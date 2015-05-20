@@ -1,13 +1,13 @@
 Return-Path: <Allen.Hubbe@emc.com>
-Received: from mailuogwhop.emc.com (mailuogwhop.emc.com. [168.159.213.141])
-        by gmr-mx.google.com with ESMTPS id dw9si957765qcb.2.2015.05.20.13.42.13
+Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
+        by gmr-mx.google.com with ESMTPS id ei3si2060916pdb.1.2015.05.20.13.42.10
         for <linux-ntb@googlegroups.com>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 20 May 2015 13:42:13 -0700 (PDT)
+        Wed, 20 May 2015 13:42:11 -0700 (PDT)
 From: Allen Hubbe <Allen.Hubbe@emc.com>
-Subject: [PATCH 06/16] NTB Pingpong Client
-Date: Wed, 20 May 2015 11:41:07 -0400
-Message-Id: <c708a1b50b8137556fb327c313184855aeaf54e3.1432135632.git.Allen.Hubbe@emc.com>
+Subject: [PATCH 12/16] ntb_transport: numa aware memory and dma chan
+Date: Wed, 20 May 2015 11:41:13 -0400
+Message-Id: <db0ebeeb8be07891f04fc9fe0620d4b4f806fa9c.1432135632.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1432135631.git.Allen.Hubbe@emc.com>
 References: <cover.1432135631.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1432135631.git.Allen.Hubbe@emc.com>
@@ -16,375 +16,157 @@ To: linux-ntb@googlegroups.com
 Cc: linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-This is a simple pingpong driver that exercises the scratchpads and
-doorbells of the ntb hardware.  This driver may be used to test that
-your ntb hardware and drivers are functioning at a basic level.
+Allocate memory and request the dma channel for the same numa node as
+the ntb device.
 
 Signed-off-by: Allen Hubbe <Allen.Hubbe@emc.com>
 ---
- Documentation/ntb.txt           |  27 +++++
- MAINTAINERS                     |   1 +
- drivers/ntb/Kconfig             |   2 +
- drivers/ntb/Makefile            |   2 +-
- drivers/ntb/test/Kconfig        |   9 ++
- drivers/ntb/test/Makefile       |   1 +
- drivers/ntb/test/ntb_pingpong.c | 251 ++++++++++++++++++++++++++++++++++++++++
- 7 files changed, 292 insertions(+), 1 deletion(-)
- create mode 100644 drivers/ntb/test/Kconfig
- create mode 100644 drivers/ntb/test/Makefile
- create mode 100644 drivers/ntb/test/ntb_pingpong.c
+ drivers/ntb/ntb_transport.c | 46 +++++++++++++++++++++++++++++++--------------
+ 1 file changed, 32 insertions(+), 14 deletions(-)
 
-diff --git a/Documentation/ntb.txt b/Documentation/ntb.txt
-index 00a3f92..e5d1591 100644
---- a/Documentation/ntb.txt
-+++ b/Documentation/ntb.txt
-@@ -37,6 +37,33 @@ Transport queue pair.  Network data is copied between socket buffers and the
- Transport queue pair buffer.  The Transport client may be used for other things
- besides Netdev, however no other applications have yet been written.
+diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+index c76d8b9..91809fa 100644
+--- a/drivers/ntb/ntb_transport.c
++++ b/drivers/ntb/ntb_transport.c
+@@ -346,6 +346,7 @@ int ntb_transport_register_client_dev(char *device_name)
+ {
+ 	struct ntb_transport_client_dev *client_dev;
+ 	struct ntb_transport_ctx *nt;
++	int node;
+ 	int rc, i = 0;
  
-+### NTB Ping Pong Test Client (ntb\_pingpong)
-+
-+The Ping Pong test client serves as a demonstration to exercise the doorbell
-+and scratchpad registers of NTB hardware, and as an example simple NTB client.
-+Ping Pong enables the link when started, waits for the NTB link to come up, and
-+then proceeds to read and write the doorbell scratchpad registers of the NTB.
-+The peers interrupt each other using a bit mask of doorbell bits, which is
-+shifted by one in each round, to test the behavior of multiple doorbell bits
-+and interrupt vectors.  The Ping Pong driver also reads the first local
-+scratchpad, and writes the value plus one to the first peer scratchpad, each
-+round before writing the peer doorbell register.
-+
-+Module Parameters:
-+
-+* unsafe - Some hardware has known issues with scratchpad and doorbell
-+	registers.  By default, Ping Pong will not attempt to exercise such
-+	hardware.  You may override this behavior at your own risk by setting
-+	unsafe=1.
-+* delay\_ms - Specify the delay between receiving a doorbell
-+	interrupt event and setting the peer doorbell register for the next
-+	round.
-+* init\_db - Specify the doorbell bits to start new series of rounds.  A new
-+	series begins once all the doorbell bits have been shifted out of
-+	range.
-+* dyndbg - It is suggested to specify dyndbg=+p when loading this module, and
-+	then to observe debugging output on the console.
-+
- ## NTB Hardware Drivers
+ 	if (list_empty(&ntb_transport_list))
+@@ -354,8 +355,10 @@ int ntb_transport_register_client_dev(char *device_name)
+ 	list_for_each_entry(nt, &ntb_transport_list, entry) {
+ 		struct device *dev;
  
- NTB hardware drivers should register devices with the NTB core driver.  After
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 2560e18..cbc9d3d 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -6952,6 +6952,7 @@ T:	git git://github.com/jonmason/ntb.git
- F:	drivers/ntb/
- F:	drivers/net/ntb_netdev.c
- F:	drivers/ntb/ntb.c
-+F:	drivers/ntb/ntb_pingpong.c
- F:	drivers/ntb/ntb_transport.c
- F:	include/linux/ntb.h
- F:	include/linux/ntb_transport.h
-diff --git a/drivers/ntb/Kconfig b/drivers/ntb/Kconfig
-index 988b03d..c137eb7 100644
---- a/drivers/ntb/Kconfig
-+++ b/drivers/ntb/Kconfig
-@@ -14,6 +14,8 @@ if NTB
+-		client_dev = kzalloc(sizeof(*client_dev),
+-				     GFP_KERNEL);
++		node = dev_to_node(&nt->ndev->dev);
++
++		client_dev = kzalloc_node(sizeof(*client_dev),
++				     GFP_KERNEL, node);
+ 		if (!client_dev) {
+ 			rc = -ENOMEM;
+ 			goto err;
+@@ -949,6 +952,7 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
+ 	struct ntb_transport_mw *mw;
+ 	unsigned int mw_count, qp_count;
+ 	u64 qp_bitmap;
++	int node;
+ 	int rc, i;
  
- source "drivers/ntb/hw/Kconfig"
+ 	if (ntb_db_is_unsafe(ndev))
+@@ -958,7 +962,9 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
+ 		dev_dbg(&ndev->dev,
+ 			"scratchpad is unsafe, proceed anyway...\n");
  
-+source "drivers/ntb/test/Kconfig"
+-	nt = kzalloc(sizeof(*nt), GFP_KERNEL);
++	node = dev_to_node(&ndev->dev);
 +
- config NTB_TRANSPORT
-        tristate "NTB Transport Client"
-        depends on NTB
-diff --git a/drivers/ntb/Makefile b/drivers/ntb/Makefile
-index 671c4e6..c2d2982 100644
---- a/drivers/ntb/Makefile
-+++ b/drivers/ntb/Makefile
-@@ -1,3 +1,3 @@
--obj-y += hw/
-+obj-y += hw/ test/
- obj-$(CONFIG_NTB) += ntb.o
- obj-$(CONFIG_NTB_TRANSPORT) += ntb_transport.o
-diff --git a/drivers/ntb/test/Kconfig b/drivers/ntb/test/Kconfig
-new file mode 100644
-index 0000000..9b81c4c
---- /dev/null
-+++ b/drivers/ntb/test/Kconfig
-@@ -0,0 +1,9 @@
-+config NTB_PINGPONG
-+       tristate "NTB Simple Ping Pong Client"
-+       depends on NTB
-+       help
-+        This is a simple ping pong driver that exercises the scratchpads and
-+        doorbells of the ntb hardware.  This driver may be used to test that
-+        your ntb hardware and drivers are functioning at a basic level.
-+
-+        If unsure, say N.
-diff --git a/drivers/ntb/test/Makefile b/drivers/ntb/test/Makefile
-new file mode 100644
-index 0000000..b323093
---- /dev/null
-+++ b/drivers/ntb/test/Makefile
-@@ -0,0 +1 @@
-+obj-$(CONFIG_NTB_PINGPONG) += ntb_pingpong.o
-diff --git a/drivers/ntb/test/ntb_pingpong.c b/drivers/ntb/test/ntb_pingpong.c
-new file mode 100644
-index 0000000..a18f895
---- /dev/null
-+++ b/drivers/ntb/test/ntb_pingpong.c
-@@ -0,0 +1,251 @@
-+/*
-+ * This file is provided under a dual BSD/GPLv2 license.  When using or
-+ *   redistributing this file, you may do so under either license.
-+ *
-+ *   GPL LICENSE SUMMARY
-+ *
-+ *   Copyright (C) 2015 EMC Corporation. All Rights Reserved.
-+ *
-+ *   This program is free software; you can redistribute it and/or modify
-+ *   it under the terms of version 2 of the GNU General Public License as
-+ *   published by the Free Software Foundation.
-+ *
-+ *   This program is distributed in the hope that it will be useful, but
-+ *   WITHOUT ANY WARRANTY; without even the implied warranty of
-+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-+ *   General Public License for more details.
-+ *
-+ *   BSD LICENSE
-+ *
-+ *   Copyright (C) 2015 EMC Corporation. All Rights Reserved.
-+ *
-+ *   Redistribution and use in source and binary forms, with or without
-+ *   modification, are permitted provided that the following conditions
-+ *   are met:
-+ *
-+ *     * Redistributions of source code must retain the above copyright
-+ *       notice, this list of conditions and the following disclaimer.
-+ *     * Redistributions in binary form must reproduce the above copy
-+ *       notice, this list of conditions and the following disclaimer in
-+ *       the documentation and/or other materials provided with the
-+ *       distribution.
-+ *     * Neither the name of Intel Corporation nor the names of its
-+ *       contributors may be used to endorse or promote products derived
-+ *       from this software without specific prior written permission.
-+ *
-+ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-+ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-+ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-+ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-+ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-+ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-+ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-+ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-+ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-+ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-+ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-+ *
-+ * PCIe NTB Pingpong Linux driver
-+ *
-+ * Contact Information:
-+ * Allen Hubbe <Allen.Hubbe@emc.com>
-+ */
-+
-+/* Note: load this module with option 'dyndbg=+p' */
-+
-+#include <linux/init.h>
-+#include <linux/kernel.h>
-+#include <linux/module.h>
-+
-+#include <linux/dma-mapping.h>
-+#include <linux/pci.h>
-+#include <linux/slab.h>
-+#include <linux/spinlock.h>
-+
-+#include <linux/ntb.h>
-+
-+#define DRIVER_NAME			"ntb_pingpong"
-+#define DRIVER_DESCRIPTION		"PCIe NTB Simple Pingpong Client"
-+
-+#define DRIVER_LICENSE			"Dual BSD/GPL"
-+#define DRIVER_VERSION			"1.0"
-+#define DRIVER_RELDATE			"24 March 2015"
-+#define DRIVER_AUTHOR			"Allen Hubbe <Allen.Hubbe@emc.com>"
-+
-+MODULE_LICENSE(DRIVER_LICENSE);
-+MODULE_VERSION(DRIVER_VERSION);
-+MODULE_AUTHOR(DRIVER_AUTHOR);
-+MODULE_DESCRIPTION(DRIVER_DESCRIPTION);
-+
-+static unsigned int unsafe;
-+module_param(unsafe, uint, 0644);
-+MODULE_PARM_DESC(unsafe, "Run even though ntb operations may be unsafe");
-+
-+static unsigned int delay_ms = 1000;
-+module_param(delay_ms, uint, 0644);
-+MODULE_PARM_DESC(delay_ms, "Milliseconds to delay the response to peer");
-+
-+static unsigned long db_init = 0x7;
-+module_param(db_init, ulong, 0644);
-+MODULE_PARM_DESC(delay_ms, "Initial doorbell bits to ring on the peer");
-+
-+struct pp_ctx {
-+	struct ntb_dev			*ntb;
-+	u64				db_bits;
-+	/* synchronize access to db_bits by ping and pong */
-+	spinlock_t			db_lock;
-+	struct timer_list		db_timer;
-+	unsigned long			db_delay;
-+};
-+
-+static void pp_ping(unsigned long ctx)
++	nt = kzalloc_node(sizeof(*nt), GFP_KERNEL, node);
+ 	if (!nt)
+ 		return -ENOMEM;
+ 
+@@ -968,7 +974,8 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
+ 
+ 	nt->mw_count = mw_count;
+ 
+-	nt->mw_vec = kcalloc(mw_count, sizeof(*nt->mw_vec), GFP_KERNEL);
++	nt->mw_vec = kzalloc_node(mw_count * sizeof(*nt->mw_vec),
++				  GFP_KERNEL, node);
+ 	if (!nt->mw_vec) {
+ 		rc = -ENOMEM;
+ 		goto err;
+@@ -1008,7 +1015,8 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
+ 	nt->qp_bitmap = qp_bitmap;
+ 	nt->qp_bitmap_free = qp_bitmap;
+ 
+-	nt->qp_vec = kcalloc(qp_count, sizeof(*nt->qp_vec), GFP_KERNEL);
++	nt->qp_vec = kzalloc_node(qp_count * sizeof(*nt->qp_vec),
++				  GFP_KERNEL, node);
+ 	if (!nt->qp_vec) {
+ 		rc = -ENOMEM;
+ 		goto err2;
+@@ -1497,6 +1505,11 @@ static void ntb_send_link_down(struct ntb_transport_qp *qp)
+ 	ntb_qp_link_down_reset(qp);
+ }
+ 
++static bool ntb_dma_filter_fn(struct dma_chan *chan, void *node)
 +{
-+	struct pp_ctx *pp = (void *)ctx;
-+	unsigned long irqflags;
-+	u64 db_bits, db_mask;
-+	u32 spad_rd, spad_wr;
-+
-+	spin_lock_irqsave(&pp->db_lock, irqflags);
-+	{
-+		db_mask = ntb_db_valid_mask(pp->ntb);
-+		db_bits = ntb_db_read(pp->ntb);
-+
-+		if (db_bits) {
-+			dev_dbg(&pp->ntb->dev,
-+				"Masked pongs %#llx\n",
-+				db_bits);
-+			ntb_db_clear(pp->ntb, db_bits);
-+		}
-+
-+		db_bits = ((pp->db_bits | db_bits) << 1) & db_mask;
-+
-+		if (!db_bits)
-+			db_bits = db_init;
-+
-+		spad_rd = ntb_spad_read(pp->ntb, 0);
-+		spad_wr = spad_rd + 1;
-+
-+		dev_dbg(&pp->ntb->dev,
-+			"Ping bits %#llx read %#x write %#x\n",
-+			db_bits, spad_rd, spad_wr);
-+
-+		ntb_peer_spad_write(pp->ntb, 0, spad_wr);
-+		ntb_peer_db_set(pp->ntb, db_bits);
-+		ntb_db_clear_mask(pp->ntb, db_mask);
-+
-+		pp->db_bits = 0;
-+	}
-+	spin_unlock_irqrestore(&pp->db_lock, irqflags);
++	return dev_to_node(&chan->dev->device) == (int)(unsigned long)node;
 +}
 +
-+static void pp_link_event(void *ctx)
-+{
-+	struct pp_ctx *pp = ctx;
+ /**
+  * ntb_transport_create_queue - Create a new NTB transport layer queue
+  * @rx_handler: receive callback function
+@@ -1522,12 +1535,16 @@ ntb_transport_create_queue(void *data, struct device *client_dev,
+ 	struct ntb_transport_qp *qp;
+ 	u64 qp_bit;
+ 	unsigned int free_queue;
++	dma_cap_mask_t dma_mask;
++	int node;
+ 	int i;
+ 
+ 	ndev = dev_ntb(client_dev->parent);
+ 	pdev = ndev->pdev;
+ 	nt = ndev->ctx;
+ 
++	node = dev_to_node(&ndev->dev);
 +
-+	if (ntb_link_is_up(pp->ntb, NULL, NULL) == 1) {
-+		dev_dbg(&pp->ntb->dev, "link is up\n");
-+		pp_ping((unsigned long)pp);
-+	} else {
-+		dev_dbg(&pp->ntb->dev, "link is down\n");
-+		del_timer(&pp->db_timer);
-+	}
-+}
+ 	free_queue = ffs(nt->qp_bitmap);
+ 	if (!free_queue)
+ 		goto err;
+@@ -1545,15 +1562,16 @@ ntb_transport_create_queue(void *data, struct device *client_dev,
+ 	qp->tx_handler = handlers->tx_handler;
+ 	qp->event_handler = handlers->event_handler;
+ 
+-	dmaengine_get();
+-	qp->dma_chan = dma_find_channel(DMA_MEMCPY);
+-	if (!qp->dma_chan) {
+-		dmaengine_put();
++	dma_cap_zero(dma_mask);
++	dma_cap_set(DMA_MEMCPY, dma_mask);
 +
-+static void pp_db_event(void *ctx, int vec)
-+{
-+	struct pp_ctx *pp = ctx;
-+	u64 db_bits, db_mask;
-+	unsigned long irqflags;
-+
-+	spin_lock_irqsave(&pp->db_lock, irqflags);
-+	{
-+		db_mask = ntb_db_vector_mask(pp->ntb, vec);
-+		db_bits = db_mask & ntb_db_read(pp->ntb);
-+		ntb_db_set_mask(pp->ntb, db_mask);
-+		ntb_db_clear(pp->ntb, db_bits);
-+
-+		pp->db_bits |= db_bits;
-+
-+		mod_timer(&pp->db_timer, jiffies + pp->db_delay);
-+
-+		dev_dbg(&pp->ntb->dev,
-+			"Pong vec %d bits %#llx\n",
-+			vec, db_bits);
-+	}
-+	spin_unlock_irqrestore(&pp->db_lock, irqflags);
-+}
-+
-+static const struct ntb_ctx_ops pp_ops = {
-+	.link_event = pp_link_event,
-+	.db_event = pp_db_event,
-+};
-+
-+static int pp_probe(struct ntb_client *client,
-+		    struct ntb_dev *ntb)
-+{
-+	struct pp_ctx *pp;
-+	int rc;
-+
-+	if (ntb_db_is_unsafe(ntb)) {
-+		dev_dbg(&ntb->dev, "doorbell is unsafe\n");
-+		if (!unsafe) {
-+			rc = -EINVAL;
-+			goto err_pp;
-+		}
-+	}
-+
-+	if (ntb_spad_is_unsafe(ntb)) {
-+		dev_dbg(&ntb->dev, "scratchpad is unsafe\n");
-+		if (!unsafe) {
-+			rc = -EINVAL;
-+			goto err_pp;
-+		}
-+	}
-+
-+	pp = kmalloc(sizeof(*pp), GFP_KERNEL);
-+	if (!pp) {
-+		rc = -ENOMEM;
-+		goto err_pp;
-+	}
-+
-+	pp->ntb = ntb;
-+	pp->db_bits = 0;
-+	spin_lock_init(&pp->db_lock);
-+	setup_timer(&pp->db_timer, pp_ping, (unsigned long)pp);
-+	pp->db_delay = msecs_to_jiffies(delay_ms);
-+
-+	rc = ntb_set_ctx(ntb, pp, &pp_ops);
-+	if (rc)
-+		goto err_ctx;
-+
-+	ntb_link_enable(ntb, NTB_SPEED_AUTO, NTB_WIDTH_AUTO);
-+	ntb_link_event(ntb);
-+
-+	return 0;
-+
-+err_ctx:
-+	kfree(pp);
-+err_pp:
-+	return rc;
-+}
-+
-+static void pp_remove(struct ntb_client *client,
-+		      struct ntb_dev *ntb)
-+{
-+	struct pp_ctx *pp = ntb->ctx;
-+
-+	ntb_clear_ctx(ntb);
-+	del_timer_sync(&pp->db_timer);
-+	ntb_link_disable(ntb);
-+
-+	kfree(pp);
-+}
-+
-+static struct ntb_client pp_client = {
-+	.ops = {
-+		.probe = pp_probe,
-+		.remove = pp_remove,
-+	},
-+	.name = DRIVER_NAME,
-+};
-+module_ntb_client(pp_client);
++	qp->dma_chan = dma_request_channel(dma_mask, ntb_dma_filter_fn,
++					   (void *)(unsigned long)node);
++	if (!qp->dma_chan)
+ 		dev_info(&pdev->dev, "Unable to allocate DMA channel, using CPU instead\n");
+-	}
+ 
+ 	for (i = 0; i < NTB_QP_DEF_NUM_ENTRIES; i++) {
+-		entry = kzalloc(sizeof(*entry), GFP_ATOMIC);
++		entry = kzalloc_node(sizeof(*entry), GFP_ATOMIC, node);
+ 		if (!entry)
+ 			goto err1;
+ 
+@@ -1563,7 +1581,7 @@ ntb_transport_create_queue(void *data, struct device *client_dev,
+ 	}
+ 
+ 	for (i = 0; i < NTB_QP_DEF_NUM_ENTRIES; i++) {
+-		entry = kzalloc(sizeof(*entry), GFP_ATOMIC);
++		entry = kzalloc_node(sizeof(*entry), GFP_ATOMIC, node);
+ 		if (!entry)
+ 			goto err2;
+ 
+@@ -1586,7 +1604,7 @@ err1:
+ 	while ((entry = ntb_list_rm(&qp->ntb_rx_free_q_lock, &qp->rx_free_q)))
+ 		kfree(entry);
+ 	if (qp->dma_chan)
+-		dmaengine_put();
++		dma_release_channel(qp->dma_chan);
+ 	nt->qp_bitmap_free |= qp_bit;
+ err:
+ 	return NULL;
+@@ -1623,7 +1641,7 @@ void ntb_transport_free_queue(struct ntb_transport_qp *qp)
+ 		 */
+ 		dma_sync_wait(chan, qp->last_cookie);
+ 		dmaengine_terminate_all(chan);
+-		dmaengine_put();
++		dma_release_channel(chan);
+ 	}
+ 
+ 	qp_bit = BIT_ULL(qp->qp_num);
 -- 
 2.4.0.rc0.43.gcf8a8c6
 
