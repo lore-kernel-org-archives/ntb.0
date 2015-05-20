@@ -1,13 +1,13 @@
 Return-Path: <Allen.Hubbe@emc.com>
-Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
-        by gmr-mx.google.com with ESMTPS id dq2si2590338qcb.3.2015.05.20.13.42.21
+Received: from mailuogwhop.emc.com (mailuogwhop.emc.com. [168.159.213.141])
+        by gmr-mx.google.com with ESMTPS id u1si2001028qck.0.2015.05.20.13.42.19
         for <linux-ntb@googlegroups.com>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 20 May 2015 13:42:21 -0700 (PDT)
+        Wed, 20 May 2015 13:42:19 -0700 (PDT)
 From: Allen Hubbe <Allen.Hubbe@emc.com>
-Subject: [PATCH 16/16] ntb_transport: fix small code format issues
-Date: Wed, 20 May 2015 11:41:17 -0400
-Message-Id: <b90be5db558df08636a6c87e901a14a1184d7bfd.1432135632.git.Allen.Hubbe@emc.com>
+Subject: [PATCH 15/16] ntb: default to cpu memcpy for performance
+Date: Wed, 20 May 2015 11:41:16 -0400
+Message-Id: <0979e7faf4814d1059640cd448a5ad8496604a98.1432135632.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1432135631.git.Allen.Hubbe@emc.com>
 References: <cover.1432135631.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1432135631.git.Allen.Hubbe@emc.com>
@@ -16,60 +16,53 @@ To: linux-ntb@googlegroups.com
 Cc: linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Fix code format issues detected by checkpatch.pl.  Fix one spelling
-error, and some unnecessary whitespace after cast operators.  I did not
-add the comments for spinlocks, which checkpatch still reports as
-missing.
+From: Dave Jiang <dave.jiang@intel.com>
 
+Disable DMA usage by default, since the CPU provides much better
+performance with write combining.  Provide a module parameter to enable
+DMA usage when offloading the memcpy is preferred.
+
+Signed-off-by: Dave Jiang <dave.jiang@intel.com>
 Signed-off-by: Allen Hubbe <Allen.Hubbe@emc.com>
 ---
- drivers/ntb/ntb_transport.c | 12 ++++++------
- 1 file changed, 6 insertions(+), 6 deletions(-)
+ drivers/ntb/ntb_transport.c | 17 +++++++++++++----
+ 1 file changed, 13 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 237f76f..15d237c 100644
+index cc0b7ff..237f76f 100644
 --- a/drivers/ntb/ntb_transport.c
 +++ b/drivers/ntb/ntb_transport.c
-@@ -97,7 +97,7 @@ static struct dentry *nt_debugfs_dir;
+@@ -88,6 +88,10 @@ static unsigned int copy_bytes = 1024;
+ module_param(copy_bytes, uint, 0644);
+ MODULE_PARM_DESC(copy_bytes, "Threshold under which NTB will use the CPU to copy instead of DMA");
+ 
++static bool use_dma;
++module_param(use_dma, bool, 0644);
++MODULE_PARM_DESC(use_dma, "Use DMA engine to perform large data copy");
++
+ static struct dentry *nt_debugfs_dir;
+ 
  struct ntb_queue_entry {
- 	/* ntb_queue list reference */
- 	struct list_head entry;
--	/* pointers to data to be transfered */
-+	/* pointers to data to be transferred */
- 	void *cb_data;
- 	void *buf;
- 	unsigned int len;
-@@ -1158,8 +1158,8 @@ static void ntb_async_rx(struct ntb_queue_entry *entry, void *offset,
- 		goto err_wait;
+@@ -1570,10 +1574,15 @@ ntb_transport_create_queue(void *data, struct device *client_dev,
+ 	dma_cap_zero(dma_mask);
+ 	dma_cap_set(DMA_MEMCPY, dma_mask);
  
- 	device = chan->device;
--	pay_off = (size_t) offset & ~PAGE_MASK;
--	buff_off = (size_t) buf & ~PAGE_MASK;
-+	pay_off = (size_t)offset & ~PAGE_MASK;
-+	buff_off = (size_t)buf & ~PAGE_MASK;
+-	qp->dma_chan = dma_request_channel(dma_mask, ntb_dma_filter_fn,
+-					   (void *)(unsigned long)node);
+-	if (!qp->dma_chan)
+-		dev_info(&pdev->dev, "Unable to allocate DMA channel, using CPU instead\n");
++	if (use_dma) {
++		qp->dma_chan = dma_request_channel(dma_mask, ntb_dma_filter_fn,
++						   (void *)(unsigned long)node);
++		if (!qp->dma_chan)
++			dev_info(&pdev->dev, "Unable to allocate DMA channel\n");
++	} else {
++		qp->dma_chan = NULL;
++	}
++	dev_dbg(&pdev->dev, "Using %s memcpy\n", qp->dma_chan ? "DMA" : "CPU");
  
- 	if (!is_dma_copy_aligned(device, pay_off, buff_off, len))
- 		goto err_wait;
-@@ -1397,7 +1397,7 @@ static void ntb_async_tx(struct ntb_transport_qp *qp,
- 	entry->tx_hdr = hdr;
- 
- 	iowrite32(entry->len, &hdr->len);
--	iowrite32((u32) qp->tx_pkts, &hdr->ver);
-+	iowrite32((u32)qp->tx_pkts, &hdr->ver);
- 
- 	if (!chan)
- 		goto err;
-@@ -1407,8 +1407,8 @@ static void ntb_async_tx(struct ntb_transport_qp *qp,
- 
- 	device = chan->device;
- 	dest = qp->tx_mw_phys + qp->tx_max_frame * qp->tx_index;
--	buff_off = (size_t) buf & ~PAGE_MASK;
--	dest_off = (size_t) dest & ~PAGE_MASK;
-+	buff_off = (size_t)buf & ~PAGE_MASK;
-+	dest_off = (size_t)dest & ~PAGE_MASK;
- 
- 	if (!is_dma_copy_aligned(device, buff_off, dest_off, len))
- 		goto err;
+ 	for (i = 0; i < NTB_QP_DEF_NUM_ENTRIES; i++) {
+ 		entry = kzalloc_node(sizeof(*entry), GFP_ATOMIC, node);
 -- 
 2.4.0.rc0.43.gcf8a8c6
 
