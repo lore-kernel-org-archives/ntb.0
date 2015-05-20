@@ -1,92 +1,139 @@
-Return-Path: <pebolle@tiscali.nl>
-Received: from lb1-smtp-cloud6.xs4all.net (lb1-smtp-cloud6.xs4all.net. [194.109.24.24])
-        by gmr-mx.google.com with ESMTPS id bc3si58139wib.2.2015.05.21.01.51.59
+Return-Path: <bhelgaas@google.com>
+Received: from mail-qg0-x229.google.com (mail-qg0-x229.google.com. [2607:f8b0:400d:c04::229])
+        by gmr-mx.google.com with ESMTPS id lg9si2098156qcb.1.2015.05.20.15.20.39
         for <linux-ntb@googlegroups.com>
-        (version=TLSv1 cipher=RC4-SHA bits=128/128);
-        Thu, 21 May 2015 01:51:59 -0700 (PDT)
-Message-ID: <1432198316.21715.135.camel@x220>
-Subject: Re: [PATCH 02/16] NTB Abstraction Layer
-From: Paul Bolle <pebolle@tiscali.nl>
-Date: Thu, 21 May 2015 10:51:56 +0200
-In-Reply-To: <d653819e0ebc03241fe073c9239be36a52f5e265.1432135631.git.Allen.Hubbe@emc.com>
-References: <cover.1432135631.git.Allen.Hubbe@emc.com>
-	 <d653819e0ebc03241fe073c9239be36a52f5e265.1432135631.git.Allen.Hubbe@emc.com>
-Content-Type: text/plain; charset="UTF-8"
-Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-To: Allen Hubbe <Allen.Hubbe@emc.com>
-Cc: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 20 May 2015 15:20:39 -0700 (PDT)
+Received: by mail-qg0-x229.google.com with SMTP id a63so11340697qgf.0
+        for <linux-ntb@googlegroups.com>; Wed, 20 May 2015 15:20:39 -0700 (PDT)
+MIME-Version: 1.0
+In-Reply-To: <40F65EF2B5E2254199711F58E3ACB84D7825D377@MX104CL02.corp.emc.com>
+References: <cover.1432135631.git.Allen.Hubbe@emc.com> <ae66adf68441cdaf893d2a562924615c229489c0.1432135631.git.Allen.Hubbe@emc.com>
+ <CAErSpo5gf9VhegEGY5S+dak0UuMNEMDD29JT4TcTz_UPey3aNQ@mail.gmail.com> <40F65EF2B5E2254199711F58E3ACB84D7825D377@MX104CL02.corp.emc.com>
+From: Bjorn Helgaas <bhelgaas@google.com>
+Date: Wed, 20 May 2015 17:20:18 -0500
+Message-ID: <CAErSpo5WzQ86t5F2pfhHYipcUH3h2vv1DN1-Dpx_VPsOnbpu=w@mail.gmail.com>
+Subject: Re: [PATCH 03/16] ntb: Enable link training for RP mode in the driver probe
+Content-Type: text/plain; charset=UTF-8
+To: "Hubbe, Allen" <Allen.Hubbe@emc.com>
+Cc: "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Wed, 2015-05-20 at 11:41 -0400, Allen Hubbe wrote:
->  Documentation/ntb.txt               |   58 +
->  MAINTAINERS                         |   14 +-
->  drivers/net/ntb_netdev.c            |   58 +-
->  drivers/ntb/Kconfig                 |   20 +-
->  drivers/ntb/Makefile                |    4 +-
->  drivers/ntb/hw/Kconfig              |    1 +
->  drivers/ntb/hw/Makefile             |    1 +
->  drivers/ntb/hw/intel/Kconfig        |    8 +
->  drivers/ntb/hw/intel/Makefile       |    1 +
->  drivers/ntb/hw/intel/ntb_hw_intel.c | 3108 +++++++++++++++++++----------------
->  drivers/ntb/hw/intel/ntb_hw_intel.h |  591 +++----
->  drivers/ntb/ntb.c                   |  251 +++
->  drivers/ntb/ntb_transport.c         |  927 ++++++-----
->  include/linux/ntb.h                 |  983 +++++++++++
->  include/linux/ntb_transport.h       |   25 +-
->  15 files changed, 3873 insertions(+), 2177 deletions(-)
->  create mode 100644 Documentation/ntb.txt
->  create mode 100644 drivers/ntb/hw/Kconfig
->  create mode 100644 drivers/ntb/hw/Makefile
->  create mode 100644 drivers/ntb/hw/intel/Kconfig
->  create mode 100644 drivers/ntb/hw/intel/Makefile
->  create mode 100644 drivers/ntb/ntb.c
->  create mode 100644 include/linux/ntb.h
+On Wed, May 20, 2015 at 4:46 PM, Hubbe, Allen <Allen.Hubbe@emc.com> wrote:
+> From: Bjorn Helgaas [mailto:bhelgaas@google.com]
+>> Please run "git log --oneline drivers/ntb" and make your subject lines
+>> consistent.  The convention I use in PCI (and what was used in NTB
+>> until recently) is
+>>
+>>   - Acronyms and initialisms are capitalized
+>>   - Subject line is a subsystem prefix ("PCI:", "NTB:", etc.) followed
+>> by a complete sentence starting with a capitalized verb, with no
+>> period at the end
+>
+> These are the new subject lines that will be in the v2 of this set.
 
-(My mailer tells me this message is over 200KB in size. Did you consider
-offering bribes to get people to review this patch?)
+That helps a lot, thanks.
 
-I just spotted two nits.
+> NTB: Fix small code format issues in transport
+> NTB: Default to CPU memcpy for performance
+> NTB: Improve performance with write combining
+> NTB: Use NUMA aware memory allocation
+> NTB: Use NUMA memory and DMA chan in transport
+> NTB: Reset transport QP link stats on down
+> NTB: Do not advance transport RX on link down
+> NTB: Differentiate transport link down messages
+> NTB: Rate limit ntb_qp_link_work
+> NTB: Add tool client
+> NTB: Add ping pong client
 
-> --- a/drivers/ntb/Kconfig
-> +++ b/drivers/ntb/Kconfig
->  
-> +if NTB
-> +
-> +source "drivers/ntb/hw/Kconfig"
-> +
-> +config NTB_TRANSPORT
-> +       tristate "NTB Transport Client"
-> +       depends on NTB
+I think these are test cases, not part of the kernel itself.  It'd be
+nice to know that from the summary.  I don't know what the precedent
+is for that (if there is one).
 
-Superfluous dependency.
+> NTB: Intel NTB params for SNB B2B addresses
 
-> +       help
-> +        This is a transport driver that enables connected systems to exchange
-> +        messages over the ntb hardware.  The transport exposes a queue pair api
-> +        to client drivers.
-> +
-> +        If unsure, say N.
-> +
-> +endif # NTB
+This sentence no verb :)  Not sure what you're doing with those params.
 
-> --- /dev/null
-> +++ b/drivers/ntb/hw/intel/Kconfig
+> NTB: Check the DID for workaround error flags
 
-> +config NTB_INTEL
-> +       tristate "Intel Non-Transparent Bridge support"
-> +       depends on NTB
+I think there's room to spell out "device ID".
 
-Ditto.
+> NTB: Enable link training for RP mode in probe
 
-> +       depends on X86
-> +       help
-> +        This driver supports Intel NTB on capable Xeon and Atom hardware.
-> +
-> +        If unsure, say N.
+Is that Root Port?
 
-Thanks,
+> NTB: Add NTB hardware abstraction layer
+> NTB: Move files in preparation for NTB abstraction
 
+Of course, none of this has anything to do with the patches
+themselves, which I don't intend to review because they're out of my
+area :)
 
-Paul Bolle
-
+>>
+>> On Wed, May 20, 2015 at 10:41 AM, Allen Hubbe <Allen.Hubbe@emc.com>
+>> wrote:
+>> > From: Dave Jiang <dave.jiang@intel.com>
+>> >
+>> > Link training for RP should be enabled in the driver probe. We should
+>> > not have to wait for transport loaded for this to hapen. Otherwise the
+>>
+>> s/hapen/happen/
+>>
+>> > device will not show up on the transparent bridge side.
+>> >
+>> > Signed-off-by: Dave Jiang <dave.jiang@intel.com>
+>> > ---
+>> >  drivers/ntb/hw/intel/ntb_hw_intel.c | 10 ++++++++++
+>> >  1 file changed, 10 insertions(+)
+>> >
+>> > diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c
+>> b/drivers/ntb/hw/intel/ntb_hw_intel.c
+>> > index 05c4b77..d162f22 100644
+>> > --- a/drivers/ntb/hw/intel/ntb_hw_intel.c
+>> > +++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
+>> > @@ -1333,6 +1333,9 @@ static int snb_poll_link(struct intel_ntb_dev
+>> *ndev)
+>> >
+>> >  static int snb_link_is_up(struct intel_ntb_dev *ndev)
+>> >  {
+>> > +       if (ndev->ntb.topo == NTB_TOPO_SEC)
+>> > +               return 1;
+>> > +
+>> >         return NTB_LNK_STA_ACTIVE(ndev->lnk_sta);
+>> >  }
+>> >
+>> > @@ -1642,6 +1645,7 @@ static int snb_setup_b2b_mw(struct intel_ntb_dev
+>> *ndev,
+>> >  static int snb_init_ntb(struct intel_ntb_dev *ndev)
+>> >  {
+>> >         int rc;
+>> > +       u32 ntb_ctl;
+>> >
+>> >         if (ndev->bar4_split)
+>> >                 ndev->mw_count = HSX_SPLIT_BAR_MW_COUNT;
+>> > @@ -1658,6 +1662,12 @@ static int snb_init_ntb(struct intel_ntb_dev
+>> *ndev)
+>> >                         dev_err(ndev_dev(ndev), "NTB Primary config
+>> disabled\n");
+>> >                         return -EINVAL;
+>> >                 }
+>> > +
+>> > +               /* enable link to allow secondary side device to
+>> appear */
+>> > +               ntb_ctl = ioread32(ndev->self_mmio + ndev->reg-
+>> >ntb_ctl);
+>> > +               ntb_ctl &= ~NTB_CTL_DISABLE;
+>> > +               iowrite32(ntb_ctl, ndev->self_mmio + ndev->reg-
+>> >ntb_ctl);
+>> > +
+>> >                 /* use half the spads for the peer */
+>> >                 ndev->spad_count >>= 1;
+>> >                 ndev->self_reg = &snb_pri_reg;
+>> > --
+>> > 2.4.0.rc0.43.gcf8a8c6
+>> >
+>> > --
+>> > To unsubscribe from this list: send the line "unsubscribe linux-pci"
+>> in
+>> > the body of a message to majordomo@vger.kernel.org
+>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
