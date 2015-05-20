@@ -1,13 +1,13 @@
 Return-Path: <Allen.Hubbe@emc.com>
 Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
-        by gmr-mx.google.com with ESMTPS id ei3si2060916pdb.1.2015.05.20.13.42.10
+        by gmr-mx.google.com with ESMTPS id xz5si2059161pac.1.2015.05.20.13.42.10
         for <linux-ntb@googlegroups.com>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
         Wed, 20 May 2015 13:42:11 -0700 (PDT)
 From: Allen Hubbe <Allen.Hubbe@emc.com>
-Subject: [PATCH 12/16] ntb_transport: numa aware memory and dma chan
-Date: Wed, 20 May 2015 11:41:13 -0400
-Message-Id: <db0ebeeb8be07891f04fc9fe0620d4b4f806fa9c.1432135632.git.Allen.Hubbe@emc.com>
+Subject: [PATCH 11/16] ntb_transport: reset qp link stats on down
+Date: Wed, 20 May 2015 11:41:12 -0400
+Message-Id: <574bb412dc6ae6b3bcb5dd0823bd76f3f18854dd.1432135632.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1432135631.git.Allen.Hubbe@emc.com>
 References: <cover.1432135631.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1432135631.git.Allen.Hubbe@emc.com>
@@ -16,157 +16,92 @@ To: linux-ntb@googlegroups.com
 Cc: linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Allocate memory and request the dma channel for the same numa node as
-the ntb device.
+Reset the link stats when the link goes down.  In particular, the tx and
+rx index and count must be reset, or else the tx side will be sending
+packets to the rx side, where the rx side is not expecting them.  Reset
+all the stats, to be consistent.
 
 Signed-off-by: Allen Hubbe <Allen.Hubbe@emc.com>
 ---
- drivers/ntb/ntb_transport.c | 46 +++++++++++++++++++++++++++++++--------------
- 1 file changed, 32 insertions(+), 14 deletions(-)
+ drivers/ntb/ntb_transport.c | 36 ++++++++++++++++++++++++++++--------
+ 1 file changed, 28 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index c76d8b9..91809fa 100644
+index 9b4e240..c76d8b9 100644
 --- a/drivers/ntb/ntb_transport.c
 +++ b/drivers/ntb/ntb_transport.c
-@@ -346,6 +346,7 @@ int ntb_transport_register_client_dev(char *device_name)
- {
- 	struct ntb_transport_client_dev *client_dev;
- 	struct ntb_transport_ctx *nt;
-+	int node;
- 	int rc, i = 0;
- 
- 	if (list_empty(&ntb_transport_list))
-@@ -354,8 +355,10 @@ int ntb_transport_register_client_dev(char *device_name)
- 	list_for_each_entry(nt, &ntb_transport_list, entry) {
- 		struct device *dev;
- 
--		client_dev = kzalloc(sizeof(*client_dev),
--				     GFP_KERNEL);
-+		node = dev_to_node(&nt->ndev->dev);
-+
-+		client_dev = kzalloc_node(sizeof(*client_dev),
-+				     GFP_KERNEL, node);
- 		if (!client_dev) {
- 			rc = -ENOMEM;
- 			goto err;
-@@ -949,6 +952,7 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
- 	struct ntb_transport_mw *mw;
- 	unsigned int mw_count, qp_count;
- 	u64 qp_bitmap;
-+	int node;
- 	int rc, i;
- 
- 	if (ntb_db_is_unsafe(ndev))
-@@ -958,7 +962,9 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
- 		dev_dbg(&ndev->dev,
- 			"scratchpad is unsafe, proceed anyway...\n");
- 
--	nt = kzalloc(sizeof(*nt), GFP_KERNEL);
-+	node = dev_to_node(&ndev->dev);
-+
-+	nt = kzalloc_node(sizeof(*nt), GFP_KERNEL, node);
- 	if (!nt)
- 		return -ENOMEM;
- 
-@@ -968,7 +974,8 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
- 
- 	nt->mw_count = mw_count;
- 
--	nt->mw_vec = kcalloc(mw_count, sizeof(*nt->mw_vec), GFP_KERNEL);
-+	nt->mw_vec = kzalloc_node(mw_count * sizeof(*nt->mw_vec),
-+				  GFP_KERNEL, node);
- 	if (!nt->mw_vec) {
- 		rc = -ENOMEM;
- 		goto err;
-@@ -1008,7 +1015,8 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
- 	nt->qp_bitmap = qp_bitmap;
- 	nt->qp_bitmap_free = qp_bitmap;
- 
--	nt->qp_vec = kcalloc(qp_count, sizeof(*nt->qp_vec), GFP_KERNEL);
-+	nt->qp_vec = kzalloc_node(qp_count * sizeof(*nt->qp_vec),
-+				  GFP_KERNEL, node);
- 	if (!nt->qp_vec) {
- 		rc = -ENOMEM;
- 		goto err2;
-@@ -1497,6 +1505,11 @@ static void ntb_send_link_down(struct ntb_transport_qp *qp)
- 	ntb_qp_link_down_reset(qp);
+@@ -647,18 +647,37 @@ static int ntb_set_mw(struct ntb_transport_ctx *nt, int num_mw,
+ 	return 0;
  }
  
-+static bool ntb_dma_filter_fn(struct dma_chan *chan, void *node)
++static void ntb_qp_link_down_reset(struct ntb_transport_qp *qp)
 +{
-+	return dev_to_node(&chan->dev->device) == (int)(unsigned long)node;
++	qp->link_is_up = false;
++
++	qp->tx_index = 0;
++	qp->rx_index = 0;
++	qp->rx_bytes = 0;
++	qp->rx_pkts = 0;
++	qp->rx_ring_empty = 0;
++	qp->rx_err_no_buf = 0;
++	qp->rx_err_oflow = 0;
++	qp->rx_err_ver = 0;
++	qp->rx_memcpy = 0;
++	qp->rx_async = 0;
++	qp->tx_bytes = 0;
++	qp->tx_pkts = 0;
++	qp->tx_ring_full = 0;
++	qp->tx_err_no_buf = 0;
++	qp->tx_memcpy = 0;
++	qp->tx_async = 0;
 +}
 +
- /**
-  * ntb_transport_create_queue - Create a new NTB transport layer queue
-  * @rx_handler: receive callback function
-@@ -1522,12 +1535,16 @@ ntb_transport_create_queue(void *data, struct device *client_dev,
- 	struct ntb_transport_qp *qp;
- 	u64 qp_bit;
- 	unsigned int free_queue;
-+	dma_cap_mask_t dma_mask;
-+	int node;
- 	int i;
+ static void ntb_qp_link_cleanup(struct ntb_transport_qp *qp)
+ {
+ 	struct ntb_transport_ctx *nt = qp->transport;
+ 	struct pci_dev *pdev = nt->ndev->pdev;
  
- 	ndev = dev_ntb(client_dev->parent);
- 	pdev = ndev->pdev;
- 	nt = ndev->ctx;
- 
-+	node = dev_to_node(&ndev->dev);
-+
- 	free_queue = ffs(nt->qp_bitmap);
- 	if (!free_queue)
- 		goto err;
-@@ -1545,15 +1562,16 @@ ntb_transport_create_queue(void *data, struct device *client_dev,
- 	qp->tx_handler = handlers->tx_handler;
- 	qp->event_handler = handlers->event_handler;
- 
--	dmaengine_get();
--	qp->dma_chan = dma_find_channel(DMA_MEMCPY);
--	if (!qp->dma_chan) {
--		dmaengine_put();
-+	dma_cap_zero(dma_mask);
-+	dma_cap_set(DMA_MEMCPY, dma_mask);
-+
-+	qp->dma_chan = dma_request_channel(dma_mask, ntb_dma_filter_fn,
-+					   (void *)(unsigned long)node);
-+	if (!qp->dma_chan)
- 		dev_info(&pdev->dev, "Unable to allocate DMA channel, using CPU instead\n");
+-	if (qp->link_is_up) {
+-		cancel_delayed_work_sync(&qp->link_work);
+-		return;
 -	}
+-
+ 	dev_info(&pdev->dev, "qp %d: Link Cleanup\n", qp->qp_num);
+-	qp->link_is_up = false;
++
++	cancel_delayed_work_sync(&qp->link_work);
++	ntb_qp_link_down_reset(qp);
  
- 	for (i = 0; i < NTB_QP_DEF_NUM_ENTRIES; i++) {
--		entry = kzalloc(sizeof(*entry), GFP_ATOMIC);
-+		entry = kzalloc_node(sizeof(*entry), GFP_ATOMIC, node);
- 		if (!entry)
- 			goto err1;
+ 	if (qp->event_handler)
+ 		qp->event_handler(qp->cb_data, qp->link_is_up);
+@@ -865,9 +884,9 @@ static int ntb_transport_init_queue(struct ntb_transport_ctx *nt,
+ 	qp->qp_num = qp_num;
+ 	qp->transport = nt;
+ 	qp->ndev = nt->ndev;
+-	qp->link_is_up = false;
+ 	qp->client_ready = false;
+ 	qp->event_handler = NULL;
++	ntb_qp_link_down_reset(qp);
  
-@@ -1563,7 +1581,7 @@ ntb_transport_create_queue(void *data, struct device *client_dev,
- 	}
+ 	if (qp_count % mw_count && mw_num + 1 < qp_count / mw_count)
+ 		num_qps_mw = qp_count / mw_count + 1;
+@@ -1453,7 +1472,6 @@ static void ntb_send_link_down(struct ntb_transport_qp *qp)
+ 	if (!qp->link_is_up)
+ 		return;
  
- 	for (i = 0; i < NTB_QP_DEF_NUM_ENTRIES; i++) {
--		entry = kzalloc(sizeof(*entry), GFP_ATOMIC);
-+		entry = kzalloc_node(sizeof(*entry), GFP_ATOMIC, node);
- 		if (!entry)
- 			goto err2;
+-	qp->link_is_up = false;
+ 	dev_info(&pdev->dev, "qp %d: Send Link Down\n", qp->qp_num);
  
-@@ -1586,7 +1604,7 @@ err1:
- 	while ((entry = ntb_list_rm(&qp->ntb_rx_free_q_lock, &qp->rx_free_q)))
- 		kfree(entry);
- 	if (qp->dma_chan)
--		dmaengine_put();
-+		dma_release_channel(qp->dma_chan);
- 	nt->qp_bitmap_free |= qp_bit;
- err:
- 	return NULL;
-@@ -1623,7 +1641,7 @@ void ntb_transport_free_queue(struct ntb_transport_qp *qp)
- 		 */
- 		dma_sync_wait(chan, qp->last_cookie);
- 		dmaengine_terminate_all(chan);
--		dmaengine_put();
-+		dma_release_channel(chan);
- 	}
+ 	for (i = 0; i < NTB_LINK_DOWN_TIMEOUT; i++) {
+@@ -1475,6 +1493,8 @@ static void ntb_send_link_down(struct ntb_transport_qp *qp)
+ 	if (rc)
+ 		dev_err(&pdev->dev, "ntb: QP%d unable to send linkdown msg\n",
+ 			qp->qp_num);
++
++	ntb_qp_link_down_reset(qp);
+ }
  
- 	qp_bit = BIT_ULL(qp->qp_num);
+ /**
 -- 
 2.4.0.rc0.43.gcf8a8c6
 
