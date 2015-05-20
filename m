@@ -1,95 +1,36 @@
-Return-Path: <Allen.Hubbe@emc.com>
-Received: from mailuogwhop.emc.com (mailuogwhop.emc.com. [168.159.213.141])
-        by gmr-mx.google.com with ESMTPS id lg9si2335370qcb.1.2015.05.21.06.22.07
-        for <linux-ntb@googlegroups.com>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 21 May 2015 06:22:07 -0700 (PDT)
-From: Allen Hubbe <Allen.Hubbe@emc.com>
-Subject: [PATCH v2 00/17] NTB: Add NTB hardware abstraction layer
-Date: Thu, 21 May 2015 04:20:44 -0400
-Message-Id: <cover.1432192681.git.Allen.Hubbe@emc.com>
-To: linux-ntb@googlegroups.com
-Cc: linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
+Return-Path: <dave.jiang@intel.com>
+Received: from mga01.intel.com (mga01.intel.com. [192.55.52.88])
+        by gmr-mx.google.com with ESMTP id xv6si2032757pab.2.2015.05.20.12.53.49
+        for <linux-ntb@googlegroups.com>;
+        Wed, 20 May 2015 12:53:49 -0700 (PDT)
+Subject: [PATCH] MAINTAINERS: adding mailing list for NTB
+From: Dave Jiang <dave.jiang@intel.com>
+Date: Wed, 20 May 2015 12:53:47 -0700
+Message-ID: <20150520195347.168132.74282.stgit@djiang5-desk2.amr.corp.intel.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+To: linux-kernel@vger.kernel.org
+Cc: linux-ntb@googlegroups.com, jdmason@kudzu.us, linux-pci@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-The NTB drivers currently support only one hardware driver, and one
-client type.  This patch set adds an abstraction layer, enabling
-hardware drivers by other vendors, and clients other than ntb_transport.
+Adding a mailing list for PCI NTB
 
-The commits in this set may also be pulled from:
-github.com/allenbh/linux
-tagged ntb-abh-v2
+Signed-off-by: Dave Jiang <dave.jiang@intel.com>
+---
+ MAINTAINERS |    1 +
+ 1 file changed, 1 insertion(+)
 
-The differences can be seen by comparing against the tag ntb-abh-v1.
-
-Different in v2:
- - Rewrite shortlog descriptions for spelling and style
- - Remove extraneous NTB dependency from Kconfig files
- - Reindent Kconfig files with leading tabs
- - Reindent some lines in ntb_transport
- - Append patch NTB: Rename intel hw to proper platform names
-
-Allen Hubbe (12):
-  NTB: Move files in preparation for NTB abstraction
-  NTB: Add NTB hardware abstraction layer
-  NTB: Add parameters for Intel SNB B2B addresses
-  NTB: Add ping pong test client
-  NTB: Add tool test client
-  NTB: Rate limit ntb_qp_link_work
-  NTB: Differentiate transport link down messages
-  NTB: Do not advance transport RX on link down
-  NTB: Reset transport QP link stats on down
-  NTB: Use NUMA memory and DMA chan in transport
-  NTB: Use NUMA memory in Intel driver
-  NTB: Fix small code format issues in transport
-
-Dave Jiang (5):
-  NTB: Enable link for Intel root port mode in probe
-  NTB: Check the device ID to set errata flags
-  NTB: Improve performance with write combining
-  NTB: Default to CPU memcpy for performance
-  NTB: Rename intel hw to proper platform names
-
- Documentation/ntb.txt               |  127 ++
- MAINTAINERS                         |   16 +-
- drivers/net/ntb_netdev.c            |   58 +-
- drivers/ntb/Kconfig                 |   39 +-
- drivers/ntb/Makefile                |    4 +-
- drivers/ntb/hw/Kconfig              |    1 +
- drivers/ntb/hw/Makefile             |    1 +
- drivers/ntb/hw/intel/Kconfig        |    7 +
- drivers/ntb/hw/intel/Makefile       |    1 +
- drivers/ntb/hw/intel/ntb_hw_intel.c | 2222 +++++++++++++++++++++++++++++++++++
- drivers/ntb/hw/intel/ntb_hw_intel.h |  342 ++++++
- drivers/ntb/ntb.c                   |  251 ++++
- drivers/ntb/ntb_hw.c                | 1896 ------------------------------
- drivers/ntb/ntb_hw.h                |  256 ----
- drivers/ntb/ntb_regs.h              |  177 ---
- drivers/ntb/ntb_transport.c         | 1018 +++++++++-------
- drivers/ntb/test/Kconfig            |   19 +
- drivers/ntb/test/Makefile           |    2 +
- drivers/ntb/test/ntb_pingpong.c     |  251 ++++
- drivers/ntb/test/ntb_tool.c         |  557 +++++++++
- include/linux/ntb.h                 |  969 ++++++++++++++-
- include/linux/ntb_transport.h       |   85 ++
- 22 files changed, 5491 insertions(+), 2808 deletions(-)
- create mode 100644 Documentation/ntb.txt
- create mode 100644 drivers/ntb/hw/Kconfig
- create mode 100644 drivers/ntb/hw/Makefile
- create mode 100644 drivers/ntb/hw/intel/Kconfig
- create mode 100644 drivers/ntb/hw/intel/Makefile
- create mode 100644 drivers/ntb/hw/intel/ntb_hw_intel.c
- create mode 100644 drivers/ntb/hw/intel/ntb_hw_intel.h
- create mode 100644 drivers/ntb/ntb.c
- delete mode 100644 drivers/ntb/ntb_hw.c
- delete mode 100644 drivers/ntb/ntb_hw.h
- delete mode 100644 drivers/ntb/ntb_regs.h
- create mode 100644 drivers/ntb/test/Kconfig
- create mode 100644 drivers/ntb/test/Makefile
- create mode 100644 drivers/ntb/test/ntb_pingpong.c
- create mode 100644 drivers/ntb/test/ntb_tool.c
- create mode 100644 include/linux/ntb_transport.h
-
--- 
-2.4.0.rc0.43.gcf8a8c6
+diff --git a/MAINTAINERS b/MAINTAINERS
+index f8e0afb..60440e1 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -6981,6 +6981,7 @@ F:	drivers/power/rx51_battery.c
+ NTB DRIVER
+ M:	Jon Mason <jdmason@kudzu.us>
+ M:	Dave Jiang <dave.jiang@intel.com>
++L:	linux-ntb@googlegroups.com
+ S:	Supported
+ W:	https://github.com/jonmason/ntb/wiki
+ T:	git git://github.com/jonmason/ntb.git
 
