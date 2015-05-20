@@ -1,139 +1,85 @@
-Return-Path: <bhelgaas@google.com>
-Received: from mail-qg0-x229.google.com (mail-qg0-x229.google.com. [2607:f8b0:400d:c04::229])
-        by gmr-mx.google.com with ESMTPS id lg9si2098156qcb.1.2015.05.20.15.20.39
+Return-Path: <Allen.Hubbe@emc.com>
+Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
+        by gmr-mx.google.com with ESMTPS id dw9si979635qcb.2.2015.05.20.14.47.18
         for <linux-ntb@googlegroups.com>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 20 May 2015 15:20:39 -0700 (PDT)
-Received: by mail-qg0-x229.google.com with SMTP id a63so11340697qgf.0
-        for <linux-ntb@googlegroups.com>; Wed, 20 May 2015 15:20:39 -0700 (PDT)
+        Wed, 20 May 2015 14:47:18 -0700 (PDT)
+From: "Hubbe, Allen" <Allen.Hubbe@emc.com>
+Subject: RE: [PATCH 03/16] ntb: Enable link training for RP mode in the
+ driver probe
+Date: Wed, 20 May 2015 21:46:58 +0000
+Message-ID: <40F65EF2B5E2254199711F58E3ACB84D7825D377@MX104CL02.corp.emc.com>
+References: <cover.1432135631.git.Allen.Hubbe@emc.com>
+ <ae66adf68441cdaf893d2a562924615c229489c0.1432135631.git.Allen.Hubbe@emc.com>
+ <CAErSpo5gf9VhegEGY5S+dak0UuMNEMDD29JT4TcTz_UPey3aNQ@mail.gmail.com>
+In-Reply-To: <CAErSpo5gf9VhegEGY5S+dak0UuMNEMDD29JT4TcTz_UPey3aNQ@mail.gmail.com>
+Content-Language: en-US
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-In-Reply-To: <40F65EF2B5E2254199711F58E3ACB84D7825D377@MX104CL02.corp.emc.com>
-References: <cover.1432135631.git.Allen.Hubbe@emc.com> <ae66adf68441cdaf893d2a562924615c229489c0.1432135631.git.Allen.Hubbe@emc.com>
- <CAErSpo5gf9VhegEGY5S+dak0UuMNEMDD29JT4TcTz_UPey3aNQ@mail.gmail.com> <40F65EF2B5E2254199711F58E3ACB84D7825D377@MX104CL02.corp.emc.com>
-From: Bjorn Helgaas <bhelgaas@google.com>
-Date: Wed, 20 May 2015 17:20:18 -0500
-Message-ID: <CAErSpo5WzQ86t5F2pfhHYipcUH3h2vv1DN1-Dpx_VPsOnbpu=w@mail.gmail.com>
-Subject: Re: [PATCH 03/16] ntb: Enable link training for RP mode in the driver probe
-Content-Type: text/plain; charset=UTF-8
-To: "Hubbe, Allen" <Allen.Hubbe@emc.com>
+To: Bjorn Helgaas <bhelgaas@google.com>
 Cc: "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Wed, May 20, 2015 at 4:46 PM, Hubbe, Allen <Allen.Hubbe@emc.com> wrote:
-> From: Bjorn Helgaas [mailto:bhelgaas@google.com]
->> Please run "git log --oneline drivers/ntb" and make your subject lines
->> consistent.  The convention I use in PCI (and what was used in NTB
->> until recently) is
->>
->>   - Acronyms and initialisms are capitalized
->>   - Subject line is a subsystem prefix ("PCI:", "NTB:", etc.) followed
->> by a complete sentence starting with a capitalized verb, with no
->> period at the end
->
-> These are the new subject lines that will be in the v2 of this set.
-
-That helps a lot, thanks.
-
-> NTB: Fix small code format issues in transport
-> NTB: Default to CPU memcpy for performance
-> NTB: Improve performance with write combining
-> NTB: Use NUMA aware memory allocation
-> NTB: Use NUMA memory and DMA chan in transport
-> NTB: Reset transport QP link stats on down
-> NTB: Do not advance transport RX on link down
-> NTB: Differentiate transport link down messages
-> NTB: Rate limit ntb_qp_link_work
-> NTB: Add tool client
-> NTB: Add ping pong client
-
-I think these are test cases, not part of the kernel itself.  It'd be
-nice to know that from the summary.  I don't know what the precedent
-is for that (if there is one).
-
-> NTB: Intel NTB params for SNB B2B addresses
-
-This sentence no verb :)  Not sure what you're doing with those params.
-
-> NTB: Check the DID for workaround error flags
-
-I think there's room to spell out "device ID".
-
-> NTB: Enable link training for RP mode in probe
-
-Is that Root Port?
-
-> NTB: Add NTB hardware abstraction layer
-> NTB: Move files in preparation for NTB abstraction
-
-Of course, none of this has anything to do with the patches
-themselves, which I don't intend to review because they're out of my
-area :)
-
->>
->> On Wed, May 20, 2015 at 10:41 AM, Allen Hubbe <Allen.Hubbe@emc.com>
->> wrote:
->> > From: Dave Jiang <dave.jiang@intel.com>
->> >
->> > Link training for RP should be enabled in the driver probe. We should
->> > not have to wait for transport loaded for this to hapen. Otherwise the
->>
->> s/hapen/happen/
->>
->> > device will not show up on the transparent bridge side.
->> >
->> > Signed-off-by: Dave Jiang <dave.jiang@intel.com>
->> > ---
->> >  drivers/ntb/hw/intel/ntb_hw_intel.c | 10 ++++++++++
->> >  1 file changed, 10 insertions(+)
->> >
->> > diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c
->> b/drivers/ntb/hw/intel/ntb_hw_intel.c
->> > index 05c4b77..d162f22 100644
->> > --- a/drivers/ntb/hw/intel/ntb_hw_intel.c
->> > +++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
->> > @@ -1333,6 +1333,9 @@ static int snb_poll_link(struct intel_ntb_dev
->> *ndev)
->> >
->> >  static int snb_link_is_up(struct intel_ntb_dev *ndev)
->> >  {
->> > +       if (ndev->ntb.topo == NTB_TOPO_SEC)
->> > +               return 1;
->> > +
->> >         return NTB_LNK_STA_ACTIVE(ndev->lnk_sta);
->> >  }
->> >
->> > @@ -1642,6 +1645,7 @@ static int snb_setup_b2b_mw(struct intel_ntb_dev
->> *ndev,
->> >  static int snb_init_ntb(struct intel_ntb_dev *ndev)
->> >  {
->> >         int rc;
->> > +       u32 ntb_ctl;
->> >
->> >         if (ndev->bar4_split)
->> >                 ndev->mw_count = HSX_SPLIT_BAR_MW_COUNT;
->> > @@ -1658,6 +1662,12 @@ static int snb_init_ntb(struct intel_ntb_dev
->> *ndev)
->> >                         dev_err(ndev_dev(ndev), "NTB Primary config
->> disabled\n");
->> >                         return -EINVAL;
->> >                 }
->> > +
->> > +               /* enable link to allow secondary side device to
->> appear */
->> > +               ntb_ctl = ioread32(ndev->self_mmio + ndev->reg-
->> >ntb_ctl);
->> > +               ntb_ctl &= ~NTB_CTL_DISABLE;
->> > +               iowrite32(ntb_ctl, ndev->self_mmio + ndev->reg-
->> >ntb_ctl);
->> > +
->> >                 /* use half the spads for the peer */
->> >                 ndev->spad_count >>= 1;
->> >                 ndev->self_reg = &snb_pri_reg;
->> > --
->> > 2.4.0.rc0.43.gcf8a8c6
->> >
->> > --
->> > To unsubscribe from this list: send the line "unsubscribe linux-pci"
->> in
->> > the body of a message to majordomo@vger.kernel.org
->> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+RnJvbTogQmpvcm4gSGVsZ2FhcyBbbWFpbHRvOmJoZWxnYWFzQGdvb2dsZS5jb21dDQo+IFBsZWFz
+ZSBydW4gImdpdCBsb2cgLS1vbmVsaW5lIGRyaXZlcnMvbnRiIiBhbmQgbWFrZSB5b3VyIHN1Ympl
+Y3QgbGluZXMNCj4gY29uc2lzdGVudC4gIFRoZSBjb252ZW50aW9uIEkgdXNlIGluIFBDSSAoYW5k
+IHdoYXQgd2FzIHVzZWQgaW4gTlRCDQo+IHVudGlsIHJlY2VudGx5KSBpcw0KPiANCj4gICAtIEFj
+cm9ueW1zIGFuZCBpbml0aWFsaXNtcyBhcmUgY2FwaXRhbGl6ZWQNCj4gICAtIFN1YmplY3QgbGlu
+ZSBpcyBhIHN1YnN5c3RlbSBwcmVmaXggKCJQQ0k6IiwgIk5UQjoiLCBldGMuKSBmb2xsb3dlZA0K
+PiBieSBhIGNvbXBsZXRlIHNlbnRlbmNlIHN0YXJ0aW5nIHdpdGggYSBjYXBpdGFsaXplZCB2ZXJi
+LCB3aXRoIG5vDQo+IHBlcmlvZCBhdCB0aGUgZW5kDQoNClRoZXNlIGFyZSB0aGUgbmV3IHN1Ympl
+Y3QgbGluZXMgdGhhdCB3aWxsIGJlIGluIHRoZSB2MiBvZiB0aGlzIHNldC4NCg0KTlRCOiBGaXgg
+c21hbGwgY29kZSBmb3JtYXQgaXNzdWVzIGluIHRyYW5zcG9ydA0KTlRCOiBEZWZhdWx0IHRvIENQ
+VSBtZW1jcHkgZm9yIHBlcmZvcm1hbmNlDQpOVEI6IEltcHJvdmUgcGVyZm9ybWFuY2Ugd2l0aCB3
+cml0ZSBjb21iaW5pbmcNCk5UQjogVXNlIE5VTUEgYXdhcmUgbWVtb3J5IGFsbG9jYXRpb24NCk5U
+QjogVXNlIE5VTUEgbWVtb3J5IGFuZCBETUEgY2hhbiBpbiB0cmFuc3BvcnQNCk5UQjogUmVzZXQg
+dHJhbnNwb3J0IFFQIGxpbmsgc3RhdHMgb24gZG93bg0KTlRCOiBEbyBub3QgYWR2YW5jZSB0cmFu
+c3BvcnQgUlggb24gbGluayBkb3duDQpOVEI6IERpZmZlcmVudGlhdGUgdHJhbnNwb3J0IGxpbmsg
+ZG93biBtZXNzYWdlcw0KTlRCOiBSYXRlIGxpbWl0IG50Yl9xcF9saW5rX3dvcmsNCk5UQjogQWRk
+IHRvb2wgY2xpZW50DQpOVEI6IEFkZCBwaW5nIHBvbmcgY2xpZW50DQpOVEI6IEludGVsIE5UQiBw
+YXJhbXMgZm9yIFNOQiBCMkIgYWRkcmVzc2VzDQpOVEI6IENoZWNrIHRoZSBESUQgZm9yIHdvcmth
+cm91bmQgZXJyb3IgZmxhZ3MNCk5UQjogRW5hYmxlIGxpbmsgdHJhaW5pbmcgZm9yIFJQIG1vZGUg
+aW4gcHJvYmUNCk5UQjogQWRkIE5UQiBoYXJkd2FyZSBhYnN0cmFjdGlvbiBsYXllcg0KTlRCOiBN
+b3ZlIGZpbGVzIGluIHByZXBhcmF0aW9uIGZvciBOVEIgYWJzdHJhY3Rpb24NCg0KPiANCj4gT24g
+V2VkLCBNYXkgMjAsIDIwMTUgYXQgMTA6NDEgQU0sIEFsbGVuIEh1YmJlIDxBbGxlbi5IdWJiZUBl
+bWMuY29tPg0KPiB3cm90ZToNCj4gPiBGcm9tOiBEYXZlIEppYW5nIDxkYXZlLmppYW5nQGludGVs
+LmNvbT4NCj4gPg0KPiA+IExpbmsgdHJhaW5pbmcgZm9yIFJQIHNob3VsZCBiZSBlbmFibGVkIGlu
+IHRoZSBkcml2ZXIgcHJvYmUuIFdlIHNob3VsZA0KPiA+IG5vdCBoYXZlIHRvIHdhaXQgZm9yIHRy
+YW5zcG9ydCBsb2FkZWQgZm9yIHRoaXMgdG8gaGFwZW4uIE90aGVyd2lzZSB0aGUNCj4gDQo+IHMv
+aGFwZW4vaGFwcGVuLw0KPiANCj4gPiBkZXZpY2Ugd2lsbCBub3Qgc2hvdyB1cCBvbiB0aGUgdHJh
+bnNwYXJlbnQgYnJpZGdlIHNpZGUuDQo+ID4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBEYXZlIEppYW5n
+IDxkYXZlLmppYW5nQGludGVsLmNvbT4NCj4gPiAtLS0NCj4gPiAgZHJpdmVycy9udGIvaHcvaW50
+ZWwvbnRiX2h3X2ludGVsLmMgfCAxMCArKysrKysrKysrDQo+ID4gIDEgZmlsZSBjaGFuZ2VkLCAx
+MCBpbnNlcnRpb25zKCspDQo+ID4NCj4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9udGIvaHcvaW50
+ZWwvbnRiX2h3X2ludGVsLmMNCj4gYi9kcml2ZXJzL250Yi9ody9pbnRlbC9udGJfaHdfaW50ZWwu
+Yw0KPiA+IGluZGV4IDA1YzRiNzcuLmQxNjJmMjIgMTAwNjQ0DQo+ID4gLS0tIGEvZHJpdmVycy9u
+dGIvaHcvaW50ZWwvbnRiX2h3X2ludGVsLmMNCj4gPiArKysgYi9kcml2ZXJzL250Yi9ody9pbnRl
+bC9udGJfaHdfaW50ZWwuYw0KPiA+IEBAIC0xMzMzLDYgKzEzMzMsOSBAQCBzdGF0aWMgaW50IHNu
+Yl9wb2xsX2xpbmsoc3RydWN0IGludGVsX250Yl9kZXYNCj4gKm5kZXYpDQo+ID4NCj4gPiAgc3Rh
+dGljIGludCBzbmJfbGlua19pc191cChzdHJ1Y3QgaW50ZWxfbnRiX2RldiAqbmRldikNCj4gPiAg
+ew0KPiA+ICsgICAgICAgaWYgKG5kZXYtPm50Yi50b3BvID09IE5UQl9UT1BPX1NFQykNCj4gPiAr
+ICAgICAgICAgICAgICAgcmV0dXJuIDE7DQo+ID4gKw0KPiA+ICAgICAgICAgcmV0dXJuIE5UQl9M
+TktfU1RBX0FDVElWRShuZGV2LT5sbmtfc3RhKTsNCj4gPiAgfQ0KPiA+DQo+ID4gQEAgLTE2NDIs
+NiArMTY0NSw3IEBAIHN0YXRpYyBpbnQgc25iX3NldHVwX2IyYl9tdyhzdHJ1Y3QgaW50ZWxfbnRi
+X2Rldg0KPiAqbmRldiwNCj4gPiAgc3RhdGljIGludCBzbmJfaW5pdF9udGIoc3RydWN0IGludGVs
+X250Yl9kZXYgKm5kZXYpDQo+ID4gIHsNCj4gPiAgICAgICAgIGludCByYzsNCj4gPiArICAgICAg
+IHUzMiBudGJfY3RsOw0KPiA+DQo+ID4gICAgICAgICBpZiAobmRldi0+YmFyNF9zcGxpdCkNCj4g
+PiAgICAgICAgICAgICAgICAgbmRldi0+bXdfY291bnQgPSBIU1hfU1BMSVRfQkFSX01XX0NPVU5U
+Ow0KPiA+IEBAIC0xNjU4LDYgKzE2NjIsMTIgQEAgc3RhdGljIGludCBzbmJfaW5pdF9udGIoc3Ry
+dWN0IGludGVsX250Yl9kZXYNCj4gKm5kZXYpDQo+ID4gICAgICAgICAgICAgICAgICAgICAgICAg
+ZGV2X2VycihuZGV2X2RldihuZGV2KSwgIk5UQiBQcmltYXJ5IGNvbmZpZw0KPiBkaXNhYmxlZFxu
+Iik7DQo+ID4gICAgICAgICAgICAgICAgICAgICAgICAgcmV0dXJuIC1FSU5WQUw7DQo+ID4gICAg
+ICAgICAgICAgICAgIH0NCj4gPiArDQo+ID4gKyAgICAgICAgICAgICAgIC8qIGVuYWJsZSBsaW5r
+IHRvIGFsbG93IHNlY29uZGFyeSBzaWRlIGRldmljZSB0bw0KPiBhcHBlYXIgKi8NCj4gPiArICAg
+ICAgICAgICAgICAgbnRiX2N0bCA9IGlvcmVhZDMyKG5kZXYtPnNlbGZfbW1pbyArIG5kZXYtPnJl
+Zy0NCj4gPm50Yl9jdGwpOw0KPiA+ICsgICAgICAgICAgICAgICBudGJfY3RsICY9IH5OVEJfQ1RM
+X0RJU0FCTEU7DQo+ID4gKyAgICAgICAgICAgICAgIGlvd3JpdGUzMihudGJfY3RsLCBuZGV2LT5z
+ZWxmX21taW8gKyBuZGV2LT5yZWctDQo+ID5udGJfY3RsKTsNCj4gPiArDQo+ID4gICAgICAgICAg
+ICAgICAgIC8qIHVzZSBoYWxmIHRoZSBzcGFkcyBmb3IgdGhlIHBlZXIgKi8NCj4gPiAgICAgICAg
+ICAgICAgICAgbmRldi0+c3BhZF9jb3VudCA+Pj0gMTsNCj4gPiAgICAgICAgICAgICAgICAgbmRl
+di0+c2VsZl9yZWcgPSAmc25iX3ByaV9yZWc7DQo+ID4gLS0NCj4gPiAyLjQuMC5yYzAuNDMuZ2Nm
+OGE4YzYNCj4gPg0KPiA+IC0tDQo+ID4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNl
+bmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGxpbnV4LXBjaSINCj4gaW4NCj4gPiB0aGUgYm9keSBv
+ZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPiA+IE1vcmUgbWFqb3Jk
+b21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
