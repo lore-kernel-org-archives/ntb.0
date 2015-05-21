@@ -1,161 +1,75 @@
 Return-Path: <Allen.Hubbe@emc.com>
 Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
-        by gmr-mx.google.com with ESMTPS id jk4si145684qcb.3.2015.05.21.07.45.55
+        by gmr-mx.google.com with ESMTPS id lg9si2335415qcb.1.2015.05.21.06.22.14
         for <linux-ntb@googlegroups.com>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 21 May 2015 07:45:55 -0700 (PDT)
+        Thu, 21 May 2015 06:22:14 -0700 (PDT)
 From: Allen Hubbe <Allen.Hubbe@emc.com>
-Subject: RE: [PATCH v2 00/17] NTB: Add NTB hardware abstraction layer
-Date: Thu, 21 May 2015 05:45:03 -0400
-Message-Id: <cover.1432196075.git.Allen.Hubbe@emc.com>
+Subject: [PATCH v2 16/17] NTB: Fix small code format issues in transport
+Date: Thu, 21 May 2015 04:21:00 -0400
+Message-Id: <ee2b7f7ac2925a435342f8bb2e020e5c06057683.1432196075.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1432192681.git.Allen.Hubbe@emc.com>
+References: <cover.1432192681.git.Allen.Hubbe@emc.com>
+In-Reply-To: <cover.1432196075.git.Allen.Hubbe@emc.com>
+References: <cover.1432196075.git.Allen.Hubbe@emc.com>
 To: linux-ntb@googlegroups.com
 Cc: linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-The patches in this set (v2) reply to a different message id than the 
-cover letter I sent.  Please pardon my mistake.  Other than that, I hope 
-the patches are ok this time around.
+Fix code format issues detected by checkpatch.pl.  Fix one spelling
+error, and some unnecessary whitespace after cast operators.  I did not
+add the comments for spinlocks, which checkpatch still reports as
+missing.
 
-I wrote the cover letter, and then kept the same copy after fixing a few 
-more things.  This has the email id of the cover letter generated before 
-the fixes.
+Signed-off-by: Allen Hubbe <Allen.Hubbe@emc.com>
+---
+ drivers/ntb/ntb_transport.c | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
 
-I should have instead copied the subject line and body into the new cover 
-letter that was generated for the fixed patch set.  Now I have learned my 
-lesson.
-
-In addition to the email id, the diff stat is also for the patch set that 
-I didn't send, before the last fixes.  The diff stat doesn't differ by 
-much.  If anybody cares, here is the exact diff stat for the v2.
-
- Documentation/ntb.txt               |  127 +++
- MAINTAINERS                         |   16 +-
- drivers/net/ntb_netdev.c            |   58 +-
- drivers/ntb/Kconfig                 |   39 +-
- drivers/ntb/Makefile                |    4 +-
- drivers/ntb/hw/Kconfig              |    1 +
- drivers/ntb/hw/Makefile             |    1 +
- drivers/ntb/hw/intel/Kconfig        |    7 +
- drivers/ntb/hw/intel/Makefile       |    1 +
- drivers/ntb/hw/intel/ntb_hw_intel.c | 2222 
-+++++++++++++++++++++++++++++++++++++++++++++
- drivers/ntb/hw/intel/ntb_hw_intel.h |  342 +++++++
- drivers/ntb/ntb.c                   |  251 +++++
- drivers/ntb/ntb_hw.c                | 1896 ------------------------------
---------
- drivers/ntb/ntb_hw.h                |  256 ------
- drivers/ntb/ntb_regs.h              |  177 ----
- drivers/ntb/ntb_transport.c         | 1023 +++++++++++++--------
- drivers/ntb/test/Kconfig            |   19 +
- drivers/ntb/test/Makefile           |    2 +
- drivers/ntb/test/ntb_pingpong.c     |  251 +++++
- drivers/ntb/test/ntb_tool.c         |  557 ++++++++++++
- include/linux/ntb.h                 |  969 +++++++++++++++++++-
- include/linux/ntb_transport.h       |   85 ++
- 22 files changed, 5494 insertions(+), 2810 deletions(-)
- create mode 100644 Documentation/ntb.txt
- create mode 100644 drivers/ntb/hw/Kconfig
- create mode 100644 drivers/ntb/hw/Makefile
- create mode 100644 drivers/ntb/hw/intel/Kconfig
- create mode 100644 drivers/ntb/hw/intel/Makefile
- create mode 100644 drivers/ntb/hw/intel/ntb_hw_intel.c
- create mode 100644 drivers/ntb/hw/intel/ntb_hw_intel.h
- create mode 100644 drivers/ntb/ntb.c
- delete mode 100644 drivers/ntb/ntb_hw.c
- delete mode 100644 drivers/ntb/ntb_hw.h
- delete mode 100644 drivers/ntb/ntb_regs.h
- create mode 100644 drivers/ntb/test/Kconfig
- create mode 100644 drivers/ntb/test/Makefile
- create mode 100644 drivers/ntb/test/ntb_pingpong.c
- create mode 100644 drivers/ntb/test/ntb_tool.c
- create mode 100644 include/linux/ntb_transport.h
-
-Finally, I've faked the email id of this message, so the patches appear to 
-reply to this one.  I hope this will clean up any threading for people who 
-use that feature in their email clients.
-
-From: Allen Hubbe [mailto:Allen.Hubbe@emc.com]
-> The NTB drivers currently support only one hardware driver, and one
-> client type.  This patch set adds an abstraction layer, enabling
-> hardware drivers by other vendors, and clients other than ntb_transport.
-> 
-> The commits in this set may also be pulled from:
-> github.com/allenbh/linux
-> tagged ntb-abh-v2
-> 
-> The differences can be seen by comparing against the tag ntb-abh-v1.
-> 
-> Different in v2:
->  - Rewrite shortlog descriptions for spelling and style
->  - Remove extraneous NTB dependency from Kconfig files
->  - Reindent Kconfig files with leading tabs
->  - Reindent some lines in ntb_transport
->  - Append patch NTB: Rename intel hw to proper platform names
-> 
-> Allen Hubbe (12):
->   NTB: Move files in preparation for NTB abstraction
->   NTB: Add NTB hardware abstraction layer
->   NTB: Add parameters for Intel SNB B2B addresses
->   NTB: Add ping pong test client
->   NTB: Add tool test client
->   NTB: Rate limit ntb_qp_link_work
->   NTB: Differentiate transport link down messages
->   NTB: Do not advance transport RX on link down
->   NTB: Reset transport QP link stats on down
->   NTB: Use NUMA memory and DMA chan in transport
->   NTB: Use NUMA memory in Intel driver
->   NTB: Fix small code format issues in transport
-> 
-> Dave Jiang (5):
->   NTB: Enable link for Intel root port mode in probe
->   NTB: Check the device ID to set errata flags
->   NTB: Improve performance with write combining
->   NTB: Default to CPU memcpy for performance
->   NTB: Rename intel hw to proper platform names
-> 
->  Documentation/ntb.txt               |  127 ++
->  MAINTAINERS                         |   16 +-
->  drivers/net/ntb_netdev.c            |   58 +-
->  drivers/ntb/Kconfig                 |   39 +-
->  drivers/ntb/Makefile                |    4 +-
->  drivers/ntb/hw/Kconfig              |    1 +
->  drivers/ntb/hw/Makefile             |    1 +
->  drivers/ntb/hw/intel/Kconfig        |    7 +
->  drivers/ntb/hw/intel/Makefile       |    1 +
->  drivers/ntb/hw/intel/ntb_hw_intel.c | 2222
-> +++++++++++++++++++++++++++++++++++
->  drivers/ntb/hw/intel/ntb_hw_intel.h |  342 ++++++
->  drivers/ntb/ntb.c                   |  251 ++++
->  drivers/ntb/ntb_hw.c                | 1896 ----------------------------
-> --
->  drivers/ntb/ntb_hw.h                |  256 ----
->  drivers/ntb/ntb_regs.h              |  177 ---
->  drivers/ntb/ntb_transport.c         | 1018 +++++++++-------
->  drivers/ntb/test/Kconfig            |   19 +
->  drivers/ntb/test/Makefile           |    2 +
->  drivers/ntb/test/ntb_pingpong.c     |  251 ++++
->  drivers/ntb/test/ntb_tool.c         |  557 +++++++++
->  include/linux/ntb.h                 |  969 ++++++++++++++-
->  include/linux/ntb_transport.h       |   85 ++
->  22 files changed, 5491 insertions(+), 2808 deletions(-)
->  create mode 100644 Documentation/ntb.txt
->  create mode 100644 drivers/ntb/hw/Kconfig
->  create mode 100644 drivers/ntb/hw/Makefile
->  create mode 100644 drivers/ntb/hw/intel/Kconfig
->  create mode 100644 drivers/ntb/hw/intel/Makefile
->  create mode 100644 drivers/ntb/hw/intel/ntb_hw_intel.c
->  create mode 100644 drivers/ntb/hw/intel/ntb_hw_intel.h
->  create mode 100644 drivers/ntb/ntb.c
->  delete mode 100644 drivers/ntb/ntb_hw.c
->  delete mode 100644 drivers/ntb/ntb_hw.h
->  delete mode 100644 drivers/ntb/ntb_regs.h
->  create mode 100644 drivers/ntb/test/Kconfig
->  create mode 100644 drivers/ntb/test/Makefile
->  create mode 100644 drivers/ntb/test/ntb_pingpong.c
->  create mode 100644 drivers/ntb/test/ntb_tool.c
->  create mode 100644 include/linux/ntb_transport.h
-> 
-> --
-> 2.4.0.rc0.43.gcf8a8c6
+diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+index 9c266e1..f8f2fda 100644
+--- a/drivers/ntb/ntb_transport.c
++++ b/drivers/ntb/ntb_transport.c
+@@ -97,7 +97,7 @@ static struct dentry *nt_debugfs_dir;
+ struct ntb_queue_entry {
+ 	/* ntb_queue list reference */
+ 	struct list_head entry;
+-	/* pointers to data to be transfered */
++	/* pointers to data to be transferred */
+ 	void *cb_data;
+ 	void *buf;
+ 	unsigned int len;
+@@ -1159,8 +1159,8 @@ static void ntb_async_rx(struct ntb_queue_entry *entry, void *offset,
+ 		goto err_wait;
+ 
+ 	device = chan->device;
+-	pay_off = (size_t) offset & ~PAGE_MASK;
+-	buff_off = (size_t) buf & ~PAGE_MASK;
++	pay_off = (size_t)offset & ~PAGE_MASK;
++	buff_off = (size_t)buf & ~PAGE_MASK;
+ 
+ 	if (!is_dma_copy_aligned(device, pay_off, buff_off, len))
+ 		goto err_wait;
+@@ -1398,7 +1398,7 @@ static void ntb_async_tx(struct ntb_transport_qp *qp,
+ 	entry->tx_hdr = hdr;
+ 
+ 	iowrite32(entry->len, &hdr->len);
+-	iowrite32((u32) qp->tx_pkts, &hdr->ver);
++	iowrite32((u32)qp->tx_pkts, &hdr->ver);
+ 
+ 	if (!chan)
+ 		goto err;
+@@ -1408,8 +1408,8 @@ static void ntb_async_tx(struct ntb_transport_qp *qp,
+ 
+ 	device = chan->device;
+ 	dest = qp->tx_mw_phys + qp->tx_max_frame * qp->tx_index;
+-	buff_off = (size_t) buf & ~PAGE_MASK;
+-	dest_off = (size_t) dest & ~PAGE_MASK;
++	buff_off = (size_t)buf & ~PAGE_MASK;
++	dest_off = (size_t)dest & ~PAGE_MASK;
+ 
+ 	if (!is_dma_copy_aligned(device, buff_off, dest_off, len))
+ 		goto err;
+-- 
+2.4.0.rc0.43.gcf8a8c6
 
