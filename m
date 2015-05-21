@@ -1,53 +1,40 @@
-Return-Path: <Allen.Hubbe@emc.com>
-Received: from mailuogwhop.emc.com (mailuogwhop.emc.com. [168.159.213.141])
-        by gmr-mx.google.com with ESMTPS id dw9si1189568qcb.2.2015.05.21.04.32.40
+Return-Path: <pebolle@tiscali.nl>
+Received: from lb2-smtp-cloud6.xs4all.net (lb2-smtp-cloud6.xs4all.net. [194.109.24.28])
+        by gmr-mx.google.com with ESMTPS id bc3si59763wib.2.2015.05.21.02.02.28
         for <linux-ntb@googlegroups.com>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 21 May 2015 04:32:40 -0700 (PDT)
-From: "Hubbe, Allen" <Allen.Hubbe@emc.com>
-Subject: RE: [PATCH 02/16] NTB Abstraction Layer
-Date: Thu, 21 May 2015 11:32:26 +0000
-Message-ID: <40F65EF2B5E2254199711F58E3ACB84D7825F98C@MX104CL02.corp.emc.com>
+        (version=TLSv1 cipher=RC4-SHA bits=128/128);
+        Thu, 21 May 2015 02:02:28 -0700 (PDT)
+Message-ID: <1432198946.21715.141.camel@x220>
+Subject: Re: [PATCH 07/16] NTB Tool Client
+From: Paul Bolle <pebolle@tiscali.nl>
+Date: Thu, 21 May 2015 11:02:26 +0200
+In-Reply-To: <6d1c7067f7af16088849a628a5227b2d19085098.1432135632.git.Allen.Hubbe@emc.com>
 References: <cover.1432135631.git.Allen.Hubbe@emc.com>
-	 <d653819e0ebc03241fe073c9239be36a52f5e265.1432135631.git.Allen.Hubbe@emc.com>
- <1432198316.21715.135.camel@x220>
-In-Reply-To: <1432198316.21715.135.camel@x220>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-MIME-Version: 1.0
-To: Paul Bolle <pebolle@tiscali.nl>
-Cc: "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>
+	 <6d1c7067f7af16088849a628a5227b2d19085098.1432135632.git.Allen.Hubbe@emc.com>
+Content-Type: text/plain; charset="UTF-8"
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
+To: Allen Hubbe <Allen.Hubbe@emc.com>
+Cc: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-RnJvbTogUGF1bCBCb2xsZSBbbWFpbHRvOnBlYm9sbGVAdGlzY2FsaS5ubF0NCj4gT24gV2VkLCAy
-MDE1LTA1LTIwIGF0IDExOjQxIC0wNDAwLCBBbGxlbiBIdWJiZSB3cm90ZToNCg0KDQo+IA0KPiAo
-TXkgbWFpbGVyIHRlbGxzIG1lIHRoaXMgbWVzc2FnZSBpcyBvdmVyIDIwMEtCIGluIHNpemUuIERp
-ZCB5b3UgY29uc2lkZXINCj4gb2ZmZXJpbmcgYnJpYmVzIHRvIGdldCBwZW9wbGUgdG8gcmV2aWV3
-IHRoaXMgcGF0Y2g/KQ0KDQpJIHdvdWxkIGhhdmUgbGlrZWQgdG8gc2VuZCBzbWFsbGVyIHBhdGNo
-ZXMsIHRvby4NCg0KSSBhdHRlbXB0ZWQgdG8gc3BsaXQgdGhpcyBvbmUgaW4gdGhyZWU6DQoxKSBh
-ZGQgdGhlIG50YiBjb3JlIGRyaXZlciBhbmQgaGVhZGVyIGZpbGUNCjIpIGNoYW5nZSBudGJfaHdf
-aW50ZWwgZHJpdmVyIHRvIHVzZSBuZXcgYXBpDQozKSBjaGFuZ2UgbnRiX3RyYW5zcG9ydCBkcml2
-ZXIgdG8gdXNlIG5ldyBhcGkNCg0KVGhlIHByb2JsZW0gaXMsIGFueSBjaGFuZ2UgdG8gdGhlIG9s
-ZCBudGJfaHdfaW50ZWwgKHdhcyBudGIua28pLCBvciBudGJfdHJhbnNwb3J0LCBhbG9uZSB3aWxs
-IGNhdXNlIHRoZSBvdGhlciBub3QgdG8gd29yay4NCg0KPiANCj4gSSBqdXN0IHNwb3R0ZWQgdHdv
-IG5pdHMuDQo+IA0KPiA+IC0tLSBhL2RyaXZlcnMvbnRiL0tjb25maWcNCj4gPiArKysgYi9kcml2
-ZXJzL250Yi9LY29uZmlnDQo+ID4NCj4gPiAraWYgTlRCDQo+ID4gKw0KPiA+ICtzb3VyY2UgImRy
-aXZlcnMvbnRiL2h3L0tjb25maWciDQo+ID4gKw0KPiA+ICtjb25maWcgTlRCX1RSQU5TUE9SVA0K
-PiA+ICsgICAgICAgdHJpc3RhdGUgIk5UQiBUcmFuc3BvcnQgQ2xpZW50Ig0KPiA+ICsgICAgICAg
-ZGVwZW5kcyBvbiBOVEINCj4gDQo+IFN1cGVyZmx1b3VzIGRlcGVuZGVuY3kuDQoNCkkgd2lsbCBy
-ZW1vdmUgZGVwZW5kcyBOVEIgZnJvbSB0aGlzLCBhbmQgb3RoZXIgdGhpbmdzIHdpdGhpbiBpZiBO
-VEIuDQoNCkkgd2lsbCBhbHNvIGNoYW5nZSB0aGUgbGVhZGluZyBzcGFjZXMgdG8gdGFicy4NCg0K
-PiANCj4gPiArICAgICAgIGhlbHANCj4gPiArICAgICAgICBUaGlzIGlzIGEgdHJhbnNwb3J0IGRy
-aXZlciB0aGF0IGVuYWJsZXMgY29ubmVjdGVkIHN5c3RlbXMgdG8NCj4gZXhjaGFuZ2UNCj4gPiAr
-ICAgICAgICBtZXNzYWdlcyBvdmVyIHRoZSBudGIgaGFyZHdhcmUuICBUaGUgdHJhbnNwb3J0IGV4
-cG9zZXMgYQ0KPiBxdWV1ZSBwYWlyIGFwaQ0KPiA+ICsgICAgICAgIHRvIGNsaWVudCBkcml2ZXJz
-Lg0KPiA+ICsNCj4gPiArICAgICAgICBJZiB1bnN1cmUsIHNheSBOLg0KPiA+ICsNCj4gPiArZW5k
-aWYgIyBOVEINCj4gDQo+ID4gLS0tIC9kZXYvbnVsbA0KPiA+ICsrKyBiL2RyaXZlcnMvbnRiL2h3
-L2ludGVsL0tjb25maWcNCj4gDQo+ID4gK2NvbmZpZyBOVEJfSU5URUwNCj4gPiArICAgICAgIHRy
-aXN0YXRlICJJbnRlbCBOb24tVHJhbnNwYXJlbnQgQnJpZGdlIHN1cHBvcnQiDQo+ID4gKyAgICAg
-ICBkZXBlbmRzIG9uIE5UQg0KPiANCj4gRGl0dG8uDQo+IA0KPiA+ICsgICAgICAgZGVwZW5kcyBv
-biBYODYNCj4gPiArICAgICAgIGhlbHANCj4gPiArICAgICAgICBUaGlzIGRyaXZlciBzdXBwb3J0
-cyBJbnRlbCBOVEIgb24gY2FwYWJsZSBYZW9uIGFuZCBBdG9tDQo+IGhhcmR3YXJlLg0KPiA+ICsN
-Cj4gPiArICAgICAgICBJZiB1bnN1cmUsIHNheSBOLg0KPiANCj4gVGhhbmtzLA0KPiANCj4gDQo+
-IFBhdWwgQm9sbGUNCg0KVGhhbmtzLA0KQWxsZW4NCg==
+On Wed, 2015-05-20 at 11:41 -0400, Allen Hubbe wrote:
+> --- a/drivers/ntb/test/Kconfig
+> +++ b/drivers/ntb/test/Kconfig
+> +config NTB_TOOL
+> +       tristate "NTB Debugging Tool Client"
+> +       depends on NTB
+
+Same nit as for 2/16 and 7/16.
+
+> +       help
+
+> +        If unsure, say N.
+
+(Please start the indentation with a tab, and not with spaces.)
+
+Thanks,
+
+
+Paul Bolle
+
