@@ -1,13 +1,13 @@
 Return-Path: <Allen.Hubbe@emc.com>
 Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
-        by gmr-mx.google.com with ESMTPS id u1si2268675qck.0.2015.05.21.06.22.00
+        by gmr-mx.google.com with ESMTPS id jk4si108013qcb.3.2015.05.21.06.22.00
         for <linux-ntb@googlegroups.com>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
         Thu, 21 May 2015 06:22:00 -0700 (PDT)
 From: Allen Hubbe <Allen.Hubbe@emc.com>
-Subject: [PATCH v2 08/17] NTB: Rate limit ntb_qp_link_work
-Date: Thu, 21 May 2015 04:20:52 -0400
-Message-Id: <7e222c8e1d900571b23291601e8034ae51448273.1432196075.git.Allen.Hubbe@emc.com>
+Subject: [PATCH v2 11/17] NTB: Reset transport QP link stats on down
+Date: Thu, 21 May 2015 04:20:55 -0400
+Message-Id: <20f4b3419bc565d02beade6a9db19b3796dd9dc9.1432196075.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1432192681.git.Allen.Hubbe@emc.com>
 References: <cover.1432192681.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1432196075.git.Allen.Hubbe@emc.com>
@@ -16,28 +16,92 @@ To: linux-ntb@googlegroups.com
 Cc: linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-When the ntb transport is connecting and waiting for the peer, the debug
-console receives lots of debug level messages about the remote qp link
-status being down.  Rate limit those messages.
+Reset the link stats when the link goes down.  In particular, the tx and
+rx index and count must be reset, or else the tx side will be sending
+packets to the rx side, where the rx side is not expecting them.  Reset
+all the stats, to be consistent.
 
 Signed-off-by: Allen Hubbe <Allen.Hubbe@emc.com>
 ---
- drivers/ntb/ntb_transport.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/ntb/ntb_transport.c | 36 ++++++++++++++++++++++++++++--------
+ 1 file changed, 28 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 80a35cb..e38e4f8 100644
+index 6260016..eff776f 100644
 --- a/drivers/ntb/ntb_transport.c
 +++ b/drivers/ntb/ntb_transport.c
-@@ -831,7 +831,7 @@ static void ntb_qp_link_work(struct work_struct *work)
+@@ -648,18 +648,37 @@ static int ntb_set_mw(struct ntb_transport_ctx *nt, int num_mw,
+ 	return 0;
+ }
  
- 	/* query remote spad for qp ready bits */
- 	ntb_peer_spad_read(nt->ndev, QP_LINKS);
--	dev_dbg(&pdev->dev, "Remote QP link status = %x\n", val);
-+	dev_dbg_ratelimited(&pdev->dev, "Remote QP link status = %x\n", val);
++static void ntb_qp_link_down_reset(struct ntb_transport_qp *qp)
++{
++	qp->link_is_up = false;
++
++	qp->tx_index = 0;
++	qp->rx_index = 0;
++	qp->rx_bytes = 0;
++	qp->rx_pkts = 0;
++	qp->rx_ring_empty = 0;
++	qp->rx_err_no_buf = 0;
++	qp->rx_err_oflow = 0;
++	qp->rx_err_ver = 0;
++	qp->rx_memcpy = 0;
++	qp->rx_async = 0;
++	qp->tx_bytes = 0;
++	qp->tx_pkts = 0;
++	qp->tx_ring_full = 0;
++	qp->tx_err_no_buf = 0;
++	qp->tx_memcpy = 0;
++	qp->tx_async = 0;
++}
++
+ static void ntb_qp_link_cleanup(struct ntb_transport_qp *qp)
+ {
+ 	struct ntb_transport_ctx *nt = qp->transport;
+ 	struct pci_dev *pdev = nt->ndev->pdev;
  
- 	/* See if the remote side is up */
- 	if (val & BIT(qp->qp_num)) {
+-	if (qp->link_is_up) {
+-		cancel_delayed_work_sync(&qp->link_work);
+-		return;
+-	}
+-
+ 	dev_info(&pdev->dev, "qp %d: Link Cleanup\n", qp->qp_num);
+-	qp->link_is_up = false;
++
++	cancel_delayed_work_sync(&qp->link_work);
++	ntb_qp_link_down_reset(qp);
+ 
+ 	if (qp->event_handler)
+ 		qp->event_handler(qp->cb_data, qp->link_is_up);
+@@ -866,9 +885,9 @@ static int ntb_transport_init_queue(struct ntb_transport_ctx *nt,
+ 	qp->qp_num = qp_num;
+ 	qp->transport = nt;
+ 	qp->ndev = nt->ndev;
+-	qp->link_is_up = false;
+ 	qp->client_ready = false;
+ 	qp->event_handler = NULL;
++	ntb_qp_link_down_reset(qp);
+ 
+ 	if (qp_count % mw_count && mw_num + 1 < qp_count / mw_count)
+ 		num_qps_mw = qp_count / mw_count + 1;
+@@ -1454,7 +1473,6 @@ static void ntb_send_link_down(struct ntb_transport_qp *qp)
+ 	if (!qp->link_is_up)
+ 		return;
+ 
+-	qp->link_is_up = false;
+ 	dev_info(&pdev->dev, "qp %d: Send Link Down\n", qp->qp_num);
+ 
+ 	for (i = 0; i < NTB_LINK_DOWN_TIMEOUT; i++) {
+@@ -1476,6 +1494,8 @@ static void ntb_send_link_down(struct ntb_transport_qp *qp)
+ 	if (rc)
+ 		dev_err(&pdev->dev, "ntb: QP%d unable to send linkdown msg\n",
+ 			qp->qp_num);
++
++	ntb_qp_link_down_reset(qp);
+ }
+ 
+ /**
 -- 
 2.4.0.rc0.43.gcf8a8c6
 
