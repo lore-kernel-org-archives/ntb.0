@@ -1,72 +1,87 @@
 Return-Path: <bhelgaas@google.com>
-Received: from mail-ig0-x231.google.com (mail-ig0-x231.google.com. [2607:f8b0:4001:c05::231])
-        by gmr-mx.google.com with ESMTPS id h20si230551igt.3.2015.06.09.09.53.40
+Received: from mail-ig0-x236.google.com (mail-ig0-x236.google.com. [2607:f8b0:4001:c05::236])
+        by gmr-mx.google.com with ESMTPS id ax9si226746igc.1.2015.06.09.09.46.42
         for <linux-ntb@googlegroups.com>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 09 Jun 2015 09:53:40 -0700 (PDT)
-Received: by mail-ig0-x231.google.com with SMTP id sb11so15881591igb.0
-        for <linux-ntb@googlegroups.com>; Tue, 09 Jun 2015 09:53:40 -0700 (PDT)
+        Tue, 09 Jun 2015 09:46:42 -0700 (PDT)
+Received: by mail-ig0-x236.google.com with SMTP id sb11so15752601igb.0
+        for <linux-ntb@googlegroups.com>; Tue, 09 Jun 2015 09:46:42 -0700 (PDT)
 Return-Path: <bhelgaas@google.com>
-Date: Tue, 9 Jun 2015 11:53:28 -0500
+Date: Tue, 9 Jun 2015 11:46:32 -0500
 From: Bjorn Helgaas <bhelgaas@google.com>
-Subject: Re: [PATCH v3 02/18] NTB: Add NTB hardware abstraction layer
-Message-ID: <20150609165328.GH23119@google.com>
+Subject: Re: [PATCH v3 15/18] NTB: Improve performance with write combining
+Message-ID: <20150609164632.GG23119@google.com>
 References: <cover.1433838377.git.Allen.Hubbe@emc.com>
- <21347a93355f40d945cf9f565f95e790d9b3bda5.1433838377.git.Allen.Hubbe@emc.com>
+ <bc5eb3dd58e308b06a3a7464627704210c175394.1433838377.git.Allen.Hubbe@emc.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <21347a93355f40d945cf9f565f95e790d9b3bda5.1433838377.git.Allen.Hubbe@emc.com>
+In-Reply-To: <bc5eb3dd58e308b06a3a7464627704210c175394.1433838377.git.Allen.Hubbe@emc.com>
 To: Allen Hubbe <Allen.Hubbe@emc.com>
 Cc: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Tue, Jun 09, 2015 at 05:44:29AM -0400, Allen Hubbe wrote:
-> Abstract the ntb device behind a programming interface, so that it can
-> support different hardware.  Change the intel hardware driver to fit the
-> abstraction.
+On Tue, Jun 09, 2015 at 05:44:42AM -0400, Allen Hubbe wrote:
+> From: Dave Jiang <dave.jiang@intel.com>
 > 
-> Expose the ntb hardware api to client drivers instead of tying it to
-> ntb_transport.  Make ntb_transport a client of the ntb hardware api.
+> Changing the memory window BAR mappings to write combining significantly
+> boosts the performance.  We will also use memcpy that utilizies
+
+s/utilizies/uses/
+
+> non-temporal store which showed performance improement when doing
+
+s/improement/improvement/
+
+> non-cached memcpys.
 > 
-> Signed-off-by: Allen Hubbe <Allen.Hubbe@emc.com>
+> Signed-off-by: Dave Jiang <dave.jiang@intel.com>
 > ---
+>  drivers/ntb/ntb_transport.c | 9 +++++++--
+>  1 file changed, 7 insertions(+), 2 deletions(-)
 > 
-> It was pointed out in v1 that this one patch is over 200KB.  Please
-> accept my appologies for not breaking this down further.  The affected
-> components in this patch had interdependencies, which makes it difficult
-> to contain the changes.  This change separates the components, so future
-> changes can be better contained.
->
->  Documentation/ntb.txt               |   58 +
->  MAINTAINERS                         |   14 +-
->  drivers/net/ntb_netdev.c            |   58 +-
->  drivers/ntb/Kconfig                 |   37 +-
->  drivers/ntb/Makefile                |    4 +-
->  drivers/ntb/hw/Kconfig              |    1 +
->  drivers/ntb/hw/Makefile             |    1 +
->  drivers/ntb/hw/intel/Kconfig        |    7 +
->  drivers/ntb/hw/intel/Makefile       |    1 +
->  drivers/ntb/hw/intel/ntb_hw_intel.c | 3077 +++++++++++++++++++----------------
->  drivers/ntb/hw/intel/ntb_hw_intel.h |  607 ++++---
->  drivers/ntb/ntb.c                   |  251 +++
->  drivers/ntb/ntb_transport.c         |  944 ++++++-----
->  include/linux/ntb.h                 |  984 +++++++++++
->  include/linux/ntb_transport.h       |   25 +-
->  15 files changed, 3870 insertions(+), 2199 deletions(-)
->  create mode 100644 Documentation/ntb.txt
->  create mode 100644 drivers/ntb/hw/Kconfig
->  create mode 100644 drivers/ntb/hw/Makefile
->  create mode 100644 drivers/ntb/hw/intel/Kconfig
->  create mode 100644 drivers/ntb/hw/intel/Makefile
->  create mode 100644 drivers/ntb/ntb.c
->  create mode 100644 include/linux/ntb.h
+> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+> index dc14ec81c43e..528ea0af6d54 100644
+> --- a/drivers/ntb/ntb_transport.c
+> +++ b/drivers/ntb/ntb_transport.c
+> @@ -58,6 +58,7 @@
+>  #include <linux/pci.h>
+>  #include <linux/slab.h>
+>  #include <linux/types.h>
+> +#include <linux/uaccess.h>
+>  #include "linux/ntb.h"
+>  #include "linux/ntb_transport.h"
+>  
+> @@ -993,7 +994,7 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
+>  		if (rc)
+>  			goto err1;
+>  
+> -		mw->vbase = ioremap(mw->phys_addr, mw->phys_size);
+> +		mw->vbase = ioremap_wc(mw->phys_addr, mw->phys_size);
+>  		if (!mw->vbase) {
+>  			rc = -ENOMEM;
+>  			goto err1;
+> @@ -1375,7 +1376,11 @@ static void ntb_tx_copy_callback(void *data)
+>  
+>  static void ntb_memcpy_tx(struct ntb_queue_entry *entry, void __iomem *offset)
+>  {
+> -	memcpy_toio(offset, entry->buf, entry->len);
+> +	/*
+> +	 * Using non-temporal mov to improve performance on non-cached
+> +	 * writes. Even though we aren't actually copying from user space.
+> +	 */
+> +	__copy_from_user_inatomic_nocache(offset, entry->buf, entry->len);
 
-I'm not really a reviewer (I'm only commenting on obvious English and
-spelling issues), so maybe the real reviewers can handle this.  But if I
-were reviewing the code, this patch would be far too large for me to make
-sense of.
+__copy_from_user_inatomic_nocache() only exists on x86, but this file looks
+like it's intended to be arch-agnostic?
 
-And it makes bisection and reversion significantly less useful.
-
-Bjorn
+>  
+>  	/* Ensure that the data is fully copied out before setting the flags */
+>  	wmb();
+> -- 
+> 2.4.0.rc0.43.gcf8a8c6
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-pci" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
