@@ -1,73 +1,107 @@
 Return-Path: <Allen.Hubbe@emc.com>
 Received: from mailuogwhop.emc.com (mailuogwhop.emc.com. [168.159.213.141])
-        by gmr-mx.google.com with ESMTPS id h1si106699wiw.1.2015.06.09.07.45.27
+        by gmr-mx.google.com with ESMTPS id p9si105610wiz.3.2015.06.09.07.45.28
         for <linux-ntb@googlegroups.com>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 09 Jun 2015 07:45:27 -0700 (PDT)
+        Tue, 09 Jun 2015 07:45:28 -0700 (PDT)
 From: Allen Hubbe <Allen.Hubbe@emc.com>
-Subject: [PATCH v3 03/18] NTB: Read peer info from local SPAD in transport
-Date: Tue,  9 Jun 2015 05:44:30 -0400
-Message-Id: <29c8beeb128ad2e86ee21dfebb5fb39056b47e93.1433838377.git.Allen.Hubbe@emc.com>
+Subject: [PATCH v3 08/18] NTB: Reset transport QP link stats on down
+Date: Tue,  9 Jun 2015 05:44:35 -0400
+Message-Id: <fac6bc5f87a6c9c90e4e3177de3ad0c8cac75821.1433838377.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1433838377.git.Allen.Hubbe@emc.com>
 References: <cover.1433838377.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1433838377.git.Allen.Hubbe@emc.com>
 References: <cover.1433838377.git.Allen.Hubbe@emc.com>
 To: linux-ntb@googlegroups.com
-Cc: linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>
+Cc: linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Dave Jiang <dave.jiang@intel.com>
+Reset the link stats when the link goes down.  In particular, the tx and
+rx index and count must be reset, or else the tx side will be sending
+packets to the rx side, where the rx side is not expecting them.  Reset
+all the stats, to be consistent.
 
-Importance:	High
-
-The transport was writing and then reading the peer spad, essentially
-reading what it just wrote instead of exchanging any information with
-the peer.  The transport expects the peer values to be the same as the
-local values, so this issue was not obvious.
-
-Signed-off-by: Dave Jiang <dave.jiang@intel.com>
+Signed-off-by: Allen Hubbe <Allen.Hubbe@emc.com>
 ---
- drivers/ntb/ntb_transport.c | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+ drivers/ntb/ntb_transport.c | 36 ++++++++++++++++++++++++++++--------
+ 1 file changed, 28 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 9faf1c6029af..d9538e911df6 100644
+index 0f86b60a0c0e..2efd1eae9a7c 100644
 --- a/drivers/ntb/ntb_transport.c
 +++ b/drivers/ntb/ntb_transport.c
-@@ -761,17 +761,17 @@ static void ntb_transport_link_work(struct work_struct *work)
- 	ntb_peer_spad_write(ndev, VERSION, NTB_TRANSPORT_VERSION);
+@@ -648,18 +648,37 @@ static int ntb_set_mw(struct ntb_transport_ctx *nt, int num_mw,
+ 	return 0;
+ }
  
- 	/* Query the remote side for its info */
--	val = ntb_peer_spad_read(ndev, VERSION);
-+	val = ntb_spad_read(ndev, VERSION);
- 	dev_dbg(&pdev->dev, "Remote version = %d\n", val);
- 	if (val != NTB_TRANSPORT_VERSION)
- 		goto out;
++static void ntb_qp_link_down_reset(struct ntb_transport_qp *qp)
++{
++	qp->link_is_up = false;
++
++	qp->tx_index = 0;
++	qp->rx_index = 0;
++	qp->rx_bytes = 0;
++	qp->rx_pkts = 0;
++	qp->rx_ring_empty = 0;
++	qp->rx_err_no_buf = 0;
++	qp->rx_err_oflow = 0;
++	qp->rx_err_ver = 0;
++	qp->rx_memcpy = 0;
++	qp->rx_async = 0;
++	qp->tx_bytes = 0;
++	qp->tx_pkts = 0;
++	qp->tx_ring_full = 0;
++	qp->tx_err_no_buf = 0;
++	qp->tx_memcpy = 0;
++	qp->tx_async = 0;
++}
++
+ static void ntb_qp_link_cleanup(struct ntb_transport_qp *qp)
+ {
+ 	struct ntb_transport_ctx *nt = qp->transport;
+ 	struct pci_dev *pdev = nt->ndev->pdev;
  
--	val = ntb_peer_spad_read(ndev, NUM_QPS);
-+	val = ntb_spad_read(ndev, NUM_QPS);
- 	dev_dbg(&pdev->dev, "Remote max number of qps = %d\n", val);
- 	if (val != nt->qp_count)
- 		goto out;
+-	if (qp->link_is_up) {
+-		cancel_delayed_work_sync(&qp->link_work);
+-		return;
+-	}
+-
+ 	dev_info(&pdev->dev, "qp %d: Link Cleanup\n", qp->qp_num);
+-	qp->link_is_up = false;
++
++	cancel_delayed_work_sync(&qp->link_work);
++	ntb_qp_link_down_reset(qp);
  
--	val = ntb_peer_spad_read(ndev, NUM_MWS);
-+	val = ntb_spad_read(ndev, NUM_MWS);
- 	dev_dbg(&pdev->dev, "Remote number of mws = %d\n", val);
- 	if (val != nt->mw_count)
- 		goto out;
-@@ -779,10 +779,10 @@ static void ntb_transport_link_work(struct work_struct *work)
- 	for (i = 0; i < nt->mw_count; i++) {
- 		u64 val64;
+ 	if (qp->event_handler)
+ 		qp->event_handler(qp->cb_data, qp->link_is_up);
+@@ -866,9 +885,9 @@ static int ntb_transport_init_queue(struct ntb_transport_ctx *nt,
+ 	qp->qp_num = qp_num;
+ 	qp->transport = nt;
+ 	qp->ndev = nt->ndev;
+-	qp->link_is_up = false;
+ 	qp->client_ready = false;
+ 	qp->event_handler = NULL;
++	ntb_qp_link_down_reset(qp);
  
--		val = ntb_peer_spad_read(ndev, MW0_SZ_HIGH + (i * 2));
-+		val = ntb_spad_read(ndev, MW0_SZ_HIGH + (i * 2));
- 		val64 = (u64)val << 32;
+ 	if (qp_count % mw_count && mw_num + 1 < qp_count / mw_count)
+ 		num_qps_mw = qp_count / mw_count + 1;
+@@ -1468,7 +1487,6 @@ static void ntb_send_link_down(struct ntb_transport_qp *qp)
+ 	if (!qp->link_is_up)
+ 		return;
  
--		val = ntb_peer_spad_read(ndev, MW0_SZ_LOW + (i * 2));
-+		val = ntb_spad_read(ndev, MW0_SZ_LOW + (i * 2));
- 		val64 |= val;
+-	qp->link_is_up = false;
+ 	dev_info(&pdev->dev, "qp %d: Send Link Down\n", qp->qp_num);
  
- 		dev_dbg(&pdev->dev, "Remote MW%d size = %#llx\n", i, val64);
+ 	for (i = 0; i < NTB_LINK_DOWN_TIMEOUT; i++) {
+@@ -1490,6 +1508,8 @@ static void ntb_send_link_down(struct ntb_transport_qp *qp)
+ 	if (rc)
+ 		dev_err(&pdev->dev, "ntb: QP%d unable to send linkdown msg\n",
+ 			qp->qp_num);
++
++	ntb_qp_link_down_reset(qp);
+ }
+ 
+ /**
 -- 
 2.4.0.rc0.43.gcf8a8c6
 
