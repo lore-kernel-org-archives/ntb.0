@@ -1,87 +1,55 @@
-Return-Path: <bhelgaas@google.com>
-Received: from mail-ig0-x236.google.com (mail-ig0-x236.google.com. [2607:f8b0:4001:c05::236])
-        by gmr-mx.google.com with ESMTPS id ax9si226746igc.1.2015.06.09.09.46.42
-        for <linux-ntb@googlegroups.com>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 09 Jun 2015 09:46:42 -0700 (PDT)
-Received: by mail-ig0-x236.google.com with SMTP id sb11so15752601igb.0
-        for <linux-ntb@googlegroups.com>; Tue, 09 Jun 2015 09:46:42 -0700 (PDT)
-Return-Path: <bhelgaas@google.com>
-Date: Tue, 9 Jun 2015 11:46:32 -0500
-From: Bjorn Helgaas <bhelgaas@google.com>
-Subject: Re: [PATCH v3 15/18] NTB: Improve performance with write combining
-Message-ID: <20150609164632.GG23119@google.com>
+Return-Path: <dave.jiang@intel.com>
+Received: from mga03.intel.com (mga03.intel.com. [134.134.136.65])
+        by gmr-mx.google.com with ESMTP id xz5si729032pac.1.2015.06.09.09.45.39
+        for <linux-ntb@googlegroups.com>;
+        Tue, 09 Jun 2015 09:45:39 -0700 (PDT)
+From: "Jiang, Dave" <dave.jiang@intel.com>
+Subject: Re: [PATCH v3 18/18] NTB: Increase transport MTU to 64k from 16k
+Date: Tue, 9 Jun 2015 16:45:36 +0000
+Message-ID: <1433868335.38406.111.camel@intel.com>
 References: <cover.1433838377.git.Allen.Hubbe@emc.com>
- <bc5eb3dd58e308b06a3a7464627704210c175394.1433838377.git.Allen.Hubbe@emc.com>
+	 <aba15cd979bc3523c0289f4766b47d3f45f32c38.1433838377.git.Allen.Hubbe@emc.com>
+	 <CAErSpo7B8qP34ZObkzjZ-r7bCnG6A0KG3Rorw+TajP4XU43wFg@mail.gmail.com>
+In-Reply-To: <CAErSpo7B8qP34ZObkzjZ-r7bCnG6A0KG3Rorw+TajP4XU43wFg@mail.gmail.com>
+Content-Language: en-US
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <7DCF224B447D9A4AB84DFC0FF2BD3E76@intel.com>
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <bc5eb3dd58e308b06a3a7464627704210c175394.1433838377.git.Allen.Hubbe@emc.com>
-To: Allen Hubbe <Allen.Hubbe@emc.com>
-Cc: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>
+Return-Path: dave.jiang@intel.com
+To: "bhelgaas@google.com" <bhelgaas@google.com>
+Cc: "Allen.Hubbe@emc.com" <Allen.Hubbe@emc.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Tue, Jun 09, 2015 at 05:44:42AM -0400, Allen Hubbe wrote:
-> From: Dave Jiang <dave.jiang@intel.com>
-> 
-> Changing the memory window BAR mappings to write combining significantly
-> boosts the performance.  We will also use memcpy that utilizies
-
-s/utilizies/uses/
-
-> non-temporal store which showed performance improement when doing
-
-s/improement/improvement/
-
-> non-cached memcpys.
-> 
-> Signed-off-by: Dave Jiang <dave.jiang@intel.com>
-> ---
->  drivers/ntb/ntb_transport.c | 9 +++++++--
->  1 file changed, 7 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-> index dc14ec81c43e..528ea0af6d54 100644
-> --- a/drivers/ntb/ntb_transport.c
-> +++ b/drivers/ntb/ntb_transport.c
-> @@ -58,6 +58,7 @@
->  #include <linux/pci.h>
->  #include <linux/slab.h>
->  #include <linux/types.h>
-> +#include <linux/uaccess.h>
->  #include "linux/ntb.h"
->  #include "linux/ntb_transport.h"
->  
-> @@ -993,7 +994,7 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
->  		if (rc)
->  			goto err1;
->  
-> -		mw->vbase = ioremap(mw->phys_addr, mw->phys_size);
-> +		mw->vbase = ioremap_wc(mw->phys_addr, mw->phys_size);
->  		if (!mw->vbase) {
->  			rc = -ENOMEM;
->  			goto err1;
-> @@ -1375,7 +1376,11 @@ static void ntb_tx_copy_callback(void *data)
->  
->  static void ntb_memcpy_tx(struct ntb_queue_entry *entry, void __iomem *offset)
->  {
-> -	memcpy_toio(offset, entry->buf, entry->len);
-> +	/*
-> +	 * Using non-temporal mov to improve performance on non-cached
-> +	 * writes. Even though we aren't actually copying from user space.
-> +	 */
-> +	__copy_from_user_inatomic_nocache(offset, entry->buf, entry->len);
-
-__copy_from_user_inatomic_nocache() only exists on x86, but this file looks
-like it's intended to be arch-agnostic?
-
->  
->  	/* Ensure that the data is fully copied out before setting the flags */
->  	wmb();
-> -- 
-> 2.4.0.rc0.43.gcf8a8c6
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-pci" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+T24gVHVlLCAyMDE1LTA2LTA5IGF0IDExOjA0IC0wNTAwLCAnQmpvcm4gSGVsZ2FhcycgdmlhIGxp
+bnV4LW50YiB3cm90ZToNCj4gT24gVHVlLCBKdW4gOSwgMjAxNSBhdCA0OjQ0IEFNLCBBbGxlbiBI
+dWJiZSA8QWxsZW4uSHViYmVAZW1jLmNvbT4gDQo+IHdyb3RlOg0KPiA+IEZyb206IERhdmUgSmlh
+bmcgPGRhdmUuamlhbmdAaW50ZWwuY29tPg0KPiA+IA0KPiA+IEJlbmNobWFya2luZyBzaG93ZWQg
+c2lnbmlmaWNhbnQgcGVyZm9ybWFuY2UgaW5jcmVhc2UgZ29pbmcgZnJvbSBNVFUgDQo+ID4gc2l6
+ZQ0KPiA+IG9mIDY0ayBmcm9tIDE2ay4gIENoYW5naW5nIHRoZSBkZWZhdWx0Lg0KPiANCj4gVGhp
+cyBjaGFuZ2Vsb2cgZG9lc24ndCBwYXJzZS4gIEkgdGhpbmsgeW91IG1lYW4gImdvaW5nIGZyb20g
+TVRVIHNpemUNCj4gMTZrIHRvIDY0ay4iDQoNClllcy4gU29ycnkgYWJvdXQgdGhlIGNvbmZ1c2lv
+bi4NCg0KPiANCj4gVGhlIG9yaWdpbmFsIHZhbHVlIHdhcyAweDQwMWUgKDE2ayArIDB4MWUpLCBh
+bmQgdGhlIG5ldyB2YWx1ZSBpcw0KPiBleGFjdGx5IDY0ay4gIFBsZWFzZSBpbmNsdWRlIGEgbm90
+ZSBhYm91dCB3aGF0IHRoYXQgZXh0cmEgMHgxZSB3YXMgDQo+IGZvcg0KPiBhbmQgd2h5IGl0IGlz
+bid0IG5lZWRlZCBpbiB0aGUgbmV3IHZhbHVlLg0KDQpKb24sIGNhbiB5b3UgY29tbWVudCBvbiB3
+aHkgdGhlcmUncyB0aGUgYWRkaXRpb25hbCAzMCBieXRlcyBvbiB0b3Agb2YNCjE2ayBpbiB0aGUg
+cHJldmlvdXMgdmFsdWU/IA0KDQo+IA0KPiA+IFNpZ25lZC1vZmYtYnk6IERhdmUgSmlhbmcgPGRh
+dmUuamlhbmdAaW50ZWwuY29tPg0KPiA+IC0tLQ0KPiA+ICBkcml2ZXJzL250Yi9udGJfdHJhbnNw
+b3J0LmMgfCAyICstDQo+ID4gIDEgZmlsZSBjaGFuZ2VkLCAxIGluc2VydGlvbigrKSwgMSBkZWxl
+dGlvbigtKQ0KPiA+IA0KPiA+IGRpZmYgLS1naXQgYS9kcml2ZXJzL250Yi9udGJfdHJhbnNwb3J0
+LmMgDQo+ID4gYi9kcml2ZXJzL250Yi9udGJfdHJhbnNwb3J0LmMNCj4gPiBpbmRleCBlYTIzN2Fl
+Y2EyOGMuLmM4N2JjMGNiZDYwNyAxMDA2NDQNCj4gPiAtLS0gYS9kcml2ZXJzL250Yi9udGJfdHJh
+bnNwb3J0LmMNCj4gPiArKysgYi9kcml2ZXJzL250Yi9udGJfdHJhbnNwb3J0LmMNCj4gPiBAQCAt
+NzYsNyArNzYsNyBAQCBzdGF0aWMgdW5zaWduZWQgbG9uZyBtYXhfbXdfc2l6ZTsNCj4gPiAgbW9k
+dWxlX3BhcmFtKG1heF9td19zaXplLCB1bG9uZywgMDY0NCk7DQo+ID4gIE1PRFVMRV9QQVJNX0RF
+U0MobWF4X213X3NpemUsICJMaW1pdCBzaXplIG9mIGxhcmdlIG1lbW9yeSANCj4gPiB3aW5kb3dz
+Iik7DQo+ID4gDQo+ID4gLXN0YXRpYyB1bnNpZ25lZCBpbnQgdHJhbnNwb3J0X210dSA9IDB4NDAx
+RTsNCj4gPiArc3RhdGljIHVuc2lnbmVkIGludCB0cmFuc3BvcnRfbXR1ID0gMHgxMDAwMDsNCj4g
+PiAgbW9kdWxlX3BhcmFtKHRyYW5zcG9ydF9tdHUsIHVpbnQsIDA2NDQpOw0KPiA+ICBNT0RVTEVf
+UEFSTV9ERVNDKHRyYW5zcG9ydF9tdHUsICJNYXhpbXVtIHNpemUgb2YgTlRCIHRyYW5zcG9ydCAN
+Cj4gPiBwYWNrZXRzIik7DQo+ID4gDQo+ID4gLS0NCj4gPiAyLjQuMC5yYzAuNDMuZ2NmOGE4YzYN
+Cj4gPiANCj4gPiAtLQ0KPiA+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRo
+ZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eA0KPiA+IC1wY2kiIGluDQo+ID4gdGhlIGJvZHkgb2Yg
+YSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCj4gPiBNb3JlIG1ham9yZG9t
+byBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4g
