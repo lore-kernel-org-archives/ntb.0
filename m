@@ -1,58 +1,68 @@
-Return-Path: <bhelgaas@google.com>
-Received: from mail-ig0-x235.google.com (mail-ig0-x235.google.com. [2607:f8b0:4001:c05::235])
-        by gmr-mx.google.com with ESMTPS id rs3si215263igb.2.2015.06.09.09.05.07
+Return-Path: <Allen.Hubbe@emc.com>
+Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
+        by gmr-mx.google.com with ESMTPS id p9si105630wiz.3.2015.06.09.07.45.41
         for <linux-ntb@googlegroups.com>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 09 Jun 2015 09:05:07 -0700 (PDT)
-Received: by mail-ig0-x235.google.com with SMTP id hj9so16840641igb.1
-        for <linux-ntb@googlegroups.com>; Tue, 09 Jun 2015 09:05:07 -0700 (PDT)
-MIME-Version: 1.0
-In-Reply-To: <aba15cd979bc3523c0289f4766b47d3f45f32c38.1433838377.git.Allen.Hubbe@emc.com>
-References: <cover.1433838377.git.Allen.Hubbe@emc.com> <aba15cd979bc3523c0289f4766b47d3f45f32c38.1433838377.git.Allen.Hubbe@emc.com>
-From: Bjorn Helgaas <bhelgaas@google.com>
-Date: Tue, 9 Jun 2015 11:04:46 -0500
-Message-ID: <CAErSpo7B8qP34ZObkzjZ-r7bCnG6A0KG3Rorw+TajP4XU43wFg@mail.gmail.com>
-Subject: Re: [PATCH v3 18/18] NTB: Increase transport MTU to 64k from 16k
-Content-Type: text/plain; charset=UTF-8
-To: Allen Hubbe <Allen.Hubbe@emc.com>
-Cc: linux-ntb@googlegroups.com, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>
+        Tue, 09 Jun 2015 07:45:41 -0700 (PDT)
+From: Allen Hubbe <Allen.Hubbe@emc.com>
+Subject: [PATCH v3 16/18] NTB: Default to CPU memcpy for performance
+Date: Tue,  9 Jun 2015 05:44:43 -0400
+Message-Id: <5c88264b00edf231f515d4d03878a61946a7b3b7.1433838377.git.Allen.Hubbe@emc.com>
+In-Reply-To: <cover.1433838377.git.Allen.Hubbe@emc.com>
+References: <cover.1433838377.git.Allen.Hubbe@emc.com>
+In-Reply-To: <cover.1433838377.git.Allen.Hubbe@emc.com>
+References: <cover.1433838377.git.Allen.Hubbe@emc.com>
+To: linux-ntb@googlegroups.com
+Cc: linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Tue, Jun 9, 2015 at 4:44 AM, Allen Hubbe <Allen.Hubbe@emc.com> wrote:
-> From: Dave Jiang <dave.jiang@intel.com>
->
-> Benchmarking showed significant performance increase going from MTU size
-> of 64k from 16k.  Changing the default.
+From: Dave Jiang <dave.jiang@intel.com>
 
-This changelog doesn't parse.  I think you mean "going from MTU size
-16k to 64k."
+Disable DMA usage by default, since the CPU provides much better
+performance with write combining.  Provide a module parameter to enable
+DMA usage when offloading the memcpy is preferred.
 
-The original value was 0x401e (16k + 0x1e), and the new value is
-exactly 64k.  Please include a note about what that extra 0x1e was for
-and why it isn't needed in the new value.
+Signed-off-by: Dave Jiang <dave.jiang@intel.com>
+Signed-off-by: Allen Hubbe <Allen.Hubbe@emc.com>
+---
+ drivers/ntb/ntb_transport.c | 17 +++++++++++++----
+ 1 file changed, 13 insertions(+), 4 deletions(-)
 
-> Signed-off-by: Dave Jiang <dave.jiang@intel.com>
-> ---
->  drivers/ntb/ntb_transport.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-> index ea237aeca28c..c87bc0cbd607 100644
-> --- a/drivers/ntb/ntb_transport.c
-> +++ b/drivers/ntb/ntb_transport.c
-> @@ -76,7 +76,7 @@ static unsigned long max_mw_size;
->  module_param(max_mw_size, ulong, 0644);
->  MODULE_PARM_DESC(max_mw_size, "Limit size of large memory windows");
->
-> -static unsigned int transport_mtu = 0x401E;
-> +static unsigned int transport_mtu = 0x10000;
->  module_param(transport_mtu, uint, 0644);
->  MODULE_PARM_DESC(transport_mtu, "Maximum size of NTB transport packets");
->
-> --
-> 2.4.0.rc0.43.gcf8a8c6
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-pci" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+index 528ea0af6d54..ea237aeca28c 100644
+--- a/drivers/ntb/ntb_transport.c
++++ b/drivers/ntb/ntb_transport.c
+@@ -88,6 +88,10 @@ static unsigned int copy_bytes = 1024;
+ module_param(copy_bytes, uint, 0644);
+ MODULE_PARM_DESC(copy_bytes, "Threshold under which NTB will use the CPU to copy instead of DMA");
+ 
++static bool use_dma;
++module_param(use_dma, bool, 0644);
++MODULE_PARM_DESC(use_dma, "Use DMA engine to perform large data copy");
++
+ static struct dentry *nt_debugfs_dir;
+ 
+ struct ntb_queue_entry {
+@@ -1585,10 +1589,15 @@ ntb_transport_create_queue(void *data, struct device *client_dev,
+ 	dma_cap_zero(dma_mask);
+ 	dma_cap_set(DMA_MEMCPY, dma_mask);
+ 
+-	qp->dma_chan = dma_request_channel(dma_mask, ntb_dma_filter_fn,
+-					   (void *)(unsigned long)node);
+-	if (!qp->dma_chan)
+-		dev_info(&pdev->dev, "Unable to allocate DMA channel, using CPU instead\n");
++	if (use_dma) {
++		qp->dma_chan = dma_request_channel(dma_mask, ntb_dma_filter_fn,
++						   (void *)(unsigned long)node);
++		if (!qp->dma_chan)
++			dev_info(&pdev->dev, "Unable to allocate DMA channel\n");
++	} else {
++		qp->dma_chan = NULL;
++	}
++	dev_dbg(&pdev->dev, "Using %s memcpy\n", qp->dma_chan ? "DMA" : "CPU");
+ 
+ 	for (i = 0; i < NTB_QP_DEF_NUM_ENTRIES; i++) {
+ 		entry = kzalloc_node(sizeof(*entry), GFP_ATOMIC, node);
+-- 
+2.4.0.rc0.43.gcf8a8c6
+
