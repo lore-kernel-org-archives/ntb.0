@@ -1,85 +1,38 @@
 Return-Path: <bhelgaas@google.com>
-Received: from mail-ig0-x231.google.com (mail-ig0-x231.google.com. [2607:f8b0:4001:c05::231])
-        by gmr-mx.google.com with ESMTPS id x12si222091igx.1.2015.06.09.09.24.55
+Received: from mail-ie0-x234.google.com (mail-ie0-x234.google.com. [2607:f8b0:4001:c03::234])
+        by gmr-mx.google.com with ESMTPS id g4si220723igc.3.2015.06.09.09.23.49
         for <linux-ntb@googlegroups.com>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 09 Jun 2015 09:24:55 -0700 (PDT)
-Received: by mail-ig0-x231.google.com with SMTP id sb11so15407163igb.0
-        for <linux-ntb@googlegroups.com>; Tue, 09 Jun 2015 09:24:55 -0700 (PDT)
+        Tue, 09 Jun 2015 09:23:49 -0700 (PDT)
+Received: by mail-ie0-x234.google.com with SMTP id gx4so17820533ieb.0
+        for <linux-ntb@googlegroups.com>; Tue, 09 Jun 2015 09:23:49 -0700 (PDT)
 Return-Path: <bhelgaas@google.com>
-Date: Tue, 9 Jun 2015 11:24:52 -0500
+Date: Tue, 9 Jun 2015 11:23:46 -0500
 From: Bjorn Helgaas <bhelgaas@google.com>
-Subject: Re: [PATCH v3 03/18] NTB: Read peer info from local SPAD in transport
-Message-ID: <20150609162452.GD23119@google.com>
+Subject: Re: [PATCH v3 02/18] NTB: Add NTB hardware abstraction layer
+Message-ID: <20150609162346.GC23119@google.com>
 References: <cover.1433838377.git.Allen.Hubbe@emc.com>
- <29c8beeb128ad2e86ee21dfebb5fb39056b47e93.1433838377.git.Allen.Hubbe@emc.com>
+ <21347a93355f40d945cf9f565f95e790d9b3bda5.1433838377.git.Allen.Hubbe@emc.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <29c8beeb128ad2e86ee21dfebb5fb39056b47e93.1433838377.git.Allen.Hubbe@emc.com>
+In-Reply-To: <21347a93355f40d945cf9f565f95e790d9b3bda5.1433838377.git.Allen.Hubbe@emc.com>
 To: Allen Hubbe <Allen.Hubbe@emc.com>
 Cc: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Tue, Jun 09, 2015 at 05:44:30AM -0400, Allen Hubbe wrote:
-> From: Dave Jiang <dave.jiang@intel.com>
-> 
-> Importance:	High
+These refer to English text usage (doc, comments, Kconfig help), not C code:
 
-Looks like junk, maybe inadvertently copied from an email header?
+  s/ntb/NTB/ (except where it refers directly to the driver)
+  s/pci/PCI/
+  s/PCI-E/PCIe/
+  s/api/API/
+  s/intel/Intel/
 
-> The transport was writing and then reading the peer spad, essentially
-> reading what it just wrote instead of exchanging any information with
-> the peer.  The transport expects the peer values to be the same as the
-> local values, so this issue was not obvious.
+On Tue, Jun 09, 2015 at 05:44:29AM -0400, Allen Hubbe wrote:
+> Abstract the ntb device behind a programming interface, so that it can
+> support different hardware.  Change the intel hardware driver to fit the
+> abstraction.
 > 
-> Signed-off-by: Dave Jiang <dave.jiang@intel.com>
-> ---
->  drivers/ntb/ntb_transport.c | 10 +++++-----
->  1 file changed, 5 insertions(+), 5 deletions(-)
-> 
-> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-> index 9faf1c6029af..d9538e911df6 100644
-> --- a/drivers/ntb/ntb_transport.c
-> +++ b/drivers/ntb/ntb_transport.c
-> @@ -761,17 +761,17 @@ static void ntb_transport_link_work(struct work_struct *work)
->  	ntb_peer_spad_write(ndev, VERSION, NTB_TRANSPORT_VERSION);
->  
->  	/* Query the remote side for its info */
-> -	val = ntb_peer_spad_read(ndev, VERSION);
-> +	val = ntb_spad_read(ndev, VERSION);
->  	dev_dbg(&pdev->dev, "Remote version = %d\n", val);
->  	if (val != NTB_TRANSPORT_VERSION)
->  		goto out;
->  
-> -	val = ntb_peer_spad_read(ndev, NUM_QPS);
-> +	val = ntb_spad_read(ndev, NUM_QPS);
->  	dev_dbg(&pdev->dev, "Remote max number of qps = %d\n", val);
->  	if (val != nt->qp_count)
->  		goto out;
->  
-> -	val = ntb_peer_spad_read(ndev, NUM_MWS);
-> +	val = ntb_spad_read(ndev, NUM_MWS);
->  	dev_dbg(&pdev->dev, "Remote number of mws = %d\n", val);
->  	if (val != nt->mw_count)
->  		goto out;
-> @@ -779,10 +779,10 @@ static void ntb_transport_link_work(struct work_struct *work)
->  	for (i = 0; i < nt->mw_count; i++) {
->  		u64 val64;
->  
-> -		val = ntb_peer_spad_read(ndev, MW0_SZ_HIGH + (i * 2));
-> +		val = ntb_spad_read(ndev, MW0_SZ_HIGH + (i * 2));
->  		val64 = (u64)val << 32;
->  
-> -		val = ntb_peer_spad_read(ndev, MW0_SZ_LOW + (i * 2));
-> +		val = ntb_spad_read(ndev, MW0_SZ_LOW + (i * 2));
->  		val64 |= val;
->  
->  		dev_dbg(&pdev->dev, "Remote MW%d size = %#llx\n", i, val64);
-> -- 
-> 2.4.0.rc0.43.gcf8a8c6
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-pci" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Expose the ntb hardware api to client drivers instead of tying it to
+> ntb_transport.  Make ntb_transport a client of the ntb hardware api.
