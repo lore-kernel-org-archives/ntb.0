@@ -1,13 +1,13 @@
 Return-Path: <Allen.Hubbe@emc.com>
 Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
-        by gmr-mx.google.com with ESMTPS id h1si106708wiw.1.2015.06.09.07.45.35
+        by gmr-mx.google.com with ESMTPS id bc3si105766wib.2.2015.06.09.07.45.35
         for <linux-ntb@googlegroups.com>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
         Tue, 09 Jun 2015 07:45:35 -0700 (PDT)
 From: Allen Hubbe <Allen.Hubbe@emc.com>
-Subject: [PATCH v3 13/18] NTB: Use NUMA memory and DMA chan in transport
-Date: Tue,  9 Jun 2015 05:44:40 -0400
-Message-Id: <405348e755bb4f78b6229f0d1ff2a347f0497505.1433838377.git.Allen.Hubbe@emc.com>
+Subject: [PATCH v3 14/18] NTB: Use NUMA memory in Intel driver
+Date: Tue,  9 Jun 2015 05:44:41 -0400
+Message-Id: <28dee49b012e53823387291f4ad0084b99ff8244.1433838377.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1433838377.git.Allen.Hubbe@emc.com>
 References: <cover.1433838377.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1433838377.git.Allen.Hubbe@emc.com>
@@ -16,157 +16,71 @@ To: linux-ntb@googlegroups.com
 Cc: linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Allocate memory and request the dma channel for the same numa node as
-the ntb device.
+Allocate memory for the numa node of the ntb device.
 
 Signed-off-by: Allen Hubbe <Allen.Hubbe@emc.com>
 ---
- drivers/ntb/ntb_transport.c | 46 +++++++++++++++++++++++++++++++--------------
- 1 file changed, 32 insertions(+), 14 deletions(-)
+ drivers/ntb/hw/intel/ntb_hw_intel.c | 18 ++++++++++++------
+ 1 file changed, 12 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 8ce0bf67ac20..dc14ec81c43e 100644
---- a/drivers/ntb/ntb_transport.c
-+++ b/drivers/ntb/ntb_transport.c
-@@ -346,6 +346,7 @@ int ntb_transport_register_client_dev(char *device_name)
+diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c b/drivers/ntb/hw/intel/ntb_hw_intel.c
+index bef94a8bab96..a7f1b01cfdb3 100644
+--- a/drivers/ntb/hw/intel/ntb_hw_intel.c
++++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
+@@ -413,10 +413,12 @@ static int ndev_init_isr(struct intel_ntb_dev *ndev,
+ 			 int msix_shift, int total_shift)
  {
- 	struct ntb_transport_client_dev *client_dev;
- 	struct ntb_transport_ctx *nt;
-+	int node;
- 	int rc, i = 0;
+ 	struct pci_dev *pdev;
+-	int rc, i, msix_count;
++	int rc, i, msix_count, node;
  
- 	if (list_empty(&ntb_transport_list))
-@@ -354,8 +355,10 @@ int ntb_transport_register_client_dev(char *device_name)
- 	list_for_each_entry(nt, &ntb_transport_list, entry) {
- 		struct device *dev;
+ 	pdev = ndev_pdev(ndev);
  
--		client_dev = kzalloc(sizeof(*client_dev),
--				     GFP_KERNEL);
-+		node = dev_to_node(&nt->ndev->dev);
++	node = dev_to_node(&pdev->dev);
 +
-+		client_dev = kzalloc_node(sizeof(*client_dev),
-+					  GFP_KERNEL, node);
- 		if (!client_dev) {
+ 	/* Mask all doorbell interrupts */
+ 	ndev->db_mask = ndev->db_valid_mask;
+ 	ndev->reg->db_iowrite(ndev->db_mask,
+@@ -425,11 +427,13 @@ static int ndev_init_isr(struct intel_ntb_dev *ndev,
+ 
+ 	/* Try to set up msix irq */
+ 
+-	ndev->vec = kcalloc(msix_max, sizeof(*ndev->vec), GFP_KERNEL);
++	ndev->vec = kzalloc_node(msix_max * sizeof(*ndev->vec),
++				 GFP_KERNEL, node);
+ 	if (!ndev->vec)
+ 		goto err_msix_vec_alloc;
+ 
+-	ndev->msix = kcalloc(msix_max, sizeof(*ndev->msix), GFP_KERNEL);
++	ndev->msix = kzalloc_node(msix_max * sizeof(*ndev->msix),
++				  GFP_KERNEL, node);
+ 	if (!ndev->msix)
+ 		goto err_msix_alloc;
+ 
+@@ -1960,10 +1964,12 @@ static int intel_ntb_pci_probe(struct pci_dev *pdev,
+ 			       const struct pci_device_id *id)
+ {
+ 	struct intel_ntb_dev *ndev;
+-	int rc;
++	int rc, node;
++
++	node = dev_to_node(&pdev->dev);
+ 
+ 	if (pdev_is_bwd(pdev)) {
+-		ndev = kmalloc(sizeof(*ndev), GFP_KERNEL);
++		ndev = kmalloc_node(sizeof(*ndev), GFP_KERNEL, node);
+ 		if (!ndev) {
  			rc = -ENOMEM;
- 			goto err;
-@@ -953,6 +956,7 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
- 	struct ntb_transport_mw *mw;
- 	unsigned int mw_count, qp_count;
- 	u64 qp_bitmap;
-+	int node;
- 	int rc, i;
+ 			goto err_ndev;
+@@ -1980,7 +1986,7 @@ static int intel_ntb_pci_probe(struct pci_dev *pdev,
+ 			goto err_init_dev;
  
- 	if (ntb_db_is_unsafe(ndev))
-@@ -962,7 +966,9 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
- 		dev_dbg(&ndev->dev,
- 			"scratchpad is unsafe, proceed anyway...\n");
- 
--	nt = kzalloc(sizeof(*nt), GFP_KERNEL);
-+	node = dev_to_node(&ndev->dev);
-+
-+	nt = kzalloc_node(sizeof(*nt), GFP_KERNEL, node);
- 	if (!nt)
- 		return -ENOMEM;
- 
-@@ -972,7 +978,8 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
- 
- 	nt->mw_count = mw_count;
- 
--	nt->mw_vec = kcalloc(mw_count, sizeof(*nt->mw_vec), GFP_KERNEL);
-+	nt->mw_vec = kzalloc_node(mw_count * sizeof(*nt->mw_vec),
-+				  GFP_KERNEL, node);
- 	if (!nt->mw_vec) {
- 		rc = -ENOMEM;
- 		goto err;
-@@ -1012,7 +1019,8 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
- 	nt->qp_bitmap = qp_bitmap;
- 	nt->qp_bitmap_free = qp_bitmap;
- 
--	nt->qp_vec = kcalloc(qp_count, sizeof(*nt->qp_vec), GFP_KERNEL);
-+	nt->qp_vec = kzalloc_node(qp_count * sizeof(*nt->qp_vec),
-+				  GFP_KERNEL, node);
- 	if (!nt->qp_vec) {
- 		rc = -ENOMEM;
- 		goto err2;
-@@ -1512,6 +1520,11 @@ static void ntb_send_link_down(struct ntb_transport_qp *qp)
- 	ntb_qp_link_down_reset(qp);
- }
- 
-+static bool ntb_dma_filter_fn(struct dma_chan *chan, void *node)
-+{
-+	return dev_to_node(&chan->dev->device) == (int)(unsigned long)node;
-+}
-+
- /**
-  * ntb_transport_create_queue - Create a new NTB transport layer queue
-  * @rx_handler: receive callback function
-@@ -1537,12 +1550,16 @@ ntb_transport_create_queue(void *data, struct device *client_dev,
- 	struct ntb_transport_qp *qp;
- 	u64 qp_bit;
- 	unsigned int free_queue;
-+	dma_cap_mask_t dma_mask;
-+	int node;
- 	int i;
- 
- 	ndev = dev_ntb(client_dev->parent);
- 	pdev = ndev->pdev;
- 	nt = ndev->ctx;
- 
-+	node = dev_to_node(&ndev->dev);
-+
- 	free_queue = ffs(nt->qp_bitmap);
- 	if (!free_queue)
- 		goto err;
-@@ -1560,15 +1577,16 @@ ntb_transport_create_queue(void *data, struct device *client_dev,
- 	qp->tx_handler = handlers->tx_handler;
- 	qp->event_handler = handlers->event_handler;
- 
--	dmaengine_get();
--	qp->dma_chan = dma_find_channel(DMA_MEMCPY);
--	if (!qp->dma_chan) {
--		dmaengine_put();
-+	dma_cap_zero(dma_mask);
-+	dma_cap_set(DMA_MEMCPY, dma_mask);
-+
-+	qp->dma_chan = dma_request_channel(dma_mask, ntb_dma_filter_fn,
-+					   (void *)(unsigned long)node);
-+	if (!qp->dma_chan)
- 		dev_info(&pdev->dev, "Unable to allocate DMA channel, using CPU instead\n");
--	}
- 
- 	for (i = 0; i < NTB_QP_DEF_NUM_ENTRIES; i++) {
--		entry = kzalloc(sizeof(*entry), GFP_ATOMIC);
-+		entry = kzalloc_node(sizeof(*entry), GFP_ATOMIC, node);
- 		if (!entry)
- 			goto err1;
- 
-@@ -1578,7 +1596,7 @@ ntb_transport_create_queue(void *data, struct device *client_dev,
- 	}
- 
- 	for (i = 0; i < NTB_QP_DEF_NUM_ENTRIES; i++) {
--		entry = kzalloc(sizeof(*entry), GFP_ATOMIC);
-+		entry = kzalloc_node(sizeof(*entry), GFP_ATOMIC, node);
- 		if (!entry)
- 			goto err2;
- 
-@@ -1601,7 +1619,7 @@ err1:
- 	while ((entry = ntb_list_rm(&qp->ntb_rx_free_q_lock, &qp->rx_free_q)))
- 		kfree(entry);
- 	if (qp->dma_chan)
--		dmaengine_put();
-+		dma_release_channel(qp->dma_chan);
- 	nt->qp_bitmap_free |= qp_bit;
- err:
- 	return NULL;
-@@ -1638,7 +1656,7 @@ void ntb_transport_free_queue(struct ntb_transport_qp *qp)
- 		 */
- 		dma_sync_wait(chan, qp->last_cookie);
- 		dmaengine_terminate_all(chan);
--		dmaengine_put();
-+		dma_release_channel(chan);
- 	}
- 
- 	qp_bit = BIT_ULL(qp->qp_num);
+ 	} else if (pdev_is_snb(pdev)) {
+-		ndev = kmalloc(sizeof(*ndev), GFP_KERNEL);
++		ndev = kmalloc_node(sizeof(*ndev), GFP_KERNEL, node);
+ 		if (!ndev) {
+ 			rc = -ENOMEM;
+ 			goto err_ndev;
 -- 
 2.4.0.rc0.43.gcf8a8c6
 
