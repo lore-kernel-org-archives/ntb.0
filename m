@@ -1,36 +1,58 @@
 Return-Path: <bhelgaas@google.com>
-Received: from mail-ie0-x22f.google.com (mail-ie0-x22f.google.com. [2607:f8b0:4001:c03::22f])
-        by gmr-mx.google.com with ESMTPS id x12si219758igx.1.2015.06.09.09.16.41
+Received: from mail-ig0-x235.google.com (mail-ig0-x235.google.com. [2607:f8b0:4001:c05::235])
+        by gmr-mx.google.com with ESMTPS id rs3si215263igb.2.2015.06.09.09.05.07
         for <linux-ntb@googlegroups.com>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 09 Jun 2015 09:16:41 -0700 (PDT)
-Received: by mail-ie0-x22f.google.com with SMTP id gx4so17707108ieb.0
-        for <linux-ntb@googlegroups.com>; Tue, 09 Jun 2015 09:16:41 -0700 (PDT)
-Return-Path: <bhelgaas@google.com>
-Date: Tue, 9 Jun 2015 11:16:37 -0500
-From: Bjorn Helgaas <bhelgaas@google.com>
-Subject: Re: [PATCH v3 01/18] NTB: Move files in preparation for NTB
- abstraction
-Message-ID: <20150609161637.GB23119@google.com>
-References: <cover.1433838377.git.Allen.Hubbe@emc.com>
- <8b1fb23f83098cf14b39a898a638394e52e91473.1433838377.git.Allen.Hubbe@emc.com>
+        Tue, 09 Jun 2015 09:05:07 -0700 (PDT)
+Received: by mail-ig0-x235.google.com with SMTP id hj9so16840641igb.1
+        for <linux-ntb@googlegroups.com>; Tue, 09 Jun 2015 09:05:07 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <8b1fb23f83098cf14b39a898a638394e52e91473.1433838377.git.Allen.Hubbe@emc.com>
+In-Reply-To: <aba15cd979bc3523c0289f4766b47d3f45f32c38.1433838377.git.Allen.Hubbe@emc.com>
+References: <cover.1433838377.git.Allen.Hubbe@emc.com> <aba15cd979bc3523c0289f4766b47d3f45f32c38.1433838377.git.Allen.Hubbe@emc.com>
+From: Bjorn Helgaas <bhelgaas@google.com>
+Date: Tue, 9 Jun 2015 11:04:46 -0500
+Message-ID: <CAErSpo7B8qP34ZObkzjZ-r7bCnG6A0KG3Rorw+TajP4XU43wFg@mail.gmail.com>
+Subject: Re: [PATCH v3 18/18] NTB: Increase transport MTU to 64k from 16k
+Content-Type: text/plain; charset=UTF-8
 To: Allen Hubbe <Allen.Hubbe@emc.com>
-Cc: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>
+Cc: linux-ntb@googlegroups.com, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Tue, Jun 09, 2015 at 05:44:28AM -0400, Allen Hubbe wrote:
-> This patch only serves the purpose to move files to their new locations,
+On Tue, Jun 9, 2015 at 4:44 AM, Allen Hubbe <Allen.Hubbe@emc.com> wrote:
+> From: Dave Jiang <dave.jiang@intel.com>
+>
+> Benchmarking showed significant performance increase going from MTU size
+> of 64k from 16k.  Changing the default.
 
-s/only serves the purpose to move/moves/
+This changelog doesn't parse.  I think you mean "going from MTU size
+16k to 64k."
 
-> before applying the next patch adding the NTB Abstraction layer.
-> Splitting this patch from the next is intended make distinct the which
+The original value was 0x401e (16k + 0x1e), and the new value is
+exactly 64k.  Please include a note about what that extra 0x1e was for
+and why it isn't needed in the new value.
 
-s/the which/which/
-
-> code is changed only due to moving the files, versus which are
-> substantial code changes in adding the NTB Abstraction layer.
+> Signed-off-by: Dave Jiang <dave.jiang@intel.com>
+> ---
+>  drivers/ntb/ntb_transport.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+> index ea237aeca28c..c87bc0cbd607 100644
+> --- a/drivers/ntb/ntb_transport.c
+> +++ b/drivers/ntb/ntb_transport.c
+> @@ -76,7 +76,7 @@ static unsigned long max_mw_size;
+>  module_param(max_mw_size, ulong, 0644);
+>  MODULE_PARM_DESC(max_mw_size, "Limit size of large memory windows");
+>
+> -static unsigned int transport_mtu = 0x401E;
+> +static unsigned int transport_mtu = 0x10000;
+>  module_param(transport_mtu, uint, 0644);
+>  MODULE_PARM_DESC(transport_mtu, "Maximum size of NTB transport packets");
+>
+> --
+> 2.4.0.rc0.43.gcf8a8c6
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-pci" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
