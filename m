@@ -1,17 +1,17 @@
 Return-Path: <Allen.Hubbe@emc.com>
 Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
-        by gmr-mx.google.com with ESMTPS id h1si129946wiw.1.2015.06.09.10.32.22
+        by gmr-mx.google.com with ESMTPS id ci2si321594vdd.3.2015.06.09.10.00.17
         for <linux-ntb@googlegroups.com>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 09 Jun 2015 10:32:22 -0700 (PDT)
+        Tue, 09 Jun 2015 10:00:18 -0700 (PDT)
 From: "Hubbe, Allen" <Allen.Hubbe@emc.com>
-Subject: RE: [PATCH v3 02/18] NTB: Add NTB hardware abstraction layer
-Date: Tue, 9 Jun 2015 17:32:01 +0000
-Message-ID: <40F65EF2B5E2254199711F58E3ACB84D830FFF99@MX104CL02.corp.emc.com>
+Subject: RE: [PATCH v3 09/18] NTB: Add parameters for Intel SNB B2B addresses
+Date: Tue, 9 Jun 2015 16:59:57 +0000
+Message-ID: <40F65EF2B5E2254199711F58E3ACB84D830FEEF3@MX104CL02.corp.emc.com>
 References: <cover.1433838377.git.Allen.Hubbe@emc.com>
- <21347a93355f40d945cf9f565f95e790d9b3bda5.1433838377.git.Allen.Hubbe@emc.com>
- <20150609165328.GH23119@google.com>
-In-Reply-To: <20150609165328.GH23119@google.com>
+ <c3b1dd88bf0eb3c86f38fd11cc1b1735dd593a04.1433838377.git.Allen.Hubbe@emc.com>
+ <20150609164217.GE23119@google.com>
+In-Reply-To: <20150609164217.GE23119@google.com>
 Content-Language: en-US
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: base64
@@ -20,29 +20,16 @@ To: Bjorn Helgaas <bhelgaas@google.com>
 Cc: "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-RnJvbTogQmpvcm4gSGVsZ2FhcyBbbWFpbHRvOmJoZWxnYWFzQGdvb2dsZS5jb21dDQo+ID4gSXQg
-d2FzIHBvaW50ZWQgb3V0IGluIHYxIHRoYXQgdGhpcyBvbmUgcGF0Y2ggaXMgb3ZlciAyMDBLQi4g
-IFBsZWFzZQ0KPiA+IGFjY2VwdCBteSBhcHBvbG9naWVzIGZvciBub3QgYnJlYWtpbmcgdGhpcyBk
-b3duIGZ1cnRoZXIuICBUaGUgYWZmZWN0ZWQNCj4gPiBjb21wb25lbnRzIGluIHRoaXMgcGF0Y2gg
-aGFkIGludGVyZGVwZW5kZW5jaWVzLCB3aGljaCBtYWtlcyBpdA0KPiBkaWZmaWN1bHQNCj4gPiB0
-byBjb250YWluIHRoZSBjaGFuZ2VzLiAgVGhpcyBjaGFuZ2Ugc2VwYXJhdGVzIHRoZSBjb21wb25l
-bnRzLCBzbw0KPiBmdXR1cmUNCj4gPiBjaGFuZ2VzIGNhbiBiZSBiZXR0ZXIgY29udGFpbmVkLg0K
-PiA+DQouLi4NCj4gDQo+IEknbSBub3QgcmVhbGx5IGEgcmV2aWV3ZXIgKEknbSBvbmx5IGNvbW1l
-bnRpbmcgb24gb2J2aW91cyBFbmdsaXNoIGFuZA0KPiBzcGVsbGluZyBpc3N1ZXMpLCBzbyBtYXli
-ZSB0aGUgcmVhbCByZXZpZXdlcnMgY2FuIGhhbmRsZSB0aGlzLiAgQnV0IGlmIEkNCj4gd2VyZSBy
-ZXZpZXdpbmcgdGhlIGNvZGUsIHRoaXMgcGF0Y2ggd291bGQgYmUgZmFyIHRvbyBsYXJnZSBmb3Ig
-bWUgdG8NCj4gbWFrZQ0KPiBzZW5zZSBvZi4NCj4gDQo+IEFuZCBpdCBtYWtlcyBiaXNlY3Rpb24g
-YW5kIHJldmVyc2lvbiBzaWduaWZpY2FudGx5IGxlc3MgdXNlZnVsLg0KPiANCj4gQmpvcm4NCg0K
-SSdtIG5vdCBoYXBweSBhYm91dCBpdCBlaXRoZXIuICBJIGRpZCBtYWtlIGEgZmV3IGF0dGVtcHRz
-IHRvIHNwbGl0IHRoaXMsIHNvIEkgY2FuIHNheSBhdCBsZWFzdCB0aGF0IGl0IHdpbGwgbm90IGJl
-IGVhc3kuDQoNCkkgcmVhbGx5IGNhbid0IGNoYW5nZSBudGJfdHJhbnNwb3J0IGFuZCBudGJfaHdf
-aW50ZWwgc2VwYXJhdGVseS4gIFRoZXkgY2FsbCBlYWNoIG90aGVyLCBzbyBzcGxpdHRpbmcgb25l
-IGRyaXZlciB0byB1c2UgdGhlIGFic3RyYWN0aW9uIGxheWVyIHJlcXVpcmVzIHRoZSBvdGhlciBk
-cml2ZXIgdG8gY2hhbmdlIGF0IHRoZSBzYW1lIHRpbWUsIG9yIHRoZSBvdGhlciBkcml2ZXIgYnJl
-YWtzLiAgVW5mb3J0dW5hdGVseSwgc3BsaXR0aW5nIHRoZXNlIGRyaXZlcnMgaXMgdGhlIGxhcmdl
-IGJ1bGsgb2YgdGhlIHBhdGNoLg0KDQpJIGFsc28gdHJpZWQgdG8ganVzdCBhZGQgbnRiLmgsIG50
-Yi5jIHNlcGFyYXRlbHksIGJlZm9yZSBzcGxpdGluZyBudGJfaHdfaW50ZWwgYW5kIG50Yl90cmFu
-c3BvcnQuICBJIGZvcmdldCBleGFjdGx5IHdoeSBJIGJhY2tlZCBvdXQgb2YgdGhhdCBjaGFuZ2Ug
-YSBjb3VwbGUgd2Vla3MgYWdvLiAgSSB0aGluayBpdCBoYXMgc29tZXRoaW5nIHRvIGRvIHdpdGgg
-dGhlIHdvbmt5IG1ha2UgdGFyZ2V0cyBpbiBkcml2ZXJzL250YiBhZnRlciB0aGUgZmlyc3QgcGF0
-Y2guICBJJ2xsIHRyeSBvbmNlIGFnYWluIHRvIHNwbGl0IGl0IHRoaXMgd2F5Lg0K
+RnJvbTogQmpvcm4gSGVsZ2FhcyBbbWFpbHRvOmJoZWxnYWFzQGdvb2dsZS5jb21dDQo+IE9uIFR1
+ZSwgSnVuIDA5LCAyMDE1IGF0IDA1OjQ0OjM2QU0gLTA0MDAsIEFsbGVuIEh1YmJlIHdyb3RlOg0K
+PiA+IEFkZCBtb2R1bGUgcGFyYW1ldGVycyBmb3IgdGhlIGFkZHJlc3NlcyB0byBiZSB1c2VkIGlu
+IGIyYiB0b3BvbG9neS4NCj4gDQo+IFdoYXQgZG9lcyAiYjJiIiBtZWFuPw0KDQpJbiB0aGlzIGNh
+c2UgaXQgbWVhbnMgYmFjay10by1iYWNrLCByZWZlcnJpbmcgdG8gdGhlIHRvcG9sb2d5IGNvbm5l
+Y3RpbmcgdGhlIG50YiBkZXZpY2VzLiAgVGhlcmUgYXJlIHR3byBudGIgZGV2aWNlcyBjb25uZWN0
+ZWQgdG8gZWFjaCBvdGhlciwgc2Vjb25kYXJ5IHNpZGUgdG8gc2Vjb25kYXJ5IHNpZGUsIG9yIGJh
+Y2stdG8tYmFjay4NCg0KVGhlIHRlcm1pbm9sb2d5IGlzIG5vdCBlbnRpcmVseSB1bmFtYmlndW91
+cywgdW5mb3J0dW5hdGVseS4gIEluIHRoZSBnbG9zc2FyeSBvZiBhbiBJbnRlbCBkb2MsIGl0IGlz
+IGRlZmluZWQgYXMgYWJvdmUsIGFzIGJhY2stdG8tYmFjay4gIFBMWCBkb2Vzbid0IGV2ZXIgdXNl
+IHRoZSB0ZXJtIGIyYiB0aGF0IEkgY291bGQgZmluZCwgYnV0IGl0IHVzZXMgdGhlIHRlcm0gYmFj
+ay10by1iYWNrIGluc3RlYWQgcmVmZXJyaW5nIHRvIHRoZSB0d28gaW50ZXJuYWwgZW5kcG9pbnRz
+IG9mIG9uZSBudGIgZGV2aWNlLg0K
