@@ -1,55 +1,29 @@
-Return-Path: <dave.jiang@intel.com>
-Received: from mga03.intel.com (mga03.intel.com. [134.134.136.65])
-        by gmr-mx.google.com with ESMTP id xz5si729032pac.1.2015.06.09.09.45.39
-        for <linux-ntb@googlegroups.com>;
-        Tue, 09 Jun 2015 09:45:39 -0700 (PDT)
-From: "Jiang, Dave" <dave.jiang@intel.com>
-Subject: Re: [PATCH v3 18/18] NTB: Increase transport MTU to 64k from 16k
-Date: Tue, 9 Jun 2015 16:45:36 +0000
-Message-ID: <1433868335.38406.111.camel@intel.com>
+Return-Path: <bhelgaas@google.com>
+Received: from mail-ig0-x22c.google.com (mail-ig0-x22c.google.com. [2607:f8b0:4001:c05::22c])
+        by gmr-mx.google.com with ESMTPS id x1si227871igb.2.2015.06.09.09.43.49
+        for <linux-ntb@googlegroups.com>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 09 Jun 2015 09:43:49 -0700 (PDT)
+Received: by mail-ig0-x22c.google.com with SMTP id pi8so17522416igb.0
+        for <linux-ntb@googlegroups.com>; Tue, 09 Jun 2015 09:43:49 -0700 (PDT)
+Return-Path: <bhelgaas@google.com>
+Date: Tue, 9 Jun 2015 11:43:43 -0500
+From: Bjorn Helgaas <bhelgaas@google.com>
+Subject: Re: [PATCH v3 13/18] NTB: Use NUMA memory and DMA chan in transport
+Message-ID: <20150609164343.GF23119@google.com>
 References: <cover.1433838377.git.Allen.Hubbe@emc.com>
-	 <aba15cd979bc3523c0289f4766b47d3f45f32c38.1433838377.git.Allen.Hubbe@emc.com>
-	 <CAErSpo7B8qP34ZObkzjZ-r7bCnG6A0KG3Rorw+TajP4XU43wFg@mail.gmail.com>
-In-Reply-To: <CAErSpo7B8qP34ZObkzjZ-r7bCnG6A0KG3Rorw+TajP4XU43wFg@mail.gmail.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <7DCF224B447D9A4AB84DFC0FF2BD3E76@intel.com>
-Content-Transfer-Encoding: base64
+ <405348e755bb4f78b6229f0d1ff2a347f0497505.1433838377.git.Allen.Hubbe@emc.com>
 MIME-Version: 1.0
-Return-Path: dave.jiang@intel.com
-To: "bhelgaas@google.com" <bhelgaas@google.com>
-Cc: "Allen.Hubbe@emc.com" <Allen.Hubbe@emc.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <405348e755bb4f78b6229f0d1ff2a347f0497505.1433838377.git.Allen.Hubbe@emc.com>
+To: Allen Hubbe <Allen.Hubbe@emc.com>
+Cc: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-T24gVHVlLCAyMDE1LTA2LTA5IGF0IDExOjA0IC0wNTAwLCAnQmpvcm4gSGVsZ2FhcycgdmlhIGxp
-bnV4LW50YiB3cm90ZToNCj4gT24gVHVlLCBKdW4gOSwgMjAxNSBhdCA0OjQ0IEFNLCBBbGxlbiBI
-dWJiZSA8QWxsZW4uSHViYmVAZW1jLmNvbT4gDQo+IHdyb3RlOg0KPiA+IEZyb206IERhdmUgSmlh
-bmcgPGRhdmUuamlhbmdAaW50ZWwuY29tPg0KPiA+IA0KPiA+IEJlbmNobWFya2luZyBzaG93ZWQg
-c2lnbmlmaWNhbnQgcGVyZm9ybWFuY2UgaW5jcmVhc2UgZ29pbmcgZnJvbSBNVFUgDQo+ID4gc2l6
-ZQ0KPiA+IG9mIDY0ayBmcm9tIDE2ay4gIENoYW5naW5nIHRoZSBkZWZhdWx0Lg0KPiANCj4gVGhp
-cyBjaGFuZ2Vsb2cgZG9lc24ndCBwYXJzZS4gIEkgdGhpbmsgeW91IG1lYW4gImdvaW5nIGZyb20g
-TVRVIHNpemUNCj4gMTZrIHRvIDY0ay4iDQoNClllcy4gU29ycnkgYWJvdXQgdGhlIGNvbmZ1c2lv
-bi4NCg0KPiANCj4gVGhlIG9yaWdpbmFsIHZhbHVlIHdhcyAweDQwMWUgKDE2ayArIDB4MWUpLCBh
-bmQgdGhlIG5ldyB2YWx1ZSBpcw0KPiBleGFjdGx5IDY0ay4gIFBsZWFzZSBpbmNsdWRlIGEgbm90
-ZSBhYm91dCB3aGF0IHRoYXQgZXh0cmEgMHgxZSB3YXMgDQo+IGZvcg0KPiBhbmQgd2h5IGl0IGlz
-bid0IG5lZWRlZCBpbiB0aGUgbmV3IHZhbHVlLg0KDQpKb24sIGNhbiB5b3UgY29tbWVudCBvbiB3
-aHkgdGhlcmUncyB0aGUgYWRkaXRpb25hbCAzMCBieXRlcyBvbiB0b3Agb2YNCjE2ayBpbiB0aGUg
-cHJldmlvdXMgdmFsdWU/IA0KDQo+IA0KPiA+IFNpZ25lZC1vZmYtYnk6IERhdmUgSmlhbmcgPGRh
-dmUuamlhbmdAaW50ZWwuY29tPg0KPiA+IC0tLQ0KPiA+ICBkcml2ZXJzL250Yi9udGJfdHJhbnNw
-b3J0LmMgfCAyICstDQo+ID4gIDEgZmlsZSBjaGFuZ2VkLCAxIGluc2VydGlvbigrKSwgMSBkZWxl
-dGlvbigtKQ0KPiA+IA0KPiA+IGRpZmYgLS1naXQgYS9kcml2ZXJzL250Yi9udGJfdHJhbnNwb3J0
-LmMgDQo+ID4gYi9kcml2ZXJzL250Yi9udGJfdHJhbnNwb3J0LmMNCj4gPiBpbmRleCBlYTIzN2Fl
-Y2EyOGMuLmM4N2JjMGNiZDYwNyAxMDA2NDQNCj4gPiAtLS0gYS9kcml2ZXJzL250Yi9udGJfdHJh
-bnNwb3J0LmMNCj4gPiArKysgYi9kcml2ZXJzL250Yi9udGJfdHJhbnNwb3J0LmMNCj4gPiBAQCAt
-NzYsNyArNzYsNyBAQCBzdGF0aWMgdW5zaWduZWQgbG9uZyBtYXhfbXdfc2l6ZTsNCj4gPiAgbW9k
-dWxlX3BhcmFtKG1heF9td19zaXplLCB1bG9uZywgMDY0NCk7DQo+ID4gIE1PRFVMRV9QQVJNX0RF
-U0MobWF4X213X3NpemUsICJMaW1pdCBzaXplIG9mIGxhcmdlIG1lbW9yeSANCj4gPiB3aW5kb3dz
-Iik7DQo+ID4gDQo+ID4gLXN0YXRpYyB1bnNpZ25lZCBpbnQgdHJhbnNwb3J0X210dSA9IDB4NDAx
-RTsNCj4gPiArc3RhdGljIHVuc2lnbmVkIGludCB0cmFuc3BvcnRfbXR1ID0gMHgxMDAwMDsNCj4g
-PiAgbW9kdWxlX3BhcmFtKHRyYW5zcG9ydF9tdHUsIHVpbnQsIDA2NDQpOw0KPiA+ICBNT0RVTEVf
-UEFSTV9ERVNDKHRyYW5zcG9ydF9tdHUsICJNYXhpbXVtIHNpemUgb2YgTlRCIHRyYW5zcG9ydCAN
-Cj4gPiBwYWNrZXRzIik7DQo+ID4gDQo+ID4gLS0NCj4gPiAyLjQuMC5yYzAuNDMuZ2NmOGE4YzYN
-Cj4gPiANCj4gPiAtLQ0KPiA+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRo
-ZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eA0KPiA+IC1wY2kiIGluDQo+ID4gdGhlIGJvZHkgb2Yg
-YSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCj4gPiBNb3JlIG1ham9yZG9t
-byBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4g
+On Tue, Jun 09, 2015 at 05:44:40AM -0400, Allen Hubbe wrote:
+> Allocate memory and request the dma channel for the same numa node as
+> the ntb device.
+
+It'd be nice if DMA, NUMA, and NTB were capitalized in the changelog the
+same way as in the subject line.
