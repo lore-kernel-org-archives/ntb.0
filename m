@@ -1,55 +1,77 @@
 Return-Path: <Allen.Hubbe@emc.com>
 Received: from mailuogwhop.emc.com (mailuogwhop.emc.com. [168.159.213.141])
-        by gmr-mx.google.com with ESMTPS id gt9si413777wib.2.2015.06.29.07.50.32
+        by gmr-mx.google.com with ESMTPS id ci2si454561vdd.3.2015.06.10.07.09.18
         for <linux-ntb@googlegroups.com>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 29 Jun 2015 07:50:33 -0700 (PDT)
+        Wed, 10 Jun 2015 07:09:18 -0700 (PDT)
 From: Allen Hubbe <Allen.Hubbe@emc.com>
-Subject: [PATCH 5/9] NTB: Fix oops in debugfs when transport is half-up
-Date: Mon, 29 Jun 2015 10:50:01 -0400
-Message-Id: <dc46fafa9893ffa92dad1a95fda17627dfff8c8a.1435587291.git.Allen.Hubbe@emc.com>
-In-Reply-To: <cover.1435587291.git.Allen.Hubbe@emc.com>
-References: <cover.1435587291.git.Allen.Hubbe@emc.com>
-In-Reply-To: <cover.1435587291.git.Allen.Hubbe@emc.com>
-References: <cover.1435587291.git.Allen.Hubbe@emc.com>
+Subject: [PATCH v4 16/19] NTB: Improve performance with write combining
+Date: Wed, 10 Jun 2015 05:08:21 -0400
+Message-Id: <be18922305674d3ae167969643b0c25fa3c1690b.1433925092.git.Allen.Hubbe@emc.com>
+In-Reply-To: <cover.1433925092.git.Allen.Hubbe@emc.com>
+References: <cover.1433925092.git.Allen.Hubbe@emc.com>
+In-Reply-To: <cover.1433925092.git.Allen.Hubbe@emc.com>
+References: <cover.1433925092.git.Allen.Hubbe@emc.com>
 To: linux-ntb@googlegroups.com
 Cc: linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
 List-ID: <linux-ntb.googlegroups.com>
 
 From: Dave Jiang <dave.jiang@intel.com>
 
-When the remote side is not up, we do not have all the context for the
-transport, and that causes NULL ptr access. Have the debugfs reads check
-to see if transport is up before we make access.
+Changing the memory window BAR mappings to write combining significantly
+boosts the performance.  We will also use memcpy that uses non-temporal
+store, which showed performance improvement when doing non-cached
+memcpys.
 
 Signed-off-by: Dave Jiang <dave.jiang@intel.com>
 ---
- drivers/ntb/ntb_transport.c | 6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
+
+Added #ifdef ARCH_HAS_NOCACHE_UACCESS around
+__copy_from_user_inatomic_nocache.
+
+Following the example set by here:
+https://lists.01.org/pipermail/linux-nvdimm/2015-June/001087.html
+
+ drivers/ntb/ntb_transport.c | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 30d8b52421ec..1764bb2fd265 100644
+index dc14ec81c43e..7a765d3230d8 100644
 --- a/drivers/ntb/ntb_transport.c
 +++ b/drivers/ntb/ntb_transport.c
-@@ -438,13 +438,17 @@ static ssize_t debugfs_read(struct file *filp, char __user *ubuf, size_t count,
- 	char *buf;
- 	ssize_t ret, out_offset, out_count;
+@@ -58,6 +58,7 @@
+ #include <linux/pci.h>
+ #include <linux/slab.h>
+ #include <linux/types.h>
++#include <linux/uaccess.h>
+ #include "linux/ntb.h"
+ #include "linux/ntb_transport.h"
  
-+	qp = filp->private_data;
-+
-+	if (!qp || !qp->link_is_up)
-+		return 0;
-+
- 	out_count = 1000;
+@@ -993,7 +994,7 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
+ 		if (rc)
+ 			goto err1;
  
- 	buf = kmalloc(out_count, GFP_KERNEL);
- 	if (!buf)
- 		return -ENOMEM;
+-		mw->vbase = ioremap(mw->phys_addr, mw->phys_size);
++		mw->vbase = ioremap_wc(mw->phys_addr, mw->phys_size);
+ 		if (!mw->vbase) {
+ 			rc = -ENOMEM;
+ 			goto err1;
+@@ -1375,7 +1376,15 @@ static void ntb_tx_copy_callback(void *data)
  
--	qp = filp->private_data;
- 	out_offset = 0;
- 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
- 			       "NTB QP stats\n");
+ static void ntb_memcpy_tx(struct ntb_queue_entry *entry, void __iomem *offset)
+ {
++#ifdef ARCH_HAS_NOCACHE_UACCESS
++	/*
++	 * Using non-temporal mov to improve performance on non-cached
++	 * writes, even though we aren't actually copying from user space.
++	 */
++	__copy_from_user_inatomic_nocache(offset, entry->buf, entry->len);
++#else
+ 	memcpy_toio(offset, entry->buf, entry->len);
++#endif
+ 
+ 	/* Ensure that the data is fully copied out before setting the flags */
+ 	wmb();
 -- 
 2.4.0.rc0.43.gcf8a8c6
 
