@@ -1,43 +1,123 @@
 Return-Path: <Allen.Hubbe@emc.com>
-Received: from mailuogwhop.emc.com (mailuogwhop.emc.com. [168.159.213.141])
-        by gmr-mx.google.com with ESMTPS id ci2si454534vdd.3.2015.06.10.07.09.04
+Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
+        by gmr-mx.google.com with ESMTPS id bc3si279422wib.2.2015.06.10.07.09.03
         for <linux-ntb@googlegroups.com>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 10 Jun 2015 07:09:04 -0700 (PDT)
+        Wed, 10 Jun 2015 07:09:03 -0700 (PDT)
 From: Allen Hubbe <Allen.Hubbe@emc.com>
-Subject: [PATCH v4 08/19] NTB: Do not advance transport RX on link down
-Date: Wed, 10 Jun 2015 05:08:13 -0400
-Message-Id: <9bd941c6bdf4e540f44b02bb0b0eeb1d031bedf5.1433925092.git.Allen.Hubbe@emc.com>
-In-Reply-To: <cover.1433925092.git.Allen.Hubbe@emc.com>
-References: <cover.1433925092.git.Allen.Hubbe@emc.com>
-In-Reply-To: <cover.1433925092.git.Allen.Hubbe@emc.com>
-References: <cover.1433925092.git.Allen.Hubbe@emc.com>
+Subject: [PATCH v4 00/19] NTB: Add NTB hardware abstraction layer
+Date: Wed, 10 Jun 2015 05:08:05 -0400
+Message-Id: <cover.1433925092.git.Allen.Hubbe@emc.com>
 To: linux-ntb@googlegroups.com
 Cc: linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On link down, don't advance RX index to the next entry.  The next entry
-should never be valid after receiving the link down flag.
+The NTB drivers currently support only one hardware driver, and one
+client type.  This patch set adds an abstraction layer, enabling
+hardware drivers by other vendors, and clients other than ntb_transport.
 
-Signed-off-by: Allen Hubbe <Allen.Hubbe@emc.com>
----
- drivers/ntb/ntb_transport.c | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+The commits in this set may also be pulled from:
+github.com/allenbh/linux
+tagged ntb-abh-v4
 
-diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 8d9b59f7fa07..0f86b60a0c0e 100644
---- a/drivers/ntb/ntb_transport.c
-+++ b/drivers/ntb/ntb_transport.c
-@@ -1212,8 +1212,7 @@ static int ntb_process_rxc(struct ntb_transport_qp *qp)
- 		dev_dbg(&qp->ndev->pdev->dev, "link down flag set\n");
- 		ntb_qp_link_down(qp);
- 		hdr->flags = 0;
--		iowrite32(qp->rx_index, &qp->rx_info->entry);
--		return 0;
-+		return -EAGAIN;
- 	}
- 
- 	if (hdr->ver != (u32)qp->rx_pkts) {
+Compare against previous tags ntb-abh-v1..ntb-abh-v3 to see exactly what
+changed in the each revised version of this series.
+
+Different in v4:
+ - Correct spelling, grammer, and capitalization grammer in commit messages.
+ - Zero-initialize device structure in ntb_hw_intel with kzalloc_node.
+ - Use __copy_from_user_inatomic_nocache only if the arch has it.
+ - Split adding the ntb hardware abstraction layer into two patches:
+   NTB: Add NTB hardware abstraction layer
+      Adding the abstraction layer now stands alone in its own patch.
+   NTB: Split ntb_hw_intel and ntb_transport drivers
+      This patch is still rather large, at just under 200k.
+   Unfortunately, since the original code in ntb_hw_intel and
+   ntb_transport called in both directions, one driver can't be changed
+   by itself without breaking the other.
+
+Different in v3:
+ - Reschedule long running tasklets to avoid stalls in transport.
+ - Initialize driver .owner and .name in ntb_register_client.
+ - Eliminate calls to BUG() in ntb_hw_intel.
+ - Fix incorrect PBARXLAT split-bar address assignment in ntb_hw_intel.
+ - Add bugfix patch: Read peer info from local SPAD in transport.
+ - Arrange the above bugfix, and three patches affecting transport link
+   down, to earlier in the series, because they are higher importance.
+ - Add performance patch: Increase transport MTU to 64k form 16k.
+ - Rebase on ff25ea8f4eee to resolve a merge conflict in MAINTAINERS
+   (conflicting context lines only, no conflicting changes).
+
+Different in v2:
+ - Rewrite shortlog descriptions for spelling and style
+ - Remove extraneous NTB dependency from Kconfig files
+ - Reindent Kconfig files with leading tabs
+ - Reindent some lines in ntb_transport
+ - Append patch NTB: Rename intel hw to proper platform names
+
+Allen Hubbe (12):
+  NTB: Move files in preparation for NTB abstraction
+  NTB: Add NTB hardware abstraction layer
+  NTB: Split ntb_hw_intel and ntb_transport drivers
+  NTB: Differentiate transport link down messages
+  NTB: Do not advance transport RX on link down
+  NTB: Reset transport QP link stats on down
+  NTB: Add parameters for Intel SNB B2B addresses
+  NTB: Add ping pong test client
+  NTB: Add tool test client
+  NTB: Rate limit ntb_qp_link_work
+  NTB: Use NUMA memory and DMA chan in transport
+  NTB: Use NUMA memory in Intel driver
+
+Dave Jiang (7):
+  NTB: Read peer info from local SPAD in transport
+  NTB: Enable link for Intel root port mode in probe
+  NTB: Check the device ID to set errata flags
+  NTB: Improve performance with write combining
+  NTB: Default to CPU memcpy for performance
+  NTB: Rename Intel code names to platform names
+  NTB: Increase transport MTU to 64k from 16k
+
+ Documentation/ntb.txt               |  127 ++
+ MAINTAINERS                         |   16 +-
+ drivers/net/ntb_netdev.c            |   58 +-
+ drivers/ntb/Kconfig                 |   39 +-
+ drivers/ntb/Makefile                |    5 +-
+ drivers/ntb/hw/Kconfig              |    1 +
+ drivers/ntb/hw/Makefile             |    1 +
+ drivers/ntb/hw/intel/Kconfig        |    7 +
+ drivers/ntb/hw/intel/Makefile       |    1 +
+ drivers/ntb/hw/intel/ntb_hw_intel.c | 2214 +++++++++++++++++++++++++++++++++++
+ drivers/ntb/hw/intel/ntb_hw_intel.h |  342 ++++++
+ drivers/ntb/ntb.c                   |  251 ++++
+ drivers/ntb/ntb_hw.c                | 1896 ------------------------------
+ drivers/ntb/ntb_hw.h                |  256 ----
+ drivers/ntb/ntb_regs.h              |  177 ---
+ drivers/ntb/ntb_transport.c         | 1027 +++++++++-------
+ drivers/ntb/test/Kconfig            |   19 +
+ drivers/ntb/test/Makefile           |    2 +
+ drivers/ntb/test/ntb_pingpong.c     |  250 ++++
+ drivers/ntb/test/ntb_tool.c         |  556 +++++++++
+ include/linux/ntb.h                 |  970 ++++++++++++++-
+ include/linux/ntb_transport.h       |   85 ++
+ 22 files changed, 5485 insertions(+), 2815 deletions(-)
+ create mode 100644 Documentation/ntb.txt
+ create mode 100644 drivers/ntb/hw/Kconfig
+ create mode 100644 drivers/ntb/hw/Makefile
+ create mode 100644 drivers/ntb/hw/intel/Kconfig
+ create mode 100644 drivers/ntb/hw/intel/Makefile
+ create mode 100644 drivers/ntb/hw/intel/ntb_hw_intel.c
+ create mode 100644 drivers/ntb/hw/intel/ntb_hw_intel.h
+ create mode 100644 drivers/ntb/ntb.c
+ delete mode 100644 drivers/ntb/ntb_hw.c
+ delete mode 100644 drivers/ntb/ntb_hw.h
+ delete mode 100644 drivers/ntb/ntb_regs.h
+ create mode 100644 drivers/ntb/test/Kconfig
+ create mode 100644 drivers/ntb/test/Makefile
+ create mode 100644 drivers/ntb/test/ntb_pingpong.c
+ create mode 100644 drivers/ntb/test/ntb_tool.c
+ create mode 100644 include/linux/ntb_transport.h
+
 -- 
 2.4.0.rc0.43.gcf8a8c6
 
