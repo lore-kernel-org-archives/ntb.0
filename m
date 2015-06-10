@@ -1,13 +1,13 @@
 Return-Path: <Allen.Hubbe@emc.com>
 Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
-        by gmr-mx.google.com with ESMTPS id fg5si447007vdb.1.2015.06.10.07.09.10
+        by gmr-mx.google.com with ESMTPS id fs12si450785vdb.2.2015.06.10.07.09.09
         for <linux-ntb@googlegroups.com>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 10 Jun 2015 07:09:11 -0700 (PDT)
+        Wed, 10 Jun 2015 07:09:09 -0700 (PDT)
 From: Allen Hubbe <Allen.Hubbe@emc.com>
-Subject: [PATCH v4 19/19] NTB: Increase transport MTU to 64k from 16k
-Date: Wed, 10 Jun 2015 05:08:24 -0400
-Message-Id: <b1facc7cc0e9f2a2a3e2c33ca694b75a5343c798.1433925092.git.Allen.Hubbe@emc.com>
+Subject: [PATCH v4 09/19] NTB: Reset transport QP link stats on down
+Date: Wed, 10 Jun 2015 05:08:14 -0400
+Message-Id: <d129363dc72a431f33bdf64a34996b4b183be9aa.1433925092.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1433925092.git.Allen.Hubbe@emc.com>
 References: <cover.1433925092.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1433925092.git.Allen.Hubbe@emc.com>
@@ -16,29 +16,92 @@ To: linux-ntb@googlegroups.com
 Cc: linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Dave Jiang <dave.jiang@intel.com>
+Reset the link stats when the link goes down.  In particular, the TX and
+RX index and count must be reset, or else the TX side will be sending
+packets to the RX side where the RX side is not expecting them.  Reset
+all the stats, to be consistent.
 
-Benchmarking showed a significant performance increase with the MTU size
-to 64k instead of 16k.  Change the driver default to 64k.
-
-Signed-off-by: Dave Jiang <dave.jiang@intel.com>
+Signed-off-by: Allen Hubbe <Allen.Hubbe@emc.com>
 ---
- drivers/ntb/ntb_transport.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/ntb/ntb_transport.c | 36 ++++++++++++++++++++++++++++--------
+ 1 file changed, 28 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index e07b056af3be..1551493197b4 100644
+index 0f86b60a0c0e..2efd1eae9a7c 100644
 --- a/drivers/ntb/ntb_transport.c
 +++ b/drivers/ntb/ntb_transport.c
-@@ -76,7 +76,7 @@ static unsigned long max_mw_size;
- module_param(max_mw_size, ulong, 0644);
- MODULE_PARM_DESC(max_mw_size, "Limit size of large memory windows");
+@@ -648,18 +648,37 @@ static int ntb_set_mw(struct ntb_transport_ctx *nt, int num_mw,
+ 	return 0;
+ }
  
--static unsigned int transport_mtu = 0x401E;
-+static unsigned int transport_mtu = 0x10000;
- module_param(transport_mtu, uint, 0644);
- MODULE_PARM_DESC(transport_mtu, "Maximum size of NTB transport packets");
++static void ntb_qp_link_down_reset(struct ntb_transport_qp *qp)
++{
++	qp->link_is_up = false;
++
++	qp->tx_index = 0;
++	qp->rx_index = 0;
++	qp->rx_bytes = 0;
++	qp->rx_pkts = 0;
++	qp->rx_ring_empty = 0;
++	qp->rx_err_no_buf = 0;
++	qp->rx_err_oflow = 0;
++	qp->rx_err_ver = 0;
++	qp->rx_memcpy = 0;
++	qp->rx_async = 0;
++	qp->tx_bytes = 0;
++	qp->tx_pkts = 0;
++	qp->tx_ring_full = 0;
++	qp->tx_err_no_buf = 0;
++	qp->tx_memcpy = 0;
++	qp->tx_async = 0;
++}
++
+ static void ntb_qp_link_cleanup(struct ntb_transport_qp *qp)
+ {
+ 	struct ntb_transport_ctx *nt = qp->transport;
+ 	struct pci_dev *pdev = nt->ndev->pdev;
  
+-	if (qp->link_is_up) {
+-		cancel_delayed_work_sync(&qp->link_work);
+-		return;
+-	}
+-
+ 	dev_info(&pdev->dev, "qp %d: Link Cleanup\n", qp->qp_num);
+-	qp->link_is_up = false;
++
++	cancel_delayed_work_sync(&qp->link_work);
++	ntb_qp_link_down_reset(qp);
+ 
+ 	if (qp->event_handler)
+ 		qp->event_handler(qp->cb_data, qp->link_is_up);
+@@ -866,9 +885,9 @@ static int ntb_transport_init_queue(struct ntb_transport_ctx *nt,
+ 	qp->qp_num = qp_num;
+ 	qp->transport = nt;
+ 	qp->ndev = nt->ndev;
+-	qp->link_is_up = false;
+ 	qp->client_ready = false;
+ 	qp->event_handler = NULL;
++	ntb_qp_link_down_reset(qp);
+ 
+ 	if (qp_count % mw_count && mw_num + 1 < qp_count / mw_count)
+ 		num_qps_mw = qp_count / mw_count + 1;
+@@ -1468,7 +1487,6 @@ static void ntb_send_link_down(struct ntb_transport_qp *qp)
+ 	if (!qp->link_is_up)
+ 		return;
+ 
+-	qp->link_is_up = false;
+ 	dev_info(&pdev->dev, "qp %d: Send Link Down\n", qp->qp_num);
+ 
+ 	for (i = 0; i < NTB_LINK_DOWN_TIMEOUT; i++) {
+@@ -1490,6 +1508,8 @@ static void ntb_send_link_down(struct ntb_transport_qp *qp)
+ 	if (rc)
+ 		dev_err(&pdev->dev, "ntb: QP%d unable to send linkdown msg\n",
+ 			qp->qp_num);
++
++	ntb_qp_link_down_reset(qp);
+ }
+ 
+ /**
 -- 
 2.4.0.rc0.43.gcf8a8c6
 
