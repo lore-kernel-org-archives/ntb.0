@@ -1,13 +1,13 @@
 Return-Path: <Allen.Hubbe@emc.com>
 Received: from mailuogwhop.emc.com (mailuogwhop.emc.com. [168.159.213.141])
-        by gmr-mx.google.com with ESMTPS id ci2si454561vdd.3.2015.06.10.07.09.18
+        by gmr-mx.google.com with ESMTPS id fs12si450797vdb.2.2015.06.10.07.09.18
         for <linux-ntb@googlegroups.com>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
         Wed, 10 Jun 2015 07:09:18 -0700 (PDT)
 From: Allen Hubbe <Allen.Hubbe@emc.com>
-Subject: [PATCH v4 16/19] NTB: Improve performance with write combining
-Date: Wed, 10 Jun 2015 05:08:21 -0400
-Message-Id: <be18922305674d3ae167969643b0c25fa3c1690b.1433925092.git.Allen.Hubbe@emc.com>
+Subject: [PATCH v4 15/19] NTB: Use NUMA memory in Intel driver
+Date: Wed, 10 Jun 2015 05:08:20 -0400
+Message-Id: <799721f9614087d174524a59b12bad7bb5fc94ec.1433925092.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1433925092.git.Allen.Hubbe@emc.com>
 References: <cover.1433925092.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1433925092.git.Allen.Hubbe@emc.com>
@@ -16,62 +16,71 @@ To: linux-ntb@googlegroups.com
 Cc: linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Dave Jiang <dave.jiang@intel.com>
+Allocate memory for the NUMA node of the NTB device.
 
-Changing the memory window BAR mappings to write combining significantly
-boosts the performance.  We will also use memcpy that uses non-temporal
-store, which showed performance improvement when doing non-cached
-memcpys.
-
-Signed-off-by: Dave Jiang <dave.jiang@intel.com>
+Signed-off-by: Allen Hubbe <Allen.Hubbe@emc.com>
 ---
+ drivers/ntb/hw/intel/ntb_hw_intel.c | 18 ++++++++++++------
+ 1 file changed, 12 insertions(+), 6 deletions(-)
 
-Added #ifdef ARCH_HAS_NOCACHE_UACCESS around
-__copy_from_user_inatomic_nocache.
-
-Following the example set by here:
-https://lists.01.org/pipermail/linux-nvdimm/2015-June/001087.html
-
- drivers/ntb/ntb_transport.c | 11 ++++++++++-
- 1 file changed, 10 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index dc14ec81c43e..7a765d3230d8 100644
---- a/drivers/ntb/ntb_transport.c
-+++ b/drivers/ntb/ntb_transport.c
-@@ -58,6 +58,7 @@
- #include <linux/pci.h>
- #include <linux/slab.h>
- #include <linux/types.h>
-+#include <linux/uaccess.h>
- #include "linux/ntb.h"
- #include "linux/ntb_transport.h"
- 
-@@ -993,7 +994,7 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
- 		if (rc)
- 			goto err1;
- 
--		mw->vbase = ioremap(mw->phys_addr, mw->phys_size);
-+		mw->vbase = ioremap_wc(mw->phys_addr, mw->phys_size);
- 		if (!mw->vbase) {
- 			rc = -ENOMEM;
- 			goto err1;
-@@ -1375,7 +1376,15 @@ static void ntb_tx_copy_callback(void *data)
- 
- static void ntb_memcpy_tx(struct ntb_queue_entry *entry, void __iomem *offset)
+diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c b/drivers/ntb/hw/intel/ntb_hw_intel.c
+index 3448d5fbd003..4ac0b77ec788 100644
+--- a/drivers/ntb/hw/intel/ntb_hw_intel.c
++++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
+@@ -413,10 +413,12 @@ static int ndev_init_isr(struct intel_ntb_dev *ndev,
+ 			 int msix_shift, int total_shift)
  {
-+#ifdef ARCH_HAS_NOCACHE_UACCESS
-+	/*
-+	 * Using non-temporal mov to improve performance on non-cached
-+	 * writes, even though we aren't actually copying from user space.
-+	 */
-+	__copy_from_user_inatomic_nocache(offset, entry->buf, entry->len);
-+#else
- 	memcpy_toio(offset, entry->buf, entry->len);
-+#endif
+ 	struct pci_dev *pdev;
+-	int rc, i, msix_count;
++	int rc, i, msix_count, node;
  
- 	/* Ensure that the data is fully copied out before setting the flags */
- 	wmb();
+ 	pdev = ndev_pdev(ndev);
+ 
++	node = dev_to_node(&pdev->dev);
++
+ 	/* Mask all doorbell interrupts */
+ 	ndev->db_mask = ndev->db_valid_mask;
+ 	ndev->reg->db_iowrite(ndev->db_mask,
+@@ -425,11 +427,13 @@ static int ndev_init_isr(struct intel_ntb_dev *ndev,
+ 
+ 	/* Try to set up msix irq */
+ 
+-	ndev->vec = kcalloc(msix_max, sizeof(*ndev->vec), GFP_KERNEL);
++	ndev->vec = kzalloc_node(msix_max * sizeof(*ndev->vec),
++				 GFP_KERNEL, node);
+ 	if (!ndev->vec)
+ 		goto err_msix_vec_alloc;
+ 
+-	ndev->msix = kcalloc(msix_max, sizeof(*ndev->msix), GFP_KERNEL);
++	ndev->msix = kzalloc_node(msix_max * sizeof(*ndev->msix),
++				  GFP_KERNEL, node);
+ 	if (!ndev->msix)
+ 		goto err_msix_alloc;
+ 
+@@ -1960,10 +1964,12 @@ static int intel_ntb_pci_probe(struct pci_dev *pdev,
+ 			       const struct pci_device_id *id)
+ {
+ 	struct intel_ntb_dev *ndev;
+-	int rc;
++	int rc, node;
++
++	node = dev_to_node(&pdev->dev);
+ 
+ 	if (pdev_is_bwd(pdev)) {
+-		ndev = kzalloc(sizeof(*ndev), GFP_KERNEL);
++		ndev = kzalloc_node(sizeof(*ndev), GFP_KERNEL, node);
+ 		if (!ndev) {
+ 			rc = -ENOMEM;
+ 			goto err_ndev;
+@@ -1980,7 +1986,7 @@ static int intel_ntb_pci_probe(struct pci_dev *pdev,
+ 			goto err_init_dev;
+ 
+ 	} else if (pdev_is_snb(pdev)) {
+-		ndev = kzalloc(sizeof(*ndev), GFP_KERNEL);
++		ndev = kzalloc_node(sizeof(*ndev), GFP_KERNEL, node);
+ 		if (!ndev) {
+ 			rc = -ENOMEM;
+ 			goto err_ndev;
 -- 
 2.4.0.rc0.43.gcf8a8c6
 
