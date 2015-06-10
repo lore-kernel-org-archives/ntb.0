@@ -1,13 +1,13 @@
 Return-Path: <Allen.Hubbe@emc.com>
-Received: from mailuogwhop.emc.com (mailuogwhop.emc.com. [168.159.213.141])
-        by gmr-mx.google.com with ESMTPS id z9si443957vdj.0.2015.06.10.07.09.07
+Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
+        by gmr-mx.google.com with ESMTPS id fg5si446990vdb.1.2015.06.10.07.09.05
         for <linux-ntb@googlegroups.com>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 10 Jun 2015 07:09:07 -0700 (PDT)
+        Wed, 10 Jun 2015 07:09:05 -0700 (PDT)
 From: Allen Hubbe <Allen.Hubbe@emc.com>
-Subject: [PATCH v4 17/19] NTB: Default to CPU memcpy for performance
-Date: Wed, 10 Jun 2015 05:08:22 -0400
-Message-Id: <a63c3518a82e193b06cfc6e3c51b26e8d3ba7840.1433925092.git.Allen.Hubbe@emc.com>
+Subject: [PATCH v4 07/19] NTB: Differentiate transport link down messages
+Date: Wed, 10 Jun 2015 05:08:12 -0400
+Message-Id: <e2fa2858d56a919d15e69b89d1bca82af1139bf2.1433925092.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1433925092.git.Allen.Hubbe@emc.com>
 References: <cover.1433925092.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1433925092.git.Allen.Hubbe@emc.com>
@@ -16,53 +16,36 @@ To: linux-ntb@googlegroups.com
 Cc: linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Dave Jiang <dave.jiang@intel.com>
+The same message "qp %d: Link Down\n" was printed at two locations in
+ntb_transport.  Change the messages so they are distinct.
 
-Disable DMA usage by default, since the CPU provides much better
-performance with write combining.  Provide a module parameter to enable
-DMA usage when offloading the memcpy is preferred.
-
-Signed-off-by: Dave Jiang <dave.jiang@intel.com>
 Signed-off-by: Allen Hubbe <Allen.Hubbe@emc.com>
 ---
- drivers/ntb/ntb_transport.c | 17 +++++++++++++----
- 1 file changed, 13 insertions(+), 4 deletions(-)
+ drivers/ntb/ntb_transport.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 7a765d3230d8..e07b056af3be 100644
+index d9538e911df6..8d9b59f7fa07 100644
 --- a/drivers/ntb/ntb_transport.c
 +++ b/drivers/ntb/ntb_transport.c
-@@ -88,6 +88,10 @@ static unsigned int copy_bytes = 1024;
- module_param(copy_bytes, uint, 0644);
- MODULE_PARM_DESC(copy_bytes, "Threshold under which NTB will use the CPU to copy instead of DMA");
+@@ -658,7 +658,7 @@ static void ntb_qp_link_cleanup(struct ntb_transport_qp *qp)
+ 		return;
+ 	}
  
-+static bool use_dma;
-+module_param(use_dma, bool, 0644);
-+MODULE_PARM_DESC(use_dma, "Use DMA engine to perform large data copy");
-+
- static struct dentry *nt_debugfs_dir;
+-	dev_info(&pdev->dev, "qp %d: Link Down\n", qp->qp_num);
++	dev_info(&pdev->dev, "qp %d: Link Cleanup\n", qp->qp_num);
+ 	qp->link_is_up = false;
  
- struct ntb_queue_entry {
-@@ -1589,10 +1593,15 @@ ntb_transport_create_queue(void *data, struct device *client_dev,
- 	dma_cap_zero(dma_mask);
- 	dma_cap_set(DMA_MEMCPY, dma_mask);
+ 	if (qp->event_handler)
+@@ -1470,7 +1470,7 @@ static void ntb_send_link_down(struct ntb_transport_qp *qp)
+ 		return;
  
--	qp->dma_chan = dma_request_channel(dma_mask, ntb_dma_filter_fn,
--					   (void *)(unsigned long)node);
--	if (!qp->dma_chan)
--		dev_info(&pdev->dev, "Unable to allocate DMA channel, using CPU instead\n");
-+	if (use_dma) {
-+		qp->dma_chan = dma_request_channel(dma_mask, ntb_dma_filter_fn,
-+						   (void *)(unsigned long)node);
-+		if (!qp->dma_chan)
-+			dev_info(&pdev->dev, "Unable to allocate DMA channel\n");
-+	} else {
-+		qp->dma_chan = NULL;
-+	}
-+	dev_dbg(&pdev->dev, "Using %s memcpy\n", qp->dma_chan ? "DMA" : "CPU");
+ 	qp->link_is_up = false;
+-	dev_info(&pdev->dev, "qp %d: Link Down\n", qp->qp_num);
++	dev_info(&pdev->dev, "qp %d: Send Link Down\n", qp->qp_num);
  
- 	for (i = 0; i < NTB_QP_DEF_NUM_ENTRIES; i++) {
- 		entry = kzalloc_node(sizeof(*entry), GFP_ATOMIC, node);
+ 	for (i = 0; i < NTB_LINK_DOWN_TIMEOUT; i++) {
+ 		entry = ntb_list_rm(&qp->ntb_tx_free_q_lock, &qp->tx_free_q);
 -- 
 2.4.0.rc0.43.gcf8a8c6
 
