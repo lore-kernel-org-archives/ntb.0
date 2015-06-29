@@ -1,44 +1,55 @@
 Return-Path: <Allen.Hubbe@emc.com>
 Received: from mailuogwhop.emc.com (mailuogwhop.emc.com. [168.159.213.141])
-        by gmr-mx.google.com with ESMTPS id eo3si411905wib.0.2015.06.29.07.50.32
+        by gmr-mx.google.com with ESMTPS id gt9si413777wib.2.2015.06.29.07.50.32
         for <linux-ntb@googlegroups.com>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 29 Jun 2015 07:50:32 -0700 (PDT)
+        Mon, 29 Jun 2015 07:50:33 -0700 (PDT)
 From: Allen Hubbe <Allen.Hubbe@emc.com>
-Subject: [PATCH 4/9] NTB: ntb_netdev not covering all receive errors
-Date: Mon, 29 Jun 2015 10:50:00 -0400
-Message-Id: <b102ae0f0209cfcd03f90b554857ce76d054ce5a.1435587291.git.Allen.Hubbe@emc.com>
+Subject: [PATCH 5/9] NTB: Fix oops in debugfs when transport is half-up
+Date: Mon, 29 Jun 2015 10:50:01 -0400
+Message-Id: <dc46fafa9893ffa92dad1a95fda17627dfff8c8a.1435587291.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1435587291.git.Allen.Hubbe@emc.com>
 References: <cover.1435587291.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1435587291.git.Allen.Hubbe@emc.com>
 References: <cover.1435587291.git.Allen.Hubbe@emc.com>
 To: linux-ntb@googlegroups.com
-Cc: linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Dave Jiang <mailto>, dave.jiang@intel.com, 
+Cc: linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Dave Jiang <mailto:dave.jiang@intel.com>
+From: Dave Jiang <dave.jiang@intel.com>
 
-ntb_netdev is allowing the link to come up even when -ENOMEM is returned
-from ntb_transport_rx_enqueue.  Fix to cover all possible errors.
+When the remote side is not up, we do not have all the context for the
+transport, and that causes NULL ptr access. Have the debugfs reads check
+to see if transport is up before we make access.
 
 Signed-off-by: Dave Jiang <dave.jiang@intel.com>
 ---
- drivers/net/ntb_netdev.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/ntb/ntb_transport.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/net/ntb_netdev.c b/drivers/net/ntb_netdev.c
-index 7a0aeac00c24..4d4d4f19049d 100644
---- a/drivers/net/ntb_netdev.c
-+++ b/drivers/net/ntb_netdev.c
-@@ -257,7 +257,7 @@ static int ntb_netdev_open(struct net_device *ndev)
+diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+index 30d8b52421ec..1764bb2fd265 100644
+--- a/drivers/ntb/ntb_transport.c
++++ b/drivers/ntb/ntb_transport.c
+@@ -438,13 +438,17 @@ static ssize_t debugfs_read(struct file *filp, char __user *ubuf, size_t count,
+ 	char *buf;
+ 	ssize_t ret, out_offset, out_count;
  
- 		rc = ntb_transport_rx_enqueue(dev->qp, skb, skb->data,
- 					      ndev->mtu + ETH_HLEN);
--		if (rc == -EINVAL) {
-+		if (rc) {
- 			dev_kfree_skb(skb);
- 			goto err;
- 		}
++	qp = filp->private_data;
++
++	if (!qp || !qp->link_is_up)
++		return 0;
++
+ 	out_count = 1000;
+ 
+ 	buf = kmalloc(out_count, GFP_KERNEL);
+ 	if (!buf)
+ 		return -ENOMEM;
+ 
+-	qp = filp->private_data;
+ 	out_offset = 0;
+ 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
+ 			       "NTB QP stats\n");
 -- 
 2.4.0.rc0.43.gcf8a8c6
 
