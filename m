@@ -1,13 +1,13 @@
 Return-Path: <Allen.Hubbe@emc.com>
 Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
-        by gmr-mx.google.com with ESMTPS id by9si870438qcb.1.2015.06.29.07.50.37
+        by gmr-mx.google.com with ESMTPS id jk4si5806359qcb.3.2015.06.29.07.50.36
         for <linux-ntb@googlegroups.com>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 29 Jun 2015 07:50:37 -0700 (PDT)
+        Mon, 29 Jun 2015 07:50:36 -0700 (PDT)
 From: Allen Hubbe <Allen.Hubbe@emc.com>
-Subject: [PATCH 7/9] NTB: Add PCI Device IDs for Broadwell Xeon
-Date: Mon, 29 Jun 2015 10:50:03 -0400
-Message-Id: <ebaf272374a016ae574a982b5c2d02acf02b75b9.1435587291.git.Allen.Hubbe@emc.com>
+Subject: [PATCH 9/9] NTB: Clean up QP stats info
+Date: Mon, 29 Jun 2015 10:50:05 -0400
+Message-Id: <42743bda7265a77042e3571b5035e0dd141ea665.1435587291.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1435587291.git.Allen.Hubbe@emc.com>
 References: <cover.1435587291.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1435587291.git.Allen.Hubbe@emc.com>
@@ -18,98 +18,75 @@ List-ID: <linux-ntb.googlegroups.com>
 
 From: Dave Jiang <dave.jiang@intel.com>
 
-Adding PCI Device IDs for B2B (back to back), RP (root port, primary),
-and TB (transparent bridge, secondary) devices.
+Make QP stats info more readable for debugging purposes.  Also add an
+entry to indicate whether DMA is being used.
 
 Signed-off-by: Dave Jiang <dave.jiang@intel.com>
 ---
- drivers/ntb/hw/intel/ntb_hw_intel.c | 15 +++++++++++++++
- drivers/ntb/hw/intel/ntb_hw_intel.h |  3 +++
- 2 files changed, 18 insertions(+)
+ drivers/ntb/ntb_transport.c | 25 ++++++++++++++++---------
+ 1 file changed, 16 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c b/drivers/ntb/hw/intel/ntb_hw_intel.c
-index 0ba625781197..211177f9eeff 100644
---- a/drivers/ntb/hw/intel/ntb_hw_intel.c
-+++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
-@@ -190,14 +190,17 @@ static inline int pdev_is_xeon(struct pci_dev *pdev)
- 	case PCI_DEVICE_ID_INTEL_NTB_SS_SNB:
- 	case PCI_DEVICE_ID_INTEL_NTB_SS_IVT:
- 	case PCI_DEVICE_ID_INTEL_NTB_SS_HSX:
-+	case PCI_DEVICE_ID_INTEL_NTB_SS_BDX:
- 	case PCI_DEVICE_ID_INTEL_NTB_PS_JSF:
- 	case PCI_DEVICE_ID_INTEL_NTB_PS_SNB:
- 	case PCI_DEVICE_ID_INTEL_NTB_PS_IVT:
- 	case PCI_DEVICE_ID_INTEL_NTB_PS_HSX:
-+	case PCI_DEVICE_ID_INTEL_NTB_PS_BDX:
- 	case PCI_DEVICE_ID_INTEL_NTB_B2B_JSF:
- 	case PCI_DEVICE_ID_INTEL_NTB_B2B_SNB:
- 	case PCI_DEVICE_ID_INTEL_NTB_B2B_IVT:
- 	case PCI_DEVICE_ID_INTEL_NTB_B2B_HSX:
-+	case PCI_DEVICE_ID_INTEL_NTB_B2B_BDX:
- 		return 1;
- 	}
- 	return 0;
-@@ -1844,6 +1847,9 @@ static int xeon_init_dev(struct intel_ntb_dev *ndev)
- 	case PCI_DEVICE_ID_INTEL_NTB_SS_HSX:
- 	case PCI_DEVICE_ID_INTEL_NTB_PS_HSX:
- 	case PCI_DEVICE_ID_INTEL_NTB_B2B_HSX:
-+	case PCI_DEVICE_ID_INTEL_NTB_SS_BDX:
-+	case PCI_DEVICE_ID_INTEL_NTB_PS_BDX:
-+	case PCI_DEVICE_ID_INTEL_NTB_B2B_BDX:
- 		ndev->hwerr_flags |= NTB_HWERR_SDOORBELL_LOCKUP;
- 		break;
- 	}
-@@ -1858,6 +1864,9 @@ static int xeon_init_dev(struct intel_ntb_dev *ndev)
- 	case PCI_DEVICE_ID_INTEL_NTB_SS_HSX:
- 	case PCI_DEVICE_ID_INTEL_NTB_PS_HSX:
- 	case PCI_DEVICE_ID_INTEL_NTB_B2B_HSX:
-+	case PCI_DEVICE_ID_INTEL_NTB_SS_BDX:
-+	case PCI_DEVICE_ID_INTEL_NTB_PS_BDX:
-+	case PCI_DEVICE_ID_INTEL_NTB_B2B_BDX:
- 		ndev->hwerr_flags |= NTB_HWERR_SB01BASE_LOCKUP;
- 		break;
- 	}
-@@ -1879,6 +1888,9 @@ static int xeon_init_dev(struct intel_ntb_dev *ndev)
- 	case PCI_DEVICE_ID_INTEL_NTB_SS_HSX:
- 	case PCI_DEVICE_ID_INTEL_NTB_PS_HSX:
- 	case PCI_DEVICE_ID_INTEL_NTB_B2B_HSX:
-+	case PCI_DEVICE_ID_INTEL_NTB_SS_BDX:
-+	case PCI_DEVICE_ID_INTEL_NTB_PS_BDX:
-+	case PCI_DEVICE_ID_INTEL_NTB_B2B_BDX:
- 		ndev->hwerr_flags |= NTB_HWERR_B2BDOORBELL_BIT14;
- 		break;
- 	}
-@@ -2235,14 +2247,17 @@ static const struct pci_device_id intel_ntb_pci_tbl[] = {
- 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_B2B_SNB)},
- 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_B2B_IVT)},
- 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_B2B_HSX)},
-+	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_B2B_BDX)},
- 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_PS_JSF)},
- 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_PS_SNB)},
- 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_PS_IVT)},
- 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_PS_HSX)},
-+	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_PS_BDX)},
- 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_SS_JSF)},
- 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_SS_SNB)},
- 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_SS_IVT)},
- 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_SS_HSX)},
-+	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_SS_BDX)},
- 	{0}
- };
- MODULE_DEVICE_TABLE(pci, intel_ntb_pci_tbl);
-diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.h b/drivers/ntb/hw/intel/ntb_hw_intel.h
-index 7ddaf387b679..ea0612f797df 100644
---- a/drivers/ntb/hw/intel/ntb_hw_intel.h
-+++ b/drivers/ntb/hw/intel/ntb_hw_intel.h
-@@ -67,6 +67,9 @@
- #define PCI_DEVICE_ID_INTEL_NTB_PS_HSX	0x2F0E
- #define PCI_DEVICE_ID_INTEL_NTB_SS_HSX	0x2F0F
- #define PCI_DEVICE_ID_INTEL_NTB_B2B_BWD	0x0C4E
-+#define PCI_DEVICE_ID_INTEL_NTB_B2B_BDX	0x6F0D
-+#define PCI_DEVICE_ID_INTEL_NTB_PS_BDX	0x6F0E
-+#define PCI_DEVICE_ID_INTEL_NTB_SS_BDX	0x6F0F
+diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+index 713be97be95f..b617cf218e6d 100644
+--- a/drivers/ntb/ntb_transport.c
++++ b/drivers/ntb/ntb_transport.c
+@@ -451,7 +451,7 @@ static ssize_t debugfs_read(struct file *filp, char __user *ubuf, size_t count,
  
- /* Intel Xeon hardware */
+ 	out_offset = 0;
+ 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
+-			       "NTB QP stats\n");
++			       "\nNTB QP stats:\n\n");
+ 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
+ 			       "rx_bytes - \t%llu\n", qp->rx_bytes);
+ 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
+@@ -469,11 +469,11 @@ static ssize_t debugfs_read(struct file *filp, char __user *ubuf, size_t count,
+ 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
+ 			       "rx_err_ver - \t%llu\n", qp->rx_err_ver);
+ 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
+-			       "rx_buff - \t%p\n", qp->rx_buff);
++			       "rx_buff - \t0x%p\n", qp->rx_buff);
+ 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
+ 			       "rx_index - \t%u\n", qp->rx_index);
+ 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
+-			       "rx_max_entry - \t%u\n", qp->rx_max_entry);
++			       "rx_max_entry - \t%u\n\n", qp->rx_max_entry);
+ 
+ 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
+ 			       "tx_bytes - \t%llu\n", qp->tx_bytes);
+@@ -488,21 +488,28 @@ static ssize_t debugfs_read(struct file *filp, char __user *ubuf, size_t count,
+ 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
+ 			       "tx_err_no_buf - %llu\n", qp->tx_err_no_buf);
+ 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
+-			       "tx_mw - \t%p\n", qp->tx_mw);
++			       "tx_mw - \t0x%p\n", qp->tx_mw);
+ 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
+-			       "tx_index - \t%u\n", qp->tx_index);
++			       "tx_index (H) - \t%u\n", qp->tx_index);
+ 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
+-			       "tx_max_entry - \t%u\n", qp->tx_max_entry);
+-	out_offset += snprintf(buf + out_offset, out_count - out_offset,
+-			       "qp->remote_rx_info->entry - \t%u\n",
++			       "RRI (T) - \t%u\n",
+ 			       qp->remote_rx_info->entry);
+ 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
++			       "tx_max_entry - \t%u\n", qp->tx_max_entry);
++	out_offset += snprintf(buf + out_offset, out_count - out_offset,
+ 			       "free tx - \t%u\n",
+ 			       ntb_transport_tx_free_entry(qp));
+ 
+ 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
+-			       "\nQP Link %s\n",
++			       "\n");
++	out_offset += snprintf(buf + out_offset, out_count - out_offset,
++			       "Using DMA - \t%s\n", use_dma ? "Yes" : "No");
++	out_offset += snprintf(buf + out_offset, out_count - out_offset,
++			       "QP Link - \t%s\n",
+ 			       qp->link_is_up ? "Up" : "Down");
++	out_offset += snprintf(buf + out_offset, out_count - out_offset,
++			       "\n");
++
+ 	if (out_offset > out_count)
+ 		out_offset = out_count;
  
 -- 
 2.4.0.rc0.43.gcf8a8c6
