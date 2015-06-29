@@ -1,13 +1,13 @@
 Return-Path: <Allen.Hubbe@emc.com>
-Received: from mailuogwhop.emc.com (mailuogwhop.emc.com. [168.159.213.141])
-        by gmr-mx.google.com with ESMTPS id eo3si411931wib.0.2015.06.29.07.50.40
+Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
+        by gmr-mx.google.com with ESMTPS id by9si870438qcb.1.2015.06.29.07.50.37
         for <linux-ntb@googlegroups.com>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 29 Jun 2015 07:50:40 -0700 (PDT)
+        Mon, 29 Jun 2015 07:50:37 -0700 (PDT)
 From: Allen Hubbe <Allen.Hubbe@emc.com>
-Subject: [PATCH 6/9] NTB: Schedule to receive on QP link up
-Date: Mon, 29 Jun 2015 10:50:02 -0400
-Message-Id: <9d5704c1ad72160b8fda8d761cd7b923f10916bf.1435587291.git.Allen.Hubbe@emc.com>
+Subject: [PATCH 7/9] NTB: Add PCI Device IDs for Broadwell Xeon
+Date: Mon, 29 Jun 2015 10:50:03 -0400
+Message-Id: <ebaf272374a016ae574a982b5c2d02acf02b75b9.1435587291.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1435587291.git.Allen.Hubbe@emc.com>
 References: <cover.1435587291.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1435587291.git.Allen.Hubbe@emc.com>
@@ -16,27 +16,101 @@ To: linux-ntb@googlegroups.com
 Cc: linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Schedule to receive on QP link up, to make sure that the doorbell is
-properly cleared for interrupts.
+From: Dave Jiang <dave.jiang@intel.com>
 
-Signed-off-by: Allen Hubbe <Allen.Hubbe@emc.com>
+Adding PCI Device IDs for B2B (back to back), RP (root port, primary),
+and TB (transparent bridge, secondary) devices.
+
+Signed-off-by: Dave Jiang <dave.jiang@intel.com>
 ---
- drivers/ntb/ntb_transport.c | 2 ++
- 1 file changed, 2 insertions(+)
+ drivers/ntb/hw/intel/ntb_hw_intel.c | 15 +++++++++++++++
+ drivers/ntb/hw/intel/ntb_hw_intel.h |  3 +++
+ 2 files changed, 18 insertions(+)
 
-diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 1764bb2fd265..a040a4ee6f33 100644
---- a/drivers/ntb/ntb_transport.c
-+++ b/drivers/ntb/ntb_transport.c
-@@ -901,6 +901,8 @@ static void ntb_qp_link_work(struct work_struct *work)
+diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c b/drivers/ntb/hw/intel/ntb_hw_intel.c
+index 0ba625781197..211177f9eeff 100644
+--- a/drivers/ntb/hw/intel/ntb_hw_intel.c
++++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
+@@ -190,14 +190,17 @@ static inline int pdev_is_xeon(struct pci_dev *pdev)
+ 	case PCI_DEVICE_ID_INTEL_NTB_SS_SNB:
+ 	case PCI_DEVICE_ID_INTEL_NTB_SS_IVT:
+ 	case PCI_DEVICE_ID_INTEL_NTB_SS_HSX:
++	case PCI_DEVICE_ID_INTEL_NTB_SS_BDX:
+ 	case PCI_DEVICE_ID_INTEL_NTB_PS_JSF:
+ 	case PCI_DEVICE_ID_INTEL_NTB_PS_SNB:
+ 	case PCI_DEVICE_ID_INTEL_NTB_PS_IVT:
+ 	case PCI_DEVICE_ID_INTEL_NTB_PS_HSX:
++	case PCI_DEVICE_ID_INTEL_NTB_PS_BDX:
+ 	case PCI_DEVICE_ID_INTEL_NTB_B2B_JSF:
+ 	case PCI_DEVICE_ID_INTEL_NTB_B2B_SNB:
+ 	case PCI_DEVICE_ID_INTEL_NTB_B2B_IVT:
+ 	case PCI_DEVICE_ID_INTEL_NTB_B2B_HSX:
++	case PCI_DEVICE_ID_INTEL_NTB_B2B_BDX:
+ 		return 1;
+ 	}
+ 	return 0;
+@@ -1844,6 +1847,9 @@ static int xeon_init_dev(struct intel_ntb_dev *ndev)
+ 	case PCI_DEVICE_ID_INTEL_NTB_SS_HSX:
+ 	case PCI_DEVICE_ID_INTEL_NTB_PS_HSX:
+ 	case PCI_DEVICE_ID_INTEL_NTB_B2B_HSX:
++	case PCI_DEVICE_ID_INTEL_NTB_SS_BDX:
++	case PCI_DEVICE_ID_INTEL_NTB_PS_BDX:
++	case PCI_DEVICE_ID_INTEL_NTB_B2B_BDX:
+ 		ndev->hwerr_flags |= NTB_HWERR_SDOORBELL_LOCKUP;
+ 		break;
+ 	}
+@@ -1858,6 +1864,9 @@ static int xeon_init_dev(struct intel_ntb_dev *ndev)
+ 	case PCI_DEVICE_ID_INTEL_NTB_SS_HSX:
+ 	case PCI_DEVICE_ID_INTEL_NTB_PS_HSX:
+ 	case PCI_DEVICE_ID_INTEL_NTB_B2B_HSX:
++	case PCI_DEVICE_ID_INTEL_NTB_SS_BDX:
++	case PCI_DEVICE_ID_INTEL_NTB_PS_BDX:
++	case PCI_DEVICE_ID_INTEL_NTB_B2B_BDX:
+ 		ndev->hwerr_flags |= NTB_HWERR_SB01BASE_LOCKUP;
+ 		break;
+ 	}
+@@ -1879,6 +1888,9 @@ static int xeon_init_dev(struct intel_ntb_dev *ndev)
+ 	case PCI_DEVICE_ID_INTEL_NTB_SS_HSX:
+ 	case PCI_DEVICE_ID_INTEL_NTB_PS_HSX:
+ 	case PCI_DEVICE_ID_INTEL_NTB_B2B_HSX:
++	case PCI_DEVICE_ID_INTEL_NTB_SS_BDX:
++	case PCI_DEVICE_ID_INTEL_NTB_PS_BDX:
++	case PCI_DEVICE_ID_INTEL_NTB_B2B_BDX:
+ 		ndev->hwerr_flags |= NTB_HWERR_B2BDOORBELL_BIT14;
+ 		break;
+ 	}
+@@ -2235,14 +2247,17 @@ static const struct pci_device_id intel_ntb_pci_tbl[] = {
+ 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_B2B_SNB)},
+ 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_B2B_IVT)},
+ 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_B2B_HSX)},
++	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_B2B_BDX)},
+ 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_PS_JSF)},
+ 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_PS_SNB)},
+ 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_PS_IVT)},
+ 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_PS_HSX)},
++	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_PS_BDX)},
+ 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_SS_JSF)},
+ 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_SS_SNB)},
+ 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_SS_IVT)},
+ 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_SS_HSX)},
++	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_SS_BDX)},
+ 	{0}
+ };
+ MODULE_DEVICE_TABLE(pci, intel_ntb_pci_tbl);
+diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.h b/drivers/ntb/hw/intel/ntb_hw_intel.h
+index 7ddaf387b679..ea0612f797df 100644
+--- a/drivers/ntb/hw/intel/ntb_hw_intel.h
++++ b/drivers/ntb/hw/intel/ntb_hw_intel.h
+@@ -67,6 +67,9 @@
+ #define PCI_DEVICE_ID_INTEL_NTB_PS_HSX	0x2F0E
+ #define PCI_DEVICE_ID_INTEL_NTB_SS_HSX	0x2F0F
+ #define PCI_DEVICE_ID_INTEL_NTB_B2B_BWD	0x0C4E
++#define PCI_DEVICE_ID_INTEL_NTB_B2B_BDX	0x6F0D
++#define PCI_DEVICE_ID_INTEL_NTB_PS_BDX	0x6F0E
++#define PCI_DEVICE_ID_INTEL_NTB_SS_BDX	0x6F0F
  
- 		if (qp->event_handler)
- 			qp->event_handler(qp->cb_data, qp->link_is_up);
-+
-+		tasklet_schedule(&qp->rxc_db_work);
- 	} else if (nt->link_is_up)
- 		schedule_delayed_work(&qp->link_work,
- 				      msecs_to_jiffies(NTB_LINK_DOWN_TIMEOUT));
+ /* Intel Xeon hardware */
+ 
 -- 
 2.4.0.rc0.43.gcf8a8c6
 
