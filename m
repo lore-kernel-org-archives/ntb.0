@@ -1,17 +1,18 @@
 Return-Path: <jdmason@kudzu.us>
-Received: from mail-ig0-f177.google.com (mail-ig0-f177.google.com. [209.85.213.177])
-        by gmr-mx.google.com with ESMTPS id x1si444976igb.2.2015.07.12.11.31.30
+Received: from mail-ie0-f170.google.com (mail-ie0-f170.google.com. [209.85.223.170])
+        by gmr-mx.google.com with ESMTPS id rs3si434735igb.2.2015.07.12.11.28.36
         for <linux-ntb@googlegroups.com>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Sun, 12 Jul 2015 11:31:30 -0700 (PDT)
-Received: by igvi1 with SMTP id i1so18896387igv.1
-        for <linux-ntb@googlegroups.com>; Sun, 12 Jul 2015 11:31:30 -0700 (PDT)
+        Sun, 12 Jul 2015 11:28:36 -0700 (PDT)
+Received: by ietj16 with SMTP id j16so49671143iet.0
+        for <linux-ntb@googlegroups.com>; Sun, 12 Jul 2015 11:28:36 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <cover.1436196351.git.Allen.Hubbe@emc.com>
+In-Reply-To: <0bccd8f9ce04c4d21f4c78b5ff4350df8831d284.1436196351.git.Allen.Hubbe@emc.com>
 References: <cover.1436196351.git.Allen.Hubbe@emc.com>
-Date: Sun, 12 Jul 2015 14:31:29 -0400
-Message-ID: <CAPoiz9x9d1FG4uayD=tVs+moD_svfg=o+m1sxjtj60LZURQXiA@mail.gmail.com>
-Subject: Re: [PATCH 00/12] NTB: Performance and bug fixes in ntb drivers
+	<0bccd8f9ce04c4d21f4c78b5ff4350df8831d284.1436196351.git.Allen.Hubbe@emc.com>
+Date: Sun, 12 Jul 2015 14:28:36 -0400
+Message-ID: <CAPoiz9yVf_T-6-Ud3hdh7c+gDmyh1rD2o0+BaRRydBzPuDcv4g@mail.gmail.com>
+Subject: Re: [PATCH 02/12] NTB: Add flow control to the ntb_netdev
 From: Jon Mason <jdmason@kudzu.us>
 Content-Type: text/plain; charset=UTF-8
 To: Allen Hubbe <Allen.Hubbe@emc.com>
@@ -19,63 +20,255 @@ Cc: linux-ntb@googlegroups.com, Dave Jiang <dave.jiang@intel.com>
 List-ID: <linux-ntb.googlegroups.com>
 
 On Mon, Jul 6, 2015 at 11:30 AM, Allen Hubbe <Allen.Hubbe@emc.com> wrote:
-> This series includes the following changes to fix bugs, add new hardware
-> support, and improve usability and performance of the ntb drivers.
+> From: Dave Jiang <dave.jiang@intel.com>
 >
-> Bug Fixes (issues preexisting the new ntb api):
-> NTB: Fix ntb_transport out-of-order RX update
-> NTB: Schedule to receive on QP link up
-> NTB: Fix zero size or integer overflow in ntb_set_mw
-> NTB: ntb_netdev not covering all receive errors
-> NTB: Fix oops in debugfs when transport is half-up
+> Right now if we push the NTB really hard, we start dropping packets due
+> to not able to process the packets fast enough. We need to stop the
+> upper layer from flooding us when that happens.
 >
-> Bug Fixes (regressions since the new ntb api):
-> NTB: Fix transport stats for multiple devices
+> A timer is necessary in order to restart the queue once the resource has
+> been processed on the receive side. Due to the way NTB is setup, the
+> resources on the tx side are tied to the processing of the rx side and
+> there's no async way to know when the rx side has released those
+> resources.
 >
-> Additions and Performance Improvements:
-> NTB: Remove dma_sync_wait from ntb_async_rx
-> NTB: Add PCI Device IDs for Broadwell Xeon
-> NTB: Add flow control to the ntb_netdev
-> NTB: Make the transport list in order of discovery
-> NTB: Clean up QP stats info
-> NTB: Use unique DMA channels for TX and RX
+> The following module parameters are added:
+> tx_time: The time in usecs for us to wait before we check if we restart
+>          transmit queue. (default: 1)
+> tx_start: The number of descriptors we wait for to free up before resuming
+>           transmit queue. (default: 10)
+> tx_stop: The low water mark of free descriptors before we stop tx queue.
+>          (default: 5)
 >
+> Signed-off-by: Dave Jiang <dave.jiang@intel.com>
+> ---
+>  drivers/net/ntb_netdev.c      | 80 +++++++++++++++++++++++++++++++++++++++++++
+>  drivers/ntb/ntb_transport.c   | 18 +++++++++-
+>  include/linux/ntb_transport.h |  1 +
+>  3 files changed, 98 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/net/ntb_netdev.c b/drivers/net/ntb_netdev.c
+> index 5f1ee7c05f68..84d094df1a63 100644
+> --- a/drivers/net/ntb_netdev.c
+> +++ b/drivers/net/ntb_netdev.c
+> @@ -61,11 +61,24 @@ MODULE_VERSION(NTB_NETDEV_VER);
+>  MODULE_LICENSE("Dual BSD/GPL");
+>  MODULE_AUTHOR("Intel Corporation");
+>
+> +static unsigned int tx_time = 1;
+> +module_param(tx_time, uint, 0644);
+> +MODULE_PARM_DESC(tx_time, "Time in usecs for tx resource reaper");
+> +
+> +static unsigned int tx_start = 10;
+> +module_param(tx_start, uint, 0644);
+> +MODULE_PARM_DESC(tx_start, "Number of descriptors to free before resume tx");
+> +
+> +static unsigned int tx_stop = 5;
+> +module_param(tx_stop, uint, 0644);
+> +MODULE_PARM_DESC(tx_stop, "Number of descriptors before stop upper layer tx");
 
-Ignoring the outstanding quesiton on patch 2, these patches look acceptable.
+Do you really see these being used outside of development for
+finetuning performance?  If not, the let's remove these and just mod
+them by hand when perf tuning.  There is no use adding knobs that no
+one in the field will ever use (assuming I am correct, and no one will
+ever change these from the defaults).
 
-For clarity, patches 1, 2, and 4 are bug fixes and can be sent to
-Linus now.  Patches 3, 5, 6, 9 and 10 look to be features, and should
-hit the next merge window.  How would you like patches 7, 8, and/or 12
-handled?
+Aside that that, it looks fine.
 
-Thanks,
-Jon
-
-
-
-> Allen Hubbe (4):
->   NTB: Fix ntb_transport out-of-order RX update
->   NTB: Schedule to receive on QP link up
->   NTB: Remove dma_sync_wait from ntb_async_rx
->   NTB: Fix zero size or integer overflow in ntb_set_mw
+>  struct ntb_netdev {
+>         struct list_head list;
+>         struct pci_dev *pdev;
+>         struct net_device *ndev;
+>         struct ntb_transport_qp *qp;
+> +       struct timer_list tx_timer;
+>  };
 >
-> Dave Jiang (8):
->   NTB: Add flow control to the ntb_netdev
->   NTB: Fix transport stats for multiple devices
->   NTB: ntb_netdev not covering all receive errors
->   NTB: Fix oops in debugfs when transport is half-up
->   NTB: Add PCI Device IDs for Broadwell Xeon
->   NTB: Make the transport list in order of discovery
->   NTB: Clean up QP stats info
->   NTB: Use unique DMA channels for TX and RX
+>  #define        NTB_TX_TIMEOUT_MS       1000
+> @@ -136,11 +149,42 @@ enqueue_again:
+>         }
+>  }
 >
->  drivers/net/ntb_netdev.c            |  89 +++++++++-
->  drivers/ntb/hw/intel/ntb_hw_intel.c |  15 ++
->  drivers/ntb/hw/intel/ntb_hw_intel.h |   3 +
->  drivers/ntb/ntb_transport.c         | 322 ++++++++++++++++++++++++------------
->  include/linux/ntb_transport.h       |   1 +
->  5 files changed, 320 insertions(+), 110 deletions(-)
+> +static int __ntb_netdev_maybe_stop_tx(struct net_device *netdev,
+> +                                     struct ntb_transport_qp *qp, int size)
+> +{
+> +       struct ntb_netdev *dev = netdev_priv(netdev);
+> +
+> +       netif_stop_queue(netdev);
+> +       /* Make sure to see the latest value of ntb_transport_tx_free_entry()
+> +        * since the queue was last started.
+> +        */
+> +       smp_mb();
+> +
+> +       if (likely(ntb_transport_tx_free_entry(qp) < size)) {
+> +               mod_timer(&dev->tx_timer, jiffies + usecs_to_jiffies(tx_time));
+> +               return -EBUSY;
+> +       }
+> +
+> +       netif_start_queue(netdev);
+> +       return 0;
+> +}
+> +
+> +static int ntb_netdev_maybe_stop_tx(struct net_device *ndev,
+> +                                   struct ntb_transport_qp *qp, int size)
+> +{
+> +       if (netif_queue_stopped(ndev) ||
+> +           (ntb_transport_tx_free_entry(qp) >= size))
+> +               return 0;
+> +
+> +       return __ntb_netdev_maybe_stop_tx(ndev, qp, size);
+> +}
+> +
+>  static void ntb_netdev_tx_handler(struct ntb_transport_qp *qp, void *qp_data,
+>                                   void *data, int len)
+>  {
+>         struct net_device *ndev = qp_data;
+>         struct sk_buff *skb;
+> +       struct ntb_netdev *dev = netdev_priv(ndev);
 >
+>         skb = data;
+>         if (!skb || !ndev)
+> @@ -155,6 +199,15 @@ static void ntb_netdev_tx_handler(struct ntb_transport_qp *qp, void *qp_data,
+>         }
+>
+>         dev_kfree_skb(skb);
+> +
+> +       if (ntb_transport_tx_free_entry(dev->qp) >= tx_start) {
+> +               /* Make sure anybody stopping the queue after this sees the new
+> +                * value of ntb_transport_tx_free_entry()
+> +                */
+> +               smp_mb();
+> +               if (netif_queue_stopped(ndev))
+> +                       netif_wake_queue(ndev);
+> +       }
+>  }
+>
+>  static netdev_tx_t ntb_netdev_start_xmit(struct sk_buff *skb,
+> @@ -163,10 +216,15 @@ static netdev_tx_t ntb_netdev_start_xmit(struct sk_buff *skb,
+>         struct ntb_netdev *dev = netdev_priv(ndev);
+>         int rc;
+>
+> +       ntb_netdev_maybe_stop_tx(ndev, dev->qp, tx_stop);
+> +
+>         rc = ntb_transport_tx_enqueue(dev->qp, skb, skb->data, skb->len);
+>         if (rc)
+>                 goto err;
+>
+> +       /* check for next submit */
+> +       ntb_netdev_maybe_stop_tx(ndev, dev->qp, tx_stop);
+> +
+>         return NETDEV_TX_OK;
+>
+>  err:
+> @@ -175,6 +233,23 @@ err:
+>         return NETDEV_TX_BUSY;
+>  }
+>
+> +static void ntb_netdev_tx_timer(unsigned long data)
+> +{
+> +       struct net_device *ndev = (struct net_device *)data;
+> +       struct ntb_netdev *dev = netdev_priv(ndev);
+> +
+> +       if (ntb_transport_tx_free_entry(dev->qp) < tx_stop) {
+> +               mod_timer(&dev->tx_timer, jiffies + msecs_to_jiffies(tx_time));
+> +       } else {
+> +               /* Make sure anybody stopping the queue after this sees the new
+> +                * value of ntb_transport_tx_free_entry()
+> +                */
+> +               smp_mb();
+> +               if (netif_queue_stopped(ndev))
+> +                       netif_wake_queue(ndev);
+> +       }
+> +}
+> +
+>  static int ntb_netdev_open(struct net_device *ndev)
+>  {
+>         struct ntb_netdev *dev = netdev_priv(ndev);
+> @@ -197,8 +272,11 @@ static int ntb_netdev_open(struct net_device *ndev)
+>                 }
+>         }
+>
+> +       setup_timer(&dev->tx_timer, ntb_netdev_tx_timer, (unsigned long)ndev);
+> +
+>         netif_carrier_off(ndev);
+>         ntb_transport_link_up(dev->qp);
+> +       netif_start_queue(ndev);
+>
+>         return 0;
+>
+> @@ -219,6 +297,8 @@ static int ntb_netdev_close(struct net_device *ndev)
+>         while ((skb = ntb_transport_rx_remove(dev->qp, &len)))
+>                 dev_kfree_skb(skb);
+>
+> +       del_timer_sync(&dev->tx_timer);
+> +
+>         return 0;
+>  }
+>
+> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+> index 98e58c765f2e..76a03d4070a9 100644
+> --- a/drivers/ntb/ntb_transport.c
+> +++ b/drivers/ntb/ntb_transport.c
+> @@ -488,6 +488,12 @@ static ssize_t debugfs_read(struct file *filp, char __user *ubuf, size_t count,
+>                                "tx_index - \t%u\n", qp->tx_index);
+>         out_offset += snprintf(buf + out_offset, out_count - out_offset,
+>                                "tx_max_entry - \t%u\n", qp->tx_max_entry);
+> +       out_offset += snprintf(buf + out_offset, out_count - out_offset,
+> +                              "qp->remote_rx_info->entry - \t%u\n",
+> +                              qp->remote_rx_info->entry);
+> +       out_offset += snprintf(buf + out_offset, out_count - out_offset,
+> +                              "free tx - \t%u\n",
+> +                              ntb_transport_tx_free_entry(qp));
+>
+>         out_offset += snprintf(buf + out_offset, out_count - out_offset,
+>                                "\nQP Link %s\n",
+> @@ -529,6 +535,7 @@ static struct ntb_queue_entry *ntb_list_rm(spinlock_t *lock,
+>         }
+>         entry = list_first_entry(list, struct ntb_queue_entry, entry);
+>         list_del(&entry->entry);
+> +
+>  out:
+>         spin_unlock_irqrestore(lock, flags);
+>
+> @@ -1827,7 +1834,7 @@ int ntb_transport_tx_enqueue(struct ntb_transport_qp *qp, void *cb, void *data,
+>         entry = ntb_list_rm(&qp->ntb_tx_free_q_lock, &qp->tx_free_q);
+>         if (!entry) {
+>                 qp->tx_err_no_buf++;
+> -               return -ENOMEM;
+> +               return -EBUSY;
+>         }
+>
+>         entry->cb_data = cb;
+> @@ -1953,6 +1960,15 @@ unsigned int ntb_transport_max_size(struct ntb_transport_qp *qp)
+>  }
+>  EXPORT_SYMBOL_GPL(ntb_transport_max_size);
+>
+> +unsigned int ntb_transport_tx_free_entry(struct ntb_transport_qp *qp)
+> +{
+> +       unsigned int head = qp->tx_index;
+> +       unsigned int tail = qp->remote_rx_info->entry;
+> +
+> +       return tail > head ? tail - head : qp->tx_max_entry + tail - head;
+> +}
+> +EXPORT_SYMBOL_GPL(ntb_transport_tx_free_entry);
+> +
+>  static void ntb_transport_doorbell_callback(void *data, int vector)
+>  {
+>         struct ntb_transport_ctx *nt = data;
+> diff --git a/include/linux/ntb_transport.h b/include/linux/ntb_transport.h
+> index 2862861366a5..7243eb98a722 100644
+> --- a/include/linux/ntb_transport.h
+> +++ b/include/linux/ntb_transport.h
+> @@ -83,3 +83,4 @@ void *ntb_transport_rx_remove(struct ntb_transport_qp *qp, unsigned int *len);
+>  void ntb_transport_link_up(struct ntb_transport_qp *qp);
+>  void ntb_transport_link_down(struct ntb_transport_qp *qp);
+>  bool ntb_transport_link_query(struct ntb_transport_qp *qp);
+> +unsigned int ntb_transport_tx_free_entry(struct ntb_transport_qp *qp);
 > --
 > 2.4.0.rc0.43.gcf8a8c6
 >
+> --
+> You received this message because you are subscribed to the Google Groups "linux-ntb" group.
+> To unsubscribe from this group and stop receiving emails from it, send an email to linux-ntb+unsubscribe@googlegroups.com.
+> To post to this group, send email to linux-ntb@googlegroups.com.
+> To view this discussion on the web visit https://groups.google.com/d/msgid/linux-ntb/0bccd8f9ce04c4d21f4c78b5ff4350df8831d284.1436196351.git.Allen.Hubbe%40emc.com.
+> For more options, visit https://groups.google.com/d/optout.
