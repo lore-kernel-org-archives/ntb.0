@@ -1,59 +1,81 @@
-Return-Path: <Allen.Hubbe@emc.com>
-Received: from mailuogwhop.emc.com (mailuogwhop.emc.com. [168.159.213.141])
-        by gmr-mx.google.com with ESMTPS id eo3si386948wib.0.2015.07.13.07.21.09
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-ig0-f177.google.com (mail-ig0-f177.google.com. [209.85.213.177])
+        by gmr-mx.google.com with ESMTPS id x1si444976igb.2.2015.07.12.11.31.30
         for <linux-ntb@googlegroups.com>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 13 Jul 2015 07:21:09 -0700 (PDT)
-From: "Hubbe, Allen" <Allen.Hubbe@emc.com>
-Subject: RE: [PATCH 02/12] NTB: Add flow control to the ntb_netdev
-Date: Mon, 13 Jul 2015 14:20:51 +0000
-Message-ID: <40F65EF2B5E2254199711F58E3ACB84D8BD96CA2@MX104CL02.corp.emc.com>
-References: <cover.1436196351.git.Allen.Hubbe@emc.com>
-	<0bccd8f9ce04c4d21f4c78b5ff4350df8831d284.1436196351.git.Allen.Hubbe@emc.com>
- <CAPoiz9yVf_T-6-Ud3hdh7c+gDmyh1rD2o0+BaRRydBzPuDcv4g@mail.gmail.com>
-In-Reply-To: <CAPoiz9yVf_T-6-Ud3hdh7c+gDmyh1rD2o0+BaRRydBzPuDcv4g@mail.gmail.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+        Sun, 12 Jul 2015 11:31:30 -0700 (PDT)
+Received: by igvi1 with SMTP id i1so18896387igv.1
+        for <linux-ntb@googlegroups.com>; Sun, 12 Jul 2015 11:31:30 -0700 (PDT)
 MIME-Version: 1.0
-To: Jon Mason <jdmason@kudzu.us>
-Cc: "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, Dave Jiang <dave.jiang@intel.com>
+In-Reply-To: <cover.1436196351.git.Allen.Hubbe@emc.com>
+References: <cover.1436196351.git.Allen.Hubbe@emc.com>
+Date: Sun, 12 Jul 2015 14:31:29 -0400
+Message-ID: <CAPoiz9x9d1FG4uayD=tVs+moD_svfg=o+m1sxjtj60LZURQXiA@mail.gmail.com>
+Subject: Re: [PATCH 00/12] NTB: Performance and bug fixes in ntb drivers
+From: Jon Mason <jdmason@kudzu.us>
+Content-Type: text/plain; charset=UTF-8
+To: Allen Hubbe <Allen.Hubbe@emc.com>
+Cc: linux-ntb@googlegroups.com, Dave Jiang <dave.jiang@intel.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-RnJvbTogSm9uIE1hc29uDQo+ID4gK3N0YXRpYyB1bnNpZ25lZCBpbnQgdHhfdGltZSA9IDE7DQo+
-ID4gK21vZHVsZV9wYXJhbSh0eF90aW1lLCB1aW50LCAwNjQ0KTsNCj4gPiArTU9EVUxFX1BBUk1f
-REVTQyh0eF90aW1lLCAiVGltZSBpbiB1c2VjcyBmb3IgdHggcmVzb3VyY2UgcmVhcGVyIik7DQo+
-ID4gKw0KPiA+ICtzdGF0aWMgdW5zaWduZWQgaW50IHR4X3N0YXJ0ID0gMTA7DQo+ID4gK21vZHVs
-ZV9wYXJhbSh0eF9zdGFydCwgdWludCwgMDY0NCk7DQo+ID4gK01PRFVMRV9QQVJNX0RFU0ModHhf
-c3RhcnQsICJOdW1iZXIgb2YgZGVzY3JpcHRvcnMgdG8gZnJlZSBiZWZvcmUNCj4gcmVzdW1lIHR4
-Iik7DQo+ID4gKw0KPiA+ICtzdGF0aWMgdW5zaWduZWQgaW50IHR4X3N0b3AgPSA1Ow0KPiA+ICtt
-b2R1bGVfcGFyYW0odHhfc3RvcCwgdWludCwgMDY0NCk7DQo+ID4gK01PRFVMRV9QQVJNX0RFU0Mo
-dHhfc3RvcCwgIk51bWJlciBvZiBkZXNjcmlwdG9ycyBiZWZvcmUgc3RvcCB1cHBlcg0KPiBsYXll
-ciB0eCIpOw0KPiANCj4gRG8geW91IHJlYWxseSBzZWUgdGhlc2UgYmVpbmcgdXNlZCBvdXRzaWRl
-IG9mIGRldmVsb3BtZW50IGZvcg0KPiBmaW5ldHVuaW5nIHBlcmZvcm1hbmNlPyAgSWYgbm90LCB0
-aGUgbGV0J3MgcmVtb3ZlIHRoZXNlIGFuZCBqdXN0IG1vZA0KPiB0aGVtIGJ5IGhhbmQgd2hlbiBw
-ZXJmIHR1bmluZy4gIFRoZXJlIGlzIG5vIHVzZSBhZGRpbmcga25vYnMgdGhhdCBubw0KPiBvbmUg
-aW4gdGhlIGZpZWxkIHdpbGwgZXZlciB1c2UgKGFzc3VtaW5nIEkgYW0gY29ycmVjdCwgYW5kIG5v
-IG9uZSB3aWxsDQo+IGV2ZXIgY2hhbmdlIHRoZXNlIGZyb20gdGhlIGRlZmF1bHRzKS4NCg0KSSB0
-aGluayB5b3UgYXJlIHJpZ2h0IHRoYXQgdGhlIHBhcmFtZXRlcnMgd2lsbCBuZXZlciBiZSBjaGFu
-Z2VkIGF3YXkgZnJvbSB0aGVpciBkZWZhdWx0cywgYW5kIGl0IHdvdWxkIGJlIGVhc3kgZW5vdWdo
-IHRvIGFkZCB0aGUgcGFyYW1ldGVycyBiYWNrIGlmIGl0IGlzIHJlcXVlc3RlZC4gIEkgd291bGQg
-YmUgb2sgd2l0aCByZW1vdmluZyB0aGVtLCBjb250cmFyeSB0byBteSByZXF1ZXN0IHRvIGFkZCB0
-aGVtLg0KDQpJIGFza2VkIHRvIGFkZCB0aGUgcGFyYW1ldGVycywgdGhpbmtpbmcgdGhhdCBhIGRp
-ZmZlcmVudCB0dW5pbmcgbWlnaHQgYmUgZGVzaXJhYmxlIGRlcGVuZGluZyBvbiB0aGUgd29ya2xv
-YWQgYW5kIGxpbmsgY2hhcmFjdGVyaXN0aWNzLiAgQSBoaWdoIGZyYW1lIHJhdGUgd2lsbCByZWNv
-dXAgY3JlZGl0cyBmYXN0ZXIgdGhhbiBhIHNsb3cgZnJhbWUgcmF0ZS4gIFRoZSBmcmFtZSByYXRl
-IGRlcGVuZHMgb24gdGhlIGZyYW1lIHNpemUgKGVnLCB0cmFuc2FjdGlvbmFsIHZzIHRocm91Z2hw
-dXQgd29ya2xvYWQpLCBhbmQgdGhlIHNwZWVkIG9mIHRoZSBsaW5rIChlZywgUENJZSBnZW5lcmF0
-aW9uIGFuZCB3aWR0aCkuICBJIHRoaW5rIHdlIGNvdWxkIG9ic2VydmUgYW4gb3JkZXIgb2YgbWFn
-bml0dWRlIGRpZmZlcmVuY2UgaW4gZnJhbWUgcmF0ZSB3aXRoIGRpZmZlcmVudCB3b3JrbG9hZHMg
-b24gZGlmZmVyZW50IGxpbmtzLg0KDQpUbyBkZXRlcm1pbmUgdGhlIGRlZmF1bHQgc2V0dGluZywg
-SSBzdWdnZXN0ZWQgdGhhdCB3ZSBydW4gYSBzbWFsbCBmcmFtZSB3b3JrbG9hZCwgYW5kIHR1bmUg
-Zm9yIHRoZSBsb25nZXN0IGRlbGF5IHRoYXQgZG9lcyBub3QgYWZmZWN0IHJlc3BvbnNlIHRpbWUs
-IGFuZCB0aGVuIHZhbGlkYXRlIHRoZSBzZXR0aW5nIGJ5IHJ1bm5pbmcgYSBsYXJnZSBmcmFtZSB3
-b3JrbG9hZC4gIElmIHRoZSBleHRyYSB0aW1lciBleHBpcmF0aW9ucyBkb24ndCBpbXBhY3QgY3B1
-IHV0aWxpemF0aW9uIHRvbyBtdWNoIHdpdGggdGhlIGxhcmdlIGZyYW1lIHdvcmtsb2FkLCB0aGVu
-IHRoZSBwYXJhbWV0ZXJzIG1pZ2h0IGJlIGVudGlyZWx5IHVubmVjZXNzYXJ5LiAgSSBzaG91bGQg
-aGF2ZSBhbHNvIHJlcXVlc3RlZCB0byBjdXQgdGhlIGxpbmsgd2lkdGggaW4gaGFsZiBmb3IgdGhl
-IGxhcmdlIGZyYW1lIHdvcmtsb2FkLCBzbyB3ZSBjb3VsZCBvYnNlcnZlIGEgZ3JlYXRlciBlZmZl
-Y3QuDQo=
+On Mon, Jul 6, 2015 at 11:30 AM, Allen Hubbe <Allen.Hubbe@emc.com> wrote:
+> This series includes the following changes to fix bugs, add new hardware
+> support, and improve usability and performance of the ntb drivers.
+>
+> Bug Fixes (issues preexisting the new ntb api):
+> NTB: Fix ntb_transport out-of-order RX update
+> NTB: Schedule to receive on QP link up
+> NTB: Fix zero size or integer overflow in ntb_set_mw
+> NTB: ntb_netdev not covering all receive errors
+> NTB: Fix oops in debugfs when transport is half-up
+>
+> Bug Fixes (regressions since the new ntb api):
+> NTB: Fix transport stats for multiple devices
+>
+> Additions and Performance Improvements:
+> NTB: Remove dma_sync_wait from ntb_async_rx
+> NTB: Add PCI Device IDs for Broadwell Xeon
+> NTB: Add flow control to the ntb_netdev
+> NTB: Make the transport list in order of discovery
+> NTB: Clean up QP stats info
+> NTB: Use unique DMA channels for TX and RX
+>
+
+Ignoring the outstanding quesiton on patch 2, these patches look acceptable.
+
+For clarity, patches 1, 2, and 4 are bug fixes and can be sent to
+Linus now.  Patches 3, 5, 6, 9 and 10 look to be features, and should
+hit the next merge window.  How would you like patches 7, 8, and/or 12
+handled?
+
+Thanks,
+Jon
+
+
+
+> Allen Hubbe (4):
+>   NTB: Fix ntb_transport out-of-order RX update
+>   NTB: Schedule to receive on QP link up
+>   NTB: Remove dma_sync_wait from ntb_async_rx
+>   NTB: Fix zero size or integer overflow in ntb_set_mw
+>
+> Dave Jiang (8):
+>   NTB: Add flow control to the ntb_netdev
+>   NTB: Fix transport stats for multiple devices
+>   NTB: ntb_netdev not covering all receive errors
+>   NTB: Fix oops in debugfs when transport is half-up
+>   NTB: Add PCI Device IDs for Broadwell Xeon
+>   NTB: Make the transport list in order of discovery
+>   NTB: Clean up QP stats info
+>   NTB: Use unique DMA channels for TX and RX
+>
+>  drivers/net/ntb_netdev.c            |  89 +++++++++-
+>  drivers/ntb/hw/intel/ntb_hw_intel.c |  15 ++
+>  drivers/ntb/hw/intel/ntb_hw_intel.h |   3 +
+>  drivers/ntb/ntb_transport.c         | 322 ++++++++++++++++++++++++------------
+>  include/linux/ntb_transport.h       |   1 +
+>  5 files changed, 320 insertions(+), 110 deletions(-)
+>
+> --
+> 2.4.0.rc0.43.gcf8a8c6
+>
