@@ -1,239 +1,62 @@
-Return-Path: <dave.jiang@intel.com>
-Received: from mga09.intel.com (mga09.intel.com. [134.134.136.24])
-        by gmr-mx.google.com with ESMTP id sg1si1805628pbb.1.2015.07.13.09.12.42
-        for <linux-ntb@googlegroups.com>;
-        Mon, 13 Jul 2015 09:12:42 -0700 (PDT)
-Subject: [PATCH v2] NTB: Add flow control to the ntb_netdev
-From: Dave Jiang <dave.jiang@intel.com>
-Date: Mon, 13 Jul 2015 09:12:41 -0700
-Message-ID: <20150713161241.152898.71674.stgit@djiang5-desk3.amr.corp.intel.com>
-MIME-Version: 1.0
+Return-Path: <Allen.Hubbe@emc.com>
+Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
+        by gmr-mx.google.com with ESMTPS id x12si639541igx.1.2015.07.13.08.09.00
+        for <linux-ntb@googlegroups.com>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 13 Jul 2015 08:09:00 -0700 (PDT)
+From: "Hubbe, Allen" <Allen.Hubbe@emc.com>
+Subject: RE: [PATCH 00/12] NTB: Performance and bug fixes in ntb drivers
+Date: Mon, 13 Jul 2015 15:08:43 +0000
+Message-ID: <40F65EF2B5E2254199711F58E3ACB84D8BD96DA2@MX104CL02.corp.emc.com>
+References: <cover.1436196351.git.Allen.Hubbe@emc.com>
+ <CAPoiz9x9d1FG4uayD=tVs+moD_svfg=o+m1sxjtj60LZURQXiA@mail.gmail.com>
+In-Reply-To: <CAPoiz9x9d1FG4uayD=tVs+moD_svfg=o+m1sxjtj60LZURQXiA@mail.gmail.com>
+Content-Language: en-US
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-To: Allen.Hubbe@emc.com
-Cc: linux-ntb@googlegroups.com, jdmason@kudzu.us
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
+To: Jon Mason <jdmason@kudzu.us>
+Cc: "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, Dave Jiang <dave.jiang@intel.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Right now if we push the NTB really hard, we start dropping packets due
-to not able to process the packets fast enough. We need to stop the
-upper layer from flooding us when that happens.
-
-A timer is necessary in order to restart the queue once the resource has
-been processed on the receive side. Due to the way NTB is setup, the
-resources on the tx side are tied to the processing of the rx side and
-there's no async way to know when the rx side has released those
-resources.
-
-Signed-off-by: Dave Jiang <dave.jiang@intel.com>
----
- drivers/net/ntb_netdev.c      |   77 +++++++++++++++++++++++++++++++++++++++++
- drivers/ntb/ntb_transport.c   |   18 +++++++++-
- include/linux/ntb_transport.h |    1 +
- 3 files changed, 95 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/net/ntb_netdev.c b/drivers/net/ntb_netdev.c
-index d8757bf..a9acf71 100644
---- a/drivers/net/ntb_netdev.c
-+++ b/drivers/net/ntb_netdev.c
-@@ -61,11 +61,21 @@ MODULE_VERSION(NTB_NETDEV_VER);
- MODULE_LICENSE("Dual BSD/GPL");
- MODULE_AUTHOR("Intel Corporation");
- 
-+/* Time in usecs for tx resource reaper */
-+static unsigned int tx_time = 1;
-+
-+/* Number of descriptors to free before resuming tx */
-+static unsigned int tx_start = 10;
-+
-+/* Number of descriptors still available before stop upper layer tx */
-+static unsigned int tx_stop = 5;
-+
- struct ntb_netdev {
- 	struct list_head list;
- 	struct pci_dev *pdev;
- 	struct net_device *ndev;
- 	struct ntb_transport_qp *qp;
-+	struct timer_list tx_timer;
- };
- 
- #define	NTB_TX_TIMEOUT_MS	1000
-@@ -136,11 +146,42 @@ enqueue_again:
- 	}
- }
- 
-+static int __ntb_netdev_maybe_stop_tx(struct net_device *netdev,
-+				      struct ntb_transport_qp *qp, int size)
-+{
-+	struct ntb_netdev *dev = netdev_priv(netdev);
-+
-+	netif_stop_queue(netdev);
-+	/* Make sure to see the latest value of ntb_transport_tx_free_entry()
-+	 * since the queue was last started.
-+	 */
-+	smp_mb();
-+
-+	if (likely(ntb_transport_tx_free_entry(qp) < size)) {
-+		mod_timer(&dev->tx_timer, jiffies + usecs_to_jiffies(tx_time));
-+		return -EBUSY;
-+	}
-+
-+	netif_start_queue(netdev);
-+	return 0;
-+}
-+
-+static int ntb_netdev_maybe_stop_tx(struct net_device *ndev,
-+				    struct ntb_transport_qp *qp, int size)
-+{
-+	if (netif_queue_stopped(ndev) ||
-+	    (ntb_transport_tx_free_entry(qp) >= size))
-+		return 0;
-+
-+	return __ntb_netdev_maybe_stop_tx(ndev, qp, size);
-+}
-+
- static void ntb_netdev_tx_handler(struct ntb_transport_qp *qp, void *qp_data,
- 				  void *data, int len)
- {
- 	struct net_device *ndev = qp_data;
- 	struct sk_buff *skb;
-+	struct ntb_netdev *dev = netdev_priv(ndev);
- 
- 	skb = data;
- 	if (!skb || !ndev)
-@@ -155,6 +196,15 @@ static void ntb_netdev_tx_handler(struct ntb_transport_qp *qp, void *qp_data,
- 	}
- 
- 	dev_kfree_skb(skb);
-+
-+	if (ntb_transport_tx_free_entry(dev->qp) >= tx_start) {
-+		/* Make sure anybody stopping the queue after this sees the new
-+		 * value of ntb_transport_tx_free_entry()
-+		 */
-+		smp_mb();
-+		if (netif_queue_stopped(ndev))
-+			netif_wake_queue(ndev);
-+	}
- }
- 
- static netdev_tx_t ntb_netdev_start_xmit(struct sk_buff *skb,
-@@ -163,10 +213,15 @@ static netdev_tx_t ntb_netdev_start_xmit(struct sk_buff *skb,
- 	struct ntb_netdev *dev = netdev_priv(ndev);
- 	int rc;
- 
-+	ntb_netdev_maybe_stop_tx(ndev, dev->qp, tx_stop);
-+
- 	rc = ntb_transport_tx_enqueue(dev->qp, skb, skb->data, skb->len);
- 	if (rc)
- 		goto err;
- 
-+	/* check for next submit */
-+	ntb_netdev_maybe_stop_tx(ndev, dev->qp, tx_stop);
-+
- 	return NETDEV_TX_OK;
- 
- err:
-@@ -175,6 +230,23 @@ err:
- 	return NETDEV_TX_BUSY;
- }
- 
-+static void ntb_netdev_tx_timer(unsigned long data)
-+{
-+	struct net_device *ndev = (struct net_device *)data;
-+	struct ntb_netdev *dev = netdev_priv(ndev);
-+
-+	if (ntb_transport_tx_free_entry(dev->qp) < tx_stop) {
-+		mod_timer(&dev->tx_timer, jiffies + msecs_to_jiffies(tx_time));
-+	} else {
-+		/* Make sure anybody stopping the queue after this sees the new
-+		 * value of ntb_transport_tx_free_entry()
-+		 */
-+		smp_mb();
-+		if (netif_queue_stopped(ndev))
-+			netif_wake_queue(ndev);
-+	}
-+}
-+
- static int ntb_netdev_open(struct net_device *ndev)
- {
- 	struct ntb_netdev *dev = netdev_priv(ndev);
-@@ -197,8 +269,11 @@ static int ntb_netdev_open(struct net_device *ndev)
- 		}
- 	}
- 
-+	setup_timer(&dev->tx_timer, ntb_netdev_tx_timer, (unsigned long)ndev);
-+
- 	netif_carrier_off(ndev);
- 	ntb_transport_link_up(dev->qp);
-+	netif_start_queue(ndev);
- 
- 	return 0;
- 
-@@ -219,6 +294,8 @@ static int ntb_netdev_close(struct net_device *ndev)
- 	while ((skb = ntb_transport_rx_remove(dev->qp, &len)))
- 		dev_kfree_skb(skb);
- 
-+	del_timer_sync(&dev->tx_timer);
-+
- 	return 0;
- }
- 
-diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 3363a89..8c9d50d5 100644
---- a/drivers/ntb/ntb_transport.c
-+++ b/drivers/ntb/ntb_transport.c
-@@ -494,6 +494,12 @@ static ssize_t debugfs_read(struct file *filp, char __user *ubuf, size_t count,
- 			       "tx_index - \t%u\n", qp->tx_index);
- 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
- 			       "tx_max_entry - \t%u\n", qp->tx_max_entry);
-+	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+			       "qp->remote_rx_info->entry - \t%u\n",
-+			       qp->remote_rx_info->entry);
-+	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+			       "free tx - \t%u\n",
-+			       ntb_transport_tx_free_entry(qp));
- 
- 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
- 			       "\nQP Link %s\n",
-@@ -535,6 +541,7 @@ static struct ntb_queue_entry *ntb_list_rm(spinlock_t *lock,
- 	}
- 	entry = list_first_entry(list, struct ntb_queue_entry, entry);
- 	list_del(&entry->entry);
-+
- out:
- 	spin_unlock_irqrestore(lock, flags);
- 
-@@ -1843,7 +1850,7 @@ int ntb_transport_tx_enqueue(struct ntb_transport_qp *qp, void *cb, void *data,
- 	entry = ntb_list_rm(&qp->ntb_tx_free_q_lock, &qp->tx_free_q);
- 	if (!entry) {
- 		qp->tx_err_no_buf++;
--		return -ENOMEM;
-+		return -EBUSY;
- 	}
- 
- 	entry->cb_data = cb;
-@@ -1969,6 +1976,15 @@ unsigned int ntb_transport_max_size(struct ntb_transport_qp *qp)
- }
- EXPORT_SYMBOL_GPL(ntb_transport_max_size);
- 
-+unsigned int ntb_transport_tx_free_entry(struct ntb_transport_qp *qp)
-+{
-+	unsigned int head = qp->tx_index;
-+	unsigned int tail = qp->remote_rx_info->entry;
-+
-+	return tail > head ? tail - head : qp->tx_max_entry + tail - head;
-+}
-+EXPORT_SYMBOL_GPL(ntb_transport_tx_free_entry);
-+
- static void ntb_transport_doorbell_callback(void *data, int vector)
- {
- 	struct ntb_transport_ctx *nt = data;
-diff --git a/include/linux/ntb_transport.h b/include/linux/ntb_transport.h
-index 2862861..7243eb9 100644
---- a/include/linux/ntb_transport.h
-+++ b/include/linux/ntb_transport.h
-@@ -83,3 +83,4 @@ void *ntb_transport_rx_remove(struct ntb_transport_qp *qp, unsigned int *len);
- void ntb_transport_link_up(struct ntb_transport_qp *qp);
- void ntb_transport_link_down(struct ntb_transport_qp *qp);
- bool ntb_transport_link_query(struct ntb_transport_qp *qp);
-+unsigned int ntb_transport_tx_free_entry(struct ntb_transport_qp *qp);
-
+SSByZWFycmFuZ2VkIHBhdGNoZXMgaW4gZ2l0aHViIGludG8gYnVnIGZpeGVzIGFuZCBmZWF0dXJl
+cy4NCg0KQnVnIGZpeGVzIGFyZSBpbiBudGItYWJoLg0KaHR0cHM6Ly9naXRodWIuY29tL2FsbGVu
+YmgvbGludXgvY29tbWl0cy9udGItYWJoDQoNCkZlYXR1cmVzIGFyZSBpbiBudGItYWJoLW5leHQs
+IGFmdGVyIHRoZSBidWcgZml4ZXMsIGFuZCB0aGUgcGF0Y2ggdG8gYWRkIHRoZSBlbWFpbCBsaXN0
+IHRvIE1BSU5UQUlORVJTLg0KaHR0cHM6Ly9naXRodWIuY29tL2FsbGVuYmgvbGludXgvY29tbWl0
+cy9udGItYWJoLW5leHQNCg0KPiBJZ25vcmluZyB0aGUgb3V0c3RhbmRpbmcgcXVlc2l0b24gb24g
+cGF0Y2ggMiwgdGhlc2UgcGF0Y2hlcyBsb29rDQo+IGFjY2VwdGFibGUuDQo+IA0KPiBGb3IgY2xh
+cml0eSwgcGF0Y2hlcyAxLCAyLCBhbmQgNCBhcmUgYnVnIGZpeGVzIGFuZCBjYW4gYmUgc2VudCB0
+bw0KDQpQYXRjaCAyIGlzIF9ub3RfIGEgYnVnIGZpeC4NCg0KPiBMaW51cyBub3cuICBQYXRjaGVz
+IDMsIDUsIDYsIDkgYW5kIDEwIGxvb2sgdG8gYmUgZmVhdHVyZXMsIGFuZCBzaG91bGQNCg0KUGF0
+Y2ggMyBmaXhlcyBhIHJlZ3Jlc3Npb24gLSBhZmZlY3RpbmcgZGVidWdmcyB1c2VycyBvbmx5Lg0K
+DQpQYXRjaCA1IGlzIGEgYnVnIGZpeC4NCg0KUGF0Y2ggNiBpcyBwZXJoYXBzIGEgYnVnIGZpeCwg
+dGhvdWdoIHdlIGhhdmUgbm90IHNlZW4gYW55IGJyZWFrYWdlLiAgSSBzdXNwZWN0ZWQgdGhpcyBj
+b3VsZCBiZSB0aGUgcmVhc29uIGZvciBhIGxpbmsgbm90IGNvbWluZyB1cCwgYnV0IHRoZXJlIHdh
+cyBhIGRpZmZlcmVudCBjYXVzZSBmb3IgdGhhdCBpc3N1ZS4NCg0KUGF0Y2ggOSBpcyBhIGZlYXR1
+cmUuDQoNClBhdGNoIDEwIGlzIGEgZmVhdHVyZS4NCg0KPiBoaXQgdGhlIG5leHQgbWVyZ2Ugd2lu
+ZG93LiAgSG93IHdvdWxkIHlvdSBsaWtlIHBhdGNoZXMgNywgOCwgYW5kL29yIDEyDQo+IGhhbmRs
+ZWQ/DQoNClBhdGNoIDcgaXMgYSBmZWF0dXJlLg0KDQpQYXRjaCA4IGlzIGEgZmVhdHVyZTsgaXQg
+Y291bGQgYmUgYXJndWVkIGEgYnVnIGZpeCBiZWNhdXNlIGl0IGZpeGVzIGEgdXNhYmlsaXR5IGlz
+c3VlLg0KDQpQYXRjaCAxMiBpcyBhIGJ1ZyBmaXgsIGFuZCBpdCBmaXhlcyBhbiBpc3N1ZSB0aGF0
+IHdlIGhhdmUgb2JzZXJ2ZWQgaW4gdGhlIHdpbGQuICBUaGUgYnVnIGlzIG5vdCBhIHJlZ3Jlc3Np
+b24uDQoNCj4gDQo+IFRoYW5rcywNCj4gSm9uDQo+IA0KPiANCj4gDQo+ID4gQWxsZW4gSHViYmUg
+KDQpOg0KPiA+ICAgTlRCOiBGaXggbnRiX3RyYW5zcG9ydCBvdXQtb2Ytb3JkZXIgUlggdXBkYXRl
+DQo+ID4gICBOVEI6IFNjaGVkdWxlIHRvIHJlY2VpdmUgb24gUVAgbGluayB1cA0KPiA+ICAgTlRC
+OiBSZW1vdmUgZG1hX3N5bmNfd2FpdCBmcm9tIG50Yl9hc3luY19yeA0KPiA+ICAgTlRCOiBGaXgg
+emVybyBzaXplIG9yIGludGVnZXIgb3ZlcmZsb3cgaW4gbnRiX3NldF9tdw0KPiA+DQo+ID4gRGF2
+ZSBKaWFuZyAoOCk6DQo+ID4gICBOVEI6IEFkZCBmbG93IGNvbnRyb2wgdG8gdGhlIG50Yl9uZXRk
+ZXYNCj4gPiAgIE5UQjogRml4IHRyYW5zcG9ydCBzdGF0cyBmb3IgbXVsdGlwbGUgZGV2aWNlcw0K
+PiA+ICAgTlRCOiBudGJfbmV0ZGV2IG5vdCBjb3ZlcmluZyBhbGwgcmVjZWl2ZSBlcnJvcnMNCj4g
+PiAgIE5UQjogRml4IG9vcHMgaW4gZGVidWdmcyB3aGVuIHRyYW5zcG9ydCBpcyBoYWxmLXVwDQo+
+ID4gICBOVEI6IEFkZCBQQ0kgRGV2aWNlIElEcyBmb3IgQnJvYWR3ZWxsIFhlb24NCj4gPiAgIE5U
+QjogTWFrZSB0aGUgdHJhbnNwb3J0IGxpc3QgaW4gb3JkZXIgb2YgZGlzY292ZXJ5DQo+ID4gICBO
+VEI6IENsZWFuIHVwIFFQIHN0YXRzIGluZm8NCj4gPiAgIE5UQjogVXNlIHVuaXF1ZSBETUEgY2hh
+bm5lbHMgZm9yIFRYIGFuZCBSWA0KPiA+DQo+ID4gIGRyaXZlcnMvbmV0L250Yl9uZXRkZXYuYyAg
+ICAgICAgICAgIHwgIDg5ICsrKysrKysrKy0NCj4gPiAgZHJpdmVycy9udGIvaHcvaW50ZWwvbnRi
+X2h3X2ludGVsLmMgfCAgMTUgKysNCj4gPiAgZHJpdmVycy9udGIvaHcvaW50ZWwvbnRiX2h3X2lu
+dGVsLmggfCAgIDMgKw0KPiA+ICBkcml2ZXJzL250Yi9udGJfdHJhbnNwb3J0LmMgICAgICAgICB8
+IDMyMiArKysrKysrKysrKysrKysrKysrKysrKystLS0NCj4gLS0tLS0tLS0tDQo+ID4gIGluY2x1
+ZGUvbGludXgvbnRiX3RyYW5zcG9ydC5oICAgICAgIHwgICAxICsNCj4gPiAgNSBmaWxlcyBjaGFu
+Z2VkLCAzMjAgaW5zZXJ0aW9ucygrKSwgMTEwIGRlbGV0aW9ucygtKQ0KPiA+DQo+ID4gLS0NCj4g
+PiAyLjQuMC5yYzAuNDMuZ2NmOGE4YzYNCj4gPg0K
