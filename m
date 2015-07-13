@@ -1,13 +1,13 @@
 Return-Path: <Allen.Hubbe@emc.com>
-Received: from mailuogwhop.emc.com (mailuogwhop.emc.com. [168.159.213.141])
-        by gmr-mx.google.com with ESMTPS id fj7si391492wib.3.2015.07.13.10.07.38
+Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
+        by gmr-mx.google.com with ESMTPS id x125si1888263ywb.0.2015.07.13.10.07.39
         for <linux-ntb@googlegroups.com>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 13 Jul 2015 10:07:38 -0700 (PDT)
+        Mon, 13 Jul 2015 10:07:39 -0700 (PDT)
 From: Allen Hubbe <Allen.Hubbe@emc.com>
-Subject: [PATCH v2 09/14] NTB: Add flow control to the ntb_netdev
-Date: Mon, 13 Jul 2015 08:07:17 -0400
-Message-Id: <015b0d41a835e9dcaea9f18ff3c6aa822cb49c64.1436788771.git.Allen.Hubbe@emc.com>
+Subject: [PATCH v2 14/14] NTB: Use unique DMA channels for TX and RX
+Date: Mon, 13 Jul 2015 08:07:22 -0400
+Message-Id: <edb00cbcc2b62adcad13059a8b0af60c46905176.1436788771.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1436788051.git.Allen.Hubbe@emc.com>
 References: <cover.1436788051.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1436788771.git.Allen.Hubbe@emc.com>
@@ -18,228 +18,173 @@ List-ID: <linux-ntb.googlegroups.com>
 
 From: Dave Jiang <dave.jiang@intel.com>
 
-Right now if we push the NTB really hard, we start dropping packets due
-to not able to process the packets fast enough. We need to st:qop the
-upper layer from flooding us when that happens.
-
-A timer is necessary in order to restart the queue once the resource has
-been processed on the receive side. Due to the way NTB is setup, the
-resources on the tx side are tied to the processing of the rx side and
-there's no async way to know when the rx side has released those
-resources.
+Allocate two DMA channels, one for TX operation and one for RX
+operation, instead of having one DMA channel for everything. This
+provides slightly better performance, and also will make error handling
+cleaner later on.
 
 Signed-off-by: Dave Jiang <dave.jiang@intel.com>
 ---
- drivers/net/ntb_netdev.c      | 77 +++++++++++++++++++++++++++++++++++++++++++
- drivers/ntb/ntb_transport.c   | 18 +++++++++-
- include/linux/ntb_transport.h |  1 +
- 3 files changed, 95 insertions(+), 1 deletion(-)
+ drivers/ntb/ntb_transport.c | 77 ++++++++++++++++++++++++++++++++++-----------
+ 1 file changed, 58 insertions(+), 19 deletions(-)
 
-diff --git a/drivers/net/ntb_netdev.c b/drivers/net/ntb_netdev.c
-index d8757bf9ad75..a9acf7156855 100644
---- a/drivers/net/ntb_netdev.c
-+++ b/drivers/net/ntb_netdev.c
-@@ -61,11 +61,21 @@ MODULE_VERSION(NTB_NETDEV_VER);
- MODULE_LICENSE("Dual BSD/GPL");
- MODULE_AUTHOR("Intel Corporation");
- 
-+/* Time in usecs for tx resource reaper */
-+static unsigned int tx_time = 1;
-+
-+/* Number of descriptors to free before resuming tx */
-+static unsigned int tx_start = 10;
-+
-+/* Number of descriptors still available before stop upper layer tx */
-+static unsigned int tx_stop = 5;
-+
- struct ntb_netdev {
- 	struct list_head list;
- 	struct pci_dev *pdev;
- 	struct net_device *ndev;
- 	struct ntb_transport_qp *qp;
-+	struct timer_list tx_timer;
- };
- 
- #define	NTB_TX_TIMEOUT_MS	1000
-@@ -136,11 +146,42 @@ enqueue_again:
- 	}
- }
- 
-+static int __ntb_netdev_maybe_stop_tx(struct net_device *netdev,
-+				      struct ntb_transport_qp *qp, int size)
-+{
-+	struct ntb_netdev *dev = netdev_priv(netdev);
-+
-+	netif_stop_queue(netdev);
-+	/* Make sure to see the latest value of ntb_transport_tx_free_entry()
-+	 * since the queue was last started.
-+	 */
-+	smp_mb();
-+
-+	if (likely(ntb_transport_tx_free_entry(qp) < size)) {
-+		mod_timer(&dev->tx_timer, jiffies + usecs_to_jiffies(tx_time));
-+		return -EBUSY;
-+	}
-+
-+	netif_start_queue(netdev);
-+	return 0;
-+}
-+
-+static int ntb_netdev_maybe_stop_tx(struct net_device *ndev,
-+				    struct ntb_transport_qp *qp, int size)
-+{
-+	if (netif_queue_stopped(ndev) ||
-+	    (ntb_transport_tx_free_entry(qp) >= size))
-+		return 0;
-+
-+	return __ntb_netdev_maybe_stop_tx(ndev, qp, size);
-+}
-+
- static void ntb_netdev_tx_handler(struct ntb_transport_qp *qp, void *qp_data,
- 				  void *data, int len)
- {
- 	struct net_device *ndev = qp_data;
- 	struct sk_buff *skb;
-+	struct ntb_netdev *dev = netdev_priv(ndev);
- 
- 	skb = data;
- 	if (!skb || !ndev)
-@@ -155,6 +196,15 @@ static void ntb_netdev_tx_handler(struct ntb_transport_qp *qp, void *qp_data,
- 	}
- 
- 	dev_kfree_skb(skb);
-+
-+	if (ntb_transport_tx_free_entry(dev->qp) >= tx_start) {
-+		/* Make sure anybody stopping the queue after this sees the new
-+		 * value of ntb_transport_tx_free_entry()
-+		 */
-+		smp_mb();
-+		if (netif_queue_stopped(ndev))
-+			netif_wake_queue(ndev);
-+	}
- }
- 
- static netdev_tx_t ntb_netdev_start_xmit(struct sk_buff *skb,
-@@ -163,10 +213,15 @@ static netdev_tx_t ntb_netdev_start_xmit(struct sk_buff *skb,
- 	struct ntb_netdev *dev = netdev_priv(ndev);
- 	int rc;
- 
-+	ntb_netdev_maybe_stop_tx(ndev, dev->qp, tx_stop);
-+
- 	rc = ntb_transport_tx_enqueue(dev->qp, skb, skb->data, skb->len);
- 	if (rc)
- 		goto err;
- 
-+	/* check for next submit */
-+	ntb_netdev_maybe_stop_tx(ndev, dev->qp, tx_stop);
-+
- 	return NETDEV_TX_OK;
- 
- err:
-@@ -175,6 +230,23 @@ err:
- 	return NETDEV_TX_BUSY;
- }
- 
-+static void ntb_netdev_tx_timer(unsigned long data)
-+{
-+	struct net_device *ndev = (struct net_device *)data;
-+	struct ntb_netdev *dev = netdev_priv(ndev);
-+
-+	if (ntb_transport_tx_free_entry(dev->qp) < tx_stop) {
-+		mod_timer(&dev->tx_timer, jiffies + msecs_to_jiffies(tx_time));
-+	} else {
-+		/* Make sure anybody stopping the queue after this sees the new
-+		 * value of ntb_transport_tx_free_entry()
-+		 */
-+		smp_mb();
-+		if (netif_queue_stopped(ndev))
-+			netif_wake_queue(ndev);
-+	}
-+}
-+
- static int ntb_netdev_open(struct net_device *ndev)
- {
- 	struct ntb_netdev *dev = netdev_priv(ndev);
-@@ -197,8 +269,11 @@ static int ntb_netdev_open(struct net_device *ndev)
- 		}
- 	}
- 
-+	setup_timer(&dev->tx_timer, ntb_netdev_tx_timer, (unsigned long)ndev);
-+
- 	netif_carrier_off(ndev);
- 	ntb_transport_link_up(dev->qp);
-+	netif_start_queue(ndev);
- 
- 	return 0;
- 
-@@ -219,6 +294,8 @@ static int ntb_netdev_close(struct net_device *ndev)
- 	while ((skb = ntb_transport_rx_remove(dev->qp, &len)))
- 		dev_kfree_skb(skb);
- 
-+	del_timer_sync(&dev->tx_timer);
-+
- 	return 0;
- }
- 
 diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 3363a8968f9d..8c9d50d50e92 100644
+index 1ddf84ca721a..c64de9b99742 100644
 --- a/drivers/ntb/ntb_transport.c
 +++ b/drivers/ntb/ntb_transport.c
-@@ -494,6 +494,12 @@ static ssize_t debugfs_read(struct file *filp, char __user *ubuf, size_t count,
- 			       "tx_index - \t%u\n", qp->tx_index);
+@@ -119,7 +119,8 @@ struct ntb_transport_qp {
+ 	struct ntb_transport_ctx *transport;
+ 	struct ntb_dev *ndev;
+ 	void *cb_data;
+-	struct dma_chan *dma_chan;
++	struct dma_chan *tx_dma_chan;
++	struct dma_chan *rx_dma_chan;
+ 
+ 	bool client_ready;
+ 	bool link_is_up;
+@@ -504,7 +505,11 @@ static ssize_t debugfs_read(struct file *filp, char __user *ubuf, size_t count,
  	out_offset += snprintf(buf + out_offset, out_count - out_offset,
- 			       "tx_max_entry - \t%u\n", qp->tx_max_entry);
-+	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+			       "qp->remote_rx_info->entry - \t%u\n",
-+			       qp->remote_rx_info->entry);
-+	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+			       "free tx - \t%u\n",
-+			       ntb_transport_tx_free_entry(qp));
- 
+ 			       "\n");
  	out_offset += snprintf(buf + out_offset, out_count - out_offset,
- 			       "\nQP Link %s\n",
-@@ -535,6 +541,7 @@ static struct ntb_queue_entry *ntb_list_rm(spinlock_t *lock,
- 	}
- 	entry = list_first_entry(list, struct ntb_queue_entry, entry);
- 	list_del(&entry->entry);
-+
- out:
- 	spin_unlock_irqrestore(lock, flags);
- 
-@@ -1843,7 +1850,7 @@ int ntb_transport_tx_enqueue(struct ntb_transport_qp *qp, void *cb, void *data,
- 	entry = ntb_list_rm(&qp->ntb_tx_free_q_lock, &qp->tx_free_q);
- 	if (!entry) {
- 		qp->tx_err_no_buf++;
--		return -ENOMEM;
-+		return -EBUSY;
- 	}
- 
- 	entry->cb_data = cb;
-@@ -1969,6 +1976,15 @@ unsigned int ntb_transport_max_size(struct ntb_transport_qp *qp)
- }
- EXPORT_SYMBOL_GPL(ntb_transport_max_size);
- 
-+unsigned int ntb_transport_tx_free_entry(struct ntb_transport_qp *qp)
-+{
-+	unsigned int head = qp->tx_index;
-+	unsigned int tail = qp->remote_rx_info->entry;
-+
-+	return tail > head ? tail - head : qp->tx_max_entry + tail - head;
-+}
-+EXPORT_SYMBOL_GPL(ntb_transport_tx_free_entry);
-+
- static void ntb_transport_doorbell_callback(void *data, int vector)
+-			       "Using DMA - \t%s\n", use_dma ? "Yes" : "No");
++			       "Using TX DMA - \t%s\n",
++			       qp->tx_dma_chan ? "Yes" : "No");
++	out_offset += snprintf(buf + out_offset, out_count - out_offset,
++			       "Using RX DMA - \t%s\n",
++			       qp->rx_dma_chan ? "Yes" : "No");
+ 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
+ 			       "QP Link - \t%s\n",
+ 			       qp->link_is_up ? "Up" : "Down");
+@@ -1220,7 +1225,7 @@ static void ntb_async_rx(struct ntb_queue_entry *entry, void *offset)
  {
- 	struct ntb_transport_ctx *nt = data;
-diff --git a/include/linux/ntb_transport.h b/include/linux/ntb_transport.h
-index 2862861366a5..7243eb98a722 100644
---- a/include/linux/ntb_transport.h
-+++ b/include/linux/ntb_transport.h
-@@ -83,3 +83,4 @@ void *ntb_transport_rx_remove(struct ntb_transport_qp *qp, unsigned int *len);
- void ntb_transport_link_up(struct ntb_transport_qp *qp);
- void ntb_transport_link_down(struct ntb_transport_qp *qp);
- bool ntb_transport_link_query(struct ntb_transport_qp *qp);
-+unsigned int ntb_transport_tx_free_entry(struct ntb_transport_qp *qp);
+ 	struct dma_async_tx_descriptor *txd;
+ 	struct ntb_transport_qp *qp = entry->qp;
+-	struct dma_chan *chan = qp->dma_chan;
++	struct dma_chan *chan = qp->rx_dma_chan;
+ 	struct dma_device *device;
+ 	size_t pay_off, buff_off, len;
+ 	struct dmaengine_unmap_data *unmap;
+@@ -1381,8 +1386,8 @@ static void ntb_transport_rxc_db(unsigned long data)
+ 			break;
+ 	}
+ 
+-	if (i && qp->dma_chan)
+-		dma_async_issue_pending(qp->dma_chan);
++	if (i && qp->rx_dma_chan)
++		dma_async_issue_pending(qp->rx_dma_chan);
+ 
+ 	if (i == qp->rx_max_entry) {
+ 		/* there is more work to do */
+@@ -1449,7 +1454,7 @@ static void ntb_async_tx(struct ntb_transport_qp *qp,
+ {
+ 	struct ntb_payload_header __iomem *hdr;
+ 	struct dma_async_tx_descriptor *txd;
+-	struct dma_chan *chan = qp->dma_chan;
++	struct dma_chan *chan = qp->tx_dma_chan;
+ 	struct dma_device *device;
+ 	size_t dest_off, buff_off;
+ 	struct dmaengine_unmap_data *unmap;
+@@ -1642,14 +1647,27 @@ ntb_transport_create_queue(void *data, struct device *client_dev,
+ 	dma_cap_set(DMA_MEMCPY, dma_mask);
+ 
+ 	if (use_dma) {
+-		qp->dma_chan = dma_request_channel(dma_mask, ntb_dma_filter_fn,
+-						   (void *)(unsigned long)node);
+-		if (!qp->dma_chan)
+-			dev_info(&pdev->dev, "Unable to allocate DMA channel\n");
++		qp->tx_dma_chan =
++			dma_request_channel(dma_mask, ntb_dma_filter_fn,
++					    (void *)(unsigned long)node);
++		if (!qp->tx_dma_chan)
++			dev_info(&pdev->dev, "Unable to allocate TX DMA channel\n");
++
++		qp->rx_dma_chan =
++			dma_request_channel(dma_mask, ntb_dma_filter_fn,
++					    (void *)(unsigned long)node);
++		if (!qp->rx_dma_chan)
++			dev_info(&pdev->dev, "Unable to allocate RX DMA channel\n");
+ 	} else {
+-		qp->dma_chan = NULL;
++		qp->tx_dma_chan = NULL;
++		qp->rx_dma_chan = NULL;
+ 	}
+-	dev_dbg(&pdev->dev, "Using %s memcpy\n", qp->dma_chan ? "DMA" : "CPU");
++
++	dev_dbg(&pdev->dev, "Using %s memcpy for TX\n",
++		qp->tx_dma_chan ? "DMA" : "CPU");
++
++	dev_dbg(&pdev->dev, "Using %s memcpy for RX\n",
++		qp->rx_dma_chan ? "DMA" : "CPU");
+ 
+ 	for (i = 0; i < NTB_QP_DEF_NUM_ENTRIES; i++) {
+ 		entry = kzalloc_node(sizeof(*entry), GFP_ATOMIC, node);
+@@ -1684,8 +1702,10 @@ err2:
+ err1:
+ 	while ((entry = ntb_list_rm(&qp->ntb_rx_q_lock, &qp->rx_free_q)))
+ 		kfree(entry);
+-	if (qp->dma_chan)
+-		dma_release_channel(qp->dma_chan);
++	if (qp->tx_dma_chan)
++		dma_release_channel(qp->tx_dma_chan);
++	if (qp->rx_dma_chan)
++		dma_release_channel(qp->rx_dma_chan);
+ 	nt->qp_bitmap_free |= qp_bit;
+ err:
+ 	return NULL;
+@@ -1709,12 +1729,27 @@ void ntb_transport_free_queue(struct ntb_transport_qp *qp)
+ 
+ 	pdev = qp->ndev->pdev;
+ 
+-	if (qp->dma_chan) {
+-		struct dma_chan *chan = qp->dma_chan;
++	if (qp->tx_dma_chan) {
++		struct dma_chan *chan = qp->tx_dma_chan;
++		/* Putting the dma_chan to NULL will force any new traffic to be
++		 * processed by the CPU instead of the DAM engine
++		 */
++		qp->tx_dma_chan = NULL;
++
++		/* Try to be nice and wait for any queued DMA engine
++		 * transactions to process before smashing it with a rock
++		 */
++		dma_sync_wait(chan, qp->last_cookie);
++		dmaengine_terminate_all(chan);
++		dma_release_channel(chan);
++	}
++
++	if (qp->rx_dma_chan) {
++		struct dma_chan *chan = qp->rx_dma_chan;
+ 		/* Putting the dma_chan to NULL will force any new traffic to be
+ 		 * processed by the CPU instead of the DAM engine
+ 		 */
+-		qp->dma_chan = NULL;
++		qp->rx_dma_chan = NULL;
+ 
+ 		/* Try to be nice and wait for any queued DMA engine
+ 		 * transactions to process before smashing it with a rock
+@@ -1962,16 +1997,20 @@ EXPORT_SYMBOL_GPL(ntb_transport_qp_num);
+ unsigned int ntb_transport_max_size(struct ntb_transport_qp *qp)
+ {
+ 	unsigned int max;
++	unsigned int copy_align;
+ 
+ 	if (!qp)
+ 		return 0;
+ 
+-	if (!qp->dma_chan)
++	if (!qp->tx_dma_chan && !qp->rx_dma_chan)
+ 		return qp->tx_max_frame - sizeof(struct ntb_payload_header);
+ 
++	copy_align = max(qp->tx_dma_chan->device->copy_align,
++			 qp->rx_dma_chan->device->copy_align);
++
+ 	/* If DMA engine usage is possible, try to find the max size for that */
+ 	max = qp->tx_max_frame - sizeof(struct ntb_payload_header);
+-	max -= max % (1 << qp->dma_chan->device->copy_align);
++	max -= max % (1 << copy_align);
+ 
+ 	return max;
+ }
 -- 
 2.5.0.rc1
 
