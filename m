@@ -1,62 +1,29 @@
 Return-Path: <Allen.Hubbe@emc.com>
-Received: from mailuogwhop.emc.com (mailuogwhop.emc.com. [168.159.213.141])
-        by gmr-mx.google.com with ESMTPS id t6si1000372wiz.0.2015.07.06.08.30.58
+Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
+        by gmr-mx.google.com with ESMTPS id sg1si1769051pbb.1.2015.07.13.07.23.23
         for <linux-ntb@googlegroups.com>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 06 Jul 2015 08:30:59 -0700 (PDT)
-From: Allen Hubbe <Allen.Hubbe@emc.com>
-Subject: [PATCH 00/12] NTB: Performance and bug fixes in ntb drivers
-Date: Mon,  6 Jul 2015 11:30:23 -0400
-Message-Id: <cover.1436196351.git.Allen.Hubbe@emc.com>
-To: linux-ntb@googlegroups.com
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
+        Mon, 13 Jul 2015 07:23:24 -0700 (PDT)
+From: "Hubbe, Allen" <Allen.Hubbe@emc.com>
+Subject: RE: [PATCH] NTB: Fix dereference before check
+Date: Mon, 13 Jul 2015 14:23:02 +0000
+Message-ID: <40F65EF2B5E2254199711F58E3ACB84D8BD96CC3@MX104CL02.corp.emc.com>
+References: <bb4dd048e673ff6a7ccb49610873f8b0b41cfc1d.1436201347.git.Allen.Hubbe@emc.com>
+ <CAPoiz9ym5s7emxbBSAAZehe5y_fXrAY5DkC4Y8VzuD=s3XSahw@mail.gmail.com>
+In-Reply-To: <CAPoiz9ym5s7emxbBSAAZehe5y_fXrAY5DkC4Y8VzuD=s3XSahw@mail.gmail.com>
+Content-Language: en-US
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
+To: Jon Mason <jdmason@kudzu.us>
+Cc: "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, Dave Jiang <dave.jiang@intel.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-This series includes the following changes to fix bugs, add new hardware
-support, and improve usability and performance of the ntb drivers.
-
-Bug Fixes (issues preexisting the new ntb api):
-NTB: Fix ntb_transport out-of-order RX update
-NTB: Schedule to receive on QP link up
-NTB: Fix zero size or integer overflow in ntb_set_mw
-NTB: ntb_netdev not covering all receive errors
-NTB: Fix oops in debugfs when transport is half-up
-
-Bug Fixes (regressions since the new ntb api):
-NTB: Fix transport stats for multiple devices
-
-Additions and Performance Improvements:
-NTB: Remove dma_sync_wait from ntb_async_rx
-NTB: Add PCI Device IDs for Broadwell Xeon
-NTB: Add flow control to the ntb_netdev
-NTB: Make the transport list in order of discovery
-NTB: Clean up QP stats info
-NTB: Use unique DMA channels for TX and RX
-
-
-Allen Hubbe (4):
-  NTB: Fix ntb_transport out-of-order RX update
-  NTB: Schedule to receive on QP link up
-  NTB: Remove dma_sync_wait from ntb_async_rx
-  NTB: Fix zero size or integer overflow in ntb_set_mw
-
-Dave Jiang (8):
-  NTB: Add flow control to the ntb_netdev
-  NTB: Fix transport stats for multiple devices
-  NTB: ntb_netdev not covering all receive errors
-  NTB: Fix oops in debugfs when transport is half-up
-  NTB: Add PCI Device IDs for Broadwell Xeon
-  NTB: Make the transport list in order of discovery
-  NTB: Clean up QP stats info
-  NTB: Use unique DMA channels for TX and RX
-
- drivers/net/ntb_netdev.c            |  89 +++++++++-
- drivers/ntb/hw/intel/ntb_hw_intel.c |  15 ++
- drivers/ntb/hw/intel/ntb_hw_intel.h |   3 +
- drivers/ntb/ntb_transport.c         | 322 ++++++++++++++++++++++++------------
- include/linux/ntb_transport.h       |   1 +
- 5 files changed, 320 insertions(+), 110 deletions(-)
-
--- 
-2.4.0.rc0.43.gcf8a8c6
-
+RnJvbTogSm9uIE1hc29uDQo+IE9uIE1vbiwgSnVsIDYsIDIwMTUgYXQgMTI6NTAgUE0sIEFsbGVu
+IEh1YmJlIDxBbGxlbi5IdWJiZUBlbWMuY29tPg0KPiB3cm90ZToNCj4gPiBSZW1vdmUgZWFybHkg
+ZGVyZWZlcmVuY2Ugb2YgYSBwb2ludGVyIHRoYXQgaXMgY2hlY2tlZCBsYXRlciBpbiB0aGUNCj4g
+Y29kZS4NCj4gDQo+IExvb2tzIGdvb2QgdG8gbWUuICBJIGFzc3VtZSB0aGlzIGJ1ZyBmaXggc2hv
+dWxkIGJlIHB1c2hlZCB0byBMaW51cywNCj4gYW5kIGFwcGxpZWQgcHJpb3IgdG8gYW55IG9mIHRo
+ZSBvZiBvdGhlciBwYXRjaGVzIHlvdSBoYXZlIHNlbnQgb3V0Lg0KPiBZZXM/DQo+IA0KPiBUaGFu
+a3MsDQo+IEpvbg0KDQpTdXJlLCB0aGlzIGNhbiBiZSBwbGFjZWQgYWhlYWQgb2YgdGhlIG90aGVy
+IHBhdGNoZXMuDQo=
