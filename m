@@ -1,13 +1,13 @@
 Return-Path: <Allen.Hubbe@emc.com>
 Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
-        by gmr-mx.google.com with ESMTPS id s127si1875965ywc.6.2015.07.13.10.07.40
+        by gmr-mx.google.com with ESMTPS id x125si1888270ywb.0.2015.07.13.10.07.39
         for <linux-ntb@googlegroups.com>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
         Mon, 13 Jul 2015 10:07:40 -0700 (PDT)
 From: Allen Hubbe <Allen.Hubbe@emc.com>
-Subject: [PATCH v2 08/14] NTB: Add list to MAINTAINERS
-Date: Mon, 13 Jul 2015 08:07:16 -0400
-Message-Id: <e538ec8bcba349c2fa0a1669153623e5f5f98666.1436788771.git.Allen.Hubbe@emc.com>
+Subject: [PATCH v2 10/14] NTB: Add PCI Device IDs for Broadwell Xeon
+Date: Mon, 13 Jul 2015 08:07:18 -0400
+Message-Id: <25106e2a2e6c19a8af3a830124564f7520b780fd.1436788771.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1436788051.git.Allen.Hubbe@emc.com>
 References: <cover.1436788051.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1436788771.git.Allen.Hubbe@emc.com>
@@ -16,35 +16,101 @@ To: linux-ntb@googlegroups.com
 Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Jon Mason <jdmason@kudzu.us>
+From: Dave Jiang <dave.jiang@intel.com>
 
-Add the new NTB mailing list to MAINTAINERS
+Adding PCI Device IDs for B2B (back to back), RP (root port, primary),
+and TB (transparent bridge, secondary) devices.
 
-Signed-off-by: Jon Mason <jdmason@kudzu.us>
+Signed-off-by: Dave Jiang <dave.jiang@intel.com>
 ---
- MAINTAINERS | 2 ++
- 1 file changed, 2 insertions(+)
+ drivers/ntb/hw/intel/ntb_hw_intel.c | 15 +++++++++++++++
+ drivers/ntb/hw/intel/ntb_hw_intel.h |  3 +++
+ 2 files changed, 18 insertions(+)
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 8133cefb6b6e..6a634882b420 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -7223,6 +7223,7 @@ NTB DRIVER CORE
- M:	Jon Mason <jdmason@kudzu.us>
- M:	Dave Jiang <dave.jiang@intel.com>
- M:	Allen Hubbe <Allen.Hubbe@emc.com>
-+L:	linux-ntb@googlegroups.com
- S:	Supported
- W:	https://github.com/jonmason/ntb/wiki
- T:	git git://github.com/jonmason/ntb.git
-@@ -7234,6 +7235,7 @@ F:	include/linux/ntb_transport.h
- NTB INTEL DRIVER
- M:	Jon Mason <jdmason@kudzu.us>
- M:	Dave Jiang <dave.jiang@intel.com>
-+L:	linux-ntb@googlegroups.com
- S:	Supported
- W:	https://github.com/jonmason/ntb/wiki
- T:	git git://github.com/jonmason/ntb.git
+diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c b/drivers/ntb/hw/intel/ntb_hw_intel.c
+index 87751cfd6f4f..c2bc56b67e63 100644
+--- a/drivers/ntb/hw/intel/ntb_hw_intel.c
++++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
+@@ -190,14 +190,17 @@ static inline int pdev_is_xeon(struct pci_dev *pdev)
+ 	case PCI_DEVICE_ID_INTEL_NTB_SS_SNB:
+ 	case PCI_DEVICE_ID_INTEL_NTB_SS_IVT:
+ 	case PCI_DEVICE_ID_INTEL_NTB_SS_HSX:
++	case PCI_DEVICE_ID_INTEL_NTB_SS_BDX:
+ 	case PCI_DEVICE_ID_INTEL_NTB_PS_JSF:
+ 	case PCI_DEVICE_ID_INTEL_NTB_PS_SNB:
+ 	case PCI_DEVICE_ID_INTEL_NTB_PS_IVT:
+ 	case PCI_DEVICE_ID_INTEL_NTB_PS_HSX:
++	case PCI_DEVICE_ID_INTEL_NTB_PS_BDX:
+ 	case PCI_DEVICE_ID_INTEL_NTB_B2B_JSF:
+ 	case PCI_DEVICE_ID_INTEL_NTB_B2B_SNB:
+ 	case PCI_DEVICE_ID_INTEL_NTB_B2B_IVT:
+ 	case PCI_DEVICE_ID_INTEL_NTB_B2B_HSX:
++	case PCI_DEVICE_ID_INTEL_NTB_B2B_BDX:
+ 		return 1;
+ 	}
+ 	return 0;
+@@ -1843,6 +1846,9 @@ static int xeon_init_dev(struct intel_ntb_dev *ndev)
+ 	case PCI_DEVICE_ID_INTEL_NTB_SS_HSX:
+ 	case PCI_DEVICE_ID_INTEL_NTB_PS_HSX:
+ 	case PCI_DEVICE_ID_INTEL_NTB_B2B_HSX:
++	case PCI_DEVICE_ID_INTEL_NTB_SS_BDX:
++	case PCI_DEVICE_ID_INTEL_NTB_PS_BDX:
++	case PCI_DEVICE_ID_INTEL_NTB_B2B_BDX:
+ 		ndev->hwerr_flags |= NTB_HWERR_SDOORBELL_LOCKUP;
+ 		break;
+ 	}
+@@ -1857,6 +1863,9 @@ static int xeon_init_dev(struct intel_ntb_dev *ndev)
+ 	case PCI_DEVICE_ID_INTEL_NTB_SS_HSX:
+ 	case PCI_DEVICE_ID_INTEL_NTB_PS_HSX:
+ 	case PCI_DEVICE_ID_INTEL_NTB_B2B_HSX:
++	case PCI_DEVICE_ID_INTEL_NTB_SS_BDX:
++	case PCI_DEVICE_ID_INTEL_NTB_PS_BDX:
++	case PCI_DEVICE_ID_INTEL_NTB_B2B_BDX:
+ 		ndev->hwerr_flags |= NTB_HWERR_SB01BASE_LOCKUP;
+ 		break;
+ 	}
+@@ -1878,6 +1887,9 @@ static int xeon_init_dev(struct intel_ntb_dev *ndev)
+ 	case PCI_DEVICE_ID_INTEL_NTB_SS_HSX:
+ 	case PCI_DEVICE_ID_INTEL_NTB_PS_HSX:
+ 	case PCI_DEVICE_ID_INTEL_NTB_B2B_HSX:
++	case PCI_DEVICE_ID_INTEL_NTB_SS_BDX:
++	case PCI_DEVICE_ID_INTEL_NTB_PS_BDX:
++	case PCI_DEVICE_ID_INTEL_NTB_B2B_BDX:
+ 		ndev->hwerr_flags |= NTB_HWERR_B2BDOORBELL_BIT14;
+ 		break;
+ 	}
+@@ -2234,14 +2246,17 @@ static const struct pci_device_id intel_ntb_pci_tbl[] = {
+ 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_B2B_SNB)},
+ 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_B2B_IVT)},
+ 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_B2B_HSX)},
++	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_B2B_BDX)},
+ 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_PS_JSF)},
+ 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_PS_SNB)},
+ 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_PS_IVT)},
+ 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_PS_HSX)},
++	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_PS_BDX)},
+ 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_SS_JSF)},
+ 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_SS_SNB)},
+ 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_SS_IVT)},
+ 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_SS_HSX)},
++	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_SS_BDX)},
+ 	{0}
+ };
+ MODULE_DEVICE_TABLE(pci, intel_ntb_pci_tbl);
+diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.h b/drivers/ntb/hw/intel/ntb_hw_intel.h
+index 7ddaf387b679..ea0612f797df 100644
+--- a/drivers/ntb/hw/intel/ntb_hw_intel.h
++++ b/drivers/ntb/hw/intel/ntb_hw_intel.h
+@@ -67,6 +67,9 @@
+ #define PCI_DEVICE_ID_INTEL_NTB_PS_HSX	0x2F0E
+ #define PCI_DEVICE_ID_INTEL_NTB_SS_HSX	0x2F0F
+ #define PCI_DEVICE_ID_INTEL_NTB_B2B_BWD	0x0C4E
++#define PCI_DEVICE_ID_INTEL_NTB_B2B_BDX	0x6F0D
++#define PCI_DEVICE_ID_INTEL_NTB_PS_BDX	0x6F0E
++#define PCI_DEVICE_ID_INTEL_NTB_SS_BDX	0x6F0F
+ 
+ /* Intel Xeon hardware */
+ 
 -- 
 2.5.0.rc1
 
