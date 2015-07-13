@@ -1,93 +1,67 @@
 Return-Path: <Allen.Hubbe@emc.com>
 Received: from mailuogwhop.emc.com (mailuogwhop.emc.com. [168.159.213.141])
-        by gmr-mx.google.com with ESMTPS id cj6si406876wib.1.2015.07.13.10.07.42
+        by gmr-mx.google.com with ESMTPS id ec7si396683wib.3.2015.07.13.10.07.41
         for <linux-ntb@googlegroups.com>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
         Mon, 13 Jul 2015 10:07:42 -0700 (PDT)
 From: Allen Hubbe <Allen.Hubbe@emc.com>
-Subject: [PATCH v2 12/14] NTB: Clean up QP stats info
-Date: Mon, 13 Jul 2015 08:07:20 -0400
-Message-Id: <aabf1e668413ac4f5547bdcc6af7f15334e72d4a.1436788771.git.Allen.Hubbe@emc.com>
+Subject: [PATCH v2 6/7] NTB: Fix zero size or integer overflow in ntb_set_mw
+Date: Mon, 13 Jul 2015 08:07:13 -0400
+Message-Id: <c032f37f585db5c4cb4c2076d7036c7736e0e5ea.1436788051.git.Allen.Hubbe@emc.com>
 In-Reply-To: <cover.1436788051.git.Allen.Hubbe@emc.com>
 References: <cover.1436788051.git.Allen.Hubbe@emc.com>
-In-Reply-To: <cover.1436788771.git.Allen.Hubbe@emc.com>
-References: <cover.1436788771.git.Allen.Hubbe@emc.com>
+In-Reply-To: <cover.1436788051.git.Allen.Hubbe@emc.com>
+References: <cover.1436788051.git.Allen.Hubbe@emc.com>
 To: linux-ntb@googlegroups.com
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>
+Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Dave Jiang <dave.jiang@intel.com>
+A plain 32 bit integer will overflow for values over 4GiB.
 
-Make QP stats info more readable for debugging purposes.  Also add an
-entry to indicate whether DMA is being used.
+Change the plain integer size to the appropriate size type in
+ntb_set_mw.  Change the type of the size parameter and two local
+variables used for size.
 
-Signed-off-by: Dave Jiang <dave.jiang@intel.com>
+Even if there is no overflow, a size of zero is invalid here.
+
+Reported-by: Juyoung Jung <jjung@micron.com>
+Signed-off-by: Allen Hubbe <Allen.Hubbe@emc.com>
 ---
- drivers/ntb/ntb_transport.c | 25 ++++++++++++++++---------
- 1 file changed, 16 insertions(+), 9 deletions(-)
+ drivers/ntb/ntb_transport.c | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 55c26c59f4fe..c283d1c2cb72 100644
+index b82171e3e07d..04e6c345419c 100644
 --- a/drivers/ntb/ntb_transport.c
 +++ b/drivers/ntb/ntb_transport.c
-@@ -452,7 +452,7 @@ static ssize_t debugfs_read(struct file *filp, char __user *ubuf, size_t count,
+@@ -629,13 +629,16 @@ static void ntb_free_mw(struct ntb_transport_ctx *nt, int num_mw)
+ }
  
- 	out_offset = 0;
- 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
--			       "NTB QP stats\n");
-+			       "\nNTB QP stats:\n\n");
- 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
- 			       "rx_bytes - \t%llu\n", qp->rx_bytes);
- 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-@@ -470,11 +470,11 @@ static ssize_t debugfs_read(struct file *filp, char __user *ubuf, size_t count,
- 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
- 			       "rx_err_ver - \t%llu\n", qp->rx_err_ver);
- 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
--			       "rx_buff - \t%p\n", qp->rx_buff);
-+			       "rx_buff - \t0x%p\n", qp->rx_buff);
- 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
- 			       "rx_index - \t%u\n", qp->rx_index);
- 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
--			       "rx_max_entry - \t%u\n", qp->rx_max_entry);
-+			       "rx_max_entry - \t%u\n\n", qp->rx_max_entry);
+ static int ntb_set_mw(struct ntb_transport_ctx *nt, int num_mw,
+-		      unsigned int size)
++		      resource_size_t size)
+ {
+ 	struct ntb_transport_mw *mw = &nt->mw_vec[num_mw];
+ 	struct pci_dev *pdev = nt->ndev->pdev;
+-	unsigned int xlat_size, buff_size;
++	size_t xlat_size, buff_size;
+ 	int rc;
  
- 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
- 			       "tx_bytes - \t%llu\n", qp->tx_bytes);
-@@ -489,21 +489,28 @@ static ssize_t debugfs_read(struct file *filp, char __user *ubuf, size_t count,
- 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
- 			       "tx_err_no_buf - %llu\n", qp->tx_err_no_buf);
- 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
--			       "tx_mw - \t%p\n", qp->tx_mw);
-+			       "tx_mw - \t0x%p\n", qp->tx_mw);
- 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
--			       "tx_index - \t%u\n", qp->tx_index);
-+			       "tx_index (H) - \t%u\n", qp->tx_index);
- 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
--			       "tx_max_entry - \t%u\n", qp->tx_max_entry);
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
--			       "qp->remote_rx_info->entry - \t%u\n",
-+			       "RRI (T) - \t%u\n",
- 			       qp->remote_rx_info->entry);
- 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+			       "tx_max_entry - \t%u\n", qp->tx_max_entry);
-+	out_offset += snprintf(buf + out_offset, out_count - out_offset,
- 			       "free tx - \t%u\n",
- 			       ntb_transport_tx_free_entry(qp));
- 
- 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
--			       "\nQP Link %s\n",
-+			       "\n");
-+	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+			       "Using DMA - \t%s\n", use_dma ? "Yes" : "No");
-+	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+			       "QP Link - \t%s\n",
- 			       qp->link_is_up ? "Up" : "Down");
-+	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+			       "\n");
++	if (!size)
++		return -EINVAL;
 +
- 	if (out_offset > out_count)
- 		out_offset = out_count;
+ 	xlat_size = round_up(size, mw->xlat_align_size);
+ 	buff_size = round_up(size, mw->xlat_align);
  
+@@ -655,7 +658,7 @@ static int ntb_set_mw(struct ntb_transport_ctx *nt, int num_mw,
+ 	if (!mw->virt_addr) {
+ 		mw->xlat_size = 0;
+ 		mw->buff_size = 0;
+-		dev_err(&pdev->dev, "Unable to alloc MW buff of size %d\n",
++		dev_err(&pdev->dev, "Unable to alloc MW buff of size %lu\n",
+ 			buff_size);
+ 		return -ENOMEM;
+ 	}
 -- 
 2.5.0.rc1
 
