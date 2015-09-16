@@ -1,78 +1,46 @@
-Return-Path: <Allen.Hubbe@emc.com>
-Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
-        by gmr-mx.google.com with ESMTPS id bn1si129170wib.0.2015.09.17.11.49.53
-        for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 17 Sep 2015 11:49:53 -0700 (PDT)
-From: "Hubbe, Allen" <Allen.Hubbe@emc.com>
-Subject: RE: [PATCH] NTB: Fix issue where we may be accessing NULL ptr
-Date: Thu, 17 Sep 2015 18:49:37 +0000
-Message-ID: <40F65EF2B5E2254199711F58E3ACB84D8BE618FC@MX104CL02.corp.emc.com>
-References: <20150916174310.143612.54775.stgit@djiang5-desk3.ch.intel.com>
-In-Reply-To: <20150916174310.143612.54775.stgit@djiang5-desk3.ch.intel.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Return-Path: <dave.jiang@intel.com>
+Received: from mga01.intel.com (mga01.intel.com. [192.55.52.88])
+        by gmr-mx.google.com with ESMTP id uv4si2935937pac.0.2015.09.16.10.43.41
+        for <linux-ntb@googlegroups.com>;
+        Wed, 16 Sep 2015 10:43:41 -0700 (PDT)
+Subject: [PATCH] NTB: Fix issue where we may be accessing NULL ptr
+From: Dave Jiang <dave.jiang@intel.com>
+Date: Wed, 16 Sep 2015 10:43:10 -0700
+Message-ID: <20150916174310.143612.54775.stgit@djiang5-desk3.ch.intel.com>
 MIME-Version: 1.0
-To: Dave Jiang <dave.jiang@intel.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>
-Cc: "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "allen.hubbe@emc" <allen.hubbe@emc>, "dan.carpenter@oracle.com" <dan.carpenter@oracle.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+To: jdmason@kudzu.us
+Cc: linux-ntb@googlegroups.com, allen.hubbe@emc, dan.carpenter@oracle.com
 List-ID: <linux-ntb.googlegroups.com>
 
-V2UgY2FuIHNpbXBsaWZ5IHRoaXMgZnVuY3Rpb24gZXZlbiBmdXJ0aGVyLiAgTWF5YmUgc29tZXRo
-aW5nIGxpa2UgdGhpczoNCg0KZGlmZiAtLWdpdCBhL2RyaXZlcnMvbnRiL250Yl90cmFuc3BvcnQu
-YyBiL2RyaXZlcnMvbnRiL250Yl90cmFuc3BvcnQuYw0KaW5kZXggNmUzZWU5MDdkMTg2Li5lNjhj
-N2FjMGE0YzAgMTAwNjQ0DQotLS0gYS9kcml2ZXJzL250Yi9udGJfdHJhbnNwb3J0LmMNCisrKyBi
-L2RyaXZlcnMvbnRiL250Yl90cmFuc3BvcnQuYw0KQEAgLTE5OTgsMTkgKzE5OTgsMTkgQEAgdW5z
-aWduZWQgaW50IG50Yl90cmFuc3BvcnRfbWF4X3NpemUoc3RydWN0IG50Yl90cmFuc3BvcnRfcXAg
-KnFwKQ0KIHsNCiAJdW5zaWduZWQgaW50IG1heDsNCiAJdW5zaWduZWQgaW50IGNvcHlfYWxpZ247
-DQorCXN0cnVjdCBkbWFfY2hhbiAqcnhfY2hhbiwgKnR4X2NoYW47DQogDQogCWlmICghcXApDQog
-CQlyZXR1cm4gMDsNCisJcnhfY2hhbiA9IHFwLT5yeF9kbWFfY2hhbjsNCisJdHhfY2hhbiA9IHFw
-LT50eF9kbWFfY2hhbjsNCiANCi0JaWYgKCFxcC0+dHhfZG1hX2NoYW4gJiYgIXFwLT5yeF9kbWFf
-Y2hhbikNCi0JCXJldHVybiBxcC0+dHhfbWF4X2ZyYW1lIC0gc2l6ZW9mKHN0cnVjdCBudGJfcGF5
-bG9hZF9oZWFkZXIpOw0KLQ0KLQljb3B5X2FsaWduID0gbWF4KHFwLT50eF9kbWFfY2hhbi0+ZGV2
-aWNlLT5jb3B5X2FsaWduLA0KLQkJCSBxcC0+cnhfZG1hX2NoYW4tPmRldmljZS0+Y29weV9hbGln
-bik7DQorCWNvcHlfYWxpZ24gPSBtYXgocnhfY2hhbiA/IHJ4X2NoYW4tPmRldmljZS0+Y29weV9h
-bGlnbiA6IDAsDQorCQkJIHR4X2NoYW4gPyB0eF9jaGFuLT5kZXZpY2UtPmNvcHlfYWxpZ24gOiAw
-KTsNCiANCiAJLyogSWYgRE1BIGVuZ2luZSB1c2FnZSBpcyBwb3NzaWJsZSwgdHJ5IHRvIGZpbmQg
-dGhlIG1heCBzaXplIGZvciB0aGF0ICovDQogCW1heCA9IHFwLT50eF9tYXhfZnJhbWUgLSBzaXpl
-b2Yoc3RydWN0IG50Yl9wYXlsb2FkX2hlYWRlcik7DQotCW1heCAtPSBtYXggJSAoMSA8PCBjb3B5
-X2FsaWduKTsNCisJbWF4ID0gcm91bmRfZG93bihtYXgsIDEgPDwgY29weV9hbGlnbik7DQogDQog
-CXJldHVybiBtYXg7DQogfQ0KDQpJIHdvbmRlciBpZiB3ZSBzaG91bGQgYWxzbyBjb25jZXJuIG91
-cnNlbHZlcyB3aXRoICdtYXgnIHJlZmVycmluZyB0byB0d28gdGhpbmdzIGluIHRoZSBmdW5jdGlv
-bjogdGhlIGxvY2FsIHZhcmlhYmxlIG1heCBhbmQgdGhlIG1hY3JvIG1heC4gIFRoaXMgd29ya3Mg
-YmVjYXVzZSB0aGUgc2Vjb25kIG1heCBpcyBhIG1hY3JvLCBidXQgaXQgd291bGQgbm90IHdvcmsg
-aWYgbWF4IHdlcmUgYSBmdW5jdGlvbiwgYmVjYXVzZSB0aGUgZnVuY3Rpb24gbmFtZSBtYXggd291
-bGQgYmUgaGlkZGVuIGJ5IHRoZSBsb2NhbCB2YXJpYWJsZS4NCg0KRnJvbTogRGF2ZSBKaWFuZw0K
-PiBzbWF0Y2ggZGV0ZWN0ZWQgYW4gaXNzdWUgaW4gdGhlIGZ1bmN0aW9uIG50Yl90cmFuc3BvcnRf
-bWF4X3NpemUoKSB3aGVyZQ0KPiB3ZSBjb3VsZCBiZSBkZXJlZmVyZW5jaW5nIGEgZG1hIGNoYW5u
-ZWwgcG9pbnRlciB3aGVuIGl0IGlzIE5VTEwuDQo+IA0KPiBSZXBvcnRlZC1ieTogRGFuIENhcnBl
-bnRlciA8ZGFuLmNhcnBlbnRlckBvcmFjbGUuY29tPg0KPiBTaWduZWQtb2ZmLWJ5OiBEYXZlIEpp
-YW5nIDxkYXZlLmppYW5nQGludGVsLmNvbT4NCj4gLS0tDQo+ICBkcml2ZXJzL250Yi9udGJfdHJh
-bnNwb3J0LmMgfCAgICA5ICsrKysrKystLQ0KPiAgMSBmaWxlIGNoYW5nZWQsIDcgaW5zZXJ0aW9u
-cygrKSwgMiBkZWxldGlvbnMoLSkNCj4gDQo+IGRpZmYgLS1naXQgYS9kcml2ZXJzL250Yi9udGJf
-dHJhbnNwb3J0LmMgYi9kcml2ZXJzL250Yi9udGJfdHJhbnNwb3J0LmMNCj4gaW5kZXggNmUzZWU5
-MC4uY2QwZWUzZCAxMDA2NDQNCj4gLS0tIGEvZHJpdmVycy9udGIvbnRiX3RyYW5zcG9ydC5jDQo+
-ICsrKyBiL2RyaXZlcnMvbnRiL250Yl90cmFuc3BvcnQuYw0KPiBAQCAtMjAwNSw4ICsyMDA1LDEz
-IEBAIHVuc2lnbmVkIGludCBudGJfdHJhbnNwb3J0X21heF9zaXplKHN0cnVjdA0KPiBudGJfdHJh
-bnNwb3J0X3FwICpxcCkNCj4gIAlpZiAoIXFwLT50eF9kbWFfY2hhbiAmJiAhcXAtPnJ4X2RtYV9j
-aGFuKQ0KPiAgCQlyZXR1cm4gcXAtPnR4X21heF9mcmFtZSAtIHNpemVvZihzdHJ1Y3QgbnRiX3Bh
-eWxvYWRfaGVhZGVyKTsNCj4gDQo+IC0JY29weV9hbGlnbiA9IG1heChxcC0+dHhfZG1hX2NoYW4t
-PmRldmljZS0+Y29weV9hbGlnbiwNCj4gLQkJCSBxcC0+cnhfZG1hX2NoYW4tPmRldmljZS0+Y29w
-eV9hbGlnbik7DQo+ICsJaWYgKCFxcC0+dHhfZG1hX2NoYW4pDQo+ICsJCWNvcHlfYWxpZ24gPSBx
-cC0+cnhfZG1hX2NoYW4tPmRldmljZS0+Y29weV9hbGlnbjsNCj4gKwllbHNlIGlmICghcXAtPnJ4
-X2RtYV9jaGFuKQ0KPiArCQljb3B5X2FsaWduID0gcXAtPnR4X2RtYV9jaGFuLT5kZXZpY2UtPmNv
-cHlfYWxpZ247DQo+ICsJZWxzZQ0KPiArCQljb3B5X2FsaWduID0gbWF4KHFwLT50eF9kbWFfY2hh
-bi0+ZGV2aWNlLT5jb3B5X2FsaWduLA0KPiArCQkJCSBxcC0+cnhfZG1hX2NoYW4tPmRldmljZS0+
-Y29weV9hbGlnbik7DQo+IA0KPiAgCS8qIElmIERNQSBlbmdpbmUgdXNhZ2UgaXMgcG9zc2libGUs
-IHRyeSB0byBmaW5kIHRoZSBtYXggc2l6ZSBmb3INCj4gdGhhdCAqLw0KPiAgCW1heCA9IHFwLT50
-eF9tYXhfZnJhbWUgLSBzaXplb2Yoc3RydWN0IG50Yl9wYXlsb2FkX2hlYWRlcik7DQo+IA0KPiAt
-LQ0KPiBZb3UgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGJlY2F1c2UgeW91IGFyZSBzdWJzY3JpYmVk
-IHRvIHRoZSBHb29nbGUNCj4gR3JvdXBzICJsaW51eC1udGIiIGdyb3VwLg0KPiBUbyB1bnN1YnNj
-cmliZSBmcm9tIHRoaXMgZ3JvdXAgYW5kIHN0b3AgcmVjZWl2aW5nIGVtYWlscyBmcm9tIGl0LCBz
-ZW5kDQo+IGFuIGVtYWlsIHRvIGxpbnV4LW50Yit1bnN1YnNjcmliZUBnb29nbGVncm91cHMuY29t
-Lg0KPiBUbyBwb3N0IHRvIHRoaXMgZ3JvdXAsIHNlbmQgZW1haWwgdG8gbGludXgtbnRiQGdvb2ds
-ZWdyb3Vwcy5jb20uDQo+IFRvIHZpZXcgdGhpcyBkaXNjdXNzaW9uIG9uIHRoZSB3ZWIgdmlzaXQN
-Cj4gaHR0cHM6Ly9ncm91cHMuZ29vZ2xlLmNvbS9kL21zZ2lkL2xpbnV4LQ0KPiBudGIvMjAxNTA5
-MTYxNzQzMTAuMTQzNjEyLjU0Nzc1LnN0Z2l0JTQwZGppYW5nNS1kZXNrMy5jaC5pbnRlbC5jb20u
-DQo+IEZvciBtb3JlIG9wdGlvbnMsIHZpc2l0IGh0dHBzOi8vZ3JvdXBzLmdvb2dsZS5jb20vZC9v
-cHRvdXQuDQo=
+smatch detected an issue in the function ntb_transport_max_size() where
+we could be dereferencing a dma channel pointer when it is NULL.
+
+Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
+Signed-off-by: Dave Jiang <dave.jiang@intel.com>
+---
+ drivers/ntb/ntb_transport.c |    9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+index 6e3ee90..cd0ee3d 100644
+--- a/drivers/ntb/ntb_transport.c
++++ b/drivers/ntb/ntb_transport.c
+@@ -2005,8 +2005,13 @@ unsigned int ntb_transport_max_size(struct ntb_transport_qp *qp)
+ 	if (!qp->tx_dma_chan && !qp->rx_dma_chan)
+ 		return qp->tx_max_frame - sizeof(struct ntb_payload_header);
+ 
+-	copy_align = max(qp->tx_dma_chan->device->copy_align,
+-			 qp->rx_dma_chan->device->copy_align);
++	if (!qp->tx_dma_chan)
++		copy_align = qp->rx_dma_chan->device->copy_align;
++	else if (!qp->rx_dma_chan)
++		copy_align = qp->tx_dma_chan->device->copy_align;
++	else
++		copy_align = max(qp->tx_dma_chan->device->copy_align,
++				 qp->rx_dma_chan->device->copy_align);
+ 
+ 	/* If DMA engine usage is possible, try to find the max size for that */
+ 	max = qp->tx_max_frame - sizeof(struct ntb_payload_header);
+
