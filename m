@@ -1,18 +1,17 @@
 Return-Path: <jdmason@kudzu.us>
-Received: from mail-wi0-f175.google.com (mail-wi0-f175.google.com. [209.85.212.175])
-        by gmr-mx.google.com with ESMTPS id w4si254354wiz.0.2015.10.04.19.48.52
+Received: from mail-wi0-f180.google.com (mail-wi0-f180.google.com. [209.85.212.180])
+        by gmr-mx.google.com with ESMTPS id c7si269460wiy.3.2015.10.04.19.37.45
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Sun, 04 Oct 2015 19:48:52 -0700 (PDT)
-Received: by wicge5 with SMTP id ge5so100481900wic.0
-        for <linux-ntb@googlegroups.com>; Sun, 04 Oct 2015 19:48:52 -0700 (PDT)
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Sun, 04 Oct 2015 19:37:45 -0700 (PDT)
+Received: by wicgb1 with SMTP id gb1so99384223wic.1
+        for <linux-ntb@googlegroups.com>; Sun, 04 Oct 2015 19:37:45 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <1443859782-16773-2-git-send-email-sudipm.mukherjee@gmail.com>
+In-Reply-To: <1443859782-16773-1-git-send-email-sudipm.mukherjee@gmail.com>
 References: <1443859782-16773-1-git-send-email-sudipm.mukherjee@gmail.com>
-	<1443859782-16773-2-git-send-email-sudipm.mukherjee@gmail.com>
-Date: Sun, 4 Oct 2015 22:48:52 -0400
-Message-ID: <CAPoiz9x-sHit56RhmrnKamk5GC=5vMpeBjZ8cYc+-Bg8tSP8Qw@mail.gmail.com>
-Subject: Re: [PATCH 2/2] NTB: remove unused variable
+Date: Sun, 4 Oct 2015 22:37:45 -0400
+Message-ID: <CAPoiz9x4sE8JJujuXCagdOu-xY57OUmk_bOXj69ZAZyRT+9jPw@mail.gmail.com>
+Subject: Re: [PATCH 1/2] NTB: fix access of free-ed pointer
 From: Jon Mason <jdmason@kudzu.us>
 Content-Type: text/plain; charset=UTF-8
 To: Sudip Mukherjee <sudipm.mukherjee@gmail.com>
@@ -21,53 +20,79 @@ List-ID: <linux-ntb.googlegroups.com>
 
 On Sat, Oct 3, 2015 at 4:09 AM, Sudip Mukherjee
 <sudipm.mukherjee@gmail.com> wrote:
-> These variables were not used anywhere. So remove them.
+> We were accessing nt->mw_vec after freeing it. Fix the error path so
+> that we free nt->mw_vec after we have finished using it.
 >
 > Signed-off-by: Sudip Mukherjee <sudip@vectorindia.org>
 
-Applied.
+Good catch.  Pulled into my ntb branch.
 
 Thanks,
 Jon
 
+
 > ---
->  drivers/ntb/ntb_transport.c | 4 ----
->  1 file changed, 4 deletions(-)
+>  drivers/ntb/ntb_transport.c | 15 +++++++--------
+>  1 file changed, 7 insertions(+), 8 deletions(-)
 >
 > diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-> index 69953ee..28f9a03 100644
+> index 6e3ee90..69953ee 100644
 > --- a/drivers/ntb/ntb_transport.c
 > +++ b/drivers/ntb/ntb_transport.c
-> @@ -928,7 +928,6 @@ static int ntb_transport_init_queue(struct ntb_transport_ctx *nt,
->                                     unsigned int qp_num)
->  {
->         struct ntb_transport_qp *qp;
-> -       struct ntb_transport_mw *mw;
->         phys_addr_t mw_base;
->         resource_size_t mw_size;
->         unsigned int num_qps_mw, tx_size;
-> @@ -939,7 +938,6 @@ static int ntb_transport_init_queue(struct ntb_transport_ctx *nt,
->         qp_count = nt->qp_count;
+> @@ -1080,7 +1080,7 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
+>                                   GFP_KERNEL, node);
+>         if (!nt->qp_vec) {
+>                 rc = -ENOMEM;
+> -               goto err2;
+> +               goto err1;
+>         }
 >
->         mw_num = QP_TO_MW(nt, qp_num);
-> -       mw = &nt->mw_vec[mw_num];
+>         if (nt_debugfs_dir) {
+> @@ -1092,7 +1092,7 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
+>         for (i = 0; i < qp_count; i++) {
+>                 rc = ntb_transport_init_queue(nt, i);
+>                 if (rc)
+> -                       goto err3;
+> +                       goto err2;
+>         }
 >
->         qp = &nt->qp_vec[qp_num];
->         qp->qp_num = qp_num;
-> @@ -1930,13 +1928,11 @@ EXPORT_SYMBOL_GPL(ntb_transport_link_up);
->   */
->  void ntb_transport_link_down(struct ntb_transport_qp *qp)
->  {
-> -       struct pci_dev *pdev;
->         int val;
+>         INIT_DELAYED_WORK(&nt->link_work, ntb_transport_link_work);
+> @@ -1100,12 +1100,12 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
 >
->         if (!qp)
->                 return;
+>         rc = ntb_set_ctx(ndev, nt, &ntb_transport_ops);
+>         if (rc)
+> -               goto err3;
+> +               goto err2;
 >
-> -       pdev = qp->ndev->pdev;
->         qp->client_ready = false;
+>         INIT_LIST_HEAD(&nt->client_devs);
+>         rc = ntb_bus_init(nt);
+>         if (rc)
+> -               goto err4;
+> +               goto err3;
 >
->         val = ntb_spad_read(qp->ndev, QP_LINKS);
+>         nt->link_is_up = false;
+>         ntb_link_enable(ndev, NTB_SPEED_AUTO, NTB_WIDTH_AUTO);
+> @@ -1113,17 +1113,16 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
+>
+>         return 0;
+>
+> -err4:
+> -       ntb_clear_ctx(ndev);
+>  err3:
+> -       kfree(nt->qp_vec);
+> +       ntb_clear_ctx(ndev);
+>  err2:
+> -       kfree(nt->mw_vec);
+> +       kfree(nt->qp_vec);
+>  err1:
+>         while (i--) {
+>                 mw = &nt->mw_vec[i];
+>                 iounmap(mw->vbase);
+>         }
+> +       kfree(nt->mw_vec);
+>  err:
+>         kfree(nt);
+>         return rc;
 > --
 > 1.9.1
 >
