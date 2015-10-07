@@ -1,46 +1,49 @@
-Return-Path: <dave.jiang@intel.com>
-Received: from mga01.intel.com (mga01.intel.com. [192.55.52.88])
-        by gmr-mx.google.com with ESMTP id uv4si2935937pac.0.2015.09.16.10.43.41
-        for <linux-ntb@googlegroups.com>;
-        Wed, 16 Sep 2015 10:43:41 -0700 (PDT)
-Subject: [PATCH] NTB: Fix issue where we may be accessing NULL ptr
-From: Dave Jiang <dave.jiang@intel.com>
-Date: Wed, 16 Sep 2015 10:43:10 -0700
-Message-ID: <20150916174310.143612.54775.stgit@djiang5-desk3.ch.intel.com>
+Return-Path: <arnd@arndb.de>
+Received: from mout.kundenserver.de (mout.kundenserver.de. [212.227.17.24])
+        by gmr-mx.google.com with ESMTPS id j7si65280igu.1.2015.10.07.01.00.07
+        for <linux-ntb@googlegroups.com>
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 07 Oct 2015 01:00:07 -0700 (PDT)
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: [PATCH] NTB: fix 32-bit compiler warning
+Date: Wed, 07 Oct 2015 09:59:34 +0200
+Message-ID: <10263287.Brd9HPYQJD@wuerfel>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-To: jdmason@kudzu.us
-Cc: linux-ntb@googlegroups.com, allen.hubbe@emc, dan.carpenter@oracle.com
+Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="us-ascii"
+To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
+Cc: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-ID: <linux-ntb.googlegroups.com>
 
-smatch detected an issue in the function ntb_transport_max_size() where
-we could be dereferencing a dma channel pointer when it is NULL.
+resource_size_t may be 32-bit wide on some architectures, which causes
+this warning when building the NTB code:
 
-Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
-Signed-off-by: Dave Jiang <dave.jiang@intel.com>
+drivers/ntb/ntb_transport.c: In function 'ntb_transport_link_work':
+drivers/ntb/ntb_transport.c:828:46: warning: right shift count >= width of type [-Wshift-count-overflow]
+
+The warning is harmless but can be avoided by using the upper_32_bits()
+macro.
+
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+Fixes: e26a5843f7f5 ("NTB: Split ntb_hw_intel and ntb_transport drivers")
 ---
- drivers/ntb/ntb_transport.c |    9 +++++++--
- 1 file changed, 7 insertions(+), 2 deletions(-)
+Found while building ARM allmodconfig
 
 diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 6e3ee90..cd0ee3d 100644
+index 6e3ee907d186..700f3ae833c2 100644
 --- a/drivers/ntb/ntb_transport.c
 +++ b/drivers/ntb/ntb_transport.c
-@@ -2005,8 +2005,13 @@ unsigned int ntb_transport_max_size(struct ntb_transport_qp *qp)
- 	if (!qp->tx_dma_chan && !qp->rx_dma_chan)
- 		return qp->tx_max_frame - sizeof(struct ntb_payload_header);
+@@ -825,10 +825,10 @@ static void ntb_transport_link_work(struct work_struct *work)
+ 			size = max_mw_size;
  
--	copy_align = max(qp->tx_dma_chan->device->copy_align,
--			 qp->rx_dma_chan->device->copy_align);
-+	if (!qp->tx_dma_chan)
-+		copy_align = qp->rx_dma_chan->device->copy_align;
-+	else if (!qp->rx_dma_chan)
-+		copy_align = qp->tx_dma_chan->device->copy_align;
-+	else
-+		copy_align = max(qp->tx_dma_chan->device->copy_align,
-+				 qp->rx_dma_chan->device->copy_align);
+ 		spad = MW0_SZ_HIGH + (i * 2);
+-		ntb_peer_spad_write(ndev, spad, (u32)(size >> 32));
++		ntb_peer_spad_write(ndev, spad, upper_32_bits(size));
  
- 	/* If DMA engine usage is possible, try to find the max size for that */
- 	max = qp->tx_max_frame - sizeof(struct ntb_payload_header);
+ 		spad = MW0_SZ_LOW + (i * 2);
+-		ntb_peer_spad_write(ndev, spad, (u32)size);
++		ntb_peer_spad_write(ndev, spad, lower_32_bits(size));
+ 	}
+ 
+ 	ntb_peer_spad_write(ndev, NUM_MWS, nt->mw_count);
 
