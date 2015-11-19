@@ -1,67 +1,84 @@
-Return-Path: <dave.jiang@intel.com>
-Received: from mga03.intel.com (mga03.intel.com. [134.134.136.65])
-        by gmr-mx.google.com with ESMTP id bh2si1148974pbb.1.2015.11.19.12.54.47
-        for <linux-ntb@googlegroups.com>;
-        Thu, 19 Nov 2015 12:54:47 -0800 (PST)
-From: "Jiang, Dave" <dave.jiang@intel.com>
-Subject: Re: [PATCH] NTB: Clear property bits in BAR value
-Date: Thu, 19 Nov 2015 20:54:46 +0000
-Message-ID: <1447966484.83864.268.camel@intel.com>
-References: <20151119204707.95851.65523.stgit@djiang5-desk3.ch.intel.com>
-	 <CAG6CVpXqKnRfOR_WKmrnScB0t1w7nGOFsgfYPGFrYh9Hv4LFvg@mail.gmail.com>
-In-Reply-To: <CAG6CVpXqKnRfOR_WKmrnScB0t1w7nGOFsgfYPGFrYh9Hv4LFvg@mail.gmail.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <0830625FCD95354AB98F5EF3D2F13672@intel.com>
-Content-Transfer-Encoding: base64
+Return-Path: <cse.cem@gmail.com>
+Received: from mail-yk0-f173.google.com (mail-yk0-f173.google.com. [209.85.160.173])
+        by gmr-mx.google.com with ESMTPS id z21si776528ywz.2.2015.11.19.12.50.10
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 19 Nov 2015 12:50:10 -0800 (PST)
+Received: by ykfs79 with SMTP id s79so128232628ykf.1
+        for <linux-ntb@googlegroups.com>; Thu, 19 Nov 2015 12:50:10 -0800 (PST)
+Return-Path: <cse.cem@gmail.com>
+Received: from mail-yk0-f182.google.com (mail-yk0-f182.google.com. [209.85.160.182])
+        by smtp.gmail.com with ESMTPSA id 4sm9396162ywb.26.2015.11.19.12.50.09
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 19 Nov 2015 12:50:10 -0800 (PST)
+Received: by ykdr82 with SMTP id r82so126632176ykd.3
+        for <linux-ntb@googlegroups.com>; Thu, 19 Nov 2015 12:50:09 -0800 (PST)
 MIME-Version: 1.0
-Return-Path: dave.jiang@intel.com
-To: "cem@FreeBSD.org" <cem@FreeBSD.org>
-Cc: "allen.hubbe@emc.com" <allen.hubbe@emc.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
+Reply-To: cem@FreeBSD.org
+In-Reply-To: <20151119204707.95851.65523.stgit@djiang5-desk3.ch.intel.com>
+References: <20151119204707.95851.65523.stgit@djiang5-desk3.ch.intel.com>
+Date: Thu, 19 Nov 2015 12:50:09 -0800
+Message-ID: <CAG6CVpXqKnRfOR_WKmrnScB0t1w7nGOFsgfYPGFrYh9Hv4LFvg@mail.gmail.com>
+Subject: Re: [PATCH] NTB: Clear property bits in BAR value
+From: Conrad Meyer <cem@FreeBSD.org>
+Content-Type: text/plain; charset=UTF-8
+To: Dave Jiang <dave.jiang@intel.com>
+Cc: Jon Mason <jdmason@kudzu.us>, linux-ntb@googlegroups.com, Allen Hubbe <allen.hubbe@emc.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-DQoNCk9uIFRodSwgMjAxNS0xMS0xOSBhdCAxMjo1MCAtMDgwMCwgQ29ucmFkIE1leWVyIHdyb3Rl
-Og0KPiBMb29rcyBmaW5lIHRvIG1lLiAgSXNuJ3QgdW5zaWduZWQgbG9uZyA2NCBiaXRzIG9uIExp
-bnV4IGFtZDY0Pw0KPiAoU2hvdWxkIE5UQl9CQVJfTUFTS18zMiBqdXN0IGJlIH4oMHhmdSk/KQ0K
-DQpHb29kIGNhdGNoISBJJ2xsIGZpeCB0aGF0LiANCg0KPiANCj4gQmVzdCwNCj4gQ29ucmFkDQo+
-IA0KPiBPbiBUaHUsIE5vdiAxOSwgMjAxNSBhdCAxMjo0NyBQTSwgRGF2ZSBKaWFuZyA8ZGF2ZS5q
-aWFuZ0BpbnRlbC5jb20+DQo+IHdyb3RlOg0KPiA+IFRoZSBsb3dlciBiaXRzIHJlYWQgZnJvbSBh
-IEJBUiByZWdpc3RlciB3aWxsIGNvbnRhaW4gcHJvcGVydHkgYml0cw0KPiA+IHRoYXQgd2UgZG8g
-bm90IGNhcmUgYWJvdXQuIENsZWFyIHRob3NlIHNvIHRoYXQgd2UgY2FuIHVzZSB0aGUgQkFSDQo+
-ID4gdmFsdWVzIGZvciBsaW1pdCBhbmQgeGxhdCByZWdpc3RlcnMuDQo+ID4gDQo+ID4gUmVwb3J0
-ZWQtYnk6IENvbnJhZCBNZXllciA8Y2VtQGZyZWVic2Qub3JnPg0KPiA+IFNpZ25lZC1vZmYtYnk6
-IERhdmUgSmlhbmcgPGRhdmUuamlhbmdAaW50ZWwuY29tPg0KPiA+IC0tLQ0KPiA+ICBkcml2ZXJz
-L250Yi9ody9pbnRlbC9udGJfaHdfaW50ZWwuYyB8ICAgIDQgKystLQ0KPiA+ICBkcml2ZXJzL250
-Yi9ody9pbnRlbC9udGJfaHdfaW50ZWwuaCB8ICAgIDMgKysrDQo+ID4gIDIgZmlsZXMgY2hhbmdl
-ZCwgNSBpbnNlcnRpb25zKCspLCAyIGRlbGV0aW9ucygtKQ0KPiA+IA0KPiA+IGRpZmYgLS1naXQg
-YS9kcml2ZXJzL250Yi9ody9pbnRlbC9udGJfaHdfaW50ZWwuYw0KPiA+IGIvZHJpdmVycy9udGIv
-aHcvaW50ZWwvbnRiX2h3X2ludGVsLmMNCj4gPiBpbmRleCBhMTk4ZjgyLi40MGQwNGVmIDEwMDY0
-NA0KPiA+IC0tLSBhL2RyaXZlcnMvbnRiL2h3L2ludGVsL250Yl9od19pbnRlbC5jDQo+ID4gKysr
-IGIvZHJpdmVycy9udGIvaHcvaW50ZWwvbnRiX2h3X2ludGVsLmMNCj4gPiBAQCAtODc1LDcgKzg3
-NSw3IEBAIHN0YXRpYyBpbnQgaW50ZWxfbnRiX213X3NldF90cmFucyhzdHJ1Y3QNCj4gPiBudGJf
-ZGV2ICpudGIsIGludCBpZHgsDQo+ID4gICAgICAgICBsaW1pdF9yZWcgPSBiYXIyX29mZihuZGV2
-LT54bGF0X3JlZy0+YmFyMl9saW1pdCwgYmFyKTsNCj4gPiANCj4gPiAgICAgICAgIGlmIChiYXIg
-PCA0IHx8ICFuZGV2LT5iYXI0X3NwbGl0KSB7DQo+ID4gLSAgICAgICAgICAgICAgIGJhc2UgPSBp
-b3JlYWQ2NChtbWlvICsgYmFzZV9yZWcpOw0KPiA+ICsgICAgICAgICAgICAgICBiYXNlID0gaW9y
-ZWFkNjQobW1pbyArIGJhc2VfcmVnKSAmIE5UQl9CQVJfTUFTS182NDsNCj4gPiANCj4gPiAgICAg
-ICAgICAgICAgICAgLyogU2V0IHRoZSBsaW1pdCBpZiBzdXBwb3J0ZWQsIGlmIHNpemUgaXMgbm90
-DQo+ID4gbXdfc2l6ZSAqLw0KPiA+ICAgICAgICAgICAgICAgICBpZiAobGltaXRfcmVnICYmIHNp
-emUgIT0gbXdfc2l6ZSkNCj4gPiBAQCAtOTA2LDcgKzkwNiw3IEBAIHN0YXRpYyBpbnQgaW50ZWxf
-bnRiX213X3NldF90cmFucyhzdHJ1Y3QNCj4gPiBudGJfZGV2ICpudGIsIGludCBpZHgsDQo+ID4g
-ICAgICAgICAgICAgICAgIGlmICgoYWRkciArIHNpemUpICYgKH4wdWxsIDw8IDMyKSkNCj4gPiAg
-ICAgICAgICAgICAgICAgICAgICAgICByZXR1cm4gLUVJTlZBTDsNCj4gPiANCj4gPiAtICAgICAg
-ICAgICAgICAgYmFzZSA9IGlvcmVhZDMyKG1taW8gKyBiYXNlX3JlZyk7DQo+ID4gKyAgICAgICAg
-ICAgICAgIGJhc2UgPSBpb3JlYWQzMihtbWlvICsgYmFzZV9yZWcpICYgTlRCX0JBUl9NQVNLXzMy
-Ow0KPiA+IA0KPiA+ICAgICAgICAgICAgICAgICAvKiBTZXQgdGhlIGxpbWl0IGlmIHN1cHBvcnRl
-ZCwgaWYgc2l6ZSBpcyBub3QNCj4gPiBtd19zaXplICovDQo+ID4gICAgICAgICAgICAgICAgIGlm
-IChsaW1pdF9yZWcgJiYgc2l6ZSAhPSBtd19zaXplKQ0KPiA+IGRpZmYgLS1naXQgYS9kcml2ZXJz
-L250Yi9ody9pbnRlbC9udGJfaHdfaW50ZWwuaA0KPiA+IGIvZHJpdmVycy9udGIvaHcvaW50ZWwv
-bnRiX2h3X2ludGVsLmgNCj4gPiBpbmRleCAyZWI0YWRkLi5hMjU3YzdjIDEwMDY0NA0KPiA+IC0t
-LSBhL2RyaXZlcnMvbnRiL2h3L2ludGVsL250Yl9od19pbnRlbC5oDQo+ID4gKysrIGIvZHJpdmVy
-cy9udGIvaHcvaW50ZWwvbnRiX2h3X2ludGVsLmgNCj4gPiBAQCAtMjQ1LDYgKzI0NSw5IEBADQo+
-ID4gICNkZWZpbmUgTlRCX1VOU0FGRV9EQiAgICAgICAgICAgICAgICAgIEJJVF9VTEwoMCkNCj4g
-PiAgI2RlZmluZSBOVEJfVU5TQUZFX1NQQUQgICAgICAgICAgICAgICAgICAgICAgICBCSVRfVUxM
-KDEpDQo+ID4gDQo+ID4gKyNkZWZpbmUgTlRCX0JBUl9NQVNLXzY0ICAgICAgICAgICAgICAgICAg
-ICAgICAgfigweGZ1bGwpDQo+ID4gKyNkZWZpbmUgTlRCX0JBUl9NQVNLXzMyICAgICAgICAgICAg
-ICAgICAgICAgICAgfigweGZ1bCkNCj4gPiArDQo+ID4gIHN0cnVjdCBpbnRlbF9udGJfZGV2Ow0K
-PiA+IA0KPiA+ICBzdHJ1Y3QgaW50ZWxfbnRiX3JlZyB7DQo+ID4gDQo+IA==
+Looks fine to me.  Isn't unsigned long 64 bits on Linux amd64?
+(Should NTB_BAR_MASK_32 just be ~(0xfu)?)
+
+Best,
+Conrad
+
+On Thu, Nov 19, 2015 at 12:47 PM, Dave Jiang <dave.jiang@intel.com> wrote:
+> The lower bits read from a BAR register will contain property bits
+> that we do not care about. Clear those so that we can use the BAR
+> values for limit and xlat registers.
+>
+> Reported-by: Conrad Meyer <cem@freebsd.org>
+> Signed-off-by: Dave Jiang <dave.jiang@intel.com>
+> ---
+>  drivers/ntb/hw/intel/ntb_hw_intel.c |    4 ++--
+>  drivers/ntb/hw/intel/ntb_hw_intel.h |    3 +++
+>  2 files changed, 5 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c b/drivers/ntb/hw/intel/ntb_hw_intel.c
+> index a198f82..40d04ef 100644
+> --- a/drivers/ntb/hw/intel/ntb_hw_intel.c
+> +++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
+> @@ -875,7 +875,7 @@ static int intel_ntb_mw_set_trans(struct ntb_dev *ntb, int idx,
+>         limit_reg = bar2_off(ndev->xlat_reg->bar2_limit, bar);
+>
+>         if (bar < 4 || !ndev->bar4_split) {
+> -               base = ioread64(mmio + base_reg);
+> +               base = ioread64(mmio + base_reg) & NTB_BAR_MASK_64;
+>
+>                 /* Set the limit if supported, if size is not mw_size */
+>                 if (limit_reg && size != mw_size)
+> @@ -906,7 +906,7 @@ static int intel_ntb_mw_set_trans(struct ntb_dev *ntb, int idx,
+>                 if ((addr + size) & (~0ull << 32))
+>                         return -EINVAL;
+>
+> -               base = ioread32(mmio + base_reg);
+> +               base = ioread32(mmio + base_reg) & NTB_BAR_MASK_32;
+>
+>                 /* Set the limit if supported, if size is not mw_size */
+>                 if (limit_reg && size != mw_size)
+> diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.h b/drivers/ntb/hw/intel/ntb_hw_intel.h
+> index 2eb4add..a257c7c 100644
+> --- a/drivers/ntb/hw/intel/ntb_hw_intel.h
+> +++ b/drivers/ntb/hw/intel/ntb_hw_intel.h
+> @@ -245,6 +245,9 @@
+>  #define NTB_UNSAFE_DB                  BIT_ULL(0)
+>  #define NTB_UNSAFE_SPAD                        BIT_ULL(1)
+>
+> +#define NTB_BAR_MASK_64                        ~(0xfull)
+> +#define NTB_BAR_MASK_32                        ~(0xful)
+> +
+>  struct intel_ntb_dev;
+>
+>  struct intel_ntb_reg {
+>
