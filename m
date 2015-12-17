@@ -1,120 +1,184 @@
-Return-Path: <Xiangliang.Yu@amd.com>
-Received: from na01-bl2-obe.outbound.protection.outlook.com (mail-bl2on0086.outbound.protection.outlook.com. [65.55.169.86])
-        by gmr-mx.google.com with ESMTPS id ht1si253829igb.1.2015.12.17.23.18.25
+Return-Path: <allenbh@gmail.com>
+Received: from mail-qk0-x229.google.com (mail-qk0-x229.google.com. [2607:f8b0:400d:c09::229])
+        by gmr-mx.google.com with ESMTPS id h206si184045ywb.6.2015.12.17.08.45.37
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Thu, 17 Dec 2015 23:18:25 -0800 (PST)
-From: "Yu, Xiangliang" <Xiangliang.Yu@amd.com>
-Subject: RE: [PATCH 1/3] NTB: Add AMD PCI-Express NTB driver
-Date: Fri, 18 Dec 2015 07:18:23 +0000
-Message-ID: <BLUPR12MB04202381D9B14C68B3962A95EBE10@BLUPR12MB0420.namprd12.prod.outlook.com>
-References: <1450340265-18912-1-git-send-email-Xiangliang.Yu@amd.com>
- <CAJ80satY97nwd5hJgN=F+a4fAwpqxh8nV5a7hHm6WK=2qqhOig@mail.gmail.com>
-In-Reply-To: <CAJ80satY97nwd5hJgN=F+a4fAwpqxh8nV5a7hHm6WK=2qqhOig@mail.gmail.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 17 Dec 2015 08:45:37 -0800 (PST)
+Received: by mail-qk0-x229.google.com with SMTP id t125so100761152qkh.3
+        for <linux-ntb@googlegroups.com>; Thu, 17 Dec 2015 08:45:37 -0800 (PST)
 MIME-Version: 1.0
-To: Allen Hubbe <allenbh@gmail.com>
-Cc: "jdmason@kudzu.us" <jdmason@kudzu.us>, "dave.jiang@intel.com" <dave.jiang@intel.com>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, SPG_Linux_Kernel <SPG_Linux_Kernel@amd.com>
+In-Reply-To: <1450340265-18912-1-git-send-email-Xiangliang.Yu@amd.com>
+References: <1450340265-18912-1-git-send-email-Xiangliang.Yu@amd.com>
+Date: Thu, 17 Dec 2015 11:45:37 -0500
+Message-ID: <CAJ80satY97nwd5hJgN=F+a4fAwpqxh8nV5a7hHm6WK=2qqhOig@mail.gmail.com>
+Subject: Re: [PATCH 1/3] NTB: Add AMD PCI-Express NTB driver
+From: Allen Hubbe <allenbh@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+To: Xiangliang Yu <Xiangliang.Yu@amd.com>
+Cc: jdmason@kudzu.us, dave.jiang@intel.com, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, SPG_Linux_Kernel@amd.com
 List-ID: <linux-ntb.googlegroups.com>
 
-PiBGcm9tOiBBbGxlbiBIdWJiZSBbbWFpbHRvOmFsbGVuYmhAZ21haWwuY29tXQ0KPiBTZW50OiBG
-cmlkYXksIERlY2VtYmVyIDE4LCAyMDE1IDEyOjQ2IEFNDQo+IFRvOiBZdSwgWGlhbmdsaWFuZw0K
-PiBDYzogamRtYXNvbkBrdWR6dS51czsgZGF2ZS5qaWFuZ0BpbnRlbC5jb207IGxpbnV4LW50YkBn
-b29nbGVncm91cHMuY29tOw0KPiBsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3JnOyBTUEdfTGlu
-dXhfS2VybmVsDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggMS8zXSBOVEI6IEFkZCBBTUQgUENJLUV4
-cHJlc3MgTlRCIGRyaXZlcg0KPiANCj4gT24gVGh1LCBEZWMgMTcsIDIwMTUgYXQgMzoxNyBBTSwg
-WGlhbmdsaWFuZyBZdSA8WGlhbmdsaWFuZy5ZdUBhbWQuY29tPg0KPiB3cm90ZToNCj4gPiBBTUQg
-TlRCIHN1cHBvcnQgZm9sbG93aW5nIG1haW4gZmVhdHVyZXM6DQo+ID4gKDEpIFRocmVlIG1lbW9y
-eSB3aW5kb3dzOw0KPiA+ICgyKSBTaXh0ZWVuIDMyLWJpdCBzY3JhdGNoIHBhZDsNCj4gPiAoMykg
-VHdvIDE2LWJpdCBkb29yYmVsbCBpbnRlcnJ1cHQ7DQo+ID4gKDQpIEZpdmUgZXZlbnQgaW50ZXJy
-dXB0czsNCj4gPiAoNSkgT25lIHN5c3RlbSBjYW4gd2FrZSB1cCBvcHBvc2l0ZSBzeXN0ZW0gb2Yg
-TlRCOw0KPiA+ICg2KSBGbHVzaCBwcmV2aW91cyByZXF1ZXN0IHRvIHRoZSBvcHBvc2l0ZSBzeXN0
-ZW07DQo+ID4gKDcpIFRoZXJlIGFyZSByZXNldCBhbmQgUE1FX1RPIG1lY2hhbmlzbXMgYmV0d2Vl
-biB0d28gc3lzdGVtczsNCj4gPg0KPiA+IFNpZ25lZC1vZmYtYnk6IFhpYW5nbGlhbmcgWXUgPFhp
-YW5nbGlhbmcuWXVAYW1kLmNvbT4NCj4gDQo+IElzIGhhcmR3YXJlIGF2YWlsYWJsZSBvbiB3aGlj
-aCB0aGlzIGNhbiBiZSB0ZXN0ZWQ/DQoNCk5vIHlldC4gUmlnaHQgbm93LCB2ZXJpZmllZCB0aGUg
-ZHJpdmVyIG9uIGVtdWxhdG9yLg0KDQo+IA0KPiA+ICsrKyBiL2RyaXZlcnMvbnRiL2h3L2FtZC9u
-dGJfaHdfYW1kLmMNCj4gDQo+ID4gK3N0YXRpYyB1NjQgYW1kX250Yl9kYl9yZWFkKHN0cnVjdCBu
-dGJfZGV2ICpudGIpIHsNCj4gPiArICAgICAgIHN0cnVjdCBhbWRfbnRiX2RldiAqbmRldiA9IG50
-Yl9uZGV2KG50Yik7DQo+ID4gKw0KPiA+ICsgICAgICAgcmV0dXJuICh1NjQpTlRCX1JFQURfUkVH
-KERCU1RBVCk7IH0NCj4gDQo+IERCU1RBVCBoaWRlcyB0aGUgdXNlIG9mIG5kZXYsIG9yIG5kZXYg
-aXMgdW51c2VkLiAgVGhlIGNvZGUgc2hvdWxkIGJlIG1vcmUNCj4gY2xlYXIsIGhlcmUsIGFuZCBp
-biBvdGhlciBwbGFjZXMgd2hlcmUgTlRCX1JFQURfUkVHIGFuZCBOVEJfV1JJVEVfUkVHDQo+IGFy
-ZSB1c2VkIHdpdGggYSBtYWNybyBhcmd1bWVudC4NCg0KR290IGl0LCBJIHdpbGwgYWRkIG5kZXYg
-aW50byBtYWNybyBhcmd1bWVudHMuDQoNCj4gDQo+ID4gK3N0YXRpYyB2b2lkIGFtZF9hY2tfU01V
-KHN0cnVjdCBhbWRfbnRiX2RldiAqbmRldiwgdTMyIGJpdCkgew0KPiA+ICsgICAgICAgaW50IHJl
-ZzsNCj4gPiArDQo+ID4gKyAgICAgICByZWcgPSBOVEJfUkVBRF9SRUcoU01VQUNLKTsNCj4gPiAr
-ICAgICAgIHJlZyB8PSBiaXQ7DQo+ID4gKyAgICAgICBOVEJfV1JJVEVfUkVHKHJlZywgU01VQUNL
-KTsNCj4gPiArDQo+ID4gKyAgICAgICBuZGV2LT5wZWVyX3N0YSB8PSBiaXQ7DQo+ID4gK30NCj4g
-PiArDQo+ID4gKy8qDQo+ID4gKyAqIGZsdXNoIHRoZSByZXF1ZXN0cyB0byBwZWVyIHNpZGUNCj4g
-PiArICovDQo+ID4gK3N0YXRpYyBpbnQgYW1kX2ZsdXNoX3BlZXJfcmVxdWVzdHMoc3RydWN0IGFt
-ZF9udGJfZGV2ICpuZGV2KSB7DQo+ID4gKyAgICAgICB1MzIgcmVnOw0KPiA+ICsNCj4gPiArICAg
-ICAgIGlmICghYW1kX2xpbmtfaXNfdXAobmRldikpIHsNCj4gPiArICAgICAgICAgICAgICAgZGV2
-X2VycihuZGV2X2RldihuZGV2KSwgImxpbmsgaXMgZG93bi5cbiIpOw0KPiA+ICsgICAgICAgICAg
-ICAgICByZXR1cm4gLUVJTlZBTDsNCj4gPiArICAgICAgIH0NCj4gPiArDQo+IA0KPiBBZGQgcmVp
-bml0X2NvbXBsZXRpb24sIG9yIHRoaXMgbWF5IGFscmVhZHkgYmUgImNvbXBsZXRlIiBmcm9tIGEg
-cHJldmlvdXMNCj4gZmx1c2guDQoNCk9rLg0KDQo+IA0KPiA+ICsgICAgICAgcmVnID0gTlRCX1JF
-QURfUkVHKEZMVVNIVFJJRyk7DQo+ID4gKyAgICAgICByZWcgfD0gMHgxOw0KPiA+ICsgICAgICAg
-TlRCX1dSSVRFX1JFRyhyZWcsIEZMVVNIVFJJRyk7DQo+ID4gKw0KPiA+ICsgICAgICAgd2FpdF9m
-b3JfY29tcGxldGlvbigmbmRldi0+Zmx1c2hfY21wbCk7DQo+IA0KPiBCZWNhdXNlIG9mIHdhaXRf
-Zm9yX2NvbXBsZXRpb24sIHRoYXQgdGhpcyBjYW4gb25seSBiZSBjYWxsZWQgaW4gYSB0aHJlYWQN
-Cj4gY29udGV4dC4gIFRoaXMgaXMgdW5saWtlIG90aGVyIGZ1bmN0aW9ucyBvZiBudGIuaCwgc28g
-dGhlcmUgc2hvdWxkIGF0IGxlYXN0IGJlIGENCj4gbm90ZSBpbiB0aGUgYXBpIGRvY3VtZW50YXRp
-b24uDQoNCk9rLg0KPiANCj4gPiArDQo+ID4gKyAgICAgICByZXR1cm4gMDsNCj4gPiArfQ0KPiA+
-ICsNCj4gPiArLyoNCj4gPiArICogd2FrZSB1cCB0aGUgcGVlciBzaWRlDQo+ID4gKyAqLw0KPiA+
-ICtzdGF0aWMgaW50IGFtZF93YWtldXBfcGVlcl9zaWRlKHN0cnVjdCBhbWRfbnRiX2RldiAqbmRl
-dikgew0KPiA+ICsgICAgICAgdTMyIHJlZzsNCj4gPiArDQo+ID4gKyAgICAgICBpZiAoIWFtZF9s
-aW5rX2lzX3VwKG5kZXYpKSB7DQo+ID4gKyAgICAgICAgICAgICAgIGRldl93YXJuKG5kZXZfZGV2
-KG5kZXYpLCAibGluayBpcyBkb3duLlxuIik7DQo+ID4gKyAgICAgICAgICAgICAgIHJldHVybiAt
-RUlOVkFMOw0KPiA+ICsgICAgICAgfQ0KPiA+ICsNCj4gDQo+IFNlZSBwcmV2aW91cyBjb21tZW50
-Lg0KPiANCj4gPiArICAgICAgIE5UQl9SRUFEX1JFRyhQTVNHVFJJRyk7DQo+ID4gKyAgICAgICBy
-ZWcgfD0gMHgxOw0KPiA+ICsgICAgICAgTlRCX1dSSVRFX1JFRyhyZWcsIFBNU0dUUklHKTsNCj4g
-PiArDQo+ID4gKyAgICAgICB3YWl0X2Zvcl9jb21wbGV0aW9uKCZuZGV2LT53YWtldXBfY21wbCk7
-DQo+ID4gKw0KPiA+ICsgICAgICAgcmV0dXJuIDA7DQo+ID4gK30NCj4gDQo+IA0KPiA+ICtzdGF0
-aWMgdm9pZCBhbWRfaGFuZGxlX2V2ZW50KHN0cnVjdCBhbWRfbnRiX2RldiAqbmRldiwgaW50IHZl
-Yykgew0KPiA+ICsgICAgICAgdTMyIHN0YXR1czsNCj4gPiArDQo+ID4gKyAgICAgICBzdGF0dXMg
-PSBOVEJfUkVBRF9SRUcoSU5UU1RBVCk7DQo+ID4gKyAgICAgICBpZiAoIShzdGF0dXMgJiBBTURf
-RVZFTlRfSU5UTUFTSykpDQo+ID4gKyAgICAgICAgICAgICAgIHJldHVybjsNCj4gPiArDQo+ID4g
-KyAgICAgICBkZXZfZGJnKG5kZXZfZGV2KG5kZXYpLCAic3RhdHVzID0gMHgleCBhbmQgdmVjID0g
-JWRcbiIsDQo+ID4gKyBzdGF0dXMsIHZlYyk7DQo+ID4gKw0KPiA+ICsgICAgICAgc3RhdHVzICY9
-IEFNRF9FVkVOVF9JTlRNQVNLOw0KPiA+ICsgICAgICAgc3dpdGNoIChzdGF0dXMpIHsNCj4gPiAr
-ICAgICAgIGNhc2UgQU1EX1BFRVJfRkxVU0hfRVZFTlQ6DQo+ID4gKyAgICAgICAgICAgICAgIGNv
-bXBsZXRlKCZuZGV2LT5mbHVzaF9jbXBsKTsNCj4gPiArICAgICAgICAgICAgICAgYnJlYWs7DQo+
-ID4gKyAgICAgICBjYXNlIEFNRF9QRUVSX1JFU0VUX0VWRU5UOg0KPiA+ICsgICAgICAgICAgICAg
-ICBhbWRfYWNrX1NNVShuZGV2LCBBTURfUEVFUl9SRVNFVF9FVkVOVCk7DQo+ID4gKw0KPiA+ICsg
-ICAgICAgICAgICAgICAvKiBsaW5rIGRvd24gZmlyc3QgKi8NCj4gPiArICAgICAgICAgICAgICAg
-bnRiX2xpbmtfZXZlbnQoJm5kZXYtPm50Yik7DQo+ID4gKyAgICAgICAgICAgICAgIC8qIHBvbGxp
-bmcgcGVlciBzdGF0dXMgKi8NCj4gPiArICAgICAgICAgICAgICAgc2NoZWR1bGVfZGVsYXllZF93
-b3JrKCZuZGV2LT5oYl90aW1lciwNCj4gPiArIEFNRF9MSU5LX0hCX1RJTUVPVVQpOw0KPiA+ICsN
-Cj4gPiArICAgICAgICAgICAgICAgYnJlYWs7DQo+ID4gKyAgICAgICBjYXNlIEFNRF9QRUVSX0Qz
-X0VWRU5UOg0KPiA+ICsgICAgICAgY2FzZSBBTURfUEVFUl9QTUVUT19FVkVOVDoNCj4gPiArICAg
-ICAgICAgICAgICAgYW1kX2Fja19TTVUobmRldiwgc3RhdHVzKTsNCj4gPiArDQo+ID4gKyAgICAg
-ICAgICAgICAgIC8qIGxpbmsgZG93biAqLw0KPiA+ICsgICAgICAgICAgICAgICBudGJfbGlua19l
-dmVudCgmbmRldi0+bnRiKTsNCj4gPiArDQo+ID4gKyAgICAgICAgICAgICAgIGJyZWFrOw0KPiA+
-ICsgICAgICAgY2FzZSBBTURfUEVFUl9EMF9FVkVOVDoNCj4gPiArICAgICAgICAgICAgICAgc3Rh
-dHVzID0gTlRCX1JFQURfUEVFUl9SRUcoUE1FU1RBVCk7DQo+ID4gKyAgICAgICAgICAgICAgIC8q
-IGNoZWNrIGlmIHRoaXMgaXMgV0FLRVVQIGV2ZW50ICovDQo+ID4gKyAgICAgICAgICAgICAgIGlm
-IChzdGF0dXMgJiAweDEpDQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgY29tcGxldGUoJm5k
-ZXYtPndha2V1cF9jbXBsKTsNCj4gPiArDQo+ID4gKyAgICAgICAgICAgICAgIGFtZF9hY2tfU01V
-KG5kZXYsIEFNRF9QRUVSX0QwX0VWRU5UKTsNCj4gPiArDQo+ID4gKyAgICAgICAgICAgICAgIGlm
-IChhbWRfbGlua19pc191cChuZGV2KSkNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICBudGJf
-bGlua19ldmVudCgmbmRldi0+bnRiKTsNCj4gPiArICAgICAgICAgICAgICAgZWxzZQ0KPiA+ICsg
-ICAgICAgICAgICAgICAgICAgICAgIHNjaGVkdWxlX2RlbGF5ZWRfd29yaygmbmRldi0+aGJfdGlt
-ZXIsDQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-QU1EX0xJTktfSEJfVElNRU9VVCk7DQo+ID4gKyAgICAgICAgICAgICAgIGJyZWFrOw0KPiA+ICsg
-ICAgICAgZGVmYXVsdDoNCj4gPiArICAgICAgICAgICAgICAgcHJfZXJyKCJVbnN1cHBvcnRlZCBp
-bnRlcnJ1cHQuXG4iKTsNCj4gPiArICAgICAgICAgICAgICAgYnJlYWs7DQo+ID4gKyAgICAgICB9
-DQo+ID4gK30NCj4gPiArDQo+ID4gK3N0YXRpYyBpcnFyZXR1cm5fdCBuZGV2X2ludGVycnVwdChz
-dHJ1Y3QgYW1kX250Yl9kZXYgKm5kZXYsIGludCB2ZWMpDQo+ID4gK3sNCj4gPiArICAgICAgIGRl
-dl9kYmcobmRldl9kZXYobmRldiksICJ2ZWMgJWRcbiIsIHZlYyk7DQo+ID4gKw0KPiA+ICsgICAg
-ICAgaWYgKHZlYyA+IDIwKSB7DQo+IA0KPiBUaGlzIGR1cGxpY2F0ZXMgdGhlICJkZWZhdWx0IiBj
-YXNlIG9mIGFtZF9oYW5kbGVfZXZlbnQuDQpPaywgSSdsbCByZWZpbmUgdGhlIGNvZGUuDQoNCj4g
-DQo+ID4gKyAgICAgICAgICAgICAgIGRldl9lcnIobmRldl9kZXYobmRldiksICJJbnZhbGlkIGlu
-dGVycnVwdC5cbiIpOw0KPiA+ICsgICAgICAgICAgICAgICByZXR1cm4gSVJRX0hBTkRMRUQ7DQo+
-ID4gKyAgICAgICB9DQo+ID4gKw0KPiA+ICsgICAgICAgaWYgKHZlYyA+IDE2IHx8IChuZGV2LT5t
-c2l4X3ZlY19jb3VudCA9PSAxKSkNCj4gPiArICAgICAgICAgICAgICAgYW1kX2hhbmRsZV9ldmVu
-dChuZGV2LCB2ZWMpOw0KPiA+ICsNCj4gPiArICAgICAgIGlmICh2ZWMgPCAxNikNCj4gPiArICAg
-ICAgICAgICAgICAgbnRiX2RiX2V2ZW50KCZuZGV2LT5udGIsIHZlYyk7DQo+ID4gKw0KPiA+ICsg
-ICAgICAgcmV0dXJuIElSUV9IQU5ETEVEOw0KPiA+ICt9DQo=
+On Thu, Dec 17, 2015 at 3:17 AM, Xiangliang Yu <Xiangliang.Yu@amd.com> wrote:
+> AMD NTB support following main features:
+> (1) Three memory windows;
+> (2) Sixteen 32-bit scratch pad;
+> (3) Two 16-bit doorbell interrupt;
+> (4) Five event interrupts;
+> (5) One system can wake up opposite system of NTB;
+> (6) Flush previous request to the opposite system;
+> (7) There are reset and PME_TO mechanisms between two systems;
+>
+> Signed-off-by: Xiangliang Yu <Xiangliang.Yu@amd.com>
+
+Is hardware available on which this can be tested?
+
+> +++ b/drivers/ntb/hw/amd/ntb_hw_amd.c
+
+> +static u64 amd_ntb_db_read(struct ntb_dev *ntb)
+> +{
+> +       struct amd_ntb_dev *ndev = ntb_ndev(ntb);
+> +
+> +       return (u64)NTB_READ_REG(DBSTAT);
+> +}
+
+DBSTAT hides the use of ndev, or ndev is unused.  The code should be
+more clear, here, and in other places where NTB_READ_REG and
+NTB_WRITE_REG are used with a macro argument.
+
+> +static void amd_ack_SMU(struct amd_ntb_dev *ndev, u32 bit)
+> +{
+> +       int reg;
+> +
+> +       reg = NTB_READ_REG(SMUACK);
+> +       reg |= bit;
+> +       NTB_WRITE_REG(reg, SMUACK);
+> +
+> +       ndev->peer_sta |= bit;
+> +}
+> +
+> +/*
+> + * flush the requests to peer side
+> + */
+> +static int amd_flush_peer_requests(struct amd_ntb_dev *ndev)
+> +{
+> +       u32 reg;
+> +
+> +       if (!amd_link_is_up(ndev)) {
+> +               dev_err(ndev_dev(ndev), "link is down.\n");
+> +               return -EINVAL;
+> +       }
+> +
+
+Add reinit_completion, or this may already be "complete" from a previous flush.
+
+> +       reg = NTB_READ_REG(FLUSHTRIG);
+> +       reg |= 0x1;
+> +       NTB_WRITE_REG(reg, FLUSHTRIG);
+> +
+> +       wait_for_completion(&ndev->flush_cmpl);
+
+Because of wait_for_completion, that this can only be called in a
+thread context.  This is unlike other functions of ntb.h, so there
+should at least be a note in the api documentation.
+
+> +
+> +       return 0;
+> +}
+> +
+> +/*
+> + * wake up the peer side
+> + */
+> +static int amd_wakeup_peer_side(struct amd_ntb_dev *ndev)
+> +{
+> +       u32 reg;
+> +
+> +       if (!amd_link_is_up(ndev)) {
+> +               dev_warn(ndev_dev(ndev), "link is down.\n");
+> +               return -EINVAL;
+> +       }
+> +
+
+See previous comment.
+
+> +       NTB_READ_REG(PMSGTRIG);
+> +       reg |= 0x1;
+> +       NTB_WRITE_REG(reg, PMSGTRIG);
+> +
+> +       wait_for_completion(&ndev->wakeup_cmpl);
+> +
+> +       return 0;
+> +}
+
+
+> +static void amd_handle_event(struct amd_ntb_dev *ndev, int vec)
+> +{
+> +       u32 status;
+> +
+> +       status = NTB_READ_REG(INTSTAT);
+> +       if (!(status & AMD_EVENT_INTMASK))
+> +               return;
+> +
+> +       dev_dbg(ndev_dev(ndev), "status = 0x%x and vec = %d\n", status, vec);
+> +
+> +       status &= AMD_EVENT_INTMASK;
+> +       switch (status) {
+> +       case AMD_PEER_FLUSH_EVENT:
+> +               complete(&ndev->flush_cmpl);
+> +               break;
+> +       case AMD_PEER_RESET_EVENT:
+> +               amd_ack_SMU(ndev, AMD_PEER_RESET_EVENT);
+> +
+> +               /* link down first */
+> +               ntb_link_event(&ndev->ntb);
+> +               /* polling peer status */
+> +               schedule_delayed_work(&ndev->hb_timer, AMD_LINK_HB_TIMEOUT);
+> +
+> +               break;
+> +       case AMD_PEER_D3_EVENT:
+> +       case AMD_PEER_PMETO_EVENT:
+> +               amd_ack_SMU(ndev, status);
+> +
+> +               /* link down */
+> +               ntb_link_event(&ndev->ntb);
+> +
+> +               break;
+> +       case AMD_PEER_D0_EVENT:
+> +               status = NTB_READ_PEER_REG(PMESTAT);
+> +               /* check if this is WAKEUP event */
+> +               if (status & 0x1)
+> +                       complete(&ndev->wakeup_cmpl);
+> +
+> +               amd_ack_SMU(ndev, AMD_PEER_D0_EVENT);
+> +
+> +               if (amd_link_is_up(ndev))
+> +                       ntb_link_event(&ndev->ntb);
+> +               else
+> +                       schedule_delayed_work(&ndev->hb_timer,
+> +                                               AMD_LINK_HB_TIMEOUT);
+> +               break;
+> +       default:
+> +               pr_err("Unsupported interrupt.\n");
+> +               break;
+> +       }
+> +}
+> +
+> +static irqreturn_t ndev_interrupt(struct amd_ntb_dev *ndev, int vec)
+> +{
+> +       dev_dbg(ndev_dev(ndev), "vec %d\n", vec);
+> +
+> +       if (vec > 20) {
+
+This duplicates the "default" case of amd_handle_event.
+
+> +               dev_err(ndev_dev(ndev), "Invalid interrupt.\n");
+> +               return IRQ_HANDLED;
+> +       }
+> +
+> +       if (vec > 16 || (ndev->msix_vec_count == 1))
+> +               amd_handle_event(ndev, vec);
+> +
+> +       if (vec < 16)
+> +               ntb_db_event(&ndev->ntb, vec);
+> +
+> +       return IRQ_HANDLED;
+> +}
