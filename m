@@ -1,42 +1,48 @@
-Return-Path: <Xiangliang.Yu@amd.com>
-Received: from na01-by2-obe.outbound.protection.outlook.com (mail-by2on0078.outbound.protection.outlook.com. [207.46.100.78])
-        by gmr-mx.google.com with ESMTPS id t9si12304ign.3.2015.12.16.19.19.34
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-yk0-x231.google.com (mail-yk0-x231.google.com. [2607:f8b0:4002:c07::231])
+        by gmr-mx.google.com with ESMTPS id i144si1747429ywe.2.2015.12.19.14.55.16
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Wed, 16 Dec 2015 19:19:34 -0800 (PST)
-From: Xiangliang Yu <Xiangliang.Yu@amd.com>
-Subject: [PATCH 2/3] NTB: Add AMD NTB support in Kconfig and Makefile
-Date: Thu, 17 Dec 2015 16:18:00 +0800
-Message-ID: <1450340280-18953-1-git-send-email-Xiangliang.Yu@amd.com>
-MIME-Version: 1.0
-Content-Type: text/plain
-Return-Path: Xiangliang.Yu@amd.com
-To: jdmason@kudzu.us, dave.jiang@intel.com, Allen.Hubbe@emc.com, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
-Cc: SPG_Linux_Kernel@amd.com, Xiangliang Yu <Xiangliang.Yu@amd.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Sat, 19 Dec 2015 14:55:16 -0800 (PST)
+Received: by mail-yk0-x231.google.com with SMTP id p130so97152375yka.1
+        for <linux-ntb@googlegroups.com>; Sat, 19 Dec 2015 14:55:16 -0800 (PST)
+Return-Path: <jdmason@kudzu.us>
+Received: from arkham.kudzu.us ([98.122.145.248])
+        by smtp.gmail.com with ESMTPSA id h64sm23554422ywd.46.2015.12.19.14.55.14
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1 cipher=AES128-SHA bits=128/128);
+        Sat, 19 Dec 2015 14:55:15 -0800 (PST)
+From: Jon Mason <jdmason@kudzu.us>
+Subject: [PATCH] NTB: ntb_process_tx error path bug
+Date: Sat, 19 Dec 2015 17:55:07 -0500
+Message-Id: <1450565707-3904-1-git-send-email-jdmason@kudzu.us>
+To: linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-This patch is to enable AMD NTB support in Kconfig and Makefile.
+The transmit overrun avoidance error path in ntb_process_tx accidentally
+swapped the first two values being passed to the tx_handler client.
+This could result in crashes in the ntb_netdev (or other out-of-tree NTB
+clients).
 
-Signed-off-by: Xiangliang Yu <Xiangliang.Yu@amd.com>
+Reported-by: Alex Depoutovitch <alex@pernixdata.com>
+Signed-off-by: Jon Mason <jdmason@kudzu.us>
 ---
- drivers/ntb/hw/Kconfig  | 1 +
- drivers/ntb/hw/Makefile | 1 +
- 2 files changed, 2 insertions(+)
+ drivers/ntb/ntb_transport.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/ntb/hw/Kconfig b/drivers/ntb/hw/Kconfig
-index 4d5535c..0c5c2a6 100644
---- a/drivers/ntb/hw/Kconfig
-+++ b/drivers/ntb/hw/Kconfig
-@@ -1 +1,2 @@
- source "drivers/ntb/hw/intel/Kconfig"
-+source "drivers/ntb/hw/amd/Kconfig"
-diff --git a/drivers/ntb/hw/Makefile b/drivers/ntb/hw/Makefile
-index 175d7c9..636be7d 100644
---- a/drivers/ntb/hw/Makefile
-+++ b/drivers/ntb/hw/Makefile
-@@ -1 +1,2 @@
- obj-$(CONFIG_NTB_INTEL)	+= intel/
-+obj-$(CONFIG_NTB_AMD)	+= amd/
+diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+index 60654d5..bd1bcb3 100644
+--- a/drivers/ntb/ntb_transport.c
++++ b/drivers/ntb/ntb_transport.c
+@@ -1532,7 +1532,7 @@ static int ntb_process_tx(struct ntb_transport_qp *qp,
+ 
+ 	if (entry->len > qp->tx_max_frame - sizeof(struct ntb_payload_header)) {
+ 		if (qp->tx_handler)
+-			qp->tx_handler(qp->cb_data, qp, NULL, -EIO);
++			qp->tx_handler(qp, qp->cb_data, NULL, -EIO);
+ 
+ 		ntb_list_add(&qp->ntb_tx_free_q_lock, &entry->entry,
+ 			     &qp->tx_free_q);
 -- 
-1.9.1
+2.1.4
 
