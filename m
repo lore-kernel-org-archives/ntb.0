@@ -1,48 +1,43 @@
-Return-Path: <jdmason@kudzu.us>
-Received: from mail-yk0-x231.google.com (mail-yk0-x231.google.com. [2607:f8b0:4002:c07::231])
-        by gmr-mx.google.com with ESMTPS id i144si1747429ywe.2.2015.12.19.14.55.16
+Return-Path: <Xiangliang.Yu@amd.com>
+Received: from na01-bn1-obe.outbound.protection.outlook.com (mail-bn1bon0099.outbound.protection.outlook.com. [157.56.111.99])
+        by gmr-mx.google.com with ESMTPS id fg10si4357883pad.0.2015.12.23.00.44.06
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Sat, 19 Dec 2015 14:55:16 -0800 (PST)
-Received: by mail-yk0-x231.google.com with SMTP id p130so97152375yka.1
-        for <linux-ntb@googlegroups.com>; Sat, 19 Dec 2015 14:55:16 -0800 (PST)
-Return-Path: <jdmason@kudzu.us>
-Received: from arkham.kudzu.us ([98.122.145.248])
-        by smtp.gmail.com with ESMTPSA id h64sm23554422ywd.46.2015.12.19.14.55.14
-        for <linux-ntb@googlegroups.com>
-        (version=TLS1 cipher=AES128-SHA bits=128/128);
-        Sat, 19 Dec 2015 14:55:15 -0800 (PST)
-From: Jon Mason <jdmason@kudzu.us>
-Subject: [PATCH] NTB: ntb_process_tx error path bug
-Date: Sat, 19 Dec 2015 17:55:07 -0500
-Message-Id: <1450565707-3904-1-git-send-email-jdmason@kudzu.us>
-To: linux-ntb@googlegroups.com
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
+        Wed, 23 Dec 2015 00:44:06 -0800 (PST)
+From: Xiangliang Yu <Xiangliang.Yu@amd.com>
+Subject: [PATCH V2 0/3] Change notes of V2
+Date: Wed, 23 Dec 2015 21:42:40 +0800
+Message-ID: <1450878160-9259-1-git-send-email-Xiangliang.Yu@amd.com>
+MIME-Version: 1.0
+Content-Type: text/plain
+Return-Path: Xiangliang.Yu@amd.com
+To: jdmason@kudzu.us, dave.jiang@intel.com, Allen.Hubbe@emc.com, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
+Cc: SPG_Linux_Kernel@amd.com, Xiangliang Yu <Xiangliang.Yu@amd.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-The transmit overrun avoidance error path in ntb_process_tx accidentally
-swapped the first two values being passed to the tx_handler client.
-This could result in crashes in the ntb_netdev (or other out-of-tree NTB
-clients).
+Main changes in V2:
+1. Fixed compiler warning;
+2. Add marcro argument of ndev in NTB_READ_REG/NTB_WRITE_REG;
+3. Add notes for flush and wakeup interfaces;
 
-Reported-by: Alex Depoutovitch <alex@pernixdata.com>
-Signed-off-by: Jon Mason <jdmason@kudzu.us>
----
- drivers/ntb/ntb_transport.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Xiangliang Yu (3):
+  NTB: Add AMD PCI-Express NTB driver
+  NTB: Add AMD NTB support in Kconfig and Makefile
+  NTB: Add flush_req and wakeup interface
 
-diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 60654d5..bd1bcb3 100644
---- a/drivers/ntb/ntb_transport.c
-+++ b/drivers/ntb/ntb_transport.c
-@@ -1532,7 +1532,7 @@ static int ntb_process_tx(struct ntb_transport_qp *qp,
- 
- 	if (entry->len > qp->tx_max_frame - sizeof(struct ntb_payload_header)) {
- 		if (qp->tx_handler)
--			qp->tx_handler(qp->cb_data, qp, NULL, -EIO);
-+			qp->tx_handler(qp, qp->cb_data, NULL, -EIO);
- 
- 		ntb_list_add(&qp->ntb_tx_free_q_lock, &entry->entry,
- 			     &qp->tx_free_q);
+ drivers/ntb/hw/Kconfig          |    1 +
+ drivers/ntb/hw/Makefile         |    1 +
+ drivers/ntb/hw/amd/Kconfig      |    7 +
+ drivers/ntb/hw/amd/Makefile     |    1 +
+ drivers/ntb/hw/amd/ntb_hw_amd.c | 1265 +++++++++++++++++++++++++++++++++++++++
+ drivers/ntb/hw/amd/ntb_hw_amd.h |  265 ++++++++
+ include/linux/ntb.h             |   35 ++
+ 7 files changed, 1575 insertions(+)
+ create mode 100644 drivers/ntb/hw/amd/Kconfig
+ create mode 100644 drivers/ntb/hw/amd/Makefile
+ create mode 100644 drivers/ntb/hw/amd/ntb_hw_amd.c
+ create mode 100644 drivers/ntb/hw/amd/ntb_hw_amd.h
+
 -- 
-2.1.4
+1.9.1
 
