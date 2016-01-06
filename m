@@ -1,12 +1,12 @@
 Return-Path: <dave.jiang@intel.com>
-Received: from mga02.intel.com (mga02.intel.com. [134.134.136.20])
-        by gmr-mx.google.com with ESMTP id 190si909179pfb.1.2016.01.11.13.50.12
+Received: from mga11.intel.com (mga11.intel.com. [192.55.52.93])
+        by gmr-mx.google.com with ESMTP id jj4si9096173pac.2.2016.01.06.10.04.45
         for <linux-ntb@googlegroups.com>;
-        Mon, 11 Jan 2016 13:50:12 -0800 (PST)
-Subject: [PATCH v3] ntb: ntb perf tool
+        Wed, 06 Jan 2016 10:04:47 -0800 (PST)
+Subject: [PATCH v2] ntb: ntb perf tool
 From: Dave Jiang <dave.jiang@intel.com>
-Date: Mon, 11 Jan 2016 14:50:10 -0700
-Message-ID: <20160111215010.71846.25028.stgit@djiang5-desk3.ch.intel.com>
+Date: Wed, 06 Jan 2016 11:04:42 -0700
+Message-ID: <20160106180442.203921.90814.stgit@djiang5-desk3.ch.intel.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -58,7 +58,7 @@ index 0ea32a3..9e77e0b 100644
 +obj-$(CONFIG_NTB_PERF) += ntb_perf.o
 diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
 new file mode 100644
-index 0000000..f18be06
+index 0000000..af06286
 --- /dev/null
 +++ b/drivers/ntb/test/ntb_perf.c
 @@ -0,0 +1,752 @@
@@ -335,8 +335,8 @@ index 0000000..f18be06
 +	u64 perf, diff_us;
 +	ktime_t kstart, kstop, kdiff;
 +
-+	chunks = div64_u64(win_size, buf_size);
-+	total_chunks = div64_u64(total, buf_size);
++	chunks = win_size / buf_size;
++	total_chunks = total / buf_size;
 +	kstart = ktime_get();
 +
 +	for (i = 0; i < total_chunks; i++) {
@@ -370,7 +370,7 @@ index 0000000..f18be06
 +
 +	pr_info("%s: lasted %llu usecs\n", current->comm, diff_us);
 +
-+	perf = div64_u64(copied, diff_us);
++	perf = copied / diff_us;
 +
 +	pr_info("%s: MBytes/s: %llu\n", current->comm, perf);
 +
