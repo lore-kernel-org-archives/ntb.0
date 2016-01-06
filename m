@@ -1,81 +1,49 @@
-Return-Path: <jdmason@kudzu.us>
-Received: from mail-wm0-x233.google.com (mail-wm0-x233.google.com. [2a00:1450:400c:c09::233])
-        by gmr-mx.google.com with ESMTPS id 5si252847wmm.2.2016.01.06.09.48.03
+Return-Path: <Allen.Hubbe@emc.com>
+Received: from mailuogwhop.emc.com (mailuogwhop.emc.com. [168.159.213.141])
+        by gmr-mx.google.com with ESMTPS id w129si198791wme.1.2016.01.06.08.52.52
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 06 Jan 2016 09:48:03 -0800 (PST)
-Received: by mail-wm0-x233.google.com with SMTP id u188so68964652wmu.1
-        for <linux-ntb@googlegroups.com>; Wed, 06 Jan 2016 09:48:03 -0800 (PST)
-MIME-Version: 1.0
-In-Reply-To: <40F65EF2B5E2254199711F58E3ACB84D99EF72E1@MX104CL02.corp.emc.com>
+        Wed, 06 Jan 2016 08:52:53 -0800 (PST)
+From: "Hubbe, Allen" <Allen.Hubbe@emc.com>
+Subject: RE: [PATCH V2 1/3] NTB: Add AMD PCI-Express NTB driver
+Date: Wed, 6 Jan 2016 16:52:26 +0000
+Message-ID: <40F65EF2B5E2254199711F58E3ACB84D99EF72E1@MX104CL02.corp.emc.com>
 References: <1450878175-9300-1-git-send-email-Xiangliang.Yu@amd.com>
-	<CAPoiz9znO1QT9Fphtmf4Wp2Tkvm1H-thy2=SrPi_dT9uQ4HoMQ@mail.gmail.com>
-	<40F65EF2B5E2254199711F58E3ACB84D99EF72E1@MX104CL02.corp.emc.com>
-Date: Wed, 6 Jan 2016 12:48:03 -0500
-Message-ID: <CAPoiz9y3j8=kMzZzRVrBy+0txpLgRYeq5Es51KPPau6vKv1pxA@mail.gmail.com>
-Subject: Re: [PATCH V2 1/3] NTB: Add AMD PCI-Express NTB driver
-From: Jon Mason <jdmason@kudzu.us>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-To: "Hubbe, Allen" <Allen.Hubbe@emc.com>
-Cc: Xiangliang Yu <Xiangliang.Yu@amd.com>, Dave Jiang <dave.jiang@intel.com>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, linux-kernel <linux-kernel@vger.kernel.org>, "SPG_Linux_Kernel@amd.com" <SPG_Linux_Kernel@amd.com>
+ <CAPoiz9znO1QT9Fphtmf4Wp2Tkvm1H-thy2=SrPi_dT9uQ4HoMQ@mail.gmail.com>
+In-Reply-To: <CAPoiz9znO1QT9Fphtmf4Wp2Tkvm1H-thy2=SrPi_dT9uQ4HoMQ@mail.gmail.com>
+Content-Language: en-US
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
+To: Jon Mason <jdmason@kudzu.us>, Xiangliang Yu <Xiangliang.Yu@amd.com>
+Cc: Dave Jiang <dave.jiang@intel.com>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, linux-kernel <linux-kernel@vger.kernel.org>, "SPG_Linux_Kernel@amd.com" <SPG_Linux_Kernel@amd.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Wed, Jan 6, 2016 at 11:52 AM, Hubbe, Allen <Allen.Hubbe@emc.com> wrote:
-> From: Jon Mason <jdmason@kudzu.us>:
->> On Wed, Dec 23, 2015 at 8:42 AM, Xiangliang Yu <Xiangliang.Yu@amd.com>
->> wrote:
->
->> > +#define ndev_pdev(ndev) ((ndev)->ntb.pdev)
->> > +#define ndev_name(ndev) pci_name(ndev_pdev(ndev))
->> > +#define ndev_dev(ndev) (&ndev_pdev(ndev)->dev)
->> > +#define ntb_ndev(ntb) container_of(ntb, struct amd_ntb_dev, ntb)
->> > +#define hb_ndev(work) container_of(work, struct amd_ntb_dev,
->> hb_timer.work)
->> > +#define ntb_hotplug_ndev(context) (container_of((context),     \
->> > +                       struct ntb_acpi_hotplug_context, hp)->ndev)
->>
->> Seems like these are hiding things too.  Please use them directly (or
->> at least put them in the C file and not the header file).
->
-> I like these macros for up/down casting.  Putting them close to the struc=
-ture definition seems appropriate to me, too.  I would rather see them move=
-d to right below the definition of struct amd_ntb_dev, instead of to the c =
-file.  That is my opinion, but Jon can make the final decision on it.
-
-My opinion wasn't super strong on these.  If Allen is fine with them,
-then good enough for me :)
-
-
-> However, these in particular are buggy:
->
->> > +#define ntb_ndev(ntb) container_of(ntb, struct amd_ntb_dev, ntb)
->> > +#define hb_ndev(work) container_of(work, struct amd_ntb_dev,
->> hb_timer.work)
->
-> Note: "ntb" will be replaced in all occurrences to the right.  This only =
-works if the name "ntb" is passed as the argument.  If the argument is name=
-d "foo", it will either fail at compile time to find the member "foo" in st=
-ruct amd_ntb_dev, or worse, it will hide a bug accessing the wrong member o=
-f the struct.
->
-> Rename the macro parameter __ntb.
-
-Good call.  Please make the necessary mods Xiangliang.
-
-Thanks,
-Jon
-
-
-> Allen
->
-> --
-> You received this message because you are subscribed to the Google Groups=
- "linux-ntb" group.
-> To unsubscribe from this group and stop receiving emails from it, send an=
- email to linux-ntb+unsubscribe@googlegroups.com.
-> To post to this group, send email to linux-ntb@googlegroups.com.
-> To view this discussion on the web visit https://groups.google.com/d/msgi=
-d/linux-ntb/40F65EF2B5E2254199711F58E3ACB84D99EF72E1%40MX104CL02.corp.emc.c=
-om.
-> For more options, visit https://groups.google.com/d/optout.
+RnJvbTogSm9uIE1hc29uIDxqZG1hc29uQGt1ZHp1LnVzPjoNCj4gT24gV2VkLCBEZWMgMjMsIDIw
+MTUgYXQgODo0MiBBTSwgWGlhbmdsaWFuZyBZdSA8WGlhbmdsaWFuZy5ZdUBhbWQuY29tPg0KPiB3
+cm90ZToNCg0KPiA+ICsjZGVmaW5lIG5kZXZfcGRldihuZGV2KSAoKG5kZXYpLT5udGIucGRldikN
+Cj4gPiArI2RlZmluZSBuZGV2X25hbWUobmRldikgcGNpX25hbWUobmRldl9wZGV2KG5kZXYpKQ0K
+PiA+ICsjZGVmaW5lIG5kZXZfZGV2KG5kZXYpICgmbmRldl9wZGV2KG5kZXYpLT5kZXYpDQo+ID4g
+KyNkZWZpbmUgbnRiX25kZXYobnRiKSBjb250YWluZXJfb2YobnRiLCBzdHJ1Y3QgYW1kX250Yl9k
+ZXYsIG50YikNCj4gPiArI2RlZmluZSBoYl9uZGV2KHdvcmspIGNvbnRhaW5lcl9vZih3b3JrLCBz
+dHJ1Y3QgYW1kX250Yl9kZXYsDQo+IGhiX3RpbWVyLndvcmspDQo+ID4gKyNkZWZpbmUgbnRiX2hv
+dHBsdWdfbmRldihjb250ZXh0KSAoY29udGFpbmVyX29mKChjb250ZXh0KSwgICAgIFwNCj4gPiAr
+ICAgICAgICAgICAgICAgICAgICAgICBzdHJ1Y3QgbnRiX2FjcGlfaG90cGx1Z19jb250ZXh0LCBo
+cCktPm5kZXYpDQo+IA0KPiBTZWVtcyBsaWtlIHRoZXNlIGFyZSBoaWRpbmcgdGhpbmdzIHRvby4g
+IFBsZWFzZSB1c2UgdGhlbSBkaXJlY3RseSAob3INCj4gYXQgbGVhc3QgcHV0IHRoZW0gaW4gdGhl
+IEMgZmlsZSBhbmQgbm90IHRoZSBoZWFkZXIgZmlsZSkuDQoNCkkgbGlrZSB0aGVzZSBtYWNyb3Mg
+Zm9yIHVwL2Rvd24gY2FzdGluZy4gIFB1dHRpbmcgdGhlbSBjbG9zZSB0byB0aGUgc3RydWN0dXJl
+IGRlZmluaXRpb24gc2VlbXMgYXBwcm9wcmlhdGUgdG8gbWUsIHRvby4gIEkgd291bGQgcmF0aGVy
+IHNlZSB0aGVtIG1vdmVkIHRvIHJpZ2h0IGJlbG93IHRoZSBkZWZpbml0aW9uIG9mIHN0cnVjdCBh
+bWRfbnRiX2RldiwgaW5zdGVhZCBvZiB0byB0aGUgYyBmaWxlLiAgVGhhdCBpcyBteSBvcGluaW9u
+LCBidXQgSm9uIGNhbiBtYWtlIHRoZSBmaW5hbCBkZWNpc2lvbiBvbiBpdC4NCg0KSG93ZXZlciwg
+dGhlc2UgaW4gcGFydGljdWxhciBhcmUgYnVnZ3k6DQoNCj4gPiArI2RlZmluZSBudGJfbmRldihu
+dGIpIGNvbnRhaW5lcl9vZihudGIsIHN0cnVjdCBhbWRfbnRiX2RldiwgbnRiKQ0KPiA+ICsjZGVm
+aW5lIGhiX25kZXYod29yaykgY29udGFpbmVyX29mKHdvcmssIHN0cnVjdCBhbWRfbnRiX2RldiwN
+Cj4gaGJfdGltZXIud29yaykNCg0KTm90ZTogIm50YiIgd2lsbCBiZSByZXBsYWNlZCBpbiBhbGwg
+b2NjdXJyZW5jZXMgdG8gdGhlIHJpZ2h0LiAgVGhpcyBvbmx5IHdvcmtzIGlmIHRoZSBuYW1lICJu
+dGIiIGlzIHBhc3NlZCBhcyB0aGUgYXJndW1lbnQuICBJZiB0aGUgYXJndW1lbnQgaXMgbmFtZWQg
+ImZvbyIsIGl0IHdpbGwgZWl0aGVyIGZhaWwgYXQgY29tcGlsZSB0aW1lIHRvIGZpbmQgdGhlIG1l
+bWJlciAiZm9vIiBpbiBzdHJ1Y3QgYW1kX250Yl9kZXYsIG9yIHdvcnNlLCBpdCB3aWxsIGhpZGUg
+YSBidWcgYWNjZXNzaW5nIHRoZSB3cm9uZyBtZW1iZXIgb2YgdGhlIHN0cnVjdC4NCg0KUmVuYW1l
+IHRoZSBtYWNybyBwYXJhbWV0ZXIgX19udGIuDQoNCkFsbGVuDQo=
