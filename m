@@ -1,70 +1,81 @@
-Return-Path: <Xiangliang.Yu@amd.com>
-Received: from na01-bn1-obe.outbound.protection.outlook.com (mail-bn1on0068.outbound.protection.outlook.com. [157.56.110.68])
-        by gmr-mx.google.com with ESMTPS id 190si564246pfb.1.2016.01.10.23.07.56
+Return-Path: <Allen.Hubbe@emc.com>
+Received: from mailuogwhop.emc.com (mailuogwhop.emc.com. [168.159.213.141])
+        by gmr-mx.google.com with ESMTPS id jj4si10691868pac.2.2016.01.08.07.39.49
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Sun, 10 Jan 2016 23:07:56 -0800 (PST)
-From: "Yu, Xiangliang" <Xiangliang.Yu@amd.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 08 Jan 2016 07:39:50 -0800 (PST)
+From: "Allen Hubbe" <Allen.Hubbe@emc.com>
+References: <1450878175-9300-1-git-send-email-Xiangliang.Yu@amd.com>	<CAPoiz9znO1QT9Fphtmf4Wp2Tkvm1H-thy2=SrPi_dT9uQ4HoMQ@mail.gmail.com>	<BLUPR12MB0420841C92C2D403A12EA4CFEBF50@BLUPR12MB0420.namprd12.prod.outlook.com> <CAPoiz9zqbgTvTA7hgKEQQGAuCbodH3D3dwmvNwkzRQPM1GA=aw@mail.gmail.com>
+In-Reply-To: <CAPoiz9zqbgTvTA7hgKEQQGAuCbodH3D3dwmvNwkzRQPM1GA=aw@mail.gmail.com>
 Subject: RE: [PATCH V2 1/3] NTB: Add AMD PCI-Express NTB driver
-Date: Mon, 11 Jan 2016 07:07:51 +0000
-Message-ID: <BLUPR12MB04201B8AB79A25C8173863C4EBC90@BLUPR12MB0420.namprd12.prod.outlook.com>
-References: <1450878175-9300-1-git-send-email-Xiangliang.Yu@amd.com>
-	<CAPoiz9znO1QT9Fphtmf4Wp2Tkvm1H-thy2=SrPi_dT9uQ4HoMQ@mail.gmail.com>
-	<BLUPR12MB0420841C92C2D403A12EA4CFEBF50@BLUPR12MB0420.namprd12.prod.outlook.com>
- <CAPoiz9zqbgTvTA7hgKEQQGAuCbodH3D3dwmvNwkzRQPM1GA=aw@mail.gmail.com>
- <000d01d14a2a$c0879d50$4196d7f0$@emc.com>
-In-Reply-To: <000d01d14a2a$c0879d50$4196d7f0$@emc.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Date: Fri, 8 Jan 2016 10:39:24 -0500
+Message-ID: <000d01d14a2a$c0879d50$4196d7f0$@emc.com>
 MIME-Version: 1.0
-To: Allen Hubbe <Allen.Hubbe@emc.com>, 'Jon Mason' <jdmason@kudzu.us>
-Cc: 'Dave Jiang' <dave.jiang@intel.com>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, 'linux-kernel' <linux-kernel@vger.kernel.org>, SPG_Linux_Kernel <SPG_Linux_Kernel@amd.com>
+Content-Type: text/plain;
+	charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+Content-Language: en-us
+To: 'Jon Mason' <jdmason@kudzu.us>, "'Yu, Xiangliang'" <Xiangliang.Yu@amd.com>
+Cc: 'Dave Jiang' <dave.jiang@intel.com>, linux-ntb@googlegroups.com, 'linux-kernel' <linux-kernel@vger.kernel.org>, 'SPG_Linux_Kernel' <SPG_Linux_Kernel@amd.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-PiBGcm9tOiBKb24gTWFzb24gPGpkbWFzb25Aa3VkenUudXM+DQo+ID4gT24gV2VkLCBKYW4gNiwg
-MjAxNiBhdCA5OjUwIFBNLCBZdSwgWGlhbmdsaWFuZyA8WGlhbmdsaWFuZy5ZdUBhbWQuY29tPg0K
-PiA+IHdyb3RlOg0KPiA+ID4+ID4gKyNkZWZpbmUgTlRCX1JFQURfUkVHKGJhc2UsIHIpIChpb3Jl
-YWQzMihiYXNlICsgQU1EXyAjIyByICMjDQo+ID4gPj4gX09GRlNFVCkpDQo+ID4gPj4gPiArI2Rl
-ZmluZSBOVEJfV1JJVEVfUkVHKGJhc2UsIHZhbCwgcikgKGlvd3JpdGUzMih2YWwsIGJhc2UgKyAg
-ICAgXA0KPiA+ID4+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgQU1EXyAjIyByICMjDQo+ID4gX09GRlNFVCkpDQo+ID4gPj4gPiArI2RlZmluZSBOVEJf
-UkVBRF9PRkZTRVQoYmFzZSwgciwgb2YpIChpb3JlYWQzMihiYXNlICsgb2YgKw0KPiA+IFwNCj4g
-PiA+PiA+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIEFN
-RF8gIyMgciAjIw0KPiA+IF9PRkZTRVQpKQ0KPiA+ID4+ID4gKyNkZWZpbmUgTlRCX1dSSVRFX09G
-RlNFVChiYXNlLCB2YWwsIHIsIG9mKSAoaW93cml0ZTMyKHZhbCwgYmFzZQ0KPiA+ID4+ID4gKysN
-Cj4gPiBcDQo+ID4gPj4gPiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICBvZiArIEFNRF8gIyMgciAjIw0KPiA+IF9PRkZTRVQpKQ0KPiA+ID4+DQo+ID4gPj4g
-UGxlYXNlIGRvIG5vdCB1c2UgbWFyY29zIHRvIGhpZGUgaW9yZWFkL2lvd3JpdGUuICBDYWxsDQo+
-ID4gPj4gaW9yd2FkL2lvd3JpdGUNCj4gPiBkaXJlY3RseS4NCj4gPiA+DQo+ID4gPiBJIGRvbid0
-IHNlZSBhbnkgd3JvbmcgdG8gaGlkZSBpb3JlYWQvaW93cml0ZSwgYW5kIEkgdGhpbmsgdGhlIG1h
-Y3Jvcw0KPiA+IGNhbiBtYWtlIGNvZGUgcmVhZGFibGUgYW5kIGVhc3kgdG8gbWFpbnRhaW4uDQo+
-ID4NCj4gPiBJIGRpc2FncmVlLiAgSXQgaXMgYW4gdW5uZWNlc3NhcnkgbGF5ZXIgYW5kIGNhbiBh
-ZGQgdG8gY29uZnVzaW9uLg0KPiA+IFBsZWFzZSBtYWtlIHRoZSBjaGFuZ2UuDQo+IA0KPiBJIGRv
-bid0IGxpa2UgQU1EXyMjciMjX09GRlNFVCBpbiB0aGVzZSBtYWNyb3MuICBJdCBoaWRlcyB0aGUg
-dXNlIG9mIGENCj4gZ2xvYmFsbHkgbmFtZWQgY29uc3RhbnQgbGlrZSBBTURfRk9PX09GRlNFVCwg
-c2luY2Ugb25lIHdvdWxkIHJlYWQgb25seQ0KPiBGT08gaW4gdGhlIGNvZGUuICBJdCBtYWtlcyBj
-cm9zcyByZWZlcmVuY2luZyBkaWZmaWN1bHQsIHNpbmNlIHRoZSByZWFkZXIgbmVlZHMNCj4gdG8g
-a25vdyBGT08gaXMgcmVhbGx5IEFNRF9GT09fT0ZGU0VULiAgVGhpcyB3b3VsZCBkZWZlYXQgYXV0
-b21hdGljIGNyb3NzDQo+IHJlZmVyZW5jaW5nIGxpa2UgY3Njb3BlIGFuZCBseHIuDQo+IA0KPiAj
-ZGVmaW5lIEFNRF9GT09fT0ZGU0VUIDB4YzBmZjMzDQo+IHZzDQo+IE5UQl9SRUFEX09GRlNFVChk
-ZXYtPmZvb19iYXNlLCBGT08sIG9mZnNldF9pbl9mb28pIC8vIFdoZXJlIGlzIEZPTw0KPiBkZWZp
-bmVkPw0KPiANCj4gVGhpcyBtYWNybyB3b3VsZCBoYXZlIGF0IGxlYXN0IGJlZW4gYmV0dGVyIHdy
-aXR0ZW4gd2l0aG91dCAjIzsgc28gY3Jvc3MNCj4gcmVmZXJlbmNpbmcgd291bGQgc3RpbGwgd29y
-ay4NCj4gDQo+IE5UQl9SRUFEX09GRlNFVChkZXYtPmZvb19iYXNlLCBGT08sIG9mZnNldF9pbl9m
-b28pIHZzDQo+IE5UQl9SRUFEX09GRlNFVChkZXYtPmZvb19iYXNlLCBBTURfRk9PX09GRlNFVCwg
-b2Zmc2V0X2luX2ZvbykgLy8NCj4gQU1EX0ZPT19PRkZTRVQgaXMgMHhjb2ZmMzMgKG9idmlvdXNs
-eSkNCj4gDQo+IEJ1dCB3aXRob3V0ICMjLCB0aGUgbWFjcm8gaXMganVzdCB0aGUgYWRkaXRpb24g
-b2YgaXRzIHBhcmFtZXRlcnMuICBDaGFuZ2UgdGhlDQo+IGNvbW1hcyB0byBhZGRpdGlvbiwgYW5k
-IHRoZSBtYWNybyB0byBpb3JlYWQsIGFuZCB5b3UnbGwgc2VlIHRoZXJlIGlzIG5vDQo+IGJlbmVm
-aXQgZm9yIGhhdmluZyB0aGlzIG1hY3JvIGFueSBtb3JlLg0KPiANCj4gTlRCX1JFQURfT0ZGU0VU
-KGRldi0+Zm9vX2Jhc2UsIEFNRF9GT09fT0ZGU0VULCBvZmZzZXRfaW5fZm9vKSB2cw0KPiBpb3Jl
-YWQzMihkZXYtPmZvb19iYXNlICsgQU1EX0ZPT19PRkZTRVQgKyBvZmZzZXRfaW5fZm9vKQ0KPiAN
-Cj4gSSBzZWNvbmQgSm9uJ3Mgb3Bpbmlvbi4gIFBsZWFzZSBtYWtlIHRoZSBjaGFuZ2UuICBUaGlz
-IHdvdWxkIGJlIGJldHRlciBhcw0KPiBzaW1wbHkgaW9yZWFkL3dyaXRlIGluIHRoZSBjb2RlLg0K
-DQpUaGUgbWFpbiBhaW0gb2YgdGhlc2UgbWFjcm9zIGlzIHRvIGZvY3VzZXMgb24gdGhlIG5hbWUg
-b2YgcmVnaXN0ZXIgKEZPTyksIA0Kbm90IHRoZSB3aG9sZSBtYWNyb3Mgb2YgcmVnaXN0ZXIuIA0K
-YW5kIEkgc2VlIHRoZXJlIGFyZSBsb3RzIG9mIHRoZXNlIHN0eWxlIGluIGtlcm5lbC4NCklmIHlv
-dXIgZ3V5cyBzdGlsbCBjYW4ndCBhY2NlcHQgdGhlIHN0eWxlLCBJIGNhbiBjaGFuZ2UgaXQuIA0K
-QW5kIEknbGwgY2hhbmdlIGlvcmVhZC9pb3dyaXRlIHRvIHJlYWRsL3dyaXRlbCBiZWNhdXNlIGl0
-IG9ubHkgYWNjZXNzIG1taW8gc3BhY2UuDQoNCg==
+From: Jon Mason <jdmason@kudzu.us>
+> On Wed, Jan 6, 2016 at 9:50 PM, Yu, Xiangliang <Xiangliang.Yu@amd.com>
+> wrote:
+> >> > +#define NTB_READ_REG(base, r) (ioread32(base + AMD_ ## r ##
+> >> _OFFSET))
+> >> > +#define NTB_WRITE_REG(base, val, r) (iowrite32(val, base +     \
+> >> > +                                               AMD_ ## r ##
+> _OFFSET))
+> >> > +#define NTB_READ_OFFSET(base, r, of) (ioread32(base + of +
+> \
+> >> > +                                               AMD_ ## r ##
+> _OFFSET))
+> >> > +#define NTB_WRITE_OFFSET(base, val, r, of) (iowrite32(val, base =
++
+> \
+> >> > +                                               of + AMD_ ## r ##
+> _OFFSET))
+> >>
+> >> Please do not use marcos to hide ioread/iowrite.  Call =
+iorwad/iowrite
+> directly.
+> >
+> > I don't see any wrong to hide ioread/iowrite, and I think the macros
+> can make code readable and easy to maintain.
+>=20
+> I disagree.  It is an unnecessary layer and can add to confusion.
+> Please make the change.
+
+I don't like AMD_##r##_OFFSET in these macros.  It hides the use of a =
+globally named constant like AMD_FOO_OFFSET, since one would read only =
+FOO in the code.  It makes cross referencing difficult, since the reader =
+needs to know FOO is really AMD_FOO_OFFSET.  This would defeat automatic =
+cross referencing like cscope and lxr.
+
+#define AMD_FOO_OFFSET 0xc0ff33
+vs
+NTB_READ_OFFSET(dev->foo_base, FOO, offset_in_foo)
+// Where is FOO defined?
+
+This macro would have at least been better written without ##; so cross =
+referencing would still work.
+
+NTB_READ_OFFSET(dev->foo_base, FOO, offset_in_foo)
+vs
+NTB_READ_OFFSET(dev->foo_base, AMD_FOO_OFFSET, offset_in_foo)
+// AMD_FOO_OFFSET is 0xcoff33 (obviously)
+
+But without ##, the macro is just the addition of its parameters.  =
+Change the commas to addition, and the macro to ioread, and you'll see =
+there is no benefit for having this macro any more.
+
+NTB_READ_OFFSET(dev->foo_base, AMD_FOO_OFFSET, offset_in_foo)
+vs
+ioread32(dev->foo_base + AMD_FOO_OFFSET + offset_in_foo)
+
+I second Jon's opinion.  Please make the change.  This would be better =
+as simply ioread/write in the code.
+
+Allen
+
