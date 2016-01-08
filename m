@@ -1,63 +1,53 @@
-Return-Path: <jdmason@kudzu.us>
-Received: from mail-yk0-x229.google.com (mail-yk0-x229.google.com. [2607:f8b0:4002:c07::229])
-        by gmr-mx.google.com with ESMTPS id i138si428626ywe.2.2016.01.21.17.18.30
+Return-Path: <Xiangliang.Yu@amd.com>
+Received: from na01-bl2-obe.outbound.protection.outlook.com (mail-bl2on0064.outbound.protection.outlook.com. [65.55.169.64])
+        by gmr-mx.google.com with ESMTPS id i82si7018099ywb.7.2016.01.07.19.09.37
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 21 Jan 2016 17:18:30 -0800 (PST)
-Received: by mail-yk0-x229.google.com with SMTP id k129so70504372yke.0
-        for <linux-ntb@googlegroups.com>; Thu, 21 Jan 2016 17:18:30 -0800 (PST)
-Return-Path: <jdmason@kudzu.us>
-Date: Thu, 21 Jan 2016 20:17:08 -0500
-From: Jon Mason <jdmason@kudzu.us>
-Subject: NTB patches for v4.5
-Message-ID: <20160122011706.GC18163@kudzu.us>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
+        Thu, 07 Jan 2016 19:09:37 -0800 (PST)
+From: "Yu, Xiangliang" <Xiangliang.Yu@amd.com>
+Subject: RE: [PATCH V2 0/3] Change notes of V2
+Date: Fri, 8 Jan 2016 03:09:33 +0000
+Message-ID: <BLUPR12MB0420932AB9FFCDFC625E54D6EBF60@BLUPR12MB0420.namprd12.prod.outlook.com>
+References: <1450878160-9259-1-git-send-email-Xiangliang.Yu@amd.com>
+ <000101d148ae$d6ad3540$84079fc0$@emc.com>
+ <BLUPR12MB0420EEA096245F2D6DEDD483EBF50@BLUPR12MB0420.namprd12.prod.outlook.com>
+ <000001d14959$bb730790$325916b0$@emc.com>
+In-Reply-To: <000001d14959$bb730790$325916b0$@emc.com>
+Content-Language: en-US
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-To: Allen Hubbe <Allen.Hubbe@emc.com>, Dave Jiang <dave.jiang@intel.com>, Xiangliang Yu <Xiangliang.Yu@amd.com>
-Cc: linux-ntb@googlegroups.com
+To: Allen Hubbe <Allen.Hubbe@emc.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "dave.jiang@intel.com" <dave.jiang@intel.com>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: SPG_Linux_Kernel <SPG_Linux_Kernel@amd.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Below are the patches that will be in my pull request to Linus on
-Saturday.  If possible, please test them in the next 24 hours to verify
-everything is in working order.
-
-git://github.com/jonmason/ntb ntb-4.5
-
-Thanks,
-Jon
-
-----------------------------------------------------------------
-Allen Hubbe (1):
-      NTB: Fix macro parameter conflict with field name
-
-Dave Jiang (3):
-      NTB: Clear property bits in BAR value
-      NTB: Address out of DMA descriptor issue with NTB
-      ntb: ntb perf tool
-
-Jon Mason (1):
-      NTB: ntb_process_tx error path bug
-
-Xiangliang Yu (1):
-      NTB: Add support for AMD PCI-Express Non-Transparent Bridge
-
- MAINTAINERS                         |    6 +
- drivers/ntb/hw/Kconfig              |    1 +
- drivers/ntb/hw/Makefile             |    1 +
- drivers/ntb/hw/amd/Kconfig          |    7 +
- drivers/ntb/hw/amd/Makefile         |    1 +
- drivers/ntb/hw/amd/ntb_hw_amd.c     | 1143 +++++++++++++++++++++++++++++++++++
- drivers/ntb/hw/amd/ntb_hw_amd.h     |  217 +++++++
- drivers/ntb/hw/intel/ntb_hw_intel.c |    4 +-
- drivers/ntb/hw/intel/ntb_hw_intel.h |    8 +-
- drivers/ntb/ntb_transport.c         |   50 +-
- drivers/ntb/test/Kconfig            |    8 +
- drivers/ntb/test/Makefile           |    1 +
- drivers/ntb/test/ntb_perf.c         |  748 +++++++++++++++++++++++
- 13 files changed, 2183 insertions(+), 12 deletions(-)
- create mode 100644 drivers/ntb/hw/amd/Kconfig
- create mode 100644 drivers/ntb/hw/amd/Makefile
- create mode 100644 drivers/ntb/hw/amd/ntb_hw_amd.c
- create mode 100644 drivers/ntb/hw/amd/ntb_hw_amd.h
- create mode 100644 drivers/ntb/test/ntb_perf.c
+DQoNCkhpICwNCg0KDQoNCg0KPiA+ID4gSW4gcGFydGljdWxhciwgSSB0aGluayB3ZSBuZWVkIGZl
+ZWRiYWNrIG9uICMzIGZyb20gUENJIGFuZCBwb3dlcg0KPiA+ID4gbWFuYWdlbWVudCBtYWludGFp
+bmVycy4NCj4gPg0KPiA+IEkgZG9uJ3QgZ2V0IHlvdXIgY29uY2Vybi4NCj4gPiBJIHRoaW5rIHdl
+IGNhbiBhZGQgZGV2aWNlIGF0dHJpYnV0ZSBmaWxlIHRvIGxldCBhcHBsaWNhdGlvbiB0byB0cmln
+Z2VyDQo+ID4gd2FrZXVwIGZ1bmN0aW9uLCB0aGVuIE5UQiBoYXJkd2FyZSB3aWxsIGRvIHRoZSBy
+ZXN0LiBOVEIgZHJpdmVyIGp1c3QNCj4gPiBuZWVkIHRvIGltcGxlbWVudCBzdXNwZW5kL3Jlc3Vt
+ZSBpbnRlcmZhY2Ugb2YgUENJIFBNLg0KPiA+DQo+ID4gQWRkIG9uZSBtb3JlIHRoaW5nLCBkbyB5
+b3UgdGhpbmsgTlRCIHNob3VsZCBzdXBwb3J0IHJ1bnRpbWUgcG93ZXINCj4gPiBtYW5hZ2VtZW50
+Pw0KPiA+DQo+IA0KPiBJIHRoaW5rIGl0IGlzIGdvb2QgdG8gbWFrZSB0aGUgcG93ZXIgbWFuYWdl
+bWVudCBmdW5jdGlvbmFsaXR5IGF2YWlsYWJsZS4gIEluDQo+IG90aGVyIHdvcmRzLCB5ZXMsIHRv
+IHlvdXIgbGFzdCBxdWVzdGlvbi4NCg0KR290IGl0Lg0KDQo+IE15IGNvbmNlcm4gaXMgdGhhdCBJ
+IHdvdWxkIGxpa2Ugc29tZSBkZWdyZWUgb2YgY2VydGFpbnR5IHRoYXQgaXQgaXMgZG9uZSByaWdo
+dCwNCj4gaW4gaGFybW9ueSB3aXRoIHRoZSByZXN0IG9mIHRoZSBrZXJuZWwuICBJIGRvbid0IGtu
+b3cgd2hhdCAiZG9uZSByaWdodCINCj4gbWVhbnMgaW4gdGhpcyBjYXNlLCB3aGljaCBpcyB3aHkg
+SSB3b3VsZCBsaWtlIHNvbWVvbmUgZWxzZSB0byByZXZpZXcgaXQuICBBDQo+IHNtYWxsZXIgcGF0
+Y2ggd2l0aCBvbmx5IChhbmQgYWxsIG9mKSB0aGUgcG93ZXIgbWFuYWdlbWVudCBjb2RlIHdpbGwg
+aGF2ZSBhDQo+IGJldHRlciBjaGFuY2Ugb2YgYmVpbmcgcmV2aWV3ZWQuDQoNCkkgdGhpbmsgaXQg
+aXMgb2sgaWYgZm9sbG93aW5nIHRoZSBQTSBpbnRlcmZhY2UgYW5kIHRlc3QgcGFzcy4gVGhpcyB2
+ZXJzaW9uIEknbGwgcmVtb3ZlIA0KdGhlIFBNIHBhcnQgYW5kIHdpbGwgc3VibWl0IGFsbCByZWxh
+dGVkIFBNIHBhdGNoIHdoZW4gcnVudGltZSBjb2RlIGlzIHJlYWR5Lg0KDQo+IEknbSBhbHNvIGNv
+bmNlcm5lZCBhYm91dCB0aGUgd2FpdGluZyBiZWhhdmlvciBpbiAjMiBhbmQgIzMuICBJJ20gbm90
+IHNheWluZw0KPiBpdCdzIHdyb25nLiAgQXQgbGVhc3Qgbm93IHRoYXQgYmVoYXZpb3IgaXMgbm90
+ZWQgaW4gdGhlIGFwaSBkb2N1bWVudGF0aW9uOw0KPiB0aGFua3MgZm9yIHRoYXQuICBJZiBhIFBD
+SSBvciBwb3dlciBtYW5hZ2VtZW50IGV4cGVydCBoYXMgbm8gb2JqZWN0aW9uIHRvDQo+IHRoZSB3
+YWl0aW5nIGJlaGF2aW9yIGluICMzLCB0aGVuIEkgd291bGQgYmUgY29tZm9ydGFibGUgd2l0aCB0
+aGF0IGJlaGF2aW9yIGluDQo+ICMyIGFzIHdlbGwuDQoNCkkgYWxzbyBkb24ndCBsaWtlIHRoZSB3
+YWl0aW5nIGJlaGF2aW9yLCBidXQgSSBjYW4ndCBmaW5kIHRoZSBhc3luY2hyb25vdXMgbWV0aG9k
+IHRvDQpMZXQgYXBwbGljYXRpb24ga25vdyB0aGUgcmVzdWx0LiBBbmQgSSB0aGluayAjMiBpcyBk
+aWZmZXJlbnQgZnJvbSAjMyBiZWNhdXNlIGl0IGlzbid0DQpyZWxhdGVkIHRvIFBNIG9yIFBDSS4g
+UGxlYXNlIGxldCBtZSBrbm93IGlmIHlvdSBoYXZlIGJldHRlciBjaG9pY2UuDQo=
