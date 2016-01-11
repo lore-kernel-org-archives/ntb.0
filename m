@@ -1,12 +1,12 @@
 Return-Path: <dave.jiang@intel.com>
-Received: from mga11.intel.com (mga11.intel.com. [192.55.52.93])
-        by gmr-mx.google.com with ESMTP id ui7si8021921pab.0.2016.01.11.15.33.30
+Received: from mga02.intel.com (mga02.intel.com. [134.134.136.20])
+        by gmr-mx.google.com with ESMTP id 190si909179pfb.1.2016.01.11.13.50.12
         for <linux-ntb@googlegroups.com>;
-        Mon, 11 Jan 2016 15:33:30 -0800 (PST)
-Subject: [PATCH v4] ntb: ntb perf tool
+        Mon, 11 Jan 2016 13:50:12 -0800 (PST)
+Subject: [PATCH v3] ntb: ntb perf tool
 From: Dave Jiang <dave.jiang@intel.com>
-Date: Mon, 11 Jan 2016 16:33:28 -0700
-Message-ID: <20160111233327.125643.22314.stgit@djiang5-desk3.ch.intel.com>
+Date: Mon, 11 Jan 2016 14:50:10 -0700
+Message-ID: <20160111215010.71846.25028.stgit@djiang5-desk3.ch.intel.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -26,51 +26,12 @@ driver.
 
 Signed-off-by: Dave Jiang <dave.jiang@intel.com>
 ---
- drivers/ntb/ntb_transport.c |    6 
  drivers/ntb/test/Kconfig    |    8 
  drivers/ntb/test/Makefile   |    1 
  drivers/ntb/test/ntb_perf.c |  752 +++++++++++++++++++++++++++++++++++++++++++
- 4 files changed, 767 insertions(+)
+ 3 files changed, 761 insertions(+)
  create mode 100644 drivers/ntb/test/ntb_perf.c
 
-diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 60654d5..45583e6 100644
---- a/drivers/ntb/ntb_transport.c
-+++ b/drivers/ntb/ntb_transport.c
-@@ -177,6 +177,7 @@ struct ntb_transport_qp {
- 	u64 tx_err_no_buf;
- 	u64 tx_memcpy;
- 	u64 tx_async;
-+	u64 tx_dma_debug;
- };
- 
- struct ntb_transport_mw {
-@@ -486,6 +487,8 @@ static ssize_t debugfs_read(struct file *filp, char __user *ubuf, size_t count,
- 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
- 			       "tx_async - \t%llu\n", qp->tx_async);
- 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+			       "tx_dma_debug - \t%llu\n", qp->tx_dma_debug);
-+	out_offset += snprintf(buf + out_offset, out_count - out_offset,
- 			       "tx_ring_full - \t%llu\n", qp->tx_ring_full);
- 	out_offset += snprintf(buf + out_offset, out_count - out_offset,
- 			       "tx_err_no_buf - %llu\n", qp->tx_err_no_buf);
-@@ -726,6 +729,7 @@ static void ntb_qp_link_down_reset(struct ntb_transport_qp *qp)
- 	qp->tx_err_no_buf = 0;
- 	qp->tx_memcpy = 0;
- 	qp->tx_async = 0;
-+	qp->tx_dma_debug = 0;
- }
- 
- static void ntb_qp_link_cleanup(struct ntb_transport_qp *qp)
-@@ -1499,6 +1503,8 @@ static void ntb_async_tx(struct ntb_transport_qp *qp,
- 	if (!txd)
- 		goto err_get_unmap;
- 
-+	qp->tx_dma_debug++;
-+
- 	txd->callback = ntb_tx_copy_callback;
- 	txd->callback_param = entry;
- 	dma_set_unmap(txd, unmap);
 diff --git a/drivers/ntb/test/Kconfig b/drivers/ntb/test/Kconfig
 index 01852f9..a5d0eda 100644
 --- a/drivers/ntb/test/Kconfig
@@ -97,7 +58,7 @@ index 0ea32a3..9e77e0b 100644
 +obj-$(CONFIG_NTB_PERF) += ntb_perf.o
 diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
 new file mode 100644
-index 0000000..0ba0f7e
+index 0000000..f18be06
 --- /dev/null
 +++ b/drivers/ntb/test/ntb_perf.c
 @@ -0,0 +1,752 @@
@@ -391,15 +352,15 @@ index 0000000..0ba0f7e
 +		/* Probably should schedule every 4GB to prevent soft hang. */
 +		if (((copied % SZ_4G) == 0) && !use_dma) {
 +			set_current_state(TASK_INTERRUPTIBLE);
-+			schedule_timeout(1);
++			schedule();
 +		}
 +	}
 +
-+	if (use_dma) {
++	if (use_dma)
 +		pr_info("%s: All DMA descriptors submitted\n", current->comm);
-+		while (atomic_read(&pctx->dma_sync) != 0)
-+			msleep(20);
-+	}
++
++	while (atomic_read(&pctx->dma_sync) != 0)
++		msleep(20);
 +
 +	kstop = ktime_get();
 +	kdiff = ktime_sub(kstop, kstart);
