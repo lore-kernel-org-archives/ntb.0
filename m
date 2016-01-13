@@ -1,12 +1,12 @@
 Return-Path: <dave.jiang@intel.com>
-Received: from mga03.intel.com (mga03.intel.com. [134.134.136.65])
-        by gmr-mx.google.com with ESMTP id 190si391364pfb.1.2016.01.13.12.29.51
+Received: from mga11.intel.com (mga11.intel.com. [192.55.52.93])
+        by gmr-mx.google.com with ESMTP id jj4si256338pac.2.2016.01.13.09.12.19
         for <linux-ntb@googlegroups.com>;
-        Wed, 13 Jan 2016 12:29:51 -0800 (PST)
-Subject: [PATCH v6] ntb: ntb perf tool
+        Wed, 13 Jan 2016 09:12:19 -0800 (PST)
+Subject: [PATCH v5] ntb: ntb perf tool
 From: Dave Jiang <dave.jiang@intel.com>
-Date: Wed, 13 Jan 2016 13:29:48 -0700
-Message-ID: <20160113202948.17498.70673.stgit@djiang5-desk3.ch.intel.com>
+Date: Wed, 13 Jan 2016 10:12:17 -0700
+Message-ID: <20160113171217.245451.97289.stgit@djiang5-desk3.ch.intel.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -58,7 +58,7 @@ index 0ea32a3..9e77e0b 100644
 +obj-$(CONFIG_NTB_PERF) += ntb_perf.o
 diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
 new file mode 100644
-index 0000000..c8a37ba
+index 0000000..dcf9035
 --- /dev/null
 +++ b/drivers/ntb/test/ntb_perf.c
 @@ -0,0 +1,748 @@
@@ -656,7 +656,7 @@ index 0000000..c8a37ba
 +			pr_info("Fix run_order to %u\n", run_order);
 +		}
 +
-+		node = dev_to_node(&perf->ntb->pdev->dev);
++		node = dev_to_node(&perf->ntb->dev);
 +		/* launch kernel thread */
 +		for (i = 0; i < perf->perf_threads; i++) {
 +			struct pthr_ctx *pctx;
@@ -700,14 +700,8 @@ index 0000000..c8a37ba
 +{
 +	struct pci_dev *pdev = perf->ntb->pdev;
 +
-+	if (!debugfs_initialized())
++	if (!perf_debugfs_dir)
 +		return -ENODEV;
-+
-+	if (!perf_debugfs_dir) {
-+		perf_debugfs_dir = debugfs_create_dir(KBUILD_MODNAME, NULL);
-+		if (!perf_debugfs_dir)
-+			return -ENODEV;
-+	}
 +
 +	perf->debugfs_node_dir = debugfs_create_dir(pci_name(pdev),
 +						    perf_debugfs_dir);
@@ -761,9 +755,15 @@ index 0000000..c8a37ba
 +	ntb_link_enable(ntb, NTB_SPEED_AUTO, NTB_WIDTH_AUTO);
 +	ntb_link_event(ntb);
 +
-+	rc = perf_debugfs_setup(perf);
-+	if (rc)
-+		goto err_ctx;
++	if (debugfs_initialized() && !perf_debugfs_dir) {
++		perf_debugfs_dir = debugfs_create_dir(KBUILD_MODNAME, NULL);
++		if (!perf_debugfs_dir)
++			goto err_ctx;
++
++		rc = perf_debugfs_setup(perf);
++		if (rc)
++			goto err_ctx;
++	}
 +
 +	return 0;
 +
