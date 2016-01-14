@@ -1,209 +1,280 @@
-Return-Path: <Xiangliang.Yu@amd.com>
-Received: from na01-bl2-obe.outbound.protection.outlook.com (mail-bl2on0100.outbound.protection.outlook.com. [65.55.169.100])
-        by gmr-mx.google.com with ESMTPS id w126si822621ywe.6.2016.01.14.23.37.16
+Return-Path: <Allen.Hubbe@emc.com>
+Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
+        by gmr-mx.google.com with ESMTPS id i138si562946ywe.2.2016.01.14.07.57.03
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Thu, 14 Jan 2016 23:37:16 -0800 (PST)
-From: "Yu, Xiangliang" <Xiangliang.Yu@amd.com>
-Subject: RE: [PATCH V3 1/2] NTB: Add AMD PCI-Express NTB driver
-Date: Fri, 15 Jan 2016 07:37:06 +0000
-Message-ID: <BLUPR12MB0420561A08B56E89F12139B8EBCD0@BLUPR12MB0420.namprd12.prod.outlook.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 14 Jan 2016 07:57:04 -0800 (PST)
+From: "Allen Hubbe" <Allen.Hubbe@emc.com>
 References: <1452771847-16949-1-git-send-email-Xiangliang.Yu@amd.com>
- <000101d14ee4$25f72940$71e57bc0$@emc.com>
-In-Reply-To: <000101d14ee4$25f72940$71e57bc0$@emc.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+In-Reply-To: <1452771847-16949-1-git-send-email-Xiangliang.Yu@amd.com>
+Subject: RE: [PATCH V3 1/2] NTB: Add AMD PCI-Express NTB driver
+Date: Thu, 14 Jan 2016 10:56:36 -0500
+Message-ID: <000101d14ee4$25f72940$71e57bc0$@emc.com>
 MIME-Version: 1.0
-To: Allen Hubbe <Allen.Hubbe@emc.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "dave.jiang@intel.com" <dave.jiang@intel.com>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Cc: SPG_Linux_Kernel <SPG_Linux_Kernel@amd.com>
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+Content-Language: en-us
+To: 'Xiangliang Yu' <Xiangliang.Yu@amd.com>, jdmason@kudzu.us, dave.jiang@intel.com, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
+Cc: SPG_Linux_Kernel@amd.com
 List-ID: <linux-ntb.googlegroups.com>
 
-PiA+IEFNRCBOVEIgc3VwcG9ydCBmb2xsb3dpbmcgbWFpbiBmZWF0dXJlczoNCj4gPiAoMSkgVGhy
-ZWUgbWVtb3J5IHdpbmRvd3M7DQo+ID4gKDIpIFNpeHRlZW4gMzItYml0IHNjcmF0Y2ggcGFkOw0K
-PiA+ICgzKSBUd28gMTYtYml0IGRvb3JiZWxsIGludGVycnVwdDsNCj4gDQo+IFRoaXMgaXMgaW50
-ZXJlc3RpbmcuICBMZXQncyBzdWJtaXQgeW91ciBkb29yYmVsbCBpbXBsZW1lbnRhdGlvbiBhcyBp
-cywgYnV0IEkNCj4gd29uZGVyIGlmICJtdWx0aXBsZSBkb29yYmVsbCByZWdpc3RlcnMiIGlzIHNv
-bWV0aGluZyB3ZSBzaG91bGQgZXhwb3NlIGluIHRoZQ0KPiBudGIuaCBhcGkuICBJIHdvbmRlciBo
-b3cgd2Ugc2hvdWxkIHJlY29uY2lsZSB0aGF0IHdpdGggInZlY3RvcnMiLCB1bmxlc3MgdGhleQ0K
-PiBhcmUgZXF1aXZhbGVudC4gIElmIHdlIHNlZSBhIGRldmljZSB3aXRoIG1vcmUgdGhhbiA2NCBk
-b29yYmVsbCBiaXRzIHRvdGFsLCB0aGUNCj4gbnRiLmggYXBpIHdpbGwgYmUgaW5hZGVxdWF0ZS4N
-Cg0KU29ycnksIGxldCBtZSBjbGFyaWZ5IGl0OiBvbmUgMTYtYml0IGRvb3JiZWxsIGlzIGZvciBw
-cmltYXJ5IHNpZGUgYW5kIHRoZSBvdGhlciBpcyBiZSB1c2VkDQpCeSBzZWNvbmRhcnkgc2lkZS4g
-VGhlICMzIHNob3VsZCBiZSBpcyB0aGF0IHR3byAxNi1iaXQgZG9vcmJlbGwgcmVnaXN0ZXJzLg0K
-DQo+ID4gKDQpIEZpdmUgZXZlbnQgaW50ZXJydXB0czsNCj4gPiAoNSkgT25lIHN5c3RlbSBjYW4g
-d2FrZSB1cCBvcHBvc2l0ZSBzeXN0ZW0gb2YgTlRCOw0KPiANCj4gWW91IGNvdWxkIHNheTogcG93
-ZXIgbWFuYWdlbWVudCBzdXBwb3J0IHdpbGwgYmUgYWRkZWQgaW4gYSBmb2xsb3dpbmcgcGF0Y2gu
-DQoNCkluIGhlcmUsIGkgbGlzdCBhbGwgZmVhdHVyZXMgQU1EIE5UQiBzdXBwb3J0LCBub3QgcGF0
-Y2guIFBsZWFzZSBzZWUgbXkgd29yZCBhZ2Fpbi4NCg0KPiA+ICg2KSBGbHVzaCBwcmV2aW91cyBy
-ZXF1ZXN0IHRvIHRoZSBvcHBvc2l0ZSBzeXN0ZW07DQo+IA0KPiAuLi5pbiBhIGZvbGxvd2luZyBw
-YXRjaC4NCg0KRGl0dG8uDQoNCj4gPiAoNykgVGhlcmUgYXJlIHJlc2V0IGFuZCBQTUVfVE8gbWVj
-aGFuaXNtcyBiZXR3ZWVuIHR3byBzeXN0ZW1zOw0KPiANCj4gSG93IGlzIHRoaXMgZGlmZmVyZW50
-IGZyb20gKDUgb3IgNik/ICBXaGF0IGlzIFBNRV9UTz8NCkkgZG9uJ3Qga25vdyB3aGF0IHlvdSBt
-ZWFuIGZvciB0aGUgZGlmZmVyZW50Pw0KIzUsICM2IGFuZCAjNyBpcyBoYXJkd2FyZSBkZXNpZ246
-DQojNTogb25lIHNpZGUgY2FuIHdha2UgdXAgdGhlIG9wcG9zaXRlIGlmIHRoZSBvcHBvc2l0ZSBp
-cyBzbGVlcDsNCiM2IDogb25lIHNpZGUgZmx1c2ggdGhlIHBlbmRpbmcgcmVxdWVzdCB0byBvcHBv
-c2l0ZSBzaWRlOw0KIzc6IGlmIG9uZSBzaWRlIGhhcyByZXNldCBvciBwb3dlciBvZmYgZXZlbnQs
-IHRoZSBvcHBvc2l0ZSBzaWRlIGNhbiBnZXQgdGhlIGluZm9ybWF0aW9uDQpGcm9tIHRoZSByZXNl
-dCBhbmQgUE1FX1RPIG1lY2hhbmlzbSBhbmQgZXhlY3V0ZSBzb21lIGhhbmRsZXIgdG8gYXZvaWQg
-ZGF0YSBsb3N0Lg0KDQpQTUVfVE8gaXMgUENJZSBtZXNzYWdlIG9mIHBvd2VyIHR1cm4gb2ZmLiAN
-Cg0KPiA+DQo+ID4gU2lnbmVkLW9mZi1ieTogWGlhbmdsaWFuZyBZdSA8WGlhbmdsaWFuZy5ZdUBh
-bWQuY29tPg0KPiANCj4gDQo+IE92ZXJhbGwsIHRoaXMgZHJpdmVyIGlzIGxvb2tpbmcgbXVjaCBi
-ZXR0ZXIuICBUaGFua3MgZm9yIHlvdXIgZWZmb3J0cyENCj4gDQo+IFdpdGggdGhlIC1yYzEgd2lu
-ZG93IGxpa2VseSBjbG9zaW5nIHRoaXMgd2Vla2VuZCwgbGV0J3Mgc2VlIHdoYXQgb3RoZXJzIGhh
-dmUNCj4gdG8gc2F5IGFib3V0IHRoaXMgcGF0Y2ggdjMsIG9yIGdldHRpbmcgYSB2NCB0aGlzIHdl
-ZWsuDQo+IFRoZXJlIGFyZSBhIGZldyBtaW5vciByZXF1ZXN0cyBiZWxvdy4gIFRoZXkgYXJlIG5v
-dGhpbmcgY3JpdGljYWwuDQo+IA0KPiA+ICtzdGF0aWMgdm9pZCBhbWRfYWNrX1NNVShzdHJ1Y3Qg
-YW1kX250Yl9kZXYgKm5kZXYsIHUzMiBiaXQpIHsNCj4gPiArCXZvaWQgX19pb21lbSAqbW1pbyA9
-IG5kZXYtPnNlbGZfbW1pbzsNCj4gPiArCWludCByZWc7DQo+ID4gKw0KPiA+ICsJcmVnID0gcmVh
-ZGwobW1pbyArIEFNRF9TTVVBQ0tfT0ZGU0VUKTsNCj4gPiArCXJlZyB8PSBiaXQ7DQo+ID4gKwl3
-cml0ZWwocmVnLCBtbWlvICsgQU1EX1NNVUFDS19PRkZTRVQpOw0KPiA+ICsNCj4gPiArCW5kZXYt
-PnBlZXJfc3RhIHw9IGJpdDsNCj4gPiArfQ0KPiANCj4gV2hhdCBpcyBTTVU/DQoNClN5c3RlbSBt
-YW5hZ2VtZW50IHVuaXQsIHBsZWFzZSByZWZlcmVuY2UgQU1EIG1hbnVhbC4NCg0KPiBEb2VzIHRo
-aXMgaGF2ZSB0byBkbyB3aXRoIHBvd2VyIG1hbmFnZW1lbnQsIG9yIGZsdXNoPyAgQ2FuIHlvdSBz
-YXkgd2h5IGl0DQo+IHNob3VsZCBiZSBpbiB0aGlzIHBhdGNoLCBhbmQgbm90IG9uZSBvZiB0aGUg
-b3RoZXIgb25lcz8NCg0KVGhpcyBpcyBBTUQgTlRCIGhhcmR3YXJlIHJ1bGVzLCBJIGp1c3QgZm9s
-bG93aW5nIGhhcmR3YXJlIGRlc2lnbi4gT25lIHNpZGUgY2FuIA0KY29udmV5IHRoZSBpbmZvcm1h
-dGlvbiBvZiBldmVudCBjaGFuZ2VzIHRvIHRoZSBvdGhlciBzaWRlIGJ5IFNNVSBBQ0sgcmVnaXN0
-ZXIuIA0KDQo+IA0KPiBTcGVjdWxhdGlvbjogSXMgaXQgc29tZXRoaW5nIGxpa2UsIGlmIHRoZSBw
-ZWVyIGRyaXZlciBoYXMgdGhlIGZsdXNoIHBhdGNoLCBhbmQNCj4gdGhpcyBzaWRlIGlzIG5vdCBw
-YXRjaGVkLCB0aGlzIHNpZGUgZHJpdmVyIHN0aWxsIG5lZWRzIHRvIHJlc3BvbmQgKGFjaykgZm9y
-IHRoZQ0KPiBwZWVyIGZsdXNoIHRvIGNvbXBsZXRlPyAgSW4gb3RoZXIgd29yZHMsIHRoZSBmbHVz
-aCBpcyBub3QgZnVsbHkgaW1wbGVtZW50ZWQgaW4NCj4gaHc/ICBJJ20ganVzdCBndWVzc2luZywg
-c28gSSB3b3VsZCBsaWtlIHRvIGhlYXIgeW91ciBleHBsYW5hdGlvbi4NCj4gDQoNCkkgZG9uJ3Qg
-a25vdyB3aGF0IHRvIHNheSBmb3IgeW91ciBzcGVjdWxhdGlvbiwgd2h5IG5vdCBpcyBzb2Z0d2Fy
-ZSBidWc/DQpJIGRvbuKAmXQgdGhpbmsgYW55IGhhcmR3YXJlIGNhbiB3b3JrIGZpbmUgaW4gdGhp
-cyBjYXNlLg0KDQo+ID4gK3N0YXRpYyB2b2lkIGFtZF9oYW5kbGVfZXZlbnQoc3RydWN0IGFtZF9u
-dGJfZGV2ICpuZGV2LCBpbnQgdmVjKSB7DQo+ID4gKwl2b2lkIF9faW9tZW0gKm1taW8gPSBuZGV2
-LT5zZWxmX21taW87DQo+ID4gKwl1MzIgc3RhdHVzOw0KPiA+ICsNCj4gPiArCXN0YXR1cyA9IHJl
-YWRsKG1taW8gKyBBTURfSU5UU1RBVF9PRkZTRVQpOw0KPiA+ICsJaWYgKCEoc3RhdHVzICYgQU1E
-X0VWRU5UX0lOVE1BU0spKQ0KPiA+ICsJCXJldHVybjsNCj4gPiArDQo+ID4gKwlkZXZfZGJnKG5k
-ZXZfZGV2KG5kZXYpLCAic3RhdHVzID0gMHgleCBhbmQgdmVjID0gJWRcbiIsIHN0YXR1cywNCj4g
-PiB2ZWMpOw0KPiA+ICsNCj4gPiArCXN0YXR1cyAmPSBBTURfRVZFTlRfSU5UTUFTSzsNCj4gPiAr
-CXN3aXRjaCAoc3RhdHVzKSB7DQo+ID4gKwljYXNlIEFNRF9QRUVSX0ZMVVNIX0VWRU5UOg0KPiA+
-ICsJCWRldl9pbmZvKG5kZXZfZGV2KG5kZXYpLCAiRmx1c2ggaXMgZG9uZS5cbiIpOw0KPiA+ICsJ
-CWJyZWFrOw0KPiA+ICsJY2FzZSBBTURfUEVFUl9SRVNFVF9FVkVOVDoNCj4gPiArCQlhbWRfYWNr
-X1NNVShuZGV2LCBBTURfUEVFUl9SRVNFVF9FVkVOVCk7DQo+ID4gKw0KPiA+ICsJCS8qIGxpbmsg
-ZG93biBmaXJzdCAqLw0KPiA+ICsJCW50Yl9saW5rX2V2ZW50KCZuZGV2LT5udGIpOw0KPiA+ICsJ
-CS8qIHBvbGxpbmcgcGVlciBzdGF0dXMgKi8NCj4gPiArCQlzY2hlZHVsZV9kZWxheWVkX3dvcmso
-Jm5kZXYtPmhiX3RpbWVyLA0KPiBBTURfTElOS19IQl9USU1FT1VUKTsNCj4gPiArDQo+ID4gKwkJ
-YnJlYWs7DQo+ID4gKwljYXNlIEFNRF9QRUVSX0QzX0VWRU5UOg0KPiA+ICsJY2FzZSBBTURfUEVF
-Ul9QTUVUT19FVkVOVDoNCj4gPiArCQlhbWRfYWNrX1NNVShuZGV2LCBzdGF0dXMpOw0KPiANCj4g
-SGVyZSBpcyBhY2sgU01VIGNhbGxlZC4NCg0KWWVzLCBmb2xsb3cgaGFyZHdhcmUgZGVzaWduLg0K
-DQo+ID4gKw0KPiA+ICsJCS8qIGxpbmsgZG93biAqLw0KPiA+ICsJCW50Yl9saW5rX2V2ZW50KCZu
-ZGV2LT5udGIpOw0KPiA+ICsNCj4gPiArCQlicmVhazsNCj4gPiArCWNhc2UgQU1EX1BFRVJfRDBf
-RVZFTlQ6DQo+ID4gKwkJbW1pbyA9IG5kZXYtPnBlZXJfbW1pbzsNCj4gPiArCQlzdGF0dXMgPSBy
-ZWFkbChtbWlvICsgQU1EX1BNRVNUQVRfT0ZGU0VUKTsNCj4gPiArCQkvKiBjaGVjayBpZiB0aGlz
-IGlzIFdBS0VVUCBldmVudCAqLw0KPiA+ICsJCWlmIChzdGF0dXMgJiAweDEpDQo+ID4gKwkJCWRl
-dl9pbmZvKG5kZXZfZGV2KG5kZXYpLCAiV2FrZXVwIGlzIGRvbmUuXG4iKTsNCj4gPiArDQo+ID4g
-KwkJYW1kX2Fja19TTVUobmRldiwgQU1EX1BFRVJfRDBfRVZFTlQpOw0KPiA+ICsNCj4gPiArCQlp
-ZiAoYW1kX2xpbmtfaXNfdXAobmRldikpDQo+ID4gKwkJCW50Yl9saW5rX2V2ZW50KCZuZGV2LT5u
-dGIpOw0KPiA+ICsJCWVsc2UNCj4gPiArCQkJc2NoZWR1bGVfZGVsYXllZF93b3JrKCZuZGV2LT5o
-Yl90aW1lciwNCj4gPiArCQkJCQkJQU1EX0xJTktfSEJfVElNRU9VVCk7DQo+ID4gKwkJYnJlYWs7
-DQo+ID4gKwlkZWZhdWx0Og0KPiA+ICsJCWRldl9pbmZvKG5kZXZfZGV2KG5kZXYpLCAiZXZlbnQg
-c3RhdHVzID0gMHgleC5cbiIsIHN0YXR1cyk7DQo+ID4gKwkJYnJlYWs7DQo+ID4gKwl9DQo+ID4g
-K30NCj4gDQo+ID4gK2VudW0gew0KPiANCj4gSSB3b3VsZCBwcmVmZXIgdG8gc2VlICNkZWZpbmUs
-IGJ1dCB0aGlzIHdvcmtzLi4uIFRoZXJlIGFyZSBnb29kIGFyZ3VtZW50cyB0bw0KPiBiZSBtYWRl
-IGZvciBjb21waWxlciBjb25zdGFudHMgdnMgdGhlIHByZXByb2Nlc3Nvci4gIE15IHByZWZlcmVu
-Y2UganVzdA0KPiBjb21lcyBmcm9tIHdoYXQgSSd2ZSBvYnNlcnZlZCBhYm91dCBob3cgb3RoZXIg
-ZHJpdmVycyBhcmUgd3JpdHRlbiwgYW5kDQo+ICNkZWZpbmUgZm9yIHRoaXMgc3R1ZmYgc2VlbXMg
-dG8gYmUgdGhlIGNvbnZlbnRpb24uDQoNCkkgaGF2ZSBsb3RzIG9mIFNBVEEvQmxvY2sgbGF5ZXIg
-ZXhwZXJpZW5jZSwgdGhpcyBmb2xsb3dpbmcgQUhDSSBjb2Rpbmcgc3R5bGUuDQpDb21waWxlciB3
-aWxsIGNoZWNrIGVudW0gdmFyaWFibGUsIG5vdCBmb3IgbWFjcm8uIA0KQWN0dWFsbHksIHRoZXJl
-IGFyZSBsb3RzIG9mIHNpbWlsYXIgZGVmaW5pdGlvbiBpbiBrZXJuZWwsIHN1Y2ggYXMgYmxvY2sg
-bGF5ZXIgY29kZS4NCg0KPiA+ICsJLyogQU1EIE5UQiBDYXBhYmlsaXR5ICovDQo+ID4gKwlBTURf
-TVdfQ05UCQk9IDMsDQo+ID4gKwlBTURfREJfQ05UCQk9IDE2LA0KPiA+ICsJQU1EX01TSVhfVkVD
-VE9SX0NOVAk9IDI0LA0KPiA+ICsJQU1EX1NQQURTX0NOVAkJPSAxNiwNCj4gPiArDQo+ID4gKwkv
-KiAgQU1EIE5UQiByZWdpc3RlciBvZmZzZXQgKi8NCj4gPiArCUFNRF9DTlRMX09GRlNFVAkJPSAw
-eDIwMCwNCj4gPiArDQo+ID4gKwkvKiBOVEIgY29udHJvbCByZWdpc3RlciBiaXRzICovDQo+ID4g
-KwlQTU1fUkVHX0NUTAkJPSBCSVQoMjEpLA0KPiA+ICsJU01NX1JFR19DVEwJCT0gQklUKDIwKSwN
-Cj4gPiArCVNNTV9SRUdfQUNDX1BBVEgJPSBCSVQoMTgpLA0KPiA+ICsJUE1NX1JFR19BQ0NfUEFU
-SAk9IEJJVCgxNyksDQo+ID4gKwlOVEJfQ0xLX0VOCQk9IEJJVCgxNiksDQo+ID4gKw0KPiA+ICsJ
-QU1EX1NUQV9PRkZTRVQJCT0gMHgyMDQsDQo+ID4gKwlBTURfUEdTTFZfT0ZGU0VUCT0gMHgyMDgs
-DQo+ID4gKwlBTURfU1BBRF9NVVhfT0ZGU0VUCT0gMHgyMEMsDQo+ID4gKwlBTURfU1BBRF9PRkZT
-RVQJCT0gMHgyMTAsDQo+ID4gKwlBTURfUlNNVV9IQ0lECQk9IDB4MjUwLA0KPiA+ICsJQU1EX1JT
-TVVfU0lJRAkJPSAweDI1NCwNCj4gPiArCUFNRF9QU0lPTl9PRkZTRVQJPSAweDMwMCwNCj4gPiAr
-CUFNRF9TU0lPTl9PRkZTRVQJPSAweDMzMCwNCj4gPiArCUFNRF9NTUlOREVYX09GRlNFVAk9IDB4
-NDAwLA0KPiA+ICsJQU1EX01NREFUQV9PRkZTRVQJPSAweDQwNCwNCj4gPiArCUFNRF9TSURFSU5G
-T19PRkZTRVQJPSAweDQwOCwNCj4gPiArDQo+ID4gKwlBTURfU0lERV9NQVNLCQk9IEJJVCgwKSwN
-Cj4gPiArDQo+ID4gKwkvKiBsaW1pdCByZWdpc3RlciAqLw0KPiA+ICsJQU1EX1JPTUJBUkxNVF9P
-RkZTRVQJPSAweDQxMCwNCj4gPiArCUFNRF9CQVIxTE1UX09GRlNFVAk9IDB4NDE0LA0KPiA+ICsJ
-QU1EX0JBUjIzTE1UX09GRlNFVAk9IDB4NDE4LA0KPiA+ICsJQU1EX0JBUjQ1TE1UX09GRlNFVAk9
-IDB4NDIwLA0KPiA+ICsJLyogeGxhdCBhZGRyZXNzICovDQo+ID4gKwlBTURfUE9NQkFSWExBVF9P
-RkZTRVQJPSAweDQyOCwNCj4gPiArCUFNRF9CQVIxWExBVF9PRkZTRVQJPSAweDQzMCwNCj4gPiAr
-CUFNRF9CQVIyM1hMQVRfT0ZGU0VUCT0gMHg0MzgsDQo+ID4gKwlBTURfQkFSNDVYTEFUX09GRlNF
-VAk9IDB4NDQwLA0KPiA+ICsJLyogZG9vcmJlbGwgYW5kIGludGVycnVwdCAqLw0KPiA+ICsJQU1E
-X0RCRk1fT0ZGU0VUCQk9IDB4NDUwLA0KPiA+ICsJQU1EX0RCUkVRX09GRlNFVAk9IDB4NDU0LA0K
-PiA+ICsJQU1EX01JUlJEQlNUQVRfT0ZGU0VUCT0gMHg0NTgsDQo+ID4gKwlBTURfREJNQVNLX09G
-RlNFVAk9IDB4NDVDLA0KPiA+ICsJQU1EX0RCU1RBVF9PRkZTRVQJPSAweDQ2MCwNCj4gPiArCUFN
-RF9JTlRNQVNLX09GRlNFVAk9IDB4NDcwLA0KPiA+ICsJQU1EX0lOVFNUQVRfT0ZGU0VUCT0gMHg0
-NzQsDQo+ID4gKw0KPiA+ICsJLyogZXZlbnQgdHlwZSAqLw0KPiA+ICsJQU1EX1BFRVJfRkxVU0hf
-RVZFTlQJPSBCSVQoMCksDQo+ID4gKwlBTURfUEVFUl9SRVNFVF9FVkVOVAk9IEJJVCgxKSwNCj4g
-PiArCUFNRF9QRUVSX0QzX0VWRU5UCT0gQklUKDIpLA0KPiA+ICsJQU1EX1BFRVJfUE1FVE9fRVZF
-TlQJPSBCSVQoMyksDQo+ID4gKwlBTURfUEVFUl9EMF9FVkVOVAk9IEJJVCg0KSwNCj4gPiArCUFN
-RF9FVkVOVF9JTlRNQVNLCT0gKEFNRF9QRUVSX0ZMVVNIX0VWRU5UIHwNCj4gPiArCQkJCUFNRF9Q
-RUVSX1JFU0VUX0VWRU5UIHwNCj4gQU1EX1BFRVJfRDNfRVZFTlQgfA0KPiA+ICsJCQkJQU1EX1BF
-RVJfUE1FVE9fRVZFTlQgfA0KPiBBTURfUEVFUl9EMF9FVkVOVCksDQo+ID4gKw0KPiA+ICsJQU1E
-X1BNRVNUQVRfT0ZGU0VUCT0gMHg0ODAsDQo+ID4gKwlBTURfUE1TR1RSSUdfT0ZGU0VUCT0gMHg0
-OTAsDQo+ID4gKwlBTURfTFRSTEFURU5DWV9PRkZTRVQJPSAweDQ5NCwNCj4gPiArCUFNRF9GTFVT
-SFRSSUdfT0ZGU0VUCT0gMHg0OTgsDQo+ID4gKw0KPiA+ICsJLyogU01VIHJlZ2lzdGVyKi8NCj4g
-PiArCUFNRF9TTVVBQ0tfT0ZGU0VUCT0gMHg0QTAsDQo+ID4gKwlBTURfU0lOUlNUX09GRlNFVAk9
-IDB4NEE0LA0KPiA+ICsJQU1EX1JTUE5VTV9PRkZTRVQJPSAweDRBOCwNCj4gPiArCUFNRF9TTVVf
-U1BBRE1VVEVYCT0gMHg0QjAsDQo+ID4gKwlBTURfU01VX1NQQURPRkZTRVQJPSAweDRCNCwNCj4g
-PiArDQo+ID4gKwlBTURfUEVFUl9PRkZTRVQJCT0gMHg0MDAsDQo+ID4gK307DQo+IA0KPiA+ICtz
-dHJ1Y3QgYW1kX250Yl9kZXYgew0KPiAuLi4NCj4gPiArfTsNCj4gPiArDQo+ID4gKyNkZWZpbmUg
-bmRldl9wZGV2KG5kZXYpICgobmRldiktPm50Yi5wZGV2KSAjZGVmaW5lIG5kZXZfbmFtZShuZGV2
-KQ0KPiA+ICtwY2lfbmFtZShuZGV2X3BkZXYobmRldikpICNkZWZpbmUgbmRldl9kZXYobmRldikN
-Cj4gPiArKCZuZGV2X3BkZXYobmRldiktPmRldikgI2RlZmluZSBudGJfbmRldihfX250YikNCj4g
-Y29udGFpbmVyX29mKF9fbnRiLA0KPiA+ICtzdHJ1Y3QgYW1kX250Yl9kZXYsIG50YikgI2RlZmlu
-ZSBoYl9uZGV2KF9fd29yaykNCj4gY29udGFpbmVyX29mKF9fd29yaywNCj4gPiArc3RydWN0IGFt
-ZF9udGJfZGV2LA0KPiA+IGhiX3RpbWVyLndvcmspDQo+IA0KPiBKb246IEkgdGhpbmsgdGhlc2Ug
-bWFjcm9zIGFyZSBnb29kLCBhbmQgSSBsaWtlIHRoYXQgdGhleSBhcmUgaGVyZSBuZXh0IHRvIHRo
-ZQ0KPiBzdHJ1Y3QgYW1kX250Yl9kZXYuDQo+IA0KPiA+ICtzdGF0aWMgaW50IGFtZF9udGJfbXdf
-Y291bnQoc3RydWN0IG50Yl9kZXYgKm50Yik7IHN0YXRpYyBpbnQNCj4gPiArYW1kX250Yl9td19n
-ZXRfcmFuZ2Uoc3RydWN0IG50Yl9kZXYgKm50YiwgaW50IGlkeCwNCj4gPiArCQkJcGh5c19hZGRy
-X3QgKmJhc2UsIHJlc291cmNlX3NpemVfdCAqc2l6ZSwNCj4gPiArCQkJcmVzb3VyY2Vfc2l6ZV90
-ICphbGlnbiwgcmVzb3VyY2Vfc2l6ZV90ICphbGdpbl9zaXplKTsNCj4gc3RhdGljIGludA0KPiA+
-ICthbWRfbnRiX213X3NldF90cmFucyhzdHJ1Y3QgbnRiX2RldiAqbmRldiwgaW50IGlkeCwNCj4g
-PiArCQkJCWRtYV9hZGRyX3QgYWRkciwgcmVzb3VyY2Vfc2l6ZV90IHNpemUpOw0KPiBzdGF0aWMg
-aW50DQo+ID4gK2FtZF9udGJfbGlua19pc191cChzdHJ1Y3QgbnRiX2RldiAqbnRiLA0KPiA+ICsJ
-CQkJZW51bSBudGJfc3BlZWQgKnNwZWVkLA0KPiA+ICsJCQkJZW51bSBudGJfd2lkdGggKndpZHRo
-KTsNCj4gPiArc3RhdGljIGludCBhbWRfbnRiX2xpbmtfZW5hYmxlKHN0cnVjdCBudGJfZGV2ICpu
-dGIsDQo+ID4gKwkJCQllbnVtIG50Yl9zcGVlZCBzcGVlZCwNCj4gPiArCQkJCWVudW0gbnRiX3dp
-ZHRoIHdpZHRoKTsNCj4gPiArc3RhdGljIGludCBhbWRfbnRiX2xpbmtfZGlzYWJsZShzdHJ1Y3Qg
-bnRiX2RldiAqbnRiKTsgc3RhdGljIHU2NA0KPiA+ICthbWRfbnRiX2RiX3ZhbGlkX21hc2soc3Ry
-dWN0IG50Yl9kZXYgKm50Yik7IHN0YXRpYyBpbnQNCj4gPiArYW1kX250Yl9kYl92ZWN0b3JfY291
-bnQoc3RydWN0IG50Yl9kZXYgKm50Yik7IHN0YXRpYyB1NjQNCj4gPiArYW1kX250Yl9kYl92ZWN0
-b3JfbWFzayhzdHJ1Y3QgbnRiX2RldiAqbnRiLCBpbnQgZGJfdmVjdG9yKTsgc3RhdGljDQo+ID4g
-K3U2NCBhbWRfbnRiX2RiX3JlYWQoc3RydWN0IG50Yl9kZXYgKm50Yik7IHN0YXRpYyBpbnQNCj4g
-PiArYW1kX250Yl9kYl9jbGVhcihzdHJ1Y3QgbnRiX2RldiAqbnRiLCB1NjQgZGJfYml0cyk7IHN0
-YXRpYyBpbnQNCj4gPiArYW1kX250Yl9kYl9zZXRfbWFzayhzdHJ1Y3QgbnRiX2RldiAqbnRiLCB1
-NjQgZGJfYml0cyk7IHN0YXRpYyBpbnQNCj4gPiArYW1kX250Yl9kYl9jbGVhcl9tYXNrKHN0cnVj
-dCBudGJfZGV2ICpudGIsIHU2NCBkYl9iaXRzKTsgc3RhdGljIGludA0KPiA+ICthbWRfbnRiX3Bl
-ZXJfZGJfYWRkcihzdHJ1Y3QgbnRiX2RldiAqbnRiLA0KPiA+ICsJCQkJcGh5c19hZGRyX3QgKmRi
-X2FkZHIsDQo+ID4gKwkJCQlyZXNvdXJjZV9zaXplX3QgKmRiX3NpemUpOw0KPiA+ICtzdGF0aWMg
-aW50IGFtZF9udGJfcGVlcl9kYl9zZXQoc3RydWN0IG50Yl9kZXYgKm50YiwgdTY0IGRiX2JpdHMp
-Ow0KPiA+ICtzdGF0aWMgaW50IGFtZF9udGJfc3BhZF9jb3VudChzdHJ1Y3QgbnRiX2RldiAqbnRi
-KTsgc3RhdGljIHUzMg0KPiA+ICthbWRfbnRiX3NwYWRfcmVhZChzdHJ1Y3QgbnRiX2RldiAqbnRi
-LCBpbnQgaWR4KTsgc3RhdGljIGludA0KPiA+ICthbWRfbnRiX3NwYWRfd3JpdGUoc3RydWN0IG50
-Yl9kZXYgKm50YiwgaW50IGlkeCwgdTMyIHZhbCk7IHN0YXRpYyBpbnQNCj4gPiArYW1kX250Yl9w
-ZWVyX3NwYWRfYWRkcihzdHJ1Y3QgbnRiX2RldiAqbnRiLCBpbnQgaWR4LA0KPiA+ICsJCQkJCXBo
-eXNfYWRkcl90ICpzcGFkX2FkZHIpOw0KPiA+ICtzdGF0aWMgdTMyIGFtZF9udGJfcGVlcl9zcGFk
-X3JlYWQoc3RydWN0IG50Yl9kZXYgKm50YiwgaW50IGlkeCk7DQo+ID4gK3N0YXRpYyBpbnQgYW1k
-X250Yl9wZWVyX3NwYWRfd3JpdGUoc3RydWN0IG50Yl9kZXYgKm50YiwgaW50IGlkeCwgdTMyDQo+
-ID4gdmFsKTsNCj4gDQo+IEl0J3MgdW51c3VhbCwgc29tZXRpbWVzIGRhbmdlcm91cywgdG8gdXNl
-IHRoZSBzdGF0aWMga2V5d29yZCBpbiBhIC5oIGZpbGUNCj4gKHVubGVzcyBzdGF0aWMgaW5saW5l
-LCBvciB0aGluZ3MgdGhhdCB5b3UgcmVhbGx5IGludGVuZCB0byBiZSBzdGF0aWMgaW4gbXVsdGlw
-bGUNCj4gY29tcGlsYXRpb24gdW5pdCkuICBUaGlzIC5oIGlzIG9ubHkgaW5jbHVkZWQgYnkgYSBz
-aW5nbGUgLmMgZmlsZSAoZWZmZWN0aXZlbHksIHRoaXMNCj4gZmlsZSBpcyBwYXJ0IG9mIG50Yl9o
-d19hbWQuYyksIGFuZCB0aGVzZSBhcmUgb25seSBkZWNsYXJhdGlvbnMsIG5vdCBmdW5jdGlvbg0K
-PiBkZWZpbml0aW9ucywgYnV0IGl0IG1ha2VzIG1lIG5lcnZvdXMuICBEbyB5b3UgL25lZWQvIHRo
-ZXNlIGZ1bmN0aW9ucw0KPiBmb3J3YXJkIGRlY2xhcmVkPyAgQ291bGQgeW91IHJlYXJyYW5nZSB5
-b3VyIC5jIGZpbGUgc28geW91IGRvbid0IG5lZWQgdGhlc2UNCj4gZm9yd2FyZCBkZWNsYXJlZD8g
-IElmIHlvdSBuZWVkIHRoZW0sIGNvdWxkIHlvdSBwdXQgdGhlIGRlY2xhcmF0aW9ucyBpbiB0aGUg
-LmMNCj4gZmlsZT8NCg0KQWN0dWFsbHksIEkgcHV0IGl0IGluIC5jIGZpbGUgaW4gZmlyc3QgdmVy
-c2lvbiwgSSB0aGluayBpdCBtYWtlIGNvZGUgY2xlYXIgaWYgbW92aW5nIGl0IHRvDQouaCBmaWxl
-LiBZZXMsIEkgY2FuIHJlbW92ZSBhbGwgdGhlc2UgZGVmaW5pdGlvbnMgYnkgcmVhcnJhbmdpbmcg
-LmMgZmlsZS4NCg0KQW5kIHBsZWFzZSBzcGVhayBvdXQgYWxsIHlvdXIgY29uY2VybiBpbiB0aGlz
-IHRpbWUsIHlvdSBrbm93LCBJIGhhZCBzcGVudCBsb3RzIG9mIHRpbWUNCiBPbiB0aGVzZSBwYXRj
-aGVzLg0K
+> From: Xiangliang Yu <Xiangliang.Yu@amd.com>
+>=20
+> AMD NTB support following main features:
+> (1) Three memory windows;
+> (2) Sixteen 32-bit scratch pad;
+> (3) Two 16-bit doorbell interrupt;
+
+This is interesting.  Let's submit your doorbell implementation as is, =
+but I wonder if "multiple doorbell registers" is something we should =
+expose in the ntb.h api.  I wonder how we should reconcile that with =
+"vectors", unless they are equivalent.  If we see a device with more =
+than 64 doorbell bits total, the ntb.h api will be inadequate.
+
+> (4) Five event interrupts;
+> (5) One system can wake up opposite system of NTB;
+
+You could say: power management support will be added in a following =
+patch.
+
+> (6) Flush previous request to the opposite system;
+
+...in a following patch.
+
+> (7) There are reset and PME_TO mechanisms between two systems;
+
+How is this different from (5 or 6)?  What is PME_TO?
+
+>=20
+> Signed-off-by: Xiangliang Yu <Xiangliang.Yu@amd.com>
+
+
+Overall, this driver is looking much better.  Thanks for your efforts!
+
+With the -rc1 window likely closing this weekend, let's see what others =
+have to say about this patch v3, or getting a v4 this week.
+
+There are a few minor requests below.  They are nothing critical.
+
+> +static void amd_ack_SMU(struct amd_ntb_dev *ndev, u32 bit)
+> +{
+> +	void __iomem *mmio =3D ndev->self_mmio;
+> +	int reg;
+> +
+> +	reg =3D readl(mmio + AMD_SMUACK_OFFSET);
+> +	reg |=3D bit;
+> +	writel(reg, mmio + AMD_SMUACK_OFFSET);
+> +
+> +	ndev->peer_sta |=3D bit;
+> +}
+
+What is SMU?
+
+Does this have to do with power management, or flush?  Can you say why =
+it should be in this patch, and not one of the other ones?
+
+Speculation: Is it something like, if the peer driver has the flush =
+patch, and this side is not patched, this side driver still needs to =
+respond (ack) for the peer flush to complete?  In other words, the flush =
+is not fully implemented in hw?  I'm just guessing, so I would like to =
+hear your explanation.
+
+> +static void amd_handle_event(struct amd_ntb_dev *ndev, int vec)
+> +{
+> +	void __iomem *mmio =3D ndev->self_mmio;
+> +	u32 status;
+> +
+> +	status =3D readl(mmio + AMD_INTSTAT_OFFSET);
+> +	if (!(status & AMD_EVENT_INTMASK))
+> +		return;
+> +
+> +	dev_dbg(ndev_dev(ndev), "status =3D 0x%x and vec =3D %d\n", status,
+> vec);
+> +
+> +	status &=3D AMD_EVENT_INTMASK;
+> +	switch (status) {
+> +	case AMD_PEER_FLUSH_EVENT:
+> +		dev_info(ndev_dev(ndev), "Flush is done.\n");
+> +		break;
+> +	case AMD_PEER_RESET_EVENT:
+> +		amd_ack_SMU(ndev, AMD_PEER_RESET_EVENT);
+> +
+> +		/* link down first */
+> +		ntb_link_event(&ndev->ntb);
+> +		/* polling peer status */
+> +		schedule_delayed_work(&ndev->hb_timer, AMD_LINK_HB_TIMEOUT);
+> +
+> +		break;
+> +	case AMD_PEER_D3_EVENT:
+> +	case AMD_PEER_PMETO_EVENT:
+> +		amd_ack_SMU(ndev, status);
+
+Here is ack SMU called.
+
+> +
+> +		/* link down */
+> +		ntb_link_event(&ndev->ntb);
+> +
+> +		break;
+> +	case AMD_PEER_D0_EVENT:
+> +		mmio =3D ndev->peer_mmio;
+> +		status =3D readl(mmio + AMD_PMESTAT_OFFSET);
+> +		/* check if this is WAKEUP event */
+> +		if (status & 0x1)
+> +			dev_info(ndev_dev(ndev), "Wakeup is done.\n");
+> +
+> +		amd_ack_SMU(ndev, AMD_PEER_D0_EVENT);
+> +
+> +		if (amd_link_is_up(ndev))
+> +			ntb_link_event(&ndev->ntb);
+> +		else
+> +			schedule_delayed_work(&ndev->hb_timer,
+> +						AMD_LINK_HB_TIMEOUT);
+> +		break;
+> +	default:
+> +		dev_info(ndev_dev(ndev), "event status =3D 0x%x.\n", status);
+> +		break;
+> +	}
+> +}
+
+> +enum {
+
+I would prefer to see #define, but this works... There are good =
+arguments to be made for compiler constants vs the preprocessor.  My =
+preference just comes from what I've observed about how other drivers =
+are written, and #define for this stuff seems to be the convention.
+
+> +	/* AMD NTB Capability */
+> +	AMD_MW_CNT		=3D 3,
+> +	AMD_DB_CNT		=3D 16,
+> +	AMD_MSIX_VECTOR_CNT	=3D 24,
+> +	AMD_SPADS_CNT		=3D 16,
+> +
+> +	/*  AMD NTB register offset */
+> +	AMD_CNTL_OFFSET		=3D 0x200,
+> +
+> +	/* NTB control register bits */
+> +	PMM_REG_CTL		=3D BIT(21),
+> +	SMM_REG_CTL		=3D BIT(20),
+> +	SMM_REG_ACC_PATH	=3D BIT(18),
+> +	PMM_REG_ACC_PATH	=3D BIT(17),
+> +	NTB_CLK_EN		=3D BIT(16),
+> +
+> +	AMD_STA_OFFSET		=3D 0x204,
+> +	AMD_PGSLV_OFFSET	=3D 0x208,
+> +	AMD_SPAD_MUX_OFFSET	=3D 0x20C,
+> +	AMD_SPAD_OFFSET		=3D 0x210,
+> +	AMD_RSMU_HCID		=3D 0x250,
+> +	AMD_RSMU_SIID		=3D 0x254,
+> +	AMD_PSION_OFFSET	=3D 0x300,
+> +	AMD_SSION_OFFSET	=3D 0x330,
+> +	AMD_MMINDEX_OFFSET	=3D 0x400,
+> +	AMD_MMDATA_OFFSET	=3D 0x404,
+> +	AMD_SIDEINFO_OFFSET	=3D 0x408,
+> +
+> +	AMD_SIDE_MASK		=3D BIT(0),
+> +
+> +	/* limit register */
+> +	AMD_ROMBARLMT_OFFSET	=3D 0x410,
+> +	AMD_BAR1LMT_OFFSET	=3D 0x414,
+> +	AMD_BAR23LMT_OFFSET	=3D 0x418,
+> +	AMD_BAR45LMT_OFFSET	=3D 0x420,
+> +	/* xlat address */
+> +	AMD_POMBARXLAT_OFFSET	=3D 0x428,
+> +	AMD_BAR1XLAT_OFFSET	=3D 0x430,
+> +	AMD_BAR23XLAT_OFFSET	=3D 0x438,
+> +	AMD_BAR45XLAT_OFFSET	=3D 0x440,
+> +	/* doorbell and interrupt */
+> +	AMD_DBFM_OFFSET		=3D 0x450,
+> +	AMD_DBREQ_OFFSET	=3D 0x454,
+> +	AMD_MIRRDBSTAT_OFFSET	=3D 0x458,
+> +	AMD_DBMASK_OFFSET	=3D 0x45C,
+> +	AMD_DBSTAT_OFFSET	=3D 0x460,
+> +	AMD_INTMASK_OFFSET	=3D 0x470,
+> +	AMD_INTSTAT_OFFSET	=3D 0x474,
+> +
+> +	/* event type */
+> +	AMD_PEER_FLUSH_EVENT	=3D BIT(0),
+> +	AMD_PEER_RESET_EVENT	=3D BIT(1),
+> +	AMD_PEER_D3_EVENT	=3D BIT(2),
+> +	AMD_PEER_PMETO_EVENT	=3D BIT(3),
+> +	AMD_PEER_D0_EVENT	=3D BIT(4),
+> +	AMD_EVENT_INTMASK	=3D (AMD_PEER_FLUSH_EVENT |
+> +				AMD_PEER_RESET_EVENT | AMD_PEER_D3_EVENT |
+> +				AMD_PEER_PMETO_EVENT | AMD_PEER_D0_EVENT),
+> +
+> +	AMD_PMESTAT_OFFSET	=3D 0x480,
+> +	AMD_PMSGTRIG_OFFSET	=3D 0x490,
+> +	AMD_LTRLATENCY_OFFSET	=3D 0x494,
+> +	AMD_FLUSHTRIG_OFFSET	=3D 0x498,
+> +
+> +	/* SMU register*/
+> +	AMD_SMUACK_OFFSET	=3D 0x4A0,
+> +	AMD_SINRST_OFFSET	=3D 0x4A4,
+> +	AMD_RSPNUM_OFFSET	=3D 0x4A8,
+> +	AMD_SMU_SPADMUTEX	=3D 0x4B0,
+> +	AMD_SMU_SPADOFFSET	=3D 0x4B4,
+> +
+> +	AMD_PEER_OFFSET		=3D 0x400,
+> +};
+
+> +struct amd_ntb_dev {
+...
+> +};
+> +
+> +#define ndev_pdev(ndev) ((ndev)->ntb.pdev)
+> +#define ndev_name(ndev) pci_name(ndev_pdev(ndev))
+> +#define ndev_dev(ndev) (&ndev_pdev(ndev)->dev)
+> +#define ntb_ndev(__ntb) container_of(__ntb, struct amd_ntb_dev, ntb)
+> +#define hb_ndev(__work) container_of(__work, struct amd_ntb_dev,
+> hb_timer.work)
+
+Jon: I think these macros are good, and I like that they are here next =
+to the struct amd_ntb_dev.
+
+> +static int amd_ntb_mw_count(struct ntb_dev *ntb);
+> +static int amd_ntb_mw_get_range(struct ntb_dev *ntb, int idx,
+> +			phys_addr_t *base, resource_size_t *size,
+> +			resource_size_t *align, resource_size_t *algin_size);
+> +static int amd_ntb_mw_set_trans(struct ntb_dev *ndev, int idx,
+> +				dma_addr_t addr, resource_size_t size);
+> +static int amd_ntb_link_is_up(struct ntb_dev *ntb,
+> +				enum ntb_speed *speed,
+> +				enum ntb_width *width);
+> +static int amd_ntb_link_enable(struct ntb_dev *ntb,
+> +				enum ntb_speed speed,
+> +				enum ntb_width width);
+> +static int amd_ntb_link_disable(struct ntb_dev *ntb);
+> +static u64 amd_ntb_db_valid_mask(struct ntb_dev *ntb);
+> +static int amd_ntb_db_vector_count(struct ntb_dev *ntb);
+> +static u64 amd_ntb_db_vector_mask(struct ntb_dev *ntb, int =
+db_vector);
+> +static u64 amd_ntb_db_read(struct ntb_dev *ntb);
+> +static int amd_ntb_db_clear(struct ntb_dev *ntb, u64 db_bits);
+> +static int amd_ntb_db_set_mask(struct ntb_dev *ntb, u64 db_bits);
+> +static int amd_ntb_db_clear_mask(struct ntb_dev *ntb, u64 db_bits);
+> +static int amd_ntb_peer_db_addr(struct ntb_dev *ntb,
+> +				phys_addr_t *db_addr,
+> +				resource_size_t *db_size);
+> +static int amd_ntb_peer_db_set(struct ntb_dev *ntb, u64 db_bits);
+> +static int amd_ntb_spad_count(struct ntb_dev *ntb);
+> +static u32 amd_ntb_spad_read(struct ntb_dev *ntb, int idx);
+> +static int amd_ntb_spad_write(struct ntb_dev *ntb, int idx, u32 val);
+> +static int amd_ntb_peer_spad_addr(struct ntb_dev *ntb, int idx,
+> +					phys_addr_t *spad_addr);
+> +static u32 amd_ntb_peer_spad_read(struct ntb_dev *ntb, int idx);
+> +static int amd_ntb_peer_spad_write(struct ntb_dev *ntb, int idx, u32
+> val);
+
+It's unusual, sometimes dangerous, to use the static keyword in a .h =
+file (unless static inline, or things that you really intend to be =
+static in multiple compilation unit).  This .h is only included by a =
+single .c file (effectively, this file is part of ntb_hw_amd.c), and =
+these are only declarations, not function definitions, but it makes me =
+nervous.  Do you /need/ these functions forward declared?  Could you =
+rearrange your .c file so you don't need these forward declared?  If you =
+need them, could you put the declarations in the .c file?
+
+Allen
+
