@@ -1,92 +1,101 @@
-Return-Path: <Allen.Hubbe@emc.com>
-Received: from mailuogwhop.emc.com (mailuogwhop.emc.com. [168.159.213.141])
-        by gmr-mx.google.com with ESMTPS id g66si2754655ywf.4.2016.01.20.08.26.53
+Return-Path: <Xiangliang.Yu@amd.com>
+Received: from na01-bn1-obe.outbound.protection.outlook.com (mail-bn1on0090.outbound.protection.outlook.com. [157.56.110.90])
+        by gmr-mx.google.com with ESMTPS id y199si2848015ywd.5.2016.01.19.19.16.07
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 20 Jan 2016 08:26:53 -0800 (PST)
-From: "Allen Hubbe" <Allen.Hubbe@emc.com>
-References: <1453205805-851-1-git-send-email-Xiangliang.Yu@amd.com> <000301d152f8$2e7a7780$8b6f6680$@emc.com> <BLUPR12MB04207EF72B53019C43947550EBC20@BLUPR12MB0420.namprd12.prod.outlook.com>
-In-Reply-To: <BLUPR12MB04207EF72B53019C43947550EBC20@BLUPR12MB0420.namprd12.prod.outlook.com>
-Subject: RE: [PATCH V4 1/1] NTB: Add support for AMD PCI-Express Non-Transparent Bridge
-Date: Wed, 20 Jan 2016 11:26:42 -0500
-Message-ID: <000101d1539f$5966cd70$0c346850$@emc.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
+        Tue, 19 Jan 2016 19:16:07 -0800 (PST)
+From: "Yu, Xiangliang" <Xiangliang.Yu@amd.com>
+Subject: RE: [PATCH V4 1/1] NTB: Add support for AMD PCI-Express
+ Non-Transparent Bridge
+Date: Wed, 20 Jan 2016 03:16:04 +0000
+Message-ID: <BLUPR12MB04207EF72B53019C43947550EBC20@BLUPR12MB0420.namprd12.prod.outlook.com>
+References: <1453205805-851-1-git-send-email-Xiangliang.Yu@amd.com>
+ <000301d152f8$2e7a7780$8b6f6680$@emc.com>
+In-Reply-To: <000301d152f8$2e7a7780$8b6f6680$@emc.com>
+Content-Language: en-US
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Content-Type: text/plain;
-	charset="utf-8"
-Content-Transfer-Encoding: quoted-printable
-Content-Language: en-us
-To: "'Yu, Xiangliang'" <Xiangliang.Yu@amd.com>, jdmason@kudzu.us, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
-Cc: 'SPG_Linux_Kernel' <SPG_Linux_Kernel@amd.com>
+To: Allen Hubbe <Allen.Hubbe@emc.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
+Cc: SPG_Linux_Kernel <SPG_Linux_Kernel@amd.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-> > There is some concept of "split bar" in this function, and I want to
-> be sure to
-> > understand it correctly.
-> >
-> > BAR0 - configuration?
-> > BAR1 - 32bit memory window? i.e. "split" bar?
-> > BAR2+3 - 64bit memory window?
-> > BAR4+5 - 64bit memory window?
->=20
-> Yes
-
-Ok.
-
-> > Note that "split" in the intel driver refers to BAR4+5, which is
-> normally a 64bit
-> > memory window, split into independent 32bit windows BAR4 and BAR5 by
-> > bios configuration.  Calling it "split" there makes sense.  Here,
-> calling it "split"
-> > is confusing, but as long as the code is correct, I think it's ok.
->=20
-> AMD NTB has similar design.
-
-If by similar design, you mean that BAR2+3 or BAR4+5 can be split, those =
-configurations are not currently supported by this driver.  If needed, =
-support for those configurations can be added later, as a patch.
-
-Ok with the current implementation.
-
-> > I see a lot of readl/writel and ioread/iowrite in the same file, =
-even
-> in the
-> > same function as there is here.  Pick one variant of the functions,
-> preferably
-> > the ioread/iowrite variant, and be consistent in its usage =
-throughout
-> the file.
->=20
-> Ioread/iowrite is only for 64bit read/write, I don't think it has any
-> confusion.
-
-It's not just for 64bit: there are ioread8,16,32.  In fact, ioread64 is =
-the one that's not provided by io.h: not all hardware can do a true =
-64bit read or write.  We don't need a true 64bit operation, so ioread64 =
-is provided locally, for convenience within this driver.
-
-> Actually, Intel NTB driver has same behavior.
-
-Actually, Intel NTB driver does not use readl/writel.
-
-Would you please fix this?
-
-> > It's also interesting that if it hits the last branch, =
-ndev->peer_sta
-> is assigned
-> > zero, but the function returns zero, not LNK_STA.  If the function
-> were
-> > immediately called again, it would return LNK_STA.  Can you please
-> explain
-> > the logic here?
->=20
-> Force to read link status register again because the opposite side =
-maybe
-> still
-> In resuming progress, the status variable can't show the right state,
-> have to
-> Read register directly.
-
-There's no indication in this function that it interacts with the timer. =
- With your suggestion, I'll take a closer look at the interactions =
-between this function and the timer.
-
+PiBGcm9tOiBYaWFuZ2xpYW5nIFl1IDxYaWFuZ2xpYW5nLll1QGFtZC5jb20+DQo+ID4gVGhpcyBh
+ZGRzIHN1cHBvcnQgZm9yIEFNRCdzIFBDSS1FeHByZXNzIE5vbi1UcmFuc3BhcmVudCBCcmlkZ2UN
+Cj4gPiAoTlRCKSBkZXZpY2Ugb24gdGhlIFplcHBlbGluIHBsYXRmb3JtLiBUaGUgZHJpdmVyIGNv
+bm5uZWN0cyB0byB0aGUNCj4gPiBzdGFuZGFyZCBOVEIgc3ViLXN5c3RlbSBpbnRlcmZhY2UsIHdp
+dGggbW9kaWZpY2F0aW9uIHRvIGFkZCBob29rcyBmb3INCj4gPiBwb3dlciBtYW5hZ2VtZW50IGlu
+IGEgc2VwYXJhdGUgcGF0Y2guIFRoZSBBTUQgTlRCIGRldmljZSBoYXMgMw0KPiBtZW1vcnkNCj4g
+PiB3aW5kb3dzLCAxNiBkb29yYmVsbCwgMTYgc2NyYXRjaC1wYWQgcmVnaXN0ZXJzLCBhbmQgc3Vw
+cG9ydHMgdXAgdG8gMTYNCj4gPiBQQ0llIGxhbmVzIHJ1bm5pbmcgYSBHZW4zIHNwZWVkcy4NCj4g
+Pg0KPiA+IFNpZ25lZC1vZmYtYnk6IFhpYW5nbGlhbmcgWXUgPFhpYW5nbGlhbmcuWXVAYW1kLmNv
+bT4NCj4gDQo+ID4gK3N0YXRpYyBpbnQgYW1kX250Yl9td19zZXRfdHJhbnMoc3RydWN0IG50Yl9k
+ZXYgKm50YiwgaW50IGlkeCwNCj4gPiArCQkJCWRtYV9hZGRyX3QgYWRkciwgcmVzb3VyY2Vfc2l6
+ZV90IHNpemUpIHsNCj4gDQo+IFRoZXJlIGlzIHNvbWUgY29uY2VwdCBvZiAic3BsaXQgYmFyIiBp
+biB0aGlzIGZ1bmN0aW9uLCBhbmQgSSB3YW50IHRvIGJlIHN1cmUgdG8NCj4gdW5kZXJzdGFuZCBp
+dCBjb3JyZWN0bHkuDQo+IA0KPiBCQVIwIC0gY29uZmlndXJhdGlvbj8NCj4gQkFSMSAtIDMyYml0
+IG1lbW9yeSB3aW5kb3c/IGkuZS4gInNwbGl0IiBiYXI/DQo+IEJBUjIrMyAtIDY0Yml0IG1lbW9y
+eSB3aW5kb3c/DQo+IEJBUjQrNSAtIDY0Yml0IG1lbW9yeSB3aW5kb3c/DQoNClllcyANCg0KPiBO
+b3RlIHRoYXQgInNwbGl0IiBpbiB0aGUgaW50ZWwgZHJpdmVyIHJlZmVycyB0byBCQVI0KzUsIHdo
+aWNoIGlzIG5vcm1hbGx5IGEgNjRiaXQNCj4gbWVtb3J5IHdpbmRvdywgc3BsaXQgaW50byBpbmRl
+cGVuZGVudCAzMmJpdCB3aW5kb3dzIEJBUjQgYW5kIEJBUjUgYnkNCj4gYmlvcyBjb25maWd1cmF0
+aW9uLiAgQ2FsbGluZyBpdCAic3BsaXQiIHRoZXJlIG1ha2VzIHNlbnNlLiAgSGVyZSwgY2FsbGlu
+ZyBpdCAic3BsaXQiDQo+IGlzIGNvbmZ1c2luZywgYnV0IGFzIGxvbmcgYXMgdGhlIGNvZGUgaXMg
+Y29ycmVjdCwgSSB0aGluayBpdCdzIG9rLg0KDQpBTUQgTlRCIGhhcyBzaW1pbGFyIGRlc2lnbi4N
+Cg0KPiANCj4gPiArCQkvKiBzZXQgYW5kIHZlcmlmeSBzZXR0aW5nIHRoZSB0cmFuc2xhdGlvbiBh
+ZGRyZXNzICovDQo+ID4gKwkJaW93cml0ZTY0KGFkZHIsIHBlZXJfbW1pbyArIHhsYXRfcmVnKTsN
+Cj4gPiArCQlyZWdfdmFsID0gaW9yZWFkNjQocGVlcl9tbWlvICsgeGxhdF9yZWcpOw0KPiA+ICsJ
+CWlmIChyZWdfdmFsICE9IGFkZHIpIHsNCj4gPiArCQkJaW93cml0ZTY0KDAsIHBlZXJfbW1pbyAr
+IHhsYXRfcmVnKTsNCj4gPiArCQkJcmV0dXJuIC1FSU87DQo+ID4gKwkJfQ0KPiA+ICsNCj4gPiAr
+CQkvKiBzZXQgYW5kIHZlcmlmeSBzZXR0aW5nIHRoZSBsaW1pdCAqLw0KPiA+ICsJCXdyaXRlbChs
+aW1pdCwgbW1pbyArIGxpbWl0X3JlZyk7DQo+ID4gKwkJcmVnX3ZhbCA9IHJlYWRsKG1taW8gKyBs
+aW1pdF9yZWcpOw0KPiA+ICsJCWlmIChyZWdfdmFsICE9IGxpbWl0KSB7DQo+ID4gKwkJCXdyaXRl
+bChiYXNlX2FkZHIsIG1taW8gKyBsaW1pdF9yZWcpOw0KPiA+ICsJCQl3cml0ZWwoMCwgcGVlcl9t
+bWlvICsgeGxhdF9yZWcpOw0KPiA+ICsJCQlyZXR1cm4gLUVJTzsNCj4gPiArCQl9DQo+IA0KPiBJ
+IHNlZSBhIGxvdCBvZiByZWFkbC93cml0ZWwgYW5kIGlvcmVhZC9pb3dyaXRlIGluIHRoZSBzYW1l
+IGZpbGUsIGV2ZW4gaW4gdGhlDQo+IHNhbWUgZnVuY3Rpb24gYXMgdGhlcmUgaXMgaGVyZS4gIFBp
+Y2sgb25lIHZhcmlhbnQgb2YgdGhlIGZ1bmN0aW9ucywgcHJlZmVyYWJseQ0KPiB0aGUgaW9yZWFk
+L2lvd3JpdGUgdmFyaWFudCwgYW5kIGJlIGNvbnNpc3RlbnQgaW4gaXRzIHVzYWdlIHRocm91Z2hv
+dXQgdGhlIGZpbGUuDQoNCklvcmVhZC9pb3dyaXRlIGlzIG9ubHkgZm9yIDY0Yml0IHJlYWQvd3Jp
+dGUsIEkgZG9uJ3QgdGhpbmsgaXQgaGFzIGFueSBjb25mdXNpb24uDQpBY3R1YWxseSwgSW50ZWwg
+TlRCIGRyaXZlciBoYXMgc2FtZSBiZWhhdmlvci4NCg0KPiA+ICtzdGF0aWMgaW50IGFtZF9saW5r
+X2lzX3VwKHN0cnVjdCBhbWRfbnRiX2RldiAqbmRldikgew0KPiA+ICsJaWYgKCFuZGV2LT5wZWVy
+X3N0YSkNCj4gPiArCQlyZXR1cm4gTlRCX0xOS19TVEFfQUNUSVZFKG5kZXYtPmNudGxfc3RhKTsN
+Cj4gPiArCWVsc2UgaWYgKG5kZXYtPnBlZXJfc3RhICYgQU1EX1BFRVJfUkVTRVRfRVZFTlQpDQo+
+ID4gKwkJbmRldi0+cGVlcl9zdGEgJj0gfkFNRF9QRUVSX1JFU0VUX0VWRU5UOw0KPiA+ICsJZWxz
+ZSBpZiAobmRldi0+cGVlcl9zdGEgJiBBTURfUEVFUl9EMF9FVkVOVCkNCj4gPiArCQluZGV2LT5w
+ZWVyX3N0YSA9IDA7DQo+ID4gKw0KPiA+ICsJcmV0dXJuIDA7DQo+ID4gK30NCj4gDQo+IFRoaXMg
+ZnVuY3Rpb24gY2hhbmdlZCBzaW5jZSB2My4NCj4gDQo+IFRoZSBmaXJzdCAiZWxzZSIgaXMgbm90
+IG5lY2Vzc2FyeSBhZnRlciBhIGJyYW5jaCB0aGF0IHJldHVybnMuICBJdCB3b3VsZCBiZSBtb3Jl
+DQo+IGNsZWFybHkgd3JpdHRlbiBhcyBmb2xsb3dzLg0KDQpNYWtlIHNlbnNlDQoNCj4gaWYgKCFu
+ZGV2LT5wZWVyX3N0YSkNCj4gCXJldHVybiBMTktfU1RBOw0KPiANCj4gaWYgKG5kZXYtPnBlZXJf
+c3RhICYgUkVTRVQpDQo+IAkuLi47DQo+IGVsc2UgaWYgKG5kZXYtPnBlZXJfc3RhICYgRDApDQo+
+IAkuLi47DQo+IA0KPiByZXR1cm4gMDsNCj4gDQo+IEl0J3MgYWxzbyBpbnRlcmVzdGluZyB0aGF0
+IGlmIGl0IGhpdHMgdGhlIGxhc3QgYnJhbmNoLCBuZGV2LT5wZWVyX3N0YSBpcyBhc3NpZ25lZA0K
+PiB6ZXJvLCBidXQgdGhlIGZ1bmN0aW9uIHJldHVybnMgemVybywgbm90IExOS19TVEEuICBJZiB0
+aGUgZnVuY3Rpb24gd2VyZQ0KPiBpbW1lZGlhdGVseSBjYWxsZWQgYWdhaW4sIGl0IHdvdWxkIHJl
+dHVybiBMTktfU1RBLiAgQ2FuIHlvdSBwbGVhc2UgZXhwbGFpbg0KPiB0aGUgbG9naWMgaGVyZT8N
+Cg0KRm9yY2UgdG8gcmVhZCBsaW5rIHN0YXR1cyByZWdpc3RlciBhZ2FpbiBiZWNhdXNlIHRoZSBv
+cHBvc2l0ZSBzaWRlIG1heWJlIHN0aWxsIA0KSW4gcmVzdW1pbmcgcHJvZ3Jlc3MsIHRoZSBzdGF0
+dXMgdmFyaWFibGUgY2FuJ3Qgc2hvdyB0aGUgcmlnaHQgc3RhdGUsIGhhdmUgdG8NClJlYWQgcmVn
+aXN0ZXIgZGlyZWN0bHkuDQoNCj4gVGhlIHVwcGVyIGxheWVyIG1heSBwb2xsIHRoZSBsaW5rIHN0
+YXR1cyBhdCBhbnkgdGltZSwgc28gdW5sZXNzIHRoZSBsaW5rIHN0YXR1cw0KPiBhY3R1YWxseSBj
+aGFuZ2VkIChhcyBpbmRpY2F0ZWQgYnkgdGhlIGhhcmR3YXJlKSBiZXR3ZWVuIHBvbGxzLCB0aGUg
+cmVzdWx0IG9mDQo+IHBvbGxpbmcgc2hvdWxkIGJlIHRoZSBzYW1lLg0KPiANCj4gSWYgdGhlIGZp
+cnN0IHRpbWUgcG9sbGluZyByZXR1cm5zIHplcm8gYXMgYSByZXN1bHQgb2YgcGVlcl9zdGEsDQo+
+ICAtIEFORCB0aGUgc2Vjb25kIHRpbWUgcG9sbGluZyByZXR1cm5zIExOS19TVEEsDQo+ICAtIEFO
+RCB0aGUgaGFyZHdhcmUgbGluayBzdGF0ZSBpcyBVUCwNCg0KU3RhcnQgYSB0aW1lciB0byBwb2xs
+IGhhcmR3YXJlIGxpbmsgc3RhdHVzIGFuZCB3aWxsIGNoYW5nZSBzdGF0dXMgdmFyaWFibGUgaWYg
+bGluaw0KQ2hhbmdlLiBUaGlzIHdpbGwgbWFrZSBpdCBvbmx5IGNoZWNrIGxpbmsgdmFyaWFibGUs
+IG5vdCBwZWVyX3N0YS4NClBsZWFzZSBjaGVjayB0aW1lciBjb2RlLg0KDQo+ICAtIEFORCB0aGUg
+b25seSBkaWZmZXJlbmNlIGlzIG5vdCB0aGUgaGFyZHdhcmUNCj4gICAgIGxpbmsgc3RhdGUgYnV0
+IHRoZSB2YWx1ZSBvZiBwZWVyX3N0YSwNCj4gIC0gVEhFTiB0aGlzIGlzIGEgYnVnLg0KPiANCj4g
+SSBzaG91bGQgaGF2ZSBub3RpY2VkIGFuZCBtYWRlIHRoZSBjb21tZW50IGluIHYxLCB3aGljaCBo
+YWQgdGhlIHNhbWUNCj4gYmVoYXZpb3IsIHRob3VnaCBpdCB3YXMgbW9yZSBleHBsaWNpdC4NCg0K
+VjQgbWFrZSBjb2RlIGNsZWFyLCBzbyBJIGNoYW5nZSBpdC4NCg0KPiBGcm9tIHYxOg0KPiA+ICsJ
+fSBlbHNlIGlmIChuZGV2LT5wZWVyX3N0YSAmIEFNRF9QRUVSX0QwX0VWRU5UKSB7DQo+ID4gKwkJ
+bmRldi0+cGVlcl9zdGEgPSAwOw0KPiA+ICsJCXJldHVybiAwOw0KDQpBbmQgcGxlYXNlIHNwZW5k
+IG1vcmUgdGltZSB0byBnbyB0aHJvdWdoIGFsbCBjb2RlLCBhbmQgSSdsbCB3YWl0aW5nIGZvciB5
+b3VyDQpGZWVkYmFjay4gSSBoYXZlIHNlbmQgdGhlIGNvZGUgbG9uZyB0aW1lIGFnby4gSXQgbWFr
+ZSBtZSBtb3JlIGNvbWZvcnRhYmxlDQpJZiB5b3UgY2FuIGNvbW1lbnQgYWxsIGNvbmNlcm4gaW4g
+b25lIHZlcnNpb24uDQo=
