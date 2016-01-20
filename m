@@ -1,70 +1,92 @@
-Return-Path: <Xiangliang.Yu@amd.com>
-Received: from na01-bn1-obe.outbound.protection.outlook.com (mail-bn1bon0074.outbound.protection.outlook.com. [157.56.111.74])
-        by gmr-mx.google.com with ESMTPS id i138si3036900ywe.2.2016.01.20.18.17.19
+Return-Path: <Allen.Hubbe@emc.com>
+Received: from mailuogwhop.emc.com (mailuogwhop.emc.com. [168.159.213.141])
+        by gmr-mx.google.com with ESMTPS id g66si2754655ywf.4.2016.01.20.08.26.53
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Wed, 20 Jan 2016 18:17:19 -0800 (PST)
-From: "Yu, Xiangliang" <Xiangliang.Yu@amd.com>
-Subject: RE: [PATCH V4 1/1] NTB: Add support for AMD PCI-Express
- Non-Transparent Bridge
-Date: Thu, 21 Jan 2016 02:17:15 +0000
-Message-ID: <BLUPR12MB042040E105A046796188B2A1EBC30@BLUPR12MB0420.namprd12.prod.outlook.com>
-References: <1453205805-851-1-git-send-email-Xiangliang.Yu@amd.com>
- <000301d152f8$2e7a7780$8b6f6680$@emc.com>
- <BLUPR12MB04207EF72B53019C43947550EBC20@BLUPR12MB0420.namprd12.prod.outlook.com>
- <000101d1539f$5966cd70$0c346850$@emc.com>
-In-Reply-To: <000101d1539f$5966cd70$0c346850$@emc.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 20 Jan 2016 08:26:53 -0800 (PST)
+From: "Allen Hubbe" <Allen.Hubbe@emc.com>
+References: <1453205805-851-1-git-send-email-Xiangliang.Yu@amd.com> <000301d152f8$2e7a7780$8b6f6680$@emc.com> <BLUPR12MB04207EF72B53019C43947550EBC20@BLUPR12MB0420.namprd12.prod.outlook.com>
+In-Reply-To: <BLUPR12MB04207EF72B53019C43947550EBC20@BLUPR12MB0420.namprd12.prod.outlook.com>
+Subject: RE: [PATCH V4 1/1] NTB: Add support for AMD PCI-Express Non-Transparent Bridge
+Date: Wed, 20 Jan 2016 11:26:42 -0500
+Message-ID: <000101d1539f$5966cd70$0c346850$@emc.com>
 MIME-Version: 1.0
-To: Allen Hubbe <Allen.Hubbe@emc.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
-Cc: SPG_Linux_Kernel <SPG_Linux_Kernel@amd.com>
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+Content-Language: en-us
+To: "'Yu, Xiangliang'" <Xiangliang.Yu@amd.com>, jdmason@kudzu.us, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
+Cc: 'SPG_Linux_Kernel' <SPG_Linux_Kernel@amd.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-PiA+ID4gVGhlcmUgaXMgc29tZSBjb25jZXB0IG9mICJzcGxpdCBiYXIiIGluIHRoaXMgZnVuY3Rp
-b24sIGFuZCBJIHdhbnQgdG8NCj4gPiBiZSBzdXJlIHRvDQo+ID4gPiB1bmRlcnN0YW5kIGl0IGNv
-cnJlY3RseS4NCj4gPiA+DQo+ID4gPiBCQVIwIC0gY29uZmlndXJhdGlvbj8NCj4gPiA+IEJBUjEg
-LSAzMmJpdCBtZW1vcnkgd2luZG93PyBpLmUuICJzcGxpdCIgYmFyPw0KPiA+ID4gQkFSMiszIC0g
-NjRiaXQgbWVtb3J5IHdpbmRvdz8NCj4gPiA+IEJBUjQrNSAtIDY0Yml0IG1lbW9yeSB3aW5kb3c/
-DQo+ID4NCj4gPiBZZXMNCj4gDQo+IE9rLg0KPiANCj4gPiA+IE5vdGUgdGhhdCAic3BsaXQiIGlu
-IHRoZSBpbnRlbCBkcml2ZXIgcmVmZXJzIHRvIEJBUjQrNSwgd2hpY2ggaXMNCj4gPiBub3JtYWxs
-eSBhIDY0Yml0DQo+ID4gPiBtZW1vcnkgd2luZG93LCBzcGxpdCBpbnRvIGluZGVwZW5kZW50IDMy
-Yml0IHdpbmRvd3MgQkFSNCBhbmQgQkFSNQ0KPiBieQ0KPiA+ID4gYmlvcyBjb25maWd1cmF0aW9u
-LiAgQ2FsbGluZyBpdCAic3BsaXQiIHRoZXJlIG1ha2VzIHNlbnNlLiAgSGVyZSwNCj4gPiBjYWxs
-aW5nIGl0ICJzcGxpdCINCj4gPiA+IGlzIGNvbmZ1c2luZywgYnV0IGFzIGxvbmcgYXMgdGhlIGNv
-ZGUgaXMgY29ycmVjdCwgSSB0aGluayBpdCdzIG9rLg0KPiA+DQo+ID4gQU1EIE5UQiBoYXMgc2lt
-aWxhciBkZXNpZ24uDQo+IA0KPiBJZiBieSBzaW1pbGFyIGRlc2lnbiwgeW91IG1lYW4gdGhhdCBC
-QVIyKzMgb3IgQkFSNCs1IGNhbiBiZSBzcGxpdCwgdGhvc2UNCj4gY29uZmlndXJhdGlvbnMgYXJl
-IG5vdCBjdXJyZW50bHkgc3VwcG9ydGVkIGJ5IHRoaXMgZHJpdmVyLiAgSWYgbmVlZGVkLCBzdXBw
-b3J0DQo+IGZvciB0aG9zZSBjb25maWd1cmF0aW9ucyBjYW4gYmUgYWRkZWQgbGF0ZXIsIGFzIGEg
-cGF0Y2guDQo+IA0KPiBPayB3aXRoIHRoZSBjdXJyZW50IGltcGxlbWVudGF0aW9uLg0KPiANCj4g
-PiA+IEkgc2VlIGEgbG90IG9mIHJlYWRsL3dyaXRlbCBhbmQgaW9yZWFkL2lvd3JpdGUgaW4gdGhl
-IHNhbWUgZmlsZSwNCj4gPiA+IGV2ZW4NCj4gPiBpbiB0aGUNCj4gPiA+IHNhbWUgZnVuY3Rpb24g
-YXMgdGhlcmUgaXMgaGVyZS4gIFBpY2sgb25lIHZhcmlhbnQgb2YgdGhlIGZ1bmN0aW9ucywNCj4g
-PiBwcmVmZXJhYmx5DQo+ID4gPiB0aGUgaW9yZWFkL2lvd3JpdGUgdmFyaWFudCwgYW5kIGJlIGNv
-bnNpc3RlbnQgaW4gaXRzIHVzYWdlDQo+ID4gPiB0aHJvdWdob3V0DQo+ID4gdGhlIGZpbGUuDQo+
-ID4NCj4gPiBJb3JlYWQvaW93cml0ZSBpcyBvbmx5IGZvciA2NGJpdCByZWFkL3dyaXRlLCBJIGRv
-bid0IHRoaW5rIGl0IGhhcyBhbnkNCj4gPiBjb25mdXNpb24uDQo+IA0KPiBJdCdzIG5vdCBqdXN0
-IGZvciA2NGJpdDogdGhlcmUgYXJlIGlvcmVhZDgsMTYsMzIuICBJbiBmYWN0LCBpb3JlYWQ2NCBp
-cyB0aGUgb25lDQo+IHRoYXQncyBub3QgcHJvdmlkZWQgYnkgaW8uaDogbm90IGFsbCBoYXJkd2Fy
-ZSBjYW4gZG8gYSB0cnVlIDY0Yml0IHJlYWQgb3Igd3JpdGUuDQo+IFdlIGRvbid0IG5lZWQgYSB0
-cnVlIDY0Yml0IG9wZXJhdGlvbiwgc28gaW9yZWFkNjQgaXMgcHJvdmlkZWQgbG9jYWxseSwgZm9y
-DQo+IGNvbnZlbmllbmNlIHdpdGhpbiB0aGlzIGRyaXZlci4NCj4gDQo+ID4gQWN0dWFsbHksIElu
-dGVsIE5UQiBkcml2ZXIgaGFzIHNhbWUgYmVoYXZpb3IuDQo+IA0KPiBBY3R1YWxseSwgSW50ZWwg
-TlRCIGRyaXZlciBkb2VzIG5vdCB1c2UgcmVhZGwvd3JpdGVsLg0KPiANCj4gV291bGQgeW91IHBs
-ZWFzZSBmaXggdGhpcz8NCg0KSSdsbCBjaGFuZ2UgaW9yZWFkNjQvaW93cml0ZTY0IHRvIHJlYWQ2
-NC93cml0ZTY0LCBrZWVwIGNvbnNpc3RlbnQgd2l0Y2ggcmVhZGwvcmVhZHcNCg0KPiA+ID4gSXQn
-cyBhbHNvIGludGVyZXN0aW5nIHRoYXQgaWYgaXQgaGl0cyB0aGUgbGFzdCBicmFuY2gsDQo+ID4g
-PiBuZGV2LT5wZWVyX3N0YQ0KPiA+IGlzIGFzc2lnbmVkDQo+ID4gPiB6ZXJvLCBidXQgdGhlIGZ1
-bmN0aW9uIHJldHVybnMgemVybywgbm90IExOS19TVEEuICBJZiB0aGUgZnVuY3Rpb24NCj4gPiB3
-ZXJlDQo+ID4gPiBpbW1lZGlhdGVseSBjYWxsZWQgYWdhaW4sIGl0IHdvdWxkIHJldHVybiBMTktf
-U1RBLiAgQ2FuIHlvdSBwbGVhc2UNCj4gPiBleHBsYWluDQo+ID4gPiB0aGUgbG9naWMgaGVyZT8N
-Cj4gPg0KPiA+IEZvcmNlIHRvIHJlYWQgbGluayBzdGF0dXMgcmVnaXN0ZXIgYWdhaW4gYmVjYXVz
-ZSB0aGUgb3Bwb3NpdGUgc2lkZQ0KPiA+IG1heWJlIHN0aWxsIEluIHJlc3VtaW5nIHByb2dyZXNz
-LCB0aGUgc3RhdHVzIHZhcmlhYmxlIGNhbid0IHNob3cgdGhlDQo+ID4gcmlnaHQgc3RhdGUsIGhh
-dmUgdG8gUmVhZCByZWdpc3RlciBkaXJlY3RseS4NCj4gDQo+IFRoZXJlJ3Mgbm8gaW5kaWNhdGlv
-biBpbiB0aGlzIGZ1bmN0aW9uIHRoYXQgaXQgaW50ZXJhY3RzIHdpdGggdGhlIHRpbWVyLiAgV2l0
-aA0KPiB5b3VyIHN1Z2dlc3Rpb24sIEknbGwgdGFrZSBhIGNsb3NlciBsb29rIGF0IHRoZSBpbnRl
-cmFjdGlvbnMgYmV0d2VlbiB0aGlzDQo+IGZ1bmN0aW9uIGFuZCB0aGUgdGltZXIuDQoNCkknbGwg
-YWRkIGEgY29tbWVudC4NCg0K
+> > There is some concept of "split bar" in this function, and I want to
+> be sure to
+> > understand it correctly.
+> >
+> > BAR0 - configuration?
+> > BAR1 - 32bit memory window? i.e. "split" bar?
+> > BAR2+3 - 64bit memory window?
+> > BAR4+5 - 64bit memory window?
+>=20
+> Yes
+
+Ok.
+
+> > Note that "split" in the intel driver refers to BAR4+5, which is
+> normally a 64bit
+> > memory window, split into independent 32bit windows BAR4 and BAR5 by
+> > bios configuration.  Calling it "split" there makes sense.  Here,
+> calling it "split"
+> > is confusing, but as long as the code is correct, I think it's ok.
+>=20
+> AMD NTB has similar design.
+
+If by similar design, you mean that BAR2+3 or BAR4+5 can be split, those =
+configurations are not currently supported by this driver.  If needed, =
+support for those configurations can be added later, as a patch.
+
+Ok with the current implementation.
+
+> > I see a lot of readl/writel and ioread/iowrite in the same file, =
+even
+> in the
+> > same function as there is here.  Pick one variant of the functions,
+> preferably
+> > the ioread/iowrite variant, and be consistent in its usage =
+throughout
+> the file.
+>=20
+> Ioread/iowrite is only for 64bit read/write, I don't think it has any
+> confusion.
+
+It's not just for 64bit: there are ioread8,16,32.  In fact, ioread64 is =
+the one that's not provided by io.h: not all hardware can do a true =
+64bit read or write.  We don't need a true 64bit operation, so ioread64 =
+is provided locally, for convenience within this driver.
+
+> Actually, Intel NTB driver has same behavior.
+
+Actually, Intel NTB driver does not use readl/writel.
+
+Would you please fix this?
+
+> > It's also interesting that if it hits the last branch, =
+ndev->peer_sta
+> is assigned
+> > zero, but the function returns zero, not LNK_STA.  If the function
+> were
+> > immediately called again, it would return LNK_STA.  Can you please
+> explain
+> > the logic here?
+>=20
+> Force to read link status register again because the opposite side =
+maybe
+> still
+> In resuming progress, the status variable can't show the right state,
+> have to
+> Read register directly.
+
+There's no indication in this function that it interacts with the timer. =
+ With your suggestion, I'll take a closer look at the interactions =
+between this function and the timer.
+
