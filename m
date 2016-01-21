@@ -1,80 +1,99 @@
-Return-Path: <Allen.Hubbe@emc.com>
-Received: from mailuogwhop.emc.com (mailuogwhop.emc.com. [168.159.213.141])
-        by gmr-mx.google.com with ESMTPS id y199si3437462ywd.5.2016.01.20.22.17.02
+Return-Path: <Xiangliang.Yu@amd.com>
+Received: from na01-bl2-obe.outbound.protection.outlook.com (mail-bl2on0084.outbound.protection.outlook.com. [65.55.169.84])
+        by gmr-mx.google.com with ESMTPS id u74si3061879ywf.0.2016.01.20.21.58.06
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 20 Jan 2016 22:17:02 -0800 (PST)
-From: "Allen Hubbe" <Allen.Hubbe@emc.com>
-References: <1453365583-9823-1-git-send-email-Xiangliang.Yu@amd.com> <000001d15405$24fe24a0$6efa6de0$@emc.com> <BLUPR12MB04204F0184C91CC2FB96E5DCEBC30@BLUPR12MB0420.namprd12.prod.outlook.com>
-In-Reply-To: <BLUPR12MB04204F0184C91CC2FB96E5DCEBC30@BLUPR12MB0420.namprd12.prod.outlook.com>
-Subject: RE: [PATCH V5 1/1] NTB: Add support for AMD PCI-Express Non-Transparent Bridge
-Date: Thu, 21 Jan 2016 01:16:41 -0500
-Message-ID: <000101d15413$4c466a50$e4d33ef0$@emc.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
+        Wed, 20 Jan 2016 21:58:06 -0800 (PST)
+From: "Yu, Xiangliang" <Xiangliang.Yu@amd.com>
+Subject: RE: [PATCH V5 1/1] NTB: Add support for AMD PCI-Express
+ Non-Transparent Bridge
+Date: Thu, 21 Jan 2016 05:58:01 +0000
+Message-ID: <BLUPR12MB04204F0184C91CC2FB96E5DCEBC30@BLUPR12MB0420.namprd12.prod.outlook.com>
+References: <1453365583-9823-1-git-send-email-Xiangliang.Yu@amd.com>
+ <000001d15405$24fe24a0$6efa6de0$@emc.com>
+In-Reply-To: <000001d15405$24fe24a0$6efa6de0$@emc.com>
+Content-Language: en-US
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Content-Type: text/plain;
-	charset="utf-8"
-Content-Transfer-Encoding: quoted-printable
-Content-Language: en-us
-To: "'Yu, Xiangliang'" <Xiangliang.Yu@amd.com>, jdmason@kudzu.us, dave.jiang@intel.com, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
-Cc: 'SPG_Linux_Kernel' <SPG_Linux_Kernel@amd.com>
+To: Allen Hubbe <Allen.Hubbe@emc.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "dave.jiang@intel.com" <dave.jiang@intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
+Cc: SPG_Linux_Kernel <SPG_Linux_Kernel@amd.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Yu, Xiangliang [mailto:Xiangliang.Yu@amd.com]
-> > > Signed-off-by: Jon Mason <jdmason@kudzu.us>
-> > > Signed-off-by: Allen Hubbe <Allen.Hubbe@emc.com>
-> >
-> > NO.
->=20
-> Ok, I'll change it if you doesn't want to change it.
-
-Nah, just remember it for next time...
-
-I'm satisfied with this v5.
-
-Reviewed-by: Allen Hubbe <Allen.Hubbe@emc.com>
-
-> I don=E2=80=99t think so. In here, the i/o memory is only happened =
-when
-> pci_iomap return
-> Success, so the register can't be accessed through IO port way. And
-> ioread* will
-> Check if the memory type is mmio type or IO port type (please see the
-> definition).
->  I don=E2=80=99t think we need to check It, so I use read* because It =
-can make
-> more efficient.
-> I think we need to think about actual usage, not only follow book.
-> And, I have said it in previous version, I don=E2=80=99t like explain =
-it again,
-> and again.
-> If you have any concern, please tell me after my comment.
-
-It's not more efficient, on this platform it's the same.
-
-If it were my driver I would change it... but you can keep it this way.
-
-> > This is different from v4.  It used to be:
->=20
-> Because peer_sta is change to 0, so amd_link_is_up will return 0
-> (offline)
-> And will not check hardware link status. So It maybe make it offline
-> forever
-
-It fixed a bug?  Great!
-
-> > I'm nervous about ndev->peer_sta, the behavior of link_is_up,
-> > timers...
->
-> Actually, the code is designed according to Atom NTB, except for the
-> peer_sta.
-
-Except for peer_sta, and that's a pretty critical design change.  I'm =
-still nervous, but I'll trust that you have been able to test this =
-behavior thourougly.
-
-> I'll add the explaination when having changes.
-
-Thanks.
-
-Allen
-
+DQoNCj4gRnJvbTogWGlhbmdsaWFuZyBZdSA8WGlhbmdsaWFuZy5ZdUBhbWQuY29tPg0KPiA+IFRo
+aXMgYWRkcyBzdXBwb3J0IGZvciBBTUQncyBQQ0ktRXhwcmVzcyBOb24tVHJhbnNwYXJlbnQgQnJp
+ZGdlDQo+ID4gKE5UQikgZGV2aWNlIG9uIHRoZSBaZXBwZWxpbiBwbGF0Zm9ybS4gVGhlIGRyaXZl
+ciBjb25ubmVjdHMgdG8gdGhlDQo+ID4gc3RhbmRhcmQgTlRCIHN1Yi1zeXN0ZW0gaW50ZXJmYWNl
+LCB3aXRoIG1vZGlmaWNhdGlvbiB0byBhZGQgaG9va3MgZm9yDQo+ID4gcG93ZXIgbWFuYWdlbWVu
+dCBpbiBhIHNlcGFyYXRlIHBhdGNoLiBUaGUgQU1EIE5UQiBkZXZpY2UgaGFzIDMNCj4gbWVtb3J5
+DQo+ID4gd2luZG93cywgMTYgZG9vcmJlbGwsIDE2IHNjcmF0Y2gtcGFkIHJlZ2lzdGVycywgYW5k
+IHN1cHBvcnRzIHVwIHRvIDE2DQo+ID4gUENJZSBsYW5lcyBydW5uaW5nIGEgR2VuMyBzcGVlZHMu
+DQo+ID4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBYaWFuZ2xpYW5nIFl1IDxYaWFuZ2xpYW5nLll1QGFt
+ZC5jb20+DQo+IA0KPiA+IFNpZ25lZC1vZmYtYnk6IEpvbiBNYXNvbiA8amRtYXNvbkBrdWR6dS51
+cz4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBBbGxlbiBIdWJiZSA8QWxsZW4uSHViYmVAZW1jLmNvbT4N
+Cj4gDQo+IE5PLg0KDQpPaywgSSdsbCBjaGFuZ2UgaXQgaWYgeW91IGRvZXNuJ3Qgd2FudCB0byBj
+aGFuZ2UgaXQuDQoNCj4gDQo+ID4gKwkJLyogc2V0IGFuZCB2ZXJpZnkgc2V0dGluZyB0aGUgdHJh
+bnNsYXRpb24gYWRkcmVzcyAqLw0KPiA+ICsJCXdyaXRlNjQoYWRkciwgcGVlcl9tbWlvICsgeGxh
+dF9yZWcpOw0KPiA+ICsJCXJlZ192YWwgPSByZWFkNjQocGVlcl9tbWlvICsgeGxhdF9yZWcpOw0K
+PiA+ICsJCWlmIChyZWdfdmFsICE9IGFkZHIpIHsNCj4gPiArCQkJd3JpdGU2NCgwLCBwZWVyX21t
+aW8gKyB4bGF0X3JlZyk7DQo+ID4gKwkJCXJldHVybiAtRUlPOw0KPiA+ICsJCX0NCj4gPiArDQo+
+ID4gKwkJLyogc2V0IGFuZCB2ZXJpZnkgc2V0dGluZyB0aGUgbGltaXQgKi8NCj4gPiArCQl3cml0
+ZWwobGltaXQsIG1taW8gKyBsaW1pdF9yZWcpOw0KPiA+ICsJCXJlZ192YWwgPSByZWFkbChtbWlv
+ICsgbGltaXRfcmVnKTsNCj4gPiArCQlpZiAocmVnX3ZhbCAhPSBsaW1pdCkgew0KPiA+ICsJCQl3
+cml0ZWwoYmFzZV9hZGRyLCBtbWlvICsgbGltaXRfcmVnKTsNCj4gPiArCQkJd3JpdGVsKDAsIHBl
+ZXJfbW1pbyArIHhsYXRfcmVnKTsNCj4gPiArCQkJcmV0dXJuIC1FSU87DQo+ID4gKwkJfQ0KPiAN
+Cj4gSSBzZWUgd2hhdCB5b3UgZGlkIHRoZXJlLCBjaGFuZ2UgaW93cml0ZTY0IHRvIHdyaXRlNjQu
+DQo+IA0KPiBXaGF0IEkgbWVhbnQgd2FzOg0KPiAgLSBjaGFuZ2UgcmVhZGwgdG8gaW9yZWFkMzIu
+DQo+ICAtIGNoYW5nZSB3cml0ZWwgdG8gaW93cml0ZTMyLg0KPiAgLSBjaGFuZ2UgcmVhZGIsIHJl
+YWR3LCB3cml0ZWIsIHdyaXRldyAoaWYgdGhlcmUgYXJlIGFueSkNCj4gIC0gbGVhdmUgaW9yZWFk
+NjQgYW5kIGlvd3JpdGU2NCBhcyB0aGV5IHdlcmUuDQo+IA0KPiBXaHk6IGh0dHA6Ly93d3cubWFr
+ZWxpbnV4Lm5ldC9sZGQzL2NocC05LXNlY3QtNA0KPiANCj4gUXVvdGU6ICJJZiB5b3UgcmVhZCB0
+aHJvdWdoIHRoZSBrZXJuZWwgc291cmNlLCB5b3Ugc2VlIG1hbnkgY2FsbHMgdG8gYW4gb2xkZXIN
+Cj4gc2V0IG9mIGZ1bmN0aW9ucyB3aGVuIEkvTyBtZW1vcnkgaXMgYmVpbmcgdXNlZC4gVGhlc2Ug
+ZnVuY3Rpb25zIHN0aWxsIHdvcmssDQo+IGJ1dCB0aGVpciB1c2UgaW4gbmV3IGNvZGUgaXMgZGlz
+Y291cmFnZWQuIEFtb25nIG90aGVyIHRoaW5ncywgdGhleSBhcmUgbGVzcw0KPiBzYWZlIGJlY2F1
+c2UgdGhleSBkbyBub3QgcGVyZm9ybSB0aGUgc2FtZSBzb3J0IG9mIHR5cGUgY2hlY2tpbmcuIg0K
+PiANCj4gVGhlICJvbGRlciBzZXQgb2YgZnVuY3Rpb25zIiBhcmUgcmVhZFtid2xdLCB3cml0ZVti
+d2xdLiAgVGhpcyBpcyBhIG5ldyBkcml2ZXIsDQo+IHdpdGggYWxsIG5ldyBjb2RlLiAgUGxlYXNl
+IHVzZSB0aGUgaW9yZWFkL2lvd3JpdGUgdmFyaWFudHMuDQoNCkkgZG9u4oCZdCB0aGluayBzby4g
+SW4gaGVyZSwgdGhlIGkvbyBtZW1vcnkgaXMgb25seSBoYXBwZW5lZCB3aGVuIHBjaV9pb21hcCBy
+ZXR1cm4NClN1Y2Nlc3MsIHNvIHRoZSByZWdpc3RlciBjYW4ndCBiZSBhY2Nlc3NlZCB0aHJvdWdo
+IElPIHBvcnQgd2F5LiBBbmQgaW9yZWFkKiB3aWxsDQpDaGVjayBpZiB0aGUgbWVtb3J5IHR5cGUg
+aXMgbW1pbyB0eXBlIG9yIElPIHBvcnQgdHlwZSAocGxlYXNlIHNlZSB0aGUgZGVmaW5pdGlvbiku
+DQogSSBkb27igJl0IHRoaW5rIHdlIG5lZWQgdG8gY2hlY2sgSXQsIHNvIEkgdXNlIHJlYWQqIGJl
+Y2F1c2UgSXQgY2FuIG1ha2UgbW9yZSBlZmZpY2llbnQuIA0KSSB0aGluayB3ZSBuZWVkIHRvIHRo
+aW5rIGFib3V0IGFjdHVhbCB1c2FnZSwgbm90IG9ubHkgZm9sbG93IGJvb2suDQpBbmQsIEkgaGF2
+ZSBzYWlkIGl0IGluIHByZXZpb3VzIHZlcnNpb24sIEkgZG9u4oCZdCBsaWtlIGV4cGxhaW4gaXQg
+YWdhaW4sIGFuZCBhZ2Fpbi4NCklmIHlvdSBoYXZlIGFueSBjb25jZXJuLCBwbGVhc2UgdGVsbCBt
+ZSBhZnRlciBteSBjb21tZW50Lg0KDQo+ID4gK3N0YXRpYyBpbnQgYW1kX2xpbmtfaXNfdXAoc3Ry
+dWN0IGFtZF9udGJfZGV2ICpuZGV2KSB7DQo+ID4gKwlpZiAoIW5kZXYtPnBlZXJfc3RhKQ0KPiA+
+ICsJCXJldHVybiBOVEJfTE5LX1NUQV9BQ1RJVkUobmRldi0+Y250bF9zdGEpOw0KPiA+ICsNCj4g
+PiArCS8qIElmIHBlZXJfc3RhIGlzIHJlc2V0IG9yIEQwIGV2ZW50LCB0aGUgSVNSIGhhcw0KPiA+
+ICsJICogc3RhcnRlZCBhIHRpbWVyIHRvIGNoZWNrIGxpbmsgc3RhdHVzIG9mIGhhcmR3YXJlLg0K
+PiA+ICsJICogU28gaGVyZSBqdXN0IGNsZWFyIHN0YXR1cyBiaXQuIEFuZCBpZiBwZWVyX3N0YSBp
+cw0KPiA+ICsJICogRDMgb3IgUE1FX1RPLCBEMC9yZXNldCBldmVudCB3aWxsIGJlIGhhcHBlbmVk
+IHdoZW4NCj4gPiArCSAqIHN5c3RlbSB3YWtldXAvcG93ZXJvbiwgc28gZG8gbm90aGluZyBoZXJl
+Lg0KPiA+ICsJICovDQo+ID4gKwlpZiAobmRldi0+cGVlcl9zdGEgJiBBTURfUEVFUl9SRVNFVF9F
+VkVOVCkNCj4gPiArCQluZGV2LT5wZWVyX3N0YSAmPSB+QU1EX1BFRVJfUkVTRVRfRVZFTlQ7DQo+
+ID4gKwllbHNlIGlmIChuZGV2LT5wZWVyX3N0YSAmIEFNRF9QRUVSX0QwX0VWRU5UKQ0KPiA+ICsJ
+CW5kZXYtPnBlZXJfc3RhID0gMDsNCj4gPiArDQo+ID4gKwlyZXR1cm4gMDsNCj4gPiArfQ0KPiAN
+Cj4gVGhhbmtzLiAgVGhpcyBpcyBtdWNoIGJldHRlci4NCj4gDQo+ID4gK3N0YXRpYyB2b2lkIGFt
+ZF9oYW5kbGVfZXZlbnQoc3RydWN0IGFtZF9udGJfZGV2ICpuZGV2LCBpbnQgdmVjKQ0KPiAuLi4N
+Cj4gPiArCWNhc2UgQU1EX1BFRVJfRDBfRVZFTlQ6DQo+IC4uLg0KPiA+ICsJCS8qIHN0YXJ0IGEg
+dGltZXIgdG8gcG9sbCBsaW5rIHN0YXR1cyAqLw0KPiA+ICsJCXNjaGVkdWxlX2RlbGF5ZWRfd29y
+aygmbmRldi0+aGJfdGltZXIsDQo+ID4gKwkJCQkJICAgICAgQU1EX0xJTktfSEJfVElNRU9VVCk7
+DQo+IA0KPiBUaGlzIGlzIGRpZmZlcmVudCBmcm9tIHY0LiAgSXQgdXNlZCB0byBiZToNCj4gDQo+
+IGlmIChhbWRfbGlua19pc191cCgpKQ0KPiAJbnRiX2xpbmtfZXZlbnQoKTsNCj4gZWxzZQ0KPiAJ
+c2NoZWR1bGVfZGVsYXllZF93b3JrKCk7DQo+IA0KPiBXaHkgaXMgdjUgY29ycmVjdD8NCj4gV2h5
+IHdhcyB2NCBpbmNvcnJlY3Q/DQoNCkJlY2F1c2UgcGVlcl9zdGEgaXMgY2hhbmdlIHRvIDAsIHNv
+IGFtZF9saW5rX2lzX3VwIHdpbGwgcmV0dXJuIDAgKG9mZmxpbmUpDQpBbmQgd2lsbCBub3QgY2hl
+Y2sgaGFyZHdhcmUgbGluayBzdGF0dXMuIFNvIEl0IG1heWJlIG1ha2UgaXQgb2ZmbGluZSBmb3Jl
+dmVyDQoNCj4gSSdtIG5lcnZvdXMgYWJvdXQgbmRldi0+cGVlcl9zdGEsIHRoZSBiZWhhdmlvciBv
+ZiBsaW5rX2lzX3VwLCB0aW1lcnMuLi4NCj4gdW5leHBsYWluZWQgY2hhbmdlcyB0byBhIGZyYWdp
+bGUgYml0IG9mIGNvZGUgLSBub3QganVzdCB0aGlzIGNvZGUsIGJ1dCBhbnkgY29kZQ0KPiB0aGF0
+IGRlYWxzIHdpdGggcGFyYWxsZWwgb3IgYXN5bmNocm9ub3VzIGJlaGF2aW9ycy4gIFdpdGggdGhl
+IGNvbW1lbnQgaW4NCj4gbGlua19pc191cCwgdGhpcyBjb2RlIGlzIG11Y2ggYmV0dGVyLCBidXQg
+YW55IGNoYW5nZXMgdG8gdGhpcyB3aG9sZSBsaW5rIHN0YXRlDQo+IG1lY2hhbmlzbSBuZWVkIHRv
+IGJlIGV4cGxhaW5lZC4NCkFjdHVhbGx5LCB0aGUgY29kZSBpcyBkZXNpZ25lZCBhY2NvcmRpbmcg
+dG8gQXRvbSBOVEIsIGV4Y2VwdCBmb3IgdGhlIHBlZXJfc3RhLiANCkknbGwgYWRkIHRoZSBleHBs
+YWluYXRpb24gd2hlbiBoYXZpbmcgY2hhbmdlcy4NCg0K
