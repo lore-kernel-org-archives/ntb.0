@@ -1,99 +1,121 @@
-Return-Path: <Xiangliang.Yu@amd.com>
-Received: from na01-bl2-obe.outbound.protection.outlook.com (mail-bl2on0084.outbound.protection.outlook.com. [65.55.169.84])
-        by gmr-mx.google.com with ESMTPS id u74si3061879ywf.0.2016.01.20.21.58.06
+Return-Path: <Allen.Hubbe@emc.com>
+Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
+        by gmr-mx.google.com with ESMTPS id w126si2936202ywe.6.2016.01.20.20.35.37
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Wed, 20 Jan 2016 21:58:06 -0800 (PST)
-From: "Yu, Xiangliang" <Xiangliang.Yu@amd.com>
-Subject: RE: [PATCH V5 1/1] NTB: Add support for AMD PCI-Express
- Non-Transparent Bridge
-Date: Thu, 21 Jan 2016 05:58:01 +0000
-Message-ID: <BLUPR12MB04204F0184C91CC2FB96E5DCEBC30@BLUPR12MB0420.namprd12.prod.outlook.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 20 Jan 2016 20:35:37 -0800 (PST)
+From: "Allen Hubbe" <Allen.Hubbe@emc.com>
 References: <1453365583-9823-1-git-send-email-Xiangliang.Yu@amd.com>
- <000001d15405$24fe24a0$6efa6de0$@emc.com>
-In-Reply-To: <000001d15405$24fe24a0$6efa6de0$@emc.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+In-Reply-To: <1453365583-9823-1-git-send-email-Xiangliang.Yu@amd.com>
+Subject: RE: [PATCH V5 1/1] NTB: Add support for AMD PCI-Express Non-Transparent Bridge
+Date: Wed, 20 Jan 2016 23:35:22 -0500
+Message-ID: <000001d15405$24fe24a0$6efa6de0$@emc.com>
 MIME-Version: 1.0
-To: Allen Hubbe <Allen.Hubbe@emc.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "dave.jiang@intel.com" <dave.jiang@intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
-Cc: SPG_Linux_Kernel <SPG_Linux_Kernel@amd.com>
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+Content-Language: en-us
+To: 'Xiangliang Yu' <Xiangliang.Yu@amd.com>, jdmason@kudzu.us, dave.jiang@intel.com, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
+Cc: SPG_Linux_Kernel@amd.com
 List-ID: <linux-ntb.googlegroups.com>
 
-DQoNCj4gRnJvbTogWGlhbmdsaWFuZyBZdSA8WGlhbmdsaWFuZy5ZdUBhbWQuY29tPg0KPiA+IFRo
-aXMgYWRkcyBzdXBwb3J0IGZvciBBTUQncyBQQ0ktRXhwcmVzcyBOb24tVHJhbnNwYXJlbnQgQnJp
-ZGdlDQo+ID4gKE5UQikgZGV2aWNlIG9uIHRoZSBaZXBwZWxpbiBwbGF0Zm9ybS4gVGhlIGRyaXZl
-ciBjb25ubmVjdHMgdG8gdGhlDQo+ID4gc3RhbmRhcmQgTlRCIHN1Yi1zeXN0ZW0gaW50ZXJmYWNl
-LCB3aXRoIG1vZGlmaWNhdGlvbiB0byBhZGQgaG9va3MgZm9yDQo+ID4gcG93ZXIgbWFuYWdlbWVu
-dCBpbiBhIHNlcGFyYXRlIHBhdGNoLiBUaGUgQU1EIE5UQiBkZXZpY2UgaGFzIDMNCj4gbWVtb3J5
-DQo+ID4gd2luZG93cywgMTYgZG9vcmJlbGwsIDE2IHNjcmF0Y2gtcGFkIHJlZ2lzdGVycywgYW5k
-IHN1cHBvcnRzIHVwIHRvIDE2DQo+ID4gUENJZSBsYW5lcyBydW5uaW5nIGEgR2VuMyBzcGVlZHMu
-DQo+ID4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBYaWFuZ2xpYW5nIFl1IDxYaWFuZ2xpYW5nLll1QGFt
-ZC5jb20+DQo+IA0KPiA+IFNpZ25lZC1vZmYtYnk6IEpvbiBNYXNvbiA8amRtYXNvbkBrdWR6dS51
-cz4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBBbGxlbiBIdWJiZSA8QWxsZW4uSHViYmVAZW1jLmNvbT4N
-Cj4gDQo+IE5PLg0KDQpPaywgSSdsbCBjaGFuZ2UgaXQgaWYgeW91IGRvZXNuJ3Qgd2FudCB0byBj
-aGFuZ2UgaXQuDQoNCj4gDQo+ID4gKwkJLyogc2V0IGFuZCB2ZXJpZnkgc2V0dGluZyB0aGUgdHJh
-bnNsYXRpb24gYWRkcmVzcyAqLw0KPiA+ICsJCXdyaXRlNjQoYWRkciwgcGVlcl9tbWlvICsgeGxh
-dF9yZWcpOw0KPiA+ICsJCXJlZ192YWwgPSByZWFkNjQocGVlcl9tbWlvICsgeGxhdF9yZWcpOw0K
-PiA+ICsJCWlmIChyZWdfdmFsICE9IGFkZHIpIHsNCj4gPiArCQkJd3JpdGU2NCgwLCBwZWVyX21t
-aW8gKyB4bGF0X3JlZyk7DQo+ID4gKwkJCXJldHVybiAtRUlPOw0KPiA+ICsJCX0NCj4gPiArDQo+
-ID4gKwkJLyogc2V0IGFuZCB2ZXJpZnkgc2V0dGluZyB0aGUgbGltaXQgKi8NCj4gPiArCQl3cml0
-ZWwobGltaXQsIG1taW8gKyBsaW1pdF9yZWcpOw0KPiA+ICsJCXJlZ192YWwgPSByZWFkbChtbWlv
-ICsgbGltaXRfcmVnKTsNCj4gPiArCQlpZiAocmVnX3ZhbCAhPSBsaW1pdCkgew0KPiA+ICsJCQl3
-cml0ZWwoYmFzZV9hZGRyLCBtbWlvICsgbGltaXRfcmVnKTsNCj4gPiArCQkJd3JpdGVsKDAsIHBl
-ZXJfbW1pbyArIHhsYXRfcmVnKTsNCj4gPiArCQkJcmV0dXJuIC1FSU87DQo+ID4gKwkJfQ0KPiAN
-Cj4gSSBzZWUgd2hhdCB5b3UgZGlkIHRoZXJlLCBjaGFuZ2UgaW93cml0ZTY0IHRvIHdyaXRlNjQu
-DQo+IA0KPiBXaGF0IEkgbWVhbnQgd2FzOg0KPiAgLSBjaGFuZ2UgcmVhZGwgdG8gaW9yZWFkMzIu
-DQo+ICAtIGNoYW5nZSB3cml0ZWwgdG8gaW93cml0ZTMyLg0KPiAgLSBjaGFuZ2UgcmVhZGIsIHJl
-YWR3LCB3cml0ZWIsIHdyaXRldyAoaWYgdGhlcmUgYXJlIGFueSkNCj4gIC0gbGVhdmUgaW9yZWFk
-NjQgYW5kIGlvd3JpdGU2NCBhcyB0aGV5IHdlcmUuDQo+IA0KPiBXaHk6IGh0dHA6Ly93d3cubWFr
-ZWxpbnV4Lm5ldC9sZGQzL2NocC05LXNlY3QtNA0KPiANCj4gUXVvdGU6ICJJZiB5b3UgcmVhZCB0
-aHJvdWdoIHRoZSBrZXJuZWwgc291cmNlLCB5b3Ugc2VlIG1hbnkgY2FsbHMgdG8gYW4gb2xkZXIN
-Cj4gc2V0IG9mIGZ1bmN0aW9ucyB3aGVuIEkvTyBtZW1vcnkgaXMgYmVpbmcgdXNlZC4gVGhlc2Ug
-ZnVuY3Rpb25zIHN0aWxsIHdvcmssDQo+IGJ1dCB0aGVpciB1c2UgaW4gbmV3IGNvZGUgaXMgZGlz
-Y291cmFnZWQuIEFtb25nIG90aGVyIHRoaW5ncywgdGhleSBhcmUgbGVzcw0KPiBzYWZlIGJlY2F1
-c2UgdGhleSBkbyBub3QgcGVyZm9ybSB0aGUgc2FtZSBzb3J0IG9mIHR5cGUgY2hlY2tpbmcuIg0K
-PiANCj4gVGhlICJvbGRlciBzZXQgb2YgZnVuY3Rpb25zIiBhcmUgcmVhZFtid2xdLCB3cml0ZVti
-d2xdLiAgVGhpcyBpcyBhIG5ldyBkcml2ZXIsDQo+IHdpdGggYWxsIG5ldyBjb2RlLiAgUGxlYXNl
-IHVzZSB0aGUgaW9yZWFkL2lvd3JpdGUgdmFyaWFudHMuDQoNCkkgZG9u4oCZdCB0aGluayBzby4g
-SW4gaGVyZSwgdGhlIGkvbyBtZW1vcnkgaXMgb25seSBoYXBwZW5lZCB3aGVuIHBjaV9pb21hcCBy
-ZXR1cm4NClN1Y2Nlc3MsIHNvIHRoZSByZWdpc3RlciBjYW4ndCBiZSBhY2Nlc3NlZCB0aHJvdWdo
-IElPIHBvcnQgd2F5LiBBbmQgaW9yZWFkKiB3aWxsDQpDaGVjayBpZiB0aGUgbWVtb3J5IHR5cGUg
-aXMgbW1pbyB0eXBlIG9yIElPIHBvcnQgdHlwZSAocGxlYXNlIHNlZSB0aGUgZGVmaW5pdGlvbiku
-DQogSSBkb27igJl0IHRoaW5rIHdlIG5lZWQgdG8gY2hlY2sgSXQsIHNvIEkgdXNlIHJlYWQqIGJl
-Y2F1c2UgSXQgY2FuIG1ha2UgbW9yZSBlZmZpY2llbnQuIA0KSSB0aGluayB3ZSBuZWVkIHRvIHRo
-aW5rIGFib3V0IGFjdHVhbCB1c2FnZSwgbm90IG9ubHkgZm9sbG93IGJvb2suDQpBbmQsIEkgaGF2
-ZSBzYWlkIGl0IGluIHByZXZpb3VzIHZlcnNpb24sIEkgZG9u4oCZdCBsaWtlIGV4cGxhaW4gaXQg
-YWdhaW4sIGFuZCBhZ2Fpbi4NCklmIHlvdSBoYXZlIGFueSBjb25jZXJuLCBwbGVhc2UgdGVsbCBt
-ZSBhZnRlciBteSBjb21tZW50Lg0KDQo+ID4gK3N0YXRpYyBpbnQgYW1kX2xpbmtfaXNfdXAoc3Ry
-dWN0IGFtZF9udGJfZGV2ICpuZGV2KSB7DQo+ID4gKwlpZiAoIW5kZXYtPnBlZXJfc3RhKQ0KPiA+
-ICsJCXJldHVybiBOVEJfTE5LX1NUQV9BQ1RJVkUobmRldi0+Y250bF9zdGEpOw0KPiA+ICsNCj4g
-PiArCS8qIElmIHBlZXJfc3RhIGlzIHJlc2V0IG9yIEQwIGV2ZW50LCB0aGUgSVNSIGhhcw0KPiA+
-ICsJICogc3RhcnRlZCBhIHRpbWVyIHRvIGNoZWNrIGxpbmsgc3RhdHVzIG9mIGhhcmR3YXJlLg0K
-PiA+ICsJICogU28gaGVyZSBqdXN0IGNsZWFyIHN0YXR1cyBiaXQuIEFuZCBpZiBwZWVyX3N0YSBp
-cw0KPiA+ICsJICogRDMgb3IgUE1FX1RPLCBEMC9yZXNldCBldmVudCB3aWxsIGJlIGhhcHBlbmVk
-IHdoZW4NCj4gPiArCSAqIHN5c3RlbSB3YWtldXAvcG93ZXJvbiwgc28gZG8gbm90aGluZyBoZXJl
-Lg0KPiA+ICsJICovDQo+ID4gKwlpZiAobmRldi0+cGVlcl9zdGEgJiBBTURfUEVFUl9SRVNFVF9F
-VkVOVCkNCj4gPiArCQluZGV2LT5wZWVyX3N0YSAmPSB+QU1EX1BFRVJfUkVTRVRfRVZFTlQ7DQo+
-ID4gKwllbHNlIGlmIChuZGV2LT5wZWVyX3N0YSAmIEFNRF9QRUVSX0QwX0VWRU5UKQ0KPiA+ICsJ
-CW5kZXYtPnBlZXJfc3RhID0gMDsNCj4gPiArDQo+ID4gKwlyZXR1cm4gMDsNCj4gPiArfQ0KPiAN
-Cj4gVGhhbmtzLiAgVGhpcyBpcyBtdWNoIGJldHRlci4NCj4gDQo+ID4gK3N0YXRpYyB2b2lkIGFt
-ZF9oYW5kbGVfZXZlbnQoc3RydWN0IGFtZF9udGJfZGV2ICpuZGV2LCBpbnQgdmVjKQ0KPiAuLi4N
-Cj4gPiArCWNhc2UgQU1EX1BFRVJfRDBfRVZFTlQ6DQo+IC4uLg0KPiA+ICsJCS8qIHN0YXJ0IGEg
-dGltZXIgdG8gcG9sbCBsaW5rIHN0YXR1cyAqLw0KPiA+ICsJCXNjaGVkdWxlX2RlbGF5ZWRfd29y
-aygmbmRldi0+aGJfdGltZXIsDQo+ID4gKwkJCQkJICAgICAgQU1EX0xJTktfSEJfVElNRU9VVCk7
-DQo+IA0KPiBUaGlzIGlzIGRpZmZlcmVudCBmcm9tIHY0LiAgSXQgdXNlZCB0byBiZToNCj4gDQo+
-IGlmIChhbWRfbGlua19pc191cCgpKQ0KPiAJbnRiX2xpbmtfZXZlbnQoKTsNCj4gZWxzZQ0KPiAJ
-c2NoZWR1bGVfZGVsYXllZF93b3JrKCk7DQo+IA0KPiBXaHkgaXMgdjUgY29ycmVjdD8NCj4gV2h5
-IHdhcyB2NCBpbmNvcnJlY3Q/DQoNCkJlY2F1c2UgcGVlcl9zdGEgaXMgY2hhbmdlIHRvIDAsIHNv
-IGFtZF9saW5rX2lzX3VwIHdpbGwgcmV0dXJuIDAgKG9mZmxpbmUpDQpBbmQgd2lsbCBub3QgY2hl
-Y2sgaGFyZHdhcmUgbGluayBzdGF0dXMuIFNvIEl0IG1heWJlIG1ha2UgaXQgb2ZmbGluZSBmb3Jl
-dmVyDQoNCj4gSSdtIG5lcnZvdXMgYWJvdXQgbmRldi0+cGVlcl9zdGEsIHRoZSBiZWhhdmlvciBv
-ZiBsaW5rX2lzX3VwLCB0aW1lcnMuLi4NCj4gdW5leHBsYWluZWQgY2hhbmdlcyB0byBhIGZyYWdp
-bGUgYml0IG9mIGNvZGUgLSBub3QganVzdCB0aGlzIGNvZGUsIGJ1dCBhbnkgY29kZQ0KPiB0aGF0
-IGRlYWxzIHdpdGggcGFyYWxsZWwgb3IgYXN5bmNocm9ub3VzIGJlaGF2aW9ycy4gIFdpdGggdGhl
-IGNvbW1lbnQgaW4NCj4gbGlua19pc191cCwgdGhpcyBjb2RlIGlzIG11Y2ggYmV0dGVyLCBidXQg
-YW55IGNoYW5nZXMgdG8gdGhpcyB3aG9sZSBsaW5rIHN0YXRlDQo+IG1lY2hhbmlzbSBuZWVkIHRv
-IGJlIGV4cGxhaW5lZC4NCkFjdHVhbGx5LCB0aGUgY29kZSBpcyBkZXNpZ25lZCBhY2NvcmRpbmcg
-dG8gQXRvbSBOVEIsIGV4Y2VwdCBmb3IgdGhlIHBlZXJfc3RhLiANCkknbGwgYWRkIHRoZSBleHBs
-YWluYXRpb24gd2hlbiBoYXZpbmcgY2hhbmdlcy4NCg0K
+From: Xiangliang Yu <Xiangliang.Yu@amd.com>
+> This adds support for AMD's PCI-Express Non-Transparent Bridge
+> (NTB) device on the Zeppelin platform. The driver connnects to the
+> standard NTB sub-system interface, with modification to add hooks
+> for power management in a separate patch. The AMD NTB device has 3
+> memory windows, 16 doorbell, 16 scratch-pad registers, and supports
+> up to 16 PCIe lanes running a Gen3 speeds.
+>=20
+> Signed-off-by: Xiangliang Yu <Xiangliang.Yu@amd.com>
+
+> Signed-off-by: Jon Mason <jdmason@kudzu.us>
+> Signed-off-by: Allen Hubbe <Allen.Hubbe@emc.com>
+
+NO.
+
+
+> +		/* set and verify setting the translation address */
+> +		write64(addr, peer_mmio + xlat_reg);
+> +		reg_val =3D read64(peer_mmio + xlat_reg);
+> +		if (reg_val !=3D addr) {
+> +			write64(0, peer_mmio + xlat_reg);
+> +			return -EIO;
+> +		}
+> +
+> +		/* set and verify setting the limit */
+> +		writel(limit, mmio + limit_reg);
+> +		reg_val =3D readl(mmio + limit_reg);
+> +		if (reg_val !=3D limit) {
+> +			writel(base_addr, mmio + limit_reg);
+> +			writel(0, peer_mmio + xlat_reg);
+> +			return -EIO;
+> +		}
+
+I see what you did there, change iowrite64 to write64.
+
+What I meant was:
+ - change readl to ioread32.
+ - change writel to iowrite32.
+ - change readb, readw, writeb, writew (if there are any)
+ - leave ioread64 and iowrite64 as they were.
+
+Why: http://www.makelinux.net/ldd3/chp-9-sect-4
+
+Quote: "If you read through the kernel source, you see many calls to an =
+older set of functions when I/O memory is being used. These functions =
+still work, but their use in new code is discouraged. Among other =
+things, they are less safe because they do not perform the same sort of =
+type checking."
+
+The "older set of functions" are read[bwl], write[bwl].  This is a new =
+driver, with all new code.  Please use the ioread/iowrite variants.
+
+> +static int amd_link_is_up(struct amd_ntb_dev *ndev)
+> +{
+> +	if (!ndev->peer_sta)
+> +		return NTB_LNK_STA_ACTIVE(ndev->cntl_sta);
+> +
+> +	/* If peer_sta is reset or D0 event, the ISR has
+> +	 * started a timer to check link status of hardware.
+> +	 * So here just clear status bit. And if peer_sta is
+> +	 * D3 or PME_TO, D0/reset event will be happened when
+> +	 * system wakeup/poweron, so do nothing here.
+> +	 */
+> +	if (ndev->peer_sta & AMD_PEER_RESET_EVENT)
+> +		ndev->peer_sta &=3D ~AMD_PEER_RESET_EVENT;
+> +	else if (ndev->peer_sta & AMD_PEER_D0_EVENT)
+> +		ndev->peer_sta =3D 0;
+> +
+> +	return 0;
+> +}
+
+Thanks.  This is much better.
+
+> +static void amd_handle_event(struct amd_ntb_dev *ndev, int vec)
+...
+> +	case AMD_PEER_D0_EVENT:
+...
+> +		/* start a timer to poll link status */
+> +		schedule_delayed_work(&ndev->hb_timer,
+> +					      AMD_LINK_HB_TIMEOUT);
+
+This is different from v4.  It used to be:
+
+if (amd_link_is_up())
+	ntb_link_event();
+else
+	schedule_delayed_work();
+
+Why is v5 correct?
+Why was v4 incorrect?
+
+I'm nervous about ndev->peer_sta, the behavior of link_is_up, timers... =
+unexplained changes to a fragile bit of code - not just this code, but =
+any code that deals with parallel or asynchronous behaviors.  With the =
+comment in link_is_up, this code is much better, but any changes to this =
+whole link state mechanism need to be explained.
+
+
+Allen
+
