@@ -1,13 +1,13 @@
 Return-Path: <Xiangliang.Yu@amd.com>
-Received: from na01-bn1-obe.outbound.protection.outlook.com (mail-bn1bn0100.outbound.protection.outlook.com. [157.56.110.100])
-        by gmr-mx.google.com with ESMTPS id r2si3548649pfr.0.2016.01.20.22.54.26
+Received: from na01-bl2-obe.outbound.protection.outlook.com (mail-bl2on0083.outbound.protection.outlook.com. [65.55.169.83])
+        by gmr-mx.google.com with ESMTPS id ti5si1567624igb.2.2016.01.20.19.40.44
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Wed, 20 Jan 2016 22:54:26 -0800 (PST)
+        Wed, 20 Jan 2016 19:40:44 -0800 (PST)
 From: Xiangliang Yu <Xiangliang.Yu@amd.com>
-Subject: [Resend PATCH V5 0/1] AMD NTB V5 changes
-Date: Thu, 21 Jan 2016 19:53:10 +0800
-Message-ID: <1453377190-10533-1-git-send-email-Xiangliang.Yu@amd.com>
+Subject: [PATCH V5 0/1] AMD NTB V5 changes
+Date: Thu, 21 Jan 2016 16:39:28 +0800
+Message-ID: <1453365568-9782-1-git-send-email-Xiangliang.Yu@amd.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 Return-Path: Xiangliang.Yu@amd.com
@@ -15,12 +15,13 @@ To: jdmason@kudzu.us, Allen.Hubbe@emc.com, dave.jiang@intel.com, linux-kernel@vg
 Cc: SPG_Linux_Kernel@amd.com, Xiangliang Yu <Xiangliang.Yu@amd.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Resend V5 for more convenient pick up.
 Main changes in V5
-Only change Signed-off-by to Reviewed-by.
+Change ioread64/iowrite64 to read64/write64 to keep consistent
+with readl/writel, readw/writel.
+Add a comment for link check function.
 
 Xiangliang Yu (1):
-  [Resend patch V5] NTB: Add support for AMD PCI-Express Non-Transparent Bridge
+  NTB: Add support for AMD PCI-Express Non-Transparent Bridge
 
  MAINTAINERS                     |    6 +
  drivers/ntb/hw/Kconfig          |    1 +
