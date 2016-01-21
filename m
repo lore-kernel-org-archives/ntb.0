@@ -1,51 +1,49 @@
-Return-Path: <dave.jiang@intel.com>
-Received: from mga14.intel.com (mga14.intel.com. [192.55.52.115])
-        by gmr-mx.google.com with ESMTP id tn7si448774pac.1.2016.01.21.14.58.10
-        for <linux-ntb@googlegroups.com>;
-        Thu, 21 Jan 2016 14:58:10 -0800 (PST)
-From: "Jiang, Dave" <dave.jiang@intel.com>
-Subject: Re: [PATCH] NTB: Fix macro parameter conflict with field name
-Date: Thu, 21 Jan 2016 22:58:07 +0000
-Message-ID: <1453417083.3824.28.camel@intel.com>
-References: <92f2c0f9f753ddb55242f01dd3d351191d2128c8.1453398752.git.Allen.Hubbe@emc.com>
-In-Reply-To: <92f2c0f9f753ddb55242f01dd3d351191d2128c8.1453398752.git.Allen.Hubbe@emc.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <93C3A8126CFE8B4B96F0CC18D5305BFD@intel.com>
-Content-Transfer-Encoding: base64
-MIME-Version: 1.0
-Return-Path: dave.jiang@intel.com
-To: "Allen.Hubbe@emc.com" <Allen.Hubbe@emc.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
+Return-Path: <Allen.Hubbe@emc.com>
+Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
+        by gmr-mx.google.com with ESMTPS id u74si368830ywf.0.2016.01.21.14.52.28
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 21 Jan 2016 14:52:28 -0800 (PST)
+From: Allen Hubbe <Allen.Hubbe@emc.com>
+Subject: [PATCH] NTB: Fix macro parameter conflict with field name
+Date: Thu, 21 Jan 2016 12:53:50 -0500
+Message-Id: <92f2c0f9f753ddb55242f01dd3d351191d2128c8.1453398752.git.Allen.Hubbe@emc.com>
+To: linux-ntb@googlegroups.com, Jon Mason <jdmason@kudzu.us>
+Cc: Allen Hubbe <Allen.Hubbe@emc.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-T24gVGh1LCAyMDE2LTAxLTIxIGF0IDEyOjUzIC0wNTAwLCBBbGxlbiBIdWJiZSB3cm90ZToNCj4g
-SWYgdGhlIHBhcmFtZXRlciBnaXZlbiB0byB0aGUgbWFjcm8gaXMgcmVwbGFjZWQgdGhyb3VnaG91
-dCB0aGUgbWFjcm8NCj4gYXMNCj4gaXQgaXMgZXZhbHVhdGVkLsKgwqBUaGUgaW50ZW50IGlzIHRo
-YXQgdGhlIG1hY3JvIHBhcmFtZXRlciBzaG91bGQNCj4gcmVwbGFjZQ0KPiB0aGUgb25seSB0aGUg
-Zmlyc3QgcGFyYW1ldGVyIHRvIGNvbnRhaW5lcl9vZigpLsKgwqBIb3dldmVyLCB0aGUgd2F5IHRo
-ZQ0KPiBtYWNybyB3YXMgd3JpdHRlbiwgaXQgd291bGQgYWxzbyBpbmFkdmVydGFudGx5IHJlcGxh
-Y2UgYSBzdHJ1Y3R1cmUNCj4gZmllbGQNCj4gbmFtZS7CoMKgSWYgYSBwYXJhbWV0ZXIgb2YgYW55
-IG90aGVyIG5hbWUgaXMgZ2l2ZW4gdG8gdGhlIG1hY3JvLCBpdA0KPiB3aWxsDQo+IGZhaWwgdG8g
-Y29tcGlsZSwgaWYgdGhlIHN0cnVjdHVyZSBkb2VzIG5vdCBjb250YWluIGEgZmllbGQgb2YgdGhl
-DQo+IHNhbWUNCj4gbmFtZS7CoMKgQXQgd29yc3QsIGl0IHdpbGwgY29tcGlsZSwgYW5kIGhpZGUg
-aW1wcm9wZXIgYWNjZXNzIG9mIGFuDQo+IHVuaW50ZW5kZWQgZmllbGQgaW4gdGhlIHN0cnVjdHVy
-ZS4NCj4gDQo+IENoYW5nZSB0aGUgbWFjcm8gcGFyYW1ldGVyIG5hbWUsIHNvIGl0IGRvZXMgbm90
-IGNvbmZsaWN0IHdpdGggdGhlDQo+IHN0cnVjdHVyZSBmaWVsZCBuYW1lLg0KPiANCj4gU2lnbmVk
-LW9mZi1ieTogQWxsZW4gSHViYmUgPEFsbGVuLkh1YmJlQGVtYy5jb20+DQpBY2tlZC1ieTogRGF2
-ZSBKaWFuZyA8ZGF2ZS5qaWFuZ0BpbnRlbC5jb20+DQoNCj4gLS0tDQo+IMKgZHJpdmVycy9udGIv
-aHcvaW50ZWwvbnRiX2h3X2ludGVsLmggfCA1ICsrKy0tDQo+IMKgMSBmaWxlIGNoYW5nZWQsIDMg
-aW5zZXJ0aW9ucygrKSwgMiBkZWxldGlvbnMoLSkNCj4gDQo+IGRpZmYgLS1naXQgYS9kcml2ZXJz
-L250Yi9ody9pbnRlbC9udGJfaHdfaW50ZWwuaA0KPiBiL2RyaXZlcnMvbnRiL2h3L2ludGVsL250
-Yl9od19pbnRlbC5oDQo+IGluZGV4IDJlYjRhZGRkMTBkMC4uNDNiM2ZlMGQ0YWVkIDEwMDY0NA0K
-PiAtLS0gYS9kcml2ZXJzL250Yi9ody9pbnRlbC9udGJfaHdfaW50ZWwuaA0KPiArKysgYi9kcml2
-ZXJzL250Yi9ody9pbnRlbC9udGJfaHdfaW50ZWwuaA0KPiBAQCAtMzM0LDcgKzMzNCw4IEBAIHN0
-cnVjdCBpbnRlbF9udGJfZGV2IHsNCj4gwqAjZGVmaW5lIG5kZXZfcGRldihuZGV2KSAoKG5kZXYp
-LT5udGIucGRldikNCj4gwqAjZGVmaW5lIG5kZXZfbmFtZShuZGV2KSBwY2lfbmFtZShuZGV2X3Bk
-ZXYobmRldikpDQo+IMKgI2RlZmluZSBuZGV2X2RldihuZGV2KSAoJm5kZXZfcGRldihuZGV2KS0+
-ZGV2KQ0KPiAtI2RlZmluZSBudGJfbmRldihudGIpIGNvbnRhaW5lcl9vZihudGIsIHN0cnVjdCBp
-bnRlbF9udGJfZGV2LCBudGIpDQo+IC0jZGVmaW5lIGhiX25kZXYod29yaykgY29udGFpbmVyX29m
-KHdvcmssIHN0cnVjdCBpbnRlbF9udGJfZGV2LA0KPiBoYl90aW1lci53b3JrKQ0KPiArI2RlZmlu
-ZSBudGJfbmRldihfX250YikgY29udGFpbmVyX29mKF9fbnRiLCBzdHJ1Y3QgaW50ZWxfbnRiX2Rl
-diwNCj4gbnRiKQ0KPiArI2RlZmluZSBoYl9uZGV2KF9fd29yaykgY29udGFpbmVyX29mKF9fd29y
-aywgc3RydWN0IGludGVsX250Yl9kZXYsIFwNCj4gKwkJCQnCoMKgwqDCoMKgaGJfdGltZXIud29y
-aykNCj4gwqANCj4gwqAjZW5kaWYNCj4gLS3CoA0KPiAyLjcuMA0KPiA=
+If the parameter given to the macro is replaced throughout the macro as
+it is evaluated.  The intent is that the macro parameter should replace
+the only the first parameter to container_of().  However, the way the
+macro was written, it would also inadvertantly replace a structure field
+name.  If a parameter of any other name is given to the macro, it will
+fail to compile, if the structure does not contain a field of the same
+name.  At worst, it will compile, and hide improper access of an
+unintended field in the structure.
+
+Change the macro parameter name, so it does not conflict with the
+structure field name.
+
+Signed-off-by: Allen Hubbe <Allen.Hubbe@emc.com>
+---
+ drivers/ntb/hw/intel/ntb_hw_intel.h | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.h b/drivers/ntb/hw/intel/ntb_hw_intel.h
+index 2eb4addd10d0..43b3fe0d4aed 100644
+--- a/drivers/ntb/hw/intel/ntb_hw_intel.h
++++ b/drivers/ntb/hw/intel/ntb_hw_intel.h
+@@ -334,7 +334,8 @@ struct intel_ntb_dev {
+ #define ndev_pdev(ndev) ((ndev)->ntb.pdev)
+ #define ndev_name(ndev) pci_name(ndev_pdev(ndev))
+ #define ndev_dev(ndev) (&ndev_pdev(ndev)->dev)
+-#define ntb_ndev(ntb) container_of(ntb, struct intel_ntb_dev, ntb)
+-#define hb_ndev(work) container_of(work, struct intel_ntb_dev, hb_timer.work)
++#define ntb_ndev(__ntb) container_of(__ntb, struct intel_ntb_dev, ntb)
++#define hb_ndev(__work) container_of(__work, struct intel_ntb_dev, \
++				     hb_timer.work)
+ 
+ #endif
+-- 
+2.7.0
+
