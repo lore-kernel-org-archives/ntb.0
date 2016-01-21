@@ -1,60 +1,80 @@
-Return-Path: <Xiangliang.Yu@amd.com>
-Received: from na01-bn1-obe.outbound.protection.outlook.com (mail-bn1on0095.outbound.protection.outlook.com. [157.56.110.95])
-        by gmr-mx.google.com with ESMTPS id jg4si964981pac.2.2016.01.20.22.33.49
+Return-Path: <Allen.Hubbe@emc.com>
+Received: from mailuogwhop.emc.com (mailuogwhop.emc.com. [168.159.213.141])
+        by gmr-mx.google.com with ESMTPS id y199si3437462ywd.5.2016.01.20.22.17.02
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Wed, 20 Jan 2016 22:33:49 -0800 (PST)
-From: "Yu, Xiangliang" <Xiangliang.Yu@amd.com>
-Subject: RE: [PATCH V5 1/1] NTB: Add support for AMD PCI-Express
- Non-Transparent Bridge
-Date: Thu, 21 Jan 2016 06:33:46 +0000
-Message-ID: <BLUPR12MB042029F94AE1602D866E7B10EBC30@BLUPR12MB0420.namprd12.prod.outlook.com>
-References: <1453365583-9823-1-git-send-email-Xiangliang.Yu@amd.com>
- <000001d15405$24fe24a0$6efa6de0$@emc.com>
- <BLUPR12MB04204F0184C91CC2FB96E5DCEBC30@BLUPR12MB0420.namprd12.prod.outlook.com>
- <000101d15413$4c466a50$e4d33ef0$@emc.com>
-In-Reply-To: <000101d15413$4c466a50$e4d33ef0$@emc.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 20 Jan 2016 22:17:02 -0800 (PST)
+From: "Allen Hubbe" <Allen.Hubbe@emc.com>
+References: <1453365583-9823-1-git-send-email-Xiangliang.Yu@amd.com> <000001d15405$24fe24a0$6efa6de0$@emc.com> <BLUPR12MB04204F0184C91CC2FB96E5DCEBC30@BLUPR12MB0420.namprd12.prod.outlook.com>
+In-Reply-To: <BLUPR12MB04204F0184C91CC2FB96E5DCEBC30@BLUPR12MB0420.namprd12.prod.outlook.com>
+Subject: RE: [PATCH V5 1/1] NTB: Add support for AMD PCI-Express Non-Transparent Bridge
+Date: Thu, 21 Jan 2016 01:16:41 -0500
+Message-ID: <000101d15413$4c466a50$e4d33ef0$@emc.com>
 MIME-Version: 1.0
-To: Allen Hubbe <Allen.Hubbe@emc.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "dave.jiang@intel.com" <dave.jiang@intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
-Cc: SPG_Linux_Kernel <SPG_Linux_Kernel@amd.com>
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+Content-Language: en-us
+To: "'Yu, Xiangliang'" <Xiangliang.Yu@amd.com>, jdmason@kudzu.us, dave.jiang@intel.com, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
+Cc: 'SPG_Linux_Kernel' <SPG_Linux_Kernel@amd.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-PiBGcm9tOiBZdSwgWGlhbmdsaWFuZyBbbWFpbHRvOlhpYW5nbGlhbmcuWXVAYW1kLmNvbV0NCj4g
-PiA+ID4gU2lnbmVkLW9mZi1ieTogSm9uIE1hc29uIDxqZG1hc29uQGt1ZHp1LnVzPg0KPiA+ID4g
-PiBTaWduZWQtb2ZmLWJ5OiBBbGxlbiBIdWJiZSA8QWxsZW4uSHViYmVAZW1jLmNvbT4NCj4gPiA+
-DQo+ID4gPiBOTy4NCj4gPg0KPiA+IE9rLCBJJ2xsIGNoYW5nZSBpdCBpZiB5b3UgZG9lc24ndCB3
-YW50IHRvIGNoYW5nZSBpdC4NCj4gDQo+IE5haCwganVzdCByZW1lbWJlciBpdCBmb3IgbmV4dCB0
-aW1lLi4uDQo+IA0KPiBJJ20gc2F0aXNmaWVkIHdpdGggdGhpcyB2NS4NCj4gDQo+IFJldmlld2Vk
-LWJ5OiBBbGxlbiBIdWJiZSA8QWxsZW4uSHViYmVAZW1jLmNvbT4NCg0KT2ssIEknbGwgY2hhbmdl
-IGl0IGFuZCByZXNlbmQgVjUNCg0KPiA+IEkgZG9u4oCZdCB0aGluayBzby4gSW4gaGVyZSwgdGhl
-IGkvbyBtZW1vcnkgaXMgb25seSBoYXBwZW5lZCB3aGVuDQo+ID4gcGNpX2lvbWFwIHJldHVybiBT
-dWNjZXNzLCBzbyB0aGUgcmVnaXN0ZXIgY2FuJ3QgYmUgYWNjZXNzZWQgdGhyb3VnaCBJTw0KPiA+
-IHBvcnQgd2F5LiBBbmQNCj4gPiBpb3JlYWQqIHdpbGwNCj4gPiBDaGVjayBpZiB0aGUgbWVtb3J5
-IHR5cGUgaXMgbW1pbyB0eXBlIG9yIElPIHBvcnQgdHlwZSAocGxlYXNlIHNlZSB0aGUNCj4gPiBk
-ZWZpbml0aW9uKS4NCj4gPiAgSSBkb27igJl0IHRoaW5rIHdlIG5lZWQgdG8gY2hlY2sgSXQsIHNv
-IEkgdXNlIHJlYWQqIGJlY2F1c2UgSXQgY2FuIG1ha2UNCj4gPiBtb3JlIGVmZmljaWVudC4NCj4g
-PiBJIHRoaW5rIHdlIG5lZWQgdG8gdGhpbmsgYWJvdXQgYWN0dWFsIHVzYWdlLCBub3Qgb25seSBm
-b2xsb3cgYm9vay4NCj4gPiBBbmQsIEkgaGF2ZSBzYWlkIGl0IGluIHByZXZpb3VzIHZlcnNpb24s
-IEkgZG9u4oCZdCBsaWtlIGV4cGxhaW4gaXQNCj4gPiBhZ2FpbiwgYW5kIGFnYWluLg0KPiA+IElm
-IHlvdSBoYXZlIGFueSBjb25jZXJuLCBwbGVhc2UgdGVsbCBtZSBhZnRlciBteSBjb21tZW50Lg0K
-PiANCj4gSXQncyBub3QgbW9yZSBlZmZpY2llbnQsIG9uIHRoaXMgcGxhdGZvcm0gaXQncyB0aGUg
-c2FtZS4NCj4gDQo+IElmIGl0IHdlcmUgbXkgZHJpdmVyIEkgd291bGQgY2hhbmdlIGl0Li4uIGJ1
-dCB5b3UgY2FuIGtlZXAgaXQgdGhpcyB3YXkuDQoNCkJlY2F1c2UgbXkgcHJldmlvdXMgU0FUQSBl
-eHBlcmllbmNlLCBJJ2QgbGlrZSB0byB1c2UgdGhpcyB3YXkuDQoNCj4gPiA+IFRoaXMgaXMgZGlm
-ZmVyZW50IGZyb20gdjQuICBJdCB1c2VkIHRvIGJlOg0KPiA+DQo+ID4gQmVjYXVzZSBwZWVyX3N0
-YSBpcyBjaGFuZ2UgdG8gMCwgc28gYW1kX2xpbmtfaXNfdXAgd2lsbCByZXR1cm4gMA0KPiA+IChv
-ZmZsaW5lKQ0KPiA+IEFuZCB3aWxsIG5vdCBjaGVjayBoYXJkd2FyZSBsaW5rIHN0YXR1cy4gU28g
-SXQgbWF5YmUgbWFrZSBpdCBvZmZsaW5lDQo+ID4gZm9yZXZlcg0KPiANCj4gSXQgZml4ZWQgYSBi
-dWc/ICBHcmVhdCENCj4gDQo+ID4gPiBJJ20gbmVydm91cyBhYm91dCBuZGV2LT5wZWVyX3N0YSwg
-dGhlIGJlaGF2aW9yIG9mIGxpbmtfaXNfdXAsDQo+ID4gPiB0aW1lcnMuLi4NCj4gPg0KPiA+IEFj
-dHVhbGx5LCB0aGUgY29kZSBpcyBkZXNpZ25lZCBhY2NvcmRpbmcgdG8gQXRvbSBOVEIsIGV4Y2Vw
-dCBmb3IgdGhlDQo+ID4gcGVlcl9zdGEuDQo+IA0KPiBFeGNlcHQgZm9yIHBlZXJfc3RhLCBhbmQg
-dGhhdCdzIGEgcHJldHR5IGNyaXRpY2FsIGRlc2lnbiBjaGFuZ2UuICBJJ20gc3RpbGwNCj4gbmVy
-dm91cywgYnV0IEknbGwgdHJ1c3QgdGhhdCB5b3UgaGF2ZSBiZWVuIGFibGUgdG8gdGVzdCB0aGlz
-IGJlaGF2aW9yDQo+IHRob3Vyb3VnbHkuDQoNClllcywgdGhlIHBhcnQgb2YgY29kZSB3aWxsIGJl
-IGNoYW5nZWQgaW4gZnV0dXJlIGJlY2F1c2UgaGFyZHdhcmUgZGVzaWduIGlzDQpCZWluZyBjaGFu
-Z2VkICB0b28uDQoNCj4gDQo+ID4gSSdsbCBhZGQgdGhlIGV4cGxhaW5hdGlvbiB3aGVuIGhhdmlu
-ZyBjaGFuZ2VzLg0KDQo=
+From: Yu, Xiangliang [mailto:Xiangliang.Yu@amd.com]
+> > > Signed-off-by: Jon Mason <jdmason@kudzu.us>
+> > > Signed-off-by: Allen Hubbe <Allen.Hubbe@emc.com>
+> >
+> > NO.
+>=20
+> Ok, I'll change it if you doesn't want to change it.
+
+Nah, just remember it for next time...
+
+I'm satisfied with this v5.
+
+Reviewed-by: Allen Hubbe <Allen.Hubbe@emc.com>
+
+> I don=E2=80=99t think so. In here, the i/o memory is only happened =
+when
+> pci_iomap return
+> Success, so the register can't be accessed through IO port way. And
+> ioread* will
+> Check if the memory type is mmio type or IO port type (please see the
+> definition).
+>  I don=E2=80=99t think we need to check It, so I use read* because It =
+can make
+> more efficient.
+> I think we need to think about actual usage, not only follow book.
+> And, I have said it in previous version, I don=E2=80=99t like explain =
+it again,
+> and again.
+> If you have any concern, please tell me after my comment.
+
+It's not more efficient, on this platform it's the same.
+
+If it were my driver I would change it... but you can keep it this way.
+
+> > This is different from v4.  It used to be:
+>=20
+> Because peer_sta is change to 0, so amd_link_is_up will return 0
+> (offline)
+> And will not check hardware link status. So It maybe make it offline
+> forever
+
+It fixed a bug?  Great!
+
+> > I'm nervous about ndev->peer_sta, the behavior of link_is_up,
+> > timers...
+>
+> Actually, the code is designed according to Atom NTB, except for the
+> peer_sta.
+
+Except for peer_sta, and that's a pretty critical design change.  I'm =
+still nervous, but I'll trust that you have been able to test this =
+behavior thourougly.
+
+> I'll add the explaination when having changes.
+
+Thanks.
+
+Allen
+
