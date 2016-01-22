@@ -1,47 +1,31 @@
 Return-Path: <jdmason@kudzu.us>
-Received: from mail-yk0-x22b.google.com (mail-yk0-x22b.google.com. [2607:f8b0:4002:c07::22b])
-        by gmr-mx.google.com with ESMTPS id i138si1107908ywe.2.2016.01.23.11.53.26
+Received: from mail-yk0-x229.google.com (mail-yk0-x229.google.com. [2607:f8b0:4002:c07::229])
+        by gmr-mx.google.com with ESMTPS id i138si428626ywe.2.2016.01.21.17.18.30
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Sat, 23 Jan 2016 11:53:26 -0800 (PST)
-Received: by mail-yk0-x22b.google.com with SMTP id a85so122669656ykb.1
-        for <linux-ntb@googlegroups.com>; Sat, 23 Jan 2016 11:53:26 -0800 (PST)
+        Thu, 21 Jan 2016 17:18:30 -0800 (PST)
+Received: by mail-yk0-x229.google.com with SMTP id k129so70504372yke.0
+        for <linux-ntb@googlegroups.com>; Thu, 21 Jan 2016 17:18:30 -0800 (PST)
 Return-Path: <jdmason@kudzu.us>
-Date: Sat, 23 Jan 2016 14:52:08 -0500
+Date: Thu, 21 Jan 2016 20:17:08 -0500
 From: Jon Mason <jdmason@kudzu.us>
-Subject: [GIT PULL] NTB changes for v4.5
-Message-ID: <20160123195207.GA18724@kudzu.us>
+Subject: NTB patches for v4.5
+Message-ID: <20160122011706.GC18163@kudzu.us>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, , linux-ntb@googlegroups.com
+To: Allen Hubbe <Allen.Hubbe@emc.com>, Dave Jiang <dave.jiang@intel.com>, Xiangliang Yu <Xiangliang.Yu@amd.com>
+Cc: linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-Hello Linus,
-Here are a few NTB changes fixes for v4.5.  A new driver for the AMD
-NTB and a few bug fixes.  Please consider pulling them.
+Below are the patches that will be in my pull request to Linus on
+Saturday.  If possible, please test them in the next 24 hours to verify
+everything is in working order.
+
+git://github.com/jonmason/ntb ntb-4.5
 
 Thanks,
 Jon
-
-
-
-The following changes since commit afd2ff9b7e1b367172f18ba7f693dfb62bdcb2dc:
-
-  Linux 4.4 (2016-01-10 15:01:32 -0800)
-
-are available in the git repository at:
-
-  git://github.com/jonmason/ntb tags/ntb-4.5
-
-for you to fetch changes up to 03beaec80d57e7a540b1990188f8a97a076da6de:
-
-  NTB: Fix macro parameter conflict with field name (2016-01-21 19:53:10 -0500)
-
-----------------------------------------------------------------
-A new driver to support AMD NTB, a NTB performance test driver, NTB bugs
-fixes, and the ability to recover from running out of DMA descriptors.
 
 ----------------------------------------------------------------
 Allen Hubbe (1):
