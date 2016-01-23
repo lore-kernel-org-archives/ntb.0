@@ -1,49 +1,79 @@
-Return-Path: <Allen.Hubbe@emc.com>
-Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
-        by gmr-mx.google.com with ESMTPS id u74si368830ywf.0.2016.01.21.14.52.28
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-yk0-x22b.google.com (mail-yk0-x22b.google.com. [2607:f8b0:4002:c07::22b])
+        by gmr-mx.google.com with ESMTPS id i138si1107908ywe.2.2016.01.23.11.53.26
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 21 Jan 2016 14:52:28 -0800 (PST)
-From: Allen Hubbe <Allen.Hubbe@emc.com>
-Subject: [PATCH] NTB: Fix macro parameter conflict with field name
-Date: Thu, 21 Jan 2016 12:53:50 -0500
-Message-Id: <92f2c0f9f753ddb55242f01dd3d351191d2128c8.1453398752.git.Allen.Hubbe@emc.com>
-To: linux-ntb@googlegroups.com, Jon Mason <jdmason@kudzu.us>
-Cc: Allen Hubbe <Allen.Hubbe@emc.com>
+        Sat, 23 Jan 2016 11:53:26 -0800 (PST)
+Received: by mail-yk0-x22b.google.com with SMTP id a85so122669656ykb.1
+        for <linux-ntb@googlegroups.com>; Sat, 23 Jan 2016 11:53:26 -0800 (PST)
+Return-Path: <jdmason@kudzu.us>
+Date: Sat, 23 Jan 2016 14:52:08 -0500
+From: Jon Mason <jdmason@kudzu.us>
+Subject: [GIT PULL] NTB changes for v4.5
+Message-ID: <20160123195207.GA18724@kudzu.us>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+To: torvalds@linux-foundation.org
+Cc: linux-kernel@vger.kernel.org, , linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-If the parameter given to the macro is replaced throughout the macro as
-it is evaluated.  The intent is that the macro parameter should replace
-the only the first parameter to container_of().  However, the way the
-macro was written, it would also inadvertantly replace a structure field
-name.  If a parameter of any other name is given to the macro, it will
-fail to compile, if the structure does not contain a field of the same
-name.  At worst, it will compile, and hide improper access of an
-unintended field in the structure.
+Hello Linus,
+Here are a few NTB changes fixes for v4.5.  A new driver for the AMD
+NTB and a few bug fixes.  Please consider pulling them.
 
-Change the macro parameter name, so it does not conflict with the
-structure field name.
+Thanks,
+Jon
 
-Signed-off-by: Allen Hubbe <Allen.Hubbe@emc.com>
----
- drivers/ntb/hw/intel/ntb_hw_intel.h | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.h b/drivers/ntb/hw/intel/ntb_hw_intel.h
-index 2eb4addd10d0..43b3fe0d4aed 100644
---- a/drivers/ntb/hw/intel/ntb_hw_intel.h
-+++ b/drivers/ntb/hw/intel/ntb_hw_intel.h
-@@ -334,7 +334,8 @@ struct intel_ntb_dev {
- #define ndev_pdev(ndev) ((ndev)->ntb.pdev)
- #define ndev_name(ndev) pci_name(ndev_pdev(ndev))
- #define ndev_dev(ndev) (&ndev_pdev(ndev)->dev)
--#define ntb_ndev(ntb) container_of(ntb, struct intel_ntb_dev, ntb)
--#define hb_ndev(work) container_of(work, struct intel_ntb_dev, hb_timer.work)
-+#define ntb_ndev(__ntb) container_of(__ntb, struct intel_ntb_dev, ntb)
-+#define hb_ndev(__work) container_of(__work, struct intel_ntb_dev, \
-+				     hb_timer.work)
- 
- #endif
--- 
-2.7.0
 
+The following changes since commit afd2ff9b7e1b367172f18ba7f693dfb62bdcb2dc:
+
+  Linux 4.4 (2016-01-10 15:01:32 -0800)
+
+are available in the git repository at:
+
+  git://github.com/jonmason/ntb tags/ntb-4.5
+
+for you to fetch changes up to 03beaec80d57e7a540b1990188f8a97a076da6de:
+
+  NTB: Fix macro parameter conflict with field name (2016-01-21 19:53:10 -0500)
+
+----------------------------------------------------------------
+A new driver to support AMD NTB, a NTB performance test driver, NTB bugs
+fixes, and the ability to recover from running out of DMA descriptors.
+
+----------------------------------------------------------------
+Allen Hubbe (1):
+      NTB: Fix macro parameter conflict with field name
+
+Dave Jiang (3):
+      NTB: Clear property bits in BAR value
+      NTB: Address out of DMA descriptor issue with NTB
+      ntb: ntb perf tool
+
+Jon Mason (1):
+      NTB: ntb_process_tx error path bug
+
+Xiangliang Yu (1):
+      NTB: Add support for AMD PCI-Express Non-Transparent Bridge
+
+ MAINTAINERS                         |    6 +
+ drivers/ntb/hw/Kconfig              |    1 +
+ drivers/ntb/hw/Makefile             |    1 +
+ drivers/ntb/hw/amd/Kconfig          |    7 +
+ drivers/ntb/hw/amd/Makefile         |    1 +
+ drivers/ntb/hw/amd/ntb_hw_amd.c     | 1143 +++++++++++++++++++++++++++++++++++
+ drivers/ntb/hw/amd/ntb_hw_amd.h     |  217 +++++++
+ drivers/ntb/hw/intel/ntb_hw_intel.c |    4 +-
+ drivers/ntb/hw/intel/ntb_hw_intel.h |    8 +-
+ drivers/ntb/ntb_transport.c         |   50 +-
+ drivers/ntb/test/Kconfig            |    8 +
+ drivers/ntb/test/Makefile           |    1 +
+ drivers/ntb/test/ntb_perf.c         |  748 +++++++++++++++++++++++
+ 13 files changed, 2183 insertions(+), 12 deletions(-)
+ create mode 100644 drivers/ntb/hw/amd/Kconfig
+ create mode 100644 drivers/ntb/hw/amd/Makefile
+ create mode 100644 drivers/ntb/hw/amd/ntb_hw_amd.c
+ create mode 100644 drivers/ntb/hw/amd/ntb_hw_amd.h
+ create mode 100644 drivers/ntb/test/ntb_perf.c
