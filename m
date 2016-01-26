@@ -1,88 +1,116 @@
-Return-Path: <dave.jiang@intel.com>
-Received: from mga14.intel.com (mga14.intel.com. [192.55.52.115])
-        by gmr-mx.google.com with ESMTP id r2si288004pfr.0.2016.01.26.10.20.14
-        for <linux-ntb@googlegroups.com>;
-        Tue, 26 Jan 2016 10:20:14 -0800 (PST)
-From: "Jiang, Dave" <dave.jiang@intel.com>
-Subject: Re: [PATCH] ntb: perf test: fix address space confusion
-Date: Tue, 26 Jan 2016 18:20:12 +0000
-Message-ID: <1453832409.3824.59.camel@intel.com>
-References: <1453800729-2501235-1-git-send-email-arnd@arndb.de>
-In-Reply-To: <1453800729-2501235-1-git-send-email-arnd@arndb.de>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <5EF7EF319753334F9E2E42D98A8C2845@intel.com>
-Content-Transfer-Encoding: base64
-MIME-Version: 1.0
-Return-Path: dave.jiang@intel.com
-To: "Allen.Hubbe@emc.com" <Allen.Hubbe@emc.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "arnd@arndb.de" <arnd@arndb.de>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
+Return-Path: <arnd@arndb.de>
+Received: from mout.kundenserver.de (mout.kundenserver.de. [212.227.17.24])
+        by gmr-mx.google.com with ESMTPS id s132si69757wmd.1.2016.01.26.01.32.25
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 26 Jan 2016 01:32:25 -0800 (PST)
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: [PATCH] ntb: perf test: fix address space confusion
+Date: Tue, 26 Jan 2016 10:31:45 +0100
+Message-Id: <1453800729-2501235-1-git-send-email-arnd@arndb.de>
+To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
+Cc: linux-arm-kernel@lists.infradead.org, Arnd Bergmann <arnd@arndb.de>, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-T24gVHVlLCAyMDE2LTAxLTI2IGF0IDEwOjMxICswMTAwLCBBcm5kIEJlcmdtYW5uIHdyb3RlOg0K
-PiBUaGUgbnRiIGRyaXZlciBhc3NpZ25zIGJldHdlZW4gcG9pbnRlcnMgYW4gX19pb21lbSB0b2tl
-bnMsIGFuZA0KPiBhbHNvIGNhc3RzIHRoZW0gdG8gNjQtYml0IGludGVnZXJzLCB3aGljaCByZXN1
-bHRzIGluIGNvbXBpbGVyDQo+IHdhcm5pbmdzIG9uIDMyLWJpdCBzeXN0ZW1zOg0KPiANCj4gZHJp
-dmVycy9udGIvdGVzdC9udGJfcGVyZi5jOiBJbiBmdW5jdGlvbiAncGVyZl9jb3B5JzoNCj4gZHJp
-dmVycy9udGIvdGVzdC9udGJfcGVyZi5jOjIxMzoxMDogZXJyb3I6IGNhc3QgZnJvbSBwb2ludGVy
-IHRvDQo+IGludGVnZXIgb2YgZGlmZmVyZW50IHNpemUgWy1XZXJyb3I9cG9pbnRlci10by1pbnQt
-Y2FzdF0NCj4gwqAgdmJhc2UgPSAodTY0KSh1NjQgKiltdy0+dmJhc2U7DQo+IMKgwqDCoMKgwqDC
-oMKgwqDCoMKgXg0KPiBkcml2ZXJzL250Yi90ZXN0L250Yl9wZXJmLmM6MjE0OjE0OiBlcnJvcjog
-Y2FzdCBmcm9tIHBvaW50ZXIgdG8NCj4gaW50ZWdlciBvZiBkaWZmZXJlbnQgc2l6ZSBbLVdlcnJv
-cj1wb2ludGVyLXRvLWludC1jYXN0XQ0KPiDCoCBkc3RfdmFkZHIgPSAodTY0KSh1NjQgKilkc3Q7
-DQo+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBeDQo+IA0KPiBUaGlzIGFkZHMgX19pb21l
-bSBhbm5vdGF0aW9ucyB3aGVyZSBuZWVkZWQgYW5kIGNoYW5nZXMgdGhlIHRlbXBvcmFyeQ0KPiB2
-YXJpYWJsZXMgdG8gaW9tZW0gcG9pbnRlcnMgdG8gYXZvaWQgY2FzdGluZyB0aGVtIHRvIHU2NC4g
-SSBkaWQgbm90DQo+IHNlZSB0aGUgcHJvYmxlbSBpbiBsaW51eC1uZXh0IGVhcmxpZXIsIGJ1dCBp
-dCBzaG93IHNob3dlZCB1cCBpbg0KPiA0LjUtcmMxLg0KPiANCj4gU2lnbmVkLW9mZi1ieTogQXJu
-ZCBCZXJnbWFubiA8YXJuZEBhcm5kYi5kZT4NCg0KQWNrZWQtYnk6IERhdmUgSmlhbmcgPGRhdmUu
-amlhbmdAaW50ZWwuY29tPg0KDQo+IEZpeGVzOiA4YTdiNmE3NzhhODUgKCJudGI6IG50YiBwZXJm
-IHRvb2wiKQ0KPiAtLS0NCj4gwqBkcml2ZXJzL250Yi90ZXN0L250Yl9wZXJmLmMgfCAyMSArKysr
-KysrKysrKy0tLS0tLS0tLS0NCj4gwqAxIGZpbGUgY2hhbmdlZCwgMTEgaW5zZXJ0aW9ucygrKSwg
-MTAgZGVsZXRpb25zKC0pDQo+IA0KPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9udGIvdGVzdC9udGJf
-cGVyZi5jDQo+IGIvZHJpdmVycy9udGIvdGVzdC9udGJfcGVyZi5jDQo+IGluZGV4IGM4YTM3YmE0
-YjRmOS4uNmJkYzFlN2I3NTAzIDEwMDY0NA0KPiAtLS0gYS9kcml2ZXJzL250Yi90ZXN0L250Yl9w
-ZXJmLmMNCj4gKysrIGIvZHJpdmVycy9udGIvdGVzdC9udGJfcGVyZi5jDQo+IEBAIC0xNzgsNyAr
-MTc4LDcgQEAgc3RhdGljIHZvaWQgcGVyZl9jb3B5X2NhbGxiYWNrKHZvaWQgKmRhdGEpDQo+IMKg
-CWF0b21pY19kZWMoJnBjdHgtPmRtYV9zeW5jKTsNCj4gwqB9DQo+IMKgDQo+IC1zdGF0aWMgc3Np
-emVfdCBwZXJmX2NvcHkoc3RydWN0IHB0aHJfY3R4ICpwY3R4LCBjaGFyICpkc3QsDQo+ICtzdGF0
-aWMgc3NpemVfdCBwZXJmX2NvcHkoc3RydWN0IHB0aHJfY3R4ICpwY3R4LCBjaGFyIF9faW9tZW0g
-KmRzdCwNCj4gwqAJCQnCoGNoYXIgKnNyYywgc2l6ZV90IHNpemUpDQo+IMKgew0KPiDCoAlzdHJ1
-Y3QgcGVyZl9jdHggKnBlcmYgPSBwY3R4LT5wZXJmOw0KPiBAQCAtMTg5LDcgKzE4OSw4IEBAIHN0
-YXRpYyBzc2l6ZV90IHBlcmZfY29weShzdHJ1Y3QgcHRocl9jdHggKnBjdHgsDQo+IGNoYXIgKmRz
-dCwNCj4gwqAJZG1hX2Nvb2tpZV90IGNvb2tpZTsNCj4gwqAJc2l6ZV90IHNyY19vZmYsIGRzdF9v
-ZmY7DQo+IMKgCXN0cnVjdCBwZXJmX213ICptdyA9ICZwZXJmLT5tdzsNCj4gLQl1NjQgdmJhc2Us
-IGRzdF92YWRkcjsNCj4gKwl2b2lkIF9faW9tZW0gKnZiYXNlOw0KPiArCXZvaWQgX19pb21lbSAq
-ZHN0X3ZhZGRyOw0KPiDCoAlkbWFfYWRkcl90IGRzdF9waHlzOw0KPiDCoAlpbnQgcmV0cmllcyA9
-IDA7DQo+IMKgDQo+IEBAIC0yMDQsMTQgKzIwNSwxNCBAQCBzdGF0aWMgc3NpemVfdCBwZXJmX2Nv
-cHkoc3RydWN0IHB0aHJfY3R4ICpwY3R4LA0KPiBjaGFyICpkc3QsDQo+IMKgCX0NCj4gwqANCj4g
-wqAJZGV2aWNlID0gY2hhbi0+ZGV2aWNlOw0KPiAtCXNyY19vZmYgPSAoc2l6ZV90KXNyYyAmIH5Q
-QUdFX01BU0s7DQo+IC0JZHN0X29mZiA9IChzaXplX3QpZHN0ICYgflBBR0VfTUFTSzsNCj4gKwlz
-cmNfb2ZmID0gKHVpbnRwdHJfdClzcmMgJiB+UEFHRV9NQVNLOw0KPiArCWRzdF9vZmYgPSAodWlu
-dHB0cl90IF9fZm9yY2UpZHN0ICYgflBBR0VfTUFTSzsNCj4gwqANCj4gwqAJaWYgKCFpc19kbWFf
-Y29weV9hbGlnbmVkKGRldmljZSwgc3JjX29mZiwgZHN0X29mZiwgc2l6ZSkpDQo+IMKgCQlyZXR1
-cm4gLUVOT0RFVjsNCj4gwqANCj4gLQl2YmFzZSA9ICh1NjQpKHU2NCAqKW13LT52YmFzZTsNCj4g
-LQlkc3RfdmFkZHIgPSAodTY0KSh1NjQgKilkc3Q7DQo+ICsJdmJhc2UgPSBtdy0+dmJhc2U7DQo+
-ICsJZHN0X3ZhZGRyID0gZHN0Ow0KPiDCoAlkc3RfcGh5cyA9IG13LT5waHlzX2FkZHIgKyAoZHN0
-X3ZhZGRyIC0gdmJhc2UpOw0KPiDCoA0KPiDCoAl1bm1hcCA9IGRtYWVuZ2luZV9nZXRfdW5tYXBf
-ZGF0YShkZXZpY2UtPmRldiwgMSwNCj4gR0ZQX05PV0FJVCk7DQo+IEBAIC0yNjEsMTMgKzI2Miwx
-MyBAQCBlcnJfZ2V0X3VubWFwOg0KPiDCoAlyZXR1cm4gMDsNCj4gwqB9DQo+IMKgDQo+IC1zdGF0
-aWMgaW50IHBlcmZfbW92ZV9kYXRhKHN0cnVjdCBwdGhyX2N0eCAqcGN0eCwgY2hhciAqZHN0LCBj
-aGFyDQo+ICpzcmMsDQo+ICtzdGF0aWMgaW50IHBlcmZfbW92ZV9kYXRhKHN0cnVjdCBwdGhyX2N0
-eCAqcGN0eCwgY2hhciBfX2lvbWVtICpkc3QsDQo+IGNoYXIgKnNyYywNCj4gwqAJCQnCoMKgdTY0
-IGJ1Zl9zaXplLCB1NjQgd2luX3NpemUsIHU2NCB0b3RhbCkNCj4gwqB7DQo+IMKgCWludCBjaHVu
-a3MsIHRvdGFsX2NodW5rcywgaTsNCj4gwqAJaW50IGNvcGllZF9jaHVua3MgPSAwOw0KPiDCoAl1
-NjQgY29waWVkID0gMCwgcmVzdWx0Ow0KPiAtCWNoYXIgKnRtcCA9IGRzdDsNCj4gKwljaGFyIF9f
-aW9tZW0gKnRtcCA9IGRzdDsNCj4gwqAJdTY0IHBlcmYsIGRpZmZfdXM7DQo+IMKgCWt0aW1lX3Qg
-a3N0YXJ0LCBrc3RvcCwga2RpZmY7DQo+IMKgDQo+IEBAIC0zMjQsNyArMzI1LDcgQEAgc3RhdGlj
-IGludCBudGJfcGVyZl90aHJlYWQodm9pZCAqZGF0YSkNCj4gwqAJc3RydWN0IHBlcmZfY3R4ICpw
-ZXJmID0gcGN0eC0+cGVyZjsNCj4gwqAJc3RydWN0IHBjaV9kZXYgKnBkZXYgPSBwZXJmLT5udGIt
-PnBkZXY7DQo+IMKgCXN0cnVjdCBwZXJmX213ICptdyA9ICZwZXJmLT5tdzsNCj4gLQljaGFyICpk
-c3Q7DQo+ICsJY2hhciBfX2lvbWVtICpkc3Q7DQo+IMKgCXU2NCB3aW5fc2l6ZSwgYnVmX3NpemUs
-IHRvdGFsOw0KPiDCoAl2b2lkICpzcmM7DQo+IMKgCWludCByYywgbm9kZSwgaTsNCj4gQEAgLTM2
-NCw3ICszNjUsNyBAQCBzdGF0aWMgaW50IG50Yl9wZXJmX3RocmVhZCh2b2lkICpkYXRhKQ0KPiDC
-oAlpZiAoYnVmX3NpemUgPiBNQVhfVEVTVF9TSVpFKQ0KPiDCoAkJYnVmX3NpemUgPSBNQVhfVEVT
-VF9TSVpFOw0KPiDCoA0KPiAtCWRzdCA9IChjaGFyICopbXctPnZiYXNlOw0KPiArCWRzdCA9IChj
-aGFyIF9faW9tZW0gKiltdy0+dmJhc2U7DQo+IMKgDQo+IMKgCWF0b21pY19pbmMoJnBlcmYtPnRz
-eW5jKTsNCj4gwqAJd2hpbGUgKGF0b21pY19yZWFkKCZwZXJmLT50c3luYykgIT0gcGVyZi0+cGVy
-Zl90aHJlYWRzKQ==
+The ntb driver assigns between pointers an __iomem tokens, and
+also casts them to 64-bit integers, which results in compiler
+warnings on 32-bit systems:
+
+drivers/ntb/test/ntb_perf.c: In function 'perf_copy':
+drivers/ntb/test/ntb_perf.c:213:10: error: cast from pointer to integer of different size [-Werror=pointer-to-int-cast]
+  vbase = (u64)(u64 *)mw->vbase;
+          ^
+drivers/ntb/test/ntb_perf.c:214:14: error: cast from pointer to integer of different size [-Werror=pointer-to-int-cast]
+  dst_vaddr = (u64)(u64 *)dst;
+              ^
+
+This adds __iomem annotations where needed and changes the temporary
+variables to iomem pointers to avoid casting them to u64. I did not
+see the problem in linux-next earlier, but it show showed up in
+4.5-rc1.
+
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+Fixes: 8a7b6a778a85 ("ntb: ntb perf tool")
+---
+ drivers/ntb/test/ntb_perf.c | 21 +++++++++++----------
+ 1 file changed, 11 insertions(+), 10 deletions(-)
+
+diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
+index c8a37ba4b4f9..6bdc1e7b7503 100644
+--- a/drivers/ntb/test/ntb_perf.c
++++ b/drivers/ntb/test/ntb_perf.c
+@@ -178,7 +178,7 @@ static void perf_copy_callback(void *data)
+ 	atomic_dec(&pctx->dma_sync);
+ }
+ 
+-static ssize_t perf_copy(struct pthr_ctx *pctx, char *dst,
++static ssize_t perf_copy(struct pthr_ctx *pctx, char __iomem *dst,
+ 			 char *src, size_t size)
+ {
+ 	struct perf_ctx *perf = pctx->perf;
+@@ -189,7 +189,8 @@ static ssize_t perf_copy(struct pthr_ctx *pctx, char *dst,
+ 	dma_cookie_t cookie;
+ 	size_t src_off, dst_off;
+ 	struct perf_mw *mw = &perf->mw;
+-	u64 vbase, dst_vaddr;
++	void __iomem *vbase;
++	void __iomem *dst_vaddr;
+ 	dma_addr_t dst_phys;
+ 	int retries = 0;
+ 
+@@ -204,14 +205,14 @@ static ssize_t perf_copy(struct pthr_ctx *pctx, char *dst,
+ 	}
+ 
+ 	device = chan->device;
+-	src_off = (size_t)src & ~PAGE_MASK;
+-	dst_off = (size_t)dst & ~PAGE_MASK;
++	src_off = (uintptr_t)src & ~PAGE_MASK;
++	dst_off = (uintptr_t __force)dst & ~PAGE_MASK;
+ 
+ 	if (!is_dma_copy_aligned(device, src_off, dst_off, size))
+ 		return -ENODEV;
+ 
+-	vbase = (u64)(u64 *)mw->vbase;
+-	dst_vaddr = (u64)(u64 *)dst;
++	vbase = mw->vbase;
++	dst_vaddr = dst;
+ 	dst_phys = mw->phys_addr + (dst_vaddr - vbase);
+ 
+ 	unmap = dmaengine_get_unmap_data(device->dev, 1, GFP_NOWAIT);
+@@ -261,13 +262,13 @@ err_get_unmap:
+ 	return 0;
+ }
+ 
+-static int perf_move_data(struct pthr_ctx *pctx, char *dst, char *src,
++static int perf_move_data(struct pthr_ctx *pctx, char __iomem *dst, char *src,
+ 			  u64 buf_size, u64 win_size, u64 total)
+ {
+ 	int chunks, total_chunks, i;
+ 	int copied_chunks = 0;
+ 	u64 copied = 0, result;
+-	char *tmp = dst;
++	char __iomem *tmp = dst;
+ 	u64 perf, diff_us;
+ 	ktime_t kstart, kstop, kdiff;
+ 
+@@ -324,7 +325,7 @@ static int ntb_perf_thread(void *data)
+ 	struct perf_ctx *perf = pctx->perf;
+ 	struct pci_dev *pdev = perf->ntb->pdev;
+ 	struct perf_mw *mw = &perf->mw;
+-	char *dst;
++	char __iomem *dst;
+ 	u64 win_size, buf_size, total;
+ 	void *src;
+ 	int rc, node, i;
+@@ -364,7 +365,7 @@ static int ntb_perf_thread(void *data)
+ 	if (buf_size > MAX_TEST_SIZE)
+ 		buf_size = MAX_TEST_SIZE;
+ 
+-	dst = (char *)mw->vbase;
++	dst = (char __iomem *)mw->vbase;
+ 
+ 	atomic_inc(&perf->tsync);
+ 	while (atomic_read(&perf->tsync) != perf->perf_threads)
+-- 
+2.7.0
+
