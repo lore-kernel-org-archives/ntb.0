@@ -1,53 +1,88 @@
-Return-Path: <Allen.Hubbe@emc.com>
-Received: from mailuogwhop.emc.com (mailuogwhop.emc.com. [168.159.213.141])
-        by gmr-mx.google.com with ESMTPS id p88si9707259pfi.0.2016.01.06.10.20.10
-        for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 06 Jan 2016 10:20:11 -0800 (PST)
-From: "Allen Hubbe" <Allen.Hubbe@emc.com>
-References: <1450878160-9259-1-git-send-email-Xiangliang.Yu@amd.com>
-In-Reply-To: <1450878160-9259-1-git-send-email-Xiangliang.Yu@amd.com>
-Subject: RE: [PATCH V2 0/3] Change notes of V2
-Date: Wed, 6 Jan 2016 13:19:52 -0500
-Message-ID: <000101d148ae$d6ad3540$84079fc0$@emc.com>
+Return-Path: <dave.jiang@intel.com>
+Received: from mga14.intel.com (mga14.intel.com. [192.55.52.115])
+        by gmr-mx.google.com with ESMTP id r2si288004pfr.0.2016.01.26.10.20.14
+        for <linux-ntb@googlegroups.com>;
+        Tue, 26 Jan 2016 10:20:14 -0800 (PST)
+From: "Jiang, Dave" <dave.jiang@intel.com>
+Subject: Re: [PATCH] ntb: perf test: fix address space confusion
+Date: Tue, 26 Jan 2016 18:20:12 +0000
+Message-ID: <1453832409.3824.59.camel@intel.com>
+References: <1453800729-2501235-1-git-send-email-arnd@arndb.de>
+In-Reply-To: <1453800729-2501235-1-git-send-email-arnd@arndb.de>
+Content-Language: en-US
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <5EF7EF319753334F9E2E42D98A8C2845@intel.com>
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Content-Type: text/plain;
-	charset="utf-8"
-Content-Transfer-Encoding: quoted-printable
-Content-Language: en-us
-To: 'Xiangliang Yu' <Xiangliang.Yu@amd.com>, jdmason@kudzu.us, dave.jiang@intel.com, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
-Cc: SPG_Linux_Kernel@amd.com
+Return-Path: dave.jiang@intel.com
+To: "Allen.Hubbe@emc.com" <Allen.Hubbe@emc.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "arnd@arndb.de" <arnd@arndb.de>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Xiangliang Yu <Xiangliang.Yu@amd.com>:
-> Main changes in V2:
-> 1. Fixed compiler warning;
-> 2. Add marcro argument of ndev in NTB_READ_REG/NTB_WRITE_REG;
-> 3. Add notes for flush and wakeup interfaces;
->=20
-> Xiangliang Yu (3):
->   NTB: Add AMD PCI-Express NTB driver
->   NTB: Add AMD NTB support in Kconfig and Makefile
->   NTB: Add flush_req and wakeup interface
-
-Could you re-spin these patches as:
-
-Patch 1:
-	Only the parts of the driver that fit the current NTB APIs.
-
-Patch 2:
-	The new flush_req API, and the related code in the AMD driver.
-
-Patch 3:
-	The new wakeup API, and related code in the AMD driver.
-
-In particular, I think we need feedback on #3 from PCI and power =
-management maintainers.
-
-When making #1, please make sure that the patch stands on its own, =
-without any of the code related to #2 or #3 in #1.  Do put the makefile =
-and kconfig changes in #1.
-
-Thanks,
-Allen
-
+T24gVHVlLCAyMDE2LTAxLTI2IGF0IDEwOjMxICswMTAwLCBBcm5kIEJlcmdtYW5uIHdyb3RlOg0K
+PiBUaGUgbnRiIGRyaXZlciBhc3NpZ25zIGJldHdlZW4gcG9pbnRlcnMgYW4gX19pb21lbSB0b2tl
+bnMsIGFuZA0KPiBhbHNvIGNhc3RzIHRoZW0gdG8gNjQtYml0IGludGVnZXJzLCB3aGljaCByZXN1
+bHRzIGluIGNvbXBpbGVyDQo+IHdhcm5pbmdzIG9uIDMyLWJpdCBzeXN0ZW1zOg0KPiANCj4gZHJp
+dmVycy9udGIvdGVzdC9udGJfcGVyZi5jOiBJbiBmdW5jdGlvbiAncGVyZl9jb3B5JzoNCj4gZHJp
+dmVycy9udGIvdGVzdC9udGJfcGVyZi5jOjIxMzoxMDogZXJyb3I6IGNhc3QgZnJvbSBwb2ludGVy
+IHRvDQo+IGludGVnZXIgb2YgZGlmZmVyZW50IHNpemUgWy1XZXJyb3I9cG9pbnRlci10by1pbnQt
+Y2FzdF0NCj4gwqAgdmJhc2UgPSAodTY0KSh1NjQgKiltdy0+dmJhc2U7DQo+IMKgwqDCoMKgwqDC
+oMKgwqDCoMKgXg0KPiBkcml2ZXJzL250Yi90ZXN0L250Yl9wZXJmLmM6MjE0OjE0OiBlcnJvcjog
+Y2FzdCBmcm9tIHBvaW50ZXIgdG8NCj4gaW50ZWdlciBvZiBkaWZmZXJlbnQgc2l6ZSBbLVdlcnJv
+cj1wb2ludGVyLXRvLWludC1jYXN0XQ0KPiDCoCBkc3RfdmFkZHIgPSAodTY0KSh1NjQgKilkc3Q7
+DQo+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBeDQo+IA0KPiBUaGlzIGFkZHMgX19pb21l
+bSBhbm5vdGF0aW9ucyB3aGVyZSBuZWVkZWQgYW5kIGNoYW5nZXMgdGhlIHRlbXBvcmFyeQ0KPiB2
+YXJpYWJsZXMgdG8gaW9tZW0gcG9pbnRlcnMgdG8gYXZvaWQgY2FzdGluZyB0aGVtIHRvIHU2NC4g
+SSBkaWQgbm90DQo+IHNlZSB0aGUgcHJvYmxlbSBpbiBsaW51eC1uZXh0IGVhcmxpZXIsIGJ1dCBp
+dCBzaG93IHNob3dlZCB1cCBpbg0KPiA0LjUtcmMxLg0KPiANCj4gU2lnbmVkLW9mZi1ieTogQXJu
+ZCBCZXJnbWFubiA8YXJuZEBhcm5kYi5kZT4NCg0KQWNrZWQtYnk6IERhdmUgSmlhbmcgPGRhdmUu
+amlhbmdAaW50ZWwuY29tPg0KDQo+IEZpeGVzOiA4YTdiNmE3NzhhODUgKCJudGI6IG50YiBwZXJm
+IHRvb2wiKQ0KPiAtLS0NCj4gwqBkcml2ZXJzL250Yi90ZXN0L250Yl9wZXJmLmMgfCAyMSArKysr
+KysrKysrKy0tLS0tLS0tLS0NCj4gwqAxIGZpbGUgY2hhbmdlZCwgMTEgaW5zZXJ0aW9ucygrKSwg
+MTAgZGVsZXRpb25zKC0pDQo+IA0KPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9udGIvdGVzdC9udGJf
+cGVyZi5jDQo+IGIvZHJpdmVycy9udGIvdGVzdC9udGJfcGVyZi5jDQo+IGluZGV4IGM4YTM3YmE0
+YjRmOS4uNmJkYzFlN2I3NTAzIDEwMDY0NA0KPiAtLS0gYS9kcml2ZXJzL250Yi90ZXN0L250Yl9w
+ZXJmLmMNCj4gKysrIGIvZHJpdmVycy9udGIvdGVzdC9udGJfcGVyZi5jDQo+IEBAIC0xNzgsNyAr
+MTc4LDcgQEAgc3RhdGljIHZvaWQgcGVyZl9jb3B5X2NhbGxiYWNrKHZvaWQgKmRhdGEpDQo+IMKg
+CWF0b21pY19kZWMoJnBjdHgtPmRtYV9zeW5jKTsNCj4gwqB9DQo+IMKgDQo+IC1zdGF0aWMgc3Np
+emVfdCBwZXJmX2NvcHkoc3RydWN0IHB0aHJfY3R4ICpwY3R4LCBjaGFyICpkc3QsDQo+ICtzdGF0
+aWMgc3NpemVfdCBwZXJmX2NvcHkoc3RydWN0IHB0aHJfY3R4ICpwY3R4LCBjaGFyIF9faW9tZW0g
+KmRzdCwNCj4gwqAJCQnCoGNoYXIgKnNyYywgc2l6ZV90IHNpemUpDQo+IMKgew0KPiDCoAlzdHJ1
+Y3QgcGVyZl9jdHggKnBlcmYgPSBwY3R4LT5wZXJmOw0KPiBAQCAtMTg5LDcgKzE4OSw4IEBAIHN0
+YXRpYyBzc2l6ZV90IHBlcmZfY29weShzdHJ1Y3QgcHRocl9jdHggKnBjdHgsDQo+IGNoYXIgKmRz
+dCwNCj4gwqAJZG1hX2Nvb2tpZV90IGNvb2tpZTsNCj4gwqAJc2l6ZV90IHNyY19vZmYsIGRzdF9v
+ZmY7DQo+IMKgCXN0cnVjdCBwZXJmX213ICptdyA9ICZwZXJmLT5tdzsNCj4gLQl1NjQgdmJhc2Us
+IGRzdF92YWRkcjsNCj4gKwl2b2lkIF9faW9tZW0gKnZiYXNlOw0KPiArCXZvaWQgX19pb21lbSAq
+ZHN0X3ZhZGRyOw0KPiDCoAlkbWFfYWRkcl90IGRzdF9waHlzOw0KPiDCoAlpbnQgcmV0cmllcyA9
+IDA7DQo+IMKgDQo+IEBAIC0yMDQsMTQgKzIwNSwxNCBAQCBzdGF0aWMgc3NpemVfdCBwZXJmX2Nv
+cHkoc3RydWN0IHB0aHJfY3R4ICpwY3R4LA0KPiBjaGFyICpkc3QsDQo+IMKgCX0NCj4gwqANCj4g
+wqAJZGV2aWNlID0gY2hhbi0+ZGV2aWNlOw0KPiAtCXNyY19vZmYgPSAoc2l6ZV90KXNyYyAmIH5Q
+QUdFX01BU0s7DQo+IC0JZHN0X29mZiA9IChzaXplX3QpZHN0ICYgflBBR0VfTUFTSzsNCj4gKwlz
+cmNfb2ZmID0gKHVpbnRwdHJfdClzcmMgJiB+UEFHRV9NQVNLOw0KPiArCWRzdF9vZmYgPSAodWlu
+dHB0cl90IF9fZm9yY2UpZHN0ICYgflBBR0VfTUFTSzsNCj4gwqANCj4gwqAJaWYgKCFpc19kbWFf
+Y29weV9hbGlnbmVkKGRldmljZSwgc3JjX29mZiwgZHN0X29mZiwgc2l6ZSkpDQo+IMKgCQlyZXR1
+cm4gLUVOT0RFVjsNCj4gwqANCj4gLQl2YmFzZSA9ICh1NjQpKHU2NCAqKW13LT52YmFzZTsNCj4g
+LQlkc3RfdmFkZHIgPSAodTY0KSh1NjQgKilkc3Q7DQo+ICsJdmJhc2UgPSBtdy0+dmJhc2U7DQo+
+ICsJZHN0X3ZhZGRyID0gZHN0Ow0KPiDCoAlkc3RfcGh5cyA9IG13LT5waHlzX2FkZHIgKyAoZHN0
+X3ZhZGRyIC0gdmJhc2UpOw0KPiDCoA0KPiDCoAl1bm1hcCA9IGRtYWVuZ2luZV9nZXRfdW5tYXBf
+ZGF0YShkZXZpY2UtPmRldiwgMSwNCj4gR0ZQX05PV0FJVCk7DQo+IEBAIC0yNjEsMTMgKzI2Miwx
+MyBAQCBlcnJfZ2V0X3VubWFwOg0KPiDCoAlyZXR1cm4gMDsNCj4gwqB9DQo+IMKgDQo+IC1zdGF0
+aWMgaW50IHBlcmZfbW92ZV9kYXRhKHN0cnVjdCBwdGhyX2N0eCAqcGN0eCwgY2hhciAqZHN0LCBj
+aGFyDQo+ICpzcmMsDQo+ICtzdGF0aWMgaW50IHBlcmZfbW92ZV9kYXRhKHN0cnVjdCBwdGhyX2N0
+eCAqcGN0eCwgY2hhciBfX2lvbWVtICpkc3QsDQo+IGNoYXIgKnNyYywNCj4gwqAJCQnCoMKgdTY0
+IGJ1Zl9zaXplLCB1NjQgd2luX3NpemUsIHU2NCB0b3RhbCkNCj4gwqB7DQo+IMKgCWludCBjaHVu
+a3MsIHRvdGFsX2NodW5rcywgaTsNCj4gwqAJaW50IGNvcGllZF9jaHVua3MgPSAwOw0KPiDCoAl1
+NjQgY29waWVkID0gMCwgcmVzdWx0Ow0KPiAtCWNoYXIgKnRtcCA9IGRzdDsNCj4gKwljaGFyIF9f
+aW9tZW0gKnRtcCA9IGRzdDsNCj4gwqAJdTY0IHBlcmYsIGRpZmZfdXM7DQo+IMKgCWt0aW1lX3Qg
+a3N0YXJ0LCBrc3RvcCwga2RpZmY7DQo+IMKgDQo+IEBAIC0zMjQsNyArMzI1LDcgQEAgc3RhdGlj
+IGludCBudGJfcGVyZl90aHJlYWQodm9pZCAqZGF0YSkNCj4gwqAJc3RydWN0IHBlcmZfY3R4ICpw
+ZXJmID0gcGN0eC0+cGVyZjsNCj4gwqAJc3RydWN0IHBjaV9kZXYgKnBkZXYgPSBwZXJmLT5udGIt
+PnBkZXY7DQo+IMKgCXN0cnVjdCBwZXJmX213ICptdyA9ICZwZXJmLT5tdzsNCj4gLQljaGFyICpk
+c3Q7DQo+ICsJY2hhciBfX2lvbWVtICpkc3Q7DQo+IMKgCXU2NCB3aW5fc2l6ZSwgYnVmX3NpemUs
+IHRvdGFsOw0KPiDCoAl2b2lkICpzcmM7DQo+IMKgCWludCByYywgbm9kZSwgaTsNCj4gQEAgLTM2
+NCw3ICszNjUsNyBAQCBzdGF0aWMgaW50IG50Yl9wZXJmX3RocmVhZCh2b2lkICpkYXRhKQ0KPiDC
+oAlpZiAoYnVmX3NpemUgPiBNQVhfVEVTVF9TSVpFKQ0KPiDCoAkJYnVmX3NpemUgPSBNQVhfVEVT
+VF9TSVpFOw0KPiDCoA0KPiAtCWRzdCA9IChjaGFyICopbXctPnZiYXNlOw0KPiArCWRzdCA9IChj
+aGFyIF9faW9tZW0gKiltdy0+dmJhc2U7DQo+IMKgDQo+IMKgCWF0b21pY19pbmMoJnBlcmYtPnRz
+eW5jKTsNCj4gwqAJd2hpbGUgKGF0b21pY19yZWFkKCZwZXJmLT50c3luYykgIT0gcGVyZi0+cGVy
+Zl90aHJlYWRzKQ==
