@@ -1,120 +1,68 @@
-Return-Path: <arnd@arndb.de>
-Received: from mout.kundenserver.de (mout.kundenserver.de. [212.227.126.134])
-        by gmr-mx.google.com with ESMTPS id c140si325172wmh.1.2016.02.29.03.47.27
+Return-Path: <Allen.Hubbe@emc.com>
+Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
+        by gmr-mx.google.com with ESMTPS id u66si1005242pfa.2.2016.02.03.10.11.15
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 29 Feb 2016 03:47:27 -0800 (PST)
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: [PATCH, RESEND] ntb: perf test: fix address space confusion
-Date: Mon, 29 Feb 2016 12:47:05 +0100
-Message-Id: <1456746438-3842627-1-git-send-email-arnd@arndb.de>
-To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
-Cc: linux-arm-kernel@lists.infradead.org, Arnd Bergmann <arnd@arndb.de>, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
+        Wed, 03 Feb 2016 10:11:15 -0800 (PST)
+From: "Allen Hubbe" <Allen.Hubbe@emc.com>
+References: <8b17fab4dd0a98d2b19d40b000b81312de551732.1454485437.git.baruch@tkos.co.il>
+In-Reply-To: <8b17fab4dd0a98d2b19d40b000b81312de551732.1454485437.git.baruch@tkos.co.il>
+Subject: RE: [PATCH] NTB: doc: remove underscore escaping
+Date: Wed, 3 Feb 2016 13:10:51 -0500
+Message-ID: <000001d15eae$393fd4a0$abbf7de0$@emc.com>
+MIME-Version: 1.0
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+Content-Language: en-us
+To: 'Baruch Siach' <baruch@tkos.co.il>, 'Jon Mason' <jdmason@kudzu.us>, 'Dave Jiang' <dave.jiang@intel.com>
+Cc: linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-The ntb driver assigns between pointers an __iomem tokens, and
-also casts them to 64-bit integers, which results in compiler
-warnings on 32-bit systems:
+> From: Baruch Siach
+> This escaping sequence makes the plain text file hard to read, and
+> obscures the
+> name of identifies like module parameters. This is probably a left =
+over
+> from a
+> markup version of the text.
 
-drivers/ntb/test/ntb_perf.c: In function 'perf_copy':
-drivers/ntb/test/ntb_perf.c:213:10: error: cast from pointer to integer of different size [-Werror=pointer-to-int-cast]
-  vbase = (u64)(u64 *)mw->vbase;
-          ^
-drivers/ntb/test/ntb_perf.c:214:14: error: cast from pointer to integer of different size [-Werror=pointer-to-int-cast]
-  dst_vaddr = (u64)(u64 *)dst;
-              ^
+s/identifies/identifiers/
 
-This adds __iomem annotations where needed and changes the temporary
-variables to iomem pointers to avoid casting them to u64. I did not
-see the problem in linux-next earlier, but it show showed up in
-4.5-rc1.
+Rather than guessing the original intent, you can say, "This is an =
+artifact left over from formatting the document as markdown."
 
-Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-Acked-by: Dave Jiang <dave.jiang@intel.com>
-Fixes: 8a7b6a778a85 ("ntb: ntb perf tool")
----
-I sent this out on Jan 26, but the problem still persists in linux-next
-as of Feb 29.
+>=20
+> Signed-off-by: Baruch Siach <baruch@tkos.co.il>
 
- drivers/ntb/test/ntb_perf.c | 21 +++++++++++----------
- 1 file changed, 11 insertions(+), 10 deletions(-)
+> -### NTB Transport Client (ntb\_transport) and NTB Netdev =
+(ntb\_netdev)
+> +### NTB Transport Client (ntb_transport) and NTB Netdev (ntb_netdev)
 
-diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index c8a37ba4b4f9..6bdc1e7b7503 100644
---- a/drivers/ntb/test/ntb_perf.c
-+++ b/drivers/ntb/test/ntb_perf.c
-@@ -178,7 +178,7 @@ static void perf_copy_callback(void *data)
- 	atomic_dec(&pctx->dma_sync);
- }
- 
--static ssize_t perf_copy(struct pthr_ctx *pctx, char *dst,
-+static ssize_t perf_copy(struct pthr_ctx *pctx, char __iomem *dst,
- 			 char *src, size_t size)
- {
- 	struct perf_ctx *perf = pctx->perf;
-@@ -189,7 +189,8 @@ static ssize_t perf_copy(struct pthr_ctx *pctx, char *dst,
- 	dma_cookie_t cookie;
- 	size_t src_off, dst_off;
- 	struct perf_mw *mw = &perf->mw;
--	u64 vbase, dst_vaddr;
-+	void __iomem *vbase;
-+	void __iomem *dst_vaddr;
- 	dma_addr_t dst_phys;
- 	int retries = 0;
- 
-@@ -204,14 +205,14 @@ static ssize_t perf_copy(struct pthr_ctx *pctx, char *dst,
- 	}
- 
- 	device = chan->device;
--	src_off = (size_t)src & ~PAGE_MASK;
--	dst_off = (size_t)dst & ~PAGE_MASK;
-+	src_off = (uintptr_t)src & ~PAGE_MASK;
-+	dst_off = (uintptr_t __force)dst & ~PAGE_MASK;
- 
- 	if (!is_dma_copy_aligned(device, src_off, dst_off, size))
- 		return -ENODEV;
- 
--	vbase = (u64)(u64 *)mw->vbase;
--	dst_vaddr = (u64)(u64 *)dst;
-+	vbase = mw->vbase;
-+	dst_vaddr = dst;
- 	dst_phys = mw->phys_addr + (dst_vaddr - vbase);
- 
- 	unmap = dmaengine_get_unmap_data(device->dev, 1, GFP_NOWAIT);
-@@ -261,13 +262,13 @@ err_get_unmap:
- 	return 0;
- }
- 
--static int perf_move_data(struct pthr_ctx *pctx, char *dst, char *src,
-+static int perf_move_data(struct pthr_ctx *pctx, char __iomem *dst, char *src,
- 			  u64 buf_size, u64 win_size, u64 total)
- {
- 	int chunks, total_chunks, i;
- 	int copied_chunks = 0;
- 	u64 copied = 0, result;
--	char *tmp = dst;
-+	char __iomem *tmp = dst;
- 	u64 perf, diff_us;
- 	ktime_t kstart, kstop, kdiff;
- 
-@@ -324,7 +325,7 @@ static int ntb_perf_thread(void *data)
- 	struct perf_ctx *perf = pctx->perf;
- 	struct pci_dev *pdev = perf->ntb->pdev;
- 	struct perf_mw *mw = &perf->mw;
--	char *dst;
-+	char __iomem *dst;
- 	u64 win_size, buf_size, total;
- 	void *src;
- 	int rc, node, i;
-@@ -364,7 +365,7 @@ static int ntb_perf_thread(void *data)
- 	if (buf_size > MAX_TEST_SIZE)
- 		buf_size = MAX_TEST_SIZE;
- 
--	dst = (char *)mw->vbase;
-+	dst = (char __iomem *)mw->vbase;
- 
- 	atomic_inc(&perf->tsync);
- 	while (atomic_read(&perf->tsync) != perf->perf_threads)
--- 
-2.7.0
+You are correct.  The escaping of underscore is to avoid italicizing the =
+text between underscores when the document is processed with markdown.  =
+The escaping is intentional.
+
+There is not much by way of official guidance around the use or non-use =
+of markup/markdown/asciidoc in Linux/Documentation (or, I have not found =
+it - please direct me).  There are a few other files under Documentation =
+with similar markup; most seem to be related to acpi.  It seems to me =
+that subsystems like acpi have autonomy in deciding how to markup their =
+own documentation.  There is also value in being consistent, and =
+documents with markup are distinctly in the minority.  I also recognize =
+your point about the markup making the plain text marginally harder to =
+read.
+
+On the other hand, anyone familiar with markdown will recognize the =
+section headings, fixed width annotations, and preformatted blocks.  =
+Someone might take this document, recognize the format, and process it =
+with markdown.  If the escaping is taken away, the result of processing =
+will look strange.  Therefore, if the underscore escaping is to be =
+removed, I would rather see the whole document changed in such a way =
+that makes it obvious that the document is not markdown.
+
+I would leave it in, but I will not stand in the way if Jon and Dave =
+would rather take it out.
+
+Allen
 
