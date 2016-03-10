@@ -1,37 +1,41 @@
-Return-Path: <dave.jiang@intel.com>
-Received: from mga11.intel.com (mga11.intel.com. [192.55.52.93])
-        by gmr-mx.google.com with ESMTP id 12si656268pfb.1.2016.03.10.08.24.29
-        for <linux-ntb@googlegroups.com>;
-        Thu, 10 Mar 2016 08:24:29 -0800 (PST)
-From: "Jiang, Dave" <dave.jiang@intel.com>
-Subject: Re: [PATCH] ntb: fix possible NULL dereference
-Date: Thu, 10 Mar 2016 16:24:28 +0000
-Message-ID: <1457627059.3577.34.camel@intel.com>
-References: <1457612471-26128-1-git-send-email-sudipm.mukherjee@gmail.com>
-In-Reply-To: <1457612471-26128-1-git-send-email-sudipm.mukherjee@gmail.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <F59984587ED6824C809878F1A754E800@intel.com>
-Content-Transfer-Encoding: base64
-MIME-Version: 1.0
-Return-Path: dave.jiang@intel.com
-To: "Allen.Hubbe@emc.com" <Allen.Hubbe@emc.com>, "sudipm.mukherjee@gmail.com" <sudipm.mukherjee@gmail.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
+Return-Path: <sudipm.mukherjee@gmail.com>
+Received: from mail-pa0-x22f.google.com (mail-pa0-x22f.google.com. [2607:f8b0:400e:c03::22f])
+        by gmr-mx.google.com with ESMTPS id y20si435537pfa.2.2016.03.10.04.21.25
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 10 Mar 2016 04:21:25 -0800 (PST)
+Received: by mail-pa0-x22f.google.com with SMTP id td3so39391690pab.2
+        for <linux-ntb@googlegroups.com>; Thu, 10 Mar 2016 04:21:25 -0800 (PST)
+Return-Path: <sudipm.mukherjee@gmail.com>
+From: Sudip Mukherjee <sudipm.mukherjee@gmail.com>
+Subject: [PATCH] ntb: fix possible NULL dereference
+Date: Thu, 10 Mar 2016 17:51:11 +0530
+Message-Id: <1457612471-26128-1-git-send-email-sudipm.mukherjee@gmail.com>
+To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
+Cc: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, Sudip Mukherjee <sudipm.mukherjee@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-T24gVGh1LCAyMDE2LTAzLTEwIGF0IDE3OjUxICswNTMwLCBTdWRpcCBNdWtoZXJqZWUgd3JvdGU6
-DQo+IGttYWxsb2MgY2FuIGZhaWwgYW5kIHdlIHNob3VsZCBjaGVjayBmb3IgTlVMTCBiZWZvcmUg
-dXNpbmcgdGhlDQo+IHBvaW50ZXINCj4gcmV0dXJuZWQgYnkga21hbGxvYy4NCj4gDQo+IFNpZ25l
-ZC1vZmYtYnk6IFN1ZGlwIE11a2hlcmplZSA8c3VkaXAubXVraGVyamVlQGNvZGV0aGluay5jby51
-az4NCkFja2VkLWJ5OiBEYXZlIEppYW5nIDxkYXZlLmppYW5nQGludGVsLmNvbT4NCg0KVGhhbmtz
-IQ0KDQo+IC0tLQ0KPiDCoGRyaXZlcnMvbnRiL3Rlc3QvbnRiX3BlcmYuYyB8IDIgKysNCj4gwqAx
-IGZpbGUgY2hhbmdlZCwgMiBpbnNlcnRpb25zKCspDQo+IA0KPiBkaWZmIC0tZ2l0IGEvZHJpdmVy
-cy9udGIvdGVzdC9udGJfcGVyZi5jDQo+IGIvZHJpdmVycy9udGIvdGVzdC9udGJfcGVyZi5jDQo+
-IGluZGV4IGM4YTM3YmEuLmIyMWU2NDcgMTAwNjQ0DQo+IC0tLSBhL2RyaXZlcnMvbnRiL3Rlc3Qv
-bnRiX3BlcmYuYw0KPiArKysgYi9kcml2ZXJzL250Yi90ZXN0L250Yl9wZXJmLmMNCj4gQEAgLTU0
-MSw2ICs1NDEsOCBAQCBzdGF0aWMgc3NpemVfdCBkZWJ1Z2ZzX3J1bl9yZWFkKHN0cnVjdCBmaWxl
-DQo+ICpmaWxwLCBjaGFyIF9fdXNlciAqdWJ1ZiwNCj4gwqAJCXJldHVybiAwOw0KPiDCoA0KPiDC
-oAlidWYgPSBrbWFsbG9jKDY0LCBHRlBfS0VSTkVMKTsNCj4gKwlpZiAoIWJ1ZikNCj4gKwkJcmV0
-dXJuIC1FTk9NRU07DQo+IMKgCW91dF9vZmZzZXQgPSBzbnByaW50ZihidWYsIDY0LCAiJWRcbiIs
-IHBlcmYtPnJ1bik7DQo+IMKgCXJldCA9IHNpbXBsZV9yZWFkX2Zyb21fYnVmZmVyKHVidWYsIGNv
-dW50LCBvZmZwLCBidWYsDQo+IG91dF9vZmZzZXQpOw0KPiDCoAlrZnJlZShidWYpOw==
+kmalloc can fail and we should check for NULL before using the pointer
+returned by kmalloc.
+
+Signed-off-by: Sudip Mukherjee <sudip.mukherjee@codethink.co.uk>
+---
+ drivers/ntb/test/ntb_perf.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
+index c8a37ba..b21e647 100644
+--- a/drivers/ntb/test/ntb_perf.c
++++ b/drivers/ntb/test/ntb_perf.c
+@@ -541,6 +541,8 @@ static ssize_t debugfs_run_read(struct file *filp, char __user *ubuf,
+ 		return 0;
+ 
+ 	buf = kmalloc(64, GFP_KERNEL);
++	if (!buf)
++		return -ENOMEM;
+ 	out_offset = snprintf(buf, 64, "%d\n", perf->run);
+ 	ret = simple_read_from_buffer(ubuf, count, offp, buf, out_offset);
+ 	kfree(buf);
+-- 
+1.9.1
+
