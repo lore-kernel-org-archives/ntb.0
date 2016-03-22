@@ -1,62 +1,47 @@
-Return-Path: <Xiangliang.Yu@amd.com>
-Received: from na01-bl2-obe.outbound.protection.outlook.com (mail-bl2on0066.outbound.protection.outlook.com. [65.55.169.66])
-        by gmr-mx.google.com with ESMTPS id p10si1269874igh.1.2016.03.22.20.22.24
+Return-Path: <Allen.Hubbe@emc.com>
+Received: from mailuogwhop.emc.com (mailuogwhop.emc.com. [168.159.213.141])
+        by gmr-mx.google.com with ESMTPS id a126si443111wmd.2.2016.03.22.07.01.09
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Tue, 22 Mar 2016 20:22:24 -0700 (PDT)
-From: "Yu, Xiangliang" <Xiangliang.Yu@amd.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 22 Mar 2016 07:01:09 -0700 (PDT)
+From: "Allen Hubbe" <Allen.Hubbe@emc.com>
+References: <17b414e0af3e8caf31b3b3aa5dddb842ef397c1a.1458550127.git.Allen.Hubbe@emc.com> <6a2984f3c623f41aae210f08f23813b680a19d56.1458550127.git.Allen.Hubbe@emc.com> <BLUPR12MB04207A01BAAA208E33D1E745EB800@BLUPR12MB0420.namprd12.prod.outlook.com>
+In-Reply-To: <BLUPR12MB04207A01BAAA208E33D1E745EB800@BLUPR12MB0420.namprd12.prod.outlook.com>
 Subject: RE: [PATCH 2/2] NTB: Remove _addr functions from ntb_hw_amd
-Date: Wed, 23 Mar 2016 03:22:22 +0000
-Message-ID: <BLUPR12MB0420FA1F9309F7B47825EDA6EB810@BLUPR12MB0420.namprd12.prod.outlook.com>
-References: <17b414e0af3e8caf31b3b3aa5dddb842ef397c1a.1458550127.git.Allen.Hubbe@emc.com>
- <6a2984f3c623f41aae210f08f23813b680a19d56.1458550127.git.Allen.Hubbe@emc.com>
- <BLUPR12MB04207A01BAAA208E33D1E745EB800@BLUPR12MB0420.namprd12.prod.outlook.com>
- <000001d18443$3bb6dc50$b32494f0$@emc.com>
-In-Reply-To: <000001d18443$3bb6dc50$b32494f0$@emc.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Date: Tue, 22 Mar 2016 10:00:45 -0400
+Message-ID: <000001d18443$3bb6dc50$b32494f0$@emc.com>
 MIME-Version: 1.0
-To: Allen Hubbe <Allen.Hubbe@emc.com>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Content-Language: en-us
+To: "'Yu, Xiangliang'" <Xiangliang.Yu@amd.com>, linux-ntb@googlegroups.com
 Cc: 'Jon Mason' <jdmason@kudzu.us>, 'Dave Jiang' <dave.jiang@intel.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBbGxlbiBIdWJiZSBbbWFpbHRv
-OkFsbGVuLkh1YmJlQGVtYy5jb21dDQo+IFNlbnQ6IFR1ZXNkYXksIE1hcmNoIDIyLCAyMDE2IDEw
-OjAxIFBNDQo+IFRvOiBZdSwgWGlhbmdsaWFuZzsgbGludXgtbnRiQGdvb2dsZWdyb3Vwcy5jb20N
-Cj4gQ2M6ICdKb24gTWFzb24nOyAnRGF2ZSBKaWFuZycNCj4gU3ViamVjdDogUkU6IFtQQVRDSCAy
-LzJdIE5UQjogUmVtb3ZlIF9hZGRyIGZ1bmN0aW9ucyBmcm9tIG50Yl9od19hbWQNCj4gDQo+ID4g
-RnJvbTogWXUsIFhpYW5nbGlhbmcNCj4gPiA+IEZyb206IEFsbGVuIEh1YmJlDQo+ID4gPiBLZXJu
-ZWwgemVybyBkYXkgdGVzdGluZyB3YXJuZWQgYWJvdXQgYWRkcmVzcyBzcGFjZSBjb25mdXNpb24u
-ICBBDQo+ID4gPiB2aXJ0dWFsIGlvbWVtIGFkZHJlc3Mgd2FzIHVzZWQgd2hlcmUgYSBwaHlzaWNh
-bCBhZGRyZXNzIGlzIGV4cGVjdGVkLg0KPiA+ID4gVGhlIG9mZmVuZGluZyBmdW5jdGlvbnMgaW1w
-bGVtZW50IGFuIG9wdGlvbmFsIHBhcnQgb2YgdGhlIGFwaSwgc28NCj4gPiA+IHRoZXkgYXJlIHJl
-bW92ZWQuICBUaGV5IGNhbiBiZSBhZGRlZCBsYXRlciwgYWZ0ZXIgdGVzdGluZy4NCj4gPg0KPiA+
-IE50Yl9kZXZfb3BzX2lzX3ZhbGlkIHdpbGwgY2hlY2sgdGhlIHJlbGF0ZWQgaW1wbGVtZW50IGFu
-ZCBBTUQgbnRiDQo+ID4gZHJpdmVyIGNhbid0IFJlZ2lzdGVyIG50YiBkZXZpY2UgaWYgeW91IHJl
-bW92ZSB0aGUgdHdvIGZ1bmN0aW9ucy4NCj4gDQo+IFNlZSBbUEFUQ0ggMS8yXS4NCg0KSSBoYXZl
-bid0IHJlY2VpdmVkIHRoZSBtYWlsIG9mIFtQQVRDSCAxLzJdLg0KDQo+IA0KPiA+IEkgdGhpbmsg
-dGhpcyBhZGRyIHNob3VsZCBiZSBpcyBpb21lbSBhZGRyZXNzIG5vdCBwaHlzaWNhbCBhZGRyZXNz
-IGFzDQo+ID4gYWRkcmVzcyBzcGFjZSBJcyBJTyBzcGFjZS4NCj4gDQo+IFRoZSBwcm9ncmFtbWlu
-ZyBpbnRlcmZhY2Ugc3BlY2lmaWVzIHRvIHJldHVybiBhIHBoeXNpY2FsIGFkZHJlc3MuICBSZXR1
-cm5pbmcNCj4gYSB2aXJ0dWFsIGFkZHJlc3MgaXMgaW5jb3JyZWN0Lg0KPiANCj4gPiBEbyB5b3Ug
-bWFwIElPIHNwYWNlIGFnYWluIGFmdGVyIGdldHRpbmcgdGhlIHBoeXNpY2FsIGFkZHJlc3M/DQo+
-ID4gUGxlYXNlIGhlbHAgY2xhcmlmeSB0aGUgdXNhZ2Ugc2NlbmFyaW9zLg0KPiANCj4gVGhlIHVz
-ZSBjYXNlIGNhbiBiZSBhcHBsaWVkIGluIHRoZSBjb21iaW5hdGlvbiBvZiBOVEIgYW5kIGEgRE1B
-IGVuZ2luZSB0bw0KPiBvZmZsb2FkIG1lbW9yeSBjb3B5IG9wZXJhdGlvbnMuICBUaGUgcGh5c2lj
-YWwgYWRkcmVzcyBlbmFibGVzIGFuDQo+IG9wdGltaXphdGlvbiBmb3IgdGhhdCB1c2UgY2FzZS4g
-IFRoZSBETUEgZW5naW5lIG9wZXJhdGVzIGluIHRoZSBwaHlzaWNhbA0KPiBhZGRyZXNzIHNwYWNl
-LCB3aXRob3V0IGEgdmlydHVhbCBtZW1vcnkgbWFwcGluZywgc28gdGhlcmUgaXMgbm8gbmVlZCB0
-bw0KPiBtYXAgdGhlIElPIHNwYWNlIGFnYWluLg0KPiANCj4gVXNpbmcgdGhlIHBoeXNpY2FsIGFk
-ZHJlc3MsIGEgZG1hIGRlc2NyaXB0b3IgY2FuIGJlIGluc2VydGVkIGludG8gdGhlIGNoYWluIG9m
-DQo+IG9wZXJhdGlvbnMgdG8gYmUgZXhlY3V0ZWQgYnkgdGhlIGRtYSBoYXJkd2FyZS4gIFRoZSBp
-bnNlcnRlZCBkZXNjcmlwdG9yDQo+IHdvdWxkIGJlIGEgd3JpdGUgb2YgdGhlIGFwcHJvcHJpYXRl
-IGJpdHMgdG8gdGhlIGRvb3JiZWxsIHJlZ2lzdGVyLiAgVGhlIHdyaXRlDQo+IHdpbGwgaGF2ZSB0
-aGUgZWZmZWN0IG9mIHJpbmdpbmcgdGhlIGRvb3JiZWxsLg0KPiANCj4gVGhlIGRtYSBoYXJkd2Fy
-ZSBwcm9jZXNzZXMgdGhlIGNoYWluIG9mIGRlc2NyaXB0b3JzIGFzeW5jaHJvbm91c2x5LCBhbmQN
-Cj4gbm90aWZpZXMgdGhlIGRtYSBkcml2ZXIgYXMgZGVzY3JpcHRvcnMgYXJlIGNvbXBsZXRlZC4g
-IEJ5IGluc2VydGluZyB0aGUNCj4gZG9vcmJlbGwgd3JpdGUgb3BlcmF0aW9uIGluIHRoZSBjaGFp
-biwgaXQgaXMgZXhlY3V0ZWQgYXN5bmNocm9ub3VzbHkgYWxvbmcNCj4gd2l0aCBvdGhlciBkbWEg
-b3BlcmF0aW9ucywgYW5kIGl0IGRvZXMgbm90IHJlcXVpcmUgdGhlIHJvdW5kIHRyaXAgYW5kDQo+
-IG92ZXJoZWFkIG9mIHByb2Nlc3NpbmcgYSBkbWEgY29tcGxldGlvbiB0byByaW5nIHRoZSBkb29y
-YmVsbC4NCg0KR290IGl0LiANCg0K
+> From: Yu, Xiangliang
+> > From: Allen Hubbe
+> > Kernel zero day testing warned about address space confusion.  A virtual
+> > iomem address was used where a physical address is expected.  The
+> > offending functions implement an optional part of the api, so they are
+> > removed.  They can be added later, after testing.
+> 
+> Ntb_dev_ops_is_valid will check the related implement and AMD ntb driver can't
+> Register ntb device if you remove the two functions.
+
+See [PATCH 1/2].
+
+> I think this addr should be is iomem address not physical address as address space
+> Is IO space.
+
+The programming interface specifies to return a physical address.  Returning a virtual address is incorrect.
+
+> Do you map IO space again after getting the physical address?
+> Please help clarify the usage scenarios.
+
+The use case can be applied in the combination of NTB and a DMA engine to offload memory copy operations.  The physical address enables an optimization for that use case.  The DMA engine operates in the physical address space, without a virtual memory mapping, so there is no need to map the IO space again.
+
+Using the physical address, a dma descriptor can be inserted into the chain of operations to be executed by the dma hardware.  The inserted descriptor would be a write of the appropriate bits to the doorbell register.  The write will have the effect of ringing the doorbell.
+
+The dma hardware processes the chain of descriptors asynchronously, and notifies the dma driver as descriptors are completed.  By inserting the doorbell write operation in the chain, it is executed asynchronously along with other dma operations, and it does not require the round trip and overhead of processing a dma completion to ring the doorbell.
+
