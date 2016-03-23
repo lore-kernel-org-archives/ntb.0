@@ -1,56 +1,41 @@
-Return-Path: <Xiangliang.Yu@amd.com>
-Received: from na01-bn1-obe.outbound.protection.outlook.com (mail-bn1on0055.outbound.protection.outlook.com. [157.56.110.55])
-        by gmr-mx.google.com with ESMTPS id y20si1336196pfa.2.2016.03.23.23.46.43
+Return-Path: <Allen.Hubbe@emc.com>
+Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
+        by gmr-mx.google.com with ESMTPS id p6si233971ywe.2.2016.03.23.07.01.27
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Wed, 23 Mar 2016 23:46:43 -0700 (PDT)
-From: "Yu, Xiangliang" <Xiangliang.Yu@amd.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 23 Mar 2016 07:01:27 -0700 (PDT)
+From: "Allen Hubbe" <Allen.Hubbe@emc.com>
+References: <17b414e0af3e8caf31b3b3aa5dddb842ef397c1a.1458550127.git.Allen.Hubbe@emc.com> <6a2984f3c623f41aae210f08f23813b680a19d56.1458550127.git.Allen.Hubbe@emc.com> <BLUPR12MB04207A01BAAA208E33D1E745EB800@BLUPR12MB0420.namprd12.prod.outlook.com> <000001d18443$3bb6dc50$b32494f0$@emc.com> <BLUPR12MB0420FA1F9309F7B47825EDA6EB810@BLUPR12MB0420.namprd12.prod.outlook.com>
+In-Reply-To: <BLUPR12MB0420FA1F9309F7B47825EDA6EB810@BLUPR12MB0420.namprd12.prod.outlook.com>
 Subject: RE: [PATCH 2/2] NTB: Remove _addr functions from ntb_hw_amd
-Date: Thu, 24 Mar 2016 06:46:41 +0000
-Message-ID: <BLUPR12MB04209CFCD26713F47FD286C3EB820@BLUPR12MB0420.namprd12.prod.outlook.com>
-References: <17b414e0af3e8caf31b3b3aa5dddb842ef397c1a.1458550127.git.Allen.Hubbe@emc.com>
- <6a2984f3c623f41aae210f08f23813b680a19d56.1458550127.git.Allen.Hubbe@emc.com>
- <BLUPR12MB04207A01BAAA208E33D1E745EB800@BLUPR12MB0420.namprd12.prod.outlook.com>
- <000001d18443$3bb6dc50$b32494f0$@emc.com>
- <BLUPR12MB0420FA1F9309F7B47825EDA6EB810@BLUPR12MB0420.namprd12.prod.outlook.com>
- <000001d1850c$734ad1c0$59e07540$@emc.com>
-In-Reply-To: <000001d1850c$734ad1c0$59e07540$@emc.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Date: Wed, 23 Mar 2016 10:01:08 -0400
+Message-ID: <000001d1850c$734ad1c0$59e07540$@emc.com>
 MIME-Version: 1.0
-To: Allen Hubbe <Allen.Hubbe@emc.com>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Content-Language: en-us
+To: "'Yu, Xiangliang'" <Xiangliang.Yu@amd.com>, linux-ntb@googlegroups.com
 Cc: 'Jon Mason' <jdmason@kudzu.us>, 'Dave Jiang' <dave.jiang@intel.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBbGxlbiBIdWJiZSBbbWFpbHRv
-OkFsbGVuLkh1YmJlQGVtYy5jb21dDQo+IFNlbnQ6IFdlZG5lc2RheSwgTWFyY2ggMjMsIDIwMTYg
-MTA6MDEgUE0NCj4gVG86IFl1LCBYaWFuZ2xpYW5nOyBsaW51eC1udGJAZ29vZ2xlZ3JvdXBzLmNv
-bQ0KPiBDYzogJ0pvbiBNYXNvbic7ICdEYXZlIEppYW5nJw0KPiBTdWJqZWN0OiBSRTogW1BBVENI
-IDIvMl0gTlRCOiBSZW1vdmUgX2FkZHIgZnVuY3Rpb25zIGZyb20gbnRiX2h3X2FtZA0KPiANCj4g
-PiBGcm9tOiBZdSwgWGlhbmdsaWFuZw0KPiA+ID4gRnJvbTogQWxsZW4gSHViYmUNCj4gPiA+ID4g
-RnJvbTogWXUsIFhpYW5nbGlhbmcNCj4gPiA+ID4gPiBGcm9tOiBBbGxlbiBIdWJiZQ0KPiA+ID4g
-PiA+IEtlcm5lbCB6ZXJvIGRheSB0ZXN0aW5nIHdhcm5lZCBhYm91dCBhZGRyZXNzIHNwYWNlIGNv
-bmZ1c2lvbi4gIEENCj4gPiA+ID4gPiB2aXJ0dWFsIGlvbWVtIGFkZHJlc3Mgd2FzIHVzZWQgd2hl
-cmUgYSBwaHlzaWNhbCBhZGRyZXNzIGlzIGV4cGVjdGVkLg0KPiA+ID4gPiA+IFRoZSBvZmZlbmRp
-bmcgZnVuY3Rpb25zIGltcGxlbWVudCBhbiBvcHRpb25hbCBwYXJ0IG9mIHRoZSBhcGksDQo+ID4g
-PiA+ID4gc28gdGhleSBhcmUgcmVtb3ZlZC4gIFRoZXkgY2FuIGJlIGFkZGVkIGxhdGVyLCBhZnRl
-ciB0ZXN0aW5nLg0KPiA+ID4gPg0KPiA+ID4gPiBOdGJfZGV2X29wc19pc192YWxpZCB3aWxsIGNo
-ZWNrIHRoZSByZWxhdGVkIGltcGxlbWVudCBhbmQgQU1EIG50Yg0KPiA+ID4gPiBkcml2ZXIgY2Fu
-J3QgUmVnaXN0ZXIgbnRiIGRldmljZSBpZiB5b3UgcmVtb3ZlIHRoZSB0d28gZnVuY3Rpb25zLg0K
-PiA+ID4NCj4gPiA+IFNlZSBbUEFUQ0ggMS8yXS4NCj4gPg0KPiA+IEkgaGF2ZW4ndCByZWNlaXZl
-ZCB0aGUgbWFpbCBvZiBbUEFUQ0ggMS8yXS4NCj4gDQo+IEkgcmVzZW50IGl0IGp1c3QgdG8geW91
-LiAgQXJlIHlvdSBub3Qgc3Vic2NyaWJlZCB0byB0aGUgbGludXgtbnRiIG1haWxpbmcgbGlzdD8N
-Cg0KWWVzLCBJIGhhdmUgc2VlbiBpdC4NCg0KPiBOb3RlOiB0aGlzIHBhdGNoIDIvMiBqdXN0IHRh
-a2VzIHRoZSBfYWRkciBmdW5jdGlvbnMgb3V0IG9mIHRoZSBkcml2ZXIsIHdoaWNoIGlzDQo+IHRo
-ZSBvbmx5IGNoYW5nZSBJIGFtIGNvbWZvcnRhYmxlIHRvIG1ha2Ugd2l0aG91dCB0ZXN0aW5nLiAg
-U2luY2UgSSBjYW5ub3QNCj4gdGVzdCB0aGUgZHJpdmVyLCBJIGNhbm5vdCBwcm92aWRlIGFueSBy
-ZWFsIGZpeCBmb3IgdGhlIGZ1bmN0aW9ucy4gIFNpbmNlIHlvdSBoYXZlDQo+IHRoZSBhYmlsaXR5
-IHRvIHRlc3QsIGlmIHlvdSBwcm92aWRlIGEgZml4IGZvciB0aGVzZSBmdW5jdGlvbnMsIEkgZXhw
-ZWN0IHlvdXIgcGF0Y2gNCj4gd291bGQgYmUgYWNjZXB0ZWQgaW5zdGVhZCBvZiB0aGlzIG9uZS4g
-IElmIHlvdSBwcm92aWRlIGEgZml4LCBpdCB3b3VsZCBiZSBiZXN0DQo+IHRvIHByb3ZpZGUgdGhh
-dCBmaXggYXNzdW1pbmcgdGhhdCBteSBwYXRjaCBoYXMgbm90IGJlZW4gYXBwbGllZCwgc28gdGhh
-dCB5b3VyDQo+IGNoYW5nZXMgZm9yIHRoZSBmaXggYXJlIGNsZWFyIGluIHRoZSBwYXRjaC4NCg0K
-T2ssIGxldCdzIGFwcGx5IGl0IGZpcnN0bHkgYmVjYXVzZSBJIGFsc28gY2FuJ3QgdGVzdCBpdCBu
-b3cuDQoNCkFja2VkLWJ5OiBYaWFuZ2xpYW5nIFl1IDxYaWFuZ2xpYW5nLll1QGFtZC5jb20+DQoN
-Cg0K
+> From: Yu, Xiangliang
+> > From: Allen Hubbe
+> > > From: Yu, Xiangliang
+> > > > From: Allen Hubbe
+> > > > Kernel zero day testing warned about address space confusion.  A
+> > > > virtual iomem address was used where a physical address is expected.
+> > > > The offending functions implement an optional part of the api, so
+> > > > they are removed.  They can be added later, after testing.
+> > >
+> > > Ntb_dev_ops_is_valid will check the related implement and AMD ntb
+> > > driver can't Register ntb device if you remove the two functions.
+> >
+> > See [PATCH 1/2].
+> 
+> I haven't received the mail of [PATCH 1/2].
+
+I resent it just to you.  Are you not subscribed to the linux-ntb mailing list?
+
+Note: this patch 2/2 just takes the _addr functions out of the driver, which is the only change I am comfortable to make without testing.  Since I cannot test the driver, I cannot provide any real fix for the functions.  Since you have the ability to test, if you provide a fix for these functions, I expect your patch would be accepted instead of this one.  If you provide a fix, it would be best to provide that fix assuming that my patch has not been applied, so that your changes for the fix are clear in the patch.
+
