@@ -1,54 +1,22 @@
-Return-Path: <dave.jiang@intel.com>
-Received: from mga02.intel.com (mga02.intel.com. [134.134.136.20])
-        by gmr-mx.google.com with ESMTP id u66si4619378pfa.2.2016.02.23.13.11.18
-        for <linux-ntb@googlegroups.com>;
-        Tue, 23 Feb 2016 13:11:18 -0800 (PST)
-Subject: [PATCH] ntb: stop link work when we do not have memory
-From: Dave Jiang <dave.jiang@intel.com>
-Date: Tue, 23 Feb 2016 14:11:12 -0700
-Message-ID: <20160223211111.196243.73270.stgit@djiang5-desk3.ch.intel.com>
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-vk0-x235.google.com (mail-vk0-x235.google.com. [2607:f8b0:400c:c05::235])
+        by gmr-mx.google.com with ESMTPS id v71si828962vkd.3.2016.03.27.08.45.55
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Sun, 27 Mar 2016 08:45:55 -0700 (PDT)
+Received: by mail-vk0-x235.google.com with SMTP id e6so133061618vkh.2
+        for <linux-ntb@googlegroups.com>; Sun, 27 Mar 2016 08:45:55 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-To: allen.hubbe@emc.com, jdmason@kudzu.us
-Cc: alex@pernixdata.com, linux-ntb@googlegroups.com
+Date: Sun, 27 Mar 2016 11:45:55 -0400
+Message-ID: <CAPoiz9xexfwCJ_Qi=SfJBtOZFyjYL9vAabdC1Rm0DMXQ6mSWTw@mail.gmail.com>
+Subject: NTB Patches
+From: Jon Mason <jdmason@kudzu.us>
+Content-Type: text/plain; charset=UTF-8
+To: linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-Instead of keep trying to go through the init routine when we aren't able
-to allocate memory, we should just stop and go down.
+All outstanding patches have been pulled into Linux v4.6-rc1.  If
+there is anything missing, please resend it.
 
-Signed-off-by: Dave Jiang <dave.jiang@intel.com>
-Tested-by: Alex Depoutovitch <alex@pernixdata.com>
----
- drivers/ntb/ntb_transport.c |   10 +++++++++-
- 1 file changed, 9 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 06d4e58..50ecbd6 100644
---- a/drivers/ntb/ntb_transport.c
-+++ b/drivers/ntb/ntb_transport.c
-@@ -829,7 +829,7 @@ static void ntb_transport_link_work(struct work_struct *work)
- 	struct pci_dev *pdev = ndev->pdev;
- 	resource_size_t size;
- 	u32 val;
--	int rc, i, spad;
-+	int rc = 0, i, spad;
- 
- 	/* send the local info, in the opposite order of the way we read it */
- 	for (i = 0; i < nt->mw_count; i++) {
-@@ -899,6 +899,14 @@ static void ntb_transport_link_work(struct work_struct *work)
- out1:
- 	for (i = 0; i < nt->mw_count; i++)
- 		ntb_free_mw(nt, i);
-+
-+	/* if there's an actual failure, we should just bail */
-+	if (rc < 0) {
-+		nt->link_is_up = false;
-+		ntb_transport_link_cleanup(nt);
-+		return;
-+	}
-+
- out:
- 	if (ntb_link_is_up(ndev, NULL, NULL) == 1)
- 		schedule_delayed_work(&nt->link_work,
-
+Thanks,
+Jon
