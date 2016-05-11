@@ -1,65 +1,41 @@
-Return-Path: <Allen.Hubbe@emc.com>
-Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
-        by gmr-mx.google.com with ESMTPS id y205si1439022ywg.7.2016.05.06.06.06.23
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-vk0-x22f.google.com (mail-vk0-x22f.google.com. [2607:f8b0:400c:c05::22f])
+        by gmr-mx.google.com with ESMTPS id k138si449342vka.2.2016.05.11.10.48.40
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 06 May 2016 06:06:23 -0700 (PDT)
-From: "Allen Hubbe" <Allen.Hubbe@emc.com>
-References: <CAO+9SsOojQ2NoRqUKCgJexBtCA=rB0JThw2q70svPAaY04-UJw@mail.gmail.com>
-In-Reply-To: <CAO+9SsOojQ2NoRqUKCgJexBtCA=rB0JThw2q70svPAaY04-UJw@mail.gmail.com>
-Subject: RE: Need information about understanding PCIE non-transparent bridge
-Date: Fri, 6 May 2016 09:05:58 -0400
-Message-ID: <000001d1a798$08a195d0$19e4c170$@emc.com>
+        Wed, 11 May 2016 10:48:40 -0700 (PDT)
+Received: by mail-vk0-x22f.google.com with SMTP id s184so66128885vkb.3
+        for <linux-ntb@googlegroups.com>; Wed, 11 May 2016 10:48:40 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain;
-	charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Content-Language: en-us
-To: 'sridhar T S' <sridhar.lochu@gmail.com>
-Cc: linux-ntb@googlegroups.com
+In-Reply-To: <CAH=XD5_QVjhSezg-AwO0UrEEwraX2ingWmMbJG0iewyhqbT39Q@mail.gmail.com>
+References: <CAH=XD5_QVjhSezg-AwO0UrEEwraX2ingWmMbJG0iewyhqbT39Q@mail.gmail.com>
+Date: Wed, 11 May 2016 13:48:40 -0400
+Message-ID: <CAPoiz9xd3bKeCvk3qTbWWmvTYdD6xHLWhbnWaprQfKDujwc9BQ@mail.gmail.com>
+Subject: Re: Intel NTB and a switch in between
+From: Jon Mason <jdmason@kudzu.us>
+Content-Type: text/plain; charset=UTF-8
+To: Kallol Biswas <kallol@nucleodyne.com>
+Cc: linux-ntb@googlegroups.com, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>
 List-ID: <linux-ntb.googlegroups.com>
 
-Hi Sridhar,
-
-If you have NTB hardware already physically connected and
-configured in your BIOS, then you can build and load the
-linux ntb modules.
-
-Here is the documentation on linux ntb modules.  It says
-what the modules do, and how to use them.
-
-http://lxr.free-electrons.com/source/Documentation/ntb.txt
-
-If you are interested in testing or demonstrating basic NTB
-functionality, try ntb_tool and ntb_pingpong.  There is
-also a network device over NTB supported by ntb_transport
-and ntb_netdev together.
-
-Please let me know if you have any questions not answered in
-the documentation.  I am happy to help.
-
-Allen
-
-From: sridhar T S
+On Mon, May 9, 2016 at 6:25 PM, Kallol Biswas <kallol@nucleodyne.com> wrote:
+> We have a requirement to setup intel processor NTB.
 >
-> Hi allen,
->
-> myself sridhar, working as senior software engineer.
-> i wanted to understand about PCIE non-transparent bridge.
->
-> i will be testing the linux device driver for NTB, for now
-> i have a very fair understanding about the architecture.
->
-> need some ideas about how to test the NTB device driver
-> across NTB systems for proper system operations with
-> respect to NTB device driver for linux
->
-> your inputs and information will be helpful.
->
-> thanks in advance.
->
-> regards,
-> Sridhar 
+> We understand that NTB-NTB back to back connection works, but
+> what if we put a transparent bridge (PCIe Switch) in between two NTBs?
 
+You should consider looking at NTB-RP mode.
 
+Thanks,
+Jon
 
+>
+>
+> Kallol
+>
+> --
+> You received this message because you are subscribed to the Google Groups "linux-ntb" group.
+> To unsubscribe from this group and stop receiving emails from it, send an email to linux-ntb+unsubscribe@googlegroups.com.
+> To post to this group, send email to linux-ntb@googlegroups.com.
+> To view this discussion on the web visit https://groups.google.com/d/msgid/linux-ntb/CAH%3DXD5_QVjhSezg-AwO0UrEEwraX2ingWmMbJG0iewyhqbT39Q%40mail.gmail.com.
+> For more options, visit https://groups.google.com/d/optout.
