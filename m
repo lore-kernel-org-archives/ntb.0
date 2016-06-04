@@ -1,40 +1,82 @@
-Return-Path: <dave.jiang@intel.com>
-Received: from mga09.intel.com (mga09.intel.com. [134.134.136.24])
-        by gmr-mx.google.com with ESMTP id c11si2810975pfc.2.2016.06.27.16.09.53
-        for <linux-ntb@googlegroups.com>;
-        Mon, 27 Jun 2016 16:09:53 -0700 (PDT)
-Subject: [PATCH 0/5] dmaengine: ioatdma: DMA error reporting
-From: Dave Jiang <dave.jiang@intel.com>
-Date: Mon, 27 Jun 2016 16:09:33 -0700
-Message-ID: <146706860557.188649.10766278554335496632.stgit@djiang5-desk3.ch.intel.com>
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-vk0-x242.google.com (mail-vk0-x242.google.com. [2607:f8b0:400c:c05::242])
+        by gmr-mx.google.com with ESMTPS id t74si456995vkb.0.2016.06.04.08.19.09
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Sat, 04 Jun 2016 08:19:09 -0700 (PDT)
+Received: by mail-vk0-x242.google.com with SMTP id t7so2819725vkf.2
+        for <linux-ntb@googlegroups.com>; Sat, 04 Jun 2016 08:19:09 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-To: vinod.koul@intel.com, allen.hubbe@emc, jdmason@kudzu.us
-Cc: dmaengine@vger.kernel.org, linux-ntb@googlegroups.com
+In-Reply-To: <CAJ80satFd9z=tdgHSPJy_BKUXRGOfUV_Kc5_dgeaChsUF62h3Q@mail.gmail.com>
+References: <1464381511-18491-1-git-send-email-logang@deltatee.com> <CAJ80satFd9z=tdgHSPJy_BKUXRGOfUV_Kc5_dgeaChsUF62h3Q@mail.gmail.com>
+From: Jon Mason <jdmason@kudzu.us>
+Date: Sat, 4 Jun 2016 11:19:07 -0400
+Message-ID: <CAPoiz9xKD15Wz1R7bYPSxX4hDqraz0sxtBiO5-5omYxEX-k8kg@mail.gmail.com>
+Subject: Re: [PATCH] ntb_tool: Fix infinite loop bug when writing
+ spad/peer_spad file
+Content-Type: text/plain; charset=UTF-8
+To: Allen Hubbe <allenbh@gmail.com>
+Cc: Logan Gunthorpe <logang@deltatee.com>, Dave Jiang <dave.jiang@intel.com>, linux-ntb@googlegroups.com, linux-kernel <linux-kernel@vger.kernel.org>
 List-ID: <linux-ntb.googlegroups.com>
 
-The following series implements error reporting and handling for ioatdma.
-An error flag field has been added to return DMA error status via the 
-generic DMA descriptor so the upper layer can be notified if there are errors.
-The ioatdma driver now will abort remaining outstanding descriptors when an
-error has occured that requires a channel reset. The Intel NTB driver has been
-modified to handle the error condition from the DMA layer. 
+On Sat, May 28, 2016 at 9:09 AM, Allen Hubbe <allenbh@gmail.com> wrote:
+> On Fri, May 27, 2016 at 4:38 PM, Logan Gunthorpe <logang@deltatee.com> wrote:
+>> If you tried to write two spads in one line, as per the example:
+>>
+>> root@peer# echo '0 0x01010101 1 0x7f7f7f7f' > $DBG_DIR/peer_spad
+>>
+>> then the CPU would freeze in an infinite loop.
+>>
+>> This wasn't immediately obvious but 'pos' was not incrementing the
+>> buffer, so after reading the second pair of values, 'pos' would once
+>> again be 3 and it would re-read the second pair of values ad infinitum.
+>>
+>> Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+>
+> Good catch.  Thanks Logan.
+>
+> Acked-by: Allen Hubbe <Allen.Hubbe@emc.com>
 
----
+Applied to the ntb branch
 
-Dave Jiang (5):
-      dmaengine: Adding error handling flag
-      dmaengine: IOATDMA: Add error handling to driver
-      dmaengine: ioatdma: add error strings to chanerr output
-      ntb: add DMA error handling for TX DMA
-      ntb: add DMA error handling for RX DMA
+Thanks,
+Jon
 
-
- drivers/dma/ioat/dma.c       |  201 ++++++++++++++++++++++++++++++++++----
- drivers/dma/ioat/registers.h |    2 
- drivers/ntb/ntb_transport.c  |  222 +++++++++++++++++++++++++++++++-----------
- include/linux/dmaengine.h    |   15 +++
- 4 files changed, 359 insertions(+), 81 deletions(-)
-
---
+>> ---
+>>  drivers/ntb/test/ntb_tool.c | 9 +++++----
+>>  1 file changed, 5 insertions(+), 4 deletions(-)
+>>
+>> diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c
+>> index 6f5dc6c..209ef7c 100644
+>> --- a/drivers/ntb/test/ntb_tool.c
+>> +++ b/drivers/ntb/test/ntb_tool.c
+>> @@ -268,7 +268,7 @@ static ssize_t tool_spadfn_write(struct tool_ctx *tc,
+>>  {
+>>         int spad_idx;
+>>         u32 spad_val;
+>> -       char *buf;
+>> +       char *buf, *buf_ptr;
+>>         int pos, n;
+>>         ssize_t rc;
+>>
+>> @@ -288,14 +288,15 @@ static ssize_t tool_spadfn_write(struct tool_ctx *tc,
+>>         }
+>>
+>>         buf[size] = 0;
+>> -
+>> -       n = sscanf(buf, "%d %i%n", &spad_idx, &spad_val, &pos);
+>> +       buf_ptr = buf;
+>> +       n = sscanf(buf_ptr, "%d %i%n", &spad_idx, &spad_val, &pos);
+>>         while (n == 2) {
+>> +               buf_ptr += pos;
+>>                 rc = spad_write_fn(tc->ntb, spad_idx, spad_val);
+>>                 if (rc)
+>>                         break;
+>>
+>> -               n = sscanf(buf + pos, "%d %i%n", &spad_idx, &spad_val, &pos);
+>> +               n = sscanf(buf_ptr, "%d %i%n", &spad_idx, &spad_val, &pos);
+>>         }
+>>
+>>         if (n < 0)
+>> --
+>> 2.1.4
