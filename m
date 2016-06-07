@@ -1,67 +1,88 @@
-Return-Path: <dave.jiang@intel.com>
-Received: from mga03.intel.com (mga03.intel.com. [134.134.136.65])
-        by gmr-mx.google.com with ESMTP id ci4si2649636pad.1.2016.06.07.10.24.37
-        for <linux-ntb@googlegroups.com>;
-        Tue, 07 Jun 2016 10:24:38 -0700 (PDT)
-From: "Jiang, Dave" <dave.jiang@intel.com>
-Subject: Re: [PATCH v2 2/3] ntb_transport: Check the number of spads the
- hardware supports
-Date: Tue, 7 Jun 2016 17:24:29 +0000
-Message-ID: <1465320253.16234.176.camel@intel.com>
+Return-Path: <gunthorp@cgy1-donard.priv.deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id 189si614235pfw.2.2016.06.07.10.21.05
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 07 Jun 2016 10:21:05 -0700 (PDT)
+From: Logan Gunthorpe <logang@deltatee.com>
+Date: Tue,  7 Jun 2016 11:20:22 -0600
+Message-Id: <1465320022-4385-1-git-send-email-logang@deltatee.com>
+In-Reply-To: <5757013F.2090401@deltatee.com>
 References: <5757013F.2090401@deltatee.com>
-	 <1465320022-4385-1-git-send-email-logang@deltatee.com>
-In-Reply-To: <1465320022-4385-1-git-send-email-logang@deltatee.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <18854F9AA3E98D41A40A3B054B6E255C@intel.com>
-Content-Transfer-Encoding: base64
-MIME-Version: 1.0
-Return-Path: dave.jiang@intel.com
-To: "logang@deltatee.com" <logang@deltatee.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>
-Cc: "Allen.Hubbe@emc.com" <Allen.Hubbe@emc.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "sudipm.mukherjee@gmail.com" <sudipm.mukherjee@gmail.com>, "arnd@arndb.de" <arnd@arndb.de>, "john.kading@gd-ms.com" <john.kading@gd-ms.com>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
+Subject: [PATCH v2 2/3] ntb_transport: Check the number of spads the hardware supports
+To: Jon Mason <jdmason@kudzu.us>
+Cc: Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, John Kading <john.kading@gd-ms.com>, Sudip Mukherjee <sudipm.mukherjee@gmail.com>, Arnd Bergmann <arnd@arndb.de>, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-T24gVHVlLCAyMDE2LTA2LTA3IGF0IDExOjIwIC0wNjAwLCBMb2dhbiBHdW50aG9ycGUgd3JvdGU6
-DQo+IEknbSB3b3JraW5nIG9uIGhhcmR3YXJlIHRoYXQgY3VycmVudGx5IGhhcyBhIGxpbWl0ZWQg
-bnVtYmVyIG9mDQo+IHNjcmF0Y2hwYWQgcmVnaXN0ZXJzIGFuZCBudGJfbmRldiBmYWlscyB3aXRo
-IG5vIGNsdWUgYXMgdG8gd2h5LiBJDQo+IGZlZWwgaXQgaXMgYmV0dGVyIHRvIGZhaWwgZWFybHkg
-YW5kIHByb3ZpZGUgYSByZWFzb25hYmxlIGVycm9yDQo+IG1lc3NhZ2UNCj4gdGhlbiB0byBmYWls
-IGxhdGVyIG9uLg0KPiANCj4gVGhlIHNhbWUgaXMgZG9uZSB0byBudGJfcGVyZiwgYnV0IGl0IGRv
-ZXNuJ3QgY3VycmVudGx5IHJlcXVpcmUgZW5vdWdoDQo+IHNwYWRzIHRvIGFjdHVhbGx5IGZhaWwu
-IEkndmUgYWxzbyByZW1vdmVkIHRoZSB1bnVzZWQgU1BBRF9NU0cgYW5kDQo+IFNQQURfQUNLIGVu
-dW1zIHNvIHRoYXQgTUFYX1NQQUQgYWNjdXJhdGVseSByZWZsZWN0cyB0aGUgbnVtYmVyIG9mDQo+
-IHNwYWRzIHVzZWQuDQo+IA0KPiBTaWduZWQtb2ZmLWJ5OiBMb2dhbiBHdW50aG9ycGUgPGxvZ2Fu
-Z0BkZWx0YXRlZS5jb20+DQoNCkFja2VkLWJ5OiBEYXZlIEppYW5nIDxkYXZlLmppYW5nQGludGVs
-LmNvbT4NCg0KPiAtLS0NCj4gwqBkcml2ZXJzL250Yi9udGJfdHJhbnNwb3J0LmMgfCA5ICsrKysr
-KystLQ0KPiDCoGRyaXZlcnMvbnRiL3Rlc3QvbnRiX3BlcmYuYyB8IDggKysrKysrLS0NCj4gwqAy
-IGZpbGVzIGNoYW5nZWQsIDEzIGluc2VydGlvbnMoKyksIDQgZGVsZXRpb25zKC0pDQo+IA0KPiBk
-aWZmIC0tZ2l0IGEvZHJpdmVycy9udGIvbnRiX3RyYW5zcG9ydC5jDQo+IGIvZHJpdmVycy9udGIv
-bnRiX3RyYW5zcG9ydC5jDQo+IGluZGV4IDJlZjlkOTEzLi42ZDk5NDBhIDEwMDY0NA0KPiAtLS0g
-YS9kcml2ZXJzL250Yi9udGJfdHJhbnNwb3J0LmMNCj4gKysrIGIvZHJpdmVycy9udGIvbnRiX3Ry
-YW5zcG9ydC5jDQo+IEBAIC0xMDM3LDYgKzEwMzcsMTMgQEAgc3RhdGljIGludCBudGJfdHJhbnNw
-b3J0X3Byb2JlKHN0cnVjdA0KPiBudGJfY2xpZW50ICpzZWxmLCBzdHJ1Y3QgbnRiX2RldiAqbmRl
-dikNCj4gwqAJaW50IG5vZGU7DQo+IMKgCWludCByYywgaTsNCj4gwqANCj4gKwltd19jb3VudCA9
-IG50Yl9td19jb3VudChuZGV2KTsNCj4gKwlpZiAobnRiX3NwYWRfY291bnQobmRldikgPCAoTlVN
-X01XUyArIDEgKyBtd19jb3VudCAqIDIpKSB7DQo+ICsJCWRldl9lcnIoJm5kZXYtPmRldiwgIk5v
-dCBlbm91Z2ggc2NyYXRjaCBwYWQNCj4gcmVnaXN0ZXJzIGZvciAlcyIsDQo+ICsJCQlOVEJfVFJB
-TlNQT1JUX05BTUUpOw0KPiArCQlyZXR1cm4gLUVJTzsNCj4gKwl9DQo+ICsNCj4gwqAJaWYgKG50
-Yl9kYl9pc191bnNhZmUobmRldikpDQo+IMKgCQlkZXZfZGJnKCZuZGV2LT5kZXYsDQo+IMKgCQkJ
-ImRvb3JiZWxsIGlzIHVuc2FmZSwgcHJvY2VlZCBhbnl3YXkuLi5cbiIpOw0KPiBAQCAtMTA1Miw4
-ICsxMDU5LDYgQEAgc3RhdGljIGludCBudGJfdHJhbnNwb3J0X3Byb2JlKHN0cnVjdA0KPiBudGJf
-Y2xpZW50ICpzZWxmLCBzdHJ1Y3QgbnRiX2RldiAqbmRldikNCj4gwqANCj4gwqAJbnQtPm5kZXYg
-PSBuZGV2Ow0KPiDCoA0KPiAtCW13X2NvdW50ID0gbnRiX213X2NvdW50KG5kZXYpOw0KPiAtDQo+
-IMKgCW50LT5td19jb3VudCA9IG13X2NvdW50Ow0KPiDCoA0KPiDCoAludC0+bXdfdmVjID0ga3ph
-bGxvY19ub2RlKG13X2NvdW50ICogc2l6ZW9mKCpudC0+bXdfdmVjKSwNCj4gZGlmZiAtLWdpdCBh
-L2RyaXZlcnMvbnRiL3Rlc3QvbnRiX3BlcmYuYw0KPiBiL2RyaXZlcnMvbnRiL3Rlc3QvbnRiX3Bl
-cmYuYw0KPiBpbmRleCAzMDYzNWM4Li40MzY4NTE5IDEwMDY0NA0KPiAtLS0gYS9kcml2ZXJzL250
-Yi90ZXN0L250Yl9wZXJmLmMNCj4gKysrIGIvZHJpdmVycy9udGIvdGVzdC9udGJfcGVyZi5jDQo+
-IEBAIC0xNDMsOCArMTQzLDYgQEAgZW51bSB7DQo+IMKgCVZFUlNJT04gPSAwLA0KPiDCoAlNV19T
-Wl9ISUdILA0KPiDCoAlNV19TWl9MT1csDQo+IC0JU1BBRF9NU0csDQo+IC0JU1BBRF9BQ0ssDQo+
-IMKgCU1BWF9TUEFEDQo+IMKgfTsNCj4gwqANCj4gQEAgLTY5Niw2ICs2OTQsMTIgQEAgc3RhdGlj
-IGludCBwZXJmX3Byb2JlKHN0cnVjdCBudGJfY2xpZW50ICpjbGllbnQsDQo+IHN0cnVjdCBudGJf
-ZGV2ICpudGIpDQo+IMKgCWludCBub2RlOw0KPiDCoAlpbnQgcmMgPSAwOw0KPiDCoA0KPiArCWlm
-IChudGJfc3BhZF9jb3VudChudGIpIDwgTUFYX1NQQUQpIHsNCj4gKwkJZGV2X2VycigmbnRiLT5k
-ZXYsICJOb3QgZW5vdWdoIHNjcmF0Y2ggcGFkIHJlZ2lzdGVycw0KPiBmb3IgJXMiLA0KPiArCQkJ
-RFJJVkVSX05BTUUpOw0KPiArCQlyZXR1cm4gLUVJTzsNCj4gKwl9DQo+ICsNCj4gwqAJbm9kZSA9
-IGRldl90b19ub2RlKCZwZGV2LT5kZXYpOw0KPiDCoA0KPiDCoAlwZXJmID0ga3phbGxvY19ub2Rl
-KHNpemVvZigqcGVyZiksIEdGUF9LRVJORUwsIG5vZGUpOw0KPiAtLcKgDQo+IDIuMS40DQo+IA==
+I'm working on hardware that currently has a limited number of
+scratchpad registers and ntb_ndev fails with no clue as to why. I
+feel it is better to fail early and provide a reasonable error message
+then to fail later on.
+
+The same is done to ntb_perf, but it doesn't currently require enough
+spads to actually fail. I've also removed the unused SPAD_MSG and
+SPAD_ACK enums so that MAX_SPAD accurately reflects the number of
+spads used.
+
+Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+---
+ drivers/ntb/ntb_transport.c | 9 +++++++--
+ drivers/ntb/test/ntb_perf.c | 8 ++++++--
+ 2 files changed, 13 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+index 2ef9d913..6d9940a 100644
+--- a/drivers/ntb/ntb_transport.c
++++ b/drivers/ntb/ntb_transport.c
+@@ -1037,6 +1037,13 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
+ 	int node;
+ 	int rc, i;
+ 
++	mw_count = ntb_mw_count(ndev);
++	if (ntb_spad_count(ndev) < (NUM_MWS + 1 + mw_count * 2)) {
++		dev_err(&ndev->dev, "Not enough scratch pad registers for %s",
++			NTB_TRANSPORT_NAME);
++		return -EIO;
++	}
++
+ 	if (ntb_db_is_unsafe(ndev))
+ 		dev_dbg(&ndev->dev,
+ 			"doorbell is unsafe, proceed anyway...\n");
+@@ -1052,8 +1059,6 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
+ 
+ 	nt->ndev = ndev;
+ 
+-	mw_count = ntb_mw_count(ndev);
+-
+ 	nt->mw_count = mw_count;
+ 
+ 	nt->mw_vec = kzalloc_node(mw_count * sizeof(*nt->mw_vec),
+diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
+index 30635c8..4368519 100644
+--- a/drivers/ntb/test/ntb_perf.c
++++ b/drivers/ntb/test/ntb_perf.c
+@@ -143,8 +143,6 @@ enum {
+ 	VERSION = 0,
+ 	MW_SZ_HIGH,
+ 	MW_SZ_LOW,
+-	SPAD_MSG,
+-	SPAD_ACK,
+ 	MAX_SPAD
+ };
+ 
+@@ -696,6 +694,12 @@ static int perf_probe(struct ntb_client *client, struct ntb_dev *ntb)
+ 	int node;
+ 	int rc = 0;
+ 
++	if (ntb_spad_count(ntb) < MAX_SPAD) {
++		dev_err(&ntb->dev, "Not enough scratch pad registers for %s",
++			DRIVER_NAME);
++		return -EIO;
++	}
++
+ 	node = dev_to_node(&pdev->dev);
+ 
+ 	perf = kzalloc_node(sizeof(*perf), GFP_KERNEL, node);
+-- 
+2.1.4
+
