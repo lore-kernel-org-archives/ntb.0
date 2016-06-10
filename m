@@ -1,178 +1,282 @@
 Return-Path: <gunthorp@cgy1-donard.priv.deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id ci4si1454510pad.1.2016.06.10.15.55.30
+        by gmr-mx.google.com with ESMTPS id e68si1331005pfa.0.2016.06.10.15.55.28
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 10 Jun 2016 15:55:30 -0700 (PDT)
+        Fri, 10 Jun 2016 15:55:28 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Fri, 10 Jun 2016 16:54:06 -0600
-Message-Id: <c859fa29b84c39cb952611904ecbf0ca02077840.1465598632.git.logang@deltatee.com>
+Date: Fri, 10 Jun 2016 16:54:05 -0600
+Message-Id: <65833d43bfcc3e37cbd136fa2a033b8948982629.1465598632.git.logang@deltatee.com>
 In-Reply-To: <cover.1465598632.git.logang@deltatee.com>
 References: <cover.1465598632.git.logang@deltatee.com>
 In-Reply-To: <cover.1465598632.git.logang@deltatee.com>
 References: <cover.1465598632.git.logang@deltatee.com>
-Subject: [PATCH 3/8] ntb_perf: Return results by reading the run file
+Subject: [PATCH 2/8] ntb_perf: Improve thread handling to increase robustness
 To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
 Cc: Shuah Khan <shuahkh@osg.samsung.com>, Sudip Mukherjee <sudipm.mukherjee@gmail.com>, Arnd Bergmann <arnd@arndb.de>, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-kselftest@vger.kernel.org, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Instead of having to watch logs, allow the results to be retrieved
-by reading back the run file. This file will return "running" when
-the test is running and nothing if no tests have been run yet.
-It returns 1 line per thread, and will display an error message if the
-corresponding thread returns an error.
+This commit accomplishes a few things:
 
-With the above change, the pr_info calls that returned the results are
-then changed to pr_debug calls.
+1) Properly prevent multiple sets of threads from running at once using
+a mutex. Lots of race issues existed with the thread_cleanup.
+
+2) The mutex allows us to ensure that threads are finished before
+tearing down the device or module.
+
+3) Don't use kthread_stop when the threads can exit by themselves, as
+this is counter-indicated by the kthread_create documentation. Threads
+now wait for kthread_stop to occur.
+
+4) Writing to the run file now blocks until the threads are complete.
+The test can then be safely interrupted by a SIGINT.
+
+Also, while I was at it:
+
+5) debugfs_run_write shouldn't return 0 in the early check cases as this
+could cause debugfs_run_write to loop undesirably.
 
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
 ---
- drivers/ntb/test/ntb_perf.c | 67 +++++++++++++++++++++++++++++++++++++--------
- 1 file changed, 55 insertions(+), 12 deletions(-)
+ drivers/ntb/test/ntb_perf.c | 124 +++++++++++++++++++++++++++-----------------
+ 1 file changed, 76 insertions(+), 48 deletions(-)
 
 diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index db4dc61..05a8705 100644
+index 5008ccf..db4dc61 100644
 --- a/drivers/ntb/test/ntb_perf.c
 +++ b/drivers/ntb/test/ntb_perf.c
-@@ -123,6 +123,9 @@ struct pthr_ctx {
+@@ -58,6 +58,7 @@
+ #include <linux/delay.h>
+ #include <linux/sizes.h>
+ #include <linux/ntb.h>
++#include <linux/mutex.h>
+ 
+ #define DRIVER_NAME		"ntb_perf"
+ #define DRIVER_DESCRIPTION	"PCIe NTB Performance Measurement Tool"
+@@ -121,6 +122,7 @@ struct pthr_ctx {
+ 	int			dma_prep_err;
  	int			src_idx;
  	void			*srcs[MAX_SRCS];
- 	wait_queue_head_t       *wq;
-+	int			status;
-+	u64			copied;
-+	u64			diff_us;
++	wait_queue_head_t       *wq;
  };
  
  struct perf_ctx {
-@@ -305,7 +308,7 @@ static int perf_move_data(struct pthr_ctx *pctx, char __iomem *dst, char *src,
+@@ -134,9 +136,11 @@ struct perf_ctx {
+ 	struct dentry		*debugfs_run;
+ 	struct dentry		*debugfs_threads;
+ 	u8			perf_threads;
+-	bool			run;
++	/* mutex ensures only one set of threads run at once */
++	struct mutex		run_mutex;
+ 	struct pthr_ctx		pthr_ctx[MAX_THREADS];
+ 	atomic_t		tsync;
++	atomic_t                tdone;
+ };
+ 
+ enum {
+@@ -295,12 +299,18 @@ static int perf_move_data(struct pthr_ctx *pctx, char __iomem *dst, char *src,
+ 			set_current_state(TASK_INTERRUPTIBLE);
+ 			schedule_timeout(1);
+ 		}
++
++		if (unlikely(kthread_should_stop()))
++			break;
  	}
  
  	if (use_dma) {
--		pr_info("%s: All DMA descriptors submitted\n", current->comm);
-+		pr_debug("%s: All DMA descriptors submitted\n", current->comm);
- 		while (atomic_read(&pctx->dma_sync) != 0) {
- 			if (kthread_should_stop())
- 				break;
-@@ -317,13 +320,16 @@ static int perf_move_data(struct pthr_ctx *pctx, char __iomem *dst, char *src,
- 	kdiff = ktime_sub(kstop, kstart);
- 	diff_us = ktime_to_us(kdiff);
+ 		pr_info("%s: All DMA descriptors submitted\n", current->comm);
+-		while (atomic_read(&pctx->dma_sync) != 0)
++		while (atomic_read(&pctx->dma_sync) != 0) {
++			if (kthread_should_stop())
++				break;
+ 			msleep(20);
++		}
+ 	}
  
--	pr_info("%s: copied %llu bytes\n", current->comm, copied);
-+	pr_debug("%s: copied %llu bytes\n", current->comm, copied);
+ 	kstop = ktime_get();
+@@ -393,7 +403,10 @@ static int ntb_perf_thread(void *data)
+ 		pctx->srcs[i] = NULL;
+ 	}
  
--	pr_info("%s: lasted %llu usecs\n", current->comm, diff_us);
-+	pr_debug("%s: lasted %llu usecs\n", current->comm, diff_us);
+-	return 0;
++	atomic_inc(&perf->tdone);
++	wake_up(pctx->wq);
++	rc = 0;
++	goto done;
  
- 	perf = div64_u64(copied, diff_us);
+ err:
+ 	for (i = 0; i < MAX_SRCS; i++) {
+@@ -406,6 +419,16 @@ err:
+ 		pctx->dma_chan = NULL;
+ 	}
  
--	pr_info("%s: MBytes/s: %llu\n", current->comm, perf);
-+	pr_debug("%s: MBytes/s: %llu\n", current->comm, perf);
++done:
++	/* Wait until we are told to stop */
++	for (;;) {
++		set_current_state(TASK_INTERRUPTIBLE);
++		if (kthread_should_stop())
++			break;
++		schedule();
++	}
++	__set_current_state(TASK_RUNNING);
 +
-+	pctx->copied = copied;
-+	pctx->diff_us = diff_us;
- 
- 	return 0;
+ 	return rc;
  }
-@@ -345,7 +351,7 @@ static int ntb_perf_thread(void *data)
- 	int rc, node, i;
- 	struct dma_chan *dma_chan = NULL;
  
--	pr_info("kthread %s starting...\n", current->comm);
-+	pr_debug("kthread %s starting...\n", current->comm);
- 
- 	node = dev_to_node(&pdev->dev);
- 
-@@ -575,19 +581,44 @@ static ssize_t debugfs_run_read(struct file *filp, char __user *ubuf,
- {
+@@ -553,6 +576,7 @@ static ssize_t debugfs_run_read(struct file *filp, char __user *ubuf,
  	struct perf_ctx *perf = filp->private_data;
  	char *buf;
--	ssize_t ret, out_offset;
--	int running;
-+	ssize_t ret, out_off = 0;
-+	struct pthr_ctx *pctx;
-+	int i;
-+	u64 rate;
+ 	ssize_t ret, out_offset;
++	int running;
  
  	if (!perf)
  		return 0;
- 
--	buf = kmalloc(64, GFP_KERNEL);
-+	buf = kmalloc(1024, GFP_KERNEL);
+@@ -560,7 +584,9 @@ static ssize_t debugfs_run_read(struct file *filp, char __user *ubuf,
+ 	buf = kmalloc(64, GFP_KERNEL);
  	if (!buf)
  		return -ENOMEM;
- 
--	running = mutex_is_locked(&perf->run_mutex);
--	out_offset = snprintf(buf, 64, "%d\n", running);
--	ret = simple_read_from_buffer(ubuf, count, offp, buf, out_offset);
-+	if (mutex_is_locked(&perf->run_mutex)) {
-+		out_off = snprintf(buf, 64, "running\n");
-+		goto read_from_buf;
-+	}
+-	out_offset = snprintf(buf, 64, "%d\n", perf->run);
 +
-+	for (i = 0; i < MAX_THREADS; i++) {
-+		pctx = &perf->pthr_ctx[i];
-+
-+		if (pctx->status == -ENODATA)
-+			break;
-+
-+		if (pctx->status) {
-+			out_off += snprintf(buf + out_off, 1024 - out_off,
-+					    "%d: error %d\n", i,
-+					    pctx->status);
-+			continue;
-+		}
-+
-+		rate = div64_u64(pctx->copied, pctx->diff_us);
-+		out_off += snprintf(buf + out_off, 1024 - out_off,
-+			"%d: copied %llu bytes in %llu usecs, %llu MBytes/s\n",
-+			i, pctx->copied, pctx->diff_us, rate);
-+	}
-+
-+read_from_buf:
-+	ret = simple_read_from_buffer(ubuf, count, offp, buf, out_off);
++	running = mutex_is_locked(&perf->run_mutex);
++	out_offset = snprintf(buf, 64, "%d\n", running);
+ 	ret = simple_read_from_buffer(ubuf, count, offp, buf, out_offset);
  	kfree(buf);
  
- 	return ret;
-@@ -601,12 +632,20 @@ static void threads_cleanup(struct perf_ctx *perf)
+@@ -572,7 +598,6 @@ static void threads_cleanup(struct perf_ctx *perf)
+ 	struct pthr_ctx *pctx;
+ 	int i;
+ 
+-	perf->run = false;
  	for (i = 0; i < MAX_THREADS; i++) {
  		pctx = &perf->pthr_ctx[i];
  		if (pctx->thread) {
--			kthread_stop(pctx->thread);
-+			pctx->status = kthread_stop(pctx->thread);
- 			pctx->thread = NULL;
- 		}
+@@ -587,65 +612,66 @@ static ssize_t debugfs_run_write(struct file *filp, const char __user *ubuf,
+ {
+ 	struct perf_ctx *perf = filp->private_data;
+ 	int node, i;
++	DECLARE_WAIT_QUEUE_HEAD(wq);
+ 
+ 	if (!perf->link_is_up)
+-		return 0;
++		return -ENOLINK;
+ 
+ 	if (perf->perf_threads == 0)
+-		return 0;
++		return -EINVAL;
+ 
+-	if (atomic_read(&perf->tsync) == 0)
+-		perf->run = false;
++	if (!mutex_trylock(&perf->run_mutex))
++		return -EBUSY;
+ 
+-	if (perf->run)
+-		threads_cleanup(perf);
+-	else {
+-		perf->run = true;
++	if (perf->perf_threads > MAX_THREADS) {
++		perf->perf_threads = MAX_THREADS;
++		pr_info("Reset total threads to: %u\n", MAX_THREADS);
++	}
+ 
+-		if (perf->perf_threads > MAX_THREADS) {
+-			perf->perf_threads = MAX_THREADS;
+-			pr_info("Reset total threads to: %u\n", MAX_THREADS);
+-		}
++	/* no greater than 1M */
++	if (seg_order > MAX_SEG_ORDER) {
++		seg_order = MAX_SEG_ORDER;
++		pr_info("Fix seg_order to %u\n", seg_order);
++	}
+ 
+-		/* no greater than 1M */
+-		if (seg_order > MAX_SEG_ORDER) {
+-			seg_order = MAX_SEG_ORDER;
+-			pr_info("Fix seg_order to %u\n", seg_order);
+-		}
++	if (run_order < seg_order) {
++		run_order = seg_order;
++		pr_info("Fix run_order to %u\n", run_order);
++	}
+ 
+-		if (run_order < seg_order) {
+-			run_order = seg_order;
+-			pr_info("Fix run_order to %u\n", run_order);
+-		}
++	node = dev_to_node(&perf->ntb->pdev->dev);
++	atomic_set(&perf->tdone, 0);
+ 
+-		node = dev_to_node(&perf->ntb->pdev->dev);
+-		/* launch kernel thread */
+-		for (i = 0; i < perf->perf_threads; i++) {
+-			struct pthr_ctx *pctx;
+-
+-			pctx = &perf->pthr_ctx[i];
+-			atomic_set(&pctx->dma_sync, 0);
+-			pctx->perf = perf;
+-			pctx->thread =
+-				kthread_create_on_node(ntb_perf_thread,
+-						       (void *)pctx,
+-						       node, "ntb_perf %d", i);
+-			if (IS_ERR(pctx->thread)) {
+-				pctx->thread = NULL;
+-				goto err;
+-			} else
+-				wake_up_process(pctx->thread);
+-
+-			if (perf->run == false)
+-				return -ENXIO;
+-		}
++	/* launch kernel thread */
++	for (i = 0; i < perf->perf_threads; i++) {
++		struct pthr_ctx *pctx;
+ 
++		pctx = &perf->pthr_ctx[i];
++		atomic_set(&pctx->dma_sync, 0);
++		pctx->perf = perf;
++		pctx->wq = &wq;
++		pctx->thread =
++			kthread_create_on_node(ntb_perf_thread,
++					       (void *)pctx,
++					       node, "ntb_perf %d", i);
++		if (IS_ERR(pctx->thread)) {
++			pctx->thread = NULL;
++			goto err;
++		} else {
++			wake_up_process(pctx->thread);
++		}
  	}
+ 
++	wait_event_interruptible(wq,
++		atomic_read(&perf->tdone) == perf->perf_threads);
++
++	threads_cleanup(perf);
++	mutex_unlock(&perf->run_mutex);
+ 	return count;
+ 
+ err:
+ 	threads_cleanup(perf);
++	mutex_unlock(&perf->run_mutex);
+ 	return -ENXIO;
  }
  
-+static void perf_clear_thread_status(struct perf_ctx *perf)
-+{
-+	int i;
-+
-+	for (i = 0; i < MAX_THREADS; i++)
-+		perf->pthr_ctx[i].status = -ENODATA;
-+}
-+
- static ssize_t debugfs_run_write(struct file *filp, const char __user *ubuf,
- 				 size_t count, loff_t *offp)
- {
-@@ -623,6 +662,8 @@ static ssize_t debugfs_run_write(struct file *filp, const char __user *ubuf,
- 	if (!mutex_trylock(&perf->run_mutex))
- 		return -EBUSY;
+@@ -713,7 +739,7 @@ static int perf_probe(struct ntb_client *client, struct ntb_dev *ntb)
+ 	perf->ntb = ntb;
+ 	perf->perf_threads = 1;
+ 	atomic_set(&perf->tsync, 0);
+-	perf->run = false;
++	mutex_init(&perf->run_mutex);
+ 	spin_lock_init(&perf->db_lock);
+ 	perf_setup_mw(ntb, perf);
+ 	INIT_DELAYED_WORK(&perf->link_work, perf_link_work);
+@@ -748,6 +774,8 @@ static void perf_remove(struct ntb_client *client, struct ntb_dev *ntb)
  
-+	perf_clear_thread_status(perf);
-+
- 	if (perf->perf_threads > MAX_THREADS) {
- 		perf->perf_threads = MAX_THREADS;
- 		pr_info("Reset total threads to: %u\n", MAX_THREADS);
-@@ -757,6 +798,8 @@ static int perf_probe(struct ntb_client *client, struct ntb_dev *ntb)
- 	if (rc)
- 		goto err_ctx;
+ 	dev_dbg(&perf->ntb->dev, "%s called\n", __func__);
  
-+	perf_clear_thread_status(perf);
++	mutex_lock(&perf->run_mutex);
 +
- 	return 0;
+ 	cancel_delayed_work_sync(&perf->link_work);
+ 	cancel_work_sync(&perf->link_cleanup);
  
- err_ctx:
 -- 
 2.1.4
 
