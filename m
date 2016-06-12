@@ -1,163 +1,185 @@
-Return-Path: <dave.jiang@intel.com>
-Received: from mga04.intel.com (mga04.intel.com. [192.55.52.120])
-        by gmr-mx.google.com with ESMTP id c11si924255pfc.2.2016.06.13.11.16.52
-        for <linux-ntb@googlegroups.com>;
-        Mon, 13 Jun 2016 11:16:52 -0700 (PDT)
-From: "Jiang, Dave" <dave.jiang@intel.com>
-Subject: Re: [PATCH 2/8] ntb_perf: Improve thread handling to increase
- robustness
-Date: Mon, 13 Jun 2016 18:16:51 +0000
-Message-ID: <1465841794.16234.249.camel@intel.com>
-References: <cover.1465598632.git.logang@deltatee.com>
-	 <65833d43bfcc3e37cbd136fa2a033b8948982629.1465598632.git.logang@deltatee.com>
-In-Reply-To: <65833d43bfcc3e37cbd136fa2a033b8948982629.1465598632.git.logang@deltatee.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <40FA359EE93F3D4D81F0A201925D44AA@intel.com>
-Content-Transfer-Encoding: base64
+Return-Path: <allenbh@gmail.com>
+Received: from mail-yw0-x242.google.com (mail-yw0-x242.google.com. [2607:f8b0:4002:c05::242])
+        by gmr-mx.google.com with ESMTPS id o205si1206107ywb.7.2016.06.11.18.28.17
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Sat, 11 Jun 2016 18:28:17 -0700 (PDT)
+Received: by mail-yw0-x242.google.com with SMTP id y6so12760518ywe.0
+        for <linux-ntb@googlegroups.com>; Sat, 11 Jun 2016 18:28:17 -0700 (PDT)
 MIME-Version: 1.0
-To: "Allen.Hubbe@emc.com" <Allen.Hubbe@emc.com>, "logang@deltatee.com" <logang@deltatee.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "shuahkh@osg.samsung.com" <shuahkh@osg.samsung.com>, "sudipm.mukherjee@gmail.com" <sudipm.mukherjee@gmail.com>, "linux-kselftest@vger.kernel.org" <linux-kselftest@vger.kernel.org>, "arnd@arndb.de" <arnd@arndb.de>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
+In-Reply-To: <575C2E28.9020604@deltatee.com>
+References: <cover.1465598632.git.logang@deltatee.com> <e447cedb6197b62f141e7688ed2329c259f33eb9.1465598632.git.logang@deltatee.com>
+ <CAJ80sasERM19iz7d9+VeyDg-nasQvBpSqe9crB16GBMez8dFew@mail.gmail.com> <575C2E28.9020604@deltatee.com>
+From: Allen Hubbe <allenbh@gmail.com>
+Date: Sat, 11 Jun 2016 21:28:17 -0400
+Message-ID: <CAJ80sasHLMN3FZnFOKgfU6d7KBmr4zt2H5ej58EapYDBaoqZag@mail.gmail.com>
+Subject: Re: [PATCH 6/8] ntb_tool: Add link status file to debugfs
+Content-Type: text/plain; charset=UTF-8
+To: Logan Gunthorpe <logang@deltatee.com>
+Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Shuah Khan <shuahkh@osg.samsung.com>, Sudip Mukherjee <sudipm.mukherjee@gmail.com>, Arnd Bergmann <arnd@arndb.de>, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-kselftest@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-T24gRnJpLCAyMDE2LTA2LTEwIGF0IDE2OjU0IC0wNjAwLCBMb2dhbiBHdW50aG9ycGUgd3JvdGU6
-DQo+IFRoaXMgY29tbWl0IGFjY29tcGxpc2hlcyBhIGZldyB0aGluZ3M6DQo+IA0KPiAxKSBQcm9w
-ZXJseSBwcmV2ZW50IG11bHRpcGxlIHNldHMgb2YgdGhyZWFkcyBmcm9tIHJ1bm5pbmcgYXQgb25j
-ZQ0KPiB1c2luZw0KPiBhIG11dGV4LiBMb3RzIG9mIHJhY2UgaXNzdWVzIGV4aXN0ZWQgd2l0aCB0
-aGUgdGhyZWFkX2NsZWFudXAuDQo+IA0KPiAyKSBUaGUgbXV0ZXggYWxsb3dzIHVzIHRvIGVuc3Vy
-ZSB0aGF0IHRocmVhZHMgYXJlIGZpbmlzaGVkIGJlZm9yZQ0KPiB0ZWFyaW5nIGRvd24gdGhlIGRl
-dmljZSBvciBtb2R1bGUuDQo+IA0KPiAzKSBEb24ndCB1c2Uga3RocmVhZF9zdG9wIHdoZW4gdGhl
-IHRocmVhZHMgY2FuIGV4aXQgYnkgdGhlbXNlbHZlcywgYXMNCj4gdGhpcyBpcyBjb3VudGVyLWlu
-ZGljYXRlZCBieSB0aGUga3RocmVhZF9jcmVhdGUgZG9jdW1lbnRhdGlvbi4NCj4gVGhyZWFkcw0K
-PiBub3cgd2FpdCBmb3Iga3RocmVhZF9zdG9wIHRvIG9jY3VyLg0KPiANCj4gNCkgV3JpdGluZyB0
-byB0aGUgcnVuIGZpbGUgbm93IGJsb2NrcyB1bnRpbCB0aGUgdGhyZWFkcyBhcmUgY29tcGxldGUu
-DQo+IFRoZSB0ZXN0IGNhbiB0aGVuIGJlIHNhZmVseSBpbnRlcnJ1cHRlZCBieSBhIFNJR0lOVC4N
-Cj4gDQo+IEFsc28sIHdoaWxlIEkgd2FzIGF0IGl0Og0KPiANCj4gNSkgZGVidWdmc19ydW5fd3Jp
-dGUgc2hvdWxkbid0IHJldHVybiAwIGluIHRoZSBlYXJseSBjaGVjayBjYXNlcyBhcw0KPiB0aGlz
-DQo+IGNvdWxkIGNhdXNlIGRlYnVnZnNfcnVuX3dyaXRlIHRvIGxvb3AgdW5kZXNpcmFibHkuDQo+
-IA0KPiBTaWduZWQtb2ZmLWJ5OiBMb2dhbiBHdW50aG9ycGUgPGxvZ2FuZ0BkZWx0YXRlZS5jb20+
-DQpBY2tlZC1ieTogRGF2ZSBKaWFuZyA8ZGF2ZS5qaWFuZ0BpbnRlbC5jb20+DQoNCj4gLS0tDQo+
-IMKgZHJpdmVycy9udGIvdGVzdC9udGJfcGVyZi5jIHwgMTI0ICsrKysrKysrKysrKysrKysrKysr
-KysrKysrKy0tLS0tLS0NCj4gLS0tLS0tLS0tLQ0KPiDCoDEgZmlsZSBjaGFuZ2VkLCA3NiBpbnNl
-cnRpb25zKCspLCA0OCBkZWxldGlvbnMoLSkNCj4gDQo+IGRpZmYgLS1naXQgYS9kcml2ZXJzL250
-Yi90ZXN0L250Yl9wZXJmLmMNCj4gYi9kcml2ZXJzL250Yi90ZXN0L250Yl9wZXJmLmMNCj4gaW5k
-ZXggNTAwOGNjZi4uZGI0ZGM2MSAxMDA2NDQNCj4gLS0tIGEvZHJpdmVycy9udGIvdGVzdC9udGJf
-cGVyZi5jDQo+ICsrKyBiL2RyaXZlcnMvbnRiL3Rlc3QvbnRiX3BlcmYuYw0KPiBAQCAtNTgsNiAr
-NTgsNyBAQA0KPiDCoCNpbmNsdWRlIDxsaW51eC9kZWxheS5oPg0KPiDCoCNpbmNsdWRlIDxsaW51
-eC9zaXplcy5oPg0KPiDCoCNpbmNsdWRlIDxsaW51eC9udGIuaD4NCj4gKyNpbmNsdWRlIDxsaW51
-eC9tdXRleC5oPg0KPiDCoA0KPiDCoCNkZWZpbmUgRFJJVkVSX05BTUUJCSJudGJfcGVyZiINCj4g
-wqAjZGVmaW5lIERSSVZFUl9ERVNDUklQVElPTgkiUENJZSBOVEIgUGVyZm9ybWFuY2UgTWVhc3Vy
-ZW1lbnQNCj4gVG9vbCINCj4gQEAgLTEyMSw2ICsxMjIsNyBAQCBzdHJ1Y3QgcHRocl9jdHggew0K
-PiDCoAlpbnQJCQlkbWFfcHJlcF9lcnI7DQo+IMKgCWludAkJCXNyY19pZHg7DQo+IMKgCXZvaWQJ
-CQkqc3Jjc1tNQVhfU1JDU107DQo+ICsJd2FpdF9xdWV1ZV9oZWFkX3TCoMKgwqDCoMKgwqDCoCp3
-cTsNCj4gwqB9Ow0KPiDCoA0KPiDCoHN0cnVjdCBwZXJmX2N0eCB7DQo+IEBAIC0xMzQsOSArMTM2
-LDExIEBAIHN0cnVjdCBwZXJmX2N0eCB7DQo+IMKgCXN0cnVjdCBkZW50cnkJCSpkZWJ1Z2ZzX3J1
-bjsNCj4gwqAJc3RydWN0IGRlbnRyeQkJKmRlYnVnZnNfdGhyZWFkczsNCj4gwqAJdTgJCQlwZXJm
-X3RocmVhZHM7DQo+IC0JYm9vbAkJCXJ1bjsNCj4gKwkvKiBtdXRleCBlbnN1cmVzIG9ubHkgb25l
-IHNldCBvZiB0aHJlYWRzIHJ1biBhdCBvbmNlICovDQo+ICsJc3RydWN0IG11dGV4CQlydW5fbXV0
-ZXg7DQo+IMKgCXN0cnVjdCBwdGhyX2N0eAkJcHRocl9jdHhbTUFYX1RIUkVBRFNdOw0KPiDCoAlh
-dG9taWNfdAkJdHN5bmM7DQo+ICsJYXRvbWljX3TCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoHRkb25lOw0KPiDCoH07DQo+IMKgDQo+IMKgZW51bSB7DQo+IEBAIC0yOTUsMTIgKzI5OSwx
-OCBAQCBzdGF0aWMgaW50IHBlcmZfbW92ZV9kYXRhKHN0cnVjdCBwdGhyX2N0eA0KPiAqcGN0eCwg
-Y2hhciBfX2lvbWVtICpkc3QsIGNoYXIgKnNyYywNCj4gwqAJCQlzZXRfY3VycmVudF9zdGF0ZShU
-QVNLX0lOVEVSUlVQVElCTEUpOw0KPiDCoAkJCXNjaGVkdWxlX3RpbWVvdXQoMSk7DQo+IMKgCQl9
-DQo+ICsNCj4gKwkJaWYgKHVubGlrZWx5KGt0aHJlYWRfc2hvdWxkX3N0b3AoKSkpDQo+ICsJCQli
-cmVhazsNCj4gwqAJfQ0KPiDCoA0KPiDCoAlpZiAodXNlX2RtYSkgew0KPiDCoAkJcHJfaW5mbygi
-JXM6IEFsbCBETUEgZGVzY3JpcHRvcnMgc3VibWl0dGVkXG4iLA0KPiBjdXJyZW50LT5jb21tKTsN
-Cj4gLQkJd2hpbGUgKGF0b21pY19yZWFkKCZwY3R4LT5kbWFfc3luYykgIT0gMCkNCj4gKwkJd2hp
-bGUgKGF0b21pY19yZWFkKCZwY3R4LT5kbWFfc3luYykgIT0gMCkgew0KPiArCQkJaWYgKGt0aHJl
-YWRfc2hvdWxkX3N0b3AoKSkNCj4gKwkJCQlicmVhazsNCj4gwqAJCQltc2xlZXAoMjApOw0KPiAr
-CQl9DQo+IMKgCX0NCj4gwqANCj4gwqAJa3N0b3AgPSBrdGltZV9nZXQoKTsNCj4gQEAgLTM5Myw3
-ICs0MDMsMTAgQEAgc3RhdGljIGludCBudGJfcGVyZl90aHJlYWQodm9pZCAqZGF0YSkNCj4gwqAJ
-CXBjdHgtPnNyY3NbaV0gPSBOVUxMOw0KPiDCoAl9DQo+IMKgDQo+IC0JcmV0dXJuIDA7DQo+ICsJ
-YXRvbWljX2luYygmcGVyZi0+dGRvbmUpOw0KPiArCXdha2VfdXAocGN0eC0+d3EpOw0KPiArCXJj
-ID0gMDsNCj4gKwlnb3RvIGRvbmU7DQo+IMKgDQo+IMKgZXJyOg0KPiDCoAlmb3IgKGkgPSAwOyBp
-IDwgTUFYX1NSQ1M7IGkrKykgew0KPiBAQCAtNDA2LDYgKzQxOSwxNiBAQCBlcnI6DQo+IMKgCQlw
-Y3R4LT5kbWFfY2hhbiA9IE5VTEw7DQo+IMKgCX0NCj4gwqANCj4gK2RvbmU6DQo+ICsJLyogV2Fp
-dCB1bnRpbCB3ZSBhcmUgdG9sZCB0byBzdG9wICovDQo+ICsJZm9yICg7Oykgew0KPiArCQlzZXRf
-Y3VycmVudF9zdGF0ZShUQVNLX0lOVEVSUlVQVElCTEUpOw0KPiArCQlpZiAoa3RocmVhZF9zaG91
-bGRfc3RvcCgpKQ0KPiArCQkJYnJlYWs7DQo+ICsJCXNjaGVkdWxlKCk7DQo+ICsJfQ0KPiArCV9f
-c2V0X2N1cnJlbnRfc3RhdGUoVEFTS19SVU5OSU5HKTsNCj4gKw0KPiDCoAlyZXR1cm4gcmM7DQo+
-IMKgfQ0KPiDCoA0KPiBAQCAtNTUzLDYgKzU3Niw3IEBAIHN0YXRpYyBzc2l6ZV90IGRlYnVnZnNf
-cnVuX3JlYWQoc3RydWN0IGZpbGUNCj4gKmZpbHAsIGNoYXIgX191c2VyICp1YnVmLA0KPiDCoAlz
-dHJ1Y3QgcGVyZl9jdHggKnBlcmYgPSBmaWxwLT5wcml2YXRlX2RhdGE7DQo+IMKgCWNoYXIgKmJ1
-ZjsNCj4gwqAJc3NpemVfdCByZXQsIG91dF9vZmZzZXQ7DQo+ICsJaW50IHJ1bm5pbmc7DQo+IMKg
-DQo+IMKgCWlmICghcGVyZikNCj4gwqAJCXJldHVybiAwOw0KPiBAQCAtNTYwLDcgKzU4NCw5IEBA
-IHN0YXRpYyBzc2l6ZV90IGRlYnVnZnNfcnVuX3JlYWQoc3RydWN0IGZpbGUNCj4gKmZpbHAsIGNo
-YXIgX191c2VyICp1YnVmLA0KPiDCoAlidWYgPSBrbWFsbG9jKDY0LCBHRlBfS0VSTkVMKTsNCj4g
-wqAJaWYgKCFidWYpDQo+IMKgCQlyZXR1cm4gLUVOT01FTTsNCj4gLQlvdXRfb2Zmc2V0ID0gc25w
-cmludGYoYnVmLCA2NCwgIiVkXG4iLCBwZXJmLT5ydW4pOw0KPiArDQo+ICsJcnVubmluZyA9IG11
-dGV4X2lzX2xvY2tlZCgmcGVyZi0+cnVuX211dGV4KTsNCj4gKwlvdXRfb2Zmc2V0ID0gc25wcmlu
-dGYoYnVmLCA2NCwgIiVkXG4iLCBydW5uaW5nKTsNCj4gwqAJcmV0ID0gc2ltcGxlX3JlYWRfZnJv
-bV9idWZmZXIodWJ1ZiwgY291bnQsIG9mZnAsIGJ1ZiwNCj4gb3V0X29mZnNldCk7DQo+IMKgCWtm
-cmVlKGJ1Zik7DQo+IMKgDQo+IEBAIC01NzIsNyArNTk4LDYgQEAgc3RhdGljIHZvaWQgdGhyZWFk
-c19jbGVhbnVwKHN0cnVjdCBwZXJmX2N0eA0KPiAqcGVyZikNCj4gwqAJc3RydWN0IHB0aHJfY3R4
-ICpwY3R4Ow0KPiDCoAlpbnQgaTsNCj4gwqANCj4gLQlwZXJmLT5ydW4gPSBmYWxzZTsNCj4gwqAJ
-Zm9yIChpID0gMDsgaSA8IE1BWF9USFJFQURTOyBpKyspIHsNCj4gwqAJCXBjdHggPSAmcGVyZi0+
-cHRocl9jdHhbaV07DQo+IMKgCQlpZiAocGN0eC0+dGhyZWFkKSB7DQo+IEBAIC01ODcsNjUgKzYx
-Miw2NiBAQCBzdGF0aWMgc3NpemVfdCBkZWJ1Z2ZzX3J1bl93cml0ZShzdHJ1Y3QgZmlsZQ0KPiAq
-ZmlscCwgY29uc3QgY2hhciBfX3VzZXIgKnVidWYsDQo+IMKgew0KPiDCoAlzdHJ1Y3QgcGVyZl9j
-dHggKnBlcmYgPSBmaWxwLT5wcml2YXRlX2RhdGE7DQo+IMKgCWludCBub2RlLCBpOw0KPiArCURF
-Q0xBUkVfV0FJVF9RVUVVRV9IRUFEKHdxKTsNCj4gwqANCj4gwqAJaWYgKCFwZXJmLT5saW5rX2lz
-X3VwKQ0KPiAtCQlyZXR1cm4gMDsNCj4gKwkJcmV0dXJuIC1FTk9MSU5LOw0KPiDCoA0KPiDCoAlp
-ZiAocGVyZi0+cGVyZl90aHJlYWRzID09IDApDQo+IC0JCXJldHVybiAwOw0KPiArCQlyZXR1cm4g
-LUVJTlZBTDsNCj4gwqANCj4gLQlpZiAoYXRvbWljX3JlYWQoJnBlcmYtPnRzeW5jKSA9PSAwKQ0K
-PiAtCQlwZXJmLT5ydW4gPSBmYWxzZTsNCj4gKwlpZiAoIW11dGV4X3RyeWxvY2soJnBlcmYtPnJ1
-bl9tdXRleCkpDQo+ICsJCXJldHVybiAtRUJVU1k7DQo+IMKgDQo+IC0JaWYgKHBlcmYtPnJ1bikN
-Cj4gLQkJdGhyZWFkc19jbGVhbnVwKHBlcmYpOw0KPiAtCWVsc2Ugew0KPiAtCQlwZXJmLT5ydW4g
-PSB0cnVlOw0KPiArCWlmIChwZXJmLT5wZXJmX3RocmVhZHMgPiBNQVhfVEhSRUFEUykgew0KPiAr
-CQlwZXJmLT5wZXJmX3RocmVhZHMgPSBNQVhfVEhSRUFEUzsNCj4gKwkJcHJfaW5mbygiUmVzZXQg
-dG90YWwgdGhyZWFkcyB0bzogJXVcbiIsDQo+IE1BWF9USFJFQURTKTsNCj4gKwl9DQo+IMKgDQo+
-IC0JCWlmIChwZXJmLT5wZXJmX3RocmVhZHMgPiBNQVhfVEhSRUFEUykgew0KPiAtCQkJcGVyZi0+
-cGVyZl90aHJlYWRzID0gTUFYX1RIUkVBRFM7DQo+IC0JCQlwcl9pbmZvKCJSZXNldCB0b3RhbCB0
-aHJlYWRzIHRvOiAldVxuIiwNCj4gTUFYX1RIUkVBRFMpOw0KPiAtCQl9DQo+ICsJLyogbm8gZ3Jl
-YXRlciB0aGFuIDFNICovDQo+ICsJaWYgKHNlZ19vcmRlciA+IE1BWF9TRUdfT1JERVIpIHsNCj4g
-KwkJc2VnX29yZGVyID0gTUFYX1NFR19PUkRFUjsNCj4gKwkJcHJfaW5mbygiRml4IHNlZ19vcmRl
-ciB0byAldVxuIiwgc2VnX29yZGVyKTsNCj4gKwl9DQo+IMKgDQo+IC0JCS8qIG5vIGdyZWF0ZXIg
-dGhhbiAxTSAqLw0KPiAtCQlpZiAoc2VnX29yZGVyID4gTUFYX1NFR19PUkRFUikgew0KPiAtCQkJ
-c2VnX29yZGVyID0gTUFYX1NFR19PUkRFUjsNCj4gLQkJCXByX2luZm8oIkZpeCBzZWdfb3JkZXIg
-dG8gJXVcbiIsIHNlZ19vcmRlcik7DQo+IC0JCX0NCj4gKwlpZiAocnVuX29yZGVyIDwgc2VnX29y
-ZGVyKSB7DQo+ICsJCXJ1bl9vcmRlciA9IHNlZ19vcmRlcjsNCj4gKwkJcHJfaW5mbygiRml4IHJ1
-bl9vcmRlciB0byAldVxuIiwgcnVuX29yZGVyKTsNCj4gKwl9DQo+IMKgDQo+IC0JCWlmIChydW5f
-b3JkZXIgPCBzZWdfb3JkZXIpIHsNCj4gLQkJCXJ1bl9vcmRlciA9IHNlZ19vcmRlcjsNCj4gLQkJ
-CXByX2luZm8oIkZpeCBydW5fb3JkZXIgdG8gJXVcbiIsIHJ1bl9vcmRlcik7DQo+IC0JCX0NCj4g
-Kwlub2RlID0gZGV2X3RvX25vZGUoJnBlcmYtPm50Yi0+cGRldi0+ZGV2KTsNCj4gKwlhdG9taWNf
-c2V0KCZwZXJmLT50ZG9uZSwgMCk7DQo+IMKgDQo+IC0JCW5vZGUgPSBkZXZfdG9fbm9kZSgmcGVy
-Zi0+bnRiLT5wZGV2LT5kZXYpOw0KPiAtCQkvKiBsYXVuY2gga2VybmVsIHRocmVhZCAqLw0KPiAt
-CQlmb3IgKGkgPSAwOyBpIDwgcGVyZi0+cGVyZl90aHJlYWRzOyBpKyspIHsNCj4gLQkJCXN0cnVj
-dCBwdGhyX2N0eCAqcGN0eDsNCj4gLQ0KPiAtCQkJcGN0eCA9ICZwZXJmLT5wdGhyX2N0eFtpXTsN
-Cj4gLQkJCWF0b21pY19zZXQoJnBjdHgtPmRtYV9zeW5jLCAwKTsNCj4gLQkJCXBjdHgtPnBlcmYg
-PSBwZXJmOw0KPiAtCQkJcGN0eC0+dGhyZWFkID0NCj4gLQkJCQlrdGhyZWFkX2NyZWF0ZV9vbl9u
-b2RlKG50Yl9wZXJmX3RocmUNCj4gYWQsDQo+IC0JCQkJCQnCoMKgwqDCoMKgwqDCoCh2b2lkICop
-cGN0eCwNCj4gLQkJCQkJCcKgwqDCoMKgwqDCoMKgbm9kZSwNCj4gIm50Yl9wZXJmICVkIiwgaSk7
-DQo+IC0JCQlpZiAoSVNfRVJSKHBjdHgtPnRocmVhZCkpIHsNCj4gLQkJCQlwY3R4LT50aHJlYWQg
-PSBOVUxMOw0KPiAtCQkJCWdvdG8gZXJyOw0KPiAtCQkJfSBlbHNlDQo+IC0JCQkJd2FrZV91cF9w
-cm9jZXNzKHBjdHgtPnRocmVhZCk7DQo+IC0NCj4gLQkJCWlmIChwZXJmLT5ydW4gPT0gZmFsc2Up
-DQo+IC0JCQkJcmV0dXJuIC1FTlhJTzsNCj4gLQkJfQ0KPiArCS8qIGxhdW5jaCBrZXJuZWwgdGhy
-ZWFkICovDQo+ICsJZm9yIChpID0gMDsgaSA8IHBlcmYtPnBlcmZfdGhyZWFkczsgaSsrKSB7DQo+
-ICsJCXN0cnVjdCBwdGhyX2N0eCAqcGN0eDsNCj4gwqANCj4gKwkJcGN0eCA9ICZwZXJmLT5wdGhy
-X2N0eFtpXTsNCj4gKwkJYXRvbWljX3NldCgmcGN0eC0+ZG1hX3N5bmMsIDApOw0KPiArCQlwY3R4
-LT5wZXJmID0gcGVyZjsNCj4gKwkJcGN0eC0+d3EgPSAmd3E7DQo+ICsJCXBjdHgtPnRocmVhZCA9
-DQo+ICsJCQlrdGhyZWFkX2NyZWF0ZV9vbl9ub2RlKG50Yl9wZXJmX3RocmVhZCwNCj4gKwkJCQkJ
-wqDCoMKgwqDCoMKgwqAodm9pZCAqKXBjdHgsDQo+ICsJCQkJCcKgwqDCoMKgwqDCoMKgbm9kZSwg
-Im50Yl9wZXJmICVkIiwNCj4gaSk7DQo+ICsJCWlmIChJU19FUlIocGN0eC0+dGhyZWFkKSkgew0K
-PiArCQkJcGN0eC0+dGhyZWFkID0gTlVMTDsNCj4gKwkJCWdvdG8gZXJyOw0KPiArCQl9IGVsc2Ug
-ew0KPiArCQkJd2FrZV91cF9wcm9jZXNzKHBjdHgtPnRocmVhZCk7DQo+ICsJCX0NCj4gwqAJfQ0K
-PiDCoA0KPiArCXdhaXRfZXZlbnRfaW50ZXJydXB0aWJsZSh3cSwNCj4gKwkJYXRvbWljX3JlYWQo
-JnBlcmYtPnRkb25lKSA9PSBwZXJmLT5wZXJmX3RocmVhZHMpOw0KPiArDQo+ICsJdGhyZWFkc19j
-bGVhbnVwKHBlcmYpOw0KPiArCW11dGV4X3VubG9jaygmcGVyZi0+cnVuX211dGV4KTsNCj4gwqAJ
-cmV0dXJuIGNvdW50Ow0KPiDCoA0KPiDCoGVycjoNCj4gwqAJdGhyZWFkc19jbGVhbnVwKHBlcmYp
-Ow0KPiArCW11dGV4X3VubG9jaygmcGVyZi0+cnVuX211dGV4KTsNCj4gwqAJcmV0dXJuIC1FTlhJ
-TzsNCj4gwqB9DQo+IMKgDQo+IEBAIC03MTMsNyArNzM5LDcgQEAgc3RhdGljIGludCBwZXJmX3By
-b2JlKHN0cnVjdCBudGJfY2xpZW50ICpjbGllbnQsDQo+IHN0cnVjdCBudGJfZGV2ICpudGIpDQo+
-IMKgCXBlcmYtPm50YiA9IG50YjsNCj4gwqAJcGVyZi0+cGVyZl90aHJlYWRzID0gMTsNCj4gwqAJ
-YXRvbWljX3NldCgmcGVyZi0+dHN5bmMsIDApOw0KPiAtCXBlcmYtPnJ1biA9IGZhbHNlOw0KPiAr
-CW11dGV4X2luaXQoJnBlcmYtPnJ1bl9tdXRleCk7DQo+IMKgCXNwaW5fbG9ja19pbml0KCZwZXJm
-LT5kYl9sb2NrKTsNCj4gwqAJcGVyZl9zZXR1cF9tdyhudGIsIHBlcmYpOw0KPiDCoAlJTklUX0RF
-TEFZRURfV09SSygmcGVyZi0+bGlua193b3JrLCBwZXJmX2xpbmtfd29yayk7DQo+IEBAIC03NDgs
-NiArNzc0LDggQEAgc3RhdGljIHZvaWQgcGVyZl9yZW1vdmUoc3RydWN0IG50Yl9jbGllbnQNCj4g
-KmNsaWVudCwgc3RydWN0IG50Yl9kZXYgKm50YikNCj4gwqANCj4gwqAJZGV2X2RiZygmcGVyZi0+
-bnRiLT5kZXYsICIlcyBjYWxsZWRcbiIsIF9fZnVuY19fKTsNCj4gwqANCj4gKwltdXRleF9sb2Nr
-KCZwZXJmLT5ydW5fbXV0ZXgpOw0KPiArDQo+IMKgCWNhbmNlbF9kZWxheWVkX3dvcmtfc3luYygm
-cGVyZi0+bGlua193b3JrKTsNCj4gwqAJY2FuY2VsX3dvcmtfc3luYygmcGVyZi0+bGlua19jbGVh
-bnVwKTsNCj4gwqANCj4gLS3CoA0KPiAyLjEuNA0KPiA=
+On Sat, Jun 11, 2016 at 11:28 AM, Logan Gunthorpe <logang@deltatee.com> wrote:
+> Hey Allen,
+>
+> Thanks for the feedback it's a bit more complicated but I don't object to
+> that. I'll work something up on Monday.
+>
+> I was trying to avoid adding link controls, but if we do, would you say the
+> module should still enable the link when it's installed? Or would we have
+> the user explicitly have to enable the link before using it?
+
+I would vote to keep the current behavior and enable the link when the
+module loads.
+
+>
+> Thanks,
+>
+> Logan
+>
+>
+> On 10/06/16 08:27 PM, Allen Hubbe wrote:
+>>
+>> On Fri, Jun 10, 2016 at 6:54 PM, Logan Gunthorpe <logang@deltatee.com>
+>> wrote:
+>>>
+>>> In order to more successfully script with ntb_tool it's useful to
+>>> have a link file to check the link status so that the script
+>>> doesn't use the other files until the link is up.
+>>>
+>>> This commit adds a 'link' file to the debugfs directory which reads
+>>> 0 or 1 depending on the link status. For scripting convenience, writing
+>>> will block until the link is up (discarding anything that was written).
+>>>
+>>> Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+>>> ---
+>>>   drivers/ntb/test/ntb_tool.c | 45
+>>> +++++++++++++++++++++++++++++++++++++++++++++
+>>>   1 file changed, 45 insertions(+)
+>>>
+>>> diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c
+>>> index 954e1d5..116352e 100644
+>>> --- a/drivers/ntb/test/ntb_tool.c
+>>> +++ b/drivers/ntb/test/ntb_tool.c
+>>> @@ -59,6 +59,12 @@
+>>>    *
+>>>    * Eg: check if clearing the doorbell mask generates an interrupt.
+>>>    *
+>>> + * # Check the link status
+>>> + * root@self# cat $DBG_DIR/link
+>>> + *
+>>> + * # Block until the link is up
+>>> + * root@self# echo > $DBG_DIR/link
+>>
+>>
+>> I think a file to get and set the link status is a good idea, but the
+>> way it is done as proposed here is not in a similar style to other
+>> ntb_tool operations.  Other operations simply read a register and
+>> format the value, or scan a value and write a register.  Similarly, I
+>> think the link status could be done in the same way: use the read file
+>> operation to get the current status with ntb_link_is_up(), and use the
+>> file write operation to enable or disable the link with
+>> ntb_link_enable() and ntb_link_disable().
+>>
+>> Waiting for link status is an interesting concept, too.  Really, one
+>> might be interested in a change in link status, whether up or down.
+>> What about a link event file that supports write to arm the event, and
+>> read to block for the event.  Consider an implementation based on
+>> <linux/completion.h>.  It would be used in combination with the link
+>> status file, above, as follows.
+>>
+>> 1: Write 1 to the event file.  This arms the event.
+>>    - The event will be disarmed by the next tool_link_event().
+>>
+>> 2: The application may read the link status file if it is interested
+>> in waiting for a particular event.
+>>
+>> 3. The application may wait for an event by reading the event file
+>>    - The application will wait as long as the event is still armed.
+>>    - If the event was disarmed before waiting, the application will not
+>> block.
+>>
+>> 4. The application should read the link status again.
+>>
+>> In any case, I think it would be more expected and natural to block
+>> while reading a file versus writing it.
+>>
+>>> + *
+>>>    * # Set the doorbell mask
+>>>    * root@self# echo 's 1' > $DBG_DIR/mask
+>>>    *
+>>> @@ -127,6 +133,7 @@ struct tool_ctx {
+>>>          struct work_struct link_cleanup;
+>>>          bool link_is_up;
+>>>          struct delayed_work link_work;
+>>> +       wait_queue_head_t link_wq;
+>>>          int mw_count;
+>>>          struct tool_mw mws[MAX_MWS];
+>>>   };
+>>> @@ -237,6 +244,7 @@ static void tool_link_work(struct work_struct *work)
+>>>                          "Error setting up memory windows: %d\n", rc);
+>>>
+>>>          tc->link_is_up = true;
+>>> +       wake_up(&tc->link_wq);
+>>>   }
+>>>
+>>>   static void tool_link_cleanup(struct work_struct *work)
+>>> @@ -573,6 +581,39 @@ static TOOL_FOPS_RDWR(tool_peer_spad_fops,
+>>>                        tool_peer_spad_read,
+>>>                        tool_peer_spad_write);
+>>>
+>>> +static ssize_t tool_link_read(struct file *filep, char __user *ubuf,
+>>> +                             size_t size, loff_t *offp)
+>>> +{
+>>> +       struct tool_ctx *tc = filep->private_data;
+>>> +       char *buf;
+>>> +       ssize_t pos, rc;
+>>> +
+>>> +       buf = kmalloc(64, GFP_KERNEL);
+>>> +       if (!buf)
+>>> +               return -ENOMEM;
+>>> +
+>>> +       pos = scnprintf(buf, 64, "%d\n", tc->link_is_up);
+>>> +       rc = simple_read_from_buffer(ubuf, size, offp, buf, pos);
+>>> +
+>>> +       kfree(buf);
+>>> +
+>>> +       return rc;
+>>> +}
+>>> +
+>>> +static ssize_t tool_link_write(struct file *filep, const char __user
+>>> *ubuf,
+>>> +                              size_t size, loff_t *offp)
+>>> +{
+>>> +       struct tool_ctx *tc = filep->private_data;
+>>> +
+>>> +       if (wait_event_interruptible(tc->link_wq, tc->link_is_up))
+>>> +               return -ERESTART;
+>>> +
+>>> +       return size;
+>>> +}
+>>> +
+>>> +static TOOL_FOPS_RDWR(tool_link_fops,
+>>> +                     tool_link_read,
+>>> +                     tool_link_write);
+>>>
+>>>   static ssize_t tool_mw_read(struct file *filep, char __user *ubuf,
+>>>                              size_t size, loff_t *offp)
+>>> @@ -708,6 +749,9 @@ static void tool_setup_dbgfs(struct tool_ctx *tc)
+>>>          debugfs_create_file("peer_spad", S_IRUSR | S_IWUSR, tc->dbgfs,
+>>>                              tc, &tool_peer_spad_fops);
+>>>
+>>> +       debugfs_create_file("link", S_IRUSR | S_IWUSR, tc->dbgfs,
+>>> +                           tc, &tool_link_fops);
+>>> +
+>>>          mw_count = min(ntb_mw_count(tc->ntb), MAX_MWS);
+>>>          for (i = 0; i < mw_count; i++) {
+>>>                  char buf[30];
+>>> @@ -741,6 +785,7 @@ static int tool_probe(struct ntb_client *self, struct
+>>> ntb_dev *ntb)
+>>>          }
+>>>
+>>>          tc->ntb = ntb;
+>>> +       init_waitqueue_head(&tc->link_wq);
+>>>          INIT_DELAYED_WORK(&tc->link_work, tool_link_work);
+>>>          INIT_WORK(&tc->link_cleanup, tool_link_cleanup);
