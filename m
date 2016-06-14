@@ -1,69 +1,64 @@
-Return-Path: <gunthorp@cgy1-donard.priv.deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id 62si3246031pfx.1.2016.06.14.10.02.37
+Return-Path: <Allen.Hubbe@emc.com>
+Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
+        by gmr-mx.google.com with ESMTPS id d71si2092319ywb.3.2016.06.14.08.54.44
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 14 Jun 2016 10:02:37 -0700 (PDT)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Tue, 14 Jun 2016 11:02:24 -0600
-Message-Id: <14c2895ca4c7430162543ffc229c2131f57153f7.1465919683.git.logang@deltatee.com>
-In-Reply-To: <cover.1465919682.git.logang@deltatee.com>
-References: <cover.1465919682.git.logang@deltatee.com>
-In-Reply-To: <cover.1465919682.git.logang@deltatee.com>
-References: <cover.1465919682.git.logang@deltatee.com>
-Subject: [PATCH v2 4/8] ntb_perf: Wait for link before running test
-To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
-Cc: Shuah Khan <shuahkh@osg.samsung.com>, Sudip Mukherjee <sudipm.mukherjee@gmail.com>, Arnd Bergmann <arnd@arndb.de>, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-kselftest@vger.kernel.org, Logan Gunthorpe <logang@deltatee.com>
+        Tue, 14 Jun 2016 08:54:44 -0700 (PDT)
+From: "Allen Hubbe" <Allen.Hubbe@emc.com>
+References: <cover.1465598632.git.logang@deltatee.com> <e447cedb6197b62f141e7688ed2329c259f33eb9.1465598632.git.logang@deltatee.com> <CAJ80sasERM19iz7d9+VeyDg-nasQvBpSqe9crB16GBMez8dFew@mail.gmail.com> <575C2E28.9020604@deltatee.com> <CAJ80sasHLMN3FZnFOKgfU6d7KBmr4zt2H5ej58EapYDBaoqZag@mail.gmail.com> <000101d1c653$bc673280$35359780$@emc.com> <57602736.7090709@deltatee.com>
+In-Reply-To: <57602736.7090709@deltatee.com>
+Subject: RE: [PATCH 6/8] ntb_tool: Add link status file to debugfs
+Date: Tue, 14 Jun 2016 11:54:16 -0400
+Message-ID: <000301d1c655$02e46f60$08ad4e20$@emc.com>
+MIME-Version: 1.0
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Content-Language: en-us
+To: 'Logan Gunthorpe' <logang@deltatee.com>, 'Allen Hubbe' <allenbh@gmail.com>
+Cc: 'Jon Mason' <jdmason@kudzu.us>, 'Dave Jiang' <dave.jiang@intel.com>, 'Shuah Khan' <shuahkh@osg.samsung.com>, 'Sudip Mukherjee' <sudipm.mukherjee@gmail.com>, 'Arnd Bergmann' <arnd@arndb.de>, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-kselftest@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-Instead of returning immediately with an error when the link is
-down, wait for the link to come up (or the user sends a SIGINT).
+From: Logan Gunthorpe
+> On 14/06/16 09:45 AM, Allen Hubbe wrote:
+> >
+> > Feel free to disregard my suggestion above.  I hope my comment has not cost you too much
+> time.
+> >
+> > The way you have written it already, and used it in the self-test script is much more
+> concise.
+> >
+> >>> + * root@self# echo > $DBG_DIR/link
+> >
+> > Acked-by: Allen.Hubbe@emc.com
+> >
+> >
+> >
+> > Eventually, I think it would be useful to let ntb_tool enable and disable the link.  In
+> that case, it might also be useful in a test script to wait for link down, not just link
+> up.
+> >
+> > What about this:
+> >
+> > # Wait for the link to be up or down
+> > root@self# echo 1 > $DBG_DIR/link
+> > root@self# echo 0 > $DBG_DIR/link
+> >
+> > It need not be a part of this patch, but eventually:
+> >
+> > # Enable or disable the link
+> > root@self# echo 1 > $DBG_DIR/link_ctrl
+> > root@self# echo 0 > $DBG_DIR/link_ctrl
+> >
+> > # Reading the link_ctrl file can also give the link status
+> > root@self# cat $DBG_DIR/link_ctrl
+> >
+> > Finally, I wonder if the file called "link" in this patch should be called "link_wait"
+> or similar, so its purpose is obviously not for enabling and disabling the link.
+> >
+> 
+> Actually I've already implemented something similar to your original
+> suggestion. I'll be submitting a v2 of this set shortly.
 
-This is to make scripting ntb_perf easier.
-
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Acked-by: Dave Jiang <dave.jiang@intel.com>
----
- drivers/ntb/test/ntb_perf.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index 05a8705..f0784e5 100644
---- a/drivers/ntb/test/ntb_perf.c
-+++ b/drivers/ntb/test/ntb_perf.c
-@@ -135,6 +135,7 @@ struct perf_ctx {
- 	bool			link_is_up;
- 	struct work_struct	link_cleanup;
- 	struct delayed_work	link_work;
-+	wait_queue_head_t	link_wq;
- 	struct dentry		*debugfs_node_dir;
- 	struct dentry		*debugfs_run;
- 	struct dentry		*debugfs_threads;
-@@ -533,6 +534,7 @@ static void perf_link_work(struct work_struct *work)
- 		goto out1;
- 
- 	perf->link_is_up = true;
-+	wake_up(&perf->link_wq);
- 
- 	return;
- 
-@@ -653,7 +655,7 @@ static ssize_t debugfs_run_write(struct file *filp, const char __user *ubuf,
- 	int node, i;
- 	DECLARE_WAIT_QUEUE_HEAD(wq);
- 
--	if (!perf->link_is_up)
-+	if (wait_event_interruptible(perf->link_wq, perf->link_is_up))
- 		return -ENOLINK;
- 
- 	if (perf->perf_threads == 0)
-@@ -783,6 +785,7 @@ static int perf_probe(struct ntb_client *client, struct ntb_dev *ntb)
- 	mutex_init(&perf->run_mutex);
- 	spin_lock_init(&perf->db_lock);
- 	perf_setup_mw(ntb, perf);
-+	init_waitqueue_head(&perf->link_wq);
- 	INIT_DELAYED_WORK(&perf->link_work, perf_link_work);
- 	INIT_WORK(&perf->link_cleanup, perf_link_cleanup);
- 
--- 
-2.1.4
+Ok.  Thanks.  I'll accept the blame if anyone doesn't like it.
 
