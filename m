@@ -1,17 +1,17 @@
 Return-Path: <gunthorp@cgy1-donard.priv.deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id i135si254837pfe.0.2016.06.15.14.26.55
+        by gmr-mx.google.com with ESMTPS id 62si3246033pfx.1.2016.06.14.10.02.37
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 15 Jun 2016 14:26:55 -0700 (PDT)
+        Tue, 14 Jun 2016 10:02:38 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Wed, 15 Jun 2016 15:26:37 -0600
-Message-Id: <d770c327d028ff794c74602268c469d54526675b.1466025130.git.logang@deltatee.com>
-In-Reply-To: <cover.1466025130.git.logang@deltatee.com>
-References: <cover.1466025130.git.logang@deltatee.com>
-In-Reply-To: <cover.1466025130.git.logang@deltatee.com>
-References: <cover.1466025130.git.logang@deltatee.com>
-Subject: [PATCH v3 08/10] ntb_pingpong: Add a debugfs file to get the ping count
+Date: Tue, 14 Jun 2016 11:02:27 -0600
+Message-Id: <1442774814a0ca9e68c08ae5061d47d8fd45753c.1465919683.git.logang@deltatee.com>
+In-Reply-To: <cover.1465919682.git.logang@deltatee.com>
+References: <cover.1465919682.git.logang@deltatee.com>
+In-Reply-To: <cover.1465919682.git.logang@deltatee.com>
+References: <cover.1465919682.git.logang@deltatee.com>
+Subject: [PATCH v2 7/8] ntb_pingpong: Add a debugfs file to get the ping count
 To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
 Cc: Shuah Khan <shuahkh@osg.samsung.com>, Sudip Mukherjee <sudipm.mukherjee@gmail.com>, Arnd Bergmann <arnd@arndb.de>, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-kselftest@vger.kernel.org, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
