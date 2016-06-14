@@ -1,283 +1,473 @@
 Return-Path: <gunthorp@cgy1-donard.priv.deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id e68si2970087pfa.0.2016.06.14.10.02.39
+        by gmr-mx.google.com with ESMTPS id 62si3246061pfx.1.2016.06.14.10.02.40
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 14 Jun 2016 10:02:39 -0700 (PDT)
+        Tue, 14 Jun 2016 10:02:40 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Tue, 14 Jun 2016 11:02:22 -0600
-Message-Id: <c55b9ce2f0ecdd0b60d028ffea1206e26d140493.1465919683.git.logang@deltatee.com>
+Date: Tue, 14 Jun 2016 11:02:28 -0600
+Message-Id: <132118f7d40e4ca4dde0b7eca819aed04a6619cc.1465919683.git.logang@deltatee.com>
 In-Reply-To: <cover.1465919682.git.logang@deltatee.com>
 References: <cover.1465919682.git.logang@deltatee.com>
 In-Reply-To: <cover.1465919682.git.logang@deltatee.com>
 References: <cover.1465919682.git.logang@deltatee.com>
-Subject: [PATCH v2 2/8] ntb_perf: Improve thread handling to increase robustness
+Subject: [PATCH v2 8/8] ntb_test: Add a selftest script for the NTB subsystem
 To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
 Cc: Shuah Khan <shuahkh@osg.samsung.com>, Sudip Mukherjee <sudipm.mukherjee@gmail.com>, Arnd Bergmann <arnd@arndb.de>, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-kselftest@vger.kernel.org, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-This commit accomplishes a few things:
+This script automates testing doorbells, scratchpads and memory windows
+for an NTB device. It can be run locally, with the NTB looped
+back to the same host or use SSH to remotely control the second host.
 
-1) Properly prevent multiple sets of threads from running at once using
-a mutex. Lots of race issues existed with the thread_cleanup.
+In the single host case, the script just needs to be passed two
+arguments: a PCI ID for each side of the link. In the two host case
+the -r option must be used to specify the remote hostname (which must
+be SSH accessible and should probably have ssh-keys exchanged).
 
-2) The mutex allows us to ensure that threads are finished before
-tearing down the device or module.
+A sample run looks like this:
 
-3) Don't use kthread_stop when the threads can exit by themselves, as
-this is counter-indicated by the kthread_create documentation. Threads
-now wait for kthread_stop to occur.
+$ sudo ./ntb_test.sh 0000:03:00.1 0000:83:00.1 -p 29
+Starting ntb_tool tests...
+Running db tests on: 0000:03:00.1 / 0000:83:00.1
+  Passed
+Running db tests on: 0000:83:00.1 / 0000:03:00.1
+  Passed
+Running spad tests on: 0000:03:00.1 / 0000:83:00.1
+  Passed
+Running spad tests on: 0000:83:00.1 / 0000:03:00.1
+  Passed
+Running mw0 tests on: 0000:03:00.1 / 0000:83:00.1
+  Passed
+Running mw0 tests on: 0000:83:00.1 / 0000:03:00.1
+  Passed
+Running mw1 tests on: 0000:03:00.1 / 0000:83:00.1
+  Passed
+Running mw1 tests on: 0000:83:00.1 / 0000:03:00.1
+  Passed
 
-4) Writing to the run file now blocks until the threads are complete.
-The test can then be safely interrupted by a SIGINT.
+Starting ntb_pingpong tests...
+Running ping pong tests on: 0000:03:00.1 / 0000:83:00.1
+  Passed
 
-Also, while I was at it:
-
-5) debugfs_run_write shouldn't return 0 in the early check cases as this
-could cause debugfs_run_write to loop undesirably.
+Starting ntb_perf tests...
+Running local perf test without DMA
+  0: copied 536870912 bytes in 238205 usecs, 2253 MBytes/s
+  Passed
+Running remote perf test without DMA
+  0: copied 536870912 bytes in 238205 usecs, 2253 MBytes/s
+  Passed
 
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Acked-by: Dave Jiang <dave.jiang@intel.com>
+Acked-by: Shuah Khan <shuahkh@osg.samsung.com>
 ---
- drivers/ntb/test/ntb_perf.c | 124 +++++++++++++++++++++++++++-----------------
- 1 file changed, 76 insertions(+), 48 deletions(-)
+ MAINTAINERS                             |   1 +
+ tools/testing/selftests/ntb/ntb_test.sh | 384 ++++++++++++++++++++++++++++++++
+ 2 files changed, 385 insertions(+)
+ create mode 100755 tools/testing/selftests/ntb/ntb_test.sh
 
-diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index 5008ccf..db4dc61 100644
---- a/drivers/ntb/test/ntb_perf.c
-+++ b/drivers/ntb/test/ntb_perf.c
-@@ -58,6 +58,7 @@
- #include <linux/delay.h>
- #include <linux/sizes.h>
- #include <linux/ntb.h>
-+#include <linux/mutex.h>
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 9c567a4..f178e7e 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -7846,6 +7846,7 @@ F:	drivers/ntb/
+ F:	drivers/net/ntb_netdev.c
+ F:	include/linux/ntb.h
+ F:	include/linux/ntb_transport.h
++F:	tools/testing/selftests/ntb/
  
- #define DRIVER_NAME		"ntb_perf"
- #define DRIVER_DESCRIPTION	"PCIe NTB Performance Measurement Tool"
-@@ -121,6 +122,7 @@ struct pthr_ctx {
- 	int			dma_prep_err;
- 	int			src_idx;
- 	void			*srcs[MAX_SRCS];
-+	wait_queue_head_t       *wq;
- };
- 
- struct perf_ctx {
-@@ -134,9 +136,11 @@ struct perf_ctx {
- 	struct dentry		*debugfs_run;
- 	struct dentry		*debugfs_threads;
- 	u8			perf_threads;
--	bool			run;
-+	/* mutex ensures only one set of threads run at once */
-+	struct mutex		run_mutex;
- 	struct pthr_ctx		pthr_ctx[MAX_THREADS];
- 	atomic_t		tsync;
-+	atomic_t                tdone;
- };
- 
- enum {
-@@ -295,12 +299,18 @@ static int perf_move_data(struct pthr_ctx *pctx, char __iomem *dst, char *src,
- 			set_current_state(TASK_INTERRUPTIBLE);
- 			schedule_timeout(1);
- 		}
+ NTB INTEL DRIVER
+ M:	Jon Mason <jdmason@kudzu.us>
+diff --git a/tools/testing/selftests/ntb/ntb_test.sh b/tools/testing/selftests/ntb/ntb_test.sh
+new file mode 100755
+index 0000000..4422d6c
+--- /dev/null
++++ b/tools/testing/selftests/ntb/ntb_test.sh
+@@ -0,0 +1,384 @@
++#!/bin/bash
++# Copyright (c) 2016 Microsemi. All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation; either version 2 of
++# the License, or (at your option) any later version.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# Author: Logan Gunthorpe <logang@deltatee.com>
 +
-+		if (unlikely(kthread_should_stop()))
-+			break;
- 	}
- 
- 	if (use_dma) {
- 		pr_info("%s: All DMA descriptors submitted\n", current->comm);
--		while (atomic_read(&pctx->dma_sync) != 0)
-+		while (atomic_read(&pctx->dma_sync) != 0) {
-+			if (kthread_should_stop())
-+				break;
- 			msleep(20);
-+		}
- 	}
- 
- 	kstop = ktime_get();
-@@ -393,7 +403,10 @@ static int ntb_perf_thread(void *data)
- 		pctx->srcs[i] = NULL;
- 	}
- 
--	return 0;
-+	atomic_inc(&perf->tdone);
-+	wake_up(pctx->wq);
-+	rc = 0;
-+	goto done;
- 
- err:
- 	for (i = 0; i < MAX_SRCS; i++) {
-@@ -406,6 +419,16 @@ err:
- 		pctx->dma_chan = NULL;
- 	}
- 
-+done:
-+	/* Wait until we are told to stop */
-+	for (;;) {
-+		set_current_state(TASK_INTERRUPTIBLE);
-+		if (kthread_should_stop())
-+			break;
-+		schedule();
-+	}
-+	__set_current_state(TASK_RUNNING);
++REMOTE_HOST=
++LIST_DEVS=FALSE
 +
- 	return rc;
- }
- 
-@@ -553,6 +576,7 @@ static ssize_t debugfs_run_read(struct file *filp, char __user *ubuf,
- 	struct perf_ctx *perf = filp->private_data;
- 	char *buf;
- 	ssize_t ret, out_offset;
-+	int running;
- 
- 	if (!perf)
- 		return 0;
-@@ -560,7 +584,9 @@ static ssize_t debugfs_run_read(struct file *filp, char __user *ubuf,
- 	buf = kmalloc(64, GFP_KERNEL);
- 	if (!buf)
- 		return -ENOMEM;
--	out_offset = snprintf(buf, 64, "%d\n", perf->run);
++DEBUGFS=${DEBUGFS-/sys/kernel/debug}
 +
-+	running = mutex_is_locked(&perf->run_mutex);
-+	out_offset = snprintf(buf, 64, "%d\n", running);
- 	ret = simple_read_from_buffer(ubuf, count, offp, buf, out_offset);
- 	kfree(buf);
- 
-@@ -572,7 +598,6 @@ static void threads_cleanup(struct perf_ctx *perf)
- 	struct pthr_ctx *pctx;
- 	int i;
- 
--	perf->run = false;
- 	for (i = 0; i < MAX_THREADS; i++) {
- 		pctx = &perf->pthr_ctx[i];
- 		if (pctx->thread) {
-@@ -587,65 +612,66 @@ static ssize_t debugfs_run_write(struct file *filp, const char __user *ubuf,
- {
- 	struct perf_ctx *perf = filp->private_data;
- 	int node, i;
-+	DECLARE_WAIT_QUEUE_HEAD(wq);
- 
- 	if (!perf->link_is_up)
--		return 0;
-+		return -ENOLINK;
- 
- 	if (perf->perf_threads == 0)
--		return 0;
-+		return -EINVAL;
- 
--	if (atomic_read(&perf->tsync) == 0)
--		perf->run = false;
-+	if (!mutex_trylock(&perf->run_mutex))
-+		return -EBUSY;
- 
--	if (perf->run)
--		threads_cleanup(perf);
--	else {
--		perf->run = true;
-+	if (perf->perf_threads > MAX_THREADS) {
-+		perf->perf_threads = MAX_THREADS;
-+		pr_info("Reset total threads to: %u\n", MAX_THREADS);
-+	}
- 
--		if (perf->perf_threads > MAX_THREADS) {
--			perf->perf_threads = MAX_THREADS;
--			pr_info("Reset total threads to: %u\n", MAX_THREADS);
--		}
-+	/* no greater than 1M */
-+	if (seg_order > MAX_SEG_ORDER) {
-+		seg_order = MAX_SEG_ORDER;
-+		pr_info("Fix seg_order to %u\n", seg_order);
-+	}
- 
--		/* no greater than 1M */
--		if (seg_order > MAX_SEG_ORDER) {
--			seg_order = MAX_SEG_ORDER;
--			pr_info("Fix seg_order to %u\n", seg_order);
--		}
-+	if (run_order < seg_order) {
-+		run_order = seg_order;
-+		pr_info("Fix run_order to %u\n", run_order);
-+	}
- 
--		if (run_order < seg_order) {
--			run_order = seg_order;
--			pr_info("Fix run_order to %u\n", run_order);
--		}
-+	node = dev_to_node(&perf->ntb->pdev->dev);
-+	atomic_set(&perf->tdone, 0);
- 
--		node = dev_to_node(&perf->ntb->pdev->dev);
--		/* launch kernel thread */
--		for (i = 0; i < perf->perf_threads; i++) {
--			struct pthr_ctx *pctx;
--
--			pctx = &perf->pthr_ctx[i];
--			atomic_set(&pctx->dma_sync, 0);
--			pctx->perf = perf;
--			pctx->thread =
--				kthread_create_on_node(ntb_perf_thread,
--						       (void *)pctx,
--						       node, "ntb_perf %d", i);
--			if (IS_ERR(pctx->thread)) {
--				pctx->thread = NULL;
--				goto err;
--			} else
--				wake_up_process(pctx->thread);
--
--			if (perf->run == false)
--				return -ENXIO;
--		}
-+	/* launch kernel thread */
-+	for (i = 0; i < perf->perf_threads; i++) {
-+		struct pthr_ctx *pctx;
- 
-+		pctx = &perf->pthr_ctx[i];
-+		atomic_set(&pctx->dma_sync, 0);
-+		pctx->perf = perf;
-+		pctx->wq = &wq;
-+		pctx->thread =
-+			kthread_create_on_node(ntb_perf_thread,
-+					       (void *)pctx,
-+					       node, "ntb_perf %d", i);
-+		if (IS_ERR(pctx->thread)) {
-+			pctx->thread = NULL;
-+			goto err;
-+		} else {
-+			wake_up_process(pctx->thread);
-+		}
- 	}
- 
-+	wait_event_interruptible(wq,
-+		atomic_read(&perf->tdone) == perf->perf_threads);
++PERF_RUN_ORDER=32
++MAX_MW_SIZE=0
++RUN_DMA_TESTS=
++DONT_CLEANUP=
 +
-+	threads_cleanup(perf);
-+	mutex_unlock(&perf->run_mutex);
- 	return count;
- 
- err:
- 	threads_cleanup(perf);
-+	mutex_unlock(&perf->run_mutex);
- 	return -ENXIO;
- }
- 
-@@ -713,7 +739,7 @@ static int perf_probe(struct ntb_client *client, struct ntb_dev *ntb)
- 	perf->ntb = ntb;
- 	perf->perf_threads = 1;
- 	atomic_set(&perf->tsync, 0);
--	perf->run = false;
-+	mutex_init(&perf->run_mutex);
- 	spin_lock_init(&perf->db_lock);
- 	perf_setup_mw(ntb, perf);
- 	INIT_DELAYED_WORK(&perf->link_work, perf_link_work);
-@@ -748,6 +774,8 @@ static void perf_remove(struct ntb_client *client, struct ntb_dev *ntb)
- 
- 	dev_dbg(&perf->ntb->dev, "%s called\n", __func__);
- 
-+	mutex_lock(&perf->run_mutex);
++function show_help()
++{
++	echo "Usage: $0 [OPTIONS] LOCAL_DEV REMOTE_DEV"
++	echo "Run tests on a pair of NTB endpoints."
++	echo
++	echo "If the NTB device loops back to the same host then,"
++	echo "just specifying the two PCI ids on the command line is"
++	echo "sufficient. Otherwise, if the NTB link spans two hosts"
++	echo "use the -r option to specify the hostname for the remote"
++	echo "device. SSH will then be used to test the remote side."
++	echo "An SSH key between the root users of the host would then"
++	echo "be highly recommended."
++	echo
++	echo "Options:"
++	echo "  -C              don't cleanup ntb modules on exit"
++	echo "  -d              run dma tests"
++	echo "  -h              show this help message"
++	echo "  -l              list available local and remote PCI ids"
++	echo "  -r REMOTE_HOST  specify the remote's hostname to connect"
++        echo "                  to for the test (using ssh)"
++	echo "  -p NUM          ntb_perf run order (default: $PERF_RUN_ORDER)"
++	echo "  -w max_mw_size  maxmium memory window size"
++	echo
++}
 +
- 	cancel_delayed_work_sync(&perf->link_work);
- 	cancel_work_sync(&perf->link_cleanup);
- 
++function parse_args()
++{
++	OPTIND=0
++	while getopts "Cdhlr:p:w:" opt; do
++		case "$opt" in
++		C)  DONT_CLEANUP=1 ;;
++		d)  RUN_DMA_TESTS=1 ;;
++		h)  show_help; exit 0 ;;
++		l)  LIST_DEVS=TRUE ;;
++		r)  REMOTE_HOST=${OPTARG} ;;
++		p)  PERF_RUN_ORDER=${OPTARG} ;;
++		w)  MAX_MW_SIZE=${OPTARG} ;;
++		\?)
++		    echo "Invalid option: -$OPTARG" >&2
++		    exit 1
++		    ;;
++		esac
++	done
++}
++
++parse_args "$@"
++shift $((OPTIND-1))
++LOCAL_DEV=$1
++shift
++parse_args "$@"
++shift $((OPTIND-1))
++REMOTE_DEV=$1
++shift
++parse_args "$@"
++
++set -e
++
++function _modprobe()
++{
++        modprobe "$@"
++}
++
++function split_remote()
++{
++	VPATH=$1
++	REMOTE=
++
++	if [[ "$VPATH" == *":/"* ]]; then
++		REMOTE=${VPATH%%:*}
++		VPATH=${VPATH#*:}
++	fi
++}
++
++function read_file()
++{
++	split_remote $1
++	if [[ "$REMOTE" != "" ]]; then
++		ssh "$REMOTE" cat "$VPATH"
++	else
++		cat "$VPATH"
++	fi
++}
++
++function write_file()
++{
++	split_remote $2
++	VALUE=$1
++
++	if [[ "$REMOTE" != "" ]]; then
++		ssh "$REMOTE" "echo \"$VALUE\" > \"$VPATH\""
++	else
++		echo "$VALUE" > "$VPATH"
++	fi
++}
++
++function doorbell_test()
++{
++	LOC=$1
++	REM=$2
++	EXP=0
++
++	echo "Running db tests on: $(basename $LOC) / $(basename $REM)"
++
++	write_file "c 0xFFFFFFFF" "$REM/db"
++
++	for ((i=1; i <= 8; i++)); do
++		let DB=$(read_file "$REM/db") || true
++		if [[ "$DB" != "$EXP" ]]; then
++			echo "Doorbell doesn't match expected value $EXP " \
++			     "in $REM/db" >&2
++			exit -1
++		fi
++
++		let "MASK=1 << ($i-1)" || true
++		let "EXP=$EXP | $MASK" || true
++		write_file "s $MASK" "$LOC/peer_db"
++	done
++
++	echo "  Passed"
++}
++
++function read_spad()
++{
++       VPATH=$1
++       IDX=$2
++
++       ROW=($(read_file "$VPATH" | grep -e "^$IDX"))
++       let VAL=${ROW[1]} || true
++       echo $VAL
++}
++
++function scratchpad_test()
++{
++	LOC=$1
++	REM=$2
++	CNT=$(read_file "$LOC/spad" | wc -l)
++
++	echo "Running spad tests on: $(basename $LOC) / $(basename $REM)"
++
++	for ((i = 0; i < $CNT; i++)); do
++		VAL=$RANDOM
++		write_file "$i $VAL" "$LOC/peer_spad"
++		RVAL=$(read_spad "$REM/spad" $i)
++
++		if [[ "$VAL" != "$RVAL" ]]; then
++			echo "Scratchpad doesn't match expected value $VAL " \
++			     "in $REM/spad, got $RVAL" >&2
++			exit -1
++		fi
++
++	done
++
++	echo "  Passed"
++}
++
++function write_mw()
++{
++	split_remote $2
++
++	if [[ "$REMOTE" != "" ]]; then
++		ssh "$REMOTE" \
++			dd if=/dev/urandom "of=$VPATH" 2> /dev/null || true
++	else
++		dd if=/dev/urandom "of=$VPATH" 2> /dev/null || true
++	fi
++}
++
++function mw_test()
++{
++	IDX=$1
++	LOC=$2
++	REM=$3
++
++	echo "Running $IDX tests on: $(basename $LOC) / $(basename $REM)"
++
++	write_mw "$LOC/$IDX"
++
++	split_remote "$LOC/$IDX"
++	if [[ "$REMOTE" == "" ]]; then
++		A=$VPATH
++	else
++		A=/tmp/ntb_test.$$.A
++		ssh "$REMOTE" cat "$VPATH" > "$A"
++	fi
++
++	split_remote "$REM/peer_$IDX"
++	if [[ "$REMOTE" == "" ]]; then
++		B=$VPATH
++	else
++		B=/tmp/ntb_test.$$.B
++		ssh "$REMOTE" cat "$VPATH" > "$B"
++	fi
++
++	cmp "$A" "$B"
++	if [[ $? != 0 ]]; then
++		echo "Memory window $MW did not match!" >&2
++	fi
++
++	if [[ "$A" == "/tmp/*" ]]; then
++		rm "$A"
++	fi
++
++	if [[ "$B" == "/tmp/*" ]]; then
++		rm "$B"
++	fi
++
++	echo "  Passed"
++}
++
++function pingpong_test()
++{
++	LOC=$1
++	REM=$2
++
++	echo "Running ping pong tests on: $(basename $LOC) / $(basename $REM)"
++
++	LOC_START=$(read_file $LOC/count)
++	REM_START=$(read_file $REM/count)
++
++	sleep 7
++
++	LOC_END=$(read_file $LOC/count)
++	REM_END=$(read_file $REM/count)
++
++	if [[ $LOC_START == $LOC_END ]] || [[ $REM_START == $REM_END ]]; then
++		echo "Ping pong counter not incrementing!" >&2
++		exit 1
++	fi
++
++	echo "  Passed"
++}
++
++function perf_test()
++{
++	USE_DMA=$1
++
++	if [[ $USE_DMA == "1" ]]; then
++		WITH="with"
++	else
++		WITH="without"
++	fi
++
++	_modprobe ntb_perf run_order=$PERF_RUN_ORDER \
++		max_mw_size=$MAX_MW_SIZE use_dma=$USE_DMA
++
++	echo "Running local perf test $WITH DMA"
++	write_file "" $LOCAL_PERF/run
++	echo -n "  "
++	read_file $LOCAL_PERF/run
++	echo "  Passed"
++
++	echo "Running remote perf test $WITH DMA"
++	write_file "" $REMOTE_PERF/run
++	echo -n "  "
++	read_file $LOCAL_PERF/run
++	echo "  Passed"
++
++	_modprobe -r ntb_perf
++}
++
++function ntb_tool_tests()
++{
++	LOCAL_TOOL=$DEBUGFS/ntb_tool/$LOCAL_DEV
++	REMOTE_TOOL=$REMOTE_HOST:$DEBUGFS/ntb_tool/$REMOTE_DEV
++
++	echo "Starting ntb_tool tests..."
++
++	_modprobe ntb_tool
++
++	echo Y > $LOCAL_TOOL/link_event
++	cat $LOCAL_TOOL/link_event > /dev/null
++
++	doorbell_test $LOCAL_TOOL $REMOTE_TOOL
++	doorbell_test $REMOTE_TOOL $LOCAL_TOOL
++	scratchpad_test $LOCAL_TOOL $REMOTE_TOOL
++	scratchpad_test $REMOTE_TOOL $LOCAL_TOOL
++
++	for MW in $(ls $LOCAL_TOOL/mw*); do
++		MW=$(basename $MW)
++		mw_test $MW $LOCAL_TOOL $REMOTE_TOOL
++		mw_test $MW $REMOTE_TOOL $LOCAL_TOOL
++	done
++
++	_modprobe -r ntb_tool
++}
++
++function ntb_pingpong_tests()
++{
++	LOCAL_PP=$DEBUGFS/ntb_pingpong/$LOCAL_DEV
++	REMOTE_PP=$REMOTE_HOST:$DEBUGFS/ntb_pingpong/$REMOTE_DEV
++
++	echo "Starting ntb_pingpong tests..."
++
++	_modprobe ntb_pingpong
++
++	pingpong_test $LOCAL_PP $REMOTE_PP
++
++	_modprobe -r ntb_pingpong
++}
++
++function ntb_perf_tests()
++{
++	LOCAL_PERF=$DEBUGFS/ntb_perf/$LOCAL_DEV
++	REMOTE_PERF=$REMOTE_HOST:$DEBUGFS/ntb_perf/$REMOTE_DEV
++
++	echo "Starting ntb_perf tests..."
++
++	perf_test 0
++
++	if [[ $RUN_DMA_TESTS ]]; then
++		perf_test 1
++	fi
++}
++
++function cleanup()
++{
++	set +e
++	_modprobe -r ntb_tool 2> /dev/null
++	_modprobe -r ntb_perf 2> /dev/null
++	_modprobe -r ntb_pingpong 2> /dev/null
++	_modprobe -r ntb_transport 2> /dev/null
++	set -e
++}
++
++cleanup
++
++if ! [[ $$DONT_CLEANUP ]]; then
++	trap cleanup EXIT
++fi
++
++if [ "$(id -u)" != "0" ]; then
++	echo "This script must be run as root" 1>&2
++	exit 1
++fi
++
++if [[ "$LIST_DEVS" == TRUE ]]; then
++	echo "Local Devices:"
++	ls -1 /sys/bus/ntb/devices
++	echo
++
++	if [[ "$REMOTE_HOST" != "" ]]; then
++		echo "Remote Devices:"
++		ssh $REMOTE_HOST ls -1 /sys/bus/ntb/devices
++	fi
++
++	exit 0
++fi
++
++if [[ "$LOCAL_DEV" == $"" ]] || [[ "$REMOTE_DEV" == $"" ]]; then
++	show_help
++	exit 1
++fi
++
++ntb_tool_tests
++echo
++ntb_pingpong_tests
++echo
++ntb_perf_tests
++echo
 -- 
 2.1.4
 
