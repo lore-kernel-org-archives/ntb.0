@@ -1,61 +1,77 @@
-Return-Path: <dave.jiang@intel.com>
-Received: from mga09.intel.com (mga09.intel.com. [134.134.136.24])
-        by gmr-mx.google.com with ESMTP id tp10si4456312pac.2.2016.06.15.15.24.37
-        for <linux-ntb@googlegroups.com>;
-        Wed, 15 Jun 2016 15:24:37 -0700 (PDT)
-From: "Jiang, Dave" <dave.jiang@intel.com>
+Return-Path: <logang@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id i135si272196pfe.0.2016.06.15.15.21.10
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 15 Jun 2016 15:21:10 -0700 (PDT)
+References: <cover.1466025130.git.logang@deltatee.com>
+ <b1aa9e9977b992621452812f744ff7827ca4f28c.1466025130.git.logang@deltatee.com>
+ <1466026416.16234.262.camel@intel.com>
+From: Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <5761D4C5.8090208@deltatee.com>
+Date: Wed, 15 Jun 2016 16:20:53 -0600
+MIME-Version: 1.0
+In-Reply-To: <1466026416.16234.262.camel@intel.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Subject: Re: [PATCH v3 10/10] ntb_perf: clear link_is_up flag when the link
  goes down.
-Date: Wed, 15 Jun 2016 22:24:36 +0000
-Message-ID: <1466029459.16234.263.camel@intel.com>
-References: <cover.1466025130.git.logang@deltatee.com>
-	 <b1aa9e9977b992621452812f744ff7827ca4f28c.1466025130.git.logang@deltatee.com>
-	 <1466026416.16234.262.camel@intel.com> <5761D4C5.8090208@deltatee.com>
-In-Reply-To: <5761D4C5.8090208@deltatee.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <89D7955BD9F78645919C3AA15900F551@intel.com>
-Content-Transfer-Encoding: base64
-MIME-Version: 1.0
-Return-Path: dave.jiang@intel.com
-To: "Allen.Hubbe@emc.com" <Allen.Hubbe@emc.com>, "logang@deltatee.com" <logang@deltatee.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>
+To: "Jiang, Dave" <dave.jiang@intel.com>, "Allen.Hubbe@emc.com" <Allen.Hubbe@emc.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>
 Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "shuahkh@osg.samsung.com" <shuahkh@osg.samsung.com>, "sudipm.mukherjee@gmail.com" <sudipm.mukherjee@gmail.com>, "linux-kselftest@vger.kernel.org" <linux-kselftest@vger.kernel.org>, "arnd@arndb.de" <arnd@arndb.de>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-T24gV2VkLCAyMDE2LTA2LTE1IGF0IDE2OjIwIC0wNjAwLCBMb2dhbiBHdW50aG9ycGUgd3JvdGU6
-DQo+IEhleSwNCj4gDQo+IEFjdHVhbGx5LCBJIGhhdmUgdG8gcmV0cmFjdCB0aGlzIHBhdGNoLiBB
-ZnRlciBzb21lIG1vcmUgdGhvcm91Z2gNCj4gdGVzdGluZw0KPiBJJ20gZmluZGluZyBhbiBpc3N1
-ZToNCj4gDQo+IFdoZW4geW91IHJlbW92ZSBhbmQgcmUtaW5zdGFsbCB0aGUgbnRiX3BlcmYgbW9k
-dWxlIHZlcnkgcXVpY2tseSwNCj4gbnRiX3BlcmYgd2lsbCBvY2Nhc2lvbmFsbHkgbWlzcyB0aGUg
-bGluayB1cCBldmVudC4gVGhpcyBpcyBiZWNhdXNlDQo+IHRoZQ0KPiBsaW5rX2NsZWFudXAgd29y
-ayBnZXRzIGRlbGF5ZWQgbG9uZyBlbm91Z2ggdGhhdCBpdCBnZXRzIHNjaGVkdWxlZA0KPiBhZnRl
-cg0KPiB0aGUgbGluayB1cCBldmVudCBnZXRzIHNlbnQuIEl0IHRoZW4gY2FuY2VscyB0aGUgbGlu
-ayB3b3JrIHRoYXQNCj4gc2hvdWxkDQo+IGhhdmUgb2NjdXJyZWQuIFdpdGhvdXQgdGhpcyBwYXRj
-aCwgaXQgbmV2ZXIgaGFwcGVucyBiZWNhdXNlDQo+IGxpbmtfaXNfdXANCj4gbmV2ZXIgcmV0dXJu
-cyB0byBmYWxzZS4NCj4gDQo+IEkgdGhpbmsgdGhlIGNvcnJlY3Qgc29sdXRpb24gaXMgdG8ganVz
-dCByZW1vdmUgdGhlIGxpbmtfY2xlYW51cCB3b3JrDQo+IGFuZA0KPiBkbyB0aG9zZSBhY3Rpb25z
-IGltbWVkaWF0ZWx5IG9uIHJlY2VpcHQgb2YgdGhlIGV2ZW50LiBJZiB0aGVyZSdzDQo+IGFncmVl
-bWVudCBvbiB0aGlzIEkgY2FuIHJlLXNwaW4gaXQgYWdhaW4uDQoNCkknbSBvayB3aXRoIHRoYXQu
-IFRoaXMgaXMgbm90IGFuIGlzc3VlIHdpdGggbnRiX3RyYW5zcG9ydD8NCg0KPiANCj4gVGhhbmtz
-LA0KPiANCj4gTG9nYW4NCj4gDQo+IA0KPiBPbiAxNS8wNi8xNiAwMzozMyBQTSwgSmlhbmcsIERh
-dmUgd3JvdGU6DQo+ID4gDQo+ID4gT24gV2VkLCAyMDE2LTA2LTE1IGF0IDE1OjI2IC0wNjAwLCBM
-b2dhbiBHdW50aG9ycGUgd3JvdGU6DQo+ID4gPiANCj4gPiA+IFdoZW4gdGhlIGxpbmsgZ29lcyBk
-b3duLCB0aGUgbGlua19pc191cCBmbGFnIGRpZCBub3QgcmV0dXJuIHRvDQo+ID4gPiBmYWxzZS4g
-VGhpcyBjb3VsZCBoYXZlIGNhdXNlZCBzb21lIHN1YnRsZSBjb3JuZXIgY2FzZSBidWdzDQo+ID4g
-PiB3aGVuIHRoZSBsaW5rIGdvZXMgdXAgYW5kIGRvd24gcXVpY2tseS4NCj4gPiA+IA0KPiA+ID4g
-U2lnbmVkLW9mZi1ieTogTG9nYW4gR3VudGhvcnBlIDxsb2dhbmdAZGVsdGF0ZWUuY29tPg0KPiA+
-IEFja2VkLWJ5OiBEYXZlIEppYW5nIDxkYXZlLmppYW5nQGludGVsLmNvbT4NCj4gPiANCj4gPiBB
-bmQgYWxsIHRoZSBvdGhlciBudGJfcGVyZiBwYXRjaGVzIHNpbmNlIHRoZXJlIHdlcmUgbm8gYWRk
-aXRpb25hbA0KPiA+IGNoYW5nZXMuwqANCj4gPiANCj4gPiA+IA0KPiA+ID4gLS0tDQo+ID4gPiDC
-oGRyaXZlcnMvbnRiL3Rlc3QvbnRiX3BlcmYuYyB8IDIgKysNCj4gPiA+IMKgMSBmaWxlIGNoYW5n
-ZWQsIDIgaW5zZXJ0aW9ucygrKQ0KPiA+ID4gDQo+ID4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9u
-dGIvdGVzdC9udGJfcGVyZi5jDQo+ID4gPiBiL2RyaXZlcnMvbnRiL3Rlc3QvbnRiX3BlcmYuYw0K
-PiA+ID4gaW5kZXggZjA3ODRlNS4uYWU5ZDFiMiAxMDA2NDQNCj4gPiA+IC0tLSBhL2RyaXZlcnMv
-bnRiL3Rlc3QvbnRiX3BlcmYuYw0KPiA+ID4gKysrIGIvZHJpdmVycy9udGIvdGVzdC9udGJfcGVy
-Zi5jDQo+ID4gPiBAQCAtNTU3LDYgKzU1Nyw4IEBAIHN0YXRpYyB2b2lkIHBlcmZfbGlua19jbGVh
-bnVwKHN0cnVjdA0KPiA+ID4gd29ya19zdHJ1Y3QNCj4gPiA+ICp3b3JrKQ0KPiA+ID4gwqANCj4g
-PiA+IMKgCWlmICghcGVyZi0+bGlua19pc191cCkNCj4gPiA+IMKgCQljYW5jZWxfZGVsYXllZF93
-b3JrX3N5bmMoJnBlcmYtPmxpbmtfd29yayk7DQo+ID4gPiArDQo+ID4gPiArCXBlcmYtPmxpbmtf
-aXNfdXAgPSBmYWxzZTsNCj4gPiA+IMKgfQ0KPiA+ID4gwqANCj4gPiA+IMKgc3RhdGljIGludCBw
-ZXJmX3NldHVwX213KHN0cnVjdCBudGJfZGV2ICpudGIsIHN0cnVjdCBwZXJmX2N0eA0KPiA+ID4g
-KnBlcmYpDQo+ID4gPiAtLcKgDQo+ID4gPiAyLjEuNA==
+Hey,
+
+Actually, I have to retract this patch. After some more thorough testing
+I'm finding an issue:
+
+When you remove and re-install the ntb_perf module very quickly,
+ntb_perf will occasionally miss the link up event. This is because the
+link_cleanup work gets delayed long enough that it gets scheduled after
+the link up event gets sent. It then cancels the link work that should
+have occurred. Without this patch, it never happens because link_is_up
+never returns to false.
+
+I think the correct solution is to just remove the link_cleanup work and
+do those actions immediately on receipt of the event. If there's
+agreement on this I can re-spin it again.
+
+Thanks,
+
+Logan
+
+
+On 15/06/16 03:33 PM, Jiang, Dave wrote:
+> On Wed, 2016-06-15 at 15:26 -0600, Logan Gunthorpe wrote:
+>> When the link goes down, the link_is_up flag did not return to
+>> false. This could have caused some subtle corner case bugs
+>> when the link goes up and down quickly.
+>>
+>> Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+> 
+> Acked-by: Dave Jiang <dave.jiang@intel.com>
+> 
+> And all the other ntb_perf patches since there were no additional
+> changes. 
+> 
+>> ---
+>>  drivers/ntb/test/ntb_perf.c | 2 ++
+>>  1 file changed, 2 insertions(+)
+>>
+>> diff --git a/drivers/ntb/test/ntb_perf.c
+>> b/drivers/ntb/test/ntb_perf.c
+>> index f0784e5..ae9d1b2 100644
+>> --- a/drivers/ntb/test/ntb_perf.c
+>> +++ b/drivers/ntb/test/ntb_perf.c
+>> @@ -557,6 +557,8 @@ static void perf_link_cleanup(struct work_struct
+>> *work)
+>>  
+>>  	if (!perf->link_is_up)
+>>  		cancel_delayed_work_sync(&perf->link_work);
+>> +
+>> +	perf->link_is_up = false;
+>>  }
+>>  
+>>  static int perf_setup_mw(struct ntb_dev *ntb, struct perf_ctx *perf)
+>> -- 
+>> 2.1.4
