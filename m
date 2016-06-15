@@ -1,104 +1,174 @@
 Return-Path: <gunthorp@cgy1-donard.priv.deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id 62si4104348pfx.1.2016.06.15.14.26.57
+        by gmr-mx.google.com with ESMTPS id ci4si4040000pad.1.2016.06.15.14.26.57
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
         Wed, 15 Jun 2016 14:26:57 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Wed, 15 Jun 2016 15:26:29 -0600
-Message-Id: <cover.1466025130.git.logang@deltatee.com>
-Subject: [PATCH v3 00/10] NTB Selftest Script
+Date: Wed, 15 Jun 2016 15:26:36 -0600
+Message-Id: <32ec8e46e2f76dd74046b34c7b50cc84206090b3.1466025130.git.logang@deltatee.com>
+In-Reply-To: <cover.1466025130.git.logang@deltatee.com>
+References: <cover.1466025130.git.logang@deltatee.com>
+In-Reply-To: <cover.1466025130.git.logang@deltatee.com>
+References: <cover.1466025130.git.logang@deltatee.com>
+Subject: [PATCH v3 07/10] ntb_tool: Add link status and files to debugfs
 To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
 Cc: Shuah Khan <shuahkh@osg.samsung.com>, Sudip Mukherjee <sudipm.mukherjee@gmail.com>, Arnd Bergmann <arnd@arndb.de>, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-kselftest@vger.kernel.org, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Changes since v2:
+In order to more successfully script with ntb_tool it's useful to
+have a link file to check the link status so that the script
+doesn't use the other files until the link is up.
 
-1) As per Allan's suggestion, I've added a patch to postpone the
-peer memory window setup until the user requests it with a 'peer_trans*'
-file. This pushes the ntb_tool API closer to the kernel API and allows
-the link status file to return the raw status of the NTB link.
+This commit adds a 'link' file to the debugfs directory which reads
+boolean (Y or N) depending on the link status. Writing to the file
+change the link state using ntb_link_enable or ntb_link_disable.
 
-2) Change the link status file to return the value of ntb_link_is_up
-instead of the local 'memory window ready' value.
+A 'link_event' file is also provided so an application can block until
+the link changes to the desired state. If the user writes a 1, it will
+block until the link is up. If the user writes a 0, it will block until
+the link is down.
 
-3) Change the link_event file to just block on write. As it was in v2,
-if multiple users attempted to use the link_event file they could
-corrupt the state another user had set. Reads to this file are no
-longer permitted.
-
-4) Updates to the ntb_test script to accommodate the above changes.
-
-5) Added some link tests to the ntb_test script. It will bring the link
-down and check that the other side agrees.
-
-6) Added a minor bug fix (Patch #10) to ntb_perf. During discussions
-with Allen it was noticed that the link_is_up flag is never cleared if
-the link goes away.
-
+Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
 ---
+ drivers/ntb/test/ntb_tool.c | 89 +++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 89 insertions(+)
 
-Changes since v1:
-
-1) Add a comment to explain the *15 in the buf size calculation,
-as per Allen's feedback.
-
-2) Clean up the changes to the pingpong client as there were some
-sloppy copying mistakes.
-
-3) Rework the 'link' file in ntb_tool as per Allen's suggestions.
-I've added a 'link_event' file the works essentially how he's asked.
-Though, I found no need to use a completion as suggested and the flow
-is maybe slightly simpler than he's suggested. Just write a boolean
-to the event file then read to wait for the link to be either up or
-down. There's still some discussion on the best interface and it's
-not much work to make additional minor functional changes.
-
-4) Update the selftest script to use the new 'link_event' file.
-
-5) Minor change to the way the selftest script lists devices thanks to
-Allen's observation.
-
----
-
-I've written a ntb_test.sh script that would probably be useful if it
-were included in the kernel. This series ends with that script and
-includes some useful interface improvements and fixes to the existing ntb
-test modules. Please see each individual commit for more information.
-They are mostly independent.
-
-The series is based off of v4.6 plus the patches I've submitted that
-have been accepted into ntb-next. They've been run through checkpatch
-with --strict this time.
-
-As always, I'm happy to incorporate any feedback.
-
-Thanks,
-
-Logan
-
----
-
-Logan Gunthorpe (10):
-  ntb_perf: Schedule based on time not on performance
-  ntb_perf: Improve thread handling to increase robustness
-  ntb_perf: Return results by reading the run file
-  ntb_perf: Wait for link before running test
-  ntb_tool: BUG: Ensure the buffer size is large enough to return all
-    spads
-  ntb_tool: Postpone memory window initialization for the user
-  ntb_tool: Add link status and files to debugfs
-  ntb_pingpong: Add a debugfs file to get the ping count
-  ntb_test: Add a selftest script for the NTB subsystem
-  ntb_perf: clear link_is_up flag when the link goes down.
-
- MAINTAINERS                             |   1 +
- drivers/ntb/test/ntb_perf.c             | 198 +++++++++-----
- drivers/ntb/test/ntb_pingpong.c         |  62 ++++-
- drivers/ntb/test/ntb_tool.c             | 455 ++++++++++++++++++++++----------
- tools/testing/selftests/ntb/ntb_test.sh | 417 +++++++++++++++++++++++++++++
- 5 files changed, 932 insertions(+), 201 deletions(-)
- create mode 100755 tools/testing/selftests/ntb/ntb_test.sh
-
---
+diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c
+index 031723d..caef74c 100644
+--- a/drivers/ntb/test/ntb_tool.c
++++ b/drivers/ntb/test/ntb_tool.c
+@@ -59,6 +59,12 @@
+  *
+  * Eg: check if clearing the doorbell mask generates an interrupt.
+  *
++ * # Check the link status
++ * root@self# cat $DBG_DIR/link
++ *
++ * # Block until the link is up
++ * root@self# echo Y > $DBG_DIR/link_event
++ *
+  * # Set the doorbell mask
+  * root@self# echo 's 1' > $DBG_DIR/mask
+  *
+@@ -131,6 +137,7 @@ struct tool_mw {
+ struct tool_ctx {
+ 	struct ntb_dev *ntb;
+ 	struct dentry *dbgfs;
++	wait_queue_head_t link_wq;
+ 	int mw_count;
+ 	struct tool_mw mws[MAX_MWS];
+ };
+@@ -159,6 +166,7 @@ static void tool_link_event(void *ctx)
+ 	dev_dbg(&tc->ntb->dev, "link is %s speed %d width %d\n",
+ 		up ? "up" : "down", speed, width);
+ 
++	wake_up(&tc->link_wq);
+ }
+ 
+ static void tool_db_event(void *ctx, int vec)
+@@ -473,6 +481,80 @@ static TOOL_FOPS_RDWR(tool_peer_spad_fops,
+ 		      tool_peer_spad_read,
+ 		      tool_peer_spad_write);
+ 
++static ssize_t tool_link_read(struct file *filep, char __user *ubuf,
++			      size_t size, loff_t *offp)
++{
++	struct tool_ctx *tc = filep->private_data;
++	char buf[3];
++
++	buf[0] = ntb_link_is_up(tc->ntb, NULL, NULL) ? 'Y' : 'N';
++	buf[1] = '\n';
++	buf[2] = '\0';
++
++	return simple_read_from_buffer(ubuf, size, offp, buf, 2);
++}
++
++static ssize_t tool_link_write(struct file *filep, const char __user *ubuf,
++			       size_t size, loff_t *offp)
++{
++	struct tool_ctx *tc = filep->private_data;
++	char buf[32];
++	size_t buf_size;
++	bool val;
++	int rc;
++
++	buf_size = min(size, (sizeof(buf) - 1));
++	if (copy_from_user(buf, ubuf, buf_size))
++		return -EFAULT;
++
++	buf[buf_size] = '\0';
++
++	rc = strtobool(buf, &val);
++	if (rc)
++		return rc;
++
++	if (val)
++		ntb_link_enable(tc->ntb, NTB_SPEED_AUTO, NTB_WIDTH_AUTO);
++	else
++		ntb_link_disable(tc->ntb);
++
++	return size;
++}
++
++static TOOL_FOPS_RDWR(tool_link_fops,
++		      tool_link_read,
++		      tool_link_write);
++
++static ssize_t tool_link_event_write(struct file *filep,
++				     const char __user *ubuf,
++				     size_t size, loff_t *offp)
++{
++	struct tool_ctx *tc = filep->private_data;
++	char buf[32];
++	size_t buf_size;
++	bool val;
++	int rc;
++
++	buf_size = min(size, (sizeof(buf) - 1));
++	if (copy_from_user(buf, ubuf, buf_size))
++		return -EFAULT;
++
++	buf[buf_size] = '\0';
++
++	rc = strtobool(buf, &val);
++	if (rc)
++		return rc;
++
++	if (wait_event_interruptible(tc->link_wq,
++		ntb_link_is_up(tc->ntb, NULL, NULL) == val))
++		return -ERESTART;
++
++	return size;
++}
++
++static TOOL_FOPS_RDWR(tool_link_event_fops,
++		      NULL,
++		      tool_link_event_write);
+ 
+ static ssize_t tool_mw_read(struct file *filep, char __user *ubuf,
+ 			    size_t size, loff_t *offp)
+@@ -793,6 +875,12 @@ static void tool_setup_dbgfs(struct tool_ctx *tc)
+ 	debugfs_create_file("peer_spad", S_IRUSR | S_IWUSR, tc->dbgfs,
+ 			    tc, &tool_peer_spad_fops);
+ 
++	debugfs_create_file("link", S_IRUSR | S_IWUSR, tc->dbgfs,
++			    tc, &tool_link_fops);
++
++	debugfs_create_file("link_event", S_IWUSR, tc->dbgfs,
++			    tc, &tool_link_event_fops);
++
+ 	for (i = 0; i < tc->mw_count; i++) {
+ 		char buf[30];
+ 
+@@ -825,6 +913,7 @@ static int tool_probe(struct ntb_client *self, struct ntb_dev *ntb)
+ 	}
+ 
+ 	tc->ntb = ntb;
++	init_waitqueue_head(&tc->link_wq);
+ 
+ 	tc->mw_count = min(ntb_mw_count(tc->ntb), MAX_MWS);
+ 	for (i = 0; i < tc->mw_count; i++) {
+-- 
 2.1.4
+
