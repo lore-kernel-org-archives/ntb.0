@@ -1,15 +1,15 @@
 Return-Path: <Allen.Hubbe@emc.com>
-Received: from mailuogwhop.emc.com (mailuogwhop.emc.com. [168.159.213.141])
-        by gmr-mx.google.com with ESMTPS id a6si386949wma.1.2016.06.15.14.50.24
+Received: from mailuogwdur.emc.com (mailuogwdur.emc.com. [128.221.224.79])
+        by gmr-mx.google.com with ESMTPS id k4si213148ywc.4.2016.06.15.14.49.09
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 15 Jun 2016 14:50:25 -0700 (PDT)
+        Wed, 15 Jun 2016 14:49:09 -0700 (PDT)
 From: "Allen Hubbe" <Allen.Hubbe@emc.com>
-References: <cover.1466025130.git.logang@deltatee.com> <a37e02139ad94ab322bfac087524a0394ec0383a.1466025130.git.logang@deltatee.com>
-In-Reply-To: <a37e02139ad94ab322bfac087524a0394ec0383a.1466025130.git.logang@deltatee.com>
-Subject: RE: [PATCH v3 09/10] ntb_test: Add a selftest script for the NTB subsystem
-Date: Wed, 15 Jun 2016 17:49:58 -0400
-Message-ID: <007901d1c74f$dcdab6c0$96902440$@emc.com>
+References: <cover.1466025130.git.logang@deltatee.com> <32ec8e46e2f76dd74046b34c7b50cc84206090b3.1466025130.git.logang@deltatee.com>
+In-Reply-To: <32ec8e46e2f76dd74046b34c7b50cc84206090b3.1466025130.git.logang@deltatee.com>
+Subject: RE: [PATCH v3 07/10] ntb_tool: Add link status and files to debugfs
+Date: Wed, 15 Jun 2016 17:48:48 -0400
+Message-ID: <007801d1c74f$b3075100$1915f300$@emc.com>
 MIME-Version: 1.0
 Content-Type: text/plain;
 	charset="Windows-1252"
@@ -20,504 +20,162 @@ Cc: 'Shuah Khan' <shuahkh@osg.samsung.com>, 'Sudip Mukherjee' <sudipm.mukherjee@
 List-ID: <linux-ntb.googlegroups.com>
 
 From: Logan Gunthorpe
-> This script automates testing doorbells, scratchpads and memory windows
-> for an NTB device. It can be run locally, with the NTB looped
-> back to the same host or use SSH to remotely control the second host.
+> In order to more successfully script with ntb_tool it's useful to
+> have a link file to check the link status so that the script
+> doesn't use the other files until the link is up.
 > 
-> In the single host case, the script just needs to be passed two
-> arguments: a PCI ID for each side of the link. In the two host case
-> the -r option must be used to specify the remote hostname (which must
-> be SSH accessible and should probably have ssh-keys exchanged).
+> This commit adds a 'link' file to the debugfs directory which reads
+> boolean (Y or N) depending on the link status. Writing to the file
+> change the link state using ntb_link_enable or ntb_link_disable.
 > 
-> A sample run looks like this:
-> 
-> $ sudo ./ntb_test.sh 0000:03:00.1 0000:83:00.1 -p 29
-> Starting ntb_tool tests...
-> Running link tests on: 0000:03:00.1 / 0000:83:00.1
->   Passed
-> Running link tests on: 0000:83:00.1 / 0000:03:00.1
->   Passed
-> Running db tests on: 0000:03:00.1 / 0000:83:00.1
->   Passed
-> Running db tests on: 0000:83:00.1 / 0000:03:00.1
->   Passed
-> Running spad tests on: 0000:03:00.1 / 0000:83:00.1
->   Passed
-> Running spad tests on: 0000:83:00.1 / 0000:03:00.1
->   Passed
-> Running mw0 tests on: 0000:03:00.1 / 0000:83:00.1
->   Passed
-> Running mw0 tests on: 0000:83:00.1 / 0000:03:00.1
->   Passed
-> Running mw1 tests on: 0000:03:00.1 / 0000:83:00.1
->   Passed
-> Running mw1 tests on: 0000:83:00.1 / 0000:03:00.1
->   Passed
-> 
-> Starting ntb_pingpong tests...
-> Running ping pong tests on: 0000:03:00.1 / 0000:83:00.1
->   Passed
-> 
-> Starting ntb_perf tests...
-> Running local perf test without DMA
->   0: copied 536870912 bytes in 164453 usecs, 3264 MBytes/s
->   Passed
-> Running remote perf test without DMA
->   0: copied 536870912 bytes in 164453 usecs, 3264 MBytes/s
->   Passed
+> A 'link_event' file is also provided so an application can block until
+> the link changes to the desired state. If the user writes a 1, it will
+> block until the link is up. If the user writes a 0, it will block until
+> the link is down.
 > 
 > Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-> Acked-by: Shuah Khan <shuahkh@osg.samsung.com>
 
 Acked-by: Allen Hubbe <Allen.Hubbe@emc.com>
 
-note one comment below, link_test
-
 > ---
->  MAINTAINERS                             |   1 +
->  tools/testing/selftests/ntb/ntb_test.sh | 417 ++++++++++++++++++++++++++++++++
->  2 files changed, 418 insertions(+)
->  create mode 100755 tools/testing/selftests/ntb/ntb_test.sh
+>  drivers/ntb/test/ntb_tool.c | 89 +++++++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 89 insertions(+)
 > 
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 9c567a4..f178e7e 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -7846,6 +7846,7 @@ F:	drivers/ntb/
->  F:	drivers/net/ntb_netdev.c
->  F:	include/linux/ntb.h
->  F:	include/linux/ntb_transport.h
-> +F:	tools/testing/selftests/ntb/
+> diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c
+> index 031723d..caef74c 100644
+> --- a/drivers/ntb/test/ntb_tool.c
+> +++ b/drivers/ntb/test/ntb_tool.c
+> @@ -59,6 +59,12 @@
+>   *
+>   * Eg: check if clearing the doorbell mask generates an interrupt.
+>   *
+> + * # Check the link status
+> + * root@self# cat $DBG_DIR/link
+> + *
+> + * # Block until the link is up
+> + * root@self# echo Y > $DBG_DIR/link_event
+> + *
+>   * # Set the doorbell mask
+>   * root@self# echo 's 1' > $DBG_DIR/mask
+>   *
+> @@ -131,6 +137,7 @@ struct tool_mw {
+>  struct tool_ctx {
+>  	struct ntb_dev *ntb;
+>  	struct dentry *dbgfs;
+> +	wait_queue_head_t link_wq;
+>  	int mw_count;
+>  	struct tool_mw mws[MAX_MWS];
+>  };
+> @@ -159,6 +166,7 @@ static void tool_link_event(void *ctx)
+>  	dev_dbg(&tc->ntb->dev, "link is %s speed %d width %d\n",
+>  		up ? "up" : "down", speed, width);
 > 
->  NTB INTEL DRIVER
->  M:	Jon Mason <jdmason@kudzu.us>
-> diff --git a/tools/testing/selftests/ntb/ntb_test.sh
-> b/tools/testing/selftests/ntb/ntb_test.sh
-> new file mode 100755
-> index 0000000..2b7bf81
-> --- /dev/null
-> +++ b/tools/testing/selftests/ntb/ntb_test.sh
-> @@ -0,0 +1,417 @@
-> +#!/bin/bash
-> +# Copyright (c) 2016 Microsemi. All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation; either version 2 of
-> +# the License, or (at your option) any later version.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# Author: Logan Gunthorpe <logang@deltatee.com>
-> +
-> +REMOTE_HOST=
-> +LIST_DEVS=FALSE
-> +
-> +DEBUGFS=${DEBUGFS-/sys/kernel/debug}
-> +
-> +PERF_RUN_ORDER=32
-> +MAX_MW_SIZE=0
-> +RUN_DMA_TESTS=
-> +DONT_CLEANUP=
-> +MW_SIZE=65536
-> +
-> +function show_help()
+> +	wake_up(&tc->link_wq);
+>  }
+> 
+>  static void tool_db_event(void *ctx, int vec)
+> @@ -473,6 +481,80 @@ static TOOL_FOPS_RDWR(tool_peer_spad_fops,
+>  		      tool_peer_spad_read,
+>  		      tool_peer_spad_write);
+> 
+> +static ssize_t tool_link_read(struct file *filep, char __user *ubuf,
+> +			      size_t size, loff_t *offp)
 > +{
-> +	echo "Usage: $0 [OPTIONS] LOCAL_DEV REMOTE_DEV"
-> +	echo "Run tests on a pair of NTB endpoints."
-> +	echo
-> +	echo "If the NTB device loops back to the same host then,"
-> +	echo "just specifying the two PCI ids on the command line is"
-> +	echo "sufficient. Otherwise, if the NTB link spans two hosts"
-> +	echo "use the -r option to specify the hostname for the remote"
-> +	echo "device. SSH will then be used to test the remote side."
-> +	echo "An SSH key between the root users of the host would then"
-> +	echo "be highly recommended."
-> +	echo
-> +	echo "Options:"
-> +	echo "  -C              don't cleanup ntb modules on exit"
-> +	echo "  -d              run dma tests"
-> +	echo "  -h              show this help message"
-> +	echo "  -l              list available local and remote PCI ids"
-> +	echo "  -r REMOTE_HOST  specify the remote's hostname to connect"
-> +        echo "                  to for the test (using ssh)"
-> +	echo "  -p NUM          ntb_perf run order (default: $PERF_RUN_ORDER)"
-> +	echo "  -w max_mw_size  maxmium memory window size"
-> +	echo
+> +	struct tool_ctx *tc = filep->private_data;
+> +	char buf[3];
+> +
+> +	buf[0] = ntb_link_is_up(tc->ntb, NULL, NULL) ? 'Y' : 'N';
+> +	buf[1] = '\n';
+> +	buf[2] = '\0';
+> +
+> +	return simple_read_from_buffer(ubuf, size, offp, buf, 2);
 > +}
 > +
-> +function parse_args()
+> +static ssize_t tool_link_write(struct file *filep, const char __user *ubuf,
+> +			       size_t size, loff_t *offp)
 > +{
-> +	OPTIND=0
-> +	while getopts "Cdhlm:r:p:w:" opt; do
-> +		case "$opt" in
-> +		C)  DONT_CLEANUP=1 ;;
-> +		d)  RUN_DMA_TESTS=1 ;;
-> +		h)  show_help; exit 0 ;;
-> +		l)  LIST_DEVS=TRUE ;;
-> +		m)  MW_SIZE=${OPTARG} ;;
-> +		r)  REMOTE_HOST=${OPTARG} ;;
-> +		p)  PERF_RUN_ORDER=${OPTARG} ;;
-> +		w)  MAX_MW_SIZE=${OPTARG} ;;
-> +		\?)
-> +		    echo "Invalid option: -$OPTARG" >&2
-> +		    exit 1
-> +		    ;;
-> +		esac
-> +	done
-> +}
+> +	struct tool_ctx *tc = filep->private_data;
+> +	char buf[32];
+> +	size_t buf_size;
+> +	bool val;
+> +	int rc;
 > +
-> +parse_args "$@"
-> +shift $((OPTIND-1))
-> +LOCAL_DEV=$1
-> +shift
-> +parse_args "$@"
-> +shift $((OPTIND-1))
-> +REMOTE_DEV=$1
-> +shift
-> +parse_args "$@"
+> +	buf_size = min(size, (sizeof(buf) - 1));
+> +	if (copy_from_user(buf, ubuf, buf_size))
+> +		return -EFAULT;
 > +
-> +set -e
+> +	buf[buf_size] = '\0';
 > +
-> +function _modprobe()
-> +{
-> +        modprobe "$@"
-> +}
+> +	rc = strtobool(buf, &val);
+> +	if (rc)
+> +		return rc;
 > +
-> +function split_remote()
-> +{
-> +	VPATH=$1
-> +	REMOTE=
-> +
-> +	if [[ "$VPATH" == *":/"* ]]; then
-> +		REMOTE=${VPATH%%:*}
-> +		VPATH=${VPATH#*:}
-> +	fi
-> +}
-> +
-> +function read_file()
-> +{
-> +	split_remote $1
-> +	if [[ "$REMOTE" != "" ]]; then
-> +		ssh "$REMOTE" cat "$VPATH"
+> +	if (val)
+> +		ntb_link_enable(tc->ntb, NTB_SPEED_AUTO, NTB_WIDTH_AUTO);
 > +	else
-> +		cat "$VPATH"
-> +	fi
+> +		ntb_link_disable(tc->ntb);
+> +
+> +	return size;
 > +}
 > +
-> +function write_file()
+> +static TOOL_FOPS_RDWR(tool_link_fops,
+> +		      tool_link_read,
+> +		      tool_link_write);
+> +
+> +static ssize_t tool_link_event_write(struct file *filep,
+> +				     const char __user *ubuf,
+> +				     size_t size, loff_t *offp)
 > +{
-> +	split_remote $2
-> +	VALUE=$1
+> +	struct tool_ctx *tc = filep->private_data;
+> +	char buf[32];
+> +	size_t buf_size;
+> +	bool val;
+> +	int rc;
 > +
-> +	if [[ "$REMOTE" != "" ]]; then
-> +		ssh "$REMOTE" "echo \"$VALUE\" > \"$VPATH\""
-> +	else
-> +		echo "$VALUE" > "$VPATH"
-> +	fi
+> +	buf_size = min(size, (sizeof(buf) - 1));
+> +	if (copy_from_user(buf, ubuf, buf_size))
+> +		return -EFAULT;
+> +
+> +	buf[buf_size] = '\0';
+> +
+> +	rc = strtobool(buf, &val);
+> +	if (rc)
+> +		return rc;
+> +
+> +	if (wait_event_interruptible(tc->link_wq,
+> +		ntb_link_is_up(tc->ntb, NULL, NULL) == val))
+> +		return -ERESTART;
+> +
+> +	return size;
 > +}
 > +
-> +function link_test()
-> +{
-> +	LOC=$1
-> +	REM=$2
-> +	EXP=0
-> +
-> +	echo "Running link tests on: $(basename $LOC) / $(basename $REM)"
-> +
-> +	write_file "N" "$LOC/link"
-> +	write_file "N" "$LOC/link_event"
-
-If it fails to bring down the link, won't it just block waiting on link_event and never make it to the next step of the test?
-
-> +	if [[ $(read_file "$REM/link") != "N" ]]; then
-> +		echo "Expected remote link to be down in $REM/link" >&2
-> +		exit -1
-> +	fi
-> +
-> +	write_file "Y" "$LOC/link"
-> +	write_file "Y" "$LOC/link_event"
-> +
-> +	echo "  Passed"
-> +}
-> +
-> +function doorbell_test()
-> +{
-> +	LOC=$1
-> +	REM=$2
-> +	EXP=0
-> +
-> +	echo "Running db tests on: $(basename $LOC) / $(basename $REM)"
-> +
-> +	write_file "c 0xFFFFFFFF" "$REM/db"
-> +
-> +	for ((i=1; i <= 8; i++)); do
-> +		let DB=$(read_file "$REM/db") || true
-> +		if [[ "$DB" != "$EXP" ]]; then
-> +			echo "Doorbell doesn't match expected value $EXP " \
-> +			     "in $REM/db" >&2
-> +			exit -1
-> +		fi
-> +
-> +		let "MASK=1 << ($i-1)" || true
-> +		let "EXP=$EXP | $MASK" || true
-> +		write_file "s $MASK" "$LOC/peer_db"
-> +	done
-> +
-> +	echo "  Passed"
-> +}
-> +
-> +function read_spad()
-> +{
-> +       VPATH=$1
-> +       IDX=$2
-> +
-> +       ROW=($(read_file "$VPATH" | grep -e "^$IDX"))
-> +       let VAL=${ROW[1]} || true
-> +       echo $VAL
-> +}
-> +
-> +function scratchpad_test()
-> +{
-> +	LOC=$1
-> +	REM=$2
-> +	CNT=$(read_file "$LOC/spad" | wc -l)
-> +
-> +	echo "Running spad tests on: $(basename $LOC) / $(basename $REM)"
-> +
-> +	for ((i = 0; i < $CNT; i++)); do
-> +		VAL=$RANDOM
-> +		write_file "$i $VAL" "$LOC/peer_spad"
-> +		RVAL=$(read_spad "$REM/spad" $i)
-> +
-> +		if [[ "$VAL" != "$RVAL" ]]; then
-> +			echo "Scratchpad doesn't match expected value $VAL " \
-> +			     "in $REM/spad, got $RVAL" >&2
-> +			exit -1
-> +		fi
-> +
-> +	done
-> +
-> +	echo "  Passed"
-> +}
-> +
-> +function write_mw()
-> +{
-> +	split_remote $2
-> +
-> +	if [[ "$REMOTE" != "" ]]; then
-> +		ssh "$REMOTE" \
-> +			dd if=/dev/urandom "of=$VPATH" 2> /dev/null || true
-> +	else
-> +		dd if=/dev/urandom "of=$VPATH" 2> /dev/null || true
-> +	fi
-> +}
-> +
-> +function mw_test()
-> +{
-> +	IDX=$1
-> +	LOC=$2
-> +	REM=$3
-> +
-> +	echo "Running $IDX tests on: $(basename $LOC) / $(basename $REM)"
-> +
-> +	write_mw "$LOC/$IDX"
-> +
-> +	split_remote "$LOC/$IDX"
-> +	if [[ "$REMOTE" == "" ]]; then
-> +		A=$VPATH
-> +	else
-> +		A=/tmp/ntb_test.$$.A
-> +		ssh "$REMOTE" cat "$VPATH" > "$A"
-> +	fi
-> +
-> +	split_remote "$REM/peer_$IDX"
-> +	if [[ "$REMOTE" == "" ]]; then
-> +		B=$VPATH
-> +	else
-> +		B=/tmp/ntb_test.$$.B
-> +		ssh "$REMOTE" cat "$VPATH" > "$B"
-> +	fi
-> +
-> +	cmp -n $MW_SIZE "$A" "$B"
-> +	if [[ $? != 0 ]]; then
-> +		echo "Memory window $MW did not match!" >&2
-> +	fi
-> +
-> +	if [[ "$A" == "/tmp/*" ]]; then
-> +		rm "$A"
-> +	fi
-> +
-> +	if [[ "$B" == "/tmp/*" ]]; then
-> +		rm "$B"
-> +	fi
-> +
-> +	echo "  Passed"
-> +}
-> +
-> +function pingpong_test()
-> +{
-> +	LOC=$1
-> +	REM=$2
-> +
-> +	echo "Running ping pong tests on: $(basename $LOC) / $(basename $REM)"
-> +
-> +	LOC_START=$(read_file $LOC/count)
-> +	REM_START=$(read_file $REM/count)
-> +
-> +	sleep 7
-> +
-> +	LOC_END=$(read_file $LOC/count)
-> +	REM_END=$(read_file $REM/count)
-> +
-> +	if [[ $LOC_START == $LOC_END ]] || [[ $REM_START == $REM_END ]]; then
-> +		echo "Ping pong counter not incrementing!" >&2
-> +		exit 1
-> +	fi
-> +
-> +	echo "  Passed"
-> +}
-> +
-> +function perf_test()
-> +{
-> +	USE_DMA=$1
-> +
-> +	if [[ $USE_DMA == "1" ]]; then
-> +		WITH="with"
-> +	else
-> +		WITH="without"
-> +	fi
-> +
-> +	_modprobe ntb_perf run_order=$PERF_RUN_ORDER \
-> +		max_mw_size=$MAX_MW_SIZE use_dma=$USE_DMA
-> +
-> +	echo "Running local perf test $WITH DMA"
-> +	write_file "" $LOCAL_PERF/run
-> +	echo -n "  "
-> +	read_file $LOCAL_PERF/run
-> +	echo "  Passed"
-> +
-> +	echo "Running remote perf test $WITH DMA"
-> +	write_file "" $REMOTE_PERF/run
-> +	echo -n "  "
-> +	read_file $LOCAL_PERF/run
-> +	echo "  Passed"
-> +
-> +	_modprobe -r ntb_perf
-> +}
-> +
-> +function ntb_tool_tests()
-> +{
-> +	LOCAL_TOOL=$DEBUGFS/ntb_tool/$LOCAL_DEV
-> +	REMOTE_TOOL=$REMOTE_HOST:$DEBUGFS/ntb_tool/$REMOTE_DEV
-> +
-> +	echo "Starting ntb_tool tests..."
-> +
-> +	_modprobe ntb_tool
-> +
-> +	write_file Y $LOCAL_TOOL/link_event
-> +	write_file Y $REMOTE_TOOL/link_event
-> +
-> +	link_test $LOCAL_TOOL $REMOTE_TOOL
-> +	link_test $REMOTE_TOOL $LOCAL_TOOL
-> +
-> +	for PEER_TRANS in $(ls $LOCAL_TOOL/peer_trans*); do
-> +		PT=$(basename $PEER_TRANS)
-> +		write_file $MW_SIZE $LOCAL_TOOL/$PT
-> +		write_file $MW_SIZE $REMOTE_TOOL/$PT
-> +	done
-> +
-> +	doorbell_test $LOCAL_TOOL $REMOTE_TOOL
-> +	doorbell_test $REMOTE_TOOL $LOCAL_TOOL
-> +	scratchpad_test $LOCAL_TOOL $REMOTE_TOOL
-> +	scratchpad_test $REMOTE_TOOL $LOCAL_TOOL
-> +
-> +	for MW in $(ls $LOCAL_TOOL/mw*); do
-> +		MW=$(basename $MW)
-> +
-> +		mw_test $MW $LOCAL_TOOL $REMOTE_TOOL
-> +		mw_test $MW $REMOTE_TOOL $LOCAL_TOOL
-> +	done
-> +
-> +	_modprobe -r ntb_tool
-> +}
-> +
-> +function ntb_pingpong_tests()
-> +{
-> +	LOCAL_PP=$DEBUGFS/ntb_pingpong/$LOCAL_DEV
-> +	REMOTE_PP=$REMOTE_HOST:$DEBUGFS/ntb_pingpong/$REMOTE_DEV
-> +
-> +	echo "Starting ntb_pingpong tests..."
-> +
-> +	_modprobe ntb_pingpong
-> +
-> +	pingpong_test $LOCAL_PP $REMOTE_PP
-> +
-> +	_modprobe -r ntb_pingpong
-> +}
-> +
-> +function ntb_perf_tests()
-> +{
-> +	LOCAL_PERF=$DEBUGFS/ntb_perf/$LOCAL_DEV
-> +	REMOTE_PERF=$REMOTE_HOST:$DEBUGFS/ntb_perf/$REMOTE_DEV
-> +
-> +	echo "Starting ntb_perf tests..."
-> +
-> +	perf_test 0
-> +
-> +	if [[ $RUN_DMA_TESTS ]]; then
-> +		perf_test 1
-> +	fi
-> +}
-> +
-> +function cleanup()
-> +{
-> +	set +e
-> +	_modprobe -r ntb_tool 2> /dev/null
-> +	_modprobe -r ntb_perf 2> /dev/null
-> +	_modprobe -r ntb_pingpong 2> /dev/null
-> +	_modprobe -r ntb_transport 2> /dev/null
-> +	set -e
-> +}
-> +
-> +cleanup
-> +
-> +if ! [[ $$DONT_CLEANUP ]]; then
-> +	trap cleanup EXIT
-> +fi
-> +
-> +if [ "$(id -u)" != "0" ]; then
-> +	echo "This script must be run as root" 1>&2
-> +	exit 1
-> +fi
-> +
-> +if [[ "$LIST_DEVS" == TRUE ]]; then
-> +	echo "Local Devices:"
-> +	ls -1 /sys/bus/ntb/devices
-> +	echo
-> +
-> +	if [[ "$REMOTE_HOST" != "" ]]; then
-> +		echo "Remote Devices:"
-> +		ssh $REMOTE_HOST ls -1 /sys/bus/ntb/devices
-> +	fi
-> +
-> +	exit 0
-> +fi
-> +
-> +if [[ "$LOCAL_DEV" == $"" ]] || [[ "$REMOTE_DEV" == $"" ]]; then
-> +	show_help
-> +	exit 1
-> +fi
-> +
-> +ntb_tool_tests
-> +echo
-> +ntb_pingpong_tests
-> +echo
-> +ntb_perf_tests
-> +echo
+> +static TOOL_FOPS_RDWR(tool_link_event_fops,
+> +		      NULL,
+> +		      tool_link_event_write);
+> 
+>  static ssize_t tool_mw_read(struct file *filep, char __user *ubuf,
+>  			    size_t size, loff_t *offp)
+> @@ -793,6 +875,12 @@ static void tool_setup_dbgfs(struct tool_ctx *tc)
+>  	debugfs_create_file("peer_spad", S_IRUSR | S_IWUSR, tc->dbgfs,
+>  			    tc, &tool_peer_spad_fops);
+> 
+> +	debugfs_create_file("link", S_IRUSR | S_IWUSR, tc->dbgfs,
+> +			    tc, &tool_link_fops);
+> +
+> +	debugfs_create_file("link_event", S_IWUSR, tc->dbgfs,
+> +			    tc, &tool_link_event_fops);
+> +
+>  	for (i = 0; i < tc->mw_count; i++) {
+>  		char buf[30];
+> 
+> @@ -825,6 +913,7 @@ static int tool_probe(struct ntb_client *self, struct ntb_dev *ntb)
+>  	}
+> 
+>  	tc->ntb = ntb;
+> +	init_waitqueue_head(&tc->link_wq);
+> 
+>  	tc->mw_count = min(ntb_mw_count(tc->ntb), MAX_MWS);
+>  	for (i = 0; i < tc->mw_count; i++) {
 > --
 > 2.1.4
 
