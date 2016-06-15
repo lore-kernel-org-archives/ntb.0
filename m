@@ -1,283 +1,49 @@
-Return-Path: <gunthorp@cgy1-donard.priv.deltatee.com>
+Return-Path: <logang@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id un17si1996060pab.0.2016.06.15.14.26.54
+        by gmr-mx.google.com with ESMTPS id c11si2287817pfc.2.2016.06.15.09.20.55
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 15 Jun 2016 14:26:54 -0700 (PDT)
+        Wed, 15 Jun 2016 09:20:56 -0700 (PDT)
+References: <cover.1465919682.git.logang@deltatee.com>
+ <cad111de08474152044d0b02aa0ee303d8a68150.1465919683.git.logang@deltatee.com>
+ <000401d1c673$9705bf50$c5113df0$@emc.com> <576070AE.10500@deltatee.com>
+ <000501d1c686$3571c1e0$a05545a0$@emc.com> <57608116.8070003@deltatee.com>
+ <000101d1c71f$53461330$f9d23990$@emc.com>
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Wed, 15 Jun 2016 15:26:31 -0600
-Message-Id: <c55b9ce2f0ecdd0b60d028ffea1206e26d140493.1466025130.git.logang@deltatee.com>
-In-Reply-To: <cover.1466025130.git.logang@deltatee.com>
-References: <cover.1466025130.git.logang@deltatee.com>
-In-Reply-To: <cover.1466025130.git.logang@deltatee.com>
-References: <cover.1466025130.git.logang@deltatee.com>
-Subject: [PATCH v3 02/10] ntb_perf: Improve thread handling to increase robustness
-To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
-Cc: Shuah Khan <shuahkh@osg.samsung.com>, Sudip Mukherjee <sudipm.mukherjee@gmail.com>, Arnd Bergmann <arnd@arndb.de>, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-kselftest@vger.kernel.org, Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <57618056.3000008@deltatee.com>
+Date: Wed, 15 Jun 2016 10:20:38 -0600
+MIME-Version: 1.0
+In-Reply-To: <000101d1c71f$53461330$f9d23990$@emc.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH v2 6/8] ntb_tool: Add link status and files to debugfs
+To: Allen Hubbe <Allen.Hubbe@emc.com>, 'Jon Mason' <jdmason@kudzu.us>, 'Dave Jiang' <dave.jiang@intel.com>
+Cc: 'Shuah Khan' <shuahkh@osg.samsung.com>, 'Sudip Mukherjee' <sudipm.mukherjee@gmail.com>, 'Arnd Bergmann' <arnd@arndb.de>, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-kselftest@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-This commit accomplishes a few things:
 
-1) Properly prevent multiple sets of threads from running at once using
-a mutex. Lots of race issues existed with the thread_cleanup.
 
-2) The mutex allows us to ensure that threads are finished before
-tearing down the device or module.
+On 15/06/16 10:02 AM, Allen Hubbe wrote:
+>> My understanding is that ntb_tool is really just a test client to verify
+>> the API and the hardware. I personally would not recommend it for any
+>> real applications. As such, I don't think this philosophical argument
+>> really matches that goal.
+> 
+> The purpose is to "verify the API and the hardware", not to support "real applications."
+> 
+> The link status reported by the tool should be the link status reported by "the API and the hardware," and not something else that might be convenient for "my ntb_test script" or "anyone else trying to script with ntb_tool."  The primary purpose of ntb_tool is api-level debugging of hardware and drivers, not scripting.
+> 
+> The problem with races in ntb_tool is due to auto-configuration of memory windows in ntb_tool.  Instead of having ntb_tool setup the memory windows automatically, maybe instead it should provide a file to control the memory windows via debugfs.  Reading the file can format what is returned by ntb_mw_get_range(), and writing the file can allocate a buffer and call ntb_mw_set_trans(), or ntb_mw_clear_trans() and free the buffer.  Then, the test script can wait for link up, then setup the memory windows, and then finally proceed with the rest of the tests, and there would be no race.  There would be no confusion about what "link up" means, and ntb_tool would more closely resemble the ntb.h api for memory windows.
 
-3) Don't use kthread_stop when the threads can exit by themselves, as
-this is counter-indicated by the kthread_create documentation. Threads
-now wait for kthread_stop to occur.
+Ok, well this is a good deal more complicated than it is now but I can
+live with it. I'll work something up shortly.
 
-4) Writing to the run file now blocks until the threads are complete.
-The test can then be safely interrupted by a SIGINT.
 
-Also, while I was at it:
+> That's interesting about the hardware.  Maybe the driver for that particular hardware should make sure that any translation register programming happens before reporting link up to its clients.  Otherwise, ntb_transport will be broken on that hardware.  The ntb_transport driver configures memory windows the first time the link comes up, and only ever again if a different memory window size is negotiated (unlikely).
+> 
+> There are two reasons for doing the configuration after link up in ntb_transport.  First, it avoids consuming memory resources if the link never comes up.  Second, ntb_transport negotiates with its peer how much of the memory window will actually be used.  The ntb_perf tool is similar.
 
-5) debugfs_run_write shouldn't return 0 in the early check cases as this
-could cause debugfs_run_write to loop undesirably.
+Hmm, yes I didn't notice that in ntb_transport. We'll have to make some
+considerations for that in our driver.
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Acked-by: Dave Jiang <dave.jiang@intel.com>
----
- drivers/ntb/test/ntb_perf.c | 124 +++++++++++++++++++++++++++-----------------
- 1 file changed, 76 insertions(+), 48 deletions(-)
-
-diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index 5008ccf..db4dc61 100644
---- a/drivers/ntb/test/ntb_perf.c
-+++ b/drivers/ntb/test/ntb_perf.c
-@@ -58,6 +58,7 @@
- #include <linux/delay.h>
- #include <linux/sizes.h>
- #include <linux/ntb.h>
-+#include <linux/mutex.h>
- 
- #define DRIVER_NAME		"ntb_perf"
- #define DRIVER_DESCRIPTION	"PCIe NTB Performance Measurement Tool"
-@@ -121,6 +122,7 @@ struct pthr_ctx {
- 	int			dma_prep_err;
- 	int			src_idx;
- 	void			*srcs[MAX_SRCS];
-+	wait_queue_head_t       *wq;
- };
- 
- struct perf_ctx {
-@@ -134,9 +136,11 @@ struct perf_ctx {
- 	struct dentry		*debugfs_run;
- 	struct dentry		*debugfs_threads;
- 	u8			perf_threads;
--	bool			run;
-+	/* mutex ensures only one set of threads run at once */
-+	struct mutex		run_mutex;
- 	struct pthr_ctx		pthr_ctx[MAX_THREADS];
- 	atomic_t		tsync;
-+	atomic_t                tdone;
- };
- 
- enum {
-@@ -295,12 +299,18 @@ static int perf_move_data(struct pthr_ctx *pctx, char __iomem *dst, char *src,
- 			set_current_state(TASK_INTERRUPTIBLE);
- 			schedule_timeout(1);
- 		}
-+
-+		if (unlikely(kthread_should_stop()))
-+			break;
- 	}
- 
- 	if (use_dma) {
- 		pr_info("%s: All DMA descriptors submitted\n", current->comm);
--		while (atomic_read(&pctx->dma_sync) != 0)
-+		while (atomic_read(&pctx->dma_sync) != 0) {
-+			if (kthread_should_stop())
-+				break;
- 			msleep(20);
-+		}
- 	}
- 
- 	kstop = ktime_get();
-@@ -393,7 +403,10 @@ static int ntb_perf_thread(void *data)
- 		pctx->srcs[i] = NULL;
- 	}
- 
--	return 0;
-+	atomic_inc(&perf->tdone);
-+	wake_up(pctx->wq);
-+	rc = 0;
-+	goto done;
- 
- err:
- 	for (i = 0; i < MAX_SRCS; i++) {
-@@ -406,6 +419,16 @@ err:
- 		pctx->dma_chan = NULL;
- 	}
- 
-+done:
-+	/* Wait until we are told to stop */
-+	for (;;) {
-+		set_current_state(TASK_INTERRUPTIBLE);
-+		if (kthread_should_stop())
-+			break;
-+		schedule();
-+	}
-+	__set_current_state(TASK_RUNNING);
-+
- 	return rc;
- }
- 
-@@ -553,6 +576,7 @@ static ssize_t debugfs_run_read(struct file *filp, char __user *ubuf,
- 	struct perf_ctx *perf = filp->private_data;
- 	char *buf;
- 	ssize_t ret, out_offset;
-+	int running;
- 
- 	if (!perf)
- 		return 0;
-@@ -560,7 +584,9 @@ static ssize_t debugfs_run_read(struct file *filp, char __user *ubuf,
- 	buf = kmalloc(64, GFP_KERNEL);
- 	if (!buf)
- 		return -ENOMEM;
--	out_offset = snprintf(buf, 64, "%d\n", perf->run);
-+
-+	running = mutex_is_locked(&perf->run_mutex);
-+	out_offset = snprintf(buf, 64, "%d\n", running);
- 	ret = simple_read_from_buffer(ubuf, count, offp, buf, out_offset);
- 	kfree(buf);
- 
-@@ -572,7 +598,6 @@ static void threads_cleanup(struct perf_ctx *perf)
- 	struct pthr_ctx *pctx;
- 	int i;
- 
--	perf->run = false;
- 	for (i = 0; i < MAX_THREADS; i++) {
- 		pctx = &perf->pthr_ctx[i];
- 		if (pctx->thread) {
-@@ -587,65 +612,66 @@ static ssize_t debugfs_run_write(struct file *filp, const char __user *ubuf,
- {
- 	struct perf_ctx *perf = filp->private_data;
- 	int node, i;
-+	DECLARE_WAIT_QUEUE_HEAD(wq);
- 
- 	if (!perf->link_is_up)
--		return 0;
-+		return -ENOLINK;
- 
- 	if (perf->perf_threads == 0)
--		return 0;
-+		return -EINVAL;
- 
--	if (atomic_read(&perf->tsync) == 0)
--		perf->run = false;
-+	if (!mutex_trylock(&perf->run_mutex))
-+		return -EBUSY;
- 
--	if (perf->run)
--		threads_cleanup(perf);
--	else {
--		perf->run = true;
-+	if (perf->perf_threads > MAX_THREADS) {
-+		perf->perf_threads = MAX_THREADS;
-+		pr_info("Reset total threads to: %u\n", MAX_THREADS);
-+	}
- 
--		if (perf->perf_threads > MAX_THREADS) {
--			perf->perf_threads = MAX_THREADS;
--			pr_info("Reset total threads to: %u\n", MAX_THREADS);
--		}
-+	/* no greater than 1M */
-+	if (seg_order > MAX_SEG_ORDER) {
-+		seg_order = MAX_SEG_ORDER;
-+		pr_info("Fix seg_order to %u\n", seg_order);
-+	}
- 
--		/* no greater than 1M */
--		if (seg_order > MAX_SEG_ORDER) {
--			seg_order = MAX_SEG_ORDER;
--			pr_info("Fix seg_order to %u\n", seg_order);
--		}
-+	if (run_order < seg_order) {
-+		run_order = seg_order;
-+		pr_info("Fix run_order to %u\n", run_order);
-+	}
- 
--		if (run_order < seg_order) {
--			run_order = seg_order;
--			pr_info("Fix run_order to %u\n", run_order);
--		}
-+	node = dev_to_node(&perf->ntb->pdev->dev);
-+	atomic_set(&perf->tdone, 0);
- 
--		node = dev_to_node(&perf->ntb->pdev->dev);
--		/* launch kernel thread */
--		for (i = 0; i < perf->perf_threads; i++) {
--			struct pthr_ctx *pctx;
--
--			pctx = &perf->pthr_ctx[i];
--			atomic_set(&pctx->dma_sync, 0);
--			pctx->perf = perf;
--			pctx->thread =
--				kthread_create_on_node(ntb_perf_thread,
--						       (void *)pctx,
--						       node, "ntb_perf %d", i);
--			if (IS_ERR(pctx->thread)) {
--				pctx->thread = NULL;
--				goto err;
--			} else
--				wake_up_process(pctx->thread);
--
--			if (perf->run == false)
--				return -ENXIO;
--		}
-+	/* launch kernel thread */
-+	for (i = 0; i < perf->perf_threads; i++) {
-+		struct pthr_ctx *pctx;
- 
-+		pctx = &perf->pthr_ctx[i];
-+		atomic_set(&pctx->dma_sync, 0);
-+		pctx->perf = perf;
-+		pctx->wq = &wq;
-+		pctx->thread =
-+			kthread_create_on_node(ntb_perf_thread,
-+					       (void *)pctx,
-+					       node, "ntb_perf %d", i);
-+		if (IS_ERR(pctx->thread)) {
-+			pctx->thread = NULL;
-+			goto err;
-+		} else {
-+			wake_up_process(pctx->thread);
-+		}
- 	}
- 
-+	wait_event_interruptible(wq,
-+		atomic_read(&perf->tdone) == perf->perf_threads);
-+
-+	threads_cleanup(perf);
-+	mutex_unlock(&perf->run_mutex);
- 	return count;
- 
- err:
- 	threads_cleanup(perf);
-+	mutex_unlock(&perf->run_mutex);
- 	return -ENXIO;
- }
- 
-@@ -713,7 +739,7 @@ static int perf_probe(struct ntb_client *client, struct ntb_dev *ntb)
- 	perf->ntb = ntb;
- 	perf->perf_threads = 1;
- 	atomic_set(&perf->tsync, 0);
--	perf->run = false;
-+	mutex_init(&perf->run_mutex);
- 	spin_lock_init(&perf->db_lock);
- 	perf_setup_mw(ntb, perf);
- 	INIT_DELAYED_WORK(&perf->link_work, perf_link_work);
-@@ -748,6 +774,8 @@ static void perf_remove(struct ntb_client *client, struct ntb_dev *ntb)
- 
- 	dev_dbg(&perf->ntb->dev, "%s called\n", __func__);
- 
-+	mutex_lock(&perf->run_mutex);
-+
- 	cancel_delayed_work_sync(&perf->link_work);
- 	cancel_work_sync(&perf->link_cleanup);
- 
--- 
-2.1.4
-
+Logan
