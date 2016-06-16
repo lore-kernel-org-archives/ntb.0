@@ -1,82 +1,84 @@
-Return-Path: <jdmason@kudzu.us>
-Received: from mail-vk0-x242.google.com (mail-vk0-x242.google.com. [2607:f8b0:400c:c05::242])
-        by gmr-mx.google.com with ESMTPS id t74si456995vkb.0.2016.06.04.08.19.09
-        for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Sat, 04 Jun 2016 08:19:09 -0700 (PDT)
-Received: by mail-vk0-x242.google.com with SMTP id t7so2819725vkf.2
-        for <linux-ntb@googlegroups.com>; Sat, 04 Jun 2016 08:19:09 -0700 (PDT)
+Return-Path: <dave.jiang@intel.com>
+Received: from mga01.intel.com (mga01.intel.com. [192.55.52.88])
+        by gmr-mx.google.com with ESMTP id tp10si5106545pac.2.2016.06.16.13.57.22
+        for <linux-ntb@googlegroups.com>;
+        Thu, 16 Jun 2016 13:57:22 -0700 (PDT)
+From: "Jiang, Dave" <dave.jiang@intel.com>
+Subject: Re: [PATCH v4 10/10] ntb_perf: clear link_is_up flag when the link
+ goes down.
+Date: Thu, 16 Jun 2016 20:57:20 +0000
+Message-ID: <1466110623.16234.279.camel@intel.com>
+References: <cover.1466098407.git.logang@deltatee.com>
+	 <53d495a5f97211289302ddb60d8508edeaab20ed.1466098407.git.logang@deltatee.com>
+In-Reply-To: <53d495a5f97211289302ddb60d8508edeaab20ed.1466098407.git.logang@deltatee.com>
+Content-Language: en-US
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <D480B013CFC92D4E9ED6174EF97D9C8A@intel.com>
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-In-Reply-To: <CAJ80satFd9z=tdgHSPJy_BKUXRGOfUV_Kc5_dgeaChsUF62h3Q@mail.gmail.com>
-References: <1464381511-18491-1-git-send-email-logang@deltatee.com> <CAJ80satFd9z=tdgHSPJy_BKUXRGOfUV_Kc5_dgeaChsUF62h3Q@mail.gmail.com>
-From: Jon Mason <jdmason@kudzu.us>
-Date: Sat, 4 Jun 2016 11:19:07 -0400
-Message-ID: <CAPoiz9xKD15Wz1R7bYPSxX4hDqraz0sxtBiO5-5omYxEX-k8kg@mail.gmail.com>
-Subject: Re: [PATCH] ntb_tool: Fix infinite loop bug when writing
- spad/peer_spad file
-Content-Type: text/plain; charset=UTF-8
-To: Allen Hubbe <allenbh@gmail.com>
-Cc: Logan Gunthorpe <logang@deltatee.com>, Dave Jiang <dave.jiang@intel.com>, linux-ntb@googlegroups.com, linux-kernel <linux-kernel@vger.kernel.org>
+Return-Path: dave.jiang@intel.com
+To: "Allen.Hubbe@emc.com" <Allen.Hubbe@emc.com>, "logang@deltatee.com" <logang@deltatee.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "shuahkh@osg.samsung.com" <shuahkh@osg.samsung.com>, "sudipm.mukherjee@gmail.com" <sudipm.mukherjee@gmail.com>, "linux-kselftest@vger.kernel.org" <linux-kselftest@vger.kernel.org>, "arnd@arndb.de" <arnd@arndb.de>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Sat, May 28, 2016 at 9:09 AM, Allen Hubbe <allenbh@gmail.com> wrote:
-> On Fri, May 27, 2016 at 4:38 PM, Logan Gunthorpe <logang@deltatee.com> wrote:
->> If you tried to write two spads in one line, as per the example:
->>
->> root@peer# echo '0 0x01010101 1 0x7f7f7f7f' > $DBG_DIR/peer_spad
->>
->> then the CPU would freeze in an infinite loop.
->>
->> This wasn't immediately obvious but 'pos' was not incrementing the
->> buffer, so after reading the second pair of values, 'pos' would once
->> again be 3 and it would re-read the second pair of values ad infinitum.
->>
->> Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
->
-> Good catch.  Thanks Logan.
->
-> Acked-by: Allen Hubbe <Allen.Hubbe@emc.com>
-
-Applied to the ntb branch
-
-Thanks,
-Jon
-
->> ---
->>  drivers/ntb/test/ntb_tool.c | 9 +++++----
->>  1 file changed, 5 insertions(+), 4 deletions(-)
->>
->> diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c
->> index 6f5dc6c..209ef7c 100644
->> --- a/drivers/ntb/test/ntb_tool.c
->> +++ b/drivers/ntb/test/ntb_tool.c
->> @@ -268,7 +268,7 @@ static ssize_t tool_spadfn_write(struct tool_ctx *tc,
->>  {
->>         int spad_idx;
->>         u32 spad_val;
->> -       char *buf;
->> +       char *buf, *buf_ptr;
->>         int pos, n;
->>         ssize_t rc;
->>
->> @@ -288,14 +288,15 @@ static ssize_t tool_spadfn_write(struct tool_ctx *tc,
->>         }
->>
->>         buf[size] = 0;
->> -
->> -       n = sscanf(buf, "%d %i%n", &spad_idx, &spad_val, &pos);
->> +       buf_ptr = buf;
->> +       n = sscanf(buf_ptr, "%d %i%n", &spad_idx, &spad_val, &pos);
->>         while (n == 2) {
->> +               buf_ptr += pos;
->>                 rc = spad_write_fn(tc->ntb, spad_idx, spad_val);
->>                 if (rc)
->>                         break;
->>
->> -               n = sscanf(buf + pos, "%d %i%n", &spad_idx, &spad_val, &pos);
->> +               n = sscanf(buf_ptr, "%d %i%n", &spad_idx, &spad_val, &pos);
->>         }
->>
->>         if (n < 0)
->> --
->> 2.1.4
+T24gVGh1LCAyMDE2LTA2LTE2IGF0IDE0OjE3IC0wNjAwLCBMb2dhbiBHdW50aG9ycGUgd3JvdGU6
+DQo+IFdoZW4gdGhlIGxpbmsgZ29lcyBkb3duLCB0aGUgbGlua19pc191cCBmbGFnIGRpZCBub3Qg
+cmV0dXJuIHRvDQo+IGZhbHNlLiBUaGlzIGNvdWxkIGhhdmUgY2F1c2VkIHNvbWUgc3VidGxlIGNv
+cm5lciBjYXNlIGJ1Z3MNCj4gd2hlbiB0aGUgbGluayBnb2VzIHVwIGFuZCBkb3duIHF1aWNrbHku
+DQo+IA0KPiBPbmNlIHRoYXQgd2FzIGZpeGVkLCB0aGVyZSB3YXMgZm91bmQgdG8gYmUgYSByYWNl
+IGlmIHRoZSBsaW5rIHdhcw0KPiBicm91Z2h0IGRvd24gdGhlbiBpbW1lZGlhdGVseSB1cC4gVGhl
+IGxpbmtfY2xlYW51cCB3b3JrIHdvdWxkDQo+IG9jY2FzaW9uYWxseSBiZSBzY2hlZHVsZWQgYWZ0
+ZXIgdGhlIG5leHQgbGluayB1cCBldmVudC4gVGhpcyB3b3VsZA0KPiBjYW5jZWwgdGhlIGxpbmtf
+d29yayB0aGF0IHdhcyBzdXBwb3NlZCB0byBvY2N1ciBhbmQgbGVhdmUgbnRiX3BlcmYNCj4gaW4g
+YW4gdW51c2FibGUgc3RhdGUuDQo+IA0KPiBUbyBmaXggdGhpcyB3ZSBnZXQgcmlkIG9mIHRoZSBs
+aW5rX2NsZWFudXAgd29yayBhbmQgcHV0IHRoZSBhY3Rpb25zDQo+IGRpcmVjdGx5IGluIHRoZSBs
+aW5rX2Rvd24gZXZlbnQuDQo+IA0KPiBTaWduZWQtb2ZmLWJ5OiBMb2dhbiBHdW50aG9ycGUgPGxv
+Z2FuZ0BkZWx0YXRlZS5jb20+DQoNCkFja2VkLWJ5OiBEYXZlIEppYW5nIDxkYXZlLmppYW5nQGlu
+dGVsLmNvbT4NCg0KQWxzbyBwYXRjaGVzIDEtMyBBY2tlZC7CoA0KDQo+IC0tLQ0KPiDCoGRyaXZl
+cnMvbnRiL3Rlc3QvbnRiX3BlcmYuYyB8IDI4ICsrKysrKysrKy0tLS0tLS0tLS0tLS0tLS0tLS0N
+Cj4gwqAxIGZpbGUgY2hhbmdlZCwgOSBpbnNlcnRpb25zKCspLCAxOSBkZWxldGlvbnMoLSkNCj4g
+DQo+IGRpZmYgLS1naXQgYS9kcml2ZXJzL250Yi90ZXN0L250Yl9wZXJmLmMNCj4gYi9kcml2ZXJz
+L250Yi90ZXN0L250Yl9wZXJmLmMNCj4gaW5kZXggZjA3ODRlNS4uNmE1MGYyMCAxMDA2NDQNCj4g
+LS0tIGEvZHJpdmVycy9udGIvdGVzdC9udGJfcGVyZi5jDQo+ICsrKyBiL2RyaXZlcnMvbnRiL3Rl
+c3QvbnRiX3BlcmYuYw0KPiBAQCAtMTMzLDcgKzEzMyw2IEBAIHN0cnVjdCBwZXJmX2N0eCB7DQo+
+IMKgCXNwaW5sb2NrX3QJCWRiX2xvY2s7DQo+IMKgCXN0cnVjdCBwZXJmX213CQltdzsNCj4gwqAJ
+Ym9vbAkJCWxpbmtfaXNfdXA7DQo+IC0Jc3RydWN0IHdvcmtfc3RydWN0CWxpbmtfY2xlYW51cDsN
+Cj4gwqAJc3RydWN0IGRlbGF5ZWRfd29yawlsaW5rX3dvcms7DQo+IMKgCXdhaXRfcXVldWVfaGVh
+ZF90CWxpbmtfd3E7DQo+IMKgCXN0cnVjdCBkZW50cnkJCSpkZWJ1Z2ZzX25vZGVfZGlyOw0KPiBA
+QCAtMTU4LDEwICsxNTcsMTYgQEAgc3RhdGljIHZvaWQgcGVyZl9saW5rX2V2ZW50KHZvaWQgKmN0
+eCkNCj4gwqB7DQo+IMKgCXN0cnVjdCBwZXJmX2N0eCAqcGVyZiA9IGN0eDsNCj4gwqANCj4gLQlp
+ZiAobnRiX2xpbmtfaXNfdXAocGVyZi0+bnRiLCBOVUxMLCBOVUxMKSA9PSAxKQ0KPiArCWlmIChu
+dGJfbGlua19pc191cChwZXJmLT5udGIsIE5VTEwsIE5VTEwpID09IDEpIHsNCj4gwqAJCXNjaGVk
+dWxlX2RlbGF5ZWRfd29yaygmcGVyZi0+bGlua193b3JrLCAyKkhaKTsNCj4gLQllbHNlDQo+IC0J
+CXNjaGVkdWxlX3dvcmsoJnBlcmYtPmxpbmtfY2xlYW51cCk7DQo+ICsJfSBlbHNlIHsNCj4gKwkJ
+ZGV2X2RiZygmcGVyZi0+bnRiLT5wZGV2LT5kZXYsICJsaW5rIGRvd25cbiIpOw0KPiArDQo+ICsJ
+CWlmICghcGVyZi0+bGlua19pc191cCkNCj4gKwkJCWNhbmNlbF9kZWxheWVkX3dvcmtfc3luYygm
+cGVyZi0+bGlua193b3JrKTsNCj4gKw0KPiArCQlwZXJmLT5saW5rX2lzX3VwID0gZmFsc2U7DQo+
+ICsJfQ0KPiDCoH0NCj4gwqANCj4gwqBzdGF0aWMgdm9pZCBwZXJmX2RiX2V2ZW50KHZvaWQgKmN0
+eCwgaW50IHZlYykNCj4gQEAgLTU0NywxOCArNTUyLDYgQEAgb3V0Og0KPiDCoAkJCQnCoMKgwqDC
+oMKgwqBtc2Vjc190b19qaWZmaWVzKFBFUkZfTElOS19ET1cNCj4gTl9USU1FT1VUKSk7DQo+IMKg
+fQ0KPiDCoA0KPiAtc3RhdGljIHZvaWQgcGVyZl9saW5rX2NsZWFudXAoc3RydWN0IHdvcmtfc3Ry
+dWN0ICp3b3JrKQ0KPiAtew0KPiAtCXN0cnVjdCBwZXJmX2N0eCAqcGVyZiA9IGNvbnRhaW5lcl9v
+Zih3b3JrLA0KPiAtCQkJCQnCoMKgwqDCoMKgc3RydWN0IHBlcmZfY3R4LA0KPiAtCQkJCQnCoMKg
+wqDCoMKgbGlua19jbGVhbnVwKTsNCj4gLQ0KPiAtCWRldl9kYmcoJnBlcmYtPm50Yi0+cGRldi0+
+ZGV2LCAiJXMgY2FsbGVkXG4iLCBfX2Z1bmNfXyk7DQo+IC0NCj4gLQlpZiAoIXBlcmYtPmxpbmtf
+aXNfdXApDQo+IC0JCWNhbmNlbF9kZWxheWVkX3dvcmtfc3luYygmcGVyZi0+bGlua193b3JrKTsN
+Cj4gLX0NCj4gLQ0KPiDCoHN0YXRpYyBpbnQgcGVyZl9zZXR1cF9tdyhzdHJ1Y3QgbnRiX2RldiAq
+bnRiLCBzdHJ1Y3QgcGVyZl9jdHggKnBlcmYpDQo+IMKgew0KPiDCoAlzdHJ1Y3QgcGVyZl9tdyAq
+bXc7DQo+IEBAIC03ODcsNyArNzgwLDYgQEAgc3RhdGljIGludCBwZXJmX3Byb2JlKHN0cnVjdCBu
+dGJfY2xpZW50ICpjbGllbnQsDQo+IHN0cnVjdCBudGJfZGV2ICpudGIpDQo+IMKgCXBlcmZfc2V0
+dXBfbXcobnRiLCBwZXJmKTsNCj4gwqAJaW5pdF93YWl0cXVldWVfaGVhZCgmcGVyZi0+bGlua193
+cSk7DQo+IMKgCUlOSVRfREVMQVlFRF9XT1JLKCZwZXJmLT5saW5rX3dvcmssIHBlcmZfbGlua193
+b3JrKTsNCj4gLQlJTklUX1dPUksoJnBlcmYtPmxpbmtfY2xlYW51cCwgcGVyZl9saW5rX2NsZWFu
+dXApOw0KPiDCoA0KPiDCoAlyYyA9IG50Yl9zZXRfY3R4KG50YiwgcGVyZiwgJnBlcmZfb3BzKTsN
+Cj4gwqAJaWYgKHJjKQ0KPiBAQCAtODA3LDcgKzc5OSw2IEBAIHN0YXRpYyBpbnQgcGVyZl9wcm9i
+ZShzdHJ1Y3QgbnRiX2NsaWVudCAqY2xpZW50LA0KPiBzdHJ1Y3QgbnRiX2RldiAqbnRiKQ0KPiDC
+oA0KPiDCoGVycl9jdHg6DQo+IMKgCWNhbmNlbF9kZWxheWVkX3dvcmtfc3luYygmcGVyZi0+bGlu
+a193b3JrKTsNCj4gLQljYW5jZWxfd29ya19zeW5jKCZwZXJmLT5saW5rX2NsZWFudXApOw0KPiDC
+oAlrZnJlZShwZXJmKTsNCj4gwqBlcnJfcGVyZjoNCj4gwqAJcmV0dXJuIHJjOw0KPiBAQCAtODIz
+LDcgKzgxNCw2IEBAIHN0YXRpYyB2b2lkIHBlcmZfcmVtb3ZlKHN0cnVjdCBudGJfY2xpZW50DQo+
+ICpjbGllbnQsIHN0cnVjdCBudGJfZGV2ICpudGIpDQo+IMKgCW11dGV4X2xvY2soJnBlcmYtPnJ1
+bl9tdXRleCk7DQo+IMKgDQo+IMKgCWNhbmNlbF9kZWxheWVkX3dvcmtfc3luYygmcGVyZi0+bGlu
+a193b3JrKTsNCj4gLQljYW5jZWxfd29ya19zeW5jKCZwZXJmLT5saW5rX2NsZWFudXApOw0KPiDC
+oA0KPiDCoAludGJfY2xlYXJfY3R4KG50Yik7DQo+IMKgCW50Yl9saW5rX2Rpc2FibGUobnRiKTsN
+Cj4gLS3CoA0KPiAyLjEuNA0KPiA=
