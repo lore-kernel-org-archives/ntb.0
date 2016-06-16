@@ -1,17 +1,17 @@
 Return-Path: <gunthorp@cgy1-donard.priv.deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id po17si613156pab.2.2016.06.20.12.15.27
+        by gmr-mx.google.com with ESMTPS id ci4si4661277pad.1.2016.06.16.13.17.30
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 20 Jun 2016 12:15:27 -0700 (PDT)
+        Thu, 16 Jun 2016 13:17:30 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Mon, 20 Jun 2016 13:15:09 -0600
-Message-Id: <cab9ece5eee72425b93c22294d55f2ceab34840b.1466449562.git.logang@deltatee.com>
-In-Reply-To: <cover.1466449562.git.logang@deltatee.com>
-References: <cover.1466449562.git.logang@deltatee.com>
-In-Reply-To: <cover.1466449562.git.logang@deltatee.com>
-References: <cover.1466449562.git.logang@deltatee.com>
-Subject: [PATCH v5 06/10] ntb_tool: Postpone memory window initialization for the user
+Date: Thu, 16 Jun 2016 14:17:09 -0600
+Message-Id: <f1f7e4973468c0bea13c0ca071eda95bcd62ddd7.1466098407.git.logang@deltatee.com>
+In-Reply-To: <cover.1466098407.git.logang@deltatee.com>
+References: <cover.1466098407.git.logang@deltatee.com>
+In-Reply-To: <cover.1466098407.git.logang@deltatee.com>
+References: <cover.1466098407.git.logang@deltatee.com>
+Subject: [PATCH v4 06/10] ntb_tool: Postpone memory window initialization for the user
 To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
 Cc: Shuah Khan <shuahkh@osg.samsung.com>, Sudip Mukherjee <sudipm.mukherjee@gmail.com>, Arnd Bergmann <arnd@arndb.de>, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-kselftest@vger.kernel.org, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
@@ -30,12 +30,13 @@ Additionally, it was noticed that the read and write functions for the
 'peer_mw*' files should have checked for a NULL pointer.
 
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+Acked-by: Allen Hubbe <Allen.Hubbe@emc.com>
 ---
- drivers/ntb/test/ntb_tool.c | 366 +++++++++++++++++++++++++++-----------------
- 1 file changed, 228 insertions(+), 138 deletions(-)
+ drivers/ntb/test/ntb_tool.c | 356 +++++++++++++++++++++++++++-----------------
+ 1 file changed, 218 insertions(+), 138 deletions(-)
 
 diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c
-index cba31fd..1509b4c 100644
+index cba31fd..031723d 100644
 --- a/drivers/ntb/test/ntb_tool.c
 +++ b/drivers/ntb/test/ntb_tool.c
 @@ -79,6 +79,13 @@
@@ -262,7 +263,7 @@ index cba31fd..1509b4c 100644
  	return simple_write_to_buffer(mw->peer, mw->size, offp, ubuf, size);
  }
  
-@@ -679,9 +579,199 @@ static TOOL_FOPS_RDWR(tool_peer_mw_fops,
+@@ -679,9 +579,189 @@ static TOOL_FOPS_RDWR(tool_peer_mw_fops,
  		      tool_peer_mw_read,
  		      tool_peer_mw_write);
  
@@ -293,7 +294,7 @@ index cba31fd..1509b4c 100644
 +
 +	rc = ntb_mw_set_trans(tc->ntb, idx, mw->peer_dma, mw->size);
 +	if (rc)
-+		goto err_free_dma;
++		return rc;
 +
 +	snprintf(buf, sizeof(buf), "peer_mw%d", idx);
 +	mw->peer_dbg_file = debugfs_create_file(buf, S_IRUSR | S_IWUSR,
@@ -301,16 +302,6 @@ index cba31fd..1509b4c 100644
 +						&tool_peer_mw_fops);
 +
 +	return 0;
-+
-+err_free_dma:
-+	dma_free_coherent(&tc->ntb->pdev->dev, mw->size,
-+			  mw->peer,
-+			  mw->peer_dma);
-+	mw->peer = NULL;
-+	mw->peer_dma = 0;
-+	mw->size = 0;
-+
-+	return rc;
 +}
 +
 +static void tool_free_mw(struct tool_ctx *tc, int idx)
@@ -463,7 +454,7 @@ index cba31fd..1509b4c 100644
  	int i;
  
  	/* This modules is useless without dbgfs... */
-@@ -713,18 +803,16 @@ static void tool_setup_dbgfs(struct tool_ctx *tc)
+@@ -713,18 +793,16 @@ static void tool_setup_dbgfs(struct tool_ctx *tc)
  	debugfs_create_file("peer_spad", S_IRUSR | S_IWUSR, tc->dbgfs,
  			    tc, &tool_peer_spad_fops);
  
@@ -485,7 +476,7 @@ index cba31fd..1509b4c 100644
  	}
  }
  
-@@ -732,6 +820,7 @@ static int tool_probe(struct ntb_client *self, struct ntb_dev *ntb)
+@@ -732,6 +810,7 @@ static int tool_probe(struct ntb_client *self, struct ntb_dev *ntb)
  {
  	struct tool_ctx *tc;
  	int rc;
@@ -493,7 +484,7 @@ index cba31fd..1509b4c 100644
  
  	if (ntb_db_is_unsafe(ntb))
  		dev_dbg(&ntb->dev, "doorbell is unsafe\n");
-@@ -746,8 +835,13 @@ static int tool_probe(struct ntb_client *self, struct ntb_dev *ntb)
+@@ -746,8 +825,13 @@ static int tool_probe(struct ntb_client *self, struct ntb_dev *ntb)
  	}
  
  	tc->ntb = ntb;
@@ -509,7 +500,7 @@ index cba31fd..1509b4c 100644
  
  	tool_setup_dbgfs(tc);
  
-@@ -761,9 +855,8 @@ static int tool_probe(struct ntb_client *self, struct ntb_dev *ntb)
+@@ -761,9 +845,8 @@ static int tool_probe(struct ntb_client *self, struct ntb_dev *ntb)
  	return 0;
  
  err_ctx:
@@ -520,7 +511,7 @@ index cba31fd..1509b4c 100644
  	kfree(tc);
  err_tc:
  	return rc;
-@@ -773,9 +866,6 @@ static void tool_remove(struct ntb_client *self, struct ntb_dev *ntb)
+@@ -773,9 +856,6 @@ static void tool_remove(struct ntb_client *self, struct ntb_dev *ntb)
  {
  	struct tool_ctx *tc = ntb->ctx;
  
