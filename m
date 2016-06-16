@@ -1,179 +1,123 @@
 Return-Path: <gunthorp@cgy1-donard.priv.deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id un17si2737335pab.0.2016.06.16.13.17.31
+        by gmr-mx.google.com with ESMTPS id 62si4842689pfx.1.2016.06.16.13.17.30
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 16 Jun 2016 13:17:31 -0700 (PDT)
+        Thu, 16 Jun 2016 13:17:30 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Thu, 16 Jun 2016 14:17:06 -0600
-Message-Id: <282288d244df4a832d20820fb2f3f74e24e40875.1466098407.git.logang@deltatee.com>
-In-Reply-To: <cover.1466098407.git.logang@deltatee.com>
-References: <cover.1466098407.git.logang@deltatee.com>
-In-Reply-To: <cover.1466098407.git.logang@deltatee.com>
-References: <cover.1466098407.git.logang@deltatee.com>
-Subject: [PATCH v4 03/10] ntb_perf: Return results by reading the run file
+Date: Thu, 16 Jun 2016 14:17:03 -0600
+Message-Id: <cover.1466098407.git.logang@deltatee.com>
+Subject: [PATCH v4 00/10] NTB Selftest Script
 To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
 Cc: Shuah Khan <shuahkh@osg.samsung.com>, Sudip Mukherjee <sudipm.mukherjee@gmail.com>, Arnd Bergmann <arnd@arndb.de>, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-kselftest@vger.kernel.org, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Instead of having to watch logs, allow the results to be retrieved
-by reading back the run file. This file will return "running" when
-the test is running and nothing if no tests have been run yet.
-It returns 1 line per thread, and will display an error message if the
-corresponding thread returns an error.
+Hopefully this is the last revision of this set.
 
-With the above change, the pr_info calls that returned the results are
-then changed to pr_debug calls.
+Changes since v3:
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Acked-by: Dave Jiang <dave.jiang@intel.com>
+1) Check the error returned when setting the link in ntb_tool and pass
+it back to the user.
+
+2) If an error occurs when setting the link down during a link test in
+ntb_test, just print unsupported and continue on. (For hardware that
+does not support setting the link down.)
+
+3) Fix a race condition problem introduced by clearing the link is
+up flag in ntb_perf. We do this by getting rid of the link cleanup
+work and doing the few actions in the link event handler.
+Dave Jiang has already ok'd this approach.
+
 ---
- drivers/ntb/test/ntb_perf.c | 67 +++++++++++++++++++++++++++++++++++++--------
- 1 file changed, 55 insertions(+), 12 deletions(-)
 
-diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index db4dc61..05a8705 100644
---- a/drivers/ntb/test/ntb_perf.c
-+++ b/drivers/ntb/test/ntb_perf.c
-@@ -123,6 +123,9 @@ struct pthr_ctx {
- 	int			src_idx;
- 	void			*srcs[MAX_SRCS];
- 	wait_queue_head_t       *wq;
-+	int			status;
-+	u64			copied;
-+	u64			diff_us;
- };
- 
- struct perf_ctx {
-@@ -305,7 +308,7 @@ static int perf_move_data(struct pthr_ctx *pctx, char __iomem *dst, char *src,
- 	}
- 
- 	if (use_dma) {
--		pr_info("%s: All DMA descriptors submitted\n", current->comm);
-+		pr_debug("%s: All DMA descriptors submitted\n", current->comm);
- 		while (atomic_read(&pctx->dma_sync) != 0) {
- 			if (kthread_should_stop())
- 				break;
-@@ -317,13 +320,16 @@ static int perf_move_data(struct pthr_ctx *pctx, char __iomem *dst, char *src,
- 	kdiff = ktime_sub(kstop, kstart);
- 	diff_us = ktime_to_us(kdiff);
- 
--	pr_info("%s: copied %llu bytes\n", current->comm, copied);
-+	pr_debug("%s: copied %llu bytes\n", current->comm, copied);
- 
--	pr_info("%s: lasted %llu usecs\n", current->comm, diff_us);
-+	pr_debug("%s: lasted %llu usecs\n", current->comm, diff_us);
- 
- 	perf = div64_u64(copied, diff_us);
- 
--	pr_info("%s: MBytes/s: %llu\n", current->comm, perf);
-+	pr_debug("%s: MBytes/s: %llu\n", current->comm, perf);
-+
-+	pctx->copied = copied;
-+	pctx->diff_us = diff_us;
- 
- 	return 0;
- }
-@@ -345,7 +351,7 @@ static int ntb_perf_thread(void *data)
- 	int rc, node, i;
- 	struct dma_chan *dma_chan = NULL;
- 
--	pr_info("kthread %s starting...\n", current->comm);
-+	pr_debug("kthread %s starting...\n", current->comm);
- 
- 	node = dev_to_node(&pdev->dev);
- 
-@@ -575,19 +581,44 @@ static ssize_t debugfs_run_read(struct file *filp, char __user *ubuf,
- {
- 	struct perf_ctx *perf = filp->private_data;
- 	char *buf;
--	ssize_t ret, out_offset;
--	int running;
-+	ssize_t ret, out_off = 0;
-+	struct pthr_ctx *pctx;
-+	int i;
-+	u64 rate;
- 
- 	if (!perf)
- 		return 0;
- 
--	buf = kmalloc(64, GFP_KERNEL);
-+	buf = kmalloc(1024, GFP_KERNEL);
- 	if (!buf)
- 		return -ENOMEM;
- 
--	running = mutex_is_locked(&perf->run_mutex);
--	out_offset = snprintf(buf, 64, "%d\n", running);
--	ret = simple_read_from_buffer(ubuf, count, offp, buf, out_offset);
-+	if (mutex_is_locked(&perf->run_mutex)) {
-+		out_off = snprintf(buf, 64, "running\n");
-+		goto read_from_buf;
-+	}
-+
-+	for (i = 0; i < MAX_THREADS; i++) {
-+		pctx = &perf->pthr_ctx[i];
-+
-+		if (pctx->status == -ENODATA)
-+			break;
-+
-+		if (pctx->status) {
-+			out_off += snprintf(buf + out_off, 1024 - out_off,
-+					    "%d: error %d\n", i,
-+					    pctx->status);
-+			continue;
-+		}
-+
-+		rate = div64_u64(pctx->copied, pctx->diff_us);
-+		out_off += snprintf(buf + out_off, 1024 - out_off,
-+			"%d: copied %llu bytes in %llu usecs, %llu MBytes/s\n",
-+			i, pctx->copied, pctx->diff_us, rate);
-+	}
-+
-+read_from_buf:
-+	ret = simple_read_from_buffer(ubuf, count, offp, buf, out_off);
- 	kfree(buf);
- 
- 	return ret;
-@@ -601,12 +632,20 @@ static void threads_cleanup(struct perf_ctx *perf)
- 	for (i = 0; i < MAX_THREADS; i++) {
- 		pctx = &perf->pthr_ctx[i];
- 		if (pctx->thread) {
--			kthread_stop(pctx->thread);
-+			pctx->status = kthread_stop(pctx->thread);
- 			pctx->thread = NULL;
- 		}
- 	}
- }
- 
-+static void perf_clear_thread_status(struct perf_ctx *perf)
-+{
-+	int i;
-+
-+	for (i = 0; i < MAX_THREADS; i++)
-+		perf->pthr_ctx[i].status = -ENODATA;
-+}
-+
- static ssize_t debugfs_run_write(struct file *filp, const char __user *ubuf,
- 				 size_t count, loff_t *offp)
- {
-@@ -623,6 +662,8 @@ static ssize_t debugfs_run_write(struct file *filp, const char __user *ubuf,
- 	if (!mutex_trylock(&perf->run_mutex))
- 		return -EBUSY;
- 
-+	perf_clear_thread_status(perf);
-+
- 	if (perf->perf_threads > MAX_THREADS) {
- 		perf->perf_threads = MAX_THREADS;
- 		pr_info("Reset total threads to: %u\n", MAX_THREADS);
-@@ -757,6 +798,8 @@ static int perf_probe(struct ntb_client *client, struct ntb_dev *ntb)
- 	if (rc)
- 		goto err_ctx;
- 
-+	perf_clear_thread_status(perf);
-+
- 	return 0;
- 
- err_ctx:
--- 
+Changes since v2:
+
+1) As per Allan's suggestion, I've added a patch to postpone the
+peer memory window setup until the user requests it with a 'peer_trans*'
+file. This pushes the ntb_tool API closer to the kernel API and allows
+the link status file to return the raw status of the NTB link.
+
+2) Change the link status file to return the value of ntb_link_is_up
+instead of the local 'memory window ready' value.
+
+3) Change the link_event file to just block on write. As it was in v2,
+if multiple users attempted to use the link_event file they could
+corrupt the state another user had set. Reads to this file are no
+longer permitted.
+
+4) Updates to the ntb_test script to accommodate the above changes.
+
+5) Added some link tests to the ntb_test script. It will bring the link
+down and check that the other side agrees.
+
+6) Added a minor bug fix (Patch #10) to ntb_perf. During discussions
+with Allen it was noticed that the link_is_up flag is never cleared if
+the link goes away.
+
+---
+
+Changes since v1:
+
+1) Add a comment to explain the *15 in the buf size calculation,
+as per Allen's feedback.
+
+2) Clean up the changes to the pingpong client as there were some
+sloppy copying mistakes.
+
+3) Rework the 'link' file in ntb_tool as per Allen's suggestions.
+I've added a 'link_event' file the works essentially how he's asked.
+Though, I found no need to use a completion as suggested and the flow
+is maybe slightly simpler than he's suggested. Just write a boolean
+to the event file then read to wait for the link to be either up or
+down. There's still some discussion on the best interface and it's
+not much work to make additional minor functional changes.
+
+4) Update the selftest script to use the new 'link_event' file.
+
+5) Minor change to the way the selftest script lists devices thanks to
+Allen's observation.
+
+---
+
+I've written a ntb_test.sh script that would probably be useful if it
+were included in the kernel. This series ends with that script and
+includes some useful interface improvements and fixes to the existing ntb
+test modules. Please see each individual commit for more information.
+They are mostly independent.
+
+The series is based off of v4.6 plus the patches I've submitted that
+have been accepted into ntb-next. They've been run through checkpatch
+with --strict this time.
+
+As always, I'm happy to incorporate any feedback.
+
+Thanks,
+
+Logan
+
+---
+
+
+Logan Gunthorpe (10):
+  ntb_perf: Schedule based on time not on performance
+  ntb_perf: Improve thread handling to increase robustness
+  ntb_perf: Return results by reading the run file
+  ntb_perf: Wait for link before running test
+  ntb_tool: BUG: Ensure the buffer size is large enough to return all
+    spads
+  ntb_tool: Postpone memory window initialization for the user
+  ntb_tool: Add link status and files to debugfs
+  ntb_pingpong: Add a debugfs file to get the ping count
+  ntb_test: Add a selftest script for the NTB subsystem
+  ntb_perf: clear link_is_up flag when the link goes down.
+
+ MAINTAINERS                             |   1 +
+ drivers/ntb/test/ntb_perf.c             | 224 ++++++++++------
+ drivers/ntb/test/ntb_pingpong.c         |  62 ++++-
+ drivers/ntb/test/ntb_tool.c             | 458 ++++++++++++++++++++++----------
+ tools/testing/selftests/ntb/ntb_test.sh | 422 +++++++++++++++++++++++++++++
+ 5 files changed, 947 insertions(+), 220 deletions(-)
+ create mode 100755 tools/testing/selftests/ntb/ntb_test.sh
+
+--
 2.1.4
-
