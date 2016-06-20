@@ -1,115 +1,139 @@
 Return-Path: <gunthorp@cgy1-donard.priv.deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id po17si613177pab.2.2016.06.20.12.15.31
+        by gmr-mx.google.com with ESMTPS id c11si5593062pfc.2.2016.06.20.12.15.30
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 20 Jun 2016 12:15:32 -0700 (PDT)
+        Mon, 20 Jun 2016 12:15:30 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Mon, 20 Jun 2016 13:15:13 -0600
-Message-Id: <6d67ae50526e400dbe4b9ff9dcee8a5344d466f8.1466449562.git.logang@deltatee.com>
-In-Reply-To: <cover.1466449562.git.logang@deltatee.com>
-References: <cover.1466449562.git.logang@deltatee.com>
-In-Reply-To: <cover.1466449562.git.logang@deltatee.com>
-References: <cover.1466449562.git.logang@deltatee.com>
-Subject: [PATCH v5 10/10] ntb_perf: clear link_is_up flag when the link goes down.
+Date: Mon, 20 Jun 2016 13:15:03 -0600
+Message-Id: <cover.1466449562.git.logang@deltatee.com>
+Subject: [PATCH v5 00/10] NTB Selftest Script
 To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
 Cc: Shuah Khan <shuahkh@osg.samsung.com>, Sudip Mukherjee <sudipm.mukherjee@gmail.com>, Arnd Bergmann <arnd@arndb.de>, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-kselftest@vger.kernel.org, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-When the link goes down, the link_is_up flag did not return to
-false. This could have caused some subtle corner case bugs
-when the link goes up and down quickly.
+Sorry, I thought this was done but I found one more minor issue with
+these patches so I'm resubmitting them one last time. Besides this isuse,
+I think I have acks for all the patches and everything is working as I'd
+like.
 
-Once that was fixed, there was found to be a race if the link was
-brought down then immediately up. The link_cleanup work would
-occasionally be scheduled after the next link up event. This would
-cancel the link_work that was supposed to occur and leave ntb_perf
-in an unusable state.
+Changes since v4:
 
-To fix this we get rid of the link_cleanup work and put the actions
-directly in the link_down event.
+1) In patch 0006, when setting a translation fails in tool_setup_mw,
+we now properly clean up the peer dma memory. Before that patch, it
+wasn't required because if tool_setup_mw failed the module would clean
+up all mws. After this patch, the clean up never happened, so it would
+return an error to the user but the DMA memory would still be allocated
+and the peer_trans file would report that it's ready but the debugfs
+file would not have been created. In v5, after an error, no DMA memory
+is allocated and it will still report that it's not ready to the user when
+reading peer_trans.
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Acked-by: Dave Jiang <dave.jiang@intel.com>
 ---
- drivers/ntb/test/ntb_perf.c | 28 +++++++++-------------------
- 1 file changed, 9 insertions(+), 19 deletions(-)
 
-diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index f0784e5..6a50f20 100644
---- a/drivers/ntb/test/ntb_perf.c
-+++ b/drivers/ntb/test/ntb_perf.c
-@@ -133,7 +133,6 @@ struct perf_ctx {
- 	spinlock_t		db_lock;
- 	struct perf_mw		mw;
- 	bool			link_is_up;
--	struct work_struct	link_cleanup;
- 	struct delayed_work	link_work;
- 	wait_queue_head_t	link_wq;
- 	struct dentry		*debugfs_node_dir;
-@@ -158,10 +157,16 @@ static void perf_link_event(void *ctx)
- {
- 	struct perf_ctx *perf = ctx;
- 
--	if (ntb_link_is_up(perf->ntb, NULL, NULL) == 1)
-+	if (ntb_link_is_up(perf->ntb, NULL, NULL) == 1) {
- 		schedule_delayed_work(&perf->link_work, 2*HZ);
--	else
--		schedule_work(&perf->link_cleanup);
-+	} else {
-+		dev_dbg(&perf->ntb->pdev->dev, "link down\n");
-+
-+		if (!perf->link_is_up)
-+			cancel_delayed_work_sync(&perf->link_work);
-+
-+		perf->link_is_up = false;
-+	}
- }
- 
- static void perf_db_event(void *ctx, int vec)
-@@ -547,18 +552,6 @@ out:
- 				      msecs_to_jiffies(PERF_LINK_DOWN_TIMEOUT));
- }
- 
--static void perf_link_cleanup(struct work_struct *work)
--{
--	struct perf_ctx *perf = container_of(work,
--					     struct perf_ctx,
--					     link_cleanup);
--
--	dev_dbg(&perf->ntb->pdev->dev, "%s called\n", __func__);
--
--	if (!perf->link_is_up)
--		cancel_delayed_work_sync(&perf->link_work);
--}
--
- static int perf_setup_mw(struct ntb_dev *ntb, struct perf_ctx *perf)
- {
- 	struct perf_mw *mw;
-@@ -787,7 +780,6 @@ static int perf_probe(struct ntb_client *client, struct ntb_dev *ntb)
- 	perf_setup_mw(ntb, perf);
- 	init_waitqueue_head(&perf->link_wq);
- 	INIT_DELAYED_WORK(&perf->link_work, perf_link_work);
--	INIT_WORK(&perf->link_cleanup, perf_link_cleanup);
- 
- 	rc = ntb_set_ctx(ntb, perf, &perf_ops);
- 	if (rc)
-@@ -807,7 +799,6 @@ static int perf_probe(struct ntb_client *client, struct ntb_dev *ntb)
- 
- err_ctx:
- 	cancel_delayed_work_sync(&perf->link_work);
--	cancel_work_sync(&perf->link_cleanup);
- 	kfree(perf);
- err_perf:
- 	return rc;
-@@ -823,7 +814,6 @@ static void perf_remove(struct ntb_client *client, struct ntb_dev *ntb)
- 	mutex_lock(&perf->run_mutex);
- 
- 	cancel_delayed_work_sync(&perf->link_work);
--	cancel_work_sync(&perf->link_cleanup);
- 
- 	ntb_clear_ctx(ntb);
- 	ntb_link_disable(ntb);
--- 
+Changes since v3:
+
+1) Check the error returned when setting the link in ntb_tool and pass
+it back to the user.
+
+2) If an error occurs when setting the link down during a link test in
+ntb_test, just print unsupported and continue on. (For hardware that
+does not support setting the link down.)
+
+3) Fix a race condition problem introduced by clearing the link is
+up flag in ntb_perf. We do this by getting rid of the link cleanup
+work and doing the few actions in the link event handler.
+Dave Jiang has already ok'd this approach.
+
+---
+
+Changes since v2:
+
+1) As per Allan's suggestion, I've added a patch to postpone the
+peer memory window setup until the user requests it with a 'peer_trans*'
+file. This pushes the ntb_tool API closer to the kernel API and allows
+the link status file to return the raw status of the NTB link.
+
+2) Change the link status file to return the value of ntb_link_is_up
+instead of the local 'memory window ready' value.
+
+3) Change the link_event file to just block on write. As it was in v2,
+if multiple users attempted to use the link_event file they could
+corrupt the state another user had set. Reads to this file are no
+longer permitted.
+
+4) Updates to the ntb_test script to accommodate the above changes.
+
+5) Added some link tests to the ntb_test script. It will bring the link
+down and check that the other side agrees.
+
+6) Added a minor bug fix (Patch #10) to ntb_perf. During discussions
+with Allen it was noticed that the link_is_up flag is never cleared if
+the link goes away.
+
+---
+
+Changes since v1:
+
+1) Add a comment to explain the *15 in the buf size calculation,
+as per Allen's feedback.
+
+2) Clean up the changes to the pingpong client as there were some
+sloppy copying mistakes.
+
+3) Rework the 'link' file in ntb_tool as per Allen's suggestions.
+I've added a 'link_event' file the works essentially how he's asked.
+Though, I found no need to use a completion as suggested and the flow
+is maybe slightly simpler than he's suggested. Just write a boolean
+to the event file then read to wait for the link to be either up or
+down. There's still some discussion on the best interface and it's
+not much work to make additional minor functional changes.
+
+4) Update the selftest script to use the new 'link_event' file.
+
+5) Minor change to the way the selftest script lists devices thanks to
+Allen's observation.
+
+---
+
+I've written a ntb_test.sh script that would probably be useful if it
+were included in the kernel. This series ends with that script and
+includes some useful interface improvements and fixes to the existing ntb
+test modules. Please see each individual commit for more information.
+They are mostly independent.
+
+The series is based off of v4.6 plus the patches I've submitted that
+have been accepted into ntb-next. They've been run through checkpatch
+with --strict this time.
+
+As always, I'm happy to incorporate any feedback.
+
+Thanks,
+
+Logan
+
+---
+
+Logan Gunthorpe (10):
+  ntb_perf: Schedule based on time not on performance
+  ntb_perf: Improve thread handling to increase robustness
+  ntb_perf: Return results by reading the run file
+  ntb_perf: Wait for link before running test
+  ntb_tool: BUG: Ensure the buffer size is large enough to return all
+    spads
+  ntb_tool: Postpone memory window initialization for the user
+  ntb_tool: Add link status and files to debugfs
+  ntb_pingpong: Add a debugfs file to get the ping count
+  ntb_test: Add a selftest script for the NTB subsystem
+  ntb_perf: clear link_is_up flag when the link goes down.
+
+ MAINTAINERS                             |   1 +
+ drivers/ntb/test/ntb_perf.c             | 224 +++++++++------
+ drivers/ntb/test/ntb_pingpong.c         |  62 ++++-
+ drivers/ntb/test/ntb_tool.c             | 468 ++++++++++++++++++++++----------
+ tools/testing/selftests/ntb/ntb_test.sh | 422 ++++++++++++++++++++++++++++
+ 5 files changed, 957 insertions(+), 220 deletions(-)
+ create mode 100755 tools/testing/selftests/ntb/ntb_test.sh
+
+--
 2.1.4
-
