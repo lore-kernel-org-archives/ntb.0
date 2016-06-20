@@ -1,283 +1,178 @@
 Return-Path: <gunthorp@cgy1-donard.priv.deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id po17si613164pab.2.2016.06.20.12.15.28
+        by gmr-mx.google.com with ESMTPS id c11si5593052pfc.2.2016.06.20.12.15.28
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
         Mon, 20 Jun 2016 12:15:28 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Mon, 20 Jun 2016 13:15:05 -0600
-Message-Id: <c55b9ce2f0ecdd0b60d028ffea1206e26d140493.1466449562.git.logang@deltatee.com>
+Date: Mon, 20 Jun 2016 13:15:10 -0600
+Message-Id: <01f5eed87f1d0aff89af4d56091a5115d29410b0.1466449562.git.logang@deltatee.com>
 In-Reply-To: <cover.1466449562.git.logang@deltatee.com>
 References: <cover.1466449562.git.logang@deltatee.com>
 In-Reply-To: <cover.1466449562.git.logang@deltatee.com>
 References: <cover.1466449562.git.logang@deltatee.com>
-Subject: [PATCH v5 02/10] ntb_perf: Improve thread handling to increase robustness
+Subject: [PATCH v5 07/10] ntb_tool: Add link status and files to debugfs
 To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
 Cc: Shuah Khan <shuahkh@osg.samsung.com>, Sudip Mukherjee <sudipm.mukherjee@gmail.com>, Arnd Bergmann <arnd@arndb.de>, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-kselftest@vger.kernel.org, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-This commit accomplishes a few things:
+In order to more successfully script with ntb_tool it's useful to
+have a link file to check the link status so that the script
+doesn't use the other files until the link is up.
 
-1) Properly prevent multiple sets of threads from running at once using
-a mutex. Lots of race issues existed with the thread_cleanup.
+This commit adds a 'link' file to the debugfs directory which reads
+boolean (Y or N) depending on the link status. Writing to the file
+change the link state using ntb_link_enable or ntb_link_disable.
 
-2) The mutex allows us to ensure that threads are finished before
-tearing down the device or module.
-
-3) Don't use kthread_stop when the threads can exit by themselves, as
-this is counter-indicated by the kthread_create documentation. Threads
-now wait for kthread_stop to occur.
-
-4) Writing to the run file now blocks until the threads are complete.
-The test can then be safely interrupted by a SIGINT.
-
-Also, while I was at it:
-
-5) debugfs_run_write shouldn't return 0 in the early check cases as this
-could cause debugfs_run_write to loop undesirably.
+A 'link_event' file is also provided so an application can block until
+the link changes to the desired state. If the user writes a 1, it will
+block until the link is up. If the user writes a 0, it will block until
+the link is down.
 
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Acked-by: Dave Jiang <dave.jiang@intel.com>
+Acked-by: Allen Hubbe <Allen.Hubbe@emc.com>
 ---
- drivers/ntb/test/ntb_perf.c | 124 +++++++++++++++++++++++++++-----------------
- 1 file changed, 76 insertions(+), 48 deletions(-)
+ drivers/ntb/test/ntb_tool.c | 92 +++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 92 insertions(+)
 
-diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index 5008ccf..db4dc61 100644
---- a/drivers/ntb/test/ntb_perf.c
-+++ b/drivers/ntb/test/ntb_perf.c
-@@ -58,6 +58,7 @@
- #include <linux/delay.h>
- #include <linux/sizes.h>
- #include <linux/ntb.h>
-+#include <linux/mutex.h>
- 
- #define DRIVER_NAME		"ntb_perf"
- #define DRIVER_DESCRIPTION	"PCIe NTB Performance Measurement Tool"
-@@ -121,6 +122,7 @@ struct pthr_ctx {
- 	int			dma_prep_err;
- 	int			src_idx;
- 	void			*srcs[MAX_SRCS];
-+	wait_queue_head_t       *wq;
+diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c
+index 1509b4c..61bf2ef 100644
+--- a/drivers/ntb/test/ntb_tool.c
++++ b/drivers/ntb/test/ntb_tool.c
+@@ -59,6 +59,12 @@
+  *
+  * Eg: check if clearing the doorbell mask generates an interrupt.
+  *
++ * # Check the link status
++ * root@self# cat $DBG_DIR/link
++ *
++ * # Block until the link is up
++ * root@self# echo Y > $DBG_DIR/link_event
++ *
+  * # Set the doorbell mask
+  * root@self# echo 's 1' > $DBG_DIR/mask
+  *
+@@ -131,6 +137,7 @@ struct tool_mw {
+ struct tool_ctx {
+ 	struct ntb_dev *ntb;
+ 	struct dentry *dbgfs;
++	wait_queue_head_t link_wq;
+ 	int mw_count;
+ 	struct tool_mw mws[MAX_MWS];
  };
+@@ -159,6 +166,7 @@ static void tool_link_event(void *ctx)
+ 	dev_dbg(&tc->ntb->dev, "link is %s speed %d width %d\n",
+ 		up ? "up" : "down", speed, width);
  
- struct perf_ctx {
-@@ -134,9 +136,11 @@ struct perf_ctx {
- 	struct dentry		*debugfs_run;
- 	struct dentry		*debugfs_threads;
- 	u8			perf_threads;
--	bool			run;
-+	/* mutex ensures only one set of threads run at once */
-+	struct mutex		run_mutex;
- 	struct pthr_ctx		pthr_ctx[MAX_THREADS];
- 	atomic_t		tsync;
-+	atomic_t                tdone;
- };
- 
- enum {
-@@ -295,12 +299,18 @@ static int perf_move_data(struct pthr_ctx *pctx, char __iomem *dst, char *src,
- 			set_current_state(TASK_INTERRUPTIBLE);
- 			schedule_timeout(1);
- 		}
-+
-+		if (unlikely(kthread_should_stop()))
-+			break;
- 	}
- 
- 	if (use_dma) {
- 		pr_info("%s: All DMA descriptors submitted\n", current->comm);
--		while (atomic_read(&pctx->dma_sync) != 0)
-+		while (atomic_read(&pctx->dma_sync) != 0) {
-+			if (kthread_should_stop())
-+				break;
- 			msleep(20);
-+		}
- 	}
- 
- 	kstop = ktime_get();
-@@ -393,7 +403,10 @@ static int ntb_perf_thread(void *data)
- 		pctx->srcs[i] = NULL;
- 	}
- 
--	return 0;
-+	atomic_inc(&perf->tdone);
-+	wake_up(pctx->wq);
-+	rc = 0;
-+	goto done;
- 
- err:
- 	for (i = 0; i < MAX_SRCS; i++) {
-@@ -406,6 +419,16 @@ err:
- 		pctx->dma_chan = NULL;
- 	}
- 
-+done:
-+	/* Wait until we are told to stop */
-+	for (;;) {
-+		set_current_state(TASK_INTERRUPTIBLE);
-+		if (kthread_should_stop())
-+			break;
-+		schedule();
-+	}
-+	__set_current_state(TASK_RUNNING);
-+
- 	return rc;
++	wake_up(&tc->link_wq);
  }
  
-@@ -553,6 +576,7 @@ static ssize_t debugfs_run_read(struct file *filp, char __user *ubuf,
- 	struct perf_ctx *perf = filp->private_data;
- 	char *buf;
- 	ssize_t ret, out_offset;
-+	int running;
+ static void tool_db_event(void *ctx, int vec)
+@@ -473,6 +481,83 @@ static TOOL_FOPS_RDWR(tool_peer_spad_fops,
+ 		      tool_peer_spad_read,
+ 		      tool_peer_spad_write);
  
- 	if (!perf)
- 		return 0;
-@@ -560,7 +584,9 @@ static ssize_t debugfs_run_read(struct file *filp, char __user *ubuf,
- 	buf = kmalloc(64, GFP_KERNEL);
- 	if (!buf)
- 		return -ENOMEM;
--	out_offset = snprintf(buf, 64, "%d\n", perf->run);
++static ssize_t tool_link_read(struct file *filep, char __user *ubuf,
++			      size_t size, loff_t *offp)
++{
++	struct tool_ctx *tc = filep->private_data;
++	char buf[3];
 +
-+	running = mutex_is_locked(&perf->run_mutex);
-+	out_offset = snprintf(buf, 64, "%d\n", running);
- 	ret = simple_read_from_buffer(ubuf, count, offp, buf, out_offset);
- 	kfree(buf);
++	buf[0] = ntb_link_is_up(tc->ntb, NULL, NULL) ? 'Y' : 'N';
++	buf[1] = '\n';
++	buf[2] = '\0';
++
++	return simple_read_from_buffer(ubuf, size, offp, buf, 2);
++}
++
++static ssize_t tool_link_write(struct file *filep, const char __user *ubuf,
++			       size_t size, loff_t *offp)
++{
++	struct tool_ctx *tc = filep->private_data;
++	char buf[32];
++	size_t buf_size;
++	bool val;
++	int rc;
++
++	buf_size = min(size, (sizeof(buf) - 1));
++	if (copy_from_user(buf, ubuf, buf_size))
++		return -EFAULT;
++
++	buf[buf_size] = '\0';
++
++	rc = strtobool(buf, &val);
++	if (rc)
++		return rc;
++
++	if (val)
++		rc = ntb_link_enable(tc->ntb, NTB_SPEED_AUTO, NTB_WIDTH_AUTO);
++	else
++		rc = ntb_link_disable(tc->ntb);
++
++	if (rc)
++		return rc;
++
++	return size;
++}
++
++static TOOL_FOPS_RDWR(tool_link_fops,
++		      tool_link_read,
++		      tool_link_write);
++
++static ssize_t tool_link_event_write(struct file *filep,
++				     const char __user *ubuf,
++				     size_t size, loff_t *offp)
++{
++	struct tool_ctx *tc = filep->private_data;
++	char buf[32];
++	size_t buf_size;
++	bool val;
++	int rc;
++
++	buf_size = min(size, (sizeof(buf) - 1));
++	if (copy_from_user(buf, ubuf, buf_size))
++		return -EFAULT;
++
++	buf[buf_size] = '\0';
++
++	rc = strtobool(buf, &val);
++	if (rc)
++		return rc;
++
++	if (wait_event_interruptible(tc->link_wq,
++		ntb_link_is_up(tc->ntb, NULL, NULL) == val))
++		return -ERESTART;
++
++	return size;
++}
++
++static TOOL_FOPS_RDWR(tool_link_event_fops,
++		      NULL,
++		      tool_link_event_write);
  
-@@ -572,7 +598,6 @@ static void threads_cleanup(struct perf_ctx *perf)
- 	struct pthr_ctx *pctx;
- 	int i;
+ static ssize_t tool_mw_read(struct file *filep, char __user *ubuf,
+ 			    size_t size, loff_t *offp)
+@@ -803,6 +888,12 @@ static void tool_setup_dbgfs(struct tool_ctx *tc)
+ 	debugfs_create_file("peer_spad", S_IRUSR | S_IWUSR, tc->dbgfs,
+ 			    tc, &tool_peer_spad_fops);
  
--	perf->run = false;
- 	for (i = 0; i < MAX_THREADS; i++) {
- 		pctx = &perf->pthr_ctx[i];
- 		if (pctx->thread) {
-@@ -587,65 +612,66 @@ static ssize_t debugfs_run_write(struct file *filp, const char __user *ubuf,
- {
- 	struct perf_ctx *perf = filp->private_data;
- 	int node, i;
-+	DECLARE_WAIT_QUEUE_HEAD(wq);
++	debugfs_create_file("link", S_IRUSR | S_IWUSR, tc->dbgfs,
++			    tc, &tool_link_fops);
++
++	debugfs_create_file("link_event", S_IWUSR, tc->dbgfs,
++			    tc, &tool_link_event_fops);
++
+ 	for (i = 0; i < tc->mw_count; i++) {
+ 		char buf[30];
  
- 	if (!perf->link_is_up)
--		return 0;
-+		return -ENOLINK;
- 
- 	if (perf->perf_threads == 0)
--		return 0;
-+		return -EINVAL;
- 
--	if (atomic_read(&perf->tsync) == 0)
--		perf->run = false;
-+	if (!mutex_trylock(&perf->run_mutex))
-+		return -EBUSY;
- 
--	if (perf->run)
--		threads_cleanup(perf);
--	else {
--		perf->run = true;
-+	if (perf->perf_threads > MAX_THREADS) {
-+		perf->perf_threads = MAX_THREADS;
-+		pr_info("Reset total threads to: %u\n", MAX_THREADS);
-+	}
- 
--		if (perf->perf_threads > MAX_THREADS) {
--			perf->perf_threads = MAX_THREADS;
--			pr_info("Reset total threads to: %u\n", MAX_THREADS);
--		}
-+	/* no greater than 1M */
-+	if (seg_order > MAX_SEG_ORDER) {
-+		seg_order = MAX_SEG_ORDER;
-+		pr_info("Fix seg_order to %u\n", seg_order);
-+	}
- 
--		/* no greater than 1M */
--		if (seg_order > MAX_SEG_ORDER) {
--			seg_order = MAX_SEG_ORDER;
--			pr_info("Fix seg_order to %u\n", seg_order);
--		}
-+	if (run_order < seg_order) {
-+		run_order = seg_order;
-+		pr_info("Fix run_order to %u\n", run_order);
-+	}
- 
--		if (run_order < seg_order) {
--			run_order = seg_order;
--			pr_info("Fix run_order to %u\n", run_order);
--		}
-+	node = dev_to_node(&perf->ntb->pdev->dev);
-+	atomic_set(&perf->tdone, 0);
- 
--		node = dev_to_node(&perf->ntb->pdev->dev);
--		/* launch kernel thread */
--		for (i = 0; i < perf->perf_threads; i++) {
--			struct pthr_ctx *pctx;
--
--			pctx = &perf->pthr_ctx[i];
--			atomic_set(&pctx->dma_sync, 0);
--			pctx->perf = perf;
--			pctx->thread =
--				kthread_create_on_node(ntb_perf_thread,
--						       (void *)pctx,
--						       node, "ntb_perf %d", i);
--			if (IS_ERR(pctx->thread)) {
--				pctx->thread = NULL;
--				goto err;
--			} else
--				wake_up_process(pctx->thread);
--
--			if (perf->run == false)
--				return -ENXIO;
--		}
-+	/* launch kernel thread */
-+	for (i = 0; i < perf->perf_threads; i++) {
-+		struct pthr_ctx *pctx;
- 
-+		pctx = &perf->pthr_ctx[i];
-+		atomic_set(&pctx->dma_sync, 0);
-+		pctx->perf = perf;
-+		pctx->wq = &wq;
-+		pctx->thread =
-+			kthread_create_on_node(ntb_perf_thread,
-+					       (void *)pctx,
-+					       node, "ntb_perf %d", i);
-+		if (IS_ERR(pctx->thread)) {
-+			pctx->thread = NULL;
-+			goto err;
-+		} else {
-+			wake_up_process(pctx->thread);
-+		}
+@@ -835,6 +926,7 @@ static int tool_probe(struct ntb_client *self, struct ntb_dev *ntb)
  	}
  
-+	wait_event_interruptible(wq,
-+		atomic_read(&perf->tdone) == perf->perf_threads);
-+
-+	threads_cleanup(perf);
-+	mutex_unlock(&perf->run_mutex);
- 	return count;
+ 	tc->ntb = ntb;
++	init_waitqueue_head(&tc->link_wq);
  
- err:
- 	threads_cleanup(perf);
-+	mutex_unlock(&perf->run_mutex);
- 	return -ENXIO;
- }
- 
-@@ -713,7 +739,7 @@ static int perf_probe(struct ntb_client *client, struct ntb_dev *ntb)
- 	perf->ntb = ntb;
- 	perf->perf_threads = 1;
- 	atomic_set(&perf->tsync, 0);
--	perf->run = false;
-+	mutex_init(&perf->run_mutex);
- 	spin_lock_init(&perf->db_lock);
- 	perf_setup_mw(ntb, perf);
- 	INIT_DELAYED_WORK(&perf->link_work, perf_link_work);
-@@ -748,6 +774,8 @@ static void perf_remove(struct ntb_client *client, struct ntb_dev *ntb)
- 
- 	dev_dbg(&perf->ntb->dev, "%s called\n", __func__);
- 
-+	mutex_lock(&perf->run_mutex);
-+
- 	cancel_delayed_work_sync(&perf->link_work);
- 	cancel_work_sync(&perf->link_cleanup);
- 
+ 	tc->mw_count = min(ntb_mw_count(tc->ntb), MAX_MWS);
+ 	for (i = 0; i < tc->mw_count; i++) {
 -- 
 2.1.4
 
