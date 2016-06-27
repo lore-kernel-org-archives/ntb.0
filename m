@@ -1,12 +1,12 @@
 Return-Path: <dave.jiang@intel.com>
-Received: from mga04.intel.com (mga04.intel.com. [192.55.52.120])
-        by gmr-mx.google.com with ESMTP id un17si2948999pab.0.2016.06.27.16.10.19
+Received: from mga11.intel.com (mga11.intel.com. [192.55.52.93])
+        by gmr-mx.google.com with ESMTP id i135si2967564pfe.0.2016.06.27.16.10.17
         for <linux-ntb@googlegroups.com>;
-        Mon, 27 Jun 2016 16:10:19 -0700 (PDT)
-Subject: [PATCH 3/5] dmaengine: ioatdma: add error strings to chanerr output
+        Mon, 27 Jun 2016 16:10:17 -0700 (PDT)
+Subject: [PATCH 4/5] ntb: add DMA error handling for TX DMA
 From: Dave Jiang <dave.jiang@intel.com>
-Date: Mon, 27 Jun 2016 16:09:51 -0700
-Message-ID: <146706899100.188649.46511704590423045.stgit@djiang5-desk3.ch.intel.com>
+Date: Mon, 27 Jun 2016 16:09:56 -0700
+Message-ID: <146706899641.188649.16969346461413257840.stgit@djiang5-desk3.ch.intel.com>
 In-Reply-To: <146706860557.188649.10766278554335496632.stgit@djiang5-desk3.ch.intel.com>
 References: <146706860557.188649.10766278554335496632.stgit@djiang5-desk3.ch.intel.com>
 MIME-Version: 1.0
@@ -16,111 +16,226 @@ To: vinod.koul@intel.com, allen.hubbe@emc, jdmason@kudzu.us
 Cc: dmaengine@vger.kernel.org, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-Provide a mechanism to translate CHANERR bits to English strings in order
-to allow user to report more concise errors.
+Adding support on the tx DMA path to allow recovery of errors when DMA
+responds with error status and abort all the subsequent ops.
 
 Signed-off-by: Dave Jiang <dave.jiang@intel.com>
 ---
- drivers/dma/ioat/dma.c |   65 +++++++++++++++++++++++++++++++++++++++++++++---
- 1 file changed, 61 insertions(+), 4 deletions(-)
+ drivers/ntb/ntb_transport.c |  123 +++++++++++++++++++++++++++++++------------
+ 1 file changed, 89 insertions(+), 34 deletions(-)
 
-diff --git a/drivers/dma/ioat/dma.c b/drivers/dma/ioat/dma.c
-index 1bbc005..68e0cad 100644
---- a/drivers/dma/ioat/dma.c
-+++ b/drivers/dma/ioat/dma.c
-@@ -38,8 +38,54 @@
+diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+index 2ef9d913..55a5ae0 100644
+--- a/drivers/ntb/ntb_transport.c
++++ b/drivers/ntb/ntb_transport.c
+@@ -102,6 +102,10 @@ struct ntb_queue_entry {
+ 	void *buf;
+ 	unsigned int len;
+ 	unsigned int flags;
++	struct dma_async_tx_descriptor *txd;
++	int retries;
++	int errors;
++	unsigned int tx_index;
  
- #include "../dmaengine.h"
+ 	struct ntb_transport_qp *qp;
+ 	union {
+@@ -258,6 +262,9 @@ enum {
+ static void ntb_transport_rxc_db(unsigned long data);
+ static const struct ntb_ctx_ops ntb_transport_ops;
+ static struct ntb_client ntb_transport_client;
++static int ntb_async_tx_submit(struct ntb_transport_qp *qp,
++			       struct ntb_queue_entry *entry);
++static void ntb_memcpy_tx(struct ntb_queue_entry *entry, void __iomem *offset);
  
-+static char *chanerr_str[] = {
-+	"DMA Transfer Destination Address Error",
-+	"Next Descriptor Address Error",
-+	"Descriptor Error",
-+	"Chan Address Value Error",
-+	"CHANCMD Error",
-+	"Chipset Uncorrectable Data Integrity Error",
-+	"DMA Uncorrectable Data Integrity Error",
-+	"Read Data Error",
-+	"Write Data Error",
-+	"Descriptor Control Error",
-+	"Descriptor Transfer Size Error",
-+	"Completion Address Error",
-+	"Interrupt Configuration Error",
-+	"Super extended descriptor Address Error",
-+	"Unaffiliated Error",
-+	"CRC or XOR P Error",
-+	"XOR Q Error",
-+	"Descriptor Count Error",
-+	"DIF All F detect Error",
-+	"Guard Tag verification Error",
-+	"Application Tag verification Error",
-+	"Reference Tag verification Error",
-+	"Bundle Bit Error",
-+	"Result DIF All F detect Error",
-+	"Result Guard Tag verification Error",
-+	"Result Application Tag verification Error",
-+	"Result Reference Tag verification Error",
-+	NULL
-+};
+ static int ntb_transport_bus_match(struct device *dev,
+ 				   struct device_driver *drv)
+@@ -1444,21 +1451,46 @@ static void ntb_tx_copy_callback(void *data)
+ 	struct ntb_queue_entry *entry = data;
+ 	struct ntb_transport_qp *qp = entry->qp;
+ 	struct ntb_payload_header __iomem *hdr = entry->tx_hdr;
++	struct dma_async_tx_descriptor *txd;
++	unsigned int len;
++	bool abort = false;
 +
- static void ioat_eh(struct ioatdma_chan *ioat_chan);
- 
-+static void ioat_print_chanerrs(struct ioatdma_chan *ioat_chan, u32 chanerr)
-+{
-+	int i;
++	txd = entry->txd;
 +
-+	for (i = 0; i < 32; i++) {
-+		if ((chanerr >> i) & 1) {
-+			if (chanerr_str[i]) {
-+				dev_err(to_dev(ioat_chan), "Err(%d): %s\n",
-+					i, chanerr_str[i]);
-+			} else
-+				break;
++	/* we need to check DMA results if we are using DMA */
++	if (txd) {
++		switch (txd->result) {
++		case ERR_DMA_READ:
++		case ERR_DMA_WRITE:
++			entry->errors++;
++		case ERR_DMA_ABORT:
++			abort = true;
++			goto handle_tx;
++		case ERR_DMA_NONE:
++		default:
++			break;
 +		}
 +	}
-+}
+ 
+ 	iowrite32(entry->flags | DESC_DONE_FLAG, &hdr->flags);
+ 
+ 	ntb_peer_db_set(qp->ndev, BIT_ULL(qp->qp_num));
+ 
++handle_tx:
 +
- /**
-  * ioat_dma_do_interrupt - handler used for single vector interrupt mode
-  * @irq: interrupt id
-@@ -769,6 +815,11 @@ static void ioat_eh(struct ioatdma_chan *ioat_chan)
- 	if (chanerr ^ err_handled || chanerr == 0) {
- 		dev_err(to_dev(ioat_chan), "%s: fatal error (%x:%x)\n",
- 			__func__, chanerr, err_handled);
-+		dev_err(to_dev(ioat_chan), "Errors handled:\n");
-+		ioat_print_chanerrs(ioat_chan, err_handled);
-+		dev_err(to_dev(ioat_chan), "Errors not handled:\n");
-+		ioat_print_chanerrs(ioat_chan, (chanerr & ~err_handled));
-+
- 		BUG();
+ 	/* The entry length can only be zero if the packet is intended to be a
+ 	 * "link down" or similar.  Since no payload is being sent in these
+ 	 * cases, there is nothing to add to the completion queue.
+ 	 */
+ 	if (entry->len > 0) {
+-		qp->tx_bytes += entry->len;
++		if (!abort) {
++			qp->tx_bytes += entry->len;
++			len = entry->len;
++		} else
++			len = 0;
+ 
+ 		if (qp->tx_handler)
+-			qp->tx_handler(qp, qp->cb_data, entry->cb_data,
+-				       entry->len);
++			qp->tx_handler(qp, qp->cb_data, entry->cb_data, len);
  	}
  
-@@ -829,6 +880,9 @@ void ioat_timer_event(unsigned long data)
- 		chanerr = readl(ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
- 		dev_err(to_dev(ioat_chan), "%s: Channel halted (%x)\n",
- 			__func__, chanerr);
-+		dev_err(to_dev(ioat_chan), "Errors:\n");
-+		ioat_print_chanerrs(ioat_chan, chanerr);
-+
- 		if (test_bit(IOAT_RUN, &ioat_chan->state)) {
- 			spin_lock_bh(&ioat_chan->cleanup_lock);
- 			spin_lock_bh(&ioat_chan->prep_lock);
-@@ -871,10 +925,13 @@ void ioat_timer_event(unsigned long data)
- 		u32 chanerr;
+ 	ntb_list_add(&qp->ntb_tx_free_q_lock, &entry->entry, &qp->tx_free_q);
+@@ -1482,37 +1514,21 @@ static void ntb_memcpy_tx(struct ntb_queue_entry *entry, void __iomem *offset)
+ 	ntb_tx_copy_callback(entry);
+ }
  
- 		chanerr = readl(ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
--		dev_warn(to_dev(ioat_chan), "CHANSTS: %#Lx CHANERR: %#x\n",
--			 status, chanerr);
--		dev_warn(to_dev(ioat_chan), "Active descriptors: %d\n",
--			 ioat_ring_active(ioat_chan));
-+		dev_err(to_dev(ioat_chan), "CHANSTS: %#Lx CHANERR: %#x\n",
-+			status, chanerr);
-+		dev_err(to_dev(ioat_chan), "Errors:\n");
-+		ioat_print_chanerrs(ioat_chan, chanerr);
-+
-+		dev_dbg(to_dev(ioat_chan), "Active descriptors: %d\n",
-+			ioat_ring_active(ioat_chan));
+-static void ntb_async_tx(struct ntb_transport_qp *qp,
+-			 struct ntb_queue_entry *entry)
++static int ntb_async_tx_submit(struct ntb_transport_qp *qp,
++			       struct ntb_queue_entry *entry)
+ {
+-	struct ntb_payload_header __iomem *hdr;
+-	struct dma_async_tx_descriptor *txd;
+ 	struct dma_chan *chan = qp->tx_dma_chan;
+ 	struct dma_device *device;
++	size_t len = entry->len;
++	void *buf = entry->buf;
+ 	size_t dest_off, buff_off;
+ 	struct dmaengine_unmap_data *unmap;
+ 	dma_addr_t dest;
+ 	dma_cookie_t cookie;
+-	void __iomem *offset;
+-	size_t len = entry->len;
+-	void *buf = entry->buf;
+ 	int retries = 0;
  
- 		spin_lock_bh(&ioat_chan->prep_lock);
- 		set_bit(IOAT_CHAN_DOWN, &ioat_chan->state);
+-	offset = qp->tx_mw + qp->tx_max_frame * qp->tx_index;
+-	hdr = offset + qp->tx_max_frame - sizeof(struct ntb_payload_header);
+-	entry->tx_hdr = hdr;
+-
+-	iowrite32(entry->len, &hdr->len);
+-	iowrite32((u32)qp->tx_pkts, &hdr->ver);
+-
+-	if (!chan)
+-		goto err;
+-
+-	if (len < copy_bytes)
+-		goto err;
+-
+ 	device = chan->device;
+-	dest = qp->tx_mw_phys + qp->tx_max_frame * qp->tx_index;
++	dest = qp->tx_mw_phys + qp->tx_max_frame * entry->tx_index;
+ 	buff_off = (size_t)buf & ~PAGE_MASK;
+ 	dest_off = (size_t)dest & ~PAGE_MASK;
+ 
+@@ -1532,39 +1548,74 @@ static void ntb_async_tx(struct ntb_transport_qp *qp,
+ 	unmap->to_cnt = 1;
+ 
+ 	for (retries = 0; retries < DMA_RETRIES; retries++) {
+-		txd = device->device_prep_dma_memcpy(chan, dest, unmap->addr[0],
+-						     len, DMA_PREP_INTERRUPT);
+-		if (txd)
++		entry->txd = device->device_prep_dma_memcpy(chan, dest,
++							    unmap->addr[0], len,
++							    DMA_PREP_INTERRUPT);
++		if (entry->txd)
+ 			break;
+ 
+ 		set_current_state(TASK_INTERRUPTIBLE);
+ 		schedule_timeout(DMA_OUT_RESOURCE_TO);
+ 	}
+ 
+-	if (!txd) {
++	if (!entry->txd) {
+ 		qp->dma_tx_prep_err++;
+ 		goto err_get_unmap;
+ 	}
+ 
+-	txd->callback = ntb_tx_copy_callback;
+-	txd->callback_param = entry;
+-	dma_set_unmap(txd, unmap);
++	entry->txd->callback = ntb_tx_copy_callback;
++	entry->txd->callback_param = entry;
++	dma_set_unmap(entry->txd, unmap);
+ 
+-	cookie = dmaengine_submit(txd);
++	cookie = dmaengine_submit(entry->txd);
+ 	if (dma_submit_error(cookie))
+ 		goto err_set_unmap;
+ 
+ 	dmaengine_unmap_put(unmap);
+ 
+ 	dma_async_issue_pending(chan);
+-	qp->tx_async++;
+ 
+-	return;
++	return 0;
+ err_set_unmap:
+ 	dmaengine_unmap_put(unmap);
+ err_get_unmap:
+ 	dmaengine_unmap_put(unmap);
+ err:
++	return -ENXIO;
++}
++
++static void ntb_async_tx(struct ntb_transport_qp *qp,
++			 struct ntb_queue_entry *entry)
++{
++	struct ntb_payload_header __iomem *hdr;
++	struct dma_chan *chan = qp->tx_dma_chan;
++	void __iomem *offset;
++	int res;
++
++	entry->tx_index = qp->tx_index;
++	offset = qp->tx_mw + qp->tx_max_frame * entry->tx_index;
++	hdr = offset + qp->tx_max_frame - sizeof(struct ntb_payload_header);
++	entry->tx_hdr = hdr;
++
++	iowrite32(entry->len, &hdr->len);
++	iowrite32((u32)qp->tx_pkts, &hdr->ver);
++
++	if (!chan)
++		goto err;
++
++	if (entry->len < copy_bytes)
++		goto err;
++
++	res = ntb_async_tx_submit(qp, entry);
++	if (res < 0)
++		goto err;
++
++	if (!entry->retries)
++		qp->tx_async++;
++
++	return;
++
++err:
+ 	ntb_memcpy_tx(entry, offset);
+ 	qp->tx_memcpy++;
+ }
+@@ -1940,6 +1991,10 @@ int ntb_transport_tx_enqueue(struct ntb_transport_qp *qp, void *cb, void *data,
+ 	entry->buf = data;
+ 	entry->len = len;
+ 	entry->flags = 0;
++	entry->errors = 0;
++	entry->retries = 0;
++	entry->tx_index = 0;
++	entry->txd = NULL;
+ 
+ 	rc = ntb_process_tx(qp, entry);
+ 	if (rc)
 
