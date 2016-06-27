@@ -1,285 +1,237 @@
-Return-Path: <allenbh@gmail.com>
-Received: from mail-qk0-x244.google.com (mail-qk0-x244.google.com. [2607:f8b0:400d:c09::244])
-        by gmr-mx.google.com with ESMTPS id t206si945512ywb.3.2016.06.27.18.08.45
-        for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 27 Jun 2016 18:08:45 -0700 (PDT)
-Received: by mail-qk0-x244.google.com with SMTP id r136so437163qke.3
-        for <linux-ntb@googlegroups.com>; Mon, 27 Jun 2016 18:08:45 -0700 (PDT)
-MIME-Version: 1.0
-In-Reply-To: <146706898537.188649.13633369547142674206.stgit@djiang5-desk3.ch.intel.com>
+Return-Path: <dave.jiang@intel.com>
+Received: from mga14.intel.com (mga14.intel.com. [192.55.52.115])
+        by gmr-mx.google.com with ESMTP id i135si2967833pfe.0.2016.06.27.16.10.38
+        for <linux-ntb@googlegroups.com>;
+        Mon, 27 Jun 2016 16:10:38 -0700 (PDT)
+Subject: [PATCH 5/5] ntb: add DMA error handling for RX DMA
+From: Dave Jiang <dave.jiang@intel.com>
+Date: Mon, 27 Jun 2016 16:10:01 -0700
+Message-ID: <146706900184.188649.15761649041053225719.stgit@djiang5-desk3.ch.intel.com>
+In-Reply-To: <146706860557.188649.10766278554335496632.stgit@djiang5-desk3.ch.intel.com>
 References: <146706860557.188649.10766278554335496632.stgit@djiang5-desk3.ch.intel.com>
- <146706898537.188649.13633369547142674206.stgit@djiang5-desk3.ch.intel.com>
-From: Allen Hubbe <allenbh@gmail.com>
-Date: Mon, 27 Jun 2016 21:08:45 -0400
-Message-ID: <CAJ80satySmQk_O9hu6E7ytEovSq7v=DMFo9jawU-Sizx2Or8Lg@mail.gmail.com>
-Subject: Re: [PATCH 2/5] dmaengine: IOATDMA: Add error handling to driver
-Content-Type: text/plain; charset=UTF-8
-To: Dave Jiang <dave.jiang@intel.com>
-Cc: vinod.koul@intel.com, Allen Hubbe <allen.hubbe@emc.com>, jdmason@kudzu.us, dmaengine@vger.kernel.org, linux-ntb@googlegroups.com
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+To: vinod.koul@intel.com, allen.hubbe@emc, jdmason@kudzu.us
+Cc: dmaengine@vger.kernel.org, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-On Mon, Jun 27, 2016 at 7:09 PM, Dave Jiang <dave.jiang@intel.com> wrote:
-> Signed-off-by: Dave Jiang <dave.jiang@intel.com>
-> ---
->  drivers/dma/ioat/dma.c       |  136 ++++++++++++++++++++++++++++++++++++------
->  drivers/dma/ioat/registers.h |    2 +
->  2 files changed, 120 insertions(+), 18 deletions(-)
->
-> diff --git a/drivers/dma/ioat/dma.c b/drivers/dma/ioat/dma.c
-> index bd09961..1bbc005 100644
-> --- a/drivers/dma/ioat/dma.c
-> +++ b/drivers/dma/ioat/dma.c
-> @@ -622,7 +622,8 @@ static void ioat_cleanup(struct ioatdma_chan *ioat_chan)
->         if (is_ioat_halted(*ioat_chan->completion)) {
->                 u32 chanerr = readl(ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
->
-> -               if (chanerr & IOAT_CHANERR_HANDLE_MASK) {
-> +               if (chanerr &
-> +                   (IOAT_CHANERR_HANDLE_MASK | IOAT_CHANERR_RECOVER_MASK)) {
->                         mod_timer(&ioat_chan->timer, jiffies + IDLE_TIMEOUT);
->                         ioat_eh(ioat_chan);
->                 }
-> @@ -652,6 +653,60 @@ static void ioat_restart_channel(struct ioatdma_chan *ioat_chan)
->         __ioat_restart_chan(ioat_chan);
->  }
->
-> +
-> +static void ioat_abort_descs(struct ioatdma_chan *ioat_chan)
-> +{
-> +       struct ioatdma_device *ioat_dma = ioat_chan->ioat_dma;
-> +       struct ioat_ring_ent *desc;
-> +       u16 active;
-> +       int idx = ioat_chan->tail, i;
-> +
-> +       /*
-> +        * We assume that the failed descriptor has been processed.
-> +        * Now we are just returning all the remaining submitted
-> +        * descriptors to abort.
-> +        */
-> +       active = ioat_ring_active(ioat_chan);
-> +
-> +       /* we skip the failed descriptor that tail points to */
-> +       for (i = 1; i < active; i++) {
-> +               struct dma_async_tx_descriptor *tx;
-> +
-> +               smp_read_barrier_depends();
-> +               prefetch(ioat_get_ring_ent(ioat_chan, idx + i + 1));
-> +               desc = ioat_get_ring_ent(ioat_chan, idx + i);
-> +               desc->txd.result |= ERR_DMA_ABORT;
+Adding support on the rx DMA path to allow recovery of errors when DMA
+responds with error status and abort all the subsequent ops.
 
-See below, txd.result doesn't seem to be a bit mask.
+Signed-off-by: Dave Jiang <dave.jiang@intel.com>
+---
+ drivers/ntb/ntb_transport.c |   99 ++++++++++++++++++++++++++++++++-----------
+ 1 file changed, 74 insertions(+), 25 deletions(-)
 
-> +
-> +               tx = &desc->txd;
-> +               if (tx->cookie) {
-> +                       dma_cookie_complete(tx);
-> +                       dma_descriptor_unmap(tx);
-> +                       if (tx->callback) {
-> +                               tx->callback(tx->callback_param);
-> +                               tx->callback = NULL;
-> +                       }
-> +               }
-> +
-> +               /* skip extended descriptors */
-> +               if (desc_has_ext(desc)) {
-> +                       WARN_ON(i + 1 >= active);
-> +                       i++;
+diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+index 55a5ae0..435b206 100644
+--- a/drivers/ntb/ntb_transport.c
++++ b/drivers/ntb/ntb_transport.c
+@@ -106,13 +106,13 @@ struct ntb_queue_entry {
+ 	int retries;
+ 	int errors;
+ 	unsigned int tx_index;
++	unsigned int rx_index;
+ 
+ 	struct ntb_transport_qp *qp;
+ 	union {
+ 		struct ntb_payload_header __iomem *tx_hdr;
+ 		struct ntb_payload_header *rx_hdr;
+ 	};
+-	unsigned int index;
+ };
+ 
+ struct ntb_rx_info {
+@@ -227,6 +227,7 @@ struct ntb_transport_ctx {
+ enum {
+ 	DESC_DONE_FLAG = BIT(0),
+ 	LINK_DOWN_FLAG = BIT(1),
++	DESC_ABORT_FLAG = BIT(2),
+ };
+ 
+ struct ntb_payload_header {
+@@ -265,6 +266,9 @@ static struct ntb_client ntb_transport_client;
+ static int ntb_async_tx_submit(struct ntb_transport_qp *qp,
+ 			       struct ntb_queue_entry *entry);
+ static void ntb_memcpy_tx(struct ntb_queue_entry *entry, void __iomem *offset);
++static int ntb_async_rx_submit(struct ntb_queue_entry *entry, void *offset);
++static void ntb_memcpy_rx(struct ntb_queue_entry *entry, void *offset);
++
+ 
+ static int ntb_transport_bus_match(struct device *dev,
+ 				   struct device_driver *drv)
+@@ -1204,14 +1208,18 @@ static void ntb_complete_rxc(struct ntb_transport_qp *qp)
+ 	while (!list_empty(&qp->rx_post_q)) {
+ 		entry = list_first_entry(&qp->rx_post_q,
+ 					 struct ntb_queue_entry, entry);
+-		if (!(entry->flags & DESC_DONE_FLAG))
++		if (entry->flags & DESC_ABORT_FLAG)
++			len = 0;
++		else if (!(entry->flags & DESC_DONE_FLAG))
+ 			break;
++		else
++			len = entry->len;
++
+ 
+ 		entry->rx_hdr->flags = 0;
+-		iowrite32(entry->index, &qp->rx_info->entry);
++		iowrite32(entry->rx_index, &qp->rx_info->entry);
+ 
+ 		cb_data = entry->cb_data;
+-		len = entry->len;
+ 
+ 		list_move_tail(&entry->entry, &qp->rx_free_q);
+ 
+@@ -1229,8 +1237,27 @@ static void ntb_complete_rxc(struct ntb_transport_qp *qp)
+ static void ntb_rx_copy_callback(void *data)
+ {
+ 	struct ntb_queue_entry *entry = data;
++	struct dma_async_tx_descriptor *txd;
++	unsigned int flags = DESC_DONE_FLAG;
+ 
+-	entry->flags |= DESC_DONE_FLAG;
++	txd = entry->txd;
++
++	/* we need to check DMA results if we are using DMA */
++	if (txd) {
++		switch (txd->result) {
++		case ERR_DMA_READ:
++		case ERR_DMA_WRITE:
++			entry->errors++;
++		case ERR_DMA_ABORT:
++			flags = DESC_ABORT_FLAG;
++			break;
++		case ERR_DMA_NONE:
++		default:
++			break;
++		}
++	}
++
++	entry->flags |= flags;
+ 
+ 	ntb_complete_rxc(entry->qp);
+ }
+@@ -1248,9 +1275,8 @@ static void ntb_memcpy_rx(struct ntb_queue_entry *entry, void *offset)
+ 	ntb_rx_copy_callback(entry);
+ }
+ 
+-static void ntb_async_rx(struct ntb_queue_entry *entry, void *offset)
++static int ntb_async_rx_submit(struct ntb_queue_entry *entry, void *offset)
+ {
+-	struct dma_async_tx_descriptor *txd;
+ 	struct ntb_transport_qp *qp = entry->qp;
+ 	struct dma_chan *chan = qp->rx_dma_chan;
+ 	struct dma_device *device;
+@@ -1261,13 +1287,6 @@ static void ntb_async_rx(struct ntb_queue_entry *entry, void *offset)
+ 	int retries = 0;
+ 
+ 	len = entry->len;
+-
+-	if (!chan)
+-		goto err;
+-
+-	if (len < copy_bytes)
+-		goto err;
+-
+ 	device = chan->device;
+ 	pay_off = (size_t)offset & ~PAGE_MASK;
+ 	buff_off = (size_t)buf & ~PAGE_MASK;
+@@ -1295,26 +1314,27 @@ static void ntb_async_rx(struct ntb_queue_entry *entry, void *offset)
+ 	unmap->from_cnt = 1;
+ 
+ 	for (retries = 0; retries < DMA_RETRIES; retries++) {
+-		txd = device->device_prep_dma_memcpy(chan, unmap->addr[1],
+-						     unmap->addr[0], len,
+-						     DMA_PREP_INTERRUPT);
+-		if (txd)
++		entry->txd = device->device_prep_dma_memcpy(chan,
++							    unmap->addr[1],
++							    unmap->addr[0], len,
++							    DMA_PREP_INTERRUPT);
++		if (entry->txd)
+ 			break;
+ 
+ 		set_current_state(TASK_INTERRUPTIBLE);
+ 		schedule_timeout(DMA_OUT_RESOURCE_TO);
+ 	}
+ 
+-	if (!txd) {
++	if (!entry->txd) {
+ 		qp->dma_rx_prep_err++;
+ 		goto err_get_unmap;
+ 	}
+ 
+-	txd->callback = ntb_rx_copy_callback;
+-	txd->callback_param = entry;
+-	dma_set_unmap(txd, unmap);
++	entry->txd->callback = ntb_rx_copy_callback;
++	entry->txd->callback_param = entry;
++	dma_set_unmap(entry->txd, unmap);
+ 
+-	cookie = dmaengine_submit(txd);
++	cookie = dmaengine_submit(entry->txd);
+ 	if (dma_submit_error(cookie))
+ 		goto err_set_unmap;
+ 
+@@ -1324,13 +1344,38 @@ static void ntb_async_rx(struct ntb_queue_entry *entry, void *offset)
+ 
+ 	qp->rx_async++;
+ 
+-	return;
++	return 0;
+ 
+ err_set_unmap:
+ 	dmaengine_unmap_put(unmap);
+ err_get_unmap:
+ 	dmaengine_unmap_put(unmap);
+ err:
++	return -ENXIO;
++}
++
++static void ntb_async_rx(struct ntb_queue_entry *entry, void *offset)
++{
++	struct ntb_transport_qp *qp = entry->qp;
++	struct dma_chan *chan = qp->rx_dma_chan;
++	int res;
++
++	if (!chan)
++		goto err;
++
++	if (entry->len < copy_bytes)
++		goto err;
++
++	res = ntb_async_rx_submit(entry, offset);
++	if (res < 0)
++		goto err;
++
++	if (!entry->retries)
++		qp->rx_async++;
++
++	return;
++
++err:
+ 	ntb_memcpy_rx(entry, offset);
+ 	qp->rx_memcpy++;
+ }
+@@ -1376,7 +1421,7 @@ static int ntb_process_rxc(struct ntb_transport_qp *qp)
+ 	}
+ 
+ 	entry->rx_hdr = hdr;
+-	entry->index = qp->rx_index;
++	entry->rx_index = qp->rx_index;
+ 
+ 	if (hdr->len > entry->len) {
+ 		dev_dbg(&qp->ndev->pdev->dev,
+@@ -1949,6 +1994,10 @@ int ntb_transport_rx_enqueue(struct ntb_transport_qp *qp, void *cb, void *data,
+ 	entry->buf = data;
+ 	entry->len = len;
+ 	entry->flags = 0;
++	entry->retries = 0;
++	entry->errors = 0;
++	entry->rx_index = 0;
++	entry->txd = NULL;
+ 
+ 	ntb_list_add(&qp->ntb_rx_q_lock, &entry->entry, &qp->rx_pend_q);
+ 
 
-Is it always true that extended descriptors (note: descriptors is
-plural) means "exactly one?"  Otherwise, ++ aught to be += how how
-many.  I didn't notice anything in dma_prep.c that would use more than
-one extra.
-
-> +               }
-> +
-> +               /* cleanup super extended descriptors */
-> +               if (desc->sed) {
-> +                       ioat_free_sed(ioat_dma, desc->sed);
-> +                       desc->sed = NULL;
-> +               }
-> +       }
-> +
-> +       smp_mb(); /* finish all descriptor reads before incrementing tail */
-> +       ioat_chan->tail = idx + i;
-
-Would it also be correct to say `idx + active` here?  If so, that
-might be more clear.
-
-> +
-> +       desc = ioat_get_ring_ent(ioat_chan, ioat_chan->tail);
-> +       ioat_chan->last_completion = *ioat_chan->completion = desc->txd.phys;
-> +}
-> +
->  static void ioat_eh(struct ioatdma_chan *ioat_chan)
->  {
->         struct pci_dev *pdev = to_pdev(ioat_chan);
-> @@ -662,6 +717,7 @@ static void ioat_eh(struct ioatdma_chan *ioat_chan)
->         u32 err_handled = 0;
->         u32 chanerr_int;
->         u32 chanerr;
-> +       bool abort = false;
->
->         /* cleanup so tail points to descriptor that caused the error */
->         if (ioat_cleanup_preamble(ioat_chan, &phys_complete))
-> @@ -697,30 +753,50 @@ static void ioat_eh(struct ioatdma_chan *ioat_chan)
->                 break;
->         }
->
-> +       if (chanerr & IOAT_CHANERR_RECOVER_MASK) {
-> +               if (chanerr & IOAT_CHANERR_READ_DATA_ERR) {
-> +                       desc->txd.result |= ERR_DMA_READ;
-
-In [PATCH 1/5] ERR_DMA_XYZ values do not look appropriate for use as a bit mask.
-
-+enum err_result_flags {
-+       ERR_DMA_NONE = 0,
-+       ERR_DMA_READ,
-+       ERR_DMA_WRITE,
-+       ERR_DMA_ABORT,
-+};
-
-And in [PATCH 4/5] and [PATCH 5/5] txd.result is not used as a bit mask.
-
-+               switch (txd->result) {
-+               case ERR_DMA_READ:
-+               case ERR_DMA_WRITE:
-+                       entry->errors++;
-+               case ERR_DMA_ABORT:
-+                       flags = DESC_ABORT_FLAG;
-+                       break;
-+               case ERR_DMA_NONE:
-+               default:
-+                       break;
-+               }
-
-> +                       err_handled |= IOAT_CHANERR_READ_DATA_ERR;
-> +               } else if (chanerr & IOAT_CHANERR_WRITE_DATA_ERR) {
-> +                       desc->txd.result |= ERR_DMA_WRITE;
-> +                       err_handled |= IOAT_CHANERR_WRITE_DATA_ERR;
-> +               }
-> +
-> +               abort = true;
-> +       }
-> +
->         /* fault on unhandled error or spurious halt */
->         if (chanerr ^ err_handled || chanerr == 0) {
-
-Not part of your change, but chanerr == 0 is confusing.  Doesn't that
-mean "no errors?"  No errors would make it hard to justify BUG() that
-follows.
-
->                 dev_err(to_dev(ioat_chan), "%s: fatal error (%x:%x)\n",
->                         __func__, chanerr, err_handled);
->                 BUG();
-> -       } else { /* cleanup the faulty descriptor */
-> -               tx = &desc->txd;
-> -               if (tx->cookie) {
-> -                       dma_cookie_complete(tx);
-> -                       dma_descriptor_unmap(tx);
-> -                       if (tx->callback) {
-> -                               tx->callback(tx->callback_param);
-> -                               tx->callback = NULL;
-> -                       }
-> -               }
->         }
->
-> -       writel(chanerr, ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
-> -       pci_write_config_dword(pdev, IOAT_PCI_CHANERR_INT_OFFSET, chanerr_int);
-> +       /* cleanup the faulty descriptor since we are continuing */
-> +       tx = &desc->txd;
-> +       if (tx->cookie) {
-> +               dma_cookie_complete(tx);
-> +               dma_descriptor_unmap(tx);
-> +               if (tx->callback) {
-> +                       tx->callback(tx->callback_param);
-> +                       tx->callback = NULL;
-> +               }
-> +       }
->
->         /* mark faulting descriptor as complete */
->         *ioat_chan->completion = desc->txd.phys;
->
->         spin_lock_bh(&ioat_chan->prep_lock);
-> +       /* we need abort all descriptors */
-> +       if (abort) {
-> +               ioat_abort_descs(ioat_chan);
-> +               /* clean up the channel, we could be in weird state */
-> +               ioat_reset_hw(ioat_chan);
-> +       }
-> +
-> +       writel(chanerr, ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
-> +       pci_write_config_dword(pdev, IOAT_PCI_CHANERR_INT_OFFSET, chanerr_int);
-> +
->         ioat_restart_channel(ioat_chan);
->         spin_unlock_bh(&ioat_chan->prep_lock);
->  }
-> @@ -753,10 +829,25 @@ void ioat_timer_event(unsigned long data)
->                 chanerr = readl(ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
->                 dev_err(to_dev(ioat_chan), "%s: Channel halted (%x)\n",
->                         __func__, chanerr);
-> -               if (test_bit(IOAT_RUN, &ioat_chan->state))
-> -                       BUG_ON(is_ioat_bug(chanerr));
-> -               else /* we never got off the ground */
-> -                       return;
-> +               if (test_bit(IOAT_RUN, &ioat_chan->state)) {
-> +                       spin_lock_bh(&ioat_chan->cleanup_lock);
-> +                       spin_lock_bh(&ioat_chan->prep_lock);
-> +                       set_bit(IOAT_CHAN_DOWN, &ioat_chan->state);
-> +                       spin_unlock_bh(&ioat_chan->prep_lock);
-> +
-> +                       ioat_abort_descs(ioat_chan);
-> +                       dev_warn(to_dev(ioat_chan), "Reset channel...\n");
-> +                       ioat_reset_hw(ioat_chan);
-> +                       dev_warn(to_dev(ioat_chan), "Restart channel...\n");
-> +                       ioat_restart_channel(ioat_chan);
-> +
-> +                       spin_lock_bh(&ioat_chan->prep_lock);
-> +                       clear_bit(IOAT_CHAN_DOWN, &ioat_chan->state);
-> +                       spin_unlock_bh(&ioat_chan->prep_lock);
-> +                       spin_unlock_bh(&ioat_chan->cleanup_lock);
-> +               }
-> +
-> +               return;
->         }
->
->         spin_lock_bh(&ioat_chan->cleanup_lock);
-> @@ -780,14 +871,23 @@ void ioat_timer_event(unsigned long data)
->                 u32 chanerr;
->
->                 chanerr = readl(ioat_chan->reg_base + IOAT_CHANERR_OFFSET);
-> -               dev_warn(to_dev(ioat_chan), "Restarting channel...\n");
->                 dev_warn(to_dev(ioat_chan), "CHANSTS: %#Lx CHANERR: %#x\n",
->                          status, chanerr);
->                 dev_warn(to_dev(ioat_chan), "Active descriptors: %d\n",
->                          ioat_ring_active(ioat_chan));
->
->                 spin_lock_bh(&ioat_chan->prep_lock);
-> +               set_bit(IOAT_CHAN_DOWN, &ioat_chan->state);
-> +               spin_unlock_bh(&ioat_chan->prep_lock);
-> +
-> +               ioat_abort_descs(ioat_chan);
-> +               dev_warn(to_dev(ioat_chan), "Resetting channel...\n");
-> +               ioat_reset_hw(ioat_chan);
-> +               dev_warn(to_dev(ioat_chan), "Restarting channel...\n");
->                 ioat_restart_channel(ioat_chan);
-> +
-> +               spin_lock_bh(&ioat_chan->prep_lock);
-> +               clear_bit(IOAT_CHAN_DOWN, &ioat_chan->state);
->                 spin_unlock_bh(&ioat_chan->prep_lock);
->                 spin_unlock_bh(&ioat_chan->cleanup_lock);
->                 return;
-> diff --git a/drivers/dma/ioat/registers.h b/drivers/dma/ioat/registers.h
-> index 4994a36..faf20fa 100644
-> --- a/drivers/dma/ioat/registers.h
-> +++ b/drivers/dma/ioat/registers.h
-> @@ -233,6 +233,8 @@
->  #define IOAT_CHANERR_DESCRIPTOR_COUNT_ERR      0x40000
->
->  #define IOAT_CHANERR_HANDLE_MASK (IOAT_CHANERR_XOR_P_OR_CRC_ERR | IOAT_CHANERR_XOR_Q_ERR)
-> +#define IOAT_CHANERR_RECOVER_MASK (IOAT_CHANERR_READ_DATA_ERR | \
-> +                                  IOAT_CHANERR_WRITE_DATA_ERR)
->
->  #define IOAT_CHANERR_MASK_OFFSET               0x2C    /* 32-bit Channel Error Register */
->
->
