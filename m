@@ -1,279 +1,263 @@
-Return-Path: <dave.jiang@intel.com>
-Received: from mga03.intel.com (mga03.intel.com. [134.134.136.65])
-        by gmr-mx.google.com with ESMTP id i135si4138032pfe.0.2016.06.28.09.12.28
-        for <linux-ntb@googlegroups.com>;
-        Tue, 28 Jun 2016 09:12:28 -0700 (PDT)
-From: "Jiang, Dave" <dave.jiang@intel.com>
-Subject: Re: [PATCH 2/5] dmaengine: IOATDMA: Add error handling to driver
-Date: Tue, 28 Jun 2016 16:11:52 +0000
-Message-ID: <1467130291.3754.8.camel@intel.com>
-References: <146706860557.188649.10766278554335496632.stgit@djiang5-desk3.ch.intel.com>
-	 <146706898537.188649.13633369547142674206.stgit@djiang5-desk3.ch.intel.com>
-	 <CAJ80satySmQk_O9hu6E7ytEovSq7v=DMFo9jawU-Sizx2Or8Lg@mail.gmail.com>
-In-Reply-To: <CAJ80satySmQk_O9hu6E7ytEovSq7v=DMFo9jawU-Sizx2Or8Lg@mail.gmail.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <F28D05EBC784A24FAF1067C94C2F4218@intel.com>
-Content-Transfer-Encoding: base64
+Return-Path: <allenbh@gmail.com>
+Received: from mail-qk0-x243.google.com (mail-qk0-x243.google.com. [2607:f8b0:400d:c09::243])
+        by gmr-mx.google.com with ESMTPS id w2si1355959yww.0.2016.06.27.18.53.06
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 27 Jun 2016 18:53:06 -0700 (PDT)
+Received: by mail-qk0-x243.google.com with SMTP id j2so627511qkf.1
+        for <linux-ntb@googlegroups.com>; Mon, 27 Jun 2016 18:53:06 -0700 (PDT)
 MIME-Version: 1.0
-Return-Path: dave.jiang@intel.com
-To: "allenbh@gmail.com" <allenbh@gmail.com>
-Cc: "allen.hubbe@emc.com" <allen.hubbe@emc.com>, "dmaengine@vger.kernel.org" <dmaengine@vger.kernel.org>, "Williams, Dan J" <dan.j.williams@intel.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "Koul, Vinod" <vinod.koul@intel.com>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
+In-Reply-To: <146706899641.188649.16969346461413257840.stgit@djiang5-desk3.ch.intel.com>
+References: <146706860557.188649.10766278554335496632.stgit@djiang5-desk3.ch.intel.com>
+ <146706899641.188649.16969346461413257840.stgit@djiang5-desk3.ch.intel.com>
+From: Allen Hubbe <allenbh@gmail.com>
+Date: Mon, 27 Jun 2016 21:53:05 -0400
+Message-ID: <CAJ80satSazc03Q=y5uNCi1dNYYdJCgM8wD6RwRH21J-yPHtWyw@mail.gmail.com>
+Subject: Re: [PATCH 4/5] ntb: add DMA error handling for TX DMA
+Content-Type: text/plain; charset=UTF-8
+To: Dave Jiang <dave.jiang@intel.com>
+Cc: vinod.koul@intel.com, Allen Hubbe <allen.hubbe@emc.com>, jdmason@kudzu.us, dmaengine@vger.kernel.org, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-T24gVHVlLCAyMDE2LTA2LTI4IGF0IDAxOjA4ICswMDAwLCBBbGxlbiBIdWJiZSB3cm90ZToNCj4g
-T24gTW9uLCBKdW4gMjcsIDIwMTYgYXQgNzowOSBQTSwgRGF2ZSBKaWFuZyA8ZGF2ZS5qaWFuZ0Bp
-bnRlbC5jb20+DQo+IHdyb3RlOg0KPiA+IFNpZ25lZC1vZmYtYnk6IERhdmUgSmlhbmcgPGRhdmUu
-amlhbmdAaW50ZWwuY29tPg0KPiA+IC0tLQ0KPiA+IMKgZHJpdmVycy9kbWEvaW9hdC9kbWEuY8Kg
-wqDCoMKgwqDCoMKgfMKgwqAxMzYNCj4gPiArKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
-KysrKystLS0tLS0NCj4gPiDCoGRyaXZlcnMvZG1hL2lvYXQvcmVnaXN0ZXJzLmggfMKgwqDCoMKg
-MiArDQo+ID4gwqAyIGZpbGVzIGNoYW5nZWQsIDEyMCBpbnNlcnRpb25zKCspLCAxOCBkZWxldGlv
-bnMoLSkNCj4gPiANCj4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9kbWEvaW9hdC9kbWEuYyBiL2Ry
-aXZlcnMvZG1hL2lvYXQvZG1hLmMNCj4gPiBpbmRleCBiZDA5OTYxLi4xYmJjMDA1IDEwMDY0NA0K
-PiA+IC0tLSBhL2RyaXZlcnMvZG1hL2lvYXQvZG1hLmMNCj4gPiArKysgYi9kcml2ZXJzL2RtYS9p
-b2F0L2RtYS5jDQo+ID4gQEAgLTYyMiw3ICs2MjIsOCBAQCBzdGF0aWMgdm9pZCBpb2F0X2NsZWFu
-dXAoc3RydWN0IGlvYXRkbWFfY2hhbg0KPiA+ICppb2F0X2NoYW4pDQo+ID4gwqDCoMKgwqDCoMKg
-wqDCoGlmIChpc19pb2F0X2hhbHRlZCgqaW9hdF9jaGFuLT5jb21wbGV0aW9uKSkgew0KPiA+IMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgdTMyIGNoYW5lcnIgPSByZWFkbChpb2F0X2No
-YW4tPnJlZ19iYXNlICsNCj4gPiBJT0FUX0NIQU5FUlJfT0ZGU0VUKTsNCj4gPiANCj4gPiAtwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgaWYgKGNoYW5lcnIgJiBJT0FUX0NIQU5FUlJfSEFO
-RExFX01BU0spIHsNCj4gPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgaWYgKGNoYW5l
-cnIgJg0KPiA+ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoChJT0FUX0NI
-QU5FUlJfSEFORExFX01BU0sgfA0KPiA+IElPQVRfQ0hBTkVSUl9SRUNPVkVSX01BU0spKSB7DQo+
-ID4gwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgbW9kX3Rp
-bWVyKCZpb2F0X2NoYW4tPnRpbWVyLCBqaWZmaWVzICsNCj4gPiBJRExFX1RJTUVPVVQpOw0KPiA+
-IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoGlvYXRfZWgo
-aW9hdF9jaGFuKTsNCj4gPiDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoH0NCj4gPiBA
-QCAtNjUyLDYgKzY1Myw2MCBAQCBzdGF0aWMgdm9pZCBpb2F0X3Jlc3RhcnRfY2hhbm5lbChzdHJ1
-Y3QNCj4gPiBpb2F0ZG1hX2NoYW4gKmlvYXRfY2hhbikNCj4gPiDCoMKgwqDCoMKgwqDCoMKgX19p
-b2F0X3Jlc3RhcnRfY2hhbihpb2F0X2NoYW4pOw0KPiA+IMKgfQ0KPiA+IA0KPiA+ICsNCj4gPiAr
-c3RhdGljIHZvaWQgaW9hdF9hYm9ydF9kZXNjcyhzdHJ1Y3QgaW9hdGRtYV9jaGFuICppb2F0X2No
-YW4pDQo+ID4gK3sNCj4gPiArwqDCoMKgwqDCoMKgwqBzdHJ1Y3QgaW9hdGRtYV9kZXZpY2UgKmlv
-YXRfZG1hID0gaW9hdF9jaGFuLT5pb2F0X2RtYTsNCj4gPiArwqDCoMKgwqDCoMKgwqBzdHJ1Y3Qg
-aW9hdF9yaW5nX2VudCAqZGVzYzsNCj4gPiArwqDCoMKgwqDCoMKgwqB1MTYgYWN0aXZlOw0KPiA+
-ICvCoMKgwqDCoMKgwqDCoGludCBpZHggPSBpb2F0X2NoYW4tPnRhaWwsIGk7DQo+ID4gKw0KPiA+
-ICvCoMKgwqDCoMKgwqDCoC8qDQo+ID4gK8KgwqDCoMKgwqDCoMKgwqAqIFdlIGFzc3VtZSB0aGF0
-IHRoZSBmYWlsZWQgZGVzY3JpcHRvciBoYXMgYmVlbiBwcm9jZXNzZWQuDQo+ID4gK8KgwqDCoMKg
-wqDCoMKgwqAqIE5vdyB3ZSBhcmUganVzdCByZXR1cm5pbmcgYWxsIHRoZSByZW1haW5pbmcgc3Vi
-bWl0dGVkDQo+ID4gK8KgwqDCoMKgwqDCoMKgwqAqIGRlc2NyaXB0b3JzIHRvIGFib3J0Lg0KPiA+
-ICvCoMKgwqDCoMKgwqDCoMKgKi8NCj4gPiArwqDCoMKgwqDCoMKgwqBhY3RpdmUgPSBpb2F0X3Jp
-bmdfYWN0aXZlKGlvYXRfY2hhbik7DQo+ID4gKw0KPiA+ICvCoMKgwqDCoMKgwqDCoC8qIHdlIHNr
-aXAgdGhlIGZhaWxlZCBkZXNjcmlwdG9yIHRoYXQgdGFpbCBwb2ludHMgdG8gKi8NCj4gPiArwqDC
-oMKgwqDCoMKgwqBmb3IgKGkgPSAxOyBpIDwgYWN0aXZlOyBpKyspIHsNCj4gPiArwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgc3RydWN0IGRtYV9hc3luY190eF9kZXNjcmlwdG9yICp0eDsN
-Cj4gPiArDQo+ID4gK8KgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoHNtcF9yZWFkX2JhcnJp
-ZXJfZGVwZW5kcygpOw0KPiA+ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBwcmVmZXRj
-aChpb2F0X2dldF9yaW5nX2VudChpb2F0X2NoYW4sIGlkeCArIGkgKw0KPiA+IDEpKTsNCj4gPiAr
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgZGVzYyA9IGlvYXRfZ2V0X3JpbmdfZW50KGlv
-YXRfY2hhbiwgaWR4ICsgaSk7DQo+ID4gK8KgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoGRl
-c2MtPnR4ZC5yZXN1bHQgfD0gRVJSX0RNQV9BQk9SVDsNCj4gDQo+IFNlZSBiZWxvdywgdHhkLnJl
-c3VsdCBkb2Vzbid0IHNlZW0gdG8gYmUgYSBiaXQgbWFzay4NCg0KSSdsbCBmaXggdGhhdC4gSXQg
-c2hvdWxkbid0IGJlIGEgYml0IG1hc2suDQoNCj4gDQo+ID4gKw0KPiA+ICvCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqB0eCA9ICZkZXNjLT50eGQ7DQo+ID4gK8KgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoGlmICh0eC0+Y29va2llKSB7DQo+ID4gK8KgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBkbWFfY29va2llX2NvbXBsZXRlKHR4KTsNCj4gPiAr
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoGRtYV9kZXNjcmlw
-dG9yX3VubWFwKHR4KTsNCj4gPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoGlmICh0eC0+Y2FsbGJhY2spIHsNCj4gPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqB0eC0+Y2FsbGJhY2sodHgt
-PmNhbGxiYWNrX3BhcmFtKTsNCj4gPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqB0eC0+Y2FsbGJhY2sgPSBOVUxMOw0KPiA+ICvC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgfQ0KPiA+ICvCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqB9DQo+ID4gKw0KPiA+ICvCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqAvKiBza2lwIGV4dGVuZGVkIGRlc2NyaXB0b3JzICovDQo+ID4gK8KgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoGlmIChkZXNjX2hhc19leHQoZGVzYykpIHsNCj4gPiAr
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoFdBUk5fT04oaSAr
-IDEgPj0gYWN0aXZlKTsNCj4gPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoGkrKzsNCj4gDQo+IElzIGl0IGFsd2F5cyB0cnVlIHRoYXQgZXh0ZW5kZWQgZGVz
-Y3JpcHRvcnMgKG5vdGU6IGRlc2NyaXB0b3JzIGlzDQo+IHBsdXJhbCkgbWVhbnMgImV4YWN0bHkg
-b25lPyLCoMKgT3RoZXJ3aXNlLCArKyBhdWdodCB0byBiZSArPSBob3cgaG93DQo+IG1hbnkuwqDC
-oEkgZGlkbid0IG5vdGljZSBhbnl0aGluZyBpbiBkbWFfcHJlcC5jIHRoYXQgd291bGQgdXNlIG1v
-cmUNCj4gdGhhbg0KPiBvbmUgZXh0cmEuDQoNClRoZXJlIGNhbiBvbmx5IGJlIDEgZXh0ZW5kZWQg
-ZGVzY3JpcHRvciBhbHdheXMuDQoNCj4gDQo+ID4gK8KgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoH0NCj4gPiArDQo+ID4gK8KgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoC8qIGNsZWFu
-dXAgc3VwZXIgZXh0ZW5kZWQgZGVzY3JpcHRvcnMgKi8NCj4gPiArwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgaWYgKGRlc2MtPnNlZCkgew0KPiA+ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgaW9hdF9mcmVlX3NlZChpb2F0X2RtYSwgZGVzYy0+c2Vk
-KTsNCj4gPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoGRl
-c2MtPnNlZCA9IE5VTEw7DQo+ID4gK8KgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoH0NCj4g
-PiArwqDCoMKgwqDCoMKgwqB9DQo+ID4gKw0KPiA+ICvCoMKgwqDCoMKgwqDCoHNtcF9tYigpOyAv
-KiBmaW5pc2ggYWxsIGRlc2NyaXB0b3IgcmVhZHMgYmVmb3JlDQo+ID4gaW5jcmVtZW50aW5nIHRh
-aWwgKi8NCj4gPiArwqDCoMKgwqDCoMKgwqBpb2F0X2NoYW4tPnRhaWwgPSBpZHggKyBpOw0KPiAN
-Cj4gV291bGQgaXQgYWxzbyBiZSBjb3JyZWN0IHRvIHNheSBgaWR4ICsgYWN0aXZlYCBoZXJlP8Kg
-wqBJZiBzbywgdGhhdA0KPiBtaWdodCBiZSBtb3JlIGNsZWFyLg0KDQpvaw0KDQo+IA0KPiA+ICsN
-Cj4gPiArwqDCoMKgwqDCoMKgwqBkZXNjID0gaW9hdF9nZXRfcmluZ19lbnQoaW9hdF9jaGFuLCBp
-b2F0X2NoYW4tPnRhaWwpOw0KPiA+ICvCoMKgwqDCoMKgwqDCoGlvYXRfY2hhbi0+bGFzdF9jb21w
-bGV0aW9uID0gKmlvYXRfY2hhbi0+Y29tcGxldGlvbiA9IGRlc2MtDQo+ID4gPnR4ZC5waHlzOw0K
-PiA+ICt9DQo+ID4gKw0KPiA+IMKgc3RhdGljIHZvaWQgaW9hdF9laChzdHJ1Y3QgaW9hdGRtYV9j
-aGFuICppb2F0X2NoYW4pDQo+ID4gwqB7DQo+ID4gwqDCoMKgwqDCoMKgwqDCoHN0cnVjdCBwY2lf
-ZGV2ICpwZGV2ID0gdG9fcGRldihpb2F0X2NoYW4pOw0KPiA+IEBAIC02NjIsNiArNzE3LDcgQEAg
-c3RhdGljIHZvaWQgaW9hdF9laChzdHJ1Y3QgaW9hdGRtYV9jaGFuDQo+ID4gKmlvYXRfY2hhbikN
-Cj4gPiDCoMKgwqDCoMKgwqDCoMKgdTMyIGVycl9oYW5kbGVkID0gMDsNCj4gPiDCoMKgwqDCoMKg
-wqDCoMKgdTMyIGNoYW5lcnJfaW50Ow0KPiA+IMKgwqDCoMKgwqDCoMKgwqB1MzIgY2hhbmVycjsN
-Cj4gPiArwqDCoMKgwqDCoMKgwqBib29sIGFib3J0ID0gZmFsc2U7DQo+ID4gDQo+ID4gwqDCoMKg
-wqDCoMKgwqDCoC8qIGNsZWFudXAgc28gdGFpbCBwb2ludHMgdG8gZGVzY3JpcHRvciB0aGF0IGNh
-dXNlZCB0aGUNCj4gPiBlcnJvciAqLw0KPiA+IMKgwqDCoMKgwqDCoMKgwqBpZiAoaW9hdF9jbGVh
-bnVwX3ByZWFtYmxlKGlvYXRfY2hhbiwgJnBoeXNfY29tcGxldGUpKQ0KPiA+IEBAIC02OTcsMzAg
-Kzc1Myw1MCBAQCBzdGF0aWMgdm9pZCBpb2F0X2VoKHN0cnVjdCBpb2F0ZG1hX2NoYW4NCj4gPiAq
-aW9hdF9jaGFuKQ0KPiA+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgYnJlYWs7DQo+
-ID4gwqDCoMKgwqDCoMKgwqDCoH0NCj4gPiANCj4gPiArwqDCoMKgwqDCoMKgwqBpZiAoY2hhbmVy
-ciAmIElPQVRfQ0hBTkVSUl9SRUNPVkVSX01BU0spIHsNCj4gPiArwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgaWYgKGNoYW5lcnIgJiBJT0FUX0NIQU5FUlJfUkVBRF9EQVRBX0VSUikgew0K
-PiA+ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgZGVzYy0+
-dHhkLnJlc3VsdCB8PSBFUlJfRE1BX1JFQUQ7DQo+IA0KPiBJbiBbUEFUQ0ggMS81XSBFUlJfRE1B
-X1hZWiB2YWx1ZXMgZG8gbm90IGxvb2sgYXBwcm9wcmlhdGUgZm9yIHVzZSBhcw0KPiBhIGJpdCBt
-YXNrLg0KPiANCj4gK2VudW0gZXJyX3Jlc3VsdF9mbGFncyB7DQo+ICvCoMKgwqDCoMKgwqDCoEVS
-Ul9ETUFfTk9ORSA9IDAsDQo+ICvCoMKgwqDCoMKgwqDCoEVSUl9ETUFfUkVBRCwNCj4gK8KgwqDC
-oMKgwqDCoMKgRVJSX0RNQV9XUklURSwNCj4gK8KgwqDCoMKgwqDCoMKgRVJSX0RNQV9BQk9SVCwN
-Cj4gK307DQo+IA0KPiBBbmQgaW4gW1BBVENIIDQvNV0gYW5kIFtQQVRDSCA1LzVdIHR4ZC5yZXN1
-bHQgaXMgbm90IHVzZWQgYXMgYSBiaXQNCj4gbWFzay4NCj4gDQo+ICvCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqBzd2l0Y2ggKHR4ZC0+cmVzdWx0KSB7DQo+ICvCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqBjYXNlIEVSUl9ETUFfUkVBRDoNCj4gK8KgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoGNhc2UgRVJSX0RNQV9XUklURToNCj4gK8KgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBlbnRyeS0+ZXJyb3JzKys7DQo+ICvCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqBjYXNlIEVSUl9ETUFfQUJPUlQ6DQo+ICvCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgZmxhZ3MgPSBERVNDX0FCT1JUX0ZMQUc7DQo+
-ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgYnJlYWs7DQo+
-ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBjYXNlIEVSUl9ETUFfTk9ORToNCj4gK8Kg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoGRlZmF1bHQ6DQo+ICvCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgYnJlYWs7DQo+ICvCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqB9DQo+IA0KPiA+ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgZXJyX2hhbmRsZWQgfD0gSU9BVF9DSEFORVJSX1JFQURfREFUQV9FUlI7
-DQo+ID4gK8KgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoH0gZWxzZSBpZiAoY2hhbmVyciAm
-IElPQVRfQ0hBTkVSUl9XUklURV9EQVRBX0VSUikgew0KPiA+ICvCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgZGVzYy0+dHhkLnJlc3VsdCB8PSBFUlJfRE1BX1dS
-SVRFOw0KPiA+ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-ZXJyX2hhbmRsZWQgfD0gSU9BVF9DSEFORVJSX1dSSVRFX0RBVEFfRVJSOw0KPiA+ICvCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqB9DQo+ID4gKw0KPiA+ICvCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqBhYm9ydCA9IHRydWU7DQo+ID4gK8KgwqDCoMKgwqDCoMKgfQ0KPiA+ICsNCj4g
-PiDCoMKgwqDCoMKgwqDCoMKgLyogZmF1bHQgb24gdW5oYW5kbGVkIGVycm9yIG9yIHNwdXJpb3Vz
-IGhhbHQgKi8NCj4gPiDCoMKgwqDCoMKgwqDCoMKgaWYgKGNoYW5lcnIgXiBlcnJfaGFuZGxlZCB8
-fCBjaGFuZXJyID09IDApIHsNCj4gDQo+IE5vdCBwYXJ0IG9mIHlvdXIgY2hhbmdlLCBidXQgY2hh
-bmVyciA9PSAwIGlzIGNvbmZ1c2luZy7CoMKgRG9lc24ndCB0aGF0DQo+IG1lYW4gIm5vIGVycm9y
-cz8iwqDCoE5vIGVycm9ycyB3b3VsZCBtYWtlIGl0IGhhcmQgdG8ganVzdGlmeSBCVUcoKSB0aGF0
-DQo+IGZvbGxvd3MuDQoNCkxlZ2FjeSBjb2RlLiBUaGlzIGlzIHRoZSBiZWdpbm5pbmcgb2YgbWUg
-Y2xlYW5pbmcgb3V0IGFsbCB0aGUgQlVHKCkgaW4NCnRoZSBkcml2ZXIgYW5kIHB1dCBpbiBwcm9w
-ZXIgZXJyb3IgaGFuZGxpbmcuwqANCg0KPiANCj4gPiDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoGRldl9lcnIodG9fZGV2KGlvYXRfY2hhbiksICIlczogZmF0YWwgZXJyb3INCj4gPiAo
-JXg6JXgpXG4iLA0KPiA+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoF9fZnVuY19fLCBjaGFuZXJyLCBlcnJfaGFuZGxlZCk7DQo+ID4gwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqBCVUcoKTsNCj4gPiAtwqDCoMKgwqDCoMKgwqB9IGVsc2UgeyAv
-KiBjbGVhbnVwIHRoZSBmYXVsdHkgZGVzY3JpcHRvciAqLw0KPiA+IC3CoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqB0eCA9ICZkZXNjLT50eGQ7DQo+ID4gLcKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoGlmICh0eC0+Y29va2llKSB7DQo+ID4gLcKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBkbWFfY29va2llX2NvbXBsZXRlKHR4KTsNCj4gPiAtwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoGRtYV9kZXNjcmlwdG9y
-X3VubWFwKHR4KTsNCj4gPiAtwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoGlmICh0eC0+Y2FsbGJhY2spIHsNCj4gPiAtwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqB0eC0+Y2FsbGJhY2sodHgtPmNh
-bGxiYWNrX3BhcmFtKTsNCj4gPiAtwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqB0eC0+Y2FsbGJhY2sgPSBOVUxMOw0KPiA+IC3CoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgfQ0KPiA+IC3CoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqB9DQo+ID4gwqDCoMKgwqDCoMKgwqDCoH0NCj4gPiANCj4g
-PiAtwqDCoMKgwqDCoMKgwqB3cml0ZWwoY2hhbmVyciwgaW9hdF9jaGFuLT5yZWdfYmFzZSArIElP
-QVRfQ0hBTkVSUl9PRkZTRVQpOw0KPiA+IC3CoMKgwqDCoMKgwqDCoHBjaV93cml0ZV9jb25maWdf
-ZHdvcmQocGRldiwgSU9BVF9QQ0lfQ0hBTkVSUl9JTlRfT0ZGU0VULA0KPiA+IGNoYW5lcnJfaW50
-KTsNCj4gPiArwqDCoMKgwqDCoMKgwqAvKiBjbGVhbnVwIHRoZSBmYXVsdHkgZGVzY3JpcHRvciBz
-aW5jZSB3ZSBhcmUgY29udGludWluZyAqLw0KPiA+ICvCoMKgwqDCoMKgwqDCoHR4ID0gJmRlc2Mt
-PnR4ZDsNCj4gPiArwqDCoMKgwqDCoMKgwqBpZiAodHgtPmNvb2tpZSkgew0KPiA+ICvCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBkbWFfY29va2llX2NvbXBsZXRlKHR4KTsNCj4gPiArwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgZG1hX2Rlc2NyaXB0b3JfdW5tYXAodHgpOw0KPiA+
-ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBpZiAodHgtPmNhbGxiYWNrKSB7DQo+ID4g
-K8KgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqB0eC0+Y2FsbGJh
-Y2sodHgtPmNhbGxiYWNrX3BhcmFtKTsNCj4gPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoHR4LT5jYWxsYmFjayA9IE5VTEw7DQo+ID4gK8KgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoH0NCj4gPiArwqDCoMKgwqDCoMKgwqB9DQo+ID4gDQo+ID4gwqDC
-oMKgwqDCoMKgwqDCoC8qIG1hcmsgZmF1bHRpbmcgZGVzY3JpcHRvciBhcyBjb21wbGV0ZSAqLw0K
-PiA+IMKgwqDCoMKgwqDCoMKgwqAqaW9hdF9jaGFuLT5jb21wbGV0aW9uID0gZGVzYy0+dHhkLnBo
-eXM7DQo+ID4gDQo+ID4gwqDCoMKgwqDCoMKgwqDCoHNwaW5fbG9ja19iaCgmaW9hdF9jaGFuLT5w
-cmVwX2xvY2spOw0KPiA+ICvCoMKgwqDCoMKgwqDCoC8qIHdlIG5lZWQgYWJvcnQgYWxsIGRlc2Ny
-aXB0b3JzICovDQo+ID4gK8KgwqDCoMKgwqDCoMKgaWYgKGFib3J0KSB7DQo+ID4gK8KgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoGlvYXRfYWJvcnRfZGVzY3MoaW9hdF9jaGFuKTsNCj4gPiAr
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgLyogY2xlYW4gdXAgdGhlIGNoYW5uZWwsIHdl
-IGNvdWxkIGJlIGluIHdlaXJkIHN0YXRlDQo+ID4gKi8NCj4gPiArwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgaW9hdF9yZXNldF9odyhpb2F0X2NoYW4pOw0KPiA+ICvCoMKgwqDCoMKgwqDC
-oH0NCj4gPiArDQo+ID4gK8KgwqDCoMKgwqDCoMKgd3JpdGVsKGNoYW5lcnIsIGlvYXRfY2hhbi0+
-cmVnX2Jhc2UgKyBJT0FUX0NIQU5FUlJfT0ZGU0VUKTsNCj4gPiArwqDCoMKgwqDCoMKgwqBwY2lf
-d3JpdGVfY29uZmlnX2R3b3JkKHBkZXYsIElPQVRfUENJX0NIQU5FUlJfSU5UX09GRlNFVCwNCj4g
-PiBjaGFuZXJyX2ludCk7DQo+ID4gKw0KPiA+IMKgwqDCoMKgwqDCoMKgwqBpb2F0X3Jlc3RhcnRf
-Y2hhbm5lbChpb2F0X2NoYW4pOw0KPiA+IMKgwqDCoMKgwqDCoMKgwqBzcGluX3VubG9ja19iaCgm
-aW9hdF9jaGFuLT5wcmVwX2xvY2spOw0KPiA+IMKgfQ0KPiA+IEBAIC03NTMsMTAgKzgyOSwyNSBA
-QCB2b2lkIGlvYXRfdGltZXJfZXZlbnQodW5zaWduZWQgbG9uZyBkYXRhKQ0KPiA+IMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgY2hhbmVyciA9IHJlYWRsKGlvYXRfY2hhbi0+cmVnX2Jh
-c2UgKw0KPiA+IElPQVRfQ0hBTkVSUl9PRkZTRVQpOw0KPiA+IMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgZGV2X2Vycih0b19kZXYoaW9hdF9jaGFuKSwgIiVzOiBDaGFubmVsIGhhbHRl
-ZA0KPiA+ICgleClcbiIsDQo+ID4gwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgX19mdW5jX18sIGNoYW5lcnIpOw0KPiA+IC3CoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqBpZiAodGVzdF9iaXQoSU9BVF9SVU4sICZpb2F0X2NoYW4tPnN0YXRlKSkNCj4g
-PiAtwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoEJVR19PTihp
-c19pb2F0X2J1ZyhjaGFuZXJyKSk7DQo+ID4gLcKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oGVsc2UgLyogd2UgbmV2ZXIgZ290IG9mZiB0aGUgZ3JvdW5kICovDQo+ID4gLcKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqByZXR1cm47DQo+ID4gK8KgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoGlmICh0ZXN0X2JpdChJT0FUX1JVTiwgJmlvYXRfY2hhbi0+
-c3RhdGUpKSB7DQo+ID4gK8KgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqBzcGluX2xvY2tfYmgoJmlvYXRfY2hhbi0+Y2xlYW51cF9sb2NrKTsNCj4gPiArwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoHNwaW5fbG9ja19iaCgmaW9h
-dF9jaGFuLT5wcmVwX2xvY2spOw0KPiA+ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgc2V0X2JpdChJT0FUX0NIQU5fRE9XTiwgJmlvYXRfY2hhbi0+c3RhdGUp
-Ow0KPiA+ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgc3Bp
-bl91bmxvY2tfYmgoJmlvYXRfY2hhbi0+cHJlcF9sb2NrKTsNCj4gPiArDQo+ID4gK8KgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBpb2F0X2Fib3J0X2Rlc2NzKGlv
-YXRfY2hhbik7DQo+ID4gK8KgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqBkZXZfd2Fybih0b19kZXYoaW9hdF9jaGFuKSwgIlJlc2V0DQo+ID4gY2hhbm5lbC4uLlxu
-Iik7DQo+ID4gK8KgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBp
-b2F0X3Jlc2V0X2h3KGlvYXRfY2hhbik7DQo+ID4gK8KgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqBkZXZfd2Fybih0b19kZXYoaW9hdF9jaGFuKSwgIlJlc3RhcnQN
-Cj4gPiBjaGFubmVsLi4uXG4iKTsNCj4gPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoGlvYXRfcmVzdGFydF9jaGFubmVsKGlvYXRfY2hhbik7DQo+ID4gKw0K
-PiA+ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgc3Bpbl9s
-b2NrX2JoKCZpb2F0X2NoYW4tPnByZXBfbG9jayk7DQo+ID4gK8KgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBjbGVhcl9iaXQoSU9BVF9DSEFOX0RPV04sICZpb2F0
-X2NoYW4tDQo+ID4gPnN0YXRlKTsNCj4gPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoHNwaW5fdW5sb2NrX2JoKCZpb2F0X2NoYW4tPnByZXBfbG9jayk7DQo+
-ID4gK8KgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBzcGluX3Vu
-bG9ja19iaCgmaW9hdF9jaGFuLT5jbGVhbnVwX2xvY2spOw0KPiA+ICvCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqB9DQo+ID4gKw0KPiA+ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqByZXR1cm47DQo+ID4gwqDCoMKgwqDCoMKgwqDCoH0NCj4gPiANCj4gPiDCoMKgwqDCoMKgwqDC
-oMKgc3Bpbl9sb2NrX2JoKCZpb2F0X2NoYW4tPmNsZWFudXBfbG9jayk7DQo+ID4gQEAgLTc4MCwx
-NCArODcxLDIzIEBAIHZvaWQgaW9hdF90aW1lcl9ldmVudCh1bnNpZ25lZCBsb25nIGRhdGEpDQo+
-ID4gwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqB1MzIgY2hhbmVycjsNCj4gPiANCj4g
-PiDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoGNoYW5lcnIgPSByZWFkbChpb2F0X2No
-YW4tPnJlZ19iYXNlICsNCj4gPiBJT0FUX0NIQU5FUlJfT0ZGU0VUKTsNCj4gPiAtwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgZGV2X3dhcm4odG9fZGV2KGlvYXRfY2hhbiksICJSZXN0YXJ0
-aW5nDQo+ID4gY2hhbm5lbC4uLlxuIik7DQo+ID4gwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqBkZXZfd2Fybih0b19kZXYoaW9hdF9jaGFuKSwgIkNIQU5TVFM6ICUjTHggQ0hBTkVSUjoN
-Cj4gPiAlI3hcbiIsDQo+ID4gwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqBzdGF0dXMsIGNoYW5lcnIpOw0KPiA+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgZGV2X3dhcm4odG9fZGV2KGlvYXRfY2hhbiksICJBY3RpdmUgZGVzY3JpcHRvcnM6
-DQo+ID4gJWRcbiIsDQo+ID4gwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqBpb2F0X3JpbmdfYWN0aXZlKGlvYXRfY2hhbikpOw0KPiA+IA0KPiA+IMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgc3Bpbl9sb2NrX2JoKCZpb2F0X2NoYW4tPnByZXBf
-bG9jayk7DQo+ID4gK8KgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoHNldF9iaXQoSU9BVF9D
-SEFOX0RPV04sICZpb2F0X2NoYW4tPnN0YXRlKTsNCj4gPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgc3Bpbl91bmxvY2tfYmgoJmlvYXRfY2hhbi0+cHJlcF9sb2NrKTsNCj4gPiArDQo+
-ID4gK8KgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoGlvYXRfYWJvcnRfZGVzY3MoaW9hdF9j
-aGFuKTsNCj4gPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgZGV2X3dhcm4odG9fZGV2
-KGlvYXRfY2hhbiksICJSZXNldHRpbmcNCj4gPiBjaGFubmVsLi4uXG4iKTsNCj4gPiArwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgaW9hdF9yZXNldF9odyhpb2F0X2NoYW4pOw0KPiA+ICvC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBkZXZfd2Fybih0b19kZXYoaW9hdF9jaGFuKSwg
-IlJlc3RhcnRpbmcNCj4gPiBjaGFubmVsLi4uXG4iKTsNCj4gPiDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoGlvYXRfcmVzdGFydF9jaGFubmVsKGlvYXRfY2hhbik7DQo+ID4gKw0KPiA+
-ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBzcGluX2xvY2tfYmgoJmlvYXRfY2hhbi0+
-cHJlcF9sb2NrKTsNCj4gPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgY2xlYXJfYml0
-KElPQVRfQ0hBTl9ET1dOLCAmaW9hdF9jaGFuLT5zdGF0ZSk7DQo+ID4gwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqBzcGluX3VubG9ja19iaCgmaW9hdF9jaGFuLT5wcmVwX2xvY2spOw0K
-PiA+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgc3Bpbl91bmxvY2tfYmgoJmlvYXRf
-Y2hhbi0+Y2xlYW51cF9sb2NrKTsNCj4gPiDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oHJldHVybjsNCj4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9kbWEvaW9hdC9yZWdpc3RlcnMuaA0K
-PiA+IGIvZHJpdmVycy9kbWEvaW9hdC9yZWdpc3RlcnMuaA0KPiA+IGluZGV4IDQ5OTRhMzYuLmZh
-ZjIwZmEgMTAwNjQ0DQo+ID4gLS0tIGEvZHJpdmVycy9kbWEvaW9hdC9yZWdpc3RlcnMuaA0KPiA+
-ICsrKyBiL2RyaXZlcnMvZG1hL2lvYXQvcmVnaXN0ZXJzLmgNCj4gPiBAQCAtMjMzLDYgKzIzMyw4
-IEBADQo+ID4gwqAjZGVmaW5lIElPQVRfQ0hBTkVSUl9ERVNDUklQVE9SX0NPVU5UX0VSUsKgwqDC
-oMKgwqDCoDB4NDAwMDANCj4gPiANCj4gPiDCoCNkZWZpbmUgSU9BVF9DSEFORVJSX0hBTkRMRV9N
-QVNLIChJT0FUX0NIQU5FUlJfWE9SX1BfT1JfQ1JDX0VSUiB8DQo+ID4gSU9BVF9DSEFORVJSX1hP
-Ul9RX0VSUikNCj4gPiArI2RlZmluZSBJT0FUX0NIQU5FUlJfUkVDT1ZFUl9NQVNLIChJT0FUX0NI
-QU5FUlJfUkVBRF9EQVRBX0VSUiB8IFwNCj4gPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBJT0FUX0NIQU5FUlJfV1JJ
-VEVfREFUQV9FUlIpDQo+ID4gDQo+ID4gwqAjZGVmaW5lIElPQVRfQ0hBTkVSUl9NQVNLX09GRlNF
-VMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoDB4MkPCoMKgwqDCoC8qIDMyLWJpdA0KPiA+
-IENoYW5uZWwgRXJyb3IgUmVnaXN0ZXIgKi8NCj4gPiANCj4gPiANCj4gDQo+IC0twqA=
+On Mon, Jun 27, 2016 at 7:09 PM, Dave Jiang <dave.jiang@intel.com> wrote:
+> Adding support on the tx DMA path to allow recovery of errors when DMA
+> responds with error status and abort all the subsequent ops.
+>
+> Signed-off-by: Dave Jiang <dave.jiang@intel.com>
+> ---
+>  drivers/ntb/ntb_transport.c |  123 +++++++++++++++++++++++++++++++------------
+>  1 file changed, 89 insertions(+), 34 deletions(-)
+>
+> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+> index 2ef9d913..55a5ae0 100644
+> --- a/drivers/ntb/ntb_transport.c
+> +++ b/drivers/ntb/ntb_transport.c
+> @@ -102,6 +102,10 @@ struct ntb_queue_entry {
+>         void *buf;
+>         unsigned int len;
+>         unsigned int flags;
+> +       struct dma_async_tx_descriptor *txd;
+> +       int retries;
+> +       int errors;
+> +       unsigned int tx_index;
+>
+>         struct ntb_transport_qp *qp;
+>         union {
+> @@ -258,6 +262,9 @@ enum {
+>  static void ntb_transport_rxc_db(unsigned long data);
+>  static const struct ntb_ctx_ops ntb_transport_ops;
+>  static struct ntb_client ntb_transport_client;
+> +static int ntb_async_tx_submit(struct ntb_transport_qp *qp,
+> +                              struct ntb_queue_entry *entry);
+> +static void ntb_memcpy_tx(struct ntb_queue_entry *entry, void __iomem *offset);
+>
+>  static int ntb_transport_bus_match(struct device *dev,
+>                                    struct device_driver *drv)
+> @@ -1444,21 +1451,46 @@ static void ntb_tx_copy_callback(void *data)
+>         struct ntb_queue_entry *entry = data;
+>         struct ntb_transport_qp *qp = entry->qp;
+>         struct ntb_payload_header __iomem *hdr = entry->tx_hdr;
+> +       struct dma_async_tx_descriptor *txd;
+> +       unsigned int len;
+> +       bool abort = false;
+> +
+> +       txd = entry->txd;
+> +
+> +       /* we need to check DMA results if we are using DMA */
+> +       if (txd) {
+> +               switch (txd->result) {
+> +               case ERR_DMA_READ:
+> +               case ERR_DMA_WRITE:
+> +                       entry->errors++;
+> +               case ERR_DMA_ABORT:
+> +                       abort = true;
+> +                       goto handle_tx;
+> +               case ERR_DMA_NONE:
+> +               default:
+> +                       break;
+> +               }
+> +       }
+>
+>         iowrite32(entry->flags | DESC_DONE_FLAG, &hdr->flags);
+>
+>         ntb_peer_db_set(qp->ndev, BIT_ULL(qp->qp_num));
+>
+> +handle_tx:
+> +
+>         /* The entry length can only be zero if the packet is intended to be a
+>          * "link down" or similar.  Since no payload is being sent in these
+>          * cases, there is nothing to add to the completion queue.
+>          */
+>         if (entry->len > 0) {
+> -               qp->tx_bytes += entry->len;
+> +               if (!abort) {
+> +                       qp->tx_bytes += entry->len;
+> +                       len = entry->len;
+> +               } else
+> +                       len = 0;
+
+Checkpatch will complain about different { } for then and else.
+
+>
+>                 if (qp->tx_handler)
+> -                       qp->tx_handler(qp, qp->cb_data, entry->cb_data,
+> -                                      entry->len);
+> +                       qp->tx_handler(qp, qp->cb_data, entry->cb_data, len);
+>         }
+>
+>         ntb_list_add(&qp->ntb_tx_free_q_lock, &entry->entry, &qp->tx_free_q);
+> @@ -1482,37 +1514,21 @@ static void ntb_memcpy_tx(struct ntb_queue_entry *entry, void __iomem *offset)
+>         ntb_tx_copy_callback(entry);
+>  }
+>
+> -static void ntb_async_tx(struct ntb_transport_qp *qp,
+> -                        struct ntb_queue_entry *entry)
+> +static int ntb_async_tx_submit(struct ntb_transport_qp *qp,
+> +                              struct ntb_queue_entry *entry)
+>  {
+> -       struct ntb_payload_header __iomem *hdr;
+> -       struct dma_async_tx_descriptor *txd;
+>         struct dma_chan *chan = qp->tx_dma_chan;
+>         struct dma_device *device;
+> +       size_t len = entry->len;
+> +       void *buf = entry->buf;
+>         size_t dest_off, buff_off;
+>         struct dmaengine_unmap_data *unmap;
+>         dma_addr_t dest;
+>         dma_cookie_t cookie;
+> -       void __iomem *offset;
+> -       size_t len = entry->len;
+> -       void *buf = entry->buf;
+>         int retries = 0;
+>
+> -       offset = qp->tx_mw + qp->tx_max_frame * qp->tx_index;
+> -       hdr = offset + qp->tx_max_frame - sizeof(struct ntb_payload_header);
+> -       entry->tx_hdr = hdr;
+> -
+> -       iowrite32(entry->len, &hdr->len);
+> -       iowrite32((u32)qp->tx_pkts, &hdr->ver);
+> -
+> -       if (!chan)
+> -               goto err;
+> -
+> -       if (len < copy_bytes)
+> -               goto err;
+> -
+>         device = chan->device;
+> -       dest = qp->tx_mw_phys + qp->tx_max_frame * qp->tx_index;
+> +       dest = qp->tx_mw_phys + qp->tx_max_frame * entry->tx_index;
+>         buff_off = (size_t)buf & ~PAGE_MASK;
+>         dest_off = (size_t)dest & ~PAGE_MASK;
+>
+> @@ -1532,39 +1548,74 @@ static void ntb_async_tx(struct ntb_transport_qp *qp,
+>         unmap->to_cnt = 1;
+>
+>         for (retries = 0; retries < DMA_RETRIES; retries++) {
+> -               txd = device->device_prep_dma_memcpy(chan, dest, unmap->addr[0],
+> -                                                    len, DMA_PREP_INTERRUPT);
+> -               if (txd)
+> +               entry->txd = device->device_prep_dma_memcpy(chan, dest,
+> +                                                           unmap->addr[0], len,
+> +                                                           DMA_PREP_INTERRUPT);
+> +               if (entry->txd)
+>                         break;
+>
+>                 set_current_state(TASK_INTERRUPTIBLE);
+>                 schedule_timeout(DMA_OUT_RESOURCE_TO);
+>         }
+>
+> -       if (!txd) {
+> +       if (!entry->txd) {
+>                 qp->dma_tx_prep_err++;
+>                 goto err_get_unmap;
+>         }
+>
+> -       txd->callback = ntb_tx_copy_callback;
+> -       txd->callback_param = entry;
+> -       dma_set_unmap(txd, unmap);
+> +       entry->txd->callback = ntb_tx_copy_callback;
+> +       entry->txd->callback_param = entry;
+> +       dma_set_unmap(entry->txd, unmap);
+>
+> -       cookie = dmaengine_submit(txd);
+> +       cookie = dmaengine_submit(entry->txd);
+>         if (dma_submit_error(cookie))
+>                 goto err_set_unmap;
+>
+>         dmaengine_unmap_put(unmap);
+>
+>         dma_async_issue_pending(chan);
+> -       qp->tx_async++;
+>
+> -       return;
+> +       return 0;
+>  err_set_unmap:
+>         dmaengine_unmap_put(unmap);
+>  err_get_unmap:
+>         dmaengine_unmap_put(unmap);
+>  err:
+> +       return -ENXIO;
+> +}
+> +
+> +static void ntb_async_tx(struct ntb_transport_qp *qp,
+> +                        struct ntb_queue_entry *entry)
+> +{
+> +       struct ntb_payload_header __iomem *hdr;
+> +       struct dma_chan *chan = qp->tx_dma_chan;
+> +       void __iomem *offset;
+> +       int res;
+> +
+> +       entry->tx_index = qp->tx_index;
+> +       offset = qp->tx_mw + qp->tx_max_frame * entry->tx_index;
+> +       hdr = offset + qp->tx_max_frame - sizeof(struct ntb_payload_header);
+> +       entry->tx_hdr = hdr;
+> +
+> +       iowrite32(entry->len, &hdr->len);
+> +       iowrite32((u32)qp->tx_pkts, &hdr->ver);
+> +
+> +       if (!chan)
+> +               goto err;
+> +
+> +       if (entry->len < copy_bytes)
+> +               goto err;
+> +
+> +       res = ntb_async_tx_submit(qp, entry);
+> +       if (res < 0)
+> +               goto err;
+> +
+> +       if (!entry->retries)
+> +               qp->tx_async++;
+> +
+> +       return;
+> +
+> +err:
+
+If there is an error building or submitting the dma descriptor, we
+will fall back to cpu memcpy, but if there is an error indicated at
+the time of the dma completion, we will not.  This would be a problem
+if we later notify the peer driver that some data has been
+transferred, even though it has not been transferred.
+
+This seems like it would be a likely situation (or, as likely as
+encountering a dma engine error), because dma prep will begin to fail
+as soon as the first error is encountered.  After detecting an error,
+in [PATCH 2/5] bit IOAT_CHAN_DOWN is set, causing dma prep to fail in
+the mean time.  Then, ntb_transport will immediately fall back to
+transferring data via cpu memcpy, but I do not see any fall back to
+cpu memcpy for the failed or aborted descriptors.
+
+>         ntb_memcpy_tx(entry, offset);
+>         qp->tx_memcpy++;
+>  }
+> @@ -1940,6 +1991,10 @@ int ntb_transport_tx_enqueue(struct ntb_transport_qp *qp, void *cb, void *data,
+>         entry->buf = data;
+>         entry->len = len;
+>         entry->flags = 0;
+> +       entry->errors = 0;
+> +       entry->retries = 0;
+> +       entry->tx_index = 0;
+> +       entry->txd = NULL;
+>
+>         rc = ntb_process_tx(qp, entry);
+>         if (rc)
+>
