@@ -1,12 +1,12 @@
 Return-Path: <dave.jiang@intel.com>
-Received: from mga11.intel.com (mga11.intel.com. [192.55.52.93])
-        by gmr-mx.google.com with ESMTP id zj2si61356pac.1.2016.06.28.14.33.18
+Received: from mga14.intel.com (mga14.intel.com. [192.55.52.115])
+        by gmr-mx.google.com with ESMTP id zj2si61311pac.1.2016.06.28.14.33.12
         for <linux-ntb@googlegroups.com>;
-        Tue, 28 Jun 2016 14:33:18 -0700 (PDT)
-Subject: [PATCH v2 5/5] ntb: add DMA error handling for RX DMA
+        Tue, 28 Jun 2016 14:33:12 -0700 (PDT)
+Subject: [PATCH v2 4/5] ntb: add DMA error handling for TX DMA
 From: Dave Jiang <dave.jiang@intel.com>
-Date: Tue, 28 Jun 2016 14:32:58 -0700
-Message-ID: <146714957807.164165.6150362941409665158.stgit@djiang5-desk3.ch.intel.com>
+Date: Tue, 28 Jun 2016 14:32:52 -0700
+Message-ID: <146714957267.164165.2262183971014086356.stgit@djiang5-desk3.ch.intel.com>
 In-Reply-To: <146714937102.164165.14635157606697707937.stgit@djiang5-desk3.ch.intel.com>
 References: <146714937102.164165.14635157606697707937.stgit@djiang5-desk3.ch.intel.com>
 MIME-Version: 1.0
@@ -16,56 +16,43 @@ To: vinod.koul@intel.com, allen.hubbe@emc.com, jdmason@kudzu.us
 Cc: dmaengine@vger.kernel.org, linux-ntb@googlegroups.com, dan.j.williams@intel.com
 List-ID: <linux-ntb.googlegroups.com>
 
-Adding support on the rx DMA path to allow recovery of errors when DMA
+Adding support on the tx DMA path to allow recovery of errors when DMA
 responds with error status and abort all the subsequent ops.
 
 Signed-off-by: Dave Jiang <dave.jiang@intel.com>
 ---
- drivers/ntb/ntb_transport.c |   94 +++++++++++++++++++++++++++++++++----------
- 1 file changed, 72 insertions(+), 22 deletions(-)
+ drivers/ntb/ntb_transport.c |  119 ++++++++++++++++++++++++++++++++-----------
+ 1 file changed, 88 insertions(+), 31 deletions(-)
 
 diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index bdb2001..5754cab 100644
+index 2ef9d913..bdb2001 100644
 --- a/drivers/ntb/ntb_transport.c
 +++ b/drivers/ntb/ntb_transport.c
-@@ -106,13 +106,13 @@ struct ntb_queue_entry {
- 	int retries;
- 	int errors;
- 	unsigned int tx_index;
-+	unsigned int rx_index;
+@@ -102,6 +102,10 @@ struct ntb_queue_entry {
+ 	void *buf;
+ 	unsigned int len;
+ 	unsigned int flags;
++	struct dma_async_tx_descriptor *txd;
++	int retries;
++	int errors;
++	unsigned int tx_index;
  
  	struct ntb_transport_qp *qp;
  	union {
- 		struct ntb_payload_header __iomem *tx_hdr;
- 		struct ntb_payload_header *rx_hdr;
- 	};
--	unsigned int index;
- };
- 
- struct ntb_rx_info {
-@@ -265,6 +265,9 @@ static struct ntb_client ntb_transport_client;
- static int ntb_async_tx_submit(struct ntb_transport_qp *qp,
- 			       struct ntb_queue_entry *entry);
- static void ntb_memcpy_tx(struct ntb_queue_entry *entry, void __iomem *offset);
-+static int ntb_async_rx_submit(struct ntb_queue_entry *entry, void *offset);
-+static void ntb_memcpy_rx(struct ntb_queue_entry *entry, void *offset);
-+
+@@ -258,6 +262,9 @@ enum {
+ static void ntb_transport_rxc_db(unsigned long data);
+ static const struct ntb_ctx_ops ntb_transport_ops;
+ static struct ntb_client ntb_transport_client;
++static int ntb_async_tx_submit(struct ntb_transport_qp *qp,
++			       struct ntb_queue_entry *entry);
++static void ntb_memcpy_tx(struct ntb_queue_entry *entry, void __iomem *offset);
  
  static int ntb_transport_bus_match(struct device *dev,
  				   struct device_driver *drv)
-@@ -1208,7 +1211,7 @@ static void ntb_complete_rxc(struct ntb_transport_qp *qp)
- 			break;
- 
- 		entry->rx_hdr->flags = 0;
--		iowrite32(entry->index, &qp->rx_info->entry);
-+		iowrite32(entry->rx_index, &qp->rx_info->entry);
- 
- 		cb_data = entry->cb_data;
- 		len = entry->len;
-@@ -1229,6 +1232,31 @@ static void ntb_complete_rxc(struct ntb_transport_qp *qp)
- static void ntb_rx_copy_callback(void *data)
- {
+@@ -1444,6 +1451,33 @@ static void ntb_tx_copy_callback(void *data)
  	struct ntb_queue_entry *entry = data;
+ 	struct ntb_transport_qp *qp = entry->qp;
+ 	struct ntb_payload_header __iomem *hdr = entry->tx_hdr;
 +	struct dma_async_tx_descriptor *txd;
 +
 +	txd = entry->txd;
@@ -78,37 +65,54 @@ index bdb2001..5754cab 100644
 +			entry->errors++;
 +		case ERR_DMA_ABORT:
 +		{
-+			struct ntb_transport_qp *qp = entry->qp;
-+			void *offset = qp->rx_buff + qp->rx_max_frame *
-+					qp->rx_index;
++			void __iomem *offset =
++				qp->tx_mw + qp->tx_max_frame *
++				entry->tx_index;
 +
-+			ntb_memcpy_rx(entry, offset);
-+			qp->rx_memcpy++;
++			/* resubmit via CPU */
++			ntb_memcpy_tx(entry, offset);
++			qp->tx_memcpy++;
 +			return;
 +		}
++
 +		case ERR_DMA_NONE:
 +		default:
 +			break;
 +		}
 +	}
  
- 	entry->flags |= DESC_DONE_FLAG;
+ 	iowrite32(entry->flags | DESC_DONE_FLAG, &hdr->flags);
  
-@@ -1248,9 +1276,8 @@ static void ntb_memcpy_rx(struct ntb_queue_entry *entry, void *offset)
- 	ntb_rx_copy_callback(entry);
+@@ -1482,37 +1516,21 @@ static void ntb_memcpy_tx(struct ntb_queue_entry *entry, void __iomem *offset)
+ 	ntb_tx_copy_callback(entry);
  }
  
--static void ntb_async_rx(struct ntb_queue_entry *entry, void *offset)
-+static int ntb_async_rx_submit(struct ntb_queue_entry *entry, void *offset)
+-static void ntb_async_tx(struct ntb_transport_qp *qp,
+-			 struct ntb_queue_entry *entry)
++static int ntb_async_tx_submit(struct ntb_transport_qp *qp,
++			       struct ntb_queue_entry *entry)
  {
+-	struct ntb_payload_header __iomem *hdr;
 -	struct dma_async_tx_descriptor *txd;
- 	struct ntb_transport_qp *qp = entry->qp;
- 	struct dma_chan *chan = qp->rx_dma_chan;
+ 	struct dma_chan *chan = qp->tx_dma_chan;
  	struct dma_device *device;
-@@ -1261,13 +1288,6 @@ static void ntb_async_rx(struct ntb_queue_entry *entry, void *offset)
++	size_t len = entry->len;
++	void *buf = entry->buf;
+ 	size_t dest_off, buff_off;
+ 	struct dmaengine_unmap_data *unmap;
+ 	dma_addr_t dest;
+ 	dma_cookie_t cookie;
+-	void __iomem *offset;
+-	size_t len = entry->len;
+-	void *buf = entry->buf;
  	int retries = 0;
  
- 	len = entry->len;
+-	offset = qp->tx_mw + qp->tx_max_frame * qp->tx_index;
+-	hdr = offset + qp->tx_max_frame - sizeof(struct ntb_payload_header);
+-	entry->tx_hdr = hdr;
+-
+-	iowrite32(entry->len, &hdr->len);
+-	iowrite32((u32)qp->tx_pkts, &hdr->ver);
 -
 -	if (!chan)
 -		goto err;
@@ -117,18 +121,19 @@ index bdb2001..5754cab 100644
 -		goto err;
 -
  	device = chan->device;
- 	pay_off = (size_t)offset & ~PAGE_MASK;
+-	dest = qp->tx_mw_phys + qp->tx_max_frame * qp->tx_index;
++	dest = qp->tx_mw_phys + qp->tx_max_frame * entry->tx_index;
  	buff_off = (size_t)buf & ~PAGE_MASK;
-@@ -1295,26 +1315,27 @@ static void ntb_async_rx(struct ntb_queue_entry *entry, void *offset)
- 	unmap->from_cnt = 1;
+ 	dest_off = (size_t)dest & ~PAGE_MASK;
+ 
+@@ -1532,39 +1550,74 @@ static void ntb_async_tx(struct ntb_transport_qp *qp,
+ 	unmap->to_cnt = 1;
  
  	for (retries = 0; retries < DMA_RETRIES; retries++) {
--		txd = device->device_prep_dma_memcpy(chan, unmap->addr[1],
--						     unmap->addr[0], len,
--						     DMA_PREP_INTERRUPT);
+-		txd = device->device_prep_dma_memcpy(chan, dest, unmap->addr[0],
+-						     len, DMA_PREP_INTERRUPT);
 -		if (txd)
-+		entry->txd = device->device_prep_dma_memcpy(chan,
-+							    unmap->addr[1],
++		entry->txd = device->device_prep_dma_memcpy(chan, dest,
 +							    unmap->addr[0], len,
 +							    DMA_PREP_INTERRUPT);
 +		if (entry->txd)
@@ -140,14 +145,14 @@ index bdb2001..5754cab 100644
  
 -	if (!txd) {
 +	if (!entry->txd) {
- 		qp->dma_rx_prep_err++;
+ 		qp->dma_tx_prep_err++;
  		goto err_get_unmap;
  	}
  
--	txd->callback = ntb_rx_copy_callback;
+-	txd->callback = ntb_tx_copy_callback;
 -	txd->callback_param = entry;
 -	dma_set_unmap(txd, unmap);
-+	entry->txd->callback = ntb_rx_copy_callback;
++	entry->txd->callback = ntb_tx_copy_callback;
 +	entry->txd->callback_param = entry;
 +	dma_set_unmap(entry->txd, unmap);
  
@@ -156,13 +161,13 @@ index bdb2001..5754cab 100644
  	if (dma_submit_error(cookie))
  		goto err_set_unmap;
  
-@@ -1324,13 +1345,38 @@ static void ntb_async_rx(struct ntb_queue_entry *entry, void *offset)
+ 	dmaengine_unmap_put(unmap);
  
- 	qp->rx_async++;
+ 	dma_async_issue_pending(chan);
+-	qp->tx_async++;
  
 -	return;
 +	return 0;
- 
  err_set_unmap:
  	dmaengine_unmap_put(unmap);
  err_get_unmap:
@@ -171,11 +176,21 @@ index bdb2001..5754cab 100644
 +	return -ENXIO;
 +}
 +
-+static void ntb_async_rx(struct ntb_queue_entry *entry, void *offset)
++static void ntb_async_tx(struct ntb_transport_qp *qp,
++			 struct ntb_queue_entry *entry)
 +{
-+	struct ntb_transport_qp *qp = entry->qp;
-+	struct dma_chan *chan = qp->rx_dma_chan;
++	struct ntb_payload_header __iomem *hdr;
++	struct dma_chan *chan = qp->tx_dma_chan;
++	void __iomem *offset;
 +	int res;
++
++	entry->tx_index = qp->tx_index;
++	offset = qp->tx_mw + qp->tx_max_frame * entry->tx_index;
++	hdr = offset + qp->tx_max_frame - sizeof(struct ntb_payload_header);
++	entry->tx_hdr = hdr;
++
++	iowrite32(entry->len, &hdr->len);
++	iowrite32((u32)qp->tx_pkts, &hdr->ver);
 +
 +	if (!chan)
 +		goto err;
@@ -183,37 +198,28 @@ index bdb2001..5754cab 100644
 +	if (entry->len < copy_bytes)
 +		goto err;
 +
-+	res = ntb_async_rx_submit(entry, offset);
++	res = ntb_async_tx_submit(qp, entry);
 +	if (res < 0)
 +		goto err;
 +
 +	if (!entry->retries)
-+		qp->rx_async++;
++		qp->tx_async++;
 +
 +	return;
 +
 +err:
- 	ntb_memcpy_rx(entry, offset);
- 	qp->rx_memcpy++;
+ 	ntb_memcpy_tx(entry, offset);
+ 	qp->tx_memcpy++;
  }
-@@ -1376,7 +1422,7 @@ static int ntb_process_rxc(struct ntb_transport_qp *qp)
- 	}
- 
- 	entry->rx_hdr = hdr;
--	entry->index = qp->rx_index;
-+	entry->rx_index = qp->rx_index;
- 
- 	if (hdr->len > entry->len) {
- 		dev_dbg(&qp->ndev->pdev->dev,
-@@ -1951,6 +1997,10 @@ int ntb_transport_rx_enqueue(struct ntb_transport_qp *qp, void *cb, void *data,
+@@ -1940,6 +1993,10 @@ int ntb_transport_tx_enqueue(struct ntb_transport_qp *qp, void *cb, void *data,
  	entry->buf = data;
  	entry->len = len;
  	entry->flags = 0;
-+	entry->retries = 0;
 +	entry->errors = 0;
-+	entry->rx_index = 0;
++	entry->retries = 0;
++	entry->tx_index = 0;
 +	entry->txd = NULL;
  
- 	ntb_list_add(&qp->ntb_rx_q_lock, &entry->entry, &qp->rx_pend_q);
- 
+ 	rc = ntb_process_tx(qp, entry);
+ 	if (rc)
 
