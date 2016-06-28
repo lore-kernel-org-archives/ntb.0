@@ -1,12 +1,14 @@
 Return-Path: <dave.jiang@intel.com>
-Received: from mga02.intel.com (mga02.intel.com. [134.134.136.20])
-        by gmr-mx.google.com with ESMTP id zj2si115945pac.1.2016.06.28.16.15.25
+Received: from mga11.intel.com (mga11.intel.com. [192.55.52.93])
+        by gmr-mx.google.com with ESMTP id zj2si61356pac.1.2016.06.28.14.33.18
         for <linux-ntb@googlegroups.com>;
-        Tue, 28 Jun 2016 16:15:26 -0700 (PDT)
-Subject: [PATCH v3 0/5] dmaengine: ioatdma: DMA error reporting
+        Tue, 28 Jun 2016 14:33:18 -0700 (PDT)
+Subject: [PATCH v2 5/5] ntb: add DMA error handling for RX DMA
 From: Dave Jiang <dave.jiang@intel.com>
-Date: Tue, 28 Jun 2016 16:15:05 -0700
-Message-ID: <146715558744.208762.15608813894802261982.stgit@djiang5-desk3.ch.intel.com>
+Date: Tue, 28 Jun 2016 14:32:58 -0700
+Message-ID: <146714957807.164165.6150362941409665158.stgit@djiang5-desk3.ch.intel.com>
+In-Reply-To: <146714937102.164165.14635157606697707937.stgit@djiang5-desk3.ch.intel.com>
+References: <146714937102.164165.14635157606697707937.stgit@djiang5-desk3.ch.intel.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -14,32 +16,204 @@ To: vinod.koul@intel.com, allen.hubbe@emc.com, jdmason@kudzu.us
 Cc: dmaengine@vger.kernel.org, linux-ntb@googlegroups.com, dan.j.williams@intel.com
 List-ID: <linux-ntb.googlegroups.com>
 
-Changes v2 -> v3:
-- Fix up commit header that was missing in patch 2/5.
+Adding support on the rx DMA path to allow recovery of errors when DMA
+responds with error status and abort all the subsequent ops.
 
-Changes v1 -> v2: 
-- Addressed comments from Allen Hubbe
-- Added CPU resubmit for aborted/failed NTB submissions
-
-The following series implements error reporting and handling for ioatdma.
-An error flag field has been added to return DMA error status via the 
-generic DMA descriptor so the upper layer can be notified if there are errors.
-The ioatdma driver now will abort remaining outstanding descriptors when an
-error has occured that requires a channel reset. The Intel NTB driver has been
-modified to handle the error condition from the DMA layer.
-
+Signed-off-by: Dave Jiang <dave.jiang@intel.com>
 ---
+ drivers/ntb/ntb_transport.c |   94 +++++++++++++++++++++++++++++++++----------
+ 1 file changed, 72 insertions(+), 22 deletions(-)
 
-Dave Jiang (5):
-      dmaengine: Adding error handling flag
-      dmaengine: ioatdma: Add error handling to ioat driver
-      dmaengine: ioatdma: add error strings to chanerr output
-      ntb: add DMA error handling for TX DMA
-      ntb: add DMA error handling for RX DMA
+diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+index bdb2001..5754cab 100644
+--- a/drivers/ntb/ntb_transport.c
++++ b/drivers/ntb/ntb_transport.c
+@@ -106,13 +106,13 @@ struct ntb_queue_entry {
+ 	int retries;
+ 	int errors;
+ 	unsigned int tx_index;
++	unsigned int rx_index;
+ 
+ 	struct ntb_transport_qp *qp;
+ 	union {
+ 		struct ntb_payload_header __iomem *tx_hdr;
+ 		struct ntb_payload_header *rx_hdr;
+ 	};
+-	unsigned int index;
+ };
+ 
+ struct ntb_rx_info {
+@@ -265,6 +265,9 @@ static struct ntb_client ntb_transport_client;
+ static int ntb_async_tx_submit(struct ntb_transport_qp *qp,
+ 			       struct ntb_queue_entry *entry);
+ static void ntb_memcpy_tx(struct ntb_queue_entry *entry, void __iomem *offset);
++static int ntb_async_rx_submit(struct ntb_queue_entry *entry, void *offset);
++static void ntb_memcpy_rx(struct ntb_queue_entry *entry, void *offset);
++
+ 
+ static int ntb_transport_bus_match(struct device *dev,
+ 				   struct device_driver *drv)
+@@ -1208,7 +1211,7 @@ static void ntb_complete_rxc(struct ntb_transport_qp *qp)
+ 			break;
+ 
+ 		entry->rx_hdr->flags = 0;
+-		iowrite32(entry->index, &qp->rx_info->entry);
++		iowrite32(entry->rx_index, &qp->rx_info->entry);
+ 
+ 		cb_data = entry->cb_data;
+ 		len = entry->len;
+@@ -1229,6 +1232,31 @@ static void ntb_complete_rxc(struct ntb_transport_qp *qp)
+ static void ntb_rx_copy_callback(void *data)
+ {
+ 	struct ntb_queue_entry *entry = data;
++	struct dma_async_tx_descriptor *txd;
++
++	txd = entry->txd;
++
++	/* we need to check DMA results if we are using DMA */
++	if (txd) {
++		switch (txd->result) {
++		case ERR_DMA_READ:
++		case ERR_DMA_WRITE:
++			entry->errors++;
++		case ERR_DMA_ABORT:
++		{
++			struct ntb_transport_qp *qp = entry->qp;
++			void *offset = qp->rx_buff + qp->rx_max_frame *
++					qp->rx_index;
++
++			ntb_memcpy_rx(entry, offset);
++			qp->rx_memcpy++;
++			return;
++		}
++		case ERR_DMA_NONE:
++		default:
++			break;
++		}
++	}
+ 
+ 	entry->flags |= DESC_DONE_FLAG;
+ 
+@@ -1248,9 +1276,8 @@ static void ntb_memcpy_rx(struct ntb_queue_entry *entry, void *offset)
+ 	ntb_rx_copy_callback(entry);
+ }
+ 
+-static void ntb_async_rx(struct ntb_queue_entry *entry, void *offset)
++static int ntb_async_rx_submit(struct ntb_queue_entry *entry, void *offset)
+ {
+-	struct dma_async_tx_descriptor *txd;
+ 	struct ntb_transport_qp *qp = entry->qp;
+ 	struct dma_chan *chan = qp->rx_dma_chan;
+ 	struct dma_device *device;
+@@ -1261,13 +1288,6 @@ static void ntb_async_rx(struct ntb_queue_entry *entry, void *offset)
+ 	int retries = 0;
+ 
+ 	len = entry->len;
+-
+-	if (!chan)
+-		goto err;
+-
+-	if (len < copy_bytes)
+-		goto err;
+-
+ 	device = chan->device;
+ 	pay_off = (size_t)offset & ~PAGE_MASK;
+ 	buff_off = (size_t)buf & ~PAGE_MASK;
+@@ -1295,26 +1315,27 @@ static void ntb_async_rx(struct ntb_queue_entry *entry, void *offset)
+ 	unmap->from_cnt = 1;
+ 
+ 	for (retries = 0; retries < DMA_RETRIES; retries++) {
+-		txd = device->device_prep_dma_memcpy(chan, unmap->addr[1],
+-						     unmap->addr[0], len,
+-						     DMA_PREP_INTERRUPT);
+-		if (txd)
++		entry->txd = device->device_prep_dma_memcpy(chan,
++							    unmap->addr[1],
++							    unmap->addr[0], len,
++							    DMA_PREP_INTERRUPT);
++		if (entry->txd)
+ 			break;
+ 
+ 		set_current_state(TASK_INTERRUPTIBLE);
+ 		schedule_timeout(DMA_OUT_RESOURCE_TO);
+ 	}
+ 
+-	if (!txd) {
++	if (!entry->txd) {
+ 		qp->dma_rx_prep_err++;
+ 		goto err_get_unmap;
+ 	}
+ 
+-	txd->callback = ntb_rx_copy_callback;
+-	txd->callback_param = entry;
+-	dma_set_unmap(txd, unmap);
++	entry->txd->callback = ntb_rx_copy_callback;
++	entry->txd->callback_param = entry;
++	dma_set_unmap(entry->txd, unmap);
+ 
+-	cookie = dmaengine_submit(txd);
++	cookie = dmaengine_submit(entry->txd);
+ 	if (dma_submit_error(cookie))
+ 		goto err_set_unmap;
+ 
+@@ -1324,13 +1345,38 @@ static void ntb_async_rx(struct ntb_queue_entry *entry, void *offset)
+ 
+ 	qp->rx_async++;
+ 
+-	return;
++	return 0;
+ 
+ err_set_unmap:
+ 	dmaengine_unmap_put(unmap);
+ err_get_unmap:
+ 	dmaengine_unmap_put(unmap);
+ err:
++	return -ENXIO;
++}
++
++static void ntb_async_rx(struct ntb_queue_entry *entry, void *offset)
++{
++	struct ntb_transport_qp *qp = entry->qp;
++	struct dma_chan *chan = qp->rx_dma_chan;
++	int res;
++
++	if (!chan)
++		goto err;
++
++	if (entry->len < copy_bytes)
++		goto err;
++
++	res = ntb_async_rx_submit(entry, offset);
++	if (res < 0)
++		goto err;
++
++	if (!entry->retries)
++		qp->rx_async++;
++
++	return;
++
++err:
+ 	ntb_memcpy_rx(entry, offset);
+ 	qp->rx_memcpy++;
+ }
+@@ -1376,7 +1422,7 @@ static int ntb_process_rxc(struct ntb_transport_qp *qp)
+ 	}
+ 
+ 	entry->rx_hdr = hdr;
+-	entry->index = qp->rx_index;
++	entry->rx_index = qp->rx_index;
+ 
+ 	if (hdr->len > entry->len) {
+ 		dev_dbg(&qp->ndev->pdev->dev,
+@@ -1951,6 +1997,10 @@ int ntb_transport_rx_enqueue(struct ntb_transport_qp *qp, void *cb, void *data,
+ 	entry->buf = data;
+ 	entry->len = len;
+ 	entry->flags = 0;
++	entry->retries = 0;
++	entry->errors = 0;
++	entry->rx_index = 0;
++	entry->txd = NULL;
+ 
+ 	ntb_list_add(&qp->ntb_rx_q_lock, &entry->entry, &qp->rx_pend_q);
+ 
 
-
- drivers/dma/ioat/dma.c       |  201 +++++++++++++++++++++++++++++++++++++-----
- drivers/dma/ioat/registers.h |    2 
- 2 files changed, 181 insertions(+), 22 deletions(-)
-
---
