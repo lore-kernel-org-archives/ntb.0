@@ -1,14 +1,14 @@
 Return-Path: <dave.jiang@intel.com>
 Received: from mga03.intel.com (mga03.intel.com. [134.134.136.65])
-        by gmr-mx.google.com with ESMTP id ph9si2428667pac.1.2016.07.15.13.21.49
+        by gmr-mx.google.com with ESMTP id z4si1284374pam.0.2016.07.14.15.00.50
         for <linux-ntb@googlegroups.com>;
-        Fri, 15 Jul 2016 13:21:49 -0700 (PDT)
-Subject: [PATCH v2 39/41] ntb: add DMA error handling for TX DMA
+        Thu, 14 Jul 2016 15:00:50 -0700 (PDT)
+Subject: [PATCH 39/40] ntb: add DMA error handling for TX DMA
 From: Dave Jiang <dave.jiang@intel.com>
-Date: Fri, 15 Jul 2016 13:21:27 -0700
-Message-ID: <146861408725.154751.6668533165023760251.stgit@djiang5-desk3.ch.intel.com>
-In-Reply-To: <146861326948.154751.14835826491690292.stgit@djiang5-desk3.ch.intel.com>
-References: <146861326948.154751.14835826491690292.stgit@djiang5-desk3.ch.intel.com>
+Date: Thu, 14 Jul 2016 15:00:27 -0700
+Message-ID: <146853362724.12248.10377767638793616622.stgit@djiang5-desk3.ch.intel.com>
+In-Reply-To: <146853287568.12248.6774252283397125297.stgit@djiang5-desk3.ch.intel.com>
+References: <146853287568.12248.6774252283397125297.stgit@djiang5-desk3.ch.intel.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -24,11 +24,11 @@ Cc: Allen Hubbe <Allen.Hubbe@emc.com>
 Cc: Jon Mason <jdmason@kudzu.us>
 Cc: linux-ntb@googlegroups.com
 ---
- drivers/ntb/ntb_transport.c |  127 ++++++++++++++++++++++++++++++++-----------
- 1 file changed, 94 insertions(+), 33 deletions(-)
+ drivers/ntb/ntb_transport.c |  126 ++++++++++++++++++++++++++++++++-----------
+ 1 file changed, 93 insertions(+), 33 deletions(-)
 
 diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 2ef9d913..6403b5b 100644
+index 2ef9d913..841554c 100644
 --- a/drivers/ntb/ntb_transport.c
 +++ b/drivers/ntb/ntb_transport.c
 @@ -102,6 +102,10 @@ struct ntb_queue_entry {
@@ -52,13 +52,12 @@ index 2ef9d913..6403b5b 100644
  
  static int ntb_transport_bus_match(struct device *dev,
  				   struct device_driver *drv)
-@@ -1439,11 +1446,42 @@ static void ntb_transport_rxc_db(unsigned long data)
+@@ -1439,11 +1446,41 @@ static void ntb_transport_rxc_db(unsigned long data)
  	}
  }
  
 -static void ntb_tx_copy_callback(void *data)
-+static void ntb_tx_copy_callback(void *data,
-+				 const struct dmaengine_result *res)
++static void ntb_tx_copy_callback(void *data, struct dmaengine_result *res)
  {
  	struct ntb_queue_entry *entry = data;
  	struct ntb_transport_qp *qp = entry->qp;
@@ -69,7 +68,7 @@ index 2ef9d913..6403b5b 100644
 +
 +	/* we need to check DMA results if we are using DMA */
 +	if (txd) {
-+		enum dmaengine_tx_result dma_err = res->result;
++		enum dma_trans_result dma_err = res->result;
 +
 +		switch (dma_err) {
 +		case DMA_TRANS_READ_FAILED:
@@ -96,7 +95,7 @@ index 2ef9d913..6403b5b 100644
  
  	iowrite32(entry->flags | DESC_DONE_FLAG, &hdr->flags);
  
-@@ -1479,40 +1517,24 @@ static void ntb_memcpy_tx(struct ntb_queue_entry *entry, void __iomem *offset)
+@@ -1479,40 +1516,24 @@ static void ntb_memcpy_tx(struct ntb_queue_entry *entry, void __iomem *offset)
  	/* Ensure that the data is fully copied out before setting the flags */
  	wmb();
  
@@ -143,7 +142,7 @@ index 2ef9d913..6403b5b 100644
  	buff_off = (size_t)buf & ~PAGE_MASK;
  	dest_off = (size_t)dest & ~PAGE_MASK;
  
-@@ -1532,39 +1554,74 @@ static void ntb_async_tx(struct ntb_transport_qp *qp,
+@@ -1532,39 +1553,74 @@ static void ntb_async_tx(struct ntb_transport_qp *qp,
  	unmap->to_cnt = 1;
  
  	for (retries = 0; retries < DMA_RETRIES; retries++) {
@@ -228,7 +227,7 @@ index 2ef9d913..6403b5b 100644
  	ntb_memcpy_tx(entry, offset);
  	qp->tx_memcpy++;
  }
-@@ -1940,6 +1997,10 @@ int ntb_transport_tx_enqueue(struct ntb_transport_qp *qp, void *cb, void *data,
+@@ -1940,6 +1996,10 @@ int ntb_transport_tx_enqueue(struct ntb_transport_qp *qp, void *cb, void *data,
  	entry->buf = data;
  	entry->len = len;
  	entry->flags = 0;
