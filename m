@@ -1,14 +1,14 @@
 Return-Path: <dave.jiang@intel.com>
-Received: from mga04.intel.com (mga04.intel.com. [192.55.52.120])
-        by gmr-mx.google.com with ESMTP id d201si714477pfd.2.2016.07.15.13.21.54
+Received: from mga09.intel.com (mga09.intel.com. [134.134.136.24])
+        by gmr-mx.google.com with ESMTP id z4si1284421pam.0.2016.07.14.15.00.53
         for <linux-ntb@googlegroups.com>;
-        Fri, 15 Jul 2016 13:21:54 -0700 (PDT)
-Subject: [PATCH v2 40/41] ntb: add DMA error handling for RX DMA
+        Thu, 14 Jul 2016 15:00:53 -0700 (PDT)
+Subject: [PATCH 40/40] ntb: add DMA error handling for RX DMA
 From: Dave Jiang <dave.jiang@intel.com>
-Date: Fri, 15 Jul 2016 13:21:33 -0700
-Message-ID: <146861409387.154751.16027821661039202698.stgit@djiang5-desk3.ch.intel.com>
-In-Reply-To: <146861326948.154751.14835826491690292.stgit@djiang5-desk3.ch.intel.com>
-References: <146861326948.154751.14835826491690292.stgit@djiang5-desk3.ch.intel.com>
+Date: Thu, 14 Jul 2016 15:00:33 -0700
+Message-ID: <146853363293.12248.854323176281277590.stgit@djiang5-desk3.ch.intel.com>
+In-Reply-To: <146853287568.12248.6774252283397125297.stgit@djiang5-desk3.ch.intel.com>
+References: <146853287568.12248.6774252283397125297.stgit@djiang5-desk3.ch.intel.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -24,11 +24,11 @@ Cc: Allen Hubbe <Allen.Hubbe@emc.com>
 Cc: Jon Mason <jdmason@kudzu.us>
 Cc: linux-ntb@googlegroups.com
 ---
- drivers/ntb/ntb_transport.c |  103 +++++++++++++++++++++++++++++++++----------
- 1 file changed, 79 insertions(+), 24 deletions(-)
+ drivers/ntb/ntb_transport.c |  102 +++++++++++++++++++++++++++++++++----------
+ 1 file changed, 78 insertions(+), 24 deletions(-)
 
 diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 6403b5b..42f588d 100644
+index 841554c..ee70a58 100644
 --- a/drivers/ntb/ntb_transport.c
 +++ b/drivers/ntb/ntb_transport.c
 @@ -106,13 +106,13 @@ struct ntb_queue_entry {
@@ -65,13 +65,12 @@ index 6403b5b..42f588d 100644
  
  		cb_data = entry->cb_data;
  		len = entry->len;
-@@ -1226,9 +1229,39 @@ static void ntb_complete_rxc(struct ntb_transport_qp *qp)
+@@ -1226,9 +1229,38 @@ static void ntb_complete_rxc(struct ntb_transport_qp *qp)
  	spin_unlock_irqrestore(&qp->ntb_rx_q_lock, irqflags);
  }
  
 -static void ntb_rx_copy_callback(void *data)
-+static void ntb_rx_copy_callback(void *data,
-+				 const struct dmaengine_result *res)
++static void ntb_rx_copy_callback(void *data, struct dmaengine_result *res)
  {
  	struct ntb_queue_entry *entry = data;
 +	struct dma_async_tx_descriptor *txd;
@@ -80,7 +79,7 @@ index 6403b5b..42f588d 100644
 +
 +	/* we need to check DMA results if we are using DMA */
 +	if (txd) {
-+		enum dmaengine_tx_result dma_err = res->result;
++		enum dma_trans_result dma_err = res->result;
 +
 +		switch (dma_err) {
 +		case DMA_TRANS_READ_FAILED:
@@ -106,7 +105,7 @@ index 6403b5b..42f588d 100644
  
  	entry->flags |= DESC_DONE_FLAG;
  
-@@ -1245,12 +1278,11 @@ static void ntb_memcpy_rx(struct ntb_queue_entry *entry, void *offset)
+@@ -1245,12 +1277,11 @@ static void ntb_memcpy_rx(struct ntb_queue_entry *entry, void *offset)
  	/* Ensure that the data is fully copied out before clearing the flag */
  	wmb();
  
@@ -121,7 +120,7 @@ index 6403b5b..42f588d 100644
  	struct ntb_transport_qp *qp = entry->qp;
  	struct dma_chan *chan = qp->rx_dma_chan;
  	struct dma_device *device;
-@@ -1261,13 +1293,6 @@ static void ntb_async_rx(struct ntb_queue_entry *entry, void *offset)
+@@ -1261,13 +1292,6 @@ static void ntb_async_rx(struct ntb_queue_entry *entry, void *offset)
  	int retries = 0;
  
  	len = entry->len;
@@ -135,7 +134,7 @@ index 6403b5b..42f588d 100644
  	device = chan->device;
  	pay_off = (size_t)offset & ~PAGE_MASK;
  	buff_off = (size_t)buf & ~PAGE_MASK;
-@@ -1295,26 +1320,27 @@ static void ntb_async_rx(struct ntb_queue_entry *entry, void *offset)
+@@ -1295,26 +1319,27 @@ static void ntb_async_rx(struct ntb_queue_entry *entry, void *offset)
  	unmap->from_cnt = 1;
  
  	for (retries = 0; retries < DMA_RETRIES; retries++) {
@@ -172,7 +171,7 @@ index 6403b5b..42f588d 100644
  	if (dma_submit_error(cookie))
  		goto err_set_unmap;
  
-@@ -1324,13 +1350,38 @@ static void ntb_async_rx(struct ntb_queue_entry *entry, void *offset)
+@@ -1324,13 +1349,38 @@ static void ntb_async_rx(struct ntb_queue_entry *entry, void *offset)
  
  	qp->rx_async++;
  
@@ -212,7 +211,7 @@ index 6403b5b..42f588d 100644
  	ntb_memcpy_rx(entry, offset);
  	qp->rx_memcpy++;
  }
-@@ -1376,7 +1427,7 @@ static int ntb_process_rxc(struct ntb_transport_qp *qp)
+@@ -1376,7 +1426,7 @@ static int ntb_process_rxc(struct ntb_transport_qp *qp)
  	}
  
  	entry->rx_hdr = hdr;
@@ -221,7 +220,7 @@ index 6403b5b..42f588d 100644
  
  	if (hdr->len > entry->len) {
  		dev_dbg(&qp->ndev->pdev->dev,
-@@ -1955,6 +2006,10 @@ int ntb_transport_rx_enqueue(struct ntb_transport_qp *qp, void *cb, void *data,
+@@ -1954,6 +2004,10 @@ int ntb_transport_rx_enqueue(struct ntb_transport_qp *qp, void *cb, void *data,
  	entry->buf = data;
  	entry->len = len;
  	entry->flags = 0;
