@@ -1,14 +1,14 @@
 Return-Path: <dave.jiang@intel.com>
-Received: from mga02.intel.com (mga02.intel.com. [134.134.136.20])
-        by gmr-mx.google.com with ESMTP id ph9si1329872pac.1.2016.07.18.14.51.44
+Received: from mga03.intel.com (mga03.intel.com. [134.134.136.65])
+        by gmr-mx.google.com with ESMTP id ph9si2428667pac.1.2016.07.15.13.21.49
         for <linux-ntb@googlegroups.com>;
-        Mon, 18 Jul 2016 14:51:44 -0700 (PDT)
-Subject: [PATCH v3 39/41] ntb: add DMA error handling for TX DMA
+        Fri, 15 Jul 2016 13:21:49 -0700 (PDT)
+Subject: [PATCH v2 39/41] ntb: add DMA error handling for TX DMA
 From: Dave Jiang <dave.jiang@intel.com>
-Date: Mon, 18 Jul 2016 14:51:22 -0700
-Message-ID: <146887868236.16107.7274539553680600417.stgit@djiang5-desk3.ch.intel.com>
-In-Reply-To: <146887810715.16107.9753805230903892880.stgit@djiang5-desk3.ch.intel.com>
-References: <146887810715.16107.9753805230903892880.stgit@djiang5-desk3.ch.intel.com>
+Date: Fri, 15 Jul 2016 13:21:27 -0700
+Message-ID: <146861408725.154751.6668533165023760251.stgit@djiang5-desk3.ch.intel.com>
+In-Reply-To: <146861326948.154751.14835826491690292.stgit@djiang5-desk3.ch.intel.com>
+References: <146861326948.154751.14835826491690292.stgit@djiang5-desk3.ch.intel.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
