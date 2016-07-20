@@ -1,157 +1,234 @@
-Return-Path: <gunthorp@cgy1-donard.priv.deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id tp10si1575278pac.2.2016.06.10.15.55.28
+Return-Path: <Allen.Hubbe@emc.com>
+Received: from mailuogwhop.emc.com (mailuogwhop.emc.com. [168.159.213.141])
+        by gmr-mx.google.com with ESMTPS id r127si357052ywh.0.2016.07.20.14.16.00
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 10 Jun 2016 15:55:28 -0700 (PDT)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Fri, 10 Jun 2016 16:54:10 -0600
-Message-Id: <a326e5cfecc9c780e97d9ce1665d13474b7367c3.1465598632.git.logang@deltatee.com>
-In-Reply-To: <cover.1465598632.git.logang@deltatee.com>
-References: <cover.1465598632.git.logang@deltatee.com>
-In-Reply-To: <cover.1465598632.git.logang@deltatee.com>
-References: <cover.1465598632.git.logang@deltatee.com>
-Subject: [PATCH 7/8] ntb_pingpong: Add a debugfs file to get the ping count
-To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
-Cc: Shuah Khan <shuahkh@osg.samsung.com>, Sudip Mukherjee <sudipm.mukherjee@gmail.com>, Arnd Bergmann <arnd@arndb.de>, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-kselftest@vger.kernel.org, Logan Gunthorpe <logang@deltatee.com>
+        Wed, 20 Jul 2016 14:16:00 -0700 (PDT)
+From: "Allen Hubbe" <Allen.Hubbe@emc.com>
+References: <146904507864.11972.10146989448811282060.stgit@djiang5-desk3.ch.intel.com> <146904564766.11972.13720989511027291565.stgit@djiang5-desk3.ch.intel.com>
+In-Reply-To: <146904564766.11972.13720989511027291565.stgit@djiang5-desk3.ch.intel.com>
+Subject: RE: [PATCH v4 39/41] ntb: add DMA error handling for TX DMA
+Date: Wed, 20 Jul 2016 17:15:49 -0400
+Message-ID: <002c01d1e2cb$e43ac3f0$acb04bd0$@emc.com>
+MIME-Version: 1.0
+Content-Type: text/plain;
+	charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Content-Language: en-us
+To: 'Dave Jiang' <dave.jiang@intel.com>, vinod.koul@intel.com, lars@metafoo.de
+Cc: laurent.pinchart@ideasonboard.com, 'Jon Mason' <jdmason@kudzu.us>, dmaengine@vger.kernel.org, linux-ntb@googlegroups.com, dan.j.williams@intel.com
 List-ID: <linux-ntb.googlegroups.com>
 
-This commit adds a debugfs 'count' file to ntb_pingpong. This is so
-testing with ntb_pingpong can be automated beyond just checking the
-logs for pong messages.
+From: Dave Jiang 
+> Adding support on the tx DMA path to allow recovery of errors when
+> DMA responds with error status and abort all the subsequent ops.
+> 
+> Signed-off-by: Dave Jiang <dave.jiang@intel.com>
+> Cc: Allen Hubbe <Allen.Hubbe@emc.com>
+> Cc: Jon Mason <jdmason@kudzu.us>
+> Cc: linux-ntb@googlegroups.com
 
-The count file returns a number which increments every pong. The
-counter can be cleared by writing a zero.
+Acked-by: Allen Hubbe <Allen.Hubbe@emc.com>
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
----
- drivers/ntb/test/ntb_pingpong.c | 68 ++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 67 insertions(+), 1 deletion(-)
+> ---
+>  drivers/ntb/ntb_transport.c |  110 ++++++++++++++++++++++++++++++++-----------
+>  1 file changed, 83 insertions(+), 27 deletions(-)
+> 
+> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+> index 2ef9d913..01da764 100644
+> --- a/drivers/ntb/ntb_transport.c
+> +++ b/drivers/ntb/ntb_transport.c
+> @@ -102,6 +102,9 @@ struct ntb_queue_entry {
+>  	void *buf;
+>  	unsigned int len;
+>  	unsigned int flags;
+> +	int retries;
+> +	int errors;
+> +	unsigned int tx_index;
+> 
+>  	struct ntb_transport_qp *qp;
+>  	union {
+> @@ -258,6 +261,9 @@ enum {
+>  static void ntb_transport_rxc_db(unsigned long data);
+>  static const struct ntb_ctx_ops ntb_transport_ops;
+>  static struct ntb_client ntb_transport_client;
+> +static int ntb_async_tx_submit(struct ntb_transport_qp *qp,
+> +			       struct ntb_queue_entry *entry);
+> +static void ntb_memcpy_tx(struct ntb_queue_entry *entry, void __iomem *offset);
+> 
+>  static int ntb_transport_bus_match(struct device *dev,
+>  				   struct device_driver *drv)
+> @@ -1439,12 +1445,39 @@ static void ntb_transport_rxc_db(unsigned long data)
+>  	}
+>  }
+> 
+> -static void ntb_tx_copy_callback(void *data)
+> +static void ntb_tx_copy_callback(void *data,
+> +				 const struct dmaengine_result *res)
+>  {
+>  	struct ntb_queue_entry *entry = data;
+>  	struct ntb_transport_qp *qp = entry->qp;
+>  	struct ntb_payload_header __iomem *hdr = entry->tx_hdr;
+> 
+> +	/* we need to check DMA results if we are using DMA */
+> +	if (res) {
+> +		enum dmaengine_tx_result dma_err = res->result;
+> +
+> +		switch (dma_err) {
+> +		case DMA_TRANS_READ_FAILED:
+> +		case DMA_TRANS_WRITE_FAILED:
+> +			entry->errors++;
+> +		case DMA_TRANS_ABORTED:
+> +		{
+> +			void __iomem *offset =
+> +				qp->tx_mw + qp->tx_max_frame *
+> +				entry->tx_index;
+> +
+> +			/* resubmit via CPU */
+> +			ntb_memcpy_tx(entry, offset);
+> +			qp->tx_memcpy++;
+> +			return;
+> +		}
+> +
+> +		case DMA_TRANS_NOERROR:
+> +		default:
+> +			break;
+> +		}
+> +	}
+> +
+>  	iowrite32(entry->flags | DESC_DONE_FLAG, &hdr->flags);
+> 
+>  	ntb_peer_db_set(qp->ndev, BIT_ULL(qp->qp_num));
+> @@ -1479,40 +1512,25 @@ static void ntb_memcpy_tx(struct ntb_queue_entry *entry, void
+> __iomem *offset)
+>  	/* Ensure that the data is fully copied out before setting the flags */
+>  	wmb();
+> 
+> -	ntb_tx_copy_callback(entry);
+> +	ntb_tx_copy_callback(entry, NULL);
+>  }
+> 
+> -static void ntb_async_tx(struct ntb_transport_qp *qp,
+> -			 struct ntb_queue_entry *entry)
+> +static int ntb_async_tx_submit(struct ntb_transport_qp *qp,
+> +			       struct ntb_queue_entry *entry)
+>  {
+> -	struct ntb_payload_header __iomem *hdr;
+>  	struct dma_async_tx_descriptor *txd;
+>  	struct dma_chan *chan = qp->tx_dma_chan;
+>  	struct dma_device *device;
+> +	size_t len = entry->len;
+> +	void *buf = entry->buf;
+>  	size_t dest_off, buff_off;
+>  	struct dmaengine_unmap_data *unmap;
+>  	dma_addr_t dest;
+>  	dma_cookie_t cookie;
+> -	void __iomem *offset;
+> -	size_t len = entry->len;
+> -	void *buf = entry->buf;
+>  	int retries = 0;
+> 
+> -	offset = qp->tx_mw + qp->tx_max_frame * qp->tx_index;
+> -	hdr = offset + qp->tx_max_frame - sizeof(struct ntb_payload_header);
+> -	entry->tx_hdr = hdr;
+> -
+> -	iowrite32(entry->len, &hdr->len);
+> -	iowrite32((u32)qp->tx_pkts, &hdr->ver);
+> -
+> -	if (!chan)
+> -		goto err;
+> -
+> -	if (len < copy_bytes)
+> -		goto err;
+> -
+>  	device = chan->device;
+> -	dest = qp->tx_mw_phys + qp->tx_max_frame * qp->tx_index;
+> +	dest = qp->tx_mw_phys + qp->tx_max_frame * entry->tx_index;
+>  	buff_off = (size_t)buf & ~PAGE_MASK;
+>  	dest_off = (size_t)dest & ~PAGE_MASK;
+> 
+> @@ -1532,8 +1550,9 @@ static void ntb_async_tx(struct ntb_transport_qp *qp,
+>  	unmap->to_cnt = 1;
+> 
+>  	for (retries = 0; retries < DMA_RETRIES; retries++) {
+> -		txd = device->device_prep_dma_memcpy(chan, dest, unmap->addr[0],
+> -						     len, DMA_PREP_INTERRUPT);
+> +		txd = device->device_prep_dma_memcpy(chan, dest,
+> +						     unmap->addr[0], len,
+> +						     DMA_PREP_INTERRUPT);
+>  		if (txd)
+>  			break;
+> 
+> @@ -1546,7 +1565,7 @@ static void ntb_async_tx(struct ntb_transport_qp *qp,
+>  		goto err_get_unmap;
+>  	}
+> 
+> -	txd->callback = ntb_tx_copy_callback;
+> +	txd->callback_result = ntb_tx_copy_callback;
+>  	txd->callback_param = entry;
+>  	dma_set_unmap(txd, unmap);
+> 
+> @@ -1557,14 +1576,48 @@ static void ntb_async_tx(struct ntb_transport_qp *qp,
+>  	dmaengine_unmap_put(unmap);
+> 
+>  	dma_async_issue_pending(chan);
+> -	qp->tx_async++;
+> 
+> -	return;
+> +	return 0;
+>  err_set_unmap:
+>  	dmaengine_unmap_put(unmap);
+>  err_get_unmap:
+>  	dmaengine_unmap_put(unmap);
+>  err:
+> +	return -ENXIO;
+> +}
+> +
+> +static void ntb_async_tx(struct ntb_transport_qp *qp,
+> +			 struct ntb_queue_entry *entry)
+> +{
+> +	struct ntb_payload_header __iomem *hdr;
+> +	struct dma_chan *chan = qp->tx_dma_chan;
+> +	void __iomem *offset;
+> +	int res;
+> +
+> +	entry->tx_index = qp->tx_index;
+> +	offset = qp->tx_mw + qp->tx_max_frame * entry->tx_index;
+> +	hdr = offset + qp->tx_max_frame - sizeof(struct ntb_payload_header);
+> +	entry->tx_hdr = hdr;
+> +
+> +	iowrite32(entry->len, &hdr->len);
+> +	iowrite32((u32)qp->tx_pkts, &hdr->ver);
+> +
+> +	if (!chan)
+> +		goto err;
+> +
+> +	if (entry->len < copy_bytes)
+> +		goto err;
+> +
+> +	res = ntb_async_tx_submit(qp, entry);
+> +	if (res < 0)
+> +		goto err;
+> +
+> +	if (!entry->retries)
+> +		qp->tx_async++;
+> +
+> +	return;
+> +
+> +err:
+>  	ntb_memcpy_tx(entry, offset);
+>  	qp->tx_memcpy++;
+>  }
+> @@ -1940,6 +1993,9 @@ int ntb_transport_tx_enqueue(struct ntb_transport_qp *qp, void *cb,
+> void *data,
+>  	entry->buf = data;
+>  	entry->len = len;
+>  	entry->flags = 0;
+> +	entry->errors = 0;
+> +	entry->retries = 0;
+> +	entry->tx_index = 0;
+> 
+>  	rc = ntb_process_tx(qp, entry);
+>  	if (rc)
 
-diff --git a/drivers/ntb/test/ntb_pingpong.c b/drivers/ntb/test/ntb_pingpong.c
-index fe16005..34bbf5a 100644
---- a/drivers/ntb/test/ntb_pingpong.c
-+++ b/drivers/ntb/test/ntb_pingpong.c
-@@ -61,6 +61,7 @@
- #include <linux/pci.h>
- #include <linux/slab.h>
- #include <linux/spinlock.h>
-+#include <linux/debugfs.h>
- 
- #include <linux/ntb.h>
- 
-@@ -96,8 +97,13 @@ struct pp_ctx {
- 	spinlock_t			db_lock;
- 	struct timer_list		db_timer;
- 	unsigned long			db_delay;
-+	struct dentry			*debugfs_node_dir;
-+	struct dentry			*debugfs_count;
-+	atomic_t			count;
- };
- 
-+static struct dentry *pp_debugfs_dir;
-+
- static void pp_ping(unsigned long ctx)
- {
- 	struct pp_ctx *pp = (void *)ctx;
-@@ -171,10 +177,38 @@ static void pp_db_event(void *ctx, int vec)
- 		dev_dbg(&pp->ntb->dev,
- 			"Pong vec %d bits %#llx\n",
- 			vec, db_bits);
-+		atomic_inc(&pp->count);
- 	}
- 	spin_unlock_irqrestore(&pp->db_lock, irqflags);
- }
- 
-+static int pp_debugfs_setup(struct pp_ctx *pp)
-+{
-+	struct pci_dev *pdev = pp->ntb->pdev;
-+
-+	if (!debugfs_initialized())
-+		return -ENODEV;
-+
-+	if (!pp_debugfs_dir) {
-+		pp_debugfs_dir = debugfs_create_dir(KBUILD_MODNAME, NULL);
-+		if (!pp_debugfs_dir)
-+			return -ENODEV;
-+	}
-+
-+	pp->debugfs_node_dir = debugfs_create_dir(pci_name(pdev),
-+						  pp_debugfs_dir);
-+	if (!pp->debugfs_node_dir)
-+		return -ENODEV;
-+
-+	pp->debugfs_count = debugfs_create_atomic_t("count", S_IRUSR | S_IWUSR,
-+						    pp->debugfs_node_dir,
-+						    &pp->count);
-+	if (!pp->debugfs_count)
-+		return -ENODEV;
-+
-+	return 0;
-+}
-+
- static const struct ntb_ctx_ops pp_ops = {
- 	.link_event = pp_link_event,
- 	.db_event = pp_db_event,
-@@ -210,6 +244,7 @@ static int pp_probe(struct ntb_client *client,
- 
- 	pp->ntb = ntb;
- 	pp->db_bits = 0;
-+	atomic_set(&pp->count, 0);
- 	spin_lock_init(&pp->db_lock);
- 	setup_timer(&pp->db_timer, pp_ping, (unsigned long)pp);
- 	pp->db_delay = msecs_to_jiffies(delay_ms);
-@@ -218,6 +253,10 @@ static int pp_probe(struct ntb_client *client,
- 	if (rc)
- 		goto err_ctx;
- 
-+	rc = pp_debugfs_setup(pp);
-+	if (rc)
-+		goto err_ctx;
-+
- 	ntb_link_enable(ntb, NTB_SPEED_AUTO, NTB_WIDTH_AUTO);
- 	ntb_link_event(ntb);
- 
-@@ -234,6 +273,8 @@ static void pp_remove(struct ntb_client *client,
- {
- 	struct pp_ctx *pp = ntb->ctx;
- 
-+	debugfs_remove_recursive(pp->debugfs_node_dir);
-+
- 	ntb_clear_ctx(ntb);
- 	del_timer_sync(&pp->db_timer);
- 	ntb_link_disable(ntb);
-@@ -247,4 +288,29 @@ static struct ntb_client pp_client = {
- 		.remove = pp_remove,
- 	},
- };
--module_ntb_client(pp_client);
-+
-+static int __init tool_init(void)
-+{
-+	int rc;
-+
-+	if (debugfs_initialized())
-+		pp_debugfs_dir = debugfs_create_dir(KBUILD_MODNAME, NULL);
-+
-+	rc = ntb_register_client(&pp_client);
-+	if (rc)
-+		goto err_client;
-+
-+	return 0;
-+
-+err_client:
-+	debugfs_remove_recursive(pp_debugfs_dir);
-+	return rc;
-+}
-+module_init(tool_init);
-+
-+static void __exit tool_exit(void)
-+{
-+	ntb_unregister_client(&pp_client);
-+	debugfs_remove_recursive(pp_debugfs_dir);
-+}
-+module_exit(tool_exit);
--- 
-2.1.4
 
