@@ -1,943 +1,3078 @@
-Return-Path: <fengguang.wu@intel.com>
-Received: from mga02.intel.com (mga02.intel.com. [134.134.136.20])
-        by gmr-mx.google.com with ESMTP id i136si1659917pfe.1.2016.07.27.09.31.17
-        for <linux-ntb@googlegroups.com>;
-        Wed, 27 Jul 2016 09:31:17 -0700 (PDT)
-Date: Thu, 28 Jul 2016 00:29:44 +0800
-From: kbuild test robot <lkp@intel.com>
-Subject: Re: [PATCH 2/3] ntb: IDT 89HPES*NT* PCIe-switches NTB device driver
-Message-ID: <201607280024.Zi8nt6E1%fengguang.wu@intel.com>
-MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="6c2NcOVqGQ03X4Wi"
-Content-Disposition: inline
-In-Reply-To: <1469562619-21705-3-git-send-email-fancer.lancer@gmail.com>
-To: Serge Semin <fancer.lancer@gmail.com>
-Cc: kbuild-all@01.org, jdmason@kudzu.us, dave.jiang@intel.com, Allen.Hubbe@emc.com, Xiangliang.Yu@amd.com, Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Serge Semin <fancer.lancer@gmail.com>
+Return-Path: <fancer.lancer@gmail.com>
+Received: from mail-lf0-x241.google.com (mail-lf0-x241.google.com. [2a00:1450:4010:c07::241])
+        by gmr-mx.google.com with ESMTPS id o85si1630213wme.0.2016.07.26.12.51.13
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 26 Jul 2016 12:51:14 -0700 (PDT)
+Received: by mail-lf0-x241.google.com with SMTP id l89so932192lfi.2
+        for <linux-ntb@googlegroups.com>; Tue, 26 Jul 2016 12:51:13 -0700 (PDT)
+Return-Path: <fancer.lancer@gmail.com>
+From: Serge Semin <fancer.lancer@gmail.com>
+Subject: [PATCH 3/3] ntb: Test client drivers for asynchronous NTB devices
+Date: Tue, 26 Jul 2016 22:50:19 +0300
+Message-Id: <1469562619-21705-4-git-send-email-fancer.lancer@gmail.com>
+In-Reply-To: <1469562619-21705-1-git-send-email-fancer.lancer@gmail.com>
+References: <1469562619-21705-1-git-send-email-fancer.lancer@gmail.com>
+To: jdmason@kudzu.us
+Cc: dave.jiang@intel.com, Allen.Hubbe@emc.com, Xiangliang.Yu@amd.com, Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Serge Semin <fancer.lancer@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
+There are three drivers to independently test all interfaces implemented by
+the IDT 89HPES*NT* NTB driver.
 
---6c2NcOVqGQ03X4Wi
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Doorbells are tested by new NTB Doorbell Pingpong client driver. It implements
+the so-named algorithm. Driver starts working from setting the peer doorbell of
+the last locally set doorbell bit. If there has not been locally set doorbell,
+it sets the very first bit. After that the driver unmasks the events of the
+just set doorbell bit and waits until the peer sets the same doorbell. When
+peer does it, the local driver iterates to the next doorbell bit and starts
+delayed work thread, which will set the corresponding bit and perform doorbell
+bit umasking on waking up.
 
-Hi,
+Messaging subsystem can be tested by the client driver implementing a simple
+transmition/reception algorithm. A message can be send to a peer by writing
+data to /sys/kernel/debug/ntb_msg_test/ntbA{N}/data file. The peer can read
+it from the same file then.
 
-[auto build test WARNING on ntb/ntb-next]
-[cannot apply to v4.7 next-20160727]
-[if your patch is applied to the wrong git tree, please drop us a note to help improve the system]
+Memory Windows test driver implements a simple write/read algorithm. The driver
+allocates the predefined number of local buffers (inbound memory window -
+inwndw{N}). In order to get a translated base address driver sends a
+corresponding command to a peer. Then driver initialize the outbound memory
+windows (outwndw{N}). The read/write operations can be performed using the
+following debug nodes:
+/sys/kernel/debug/ntb_mw_test/ntbA{N}/inwndw{N}
+/sys/kernel/debug/ntb_mw_test/ntbA{N}/outwndw{N}
 
-url:    https://github.com/0day-ci/linux/commits/Serge-Semin/ntb-Asynchronous-NTB-devices-support/20160727-082033
-base:   https://github.com/jonmason/ntb ntb-next
-config: sparc64-allmodconfig (attached as .config)
-compiler: sparc64-linux-gnu-gcc (Debian 5.4.0-6) 5.4.0 20160609
-reproduce:
-        wget https://git.kernel.org/cgit/linux/kernel/git/wfg/lkp-tests.git/plain/sbin/make.cross -O ~/bin/make.cross
-        chmod +x ~/bin/make.cross
-        # save the attached .config to linux build tree
-        make.cross ARCH=sparc64 
-
-All warnings (new ones prefixed by >>):
-
-   drivers/ntb/hw/idt/ntb_hw_idt.c: In function 'idt_ntb_setmw':
->> drivers/ntb/hw/idt/ntb_hw_idt.c:1170:56: warning: right shift count >= width of type [-Wshift-count-overflow]
-     idt_ntb_writereg(cfg, IDT_NT_PCI_LUTMDATA, (u32)(addr >> 32));
-                                                           ^
-
-vim +1170 drivers/ntb/hw/idt/ntb_hw_idt.c
-
-  1154	
-  1155		/* Collect the Lookup table offset */
-  1156		idt_ntb_writefld_var(&lut_indxbar, IDT_NT_LUT_INDEX,
-  1157				     ndev->mw_self_offset + mwindx);
-  1158		idt_ntb_writefld_var(&lut_indxbar, IDT_NT_LUT_BAR, BAR2);
-  1159	
-  1160		/* Collect the Lookup table entry partition and valid bits */
-  1161		idt_ntb_writefld_var(&lut_partval, IDT_NT_LUT_PART, ndev->part);
-  1162		idt_ntb_writefld_var(&lut_partval, IDT_NT_LUT_VALID, ON);
-  1163	
-  1164		/* Start critical section writing to the local port Lookup table */
-  1165		spin_lock_irqsave(&pdata->lut_lock, irqflags);
-  1166		/* Write the data to the Lookup table registers of the peer */
-  1167		idt_ntb_writereg(cfg, IDT_NT_PCI_LUTOFFSET, lut_indxbar);
-  1168		idt_ntb_writereg(cfg, IDT_NT_PCI_LUTLDATA, (u32)addr);
-  1169	#ifdef CONFIG_64BIT
-> 1170		idt_ntb_writereg(cfg, IDT_NT_PCI_LUTMDATA, (u32)(addr >> 32));
-  1171	#else
-  1172		idt_ntb_writereg(cfg, IDT_NT_PCI_LUTMDATA, (u32)0);
-  1173	#endif /* !CONFIG_64BIT */
-  1174		idt_ntb_writereg(cfg, IDT_NT_PCI_LUTUDATA, lut_partval);
-  1175		/* Finally unlock the Lookup table */
-  1176		spin_unlock_irqrestore(&pdata->lut_lock, irqflags);
-  1177	
-  1178		return SUCCESS;
+Signed-off-by: Serge Semin <fancer.lancer@gmail.com>
 
 ---
-0-DAY kernel test infrastructure                Open Source Technology Center
-https://lists.01.org/pipermail/kbuild-all                   Intel Corporation
+ drivers/ntb/test/Kconfig        |   32 +
+ drivers/ntb/test/Makefile       |    9 +-
+ drivers/ntb/test/ntb_db_test.c  |  677 +++++++++++++++++
+ drivers/ntb/test/ntb_msg_test.c |  736 +++++++++++++++++++
+ drivers/ntb/test/ntb_mw_test.c  | 1531 +++++++++++++++++++++++++++++++++++++++
+ 5 files changed, 2983 insertions(+), 2 deletions(-)
+ create mode 100644 drivers/ntb/test/ntb_db_test.c
+ create mode 100644 drivers/ntb/test/ntb_msg_test.c
+ create mode 100644 drivers/ntb/test/ntb_mw_test.c
 
---6c2NcOVqGQ03X4Wi
-Content-Type: application/octet-stream
-Content-Disposition: attachment; filename=".config.gz"
-Content-Transfer-Encoding: base64
+diff --git a/drivers/ntb/test/Kconfig b/drivers/ntb/test/Kconfig
+index a5d0eda..80f5058 100644
+--- a/drivers/ntb/test/Kconfig
++++ b/drivers/ntb/test/Kconfig
+@@ -25,3 +25,35 @@ config NTB_PERF
+ 	 to and from the window without additional software interaction.
+ 
+ 	 If unsure, say N.
++
++config NTB_DB_TEST
++	tristate "NTB Doorbell Test Client"
++	help
++	 This is a driver to test doorbell subsystem of NTB bus devices.
++	 The design is similar to the ping pong although it exchanges the
++	 doorbell bits one-by-one, waiting for the peer response before getting
++	 to a next doorbell.
++
++	 If unsure, say N.
++
++config NTB_MSG_TEST
++	tristate "NTB Messaging Test Client"
++	help
++	 This is a driver to test messaging subsystem of NTB. It just creates
++	 one file in the DebugFS for each NTB device of asynchronous
++	 architecture. In order to send a message one can just write a text to
++	 the file. It will be immediately sent to the peer so user can get it
++	 by reading from the corresponding file.
++
++	 If unsure, say N.
++
++config NTB_MW_TEST
++	tristate "NTB Memory Windows Test Client"
++	help
++	 This is a driver to test memory sharing amongst devices. It creates a
++	 set of files in the DebugFS, one of which are used to write a text to
++	 outbound memory windows and anothers can be used to read data written
++	 by the peer to our inbound memory window.
++
++	 If unsure, say N.
++
+diff --git a/drivers/ntb/test/Makefile b/drivers/ntb/test/Makefile
+index 9e77e0b..6ea6db4 100644
+--- a/drivers/ntb/test/Makefile
++++ b/drivers/ntb/test/Makefile
+@@ -1,3 +1,8 @@
++# Synchronous hardware clients (Intel/AMD)
+ obj-$(CONFIG_NTB_PINGPONG) += ntb_pingpong.o
+-obj-$(CONFIG_NTB_TOOL) += ntb_tool.o
+-obj-$(CONFIG_NTB_PERF) += ntb_perf.o
++obj-$(CONFIG_NTB_TOOL)     += ntb_tool.o
++obj-$(CONFIG_NTB_PERF)     += ntb_perf.o
++# Asynchronous hardware clients (IDT)
++obj-$(CONFIG_NTB_DB_TEST)  += ntb_db_test.o
++obj-$(CONFIG_NTB_MSG_TEST) += ntb_msg_test.o
++obj-$(CONFIG_NTB_MW_TEST)  += ntb_mw_test.o
+diff --git a/drivers/ntb/test/ntb_db_test.c b/drivers/ntb/test/ntb_db_test.c
+new file mode 100644
+index 0000000..e93c0c6
+--- /dev/null
++++ b/drivers/ntb/test/ntb_db_test.c
+@@ -0,0 +1,677 @@
++/*
++ *   This file is provided under a GPLv2 license.  When using or
++ *   redistributing this file, you may do so under that license.
++ *
++ *   GPL LICENSE SUMMARY
++ *
++ *   Copyright (C) 2016 T-Platforms All Rights Reserved.
++ *
++ *   This program is free software; you can redistribute it and/or modify it
++ *   under the terms and conditions of the GNU General Public License,
++ *   version 2, as published by the Free Software Foundation.
++ *
++ *   This program is distributed in the hope that it will be useful, but WITHOUT
++ *   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
++ *   FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
++ *   more details.
++ *
++ *   You should have received a copy of the GNU General Public License along with
++ *   this program; if not, one can be found <http://www.gnu.org/licenses/>.
++ *
++ *   The full GNU General Public License is included in this distribution in
++ *   the file called "COPYING".
++ *
++ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
++ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
++ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
++ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
++ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
++ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
++ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ *
++ * PCIe NTB doorbells test Linux driver
++ *
++ * Contact Information:
++ * Serge Semin <fancer.lancer@gmail.com>, <Sergey.Semin@t-platforms.ru>
++ */
++
++/*
++ *       NOTE of the NTB doorbells pingpong driver design.
++ * The driver is designed to implement the pingpong algorithm. After a quick
++ * initailization the driver starts from setting the peer doorbell of the last
++ * locally set doorbell bit. If there is not any doorbell locally set, then it
++ * sets the very first bit. After that the driver unmasks the events of the
++ * just set bits and waits until the peer is set the same doorbell. When it's
++ * done, the driver iterates to the next doorbell and starts delayed work
++ * thread, which will set the corresponding bit and perform doorbell umasking
++ * on waking up.
++ */
++
++/* Note: You can load this module with either option 'dyndbg=+p' or define the
++ * next preprocessor constant */
++/*#define DEBUG*/
++
++#include <linux/init.h>
++#include <linux/kernel.h>
++#include <linux/module.h>
++#include <linux/moduleparam.h>
++
++#include <linux/slab.h>
++#include <linux/spinlock.h>
++#include <linux/bitops.h>
++#include <linux/debugfs.h>
++
++#include <linux/ntb.h>
++
++#define DRIVER_NAME		"ntb_db_test"
++#define DRIVER_DESCRIPTION	"PCIe NTB Doorbells Pingpong Client"
++#define DRIVER_VERSION		"1.0"
++
++MODULE_DESCRIPTION(DRIVER_DESCRIPTION);
++MODULE_VERSION(DRIVER_VERSION);
++MODULE_LICENSE("GPL v2");
++MODULE_AUTHOR("T-platforms");
++
++static unsigned int delay_ms = 1000;
++module_param(delay_ms, uint, 0644);
++MODULE_PARM_DESC(delay_ms,
++	"Milliseconds to delay before setting a next doorbell bit");
++
++/*
++ * DebugFS directory to place the driver debug file
++ */
++static struct dentry *dbgfs_dir;
++
++/*
++ * Enumeration of the driver states
++ * @PP_WAIT:	Driver waits until the peer sets the corresponding doorbell bit
++ * @PP_SLEEP:	Driver sleeps before to set the next doorbell bit
++ */
++enum db_pp_state {
++	PP_WAIT = 0,
++	PP_SLEEP = 1
++};
++
++/*
++ * Doorbells pingpong driver context
++ * @ntb:	Pointer to the NTB device
++ * @cycle:	Doorbells setting cycle made up until now
++ * @valid_ids:	Valid Doorbel bits
++ * @delay:	Delay between setting the next doorbell bit
++ * @state:	Current cycle state
++ * @dwork:	Kernel thread used to perform the delayed doorbell bit set
++ * @dbgfs_info:	Handler of the DebugFS driver info-file
++ */
++struct pp_ctx {
++	struct ntb_dev *ntb;
++	unsigned long long cycle;
++	u64 valid_ids;
++	unsigned long delay;
++	enum db_pp_state state;
++	struct delayed_work dwork;
++	struct dentry *dbgfs_info;
++};
++#define to_ctx_dwork(work) \
++	container_of(to_delayed_work(work), struct pp_ctx, dwork)
++
++/*
++ * Wrapper dev_err/dev_warn/dev_info/dev_dbg macros
++ */
++#define dev_err_pp(ctx, args...) \
++	dev_err(&ctx->ntb->dev, ## args)
++#define dev_warn_pp(ctx, args...) \
++	dev_warn(&ctx->ntb->dev, ## args)
++#define dev_info_pp(ctx, args...) \
++	dev_info(&ctx->ntb->dev, ## args)
++#define dev_dbg_pp(ctx, args...) \
++	dev_dbg(&ctx->ntb->dev, ## args)
++
++/*
++ * Some common constant used in the driver for better readability:
++ * @ON: Enable something
++ * @OFF: Disable something
++ * @SUCCESS: Success of a function execution
++ */
++#define ON ((u32)0x1)
++#define OFF ((u32)0x0)
++#define SUCCESS 0
++
++/*===========================================================================
++ *                           Helper functions
++ *===========================================================================*/
++
++/*
++ * Create a contiguous bitmask starting at bit position @l and ending at
++ * position @h. For example
++ * GENMASK_ULL(39, 21) gives us the 64bit vector 0x000000ffffe00000.
++ */
++#ifndef GENMASK_ULL
++#define GENMASK_ULL(h, l) \
++	(((~0ULL) << (l)) & (~0ULL >> (BITS_PER_LONG_LONG - 1 - (h))))
++#endif /* !GENMASK_ULL */
++
++/*
++ * Set the corresponding bit in the 64-bits wide word
++ */
++#ifndef BIT_ULL
++#define BIT_ULL(nr) (1ULL << (nr))
++#endif /* !BIT_ULL */
++
++/*
++ * Method to find a first set bit in 64-bits wide word. The bits numbering is
++ * from 0 to 63. If there is no any set bit, then 64 is returned.
++ */
++static inline unsigned long find_first_bit64(u64 var)
++{
++	return (0x0ULL == var) ? BITS_PER_LONG_LONG : __ffs64(var);
++}
++
++/*
++ * Method to find a next set bit in 64-bits wide word starting from the
++ * specified position. The bits numbering is from 0 to 63. If there is no any
++ * set bit within the position and the last bit of the word, then 64 is
++ * returned.
++ */
++static inline unsigned long find_next_bit64(u64 var, unsigned long pos)
++{
++	/* Consider only the valuable positions */
++	var &= GENMASK_ULL(BITS_PER_LONG_LONG - 1, pos);
++
++	return find_first_bit64(var);
++}
++
++/*===========================================================================
++ *                Pingpong algorithm functions definition
++ *===========================================================================*/
++
++/*
++ * Iterate Doorbell PingPong algorithm work thread
++ * This function clears the currently set doorbell bit, which has been
++ * unmasked before, and masks it back. Then method sets the next doorbell
++ * bit and locally unmasks it.
++ */
++static void pp_iterate_cycle(struct work_struct *work)
++{
++	struct pp_ctx *ctx = to_ctx_dwork(work);
++	struct ntb_dev *ntb = ctx->ntb;
++	u64 db_umsk, db_sts;
++	unsigned long db_id;
++	int ret;
++
++	/* Read the mask of the current disposition */
++	db_umsk = ~ntb_db_read_mask(ntb) & ctx->valid_ids;
++	if (1 != hweight64(db_umsk)) {
++		dev_err_pp(ctx,
++			"Got invalid doorbells mask %#018llx", db_umsk);
++		return;
++	}
++
++	/* Read the currently set doorbells */
++	db_sts = ntb_db_read(ntb);
++	if (0x0 == (db_sts & db_umsk)) {
++		dev_err_pp(ctx, "Got driver bug %#018llx & %#018llx == 0",
++			db_sts, db_umsk);
++		return;
++	}
++
++	/* Find the doorbell id (use db_umsk since db_sts can have several
++	 * bits set) */
++	db_id = find_first_bit64(db_umsk);
++
++	dev_dbg_pp(ctx, "PingPong the doorbell bit %lu of cycle %llu",
++		db_id, ctx->cycle);
++
++	/* Mask the currently unmasked doorbell */
++	ret = ntb_db_set_mask(ntb, db_umsk);
++	if (SUCCESS != ret) {
++		dev_err_pp(ctx, "Failed to mask db %lu by %#018llx",
++			db_id, db_umsk);
++		return;
++	}
++
++	/* Clear the currently set doorbell */
++	ret = ntb_db_clear(ntb, db_umsk);
++	if (SUCCESS != ret) {
++		dev_err_pp(ctx,
++			"Failed to clear the db bit %lu", db_id);
++		return;
++	}
++
++	/* Iterate the doorbell id to set the next doorbell bit */
++	db_id = find_next_bit64(ctx->valid_ids, db_id + 1);
++	if (BITS_PER_LONG_LONG == db_id) {
++		db_id = find_first_bit64(ctx->valid_ids);
++		ctx->cycle++;
++	}
++
++	/* Calculate the new unmasking field */
++	db_umsk = BIT_ULL(db_id);
++
++	/* Set the new peer doorbell bit */
++	ret = ntb_peer_db_set(ntb, db_umsk);
++	if (SUCCESS != ret) {
++		dev_err_pp(ctx,
++			"Failed to set the peer doorbell %lu by field %#018llx",
++			db_id, db_umsk);
++		return;
++	}
++
++	/* After this the driver is waiting for the peer response */
++	ctx->state = PP_WAIT;
++
++	/* Unmask the corresponding doorbell bit to receive the event */
++	ret = ntb_db_clear_mask(ntb, db_umsk);
++	if (SUCCESS != ret) {
++		dev_err_pp(ctx,
++			"Failed to unmask the doorbell %lu by field %#018llx",
++			db_id, db_umsk);
++		return;
++	}
++}
++
++/*
++ * Handle the event of Doorbell set
++ */
++static void pp_db_event(void *data, int vec)
++{
++	struct pp_ctx *ctx = data;
++
++	/* From now the driver is sleeping before sending the response */
++	ctx->state = PP_SLEEP;
++
++	/* Schedule the delayed work of the algorithm */
++	(void)schedule_delayed_work(&ctx->dwork, ctx->delay);
++}
++
++/*===========================================================================
++ *                      11. DebugFS callback functions
++ *===========================================================================*/
++
++static ssize_t pp_dbgfs_read(struct file *filp, char __user *ubuf,
++				  size_t count, loff_t *offp);
++
++/*
++ * Driver DebugFS operations
++ */
++static const struct file_operations pp_dbgfs_ops = {
++	.owner = THIS_MODULE,
++	.open = simple_open,
++	.read = pp_dbgfs_read
++};
++
++/*
++ * DebugFS read node info callback
++ */
++static ssize_t pp_dbgfs_read(struct file *filp, char __user *ubuf,
++			     size_t count, loff_t *offp)
++{
++	struct pp_ctx *ctx = filp->private_data;
++	struct ntb_dev *ntb = ctx->ntb;
++	char *strbuf;
++	size_t size;
++	ssize_t ret = 0, off = 0;
++
++	/* Limit the buffer size */
++	size = min_t(size_t, count, 0x800U);
++
++	/* Allocate the memory for the buffer */
++	strbuf = kmalloc(size, GFP_KERNEL);
++	if (NULL == strbuf) {
++		return -ENOMEM;
++	}
++
++	/* Put the data into the string buffer */
++	off += scnprintf(strbuf + off, size - off,
++		"\n\t\tNTB Doorbells PingPong test driver:\n\n");
++
++	/* Current driver state */
++	off += scnprintf(strbuf + off, size - off,
++		"Link state\t- %s\n",
++		(ON == ntb_link_is_up(ntb, NULL, NULL)) ? "Up" : "Down");
++	off += scnprintf(strbuf + off, size - off,
++		"Cycle\t\t- %llu\n", ctx->cycle);
++	off += scnprintf(strbuf + off, size - off,
++		"Algo state\t- %s\n",
++		(PP_SLEEP == ctx->state) ? "sleep" : "wait");
++	off += scnprintf(strbuf + off, size - off,
++		"Delay\t\t- %u ms\n", delay_ms);
++
++	/* Copy the buffer to the User Space */
++	ret = simple_read_from_buffer(ubuf, count, offp, strbuf, off);
++	kfree(strbuf);
++
++	return ret;
++}
++
++/*
++ * Driver DebugFS initialization function
++ */
++static int pp_init_dbgfs(struct pp_ctx *ctx)
++{
++	struct ntb_dev *ntb = ctx->ntb;
++	const char *devname;
++
++	/* If the top directory is not created then do nothing */
++	if (IS_ERR_OR_NULL(dbgfs_dir)) {
++		dev_warn_pp(ctx,
++			"Top DebugFS directory has not been created for "
++			DRIVER_NAME);
++		return PTR_ERR(dbgfs_dir);
++	}
++
++	/* Retrieve the device name */
++	devname = dev_name(&ntb->dev);
++
++	/* Create the corresponding file node */
++	ctx->dbgfs_info = debugfs_create_file(devname, S_IRUSR,
++		dbgfs_dir, ctx, &pp_dbgfs_ops);
++	if (IS_ERR(ctx->dbgfs_info)) {
++		dev_err_pp(ctx, "Could not create the DebugFS node %s",
++			devname);
++		return PTR_ERR(ctx->dbgfs_info);
++	}
++
++	dev_dbg_pp(ctx, "Doorbell PingPong DebugFS node is created for %s",
++		devname);
++
++	return SUCCESS;
++}
++
++/*
++ * Driver DebugFS deinitialization function
++ */
++static void pp_deinit_dbgfs(struct pp_ctx *ctx)
++{
++	struct ntb_dev *ntb = ctx->ntb;
++
++	/* Remove the DebugFS file */
++	debugfs_remove(ctx->dbgfs_info);
++
++	dev_dbg_pp(ctx, "Doorbell PingPong DebugFS node %s is discarded",
++		dev_name(&ntb->dev));
++}
++
++/*===========================================================================
++ *                   NTB device/client driver initialization
++ *===========================================================================*/
++
++/*
++ * NTB device events handlers
++ */
++static const struct ntb_ctx_ops pp_ops = {
++	.db_event = pp_db_event
++};
++
++/*
++ * Create the driver context structure
++ */
++static struct pp_ctx *pp_create_ctx(struct ntb_dev *ntb)
++{
++	struct pp_ctx *ctx;
++	int node;
++
++	/* Allocate the memory at the device NUMA node */
++	node = dev_to_node(&ntb->dev);
++	ctx = kzalloc_node(sizeof(*ctx), GFP_KERNEL, node);
++	if (IS_ERR_OR_NULL(ctx)) {
++		dev_err(&ntb->dev,
++			"No memory for NTB PingPong driver context");
++		return ERR_PTR(-ENOMEM);
++	}
++
++	/* Initialize the NTB device descriptor and delayed work */
++	ctx->ntb = ntb;
++	ctx->cycle = 0;
++	ctx->valid_ids = ntb_db_valid_mask(ntb);
++	ctx->delay = msecs_to_jiffies(delay_ms);
++	ctx->state = PP_WAIT;
++	INIT_DELAYED_WORK(&ctx->dwork, pp_iterate_cycle);
++
++	dev_dbg_pp(ctx, "Context structure is created");
++
++	return ctx;
++}
++
++/*
++ * Free the driver context structure
++ */
++static void pp_free_ctx(struct pp_ctx *ctx)
++{
++	struct ntb_dev *ntb = ctx->ntb;
++
++	/* Just free the memory allocated for the context structure */
++	kfree(ctx);
++
++	dev_dbg(&ntb->dev, "Context structure is freed");
++}
++
++/*
++ * Correspondingly initialize the ntb device structure
++ */
++static int pp_init_ntb_dev(struct pp_ctx *ctx)
++{
++	struct ntb_dev *ntb = ctx->ntb;
++	int ret;
++
++	/* Set the NTB device events context */
++	ret = ntb_set_ctx(ntb, ctx, &pp_ops);
++	if (SUCCESS != ret) {
++		dev_err_pp(ctx, "Failed to specify the NTB device context");
++		return ret;
++	}
++
++	/* Enable the link */
++	ntb_link_enable(ntb, NTB_SPEED_AUTO, NTB_WIDTH_AUTO);
++	/*ntb_link_event(ntb);*/
++
++	dev_dbg_pp(ctx, "NTB device is initialized");
++
++	return SUCCESS;
++}
++
++/*
++ * Deinitialize the ntb device structure
++ */
++static void pp_stop_ntb_dev(struct pp_ctx *ctx)
++{
++	struct ntb_dev *ntb = ctx->ntb;
++
++	/* Disable the link */
++	ntb_link_disable(ntb);
++
++	/* Clear the context to make sure there won't be any doorbell event */
++	ntb_clear_ctx(ntb);
++
++	dev_dbg_pp(ctx, "NTB device is deinitialized");
++}
++
++/*
++ * Initialize the basic algorithm-related fields
++ */
++static int pp_init_algo(struct pp_ctx *ctx)
++{
++	struct ntb_dev *ntb = ctx->ntb;
++	u64 db_sts, db_umsk;
++	int ret;
++
++	/* Read the current mask */
++	db_umsk = ~ntb_db_read_mask(ntb) & ctx->valid_ids;
++
++	/* If all doorbell have been unmasked then mask them all */
++	if (db_umsk == ctx->valid_ids) {
++		ret = ntb_db_set_mask(ntb, db_umsk);
++		if (SUCCESS != ret) {
++			dev_err_pp(ctx,
++				"Failed to mask all the doorbells "
++				"%#018llx", db_umsk);
++			return ret;
++		}
++		/* Set the unmasking variable to zero so the algorithm would
++		 * initialize the corresponding DB bit */
++		db_umsk = 0;
++	}
++
++	/* If there is no any unmasked bit then set the very first peer doorbell
++	 * bit and locally unmask it */
++	if (0x0 == db_umsk) {
++		db_umsk = BIT_ULL(0);
++		/* Set the new peer doorbell bit */
++		ret = ntb_peer_db_set(ntb, db_umsk);
++		if (SUCCESS != ret) {
++			dev_err_pp(ctx,
++				"Failed to set the peer doorbell %u by field "
++				"%#018llx", 0, db_umsk);
++			return ret;
++		}
++		/* Clear the mask of the corresponding doorbell bit */
++		ret = ntb_db_clear_mask(ntb, db_umsk);
++		if (SUCCESS != ret) {
++			dev_err_pp(ctx,
++				"Failed to unmask the doorbell %u by field "
++				"%#018llx", 0, db_umsk);
++			return ret;
++		}
++	}
++	/* If there is one umasked bit then just read the doorbell status.
++	 * If the bit is set then just start the work thread to handle the
++	 * disposition otherwise just don't do anything waiting for the peer
++	 * to set the doorbell bit */
++	else if (1 == hweight64(db_umsk)) {
++		db_sts = ntb_db_read(ntb);
++		if (0x0 != (db_sts & db_umsk)) {
++			/* Schedule the delayed work of the algorithm */
++			(void)schedule_delayed_work(&ctx->dwork, ctx->delay);
++		}
++	} else /* if (1 < hweight64(db_umsk)) */ {
++		dev_err_pp(ctx, "Invalid mask is found %#018llx", db_umsk);
++		return -EINVAL;
++	}
++
++	dev_dbg_pp(ctx, "Doorbell PingPong algorithm is initialized");
++
++	return SUCCESS;
++}
++
++/*
++ * Stop the driver algorithm
++ */
++static void pp_stop_algo(struct pp_ctx *ctx)
++{
++	/* Make sure the delayed work is not started */
++	cancel_delayed_work_sync(&ctx->dwork);
++
++	dev_dbg_pp(ctx, "Doorbell PingPong algorithm is stopped");
++}
++
++/*
++ * NTB device probe() callback function
++ */
++static int pp_probe(struct ntb_client *client, struct ntb_dev *ntb)
++{
++	struct pp_ctx *ctx;
++	int ret;
++
++	/* Both synchronous and asynchronous hardware is supported */
++	if (!ntb_valid_sync_dev_ops(ntb) && !ntb_valid_async_dev_ops(ntb)) {
++		return -EINVAL;
++	}
++
++	/* Create the current device context */
++	ctx = pp_create_ctx(ntb);
++	if (IS_ERR_OR_NULL(ctx)) {
++		return PTR_ERR(ctx);
++	}
++
++	/* Initialize the NTB device */
++	ret = pp_init_ntb_dev(ctx);
++	if (SUCCESS != ret) {
++		goto err_free_ctx;
++	}
++
++	/* Initialize the pingpong algorithm */
++	ret = pp_init_algo(ctx);
++	if (SUCCESS != ret) {
++		goto err_stop_ntb_dev;
++	}
++
++	/* Create the DebugFS node */
++	(void)pp_init_dbgfs(ctx);
++
++	/* Start  */
++
++	return SUCCESS;
++
++/*err_stop_algo:
++	pp_stop_algo(ctx);
++*/
++err_stop_ntb_dev:
++	pp_stop_ntb_dev(ctx);
++
++err_free_ctx:
++	pp_free_ctx(ctx);
++
++	return ret;
++}
++
++/*
++ * NTB device remove() callback function
++ */
++static void pp_remove(struct ntb_client *client, struct ntb_dev *ntb)
++{
++	struct pp_ctx *ctx = ntb->ctx;
++
++	/* Remove the DebugFS node */
++	pp_deinit_dbgfs(ctx);
++
++	/* Disable the NTB device link and clear the context */
++	pp_stop_ntb_dev(ctx);
++
++	/* Stop the algorithm */
++	pp_stop_algo(ctx);
++
++	/* Free the allocated context */
++	pp_free_ctx(ctx);
++}
++
++/*
++ * NTB bus client driver structure definition
++ */
++static struct ntb_client pp_client = {
++	.ops = {
++		.probe = pp_probe,
++		.remove = pp_remove,
++	},
++};
++/* module_ntb_client(pp_client); */
++
++/*
++ * Driver initialize method
++ */
++static int __init ntb_pp_init(void)
++{
++	/* Create the top DebugFS directory if the FS is initialized */
++	if (debugfs_initialized())
++		dbgfs_dir = debugfs_create_dir(KBUILD_MODNAME, NULL);
++
++	/* Registers the client driver */
++	return ntb_register_client(&pp_client);
++}
++module_init(ntb_pp_init);
++
++/*
++ * Driver exit method
++ */
++static void __exit ntb_pp_exit(void)
++{
++	/* Unregister the client driver */
++	ntb_unregister_client(&pp_client);
++
++	/* Discard the top DebugFS directory */
++	debugfs_remove_recursive(dbgfs_dir);
++}
++module_exit(ntb_pp_exit);
++
+diff --git a/drivers/ntb/test/ntb_msg_test.c b/drivers/ntb/test/ntb_msg_test.c
+new file mode 100644
+index 0000000..a4aecf4
+--- /dev/null
++++ b/drivers/ntb/test/ntb_msg_test.c
+@@ -0,0 +1,736 @@
++/*
++ *   This file is provided under a GPLv2 license.  When using or
++ *   redistributing this file, you may do so under that license.
++ *
++ *   GPL LICENSE SUMMARY
++ *
++ *   Copyright (C) 2016 T-Platforms All Rights Reserved.
++ *
++ *   This program is free software; you can redistribute it and/or modify it
++ *   under the terms and conditions of the GNU General Public License,
++ *   version 2, as published by the Free Software Foundation.
++ *
++ *   This program is distributed in the hope that it will be useful, but WITHOUT
++ *   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
++ *   FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
++ *   more details.
++ *
++ *   You should have received a copy of the GNU General Public License along with
++ *   this program; if not, one can be found <http://www.gnu.org/licenses/>.
++ *
++ *   The full GNU General Public License is included in this distribution in
++ *   the file called "COPYING".
++ *
++ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
++ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
++ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
++ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
++ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
++ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
++ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ *
++ * PCIe NTB messaging test Linux driver
++ *
++ * Contact Information:
++ * Serge Semin <fancer.lancer@gmail.com>, <Sergey.Semin@t-platforms.ru>
++ */
++
++/*
++ *               NOTE of the NTB Messaging driver design.
++ * The driver is designed to implement the simple transmition/reception
++ * algorithm. User can send data to a peer by writing it to
++ * debugfs:ntb_msg_test/ntbA_/data file, and one can read it by reading the
++ * same file on the opposite side.
++ */
++
++/* Note: You can load this module with either option 'dyndbg=+p' or define the
++ * next preprocessor constant */
++/*#define DEBUG*/
++
++#include <linux/init.h>
++#include <linux/kernel.h>
++#include <linux/module.h>
++#include <linux/moduleparam.h>
++#include <linux/types.h>
++
++#include <linux/slab.h>
++#include <linux/spinlock.h>
++#include <linux/bitops.h>
++#include <linux/debugfs.h>
++
++#include <linux/ntb.h>
++
++#define DRIVER_NAME		"ntb_msg_test"
++#define DRIVER_DESCRIPTION	"PCIe NTB Simple Messaging Client"
++#define DRIVER_VERSION		"1.0"
++#define CACHE_NAME		"ntb_msg_cache"
++
++MODULE_DESCRIPTION(DRIVER_DESCRIPTION);
++MODULE_VERSION(DRIVER_VERSION);
++MODULE_LICENSE("GPL v2");
++MODULE_AUTHOR("T-platforms");
++
++/*
++ * DebugFS directory to place the driver debug file
++ */
++static struct dentry *dbgfs_topdir;
++
++/*
++ * Doorbells pingpong driver context
++ * @ntb:	Pointer to the NTB device
++ * @msg_cache:	Messages wrapper slab
++ * @msg_lock:	Spin lock to synchrnize access to the messages list
++ * @msg_list:	List of received messages
++ * @msgcnt:	Number of received messages
++ * @failed:	Number of failed transfers
++ * @succeeded:	Number of succeeded transfers
++ * @datasize:	Maximum size of message data (in bytes) excluding the size byte
++ * @dbgfs_dir:	Handler of the driver DebugFS directory
++ */
++struct msg_ctx {
++	struct ntb_dev *ntb;
++	struct kmem_cache *msg_cache;
++	spinlock_t msg_lock;
++	struct list_head msg_list;
++	unsigned long msgcnt;
++	unsigned long failed;
++	unsigned long succeeded;
++	size_t datasize;
++	struct dentry *dbgfs_dir;
++};
++
++/*
++ * Received messages container
++ * @msg:	Message
++ * @entry:	List entry
++ */
++struct ntb_msg_wrap {
++	struct ntb_msg msg;
++	struct list_head entry;
++};
++
++/*
++ * Message converter is used to translate the struct ntb_msg to the
++ * char sized data structure with size.
++ * @size:	Size of the data
++ * @data:	Pointer to the data buffer
++ */
++struct ntb_msg_conv {
++	u8 size;
++	char data[];
++};
++
++/*
++ * Wrapper dev_err/dev_warn/dev_info/dev_dbg macros
++ */
++#define dev_err_msg(ctx, args...) \
++	dev_err(&ctx->ntb->dev, ## args)
++#define dev_warn_msg(ctx, args...) \
++	dev_warn(&ctx->ntb->dev, ## args)
++#define dev_info_msg(ctx, args...) \
++	dev_info(&ctx->ntb->dev, ## args)
++#define dev_dbg_msg(ctx, args...) \
++	dev_dbg(&ctx->ntb->dev, ## args)
++
++/*
++ * Some common constant used in the driver for better readability:
++ * @ON: Enable something
++ * @OFF: Disable something
++ * @SUCCESS: Success of a function execution
++ */
++#define ON ((u32)0x1)
++#define OFF ((u32)0x0)
++#define SUCCESS 0
++
++/*===========================================================================
++ *                         Incoming messages handlers
++ *===========================================================================*/
++
++/*
++ * Save the receive message
++ */
++static void msg_recv_handler(struct msg_ctx *ctx, const struct ntb_msg *msg)
++{
++	struct ntb_msg_wrap *wrap;
++	struct ntb_msg_conv *conv;
++
++	/* Cast the message to the converted one */
++	conv = (struct ntb_msg_conv *)msg;
++
++	/* Allocate the memory from the slab */
++	wrap = kmem_cache_alloc(ctx->msg_cache, GFP_KERNEL);
++	if (NULL == wrap) {
++		dev_err_msg(ctx,
++			"Failed to allocate memory for incoming message %.*s",
++			conv->size, conv->data);
++		return;
++	}
++
++	/* Copy the message to the buffer */
++	memcpy(&wrap->msg, msg, conv->size + 1);
++
++	/* Add the wrapped message to the list of received messages */
++	spin_lock(&ctx->msg_lock);
++	list_add_tail(&wrap->entry, &ctx->msg_list);
++	/* Increment the number of received messages in the buffer */
++	ctx->msgcnt++;
++	spin_unlock(&ctx->msg_lock);
++
++	dev_dbg_msg(ctx, "Message '%.*s' was received",
++		conv->size, conv->data);
++}
++
++/*
++ * Handler of the transmit errors
++ */
++static void msg_fail_handler(struct msg_ctx *ctx, const struct ntb_msg *msg)
++{
++	struct ntb_msg_conv *conv = (struct ntb_msg_conv *)msg;
++
++	/* Just print the error increment the errors counter */
++	dev_err_msg(ctx,
++		"Failed to send the submessage '%.*s'",
++			conv->size, conv->data);
++	ctx->failed++;
++}
++
++/*
++ * Handler of the succeeded transmits
++ */
++static void msg_sent_handler(struct msg_ctx *ctx, const struct ntb_msg *msg)
++{
++	struct ntb_msg_conv *conv = (struct ntb_msg_conv *)msg;
++
++	/* Just print the debug text and increment the succeeded msgs counter */
++	dev_dbg_msg(ctx,
++		"Submessage '%.*s' has been successfully sent",
++			conv->size, conv->data);
++	ctx->succeeded++;
++}
++
++/*
++ * Message event handler
++ */
++static void msg_event_handler(void *data, enum NTB_MSG_EVENT ev,
++			      struct ntb_msg *msg)
++{
++	struct msg_ctx *ctx = data;
++
++	/* Call the corresponding event handler */
++	switch (ev) {
++	case NTB_MSG_NEW:
++		msg_recv_handler(ctx, msg);
++		break;
++	case NTB_MSG_SENT:
++		msg_sent_handler(ctx, msg);
++		break;
++	case NTB_MSG_FAIL:
++		msg_fail_handler(ctx, msg);
++		break;
++	default:
++		dev_err_msg(ctx, "Got invalid message event %d", ev);
++		break;
++	}
++}
++
++/*===========================================================================
++ *                      11. DebugFS callback functions
++ *===========================================================================*/
++
++static ssize_t msg_dbgfs_data_read(struct file *filep, char __user *ubuf,
++				   size_t usize, loff_t *offp);
++
++static ssize_t msg_dbgfs_data_write(struct file *filep, const char __user *ubuf,
++				    size_t usize, loff_t *offp);
++
++static ssize_t msg_dbgfs_stat_read(struct file *filep, char __user *ubuf,
++				   size_t usize, loff_t *offp);
++
++/*
++ * DebugFS data node operations
++ */
++static const struct file_operations msg_dbgfs_data_ops = {
++	.owner = THIS_MODULE,
++	.open = simple_open,
++	.read = msg_dbgfs_data_read,
++	.write = msg_dbgfs_data_write
++};
++
++/*
++ * DebugFS statistics node operations
++ */
++static const struct file_operations msg_dbgfs_stat_ops = {
++	.owner = THIS_MODULE,
++	.open = simple_open,
++	.read = msg_dbgfs_stat_read,
++};
++
++/*
++ * DebugFS callback of read messages node
++ */
++static ssize_t msg_dbgfs_data_read(struct file *filep, char __user *ubuf,
++				   size_t usize, loff_t *offp)
++{
++	struct msg_ctx *ctx = filep->private_data;
++	struct list_head *entry, *safe_entry;
++	struct ntb_msg_wrap *wrap;
++	struct ntb_msg_conv *conv;
++	size_t datasize, retsize;
++	char *databuf;
++	ssize_t ret;
++
++	/* Find the size of the retrieved data in messages */
++	datasize = 0;
++	spin_lock(&ctx->msg_lock);
++	list_for_each(entry, &ctx->msg_list) {
++		wrap = list_entry(entry, struct ntb_msg_wrap, entry);
++		conv = (struct ntb_msg_conv *)&wrap->msg;
++		datasize += conv->size;
++	}
++	spin_unlock(&ctx->msg_lock);
++
++	/* Calculate the size of the output buffer */
++	datasize = min(datasize, usize);
++
++	/* Allocate the buffer */
++	databuf = kmalloc(datasize, GFP_KERNEL);
++	if (NULL == databuf) {
++		dev_err_msg(ctx, "No memory to allocate the output buffer");
++		return -ENOMEM;
++	}
++
++	/* Copy the data from the messages to the output buffer */
++	retsize = 0;
++	spin_lock(&ctx->msg_lock);
++	list_for_each_safe(entry, safe_entry, &ctx->msg_list) {
++		/* Get the message and copy it to the buffer */
++		wrap = list_entry(entry, struct ntb_msg_wrap, entry);
++		conv = (struct ntb_msg_conv *)&wrap->msg;
++
++		/* If there is no enough space left in the buffer then stop the
++		 * loop */
++		if ((datasize - retsize) < conv->size) {
++			break;
++		}
++
++		/* Copy the data to the output buffer */
++		memcpy(&databuf[retsize], conv->data, conv->size);
++
++		/* Increment the size of the retrieved data */
++		retsize += conv->size;
++
++		/* Delete the list entry and free the memory */
++		list_del(&wrap->entry);
++		kmem_cache_free(ctx->msg_cache, wrap);
++
++		/* Decrement the number of messages in the buffer */
++		ctx->msgcnt--;
++	}
++	spin_unlock(&ctx->msg_lock);
++
++	/* Copy the text to the output buffer */
++	ret = simple_read_from_buffer(ubuf, usize, offp, databuf, retsize);
++
++	/* Free the memory allocated for the buffer */
++	kfree(databuf);
++
++	return ret;
++}
++
++/*
++ * DebugFS callback of write messages node
++ */
++static ssize_t msg_dbgfs_data_write(struct file *filep, const char __user *ubuf,
++				    size_t usize, loff_t *offp)
++{
++	struct msg_ctx *ctx = filep->private_data;
++	struct ntb_dev *ntb = ctx->ntb;
++	struct ntb_msg msg;
++	struct ntb_msg_conv *conv;
++	char *databuf;
++	int pos, copied, sts = SUCCESS;
++	ssize_t ret;
++
++	/* Allocate the memory for sending data */
++	databuf = kmalloc(usize, GFP_KERNEL);
++	if (NULL == databuf) {
++		dev_err_msg(ctx, "No memory to allocate the sending data buffer");
++		return -ENOMEM;
++	}
++
++	/* Copy the data to the output buffer */
++	ret = simple_write_to_buffer(databuf, usize, offp, ubuf, usize);
++	if (0 > ret) {
++		dev_err_msg(ctx, "Failed to copy the data from the User-space");
++		kfree(databuf);
++		return ret;
++	}
++
++	/* Start copying data to the message structure and send it straight away
++	 * to the peer */
++	conv = (struct ntb_msg_conv *)&msg;
++	for (pos = 0, copied = 0; pos < usize; pos += copied) {
++		/* Calculate the size of data to copy to the message */
++		copied = min(ctx->datasize, (usize - pos));
++		/* Set the data size of the message */
++		conv->size = copied;
++		/* Copy the data */
++		memcpy(conv->data, &databuf[pos], copied);
++
++		/* Send the data stright away */
++		sts = ntb_msg_post(ntb, &msg);
++		if (SUCCESS != sts) {
++			dev_err_msg(ctx, "Failed to post the submessage %.*s",
++				copied, conv->data);
++		}
++	}
++
++	return (SUCCESS == sts) ? usize : -EINVAL;
++}
++
++/*
++ * DebugFS callback to read statistics
++ */
++static ssize_t msg_dbgfs_stat_read(struct file *filep, char __user *ubuf,
++				   size_t usize, loff_t *offp)
++{
++	struct msg_ctx *ctx = filep->private_data;
++	struct ntb_dev *ntb = ctx->ntb;
++	char *strbuf;
++	size_t size;
++	ssize_t ret = 0, off = 0;
++
++	/* Limit the buffer size */
++	size = min_t(size_t, usize, 0x800U);
++
++	/* Allocate the memory for the buffer */
++	strbuf = kmalloc(size, GFP_KERNEL);
++	if (NULL == strbuf) {
++		dev_dbg_msg(ctx,
++			"Failed to allocate the memory for statistics "
++			"output buffer");
++		return -ENOMEM;
++	}
++
++	/* Put the data into the string buffer */
++	off += scnprintf(strbuf + off, size - off,
++		"\n\t\tNTB Messaging Test driver:\n\n");
++
++	/* Current driver state */
++	off += scnprintf(strbuf + off, size - off,
++		"Link state\t\t- %s\n",
++		(ON == ntb_link_is_up(ntb, NULL, NULL)) ? "Up" : "Down");
++	off += scnprintf(strbuf + off, size - off,
++		"Message count\t\t- %lu\n", ctx->msgcnt);
++	off += scnprintf(strbuf + off, size - off,
++		"Message size\t\t- %u\n", ntb_msg_size(ntb));
++	off += scnprintf(strbuf + off, size - off,
++		"Data size\t\t- %lu\n", (unsigned long)ctx->datasize);
++	off += scnprintf(strbuf + off, size - off,
++		"Successfully sent\t- %lu\n", ctx->succeeded);
++	off += scnprintf(strbuf + off, size - off,
++		"Failed to send\t\t- %lu\n", ctx->failed);
++
++	/* Copy the buffer to the User Space */
++	ret = simple_read_from_buffer(ubuf, usize, offp, strbuf, off);
++	kfree(strbuf);
++
++	return ret;
++}
++
++/*
++ * DebugFS initialization function
++ */
++static int msg_init_dbgfs(struct msg_ctx *ctx)
++{
++	struct ntb_dev *ntb = ctx->ntb;
++	struct dentry *dbgfs_data, *dbgfs_stat;
++	const char *devname;
++	int ret;
++
++	/* If the top directory is not created then do nothing */
++	if (IS_ERR_OR_NULL(dbgfs_topdir)) {
++		dev_warn_msg(ctx,
++			"Top DebugFS directory has not been created for "
++			DRIVER_NAME);
++		return PTR_ERR(dbgfs_topdir);
++	}
++
++	/* Retrieve the device name */
++	devname = dev_name(&ntb->dev);
++
++	/* Create the device related subdirectory */
++	ctx->dbgfs_dir = debugfs_create_dir(devname, dbgfs_topdir);
++	if (IS_ERR_OR_NULL(ctx->dbgfs_dir)) {
++		dev_warn_msg(ctx,
++			"Failed to create the DebugFS subdirectory %s",
++			devname);
++		return PTR_ERR(ctx->dbgfs_dir);
++	}
++
++	/* Create the file node for data io operations */
++	dbgfs_data = debugfs_create_file("data", S_IRWXU, ctx->dbgfs_dir, ctx,
++					 &msg_dbgfs_data_ops);
++	if (IS_ERR(dbgfs_data)) {
++		dev_err_msg(ctx, "Could not create DebugFS data node");
++		ret = PTR_ERR(dbgfs_data);
++		goto err_rm_dir;
++	}
++
++	/* Create the file node for statistics io operations */
++	dbgfs_stat = debugfs_create_file("stat", S_IRWXU, ctx->dbgfs_dir, ctx,
++					 &msg_dbgfs_stat_ops);
++	if (IS_ERR(dbgfs_stat)) {
++		dev_err_msg(ctx, "Could not create DebugFS statistics node");
++		ret = PTR_ERR(dbgfs_stat);
++		goto err_rm_dir;
++	}
++
++	dev_dbg_msg(ctx, "NTB Messaging DebugFS nodes are created for %s",
++		devname);
++
++	return SUCCESS;
++
++err_rm_dir:
++	debugfs_remove_recursive(ctx->dbgfs_dir);
++
++	return ret;
++}
++
++/*
++ * DebugFS deinitialization function
++ */
++static void msg_deinit_dbgfs(struct msg_ctx *ctx)
++{
++	struct ntb_dev *ntb = ctx->ntb;
++
++	/* Remove the DebugFS directory */
++	debugfs_remove_recursive(ctx->dbgfs_dir);
++
++	dev_dbg_msg(ctx, "NTB Messaging DebugFS nodes %s/ are discarded",
++		dev_name(&ntb->dev));
++}
++
++/*===========================================================================
++ *                   NTB device/client driver initialization
++ *===========================================================================*/
++
++/*
++ * NTB device events handlers
++ */
++static const struct ntb_ctx_ops msg_ops = {
++	.msg_event = msg_event_handler
++};
++
++/*
++ * Create the driver context structure
++ */
++static struct msg_ctx *msg_create_ctx(struct ntb_dev *ntb)
++{
++	struct msg_ctx *ctx;
++	int node;
++
++	/* Allocate the memory at the device NUMA node */
++	node = dev_to_node(&ntb->dev);
++	ctx = kzalloc_node(sizeof(*ctx), GFP_KERNEL, node);
++	if (IS_ERR_OR_NULL(ctx)) {
++		dev_err(&ntb->dev,
++			"No memory for NTB Messaging driver context");
++		return ERR_PTR(-ENOMEM);
++	}
++
++	/* Create the message cache */
++	ctx->msg_cache = kmem_cache_create(CACHE_NAME,
++		sizeof(struct ntb_msg_wrap), 0, 0, NULL);
++	if (NULL == ctx->msg_cache) {
++		dev_err(&ntb->dev,
++			"Failed to allocate the message wrap structures cache");
++		kfree(ctx);
++		return ERR_PTR(-ENOMEM);
++	}
++
++	/* Initialize the context NTB device pointer */
++	ctx->ntb = ntb;
++
++	/* Initialize the message list lock and the list head */
++	spin_lock_init(&ctx->msg_lock);
++	INIT_LIST_HEAD(&ctx->msg_list);
++
++	/* Initialize the counters */
++	ctx->msgcnt = 0;
++	ctx->failed = 0;
++	ctx->succeeded = 0;
++
++	/* Initialize the data size of one message excluding the size byte */
++	ctx->datasize = 4*ntb_msg_size(ntb) - 1;
++
++	dev_dbg_msg(ctx, "Context structure is created");
++
++	return ctx;
++}
++
++/*
++ * Free the driver context structure
++ */
++static void msg_free_ctx(struct msg_ctx *ctx)
++{
++	struct ntb_dev *ntb = ctx->ntb;
++	struct ntb_msg_wrap *wrap;
++	struct list_head *entry, *safe_entry;
++
++	/* Walk through the list of messages and destroy all the allocated
++	 * memory */
++	spin_lock(&ctx->msg_lock);
++	list_for_each_safe(entry, safe_entry, &ctx->msg_list) {
++		/* Get the message wrapper */
++		wrap = list_entry(entry, struct ntb_msg_wrap, entry);
++
++		/* Delete the list entry and free the memory */
++		list_del(entry);
++		kmem_cache_free(ctx->msg_cache, wrap);
++
++		/* Decrement the number of messages in the buffer */
++		ctx->msgcnt--;
++	}
++	spin_unlock(&ctx->msg_lock);
++
++	/* Destroy the IDT messages cache */
++	kmem_cache_destroy(ctx->msg_cache);
++
++	/* Free the memory allocated for the context structure */
++	kfree(ctx);
++
++	dev_dbg(&ntb->dev, "Context structure is freed");
++}
++
++/*
++ * Initialize the ntb device structure
++ */
++static int msg_init_ntb_dev(struct msg_ctx *ctx)
++{
++	struct ntb_dev *ntb = ctx->ntb;
++	int ret;
++
++	/* Set the NTB device events context */
++	ret = ntb_set_ctx(ntb, ctx, &msg_ops);
++	if (SUCCESS != ret) {
++		dev_err_msg(ctx, "Failed to specify the NTB device context");
++		return ret;
++	}
++
++	/* Enable the link */
++	ntb_link_enable(ntb, NTB_SPEED_AUTO, NTB_WIDTH_AUTO);
++	/*ntb_link_event(ntb);*/
++
++	dev_dbg_msg(ctx, "NTB device is initialized");
++
++	return SUCCESS;
++}
++
++/*
++ * Deinitialize the ntb device structure
++ */
++static void msg_stop_ntb_dev(struct msg_ctx *ctx)
++{
++	struct ntb_dev *ntb = ctx->ntb;
++
++	/* Disable the link */
++	ntb_link_disable(ntb);
++
++	/* Clear the context */
++	ntb_clear_ctx(ntb);
++
++	dev_dbg_msg(ctx, "NTB device is deinitialized");
++}
++
++/*
++ * NTB device probe() callback function
++ */
++static int msg_probe(struct ntb_client *client, struct ntb_dev *ntb)
++{
++	struct msg_ctx *ctx;
++	int ret;
++
++	/* Only asynchronous hardware is supported */
++	if (!ntb_valid_async_dev_ops(ntb)) {
++		return -EINVAL;
++	}
++
++	/* Create the current device context */
++	ctx = msg_create_ctx(ntb);
++	if (IS_ERR_OR_NULL(ctx)) {
++		return PTR_ERR(ctx);
++	}
++
++	/* Initialize the NTB device */
++	ret = msg_init_ntb_dev(ctx);
++	if (SUCCESS != ret) {
++		msg_free_ctx(ctx);
++		return ret;
++	}
++
++	/* Create the DebugFS node */
++	(void)msg_init_dbgfs(ctx);
++
++	return SUCCESS;
++}
++
++/*
++ * NTB device remove() callback function
++ */
++static void msg_remove(struct ntb_client *client, struct ntb_dev *ntb)
++{
++	struct msg_ctx *ctx = ntb->ctx;
++
++	/* Remove the DebugFS node */
++	msg_deinit_dbgfs(ctx);
++
++	/* Disable the NTB device link and clear the context */
++	msg_stop_ntb_dev(ctx);
++
++	/* Free the allocated context */
++	msg_free_ctx(ctx);
++}
++
++/*
++ * NTB bus client driver structure definition
++ */
++static struct ntb_client msg_client = {
++	.ops = {
++		.probe = msg_probe,
++		.remove = msg_remove,
++	},
++};
++/* module_ntb_client(msg_client); */
++
++/*
++ * Driver initialize method
++ */
++static int __init ntb_msg_init(void)
++{
++	/* Create the top DebugFS directory if the FS is initialized */
++	if (debugfs_initialized())
++		dbgfs_topdir = debugfs_create_dir(KBUILD_MODNAME, NULL);
++
++	/* Registers the client driver */
++	return ntb_register_client(&msg_client);
++}
++module_init(ntb_msg_init);
++
++/*
++ * Driver exit method
++ */
++static void __exit ntb_msg_exit(void)
++{
++	/* Unregister the client driver */
++	ntb_unregister_client(&msg_client);
++
++	/* Discard the top DebugFS directory */
++	debugfs_remove_recursive(dbgfs_topdir);
++}
++module_exit(ntb_msg_exit);
++
+diff --git a/drivers/ntb/test/ntb_mw_test.c b/drivers/ntb/test/ntb_mw_test.c
+new file mode 100644
+index 0000000..b65a002
+--- /dev/null
++++ b/drivers/ntb/test/ntb_mw_test.c
+@@ -0,0 +1,1531 @@
++/*
++ *   This file is provided under a GPLv2 license.  When using or
++ *   redistributing this file, you may do so under that license.
++ *
++ *   GPL LICENSE SUMMARY
++ *
++ *   Copyright (C) 2016 T-Platforms All Rights Reserved.
++ *
++ *   This program is free software; you can redistribute it and/or modify it
++ *   under the terms and conditions of the GNU General Public License,
++ *   version 2, as published by the Free Software Foundation.
++ *
++ *   This program is distributed in the hope that it will be useful, but WITHOUT
++ *   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
++ *   FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
++ *   more details.
++ *
++ *   You should have received a copy of the GNU General Public License along with
++ *   this program; if not, one can be found <http://www.gnu.org/licenses/>.
++ *
++ *   The full GNU General Public License is included in this distribution in
++ *   the file called "COPYING".
++ *
++ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++ *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++ *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
++ *   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
++ *   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
++ *   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
++ *   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++ *   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
++ *   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
++ *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ *
++ * PCIe NTB memory windows test Linux driver
++ *
++ * Contact Information:
++ * Serge Semin <fancer.lancer@gmail.com>, <Sergey.Semin@t-platforms.ru>
++ */
++
++/*
++ *           NOTE of the NTB memory windows test driver design.
++ * The driver implements the simple read/write algorithm. It allocates the
++ * necessary inbound shared memory window by demand from the peer. Then it
++ * sends the physical address of the memory back to the peer. The corresponding
++ * inwndwN and outwndwN files are created at the DebugFS:ntb_mw_test/ntbA_/
++ * directory. The inwndwN file can be used to read the data written by a peer.
++ * The other outwndwN file is used to write data to the peer memory window.
++ */
++
++/* Note: You can load this module with either option 'dyndbg=+p' or define the
++ * next preprocessor constant */
++/*#define DEBUG*/
++
++#include <linux/init.h>
++#include <linux/kernel.h>
++#include <linux/module.h>
++#include <linux/moduleparam.h>
++#include <linux/types.h>
++#include <linux/dma-mapping.h>
++
++#include <linux/slab.h>
++#include <linux/spinlock.h>
++#include <linux/bitops.h>
++#include <linux/debugfs.h>
++
++#include <linux/ntb.h>
++
++#define DRIVER_NAME		"ntb_mw_test"
++#define DRIVER_DESCRIPTION	"PCIe NTB Memory Window Test Client"
++#define DRIVER_VERSION		"1.0"
++#define CACHE_NAME		"ntb_mw_cache"
++
++MODULE_DESCRIPTION(DRIVER_DESCRIPTION);
++MODULE_VERSION(DRIVER_VERSION);
++MODULE_LICENSE("GPL v2");
++MODULE_AUTHOR("T-platforms");
++
++/*
++ * DebugFS directory to place the driver debug file
++ */
++static struct dentry *dbgfs_topdir;
++
++/*
++ * Inbound memory windows (locally allocated) structure
++ * @dma_addr:	Address if the locally allocated memory and sent to the peer
++ * @virt_addr:	Virtual address of that memory
++ * @size:	Size of the allocated memory
++ * @addr_align:	Address alignment
++ * @size_align:	Size alignment
++ * @size_max:	Maximum possible size of the window
++ * @dbgfs_node:	DebugFS node to read data from peer
++ * @ctx:	Pointer to the driver context
++ */
++struct mw_ctx;
++struct inmw_wrap {
++	dma_addr_t dma_addr;
++	void *virt_addr;
++	resource_size_t size;
++	resource_size_t addr_align;
++	resource_size_t size_align;
++	resource_size_t size_max;
++	struct dentry *dbgfs_node;
++	struct mw_ctx *ctx;
++};
++
++/*
++ * Outbound memory windows (remotely allocated) structure
++ * @enabled:	Flag whether the window is enabled
++ * @dma_addr:	DMA address of the remotely allocated memory window and
++ *		retrieved from the peer
++ * @phys_addr:	Physical address of the memory to locally map it (retrieved
++ *		from the NTB subsystem, shortly it must be from BAR2 of IDT)
++ * @virt_addr:	Virtual address of mapped IOMEM physical address
++ * @size:	Size of the peer allocated memory
++ * @addr_align:	Alignment of the DMA address allocated by the peer
++ * @size_align:	Size alignment of the DMA address allocated by the peer
++ * @size_max:	Maximum size of the peer allocated memory
++ * @dbgfs_node:	DebugFS node to write data to peer
++ * @ctx:        Pointer to the driver context
++ */
++struct outmw_wrap {
++	bool enabled;
++	dma_addr_t dma_addr;
++	phys_addr_t phys_addr;
++	void __iomem *virt_addr;
++	resource_size_t size;
++	resource_size_t addr_align;
++	resource_size_t size_align;
++	resource_size_t size_max;
++	struct dentry *dbgfs_node;
++	struct mw_ctx *ctx;
++};
++
++/*
++ * Doorbells pingpong driver context
++ * @ntb:	Pointer to the NTB device
++ * @inmw_cnt:	Number of possible inbound memory windows
++ * @outmw_cnt:	Number of possible outbound memory windows
++ * @dbgfs_dir:	Handler of the DebugFS driver info-file
++ */
++struct mw_ctx {
++	struct ntb_dev *ntb;
++	int inmws_cnt;
++	struct inmw_wrap *inmws;
++	int outmws_cnt;
++	struct outmw_wrap *outmws;
++	struct dentry *dbgfs_dir;
++};
++
++/*
++ * Enumeration of commands
++ * @MW_GETADDRS:	Get the addresses of all memory windows peer allocated
++ * @MW_DMAADDR:		DMA address of the memory window is sent within this msg
++ * @MW_FREEADDRS:	Lock the memory windows shared from the local device
++ * @MW_TYPEMASK:	Mask of the message type
++ */
++enum msg_type {
++	MW_GETADDRS,
++	MW_DMAADDR,
++	MW_FREEADDRS,
++	MW_TYPEMASK = 0xFFFFU
++};
++
++/*
++* Helper method to get the type string name
++*/
++static inline char *mw_get_typename(enum msg_type type)
++{
++	switch (type) {
++	case MW_GETADDRS:
++		return "GETADDRS";
++	case MW_DMAADDR:
++		return "DMAADDR";
++	case MW_FREEADDRS:
++		return "FREEADDRS";
++	default:
++		break;
++	}
++
++	return "INVALID";
++}
++
++/*
++ * Wrapper dev_err/dev_warn/dev_info/dev_dbg macros
++ */
++#define dev_err_mw(ctx, args...) \
++	dev_err(&ctx->ntb->dev, ## args)
++#define dev_warn_mw(ctx, args...) \
++	dev_warn(&ctx->ntb->dev, ## args)
++#define dev_info_mw(ctx, args...) \
++	dev_info(&ctx->ntb->dev, ## args)
++#define dev_dbg_mw(ctx, args...) \
++	dev_dbg(&ctx->ntb->dev, ## args)
++
++/*
++ * Some common constant used in the driver for better readability:
++ * @ON: Enable something
++ * @OFF: Disable something
++ * @SUCCESS: Success of a function execution
++ * @MIN_MW_CNT:	Minimum memory windows count
++ * @MAX_MW_CNT: Maximum memory windows count
++ */
++#define ON ((u32)0x1)
++#define OFF ((u32)0x0)
++#define SUCCESS 0
++#define MIN_MW_CNT ((unsigned char)1)
++#define MAX_MW_CNT ((unsigned char)255)
++
++/*
++ * Shared data converter to support the different CPU architectures
++ */
++#define to_sh32(data) \
++	cpu_to_le32((data))
++#define from_sh32(data) \
++	le32_to_cpu((data))
++
++/*
++ * Module parameters:
++ * @inmw_cnt:	Number of inbound memory windows [1; 255]
++ * @outmw_cnt:	Number of outbound memory windows [1; 255]
++ * If the specified value exceeds the maximum possible valiue, then it is
++ * initialized with maximum one
++ */
++static unsigned char inmws_cnt = MAX_MW_CNT;
++module_param(inmws_cnt, byte, 0000);
++MODULE_PARM_DESC(inmws_cnt,
++	"Inbound memory windows count. Those are the memory windows, which are "
++	"locally allocated. Their address is sent to the remote host."
++	" - Parameter can be set within [1; 255], where 255 means maximum possible"
++	"   number of windows");
++
++/*===========================================================================
++ *                               Helper methods
++ *===========================================================================*/
++
++/*
++ * Alter the passed driver paremeters
++ */
++static void mw_alter_params(struct mw_ctx *ctx)
++{
++	unsigned char inmws_cnt_bak = ctx->inmws_cnt;
++
++	/* Clamp the inbound memory windows parameter */
++	ctx->inmws_cnt = clamp(inmws_cnt,
++		MIN_MW_CNT, (unsigned char)ctx->inmws_cnt);
++	if (inmws_cnt_bak != ctx->inmws_cnt) {
++		dev_warn_mw(ctx,
++			"Inbound memory windows count is altered from "
++			"%hhu to %hhu", inmws_cnt_bak, ctx->inmws_cnt);
++	}
++
++	dev_dbg_mw(ctx, "Memory windows test driver parameter is verified");
++}
++
++/*
++ * Memory block IO write method
++ */
++static void iomem_write(void __iomem *dst, const void *src, size_t cnt)
++{
++	while (cnt--) {
++		iowrite8(*(u8 *)src, dst);
++		dst++;
++		src++;
++	}
++}
++
++/*
++ * Memory block IO read method
++ */
++static void iomem_read(void __iomem *src, void *dst, size_t cnt)
++{
++	while (cnt--) {
++		*(u8 *)dst = ioread8(src);
++		dst++;
++		src++;
++	}
++}
++
++/*===========================================================================
++ *                          Message command handlers
++ *===========================================================================*/
++
++/*
++ * Send MW_GETADDRS command method
++ */
++static void mw_send_getaddrs_cmd(struct mw_ctx *ctx)
++{
++	struct ntb_msg msg;
++	int sts;
++
++	/* Clear the message structure */
++	memset(&msg, 0, sizeof(msg));
++
++	/* Set the message type only */
++	msg.type = to_sh32(MW_GETADDRS);
++
++	/* Send the message */
++	sts = ntb_msg_post(ctx->ntb, &msg);
++	if (SUCCESS != sts) {
++		dev_err_mw(ctx, "Failed to send message to get outbound window "
++			"addresses");
++	}
++}
++
++/*
++ * Send MW_FREEADDRS command method
++ */
++static void mw_send_freeaddrs_cmd(struct mw_ctx *ctx)
++{
++	struct ntb_msg msg;
++	int sts;
++
++	/* Clear the message structure */
++	memset(&msg, 0, sizeof(msg));
++
++	/* Set the message type only */
++	msg.type = to_sh32(MW_FREEADDRS);
++
++	/* Send the message */
++	sts = ntb_msg_post(ctx->ntb, &msg);
++	if (SUCCESS != sts) {
++		dev_err_mw(ctx, "Failed to send a message to disable the peer "
++			"outbound windows");
++	}
++}
++
++/*
++ * Callback method for response on the command MW_GETADDRS
++ */
++static void mw_send_inmw_addrs(struct mw_ctx *ctx)
++{
++	struct ntb_msg msg;
++	struct inmw_wrap *inmw;
++	int mwindx, sts;
++
++	/* Clear the message structure */
++	memset(&msg, 0, sizeof(msg));
++
++	/* Walk through all the inbound memory windows and send the
++	 * corresponding DMA address of the window */
++	for (mwindx = 0; mwindx < ctx->inmws_cnt; mwindx++) {
++		inmw = &ctx->inmws[mwindx];
++		/* Set the type and the memory window index */
++		msg.type = to_sh32(MW_DMAADDR | ((u32)mwindx << 16));
++
++		/* First set the size of the memory window */
++		msg.payload[0] = to_sh32(inmw->size);
++
++		/* Set the Upper part of the memory window address */
++#ifdef CONFIG_64BIT
++		msg.payload[1] = to_sh32((u32)(inmw->dma_addr >> 32));
++#else
++		/* WARNING! NTB entpoints must either have the same architecture
++		 * (x32 or x64) or use lower 4Gb for memory windows */
++		msg.payload[1] = 0;
++#endif /* !CONFIG_64BIT */
++		/* Set the Lower part of the memory window address */
++		msg.payload[2] = to_sh32((u32)(inmw->dma_addr));
++
++		/* Send the message */
++		sts = ntb_msg_post(ctx->ntb, &msg);
++		if (SUCCESS != sts) {
++			dev_err_mw(ctx,
++				"Failed to send a message with window %d "
++				"address", mwindx);
++		}
++	}
++}
++
++/*
++ * Method to set the corresponding memory window and enable it
++ */
++static void mw_set_outmw_addr(struct mw_ctx *ctx, const struct ntb_msg *msg)
++{
++	struct outmw_wrap *outmw;
++	int mwindx, sts;
++
++	/* Read the memory windows index (it's the part of the message type) */
++	mwindx = from_sh32(msg->type) >> 16;
++	if (ctx->outmws_cnt <= mwindx) {
++		dev_err_mw(ctx,
++			"Retrieved invalid outbound memory window index %d",
++			mwindx);
++		return;
++	}
++	outmw = &ctx->outmws[mwindx];
++
++	/* Read the memory window size and check whether it has proper size and
++	 * alignment */
++	outmw->size = from_sh32(msg->payload[0]);
++	if (!IS_ALIGNED(outmw->size, outmw->size_align) ||
++	    outmw->size_max < outmw->size) {
++		dev_err_mw(ctx,
++			"Retrieved invalid memory window %d size %u "
++			"(max: %u, align: %u)", mwindx, (unsigned int)outmw->size,
++			(unsigned int)outmw->size_max,
++			(unsigned int)outmw->size_align);
++		return;
++	}
++
++	/* Read the DMA address, where the second DWORD is the upper part and
++	 * the third DWORD - lower */
++	outmw->dma_addr = from_sh32(msg->payload[2]);
++#ifdef CONFIG_64BIT
++	outmw->dma_addr |= ((dma_addr_t)from_sh32(msg->payload[1]) << 32);
++#endif /* CONFIG_64BIT */
++	/* Check whether the retrieved address is properly aligned */
++	if (!IS_ALIGNED(outmw->dma_addr, outmw->addr_align)) {
++		dev_err_mw(ctx,
++			"Outbound memory window address %p is not aligned "
++			"within %u bytes", (void *)outmw->dma_addr,
++			(unsigned int)outmw->addr_align);
++		return;
++	}
++
++	/* Set the translation address of the outbound memory window */
++	sts = ntb_mw_set_trans(ctx->ntb, mwindx, outmw->dma_addr, outmw->size);
++	if (SUCCESS != sts) {
++		dev_err_mw(ctx, "Failed to set the translated address %p of "
++			"outbound memory window %d", (void *)outmw->dma_addr,
++			mwindx);
++		return;
++	}
++
++	/* Enable the memory window */
++	outmw->enabled = true;
++
++	dev_dbg_mw(ctx, "Outbound memory window %d is initialized with "
++		"address 0x%p", mwindx, (void *)outmw->dma_addr);
++}
++
++/*
++ * Lock all the outbound memory windows
++ */
++static void mw_lock_outmw_addrs(struct mw_ctx *ctx)
++{
++	int mwindx;
++
++	/* Walk through all the memory windows and lock whem by falsing
++	 * the flag */
++	for (mwindx = 0; mwindx < ctx->outmws_cnt; mwindx++) {
++		ctx->outmws[mwindx].enabled = false;
++	}
++
++	dev_dbg_mw(ctx, "Outbound memory windows are locked");
++}
++
++/*===========================================================================
++ *                      Messages and link events handlers
++ *===========================================================================*/
++
++/*
++ * Handle the retrieved message
++ */
++static void msg_recv_handler(struct mw_ctx *ctx, const struct ntb_msg *msg)
++{
++	enum msg_type type = from_sh32(msg->type) & MW_TYPEMASK;
++
++	/* Check the message types */
++	switch (type) {
++	case MW_GETADDRS:
++		mw_send_inmw_addrs(ctx);
++		break;
++	case MW_DMAADDR:
++		mw_set_outmw_addr(ctx, msg);
++		break;
++	case MW_FREEADDRS:
++		mw_lock_outmw_addrs(ctx);
++		break;
++	default:
++		dev_err_mw(ctx, "Invalid message type retrieved %d", type);
++		return;
++	}
++
++	dev_dbg_mw(ctx, "Message of type %s was received",
++		mw_get_typename(type));
++}
++
++/*
++ * Handler of the transmit errors
++ */
++static void msg_fail_handler(struct mw_ctx *ctx, const struct ntb_msg *msg)
++{
++	enum msg_type type = from_sh32(msg->type) & MW_TYPEMASK;
++
++	/* Just print the error */
++	dev_err_mw(ctx, "Failed to send the message of type %s",
++		mw_get_typename(type));
++}
++
++/*
++ * Handler of the succeeded transmits
++ */
++static void msg_sent_handler(struct mw_ctx *ctx, const struct ntb_msg *msg)
++{
++	enum msg_type type = from_sh32(msg->type) & MW_TYPEMASK;
++
++	/* Just print the debug text and increment the succeeded msgs counter */
++	dev_dbg_mw(ctx, "Message of type %s has been successfully sent",
++		mw_get_typename(type));
++}
++
++/*
++ * Message event handler
++ */
++static void msg_event_handler(void *data, enum NTB_MSG_EVENT ev,
++			      struct ntb_msg *msg)
++{
++	struct mw_ctx *ctx = data;
++
++	/* Call the corresponding event handler */
++	switch (ev) {
++	case NTB_MSG_NEW:
++		msg_recv_handler(ctx, msg);
++		break;
++	case NTB_MSG_SENT:
++		msg_sent_handler(ctx, msg);
++		break;
++	case NTB_MSG_FAIL:
++		msg_fail_handler(ctx, msg);
++		break;
++	default:
++		dev_err_mw(ctx, "Got invalid message event %d", ev);
++		break;
++	}
++}
++
++/*
++ * Link Up/Down event handler
++ */
++static void link_event_handler(void *data)
++{
++	struct mw_ctx *ctx = data;
++	int sts;
++
++	/* If link is up then send the message with GETADDRS command, otherwise
++	 * the outbound memory windows must be disabled */
++	sts = ntb_link_is_up(ctx->ntb, NULL, NULL);
++	if (ON == sts) {
++		mw_send_getaddrs_cmd(ctx);
++	} else /* if (OFF == sts) */ {
++		mw_lock_outmw_addrs(ctx);
++	}
++
++	dev_dbg_mw(ctx, "Link %s event was retrieved",
++		ON == sts ? "Up" : "Down");
++}
++
++/*===========================================================================
++ *                      11. DebugFS callback functions
++ *===========================================================================*/
++
++static ssize_t mw_dbgfs_outmw_read(struct file *filep, char __user *ubuf,
++				   size_t usize, loff_t *offp);
++
++static ssize_t mw_dbgfs_outmw_write(struct file *filep, const char __user *ubuf,
++				    size_t usize, loff_t *offp);
++
++static ssize_t mw_dbgfs_outmw_cfg_read(struct file *filep, char __user *ubuf,
++				       size_t usize, loff_t *offp);
++
++static ssize_t mw_dbgfs_inmw_read(struct file *filep, char __user *ubuf,
++				  size_t usize, loff_t *offp);
++
++static ssize_t mw_dbgfs_inmw_write(struct file *filep, const char __user *ubuf,
++				   size_t usize, loff_t *offp);
++
++static ssize_t mw_dbgfs_inmw_cfg_read(struct file *filep, char __user *ubuf,
++				      size_t usize, loff_t *offp);
++
++/*
++ * DebugFS outbound memory window node operations
++ */
++static const struct file_operations mw_dbgfs_outmw_ops = {
++	.owner = THIS_MODULE,
++	.open = simple_open,
++	.read = mw_dbgfs_outmw_read,
++	.write = mw_dbgfs_outmw_write
++};
++
++/*
++ * DebugFS outbound memory window configuration node operations
++ */
++static const struct file_operations mw_dbgfs_outmw_cfg_ops = {
++	.owner = THIS_MODULE,
++	.open = simple_open,
++	.read = mw_dbgfs_outmw_cfg_read,
++};
++
++/*
++ * DebugFS inbound memory window node operations
++ */
++static const struct file_operations mw_dbgfs_inmw_ops = {
++	.owner = THIS_MODULE,
++	.open = simple_open,
++	.read = mw_dbgfs_inmw_read,
++	.write = mw_dbgfs_inmw_write
++};
++
++/*
++ * DebugFS inbound memory window configuration node operations
++ */
++static const struct file_operations mw_dbgfs_inmw_cfg_ops = {
++	.owner = THIS_MODULE,
++	.open = simple_open,
++	.read = mw_dbgfs_inmw_cfg_read,
++};
++
++/*
++ * DebugFS read callback of outbound memory window node
++ */
++static ssize_t mw_dbgfs_outmw_read(struct file *filep, char __user *ubuf,
++				   size_t usize, loff_t *offp)
++{
++	struct outmw_wrap *wrap = filep->private_data;
++	struct mw_ctx *ctx = wrap->ctx;
++	char *databuf;
++	size_t datasize;
++	ssize_t ret = 0;
++	int sts;
++
++	/* Check whether the link is up and the outbound window is enabled */
++	sts = ntb_link_is_up(ctx->ntb, NULL, NULL);
++	if (OFF == sts || !wrap->enabled) {
++		dev_err_mw(ctx, "NTB link is %s, memory window status is %s",
++			OFF == sts ? "Down" : "Up",
++			wrap->enabled ? "enabled" : "disabled");
++		return -ENODEV;
++	}
++
++	/* Read the first DWORD with the size of the message */
++	datasize = readl(wrap->virt_addr);
++
++	/* Check the read data size */
++	if (wrap->size < datasize) {
++		dev_err_mw(ctx, "Data size %u exceeds the memory window size %u",
++			(unsigned int)datasize, (unsigned int)wrap->size);
++		return -EINVAL;
++	}
++
++	/* Calculate the size of the output buffer */
++	datasize = min(datasize, usize);
++
++	/* If there is nothing to copy then just return from the function */
++	if (0 == datasize) {
++		return 0;
++	}
++
++	/* Allocate the buffer */
++	databuf = kmalloc(datasize, GFP_KERNEL);
++	if (NULL == databuf) {
++		dev_err_mw(ctx, "No memory to allocate the output buffer");
++		return -ENOMEM;
++	}
++
++	/* Copy the data from the shared memory to the temporary buffer */
++	/* NOTE memcpy_toio could be used instead, but it weirdly works so
++	 * the traditional looping is used */
++	iomem_read((wrap->virt_addr + 4), databuf, datasize);
++	/*memcpy_fromio(databuf, wrap->virt_addr + 4, datasize);*/
++
++	/* Copy the data to the output buffer */
++	ret = simple_read_from_buffer(ubuf, usize, offp, databuf, datasize);
++
++	/* Free the memory allocated for the buffer */
++	kfree(databuf);
++
++	return ret;
++}
++
++/*
++ * DebugFS write callback of outbound memory window node
++ */
++static ssize_t mw_dbgfs_outmw_write(struct file *filep, const char __user *ubuf,
++				    size_t usize, loff_t *offp)
++{
++	struct outmw_wrap *wrap = filep->private_data;
++	struct mw_ctx *ctx = wrap->ctx;
++	char *databuf;
++	size_t datasize;
++	ssize_t ret = 0;
++	int sts;
++
++	/* Check whether the link is up and the outbound window is enabled */
++	sts = ntb_link_is_up(ctx->ntb, NULL, NULL);
++	if (OFF == sts || !wrap->enabled) {
++		dev_err_mw(ctx, "NTB link is %s, memory window status is %s",
++			OFF == sts ? "Down" : "Up",
++			wrap->enabled ? "enabled" : "disabled");
++		return -ENODEV;
++	}
++
++	/* Calculate the data size */
++	datasize = min(((size_t)wrap->size - 4), usize);
++
++	/* Allocate the memory for sending data */
++	databuf = kmalloc(datasize, GFP_KERNEL);
++	if (NULL == databuf) {
++		dev_err_mw(ctx, "No memory to allocate the input data buffer");
++		return -ENOMEM;
++	}
++
++	/* Copy the data to the output buffer */
++	ret = simple_write_to_buffer(databuf, datasize, offp, ubuf, usize);
++	if (0 > ret) {
++		dev_err_mw(ctx, "Failed to copy the data from the User-space");
++		kfree(databuf);
++		return ret;
++	}
++
++	/* First DWORD is the data size */
++	writel((u32)datasize, wrap->virt_addr);
++
++	/* Copy the data to the memory window */
++	/* NOTE memcpy_toio could be used instead, but it weirdly works so
++	 * the traditional looping is used */
++	iomem_write((wrap->virt_addr + 4), databuf, datasize);
++	/*memcpy_toio((wrap->virt_addr + 4), databuf, datasize);*/
++
++	/* Ensure that the data is fully copied out by setting the memory
++	 * barrier */
++	wmb();
++
++	/* Free the memory allocated for the buffer */
++	kfree(databuf);
++
++	return ret;
++}
++
++/*
++ * DebugFS read callback of outbound memory window configurations
++ */
++static ssize_t mw_dbgfs_outmw_cfg_read(struct file *filep, char __user *ubuf,
++				       size_t usize, loff_t *offp)
++{
++	struct outmw_wrap *wrap = filep->private_data;
++	struct mw_ctx *ctx = wrap->ctx;
++	char *strbuf;
++	size_t size;
++	ssize_t ret = 0, off = 0;
++	int id;
++
++	/* Limit the buffer size */
++	size = min_t(size_t, usize, 0x800U);
++
++	/* Allocate the memory for the buffer */
++	strbuf = kmalloc(size, GFP_KERNEL);
++	if (NULL == strbuf) {
++		dev_dbg_mw(ctx,
++			"Failed to allocated the memory for outbound memory "
++			"window configuration");
++		return -ENOMEM;
++	}
++
++	/* Put the data into the string buffer */
++	off += scnprintf(strbuf + off, size - off,
++		"\n\t\tNTB Outbound Memory Window configuration:\n\n");
++
++	/* Current driver state */
++	off += scnprintf(strbuf + off, size - off,
++		"Status\t\t\t- %s\n",
++		wrap->enabled ? "enabled" : "disabled");
++	off += scnprintf(strbuf + off, size - off,
++		"DMA address\t\t- 0x%p\n", (void *)wrap->dma_addr);
++	off += scnprintf(strbuf + off, size - off,
++		"DMA address alignment\t- %lu\n",
++		(unsigned long int)wrap->addr_align);
++	off += scnprintf(strbuf + off, size - off,
++		"Physycal map address\t- 0x%p\n", (void *)wrap->phys_addr);
++	off += scnprintf(strbuf + off, size - off,
++		"Virtual map address\t- 0x%p\n", (void *)wrap->virt_addr);
++	off += scnprintf(strbuf + off, size - off,
++		"Size of the window\t- %lu\n",
++		(unsigned long int)wrap->size);
++	off += scnprintf(strbuf + off, size - off,
++		"Size alignment\t\t- %lu\n",
++		(unsigned long int)wrap->size_align);
++	off += scnprintf(strbuf + off, size - off,
++		"Maximum size\t\t- %lu\n",
++		(unsigned long int)wrap->size_max);
++	/* Print raw data from the inbound window */
++	off += scnprintf(strbuf + off, size - off,
++		"Raw data (16 bytes)\t- ");
++	for (id = 0; id < 16; id++) {
++		off += scnprintf(strbuf + off, size - off,
++			"%02hhx ", ioread8(wrap->virt_addr + id));
++	}
++	off += scnprintf(strbuf + off, size - off, "\n");
++
++
++	/* Copy the buffer to the User Space */
++	ret = simple_read_from_buffer(ubuf, usize, offp, strbuf, off);
++	kfree(strbuf);
++
++	return ret;
++}
++
++/*
++ * DebugFS read callback of inbound memory window node
++ */
++static ssize_t mw_dbgfs_inmw_read(struct file *filep, char __user *ubuf,
++				  size_t usize, loff_t *offp)
++{
++	struct inmw_wrap *wrap = filep->private_data;
++	struct mw_ctx *ctx = wrap->ctx;
++	char *databuf;
++	size_t datasize;
++	ssize_t ret = 0;
++
++	/* Read the first DWORD with the size of the data */
++	datasize = le32_to_cpu(*(u32 *)wrap->virt_addr);
++
++	/* Calculate the size of the output buffer */
++	datasize = min(datasize, usize);
++
++	/* If there is nothing to copy then just return from the function */
++	if (0 == datasize) {
++		return 0;
++	}
++
++	/* Allocate the buffer */
++	databuf = kmalloc(datasize, GFP_KERNEL);
++	if (NULL == databuf) {
++		dev_err_mw(ctx, "No memory to allocate the output buffer");
++		return -ENOMEM;
++	}
++
++	/* Copy the data from the shared memory to the temporary buffer */
++	memcpy(databuf, wrap->virt_addr + 4, datasize);
++
++	/* Copy the data to the output buffer */
++	ret = simple_read_from_buffer(ubuf, usize, offp, databuf, datasize);
++
++	/* Free the memory allocated for the buffer */
++	kfree(databuf);
++
++	return ret;
++}
++
++/*
++ * DebugFS write callback of inbound memory window node
++ */
++static ssize_t mw_dbgfs_inmw_write(struct file *filep, const char __user *ubuf,
++				   size_t usize, loff_t *offp)
++{
++	struct inmw_wrap *wrap = filep->private_data;
++	struct mw_ctx *ctx = wrap->ctx;
++	char *databuf;
++	size_t datasize;
++	ssize_t ret = 0;
++
++	/* Calculate the data size */
++	datasize = min((size_t)wrap->size - 4, usize);
++
++	/* Allocate the memory for sending data */
++	databuf = kmalloc(datasize, GFP_KERNEL);
++	if (NULL == databuf) {
++		dev_err_mw(ctx, "No memory to allocate the input data buffer");
++		return -ENOMEM;
++	}
++
++	/* Copy the data to the output buffer */
++	ret = simple_write_to_buffer(databuf, usize, offp, ubuf, usize);
++	if (0 > ret) {
++		dev_err_mw(ctx, "Failed to copy the data from the User-space");
++		kfree(databuf);
++		return ret;
++	}
++
++	/* First DWORD is the data size */
++	*(u32 *)wrap->virt_addr = cpu_to_le32(datasize);
++
++	/* Copy the data to the memory window */
++	memcpy(wrap->virt_addr + 4, databuf, datasize);
++
++	/* Free the memory allocated for the buffer */
++	kfree(databuf);
++
++	return datasize;
++}
++
++/*
++ * DebugFS read callback of outbound memory window configurations
++ */
++static ssize_t mw_dbgfs_inmw_cfg_read(struct file *filep, char __user *ubuf,
++				      size_t usize, loff_t *offp)
++{
++	struct inmw_wrap *wrap = filep->private_data;
++	struct mw_ctx *ctx = wrap->ctx;
++	char *strbuf;
++	size_t size;
++	ssize_t ret = 0, off = 0;
++	int id;
++
++	/* Limit the buffer size */
++	size = min_t(size_t, usize, 0x800U);
++
++	/* Allocate the memory for the buffer */
++	strbuf = kmalloc(size, GFP_KERNEL);
++	if (NULL == strbuf) {
++		dev_dbg_mw(ctx,
++			"Failed to allocated the memory for inbound memory "
++			"window configuration");
++		return -ENOMEM;
++	}
++
++	/* Put the data into the string buffer */
++	off += scnprintf(strbuf + off, size - off,
++		"\n\t\tNTB Inbound Memory Window configuration:\n\n");
++
++	/* Current driver state */
++	off += scnprintf(strbuf + off, size - off,
++		"DMA address\t\t- 0x%p\n", (void *)wrap->dma_addr);
++	off += scnprintf(strbuf + off, size - off,
++		"DMA address alignment\t- %lu\n",
++		(unsigned long int)wrap->addr_align);
++	off += scnprintf(strbuf + off, size - off,
++		"Virtual address\t\t- 0x%p\n", (void *)wrap->virt_addr);
++	off += scnprintf(strbuf + off, size - off,
++		"Size of the window\t- %lu\n",
++		(unsigned long int)wrap->size);
++	off += scnprintf(strbuf + off, size - off,
++		"Size alignment\t\t- %lu\n",
++		(unsigned long int)wrap->size_align);
++	off += scnprintf(strbuf + off, size - off,
++		"Maximum size\t\t- %lu\n",
++		(unsigned long int)wrap->size_max);
++
++	/* Print raw data from the inbound window */
++	off += scnprintf(strbuf + off, size - off,
++		"Raw data (16 bytes)\t- ");
++	for (id = 0; id < 16; id++) {
++		off += scnprintf(strbuf + off, size - off,
++			"%02hhx ", *(char *)(wrap->virt_addr + id));
++	}
++	off += scnprintf(strbuf + off, size - off, "\n");
++
++
++	/* Copy the buffer to the User Space */
++	ret = simple_read_from_buffer(ubuf, usize, offp, strbuf, off);
++	kfree(strbuf);
++
++	return ret;
++}
++
++/*
++ * DebugFS initialization function
++ */
++#define NAMESIZE 16
++static int mw_init_dbgfs(struct mw_ctx *ctx)
++{
++	struct ntb_dev *ntb = ctx->ntb;
++	struct dentry *dbgfs_node;
++	char nodename[NAMESIZE];
++	const char *devname;
++	int outmwindx, inmwindx, ret;
++
++	/* If the top directory is not created then do nothing */
++	if (IS_ERR_OR_NULL(dbgfs_topdir)) {
++		dev_warn_mw(ctx,
++			"Top DebugFS directory has not been created for "
++			DRIVER_NAME);
++		return PTR_ERR(dbgfs_topdir);
++	}
++
++	/* Retrieve the device name */
++	devname = dev_name(&ntb->dev);
++
++	/* Create the device related subdirectory */
++	ctx->dbgfs_dir = debugfs_create_dir(devname, dbgfs_topdir);
++	if (IS_ERR_OR_NULL(ctx->dbgfs_dir)) {
++		dev_warn_mw(ctx,
++			"Failed to create the DebugFS subdirectory %s",
++			devname);
++		return PTR_ERR(ctx->dbgfs_dir);
++	}
++
++	/* Walk through all the outbound memory windows creating the
++	 * corresponding nodes */
++	for (outmwindx = 0; outmwindx < ctx->outmws_cnt; outmwindx++) {
++		/* Create the name of the read/write node */
++		snprintf(nodename, NAMESIZE, "outmw%d", outmwindx);
++		/* Create the data read/write node */
++		dbgfs_node = debugfs_create_file(nodename, S_IRWXU,
++			ctx->dbgfs_dir, &ctx->outmws[outmwindx],
++			&mw_dbgfs_outmw_ops);
++		if (IS_ERR(dbgfs_node)) {
++			dev_err_mw(ctx, "Could not create DebugFS '%s' node",
++			nodename);
++			ret = PTR_ERR(dbgfs_node);
++			goto err_rm_dir;
++		}
++
++		/* Create the name of the configuration node */
++		snprintf(nodename, NAMESIZE, "outmwcfg%d", outmwindx);
++		/* Create the data read/write node */
++		dbgfs_node = debugfs_create_file(nodename, S_IRWXU,
++			ctx->dbgfs_dir, &ctx->outmws[outmwindx],
++			&mw_dbgfs_outmw_cfg_ops);
++		if (IS_ERR(dbgfs_node)) {
++			dev_err_mw(ctx, "Could not create DebugFS '%s' node",
++			nodename);
++			ret = PTR_ERR(dbgfs_node);
++			goto err_rm_dir;
++		}
++	}
++
++	/* Walk through all the inbound memory windows creating the
++	 * corresponding nodes */
++	for (inmwindx = 0; inmwindx < ctx->inmws_cnt; inmwindx++) {
++		/* Create the name of the read/write node */
++		snprintf(nodename, NAMESIZE, "inmw%d", inmwindx);
++		/* Create the data read/write node */
++		dbgfs_node = debugfs_create_file(nodename, S_IRWXU,
++			ctx->dbgfs_dir, &ctx->inmws[inmwindx],
++			&mw_dbgfs_inmw_ops);
++		if (IS_ERR(dbgfs_node)) {
++			dev_err_mw(ctx, "Could not create DebugFS '%s' node",
++			nodename);
++			ret = PTR_ERR(dbgfs_node);
++			goto err_rm_dir;
++		}
++
++		/* Create the name of the configuration node */
++		snprintf(nodename, NAMESIZE, "inmwcfg%d", inmwindx);
++		/* Create the data read/write node */
++		dbgfs_node = debugfs_create_file(nodename, S_IRWXU,
++			ctx->dbgfs_dir, &ctx->inmws[inmwindx],
++			&mw_dbgfs_inmw_cfg_ops);
++		if (IS_ERR(dbgfs_node)) {
++			dev_err_mw(ctx, "Could not create DebugFS '%s' node",
++			nodename);
++			ret = PTR_ERR(dbgfs_node);
++			goto err_rm_dir;
++		}
++	}
++
++	dev_dbg_mw(ctx, "NTB Memory Windows DebugFS top diretory is created "
++		"for %s", devname);
++
++	return SUCCESS;
++
++err_rm_dir:
++	debugfs_remove_recursive(ctx->dbgfs_dir);
++
++	return ret;
++}
++
++/*
++ * DebugFS deinitialization function
++ */
++static void mw_deinit_dbgfs(struct mw_ctx *ctx)
++{
++	struct ntb_dev *ntb = ctx->ntb;
++
++	/* Remove the DebugFS directory */
++	debugfs_remove_recursive(ctx->dbgfs_dir);
++
++	dev_dbg_mw(ctx, "Memory Windows DebugFS nodes %s/ are discarded",
++		dev_name(&ntb->dev));
++}
++
++/*===========================================================================
++ *                   NTB device/client driver initialization
++ *===========================================================================*/
++
++/*
++ * NTB device events handlers
++ */
++static const struct ntb_ctx_ops mw_ops = {
++	.link_event = link_event_handler,
++	.msg_event = msg_event_handler
++};
++
++/*
++ * Create the outbound memory windows
++ */
++static int mw_create_outmws(struct mw_ctx *ctx)
++{
++	struct ntb_dev *ntb = ctx->ntb;
++	struct outmw_wrap *outmw;
++	int ret, mwindx;
++
++	/* Loop over all the outbound memory window descriptors initializing the
++	 * corresponding fields */
++	for (mwindx = 0; mwindx < ctx->outmws_cnt; mwindx++) {
++		outmw = &ctx->outmws[mwindx];
++		/* Outbound memory windows are disabled by default */
++		outmw->enabled = false;
++
++		/* Set the context */
++		outmw->ctx = ctx;
++
++		/* Retrieve the physical address of the memory to map */
++		ret = ntb_mw_get_maprsc(ntb, mwindx, &outmw->phys_addr,
++			&outmw->size);
++		if (SUCCESS != ret) {
++			dev_err_mw(ctx, "Failed to get map resources of "
++				"outbound window %d", mwindx);
++			mwindx--;
++			goto err_unmap_rsc;
++		}
++
++		/* Map the memory window resources */
++		outmw->virt_addr = ioremap_nocache(outmw->phys_addr, outmw->size);
++
++		/* Retrieve the memory windows maximum size and alignments */
++		ret = ntb_mw_get_align(ntb, mwindx, &outmw->addr_align,
++			&outmw->size_align, &outmw->size_max);
++		if (SUCCESS != ret) {
++			dev_err_mw(ctx, "Failed to get alignment options of "
++				"outbound window %d", mwindx);
++			goto err_unmap_rsc;
++		}
++	}
++
++	dev_dbg_mw(ctx, "Outbound memory windows are created");
++
++	return SUCCESS;
++
++err_unmap_rsc:
++	for (; 0 <= mwindx; mwindx--) {
++		outmw = &ctx->outmws[mwindx];
++		iounmap(outmw->virt_addr);
++	}
++
++	return ret;
++}
++
++/*
++ * Free the outbound memory windows
++ */
++static void mw_free_outmws(struct mw_ctx *ctx)
++{
++	struct outmw_wrap *outmw;
++	int mwindx;
++
++	/* Loop over all the outbound memory window descriptors and unmap the
++	 * resources */
++	for (mwindx = 0; mwindx < ctx->outmws_cnt; mwindx++) {
++		outmw = &ctx->outmws[mwindx];
++
++		/* Disable the memory window */
++		outmw->enabled = false;
++
++		/* Unmap the resource */
++		iounmap(outmw->virt_addr);
++	}
++
++	dev_dbg_mw(ctx, "Outbound memory windows are freed");
++}
++
++/*
++ * Create the inbound memory windows
++ */
++static int mw_create_inmws(struct mw_ctx *ctx)
++{
++	struct ntb_dev *ntb = ctx->ntb;
++	struct inmw_wrap *inmw;
++	int mwindx, ret = SUCCESS;
++
++	/* Loop over all the inbound memory window descriptors initializing the
++	 * corresponding fields */
++	for (mwindx = 0; mwindx < ctx->inmws_cnt; mwindx++) {
++		inmw = &ctx->inmws[mwindx];
++		/* Set the context */
++		inmw->ctx = ctx;
++		/* Retrieve the memory windows maximum size and alignments */
++		ret = ntb_peer_mw_get_align(ntb, mwindx, &inmw->addr_align,
++			&inmw->size_align, &inmw->size_max);
++		if (SUCCESS != ret) {
++			dev_err_mw(ctx, "Failed to get alignment options of "
++				"inbound window %d", mwindx);
++			mwindx--;
++			ret = -ENOMEM;
++			goto err_free_dma_bufs;
++		}
++		/* Allocate all the maximum possible size */
++		inmw->size = inmw->size_max;
++
++		/* Allocate the cache coherent DMA memory windows */
++		inmw->virt_addr = dma_zalloc_coherent(&ntb->dev, inmw->size,
++			&inmw->dma_addr, GFP_KERNEL);
++		if (IS_ERR_OR_NULL(inmw->virt_addr)) {
++			dev_err_mw(ctx,
++				"Failed to allocate the inbound buffer for %d",
++				mwindx);
++			mwindx--;
++			ret = -ENOMEM;
++			goto err_free_dma_bufs;
++		}
++		/* Make sure the allocated address is properly aligned */
++		if (!IS_ALIGNED(inmw->dma_addr, inmw->addr_align)) {
++			dev_err_mw(ctx, "DMA address %p of inbound mw %d isn't "
++				"aligned with %lu", (void *)inmw->dma_addr, mwindx,
++				(unsigned long int)inmw->addr_align);
++			ret = -EINVAL;
++			goto err_free_dma_bufs;
++		}
++	}
++
++	dev_dbg_mw(ctx, "Inbound memory windows are created");
++
++	return SUCCESS;
++
++err_free_dma_bufs:
++	for (; 0 <= mwindx; mwindx--) {
++		inmw = &ctx->inmws[mwindx];
++		dma_free_coherent(&ntb->dev, inmw->size, inmw->virt_addr,
++			inmw->dma_addr);
++	}
++
++	return ret;
++}
++
++/*
++ * Free the inbound memory windows
++ */
++static void mw_free_inmws(struct mw_ctx *ctx)
++{
++	struct ntb_dev *ntb = ctx->ntb;
++	struct inmw_wrap *inmw;
++	int mwindx;
++
++	/* Loop over all the inbound memory window descriptors and free
++	 * the allocated memory */
++	for (mwindx = 0; mwindx < ctx->inmws_cnt; mwindx++) {
++		inmw = &ctx->inmws[mwindx];
++
++		/* Free the cache coherent DMA memory window */
++		dma_free_coherent(&ntb->dev, inmw->size, inmw->virt_addr,
++			inmw->dma_addr);
++	}
++
++	dev_dbg_mw(ctx, "Inbound memory windows are freed");
++}
++
++/*
++ * Create the driver context structure
++ */
++static struct mw_ctx *mw_create_ctx(struct ntb_dev *ntb)
++{
++	struct mw_ctx *ctx, *ret;
++	int node;
++
++	/* Allocate the memory at the device NUMA node */
++	node = dev_to_node(&ntb->dev);
++	ctx = kzalloc_node(sizeof(*ctx), GFP_KERNEL, node);
++	if (IS_ERR_OR_NULL(ctx)) {
++		dev_err(&ntb->dev,
++			"No memory for NTB Memory windows driver context");
++		return ERR_PTR(-ENOMEM);
++	}
++
++	/* Initialize the context NTB device pointer */
++	ctx->ntb = ntb;
++
++	/* Read the number of memory windows */
++	/* Number of memory windows local NTB device can set to the translated
++	 * address register */
++	ctx->outmws_cnt = ntb_mw_count(ntb);
++	/* Number of memory windows peer can set to his translated address
++	 * register */
++	ctx->inmws_cnt = ntb_peer_mw_count(ntb);
++
++	/* Alter the inbound memory windows count with respect to the driver
++	 * parameter */
++	mw_alter_params(ctx);
++
++	/* Allocate the memory for memory window descriptors */
++	ctx->outmws = kzalloc_node(ctx->outmws_cnt * sizeof(*ctx->outmws),
++		GFP_KERNEL, node);
++	if (IS_ERR_OR_NULL(ctx->outmws)) {
++		dev_err_mw(ctx,
++			"Failed to allocate memory for outbound MW descriptors");
++		ret = ERR_PTR(-ENOMEM);
++		goto err_free_ctx;
++	}
++	ctx->inmws = kzalloc_node(ctx->inmws_cnt * sizeof(*ctx->inmws),
++		GFP_KERNEL, node);
++	if (IS_ERR_OR_NULL(ctx->inmws)) {
++		dev_err_mw(ctx,
++			"Failed to allocate memory for inbound MW descriptors");
++		ret = ERR_PTR(-ENOMEM);
++		goto err_free_outmws;
++	}
++
++	dev_dbg_mw(ctx, "Context structure is created");
++
++	return ctx;
++
++/*err_free_inmws:
++	kfree(ctx->inmws);
++*/
++err_free_outmws:
++	kfree(ctx->outmws);
++err_free_ctx:
++	kfree(ctx);
++
++	return ret;
++}
++
++/*
++ * Free the driver context structure
++ */
++static void mw_free_ctx(struct mw_ctx *ctx)
++{
++	struct ntb_dev *ntb = ctx->ntb;
++
++	/* Free the outbound memory windows descriptors */
++	kfree(ctx->outmws);
++
++	/* Free the inbound memory windows descriptors */
++	kfree(ctx->inmws);
++
++	/* Free the memory allocated for the context structure */
++	kfree(ctx);
++
++	dev_dbg(&ntb->dev, "Context structure is freed");
++}
++
++/*
++ * Initialize the ntb device structure
++ */
++static int mw_init_ntb_dev(struct mw_ctx *ctx)
++{
++	struct ntb_dev *ntb = ctx->ntb;
++	int ret;
++
++	/* Set the NTB device events context */
++	ret = ntb_set_ctx(ntb, ctx, &mw_ops);
++	if (SUCCESS != ret) {
++		dev_err_mw(ctx, "Failed to specify the NTB device context");
++		return ret;
++	}
++
++	/* Enable the link and rise the event to check the link state */
++	ntb_link_enable(ntb, NTB_SPEED_AUTO, NTB_WIDTH_AUTO);
++	/*ntb_link_event(ntb);*/
++
++	dev_dbg_mw(ctx, "NTB device is initialized");
++
++	return SUCCESS;
++}
++
++/*
++ * Deinitialize the ntb device structure
++ */
++static void mw_stop_ntb_dev(struct mw_ctx *ctx)
++{
++	struct ntb_dev *ntb = ctx->ntb;
++
++	/* Clear the context */
++	ntb_clear_ctx(ntb);
++
++	/* Disable the link */
++	ntb_link_disable(ntb);
++
++	dev_dbg_mw(ctx, "NTB device is deinitialized");
++}
++
++/*
++ * Initialize the DMA masks
++ */
++static int __maybe_unused mw_ntb_set_dma_mask(struct ntb_dev *ntb)
++{
++	struct device *dev;
++	int ret = SUCCESS;
++
++	/* Get the NTB device structure */
++	dev = &ntb->dev;
++	/* Try to set the Highmem DMA address */
++	ret = dma_set_mask(dev, DMA_BIT_MASK(64));
++	if (SUCCESS == ret) {
++		/* Next call won't fail of the upper one returned OK */
++		dma_set_coherent_mask(dev, DMA_BIT_MASK(64));
++		return SUCCESS;
++	}
++
++	/* Warn if the HIGHMEM can be used for DMA */
++	dev_warn(dev, "Cannot set the NTB device DMA highmem mask");
++
++	/* Try the Low 32-bits DMA addresses */
++	ret = dma_set_mask(dev, DMA_BIT_MASK(32));
++	if (SUCCESS == ret) {
++		/* The same is here */
++		dma_set_coherent_mask(dev, DMA_BIT_MASK(32));
++		return SUCCESS;
++	}
++
++	dev_err(dev, "Failed to set the NTB device DMA lowmem mask");
++
++	return ret;
++}
++
++/*
++ * NTB device probe() callback function
++ */
++static int mw_probe(struct ntb_client *client, struct ntb_dev *ntb)
++{
++	struct mw_ctx *ctx;
++	int ret;
++
++	/* Only asynchronous hardware is supported */
++	if (!ntb_valid_async_dev_ops(ntb)) {
++		return -EINVAL;
++	}
++
++	/* Check whether the messaging supports at least 4 DWORDS */
++	ret = ntb_msg_size(ntb);
++	if (4 > ret) {
++		dev_err(&ntb->dev, "NTB Messaging supports just %d < 4 dwords",
++			ret);
++		return -EINVAL;
++	}
++
++	/* Set the NTB device DMA mask */
++	/*ret = mw_ntb_set_dma_mask(ntb);
++	if (SUCCESS != ret) {
++		return ret;
++	}*/
++
++	/* Create the current device context */
++	ctx = mw_create_ctx(ntb);
++	if (IS_ERR_OR_NULL(ctx)) {
++		return PTR_ERR(ctx);
++	}
++
++	/* Allocate the inbound memory windows */
++	ret = mw_create_inmws(ctx);
++	if (SUCCESS != ret) {
++		goto err_free_ctx;
++	}
++
++	/* Map the outbound memory windows */
++	ret = mw_create_outmws(ctx);
++	if (SUCCESS != ret) {
++		goto err_free_inmws;
++	}
++
++	/* Initialize the NTB device */
++	ret = mw_init_ntb_dev(ctx);
++	if (SUCCESS != ret) {
++		goto err_free_outmws;
++	}
++
++	/* Create the DebugFS nodes */
++	(void)mw_init_dbgfs(ctx);
++
++	return SUCCESS;
++
++/*err_stop_ntb_dev:
++	mw_stop_ntb_dev(ctx);
++*/
++err_free_outmws:
++	mw_free_outmws(ctx);
++err_free_inmws:
++	mw_free_inmws(ctx);
++err_free_ctx:
++	mw_free_ctx(ctx);
++
++	return ret;
++
++}
++
++/*
++ * NTB device remove() callback function
++ */
++static void mw_remove(struct ntb_client *client, struct ntb_dev *ntb)
++{
++	struct mw_ctx *ctx = ntb->ctx;
++
++	/* Send the message so the peer would lock outbound memory windows */
++	mw_send_freeaddrs_cmd(ctx);
++
++	/* Remove the DebugFS node */
++	mw_deinit_dbgfs(ctx);
++
++	/* Disable the NTB device link and clear the context */
++	mw_stop_ntb_dev(ctx);
++
++	/* Clear the outbound memory windows */
++	mw_free_outmws(ctx);
++
++	/* Clear the inbound memory windows */
++	mw_free_inmws(ctx);
++
++	/* Free the allocated context */
++	mw_free_ctx(ctx);
++}
++
++/*
++ * NTB bus client driver structure definition
++ */
++static struct ntb_client mw_client = {
++	.ops = {
++		.probe = mw_probe,
++		.remove = mw_remove,
++	},
++};
++/* module_ntb_client(mw_client); */
++
++/*
++ * Driver initialize method
++ */
++static int __init ntb_mw_init(void)
++{
++	/* Create the top DebugFS directory if the FS is initialized */
++	if (debugfs_initialized())
++		dbgfs_topdir = debugfs_create_dir(KBUILD_MODNAME, NULL);
++
++	/* Registers the client driver */
++	return ntb_register_client(&mw_client);
++}
++module_init(ntb_mw_init);
++
++/*
++ * Driver exit method
++ */
++static void __exit ntb_mw_exit(void)
++{
++	/* Unregister the client driver */
++	ntb_unregister_client(&mw_client);
++
++	/* Discard the top DebugFS directory */
++	debugfs_remove_recursive(dbgfs_topdir);
++}
++module_exit(ntb_mw_exit);
++
+-- 
+2.6.6
 
-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
-aVYtMEczH9+G++xYzKdIqs5f4eoDiPNc51dBuPqz7jzjK1NPVFye51hmr+CvTwJvxMznIOfZ
-8Mu68wyW1QQYzkzFNpRA2wI/+XlFFkX66hSKdDIMIkzSDXsCTFiF4uqVWZ9zmCOX5q9MSLue
-NcRTWe9+hFh+SCUhc8yVepUH8hylK3NwWEb7dXu6/3LGP2j8Lj5JKpPIhAdpmfAbsXN49/Xm
-WZasVnpSrTseCGXx9YnzPEUR3Wo+JZWRq81aXuVyTpMw15mtGpnOKWrHVdZncScSCTDw9eui
-PuOoWgYeF+dxdb49ntyvy206ehtZzu9PoBDts1SsWJzXXkhsz2tLdqHPj9L9xshZllflkbP4
-FfwVHWszd6toEuAq0qnkc2CR6rw5t6+hnuPorhnOsixv1WRc0/Os9Ku+52MtrejS5zjv/Tse
-zrKpoKPniF/zPU68H2CQ9gVQiMX8ks1rHKam9wpXhfWTcyxnT4+OBUKNswz1JbnPFGUXGlrP
-+JsD1xe/zh1qJDBIaETp8Q+IZRE26NQGWwz9TqjDjm4bkI2d6w+x6V4RLQKrNnBoBQaAFmcb
-ngPOYdPrAFCkVtjRofg7Rt6+UY9oHtuK9Heb5tTdWiIkJbhLCn9don3RH/zr7HTYPh+/7Q8n
-/ILttL/fP82e9tuH2aft0/b5Hq9Ljy/fECdfApju2lRaO1drAwAZeBhg7TkVxCYBtgzTjWV/
-J8s59l8uuNOtKldwG5+UxR6TT0qlS5Hr1Osp8hsizRsyWboU5VNo1tCSio990GiWrZbTKwcd
-G7b+A2mz/fbt6fHeFFJnX3ZP3/yWVvmiGzeNtbcVvKt+dH3/1w/Ua1O8fKmYqV5fWal4PJbX
-piHzuxzeewNjYcRpifkr/rJSdyHjoX2pwAMw//em0Q2CV8VuDcHjxUqvy4g0j3FiCm29aWI5
-IcwQsa5S84olocUiGJQBpFnh7rAYiZ9zCr/sFa7VGsQtUyLRLqaC+gBdlG6Fq6V3ec4yTLdi
-YQpU5XCBEEC1zlwgzD4kn3ZhyQL9cl0LW4m41WLcmAkGN0V3JuNmwv3SikU21WOXwImpTgOC
-7DNUX1YV27gkSIhr86WlQwetD+8rm9ohAMaldL7k7/n/15vMLaWzvIkNjb5iHjKuwVfMXTvp
-DdUBOvu3BwkSJ7roHcPcM5upOYawgANw2vYOwFtY5wCsK+T5lInOp2yUALwW86sJDPdrAsK6
-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
-
---6c2NcOVqGQ03X4Wi--
