@@ -1,14 +1,14 @@
 Return-Path: <baolex.ni@intel.com>
-Received: from mga03.intel.com (mga03.intel.com. [134.134.136.65])
-        by gmr-mx.google.com with ESMTP id ph9si412101pac.1.2016.08.02.05.26.09
+Received: from mga01.intel.com (mga01.intel.com. [192.55.52.88])
+        by gmr-mx.google.com with ESMTP id ph9si412035pac.1.2016.08.02.05.26.04
         for <linux-ntb@googlegroups.com>;
-        Tue, 02 Aug 2016 05:26:09 -0700 (PDT)
+        Tue, 02 Aug 2016 05:26:04 -0700 (PDT)
 From: Baole Ni <baolex.ni@intel.com>
-Subject: [PATCH 0808/1285] Replace numeric parameter like 0444 with macro
-Date: Tue,  2 Aug 2016 19:48:28 +0800
-Message-Id: <20160802114828.3831-1-baolex.ni@intel.com>
-To: jdmason@kudzu.us, dave.jiang@intel.com, Allen.Hubbe@emc.com, rjui@broadcom.com, sbranden@broadcom.com, m.chehab@samsung.com, pawel@osciak.com, m.szyprowski@samsung.com, kyungmin.park@samsung.com, k.kozlowski@samsung.com
-Cc: linux-ntb@googlegroups.com, linux-arm-kernel@lists.infradead.org, bcm-kernel-feedback-list@broadcom.com, linux-kernel@vger.kernel.org, chuansheng.liu@intel.com, baolex.ni@intel.com
+Subject: [PATCH 0807/1285] Replace numeric parameter like 0444 with macro
+Date: Tue,  2 Aug 2016 19:48:21 +0800
+Message-Id: <20160802114821.3765-1-baolex.ni@intel.com>
+To: jdmason@kudzu.us, dave.jiang@intel.com, Allen.Hubbe@emc.com, linuxwifi@intel.com, kvalo@codeaurora.org, m.chehab@samsung.com, pawel@osciak.com, m.szyprowski@samsung.com, kyungmin.park@samsung.com, k.kozlowski@samsung.com
+Cc: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, chuansheng.liu@intel.com, baolex.ni@intel.com
 List-ID: <linux-ntb.googlegroups.com>
 
 I find that the developers often just specified the numeric value
@@ -20,42 +20,80 @@ thus, I suggest replacing the numeric parameter with the macro.
 Signed-off-by: Chuansheng Liu <chuansheng.liu@intel.com>
 Signed-off-by: Baole Ni <baolex.ni@intel.com>
 ---
- drivers/ntb/ntb_transport.c | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+ drivers/ntb/hw/intel/ntb_hw_intel.c | 20 ++++++++++----------
+ 1 file changed, 10 insertions(+), 10 deletions(-)
 
-diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 2ef9d91..222c5a1 100644
---- a/drivers/ntb/ntb_transport.c
-+++ b/drivers/ntb/ntb_transport.c
-@@ -73,23 +73,23 @@ MODULE_LICENSE("Dual BSD/GPL");
- MODULE_AUTHOR("Intel Corporation");
+diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c b/drivers/ntb/hw/intel/ntb_hw_intel.c
+index 40d04ef..7aa1faa 100644
+--- a/drivers/ntb/hw/intel/ntb_hw_intel.c
++++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
+@@ -92,56 +92,56 @@ static const struct file_operations intel_ntb_debugfs_info;
+ static struct dentry *debugfs_dir;
  
- static unsigned long max_mw_size;
--module_param(max_mw_size, ulong, 0644);
-+module_param(max_mw_size, ulong, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
- MODULE_PARM_DESC(max_mw_size, "Limit size of large memory windows");
+ static int b2b_mw_idx = -1;
+-module_param(b2b_mw_idx, int, 0644);
++module_param(b2b_mw_idx, int, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+ MODULE_PARM_DESC(b2b_mw_idx, "Use this mw idx to access the peer ntb.  A "
+ 		 "value of zero or positive starts from first mw idx, and a "
+ 		 "negative value starts from last mw idx.  Both sides MUST "
+ 		 "set the same value here!");
  
- static unsigned int transport_mtu = 0x10000;
--module_param(transport_mtu, uint, 0644);
-+module_param(transport_mtu, uint, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
- MODULE_PARM_DESC(transport_mtu, "Maximum size of NTB transport packets");
+ static unsigned int b2b_mw_share;
+-module_param(b2b_mw_share, uint, 0644);
++module_param(b2b_mw_share, uint, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+ MODULE_PARM_DESC(b2b_mw_share, "If the b2b mw is large enough, configure the "
+ 		 "ntb so that the peer ntb only occupies the first half of "
+ 		 "the mw, so the second half can still be used as a mw.  Both "
+ 		 "sides MUST set the same value here!");
  
- static unsigned char max_num_clients;
--module_param(max_num_clients, byte, 0644);
-+module_param(max_num_clients, byte, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
- MODULE_PARM_DESC(max_num_clients, "Maximum number of NTB transport clients");
+ module_param_named(xeon_b2b_usd_bar2_addr64,
+-		   xeon_b2b_usd_addr.bar2_addr64, ullong, 0644);
++		   xeon_b2b_usd_addr.bar2_addr64, ullong, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+ MODULE_PARM_DESC(xeon_b2b_usd_bar2_addr64,
+ 		 "XEON B2B USD BAR 2 64-bit address");
  
- static unsigned int copy_bytes = 1024;
--module_param(copy_bytes, uint, 0644);
-+module_param(copy_bytes, uint, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
- MODULE_PARM_DESC(copy_bytes, "Threshold under which NTB will use the CPU to copy instead of DMA");
+ module_param_named(xeon_b2b_usd_bar4_addr64,
+-		   xeon_b2b_usd_addr.bar4_addr64, ullong, 0644);
++		   xeon_b2b_usd_addr.bar4_addr64, ullong, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+ MODULE_PARM_DESC(xeon_b2b_usd_bar2_addr64,
+ 		 "XEON B2B USD BAR 4 64-bit address");
  
- static bool use_dma;
--module_param(use_dma, bool, 0644);
-+module_param(use_dma, bool, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
- MODULE_PARM_DESC(use_dma, "Use DMA engine to perform large data copy");
+ module_param_named(xeon_b2b_usd_bar4_addr32,
+-		   xeon_b2b_usd_addr.bar4_addr32, ullong, 0644);
++		   xeon_b2b_usd_addr.bar4_addr32, ullong, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+ MODULE_PARM_DESC(xeon_b2b_usd_bar2_addr64,
+ 		 "XEON B2B USD split-BAR 4 32-bit address");
  
- static struct dentry *nt_debugfs_dir;
+ module_param_named(xeon_b2b_usd_bar5_addr32,
+-		   xeon_b2b_usd_addr.bar5_addr32, ullong, 0644);
++		   xeon_b2b_usd_addr.bar5_addr32, ullong, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+ MODULE_PARM_DESC(xeon_b2b_usd_bar2_addr64,
+ 		 "XEON B2B USD split-BAR 5 32-bit address");
+ 
+ module_param_named(xeon_b2b_dsd_bar2_addr64,
+-		   xeon_b2b_dsd_addr.bar2_addr64, ullong, 0644);
++		   xeon_b2b_dsd_addr.bar2_addr64, ullong, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+ MODULE_PARM_DESC(xeon_b2b_dsd_bar2_addr64,
+ 		 "XEON B2B DSD BAR 2 64-bit address");
+ 
+ module_param_named(xeon_b2b_dsd_bar4_addr64,
+-		   xeon_b2b_dsd_addr.bar4_addr64, ullong, 0644);
++		   xeon_b2b_dsd_addr.bar4_addr64, ullong, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+ MODULE_PARM_DESC(xeon_b2b_dsd_bar2_addr64,
+ 		 "XEON B2B DSD BAR 4 64-bit address");
+ 
+ module_param_named(xeon_b2b_dsd_bar4_addr32,
+-		   xeon_b2b_dsd_addr.bar4_addr32, ullong, 0644);
++		   xeon_b2b_dsd_addr.bar4_addr32, ullong, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+ MODULE_PARM_DESC(xeon_b2b_dsd_bar2_addr64,
+ 		 "XEON B2B DSD split-BAR 4 32-bit address");
+ 
+ module_param_named(xeon_b2b_dsd_bar5_addr32,
+-		   xeon_b2b_dsd_addr.bar5_addr32, ullong, 0644);
++		   xeon_b2b_dsd_addr.bar5_addr32, ullong, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+ MODULE_PARM_DESC(xeon_b2b_dsd_bar2_addr64,
+ 		 "XEON B2B DSD split-BAR 5 32-bit address");
+ 
 -- 
 2.9.2
 
