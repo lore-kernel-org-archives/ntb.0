@@ -1,14 +1,14 @@
 Return-Path: <baolex.ni@intel.com>
 Received: from mga03.intel.com (mga03.intel.com. [134.134.136.65])
-        by gmr-mx.google.com with ESMTP id i136si447990pfe.1.2016.08.02.05.26.26
+        by gmr-mx.google.com with ESMTP id ph9si412101pac.1.2016.08.02.05.26.09
         for <linux-ntb@googlegroups.com>;
-        Tue, 02 Aug 2016 05:26:26 -0700 (PDT)
+        Tue, 02 Aug 2016 05:26:09 -0700 (PDT)
 From: Baole Ni <baolex.ni@intel.com>
-Subject: [PATCH 0810/1285] Replace numeric parameter like 0444 with macro
-Date: Tue,  2 Aug 2016 19:48:45 +0800
-Message-Id: <20160802114845.3968-1-baolex.ni@intel.com>
+Subject: [PATCH 0808/1285] Replace numeric parameter like 0444 with macro
+Date: Tue,  2 Aug 2016 19:48:28 +0800
+Message-Id: <20160802114828.3831-1-baolex.ni@intel.com>
 To: jdmason@kudzu.us, dave.jiang@intel.com, Allen.Hubbe@emc.com, rjui@broadcom.com, sbranden@broadcom.com, m.chehab@samsung.com, pawel@osciak.com, m.szyprowski@samsung.com, kyungmin.park@samsung.com, k.kozlowski@samsung.com
-Cc: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, chuansheng.liu@intel.com, baolex.ni@intel.com, arnd@arndb.de
+Cc: linux-ntb@googlegroups.com, linux-arm-kernel@lists.infradead.org, bcm-kernel-feedback-list@broadcom.com, linux-kernel@vger.kernel.org, chuansheng.liu@intel.com, baolex.ni@intel.com
 List-ID: <linux-ntb.googlegroups.com>
 
 I find that the developers often just specified the numeric value
@@ -20,32 +20,42 @@ thus, I suggest replacing the numeric parameter with the macro.
 Signed-off-by: Chuansheng Liu <chuansheng.liu@intel.com>
 Signed-off-by: Baole Ni <baolex.ni@intel.com>
 ---
- drivers/ntb/test/ntb_pingpong.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ drivers/ntb/ntb_transport.c | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/ntb/test/ntb_pingpong.c b/drivers/ntb/test/ntb_pingpong.c
-index fe16005..a7f6f41 100644
---- a/drivers/ntb/test/ntb_pingpong.c
-+++ b/drivers/ntb/test/ntb_pingpong.c
-@@ -78,15 +78,15 @@ MODULE_AUTHOR(DRIVER_AUTHOR);
- MODULE_DESCRIPTION(DRIVER_DESCRIPTION);
+diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+index 2ef9d91..222c5a1 100644
+--- a/drivers/ntb/ntb_transport.c
++++ b/drivers/ntb/ntb_transport.c
+@@ -73,23 +73,23 @@ MODULE_LICENSE("Dual BSD/GPL");
+ MODULE_AUTHOR("Intel Corporation");
  
- static unsigned int unsafe;
--module_param(unsafe, uint, 0644);
-+module_param(unsafe, uint, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
- MODULE_PARM_DESC(unsafe, "Run even though ntb operations may be unsafe");
+ static unsigned long max_mw_size;
+-module_param(max_mw_size, ulong, 0644);
++module_param(max_mw_size, ulong, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+ MODULE_PARM_DESC(max_mw_size, "Limit size of large memory windows");
  
- static unsigned int delay_ms = 1000;
--module_param(delay_ms, uint, 0644);
-+module_param(delay_ms, uint, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
- MODULE_PARM_DESC(delay_ms, "Milliseconds to delay the response to peer");
+ static unsigned int transport_mtu = 0x10000;
+-module_param(transport_mtu, uint, 0644);
++module_param(transport_mtu, uint, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+ MODULE_PARM_DESC(transport_mtu, "Maximum size of NTB transport packets");
  
- static unsigned long db_init = 0x7;
--module_param(db_init, ulong, 0644);
-+module_param(db_init, ulong, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
- MODULE_PARM_DESC(delay_ms, "Initial doorbell bits to ring on the peer");
+ static unsigned char max_num_clients;
+-module_param(max_num_clients, byte, 0644);
++module_param(max_num_clients, byte, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+ MODULE_PARM_DESC(max_num_clients, "Maximum number of NTB transport clients");
  
- struct pp_ctx {
+ static unsigned int copy_bytes = 1024;
+-module_param(copy_bytes, uint, 0644);
++module_param(copy_bytes, uint, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+ MODULE_PARM_DESC(copy_bytes, "Threshold under which NTB will use the CPU to copy instead of DMA");
+ 
+ static bool use_dma;
+-module_param(use_dma, bool, 0644);
++module_param(use_dma, bool, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+ MODULE_PARM_DESC(use_dma, "Use DMA engine to perform large data copy");
+ 
+ static struct dentry *nt_debugfs_dir;
 -- 
 2.9.2
 
