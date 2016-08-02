@@ -1,43 +1,43 @@
-Return-Path: <weiyj.lk@gmail.com>
-Received: from mail-pa0-x244.google.com (mail-pa0-x244.google.com. [2607:f8b0:400e:c03::244])
-        by gmr-mx.google.com with ESMTPS id d201si4679008pfd.2.2016.08.08.02.48.09
+Return-Path: <Allen.Hubbe@emc.com>
+Received: from esa6.dell-outbound.iphmx.com (esa6.dell-outbound.iphmx.com. [68.232.149.229])
+        by gmr-mx.google.com with ESMTPS id m82si148016ywm.2.2016.08.02.06.46.16
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 08 Aug 2016 02:48:09 -0700 (PDT)
-Received: by mail-pa0-x244.google.com with SMTP id hh10so23779950pac.1
-        for <linux-ntb@googlegroups.com>; Mon, 08 Aug 2016 02:48:09 -0700 (PDT)
-Return-Path: <weiyj.lk@gmail.com>
-From: Wei Yongjun <weiyj.lk@gmail.com>
-Subject: [PATCH] ntb_pingpong: Fix db_init parameter description
-Date: Mon,  8 Aug 2016 09:48:00 +0000
-Message-Id: <1470649680-29533-1-git-send-email-weiyj.lk@gmail.com>
+        Tue, 02 Aug 2016 06:46:16 -0700 (PDT)
+From: "Allen Hubbe" <Allen.Hubbe@emc.com>
+References: <20160802114821.3765-1-baolex.ni@intel.com>
+In-Reply-To: <20160802114821.3765-1-baolex.ni@intel.com>
+Subject: RE: [PATCH 0807/1285] Replace numeric parameter like 0444 with macro
+Date: Tue, 2 Aug 2016 09:45:55 -0400
+Message-ID: <000001d1ecc4$324df510$96e9df30$@emc.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain;
+	charset="Windows-1252"
 Content-Transfer-Encoding: 7bit
-To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Logan Gunthorpe <logang@deltatee.com>
-Cc: Wei Yongjun <weiyj.lk@gmail.com>, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
+Content-Language: en-us
+To: 'Baole Ni' <baolex.ni@intel.com>, jdmason@kudzu.us, dave.jiang@intel.com, linuxwifi@intel.com, kvalo@codeaurora.org, m.chehab@samsung.com, pawel@osciak.com, m.szyprowski@samsung.com, kyungmin.park@samsung.com, k.kozlowski@samsung.com
+Cc: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, chuansheng.liu@intel.com
 List-ID: <linux-ntb.googlegroups.com>
 
-Fix 'db_init' parameter description.
+From: Baole Ni
+> diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c b/drivers/ntb/hw/intel/ntb_hw_intel.c
+> index 40d04ef..7aa1faa 100644
+> --- a/drivers/ntb/hw/intel/ntb_hw_intel.c
+> +++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
+> @@ -92,56 +92,56 @@ static const struct file_operations intel_ntb_debugfs_info;
+>  static struct dentry *debugfs_dir;
+> 
+>  static int b2b_mw_idx = -1;
+> -module_param(b2b_mw_idx, int, 0644);
+> +module_param(b2b_mw_idx, int, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
-Signed-off-by: Wei Yongjun <weiyj.lk@gmail.com>
----
- drivers/ntb/test/ntb_pingpong.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+The result of this change should be simplified to S_IWUSR | S_IRUGO.
 
-diff --git a/drivers/ntb/test/ntb_pingpong.c b/drivers/ntb/test/ntb_pingpong.c
-index 7d31179..4358611 100644
---- a/drivers/ntb/test/ntb_pingpong.c
-+++ b/drivers/ntb/test/ntb_pingpong.c
-@@ -88,7 +88,7 @@ MODULE_PARM_DESC(delay_ms, "Milliseconds to delay the response to peer");
- 
- static unsigned long db_init = 0x7;
- module_param(db_init, ulong, 0644);
--MODULE_PARM_DESC(delay_ms, "Initial doorbell bits to ring on the peer");
-+MODULE_PARM_DESC(db_init, "Initial doorbell bits to ring on the peer");
- 
- struct pp_ctx {
- 	struct ntb_dev			*ntb;
+>  module_param_named(xeon_b2b_usd_bar2_addr64,
+> -		   xeon_b2b_usd_addr.bar2_addr64, ullong, 0644);
+> +		   xeon_b2b_usd_addr.bar2_addr64, ullong, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
+This line is 97 columns long.
 
+The result of this change should be simplified to S_IWUSR | S_IRUGO, and that might put it under 80 columns.  There are bound to still be other places where this kind of replacement will require additional changes to code formatting.
 
