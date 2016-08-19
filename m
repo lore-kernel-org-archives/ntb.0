@@ -1,111 +1,36 @@
-Return-Path: <jdmason@kudzu.us>
-Received: from mail-ua0-x243.google.com (mail-ua0-x243.google.com. [2607:f8b0:400c:c08::243])
-        by gmr-mx.google.com with ESMTPS id a132si96231vki.0.2016.08.05.07.35.30
+Return-Path: <Allen.Hubbe@emc.com>
+Received: from esa1.dell-outbound.iphmx.com (esa1.dell-outbound.iphmx.com. [68.232.153.90])
+        by gmr-mx.google.com with ESMTPS id t138si244527ywc.7.2016.08.19.06.41.57
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 05 Aug 2016 07:35:30 -0700 (PDT)
-Received: by mail-ua0-x243.google.com with SMTP id s7so5875278uas.1
-        for <linux-ntb@googlegroups.com>; Fri, 05 Aug 2016 07:35:30 -0700 (PDT)
+        Fri, 19 Aug 2016 06:41:58 -0700 (PDT)
+From: "Allen Hubbe" <Allen.Hubbe@emc.com>
+References: <002201d1f1be$a24fe400$e6efac00$@emc.com> <20160818215604.GA19986@mobilestation> <20160819091000.GA14241@mobilestation>
+In-Reply-To: <20160819091000.GA14241@mobilestation>
+Subject: RE: [PATCH v2 1/3] ntb: Add asynchronous devices support to NTB-bus interface
+Date: Fri, 19 Aug 2016 09:41:41 -0400
+Message-ID: <000001d1fa1f$6cddf230$4699d690$@emc.com>
 MIME-Version: 1.0
-In-Reply-To: <1469204350.52273.3.camel@intel.com>
-References: <6a5cd51b82d6d20bfbc129f4d83264d93adbf78c.1469194609.git.Allen.Hubbe@emc.com>
- <1469204350.52273.3.camel@intel.com>
-From: Jon Mason <jdmason@kudzu.us>
-Date: Fri, 5 Aug 2016 10:35:30 -0400
-Message-ID: <CAPoiz9yqfyqZiuJCAF0j9w5rcvamghKd8mAaM1+hjnEwgaO6ew@mail.gmail.com>
-Subject: Re: [PATCH 1/2] NTB: ntb_hw_intel: show BAR size in debugfs info
-Content-Type: text/plain; charset=UTF-8
-To: "Jiang, Dave" <dave.jiang@intel.com>
-Cc: "Allen.Hubbe@emc.com" <Allen.Hubbe@emc.com>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Content-Language: en-us
+To: 'Serge Semin' <fancer.lancer@gmail.com>
+Cc: jdmason@kudzu.us, dave.jiang@intel.com, Xiangliang.Yu@amd.com, Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-On Fri, Jul 22, 2016 at 12:19 PM, Jiang, Dave <dave.jiang@intel.com> wrote:
->
-> On Fri, 2016-07-22 at 09:38 -0400, Allen Hubbe wrote:
->> It will be useful to know the hardware configured BAR size to
->> diagnose
->> issues with NTB memory windows.
->>
->> Signed-off-by: Allen Hubbe <Allen.Hubbe@emc.com>
-> Acked-by: Dave Jiang <dave.jiang@intel.com>
+From: Serge Semin
+> 3) IDT driver redevelopment will take a lot of time, since I don't have much free time to
+> do it. It may be half of year or even more.
+> 
+> From my side, such an improvement will significantly complicate the NTB Kernel API. Since
+> you are the subsystem maintainer it's your decision which design to choose, but I don't think
+> I'll do the IDT driver suitable for this design anytime soon.
 
-Pulled into my ntb brach
+I'm sorry to have made you feel that way.
 
->> ---
->>  drivers/ntb/hw/intel/ntb_hw_intel.c | 39
->> ++++++++++++++++++++++++++++++++++++-
->>  1 file changed, 38 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c
->> b/drivers/ntb/hw/intel/ntb_hw_intel.c
->> index 40d04ef5da9e..5efd03705e5c 100644
->> --- a/drivers/ntb/hw/intel/ntb_hw_intel.c
->> +++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
->> @@ -551,13 +551,15 @@ static ssize_t ndev_debugfs_read(struct file
->> *filp, char __user *ubuf,
->>                                size_t count, loff_t *offp)
->>  {
->>       struct intel_ntb_dev *ndev;
->> +     struct pci_dev *pdev;
->>       void __iomem *mmio;
->>       char *buf;
->>       size_t buf_size;
->>       ssize_t ret, off;
->> -     union { u64 v64; u32 v32; u16 v16; } u;
->> +     union { u64 v64; u32 v32; u16 v16; u8 v8; } u;
->>
->>       ndev = filp->private_data;
->> +     pdev = ndev_pdev(ndev);
->>       mmio = ndev->self_mmio;
->>
->>       buf_size = min(count, 0x800ul);
->> @@ -632,6 +634,41 @@ static ssize_t ndev_debugfs_read(struct file
->> *filp, char __user *ubuf,
->>                        "Doorbell Bell -\t\t%#llx\n", u.v64);
->>
->>       off += scnprintf(buf + off, buf_size - off,
->> +                      "\nNTB Window Size:\n");
->> +
->> +     pci_read_config_byte(pdev, XEON_PBAR23SZ_OFFSET, &u.v8);
->> +     off += scnprintf(buf + off, buf_size - off,
->> +                      "PBAR23SZ %hhu\n", u.v8);
->> +     if (!ndev->bar4_split) {
->> +             pci_read_config_byte(pdev, XEON_PBAR45SZ_OFFSET,
->> &u.v8);
->> +             off += scnprintf(buf + off, buf_size - off,
->> +                              "PBAR45SZ %hhu\n", u.v8);
->> +     } else {
->> +             pci_read_config_byte(pdev, XEON_PBAR4SZ_OFFSET,
->> &u.v8);
->> +             off += scnprintf(buf + off, buf_size - off,
->> +                              "PBAR4SZ %hhu\n", u.v8);
->> +             pci_read_config_byte(pdev, XEON_PBAR5SZ_OFFSET,
->> &u.v8);
->> +             off += scnprintf(buf + off, buf_size - off,
->> +                              "PBAR5SZ %hhu\n", u.v8);
->> +     }
->> +
->> +     pci_read_config_byte(pdev, XEON_SBAR23SZ_OFFSET, &u.v8);
->> +     off += scnprintf(buf + off, buf_size - off,
->> +                      "SBAR23SZ %hhu\n", u.v8);
->> +     if (!ndev->bar4_split) {
->> +             pci_read_config_byte(pdev, XEON_SBAR45SZ_OFFSET,
->> &u.v8);
->> +             off += scnprintf(buf + off, buf_size - off,
->> +                              "SBAR45SZ %hhu\n", u.v8);
->> +     } else {
->> +             pci_read_config_byte(pdev, XEON_SBAR4SZ_OFFSET,
->> &u.v8);
->> +             off += scnprintf(buf + off, buf_size - off,
->> +                              "SBAR4SZ %hhu\n", u.v8);
->> +             pci_read_config_byte(pdev, XEON_SBAR5SZ_OFFSET,
->> &u.v8);
->> +             off += scnprintf(buf + off, buf_size - off,
->> +                              "SBAR5SZ %hhu\n", u.v8);
->> +     }
->> +
->> +     off += scnprintf(buf + off, buf_size - off,
->>                        "\nNTB Incoming XLAT:\n");
->>
->>       u.v64 = ioread64(mmio + bar2_off(ndev->xlat_reg->bar2_xlat,
->> 2));
+> > I hope we got it settled now. If not, We can have a Skype conversation, since writing
+> such a long letters takes lot of time.
+
+Come join irc.oftc.net #ntb
+
