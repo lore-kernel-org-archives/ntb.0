@@ -1,48 +1,53 @@
-Return-Path: <dave.jiang@intel.com>
-Received: from mga05.intel.com (mga05.intel.com. [192.55.52.43])
-        by gmr-mx.google.com with ESMTPS id ph9si2821597pac.1.2016.08.22.09.58.28
+Return-Path: <hofrat@osadl.org>
+Received: from www.osadl.org (www.osadl.org. [62.245.132.105])
+        by gmr-mx.google.com with ESMTPS id o10si846238wme.0.2016.08.22.09.49.25
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 22 Aug 2016 09:58:28 -0700 (PDT)
-From: "Jiang, Dave" <dave.jiang@intel.com>
-Subject: Re: [PATCH 2/2] ntb: make DMA_OUT_RESOURCE_TO HZ independent
-Date: Mon, 22 Aug 2016 16:58:27 +0000
-Message-ID: <1471885081.3770.129.camel@intel.com>
+        (version=TLS1 cipher=AES128-SHA bits=128/128);
+        Mon, 22 Aug 2016 09:49:25 -0700 (PDT)
+From: Nicholas Mc Guire <hofrat@osadl.org>
+Subject: [PATCH 2/2] ntb: make DMA_OUT_RESOURCE_TO HZ independent
+Date: Mon, 22 Aug 2016 18:51:36 +0200
+Message-Id: <1471884696-25558-2-git-send-email-hofrat@osadl.org>
+In-Reply-To: <1471884696-25558-1-git-send-email-hofrat@osadl.org>
 References: <1471884696-25558-1-git-send-email-hofrat@osadl.org>
-	 <1471884696-25558-2-git-send-email-hofrat@osadl.org>
-In-Reply-To: <1471884696-25558-2-git-send-email-hofrat@osadl.org>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <12260D3AE540CE4180F4182AB6ABB8F9@intel.com>
-Content-Transfer-Encoding: base64
-MIME-Version: 1.0
-To: "hofrat@osadl.org" <hofrat@osadl.org>, "jdmason@kudzu.us" <jdmason@kudzu.us>
-Cc: "Allen.Hubbe@emc.com" <Allen.Hubbe@emc.com>, "logang@deltatee.com" <logang@deltatee.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "sudipm.mukherjee@gmail.com" <sudipm.mukherjee@gmail.com>, "arnd@arndb.de" <arnd@arndb.de>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
+To: Jon Mason <jdmason@kudzu.us>
+Cc: Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Logan Gunthorpe <logang@deltatee.com>, Arnd Bergmann <arnd@arndb.de>, Sudip Mukherjee <sudipm.mukherjee@gmail.com>, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Nicholas Mc Guire <hofrat@osadl.org>
 List-ID: <linux-ntb.googlegroups.com>
 
-DQpPbiBNb24sIDIwMTYtMDgtMjIgYXQgMTg6NTEgKzAyMDAsIE5pY2hvbGFzIE1jIEd1aXJlIHdy
-b3RlOg0KPiBzY2hlZHVsZV90aW1lb3V0XyogdGFrZXMgYSB0aW1lb3V0IGluIGppZmZpZXMgYnV0
-IHRoZSBjb2RlIGN1cnJlbnRseQ0KPiBpcw0KPiBwYXNzaW5nIGluIGEgY29uc3RhbnQgd2hpY2gg
-bWFrZXMgdGhpcyB0aW1lb3V0IEhaIGRlcGVuZGVudCwgc28gcGFzcw0KPiBpdA0KPiB0aHJvdWdo
-IG1zZWNzX3RvX2ppZmZpZXMoKSB0byBmaXggdGhpcyB1cC4NCj4gDQo+IFNpZ25lZC1vZmYtYnk6
-IE5pY2hvbGFzIE1jIEd1aXJlIDxob2ZyYXRAb3NhZGwub3JnPg0KDQpBY2tlZC1ieTogRGF2ZSBK
-aWFuZyA8ZGF2ZS5qaWFuZ0BpbnRlbC5jb20+DQoNCg0KPiAtLS0NCj4gDQo+IFByb2JsZW0gZm91
-bmQgYnkgY29jY2luZWxsZSBzY3JpcHQNCj4gDQo+IFRoZSBiZWxvdyBwYXRjaCBzZXRzIHRoZSB0
-aW1lb3V0IHRvIDUwbXMgLSBub3QgY2xlYXIgd2hhdCBIWiBzZXR0aW5nDQo+IHdhcw0KPiBhc3N1
-bWVkIGR1cmluZyBkZXNpZ24vdGVzdGluZywgc28gdGhpcyBuZWVkcyBhbiBhY2sgYnkgc29tZW9u
-ZSB3aG8NCj4ga25vd3MNCj4gdGhlIGRyaXZlciBhbmQgY2FuIGNvbmZpcm0gdGhhdCA1MG1zIGlz
-IHJlYXNvbmFibGUgdG8gd2FpdCBvbiBETUENCj4gcmV0cmllcy4NCj4gDQo+IFBhdGNoIHdhcyBj
-b21waWxlIHRlc3RlZCB3aXRoOiB4ODZfNjRfZGVmY29uZmlnICsgQ09ORklHX05UQj1tLA0KPiBD
-T05GSUdfTlRCX1BFUkY9bQ0KPiANCj4gUGF0Y2ggaXMgYWdhaW5zdCA0LjguMC1yYzIgKGxvY2Fs
-dmVyc2lvbi1uZXh0IGlzIC1uZXh0LTIwMTYwODIyKQ0KPiANCj4gwqBkcml2ZXJzL250Yi90ZXN0
-L250Yl9wZXJmLmMgfCAyICstDQo+IMKgMSBmaWxlIGNoYW5nZWQsIDEgaW5zZXJ0aW9uKCspLCAx
-IGRlbGV0aW9uKC0pDQo+IA0KPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9udGIvdGVzdC9udGJfcGVy
-Zi5jDQo+IGIvZHJpdmVycy9udGIvdGVzdC9udGJfcGVyZi5jDQo+IGluZGV4IDZhNTBmMjAuLmUw
-NjViNjkgMTAwNjQ0DQo+IC0tLSBhL2RyaXZlcnMvbnRiL3Rlc3QvbnRiX3BlcmYuYw0KPiArKysg
-Yi9kcml2ZXJzL250Yi90ZXN0L250Yl9wZXJmLmMNCj4gQEAgLTcyLDcgKzcyLDcgQEANCj4gwqAj
-ZGVmaW5lIE1BWF9USFJFQURTCQkzMg0KPiDCoCNkZWZpbmUgTUFYX1RFU1RfU0laRQkJU1pfMU0N
-Cj4gwqAjZGVmaW5lIE1BWF9TUkNTCQkzMg0KPiAtI2RlZmluZSBETUFfT1VUX1JFU09VUkNFX1RP
-CTUwDQo+ICsjZGVmaW5lIERNQV9PVVRfUkVTT1VSQ0VfVE8JbXNlY3NfdG9famlmZmllcyg1MCkN
-Cj4gwqAjZGVmaW5lIERNQV9SRVRSSUVTCQkyMA0KPiDCoCNkZWZpbmUgU1pfNEcJCQkoMVVMTCA8
-PCAzMikNCj4gwqAjZGVmaW5lIE1BWF9TRUdfT1JERVIJCTIwIC8qIG5vIGxhcmdlciB0aGFuIDFN
-IGZvcg0KPiBrbWFsbG9jIGJ1ZmZlciAqLw0KPiAtLcKgDQo+IDIuMS40DQo+IA==
+schedule_timeout_* takes a timeout in jiffies but the code currently is
+passing in a constant which makes this timeout HZ dependent, so pass it
+through msecs_to_jiffies() to fix this up.
+
+Signed-off-by: Nicholas Mc Guire <hofrat@osadl.org>
+---
+
+Problem found by coccinelle script
+
+The below patch sets the timeout to 50ms - not clear what HZ setting was
+assumed during design/testing, so this needs an ack by someone who knows
+the driver and can confirm that 50ms is reasonable to wait on DMA retries.
+
+Patch was compile tested with: x86_64_defconfig + CONFIG_NTB=m,
+CONFIG_NTB_PERF=m
+
+Patch is against 4.8.0-rc2 (localversion-next is -next-20160822)
+
+ drivers/ntb/test/ntb_perf.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
+index 6a50f20..e065b69 100644
+--- a/drivers/ntb/test/ntb_perf.c
++++ b/drivers/ntb/test/ntb_perf.c
+@@ -72,7 +72,7 @@
+ #define MAX_THREADS		32
+ #define MAX_TEST_SIZE		SZ_1M
+ #define MAX_SRCS		32
+-#define DMA_OUT_RESOURCE_TO	50
++#define DMA_OUT_RESOURCE_TO	msecs_to_jiffies(50)
+ #define DMA_RETRIES		20
+ #define SZ_4G			(1ULL << 32)
+ #define MAX_SEG_ORDER		20 /* no larger than 1M for kmalloc buffer */
+-- 
+2.1.4
+
