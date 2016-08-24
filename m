@@ -1,80 +1,58 @@
-Return-Path: <jdmason@kudzu.us>
-Received: from mail-qk0-x244.google.com (mail-qk0-x244.google.com. [2607:f8b0:400d:c09::244])
-        by gmr-mx.google.com with ESMTPS id f206si1379420ywb.6.2016.08.05.13.26.25
+Return-Path: <Allen.Hubbe@emc.com>
+Received: from esa2.dell-outbound.iphmx.com (esa2.dell-outbound.iphmx.com. [68.232.149.220])
+        by gmr-mx.google.com with ESMTPS id f206si900253ywb.6.2016.08.24.15.04.55
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 05 Aug 2016 13:26:25 -0700 (PDT)
-Received: by mail-qk0-x244.google.com with SMTP id x67so6348446qke.1
-        for <linux-ntb@googlegroups.com>; Fri, 05 Aug 2016 13:26:25 -0700 (PDT)
-Return-Path: <jdmason@kudzu.us>
-From: Jon Mason <jdmason@kudzu.us>
-Date: Fri, 5 Aug 2016 16:26:21 -0400
-Subject: [GIT PULL] NTB bug fixes for v4.8
-Message-ID: <20160805202621.GA4159@arkham.kudzu.us>
+        Wed, 24 Aug 2016 15:04:55 -0700 (PDT)
+From: "Allen Hubbe" <Allen.Hubbe@emc.com>
+References: <147207338678.160450.10674653800874976448.stgit@djiang5-desk3.ch.intel.com>
+In-Reply-To: <147207338678.160450.10674653800874976448.stgit@djiang5-desk3.ch.intel.com>
+Subject: RE: [PATCH] ntb: ntb_hw_intel: init peer_addr in struct intel_ntb_dev
+Date: Wed, 24 Aug 2016 18:04:36 -0400
+Message-ID: <000101d1fe53$8112f920$8338eb60$@emc.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Content-Language: en-us
+To: 'Dave Jiang' <dave.jiang@intel.com>, jdmason@kudzu.us
+Cc: linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-Hello Linus,
-Here are a few NTB improvements and bug fixes for 4.8.  Please consider
-pulling them.
+From: Dave Jiang
+> The peer_addr member of intel_ntb_dev is not set, therefore when
+> acquiring ntb_peer_db and ntb_peer_spad we only get the offset rather
+> than the actual physical address. Adding fix to correct that.
+> 
+> Signed-off-by: Dave Jiang <dave.jiang@intel.com>
 
-Thanks,
-Jon
+Acked-by: Allen Hubbe <Allen.Hubbe@emc.com>
+
+> ---
+>  drivers/ntb/hw/intel/ntb_hw_intel.c |    3 +++
+>  1 file changed, 3 insertions(+)
+> 
+> diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c b/drivers/ntb/hw/intel/ntb_hw_intel.c
+> index 40d04ef..3ad1f15 100644
+> --- a/drivers/ntb/hw/intel/ntb_hw_intel.c
+> +++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
+> @@ -1718,6 +1718,8 @@ static int xeon_setup_b2b_mw(struct intel_ntb_dev *ndev,
+>  					    XEON_B2B_MIN_SIZE);
+>  		if (!ndev->peer_mmio)
+>  			return -EIO;
+> +
+> +		ndev->peer_addr = pci_resource_start(pdev, b2b_bar);
+>  	}
+> 
+>  	return 0;
+> @@ -1982,6 +1984,7 @@ static int intel_ntb_init_pci(struct intel_ntb_dev *ndev, struct
+> pci_dev *pdev)
+>  		goto err_mmio;
+>  	}
+>  	ndev->peer_mmio = ndev->self_mmio;
+> +	ndev->peer_addr = pci_resource_start(pdev, 0);
+> 
+>  	return 0;
+> 
 
 
-
-The following changes since commit 523d939ef98fd712632d93a5a2b588e477a7565e:
-
-  Linux 4.7 (2016-07-24 12:23:50 -0700)
-
-are available in the git repository at:
-
-  git://github.com/jonmason/ntb tags/ntb-4.8
-
-for you to fetch changes up to 95f1464f695055c72de6044d7c8a2a7a1e0c7ea2:
-
-  NTB: ntb_hw_intel: use local variable pdev (2016-08-05 10:34:13 -0400)
-
-----------------------------------------------------------------
-NTB bug fixes for the ntb_tool and ntb_perf, and improvements to the
-ntb_perf and ntb_pingpong for increased debugability.  Also,
-modification to the ntb_transport layer to increase/decrease the number
-of transport entries depending on the ring size.
-
-----------------------------------------------------------------
-Allen Hubbe (2):
-      NTB: ntb_hw_intel: show BAR size in debugfs info
-      NTB: ntb_hw_intel: use local variable pdev
-
-Dave Jiang (1):
-      NTB: allocate number transport entries depending on size of ring size
-
-Logan Gunthorpe (14):
-      ntb_tool: Fix infinite loop bug when writing spad/peer_spad file
-      ntb_tool: BUG: Ensure the buffer size is large enough to return all spads
-      ntb_perf: Allow limiting the size of the memory windows
-      ntb_tool: Add memory window debug support
-      ntb_transport: Check the number of spads the hardware supports
-      ntb_perf: Schedule based on time not on performance
-      ntb_perf: Improve thread handling to increase robustness
-      ntb_perf: Return results by reading the run file
-      ntb_perf: Wait for link before running test
-      ntb_tool: Postpone memory window initialization for the user
-      ntb_tool: Add link status and files to debugfs
-      ntb_pingpong: Add a debugfs file to get the ping count
-      ntb_perf: clear link_is_up flag when the link goes down.
-      ntb_test: Add a selftest script for the NTB subsystem
-
- MAINTAINERS                             |   1 +
- drivers/ntb/hw/intel/ntb_hw_intel.c     |  49 +++-
- drivers/ntb/ntb_transport.c             |  38 ++-
- drivers/ntb/test/ntb_perf.c             | 240 +++++++++++------
- drivers/ntb/test/ntb_pingpong.c         |  62 ++++-
- drivers/ntb/test/ntb_tool.c             | 459 +++++++++++++++++++++++++++++++-
- tools/testing/selftests/ntb/ntb_test.sh | 422 +++++++++++++++++++++++++++++
- 7 files changed, 1172 insertions(+), 99 deletions(-)
- create mode 100755 tools/testing/selftests/ntb/ntb_test.sh
