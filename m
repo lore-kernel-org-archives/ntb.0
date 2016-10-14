@@ -1,128 +1,67 @@
-Return-Path: <arnd@arndb.de>
-Received: from mout.kundenserver.de (mout.kundenserver.de. [212.227.126.130])
-        by gmr-mx.google.com with ESMTPS id v132si940890wmf.1.2016.09.14.06.25.53
+Return-Path: <dave.jiang@intel.com>
+Received: from mga07.intel.com (mga07.intel.com. [134.134.136.100])
+        by gmr-mx.google.com with ESMTPS id um12si3220550pab.2.2016.10.14.10.07.14
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 14 Sep 2016 06:25:53 -0700 (PDT)
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [RFC PATCH 00/11] pci: support for configurable PCI endpoint
-Date: Wed, 14 Sep 2016 15:25:41 +0200
-Message-ID: <2837059.ka7z3gzjF2@wuerfel>
-In-Reply-To: <1473829927-20466-1-git-send-email-kishon@ti.com>
-References: <1473829927-20466-1-git-send-email-kishon@ti.com>
+        Fri, 14 Oct 2016 10:07:14 -0700 (PDT)
+Subject: Re: [patch] ntb_perf: potential info leak in debugfs
+References: <20161014073418.GD15168@mwanda>
+From: Dave Jiang <dave.jiang@intel.com>
+Message-ID: <2df67889-a7d5-2313-2828-3457115fbcfa@intel.com>
+Date: Fri, 14 Oct 2016 10:07:13 -0700
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="us-ascii"
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: Bjorn Helgaas <bhelgaas@google.com>, Jingoo Han <jingoohan1@gmail.com>, hch@infradead.org, Joao.Pinto@synopsys.com, mingkai.hu@nxp.com, m-karicheri2@ti.com, Pratyush Anand <pratyush.anand@gmail.com>, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Joao Pinto <jpinto@synopsys.com>, Rob Herring <robh+dt@kernel.org>, nsekhar@ti.com, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, linux-ntb@googlegroups.com
+In-Reply-To: <20161014073418.GD15168@mwanda>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+To: Dan Carpenter <dan.carpenter@oracle.com>, Jon Mason <jdmason@kudzu.us>, Logan Gunthorpe <logang@deltatee.com>
+Cc: Allen Hubbe <Allen.Hubbe@emc.com>, Sudip Mukherjee <sudipm.mukherjee@gmail.com>, Arnd Bergmann <arnd@arndb.de>, linux-ntb@googlegroups.com, kernel-janitors@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-On Wednesday, September 14, 2016 10:41:56 AM CEST Kishon Vijay Abraham I wrote:
-> This patch series
-> 	*) adds PCI endpoint core layer
-> 	*) modifies designware/dra7xx driver to be configured in EP mode
-> 	*) adds a PCI endpoint *test* function driver
 
-Hi Kishon,
 
-I think this is a great start, thanks for posting early with a clear
-list of limitations and TODO items.
-
-I've added the drivers/ntb maintainers to Cc, given that there is
-a certain degree of overlap between your work and the existing
-code, I think they should be part of the discussion.
- 
-> Known Limitation:
-> 	*) Does not support multi-function devices
-
-If I understand it right, this was a problem for USB and adding
-it later made it somewhat inconsistent. Maybe we can at least
-try to come up with an idea of how multi-function devices
-could be handled even if we don't implement it until someone
-actually needs it.
-
-Is your hardware able to make the PCIe endpoint look like
-a device with multiple PCI functions, or would one have to
-do this in software inside of a single PCI function if we
-ever need it?
-
-> TODO:
-> 	*) access buffers in RC
-> 	*) raise MSI interrupts
-> 	*) Enable user space control for the RC side PCI driver
-
-The user space control would end up just being one of several
-gadget drivers, right? E.g. gadget drivers for standard hardware
-(8250 uart, ATA, NVMe, some ethernet) could be done as kernel
-drivers while a user space driver can be used for things that
-are more unusual and that don't need to interface to another
-part of the kernel?
-
-> 	*) Adapt all other users of designware to use the new design (only
-> 	   dra7xx has been adapted)
-
-I don't fully understand this part. Does every designware based
-driver need modifications, or are the changes to the
-generic parts of the designware driver enough to make it
-work for the simpler platforms?
-
-> HOW TO:
+On 10/14/2016 12:34 AM, Dan Carpenter wrote:
+> This is a static checker warning, not something I'm desperately
+> concerned about.  But snprintf() returns the number of bytes that
+> would have been copied if there were space.  We really care about the
+> number of bytes that actually were copied so we should use scnprintf()
+> instead.
 > 
-> ON THE EP SIDE:
-> ***************
+> It probably won't overrun, and in that case we may as well just use
+> sprintf() but these sorts of things make static checkers and code
+> reviewers happier.
 > 
-> /* EP function is configured using configfs */
-> # mount -t configfs none /sys/kernel/config
+> Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+Acked-by: Dave Jiang <dave.jiang@intel.com>
+
 > 
-> /* PCI EP core layer creates "pci_ep" entry in configfs */
-> # cd /sys/kernel/config/pci_ep/
+> diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
+> index 6a50f20..2d9ca58 100644
+> --- a/drivers/ntb/test/ntb_perf.c
+> +++ b/drivers/ntb/test/ntb_perf.c
+> @@ -589,7 +589,7 @@ static ssize_t debugfs_run_read(struct file *filp, char __user *ubuf,
+>  		return -ENOMEM;
+>  
+>  	if (mutex_is_locked(&perf->run_mutex)) {
+> -		out_off = snprintf(buf, 64, "running\n");
+> +		out_off = scnprintf(buf, 64, "running\n");
+>  		goto read_from_buf;
+>  	}
+>  
+> @@ -600,14 +600,14 @@ static ssize_t debugfs_run_read(struct file *filp, char __user *ubuf,
+>  			break;
+>  
+>  		if (pctx->status) {
+> -			out_off += snprintf(buf + out_off, 1024 - out_off,
+> +			out_off += scnprintf(buf + out_off, 1024 - out_off,
+>  					    "%d: error %d\n", i,
+>  					    pctx->status);
+>  			continue;
+>  		}
+>  
+>  		rate = div64_u64(pctx->copied, pctx->diff_us);
+> -		out_off += snprintf(buf + out_off, 1024 - out_off,
+> +		out_off += scnprintf(buf + out_off, 1024 - out_off,
+>  			"%d: copied %llu bytes in %llu usecs, %llu MBytes/s\n",
+>  			i, pctx->copied, pctx->diff_us, rate);
+>  	}
 > 
-> /*
->  * This is the 1st step in creating an endpoint function. This
->  * creates the endpoint function device *instance*. The string
->  * before the .<num> suffix will identify the driver this
->  * EP function will bind to.
->  * Just pci_epf_test is also valid. The .<num> suffix is used
->  * if there are multiple PCI controllers and all of them wants
->  * to use the same function.
->  */
-> # mkdir pci_epf_test.0
-
-I haven't used USB gadgets, but I assume this is modeled around
-the same interface. If there are notable differences, please mention
-what they are. Otherwise the general concept seems rather nice to me.
-
->  drivers/pci/{host => controller}/Kconfig           |  109 +++++-
->  drivers/pci/{host => controller}/Makefile          |    2 +
->  drivers/pci/{host => controller}/pci-aardvark.c    |    0
->  drivers/pci/{host => controller}/pci-dra7xx.c      |  340 +++++++++++++----
->  drivers/pci/{host => controller}/pci-exynos.c      |    0
->  drivers/pci/{host => controller}/pci-host-common.c |    0
->  .../pci/{host => controller}/pci-host-generic.c    |    0
->  drivers/pci/{host => controller}/pci-hyperv.c      |    0
->  drivers/pci/{host => controller}/pci-imx6.c        |    0
->  drivers/pci/{host => controller}/pci-keystone-dw.c |    0
->  drivers/pci/{host => controller}/pci-keystone.c    |    0
->  drivers/pci/{host => controller}/pci-keystone.h    |    0
-
-Maybe it's better to wait before moving it around, this will make
-it harder for you to rebase the patch series while you are working on
-it and other people are working on the existing code.
-
-I'd suggest dropping the rename patches for the moment and just work
-in drivers/pci/host.
-
-Let's talk (high-level) about the DT binding. I see that the way
-you have done it here, one will need to have a different .dtb file
-for a machine depending on whether the PCIe is used in host or
-endpoint mode. The advantage of this way is that it's a much
-cleaner binding (PCIe host bindings are a mess, and adding more
-options to it will only make it worse), the downside is that
-you can't decide at runtime what you want to use it for. E.g.
-connecting two identical machines over PCIe requires deciding
-in the bootloader which one is the endpoint, or using DT
-overlays, which may be awkward for some users. Is this a realistic
-use case, or do you expect that all machines will only ever be
-used in one of the two ways?
-
-	Arnd
