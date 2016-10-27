@@ -1,59 +1,48 @@
-Return-Path: <dan.carpenter@oracle.com>
-Received: from aserp1040.oracle.com (aserp1040.oracle.com. [141.146.126.69])
-        by gmr-mx.google.com with ESMTPS id n126si34576ita.0.2016.10.14.00.35.45
+Return-Path: <dave.jiang@intel.com>
+Received: from mga02.intel.com (mga02.intel.com. [134.134.136.20])
+        by gmr-mx.google.com with ESMTPS id 7si2493341par.0.2016.10.27.11.06.44
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 14 Oct 2016 00:35:45 -0700 (PDT)
-Date: Fri, 14 Oct 2016 10:34:18 +0300
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: [patch] ntb_perf: potential info leak in debugfs
-Message-ID: <20161014073418.GD15168@mwanda>
+        (version=TLS1 cipher=AES128-SHA bits=128/128);
+        Thu, 27 Oct 2016 11:06:44 -0700 (PDT)
+Subject: [PATCH] ntb: ntb_hw_intel: init peer_addr in struct intel_ntb_dev
+From: Dave Jiang <dave.jiang@intel.com>
+Date: Thu, 27 Oct 2016 11:06:44 -0700
+Message-ID: <147759160406.148101.6570617851207590619.stgit@djiang5-desk3.ch.intel.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-To: Jon Mason <jdmason@kudzu.us>, Logan Gunthorpe <logang@deltatee.com>
-Cc: Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Sudip Mukherjee <sudipm.mukherjee@gmail.com>, Arnd Bergmann <arnd@arndb.de>, linux-ntb@googlegroups.com, kernel-janitors@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+To: jdmason@kudzu.us
+Cc: linux-ntb@googlegroups.com, allen.hubbe@emc.com
 List-ID: <linux-ntb.googlegroups.com>
 
-This is a static checker warning, not something I'm desperately
-concerned about.  But snprintf() returns the number of bytes that
-would have been copied if there were space.  We really care about the
-number of bytes that actually were copied so we should use scnprintf()
-instead.
+The peer_addr member of intel_ntb_dev is not set, therefore when
+acquiring ntb_peer_db and ntb_peer_spad we only get the offset rather
+than the actual physical address. Adding fix to correct that.
 
-It probably won't overrun, and in that case we may as well just use
-sprintf() but these sorts of things make static checkers and code
-reviewers happier.
+Signed-off-by: Dave Jiang <dave.jiang@intel.com>
+---
+ drivers/ntb/hw/intel/ntb_hw_intel.c |    3 +++
+ 1 file changed, 3 insertions(+)
 
-Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
-
-diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index 6a50f20..2d9ca58 100644
---- a/drivers/ntb/test/ntb_perf.c
-+++ b/drivers/ntb/test/ntb_perf.c
-@@ -589,7 +589,7 @@ static ssize_t debugfs_run_read(struct file *filp, char __user *ubuf,
- 		return -ENOMEM;
- 
- 	if (mutex_is_locked(&perf->run_mutex)) {
--		out_off = snprintf(buf, 64, "running\n");
-+		out_off = scnprintf(buf, 64, "running\n");
- 		goto read_from_buf;
+diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c b/drivers/ntb/hw/intel/ntb_hw_intel.c
+index 0d5c29a..d6fe7ab 100644
+--- a/drivers/ntb/hw/intel/ntb_hw_intel.c
++++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
+@@ -1755,6 +1755,8 @@ static int xeon_setup_b2b_mw(struct intel_ntb_dev *ndev,
+ 					    XEON_B2B_MIN_SIZE);
+ 		if (!ndev->peer_mmio)
+ 			return -EIO;
++
++		ndev->peer_addr = pci_resource_start(pdev, b2b_bar);
  	}
  
-@@ -600,14 +600,14 @@ static ssize_t debugfs_run_read(struct file *filp, char __user *ubuf,
- 			break;
- 
- 		if (pctx->status) {
--			out_off += snprintf(buf + out_off, 1024 - out_off,
-+			out_off += scnprintf(buf + out_off, 1024 - out_off,
- 					    "%d: error %d\n", i,
- 					    pctx->status);
- 			continue;
- 		}
- 
- 		rate = div64_u64(pctx->copied, pctx->diff_us);
--		out_off += snprintf(buf + out_off, 1024 - out_off,
-+		out_off += scnprintf(buf + out_off, 1024 - out_off,
- 			"%d: copied %llu bytes in %llu usecs, %llu MBytes/s\n",
- 			i, pctx->copied, pctx->diff_us, rate);
+ 	return 0;
+@@ -2019,6 +2021,7 @@ static int intel_ntb_init_pci(struct intel_ntb_dev *ndev, struct pci_dev *pdev)
+ 		goto err_mmio;
  	}
+ 	ndev->peer_mmio = ndev->self_mmio;
++	ndev->peer_addr = pci_resource_start(pdev, 0);
+ 
+ 	return 0;
+ 
+
