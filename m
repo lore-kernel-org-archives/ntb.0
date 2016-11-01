@@ -1,85 +1,67 @@
-Return-Path: <Shyam-sundar.S-k@amd.com>
-Received: from NAM03-DM3-obe.outbound.protection.outlook.com (mail-dm3nam03on0080.outbound.protection.outlook.com. [104.47.41.80])
-        by gmr-mx.google.com with ESMTPS id p14si1823896pfl.0.2016.11.18.01.22.12
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-yb0-x241.google.com (mail-yb0-x241.google.com. [2607:f8b0:4002:c09::241])
+        by gmr-mx.google.com with ESMTPS id b67si1036364ywc.2.2016.11.01.13.33.33
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Fri, 18 Nov 2016 01:22:13 -0800 (PST)
-From: Shyam Sundar S K <ssundark@amd.com>
-Subject: [PATCH] NTB: add support for hotplug feature
-Message-ID: <00df7583-4784-d855-7ed8-442f9bfe08e2@amd.com>
-Date: Fri, 18 Nov 2016 14:51:41 +0530
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 01 Nov 2016 13:33:33 -0700 (PDT)
+Received: by mail-yb0-x241.google.com with SMTP id f97so2552265ybi.1
+        for <linux-ntb@googlegroups.com>; Tue, 01 Nov 2016 13:33:33 -0700 (PDT)
+Return-Path: <jdmason@kudzu.us>
+Date: Tue, 1 Nov 2016 16:33:31 -0400
+From: Jon Mason <jdmason@kudzu.us>
+Subject: Re: [PATCH] ntb: ntb_hw_intel: init peer_addr in struct intel_ntb_dev
+Message-ID: <20161101203330.GA25928@kudzu.us>
+References: <147207338678.160450.10674653800874976448.stgit@djiang5-desk3.ch.intel.com>
+ <000101d1fe53$8112f920$8338eb60$@emc.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-Path: ssundark@amd.com
-To: "Yu, Xiangliang" <Xiangliang.Yu@amd.com>, jdmason@kudzu.us, Allen Hubbe <Allen.Hubbe@dell.com>, dave.jiang@intel.com
-Cc: "Shah, Nehal-bakulchandra" <Nehal-bakulchandra.Shah@amd.com>, "Subramaniyan, Ramkumar" <ramkumar.ks@amd.com>, "Su, Richard (Bin)" <Richard1.Su@amd.com>, linux-ntb@googlegroups.com
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <000101d1fe53$8112f920$8338eb60$@emc.com>
+To: Allen Hubbe <Allen.Hubbe@emc.com>
+Cc: 'Dave Jiang' <dave.jiang@intel.com>, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Xiangliang Yu <Xiangliang.Yu@amd.com>
+On Wed, Aug 24, 2016 at 06:04:36PM -0400, Allen Hubbe wrote:
+> From: Dave Jiang
+> > The peer_addr member of intel_ntb_dev is not set, therefore when
+> > acquiring ntb_peer_db and ntb_peer_spad we only get the offset rather
+> > than the actual physical address. Adding fix to correct that.
+> > 
+> > Signed-off-by: Dave Jiang <dave.jiang@intel.com>
+> 
+> Acked-by: Allen Hubbe <Allen.Hubbe@emc.com>
 
-AMD NTB support hotplug under B2B mode. NTB will trigger link
-up/down interrupt event when doing plug add/remove, this patch
-implements the two interrupt event to support B2B hotplug function.
+Sorry for missing this one.  In my tree now.
 
-Signed-off-by: Xiangliang Yu <Xiangliang.Yu@amd.com>
-Signed-off-by: S-k, Shyam-sundar <Shyam-sundar.S-k@amd.com>
----
- drivers/ntb/hw/amd/ntb_hw_amd.c | 9 ++++++++-
- drivers/ntb/hw/amd/ntb_hw_amd.h | 5 ++++-
- 2 files changed, 12 insertions(+), 2 deletions(-)
+Thanks,
+Jon
 
-diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.c b/drivers/ntb/hw/amd/ntb_hw_amd.c
-index 9bbe3e0..2fc202c 100644
---- a/drivers/ntb/hw/amd/ntb_hw_amd.c
-+++ b/drivers/ntb/hw/amd/ntb_hw_amd.c
-@@ -194,6 +194,11 @@ static int amd_link_is_up(struct amd_ntb_dev *ndev)
- 	if (!ndev->peer_sta)
- 		return NTB_LNK_STA_ACTIVE(ndev->cntl_sta);
-
-+	if (ndev->peer_sta & AMD_LINK_UP_EVENT) {
-+		ndev->peer_sta = 0;
-+		return 1;
-+	}
-+
- 	/* If peer_sta is reset or D0 event, the ISR has
- 	 * started a timer to check link status of hardware.
- 	 * So here just clear status bit. And if peer_sta is
-@@ -202,7 +207,7 @@ static int amd_link_is_up(struct amd_ntb_dev *ndev)
- 	 */
- 	if (ndev->peer_sta & AMD_PEER_RESET_EVENT)
- 		ndev->peer_sta &= ~AMD_PEER_RESET_EVENT;
--	else if (ndev->peer_sta & AMD_PEER_D0_EVENT)
-+	else if (ndev->peer_sta & (AMD_PEER_D0_EVENT | AMD_LINK_DOWN_EVENT))
- 		ndev->peer_sta = 0;
-
- 	return 0;
-@@ -480,6 +485,8 @@ static void amd_handle_event(struct amd_ntb_dev *ndev, int vec)
- 		break;
- 	case AMD_PEER_D3_EVENT:
- 	case AMD_PEER_PMETO_EVENT:
-+	case AMD_LINK_UP_EVENT:
-+	case AMD_LINK_DOWN_EVENT:
- 		amd_ack_smu(ndev, status);
-
- 		/* link down */
-diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.h b/drivers/ntb/hw/amd/ntb_hw_amd.h
-index 2eac3cd..13d73ed 100644
---- a/drivers/ntb/hw/amd/ntb_hw_amd.h
-+++ b/drivers/ntb/hw/amd/ntb_hw_amd.h
-@@ -148,9 +148,12 @@ enum {
- 	AMD_PEER_D3_EVENT	= BIT(2),
- 	AMD_PEER_PMETO_EVENT	= BIT(3),
- 	AMD_PEER_D0_EVENT	= BIT(4),
-+	AMD_LINK_UP_EVENT	= BIT(5),
-+	AMD_LINK_DOWN_EVENT	= BIT(6),
- 	AMD_EVENT_INTMASK	= (AMD_PEER_FLUSH_EVENT |
- 				AMD_PEER_RESET_EVENT | AMD_PEER_D3_EVENT |
--				AMD_PEER_PMETO_EVENT | AMD_PEER_D0_EVENT),
-+				AMD_PEER_PMETO_EVENT | AMD_PEER_D0_EVENT |
-+				AMD_LINK_UP_EVENT | AMD_LINK_DOWN_EVENT),
-
- 	AMD_PMESTAT_OFFSET	= 0x480,
- 	AMD_PMSGTRIG_OFFSET	= 0x490,
--- 
-2.7.4
+> 
+> > ---
+> >  drivers/ntb/hw/intel/ntb_hw_intel.c |    3 +++
+> >  1 file changed, 3 insertions(+)
+> > 
+> > diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c b/drivers/ntb/hw/intel/ntb_hw_intel.c
+> > index 40d04ef..3ad1f15 100644
+> > --- a/drivers/ntb/hw/intel/ntb_hw_intel.c
+> > +++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
+> > @@ -1718,6 +1718,8 @@ static int xeon_setup_b2b_mw(struct intel_ntb_dev *ndev,
+> >  					    XEON_B2B_MIN_SIZE);
+> >  		if (!ndev->peer_mmio)
+> >  			return -EIO;
+> > +
+> > +		ndev->peer_addr = pci_resource_start(pdev, b2b_bar);
+> >  	}
+> > 
+> >  	return 0;
+> > @@ -1982,6 +1984,7 @@ static int intel_ntb_init_pci(struct intel_ntb_dev *ndev, struct
+> > pci_dev *pdev)
+> >  		goto err_mmio;
+> >  	}
+> >  	ndev->peer_mmio = ndev->self_mmio;
+> > +	ndev->peer_addr = pci_resource_start(pdev, 0);
+> > 
+> >  	return 0;
+> > 
+> 
+> 
