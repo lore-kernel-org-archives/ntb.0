@@ -1,132 +1,64 @@
-Return-Path: <Shyam-sundar.S-k@amd.com>
-Received: from NAM02-CY1-obe.outbound.protection.outlook.com (mail-cys01nam02on0057.outbound.protection.outlook.com. [104.47.37.57])
-        by gmr-mx.google.com with ESMTPS id c68si3753427ith.1.2016.11.14.01.00.52
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-yb0-x242.google.com (mail-yb0-x242.google.com. [2607:f8b0:4002:c09::242])
+        by gmr-mx.google.com with ESMTPS id q185si1735175ywh.4.2016.11.13.14.21.52
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Mon, 14 Nov 2016 01:00:52 -0800 (PST)
-From: Shyam Sundar S K <ssundark@amd.com>
-Subject: [PATCH] NTB: Register and offset values fix for memory window
-Message-ID: <c44465a3-780b-3dbd-22dc-4be241009e3c@amd.com>
-Date: Mon, 14 Nov 2016 14:30:23 +0530
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Sun, 13 Nov 2016 14:21:52 -0800 (PST)
+Received: by mail-yb0-x242.google.com with SMTP id d128so2055994ybh.3
+        for <linux-ntb@googlegroups.com>; Sun, 13 Nov 2016 14:21:52 -0800 (PST)
+Return-Path: <jdmason@kudzu.us>
+From: Jon Mason <jdmason@kudzu.us>
+Date: Sun, 13 Nov 2016 17:21:49 -0500
+Subject: [GIT PULL] NTB bug fixes for v4.9
+Message-ID: <20161113222148.GA28184@arkham.kudzu.us>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-Path: ssundark@amd.com
-To: "Yu, Xiangliang" <Xiangliang.Yu@amd.com>, jdmason@kudzu.us
-Cc: dave.jiang@intel.com, Allen.Hubbe@emc.com, linux-ntb@googlegroups.com, "Sen, Pankaj" <Pankaj.Sen@amd.com>, "Shah,
- Nehal-bakulchandra" <Nehal-bakulchandra.Shah@amd.com>, "Agrawal,
- Nitesh-kumar" <Nitesh-kumar.Agrawal@amd.com>, "Subramaniyan, Ramkumar" <ramkumar.ks@amd.com>, Richard1.Su@amd.com
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+To: torvalds@linux-foundation.org
+Cc: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-Due to incorrect limit and translation register values, NTB link was
-going down when the memory window translation was setup. Made appropriate
-changes as per spec.
+Hello Linus,
+Here are a few NTB bug fixes for 4.9.  Please consider pulling them.
 
-Also, fixed the limit register values for BAR1, which was overlapping
-with the BAR23 address.
+Thanks,
+Jon
 
-Reviewed-by: Sen, Pankaj <Pankaj.Sen@amd.com>
-Reviewed-by: Shah, Nehal-bakulchandra <Nehal-bakulchandra.Shah@amd.com>
-Acked-by: Xiangliang Yu <Xiangliang.Yu@amd.com>
-Signed-off-by: S-k, Shyam-sundar <Shyam-sundar.S-k@amd.com>
----
- drivers/ntb/hw/amd/ntb_hw_amd.c | 35 ++++++++++++-----------------------
- 1 file changed, 12 insertions(+), 23 deletions(-)
 
-diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.c b/drivers/ntb/hw/amd/ntb_hw_amd.c
-index 6ccba0d..9bbe3e0 100644
---- a/drivers/ntb/hw/amd/ntb_hw_amd.c
-+++ b/drivers/ntb/hw/amd/ntb_hw_amd.c
-@@ -138,11 +138,11 @@ static int amd_ntb_mw_set_trans(struct ntb_dev *ntb, int idx,
- 	base_addr = pci_resource_start(ndev->ntb.pdev, bar);
 
- 	if (bar != 1) {
--		xlat_reg = AMD_BAR23XLAT_OFFSET + ((bar - 2) << 3);
--		limit_reg = AMD_BAR23LMT_OFFSET + ((bar - 2) << 3);
-+		xlat_reg = AMD_BAR23XLAT_OFFSET + ((bar - 2) << 2);
-+		limit_reg = AMD_BAR23LMT_OFFSET + ((bar - 2) << 2);
+The following changes since commit a25f0944ba9b1d8a6813fd6f1a86f1bd59ac25a6:
 
- 		/* Set the limit if supported */
--		limit = base_addr + size;
-+		limit = size;
+  Linux 4.9-rc5 (2016-11-13 10:32:32 -0800)
 
- 		/* set and verify setting the translation address */
- 		write64(addr, peer_mmio + xlat_reg);
-@@ -164,14 +164,9 @@ static int amd_ntb_mw_set_trans(struct ntb_dev *ntb, int idx,
- 		xlat_reg = AMD_BAR1XLAT_OFFSET;
- 		limit_reg = AMD_BAR1LMT_OFFSET;
+are available in the git repository at:
 
--		/* split bar addr range must all be 32 bit */
--		if (addr & (~0ull << 32))
--			return -EINVAL;
--		if ((addr + size) & (~0ull << 32))
--			return -EINVAL;
+  git://github.com/jonmason/ntb tags/ntb-4.9
 
- 		/* Set the limit if supported */
--		limit = base_addr + size;
-+		limit = size;
+for you to fetch changes up to 819baf885953b588b63bef28e5598daf9ed4ddf9:
 
- 		/* set and verify setting the translation address */
- 		write64(addr, peer_mmio + xlat_reg);
-@@ -376,13 +371,11 @@ static u32 amd_ntb_spad_read(struct ntb_dev *ntb, int idx)
- {
- 	struct amd_ntb_dev *ndev = ntb_ndev(ntb);
- 	void __iomem *mmio = ndev->self_mmio;
--	u32 offset;
+  ntb_perf: potential info leak in debugfs (2016-11-13 16:48:30 -0500)
 
--	if (idx < 0 || idx >= ndev->spad_count)
-+	if (idx < 0 || idx >= (ndev->spad_count + 4))
- 		return 0;
+----------------------------------------------------------------
+NTB bug fixes for ntb_hw_intel, ntb_perf, and ntb_pingpong.  Also, a
+fixup to use jiffies in schedule_timeout_* call instead of a constant.
 
--	offset = ndev->self_spad + (idx << 2);
--	return readl(mmio + AMD_SPAD_OFFSET + offset);
-+	return readl(mmio + AMD_SPAD_OFFSET + (idx << 2));
- }
+----------------------------------------------------------------
+Dan Carpenter (1):
+      ntb_perf: potential info leak in debugfs
 
- static int amd_ntb_spad_write(struct ntb_dev *ntb,
-@@ -392,11 +385,10 @@ static int amd_ntb_spad_write(struct ntb_dev *ntb,
- 	void __iomem *mmio = ndev->self_mmio;
- 	u32 offset;
+Dave Jiang (1):
+      ntb: ntb_hw_intel: init peer_addr in struct intel_ntb_dev
 
--	if (idx < 0 || idx >= ndev->spad_count)
-+	if (idx < 0 || idx >= (ndev->spad_count + 4))
- 		return -EINVAL;
+Nicholas Mc Guire (2):
+      ntb_transport: make DMA_OUT_RESOURCE_TO HZ independent
+      ntb: make DMA_OUT_RESOURCE_TO HZ independent
 
--	offset = ndev->self_spad + (idx << 2);
--	writel(val, mmio + AMD_SPAD_OFFSET + offset);
-+	writel(val, mmio + AMD_SPAD_OFFSET + (idx << 2));
+Wei Yongjun (2):
+      ntb_pingpong: Fix db_init parameter description
+      NTB: ntb_hw_intel: Fix typo in module parameter descriptions
 
- 	return 0;
- }
-@@ -405,13 +397,11 @@ static u32 amd_ntb_peer_spad_read(struct ntb_dev *ntb, int idx)
- {
- 	struct amd_ntb_dev *ndev = ntb_ndev(ntb);
- 	void __iomem *mmio = ndev->self_mmio;
--	u32 offset;
-
--	if (idx < 0 || idx >= ndev->spad_count)
-+	if (idx < 0 || idx >= (ndev->spad_count + 4))
- 		return -EINVAL;
-
--	offset = ndev->peer_spad + (idx << 2);
--	return readl(mmio + AMD_SPAD_OFFSET + offset);
-+	return readl(mmio + AMD_SPAD_OFFSET + (idx << 2));
- }
-
- static int amd_ntb_peer_spad_write(struct ntb_dev *ntb,
-@@ -421,11 +411,10 @@ static int amd_ntb_peer_spad_write(struct ntb_dev *ntb,
- 	void __iomem *mmio = ndev->self_mmio;
- 	u32 offset;
-
--	if (idx < 0 || idx >= ndev->spad_count)
-+	if (idx < 0 || idx >= (ndev->spad_count + 4))
- 		return -EINVAL;
-
--	offset = ndev->peer_spad + (idx << 2);
--	writel(val, mmio + AMD_SPAD_OFFSET + offset);
-+	writel(val, mmio + AMD_SPAD_OFFSET + (idx << 2));
-
- 	return 0;
- }
--- 
-2.7.4
+ drivers/ntb/hw/intel/ntb_hw_intel.c | 15 +++++++++------
+ drivers/ntb/ntb_transport.c         |  2 +-
+ drivers/ntb/test/ntb_perf.c         |  8 ++++----
+ drivers/ntb/test/ntb_pingpong.c     |  2 +-
+ 4 files changed, 15 insertions(+), 12 deletions(-)
