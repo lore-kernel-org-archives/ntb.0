@@ -1,64 +1,85 @@
-Return-Path: <jdmason@kudzu.us>
-Received: from mail-yb0-x242.google.com (mail-yb0-x242.google.com. [2607:f8b0:4002:c09::242])
-        by gmr-mx.google.com with ESMTPS id q185si1735175ywh.4.2016.11.13.14.21.52
+Return-Path: <Shyam-sundar.S-k@amd.com>
+Received: from NAM03-DM3-obe.outbound.protection.outlook.com (mail-dm3nam03on0080.outbound.protection.outlook.com. [104.47.41.80])
+        by gmr-mx.google.com with ESMTPS id p14si1823896pfl.0.2016.11.18.01.22.12
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Sun, 13 Nov 2016 14:21:52 -0800 (PST)
-Received: by mail-yb0-x242.google.com with SMTP id d128so2055994ybh.3
-        for <linux-ntb@googlegroups.com>; Sun, 13 Nov 2016 14:21:52 -0800 (PST)
-Return-Path: <jdmason@kudzu.us>
-From: Jon Mason <jdmason@kudzu.us>
-Date: Sun, 13 Nov 2016 17:21:49 -0500
-Subject: [GIT PULL] NTB bug fixes for v4.9
-Message-ID: <20161113222148.GA28184@arkham.kudzu.us>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
+        Fri, 18 Nov 2016 01:22:13 -0800 (PST)
+From: Shyam Sundar S K <ssundark@amd.com>
+Subject: [PATCH] NTB: add support for hotplug feature
+Message-ID: <00df7583-4784-d855-7ed8-442f9bfe08e2@amd.com>
+Date: Fri, 18 Nov 2016 14:51:41 +0530
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-Path: ssundark@amd.com
+To: "Yu, Xiangliang" <Xiangliang.Yu@amd.com>, jdmason@kudzu.us, Allen Hubbe <Allen.Hubbe@dell.com>, dave.jiang@intel.com
+Cc: "Shah, Nehal-bakulchandra" <Nehal-bakulchandra.Shah@amd.com>, "Subramaniyan, Ramkumar" <ramkumar.ks@amd.com>, "Su, Richard (Bin)" <Richard1.Su@amd.com>, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-Hello Linus,
-Here are a few NTB bug fixes for 4.9.  Please consider pulling them.
+From: Xiangliang Yu <Xiangliang.Yu@amd.com>
 
-Thanks,
-Jon
+AMD NTB support hotplug under B2B mode. NTB will trigger link
+up/down interrupt event when doing plug add/remove, this patch
+implements the two interrupt event to support B2B hotplug function.
 
+Signed-off-by: Xiangliang Yu <Xiangliang.Yu@amd.com>
+Signed-off-by: S-k, Shyam-sundar <Shyam-sundar.S-k@amd.com>
+---
+ drivers/ntb/hw/amd/ntb_hw_amd.c | 9 ++++++++-
+ drivers/ntb/hw/amd/ntb_hw_amd.h | 5 ++++-
+ 2 files changed, 12 insertions(+), 2 deletions(-)
 
+diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.c b/drivers/ntb/hw/amd/ntb_hw_amd.c
+index 9bbe3e0..2fc202c 100644
+--- a/drivers/ntb/hw/amd/ntb_hw_amd.c
++++ b/drivers/ntb/hw/amd/ntb_hw_amd.c
+@@ -194,6 +194,11 @@ static int amd_link_is_up(struct amd_ntb_dev *ndev)
+ 	if (!ndev->peer_sta)
+ 		return NTB_LNK_STA_ACTIVE(ndev->cntl_sta);
 
-The following changes since commit a25f0944ba9b1d8a6813fd6f1a86f1bd59ac25a6:
++	if (ndev->peer_sta & AMD_LINK_UP_EVENT) {
++		ndev->peer_sta = 0;
++		return 1;
++	}
++
+ 	/* If peer_sta is reset or D0 event, the ISR has
+ 	 * started a timer to check link status of hardware.
+ 	 * So here just clear status bit. And if peer_sta is
+@@ -202,7 +207,7 @@ static int amd_link_is_up(struct amd_ntb_dev *ndev)
+ 	 */
+ 	if (ndev->peer_sta & AMD_PEER_RESET_EVENT)
+ 		ndev->peer_sta &= ~AMD_PEER_RESET_EVENT;
+-	else if (ndev->peer_sta & AMD_PEER_D0_EVENT)
++	else if (ndev->peer_sta & (AMD_PEER_D0_EVENT | AMD_LINK_DOWN_EVENT))
+ 		ndev->peer_sta = 0;
 
-  Linux 4.9-rc5 (2016-11-13 10:32:32 -0800)
+ 	return 0;
+@@ -480,6 +485,8 @@ static void amd_handle_event(struct amd_ntb_dev *ndev, int vec)
+ 		break;
+ 	case AMD_PEER_D3_EVENT:
+ 	case AMD_PEER_PMETO_EVENT:
++	case AMD_LINK_UP_EVENT:
++	case AMD_LINK_DOWN_EVENT:
+ 		amd_ack_smu(ndev, status);
 
-are available in the git repository at:
+ 		/* link down */
+diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.h b/drivers/ntb/hw/amd/ntb_hw_amd.h
+index 2eac3cd..13d73ed 100644
+--- a/drivers/ntb/hw/amd/ntb_hw_amd.h
++++ b/drivers/ntb/hw/amd/ntb_hw_amd.h
+@@ -148,9 +148,12 @@ enum {
+ 	AMD_PEER_D3_EVENT	= BIT(2),
+ 	AMD_PEER_PMETO_EVENT	= BIT(3),
+ 	AMD_PEER_D0_EVENT	= BIT(4),
++	AMD_LINK_UP_EVENT	= BIT(5),
++	AMD_LINK_DOWN_EVENT	= BIT(6),
+ 	AMD_EVENT_INTMASK	= (AMD_PEER_FLUSH_EVENT |
+ 				AMD_PEER_RESET_EVENT | AMD_PEER_D3_EVENT |
+-				AMD_PEER_PMETO_EVENT | AMD_PEER_D0_EVENT),
++				AMD_PEER_PMETO_EVENT | AMD_PEER_D0_EVENT |
++				AMD_LINK_UP_EVENT | AMD_LINK_DOWN_EVENT),
 
-  git://github.com/jonmason/ntb tags/ntb-4.9
-
-for you to fetch changes up to 819baf885953b588b63bef28e5598daf9ed4ddf9:
-
-  ntb_perf: potential info leak in debugfs (2016-11-13 16:48:30 -0500)
-
-----------------------------------------------------------------
-NTB bug fixes for ntb_hw_intel, ntb_perf, and ntb_pingpong.  Also, a
-fixup to use jiffies in schedule_timeout_* call instead of a constant.
-
-----------------------------------------------------------------
-Dan Carpenter (1):
-      ntb_perf: potential info leak in debugfs
-
-Dave Jiang (1):
-      ntb: ntb_hw_intel: init peer_addr in struct intel_ntb_dev
-
-Nicholas Mc Guire (2):
-      ntb_transport: make DMA_OUT_RESOURCE_TO HZ independent
-      ntb: make DMA_OUT_RESOURCE_TO HZ independent
-
-Wei Yongjun (2):
-      ntb_pingpong: Fix db_init parameter description
-      NTB: ntb_hw_intel: Fix typo in module parameter descriptions
-
- drivers/ntb/hw/intel/ntb_hw_intel.c | 15 +++++++++------
- drivers/ntb/ntb_transport.c         |  2 +-
- drivers/ntb/test/ntb_perf.c         |  8 ++++----
- drivers/ntb/test/ntb_pingpong.c     |  2 +-
- 4 files changed, 15 insertions(+), 12 deletions(-)
+ 	AMD_PMESTAT_OFFSET	= 0x480,
+ 	AMD_PMSGTRIG_OFFSET	= 0x490,
+-- 
+2.7.4
