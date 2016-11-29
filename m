@@ -1,78 +1,47 @@
 Return-Path: <jdmason@kudzu.us>
-Received: from mail-yw0-x243.google.com (mail-yw0-x243.google.com. [2607:f8b0:4002:c05::243])
-        by gmr-mx.google.com with ESMTPS id w126si2123272yww.7.2016.11.01.13.35.39
+Received: from mail-yw0-x244.google.com (mail-yw0-x244.google.com. [2607:f8b0:4002:c05::244])
+        by gmr-mx.google.com with ESMTPS id p22si4525830ywe.3.2016.11.29.11.58.41
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 01 Nov 2016 13:35:39 -0700 (PDT)
-Received: by mail-yw0-x243.google.com with SMTP id s68so1443555ywg.0
-        for <linux-ntb@googlegroups.com>; Tue, 01 Nov 2016 13:35:39 -0700 (PDT)
+        Tue, 29 Nov 2016 11:58:41 -0800 (PST)
+Received: by mail-yw0-x244.google.com with SMTP id s68so13092587ywg.0
+        for <linux-ntb@googlegroups.com>; Tue, 29 Nov 2016 11:58:41 -0800 (PST)
 Return-Path: <jdmason@kudzu.us>
-Date: Tue, 1 Nov 2016 16:35:37 -0400
+Date: Tue, 29 Nov 2016 14:58:39 -0500
 From: Jon Mason <jdmason@kudzu.us>
-Subject: Re: [patch] ntb_perf: potential info leak in debugfs
-Message-ID: <20161101203536.GB25928@kudzu.us>
-References: <20161014073418.GD15168@mwanda>
- <2df67889-a7d5-2313-2828-3457115fbcfa@intel.com>
+Subject: Re: [PATCH v3] ntb: Adding Skylake Xeon NTB support
+Message-ID: <20161129195838.GA18783@kudzu.us>
+References: <147933021880.124938.13946656717891227718.stgit@djiang5-desk3.ch.intel.com>
+ <000101d24051$3c287a20$b4796e60$@emc.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <2df67889-a7d5-2313-2828-3457115fbcfa@intel.com>
-To: Dave Jiang <dave.jiang@intel.com>
-Cc: Dan Carpenter <dan.carpenter@oracle.com>, Logan Gunthorpe <logang@deltatee.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Sudip Mukherjee <sudipm.mukherjee@gmail.com>, Arnd Bergmann <arnd@arndb.de>, linux-ntb@googlegroups.com, kernel-janitors@vger.kernel.org
+In-Reply-To: <000101d24051$3c287a20$b4796e60$@emc.com>
+To: Allen Hubbe <Allen.Hubbe@dell.com>
+Cc: 'Dave Jiang' <dave.jiang@intel.com>, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-On Fri, Oct 14, 2016 at 10:07:13AM -0700, Dave Jiang wrote:
-> 
-> 
-> On 10/14/2016 12:34 AM, Dan Carpenter wrote:
-> > This is a static checker warning, not something I'm desperately
-> > concerned about.  But snprintf() returns the number of bytes that
-> > would have been copied if there were space.  We really care about the
-> > number of bytes that actually were copied so we should use scnprintf()
-> > instead.
+On Wed, Nov 16, 2016 at 04:34:38PM -0500, Allen Hubbe wrote:
+> From: Dave Jiang
+> > Sent: Wednesday, November 16, 2016 4:04 PM
+> > To: Hubbe, Allen; jdmason@kudzu.us
+> > Cc: linux-ntb@googlegroups.com
+> > Subject: [PATCH v3] ntb: Adding Skylake Xeon NTB support
 > > 
-> > It probably won't overrun, and in that case we may as well just use
-> > sprintf() but these sorts of things make static checkers and code
-> > reviewers happier.
+> > The Skylake Xeon NTB hardware has made some changes to the register name,
+> > offset, and the way doorbells work. Adding driver support for the new
+> > hardware.
 > > 
-> > Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
-> Acked-by: Dave Jiang <dave.jiang@intel.com>
+> > Signed-off-by: Dave Jiang <dave.jiang@intel.com>
+> 
+> Acked-by: Allen Hubbe <Allen.Hubbe@dell.com>
 
-Sorry for the delay.  Pulled into my ntb branch.
-
-Thanks,
-Jon
+Pulled in to the ntb-next branch
 
 > 
+> > ---
+> >  drivers/ntb/hw/intel/ntb_hw_intel.c |  660 +++++++++++++++++++++++++++++++++++
+> >  drivers/ntb/hw/intel/ntb_hw_intel.h |   48 +++
+> >  2 files changed, 703 insertions(+), 5 deletions(-)
 > > 
-> > diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-> > index 6a50f20..2d9ca58 100644
-> > --- a/drivers/ntb/test/ntb_perf.c
-> > +++ b/drivers/ntb/test/ntb_perf.c
-> > @@ -589,7 +589,7 @@ static ssize_t debugfs_run_read(struct file *filp, char __user *ubuf,
-> >  		return -ENOMEM;
-> >  
-> >  	if (mutex_is_locked(&perf->run_mutex)) {
-> > -		out_off = snprintf(buf, 64, "running\n");
-> > +		out_off = scnprintf(buf, 64, "running\n");
-> >  		goto read_from_buf;
-> >  	}
-> >  
-> > @@ -600,14 +600,14 @@ static ssize_t debugfs_run_read(struct file *filp, char __user *ubuf,
-> >  			break;
-> >  
-> >  		if (pctx->status) {
-> > -			out_off += snprintf(buf + out_off, 1024 - out_off,
-> > +			out_off += scnprintf(buf + out_off, 1024 - out_off,
-> >  					    "%d: error %d\n", i,
-> >  					    pctx->status);
-> >  			continue;
-> >  		}
-> >  
-> >  		rate = div64_u64(pctx->copied, pctx->diff_us);
-> > -		out_off += snprintf(buf + out_off, 1024 - out_off,
-> > +		out_off += scnprintf(buf + out_off, 1024 - out_off,
-> >  			"%d: copied %llu bytes in %llu usecs, %llu MBytes/s\n",
-> >  			i, pctx->copied, pctx->diff_us, rate);
-> >  	}
-> > 
+> 
