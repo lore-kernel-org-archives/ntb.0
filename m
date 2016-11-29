@@ -1,101 +1,181 @@
 Return-Path: <fancer.lancer@gmail.com>
 Received: from mail-lf0-x243.google.com (mail-lf0-x243.google.com. [2a00:1450:4010:c07::243])
-        by gmr-mx.google.com with ESMTPS id s81si354714wmf.3.2016.11.29.09.16.01
+        by gmr-mx.google.com with ESMTPS id s81si354714wmf.3.2016.11.29.09.16.00
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 29 Nov 2016 09:16:01 -0800 (PST)
+        Tue, 29 Nov 2016 09:16:00 -0800 (PST)
 Received: by mail-lf0-x243.google.com with SMTP id 98so13272887lfs.0
-        for <linux-ntb@googlegroups.com>; Tue, 29 Nov 2016 09:16:01 -0800 (PST)
+        for <linux-ntb@googlegroups.com>; Tue, 29 Nov 2016 09:16:00 -0800 (PST)
 Return-Path: <fancer.lancer@gmail.com>
 From: Serge Semin <fancer.lancer@gmail.com>
-Subject: [PATCH 06/22] NTB: Slightly alter link state NTB API
-Date: Tue, 29 Nov 2016 20:16:01 +0300
-Message-Id: <1480439777-1080-7-git-send-email-fancer.lancer@gmail.com>
+Subject: [PATCH 05/22] NTB: Alter Scratchpads NTB API to support multi-ports interface
+Date: Tue, 29 Nov 2016 20:16:00 +0300
+Message-Id: <1480439777-1080-6-git-send-email-fancer.lancer@gmail.com>
 In-Reply-To: <1480439777-1080-1-git-send-email-fancer.lancer@gmail.com>
 References: <1480439777-1080-1-git-send-email-fancer.lancer@gmail.com>
 To: jdmason@kudzu.us, dave.jiang@intel.com, Allen.Hubbe@emc.com, Xiangliang.Yu@amd.com
 Cc: Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Serge Semin <fancer.lancer@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Some minor changes of link state NTB API. Particularly link_is_up()
-method from now shall return a bitfield of link states for all accessible
-port indexes.
+Even though there is no any real NTB hardware, which would have both more
+than two ports and Scratchpad registers, it is logically correct to have
+Scratchpad API accepting a peer port index as well. Intel/AMD drivers used
+to utilize Primary and Secondary topology to split Scratchpad between
+connected root devices. Since port-index API replaced Primary and Secondary
+topology, Intel/AMD NTB hadrware drivers can use device port to determine
+which Scratchpad registers actually belong to local and peer devices.
+The same approach can be used if some potential hardware in future will be
+multi-port and have some set of Scratchpads.
 
 Signed-off-by: Serge Semin <fancer.lancer@gmail.com>
 
 ---
- include/linux/ntb.h | 31 ++++++++++++++++---------------
- 1 file changed, 16 insertions(+), 15 deletions(-)
+ include/linux/ntb.h | 46 ++++++++++++++++++++++++++--------------------
+ 1 file changed, 26 insertions(+), 20 deletions(-)
 
 diff --git a/include/linux/ntb.h b/include/linux/ntb.h
-index fc9d034..a59a155 100644
+index 59de1f6..fc9d034 100644
 --- a/include/linux/ntb.h
 +++ b/include/linux/ntb.h
-@@ -221,7 +221,7 @@ struct ntb_dev_ops {
- 	int (*peer_port_number)(struct ntb_dev *ntb, int pidx);
- 	int (*peer_port_idx)(struct ntb_dev *ntb, int port);
+@@ -268,13 +268,14 @@ struct ntb_dev_ops {
+ 	int (*spad_is_unsafe)(struct ntb_dev *ntb);
+ 	int (*spad_count)(struct ntb_dev *ntb);
  
--	int (*link_is_up)(struct ntb_dev *ntb,
-+	u64 (*link_is_up)(struct ntb_dev *ntb,
- 			  enum ntb_speed *speed, enum ntb_width *width);
- 	int (*link_enable)(struct ntb_dev *ntb,
- 			   enum ntb_speed max_speed, enum ntb_width max_width);
-@@ -567,25 +567,26 @@ static inline int ntb_peer_port_idx(struct ntb_dev *ntb, int port)
-  * state once after every link event.  It is safe to query the link state in
-  * the context of the link event callback.
+-	u32 (*spad_read)(struct ntb_dev *ntb, int idx);
+-	int (*spad_write)(struct ntb_dev *ntb, int idx, u32 val);
++	u32 (*spad_read)(struct ntb_dev *ntb, int sidx);
++	int (*spad_write)(struct ntb_dev *ntb, int sidx, u32 val);
+ 
+-	int (*peer_spad_addr)(struct ntb_dev *ntb, int idx,
++	int (*peer_spad_addr)(struct ntb_dev *ntb, int pidx, int sidx,
+ 			      phys_addr_t *spad_addr);
+-	u32 (*peer_spad_read)(struct ntb_dev *ntb, int idx);
+-	int (*peer_spad_write)(struct ntb_dev *ntb, int idx, u32 val);
++	u32 (*peer_spad_read)(struct ntb_dev *ntb, int pidx, int sidx);
++	int (*peer_spad_write)(struct ntb_dev *ntb, int pidx, int sidx,
++			       u32 val);
+ 
+ 	int (*msg_count)(struct ntb_dev *ntb);
+ 	u64 (*msg_inbits)(struct ntb_dev *ntb);
+@@ -1201,6 +1202,7 @@ static inline int ntb_spad_is_unsafe(struct ntb_dev *ntb)
+  * @ntb:	NTB device context.
   *
-- * Return: One if the link is up, zero if the link is down, otherwise a
-- *		negative value indicating the error number.
-+ * Return: bitfield of indexed ports link state: bit is set/cleared if the
-+ *         link is up/down respectively, otherwise a negative value indicating
-+ *         an error number.
+  * Hardware and topology may support a different number of scratchpads.
++ * Although it must be the same for all ports per NTB device.
+  *
+  * Return: the number of scratchpads.
   */
--static inline int ntb_link_is_up(struct ntb_dev *ntb,
-+static inline u64 ntb_link_is_up(struct ntb_dev *ntb,
- 				 enum ntb_speed *speed, enum ntb_width *width)
+@@ -1215,42 +1217,43 @@ static inline int ntb_spad_count(struct ntb_dev *ntb)
+ /**
+  * ntb_spad_read() - read the local scratchpad register
+  * @ntb:	NTB device context.
+- * @idx:	Scratchpad index.
++ * @sidx:	Scratchpad index.
+  *
+  * Read the local scratchpad register, and return the value.
+  *
+  * Return: The value of the local scratchpad register.
+  */
+-static inline u32 ntb_spad_read(struct ntb_dev *ntb, int idx)
++static inline u32 ntb_spad_read(struct ntb_dev *ntb, int sidx)
  {
- 	return ntb->ops->link_is_up(ntb, speed, width);
+ 	if (!ntb->ops->spad_read)
+ 		return ~(u32)0;
+ 
+-	return ntb->ops->spad_read(ntb, idx);
++	return ntb->ops->spad_read(ntb, sidx);
  }
  
  /**
-- * ntb_link_enable() - enable the link on the secondary side of the ntb
-+ * ntb_link_enable() - enable the link of the ntb
+  * ntb_spad_write() - write the local scratchpad register
   * @ntb:	NTB device context.
-  * @max_speed:	The maximum link speed expressed as PCIe generation number.
-  * @max_width:	The maximum link width expressed as the number of PCIe lanes.
+- * @idx:	Scratchpad index.
++ * @sidx:	Scratchpad index.
+  * @val:	Scratchpad value.
   *
-- * Enable the link on the secondary side of the ntb.  This can only be done
-- * from the primary side of the ntb in primary or b2b topology.  The ntb device
-- * should train the link to its maximum speed and width, or the requested speed
-- * and width, whichever is smaller, if supported.
-+ * Enable the NTB/PCIe link on the local or remote (for bridge-to-bridge
-+ * topology) side of the bridge. The ntb device should train the link to its
-+ * maximum speed and width, or the requested speed and width, whichever is
-+ * smaller, if supported.
+  * Write the value to the local scratchpad register.
   *
   * Return: Zero on success, otherwise an error number.
   */
-@@ -597,14 +598,14 @@ static inline int ntb_link_enable(struct ntb_dev *ntb,
+-static inline int ntb_spad_write(struct ntb_dev *ntb, int idx, u32 val)
++static inline int ntb_spad_write(struct ntb_dev *ntb, int sidx, u32 val)
+ {
+ 	if (!ntb->ops->spad_write)
+ 		return -EINVAL;
+ 
+-	return ntb->ops->spad_write(ntb, idx, val);
++	return ntb->ops->spad_write(ntb, sidx, val);
  }
  
  /**
-- * ntb_link_disable() - disable the link on the secondary side of the ntb
-+ * ntb_link_disable() - disable the link of the ntb
+  * ntb_peer_spad_addr() - address of the peer scratchpad register
   * @ntb:	NTB device context.
+- * @idx:	Scratchpad index.
++ * @pidx:	Port index of peer device.
++ * @sidx:	Scratchpad index.
+  * @spad_addr:	OUT - The address of the peer scratchpad register.
   *
-- * Disable the link on the secondary side of the ntb.  This can only be
-- * done from the primary side of the ntb in primary or b2b topology.  The ntb
-- * device should disable the link.  Returning from this call must indicate that
-- * a barrier has passed, though with no more writes may pass in either
-- * direction across the link, except if this call returns an error number.
-+ * Disable the link on the local or remote (for b2b topology) of the ntb.
-+ * The ntb device should disable the link.  Returning from this call must
-+ * indicate that a barrier has passed, though with no more writes may pass in
-+ * either direction across the link, except if this call returns an error
-+ * number.
+  * Return the address of the peer doorbell register.  This may be used, for
+@@ -1258,48 +1261,51 @@ static inline int ntb_spad_write(struct ntb_dev *ntb, int idx, u32 val)
   *
   * Return: Zero on success, otherwise an error number.
   */
+-static inline int ntb_peer_spad_addr(struct ntb_dev *ntb, int idx,
++static inline int ntb_peer_spad_addr(struct ntb_dev *ntb, int pidx, int sidx,
+ 				     phys_addr_t *spad_addr)
+ {
+ 	if (!ntb->ops->peer_spad_addr)
+ 		return -EINVAL;
+ 
+-	return ntb->ops->peer_spad_addr(ntb, idx, spad_addr);
++	return ntb->ops->peer_spad_addr(ntb, pidx, sidx, spad_addr);
+ }
+ 
+ /**
+  * ntb_peer_spad_read() - read the peer scratchpad register
+  * @ntb:	NTB device context.
+- * @idx:	Scratchpad index.
++ * @pidx:	Port index of peer device.
++ * @sidx:	Scratchpad index.
+  *
+  * Read the peer scratchpad register, and return the value.
+  *
+  * Return: The value of the local scratchpad register.
+  */
+-static inline u32 ntb_peer_spad_read(struct ntb_dev *ntb, int idx)
++static inline u32 ntb_peer_spad_read(struct ntb_dev *ntb, int pidx, int sidx)
+ {
+ 	if (!ntb->ops->peer_spad_read)
+ 		return ~(u32)0;
+ 
+-	return ntb->ops->peer_spad_read(ntb, idx);
++	return ntb->ops->peer_spad_read(ntb, pidx, sidx);
+ }
+ 
+ /**
+  * ntb_peer_spad_write() - write the peer scratchpad register
+  * @ntb:	NTB device context.
+- * @idx:	Scratchpad index.
++ * @pidx:	Port index of peer device.
++ * @sidx:	Scratchpad index.
+  * @val:	Scratchpad value.
+  *
+  * Write the value to the peer scratchpad register.
+  *
+  * Return: Zero on success, otherwise an error number.
+  */
+-static inline int ntb_peer_spad_write(struct ntb_dev *ntb, int idx, u32 val)
++static inline int ntb_peer_spad_write(struct ntb_dev *ntb, int pidx, int sidx,
++				      u32 val)
+ {
+ 	if (!ntb->ops->peer_spad_write)
+ 		return -EINVAL;
+ 
+-	return ntb->ops->peer_spad_write(ntb, idx, val);
++	return ntb->ops->peer_spad_write(ntb, pidx, sidx, val);
+ }
+ 
+ /**
 -- 
 2.6.6
 
