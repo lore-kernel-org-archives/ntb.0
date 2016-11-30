@@ -1,24 +1,23 @@
 Return-Path: <fengguang.wu@intel.com>
-Received: from mga14.intel.com (mga14.intel.com. [192.55.52.115])
-        by gmr-mx.google.com with ESMTPS id n18si861515pfb.2.2016.11.30.11.47.21
+Received: from mga07.intel.com (mga07.intel.com. [134.134.136.100])
+        by gmr-mx.google.com with ESMTPS id 126si916661itj.3.2016.11.30.11.13.18
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 30 Nov 2016 11:47:22 -0800 (PST)
-Date: Thu, 1 Dec 2016 03:46:27 +0800
+        Wed, 30 Nov 2016 11:13:18 -0800 (PST)
+Date: Thu, 1 Dec 2016 03:12:17 +0800
 From: kbuild test robot <lkp@intel.com>
-Subject: Re: [PATCH 03/22] NTB: Alter NTB API to support both inbound and
- outbound MW based interfaces
-Message-ID: <201612010326.PrxJEDMZ%fengguang.wu@intel.com>
+Subject: Re: [PATCH 02/22] NTB: Add peer indexed ports NTB API
+Message-ID: <201612010332.qiNaiLq6%fengguang.wu@intel.com>
 MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="pf9I7BMVVzbSWLtt"
+Content-Type: multipart/mixed; boundary="M9NhX3UHpAaciwkO"
 Content-Disposition: inline
-In-Reply-To: <1480439777-1080-4-git-send-email-fancer.lancer@gmail.com>
+In-Reply-To: <1480439777-1080-3-git-send-email-fancer.lancer@gmail.com>
 To: Serge Semin <fancer.lancer@gmail.com>
 Cc: kbuild-all@01.org, jdmason@kudzu.us, dave.jiang@intel.com, Allen.Hubbe@emc.com, Xiangliang.Yu@amd.com, Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Serge Semin <fancer.lancer@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
 
---pf9I7BMVVzbSWLtt
+--M9NhX3UHpAaciwkO
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 
@@ -39,61 +38,10 @@ reproduce:
 Note: the linux-review/Serge-Semin/NTB-Alter-kernel-API-to-support-multi-port-devices/20161201-014939 HEAD ced946cf007084caf9a2ec237c898bbf1940b440 builds fine.
       It only hurts bisectibility.
 
-All errors (new ones prefixed by >>):
+All error/warnings (new ones prefixed by >>):
 
-   drivers/ntb/ntb_transport.c: In function 'ntb_free_mw':
->> drivers/ntb/ntb_transport.c:685:2: error: too few arguments to function 'ntb_mw_clear_trans'
-     ntb_mw_clear_trans(nt->ndev, num_mw);
-     ^~~~~~~~~~~~~~~~~~
-   In file included from drivers/ntb/ntb_transport.c:62:0:
-   include/linux/ntb.h:739:19: note: declared here
-    static inline int ntb_mw_clear_trans(struct ntb_dev *ntb, int pidx, int widx)
-                      ^~~~~~~~~~~~~~~~~~
-   drivers/ntb/ntb_transport.c: In function 'ntb_set_mw':
->> drivers/ntb/ntb_transport.c:742:7: error: too few arguments to function 'ntb_mw_set_trans'
-     rc = ntb_mw_set_trans(nt->ndev, num_mw, mw->dma_addr, mw->xlat_size);
-          ^~~~~~~~~~~~~~~~
-   In file included from drivers/ntb/ntb_transport.c:62:0:
-   include/linux/ntb.h:718:19: note: declared here
-    static inline int ntb_mw_set_trans(struct ntb_dev *ntb, int pidx, int widx,
-                      ^~~~~~~~~~~~~~~~
-   drivers/ntb/ntb_transport.c: In function 'ntb_transport_probe':
->> drivers/ntb/ntb_transport.c:1072:13: error: too few arguments to function 'ntb_mw_count'
-     mw_count = ntb_mw_count(ndev);
-                ^~~~~~~~~~~~
-   In file included from drivers/ntb/ntb_transport.c:62:0:
-   include/linux/ntb.h:669:19: note: declared here
-    static inline int ntb_mw_count(struct ntb_dev *ntb, int pidx)
-                      ^~~~~~~~~~~~
->> drivers/ntb/ntb_transport.c:1106:8: error: implicit declaration of function 'ntb_mw_get_range' [-Werror=implicit-function-declaration]
-      rc = ntb_mw_get_range(ndev, i, &mw->phys_addr, &mw->phys_size,
-           ^~~~~~~~~~~~~~~~
-   cc1: some warnings being treated as errors
---
-   drivers/ntb/test/ntb_perf.c: In function 'perf_free_mw':
->> drivers/ntb/test/ntb_perf.c:455:2: error: too few arguments to function 'ntb_mw_clear_trans'
-     ntb_mw_clear_trans(perf->ntb, 0);
-     ^~~~~~~~~~~~~~~~~~
-   In file included from drivers/ntb/test/ntb_perf.c:60:0:
-   include/linux/ntb.h:739:19: note: declared here
-    static inline int ntb_mw_clear_trans(struct ntb_dev *ntb, int pidx, int widx)
-                      ^~~~~~~~~~~~~~~~~~
-   drivers/ntb/test/ntb_perf.c: In function 'perf_set_mw':
->> drivers/ntb/test/ntb_perf.c:491:7: error: too few arguments to function 'ntb_mw_set_trans'
-     rc = ntb_mw_set_trans(perf->ntb, 0, mw->dma_addr, mw->xlat_size);
-          ^~~~~~~~~~~~~~~~
-   In file included from drivers/ntb/test/ntb_perf.c:60:0:
-   include/linux/ntb.h:718:19: note: declared here
-    static inline int ntb_mw_set_trans(struct ntb_dev *ntb, int pidx, int widx,
-                      ^~~~~~~~~~~~~~~~
-   drivers/ntb/test/ntb_perf.c: In function 'perf_setup_mw':
->> drivers/ntb/test/ntb_perf.c:562:7: error: implicit declaration of function 'ntb_mw_get_range' [-Werror=implicit-function-declaration]
-     rc = ntb_mw_get_range(ntb, 0, &mw->phys_addr, &mw->phys_size,
-          ^~~~~~~~~~~~~~~~
-   cc1: some warnings being treated as errors
---
    drivers/ntb/hw/amd/ntb_hw_amd.c: In function 'amd_ntb_link_enable':
-   drivers/ntb/hw/amd/ntb_hw_amd.c:256:24: error: 'NTB_TOPO_SEC' undeclared (first use in this function)
+>> drivers/ntb/hw/amd/ntb_hw_amd.c:256:24: error: 'NTB_TOPO_SEC' undeclared (first use in this function)
      if (ndev->ntb.topo == NTB_TOPO_SEC)
                            ^~~~~~~~~~~~
    drivers/ntb/hw/amd/ntb_hw_amd.c:256:24: note: each undeclared identifier is reported only once for each function it appears in
@@ -101,24 +49,8 @@ All errors (new ones prefixed by >>):
    drivers/ntb/hw/amd/ntb_hw_amd.c:277:24: error: 'NTB_TOPO_SEC' undeclared (first use in this function)
      if (ndev->ntb.topo == NTB_TOPO_SEC)
                            ^~~~~~~~~~~~
-   drivers/ntb/hw/amd/ntb_hw_amd.c: At top level:
->> drivers/ntb/hw/amd/ntb_hw_amd.c:434:15: error: initialization from incompatible pointer type [-Werror=incompatible-pointer-types]
-     .mw_count  = amd_ntb_mw_count,
-                  ^~~~~~~~~~~~~~~~
-   drivers/ntb/hw/amd/ntb_hw_amd.c:434:15: note: (near initialization for 'amd_ntb_ops.mw_count')
->> drivers/ntb/hw/amd/ntb_hw_amd.c:435:2: error: unknown field 'mw_get_range' specified in initializer
-     .mw_get_range  = amd_ntb_mw_get_range,
-     ^
-   drivers/ntb/hw/amd/ntb_hw_amd.c:435:19: error: initialization from incompatible pointer type [-Werror=incompatible-pointer-types]
-     .mw_get_range  = amd_ntb_mw_get_range,
-                      ^~~~~~~~~~~~~~~~~~~~
-   drivers/ntb/hw/amd/ntb_hw_amd.c:435:19: note: (near initialization for 'amd_ntb_ops.mw_get_align')
-   drivers/ntb/hw/amd/ntb_hw_amd.c:436:19: error: initialization from incompatible pointer type [-Werror=incompatible-pointer-types]
-     .mw_set_trans  = amd_ntb_mw_set_trans,
-                      ^~~~~~~~~~~~~~~~~~~~
-   drivers/ntb/hw/amd/ntb_hw_amd.c:436:19: note: (near initialization for 'amd_ntb_ops.mw_set_trans')
    drivers/ntb/hw/amd/ntb_hw_amd.c: In function 'amd_init_ntb':
-   drivers/ntb/hw/amd/ntb_hw_amd.c:880:7: error: 'NTB_TOPO_PRI' undeclared (first use in this function)
+>> drivers/ntb/hw/amd/ntb_hw_amd.c:880:7: error: 'NTB_TOPO_PRI' undeclared (first use in this function)
      case NTB_TOPO_PRI:
           ^~~~~~~~~~~~
    drivers/ntb/hw/amd/ntb_hw_amd.c:881:7: error: 'NTB_TOPO_SEC' undeclared (first use in this function)
@@ -131,97 +63,113 @@ All errors (new ones prefixed by >>):
    drivers/ntb/hw/amd/ntb_hw_amd.c:917:10: error: 'NTB_TOPO_PRI' undeclared (first use in this function)
       return NTB_TOPO_PRI;
              ^~~~~~~~~~~~
-   drivers/ntb/hw/amd/ntb_hw_amd.c:918:1: warning: control reaches end of non-void function [-Wreturn-type]
+>> drivers/ntb/hw/amd/ntb_hw_amd.c:918:1: warning: control reaches end of non-void function [-Wreturn-type]
     }
     ^
+--
+   drivers/ntb/hw/intel/ntb_hw_intel.c: In function 'ndev_reset_unsafe_flags':
+   drivers/ntb/hw/intel/ntb_hw_intel.c:232:8: error: implicit declaration of function 'ntb_topo_is_b2b' [-Werror=implicit-function-declaration]
+      if (!ntb_topo_is_b2b(ndev->ntb.topo))
+           ^~~~~~~~~~~~~~~
+   drivers/ntb/hw/intel/ntb_hw_intel.c: In function 'intel_ntb_link_enable':
+>> drivers/ntb/hw/intel/ntb_hw_intel.c:1206:24: error: 'NTB_TOPO_SEC' undeclared (first use in this function)
+     if (ndev->ntb.topo == NTB_TOPO_SEC)
+                           ^~~~~~~~~~~~
+   drivers/ntb/hw/intel/ntb_hw_intel.c:1206:24: note: each undeclared identifier is reported only once for each function it appears in
+   drivers/ntb/hw/intel/ntb_hw_intel.c: In function 'intel_ntb_link_disable':
+   drivers/ntb/hw/intel/ntb_hw_intel.c:1235:24: error: 'NTB_TOPO_SEC' undeclared (first use in this function)
+     if (ndev->ntb.topo == NTB_TOPO_SEC)
+                           ^~~~~~~~~~~~
+   drivers/ntb/hw/intel/ntb_hw_intel.c: In function 'atom_ppd_topo':
+   drivers/ntb/hw/intel/ntb_hw_intel.c:1448:10: error: 'NTB_TOPO_B2B_USD' undeclared (first use in this function)
+      return NTB_TOPO_B2B_USD;
+             ^~~~~~~~~~~~~~~~
+   drivers/ntb/hw/intel/ntb_hw_intel.c:1452:10: error: 'NTB_TOPO_B2B_DSD' undeclared (first use in this function)
+      return NTB_TOPO_B2B_DSD;
+             ^~~~~~~~~~~~~~~~
+   drivers/ntb/hw/intel/ntb_hw_intel.c: In function 'atom_init_ntb':
+   drivers/ntb/hw/intel/ntb_hw_intel.c:1572:7: error: 'NTB_TOPO_B2B_USD' undeclared (first use in this function)
+     case NTB_TOPO_B2B_USD:
+          ^~~~~~~~~~~~~~~~
+   drivers/ntb/hw/intel/ntb_hw_intel.c:1573:7: error: 'NTB_TOPO_B2B_DSD' undeclared (first use in this function)
+     case NTB_TOPO_B2B_DSD:
+          ^~~~~~~~~~~~~~~~
+   drivers/ntb/hw/intel/ntb_hw_intel.c: In function 'atom_init_dev':
+   drivers/ntb/hw/intel/ntb_hw_intel.c:1614:24: error: 'NTB_TOPO_SEC' undeclared (first use in this function)
+     if (ndev->ntb.topo != NTB_TOPO_SEC) {
+                           ^~~~~~~~~~~~
+   drivers/ntb/hw/intel/ntb_hw_intel.c: In function 'skx_init_ntb':
+   drivers/ntb/hw/intel/ntb_hw_intel.c:1789:7: error: 'NTB_TOPO_B2B_USD' undeclared (first use in this function)
+     case NTB_TOPO_B2B_USD:
+          ^~~~~~~~~~~~~~~~
+   drivers/ntb/hw/intel/ntb_hw_intel.c:1790:7: error: 'NTB_TOPO_B2B_DSD' undeclared (first use in this function)
+     case NTB_TOPO_B2B_DSD:
+          ^~~~~~~~~~~~~~~~
+   drivers/ntb/hw/intel/ntb_hw_intel.c: In function 'xeon_link_is_up':
+   drivers/ntb/hw/intel/ntb_hw_intel.c:2043:24: error: 'NTB_TOPO_SEC' undeclared (first use in this function)
+     if (ndev->ntb.topo == NTB_TOPO_SEC)
+                           ^~~~~~~~~~~~
+   drivers/ntb/hw/intel/ntb_hw_intel.c: In function 'xeon_ppd_topo':
+   drivers/ntb/hw/intel/ntb_hw_intel.c:2053:10: error: 'NTB_TOPO_B2B_USD' undeclared (first use in this function)
+      return NTB_TOPO_B2B_USD;
+             ^~~~~~~~~~~~~~~~
+   drivers/ntb/hw/intel/ntb_hw_intel.c:2056:10: error: 'NTB_TOPO_B2B_DSD' undeclared (first use in this function)
+      return NTB_TOPO_B2B_DSD;
+             ^~~~~~~~~~~~~~~~
+>> drivers/ntb/hw/intel/ntb_hw_intel.c:2060:10: error: 'NTB_TOPO_PRI' undeclared (first use in this function)
+      return NTB_TOPO_PRI;
+             ^~~~~~~~~~~~
+   drivers/ntb/hw/intel/ntb_hw_intel.c:2064:10: error: 'NTB_TOPO_SEC' undeclared (first use in this function)
+      return NTB_TOPO_SEC;
+             ^~~~~~~~~~~~
+   drivers/ntb/hw/intel/ntb_hw_intel.c: In function 'xeon_init_ntb':
+   drivers/ntb/hw/intel/ntb_hw_intel.c:2356:7: error: 'NTB_TOPO_PRI' undeclared (first use in this function)
+     case NTB_TOPO_PRI:
+          ^~~~~~~~~~~~
+   drivers/ntb/hw/intel/ntb_hw_intel.c:2374:7: error: 'NTB_TOPO_SEC' undeclared (first use in this function)
+     case NTB_TOPO_SEC:
+          ^~~~~~~~~~~~
+   drivers/ntb/hw/intel/ntb_hw_intel.c:2386:7: error: 'NTB_TOPO_B2B_USD' undeclared (first use in this function)
+     case NTB_TOPO_B2B_USD:
+          ^~~~~~~~~~~~~~~~
+   drivers/ntb/hw/intel/ntb_hw_intel.c:2387:7: error: 'NTB_TOPO_B2B_DSD' undeclared (first use in this function)
+     case NTB_TOPO_B2B_DSD:
+          ^~~~~~~~~~~~~~~~
+   drivers/ntb/hw/intel/ntb_hw_intel.c: In function 'xeon_init_dev':
+   drivers/ntb/hw/intel/ntb_hw_intel.c:2534:24: error: 'NTB_TOPO_SEC' undeclared (first use in this function)
+     if (ndev->ntb.topo != NTB_TOPO_SEC) {
+                           ^~~~~~~~~~~~
    cc1: some warnings being treated as errors
 
-vim +/ntb_mw_clear_trans +685 drivers/ntb/ntb_transport.c
+vim +/NTB_TOPO_SEC +256 drivers/ntb/hw/amd/ntb_hw_amd.c
 
-e26a5843 Allen Hubbe 2015-04-09  679  	struct ntb_transport_mw *mw = &nt->mw_vec[num_mw];
-e26a5843 Allen Hubbe 2015-04-09  680  	struct pci_dev *pdev = nt->ndev->pdev;
-b77b2637 Jon Mason   2013-02-01  681  
-b77b2637 Jon Mason   2013-02-01  682  	if (!mw->virt_addr)
-b77b2637 Jon Mason   2013-02-01  683  		return;
-b77b2637 Jon Mason   2013-02-01  684  
-e26a5843 Allen Hubbe 2015-04-09 @685  	ntb_mw_clear_trans(nt->ndev, num_mw);
-e26a5843 Allen Hubbe 2015-04-09  686  	dma_free_coherent(&pdev->dev, mw->buff_size,
-e26a5843 Allen Hubbe 2015-04-09  687  			  mw->virt_addr, mw->dma_addr);
-e26a5843 Allen Hubbe 2015-04-09  688  	mw->xlat_size = 0;
-e26a5843 Allen Hubbe 2015-04-09  689  	mw->buff_size = 0;
-b77b2637 Jon Mason   2013-02-01  690  	mw->virt_addr = NULL;
-b77b2637 Jon Mason   2013-02-01  691  }
-b77b2637 Jon Mason   2013-02-01  692  
-e26a5843 Allen Hubbe 2015-04-09  693  static int ntb_set_mw(struct ntb_transport_ctx *nt, int num_mw,
-8c9edf63 Allen Hubbe 2015-07-13  694  		      resource_size_t size)
-fce8a7bb Jon Mason   2012-11-16  695  {
-e26a5843 Allen Hubbe 2015-04-09  696  	struct ntb_transport_mw *mw = &nt->mw_vec[num_mw];
-e26a5843 Allen Hubbe 2015-04-09  697  	struct pci_dev *pdev = nt->ndev->pdev;
-8c9edf63 Allen Hubbe 2015-07-13  698  	size_t xlat_size, buff_size;
-e26a5843 Allen Hubbe 2015-04-09  699  	int rc;
-e26a5843 Allen Hubbe 2015-04-09  700  
-8c9edf63 Allen Hubbe 2015-07-13  701  	if (!size)
-8c9edf63 Allen Hubbe 2015-07-13  702  		return -EINVAL;
-8c9edf63 Allen Hubbe 2015-07-13  703  
-e26a5843 Allen Hubbe 2015-04-09  704  	xlat_size = round_up(size, mw->xlat_align_size);
-e26a5843 Allen Hubbe 2015-04-09  705  	buff_size = round_up(size, mw->xlat_align);
-fce8a7bb Jon Mason   2012-11-16  706  
-b77b2637 Jon Mason   2013-02-01  707  	/* No need to re-setup */
-e26a5843 Allen Hubbe 2015-04-09  708  	if (mw->xlat_size == xlat_size)
-b77b2637 Jon Mason   2013-02-01  709  		return 0;
-b77b2637 Jon Mason   2013-02-01  710  
-e26a5843 Allen Hubbe 2015-04-09  711  	if (mw->buff_size)
-b77b2637 Jon Mason   2013-02-01  712  		ntb_free_mw(nt, num_mw);
-b77b2637 Jon Mason   2013-02-01  713  
-e26a5843 Allen Hubbe 2015-04-09  714  	/* Alloc memory for receiving data.  Must be aligned */
-e26a5843 Allen Hubbe 2015-04-09  715  	mw->xlat_size = xlat_size;
-e26a5843 Allen Hubbe 2015-04-09  716  	mw->buff_size = buff_size;
-fce8a7bb Jon Mason   2012-11-16  717  
-e26a5843 Allen Hubbe 2015-04-09  718  	mw->virt_addr = dma_alloc_coherent(&pdev->dev, buff_size,
-e26a5843 Allen Hubbe 2015-04-09  719  					   &mw->dma_addr, GFP_KERNEL);
-fce8a7bb Jon Mason   2012-11-16  720  	if (!mw->virt_addr) {
-e26a5843 Allen Hubbe 2015-04-09  721  		mw->xlat_size = 0;
-e26a5843 Allen Hubbe 2015-04-09  722  		mw->buff_size = 0;
-8c9edf63 Allen Hubbe 2015-07-13  723  		dev_err(&pdev->dev, "Unable to alloc MW buff of size %zu\n",
-e26a5843 Allen Hubbe 2015-04-09  724  			buff_size);
-fce8a7bb Jon Mason   2012-11-16  725  		return -ENOMEM;
-fce8a7bb Jon Mason   2012-11-16  726  	}
-fce8a7bb Jon Mason   2012-11-16  727  
-3cc5ba19 Dave Jiang  2014-08-28  728  	/*
-3cc5ba19 Dave Jiang  2014-08-28  729  	 * we must ensure that the memory address allocated is BAR size
-3cc5ba19 Dave Jiang  2014-08-28  730  	 * aligned in order for the XLAT register to take the value. This
-3cc5ba19 Dave Jiang  2014-08-28  731  	 * is a requirement of the hardware. It is recommended to setup CMA
-3cc5ba19 Dave Jiang  2014-08-28  732  	 * for BAR sizes equal or greater than 4MB.
-3cc5ba19 Dave Jiang  2014-08-28  733  	 */
-e26a5843 Allen Hubbe 2015-04-09  734  	if (!IS_ALIGNED(mw->dma_addr, mw->xlat_align)) {
-e26a5843 Allen Hubbe 2015-04-09  735  		dev_err(&pdev->dev, "DMA memory %pad is not aligned\n",
-3cc5ba19 Dave Jiang  2014-08-28  736  			&mw->dma_addr);
-3cc5ba19 Dave Jiang  2014-08-28  737  		ntb_free_mw(nt, num_mw);
-3cc5ba19 Dave Jiang  2014-08-28  738  		return -ENOMEM;
-3cc5ba19 Dave Jiang  2014-08-28  739  	}
-3cc5ba19 Dave Jiang  2014-08-28  740  
-fce8a7bb Jon Mason   2012-11-16  741  	/* Notify HW the memory location of the receive buffer */
-e26a5843 Allen Hubbe 2015-04-09 @742  	rc = ntb_mw_set_trans(nt->ndev, num_mw, mw->dma_addr, mw->xlat_size);
-e26a5843 Allen Hubbe 2015-04-09  743  	if (rc) {
-e26a5843 Allen Hubbe 2015-04-09  744  		dev_err(&pdev->dev, "Unable to set mw%d translation", num_mw);
-e26a5843 Allen Hubbe 2015-04-09  745  		ntb_free_mw(nt, num_mw);
+a1b36958 Xiangliang Yu 2016-01-21  250  	u32 ntb_ctl;
+a1b36958 Xiangliang Yu 2016-01-21  251  
+a1b36958 Xiangliang Yu 2016-01-21  252  	/* Enable event interrupt */
+a1b36958 Xiangliang Yu 2016-01-21  253  	ndev->int_mask &= ~AMD_EVENT_INTMASK;
+a1b36958 Xiangliang Yu 2016-01-21  254  	writel(ndev->int_mask, mmio + AMD_INTMASK_OFFSET);
+a1b36958 Xiangliang Yu 2016-01-21  255  
+a1b36958 Xiangliang Yu 2016-01-21 @256  	if (ndev->ntb.topo == NTB_TOPO_SEC)
+a1b36958 Xiangliang Yu 2016-01-21  257  		return -EINVAL;
+a1b36958 Xiangliang Yu 2016-01-21  258  	dev_dbg(ndev_dev(ndev), "Enabling Link.\n");
+a1b36958 Xiangliang Yu 2016-01-21  259  
 
-:::::: The code at line 685 was first introduced by commit
-:::::: e26a5843f7f5014ae4460030ca4de029a3ac35d3 NTB: Split ntb_hw_intel and ntb_transport drivers
+:::::: The code at line 256 was first introduced by commit
+:::::: a1b3695820aa490e58915d720a1438069813008b NTB: Add support for AMD PCI-Express Non-Transparent Bridge
 
-:::::: TO: Allen Hubbe <Allen.Hubbe@emc.com>
+:::::: TO: Xiangliang Yu <Xiangliang.Yu@amd.com>
 :::::: CC: Jon Mason <jdmason@kudzu.us>
 
 ---
 0-DAY kernel test infrastructure                Open Source Technology Center
 https://lists.01.org/pipermail/kbuild-all                   Intel Corporation
 
---pf9I7BMVVzbSWLtt
+--M9NhX3UHpAaciwkO
 Content-Type: application/gzip
 Content-Disposition: attachment; filename=".config.gz"
 Content-Transfer-Encoding: base64
 
-H4sICDkpP1gAAy5jb25maWcAjFxLd+M2st7nV+h07mJmkbTtdhz3uccLiAQlRATBBkBJ9obH
+H4sICLEiP1gAAy5jb25maWcAjFxLd+M2st7nV+h07mJmkbTtdhz3uccLiAQlRATBBkBJ9obH
 basTn7itjCxn0v9+qgBSBKCikiySGCiAeNTjqwf0/XffT9jbfvv1fv/0cP/8/G3y6+Zls7vf
 bx4nX56eN/8/ydWkUnbCc2F/BOLy6eXtr/d/XV+1V5eTyx8//nj2w+7h58lis3vZPE+y7cuX
 p1/fYPzT9uW777/LVFWIGZBOhb351v+5dqOjv4c/RGWsbjIrVNXmPFM510Onamzd2LZQWjJ7
@@ -653,4 +601,4 @@ JsThlgVrJcBbi+R9JhyPS9G2VaJA1pBQaoTjGkGhCmThg/AmwrukxeufwrYe6MFzq9alQKcf
 q4nXlkQrc3w2bX2V32I6GgtQNan7wCNN2ShZzTXa+1bRRa10KL95F0K3q5xdaC3GVKmsrycx
 1GJXhOL8YzE0yeAcDE8ovLcZ6D5oRtKVfipr2wOh1TebAPh/Zs6prBhiAQA=
 
---pf9I7BMVVzbSWLtt--
+--M9NhX3UHpAaciwkO--
