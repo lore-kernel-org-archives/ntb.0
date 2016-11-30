@@ -1,24 +1,23 @@
 Return-Path: <fengguang.wu@intel.com>
-Received: from mga09.intel.com (mga09.intel.com. [134.134.136.24])
-        by gmr-mx.google.com with ESMTPS id g192si714550pfb.1.2016.11.30.10.54.19
+Received: from mga14.intel.com (mga14.intel.com. [192.55.52.115])
+        by gmr-mx.google.com with ESMTPS id n18si783405pfb.2.2016.11.30.10.40.16
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 30 Nov 2016 10:54:19 -0800 (PST)
-Date: Thu, 1 Dec 2016 02:54:09 +0800
+        Wed, 30 Nov 2016 10:40:16 -0800 (PST)
+Date: Thu, 1 Dec 2016 02:40:11 +0800
 From: kbuild test robot <lkp@intel.com>
-Subject: Re: [PATCH 03/22] NTB: Alter NTB API to support both inbound and
- outbound MW based interfaces
-Message-ID: <201612010255.xB6WxXvX%fengguang.wu@intel.com>
+Subject: Re: [PATCH 02/22] NTB: Add peer indexed ports NTB API
+Message-ID: <201612010212.VgP7bO0Y%fengguang.wu@intel.com>
 MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="/04w6evG8XlLl3ft"
+Content-Type: multipart/mixed; boundary="FCuugMFkClbJLl1L"
 Content-Disposition: inline
-In-Reply-To: <1480439777-1080-4-git-send-email-fancer.lancer@gmail.com>
+In-Reply-To: <1480439777-1080-3-git-send-email-fancer.lancer@gmail.com>
 To: Serge Semin <fancer.lancer@gmail.com>
 Cc: kbuild-all@01.org, jdmason@kudzu.us, dave.jiang@intel.com, Allen.Hubbe@emc.com, Xiangliang.Yu@amd.com, Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Serge Semin <fancer.lancer@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
 
---/04w6evG8XlLl3ft
+--FCuugMFkClbJLl1L
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 
@@ -39,7 +38,7 @@ reproduce:
 All errors (new ones prefixed by >>):
 
    drivers/ntb/hw/intel/ntb_hw_intel.c: In function 'ndev_reset_unsafe_flags':
-   drivers/ntb/hw/intel/ntb_hw_intel.c:232:8: error: implicit declaration of function 'ntb_topo_is_b2b' [-Werror=implicit-function-declaration]
+>> drivers/ntb/hw/intel/ntb_hw_intel.c:232:8: error: implicit declaration of function 'ntb_topo_is_b2b' [-Werror=implicit-function-declaration]
       if (!ntb_topo_is_b2b(ndev->ntb.topo))
            ^~~~~~~~~~~~~~~
    drivers/ntb/hw/intel/ntb_hw_intel.c: In function 'intel_ntb_link_enable':
@@ -52,10 +51,10 @@ All errors (new ones prefixed by >>):
      if (ndev->ntb.topo == NTB_TOPO_SEC)
                            ^~~~~~~~~~~~
    drivers/ntb/hw/intel/ntb_hw_intel.c: In function 'atom_ppd_topo':
-   drivers/ntb/hw/intel/ntb_hw_intel.c:1448:10: error: 'NTB_TOPO_B2B_USD' undeclared (first use in this function)
+>> drivers/ntb/hw/intel/ntb_hw_intel.c:1448:10: error: 'NTB_TOPO_B2B_USD' undeclared (first use in this function)
       return NTB_TOPO_B2B_USD;
              ^~~~~~~~~~~~~~~~
-   drivers/ntb/hw/intel/ntb_hw_intel.c:1452:10: error: 'NTB_TOPO_B2B_DSD' undeclared (first use in this function)
+>> drivers/ntb/hw/intel/ntb_hw_intel.c:1452:10: error: 'NTB_TOPO_B2B_DSD' undeclared (first use in this function)
       return NTB_TOPO_B2B_DSD;
              ^~~~~~~~~~~~~~~~
    drivers/ntb/hw/intel/ntb_hw_intel.c: In function 'atom_init_ntb':
@@ -110,54 +109,22 @@ All errors (new ones prefixed by >>):
    drivers/ntb/hw/intel/ntb_hw_intel.c:2534:24: error: 'NTB_TOPO_SEC' undeclared (first use in this function)
      if (ndev->ntb.topo != NTB_TOPO_SEC) {
                            ^~~~~~~~~~~~
-   drivers/ntb/hw/intel/ntb_hw_intel.c: At top level:
->> drivers/ntb/hw/intel/ntb_hw_intel.c:2886:15: error: initialization from incompatible pointer type [-Werror=incompatible-pointer-types]
-     .mw_count  = intel_ntb_mw_count,
-                  ^~~~~~~~~~~~~~~~~~
-   drivers/ntb/hw/intel/ntb_hw_intel.c:2886:15: note: (near initialization for 'intel_ntb_ops.mw_count')
->> drivers/ntb/hw/intel/ntb_hw_intel.c:2887:2: error: unknown field 'mw_get_range' specified in initializer
-     .mw_get_range  = intel_ntb_mw_get_range,
-     ^
-   drivers/ntb/hw/intel/ntb_hw_intel.c:2887:19: error: initialization from incompatible pointer type [-Werror=incompatible-pointer-types]
-     .mw_get_range  = intel_ntb_mw_get_range,
-                      ^~~~~~~~~~~~~~~~~~~~~~
-   drivers/ntb/hw/intel/ntb_hw_intel.c:2887:19: note: (near initialization for 'intel_ntb_ops.mw_get_align')
-   drivers/ntb/hw/intel/ntb_hw_intel.c:2888:19: error: initialization from incompatible pointer type [-Werror=incompatible-pointer-types]
-     .mw_set_trans  = intel_ntb_mw_set_trans,
-                      ^~~~~~~~~~~~~~~~~~~~~~
-   drivers/ntb/hw/intel/ntb_hw_intel.c:2888:19: note: (near initialization for 'intel_ntb_ops.mw_set_trans')
-   drivers/ntb/hw/intel/ntb_hw_intel.c:2912:15: error: initialization from incompatible pointer type [-Werror=incompatible-pointer-types]
-     .mw_count  = intel_ntb_mw_count,
-                  ^~~~~~~~~~~~~~~~~~
-   drivers/ntb/hw/intel/ntb_hw_intel.c:2912:15: note: (near initialization for 'intel_ntb3_ops.mw_count')
-   drivers/ntb/hw/intel/ntb_hw_intel.c:2913:2: error: unknown field 'mw_get_range' specified in initializer
-     .mw_get_range  = intel_ntb_mw_get_range,
-     ^
-   drivers/ntb/hw/intel/ntb_hw_intel.c:2913:19: error: initialization from incompatible pointer type [-Werror=incompatible-pointer-types]
-     .mw_get_range  = intel_ntb_mw_get_range,
-                      ^~~~~~~~~~~~~~~~~~~~~~
-   drivers/ntb/hw/intel/ntb_hw_intel.c:2913:19: note: (near initialization for 'intel_ntb3_ops.mw_get_align')
-   drivers/ntb/hw/intel/ntb_hw_intel.c:2914:19: error: initialization from incompatible pointer type [-Werror=incompatible-pointer-types]
-     .mw_set_trans  = intel_ntb3_mw_set_trans,
-                      ^~~~~~~~~~~~~~~~~~~~~~~
-   drivers/ntb/hw/intel/ntb_hw_intel.c:2914:19: note: (near initialization for 'intel_ntb3_ops.mw_set_trans')
    cc1: some warnings being treated as errors
 
-vim +/mw_get_range +2887 drivers/ntb/hw/intel/ntb_hw_intel.c
+vim +/ntb_topo_is_b2b +232 drivers/ntb/hw/intel/ntb_hw_intel.c
 
-89a85cde Dave Jiang  2016-11-16  2880  	.bar2_limit		= SKX_IMBAR1XLMT_OFFSET,
-89a85cde Dave Jiang  2016-11-16  2881  	.bar2_xlat		= SKX_IMBAR1XBASE_OFFSET,
-89a85cde Dave Jiang  2016-11-16  2882  };
-89a85cde Dave Jiang  2016-11-16  2883  
-e26a5843 Allen Hubbe 2015-04-09  2884  /* operations for primary side of local ntb */
-e26a5843 Allen Hubbe 2015-04-09  2885  static const struct ntb_dev_ops intel_ntb_ops = {
-e26a5843 Allen Hubbe 2015-04-09 @2886  	.mw_count		= intel_ntb_mw_count,
-e26a5843 Allen Hubbe 2015-04-09 @2887  	.mw_get_range		= intel_ntb_mw_get_range,
-e26a5843 Allen Hubbe 2015-04-09  2888  	.mw_set_trans		= intel_ntb_mw_set_trans,
-e26a5843 Allen Hubbe 2015-04-09  2889  	.link_is_up		= intel_ntb_link_is_up,
-e26a5843 Allen Hubbe 2015-04-09  2890  	.link_enable		= intel_ntb_link_enable,
+fce8a7bb drivers/ntb/ntb_hw.c                Jon Mason   2012-11-16  226  {
+e26a5843 drivers/ntb/hw/intel/ntb_hw_intel.c Allen Hubbe 2015-04-09  227  	ndev->unsafe_flags = 0;
+e26a5843 drivers/ntb/hw/intel/ntb_hw_intel.c Allen Hubbe 2015-04-09  228  	ndev->unsafe_flags_ignore = 0;
+fce8a7bb drivers/ntb/ntb_hw.c                Jon Mason   2012-11-16  229  
+e26a5843 drivers/ntb/hw/intel/ntb_hw_intel.c Allen Hubbe 2015-04-09  230  	/* Only B2B has a workaround to avoid SDOORBELL */
+e26a5843 drivers/ntb/hw/intel/ntb_hw_intel.c Allen Hubbe 2015-04-09  231  	if (ndev->hwerr_flags & NTB_HWERR_SDOORBELL_LOCKUP)
+e26a5843 drivers/ntb/hw/intel/ntb_hw_intel.c Allen Hubbe 2015-04-09 @232  		if (!ntb_topo_is_b2b(ndev->ntb.topo))
+e26a5843 drivers/ntb/hw/intel/ntb_hw_intel.c Allen Hubbe 2015-04-09  233  			ndev->unsafe_flags |= NTB_UNSAFE_DB;
+fce8a7bb drivers/ntb/ntb_hw.c                Jon Mason   2012-11-16  234  
+e26a5843 drivers/ntb/hw/intel/ntb_hw_intel.c Allen Hubbe 2015-04-09  235  	/* No low level workaround to avoid SB01BASE */
 
-:::::: The code at line 2887 was first introduced by commit
+:::::: The code at line 232 was first introduced by commit
 :::::: e26a5843f7f5014ae4460030ca4de029a3ac35d3 NTB: Split ntb_hw_intel and ntb_transport drivers
 
 :::::: TO: Allen Hubbe <Allen.Hubbe@emc.com>
@@ -167,12 +134,12 @@ e26a5843 Allen Hubbe 2015-04-09  2890  	.link_enable		= intel_ntb_link_enable,
 0-DAY kernel test infrastructure                Open Source Technology Center
 https://lists.01.org/pipermail/kbuild-all                   Intel Corporation
 
---/04w6evG8XlLl3ft
+--FCuugMFkClbJLl1L
 Content-Type: application/gzip
 Content-Disposition: attachment; filename=".config.gz"
 Content-Transfer-Encoding: base64
 
-H4sICN4eP1gAAy5jb25maWcAjDzLcty2svt8xZRzF+csEkuyLTt1SwuQBGeQIQmaAEcjbViK
+H4sICNcaP1gAAy5jb25maWcAjDzLcty2svt8xZRzF+csEkuyLTt1SwuQBGeQIQmaAEcjbViK
 NE5URw8fSc6N//52N/hogKASL2yzuwHi0e9uzo8//LgS314e769ebq+v7u6+r34/PByerl4O
 N6svt3eH/11lelVpu5KZsj8DcXH78O2vt399Ou1O36/e//zLz0c/PV1/XG0PTw+Hu1X6+PDl
 9vdvMP728eGHH39IdZWrNZAmyp59Hx73NNp7nh5UZWzTplbpqstkqjPZTEjd2rq1Xa6bUtiz
@@ -1222,4 +1189,4 @@ JTfIzKtUeo506wj0JGKlwthAdbxNG2F91oXohrWV8mNSouLEedtRircAxHT649RB+Pgk6OQH
 d2RF0Icfy40FYbiozJOggqYpPDg6nuw3PzyZLZyaFJ5SAbpc/VitLHi5+LFkWTX48DDjUkGD
 kaNKn3FsgyNOcTOXkYRxjHpxlzqSUFjuLQNPGpRRXHHz5caYmv/8r/8H+kLbJkx8AwA=
 
---/04w6evG8XlLl3ft--
+--FCuugMFkClbJLl1L--
