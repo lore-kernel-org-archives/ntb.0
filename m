@@ -1,105 +1,35 @@
-Return-Path: <Shyam-sundar.S-k@amd.com>
-Received: from NAM01-BY2-obe.outbound.protection.outlook.com (mail-by2nam01on0087.outbound.protection.outlook.com. [104.47.34.87])
-        by gmr-mx.google.com with ESMTPS id 13si615898itg.2.2016.12.02.09.47.22
+Return-Path: <Allen.Hubbe@dell.com>
+Received: from esa2.dell-outbound.iphmx.com (esa2.dell-outbound.iphmx.com. [68.232.149.220])
+        by gmr-mx.google.com with ESMTPS id z131si437089ywz.4.2016.12.02.08.58.26
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Fri, 02 Dec 2016 09:47:22 -0800 (PST)
-From: Shyam Sundar S K <ssundark@amd.com>
-Subject: [PATCH v3] ntb_transport: Limit memory windows based on available,
- scratchpads
-Message-ID: <9fd3e0a0-8385-dc61-0671-f1e95feae0f2@amd.com>
-Date: Fri, 2 Dec 2016 23:16:50 +0530
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 02 Dec 2016 08:58:26 -0800 (PST)
+From: "Allen Hubbe" <Allen.Hubbe@dell.com>
+References: <77f276f0-18df-6365-1b66-dfe4b30ee7d8@amd.com> <000101d24c42$f507b040$df1710c0$@dell.com> <7e2a1e3b-607a-197e-f965-e26cd3a4af60@amd.com> <000001d24ca8$955380a0$bffa81e0$@dell.com> <8648997a-6e7d-fadb-be24-dc8ecf71d27e@amd.com>
+In-Reply-To: <8648997a-6e7d-fadb-be24-dc8ecf71d27e@amd.com>
+Subject: RE: [PATCH 1/2] ntb_transport: Limit memory windows based on available, scratchpads
+Date: Fri, 2 Dec 2016 11:57:43 -0500
+Message-ID: <003601d24cbd$33648000$9a2d8000$@dell.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain;
+	charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-Path: ssundark@amd.com
-To: Jon Mason <jdmason@kudzu.us>, Allen Hubbe <Allen.Hubbe@dell.com>, linux-ntb@googlegroups.com
-Cc: Dave Jiang <dave.jiang@intel.com>, "Yu, Xiangliang" <Xiangliang.Yu@amd.com>, "Sen, Pankaj" <Pankaj.Sen@amd.com>, "Shah,
- Nehal-bakulchandra" <Nehal-bakulchandra.Shah@amd.com>, "Agrawal,
- Nitesh-kumar" <Nitesh-kumar.Agrawal@amd.com>, "Subramaniyan, Ramkumar" <ramkumar.ks@amd.com>, "Su, Richard (Bin)" <Richard1.Su@amd.com>
+Content-Language: en-us
+To: 'Shyam Sundar S K' <ssundark@amd.com>, 'Jon Mason' <jdmason@kudzu.us>, 'Dave Jiang' <dave.jiang@intel.com>
+Cc: "'Yu, Xiangliang'" <Xiangliang.Yu@amd.com>, "'Shah, Nehal-bakulchandra'" <Nehal-bakulchandra.Shah@amd.com>, "'Agrawal, Nitesh-kumar'" <Nitesh-kumar.Agrawal@amd.com>, "'Sen, Pankaj'" <Pankaj.Sen@amd.com>, "'Su, Richard (Bin)'" <Richard1.Su@amd.com>, "'Subramaniyan, Ramkumar'" <ramkumar.ks@amd.com>, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-When the underlying NTB H/W driver advertises more memory windows
-than the number of scratchpads available to setup MW's, it is likely
-that we may end up filling the remaining memory windows with garbage.
-So to avoid that, lets limit the memory windows that transport driver
-can setup based on the available scratchpads.
+This should be subject: [PATCH v2 ...]
+Next should be PATCH v3.
 
-Reviewed-by: Shah, Nehal-bakulchandra <Nehal-bakulchandra.Shah@amd.com>
-Reviewed-by: Agrawal, Nitesh-kumar <Nitesh-kumar.Agrawal@amd.com>
-Signed-off-by: S-k, Shyam-sundar <Shyam-sundar.S-k@amd.com>
----
- drivers/ntb/ntb_transport.c | 24 +++++++++++++-----------
- 1 file changed, 13 insertions(+), 11 deletions(-)
+git format-patch -v3
 
-diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 4eb8adb..e02ad4e 100644
---- a/drivers/ntb/ntb_transport.c
-+++ b/drivers/ntb/ntb_transport.c
-@@ -66,6 +66,7 @@
- #define NTB_TRANSPORT_VER	"4"
- #define NTB_TRANSPORT_NAME	"ntb_transport"
- #define NTB_TRANSPORT_DESC	"Software Queue-Pair Transport over NTB"
-+#define NTB_TRANSPORT_MIN_SPADS (MW0_SZ_HIGH + 2)
+From: Shyam Sundar S K
+> -	for (i = 0; i < MAX_SPAD; i++)
+> +	for (i = 0; i < ntb_spad_count(nt->ndev); i++)
 
- MODULE_DESCRIPTION(NTB_TRANSPORT_DESC);
- MODULE_VERSION(NTB_TRANSPORT_VER);
-@@ -242,9 +243,6 @@ enum {
- 	NUM_MWS,
- 	MW0_SZ_HIGH,
- 	MW0_SZ_LOW,
--	MW1_SZ_HIGH,
--	MW1_SZ_LOW,
--	MAX_SPAD,
- };
+count = ntb_spad_count(nt->ndev);
+for (i = 0; i < count; i++) ...
 
- #define dev_client_dev(__dev) \
-@@ -831,7 +829,7 @@ static void ntb_transport_link_cleanup(struct ntb_transport_ctx *nt)
- 	 * goes down, blast them now to give them a sane value the next
- 	 * time they are accessed
- 	 */
--	for (i = 0; i < MAX_SPAD; i++)
-+	for (i = 0; i < ntb_spad_count(nt->ndev); i++)
- 		ntb_spad_write(nt->ndev, i, 0);
- }
+The rest looks good.  Thanks.
 
-@@ -1064,17 +1062,12 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
- {
- 	struct ntb_transport_ctx *nt;
- 	struct ntb_transport_mw *mw;
--	unsigned int mw_count, qp_count;
-+	unsigned int mw_count, qp_count, spad_count, max_mw_count_for_spads;
- 	u64 qp_bitmap;
- 	int node;
- 	int rc, i;
-
- 	mw_count = ntb_mw_count(ndev);
--	if (ntb_spad_count(ndev) < (NUM_MWS + 1 + mw_count * 2)) {
--		dev_err(&ndev->dev, "Not enough scratch pad registers for %s",
--			NTB_TRANSPORT_NAME);
--		return -EIO;
--	}
-
- 	if (ntb_db_is_unsafe(ndev))
- 		dev_dbg(&ndev->dev,
-@@ -1090,8 +1083,17 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
- 		return -ENOMEM;
-
- 	nt->ndev = ndev;
-+	spad_count = ntb_spad_count(ndev);
-+
-+	/* Limit the MW's based on the availability of scratchpads */
-+
-+	if (spad_count < NTB_TRANSPORT_MIN_SPADS) {
-+		nt->mw_count = 0;
-+		goto err;
-+	}
-
--	nt->mw_count = mw_count;
-+	max_mw_count_for_spads = (spad_count - MW0_SZ_HIGH) / 2;
-+	nt->mw_count = min(mw_count, max_mw_count_for_spads);
-
- 	nt->mw_vec = kzalloc_node(mw_count * sizeof(*nt->mw_vec),
- 				  GFP_KERNEL, node);
--- 
-2.7.4
