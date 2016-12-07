@@ -1,19 +1,19 @@
 Return-Path: <Shyam-sundar.S-k@amd.com>
-Received: from NAM01-BY2-obe.outbound.protection.outlook.com (mail-by2nam01on0054.outbound.protection.outlook.com. [104.47.34.54])
-        by gmr-mx.google.com with ESMTPS id t67si3901386pfd.3.2016.12.07.09.07.32
+Received: from NAM02-BL2-obe.outbound.protection.outlook.com (mail-bl2nam02on0047.outbound.protection.outlook.com. [104.47.38.47])
+        by gmr-mx.google.com with ESMTPS id v140si1047900itc.0.2016.12.06.23.20.49
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Wed, 07 Dec 2016 09:07:32 -0800 (PST)
+        Tue, 06 Dec 2016 23:20:49 -0800 (PST)
 From: Shyam Sundar S K <ssundark@amd.com>
-Subject: [PATCH v5] ntb_transport: Limit memory windows based on available,
+Subject: [PATCH v4] ntb_transport: Limit memory windows based on available,
  scratchpads
-Message-ID: <fb25c1dd-7532-8f09-45d6-d25c155f3a5d@amd.com>
-Date: Wed, 7 Dec 2016 22:37:05 +0530
+Message-ID: <236df8d4-c97e-6e43-b3e7-df52261ab4c1@amd.com>
+Date: Wed, 7 Dec 2016 12:50:24 +0530
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-Path: ssundark@amd.com
-To: Allen Hubbe <Allen.Hubbe@dell.com>, Dave Jiang <dave.jiang@intel.com>, Jon Mason <jdmason@kudzu.us>, linux-ntb@googlegroups.com, "Shah,
+To: Allen Hubbe <Allen.Hubbe@dell.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, linux-ntb@googlegroups.com, "Shah,
  Nehal-bakulchandra" <Nehal-bakulchandra.Shah@amd.com>, "Sen, Pankaj" <Pankaj.Sen@amd.com>, "Agrawal, Nitesh-kumar" <Nitesh-kumar.Agrawal@amd.com>, "Subramaniyan, Ramkumar" <ramkumar.ks@amd.com>, "Su, Richard (Bin)" <Richard1.Su@amd.com>
 List-ID: <linux-ntb.googlegroups.com>
 
@@ -27,11 +27,11 @@ Reviewed-by: Shah, Nehal-bakulchandra <Nehal-bakulchandra.Shah@amd.com>
 Reviewed-by: Agrawal, Nitesh-kumar <Nitesh-kumar.Agrawal@amd.com>
 Signed-off-by: S-k, Shyam-sundar <Shyam-sundar.S-k@amd.com>
 ---
- drivers/ntb/ntb_transport.c | 27 +++++++++++++++------------
- 1 file changed, 15 insertions(+), 12 deletions(-)
+ drivers/ntb/ntb_transport.c | 26 +++++++++++++++-----------
+ 1 file changed, 15 insertions(+), 11 deletions(-)
 
 diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 4eb8adb..6adbfa3 100644
+index 4eb8adb..0589372 100644
 --- a/drivers/ntb/ntb_transport.c
 +++ b/drivers/ntb/ntb_transport.c
 @@ -66,6 +66,7 @@
@@ -52,16 +52,15 @@ index 4eb8adb..6adbfa3 100644
  };
 
  #define dev_client_dev(__dev) \
-@@ -811,7 +809,7 @@ static void ntb_transport_link_cleanup(struct ntb_transport_ctx *nt)
- {
+@@ -812,6 +810,7 @@ static void ntb_transport_link_cleanup(struct ntb_transport_ctx *nt)
  	struct ntb_transport_qp *qp;
  	u64 qp_bitmap_alloc;
--	int i;
-+	unsigned int i, count;
+ 	int i;
++	unsigned int count;
 
  	qp_bitmap_alloc = nt->qp_bitmap & ~nt->qp_bitmap_free;
 
-@@ -831,7 +829,8 @@ static void ntb_transport_link_cleanup(struct ntb_transport_ctx *nt)
+@@ -831,7 +830,8 @@ static void ntb_transport_link_cleanup(struct ntb_transport_ctx *nt)
  	 * goes down, blast them now to give them a sane value the next
  	 * time they are accessed
  	 */
@@ -71,7 +70,7 @@ index 4eb8adb..6adbfa3 100644
  		ntb_spad_write(nt->ndev, i, 0);
  }
 
-@@ -1064,17 +1063,12 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
+@@ -1064,17 +1064,12 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
  {
  	struct ntb_transport_ctx *nt;
  	struct ntb_transport_mw *mw;
@@ -90,7 +89,7 @@ index 4eb8adb..6adbfa3 100644
 
  	if (ntb_db_is_unsafe(ndev))
  		dev_dbg(&ndev->dev,
-@@ -1090,8 +1084,17 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
+@@ -1090,8 +1085,17 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
  		return -ENOMEM;
 
  	nt->ndev = ndev;
