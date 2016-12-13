@@ -1,13 +1,13 @@
 Return-Path: <Allen.Hubbe@dell.com>
 Received: from esa1.dell-outbound.iphmx.com (esa1.dell-outbound.iphmx.com. [68.232.153.90])
-        by gmr-mx.google.com with ESMTPS id u66si2686555ywg.1.2016.12.12.20.12.26
+        by gmr-mx.google.com with ESMTPS id h18si2945835ywc.2.2016.12.12.20.12.16
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 12 Dec 2016 20:12:26 -0800 (PST)
+        Mon, 12 Dec 2016 20:12:17 -0800 (PST)
 From: "Allen Hubbe" <Allen.Hubbe@dell.com>
-Subject: RE: [PATCH v2 2/9] NTB: Add indexed ports NTB API
-Date: Mon, 12 Dec 2016 23:11:57 -0500
-Message-ID: <000101d254f7$0eddadf0$2c9909d0$@dell.com>
+Subject: RE: [PATCH v2 1/9] NTB: Make link-state API being declared first
+Date: Mon, 12 Dec 2016 23:11:47 -0500
+Message-ID: <000001d254f7$083e94a0$18bbbde0$@dell.com>
 MIME-Version: 1.0
 Content-Type: text/plain;
 	charset="Windows-1252"
@@ -17,472 +17,641 @@ To: 'Serge Semin' <fancer.lancer@gmail.com>, jdmason@kudzu.us, dave.jiang@intel.
 Cc: Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Serge Semin 
-> There are some NTB hardware, which can combine more than just two domains
-> over NTB. For instance, some IDT PCIe-switches can have NTB-functions
-> activated on more than two-ports. The different domains are distinguished
-> by ports they are connected to. So the new port-related methods are added to
-> the NTB API:
->  ntb_port_number() - return local port
->  ntb_peer_port_count() - return number of peers local port can connect to
->  ntb_peer_port_number(pdix) - return port number by it index
->  ntb_peer_port_idx(port) - return port index by it number
+From: Serge Semin
+> Since link operations are usually performed before memory window access
+> operations, it's logically better to declared link-related API before any
+> other methods. Additionally it's good practice for readability to declare
+> NTB device callback methods of hadrware drivers with the same order as it's
+> done within ntb.h.
+
+s/hadrware/hardware/
+
+Please limit this change to ntb.h.  Leave it to the hardware driver maintainers to rearrange the methods in each driver if they care to.  Code movement may conflict with other changes in development.
+
 > 
-> Current test-drivers aren't changed much. They still support two-ports devices
-> for the time being while multi-ports hardware drivers aren't added.
-> 
-
-The port methods are the same for PRI/SEC drivers.  Rather than duplicating the code, multiport could be made optional in the api, and default implementations provided by ntb common code.
-
-Some comments below.
-
 > Signed-off-by: Serge Semin <fancer.lancer@gmail.com>
 > 
 > ---
->  drivers/ntb/hw/amd/ntb_hw_amd.c     | 47 ++++++++++++++++++++++++
->  drivers/ntb/hw/amd/ntb_hw_amd.h     |  9 +++++
->  drivers/ntb/hw/intel/ntb_hw_intel.c | 52 ++++++++++++++++++++++++++-
->  drivers/ntb/hw/intel/ntb_hw_intel.h |  9 +++++
->  drivers/ntb/ntb_transport.c         |  6 ++++
->  drivers/ntb/test/ntb_perf.c         |  4 +++
->  drivers/ntb/test/ntb_pingpong.c     |  6 ++++
->  drivers/ntb/test/ntb_tool.c         |  5 +++
->  include/linux/ntb.h                 | 71 +++++++++++++++++++++++++++++++++++++
->  9 files changed, 208 insertions(+), 1 deletion(-)
+>  drivers/ntb/hw/amd/ntb_hw_amd.c     | 188 ++++++++++++++++++------------------
+>  drivers/ntb/hw/intel/ntb_hw_intel.c | 168 ++++++++++++++++----------------
+>  include/linux/ntb.h                 | 137 +++++++++++++-------------
+>  3 files changed, 247 insertions(+), 246 deletions(-)
 > 
 > diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.c b/drivers/ntb/hw/amd/ntb_hw_amd.c
-> index 6704327..0b767ef 100644
+> index 6ccba0d..6704327 100644
 > --- a/drivers/ntb/hw/amd/ntb_hw_amd.c
 > +++ b/drivers/ntb/hw/amd/ntb_hw_amd.c
-> @@ -71,6 +71,49 @@ MODULE_AUTHOR("AMD Inc.");
+> @@ -71,6 +71,97 @@ MODULE_AUTHOR("AMD Inc.");
 >  static const struct file_operations amd_ntb_debugfs_info;
 >  static struct dentry *debugfs_dir;
 > 
-> +static int amd_ntb_port_number(struct ntb_dev *ntb)
+> +static int amd_link_is_up(struct amd_ntb_dev *ndev)
 > +{
-> +	switch (ntb->topo) {
-> +	case NTB_TOPO_PRI:
-> +	case NTB_TOPO_B2B_USD:
-> +		return NTB_PORT_PRI_USD;
-> +	case NTB_TOPO_SEC:
-> +	case NTB_TOPO_B2B_DSD:
-> +		return NTB_PORT_SEC_DSD;
-> +	default:
-> +		break;
-> +	}
+> +	if (!ndev->peer_sta)
+> +		return NTB_LNK_STA_ACTIVE(ndev->cntl_sta);
 > +
-> +	return -EINVAL;
-> +}
+> +	/* If peer_sta is reset or D0 event, the ISR has
+> +	 * started a timer to check link status of hardware.
+> +	 * So here just clear status bit. And if peer_sta is
+> +	 * D3 or PME_TO, D0/reset event will be happened when
+> +	 * system wakeup/poweron, so do nothing here.
+> +	 */
+> +	if (ndev->peer_sta & AMD_PEER_RESET_EVENT)
+> +		ndev->peer_sta &= ~AMD_PEER_RESET_EVENT;
+> +	else if (ndev->peer_sta & AMD_PEER_D0_EVENT)
+> +		ndev->peer_sta = 0;
 > +
-> +static int amd_ntb_peer_port_count(struct ntb_dev *ntb)
-> +{
-> +	return NTB_PEER_CNT;
-> +}
-> +
-> +static int amd_ntb_peer_port_number(struct ntb_dev *ntb, int pidx)
-> +{
-> +	int local_port = amd_ntb_port_number(ntb);
-> +
-> +	if (pidx > NTB_PIDX_MAX)
-> +		return -EINVAL;
-
-pidx may be negative.
-
-> +
-> +	return (local_port == NTB_PORT_PRI_USD ?
-> +		NTB_PORT_SEC_DSD : NTB_PORT_PRI_USD);
-
-local_port may be -EINVAL.
-
-It may be simpler to have the same switch statement here as in amd_ntb_port_number(), with the return statements swapped.
-
-> +}
-> +
-> +static int amd_ntb_peer_port_idx(struct ntb_dev *ntb, int port)
-> +{
-> +	int local_port = amd_ntb_port_number(ntb);
-> +
-> +	if ((local_port == NTB_PORT_PRI_USD && port != NTB_PORT_SEC_DSD) ||
-> +	    (local_port == NTB_PORT_SEC_DSD && port != NTB_PORT_PRI_USD))
-> +		return -EINVAL;
-> +
-
-How about:
-
-peer_port = amd_ntb_peer_port_number(ntb, 0);
-
-if (peer_port == -EINVAL || port != peer_port)
-	return -EINVAL;
-
-return 0;
-
 > +	return 0;
 > +}
 > +
->  static int amd_link_is_up(struct amd_ntb_dev *ndev)
+> +static int amd_ntb_link_is_up(struct ntb_dev *ntb,
+> +			      enum ntb_speed *speed,
+> +			      enum ntb_width *width)
+> +{
+> +	struct amd_ntb_dev *ndev = ntb_ndev(ntb);
+> +	int ret = 0;
+> +
+> +	if (amd_link_is_up(ndev)) {
+> +		if (speed)
+> +			*speed = NTB_LNK_STA_SPEED(ndev->lnk_sta);
+> +		if (width)
+> +			*width = NTB_LNK_STA_WIDTH(ndev->lnk_sta);
+> +
+> +		dev_dbg(ndev_dev(ndev), "link is up.\n");
+> +
+> +		ret = 1;
+> +	} else {
+> +		if (speed)
+> +			*speed = NTB_SPEED_NONE;
+> +		if (width)
+> +			*width = NTB_WIDTH_NONE;
+> +
+> +		dev_dbg(ndev_dev(ndev), "link is down.\n");
+> +	}
+> +
+> +	return ret;
+> +}
+> +
+> +static int amd_ntb_link_enable(struct ntb_dev *ntb,
+> +			       enum ntb_speed max_speed,
+> +			       enum ntb_width max_width)
+> +{
+> +	struct amd_ntb_dev *ndev = ntb_ndev(ntb);
+> +	void __iomem *mmio = ndev->self_mmio;
+> +	u32 ntb_ctl;
+> +
+> +	/* Enable event interrupt */
+> +	ndev->int_mask &= ~AMD_EVENT_INTMASK;
+> +	writel(ndev->int_mask, mmio + AMD_INTMASK_OFFSET);
+> +
+> +	if (ndev->ntb.topo == NTB_TOPO_SEC)
+> +		return -EINVAL;
+> +	dev_dbg(ndev_dev(ndev), "Enabling Link.\n");
+> +
+> +	ntb_ctl = readl(mmio + AMD_CNTL_OFFSET);
+> +	ntb_ctl |= (PMM_REG_CTL | SMM_REG_CTL);
+> +	writel(ntb_ctl, mmio + AMD_CNTL_OFFSET);
+> +
+> +	return 0;
+> +}
+> +
+> +static int amd_ntb_link_disable(struct ntb_dev *ntb)
+> +{
+> +	struct amd_ntb_dev *ndev = ntb_ndev(ntb);
+> +	void __iomem *mmio = ndev->self_mmio;
+> +	u32 ntb_ctl;
+> +
+> +	/* Disable event interrupt */
+> +	ndev->int_mask |= AMD_EVENT_INTMASK;
+> +	writel(ndev->int_mask, mmio + AMD_INTMASK_OFFSET);
+> +
+> +	if (ndev->ntb.topo == NTB_TOPO_SEC)
+> +		return -EINVAL;
+> +	dev_dbg(ndev_dev(ndev), "Enabling Link.\n");
+> +
+> +	ntb_ctl = readl(mmio + AMD_CNTL_OFFSET);
+> +	ntb_ctl &= ~(PMM_REG_CTL | SMM_REG_CTL);
+> +	writel(ntb_ctl, mmio + AMD_CNTL_OFFSET);
+> +
+> +	return 0;
+> +}
+> +
+>  static int ndev_mw_to_bar(struct amd_ntb_dev *ndev, int idx)
 >  {
->  	if (!ndev->peer_sta)
-> @@ -431,6 +474,10 @@ static int amd_ntb_peer_spad_write(struct ntb_dev *ntb,
+>  	if (idx < 0 || idx > ndev->mw_count)
+> @@ -194,97 +285,6 @@ static int amd_ntb_mw_set_trans(struct ntb_dev *ntb, int idx,
+>  	return 0;
+>  }
+> 
+> -static int amd_link_is_up(struct amd_ntb_dev *ndev)
+> -{
+> -	if (!ndev->peer_sta)
+> -		return NTB_LNK_STA_ACTIVE(ndev->cntl_sta);
+> -
+> -	/* If peer_sta is reset or D0 event, the ISR has
+> -	 * started a timer to check link status of hardware.
+> -	 * So here just clear status bit. And if peer_sta is
+> -	 * D3 or PME_TO, D0/reset event will be happened when
+> -	 * system wakeup/poweron, so do nothing here.
+> -	 */
+> -	if (ndev->peer_sta & AMD_PEER_RESET_EVENT)
+> -		ndev->peer_sta &= ~AMD_PEER_RESET_EVENT;
+> -	else if (ndev->peer_sta & AMD_PEER_D0_EVENT)
+> -		ndev->peer_sta = 0;
+> -
+> -	return 0;
+> -}
+> -
+> -static int amd_ntb_link_is_up(struct ntb_dev *ntb,
+> -			      enum ntb_speed *speed,
+> -			      enum ntb_width *width)
+> -{
+> -	struct amd_ntb_dev *ndev = ntb_ndev(ntb);
+> -	int ret = 0;
+> -
+> -	if (amd_link_is_up(ndev)) {
+> -		if (speed)
+> -			*speed = NTB_LNK_STA_SPEED(ndev->lnk_sta);
+> -		if (width)
+> -			*width = NTB_LNK_STA_WIDTH(ndev->lnk_sta);
+> -
+> -		dev_dbg(ndev_dev(ndev), "link is up.\n");
+> -
+> -		ret = 1;
+> -	} else {
+> -		if (speed)
+> -			*speed = NTB_SPEED_NONE;
+> -		if (width)
+> -			*width = NTB_WIDTH_NONE;
+> -
+> -		dev_dbg(ndev_dev(ndev), "link is down.\n");
+> -	}
+> -
+> -	return ret;
+> -}
+> -
+> -static int amd_ntb_link_enable(struct ntb_dev *ntb,
+> -			       enum ntb_speed max_speed,
+> -			       enum ntb_width max_width)
+> -{
+> -	struct amd_ntb_dev *ndev = ntb_ndev(ntb);
+> -	void __iomem *mmio = ndev->self_mmio;
+> -	u32 ntb_ctl;
+> -
+> -	/* Enable event interrupt */
+> -	ndev->int_mask &= ~AMD_EVENT_INTMASK;
+> -	writel(ndev->int_mask, mmio + AMD_INTMASK_OFFSET);
+> -
+> -	if (ndev->ntb.topo == NTB_TOPO_SEC)
+> -		return -EINVAL;
+> -	dev_dbg(ndev_dev(ndev), "Enabling Link.\n");
+> -
+> -	ntb_ctl = readl(mmio + AMD_CNTL_OFFSET);
+> -	ntb_ctl |= (PMM_REG_CTL | SMM_REG_CTL);
+> -	writel(ntb_ctl, mmio + AMD_CNTL_OFFSET);
+> -
+> -	return 0;
+> -}
+> -
+> -static int amd_ntb_link_disable(struct ntb_dev *ntb)
+> -{
+> -	struct amd_ntb_dev *ndev = ntb_ndev(ntb);
+> -	void __iomem *mmio = ndev->self_mmio;
+> -	u32 ntb_ctl;
+> -
+> -	/* Disable event interrupt */
+> -	ndev->int_mask |= AMD_EVENT_INTMASK;
+> -	writel(ndev->int_mask, mmio + AMD_INTMASK_OFFSET);
+> -
+> -	if (ndev->ntb.topo == NTB_TOPO_SEC)
+> -		return -EINVAL;
+> -	dev_dbg(ndev_dev(ndev), "Enabling Link.\n");
+> -
+> -	ntb_ctl = readl(mmio + AMD_CNTL_OFFSET);
+> -	ntb_ctl &= ~(PMM_REG_CTL | SMM_REG_CTL);
+> -	writel(ntb_ctl, mmio + AMD_CNTL_OFFSET);
+> -
+> -	return 0;
+> -}
+> -
+>  static u64 amd_ntb_db_valid_mask(struct ntb_dev *ntb)
+>  {
+>  	return ntb_ndev(ntb)->db_valid_mask;
+> @@ -431,12 +431,12 @@ static int amd_ntb_peer_spad_write(struct ntb_dev *ntb,
 >  }
 > 
 >  static const struct ntb_dev_ops amd_ntb_ops = {
-> +	.port_number		= amd_ntb_port_number,
-> +	.peer_port_count	= amd_ntb_peer_port_count,
-> +	.peer_port_number	= amd_ntb_peer_port_number,
-> +	.peer_port_idx		= amd_ntb_peer_port_idx,
+> -	.mw_count		= amd_ntb_mw_count,
+> -	.mw_get_range		= amd_ntb_mw_get_range,
+> -	.mw_set_trans		= amd_ntb_mw_set_trans,
 >  	.link_is_up		= amd_ntb_link_is_up,
 >  	.link_enable		= amd_ntb_link_enable,
 >  	.link_disable		= amd_ntb_link_disable,
-> diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.h b/drivers/ntb/hw/amd/ntb_hw_amd.h
-> index 2eac3cd..1aeb08f 100644
-> --- a/drivers/ntb/hw/amd/ntb_hw_amd.h
-> +++ b/drivers/ntb/hw/amd/ntb_hw_amd.h
-> @@ -62,6 +62,10 @@
->  #define NTB_LNK_STA_SPEED(x)	(((x) & NTB_LNK_STA_SPEED_MASK) >> 16)
->  #define NTB_LNK_STA_WIDTH(x)	(((x) & NTB_LNK_STA_WIDTH_MASK) >> 20)
-> 
-> +/* port related constants */
-> +#define NTB_PEER_CNT			(1)
-> +#define NTB_PIDX_MAX			(0)
-
-Just NTB_PEER_CNT is sufficient.  Anything that checks if (pidx > NTB_PIDX_MAX) could check if (pidx >= NTB_PEER_CNT).
-
-> +
->  #ifndef read64
->  #ifdef readq
->  #define read64 readq
-> @@ -91,6 +95,11 @@ static inline void _write64(u64 val, void __iomem *mmio)
->  #endif
->  #endif
-> 
-> +enum amd_ntb_port {
-> +	NTB_PORT_PRI_USD,
-> +	NTB_PORT_SEC_DSD
-> +};
-
-This could be part of ntb.h, since it will likely be the same for any of the PRI/SEC variety of NTB devices.  Making it a part of the api will encourage other PRI/SEC drivers to assign port numbers the same way using these values.  Or, drivers may be made consistent by sharing common code.
-
-> +
->  enum {
->  	/* AMD NTB Capability */
->  	AMD_MW_CNT		= 3,
+> +	.mw_count		= amd_ntb_mw_count,
+> +	.mw_get_range		= amd_ntb_mw_get_range,
+> +	.mw_set_trans		= amd_ntb_mw_set_trans,
+>  	.db_valid_mask		= amd_ntb_db_valid_mask,
+>  	.db_vector_count	= amd_ntb_db_vector_count,
+>  	.db_vector_mask		= amd_ntb_db_vector_mask,
 > diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c b/drivers/ntb/hw/intel/ntb_hw_intel.c
-> index 68d9908..7e44dc3 100644
+> index d2ce280..68d9908 100644
 > --- a/drivers/ntb/hw/intel/ntb_hw_intel.c
 > +++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
-> @@ -1035,6 +1035,49 @@ static void ndev_deinit_debugfs(struct intel_ntb_dev *ndev)
+> @@ -1035,6 +1035,84 @@ static void ndev_deinit_debugfs(struct intel_ntb_dev *ndev)
 >  	debugfs_remove_recursive(ndev->debugfs_dir);
 >  }
-
-Apply same comments above to Intel driver.
-
 > 
-> +static int intel_ntb_port_number(struct ntb_dev *ntb)
+> +static int intel_ntb_link_is_up(struct ntb_dev *ntb,
+> +				enum ntb_speed *speed,
+> +				enum ntb_width *width)
 > +{
-> +	switch (ntb->topo) {
-> +	case NTB_TOPO_PRI:
-> +	case NTB_TOPO_B2B_USD:
-> +		return NTB_PORT_PRI_USD;
-> +	case NTB_TOPO_SEC:
-> +	case NTB_TOPO_B2B_DSD:
-> +		return NTB_PORT_SEC_DSD;
-> +	default:
-> +		break;
+> +	struct intel_ntb_dev *ndev = ntb_ndev(ntb);
+> +
+> +	if (ndev->reg->link_is_up(ndev)) {
+> +		if (speed)
+> +			*speed = NTB_LNK_STA_SPEED(ndev->lnk_sta);
+> +		if (width)
+> +			*width = NTB_LNK_STA_WIDTH(ndev->lnk_sta);
+> +		return 1;
+> +	} else {
+> +		/* TODO MAYBE: is it possible to observe the link speed and
+> +		 * width while link is training? */
+> +		if (speed)
+> +			*speed = NTB_SPEED_NONE;
+> +		if (width)
+> +			*width = NTB_WIDTH_NONE;
+> +		return 0;
 > +	}
-> +
-> +	return -EINVAL;
 > +}
 > +
-> +static int intel_ntb_peer_port_count(struct ntb_dev *ntb)
+> +static int intel_ntb_link_enable(struct ntb_dev *ntb,
+> +				 enum ntb_speed max_speed,
+> +				 enum ntb_width max_width)
 > +{
-> +	return NTB_PEER_CNT;
-> +}
+> +	struct intel_ntb_dev *ndev;
+> +	u32 ntb_ctl;
 > +
-> +static int intel_ntb_peer_port_number(struct ntb_dev *ntb, int pidx)
-> +{
-> +	int local_port = intel_ntb_port_number(ntb);
+> +	ndev = container_of(ntb, struct intel_ntb_dev, ntb);
 > +
-> +	if (pidx > NTB_PIDX_MAX)
+> +	if (ndev->ntb.topo == NTB_TOPO_SEC)
 > +		return -EINVAL;
 > +
-> +	return (local_port == NTB_PORT_PRI_USD ?
-> +		NTB_PORT_SEC_DSD : NTB_PORT_PRI_USD);
-> +}
+> +	dev_dbg(ndev_dev(ndev),
+> +		"Enabling link with max_speed %d max_width %d\n",
+> +		max_speed, max_width);
+> +	if (max_speed != NTB_SPEED_AUTO)
+> +		dev_dbg(ndev_dev(ndev), "ignoring max_speed %d\n", max_speed);
+> +	if (max_width != NTB_WIDTH_AUTO)
+> +		dev_dbg(ndev_dev(ndev), "ignoring max_width %d\n", max_width);
 > +
-> +static int intel_ntb_peer_port_idx(struct ntb_dev *ntb, int port)
-> +{
-> +	int local_port = intel_ntb_port_number(ntb);
-> +
-> +	if ((local_port == NTB_PORT_PRI_USD && port != NTB_PORT_SEC_DSD) ||
-> +	    (local_port == NTB_PORT_SEC_DSD && port != NTB_PORT_PRI_USD))
-> +		return -EINVAL;
+> +	ntb_ctl = ioread32(ndev->self_mmio + ndev->reg->ntb_ctl);
+> +	ntb_ctl &= ~(NTB_CTL_DISABLE | NTB_CTL_CFG_LOCK);
+> +	ntb_ctl |= NTB_CTL_P2S_BAR2_SNOOP | NTB_CTL_S2P_BAR2_SNOOP;
+> +	ntb_ctl |= NTB_CTL_P2S_BAR4_SNOOP | NTB_CTL_S2P_BAR4_SNOOP;
+> +	if (ndev->bar4_split)
+> +		ntb_ctl |= NTB_CTL_P2S_BAR5_SNOOP | NTB_CTL_S2P_BAR5_SNOOP;
+> +	iowrite32(ntb_ctl, ndev->self_mmio + ndev->reg->ntb_ctl);
 > +
 > +	return 0;
 > +}
 > +
->  static int intel_ntb_link_is_up(struct ntb_dev *ntb,
->  				enum ntb_speed *speed,
->  				enum ntb_width *width)
-> @@ -1775,7 +1818,6 @@ static int skx_init_ntb(struct intel_ntb_dev *ndev)
+> +static int intel_ntb_link_disable(struct ntb_dev *ntb)
+> +{
+> +	struct intel_ntb_dev *ndev;
+> +	u32 ntb_cntl;
+> +
+> +	ndev = container_of(ntb, struct intel_ntb_dev, ntb);
+> +
+> +	if (ndev->ntb.topo == NTB_TOPO_SEC)
+> +		return -EINVAL;
+> +
+> +	dev_dbg(ndev_dev(ndev), "Disabling link\n");
+> +
+> +	/* Bring NTB link down */
+> +	ntb_cntl = ioread32(ndev->self_mmio + ndev->reg->ntb_ctl);
+> +	ntb_cntl &= ~(NTB_CTL_P2S_BAR2_SNOOP | NTB_CTL_S2P_BAR2_SNOOP);
+> +	ntb_cntl &= ~(NTB_CTL_P2S_BAR4_SNOOP | NTB_CTL_S2P_BAR4_SNOOP);
+> +	if (ndev->bar4_split)
+> +		ntb_cntl &= ~(NTB_CTL_P2S_BAR5_SNOOP | NTB_CTL_S2P_BAR5_SNOOP);
+> +	ntb_cntl |= NTB_CTL_DISABLE | NTB_CTL_CFG_LOCK;
+> +	iowrite32(ntb_cntl, ndev->self_mmio + ndev->reg->ntb_ctl);
+> +
+> +	return 0;
+> +}
+> +
+>  static int intel_ntb_mw_count(struct ntb_dev *ntb)
 >  {
->  	int rc;
+>  	return ntb_ndev(ntb)->mw_count;
+> @@ -1171,84 +1249,6 @@ static int intel_ntb_mw_set_trans(struct ntb_dev *ntb, int idx,
+>  	return 0;
+>  }
 > 
+> -static int intel_ntb_link_is_up(struct ntb_dev *ntb,
+> -				enum ntb_speed *speed,
+> -				enum ntb_width *width)
+> -{
+> -	struct intel_ntb_dev *ndev = ntb_ndev(ntb);
 > -
->  	ndev->mw_count = XEON_MW_COUNT;
->  	ndev->spad_count = SKX_SPAD_COUNT;
->  	ndev->db_count = SKX_DB_COUNT;
-> @@ -2883,6 +2925,10 @@ static const struct intel_ntb_xlat_reg skx_sec_xlat = {
+> -	if (ndev->reg->link_is_up(ndev)) {
+> -		if (speed)
+> -			*speed = NTB_LNK_STA_SPEED(ndev->lnk_sta);
+> -		if (width)
+> -			*width = NTB_LNK_STA_WIDTH(ndev->lnk_sta);
+> -		return 1;
+> -	} else {
+> -		/* TODO MAYBE: is it possible to observe the link speed and
+> -		 * width while link is training? */
+> -		if (speed)
+> -			*speed = NTB_SPEED_NONE;
+> -		if (width)
+> -			*width = NTB_WIDTH_NONE;
+> -		return 0;
+> -	}
+> -}
+> -
+> -static int intel_ntb_link_enable(struct ntb_dev *ntb,
+> -				 enum ntb_speed max_speed,
+> -				 enum ntb_width max_width)
+> -{
+> -	struct intel_ntb_dev *ndev;
+> -	u32 ntb_ctl;
+> -
+> -	ndev = container_of(ntb, struct intel_ntb_dev, ntb);
+> -
+> -	if (ndev->ntb.topo == NTB_TOPO_SEC)
+> -		return -EINVAL;
+> -
+> -	dev_dbg(ndev_dev(ndev),
+> -		"Enabling link with max_speed %d max_width %d\n",
+> -		max_speed, max_width);
+> -	if (max_speed != NTB_SPEED_AUTO)
+> -		dev_dbg(ndev_dev(ndev), "ignoring max_speed %d\n", max_speed);
+> -	if (max_width != NTB_WIDTH_AUTO)
+> -		dev_dbg(ndev_dev(ndev), "ignoring max_width %d\n", max_width);
+> -
+> -	ntb_ctl = ioread32(ndev->self_mmio + ndev->reg->ntb_ctl);
+> -	ntb_ctl &= ~(NTB_CTL_DISABLE | NTB_CTL_CFG_LOCK);
+> -	ntb_ctl |= NTB_CTL_P2S_BAR2_SNOOP | NTB_CTL_S2P_BAR2_SNOOP;
+> -	ntb_ctl |= NTB_CTL_P2S_BAR4_SNOOP | NTB_CTL_S2P_BAR4_SNOOP;
+> -	if (ndev->bar4_split)
+> -		ntb_ctl |= NTB_CTL_P2S_BAR5_SNOOP | NTB_CTL_S2P_BAR5_SNOOP;
+> -	iowrite32(ntb_ctl, ndev->self_mmio + ndev->reg->ntb_ctl);
+> -
+> -	return 0;
+> -}
+> -
+> -static int intel_ntb_link_disable(struct ntb_dev *ntb)
+> -{
+> -	struct intel_ntb_dev *ndev;
+> -	u32 ntb_cntl;
+> -
+> -	ndev = container_of(ntb, struct intel_ntb_dev, ntb);
+> -
+> -	if (ndev->ntb.topo == NTB_TOPO_SEC)
+> -		return -EINVAL;
+> -
+> -	dev_dbg(ndev_dev(ndev), "Disabling link\n");
+> -
+> -	/* Bring NTB link down */
+> -	ntb_cntl = ioread32(ndev->self_mmio + ndev->reg->ntb_ctl);
+> -	ntb_cntl &= ~(NTB_CTL_P2S_BAR2_SNOOP | NTB_CTL_S2P_BAR2_SNOOP);
+> -	ntb_cntl &= ~(NTB_CTL_P2S_BAR4_SNOOP | NTB_CTL_S2P_BAR4_SNOOP);
+> -	if (ndev->bar4_split)
+> -		ntb_cntl &= ~(NTB_CTL_P2S_BAR5_SNOOP | NTB_CTL_S2P_BAR5_SNOOP);
+> -	ntb_cntl |= NTB_CTL_DISABLE | NTB_CTL_CFG_LOCK;
+> -	iowrite32(ntb_cntl, ndev->self_mmio + ndev->reg->ntb_ctl);
+> -
+> -	return 0;
+> -}
+> -
+>  static int intel_ntb_db_is_unsafe(struct ntb_dev *ntb)
+>  {
+>  	return ndev_ignore_unsafe(ntb_ndev(ntb), NTB_UNSAFE_DB);
+> @@ -2883,12 +2883,12 @@ static const struct intel_ntb_xlat_reg skx_sec_xlat = {
 > 
 >  /* operations for primary side of local ntb */
 >  static const struct ntb_dev_ops intel_ntb_ops = {
-> +	.port_number		= intel_ntb_port_number,
-> +	.peer_port_count	= intel_ntb_peer_port_count,
-> +	.peer_port_number	= intel_ntb_peer_port_number,
-> +	.peer_port_idx		= intel_ntb_peer_port_idx,
+> -	.mw_count		= intel_ntb_mw_count,
+> -	.mw_get_range		= intel_ntb_mw_get_range,
+> -	.mw_set_trans		= intel_ntb_mw_set_trans,
 >  	.link_is_up		= intel_ntb_link_is_up,
 >  	.link_enable		= intel_ntb_link_enable,
 >  	.link_disable		= intel_ntb_link_disable,
-> @@ -2909,6 +2955,10 @@ static const struct ntb_dev_ops intel_ntb_ops = {
+> +	.mw_count		= intel_ntb_mw_count,
+> +	.mw_get_range		= intel_ntb_mw_get_range,
+> +	.mw_set_trans		= intel_ntb_mw_set_trans,
+>  	.db_is_unsafe		= intel_ntb_db_is_unsafe,
+>  	.db_valid_mask		= intel_ntb_db_valid_mask,
+>  	.db_vector_count	= intel_ntb_db_vector_count,
+> @@ -2909,12 +2909,12 @@ static const struct ntb_dev_ops intel_ntb_ops = {
 >  };
 > 
 >  static const struct ntb_dev_ops intel_ntb3_ops = {
-> +	.port_number		= intel_ntb_port_number,
-> +	.peer_port_count	= intel_ntb_peer_port_count,
-> +	.peer_port_number	= intel_ntb_peer_port_number,
-> +	.peer_port_idx		= intel_ntb_peer_port_idx,
+> -	.mw_count		= intel_ntb_mw_count,
+> -	.mw_get_range		= intel_ntb_mw_get_range,
+> -	.mw_set_trans		= intel_ntb3_mw_set_trans,
 >  	.link_is_up		= intel_ntb_link_is_up,
 >  	.link_enable		= intel_ntb3_link_enable,
 >  	.link_disable		= intel_ntb_link_disable,
-> diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.h b/drivers/ntb/hw/intel/ntb_hw_intel.h
-> index 6e8c182..f12c960 100644
-> --- a/drivers/ntb/hw/intel/ntb_hw_intel.h
-> +++ b/drivers/ntb/hw/intel/ntb_hw_intel.h
-> @@ -295,6 +295,15 @@
->  #define NTB_BAR_MASK_64			~(0xfull)
->  #define NTB_BAR_MASK_32			~(0xfu)
-> 
-> +/* port related constants */
-> +#define NTB_PEER_CNT			(1)
-> +#define NTB_PIDX_MAX			(0)
-> +
-> +enum intel_ntb_port {
-> +	NTB_PORT_PRI_USD,
-> +	NTB_PORT_SEC_DSD
-> +};
-> +
->  struct intel_ntb_dev;
-> 
->  struct intel_ntb_reg {
-> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-> index 4eb8adb..37d428d 100644
-> --- a/drivers/ntb/ntb_transport.c
-> +++ b/drivers/ntb/ntb_transport.c
-> @@ -94,6 +94,9 @@ MODULE_PARM_DESC(use_dma, "Use DMA engine to perform large data copy");
-> 
->  static struct dentry *nt_debugfs_dir;
-> 
-> +/* Only two-ports NTB devices are supported */
-> +#define PIDX		0
-> +
->  struct ntb_queue_entry {
->  	/* ntb_queue list reference */
->  	struct list_head entry;
-> @@ -1083,6 +1086,9 @@ static int ntb_transport_probe(struct ntb_client *self, struct
-> ntb_dev *ndev)
->  		dev_dbg(&ndev->dev,
->  			"scratchpad is unsafe, proceed anyway...\n");
-> 
-> +	if (ntb_peer_port_count(ndev) != 1)
-> +		dev_warn(&ndev->dev, "Multi-port NTB devices unsupported\n");
-> +
->  	node = dev_to_node(&ndev->dev);
-> 
->  	nt = kzalloc_node(sizeof(*nt), GFP_KERNEL, node);
-> diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-> index e75d4fd..481827a 100644
-> --- a/drivers/ntb/test/ntb_perf.c
-> +++ b/drivers/ntb/test/ntb_perf.c
-> @@ -76,6 +76,7 @@
->  #define DMA_RETRIES		20
->  #define SZ_4G			(1ULL << 32)
->  #define MAX_SEG_ORDER		20 /* no larger than 1M for kmalloc buffer */
-> +#define PIDX			0
-> 
->  MODULE_LICENSE(DRIVER_LICENSE);
->  MODULE_VERSION(DRIVER_VERSION);
-> @@ -764,6 +765,9 @@ static int perf_probe(struct ntb_client *client, struct ntb_dev *ntb)
->  		return -EIO;
->  	}
-> 
-> +	if (ntb_peer_port_count(ntb) != 1)
-> +		dev_warn(&ntb->dev, "Multi-port NTB devices unsupported\n");
-> +
->  	node = dev_to_node(&pdev->dev);
-> 
->  	perf = kzalloc_node(sizeof(*perf), GFP_KERNEL, node);
-> diff --git a/drivers/ntb/test/ntb_pingpong.c b/drivers/ntb/test/ntb_pingpong.c
-> index 4358611..6dd7582 100644
-> --- a/drivers/ntb/test/ntb_pingpong.c
-> +++ b/drivers/ntb/test/ntb_pingpong.c
-> @@ -90,6 +90,9 @@ static unsigned long db_init = 0x7;
->  module_param(db_init, ulong, 0644);
->  MODULE_PARM_DESC(db_init, "Initial doorbell bits to ring on the peer");
-> 
-> +/* Only two-ports NTB devices are supported */
-> +#define PIDX		0
-> +
->  struct pp_ctx {
->  	struct ntb_dev			*ntb;
->  	u64				db_bits;
-> @@ -230,6 +233,9 @@ static int pp_probe(struct ntb_client *client,
->  		}
->  	}
-> 
-> +	if (ntb_peer_port_count(ntb) != 1)
-> +		dev_warn(&ntb->dev, "multi-port NTB is unsupported\n");
-> +
->  	pp = kmalloc(sizeof(*pp), GFP_KERNEL);
->  	if (!pp) {
->  		rc = -ENOMEM;
-> diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c
-> index 61bf2ef..85b6417 100644
-> --- a/drivers/ntb/test/ntb_tool.c
-> +++ b/drivers/ntb/test/ntb_tool.c
-> @@ -120,6 +120,8 @@ MODULE_AUTHOR(DRIVER_AUTHOR);
->  MODULE_DESCRIPTION(DRIVER_DESCRIPTION);
-> 
->  #define MAX_MWS 16
-> +/* Only two-ports devices are supported */
-> +#define PIDX	0
-> 
->  static struct dentry *tool_dbgfs;
-> 
-> @@ -919,6 +921,9 @@ static int tool_probe(struct ntb_client *self, struct ntb_dev *ntb)
->  	if (ntb_spad_is_unsafe(ntb))
->  		dev_dbg(&ntb->dev, "scratchpad is unsafe\n");
-> 
-> +	if (ntb_peer_port_count(ntb) != 1)
-> +		dev_warn(&ntb->dev, "multi-port NTB is unsupported\n");
-> +
->  	tc = kzalloc(sizeof(*tc), GFP_KERNEL);
->  	if (!tc) {
->  		rc = -ENOMEM;
+> +	.mw_count		= intel_ntb_mw_count,
+> +	.mw_get_range		= intel_ntb_mw_get_range,
+> +	.mw_set_trans		= intel_ntb3_mw_set_trans,
+>  	.db_valid_mask		= intel_ntb_db_valid_mask,
+>  	.db_vector_count	= intel_ntb_db_vector_count,
+>  	.db_vector_mask		= intel_ntb_db_vector_mask,
 > diff --git a/include/linux/ntb.h b/include/linux/ntb.h
-> index 5d1f260..3216689 100644
+> index 6f47562..5d1f260 100644
 > --- a/include/linux/ntb.h
 > +++ b/include/linux/ntb.h
-> @@ -179,6 +179,10 @@ static inline int ntb_ctx_ops_is_valid(const struct ntb_ctx_ops *ops)
+> @@ -179,13 +179,13 @@ static inline int ntb_ctx_ops_is_valid(const struct ntb_ctx_ops
+> *ops)
 > 
 >  /**
 >   * struct ntb_ctx_ops - ntb device operations
-> + * @port_number:	See ntb_port_number().
-> + * @peer_port_count:	See ntb_peer_port_count().
-> + * @peer_port_number:	See ntb_peer_port_number().
-> + * @peer_port_idx:	See ntb_peer_port_idx().
->   * @link_is_up:		See ntb_link_is_up().
->   * @link_enable:	See ntb_link_enable().
->   * @link_disable:	See ntb_link_disable().
-> @@ -212,6 +216,11 @@ static inline int ntb_ctx_ops_is_valid(const struct ntb_ctx_ops *ops)
+> + * @link_is_up:		See ntb_link_is_up().
+> + * @link_enable:	See ntb_link_enable().
+> + * @link_disable:	See ntb_link_disable().
+>   * @mw_count:		See ntb_mw_count().
+>   * @mw_get_range:	See ntb_mw_get_range().
+>   * @mw_set_trans:	See ntb_mw_set_trans().
+>   * @mw_clear_trans:	See ntb_mw_clear_trans().
+> - * @link_is_up:		See ntb_link_is_up().
+> - * @link_enable:	See ntb_link_enable().
+> - * @link_disable:	See ntb_link_disable().
+>   * @db_is_unsafe:	See ntb_db_is_unsafe().
+>   * @db_valid_mask:	See ntb_db_valid_mask().
+>   * @db_vector_count:	See ntb_db_vector_count().
+> @@ -212,6 +212,12 @@ static inline int ntb_ctx_ops_is_valid(const struct ntb_ctx_ops *ops)
 >   * @peer_spad_write:	See ntb_peer_spad_write().
 >   */
 >  struct ntb_dev_ops {
-> +	int (*port_number)(struct ntb_dev *ntb);
-> +	int (*peer_port_count)(struct ntb_dev *ntb);
-> +	int (*peer_port_number)(struct ntb_dev *ntb, int pidx);
-> +	int (*peer_port_idx)(struct ntb_dev *ntb, int port);
+> +	int (*link_is_up)(struct ntb_dev *ntb,
+> +			  enum ntb_speed *speed, enum ntb_width *width);
+> +	int (*link_enable)(struct ntb_dev *ntb,
+> +			   enum ntb_speed max_speed, enum ntb_width max_width);
+> +	int (*link_disable)(struct ntb_dev *ntb);
 > +
->  	int (*link_is_up)(struct ntb_dev *ntb,
->  			  enum ntb_speed *speed, enum ntb_width *width);
->  	int (*link_enable)(struct ntb_dev *ntb,
-> @@ -265,6 +274,10 @@ static inline int ntb_dev_ops_is_valid(const struct ntb_dev_ops *ops)
+>  	int (*mw_count)(struct ntb_dev *ntb);
+>  	int (*mw_get_range)(struct ntb_dev *ntb, int idx,
+>  			    phys_addr_t *base, resource_size_t *size,
+> @@ -220,12 +226,6 @@ struct ntb_dev_ops {
+>  			    dma_addr_t addr, resource_size_t size);
+>  	int (*mw_clear_trans)(struct ntb_dev *ntb, int idx);
+> 
+> -	int (*link_is_up)(struct ntb_dev *ntb,
+> -			  enum ntb_speed *speed, enum ntb_width *width);
+> -	int (*link_enable)(struct ntb_dev *ntb,
+> -			   enum ntb_speed max_speed, enum ntb_width max_width);
+> -	int (*link_disable)(struct ntb_dev *ntb);
+> -
+>  	int (*db_is_unsafe)(struct ntb_dev *ntb);
+>  	u64 (*db_valid_mask)(struct ntb_dev *ntb);
+>  	int (*db_vector_count)(struct ntb_dev *ntb);
+> @@ -265,13 +265,14 @@ static inline int ntb_dev_ops_is_valid(const struct ntb_dev_ops
+> *ops)
 >  {
 >  	/* commented callbacks are not required: */
 >  	return
-> +		ops->port_number			&&
-> +		ops->peer_port_count			&&
-> +		ops->peer_port_number			&&
-> +		ops->peer_port_idx			&&
-
-If these are made optional, then:
-
-!ops->peer_port_count == !ops->port_number &&
-!ops->peer_port_number == !ops->port_number &&
-!ops->peer_port_idx == !ops->port_number &&
-
->  		ops->link_is_up				&&
->  		ops->link_enable			&&
->  		ops->link_disable			&&
-> @@ -442,6 +455,64 @@ void ntb_link_event(struct ntb_dev *ntb);
+> +		ops->link_is_up				&&
+> +		ops->link_enable			&&
+> +		ops->link_disable			&&
+>  		ops->mw_count				&&
+>  		ops->mw_get_range			&&
+>  		ops->mw_set_trans			&&
+>  		/* ops->mw_clear_trans			&& */
+> -		ops->link_is_up				&&
+> -		ops->link_enable			&&
+> -		ops->link_disable			&&
+> +
+>  		/* ops->db_is_unsafe			&& */
+>  		ops->db_valid_mask			&&
+> 
+> @@ -441,6 +442,62 @@ void ntb_link_event(struct ntb_dev *ntb);
 >  void ntb_db_event(struct ntb_dev *ntb, int vector);
 > 
 >  /**
-> + * ntb_port_number() - get the local port number
+> + * ntb_link_is_up() - get the current ntb link state
 > + * @ntb:	NTB device context.
+> + * @speed:	OUT - The link speed expressed as PCIe generation number.
+> + * @width:	OUT - The link width expressed as the number of PCIe lanes.
 > + *
-> + * Hardware must support at least simple two-ports ntb connection
+> + * Get the current state of the ntb link.  It is recommended to query the link
+> + * state once after every link event.  It is safe to query the link state in
+> + * the context of the link event callback.
 > + *
-> + * Return: the local port number
+> + * Return: One if the link is up, zero if the link is down, otherwise a
+> + *		negative value indicating the error number.
 > + */
-> +static inline int ntb_port_number(struct ntb_dev *ntb)
+> +static inline int ntb_link_is_up(struct ntb_dev *ntb,
+> +				 enum ntb_speed *speed, enum ntb_width *width)
 > +{
-
-If these are made optional, then:
-
-if (!ntb->ops->port_number)
-	return ntb_default_port_number(ntb);
-
-> +	return ntb->ops->port_number(ntb);
+> +	return ntb->ops->link_is_up(ntb, speed, width);
 > +}
 > +
 > +/**
-> + * ntb_peer_port_count() - get the number of peer device ports
+> + * ntb_link_enable() - enable the link on the secondary side of the ntb
 > + * @ntb:	NTB device context.
+> + * @max_speed:	The maximum link speed expressed as PCIe generation number.
+> + * @max_width:	The maximum link width expressed as the number of PCIe lanes.
 > + *
-> + * Hardware may support an access to memory of several remote domains
-> + * over multi-port NTB devices. This method returns the number of peers,
-> + * local device can have shared memory with.
+> + * Enable the link on the secondary side of the ntb.  This can only be done
+> + * from the primary side of the ntb in primary or b2b topology.  The ntb device
+> + * should train the link to its maximum speed and width, or the requested speed
+> + * and width, whichever is smaller, if supported.
 > + *
-> + * Return: the number of peer ports
+> + * Return: Zero on success, otherwise an error number.
 > + */
-> +static inline int ntb_peer_port_count(struct ntb_dev *ntb)
+> +static inline int ntb_link_enable(struct ntb_dev *ntb,
+> +				  enum ntb_speed max_speed,
+> +				  enum ntb_width max_width)
 > +{
-> +	return ntb->ops->peer_port_count(ntb);
+> +	return ntb->ops->link_enable(ntb, max_speed, max_width);
 > +}
 > +
 > +/**
-> + * ntb_peer_port_number() - get the peer port by given index
+> + * ntb_link_disable() - disable the link on the secondary side of the ntb
 > + * @ntb:	NTB device context.
-> + * @pidx:	Peer port index.
 > + *
-> + * Peer ports are continuously enumerated by NTB API logic, so this methods
-> + * lets to retrieve port real number by its index.
+> + * Disable the link on the secondary side of the ntb.  This can only be
+> + * done from the primary side of the ntb in primary or b2b topology.  The ntb
+> + * device should disable the link.  Returning from this call must indicate that
+> + * a barrier has passed, though with no more writes may pass in either
+> + * direction across the link, except if this call returns an error number.
 > + *
-> + * Return: the peer device port or negative value indicating an error
+> + * Return: Zero on success, otherwise an error number.
 > + */
-> +static inline int ntb_peer_port_number(struct ntb_dev *ntb, int pidx)
+> +static inline int ntb_link_disable(struct ntb_dev *ntb)
 > +{
-> +	return ntb->ops->peer_port_number(ntb, pidx);
+> +	return ntb->ops->link_disable(ntb);
 > +}
 > +
 > +/**
-> + * ntb_peer_port_idx() - get the peer device port index by given port number
-> + * @ntb:	NTB device context.
-> + * @port:	Peer port number.
-> + *
-> + * Inverse operation of ntb_peer_port_number(), so one can get port index
-> + * by specified port number.
-> + *
-> + * Return: the peer port index or negative value indicating an error
-> + */
-> +static inline int ntb_peer_port_idx(struct ntb_dev *ntb, int port)
-> +{
-> +	return ntb->ops->peer_port_idx(ntb, port);
-> +}
-> +
-> +/**
->   * ntb_link_is_up() - get the current ntb link state
+>   * ntb_mw_count() - get the number of memory windows
 >   * @ntb:	NTB device context.
->   * @speed:	OUT - The link speed expressed as PCIe generation number.
+>   *
+> @@ -517,62 +574,6 @@ static inline int ntb_mw_clear_trans(struct ntb_dev *ntb, int idx)
+>  }
+> 
+>  /**
+> - * ntb_link_is_up() - get the current ntb link state
+> - * @ntb:	NTB device context.
+> - * @speed:	OUT - The link speed expressed as PCIe generation number.
+> - * @width:	OUT - The link width expressed as the number of PCIe lanes.
+> - *
+> - * Get the current state of the ntb link.  It is recommended to query the link
+> - * state once after every link event.  It is safe to query the link state in
+> - * the context of the link event callback.
+> - *
+> - * Return: One if the link is up, zero if the link is down, otherwise a
+> - *		negative value indicating the error number.
+> - */
+> -static inline int ntb_link_is_up(struct ntb_dev *ntb,
+> -				 enum ntb_speed *speed, enum ntb_width *width)
+> -{
+> -	return ntb->ops->link_is_up(ntb, speed, width);
+> -}
+> -
+> -/**
+> - * ntb_link_enable() - enable the link on the secondary side of the ntb
+> - * @ntb:	NTB device context.
+> - * @max_speed:	The maximum link speed expressed as PCIe generation number.
+> - * @max_width:	The maximum link width expressed as the number of PCIe lanes.
+> - *
+> - * Enable the link on the secondary side of the ntb.  This can only be done
+> - * from the primary side of the ntb in primary or b2b topology.  The ntb device
+> - * should train the link to its maximum speed and width, or the requested speed
+> - * and width, whichever is smaller, if supported.
+> - *
+> - * Return: Zero on success, otherwise an error number.
+> - */
+> -static inline int ntb_link_enable(struct ntb_dev *ntb,
+> -				  enum ntb_speed max_speed,
+> -				  enum ntb_width max_width)
+> -{
+> -	return ntb->ops->link_enable(ntb, max_speed, max_width);
+> -}
+> -
+> -/**
+> - * ntb_link_disable() - disable the link on the secondary side of the ntb
+> - * @ntb:	NTB device context.
+> - *
+> - * Disable the link on the secondary side of the ntb.  This can only be
+> - * done from the primary side of the ntb in primary or b2b topology.  The ntb
+> - * device should disable the link.  Returning from this call must indicate that
+> - * a barrier has passed, though with no more writes may pass in either
+> - * direction across the link, except if this call returns an error number.
+> - *
+> - * Return: Zero on success, otherwise an error number.
+> - */
+> -static inline int ntb_link_disable(struct ntb_dev *ntb)
+> -{
+> -	return ntb->ops->link_disable(ntb);
+> -}
+> -
+> -/**
+>   * ntb_db_is_unsafe() - check if it is safe to use hardware doorbell
+>   * @ntb:	NTB device context.
+>   *
 > --
 > 2.6.6
 
