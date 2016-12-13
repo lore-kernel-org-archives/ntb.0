@@ -1,13 +1,13 @@
 Return-Path: <Allen.Hubbe@dell.com>
-Received: from esa8.dell-outbound.iphmx.com (esa8.dell-outbound.iphmx.com. [68.232.149.218])
-        by gmr-mx.google.com with ESMTPS id h18si2946380ywc.2.2016.12.12.20.14.21
+Received: from esa2.dell-outbound.iphmx.com (esa2.dell-outbound.iphmx.com. [68.232.149.220])
+        by gmr-mx.google.com with ESMTPS id h18si2946227ywc.2.2016.12.12.20.13.47
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 12 Dec 2016 20:14:21 -0800 (PST)
+        Mon, 12 Dec 2016 20:13:47 -0800 (PST)
 From: "Allen Hubbe" <Allen.Hubbe@dell.com>
-Subject: RE: [PATCH v2 6/9] NTB: Add Messaging NTB API
-Date: Mon, 12 Dec 2016 23:13:58 -0500
-Message-ID: <000501d254f7$56009620$0201c260$@dell.com>
+Subject: RE: [PATCH v2 5/9] NTB: Alter Scratchpads API to support multi-ports devices
+Date: Mon, 12 Dec 2016 23:13:17 -0500
+Message-ID: <000401d254f7$3c44e8d0$b4ceba70$@dell.com>
 MIME-Version: 1.0
 Content-Type: text/plain;
 	charset="Windows-1252"
@@ -17,325 +17,539 @@ To: 'Serge Semin' <fancer.lancer@gmail.com>, jdmason@kudzu.us, dave.jiang@intel.
 Cc: Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Serge Semin
-> Some IDT NTB-capable PCIe-switches have message registers to communicate with
-> peer devices. This patch adds new NTB API callback methods, which can be used
-> to utilize these registers functionality:
->  ntb_msg_count(); - get number of message registers
->  ntb_msg_inbits(); - get bitfield of inbound message registers status
->  ntb_msg_outbits(); - get bitfield of outbound message registers status
->  ntb_msg_read_sts(); - read the inbound and outbound message registers status
->  ntb_msg_clear_sts(); - clear status bits of message registers
->  ntb_msg_set_mask(); - mask interrupts raised by status bits of message
-> registers.
->  ntb_msg_clear_mask(); - clear interrupts mask bits of message registers
->  ntb_msg_read(midx, *pidx); - read message register with specified index,
-> additionally getting peer port index which data received from
->  ntb_msg_write(midx, pidx); - write data to the specified message register
-> sending it to the passed peer device connected over a pidx port
->  ntb_msg_event(); - notify driver context of a new message event
-> 
-> Of course there is hadrware which doesn't support Message registers, so
+From: Serge Semin 
+> Even though there is no any real NTB hardware, which would have both more
+> than two ports and Scratchpad registers, it is logically correct to have
+> Scratchpad API accepting a peer port index as well. Intel/AMD drivers utilize
+> Primary and Secondary topology to split Scratchpad between connected root
+> devices. Since port-index API introduced, Intel/AMD NTB hadrware drivers can
 
 s/hadrware/hardware/
 
-> this API is made optional.
+> use device port to determine which Scratchpad registers actually belong to
+> local and peer devices. The same approach can be used if some potential
+> hardware in future will be multi-port and have some set of Scratchpads.
+> Here are the brief of changes in the API:
+>  ntb_spad_count() - return number of Scratchpad per each port
+>  ntb_peer_spad_addr(pidx, sidx) - address of Scratchpad register of the
+> peer device with pidx-index
+>  ntb_peer_spad_read(pidx, sidx) - read specified Scratchpad register of the
+> peer with pidx-index
+>  ntb_peer_spad_write(pidx, sidx) - write data to Scratchpad register of the
+> peer with pidx-index
 > 
+> Since there is hardware which doesn't support Scratchpad registers, the
+> corresponding API methods are now made optional.
+
+The api change looks good.  See the comment to simplify ntb_tool.
+
 > Signed-off-by: Serge Semin <fancer.lancer@gmail.com>
-
-Acked-by: Allen Hubbe <Allen.Hubbe@dell.com>
-
 > 
 > ---
->  drivers/ntb/ntb.c   |  13 ++++
->  include/linux/ntb.h | 205 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  2 files changed, 218 insertions(+)
+>  drivers/ntb/hw/amd/ntb_hw_amd.c     | 14 +++----
+>  drivers/ntb/hw/intel/ntb_hw_intel.c | 14 +++----
+>  drivers/ntb/ntb_transport.c         | 17 ++++-----
+>  drivers/ntb/test/ntb_perf.c         |  6 +--
+>  drivers/ntb/test/ntb_pingpong.c     |  8 +++-
+>  drivers/ntb/test/ntb_tool.c         | 45 +++++++++++++++++-----
+>  include/linux/ntb.h                 | 76 +++++++++++++++++++++++--------------
+>  7 files changed, 115 insertions(+), 65 deletions(-)
 > 
-> diff --git a/drivers/ntb/ntb.c b/drivers/ntb/ntb.c
-> index f6153af..06574f8 100644
-> --- a/drivers/ntb/ntb.c
-> +++ b/drivers/ntb/ntb.c
-> @@ -193,6 +193,19 @@ void ntb_db_event(struct ntb_dev *ntb, int vector)
+> diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.c b/drivers/ntb/hw/amd/ntb_hw_amd.c
+> index 74fe9b8..a2596ad 100644
+> --- a/drivers/ntb/hw/amd/ntb_hw_amd.c
+> +++ b/drivers/ntb/hw/amd/ntb_hw_amd.c
+> @@ -476,30 +476,30 @@ static int amd_ntb_spad_write(struct ntb_dev *ntb,
+>  	return 0;
 >  }
->  EXPORT_SYMBOL(ntb_db_event);
 > 
-> +void ntb_msg_event(struct ntb_dev *ntb)
-> +{
-> +	unsigned long irqflags;
-> +
-> +	spin_lock_irqsave(&ntb->ctx_lock, irqflags);
-> +	{
-> +		if (ntb->ctx_ops && ntb->ctx_ops->msg_event)
-> +			ntb->ctx_ops->msg_event(ntb->ctx);
-> +	}
-> +	spin_unlock_irqrestore(&ntb->ctx_lock, irqflags);
-> +}
-> +EXPORT_SYMBOL(ntb_msg_event);
-> +
->  static int ntb_probe(struct device *dev)
+> -static u32 amd_ntb_peer_spad_read(struct ntb_dev *ntb, int idx)
+> +static u32 amd_ntb_peer_spad_read(struct ntb_dev *ntb, int pidx, int sidx)
 >  {
->  	struct ntb_dev *ntb;
+>  	struct amd_ntb_dev *ndev = ntb_ndev(ntb);
+>  	void __iomem *mmio = ndev->self_mmio;
+>  	u32 offset;
+> 
+> -	if (idx < 0 || idx >= ndev->spad_count)
+> +	if (sidx < 0 || sidx >= ndev->spad_count)
+>  		return -EINVAL;
+> 
+> -	offset = ndev->peer_spad + (idx << 2);
+> +	offset = ndev->peer_spad + (sidx << 2);
+>  	return readl(mmio + AMD_SPAD_OFFSET + offset);
+>  }
+> 
+> -static int amd_ntb_peer_spad_write(struct ntb_dev *ntb,
+> -				   int idx, u32 val)
+> +static int amd_ntb_peer_spad_write(struct ntb_dev *ntb, int pidx,
+> +				   int sidx, u32 val)
+>  {
+>  	struct amd_ntb_dev *ndev = ntb_ndev(ntb);
+>  	void __iomem *mmio = ndev->self_mmio;
+>  	u32 offset;
+> 
+> -	if (idx < 0 || idx >= ndev->spad_count)
+> +	if (sidx < 0 || sidx >= ndev->spad_count)
+>  		return -EINVAL;
+> 
+> -	offset = ndev->peer_spad + (idx << 2);
+> +	offset = ndev->peer_spad + (sidx << 2);
+>  	writel(val, mmio + AMD_SPAD_OFFSET + offset);
+> 
+>  	return 0;
+> diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c b/drivers/ntb/hw/intel/ntb_hw_intel.c
+> index 5a57d9e..471b0ba 100644
+> --- a/drivers/ntb/hw/intel/ntb_hw_intel.c
+> +++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
+> @@ -1452,30 +1452,30 @@ static int intel_ntb_spad_write(struct ntb_dev *ntb,
+>  			       ndev->self_reg->spad);
+>  }
+> 
+> -static int intel_ntb_peer_spad_addr(struct ntb_dev *ntb, int idx,
+> +static int intel_ntb_peer_spad_addr(struct ntb_dev *ntb, int pidx, int sidx,
+>  				    phys_addr_t *spad_addr)
+>  {
+>  	struct intel_ntb_dev *ndev = ntb_ndev(ntb);
+> 
+> -	return ndev_spad_addr(ndev, idx, spad_addr, ndev->peer_addr,
+> +	return ndev_spad_addr(ndev, sidx, spad_addr, ndev->peer_addr,
+>  			      ndev->peer_reg->spad);
+>  }
+> 
+> -static u32 intel_ntb_peer_spad_read(struct ntb_dev *ntb, int idx)
+> +static u32 intel_ntb_peer_spad_read(struct ntb_dev *ntb, int pidx, int sidx)
+>  {
+>  	struct intel_ntb_dev *ndev = ntb_ndev(ntb);
+> 
+> -	return ndev_spad_read(ndev, idx,
+> +	return ndev_spad_read(ndev, sidx,
+>  			      ndev->peer_mmio +
+>  			      ndev->peer_reg->spad);
+>  }
+> 
+> -static int intel_ntb_peer_spad_write(struct ntb_dev *ntb,
+> -				     int idx, u32 val)
+> +static int intel_ntb_peer_spad_write(struct ntb_dev *ntb, int pidx,
+> +				     int sidx, u32 val)
+>  {
+>  	struct intel_ntb_dev *ndev = ntb_ndev(ntb);
+> 
+> -	return ndev_spad_write(ndev, idx, val,
+> +	return ndev_spad_write(ndev, sidx, val,
+>  			       ndev->peer_mmio +
+>  			       ndev->peer_reg->spad);
+>  }
+> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+> index cb4f99889..b2475f4 100644
+> --- a/drivers/ntb/ntb_transport.c
+> +++ b/drivers/ntb/ntb_transport.c
+> @@ -875,17 +875,17 @@ static void ntb_transport_link_work(struct work_struct *work)
+>  			size = max_mw_size;
+> 
+>  		spad = MW0_SZ_HIGH + (i * 2);
+> -		ntb_peer_spad_write(ndev, spad, upper_32_bits(size));
+> +		ntb_peer_spad_write(ndev, PIDX, spad, upper_32_bits(size));
+> 
+>  		spad = MW0_SZ_LOW + (i * 2);
+> -		ntb_peer_spad_write(ndev, spad, lower_32_bits(size));
+> +		ntb_peer_spad_write(ndev, PIDX, spad, lower_32_bits(size));
+>  	}
+> 
+> -	ntb_peer_spad_write(ndev, NUM_MWS, nt->mw_count);
+> +	ntb_peer_spad_write(ndev, PIDX, NUM_MWS, nt->mw_count);
+> 
+> -	ntb_peer_spad_write(ndev, NUM_QPS, nt->qp_count);
+> +	ntb_peer_spad_write(ndev, PIDX, NUM_QPS, nt->qp_count);
+> 
+> -	ntb_peer_spad_write(ndev, VERSION, NTB_TRANSPORT_VERSION);
+> +	ntb_peer_spad_write(ndev, PIDX, VERSION, NTB_TRANSPORT_VERSION);
+> 
+>  	/* Query the remote side for its info */
+>  	val = ntb_spad_read(ndev, VERSION);
+> @@ -961,10 +961,10 @@ static void ntb_qp_link_work(struct work_struct *work)
+> 
+>  	val = ntb_spad_read(nt->ndev, QP_LINKS);
+> 
+> -	ntb_peer_spad_write(nt->ndev, QP_LINKS, val | BIT(qp->qp_num));
+> +	ntb_peer_spad_write(nt->ndev, PIDX, QP_LINKS, val | BIT(qp->qp_num));
+> 
+>  	/* query remote spad for qp ready bits */
+> -	ntb_peer_spad_read(nt->ndev, QP_LINKS);
+> +	ntb_peer_spad_read(nt->ndev, PIDX, QP_LINKS);
+>  	dev_dbg_ratelimited(&pdev->dev, "Remote QP link status = %x\n", val);
+> 
+>  	/* See if the remote side is up */
+> @@ -2141,8 +2141,7 @@ void ntb_transport_link_down(struct ntb_transport_qp *qp)
+> 
+>  	val = ntb_spad_read(qp->ndev, QP_LINKS);
+> 
+> -	ntb_peer_spad_write(qp->ndev, QP_LINKS,
+> -			    val & ~BIT(qp->qp_num));
+> +	ntb_peer_spad_write(qp->ndev, PIDX, QP_LINKS, val & ~BIT(qp->qp_num));
+> 
+>  	if (qp->link_is_up)
+>  		ntb_send_link_down(qp);
+> diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
+> index 3efb5b5..99f1522 100644
+> --- a/drivers/ntb/test/ntb_perf.c
+> +++ b/drivers/ntb/test/ntb_perf.c
+> @@ -516,9 +516,9 @@ static void perf_link_work(struct work_struct *work)
+>  	if (max_mw_size && size > max_mw_size)
+>  		size = max_mw_size;
+> 
+> -	ntb_peer_spad_write(ndev, MW_SZ_HIGH, upper_32_bits(size));
+> -	ntb_peer_spad_write(ndev, MW_SZ_LOW, lower_32_bits(size));
+> -	ntb_peer_spad_write(ndev, VERSION, PERF_VERSION);
+> +	ntb_peer_spad_write(ndev, PIDX, MW_SZ_HIGH, upper_32_bits(size));
+> +	ntb_peer_spad_write(ndev, PIDX, MW_SZ_LOW, lower_32_bits(size));
+> +	ntb_peer_spad_write(ndev, PIDX, VERSION, PERF_VERSION);
+> 
+>  	/* now read what peer wrote */
+>  	val = ntb_spad_read(ndev, VERSION);
+> diff --git a/drivers/ntb/test/ntb_pingpong.c b/drivers/ntb/test/ntb_pingpong.c
+> index 6dd7582..4ee5c14 100644
+> --- a/drivers/ntb/test/ntb_pingpong.c
+> +++ b/drivers/ntb/test/ntb_pingpong.c
+> @@ -138,7 +138,7 @@ static void pp_ping(unsigned long ctx)
+>  			"Ping bits %#llx read %#x write %#x\n",
+>  			db_bits, spad_rd, spad_wr);
+> 
+> -		ntb_peer_spad_write(pp->ntb, 0, spad_wr);
+> +		ntb_peer_spad_write(pp->ntb, PIDX, 0, spad_wr);
+>  		ntb_peer_db_set(pp->ntb, db_bits);
+>  		ntb_db_clear_mask(pp->ntb, db_mask);
+> 
+> @@ -225,6 +225,12 @@ static int pp_probe(struct ntb_client *client,
+>  		}
+>  	}
+> 
+> +	if (ntb_spad_count(ntb) < 1) {
+> +		dev_dbg(&ntb->dev, "no enough scratchpads\n");
+> +		rc = -EINVAL;
+> +		goto err_pp;
+> +	}
+> +
+>  	if (ntb_spad_is_unsafe(ntb)) {
+>  		dev_dbg(&ntb->dev, "scratchpad is unsafe\n");
+>  		if (!unsafe) {
+> diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c
+> index 7aa6018..0f57b2e 100644
+> --- a/drivers/ntb/test/ntb_tool.c
+> +++ b/drivers/ntb/test/ntb_tool.c
+> @@ -264,14 +264,17 @@ static ssize_t tool_dbfn_write(struct tool_ctx *tc,
+> 
+>  static ssize_t tool_spadfn_read(struct tool_ctx *tc, char __user *ubuf,
+>  				size_t size, loff_t *offp,
+> -				u32 (*spad_read_fn)(struct ntb_dev *, int))
+> +				u32 (*spad_read_fn)(struct ntb_dev *, int),
+> +				u32 (*spad_peer_read_fn)(struct ntb_dev *, int,
+> +							 int))
+>  {
+>  	size_t buf_size;
+>  	char *buf;
+>  	ssize_t pos, rc;
+>  	int i, spad_count;
+> +	u32 data;
+> 
+> -	if (!spad_read_fn)
+> +	if (!spad_read_fn && !spad_peer_read_fn)
+>  		return -EINVAL;
+> 
+>  	spad_count = ntb_spad_count(tc->ntb);
+> @@ -290,8 +293,12 @@ static ssize_t tool_spadfn_read(struct tool_ctx *tc, char __user
+> *ubuf,
+>  	pos = 0;
+> 
+>  	for (i = 0; i < spad_count; ++i) {
+> +		if (spad_read_fn)
+> +			data = spad_read_fn(tc->ntb, i);
+> +		else
+> +			data = spad_peer_read_fn(tc->ntb, PIDX, i);
+
+As long as we are just supporting pidx zero for now, the changes in ntb_tool can be simplified.
+
+static u32 ntb_tool_peer_spad_read(struct ntb_dev *ntb, int sidx)
+{
+	return ntb_peer_spad_read(ntb, PIDX, sidx);
+}
+
+Then, just pass ntb_tool_peer_spad_read in place of tc->ntb->ops.peer_spad_read.
+
+Similar for peer_spad_write.
+
+>  		pos += scnprintf(buf + pos, buf_size - pos, "%d\t%#x\n",
+> -				 i, spad_read_fn(tc->ntb, i));
+> +				 i, data);
+>  	}
+> 
+>  	rc = simple_read_from_buffer(ubuf, size, offp, buf, pos);
+> @@ -305,7 +312,9 @@ static ssize_t tool_spadfn_write(struct tool_ctx *tc,
+>  				 const char __user *ubuf,
+>  				 size_t size, loff_t *offp,
+>  				 int (*spad_write_fn)(struct ntb_dev *,
+> -						      int, u32))
+> +						      int, u32),
+> +				 int (*spad_peer_write_fn)(struct ntb_dev *,
+> +							   int, int, u32))
+>  {
+>  	int spad_idx;
+>  	u32 spad_val;
+> @@ -313,7 +322,7 @@ static ssize_t tool_spadfn_write(struct tool_ctx *tc,
+>  	int pos, n;
+>  	ssize_t rc;
+> 
+> -	if (!spad_write_fn) {
+> +	if (!spad_write_fn || !spad_peer_write_fn) {
+>  		dev_dbg(&tc->ntb->dev, "no spad write fn\n");
+>  		return -EINVAL;
+>  	}
+> @@ -333,7 +342,11 @@ static ssize_t tool_spadfn_write(struct tool_ctx *tc,
+>  	n = sscanf(buf_ptr, "%d %i%n", &spad_idx, &spad_val, &pos);
+>  	while (n == 2) {
+>  		buf_ptr += pos;
+> -		rc = spad_write_fn(tc->ntb, spad_idx, spad_val);
+> +		if (spad_write_fn)
+> +			rc = spad_write_fn(tc->ntb, spad_idx, spad_val);
+> +		else
+> +			rc = spad_peer_write_fn(tc->ntb, PIDX, spad_idx,
+> +						spad_val);
+>  		if (rc)
+>  			break;
+> 
+> @@ -446,7 +459,7 @@ static ssize_t tool_spad_read(struct file *filep, char __user *ubuf,
+>  	struct tool_ctx *tc = filep->private_data;
+> 
+>  	return tool_spadfn_read(tc, ubuf, size, offp,
+> -				tc->ntb->ops->spad_read);
+> +				tc->ntb->ops->spad_read, NULL);
+>  }
+> 
+>  static ssize_t tool_spad_write(struct file *filep, const char __user *ubuf,
+> @@ -455,7 +468,7 @@ static ssize_t tool_spad_write(struct file *filep, const char __user
+> *ubuf,
+>  	struct tool_ctx *tc = filep->private_data;
+> 
+>  	return tool_spadfn_write(tc, ubuf, size, offp,
+> -				 tc->ntb->ops->spad_write);
+> +				 tc->ntb->ops->spad_write, NULL);
+>  }
+> 
+>  static TOOL_FOPS_RDWR(tool_spad_fops,
+> @@ -467,7 +480,7 @@ static ssize_t tool_peer_spad_read(struct file *filep, char __user
+> *ubuf,
+>  {
+>  	struct tool_ctx *tc = filep->private_data;
+> 
+> -	return tool_spadfn_read(tc, ubuf, size, offp,
+> +	return tool_spadfn_read(tc, ubuf, size, offp, NULL,
+>  				tc->ntb->ops->peer_spad_read);
+>  }
+> 
+> @@ -476,7 +489,7 @@ static ssize_t tool_peer_spad_write(struct file *filep, const char
+> __user *ubuf,
+>  {
+>  	struct tool_ctx *tc = filep->private_data;
+> 
+> -	return tool_spadfn_write(tc, ubuf, size, offp,
+> +	return tool_spadfn_write(tc, ubuf, size, offp, NULL,
+>  				 tc->ntb->ops->peer_spad_write);
+>  }
+> 
+> @@ -935,6 +948,18 @@ static int tool_probe(struct ntb_client *self, struct ntb_dev *ntb)
+>  	if (ntb_peer_port_count(ntb) != 1)
+>  		dev_warn(&ntb->dev, "multi-port NTB is unsupported\n");
+> 
+> +	if (ntb_spad_count(ntb) < 1) {
+> +		dev_dbg(&ntb->dev, "no enough scratchpads\n");
+> +		rc = -EINVAL;
+> +		goto err_tc;
+> +	}
+> +
+> +	if (!ntb->ops->mw_set_trans) {
+> +		dev_dbg(&ntb->dev, "need inbound MW based NTB API\n");
+> +		rc = -EINVAL;
+> +		goto err_tc;
+> +	}
+> +
+>  	tc = kzalloc(sizeof(*tc), GFP_KERNEL);
+>  	if (!tc) {
+>  		rc = -ENOMEM;
 > diff --git a/include/linux/ntb.h b/include/linux/ntb.h
-> index a6bf15d..90746df 100644
+> index fb78663..a6bf15d 100644
 > --- a/include/linux/ntb.h
 > +++ b/include/linux/ntb.h
-> @@ -164,10 +164,12 @@ static inline int ntb_client_ops_is_valid(const struct
-> ntb_client_ops *ops)
->   * struct ntb_ctx_ops - ntb driver context operations
->   * @link_event:		See ntb_link_event().
->   * @db_event:		See ntb_db_event().
-> + * @msg_event:		See ntb_msg_event().
->   */
->  struct ntb_ctx_ops {
->  	void (*link_event)(void *ctx);
->  	void (*db_event)(void *ctx, int db_vector);
-> +	void (*msg_event)(void *ctx);
->  };
+> @@ -274,13 +274,14 @@ struct ntb_dev_ops {
+>  	int (*spad_is_unsafe)(struct ntb_dev *ntb);
+>  	int (*spad_count)(struct ntb_dev *ntb);
 > 
->  static inline int ntb_ctx_ops_is_valid(const struct ntb_ctx_ops *ops)
-> @@ -176,6 +178,7 @@ static inline int ntb_ctx_ops_is_valid(const struct ntb_ctx_ops *ops)
->  	return
->  		/* ops->link_event		&& */
->  		/* ops->db_event		&& */
-> +		/* ops->msg_event		&& */
->  		1;
->  }
+> -	u32 (*spad_read)(struct ntb_dev *ntb, int idx);
+> -	int (*spad_write)(struct ntb_dev *ntb, int idx, u32 val);
+> +	u32 (*spad_read)(struct ntb_dev *ntb, int sidx);
+> +	int (*spad_write)(struct ntb_dev *ntb, int sidx, u32 val);
 > 
-> @@ -220,6 +223,15 @@ static inline int ntb_ctx_ops_is_valid(const struct ntb_ctx_ops *ops)
->   * @peer_spad_addr:	See ntb_peer_spad_addr().
->   * @peer_spad_read:	See ntb_peer_spad_read().
->   * @peer_spad_write:	See ntb_peer_spad_write().
-> + * @msg_count:		See ntb_msg_count().
-> + * @msg_inbits:		See ntb_msg_inbits().
-> + * @msg_outbits:	See ntb_msg_outbits().
-> + * @msg_read_sts:	See ntb_msg_read_sts().
-> + * @msg_clear_sts:	See ntb_msg_clear_sts().
-> + * @msg_set_mask:	See ntb_msg_set_mask().
-> + * @msg_clear_mask:	See ntb_msg_clear_mask().
-> + * @msg_read:		See ntb_msg_read().
-> + * @msg_write:		See ntb_msg_write().
->   */
->  struct ntb_dev_ops {
->  	int (*port_number)(struct ntb_dev *ntb);
-> @@ -282,6 +294,16 @@ struct ntb_dev_ops {
->  	u32 (*peer_spad_read)(struct ntb_dev *ntb, int pidx, int sidx);
->  	int (*peer_spad_write)(struct ntb_dev *ntb, int pidx, int sidx,
->  			       u32 val);
-> +
-> +	int (*msg_count)(struct ntb_dev *ntb);
-> +	u64 (*msg_inbits)(struct ntb_dev *ntb);
-> +	u64 (*msg_outbits)(struct ntb_dev *ntb);
-> +	u64 (*msg_read_sts)(struct ntb_dev *ntb);
-> +	int (*msg_clear_sts)(struct ntb_dev *ntb, u64 sts_bits);
-> +	int (*msg_set_mask)(struct ntb_dev *ntb, u64 mask_bits);
-> +	int (*msg_clear_mask)(struct ntb_dev *ntb, u64 mask_bits);
-> +	int (*msg_read)(struct ntb_dev *ntb, int midx, int *pidx, u32 *msg);
-> +	int (*msg_write)(struct ntb_dev *ntb, int midx, int pidx, u32 msg);
+> -	int (*peer_spad_addr)(struct ntb_dev *ntb, int idx,
+> +	int (*peer_spad_addr)(struct ntb_dev *ntb, int pidx, int sidx,
+>  			      phys_addr_t *spad_addr);
+> -	u32 (*peer_spad_read)(struct ntb_dev *ntb, int idx);
+> -	int (*peer_spad_write)(struct ntb_dev *ntb, int idx, u32 val);
+> +	u32 (*peer_spad_read)(struct ntb_dev *ntb, int pidx, int sidx);
+> +	int (*peer_spad_write)(struct ntb_dev *ntb, int pidx, int sidx,
+> +			       u32 val);
 >  };
 > 
 >  static inline int ntb_dev_ops_is_valid(const struct ntb_dev_ops *ops)
-> @@ -329,6 +351,15 @@ static inline int ntb_dev_ops_is_valid(const struct ntb_dev_ops *ops)
->  		/* !ops->peer_spad_addr == !ops->spad_count && */
->  		/* !ops->peer_spad_read == !ops->spad_count && */
->  		!ops->peer_spad_write == !ops->spad_count &&
-> +
-> +		!ops->msg_inbits == !ops->msg_count	&&
-> +		!ops->msg_outbits == !ops->msg_count	&&
-> +		!ops->msg_read_sts == !ops->msg_count	&&
-> +		!ops->msg_clear_sts == !ops->msg_count	&&
-> +		/* !ops->msg_set_mask == !ops->msg_count && */
-> +		/* !ops->msg_clear_mask == !ops->msg_count && */
-> +		!ops->msg_read == !ops->msg_count	&&
-> +		!ops->msg_write == !ops->msg_count	&&
+> @@ -322,13 +323,12 @@ static inline int ntb_dev_ops_is_valid(const struct ntb_dev_ops
+> *ops)
+>  		/* ops->peer_db_read_mask		&& */
+>  		/* ops->peer_db_set_mask		&& */
+>  		/* ops->peer_db_clear_mask		&& */
+> -		/* ops->spad_is_unsafe			&& */
+> -		ops->spad_count				&&
+> -		ops->spad_read				&&
+> -		ops->spad_write				&&
+> -		/* ops->peer_spad_addr			&& */
+> -		/* ops->peer_spad_read			&& */
+> -		ops->peer_spad_write			&&
+> +		/* !ops->spad_is_unsafe == !ops->spad_count && */
+> +		!ops->spad_read == !ops->spad_count	&&
+> +		!ops->spad_write == !ops->spad_count	&&
+> +		/* !ops->peer_spad_addr == !ops->spad_count && */
+> +		/* !ops->peer_spad_read == !ops->spad_count && */
+> +		!ops->peer_spad_write == !ops->spad_count &&
 >  		1;
 >  }
 > 
-> @@ -472,6 +503,18 @@ void ntb_link_event(struct ntb_dev *ntb);
->  void ntb_db_event(struct ntb_dev *ntb, int vector);
-> 
->  /**
-> + * ntb_msg_event() - notify driver context of a message event
-> + * @ntb:	NTB device context.
-> + *
-> + * Notify the driver context of a message event.  If hardware supports
-> + * message registers, this event indicates, that a new message arrived in
-> + * some incoming message register or last sent message couldn't be delivered.
-> + * The events can be masked/unmasked by the methods ntb_msg_set_mask() and
-> + * ntb_msg_clear_mask().
-> + */
-> +void ntb_msg_event(struct ntb_dev *ntb);
-> +
-> +/**
->   * ntb_port_number() - get the local port number
->   * @ntb:	NTB device context.
->   *
-> @@ -1197,4 +1240,166 @@ static inline int ntb_peer_spad_write(struct ntb_dev *ntb, int
-> pidx, int sidx,
->  	return ntb->ops->peer_spad_write(ntb, pidx, sidx, val);
+> @@ -1087,51 +1087,62 @@ static inline int ntb_spad_is_unsafe(struct ntb_dev *ntb)
 >  }
 > 
-> +/**
-> + * ntb_msg_count() - get the number of message registers
-> + * @ntb:	NTB device context.
-> + *
-> + * Hardware may support a different number of messge registers.
-> + *
-> + * Return: the number of message registers.
-> + */
-> +static inline int ntb_msg_count(struct ntb_dev *ntb)
-> +{
-> +	if (!ntb->ops->msg_count)
+>  /**
+> - * ntb_mw_count() - get the number of scratchpads
+> + * ntb_spad_count() - get the number of scratchpads
+>   * @ntb:	NTB device context.
+>   *
+>   * Hardware and topology may support a different number of scratchpads.
+> + * Although it must be the same for all ports per NTB device.
+>   *
+>   * Return: the number of scratchpads.
+>   */
+>  static inline int ntb_spad_count(struct ntb_dev *ntb)
+>  {
+> +	if (!ntb->ops->spad_count)
 > +		return 0;
 > +
-> +	return ntb->ops->msg_count(ntb);
-> +}
+>  	return ntb->ops->spad_count(ntb);
+>  }
+> 
+>  /**
+>   * ntb_spad_read() - read the local scratchpad register
+>   * @ntb:	NTB device context.
+> - * @idx:	Scratchpad index.
+> + * @sidx:	Scratchpad index.
+>   *
+>   * Read the local scratchpad register, and return the value.
+>   *
+>   * Return: The value of the local scratchpad register.
+>   */
+> -static inline u32 ntb_spad_read(struct ntb_dev *ntb, int idx)
+> +static inline u32 ntb_spad_read(struct ntb_dev *ntb, int sidx)
+>  {
+> -	return ntb->ops->spad_read(ntb, idx);
+> +	if (!ntb->ops->spad_read)
+> +		return ~(u32)0;
 > +
-> +/**
-> + * ntb_msg_inbits() - get a bitsfield of inbound message registers status
-> + * @ntb:	NTB device context.
-> + *
-> + * The method returns the bitsfield of status and mask registers, which related
-> + * to inbound message registers.
-> + *
-> + * Return: bitsfield of inbound message registers.
-> + */
-> +static inline u64 ntb_msg_inbits(struct ntb_dev *ntb)
-> +{
-> +	if (!ntb->ops->msg_inbits)
-> +		return 0;
-> +
-> +	return ntb->ops->msg_inbits(ntb);
-> +}
-> +
-> +/**
-> + * ntb_msg_outbits() - get a bitsfield of outbound message registers status
-> + * @ntb:	NTB device context.
-> + *
-> + * The method returns the bitsfield of status and mask registers, which related
-> + * to outbound message registers.
-> + *
-> + * Return: bitsfield of outbound message registers.
-> + */
-> +static inline u64 ntb_msg_outbits(struct ntb_dev *ntb)
-> +{
-> +	if (!ntb->ops->msg_outbits)
-> +		return 0;
-> +
-> +	return ntb->ops->msg_outbits(ntb);
-> +}
-> +
-> +/**
-> + * ntb_msg_read_sts() - read the message registers status
-> + * @ntb:	NTB device context.
-> + *
-> + * Read the status of message register. Inbound and outbound message registers
-> + * related bits can be filetered by masks retrieved from ntb_msg_inbits() and
-> + * ntb_msg_outbits().
-> + *
-> + * Return: status bits of message registers
-> + */
-> +static inline u64 ntb_msg_read_sts(struct ntb_dev *ntb)
-> +{
-> +	if (!ntb->ops->msg_read_sts)
-> +		return 0;
-> +
-> +	return ntb->ops->msg_read_sts(ntb);
-> +}
-> +
-> +/**
-> + * ntb_msg_clear_sts() - clear status bits of message registers
-> + * @ntb:	NTB device context.
-> + * @sts_bits:	Status bits to clear.
-> + *
-> + * Clear bits in the status register.
-> + *
-> + * Return: Zero on success, otherwise a negative error number.
-> + */
-> +static inline int ntb_msg_clear_sts(struct ntb_dev *ntb, u64 sts_bits)
-> +{
-> +	if (!ntb->ops->msg_clear_sts)
+> +	return ntb->ops->spad_read(ntb, sidx);
+>  }
+> 
+>  /**
+>   * ntb_spad_write() - write the local scratchpad register
+>   * @ntb:	NTB device context.
+> - * @idx:	Scratchpad index.
+> + * @sidx:	Scratchpad index.
+>   * @val:	Scratchpad value.
+>   *
+>   * Write the value to the local scratchpad register.
+>   *
+>   * Return: Zero on success, otherwise an error number.
+>   */
+> -static inline int ntb_spad_write(struct ntb_dev *ntb, int idx, u32 val)
+> +static inline int ntb_spad_write(struct ntb_dev *ntb, int sidx, u32 val)
+>  {
+> -	return ntb->ops->spad_write(ntb, idx, val);
+> +	if (!ntb->ops->spad_write)
 > +		return -EINVAL;
 > +
-> +	return ntb->ops->msg_clear_sts(ntb, sts_bits);
-> +}
+> +	return ntb->ops->spad_write(ntb, sidx, val);
+>  }
+> 
+>  /**
+>   * ntb_peer_spad_addr() - address of the peer scratchpad register
+>   * @ntb:	NTB device context.
+> - * @idx:	Scratchpad index.
+> + * @pidx:	Port index of peer device.
+> + * @sidx:	Scratchpad index.
+>   * @spad_addr:	OUT - The address of the peer scratchpad register.
+>   *
+>   * Return the address of the peer doorbell register.  This may be used, for
+> @@ -1139,42 +1150,51 @@ static inline int ntb_spad_write(struct ntb_dev *ntb, int idx, u32
+> val)
+>   *
+>   * Return: Zero on success, otherwise an error number.
+>   */
+> -static inline int ntb_peer_spad_addr(struct ntb_dev *ntb, int idx,
+> +static inline int ntb_peer_spad_addr(struct ntb_dev *ntb, int pidx, int sidx,
+>  				     phys_addr_t *spad_addr)
+>  {
+>  	if (!ntb->ops->peer_spad_addr)
+>  		return -EINVAL;
+> 
+> -	return ntb->ops->peer_spad_addr(ntb, idx, spad_addr);
+> +	return ntb->ops->peer_spad_addr(ntb, pidx, sidx, spad_addr);
+>  }
+> 
+>  /**
+>   * ntb_peer_spad_read() - read the peer scratchpad register
+>   * @ntb:	NTB device context.
+> - * @idx:	Scratchpad index.
+> + * @pidx:	Port index of peer device.
+> + * @sidx:	Scratchpad index.
+>   *
+>   * Read the peer scratchpad register, and return the value.
+>   *
+>   * Return: The value of the local scratchpad register.
+>   */
+> -static inline u32 ntb_peer_spad_read(struct ntb_dev *ntb, int idx)
+> +static inline u32 ntb_peer_spad_read(struct ntb_dev *ntb, int pidx, int sidx)
+>  {
+> -	return ntb->ops->peer_spad_read(ntb, idx);
+> +	if (!ntb->ops->peer_spad_read)
+> +		return ~(u32)0;
 > +
-> +/**
-> + * ntb_msg_set_mask() - set mask of message register status bits
-> + * @ntb:	NTB device context.
-> + * @mask_bits:	Mask bits.
-> + *
-> + * Mask the message registers status bits from raising the message event.
-> + *
-> + * Return: Zero on success, otherwise a negative error number.
-> + */
-> +static inline int ntb_msg_set_mask(struct ntb_dev *ntb, u64 mask_bits)
-> +{
-> +	if (!ntb->ops->msg_set_mask)
+> +	return ntb->ops->peer_spad_read(ntb, pidx, sidx);
+>  }
+> 
+>  /**
+>   * ntb_peer_spad_write() - write the peer scratchpad register
+>   * @ntb:	NTB device context.
+> - * @idx:	Scratchpad index.
+> + * @pidx:	Port index of peer device.
+> + * @sidx:	Scratchpad index.
+>   * @val:	Scratchpad value.
+>   *
+>   * Write the value to the peer scratchpad register.
+>   *
+>   * Return: Zero on success, otherwise an error number.
+>   */
+> -static inline int ntb_peer_spad_write(struct ntb_dev *ntb, int idx, u32 val)
+> +static inline int ntb_peer_spad_write(struct ntb_dev *ntb, int pidx, int sidx,
+> +				      u32 val)
+>  {
+> -	return ntb->ops->peer_spad_write(ntb, idx, val);
+> +	if (!ntb->ops->peer_spad_write)
 > +		return -EINVAL;
 > +
-> +	return ntb->ops->msg_set_mask(ntb, mask_bits);
-> +}
-> +
-> +/**
-> + * ntb_msg_clear_mask() - clear message registers mask
-> + * @ntb:	NTB device context.
-> + * @mask_bits:	Mask bits to clear.
-> + *
-> + * Clear bits in the message events mask register.
-> + *
-> + * Return: Zero on success, otherwise a negative error number.
-> + */
-> +static inline int ntb_msg_clear_mask(struct ntb_dev *ntb, u64 mask_bits)
-> +{
-> +	if (!ntb->ops->msg_clear_mask)
-> +		return -EINVAL;
-> +
-> +	return ntb->ops->msg_clear_mask(ntb, mask_bits);
-> +}
-> +
-> +/**
-> + * ntb_msg_read() - read message register with specified index
-> + * @ntb:	NTB device context.
-> + * @midx:	Message register index
-> + * @pidx:	OUT - Port index of peer device a message retrieved from
-> + * @msg:	OUT - Data
-> + *
-> + * Read data from the specified message register. Source port index of a
-> + * message is retrieved as well.
-> + *
-> + * Return: Zero on success, otherwise a negative error number.
-> + */
-> +static inline int ntb_msg_read(struct ntb_dev *ntb, int midx, int *pidx,
-> +			       u32 *msg)
-> +{
-> +	if (!ntb->ops->msg_read)
-> +		return -EINVAL;
-> +
-> +	return ntb->ops->msg_read(ntb, midx, pidx, msg);
-> +}
-> +
-> +/**
-> + * ntb_msg_write() - write data to the specified message register
-> + * @ntb:	NTB device context.
-> + * @midx:	Message register index
-> + * @pidx:	Port index of peer device a message being sent to
-> + * @msg:	Data to send
-> + *
-> + * Send data to a specified peer device using the defined message register.
-> + * Message event can be raised if the midx registers isn't empty while
-> + * calling this method and the corresponding interrupt isn't masked.
-> + *
-> + * Return: Zero on success, otherwise a negative error number.
-> + */
-> +static inline int ntb_msg_write(struct ntb_dev *ntb, int midx, int pidx,
-> +				u32 msg)
-> +{
-> +	if (!ntb->ops->msg_write)
-> +		return -EINVAL;
-> +
-> +	return ntb->ops->msg_write(ntb, midx, pidx, msg);
-> +}
-> +
+> +	return ntb->ops->peer_spad_write(ntb, pidx, sidx, val);
+>  }
+> 
 >  #endif
 > --
 > 2.6.6
