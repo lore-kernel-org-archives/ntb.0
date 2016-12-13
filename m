@@ -1,70 +1,125 @@
-Return-Path: <fancer.lancer@gmail.com>
-Received: from mail-lf0-x244.google.com (mail-lf0-x244.google.com. [2a00:1450:4010:c07::244])
-        by gmr-mx.google.com with ESMTPS id d199si364106wmd.1.2016.12.13.15.49.27
+Return-Path: <Allen.Hubbe@dell.com>
+Received: from esa8.dell-outbound.iphmx.com (esa8.dell-outbound.iphmx.com. [68.232.149.218])
+        by gmr-mx.google.com with ESMTPS id p22si2736273ywe.3.2016.12.12.20.15.02
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 13 Dec 2016 15:49:27 -0800 (PST)
-Received: by mail-lf0-x244.google.com with SMTP id 96so224886lfs.1
-        for <linux-ntb@googlegroups.com>; Tue, 13 Dec 2016 15:49:27 -0800 (PST)
-Return-Path: <fancer.lancer@gmail.com>
-From: Serge Semin <fancer.lancer@gmail.com>
-Subject: [PATCH v3 0/9] NTB: Alter kernel API to support multi-port devices
-Date: Wed, 14 Dec 2016 02:49:12 +0300
-Message-Id: <1481672961-10753-1-git-send-email-fancer.lancer@gmail.com>
-In-Reply-To: <1481576902-21091-1-git-send-email-fancer.lancer@gmail.com>
-References: <1481576902-21091-1-git-send-email-fancer.lancer@gmail.com>
-To: jdmason@kudzu.us, dave.jiang@intel.com, Allen.Hubbe@emc.com, Xiangliang.Yu@amd.com
-Cc: Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Serge Semin <fancer.lancer@gmail.com>
+        Mon, 12 Dec 2016 20:15:02 -0800 (PST)
+From: "Allen Hubbe" <Allen.Hubbe@dell.com>
+Subject: RE: [PATCH v2 9/9] NTB: Add ntb.h comments
+Date: Mon, 12 Dec 2016 23:14:41 -0500
+Message-ID: <000801d254f7$6f2b2700$4d817500$@dell.com>
+MIME-Version: 1.0
+Content-Type: text/plain;
+	charset="Windows-1252"
+Content-Transfer-Encoding: 7bit
+Content-Language: en-us
+To: 'Serge Semin' <fancer.lancer@gmail.com>, jdmason@kudzu.us, dave.jiang@intel.com, Xiangliang.Yu@amd.com
+Cc: Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-There are devices, like IDT PCIe-switches, which have more than just two ports.
-Particularly one device can have up to eight ports with NTB-function activated.
-In order to support such devices, NTB kernel API should be altered since
-currently it's optimized to work with two-ports devices only.
+From: Serge Semin
+> 
+> Signed-off-by: Serge Semin <fancer.lancer@gmail.com>
+> 
+> ---
+>  include/linux/ntb.h | 17 +++++++++++------
+>  1 file changed, 11 insertions(+), 6 deletions(-)
+> 
+> diff --git a/include/linux/ntb.h b/include/linux/ntb.h
+> index fe0437c..c5a369c 100644
+> --- a/include/linux/ntb.h
+> +++ b/include/linux/ntb.h
+> @@ -312,13 +312,18 @@ static inline int ntb_dev_ops_is_valid(const struct ntb_dev_ops
+> *ops)
+>  {
+>  	/* commented callbacks are not required: */
+>  	return
+> +		/* Port operations are required */
 
-Changelog v2:
- - Move comments from cover letter to individual patches
- - Combine patches to make code buildable
- - Alter patchset to support Intel SKX driver
- - Make sure all the API uses the same midx/widx/pidx/sidx arguments notation
- - Move new MW API usage description into Documention
- - Alter Spad/Msg API checking valid function to make spad and msg interfaces optional
- - Alter comments in ntb.h
- - Split: add NTB_SPEED_GEN4 and ntb.h comments into separate patches
- - Put copyrights into some of the existing patches
- - Get rid of TOPO updates
+Maybe: are required for multiport devices.
 
-Changelog v3:
- - Get rid of code rearrangements within Intel/AMD drivers
- - Make two-ports NTB API being default
- - Check pidx argument for negative values
- - Translation address methods should return zero in case if not implemented
- - Simplify Scratchpad alterations of ntb_tool client driver
- - ntb.h comments are altered in compliance with port-related API changes
- - Spell check the text
+>  		ops->port_number			&&
+>  		ops->peer_port_count			&&
+>  		ops->peer_port_number			&&
+>  		ops->peer_port_idx			&&
+> +
+> +		/* Link operations are requiered */
+>  		ops->link_is_up				&&
+>  		ops->link_enable			&&
+>  		ops->link_disable			&&
 
-Serge Semin (9):
-  NTB: Make link-state API being declared first
-  NTB: Add indexed ports NTB API
-  NTB: Alter link-state API to support multi-port devices
-  NTB: Alter MW API to support multi-ports devices
-  NTB: Alter Scratchpads API to support multi-ports devices
-  NTB: Add Messaging NTB API
-  NTB: Add new Memory Windows API documentation
-  NTB: Add PCIe Gen4 link speed
-  NTB: Add ntb.h comments
+Wasn't the first patch in this series all about making link ops first?
 
- Documentation/ntb.txt               |  99 ++++-
- drivers/ntb/hw/amd/ntb_hw_amd.c     |  84 +++--
- drivers/ntb/hw/intel/ntb_hw_intel.c | 106 ++++--
- drivers/ntb/ntb.c                   |  69 ++++
- drivers/ntb/ntb_transport.c         |  44 ++-
- drivers/ntb/test/ntb_perf.c         |  27 +-
- drivers/ntb/test/ntb_pingpong.c     |  14 +-
- drivers/ntb/test/ntb_tool.c         |  69 +++-
- include/linux/ntb.h                 | 724 ++++++++++++++++++++++++++++++------
- 9 files changed, 1026 insertions(+), 210 deletions(-)
+> +
+> +		/* One or both MW interfaces should be developed */
+>  		ops->mw_count				&&
+>  		ops->mw_get_align			&&
+>  		(ops->mw_set_trans			||
+> @@ -328,12 +333,11 @@ static inline int ntb_dev_ops_is_valid(const struct ntb_dev_ops
+> *ops)
+>  		ops->peer_mw_get_addr			&&
+>  		/* ops->peer_mw_clear_trans		&& */
+> 
+> +		/* Doorbell operations are mostly required */
+>  		/* ops->db_is_unsafe			&& */
+>  		ops->db_valid_mask			&&
+> -
+>  		/* both set, or both unset */
+>  		(!ops->db_vector_count == !ops->db_vector_mask) &&
+> -
+>  		ops->db_read				&&
+>  		/* ops->db_set				&& */
+>  		ops->db_clear				&&
+> @@ -347,6 +351,8 @@ static inline int ntb_dev_ops_is_valid(const struct ntb_dev_ops *ops)
+>  		/* ops->peer_db_read_mask		&& */
+>  		/* ops->peer_db_set_mask		&& */
+>  		/* ops->peer_db_clear_mask		&& */
+> +
+> +		/* Scrachpad interface is optional */
+>  		/* !ops->spad_is_unsafe == !ops->spad_count && */
+>  		!ops->spad_read == !ops->spad_count	&&
+>  		!ops->spad_write == !ops->spad_count	&&
+> @@ -354,6 +360,7 @@ static inline int ntb_dev_ops_is_valid(const struct ntb_dev_ops *ops)
+>  		/* !ops->peer_spad_read == !ops->spad_count && */
+>  		!ops->peer_spad_write == !ops->spad_count &&
+> 
+> +		/* Message registers interface is optional */
+>  		!ops->msg_inbits == !ops->msg_count	&&
+>  		!ops->msg_outbits == !ops->msg_count	&&
+>  		!ops->msg_read_sts == !ops->msg_count	&&
+> @@ -374,13 +381,12 @@ struct ntb_client {
+>  	struct device_driver		drv;
+>  	const struct ntb_client_ops	ops;
+>  };
+> -
+>  #define drv_ntb_client(__drv) container_of((__drv), struct ntb_client, drv)
+> 
+>  /**
+>   * struct ntb_device - ntb device
+>   * @dev:		Linux device object.
+> - * @pdev:		Pci device entry of the ntb.
+> + * @pdev:		PCI device entry of the ntb.
+>   * @topo:		Detected topology of the ntb.
+>   * @ops:		See &ntb_dev_ops.
+>   * @ctx:		See &ntb_ctx_ops.
+> @@ -401,7 +407,6 @@ struct ntb_dev {
+>  	/* block unregister until device is fully released */
+>  	struct completion		released;
+>  };
+> -
+>  #define dev_ntb(__dev) container_of((__dev), struct ntb_dev, dev)
+> 
+>  /**
+> @@ -498,7 +503,7 @@ void ntb_link_event(struct ntb_dev *ntb);
+>   * multiple interrupt vectors for doorbells, the vector number indicates which
+>   * vector received the interrupt.  The vector number is relative to the first
+>   * vector used for doorbells, starting at zero, and must be less than
+> - ** ntb_db_vector_count().  The driver may call ntb_db_read() to check which
+> + * ntb_db_vector_count().  The driver may call ntb_db_read() to check which
+>   * doorbell bits need service, and ntb_db_vector_mask() to determine which of
+>   * those bits are associated with the vector number.
+>   */
+> --
+> 2.6.6
 
--- 
-2.6.6
 
