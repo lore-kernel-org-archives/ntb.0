@@ -1,16 +1,16 @@
 Return-Path: <fancer.lancer@gmail.com>
-Received: from mail-lf0-x243.google.com (mail-lf0-x243.google.com. [2a00:1450:4010:c07::243])
-        by gmr-mx.google.com with ESMTPS id d199si364313wmd.1.2016.12.13.15.49.32
+Received: from mail-lf0-x244.google.com (mail-lf0-x244.google.com. [2a00:1450:4010:c07::244])
+        by gmr-mx.google.com with ESMTPS id d199si364106wmd.1.2016.12.13.15.49.31
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 13 Dec 2016 15:49:32 -0800 (PST)
-Received: by mail-lf0-x243.google.com with SMTP id o20so216649lfg.3
-        for <linux-ntb@googlegroups.com>; Tue, 13 Dec 2016 15:49:32 -0800 (PST)
+        Tue, 13 Dec 2016 15:49:31 -0800 (PST)
+Received: by mail-lf0-x244.google.com with SMTP id 96so224886lfs.1
+        for <linux-ntb@googlegroups.com>; Tue, 13 Dec 2016 15:49:31 -0800 (PST)
 Return-Path: <fancer.lancer@gmail.com>
 From: Serge Semin <fancer.lancer@gmail.com>
-Subject: [PATCH v3 5/9] NTB: Alter Scratchpads API to support multi-ports devices
-Date: Wed, 14 Dec 2016 02:49:17 +0300
-Message-Id: <1481672961-10753-6-git-send-email-fancer.lancer@gmail.com>
+Subject: [PATCH v3 4/9] NTB: Alter MW API to support multi-ports devices
+Date: Wed, 14 Dec 2016 02:49:16 +0300
+Message-Id: <1481672961-10753-5-git-send-email-fancer.lancer@gmail.com>
 In-Reply-To: <1481672961-10753-1-git-send-email-fancer.lancer@gmail.com>
 References: <1481576902-21091-1-git-send-email-fancer.lancer@gmail.com>
  <1481672961-10753-1-git-send-email-fancer.lancer@gmail.com>
@@ -18,258 +18,597 @@ To: jdmason@kudzu.us, dave.jiang@intel.com, Allen.Hubbe@emc.com, Xiangliang.Yu@a
 Cc: Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Serge Semin <fancer.lancer@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Even though there is no any real NTB hardware, which would have both more
-than two ports and Scratchpad registers, it is logically correct to have
-Scratchpad API accepting a peer port index as well. Intel/AMD drivers utilize
-Primary and Secondary topology to split Scratchpad between connected root
-devices. Since port-index API introduced, Intel/AMD NTB hardware drivers can
-use device port to determine which Scratchpad registers actually belong to
-local and peer devices. The same approach can be used if some potential
-hardware in future will be multi-port and have some set of Scratchpads.
-Here are the brief of changes in the API:
- ntb_spad_count() - return number of Scratchpads per each port
- ntb_peer_spad_addr(pidx, sidx) - address of Scratchpad register of the
-peer device with pidx-index
- ntb_peer_spad_read(pidx, sidx) - read specified Scratchpad register of the
-peer with pidx-index
- ntb_peer_spad_write(pidx, sidx) - write data to Scratchpad register of the
-peer with pidx-index
+Multi-port NTB devices permit to share a memory between all accessible peers.
+Memory Windows API is altered to correspondingly initialize and map memory
+windows for such devices:
+ ntb_mw_count(pidx); - number of inbound memory windows, which can be allocated
+for shared buffer with specified peer device.
+ ntb_mw_get_align(pidx, widx); - get alignment and size restriction parameters
+to properly allocate inbound memory region.
+ ntb_peer_mw_count(); - get number of outbound memory windows.
+ ntb_peer_mw_get_addr(widx); - get mapping address of an outbound memory window
 
-Since there is hardware which doesn't support Scratchpad registers, the
-corresponding API methods are now made optional.
+If hardware supports inbound translation configured on the local ntb port:
+ ntb_mw_set_trans(pidx, widx); - set translation address of allocated inbound
+memory window so a peer device could access it.
+ ntb_mw_clear_trans(pidx, widx); - clear the translation address of an inbound
+memory window.
+
+If hardware supports outbound translation configured on the peer ntb port:
+ ntb_peer_mw_set_trans(pidx, widx); - set translation address of a memory
+window retrieved from a peer device
+ ntb_peer_mw_clear_trans(pidx, widx); - clear the translation address of an
+outbound memory window
 
 Signed-off-by: Serge Semin <fancer.lancer@gmail.com>
 ---
- drivers/ntb/hw/amd/ntb_hw_amd.c     | 14 +++----
- drivers/ntb/hw/intel/ntb_hw_intel.c | 14 +++----
- drivers/ntb/ntb_transport.c         | 17 ++++-----
- drivers/ntb/test/ntb_perf.c         |  6 +--
- drivers/ntb/test/ntb_pingpong.c     |  8 +++-
- drivers/ntb/test/ntb_tool.c         | 21 ++++++++--
- include/linux/ntb.h                 | 76 +++++++++++++++++++++++--------------
- 7 files changed, 98 insertions(+), 58 deletions(-)
+ drivers/ntb/hw/amd/ntb_hw_amd.c     |  68 +++++++++---
+ drivers/ntb/hw/intel/ntb_hw_intel.c |  90 ++++++++++++----
+ drivers/ntb/ntb.c                   |   2 +
+ drivers/ntb/ntb_transport.c         |  21 +++-
+ drivers/ntb/test/ntb_perf.c         |  17 ++-
+ drivers/ntb/test/ntb_tool.c         |  43 +++++---
+ include/linux/ntb.h                 | 208 ++++++++++++++++++++++++++++--------
+ 7 files changed, 342 insertions(+), 107 deletions(-)
 
 diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.c b/drivers/ntb/hw/amd/ntb_hw_amd.c
-index 6a41c38..bc537aa 100644
+index 4d8d0bd..6a41c38 100644
 --- a/drivers/ntb/hw/amd/ntb_hw_amd.c
 +++ b/drivers/ntb/hw/amd/ntb_hw_amd.c
-@@ -433,30 +433,30 @@ static int amd_ntb_spad_write(struct ntb_dev *ntb,
+@@ -5,6 +5,7 @@
+  *   GPL LICENSE SUMMARY
+  *
+  *   Copyright (C) 2016 Advanced Micro Devices, Inc. All Rights Reserved.
++ *   Copyright (C) 2016 T-Platforms. All Rights Reserved.
+  *
+  *   This program is free software; you can redistribute it and/or modify
+  *   it under the terms of version 2 of the GNU General Public License as
+@@ -13,6 +14,7 @@
+  *   BSD LICENSE
+  *
+  *   Copyright (C) 2016 Advanced Micro Devices, Inc. All Rights Reserved.
++ *   Copyright (C) 2016 T-Platforms. All Rights Reserved.
+  *
+  *   Redistribution and use in source and binary forms, with or without
+  *   modification, are permitted provided that the following conditions
+@@ -79,40 +81,42 @@ static int ndev_mw_to_bar(struct amd_ntb_dev *ndev, int idx)
+ 	return 1 << idx;
+ }
+ 
+-static int amd_ntb_mw_count(struct ntb_dev *ntb)
++static int amd_ntb_mw_count(struct ntb_dev *ntb, int pidx)
+ {
++	if (pidx != NTB_DEF_PEER_IDX)
++		return -EINVAL;
++
+ 	return ntb_ndev(ntb)->mw_count;
+ }
+ 
+-static int amd_ntb_mw_get_range(struct ntb_dev *ntb, int idx,
+-				phys_addr_t *base,
+-				resource_size_t *size,
+-				resource_size_t *align,
+-				resource_size_t *align_size)
++static int amd_ntb_mw_get_align(struct ntb_dev *ntb, int pidx, int idx,
++				resource_size_t *addr_align,
++				resource_size_t *size_align,
++				resource_size_t *size_max)
+ {
+ 	struct amd_ntb_dev *ndev = ntb_ndev(ntb);
+ 	int bar;
+ 
++	if (pidx != NTB_DEF_PEER_IDX)
++		return -EINVAL;
++
+ 	bar = ndev_mw_to_bar(ndev, idx);
+ 	if (bar < 0)
+ 		return bar;
+ 
+-	if (base)
+-		*base = pci_resource_start(ndev->ntb.pdev, bar);
+-
+-	if (size)
+-		*size = pci_resource_len(ndev->ntb.pdev, bar);
++	if (addr_align)
++		*addr_align = SZ_4K;
+ 
+-	if (align)
+-		*align = SZ_4K;
++	if (size_align)
++		*size_align = 1;
+ 
+-	if (align_size)
+-		*align_size = 1;
++	if (size_max)
++		*size_max = pci_resource_len(ndev->ntb.pdev, bar);
+ 
  	return 0;
  }
  
--static u32 amd_ntb_peer_spad_read(struct ntb_dev *ntb, int idx)
-+static u32 amd_ntb_peer_spad_read(struct ntb_dev *ntb, int pidx, int sidx)
+-static int amd_ntb_mw_set_trans(struct ntb_dev *ntb, int idx,
++static int amd_ntb_mw_set_trans(struct ntb_dev *ntb, int pidx, int idx,
+ 				dma_addr_t addr, resource_size_t size)
  {
  	struct amd_ntb_dev *ndev = ntb_ndev(ntb);
- 	void __iomem *mmio = ndev->self_mmio;
- 	u32 offset;
+@@ -122,6 +126,9 @@ static int amd_ntb_mw_set_trans(struct ntb_dev *ntb, int idx,
+ 	u64 base_addr, limit, reg_val;
+ 	int bar;
  
--	if (idx < 0 || idx >= ndev->spad_count)
-+	if (sidx < 0 || sidx >= ndev->spad_count)
- 		return -EINVAL;
- 
--	offset = ndev->peer_spad + (idx << 2);
-+	offset = ndev->peer_spad + (sidx << 2);
- 	return readl(mmio + AMD_SPAD_OFFSET + offset);
++	if (pidx != NTB_DEF_PEER_IDX)
++		return -EINVAL;
++
+ 	bar = ndev_mw_to_bar(ndev, idx);
+ 	if (bar < 0)
+ 		return bar;
+@@ -285,6 +292,31 @@ static int amd_ntb_link_disable(struct ntb_dev *ntb)
+ 	return 0;
  }
  
--static int amd_ntb_peer_spad_write(struct ntb_dev *ntb,
--				   int idx, u32 val)
-+static int amd_ntb_peer_spad_write(struct ntb_dev *ntb, int pidx,
-+				   int sidx, u32 val)
++static int amd_ntb_peer_mw_count(struct ntb_dev *ntb)
++{
++	/* The same as for inbound MWs */
++	return ntb_ndev(ntb)->mw_count;
++}
++
++static int amd_ntb_peer_mw_get_addr(struct ntb_dev *ntb, int idx,
++				    phys_addr_t *base, resource_size_t *size)
++{
++	struct amd_ntb_dev *ndev = ntb_ndev(ntb);
++	int bar;
++
++	bar = ndev_mw_to_bar(ndev, idx);
++	if (bar < 0)
++		return bar;
++
++	if (base)
++		*base = pci_resource_start(ndev->ntb.pdev, bar);
++
++	if (size)
++		*size = pci_resource_len(ndev->ntb.pdev, bar);
++
++	return 0;
++}
++
+ static u64 amd_ntb_db_valid_mask(struct ntb_dev *ntb)
  {
- 	struct amd_ntb_dev *ndev = ntb_ndev(ntb);
- 	void __iomem *mmio = ndev->self_mmio;
- 	u32 offset;
+ 	return ntb_ndev(ntb)->db_valid_mask;
+@@ -432,8 +464,10 @@ static int amd_ntb_peer_spad_write(struct ntb_dev *ntb,
  
--	if (idx < 0 || idx >= ndev->spad_count)
-+	if (sidx < 0 || sidx >= ndev->spad_count)
- 		return -EINVAL;
- 
--	offset = ndev->peer_spad + (idx << 2);
-+	offset = ndev->peer_spad + (sidx << 2);
- 	writel(val, mmio + AMD_SPAD_OFFSET + offset);
- 
- 	return 0;
+ static const struct ntb_dev_ops amd_ntb_ops = {
+ 	.mw_count		= amd_ntb_mw_count,
+-	.mw_get_range		= amd_ntb_mw_get_range,
++	.mw_get_align		= amd_ntb_mw_get_align,
+ 	.mw_set_trans		= amd_ntb_mw_set_trans,
++	.peer_mw_count		= amd_ntb_peer_mw_count,
++	.peer_mw_get_addr	= amd_ntb_peer_mw_get_addr,
+ 	.link_is_up		= amd_ntb_link_is_up,
+ 	.link_enable		= amd_ntb_link_enable,
+ 	.link_disable		= amd_ntb_link_disable,
 diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c b/drivers/ntb/hw/intel/ntb_hw_intel.c
-index 4b84012..7bb14cb 100644
+index 725ffa4..4b84012 100644
 --- a/drivers/ntb/hw/intel/ntb_hw_intel.c
 +++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
-@@ -1409,30 +1409,30 @@ static int intel_ntb_spad_write(struct ntb_dev *ntb,
- 			       ndev->self_reg->spad);
+@@ -6,6 +6,7 @@
+  *
+  *   Copyright(c) 2012 Intel Corporation. All rights reserved.
+  *   Copyright (C) 2015 EMC Corporation. All Rights Reserved.
++ *   Copyright (C) 2016 T-Platforms. All Rights Reserved.
+  *
+  *   This program is free software; you can redistribute it and/or modify
+  *   it under the terms of version 2 of the GNU General Public License as
+@@ -15,6 +16,7 @@
+  *
+  *   Copyright(c) 2012 Intel Corporation. All rights reserved.
+  *   Copyright (C) 2015 EMC Corporation. All Rights Reserved.
++ *   Copyright (C) 2016 T-Platforms. All Rights Reserved.
+  *
+  *   Redistribution and use in source and binary forms, with or without
+  *   modification, are permitted provided that the following conditions
+@@ -1035,20 +1037,26 @@ static void ndev_deinit_debugfs(struct intel_ntb_dev *ndev)
+ 	debugfs_remove_recursive(ndev->debugfs_dir);
  }
  
--static int intel_ntb_peer_spad_addr(struct ntb_dev *ntb, int idx,
-+static int intel_ntb_peer_spad_addr(struct ntb_dev *ntb, int pidx, int sidx,
- 				    phys_addr_t *spad_addr)
+-static int intel_ntb_mw_count(struct ntb_dev *ntb)
++static int intel_ntb_mw_count(struct ntb_dev *ntb, int pidx)
+ {
++	if (pidx != NTB_DEF_PEER_IDX)
++		return -EINVAL;
++
+ 	return ntb_ndev(ntb)->mw_count;
+ }
+ 
+-static int intel_ntb_mw_get_range(struct ntb_dev *ntb, int idx,
+-				  phys_addr_t *base,
+-				  resource_size_t *size,
+-				  resource_size_t *align,
+-				  resource_size_t *align_size)
++static int intel_ntb_mw_get_align(struct ntb_dev *ntb, int pidx, int idx,
++				  resource_size_t *addr_align,
++				  resource_size_t *size_align,
++				  resource_size_t *size_max)
  {
  	struct intel_ntb_dev *ndev = ntb_ndev(ntb);
++	resource_size_t bar_size, mw_size;
+ 	int bar;
  
--	return ndev_spad_addr(ndev, idx, spad_addr, ndev->peer_addr,
-+	return ndev_spad_addr(ndev, sidx, spad_addr, ndev->peer_addr,
- 			      ndev->peer_reg->spad);
++	if (pidx != NTB_DEF_PEER_IDX)
++		return -EINVAL;
++
+ 	if (idx >= ndev->b2b_idx && !ndev->b2b_off)
+ 		idx += 1;
+ 
+@@ -1056,24 +1064,26 @@ static int intel_ntb_mw_get_range(struct ntb_dev *ntb, int idx,
+ 	if (bar < 0)
+ 		return bar;
+ 
+-	if (base)
+-		*base = pci_resource_start(ndev->ntb.pdev, bar) +
+-			(idx == ndev->b2b_idx ? ndev->b2b_off : 0);
++	bar_size = pci_resource_len(ndev->ntb.pdev, bar);
+ 
+-	if (size)
+-		*size = pci_resource_len(ndev->ntb.pdev, bar) -
+-			(idx == ndev->b2b_idx ? ndev->b2b_off : 0);
++	if (idx == ndev->b2b_idx)
++		mw_size = bar_size - ndev->b2b_off;
++	else
++		mw_size = bar_size;
++
++	if (addr_align)
++		*addr_align = pci_resource_len(ndev->ntb.pdev, bar);
+ 
+-	if (align)
+-		*align = pci_resource_len(ndev->ntb.pdev, bar);
++	if (size_align)
++		*size_align = 1;
+ 
+-	if (align_size)
+-		*align_size = 1;
++	if (size_max)
++		*size_max = mw_size;
+ 
+ 	return 0;
  }
  
--static u32 intel_ntb_peer_spad_read(struct ntb_dev *ntb, int idx)
-+static u32 intel_ntb_peer_spad_read(struct ntb_dev *ntb, int pidx, int sidx)
+-static int intel_ntb_mw_set_trans(struct ntb_dev *ntb, int idx,
++static int intel_ntb_mw_set_trans(struct ntb_dev *ntb, int pidx, int idx,
+ 				  dma_addr_t addr, resource_size_t size)
  {
  	struct intel_ntb_dev *ndev = ntb_ndev(ntb);
+@@ -1083,6 +1093,9 @@ static int intel_ntb_mw_set_trans(struct ntb_dev *ntb, int idx,
+ 	u64 base, limit, reg_val;
+ 	int bar;
  
--	return ndev_spad_read(ndev, idx,
-+	return ndev_spad_read(ndev, sidx,
- 			      ndev->peer_mmio +
- 			      ndev->peer_reg->spad);
++	if (pidx != NTB_DEF_PEER_IDX)
++		return -EINVAL;
++
+ 	if (idx >= ndev->b2b_idx && !ndev->b2b_off)
+ 		idx += 1;
+ 
+@@ -1249,6 +1262,36 @@ static int intel_ntb_link_disable(struct ntb_dev *ntb)
+ 	return 0;
  }
  
--static int intel_ntb_peer_spad_write(struct ntb_dev *ntb,
--				     int idx, u32 val)
-+static int intel_ntb_peer_spad_write(struct ntb_dev *ntb, int pidx,
-+				     int sidx, u32 val)
++static int intel_ntb_peer_mw_count(struct ntb_dev *ntb)
++{
++	/* Numbers of inbound and outbound memory windows match */
++	return ntb_ndev(ntb)->mw_count;
++}
++
++static int intel_ntb_peer_mw_get_addr(struct ntb_dev *ntb, int idx,
++				     phys_addr_t *base, resource_size_t *size)
++{
++	struct intel_ntb_dev *ndev = ntb_ndev(ntb);
++	int bar;
++
++	if (idx >= ndev->b2b_idx && !ndev->b2b_off)
++		idx += 1;
++
++	bar = ndev_mw_to_bar(ndev, idx);
++	if (bar < 0)
++		return bar;
++
++	if (base)
++		*base = pci_resource_start(ndev->ntb.pdev, bar) +
++			(idx == ndev->b2b_idx ? ndev->b2b_off : 0);
++
++	if (size)
++		*size = pci_resource_len(ndev->ntb.pdev, bar) -
++			(idx == ndev->b2b_idx ? ndev->b2b_off : 0);
++
++	return 0;
++}
++
+ static int intel_ntb_db_is_unsafe(struct ntb_dev *ntb)
+ {
+ 	return ndev_ignore_unsafe(ntb_ndev(ntb), NTB_UNSAFE_DB);
+@@ -1880,7 +1923,7 @@ static int intel_ntb3_link_enable(struct ntb_dev *ntb,
+ 
+ 	return 0;
+ }
+-static int intel_ntb3_mw_set_trans(struct ntb_dev *ntb, int idx,
++static int intel_ntb3_mw_set_trans(struct ntb_dev *ntb, int pidx, int idx,
+ 				   dma_addr_t addr, resource_size_t size)
  {
  	struct intel_ntb_dev *ndev = ntb_ndev(ntb);
+@@ -1890,6 +1933,9 @@ static int intel_ntb3_mw_set_trans(struct ntb_dev *ntb, int idx,
+ 	u64 base, limit, reg_val;
+ 	int bar;
  
--	return ndev_spad_write(ndev, idx, val,
-+	return ndev_spad_write(ndev, sidx, val,
- 			       ndev->peer_mmio +
- 			       ndev->peer_reg->spad);
- }
++	if (pidx != NTB_DEF_PEER_IDX)
++		return -EINVAL;
++
+ 	if (idx >= ndev->b2b_idx && !ndev->b2b_off)
+ 		idx += 1;
+ 
+@@ -2884,8 +2930,10 @@ static const struct intel_ntb_xlat_reg skx_sec_xlat = {
+ /* operations for primary side of local ntb */
+ static const struct ntb_dev_ops intel_ntb_ops = {
+ 	.mw_count		= intel_ntb_mw_count,
+-	.mw_get_range		= intel_ntb_mw_get_range,
++	.mw_get_align		= intel_ntb_mw_get_align,
+ 	.mw_set_trans		= intel_ntb_mw_set_trans,
++	.peer_mw_count		= intel_ntb_peer_mw_count,
++	.peer_mw_get_addr	= intel_ntb_peer_mw_get_addr,
+ 	.link_is_up		= intel_ntb_link_is_up,
+ 	.link_enable		= intel_ntb_link_enable,
+ 	.link_disable		= intel_ntb_link_disable,
+@@ -2910,8 +2958,10 @@ static const struct ntb_dev_ops intel_ntb_ops = {
+ 
+ static const struct ntb_dev_ops intel_ntb3_ops = {
+ 	.mw_count		= intel_ntb_mw_count,
+-	.mw_get_range		= intel_ntb_mw_get_range,
++	.mw_get_align		= intel_ntb_mw_get_align,
+ 	.mw_set_trans		= intel_ntb3_mw_set_trans,
++	.peer_mw_count		= intel_ntb_peer_mw_count,
++	.peer_mw_get_addr	= intel_ntb_peer_mw_get_addr,
+ 	.link_is_up		= intel_ntb_link_is_up,
+ 	.link_enable		= intel_ntb3_link_enable,
+ 	.link_disable		= intel_ntb_link_disable,
+diff --git a/drivers/ntb/ntb.c b/drivers/ntb/ntb.c
+index 1e92e52..2551bb2 100644
+--- a/drivers/ntb/ntb.c
++++ b/drivers/ntb/ntb.c
+@@ -5,6 +5,7 @@
+  *   GPL LICENSE SUMMARY
+  *
+  *   Copyright (C) 2015 EMC Corporation. All Rights Reserved.
++ *   Copyright (C) 2016 T-Platforms. All Rights Reserved.
+  *
+  *   This program is free software; you can redistribute it and/or modify
+  *   it under the terms of version 2 of the GNU General Public License as
+@@ -18,6 +19,7 @@
+  *   BSD LICENSE
+  *
+  *   Copyright (C) 2015 EMC Corporation. All Rights Reserved.
++ *   Copyright (C) 2016 T-Platforms. All Rights Reserved.
+  *
+  *   Redistribution and use in source and binary forms, with or without
+  *   modification, are permitted provided that the following conditions
 diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 4d5b160..28aaba3 100644
+index 10518b7..4d5b160 100644
 --- a/drivers/ntb/ntb_transport.c
 +++ b/drivers/ntb/ntb_transport.c
-@@ -875,17 +875,17 @@ static void ntb_transport_link_work(struct work_struct *work)
- 			size = max_mw_size;
+@@ -685,7 +685,7 @@ static void ntb_free_mw(struct ntb_transport_ctx *nt, int num_mw)
+ 	if (!mw->virt_addr)
+ 		return;
  
- 		spad = MW0_SZ_HIGH + (i * 2);
--		ntb_peer_spad_write(ndev, spad, upper_32_bits(size));
-+		ntb_peer_spad_write(ndev, PIDX, spad, upper_32_bits(size));
- 
- 		spad = MW0_SZ_LOW + (i * 2);
--		ntb_peer_spad_write(ndev, spad, lower_32_bits(size));
-+		ntb_peer_spad_write(ndev, PIDX, spad, lower_32_bits(size));
+-	ntb_mw_clear_trans(nt->ndev, num_mw);
++	ntb_mw_clear_trans(nt->ndev, PIDX, num_mw);
+ 	dma_free_coherent(&pdev->dev, mw->buff_size,
+ 			  mw->virt_addr, mw->dma_addr);
+ 	mw->xlat_size = 0;
+@@ -742,7 +742,8 @@ static int ntb_set_mw(struct ntb_transport_ctx *nt, int num_mw,
  	}
  
--	ntb_peer_spad_write(ndev, NUM_MWS, nt->mw_count);
-+	ntb_peer_spad_write(ndev, PIDX, NUM_MWS, nt->mw_count);
+ 	/* Notify HW the memory location of the receive buffer */
+-	rc = ntb_mw_set_trans(nt->ndev, num_mw, mw->dma_addr, mw->xlat_size);
++	rc = ntb_mw_set_trans(nt->ndev, PIDX, num_mw, mw->dma_addr,
++			      mw->xlat_size);
+ 	if (rc) {
+ 		dev_err(&pdev->dev, "Unable to set mw%d translation", num_mw);
+ 		ntb_free_mw(nt, num_mw);
+@@ -1072,13 +1073,18 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
+ 	int node;
+ 	int rc, i;
  
--	ntb_peer_spad_write(ndev, NUM_QPS, nt->qp_count);
-+	ntb_peer_spad_write(ndev, PIDX, NUM_QPS, nt->qp_count);
- 
--	ntb_peer_spad_write(ndev, VERSION, NTB_TRANSPORT_VERSION);
-+	ntb_peer_spad_write(ndev, PIDX, VERSION, NTB_TRANSPORT_VERSION);
- 
- 	/* Query the remote side for its info */
- 	val = ntb_spad_read(ndev, VERSION);
-@@ -961,10 +961,10 @@ static void ntb_qp_link_work(struct work_struct *work)
- 
- 	val = ntb_spad_read(nt->ndev, QP_LINKS);
- 
--	ntb_peer_spad_write(nt->ndev, QP_LINKS, val | BIT(qp->qp_num));
-+	ntb_peer_spad_write(nt->ndev, PIDX, QP_LINKS, val | BIT(qp->qp_num));
- 
- 	/* query remote spad for qp ready bits */
--	ntb_peer_spad_read(nt->ndev, QP_LINKS);
-+	ntb_peer_spad_read(nt->ndev, PIDX, QP_LINKS);
- 	dev_dbg_ratelimited(&pdev->dev, "Remote QP link status = %x\n", val);
- 
- 	/* See if the remote side is up */
-@@ -2141,8 +2141,7 @@ void ntb_transport_link_down(struct ntb_transport_qp *qp)
- 
- 	val = ntb_spad_read(qp->ndev, QP_LINKS);
- 
--	ntb_peer_spad_write(qp->ndev, QP_LINKS,
--			    val & ~BIT(qp->qp_num));
-+	ntb_peer_spad_write(qp->ndev, PIDX, QP_LINKS, val & ~BIT(qp->qp_num));
- 
- 	if (qp->link_is_up)
- 		ntb_send_link_down(qp);
-diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index cbff0b4..0a493ba 100644
---- a/drivers/ntb/test/ntb_perf.c
-+++ b/drivers/ntb/test/ntb_perf.c
-@@ -516,9 +516,9 @@ static void perf_link_work(struct work_struct *work)
- 	if (max_mw_size && size > max_mw_size)
- 		size = max_mw_size;
- 
--	ntb_peer_spad_write(ndev, MW_SZ_HIGH, upper_32_bits(size));
--	ntb_peer_spad_write(ndev, MW_SZ_LOW, lower_32_bits(size));
--	ntb_peer_spad_write(ndev, VERSION, PERF_VERSION);
-+	ntb_peer_spad_write(ndev, PIDX, MW_SZ_HIGH, upper_32_bits(size));
-+	ntb_peer_spad_write(ndev, PIDX, MW_SZ_LOW, lower_32_bits(size));
-+	ntb_peer_spad_write(ndev, PIDX, VERSION, PERF_VERSION);
- 
- 	/* now read what peer wrote */
- 	val = ntb_spad_read(ndev, VERSION);
-diff --git a/drivers/ntb/test/ntb_pingpong.c b/drivers/ntb/test/ntb_pingpong.c
-index 12f8b40..938a18b 100644
---- a/drivers/ntb/test/ntb_pingpong.c
-+++ b/drivers/ntb/test/ntb_pingpong.c
-@@ -138,7 +138,7 @@ static void pp_ping(unsigned long ctx)
- 			"Ping bits %#llx read %#x write %#x\n",
- 			db_bits, spad_rd, spad_wr);
- 
--		ntb_peer_spad_write(pp->ntb, 0, spad_wr);
-+		ntb_peer_spad_write(pp->ntb, PIDX, 0, spad_wr);
- 		ntb_peer_db_set(pp->ntb, db_bits);
- 		ntb_db_clear_mask(pp->ntb, db_mask);
- 
-@@ -225,6 +225,12 @@ static int pp_probe(struct ntb_client *client,
- 		}
+-	mw_count = ntb_mw_count(ndev);
++	mw_count = ntb_mw_count(ndev, PIDX);
+ 	if (ntb_spad_count(ndev) < (NUM_MWS + 1 + mw_count * 2)) {
+ 		dev_err(&ndev->dev, "Not enough scratch pad registers for %s",
+ 			NTB_TRANSPORT_NAME);
+ 		return -EIO;
  	}
  
-+	if (ntb_spad_count(ntb) < 1) {
-+		dev_dbg(&ntb->dev, "no enough scratchpads\n");
-+		rc = -EINVAL;
-+		goto err_pp;
++	if (!ndev->ops->mw_set_trans) {
++		dev_err(&ndev->dev, "Inbound MW based NTB API is required\n");
++		return -EINVAL;
 +	}
 +
- 	if (ntb_spad_is_unsafe(ntb)) {
- 		dev_dbg(&ntb->dev, "scratchpad is unsafe\n");
- 		if (!unsafe) {
-diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c
-index cb69247..f002bf4 100644
---- a/drivers/ntb/test/ntb_tool.c
-+++ b/drivers/ntb/test/ntb_tool.c
-@@ -462,13 +462,22 @@ static TOOL_FOPS_RDWR(tool_spad_fops,
- 		      tool_spad_read,
- 		      tool_spad_write);
+ 	if (ntb_db_is_unsafe(ndev))
+ 		dev_dbg(&ndev->dev,
+ 			"doorbell is unsafe, proceed anyway...\n");
+@@ -1109,8 +1115,13 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
+ 	for (i = 0; i < mw_count; i++) {
+ 		mw = &nt->mw_vec[i];
  
-+static u32 ntb_tool_peer_spad_read(struct ntb_dev *ntb, int sidx)
-+{
-+	return ntb_peer_spad_read(ntb, PIDX, sidx);
-+}
+-		rc = ntb_mw_get_range(ndev, i, &mw->phys_addr, &mw->phys_size,
+-				      &mw->xlat_align, &mw->xlat_align_size);
++		rc = ntb_mw_get_align(ndev, PIDX, i, &mw->xlat_align,
++				      &mw->xlat_align_size, NULL);
++		if (rc)
++			goto err1;
 +
- static ssize_t tool_peer_spad_read(struct file *filep, char __user *ubuf,
- 				   size_t size, loff_t *offp)
- {
- 	struct tool_ctx *tc = filep->private_data;
++		rc = ntb_peer_mw_get_addr(ndev, i, &mw->phys_addr,
++					  &mw->phys_size);
+ 		if (rc)
+ 			goto err1;
  
--	return tool_spadfn_read(tc, ubuf, size, offp,
--				tc->ntb->ops->peer_spad_read);
-+	return tool_spadfn_read(tc, ubuf, size, offp, ntb_tool_peer_spad_read);
-+}
-+
-+static int ntb_tool_peer_spad_write(struct ntb_dev *ntb, int sidx, u32 val)
-+{
-+	return ntb_peer_spad_write(ntb, PIDX, sidx, val);
- }
+diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
+index c908b3a..cbff0b4 100644
+--- a/drivers/ntb/test/ntb_perf.c
++++ b/drivers/ntb/test/ntb_perf.c
+@@ -453,7 +453,7 @@ static void perf_free_mw(struct perf_ctx *perf)
+ 	if (!mw->virt_addr)
+ 		return;
  
- static ssize_t tool_peer_spad_write(struct file *filep, const char __user *ubuf,
-@@ -477,7 +486,7 @@ static ssize_t tool_peer_spad_write(struct file *filep, const char __user *ubuf,
- 	struct tool_ctx *tc = filep->private_data;
- 
- 	return tool_spadfn_write(tc, ubuf, size, offp,
--				 tc->ntb->ops->peer_spad_write);
-+				 ntb_tool_peer_spad_write);
- }
- 
- static TOOL_FOPS_RDWR(tool_peer_spad_fops,
-@@ -926,6 +935,12 @@ static int tool_probe(struct ntb_client *self, struct ntb_dev *ntb)
- 		goto err_tc;
+-	ntb_mw_clear_trans(perf->ntb, 0);
++	ntb_mw_clear_trans(perf->ntb, PIDX, 0);
+ 	dma_free_coherent(&pdev->dev, mw->buf_size,
+ 			  mw->virt_addr, mw->dma_addr);
+ 	mw->xlat_size = 0;
+@@ -489,7 +489,7 @@ static int perf_set_mw(struct perf_ctx *perf, resource_size_t size)
+ 		mw->buf_size = 0;
  	}
  
-+	if (ntb_spad_count(ntb) < 1) {
-+		dev_dbg(&ntb->dev, "no enough scratchpads\n");
+-	rc = ntb_mw_set_trans(perf->ntb, 0, mw->dma_addr, mw->xlat_size);
++	rc = ntb_mw_set_trans(perf->ntb, PIDX, 0, mw->dma_addr, mw->xlat_size);
+ 	if (rc) {
+ 		dev_err(&perf->ntb->dev, "Unable to set mw0 translation\n");
+ 		perf_free_mw(perf);
+@@ -560,8 +560,12 @@ static int perf_setup_mw(struct ntb_dev *ntb, struct perf_ctx *perf)
+ 
+ 	mw = &perf->mw;
+ 
+-	rc = ntb_mw_get_range(ntb, 0, &mw->phys_addr, &mw->phys_size,
+-			      &mw->xlat_align, &mw->xlat_align_size);
++	rc = ntb_mw_get_align(ntb, PIDX, 0, &mw->xlat_align,
++			      &mw->xlat_align_size, NULL);
++	if (rc)
++		return rc;
++
++	rc = ntb_peer_mw_get_addr(ntb, 0, &mw->phys_addr, &mw->phys_size);
+ 	if (rc)
+ 		return rc;
+ 
+@@ -765,6 +769,11 @@ static int perf_probe(struct ntb_client *client, struct ntb_dev *ntb)
+ 		return -EIO;
+ 	}
+ 
++	if (!ntb->ops->mw_set_trans) {
++		dev_err(&ntb->dev, "Need inbound MW based NTB API\n");
++		return -EINVAL;
++	}
++
+ 	if (ntb_peer_port_count(ntb) != NTB_DEF_PEER_CNT)
+ 		dev_warn(&ntb->dev, "Multi-port NTB devices unsupported\n");
+ 
+diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c
+index 690862d..cb69247 100644
+--- a/drivers/ntb/test/ntb_tool.c
++++ b/drivers/ntb/test/ntb_tool.c
+@@ -119,7 +119,8 @@ MODULE_VERSION(DRIVER_VERSION);
+ MODULE_AUTHOR(DRIVER_AUTHOR);
+ MODULE_DESCRIPTION(DRIVER_DESCRIPTION);
+ 
+-#define MAX_MWS 16
++/* It is rare to have hadrware with greater than six MWs */
++#define MAX_MWS	6
+ /* Only two-ports devices are supported */
+ #define PIDX	NTB_DEF_PEER_IDX
+ 
+@@ -670,28 +671,27 @@ static int tool_setup_mw(struct tool_ctx *tc, int idx, size_t req_size)
+ {
+ 	int rc;
+ 	struct tool_mw *mw = &tc->mws[idx];
+-	phys_addr_t base;
+-	resource_size_t size, align, align_size;
++	resource_size_t size, align_addr, align_size;
+ 	char buf[16];
+ 
+ 	if (mw->peer)
+ 		return 0;
+ 
+-	rc = ntb_mw_get_range(tc->ntb, idx, &base, &size, &align,
+-			      &align_size);
++	rc = ntb_mw_get_align(tc->ntb, PIDX, idx, &align_addr,
++				&align_size, &size);
+ 	if (rc)
+ 		return rc;
+ 
+ 	mw->size = min_t(resource_size_t, req_size, size);
+-	mw->size = round_up(mw->size, align);
++	mw->size = round_up(mw->size, align_addr);
+ 	mw->size = round_up(mw->size, align_size);
+ 	mw->peer = dma_alloc_coherent(&tc->ntb->pdev->dev, mw->size,
+ 				      &mw->peer_dma, GFP_KERNEL);
+ 
+-	if (!mw->peer)
++	if (!mw->peer || !IS_ALIGNED(mw->peer_dma, align_addr))
+ 		return -ENOMEM;
+ 
+-	rc = ntb_mw_set_trans(tc->ntb, idx, mw->peer_dma, mw->size);
++	rc = ntb_mw_set_trans(tc->ntb, PIDX, idx, mw->peer_dma, mw->size);
+ 	if (rc)
+ 		goto err_free_dma;
+ 
+@@ -718,7 +718,7 @@ static void tool_free_mw(struct tool_ctx *tc, int idx)
+ 	struct tool_mw *mw = &tc->mws[idx];
+ 
+ 	if (mw->peer) {
+-		ntb_mw_clear_trans(tc->ntb, idx);
++		ntb_mw_clear_trans(tc->ntb, PIDX, idx);
+ 		dma_free_coherent(&tc->ntb->pdev->dev, mw->size,
+ 				  mw->peer,
+ 				  mw->peer_dma);
+@@ -744,8 +744,9 @@ static ssize_t tool_peer_mw_trans_read(struct file *filep,
+ 
+ 	phys_addr_t base;
+ 	resource_size_t mw_size;
+-	resource_size_t align;
++	resource_size_t align_addr;
+ 	resource_size_t align_size;
++	resource_size_t max_size;
+ 
+ 	buf_size = min_t(size_t, size, 512);
+ 
+@@ -753,8 +754,9 @@ static ssize_t tool_peer_mw_trans_read(struct file *filep,
+ 	if (!buf)
+ 		return -ENOMEM;
+ 
+-	ntb_mw_get_range(mw->tc->ntb, mw->idx,
+-			 &base, &mw_size, &align, &align_size);
++	ntb_mw_get_align(mw->tc->ntb, PIDX, mw->idx,
++			 &align_addr, &align_size, &max_size);
++	ntb_peer_mw_get_addr(mw->tc->ntb, mw->idx, &base, &mw_size);
+ 
+ 	off += scnprintf(buf + off, buf_size - off,
+ 			 "Peer MW %d Information:\n", mw->idx);
+@@ -769,13 +771,17 @@ static ssize_t tool_peer_mw_trans_read(struct file *filep,
+ 
+ 	off += scnprintf(buf + off, buf_size - off,
+ 			 "Alignment             \t%lld\n",
+-			 (unsigned long long)align);
++			 (unsigned long long)align_addr);
+ 
+ 	off += scnprintf(buf + off, buf_size - off,
+ 			 "Size Alignment        \t%lld\n",
+ 			 (unsigned long long)align_size);
+ 
+ 	off += scnprintf(buf + off, buf_size - off,
++			 "Size Max              \t%lld\n",
++			 (unsigned long long)max_size);
++
++	off += scnprintf(buf + off, buf_size - off,
+ 			 "Ready                 \t%c\n",
+ 			 (mw->peer) ? 'Y' : 'N');
+ 
+@@ -829,8 +835,7 @@ static int tool_init_mw(struct tool_ctx *tc, int idx)
+ 	phys_addr_t base;
+ 	int rc;
+ 
+-	rc = ntb_mw_get_range(tc->ntb, idx, &base, &mw->win_size,
+-			      NULL, NULL);
++	rc = ntb_peer_mw_get_addr(tc->ntb, idx, &base, &mw->win_size);
+ 	if (rc)
+ 		return rc;
+ 
+@@ -915,6 +920,12 @@ static int tool_probe(struct ntb_client *self, struct ntb_dev *ntb)
+ 	int rc;
+ 	int i;
+ 
++	if (!ntb->ops->mw_set_trans) {
++		dev_dbg(&ntb->dev, "need inbound MW based NTB API\n");
 +		rc = -EINVAL;
 +		goto err_tc;
 +	}
@@ -277,181 +616,310 @@ index cb69247..f002bf4 100644
  	if (ntb_db_is_unsafe(ntb))
  		dev_dbg(&ntb->dev, "doorbell is unsafe\n");
  
+@@ -933,7 +944,7 @@ static int tool_probe(struct ntb_client *self, struct ntb_dev *ntb)
+ 	tc->ntb = ntb;
+ 	init_waitqueue_head(&tc->link_wq);
+ 
+-	tc->mw_count = min(ntb_mw_count(tc->ntb), MAX_MWS);
++	tc->mw_count = min(ntb_mw_count(tc->ntb, PIDX), MAX_MWS);
+ 	for (i = 0; i < tc->mw_count; i++) {
+ 		rc = tool_init_mw(tc, i);
+ 		if (rc)
 diff --git a/include/linux/ntb.h b/include/linux/ntb.h
-index f6ec88f..a54e2be 100644
+index 6eef109..f6ec88f 100644
 --- a/include/linux/ntb.h
 +++ b/include/linux/ntb.h
-@@ -288,13 +288,14 @@ struct ntb_dev_ops {
- 	int (*spad_is_unsafe)(struct ntb_dev *ntb);
- 	int (*spad_count)(struct ntb_dev *ntb);
+@@ -5,6 +5,7 @@
+  *   GPL LICENSE SUMMARY
+  *
+  *   Copyright (C) 2015 EMC Corporation. All Rights Reserved.
++ *   Copyright (C) 2016 T-Platforms. All Rights Reserved.
+  *
+  *   This program is free software; you can redistribute it and/or modify
+  *   it under the terms of version 2 of the GNU General Public License as
+@@ -18,6 +19,7 @@
+  *   BSD LICENSE
+  *
+  *   Copyright (C) 2015 EMC Corporation. All Rights Reserved.
++ *   Copyright (C) 2016 T-Platforms. All Rights Reserved.
+  *
+  *   Redistribution and use in source and binary forms, with or without
+  *   modification, are permitted provided that the following conditions
+@@ -201,9 +203,13 @@ static inline int ntb_ctx_ops_is_valid(const struct ntb_ctx_ops *ops)
+  * @link_enable:	See ntb_link_enable().
+  * @link_disable:	See ntb_link_disable().
+  * @mw_count:		See ntb_mw_count().
+- * @mw_get_range:	See ntb_mw_get_range().
++ * @mw_get_align:	See ntb_mw_get_align().
+  * @mw_set_trans:	See ntb_mw_set_trans().
+  * @mw_clear_trans:	See ntb_mw_clear_trans().
++ * @peer_mw_count:	See ntb_peer_mw_count().
++ * @peer_mw_get_addr:	See ntb_peer_mw_get_addr().
++ * @peer_mw_set_trans:	See ntb_peer_mw_set_trans().
++ * @peer_mw_clear_trans:See ntb_peer_mw_clear_trans().
+  * @db_is_unsafe:	See ntb_db_is_unsafe().
+  * @db_valid_mask:	See ntb_db_valid_mask().
+  * @db_vector_count:	See ntb_db_vector_count().
+@@ -241,13 +247,20 @@ struct ntb_dev_ops {
+ 			   enum ntb_speed max_speed, enum ntb_width max_width);
+ 	int (*link_disable)(struct ntb_dev *ntb);
  
--	u32 (*spad_read)(struct ntb_dev *ntb, int idx);
--	int (*spad_write)(struct ntb_dev *ntb, int idx, u32 val);
-+	u32 (*spad_read)(struct ntb_dev *ntb, int sidx);
-+	int (*spad_write)(struct ntb_dev *ntb, int sidx, u32 val);
+-	int (*mw_count)(struct ntb_dev *ntb);
+-	int (*mw_get_range)(struct ntb_dev *ntb, int idx,
+-			    phys_addr_t *base, resource_size_t *size,
+-			resource_size_t *align, resource_size_t *align_size);
+-	int (*mw_set_trans)(struct ntb_dev *ntb, int idx,
++	int (*mw_count)(struct ntb_dev *ntb, int pidx);
++	int (*mw_get_align)(struct ntb_dev *ntb, int pidx, int widx,
++			    resource_size_t *addr_align,
++			    resource_size_t *size_align,
++			    resource_size_t *size_max);
++	int (*mw_set_trans)(struct ntb_dev *ntb, int pidx, int widx,
+ 			    dma_addr_t addr, resource_size_t size);
+-	int (*mw_clear_trans)(struct ntb_dev *ntb, int idx);
++	int (*mw_clear_trans)(struct ntb_dev *ntb, int pidx, int widx);
++	int (*peer_mw_count)(struct ntb_dev *ntb);
++	int (*peer_mw_get_addr)(struct ntb_dev *ntb, int widx,
++				phys_addr_t *base, resource_size_t *size);
++	int (*peer_mw_set_trans)(struct ntb_dev *ntb, int pidx, int widx,
++				 u64 addr, resource_size_t size);
++	int (*peer_mw_clear_trans)(struct ntb_dev *ntb, int pidx, int widx);
  
--	int (*peer_spad_addr)(struct ntb_dev *ntb, int idx,
-+	int (*peer_spad_addr)(struct ntb_dev *ntb, int pidx, int sidx,
- 			      phys_addr_t *spad_addr);
--	u32 (*peer_spad_read)(struct ntb_dev *ntb, int idx);
--	int (*peer_spad_write)(struct ntb_dev *ntb, int idx, u32 val);
-+	u32 (*peer_spad_read)(struct ntb_dev *ntb, int pidx, int sidx);
-+	int (*peer_spad_write)(struct ntb_dev *ntb, int pidx, int sidx,
-+			       u32 val);
- };
+ 	int (*db_is_unsafe)(struct ntb_dev *ntb);
+ 	u64 (*db_valid_mask)(struct ntb_dev *ntb);
+@@ -295,9 +308,13 @@ static inline int ntb_dev_ops_is_valid(const struct ntb_dev_ops *ops)
+ 		ops->link_enable			&&
+ 		ops->link_disable			&&
+ 		ops->mw_count				&&
+-		ops->mw_get_range			&&
+-		ops->mw_set_trans			&&
++		ops->mw_get_align			&&
++		(ops->mw_set_trans			||
++		 ops->peer_mw_set_trans)		&&
+ 		/* ops->mw_clear_trans			&& */
++		ops->peer_mw_count			&&
++		ops->peer_mw_get_addr			&&
++		/* ops->peer_mw_clear_trans		&& */
  
- static inline int ntb_dev_ops_is_valid(const struct ntb_dev_ops *ops)
-@@ -335,13 +336,12 @@ static inline int ntb_dev_ops_is_valid(const struct ntb_dev_ops *ops)
- 		/* ops->peer_db_read_mask		&& */
- 		/* ops->peer_db_set_mask		&& */
- 		/* ops->peer_db_clear_mask		&& */
--		/* ops->spad_is_unsafe			&& */
--		ops->spad_count				&&
--		ops->spad_read				&&
--		ops->spad_write				&&
--		/* ops->peer_spad_addr			&& */
--		/* ops->peer_spad_read			&& */
--		ops->peer_spad_write			&&
-+		/* !ops->spad_is_unsafe == !ops->spad_count	&& */
-+		!ops->spad_read == !ops->spad_count		&&
-+		!ops->spad_write == !ops->spad_count		&&
-+		/* !ops->peer_spad_addr == !ops->spad_count	&& */
-+		/* !ops->peer_spad_read == !ops->spad_count	&& */
-+		!ops->peer_spad_write == !ops->spad_count	&&
- 		1;
- }
- 
-@@ -1172,51 +1172,62 @@ static inline int ntb_spad_is_unsafe(struct ntb_dev *ntb)
+ 		/* ops->db_is_unsafe			&& */
+ 		ops->db_valid_mask			&&
+@@ -655,79 +672,180 @@ static inline int ntb_link_disable(struct ntb_dev *ntb)
  }
  
  /**
-- * ntb_mw_count() - get the number of scratchpads
-+ * ntb_spad_count() - get the number of scratchpads
+- * ntb_mw_count() - get the number of memory windows
++ * ntb_mw_count() - get the number of inbound memory windows, which could
++ *                  be created for a specified peer device
   * @ntb:	NTB device context.
++ * @pidx:	Port index of peer device.
   *
-  * Hardware and topology may support a different number of scratchpads.
-+ * Although it must be the same for all ports per NTB device.
+  * Hardware and topology may support a different number of memory windows.
++ * Moreover different peer devices can support different number of memory
++ * windows. Simply speaking this method returns the number of possible inbound
++ * memory windows to share with specified peer device.
   *
-  * Return: the number of scratchpads.
+  * Return: the number of memory windows.
   */
- static inline int ntb_spad_count(struct ntb_dev *ntb)
+-static inline int ntb_mw_count(struct ntb_dev *ntb)
++static inline int ntb_mw_count(struct ntb_dev *ntb, int pidx)
  {
-+	if (!ntb->ops->spad_count)
+-	return ntb->ops->mw_count(ntb);
++	return ntb->ops->mw_count(ntb, pidx);
+ }
+ 
+ /**
+- * ntb_mw_get_range() - get the range of a memory window
++ * ntb_mw_get_align() - get the restriction parameters of inbound memory window
+  * @ntb:	NTB device context.
+- * @idx:	Memory window number.
+- * @base:	OUT - the base address for mapping the memory window
+- * @size:	OUT - the size for mapping the memory window
+- * @align:	OUT - the base alignment for translating the memory window
+- * @align_size:	OUT - the size alignment for translating the memory window
+- *
+- * Get the range of a memory window.  NULL may be given for any output
+- * parameter if the value is not needed.  The base and size may be used for
+- * mapping the memory window, to access the peer memory.  The alignment and
+- * size may be used for translating the memory window, for the peer to access
+- * memory on the local system.
+- *
+- * Return: Zero on success, otherwise an error number.
++ * @pidx:	Port index of peer device.
++ * @widx:	Memory window index.
++ * @addr_align:	OUT - the base alignment for translating the memory window
++ * @size_align:	OUT - the size alignment for translating the memory window
++ * @size_max:	OUT - the maximum size of the memory window
++ *
++ * Get the alignments of an inbound memory window with specified index.
++ * NULL may be given for any output parameter if the value is not needed.
++ * The alignment and size parameters may be used for allocation of proper
++ * shared memory.
++ *
++ * Return: Zero on success, otherwise a negative error number.
+  */
+-static inline int ntb_mw_get_range(struct ntb_dev *ntb, int idx,
+-				   phys_addr_t *base, resource_size_t *size,
+-		resource_size_t *align, resource_size_t *align_size)
++static inline int ntb_mw_get_align(struct ntb_dev *ntb, int pidx, int widx,
++				   resource_size_t *addr_align,
++				   resource_size_t *size_align,
++				   resource_size_t *size_max)
+ {
+-	return ntb->ops->mw_get_range(ntb, idx, base, size,
+-			align, align_size);
++	return ntb->ops->mw_get_align(ntb, pidx, widx, addr_align, size_align,
++				      size_max);
+ }
+ 
+ /**
+- * ntb_mw_set_trans() - set the translation of a memory window
++ * ntb_mw_set_trans() - set the translation of an inbound memory window
+  * @ntb:	NTB device context.
+- * @idx:	Memory window number.
+- * @addr:	The dma address local memory to expose to the peer.
++ * @pidx:	Port index of peer device.
++ * @widx:	Memory window index.
++ * @addr:	The dma address of local memory to expose to the peer.
+  * @size:	The size of the local memory to expose to the peer.
+  *
+  * Set the translation of a memory window.  The peer may access local memory
+  * through the window starting at the address, up to the size.  The address
+- * must be aligned to the alignment specified by ntb_mw_get_range().  The size
+- * must be aligned to the size alignment specified by ntb_mw_get_range().
++ * and size must be aligned in compliance with restrictions of
++ * ntb_mw_get_align(). The region size should not exceed the size_max parameter
++ * of that method.
++ *
++ * This method may not be implemented due to the hardware specific memory
++ * windows interface.
+  *
+  * Return: Zero on success, otherwise an error number.
+  */
+-static inline int ntb_mw_set_trans(struct ntb_dev *ntb, int idx,
++static inline int ntb_mw_set_trans(struct ntb_dev *ntb, int pidx, int widx,
+ 				   dma_addr_t addr, resource_size_t size)
+ {
+-	return ntb->ops->mw_set_trans(ntb, idx, addr, size);
++	if (!ntb->ops->mw_set_trans)
 +		return 0;
 +
- 	return ntb->ops->spad_count(ntb);
++	return ntb->ops->mw_set_trans(ntb, pidx, widx, addr, size);
  }
  
  /**
-  * ntb_spad_read() - read the local scratchpad register
+- * ntb_mw_clear_trans() - clear the translation of a memory window
++ * ntb_mw_clear_trans() - clear the translation address of an inbound memory
++ *                        window
   * @ntb:	NTB device context.
-- * @idx:	Scratchpad index.
-+ * @sidx:	Scratchpad index.
+- * @idx:	Memory window number.
++ * @pidx:	Port index of peer device.
++ * @widx:	Memory window index.
   *
-  * Read the local scratchpad register, and return the value.
-  *
-  * Return: The value of the local scratchpad register.
-  */
--static inline u32 ntb_spad_read(struct ntb_dev *ntb, int idx)
-+static inline u32 ntb_spad_read(struct ntb_dev *ntb, int sidx)
- {
--	return ntb->ops->spad_read(ntb, idx);
-+	if (!ntb->ops->spad_read)
-+		return ~(u32)0;
-+
-+	return ntb->ops->spad_read(ntb, sidx);
- }
- 
- /**
-  * ntb_spad_write() - write the local scratchpad register
-  * @ntb:	NTB device context.
-- * @idx:	Scratchpad index.
-+ * @sidx:	Scratchpad index.
-  * @val:	Scratchpad value.
-  *
-  * Write the value to the local scratchpad register.
+- * Clear the translation of a memory window.  The peer may no longer access
+- * local memory through the window.
++ * Clear the translation of an inbound memory window.  The peer may no longer
++ * access local memory through the window.
   *
   * Return: Zero on success, otherwise an error number.
   */
--static inline int ntb_spad_write(struct ntb_dev *ntb, int idx, u32 val)
-+static inline int ntb_spad_write(struct ntb_dev *ntb, int sidx, u32 val)
+-static inline int ntb_mw_clear_trans(struct ntb_dev *ntb, int idx)
++static inline int ntb_mw_clear_trans(struct ntb_dev *ntb, int pidx, int widx)
  {
--	return ntb->ops->spad_write(ntb, idx, val);
-+	if (!ntb->ops->spad_write)
-+		return -EINVAL;
+ 	if (!ntb->ops->mw_clear_trans)
+-		return ntb->ops->mw_set_trans(ntb, idx, 0, 0);
++		return ntb_mw_set_trans(ntb, pidx, widx, 0, 0);
 +
-+	return ntb->ops->spad_write(ntb, sidx, val);
++	return ntb->ops->mw_clear_trans(ntb, pidx, widx);
++}
++
++/**
++ * ntb_peer_mw_count() - get the number of outbound memory windows, which could
++ *                       be mapped to access a shared memory
++ * @ntb:	NTB device context.
++ *
++ * Hardware and topology may support a different number of memory windows.
++ * This method returns the number of outbound memory windows supported by
++ * local device.
++ *
++ * Return: the number of memory windows.
++ */
++static inline int ntb_peer_mw_count(struct ntb_dev *ntb)
++{
++	return ntb->ops->peer_mw_count(ntb);
++}
++
++/**
++ * ntb_peer_mw_get_addr() - get map address of an outbound memory window
++ * @ntb:	NTB device context.
++ * @widx:	Memory window index (within ntb_peer_mw_count() return value).
++ * @base:	OUT - the base address of mapping region.
++ * @size:	OUT - the size of mapping region.
++ *
++ * Get base and size of memory region to map.  NULL may be given for any output
++ * parameter if the value is not needed.  The base and size may be used for
++ * mapping the memory window, to access the peer memory.
++ *
++ * Return: Zero on success, otherwise a negative error number.
++ */
++static inline int ntb_peer_mw_get_addr(struct ntb_dev *ntb, int widx,
++				      phys_addr_t *base, resource_size_t *size)
++{
++	return ntb->ops->peer_mw_get_addr(ntb, widx, base, size);
++}
++
++/**
++ * ntb_peer_mw_set_trans() - set a translation address of a memory window
++ *                           retrieved from a peer device
++ * @ntb:	NTB device context.
++ * @pidx:	Port index of peer device the translation address received from.
++ * @widx:	Memory window index.
++ * @addr:	The dma address of the shared memory to access.
++ * @size:	The size of the shared memory to access.
++ *
++ * Set the translation of an outbound memory window.  The local device may
++ * access shared memory allocated by a peer device sent the address.
++ *
++ * This method may not be implemented due to the hardware specific memory
++ * windows interface, so a translation address can be only set on the side,
++ * where shared memory (inbound memory windows) is allocated.
++ *
++ * Return: Zero on success, otherwise an error number.
++ */
++static inline int ntb_peer_mw_set_trans(struct ntb_dev *ntb, int pidx, int widx,
++					u64 addr, resource_size_t size)
++{
++	if (!ntb->ops->peer_mw_set_trans)
++		return 0;
++
++	return ntb->ops->peer_mw_set_trans(ntb, pidx, widx, addr, size);
++}
++
++/**
++ * ntb_peer_mw_clear_trans() - clear the translation address of an outbound
++ *                             memory window
++ * @ntb:	NTB device context.
++ * @pidx:	Port index of peer device.
++ * @widx:	Memory window index.
++ *
++ * Clear the translation of a outbound memory window.  The local device may no
++ * longer access a shared memory through the window.
++ *
++ * This method may not be implemented due to the hardware specific memory
++ * windows interface.
++ *
++ * Return: Zero on success, otherwise an error number.
++ */
++static inline int ntb_peer_mw_clear_trans(struct ntb_dev *ntb, int pidx,
++					  int widx)
++{
++	if (!ntb->ops->peer_mw_clear_trans)
++		return ntb_peer_mw_set_trans(ntb, pidx, widx, 0, 0);
+ 
+-	return ntb->ops->mw_clear_trans(ntb, idx);
++	return ntb->ops->peer_mw_clear_trans(ntb, pidx, widx);
  }
  
  /**
-  * ntb_peer_spad_addr() - address of the peer scratchpad register
-  * @ntb:	NTB device context.
-- * @idx:	Scratchpad index.
-+ * @pidx:	Port index of peer device.
-+ * @sidx:	Scratchpad index.
-  * @spad_addr:	OUT - The address of the peer scratchpad register.
-  *
-  * Return the address of the peer doorbell register.  This may be used, for
-@@ -1224,42 +1235,51 @@ static inline int ntb_spad_write(struct ntb_dev *ntb, int idx, u32 val)
-  *
-  * Return: Zero on success, otherwise an error number.
-  */
--static inline int ntb_peer_spad_addr(struct ntb_dev *ntb, int idx,
-+static inline int ntb_peer_spad_addr(struct ntb_dev *ntb, int pidx, int sidx,
- 				     phys_addr_t *spad_addr)
- {
- 	if (!ntb->ops->peer_spad_addr)
- 		return -EINVAL;
- 
--	return ntb->ops->peer_spad_addr(ntb, idx, spad_addr);
-+	return ntb->ops->peer_spad_addr(ntb, pidx, sidx, spad_addr);
- }
- 
- /**
-  * ntb_peer_spad_read() - read the peer scratchpad register
-  * @ntb:	NTB device context.
-- * @idx:	Scratchpad index.
-+ * @pidx:	Port index of peer device.
-+ * @sidx:	Scratchpad index.
-  *
-  * Read the peer scratchpad register, and return the value.
-  *
-  * Return: The value of the local scratchpad register.
-  */
--static inline u32 ntb_peer_spad_read(struct ntb_dev *ntb, int idx)
-+static inline u32 ntb_peer_spad_read(struct ntb_dev *ntb, int pidx, int sidx)
- {
--	return ntb->ops->peer_spad_read(ntb, idx);
-+	if (!ntb->ops->peer_spad_read)
-+		return ~(u32)0;
-+
-+	return ntb->ops->peer_spad_read(ntb, pidx, sidx);
- }
- 
- /**
-  * ntb_peer_spad_write() - write the peer scratchpad register
-  * @ntb:	NTB device context.
-- * @idx:	Scratchpad index.
-+ * @pidx:	Port index of peer device.
-+ * @sidx:	Scratchpad index.
-  * @val:	Scratchpad value.
-  *
-  * Write the value to the peer scratchpad register.
-  *
-  * Return: Zero on success, otherwise an error number.
-  */
--static inline int ntb_peer_spad_write(struct ntb_dev *ntb, int idx, u32 val)
-+static inline int ntb_peer_spad_write(struct ntb_dev *ntb, int pidx, int sidx,
-+				      u32 val)
- {
--	return ntb->ops->peer_spad_write(ntb, idx, val);
-+	if (!ntb->ops->peer_spad_write)
-+		return -EINVAL;
-+
-+	return ntb->ops->peer_spad_write(ntb, pidx, sidx, val);
- }
- 
- #endif
 -- 
 2.6.6
 
