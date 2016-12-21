@@ -1,44 +1,64 @@
-Return-Path: <Allen.Hubbe@dell.com>
-Received: from esa8.dell-outbound.iphmx.com (esa8.dell-outbound.iphmx.com. [68.232.149.218])
-        by gmr-mx.google.com with ESMTPS id z131si3617026ywz.4.2016.12.27.14.57.26
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-yb0-x242.google.com (mail-yb0-x242.google.com. [2607:f8b0:4002:c09::242])
+        by gmr-mx.google.com with ESMTPS id z131si1880183ywz.4.2016.12.21.08.54.17
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 27 Dec 2016 14:57:26 -0800 (PST)
-From: Allen Hubbe <Allen.Hubbe@dell.com>
-Subject: [PATCH] NTB: ntb_transport: fix debugfs_remove_recursive
-Date: Tue, 27 Dec 2016 17:57:04 -0500
-Message-Id: <6f7341ada9073025b0172a2ab0decc084b4d2ef4.1482879327.git.Allen.Hubbe@dell.com>
-To: linux-ntb@googlegroups.com
-Cc: Jon Mason <jdmason@kudzu.us>, Allen Hubbe <Allen.Hubbe@dell.com>
+        Wed, 21 Dec 2016 08:54:17 -0800 (PST)
+Received: by mail-yb0-x242.google.com with SMTP id s74so614683ybi.3
+        for <linux-ntb@googlegroups.com>; Wed, 21 Dec 2016 08:54:17 -0800 (PST)
+Return-Path: <jdmason@kudzu.us>
+Date: Wed, 21 Dec 2016 11:54:14 -0500
+From: Jon Mason <jdmason@kudzu.us>
+Subject: Re: [PATCH] ntb: fix SKX NTB config space size register offsets
+Message-ID: <20161221165413.GD32599@kudzu.us>
+References: <148164499341.194663.8632238363765425811.stgit@djiang5-desk3.ch.intel.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <148164499341.194663.8632238363765425811.stgit@djiang5-desk3.ch.intel.com>
+To: Dave Jiang <dave.jiang@intel.com>
+Cc: Allen.Hubbe@emc.com, linux-ntb@googlegroups.com, Sandeep Mann <sandeep@purestorage.com>, Zachary Ross <zacharyx.ross@intel.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-The call to debugfs_remove_recursive(qp->debugfs_dir) of the sub-level
-directory must not be later than
-debugfs_remove_recursive(nt_debugfs_dir) of the top-level directory.
-Otherwise, the sub-level directory will not exist, and it would be
-invalid (panic) to attempt to remove it.  This removes the top-level
-directory last, after sub-level directories have been cleaned up.
+On Tue, Dec 13, 2016 at 09:03:13AM -0700, Dave Jiang wrote:
+> The offsets for the SZ registers are wrong. Updated.
+> 
+> Signed-off-by: Dave Jiang <dave.jiang@intel.com>
+> Reported-by: Sandeep Mann <sandeep@purestorage.com>
+> Tested-by: Zachary Ross <zacharyx.ross@intel.com>
 
-Signed-off-by: Allen Hubbe <Allen.Hubbe@dell.com>
----
- drivers/ntb/ntb_transport.c | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+Applied to my ntb branch
 
-diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index f81aa4b18d9f..0e18adb51e4e 100644
---- a/drivers/ntb/ntb_transport.c
-+++ b/drivers/ntb/ntb_transport.c
-@@ -2273,9 +2273,8 @@ module_init(ntb_transport_init);
- 
- static void __exit ntb_transport_exit(void)
- {
--	debugfs_remove_recursive(nt_debugfs_dir);
--
- 	ntb_unregister_client(&ntb_transport_client);
- 	bus_unregister(&ntb_transport_bus);
-+	debugfs_remove_recursive(nt_debugfs_dir);
- }
- module_exit(ntb_transport_exit);
--- 
-2.9.1
+Thanks,
+Jon
 
+> ---
+>  drivers/ntb/hw/intel/ntb_hw_intel.h |    8 ++++----
+>  1 file changed, 4 insertions(+), 4 deletions(-)
+> 
+> diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.h b/drivers/ntb/hw/intel/ntb_hw_intel.h
+> index 6e8c182..f2cf8a7 100644
+> --- a/drivers/ntb/hw/intel/ntb_hw_intel.h
+> +++ b/drivers/ntb/hw/intel/ntb_hw_intel.h
+> @@ -152,10 +152,10 @@
+>  #define XEON_SPAD_COUNT			16
+>  
+>  /* Intel Skylake Xeon hardware */
+> -#define SKX_IMBAR1SZ_OFFSET		0x00d1
+> -#define SKX_IMBAR2SZ_OFFSET		0x00d5
+> -#define SKX_EMBAR1SZ_OFFSET		0x00d3
+> -#define SKX_EMBAR2SZ_OFFSET		0x00d6
+> +#define SKX_IMBAR1SZ_OFFSET		0x00d0
+> +#define SKX_IMBAR2SZ_OFFSET		0x00d1
+> +#define SKX_EMBAR1SZ_OFFSET		0x00d2
+> +#define SKX_EMBAR2SZ_OFFSET		0x00d3
+>  #define SKX_DEVCTRL_OFFSET		0x0098
+>  #define SKX_DEVSTS_OFFSET		0x009a
+>  #define SKX_UNCERRSTS_OFFSET		0x014c
+> 
+> -- 
+> You received this message because you are subscribed to the Google Groups "linux-ntb" group.
+> To unsubscribe from this group and stop receiving emails from it, send an email to linux-ntb+unsubscribe@googlegroups.com.
+> To post to this group, send email to linux-ntb@googlegroups.com.
+> To view this discussion on the web visit https://groups.google.com/d/msgid/linux-ntb/148164499341.194663.8632238363765425811.stgit%40djiang5-desk3.ch.intel.com.
+> For more options, visit https://groups.google.com/d/optout.
