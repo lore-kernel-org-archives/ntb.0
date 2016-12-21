@@ -1,77 +1,69 @@
 Return-Path: <jdmason@kudzu.us>
-Received: from mail-yw0-x241.google.com (mail-yw0-x241.google.com. [2607:f8b0:4002:c05::241])
-        by gmr-mx.google.com with ESMTPS id h18si1850439ywc.2.2016.12.24.07.55.09
+Received: from mail-yw0-x243.google.com (mail-yw0-x243.google.com. [2607:f8b0:4002:c05::243])
+        by gmr-mx.google.com with ESMTPS id r3si81337ywg.5.2016.12.21.08.40.43
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Sat, 24 Dec 2016 07:55:09 -0800 (PST)
-Received: by mail-yw0-x241.google.com with SMTP id r204so18532527ywb.3
-        for <linux-ntb@googlegroups.com>; Sat, 24 Dec 2016 07:55:09 -0800 (PST)
+        Wed, 21 Dec 2016 08:40:43 -0800 (PST)
+Received: by mail-yw0-x243.google.com with SMTP id a10so13149959ywa.1
+        for <linux-ntb@googlegroups.com>; Wed, 21 Dec 2016 08:40:43 -0800 (PST)
 Return-Path: <jdmason@kudzu.us>
+Date: Wed, 21 Dec 2016 11:40:41 -0500
 From: Jon Mason <jdmason@kudzu.us>
-Date: Sat, 24 Dec 2016 10:55:02 -0500
-Subject: [GIT PULL] NTB bug fixes for v4.10
-Message-ID: <20161224155502.GA13401@arkham.kudzu.us>
+Subject: Re: [PATCH] NTB: correct ntb_peer_spad_read for case when callback
+ is not supplied.
+Message-ID: <20161221164040.GA32599@kudzu.us>
+References: <2a1282ae9ad64a34b4795541a2c290b5@mspexmb1.Beer.Town>
+ <b40a94020de44fb6974bfcc978d1ce52@mspexmb1.Beer.Town>
+ <002101d25176$e14ac450$a3e04cf0$@dell.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
+In-Reply-To: <002101d25176$e14ac450$a3e04cf0$@dell.com>
+To: Allen Hubbe <Allen.Hubbe@dell.com>
+Cc: "Wahl, Steve" <Steve.Wahl@dell.com>, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-Hello Linus,
-Here are a few NTB bug fixes, new HE support, and updates to AMD NTB for
-4.10.  Please consider pulling them.
+On Thu, Dec 08, 2016 at 12:16:57PM -0500, Allen Hubbe wrote:
+> From: Steven Wahl
+> >
+> > Signed-off-by: Steve Wahl <Steve.Wahl@dell.com>
+> 
+> The only thing lacking here is a commit comment, but the change is self-explanatory.  Thanks!
+> 
+> Acked-by: Allen Hubbe <Allen.Hubbe@dell.com>
+
+This didn't apply cleanly for some reason.  I hand applied it, as it
+was a simple patch and duplicated the title into the body of the
+commit.
 
 Thanks,
 Jon
 
-
-
-The following changes since commit 69973b830859bc6529a7a0468ba0d80ee5117826:
-
-  Linux 4.9 (2016-12-11 11:17:54 -0800)
-
-are available in the git repository at:
-
-  git://github.com/jonmason/ntb tags/ntb-4.10
-
-for you to fetch changes up to dfb7d24c5ad5c986f2417f52784738b67cfedd4d:
-
-  ntb_transport: Remove unnecessary call to ntb_peer_spad_read (2016-12-23 16:11:07 -0500)
-
-----------------------------------------------------------------
-NTB bug fixes for removing an unnecessary call to ntb_peer_spad_read,
-and correcting a free_irq inconsistency.  It adds Intel SKX support.
-Finally, it changes the AMD NTB maintainer, and fixes some bugs present
-there.
-
-----------------------------------------------------------------
-Christophe JAILLET (1):
-      NTB: Fix 'request_irq()' and 'free_irq()' inconsistancy
-
-Dave Jiang (2):
-      ntb: Adding Skylake Xeon NTB support
-      ntb: fix SKX NTB config space size register offsets
-
-Shyam Sundar S K (3):
-      NTB: Register and offset values fix for memory window
-      ntb_transport: Limit memory windows based on available, scratchpads
-      MAINTAINERS: Change in maintainer for AMD NTB
-
-Steve Wahl (1):
-      ntb_transport: Remove unnecessary call to ntb_peer_spad_read
-
-Steven Wahl (1):
-      NTB: correct ntb_peer_spad_read for case when callback is not supplied.
-
-Xiangliang Yu (1):
-      NTB: add support for hotplug feature
-
- MAINTAINERS                         |   2 +-
- drivers/ntb/hw/amd/ntb_hw_amd.c     |  25 +-
- drivers/ntb/hw/amd/ntb_hw_amd.h     |   5 +-
- drivers/ntb/hw/intel/ntb_hw_intel.c | 662 +++++++++++++++++++++++++++++++++++-
- drivers/ntb/hw/intel/ntb_hw_intel.h |  48 +++
- drivers/ntb/ntb_transport.c         |  29 +-
- include/linux/ntb.h                 |   3 +
- 7 files changed, 741 insertions(+), 33 deletions(-)
+> 
+> > ---
+> >  include/linux/ntb.h | 3 +++
+> >  1 file changed, 3 insertions(+)
+> > 
+> > diff --git a/include/linux/ntb.h b/include/linux/ntb.h
+> > index 6f47562..816bd98 100644
+> > --- a/include/linux/ntb.h
+> > +++ b/include/linux/ntb.h
+> > @@ -968,6 +968,9 @@ static inline int ntb_peer_spad_addr(struct ntb_dev *ntb, int idx,
+> >   */
+> >  static inline u32 ntb_peer_spad_read(struct ntb_dev *ntb, int idx)
+> >  {
+> > +       if (!ntb->ops->peer_spad_read)
+> > +               return 0;
+> > +
+> >         return ntb->ops->peer_spad_read(ntb, idx);
+> >  }
+> > 
+> > --
+> > 2.7.4
+> 
+> -- 
+> You received this message because you are subscribed to the Google Groups "linux-ntb" group.
+> To unsubscribe from this group and stop receiving emails from it, send an email to linux-ntb+unsubscribe@googlegroups.com.
+> To post to this group, send email to linux-ntb@googlegroups.com.
+> To view this discussion on the web visit https://groups.google.com/d/msgid/linux-ntb/002101d25176%24e14ac450%24a3e04cf0%24%40dell.com.
+> For more options, visit https://groups.google.com/d/optout.
