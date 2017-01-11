@@ -1,48 +1,34 @@
-Date: Sun, 15 Jan 2017 14:38:15 -0800 (PST)
-From: jmrodriguezhw88@gmail.com
-Message-Id: <9a71e132-ec50-4e5d-bd29-1ad735acec07@googlegroups.com>
-In-Reply-To: <1483407036-20697-1-git-send-email-logang@deltatee.com>
+Return-Path: <logang@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id r1si1412032pfg.4.2017.01.11.09.48.55
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 11 Jan 2017 09:48:56 -0800 (PST)
 References: <1483407036-20697-1-git-send-email-logang@deltatee.com>
-Subject: Re: [PATCH 0/2] Style fixes: open code obfuscating macros
+ <20170110215527.GD13381@kudzu.us>
+ <CAPoiz9wZq1m-7=CsyUKK07+vCm3Lyhf+z77TooUmff4-v_mh_Q@mail.gmail.com>
+ <1484089612.12006.11.camel@perches.com>
+ <ebef7d4f-1e3d-b70f-741b-3f06b820289a@deltatee.com>
+ <20170111065036.GA4111@kroah.com>
+From: Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <b6de6b70-7dbd-d8e6-9967-b9590fef91ad@deltatee.com>
+Date: Wed, 11 Jan 2017 10:48:51 -0700
 MIME-Version: 1.0
-Content-Type: multipart/mixed; 
-	boundary="----=_Part_4493_1823960954.1484519895838"
-To: linux-ntb <linux-ntb@googlegroups.com>
-Cc: Xiangliang.Yu@amd.com, jdmason@kudzu.us, dave.jiang@intel.com, Allen.Hubbe@emc.com, gregkh@linuxfoundation.org, linux-kernel@vger.kernel.org, logang@deltatee.com
+In-Reply-To: <20170111065036.GA4111@kroah.com>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH 0/2] Style fixes: open code obfuscating macros
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Joe Perches <joe@perches.com>, Jon Mason <jdmason@kudzu.us>, Xiangliang Yu <Xiangliang.Yu@amd.com>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, linux-ntb@googlegroups.com, linux-kernel <linux-kernel@vger.kernel.org>
 List-ID: <linux-ntb.googlegroups.com>
 
-------=_Part_4493_1823960954.1484519895838
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
 
-On Monday, January 2, 2017 at 5:31:15 PM UTC-8, Logan Gunthorpe wrote:
-> Hi,
-> 
-> I had copied some poor code style from the NTB drivers into an unrelated
-> driver. Upon review of my new code, I learned it was not a good idea
-> to sweep dirty things under the rug^W macro. See [1], where Gregg k-h
-> suggested I fix the problem at the source.
-> 
-> Thus, please merge the following two patches to improve the style of
-> the NTB drivers.
-> 
-> Thanks,
-> 
-> Logan
-> 
-> [1] http://www.spinics.net/lists/linux-pci/msg56904.html
-> 
-> 
-> Logan Gunthorpe (2):
->   ntb_hw_amd: Style fixes: open code macros that just obfuscate code
->   ntb_hw_intel: Style fixes: open code macros that just obfuscate code
-> 
->  drivers/ntb/hw/amd/ntb_hw_amd.c     |  59 ++++++++-------
->  drivers/ntb/hw/amd/ntb_hw_amd.h     |   3 -
->  drivers/ntb/hw/intel/ntb_hw_intel.c | 145 ++++++++++++++++++------------------
->  drivers/ntb/hw/intel/ntb_hw_intel.h |   3 -
->  4 files changed, 104 insertions(+), 106 deletions(-)
-> 
-> --
-> 2.1.4
-------=_Part_4493_1823960954.1484519895838--
+
+On 10/01/17 11:50 PM, Greg Kroah-Hartman wrote:
+> You should be printing against the ntb struct device, as that's the
+> "correct" structure here, and not the PCI device at all, as that's too
+> far up the device chain from what the driver is supposed to be doing.
+
+Yup, agreed and thanks. My v2 patchset already makes this change.
+
+Logan
