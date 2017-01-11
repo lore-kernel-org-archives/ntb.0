@@ -1,54 +1,54 @@
-Return-Path: <gregkh@linuxfoundation.org>
-Received: from mail.linuxfoundation.org (mail.linuxfoundation.org. [140.211.169.12])
-        by gmr-mx.google.com with ESMTPS id r8si1040281pfa.5.2017.01.10.22.50.15
+Return-Path: <logang@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id r1si835706pfg.4.2017.01.10.16.34.14
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 10 Jan 2017 22:50:15 -0800 (PST)
-Date: Wed, 11 Jan 2017 07:50:36 +0100
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: Re: [PATCH 0/2] Style fixes: open code obfuscating macros
-Message-ID: <20170111065036.GA4111@kroah.com>
-References: <1483407036-20697-1-git-send-email-logang@deltatee.com>
- <20170110215527.GD13381@kudzu.us>
- <CAPoiz9wZq1m-7=CsyUKK07+vCm3Lyhf+z77TooUmff4-v_mh_Q@mail.gmail.com>
- <1484089612.12006.11.camel@perches.com>
- <ebef7d4f-1e3d-b70f-741b-3f06b820289a@deltatee.com>
+        Tue, 10 Jan 2017 16:34:14 -0800 (PST)
+References: <1484094731-15965-1-git-send-email-logang@deltatee.com>
+From: Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <2f7c2161-5e5b-13b7-4970-4c9c25f0e0c9@deltatee.com>
+Date: Tue, 10 Jan 2017 17:34:13 -0700
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ebef7d4f-1e3d-b70f-741b-3f06b820289a@deltatee.com>
-To: Logan Gunthorpe <logang@deltatee.com>
-Cc: Joe Perches <joe@perches.com>, Jon Mason <jdmason@kudzu.us>, Xiangliang Yu <Xiangliang.Yu@amd.com>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, linux-ntb@googlegroups.com, linux-kernel <linux-kernel@vger.kernel.org>
+In-Reply-To: <1484094731-15965-1-git-send-email-logang@deltatee.com>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH 0/2] Style fixes: open code obfuscating macros
+To: Xiangliang Yu <Xiangliang.Yu@amd.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Joe Perches <joe@perches.com>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-On Tue, Jan 10, 2017 at 04:34:41PM -0700, Logan Gunthorpe wrote:
-> 
-> 
-> On 10/01/17 04:06 PM, Joe Perches wrote:
-> > It might also be better to add and use YA
-> > logging macro like ndev_dbg
-> > 
-> > #define ndev_dvg(ndev, fmt, ...)	\
-> > 	dev_dbg(&(ndev)->ntb.pdev->dev, fmt, ##__VA_ARGS__)
-> > 
-> > so that the new temporaries that are used just
-> > for debugging are not required.
-> > 
-> 
-> I feel like that's going in the exact opposite direction from what Greg
-> was looking for... I think the point is to hide less of where the device
-> is coming from, not to create a new and different macro that hides
-> things in a different way.
-> 
-> Or, more likely, I _think_ Greg would suggest that this is showing that
-> the driver model isn't really being used properly. Perhaps, we should be
-> printing against the ntb struct device instead of the pci device so
-> there is no dereferencing.
+Sorry, sorry. I resent the wrong set :(
 
-You should be printing against the ntb struct device, as that's the
-"correct" structure here, and not the PCI device at all, as that's too
-far up the device chain from what the driver is supposed to be doing.
+Logan
 
-thanks,
-
-greg k-h
+On 10/01/17 05:32 PM, Logan Gunthorpe wrote:
+> Hi,
+> 
+> I had copied some poor code style from the NTB drivers into an unrelated
+> driver. Upon review of my new code, I learned it was not a good idea
+> to sweep dirty things under the rug^W macro. See [1], where Gregg k-h
+> suggested I fix the problem at the source.
+> 
+> Thus, please merge the following two patches to improve the style of
+> the NTB drivers.
+> 
+> Thanks,
+> 
+> Logan
+> 
+> [1] http://www.spinics.net/lists/linux-pci/msg56904.html
+> 
+> 
+> Logan Gunthorpe (2):
+>   ntb_hw_amd: Style fixes: open code macros that just obfuscate code
+>   ntb_hw_intel: Style fixes: open code macros that just obfuscate code
+> 
+>  drivers/ntb/hw/amd/ntb_hw_amd.c     |  59 ++++++++-------
+>  drivers/ntb/hw/amd/ntb_hw_amd.h     |   3 -
+>  drivers/ntb/hw/intel/ntb_hw_intel.c | 145 ++++++++++++++++++------------------
+>  drivers/ntb/hw/intel/ntb_hw_intel.h |   3 -
+>  4 files changed, 104 insertions(+), 106 deletions(-)
+> 
+> --
+> 2.1.4
+> 
