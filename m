@@ -1,85 +1,62 @@
 Return-Path: <jdmason@kudzu.us>
-Received: from mail-ua0-x243.google.com (mail-ua0-x243.google.com. [2607:f8b0:400c:c08::243])
-        by gmr-mx.google.com with ESMTPS id m190si1491730vkf.5.2017.02.01.12.08.19
+Received: from mail-qk0-x234.google.com (mail-qk0-x234.google.com. [2607:f8b0:400d:c09::234])
+        by gmr-mx.google.com with ESMTPS id y63si1218336ywe.5.2017.02.16.20.24.30
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 01 Feb 2017 12:08:19 -0800 (PST)
-Received: by mail-ua0-x243.google.com with SMTP id d5so36828893uag.0
-        for <linux-ntb@googlegroups.com>; Wed, 01 Feb 2017 12:08:19 -0800 (PST)
-MIME-Version: 1.0
-In-Reply-To: <5ed3be6c-c94e-1ade-e4cd-a8e8293296cd@deltatee.com>
-References: <1484094819-16084-1-git-send-email-logang@deltatee.com> <5ed3be6c-c94e-1ade-e4cd-a8e8293296cd@deltatee.com>
+        Thu, 16 Feb 2017 20:24:30 -0800 (PST)
+Received: by mail-qk0-x234.google.com with SMTP id s186so35004405qkb.1
+        for <linux-ntb@googlegroups.com>; Thu, 16 Feb 2017 20:24:30 -0800 (PST)
+Return-Path: <jdmason@kudzu.us>
 From: Jon Mason <jdmason@kudzu.us>
-Date: Wed, 1 Feb 2017 15:08:18 -0500
-Message-ID: <CAPoiz9zyATQRw=5ydnSteAqrZkvQ3D24xwt7kR-1aASysquJkQ@mail.gmail.com>
-Subject: Re: [PATCH v2 0/4] Style fixes: open code obfuscating macros
-Content-Type: text/plain; charset=UTF-8
-To: Logan Gunthorpe <logang@deltatee.com>
-Cc: Xiangliang Yu <Xiangliang.Yu@amd.com>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Joe Perches <joe@perches.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-ntb@googlegroups.com, linux-kernel <linux-kernel@vger.kernel.org>
+Date: Thu, 16 Feb 2017 23:24:22 -0500
+Subject: [GIT PULL] NTB bug fixes for vv4.10
+Message-ID: <20170217042422.GA10511@graymalkin.kudzu.us>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+To: torvalds@linux-foundation.org
+Cc: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-On Thu, Jan 26, 2017 at 3:00 PM, Logan Gunthorpe <logang@deltatee.com> wrote:
-> Hi,
->
-> It's been a couple weeks... Any thoughts on this?
-
-My apologies for not responding sooner.  A large rework of the core
-NTB code was done prior to your patches (for IDT NTB support).
-Unfortunately, after those changes this series does not apply cleanly.
-I understand the changes being made, and will fix-up the patches to
-make it apply cleanly on the updated code base.
+Hello Linus,
+Here are a few last minute NTB bug fixes for v4.10.  They are fairly
+critical, and would appreicate them getting pulled in (though I
+understand this is extremely late in the cycle).
 
 Thanks,
 Jon
 
->
-> Thanks,
->
-> Logan
->
-> On 10/01/17 05:33 PM, Logan Gunthorpe wrote:
->> Hi,
->>
->> Here's an updated version of the style fixes patchset. The differences
->> from v1 are:
->>
->> 1) Rebased onto Jon Mason's current NTB branch
->>
->> 2) Added two more patches to convert the print lines to use the ntb
->> device and not the pci one. This seems more sane, shortens a bunch
->> of lines and removes the need for temporaries.
->>
->> Note with (2): I've tried my best to ensure that statements that print
->> before the ntb device is registered still use the PCI device. However,
->> someone should probably review and test this as I don't have access
->> to all types of hardware to do that.
->>
->> Thanks,
->>
->> Logan
->>
->>
->>
->> Logan Gunthorpe (4):
->>   ntb_hw_amd: Style fixes: open code macros that just obfuscate code
->>   ntb_hw_intel: Style fixes: open code macros that just obfuscate code
->>   ntb_hw_amd: Print kernel messages with the ntb device not the pci one
->>   ntb_hw_intel: Print kernel messages with the ntb device not the pci
->>     one
->>
->>  drivers/ntb/hw/amd/ntb_hw_amd.c     |  60 +++++------
->>  drivers/ntb/hw/amd/ntb_hw_amd.h     |   3 -
->>  drivers/ntb/hw/intel/ntb_hw_intel.c | 192 +++++++++++++++++-------------------
->>  drivers/ntb/hw/intel/ntb_hw_intel.h |   3 -
->>  4 files changed, 124 insertions(+), 134 deletions(-)
->>
->> --
->> 2.1.4
->>
->
-> --
-> You received this message because you are subscribed to the Google Groups "linux-ntb" group.
-> To unsubscribe from this group and stop receiving emails from it, send an email to linux-ntb+unsubscribe@googlegroups.com.
-> To post to this group, send email to linux-ntb@googlegroups.com.
-> To view this discussion on the web visit https://groups.google.com/d/msgid/linux-ntb/5ed3be6c-c94e-1ade-e4cd-a8e8293296cd%40deltatee.com.
-> For more options, visit https://groups.google.com/d/optout.
+
+
+The following changes since commit 7089db84e356562f8ba737c29e472cc42d530dbc:
+
+  Linux 4.10-rc8 (2017-02-12 13:03:20 -0800)
+
+are available in the git repository at:
+
+  git://github.com/jonmason/ntb tags/ntb-4.10-bugfixes
+
+for you to fetch changes up to 939ada5fb587840ae4db47846087be4162477b13:
+
+  ntb: ntb_hw_intel: link_poll isn't clearing the pending status properly (2017-02-16 23:11:26 -0500)
+
+----------------------------------------------------------------
+NTB bug fixes to address a crash when unloading the ntb module, a DMA
+engine unmap leak, allowing the proper queue choice, and clearing the
+SKX irq bit.
+
+----------------------------------------------------------------
+Allen Hubbe (1):
+      NTB: ntb_transport: fix debugfs_remove_recursive
+
+Dave Jiang (2):
+      ntb: ntb_perf missing dmaengine_unmap_put
+      ntb: ntb_hw_intel: link_poll isn't clearing the pending status properly
+
+Thomas VanSelus (1):
+      ntb_transport: Pick an unused queue
+
+ drivers/ntb/hw/intel/ntb_hw_intel.c | 24 +++++++++++++++++++++++-
+ drivers/ntb/ntb_transport.c         |  5 ++---
+ drivers/ntb/test/ntb_perf.c         |  2 ++
+ 3 files changed, 27 insertions(+), 4 deletions(-)
