@@ -1,14 +1,14 @@
 Return-Path: <Gary.Hook@amd.com>
-Received: from NAM03-CO1-obe.outbound.protection.outlook.com (mail-co1nam03on0075.outbound.protection.outlook.com. [104.47.40.75])
-        by gmr-mx.google.com with ESMTPS id r66si106225pfb.7.2017.05.04.13.21.41
+Received: from NAM03-CO1-obe.outbound.protection.outlook.com (mail-co1nam03on0053.outbound.protection.outlook.com. [104.47.40.53])
+        by gmr-mx.google.com with ESMTPS id f188si120264pfc.1.2017.05.04.13.21.31
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Thu, 04 May 2017 13:21:41 -0700 (PDT)
-Subject: [PATCH V2 3/3] ntb: Add more debugfs support for ntb_perf testing
- options
+        Thu, 04 May 2017 13:21:32 -0700 (PDT)
+Subject: [PATCH V2 2/3] ntb: Remove debug-fs variables from the context
+ structure
 From: Gary R Hook <gary.hook@amd.com>
-Date: Thu, 4 May 2017 15:21:35 -0500
-Message-ID: <20170504202135.10113.49796.stgit@taos.amd.com>
+Date: Thu, 4 May 2017 15:21:25 -0500
+Message-ID: <20170504202125.10113.57984.stgit@taos.amd.com>
 In-Reply-To: <20170504201544.10113.13551.stgit@taos.amd.com>
 References: <20170504201544.10113.13551.stgit@taos.amd.com>
 MIME-Version: 1.0
@@ -19,69 +19,69 @@ To: linux-ntb@googlegroups.com
 Cc: Allen.Hubbe@emc.com, dave.jiang@intel.com, jdmason@kudzu.us
 List-ID: <linux-ntb.googlegroups.com>
 
-The ntb_perf tool uses module parameters to control the
-characteristics of its test.  Enable the changing of these
-options through debugfs, and eliminating the need to unload
-and reload the module to make changes and run additional tests.
-
-Add a new module parameter that forces the DMA channel
-selection onto the same node as the NTB device (default: true).
-
- - seg_order: Size of the NTB memory window; power of 2.
- - run_order: Size of the data buffer; power of 2.
- - use_dma:   Use DMA or memcpy? Default: 0.
- - on_node:   Only use DMA channel(s) on the NTB node. Default: true.
-
+The Debug FS entries manage themselves; we don't need to hang onto
+them in the context structure.
 
 Signed-off-by: Gary R Hook <gary.hook@amd.com>
 ---
- drivers/ntb/test/ntb_perf.c |   28 ++++++++++++++++++++++++++++
- 1 file changed, 28 insertions(+)
+ drivers/ntb/test/ntb_perf.c |   28 ++++++++++++++--------------
+ 1 file changed, 14 insertions(+), 14 deletions(-)
 
 diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index 70085d5d553f..d13b837e8396 100644
+index bfceae0e6477..70085d5d553f 100644
 --- a/drivers/ntb/test/ntb_perf.c
 +++ b/drivers/ntb/test/ntb_perf.c
-@@ -737,6 +737,10 @@ static int perf_debugfs_setup(struct perf_ctx *perf)
- 	struct dentry *debugfs_node_dir;
- 	struct dentry *debugfs_run;
- 	struct dentry *debugfs_threads;
-+	struct dentry *debugfs_seg_order;
-+	struct dentry *debugfs_run_order;
-+	struct dentry *debugfs_use_dma;
-+	struct dentry *debugfs_on_node;
+@@ -140,9 +140,6 @@ struct perf_ctx {
+ 	bool			link_is_up;
+ 	struct delayed_work	link_work;
+ 	wait_queue_head_t	link_wq;
+-	struct dentry		*debugfs_node_dir;
+-	struct dentry		*debugfs_run;
+-	struct dentry		*debugfs_threads;
+ 	u8			perf_threads;
+ 	/* mutex ensures only one set of threads run at once */
+ 	struct mutex		run_mutex;
+@@ -737,6 +734,9 @@ static ssize_t debugfs_run_write(struct file *filp, const char __user *ubuf,
+ static int perf_debugfs_setup(struct perf_ctx *perf)
+ {
+ 	struct pci_dev *pdev = perf->ntb->pdev;
++	struct dentry *debugfs_node_dir;
++	struct dentry *debugfs_run;
++	struct dentry *debugfs_threads;
  
  	if (!debugfs_initialized())
  		return -ENODEV;
-@@ -764,6 +768,30 @@ static int perf_debugfs_setup(struct perf_ctx *perf)
- 	if (!debugfs_threads)
+@@ -747,21 +747,21 @@ static int perf_debugfs_setup(struct perf_ctx *perf)
+ 			return -ENODEV;
+ 	}
+ 
+-	perf->debugfs_node_dir = debugfs_create_dir(pci_name(pdev),
+-						    perf_debugfs_dir);
+-	if (!perf->debugfs_node_dir)
++	debugfs_node_dir = debugfs_create_dir(pci_name(pdev),
++					      perf_debugfs_dir);
++	if (!debugfs_node_dir)
  		return -ENODEV;
  
-+	debugfs_seg_order = debugfs_create_u32("seg_order", 0600,
-+					       debugfs_node_dir,
-+					       &seg_order);
-+	if (!debugfs_seg_order)
-+		return -ENODEV;
-+
-+	debugfs_run_order = debugfs_create_u32("run_order", 0600,
-+					       debugfs_node_dir,
-+					       &run_order);
-+	if (!debugfs_run_order)
-+		return -ENODEV;
-+
-+	debugfs_use_dma = debugfs_create_bool("use_dma", 0600,
-+					       debugfs_node_dir,
-+					       &use_dma);
-+	if (!debugfs_use_dma)
-+		return -ENODEV;
-+
-+	debugfs_on_node = debugfs_create_bool("on_node", 0600,
-+					      debugfs_node_dir,
-+					      &on_node);
-+	if (!debugfs_on_node)
-+		return -ENODEV;
-+
- 	return 0;
- }
+-	perf->debugfs_run = debugfs_create_file("run", S_IRUSR | S_IWUSR,
+-						perf->debugfs_node_dir, perf,
+-						&ntb_perf_debugfs_run);
+-	if (!perf->debugfs_run)
++	debugfs_run = debugfs_create_file("run", S_IRUSR | S_IWUSR,
++					  debugfs_node_dir, perf,
++					  &ntb_perf_debugfs_run);
++	if (!debugfs_run)
+ 		return -ENODEV;
  
+-	perf->debugfs_threads = debugfs_create_u8("threads", S_IRUSR | S_IWUSR,
+-						  perf->debugfs_node_dir,
+-						  &perf->perf_threads);
+-	if (!perf->debugfs_threads)
++	debugfs_threads = debugfs_create_u8("threads", S_IRUSR | S_IWUSR,
++					    debugfs_node_dir,
++					    &perf->perf_threads);
++	if (!debugfs_threads)
+ 		return -ENODEV;
+ 
+ 	return 0;
 
