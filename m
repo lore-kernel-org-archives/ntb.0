@@ -1,57 +1,87 @@
-Return-Path: <dave.jiang@intel.com>
-Received: from mga01.intel.com (mga01.intel.com. [192.55.52.88])
-        by gmr-mx.google.com with ESMTPS id 63si113554pfp.3.2017.05.09.11.03.45
+Return-Path: <Gary.Hook@amd.com>
+Received: from NAM03-BY2-obe.outbound.protection.outlook.com (mail-by2nam03on0046.outbound.protection.outlook.com. [104.47.42.46])
+        by gmr-mx.google.com with ESMTPS id k16si16628pfg.5.2017.05.09.07.33.47
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 09 May 2017 11:03:45 -0700 (PDT)
-Subject: Re: [PATCH V3 0/3] Add/expose control features for the NTB perf test
- module
-References: <20170509142856.12995.96207.stgit@taos.amd.com>
-From: Dave Jiang <dave.jiang@intel.com>
-Message-ID: <f45ed707-fcc9-5ff6-2bbb-eb21d098769d@intel.com>
-Date: Tue, 9 May 2017 11:02:33 -0700
-MIME-Version: 1.0
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
+        Tue, 09 May 2017 07:33:47 -0700 (PDT)
+Subject: [PATCH V3 3/3] ntb: Add more debugfs support for ntb_perf testing
+ options
+From: Gary R Hook <gary.hook@amd.com>
+Date: Tue, 9 May 2017 09:33:36 -0500
+Message-ID: <20170509143336.12995.17807.stgit@taos.amd.com>
 In-Reply-To: <20170509142856.12995.96207.stgit@taos.amd.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
+References: <20170509142856.12995.96207.stgit@taos.amd.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-To: Gary R Hook <gary.hook@amd.com>, linux-ntb@googlegroups.com
-Cc: Allen.Hubbe@emc.com, jdmason@kudzu.us
+Return-Path: gary.hook@amd.com
+To: linux-ntb@googlegroups.com
+Cc: Allen.Hubbe@emc.com, dave.jiang@intel.com, jdmason@kudzu.us
 List-ID: <linux-ntb.googlegroups.com>
 
+The ntb_perf tool uses module parameters to control the
+characteristics of its test.  Enable the changing of these
+options through debugfs, and eliminating the need to unload
+and reload the module to make changes and run additional tests.
+
+Add a new module parameter that forces the DMA channel
+selection onto the same node as the NTB device (default: true).
+
+ - seg_order: Size of the NTB memory window; power of 2.
+ - run_order: Size of the data buffer; power of 2.
+ - use_dma:   Use DMA or memcpy? Default: 0.
+ - on_node:   Only use DMA channel(s) on the NTB node. Default: true.
 
 
-On 05/09/2017 07:33 AM, Gary R Hook wrote:
-> The goal of this series is to add and expose some control mechanisms for the
-> performance test module:
-> 
->  - Provide a switch to allow memory and threads to be anywhere, as
->    opposed to only the NTB node.
->  - The debug filesystem entries do not need to be retained after they
->    are set up. Remove the variables from the context structure and make
->    them automatic,
->  - Create a debug-fs entry for every module parameter. This allows test
->    parameters to be changed, and additional tests to be run, without
->    unloading the ntb_perf module each time.
-> 
-> Changes since V2:
->  - Use on_node to decide if -anything- is required to be on the NTB node.
-> 
-> Changes since V1:
->  - Split patch into appropriate pieces.
-> 
-> ---
-> 
-> Gary R Hook (3):
->       ntb: Add a module option to control affinity of DMA channels
->       ntb: Remove debug-fs variables from the context structure
->       ntb: Add more debugfs support for ntb_perf testing options
-> 
-> 
->  drivers/ntb/test/ntb_perf.c |   72 ++++++++++++++++++++++++++++++++-----------
->  1 file changed, 54 insertions(+), 18 deletions(-)
-> 
+Signed-off-by: Gary R Hook <gary.hook@amd.com>
+---
+ drivers/ntb/test/ntb_perf.c |   28 ++++++++++++++++++++++++++++
+ 1 file changed, 28 insertions(+)
 
-ack the series
+diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
+index 60e0dd320aef..6fdddf86269e 100644
+--- a/drivers/ntb/test/ntb_perf.c
++++ b/drivers/ntb/test/ntb_perf.c
+@@ -737,6 +737,10 @@ static int perf_debugfs_setup(struct perf_ctx *perf)
+ 	struct dentry *debugfs_node_dir;
+ 	struct dentry *debugfs_run;
+ 	struct dentry *debugfs_threads;
++	struct dentry *debugfs_seg_order;
++	struct dentry *debugfs_run_order;
++	struct dentry *debugfs_use_dma;
++	struct dentry *debugfs_on_node;
+ 
+ 	if (!debugfs_initialized())
+ 		return -ENODEV;
+@@ -764,6 +768,30 @@ static int perf_debugfs_setup(struct perf_ctx *perf)
+ 	if (!debugfs_threads)
+ 		return -ENODEV;
+ 
++	debugfs_seg_order = debugfs_create_u32("seg_order", 0600,
++					       debugfs_node_dir,
++					       &seg_order);
++	if (!debugfs_seg_order)
++		return -ENODEV;
++
++	debugfs_run_order = debugfs_create_u32("run_order", 0600,
++					       debugfs_node_dir,
++					       &run_order);
++	if (!debugfs_run_order)
++		return -ENODEV;
++
++	debugfs_use_dma = debugfs_create_bool("use_dma", 0600,
++					       debugfs_node_dir,
++					       &use_dma);
++	if (!debugfs_use_dma)
++		return -ENODEV;
++
++	debugfs_on_node = debugfs_create_bool("on_node", 0600,
++					      debugfs_node_dir,
++					      &on_node);
++	if (!debugfs_on_node)
++		return -ENODEV;
++
+ 	return 0;
+ }
+ 
 
-Acked-by: Dave Jiang <dave.jiang@intel.com>
