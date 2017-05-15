@@ -1,45 +1,48 @@
 Return-Path: <Gary.Hook@amd.com>
-Received: from NAM02-SN1-obe.outbound.protection.outlook.com (mail-sn1nam02on0061.outbound.protection.outlook.com. [104.47.36.61])
-        by gmr-mx.google.com with ESMTPS id f188si24747pfc.1.2017.05.04.09.36.59
+Received: from NAM03-CO1-obe.outbound.protection.outlook.com (mail-co1nam03on0054.outbound.protection.outlook.com. [104.47.40.54])
+        by gmr-mx.google.com with ESMTPS id r66si1689200pfb.7.2017.05.15.06.48.53
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Thu, 04 May 2017 09:36:59 -0700 (PDT)
-Subject: [PATCH] ntb: Correct modinfo usage statement for ntb_perf
-From: Gary R Hook <gary.hook@amd.com>
-Date: Thu, 4 May 2017 11:36:52 -0500
-Message-ID: <20170504163652.6904.47683.stgit@taos.amd.com>
+        Mon, 15 May 2017 06:48:53 -0700 (PDT)
+Subject: Re: [PATCH V3 2/3] ntb: Remove debug-fs variables from the context
+ structure
+References: <20170509142856.12995.96207.stgit@taos.amd.com>
+ <20170509143328.12995.19706.stgit@taos.amd.com>
+ <20170514133206.GA6027@kudzu.us>
+From: Gary R Hook <ghook@amd.com>
+Message-ID: <d3647128-dd92-086b-405b-b816d5f3a9ed@amd.com>
+Date: Mon, 15 May 2017 08:48:44 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+In-Reply-To: <20170514133206.GA6027@kudzu.us>
+Content-Type: text/plain; charset="windows-1252"; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-Path: gary.hook@amd.com
-To: linux-ntb@googlegroups.com
-Cc: Allen.Hubbe@emc.com, dave.jiang@intel.com, jdmason@kudzu.us
+Return-Path: ghook@amd.com
+To: Jon Mason <jdmason@kudzu.us>, Gary R Hook <gary.hook@amd.com>
+Cc: linux-ntb@googlegroups.com, Allen.Hubbe@emc.com, dave.jiang@intel.com
 List-ID: <linux-ntb.googlegroups.com>
 
-The order parameters are powers of 2; adjust the usage information
-to use correct mathematical representations.
+On 05/14/2017 08:32 AM, Jon Mason wrote:
+> On Tue, May 09, 2017 at 09:33:28AM -0500, Gary R Hook wrote:
+>> The Debug FS entries manage themselves; we don't need to hang onto
+>> them in the context structure.
+>>
+>> Signed-off-by: Gary R Hook <gary.hook@amd.com>
+>> ---
 
-Signed-off-by: Gary R Hook <gary.hook@amd.com>
----
- drivers/ntb/test/ntb_perf.c |    4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+<snip>
 
-diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index 9c4a21f1a9d9..42756a98a728 100644
---- a/drivers/ntb/test/ntb_perf.c
-+++ b/drivers/ntb/test/ntb_perf.c
-@@ -91,11 +91,11 @@
- 
- static unsigned int seg_order = 19; /* 512K */
- module_param(seg_order, uint, 0644);
--MODULE_PARM_DESC(seg_order, "size order [n^2] of buffer segment for testing");
-+MODULE_PARM_DESC(seg_order, "size order [2^n] of buffer segment for testing");
- 
- static unsigned int run_order = 32; /* 4G */
- module_param(run_order, uint, 0644);
--MODULE_PARM_DESC(run_order, "size order [n^2] of total data to transfer");
-+MODULE_PARM_DESC(run_order, "size order [2^n] of total data to transfer");
- 
- static bool use_dma; /* default to 0 */
- module_param(use_dma, bool, 0644);
+>> +	debugfs_threads = debugfs_create_u8("threads", S_IRUSR | S_IWUSR,
+>> +					    debugfs_node_dir,
+>> +					    &perf->perf_threads);
+>> +	if (!debugfs_threads)
+>>  		return -ENODEV;
+>
+> I'm going to apply this, since it isn't that different then what
+> exists now.  However, I would like to see this have an error path that
+> unrolls the creation if one of them fails.
 
+Yes, that would make sense. Will do.
+
+
+-- 
+Man, I love eighth notes.
