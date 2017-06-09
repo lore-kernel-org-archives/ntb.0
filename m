@@ -1,160 +1,83 @@
-Return-Path: <gunthorp@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id t191si2689itb.1.2017.06.28.20.27.00
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-qt0-x243.google.com (mail-qt0-x243.google.com. [2607:f8b0:400d:c0d::243])
+        by gmr-mx.google.com with ESMTPS id o187si140137ywd.1.2017.06.09.14.09.17
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 28 Jun 2017 20:27:00 -0700 (PDT)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Wed, 28 Jun 2017 21:26:37 -0600
-Message-Id: <20170629032648.3073-6-logang@deltatee.com>
-In-Reply-To: <20170629032648.3073-1-logang@deltatee.com>
-References: <20170629032648.3073-1-logang@deltatee.com>
-Subject: [PATCH 05/16] ntb: ensure ntb_mw_get_align is only called when the link is up
-To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>, Logan Gunthorpe <logang@deltatee.com>
+        Fri, 09 Jun 2017 14:09:17 -0700 (PDT)
+Received: by mail-qt0-x243.google.com with SMTP id s33so17740506qtg.3
+        for <linux-ntb@googlegroups.com>; Fri, 09 Jun 2017 14:09:17 -0700 (PDT)
+Return-Path: <jdmason@kudzu.us>
+Date: Fri, 9 Jun 2017 17:09:09 -0400
+From: Jon Mason <jdmason@kudzu.us>
+Subject: Re: [PATCH] ntb_transport: fix bug calculating num_qps_mw
+Message-ID: <20170609210908.GC9847@kudzu.us>
+References: <20170605200053.6912-1-logang@deltatee.com>
+ <20170605200053.6912-3-logang@deltatee.com>
+ <000101d2dec6$0648f060$12dad120$@dell.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <000101d2dec6$0648f060$12dad120$@dell.com>
+To: Allen Hubbe <Allen.Hubbe@dell.com>
+Cc: 'Logan Gunthorpe' <logang@deltatee.com>, linux-ntb@googlegroups.com, 'Dave Jiang' <dave.jiang@intel.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-With switchtec hardware it's impossible to get the alignment parameters
-for a peer's memory window until the peer's driver has configured it's
-windows. Strictly speaking, the link doesn't have to be up for this,
-but the link being up is the only way the client can tell that
-the otherside has been configured.
+On Tue, Jun 06, 2017 at 09:08:43AM -0400, Allen Hubbe wrote:
+> From: Logan Gunthorpe
+> > A divide by zero error occurs if qp_count is less than mw_count because
+> > num_qps_mw is calculated to be zero. The calculation appears to be
+> > incorrect.
+> > 
+> > The requirement is for num_qps_mw to be set to qp_count / mw_count
+> > with any remainder divided among the earlier mws.
+> > 
+> > For example, if mw_count is 5 and qp_count is 12 then mws 0 and 1
+> > will have 3 qps per window and mws 2 through 4 will have 2 qps per window.
+> > Thus, when mw_num < qp_count % mw_count, num_qps_mw is 1 higher
+> > than when mw_num >= qp_count.
+> > 
+> > Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+> > Cc: Jon Mason <jdmason@kudzu.us>
+> > Cc: Dave Jiang <dave.jiang@intel.com>
+> > Cc: Allen Hubbe <Allen.Hubbe@emc.com>
+> 
+> Acked-by: Allen Hubbe <Allen.Hubbe@dell.com>
 
-This patch converts ntb_transport and ntb_perf to use this function after
-the link goes up. This simplifies these clients slightly because they
-no longer have to store the alignment parameters. It also tweaks
-ntb_tool so that peer_mw_trans will print zero if it is run before
-the link goes up.
+Adding to my ntb branch with the following line:
+Fixes: e26a5843f7f5 ("NTB: Split ntb_hw_intel and ntb_transport drivers")
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
----
- drivers/ntb/ntb_transport.c | 20 ++++++++++----------
- drivers/ntb/test/ntb_perf.c | 18 +++++++++---------
- drivers/ntb/test/ntb_tool.c |  6 +++---
- 3 files changed, 22 insertions(+), 22 deletions(-)
+This enables the stable kernels it is a bug fix and to pick it up.
 
-diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index b29558ddfe95..7ed745aaa213 100644
---- a/drivers/ntb/ntb_transport.c
-+++ b/drivers/ntb/ntb_transport.c
-@@ -191,8 +191,6 @@ struct ntb_transport_qp {
- struct ntb_transport_mw {
- 	phys_addr_t phys_addr;
- 	resource_size_t phys_size;
--	resource_size_t xlat_align;
--	resource_size_t xlat_align_size;
- 	void __iomem *vbase;
- 	size_t xlat_size;
- 	size_t buff_size;
-@@ -687,13 +685,20 @@ static int ntb_set_mw(struct ntb_transport_ctx *nt, int num_mw,
- 	struct ntb_transport_mw *mw = &nt->mw_vec[num_mw];
- 	struct pci_dev *pdev = nt->ndev->pdev;
- 	size_t xlat_size, buff_size;
-+	resource_size_t xlat_align;
-+	resource_size_t xlat_align_size;
- 	int rc;
- 
- 	if (!size)
- 		return -EINVAL;
- 
--	xlat_size = round_up(size, mw->xlat_align_size);
--	buff_size = round_up(size, mw->xlat_align);
-+	rc = ntb_mw_get_align(nt->ndev, PIDX, num_mw, &xlat_align,
-+			      &xlat_align_size, NULL);
-+	if (rc)
-+		return rc;
-+
-+	xlat_size = round_up(size, xlat_align_size);
-+	buff_size = round_up(size, xlat_align);
- 
- 	/* No need to re-setup */
- 	if (mw->xlat_size == xlat_size)
-@@ -722,7 +727,7 @@ static int ntb_set_mw(struct ntb_transport_ctx *nt, int num_mw,
- 	 * is a requirement of the hardware. It is recommended to setup CMA
- 	 * for BAR sizes equal or greater than 4MB.
- 	 */
--	if (!IS_ALIGNED(mw->dma_addr, mw->xlat_align)) {
-+	if (!IS_ALIGNED(mw->dma_addr, xlat_align)) {
- 		dev_err(&pdev->dev, "DMA memory %pad is not aligned\n",
- 			&mw->dma_addr);
- 		ntb_free_mw(nt, num_mw);
-@@ -1106,11 +1111,6 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
- 	for (i = 0; i < mw_count; i++) {
- 		mw = &nt->mw_vec[i];
- 
--		rc = ntb_mw_get_align(ndev, PIDX, i, &mw->xlat_align,
--				      &mw->xlat_align_size, NULL);
--		if (rc)
--			goto err1;
--
- 		rc = ntb_peer_mw_get_addr(ndev, i, &mw->phys_addr,
- 					  &mw->phys_size);
- 		if (rc)
-diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index 759f772fa00c..427112cf101a 100644
---- a/drivers/ntb/test/ntb_perf.c
-+++ b/drivers/ntb/test/ntb_perf.c
-@@ -108,8 +108,6 @@ MODULE_PARM_DESC(on_node, "Run threads only on NTB device node (default: true)")
- struct perf_mw {
- 	phys_addr_t	phys_addr;
- 	resource_size_t	phys_size;
--	resource_size_t	xlat_align;
--	resource_size_t	xlat_align_size;
- 	void __iomem	*vbase;
- 	size_t		xlat_size;
- 	size_t		buf_size;
-@@ -472,13 +470,20 @@ static int perf_set_mw(struct perf_ctx *perf, resource_size_t size)
- {
- 	struct perf_mw *mw = &perf->mw;
- 	size_t xlat_size, buf_size;
-+	resource_size_t	xlat_align;
-+	resource_size_t	xlat_align_size;
- 	int rc;
- 
- 	if (!size)
- 		return -EINVAL;
- 
--	xlat_size = round_up(size, mw->xlat_align_size);
--	buf_size = round_up(size, mw->xlat_align);
-+	rc = ntb_mw_get_align(perf->ntb, PIDX, 0, &xlat_align,
-+			      &xlat_align_size, NULL);
-+	if (rc)
-+		return rc;
-+
-+	xlat_size = round_up(size, xlat_align_size);
-+	buf_size = round_up(size, xlat_align);
- 
- 	if (mw->xlat_size == xlat_size)
- 		return 0;
-@@ -567,11 +572,6 @@ static int perf_setup_mw(struct ntb_dev *ntb, struct perf_ctx *perf)
- 
- 	mw = &perf->mw;
- 
--	rc = ntb_mw_get_align(ntb, PIDX, 0, &mw->xlat_align,
--			      &mw->xlat_align_size, NULL);
--	if (rc)
--		return rc;
--
- 	rc = ntb_peer_mw_get_addr(ntb, 0, &mw->phys_addr, &mw->phys_size);
- 	if (rc)
- 		return rc;
-diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c
-index a69815c45ce6..91526a986caa 100644
---- a/drivers/ntb/test/ntb_tool.c
-+++ b/drivers/ntb/test/ntb_tool.c
-@@ -753,9 +753,9 @@ static ssize_t tool_peer_mw_trans_read(struct file *filep,
- 
- 	phys_addr_t base;
- 	resource_size_t mw_size;
--	resource_size_t align_addr;
--	resource_size_t align_size;
--	resource_size_t max_size;
-+	resource_size_t align_addr = 0;
-+	resource_size_t align_size = 0;
-+	resource_size_t max_size = 0;
- 
- 	buf_size = min_t(size_t, size, 512);
- 
--- 
-2.11.0
-
+Thanks,
+Jon
+> 
+> > ---
+> >  drivers/ntb/ntb_transport.c | 4 ++--
+> >  1 file changed, 2 insertions(+), 2 deletions(-)
+> > 
+> > diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+> > index 0a778d2cab94..5b6b00ea6ed9 100644
+> > --- a/drivers/ntb/ntb_transport.c
+> > +++ b/drivers/ntb/ntb_transport.c
+> > @@ -623,7 +623,7 @@ static int ntb_transport_setup_qp_mw(struct ntb_transport_ctx *nt,
+> >  	if (!mw->virt_addr)
+> >  		return -ENOMEM;
+> > 
+> > -	if (qp_count % mw_count && mw_num + 1 < qp_count / mw_count)
+> > +	if (mw_num < qp_count % mw_count)
+> >  		num_qps_mw = qp_count / mw_count + 1;
+> >  	else
+> >  		num_qps_mw = qp_count / mw_count;
+> > @@ -1000,7 +1000,7 @@ static int ntb_transport_init_queue(struct ntb_transport_ctx *nt,
+> >  	qp->event_handler = NULL;
+> >  	ntb_qp_link_down_reset(qp);
+> > 
+> > -	if (qp_count % mw_count && mw_num + 1 < qp_count / mw_count)
+> > +	if (mw_num < qp_count % mw_count)
+> >  		num_qps_mw = qp_count / mw_count + 1;
+> >  	else
+> >  		num_qps_mw = qp_count / mw_count;
+> > --
+> > 2.11.0
+> 
+> 
