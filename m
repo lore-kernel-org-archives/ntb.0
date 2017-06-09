@@ -1,81 +1,75 @@
-Return-Path: <gunthorp@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id w66si71362ita.2.2017.06.15.13.37.53
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-qt0-x241.google.com (mail-qt0-x241.google.com. [2607:f8b0:400d:c0d::241])
+        by gmr-mx.google.com with ESMTPS id y7si146697ywd.8.2017.06.09.14.09.56
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 15 Jun 2017 13:37:53 -0700 (PDT)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Thu, 15 Jun 2017 14:37:16 -0600
-Message-Id: <20170615203729.9009-1-logang@deltatee.com>
-Subject: [RFC PATCH 00/13] Switchtec NTB Support
-To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Logan Gunthorpe <logang@deltatee.com>
+        Fri, 09 Jun 2017 14:09:56 -0700 (PDT)
+Received: by mail-qt0-x241.google.com with SMTP id s33so17743751qtg.3
+        for <linux-ntb@googlegroups.com>; Fri, 09 Jun 2017 14:09:56 -0700 (PDT)
+Return-Path: <jdmason@kudzu.us>
+Date: Fri, 9 Jun 2017 17:09:54 -0400
+From: Jon Mason <jdmason@kudzu.us>
+Subject: Re: [PATCH] ntb_transport: fix qp count bug
+Message-ID: <20170609210954.GD9847@kudzu.us>
+References: <20170605200053.6912-1-logang@deltatee.com>
+ <20170605200053.6912-2-logang@deltatee.com>
+ <000201d2dec6$08e211d0$1aa63570$@dell.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <000201d2dec6$08e211d0$1aa63570$@dell.com>
+To: Allen Hubbe <Allen.Hubbe@dell.com>
+Cc: 'Logan Gunthorpe' <logang@deltatee.com>, linux-ntb@googlegroups.com, 'Dave Jiang' <dave.jiang@intel.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Hi,
+On Tue, Jun 06, 2017 at 09:08:47AM -0400, Allen Hubbe wrote:
+> From: Logan Gunthorpe
+> > In cases where there are more mw's than spads/2-2, the mw count gets
+> > reduced to match the limitation. ntb_transport also tries to ensure that
+> > there are fewer qps than mws but uses the full mw count instead of
+> > the reduced one. When this happens, the math in
+> > 'ntb_transport_setup_qp_mw' will get confused and result in a kernel
+> > paging request bug.
+> > 
+> > This patch fixes the bug by reducing qp_count to the reduced mw count
+> > instead of the full mw count.
+> > 
+> > Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+> > Cc: Jon Mason <jdmason@kudzu.us>
+> > Cc: Dave Jiang <dave.jiang@intel.com>
+> > Cc: Allen Hubbe <Allen.Hubbe@emc.com>
+> 
+> Acked-by: Allen Hubbe <Allen.Hubbe@dell.com>
 
-This patchset implements Non-Transparent Bridge (NTB) support for the
-Microsemi Switchtec series of switches. We're looking for some
-review from the community at this point but hope to get it upstreamed
-for v4.14.
+Adding to my ntb branch with the following line:
+Fixes: e26a5843f7f5 ("NTB: Split ntb_hw_intel and ntb_transport drivers")
 
-Switchtec NTB support is configured over the same function and bar
-as the management endpoint. Thus, the new driver hooks into the
-management driver which we had merged in v4.12. We use the class
-interface API to register an NTB device for every switchtec device
-which supports NTB (not all do).
-
-The Switchtec hardware supports doorbells, memory windows and messages.
-Seeing there is no native scratchpad support, 128 spads are emulated
-through the use of a pre-setup memory window. The switch has 64
-doorbells which are shared between the two partitions and a
-configurable set of memory windows. While the hardware supports more
-than 2 partitions, this driver only supports the first two seeing
-the current NTB API only supports two hosts.
-
-The driver has been tested with ntb_netdev and fully passes the
-ntb_test script.
-
-This patchset is based off of v4.12-rc5 and can be found in this
-git repo:
-
-https://github.com/sbates130272/linux-p2pmem.git switchtec_ntb
+This enables the stable kernels it is a bug fix and to pick it up.
 
 Thanks,
-
-Logan
-
-
-Logan Gunthorpe (13):
-  switchtec: move structure definitions into a common header
-  switchtec: export class symbol for use in upper layer driver
-  switchtec: add ntb hardware register definitions
-  switchtec: add link event notifier block
-  switchtec_ntb: introduce initial ntb driver
-  switchtec_ntb: initialize hardware for memory windows
-  switchtec_ntb: initialize hardware for doorbells and messages
-  switchtec_ntb: add skeleton ntb driver
-  switchtec_ntb: add link management
-  switchtec_ntb: implement doorbell registers
-  switchtec_ntb: implement scratchpad registers
-  switchtec_ntb: add memory window support
-  switchtec_ntb: update switchtec documentation with notes for ntb
-
- Documentation/switchtec.txt         |   12 +
- MAINTAINERS                         |    2 +
- drivers/ntb/hw/Kconfig              |    1 +
- drivers/ntb/hw/Makefile             |    1 +
- drivers/ntb/hw/mscc/Kconfig         |    9 +
- drivers/ntb/hw/mscc/Makefile        |    1 +
- drivers/ntb/hw/mscc/switchtec_ntb.c | 1144 +++++++++++++++++++++++++++++++++++
- drivers/pci/switch/switchtec.c      |  319 ++--------
- include/linux/ntb.h                 |    3 +
- include/linux/switchtec.h           |  365 +++++++++++
- 10 files changed, 1601 insertions(+), 256 deletions(-)
- create mode 100644 drivers/ntb/hw/mscc/Kconfig
- create mode 100644 drivers/ntb/hw/mscc/Makefile
- create mode 100644 drivers/ntb/hw/mscc/switchtec_ntb.c
- create mode 100644 include/linux/switchtec.h
-
---
-2.11.0
+Jon
+> 
+> > ---
+> >  drivers/ntb/ntb_transport.c | 4 ++--
+> >  1 file changed, 2 insertions(+), 2 deletions(-)
+> > 
+> > diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+> > index 02ca45fdd892..0a778d2cab94 100644
+> > --- a/drivers/ntb/ntb_transport.c
+> > +++ b/drivers/ntb/ntb_transport.c
+> > @@ -1128,8 +1128,8 @@ static int ntb_transport_probe(struct ntb_client *self, struct
+> > ntb_dev *ndev)
+> >  	qp_count = ilog2(qp_bitmap);
+> >  	if (max_num_clients && max_num_clients < qp_count)
+> >  		qp_count = max_num_clients;
+> > -	else if (mw_count < qp_count)
+> > -		qp_count = mw_count;
+> > +	else if (nt->mw_count < qp_count)
+> > +		qp_count = nt->mw_count;
+> > 
+> >  	qp_bitmap &= BIT_ULL(qp_count) - 1;
+> > 
+> > --
+> > 2.11.0
+> 
+> 
