@@ -1,162 +1,64 @@
-Return-Path: <paboyle@ph.ed.ac.uk>
-Received: from loire.is.ed.ac.uk (loire.is.ed.ac.uk. [129.215.16.10])
-        by gmr-mx.google.com with ESMTP id f140si3426521wme.4.2017.06.30.16.46.22
-        for <linux-ntb@googlegroups.com>;
-        Fri, 30 Jun 2017 16:46:22 -0700 (PDT)
-Received: from lmtp1.ucs.ed.ac.uk (lmtp1.ucs.ed.ac.uk [129.215.149.64])
-	by loire.is.ed.ac.uk (8.14.7/8.14.6) with ESMTP id v5UNkLJM001473
-	for <linux-ntb@googlegroups.com>; Sat, 1 Jul 2017 00:46:21 +0100
-Received: from [192.168.1.6] (cpc104832-sgyl39-2-0-cust180.18-2.cable.virginm.net [77.99.169.181])
-	(authenticated user=paboyle mech=PLAIN bits=0)
-	by lmtp1.ucs.ed.ac.uk (8.13.8/8.13.7) with ESMTP id v5UNkKcV018655
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NOT)
-	for <linux-ntb@googlegroups.com>; Sat, 1 Jul 2017 00:46:21 +0100 (BST)
-From: Peter Boyle <paboyle@ph.ed.ac.uk>
-Content-Type: multipart/mixed; boundary="----------=_1498866381-11319-156"
-Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
-Subject: NTB query
-Message-Id: <4CE1E1EA-7A1C-4DC0-80E1-8F738C7179EF@ph.ed.ac.uk>
-Date: Sat, 1 Jul 2017 00:46:20 +0100
-Content-Transfer-Encoding: binary
-To: linux-ntb@googlegroups.com
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-qt0-x241.google.com (mail-qt0-x241.google.com. [2607:f8b0:400d:c0d::241])
+        by gmr-mx.google.com with ESMTPS id y7si141389ywd.8.2017.06.09.13.33.18
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 09 Jun 2017 13:33:18 -0700 (PDT)
+Received: by mail-qt0-x241.google.com with SMTP id w1so17487312qtg.0
+        for <linux-ntb@googlegroups.com>; Fri, 09 Jun 2017 13:33:18 -0700 (PDT)
+Return-Path: <jdmason@kudzu.us>
+Date: Fri, 9 Jun 2017 16:33:15 -0400
+From: Jon Mason <jdmason@kudzu.us>
+Subject: Re: [PATCH] ntb: Correct modinfo usage statement for ntb_perf
+Message-ID: <20170609203315.GA9847@kudzu.us>
+References: <20170504163652.6904.47683.stgit@taos.amd.com>
+ <c8b3198e-e38a-05a4-fa31-a8d074888f01@intel.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <c8b3198e-e38a-05a4-fa31-a8d074888f01@intel.com>
+To: Dave Jiang <dave.jiang@intel.com>
+Cc: Gary R Hook <gary.hook@amd.com>, linux-ntb@googlegroups.com, Allen.Hubbe@emc.com
 List-ID: <linux-ntb.googlegroups.com>
 
-This is a multi-part message in MIME format...
+On Thu, May 04, 2017 at 09:47:44AM -0700, Dave Jiang wrote:
+> 
+> 
+> On 05/04/2017 09:36 AM, Gary R Hook wrote:
+> > The order parameters are powers of 2; adjust the usage information
+> > to use correct mathematical representations.
+> > 
+> > Signed-off-by: Gary R Hook <gary.hook@amd.com>
+> Acked-by: Dave Jiang <dave.jiang@intel.com>
 
-------------=_1498866381-11319-156
-Received: from [192.168.1.6] (cpc104832-sgyl39-2-0-cust180.18-2.cable.virginm.net [77.99.169.181])
-	(authenticated user=paboyle mech=PLAIN bits=0)
-	by lmtp1.ucs.ed.ac.uk (8.13.8/8.13.7) with ESMTP id v5UNkKcV018655
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NOT)
-	for <linux-ntb@googlegroups.com>; Sat, 1 Jul 2017 00:46:21 +0100 (BST)
-From: Peter Boyle <paboyle@ph.ed.ac.uk>
-Content-Type: multipart/alternative;
- boundary="Apple-Mail=_C215662D-9611-48FB-B541-63A54416B3E1"
-Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
-Subject: NTB query
-Message-Id: <4CE1E1EA-7A1C-4DC0-80E1-8F738C7179EF@ph.ed.ac.uk>
-Date: Sat, 1 Jul 2017 00:46:20 +0100
-To: linux-ntb@googlegroups.com
-X-Mailer: Apple Mail (2.3273)
-X-Scanned-By: MIMEDefang 2.52 on 129.215.149.64
+Sorry, I think I missed this one.  Adding to my ntb branch with the
+following line
 
+Fixes: 8a7b6a778a85 ("ntb: ntb perf tool")
 
---Apple-Mail=_C215662D-9611-48FB-B541-63A54416B3E1
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain;
-	charset=utf-8
+This enables the stable kernels it is a bug fix and to pick it up.
 
-
-Hi,
-
-sorry for cold emailing you; I=E2=80=99m interested in the possibility to s=
-et up an ugly home
-grown, domain specific HPC approach.
-
-We=E2=80=99ve built cartesian grid machines (e.g. 3d) in the past with only=
- nearest neighbour
-communication and no routing. Our QCDOC computer is an example:
-
-https://web.archive.org/web/20081007081750/http://www.bnl.gov/lqcd/linkable=
-_files/pdf/pap231.pdf <https://web.archive.org/web/20081007081750/http://ww=
-w.bnl.gov/lqcd/linkable_files/pdf/pap231.pdf>
-
-An earlier version QCDSP won the Gordon Bell Prize (I wasn=E2=80=99t part o=
-f the team at that time).
-
-I=E2=80=99m curious whether NTB or similar can be used to direct connect a =
-single CPU with PCIe Root complex
-to 6 neighbours, and out of this build a  3d mesh where the neighbours can =
-RDMA each others memory.
-
-I=E2=80=99m well aware it would really be very painful, but I don=E2=80=99t=
- have sufficient documentation on the root complexes of=20
-current CPU=E2=80=99s that integrate them to know whether the hardware in p=
-rinciple out there would
-let me do this. I=E2=80=99m also not saying I=E2=80=99m planning on doing t=
-his; just presently researching if it would in principle
-be possible.
-
-My dream is that the power, price performance of lower end chips is great, =
-but the cost of
-high end interconnected is killing and driving to high end nodes.
-
-e.g. I get 100GF/s on a quad core costing $400, but only 400 GF/s on a dual=
- socket Xeon costin $7000.
-
-- I=E2=80=99d rather expect $1600 and connect four quad-cores; but the $400=
-0 of OPA cards, cables and switch required is crippling.
-
-NTB is in principle THE  solution for this.
-
-Ideally, we=E2=80=99d build custom boards, racks, backplanes like our QCDOC=
- design and pull something like 8 links at x 4 lanes
-out of each chip and build a =E2=80=9Cfree=E2=80=9D but restricted intercon=
-nect where the only extra parts are copper traces costing only a few=20
-extra dollars per node.
-
-Thanks for any information,
-
-Peter=
-
---Apple-Mail=_C215662D-9611-48FB-B541-63A54416B3E1
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/html;
-	charset=utf-8
-
-<html><head><meta http-equiv=3D"Content-Type" content=3D"text/html charset=
-=3Dutf-8"></head><body style=3D"word-wrap: break-word; -webkit-nbsp-mode: s=
-pace; -webkit-line-break: after-white-space;" class=3D""><div class=3D""><b=
-r class=3D""></div><div class=3D"">Hi,</div><div class=3D""><br class=3D"">=
-</div><div class=3D"">sorry for cold emailing you; I=E2=80=99m interested i=
-n the possibility to set up an ugly home</div><div class=3D"">grown, domain=
- specific HPC approach.</div><div class=3D""><br class=3D""></div><div clas=
-s=3D"">We=E2=80=99ve built cartesian grid machines (e.g. 3d) in the past wi=
-th only nearest neighbour</div><div class=3D"">communication and no routing=
-. Our QCDOC computer is an example:</div><div class=3D""><br class=3D""></d=
-iv><div class=3D""><a href=3D"https://web.archive.org/web/20081007081750/ht=
-tp://www.bnl.gov/lqcd/linkable_files/pdf/pap231.pdf" class=3D"">https://web=
-.archive.org/web/20081007081750/http://www.bnl.gov/lqcd/linkable_files/pdf/=
-pap231.pdf</a></div><div class=3D""><br class=3D""></div><div class=3D"">An=
- earlier version QCDSP won the Gordon Bell Prize (I wasn=E2=80=99t part of =
-the team at that time).</div><div class=3D""><br class=3D""></div><div clas=
-s=3D"">I=E2=80=99m curious whether NTB or similar can be used to direct con=
-nect a single CPU with PCIe Root complex</div><div class=3D"">to 6 neighbou=
-rs, and out of this build a &nbsp;3d mesh where the neighbours can RDMA eac=
-h others memory.</div><div class=3D""><br class=3D""></div><div class=3D"">=
-I=E2=80=99m well aware it would really be very painful, but I don=E2=80=99t=
- have sufficient documentation on the root complexes of&nbsp;</div><div cla=
-ss=3D"">current CPU=E2=80=99s that integrate them to know whether the hardw=
-are in principle out there would</div><div class=3D"">let me do this. I=E2=
-=80=99m also not saying I=E2=80=99m planning on doing this; just presently =
-researching if it would in principle</div><div class=3D"">be possible.</div=
-><div class=3D""><br class=3D""></div><div class=3D"">My dream is that the =
-power, price performance of lower end chips is great, but the cost of</div>=
-<div class=3D"">high end interconnected is killing and driving to high end =
-nodes.</div><div class=3D""><br class=3D""></div><div class=3D"">e.g. I get=
- 100GF/s on a quad core costing $400, but only 400 GF/s on a dual socket Xe=
-on costin $7000.</div><div class=3D""><br class=3D""></div><div class=3D"">=
-- I=E2=80=99d rather expect $1600 and connect four quad-cores; but the $400=
-0 of OPA cards, cables and switch required is crippling.</div><div class=3D=
-""><br class=3D""></div><div class=3D"">NTB is in principle THE &nbsp;solut=
-ion for this.</div><div class=3D""><br class=3D""></div><div class=3D"">Ide=
-ally, we=E2=80=99d build custom boards, racks, backplanes like our QCDOC de=
-sign and pull something like 8 links at x 4 lanes</div><div class=3D"">out =
-of each chip and build a =E2=80=9Cfree=E2=80=9D but restricted interconnect=
- where the only extra parts are copper traces costing only a few&nbsp;</div=
-><div class=3D"">extra dollars per node.</div><div class=3D""><br class=3D"=
-"></div><div class=3D"">Thanks for any information,</div><div class=3D""><b=
-r class=3D""></div><div class=3D"">Peter</div></body></html>=
-
---Apple-Mail=_C215662D-9611-48FB-B541-63A54416B3E1--
-
-------------=_1498866381-11319-156
-Content-Type: text/plain
-Content-Disposition: inline
-Content-Transfer-Encoding: 7bit
-Content-Description: Edinburgh University charitable status
-
-The University of Edinburgh is a charitable body, registered in
-Scotland, with registration number SC005336.
-
-------------=_1498866381-11319-156--
+> 
+> > ---
+> >  drivers/ntb/test/ntb_perf.c |    4 ++--
+> >  1 file changed, 2 insertions(+), 2 deletions(-)
+> > 
+> > diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
+> > index 9c4a21f1a9d9..42756a98a728 100644
+> > --- a/drivers/ntb/test/ntb_perf.c
+> > +++ b/drivers/ntb/test/ntb_perf.c
+> > @@ -91,11 +91,11 @@
+> >  
+> >  static unsigned int seg_order = 19; /* 512K */
+> >  module_param(seg_order, uint, 0644);
+> > -MODULE_PARM_DESC(seg_order, "size order [n^2] of buffer segment for testing");
+> > +MODULE_PARM_DESC(seg_order, "size order [2^n] of buffer segment for testing");
+> >  
+> >  static unsigned int run_order = 32; /* 4G */
+> >  module_param(run_order, uint, 0644);
+> > -MODULE_PARM_DESC(run_order, "size order [n^2] of total data to transfer");
+> > +MODULE_PARM_DESC(run_order, "size order [2^n] of total data to transfer");
+> >  
+> >  static bool use_dma; /* default to 0 */
+> >  module_param(use_dma, bool, 0644);
+> > 
