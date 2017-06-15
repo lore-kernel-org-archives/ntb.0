@@ -1,63 +1,133 @@
-Return-Path: <jdmason@kudzu.us>
-Received: from mail-ua0-x233.google.com (mail-ua0-x233.google.com. [2607:f8b0:400c:c08::233])
-        by gmr-mx.google.com with ESMTPS id 200si1097690vkk.10.2017.06.13.07.19.37
+Return-Path: <gunthorp@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id o17si65691ito.4.2017.06.15.13.37.46
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 13 Jun 2017 07:19:37 -0700 (PDT)
-Received: by mail-ua0-x233.google.com with SMTP id m31so76207076uam.1
-        for <linux-ntb@googlegroups.com>; Tue, 13 Jun 2017 07:19:37 -0700 (PDT)
-MIME-Version: 1.0
-From: Jon Mason <jdmason@kudzu.us>
-Date: Tue, 13 Jun 2017 10:19:36 -0400
-Message-ID: <CAPoiz9wgXa7K-H10w3XrnbDKrw_ku_neY0SwCnOYvJkDEATaRg@mail.gmail.com>
-Subject: Bug fix pull request coming soon
-Content-Type: text/plain; charset="UTF-8"
-To: linux-ntb@googlegroups.com
+        Thu, 15 Jun 2017 13:37:47 -0700 (PDT)
+From: Logan Gunthorpe <logang@deltatee.com>
+Date: Thu, 15 Jun 2017 14:37:19 -0600
+Message-Id: <20170615203729.9009-4-logang@deltatee.com>
+In-Reply-To: <20170615203729.9009-1-logang@deltatee.com>
+References: <20170615203729.9009-1-logang@deltatee.com>
+Subject: [RFC PATCH 03/13] switchtec: add ntb hardware register definitions
+To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Below is roughly the pull request for bug fixes going to Linus today.
-If you have time, please test.
+There are two additional regions: ctrl and dbmsg. The first is
+for generic ntb control and memory windows. The second for doorbells
+and message registers. This patch also adds a number of related
+constants for using these registers.
 
-FYI, I missed the merge window for the features a few weeks ago by a
-few hours.  I still have those patches queued, and I rebased them on
-top of these patches.  So, those will not be going until 4.13, but
-they are ready when that merge window opens.  Sorry for the delay.
-
-Thanks,
-Jon
-
+Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+Reviewed-by: Stephen Bates <sbates@raithlin.com>
+Reviewed-by: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
 ---
+ include/linux/switchtec.h | 84 +++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 84 insertions(+)
 
-The following changes since commit 32c1431eea4881a6b17bd7c639315010aeefa452:
+diff --git a/include/linux/switchtec.h b/include/linux/switchtec.h
+index 3b87618fc42f..3c6b964885e9 100644
+--- a/include/linux/switchtec.h
++++ b/include/linux/switchtec.h
+@@ -147,6 +147,12 @@ struct flash_info_regs {
+ 	struct partition_info vendor[8];
+ };
+ 
++enum {
++	SWITCHTEC_NTB_REG_INFO_OFFSET   = 0x0000,
++	SWITCHTEC_NTB_REG_CTRL_OFFSET   = 0x4000,
++	SWITCHTEC_NTB_REG_DBMSG_OFFSET  = 0x64000,
++};
++
+ struct ntb_info_regs {
+ 	u8  partition_count;
+ 	u8  partition_id;
+@@ -182,6 +188,84 @@ struct part_cfg_regs {
+ } __packed;
+ 
+ enum {
++	NTB_CTRL_PART_OP_LOCK = 0x1,
++	NTB_CTRL_PART_OP_CFG = 0x2,
++	NTB_CTRL_PART_OP_RESET = 0x3,
++
++	NTB_CTRL_PART_STATUS_NORMAL = 0x1,
++	NTB_CTRL_PART_STATUS_LOCKED = 0x2,
++	NTB_CTRL_PART_STATUS_LOCKING = 0x3,
++	NTB_CTRL_PART_STATUS_CONFIGURING = 0x4,
++	NTB_CTRL_PART_STATUS_RESETTING = 0x5,
++
++	NTB_CTRL_BAR_VALID = 1 << 0,
++	NTB_CTRL_BAR_DIR_WIN_EN = 1 << 4,
++	NTB_CTRL_BAR_LUT_WIN_EN = 1 << 5,
++
++	NTB_CTRL_REQ_ID_EN = 1 << 0,
++
++	NTB_CTRL_LUT_EN = 1 << 0,
++
++	NTB_PART_CTRL_ID_PROT_DIS = 1 << 0,
++};
++
++struct ntb_ctrl_regs {
++	u32 partition_status;
++	u32 partition_op;
++	u32 partition_ctrl;
++	u32 bar_setup;
++	u32 bar_error;
++	u16 lut_table_entries;
++	u16 lut_table_offset;
++	u32 lut_error;
++	u16 req_id_table_size;
++	u16 req_id_table_offset;
++	u32 req_id_error;
++	u32 reserved1[7];
++	struct {
++		u32 ctl;
++		u32 win_size;
++		u64 xlate_addr;
++	} bar_entry[6];
++	u32 reserved2[216];
++	u32 req_id_table[256];
++	u32 reserved3[512];
++	u64 lut_entry[512];
++} __packed;
++
++#define NTB_DBMSG_IMSG_STATUS BIT_ULL(32)
++#define NTB_DBMSG_IMSG_MASK   BIT_ULL(40)
++
++struct ntb_dbmsg_regs {
++	u32 reserved1[1024];
++	u64 odb;
++	u64 odb_mask;
++	u64 idb;
++	u64 idb_mask;
++	u8  idb_vec_map[64];
++	u32 msg_map;
++	u32 reserved2;
++	struct {
++		u32 msg;
++		u32 status;
++	} omsg[4];
++
++	struct {
++		u32 msg;
++		u8  status;
++		u8  mask;
++		u8  src;
++		u8  reserved;
++	} imsg[4];
++
++	u8 reserved3[3928];
++	u8 msix_table[1024];
++	u8 reserved4[3072];
++	u8 pba[24];
++	u8 reserved5[4072];
++} __packed;
++
++enum {
+ 	SWITCHTEC_PART_CFG_EVENT_RESET = 1 << 0,
+ 	SWITCHTEC_PART_CFG_EVENT_MRPC_CMP = 1 << 1,
+ 	SWITCHTEC_PART_CFG_EVENT_MRPC_ASYNC_CMP = 1 << 2,
+-- 
+2.11.0
 
-  Linux 4.12-rc5 (2017-06-11 16:48:20 -0700)
-
-are available in the git repository at:
-
-  git://github.com/jonmason/ntb
-
-for you to fetch changes up to 88ff6f155eb14e7538b8f4bceef242ad6ac127b7:
-
-  ntb: no sleep in ntb_async_tx_submit (2017-06-13 09:57:01 -0400)
-
-----------------------------------------------------------------
-Allen Hubbe (1):
-      ntb: no sleep in ntb_async_tx_submit
-
-Dave Jiang (1):
-      ntb: ntb_hw_intel: Skylake doorbells should be 32bits, not 64bits
-
-Gary R Hook (1):
-      ntb: Correct modinfo usage statement for ntb_perf
-
-Logan Gunthorpe (3):
-      NTB: ntb_test: fix bug printing ntb_perf results
-      ntb_transport: fix qp count bug
-      ntb_transport: fix bug calculating num_qps_mw
-
- drivers/ntb/hw/intel/ntb_hw_intel.c     |  2 +-
- drivers/ntb/ntb_transport.c             | 58
-+++++++++++-----------------------------------------------
- drivers/ntb/test/ntb_perf.c             |  4 ++--
- tools/testing/selftests/ntb/ntb_test.sh |  2 +-
- 4 files changed, 15 insertions(+), 51 deletions(-)
