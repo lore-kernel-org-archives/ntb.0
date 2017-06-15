@@ -1,49 +1,49 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id j141si235767itb.6.2017.06.27.16.02.12
+        by gmr-mx.google.com with ESMTPS id n194si13647itg.3.2017.06.15.13.37.43
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 27 Jun 2017 16:02:12 -0700 (PDT)
+        Thu, 15 Jun 2017 13:37:43 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Tue, 27 Jun 2017 17:02:01 -0600
-Message-Id: <20170627230204.16410-1-logang@deltatee.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
-Subject: [PATCH v2 0/3] make io{read|write}64 more globally usable
-To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org
-Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jyri Sarha <jsarha@ti.com>, Stephen Bates <sbates@raithlin.com>, Logan Gunthorpe <logang@deltatee.com>
+Date: Thu, 15 Jun 2017 14:37:29 -0600
+Message-Id: <20170615203729.9009-14-logang@deltatee.com>
+In-Reply-To: <20170615203729.9009-1-logang@deltatee.com>
+References: <20170615203729.9009-1-logang@deltatee.com>
+Subject: [RFC PATCH 13/13] switchtec_ntb: update switchtec documentation with notes for ntb
+To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Hi,
+The switchtec_ntb driver has a couple requirements on the switchec's
+hardware configuration so we add these notes to the documentation.
 
-This is my second attempt to cleanup the io{read|write}64 functions so
-that I can use them in a new driver[1]. This time, per a suggestion from Arnd,
-we simply add the io64 functions to the io-64-nonatomic headers and
-cleanup the two obvious drivers. (Horia provided me with a corrected patch
-for the crypto caam which I have included.)
+Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+Reviewed-by: Stephen Bates <sbates@raithlin.com>
+Reviewed-by: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
+---
+ Documentation/switchtec.txt | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
 
-I've droped the tilcdc patch as it does not appear to support
-non-atomic accesses, so it's hack around iowrite64 will remain.
-
-Thanks,
-
-Logan
-
-[1] https://marc.info/?l=linux-kernel&m=149774601910663&w=2
-
-Horia Geantă (1):
-  crypto: caam: cleanup CONFIG_64BIT ifdefs when using io{read|write}64
-
-Logan Gunthorpe (2):
-  io-64-nonatomic: add io{read|write}64[be] macros
-  ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
-
- drivers/crypto/caam/regs.h            | 35 +++++------------------------------
- drivers/ntb/hw/intel/ntb_hw_intel.c   | 31 +------------------------------
- include/linux/io-64-nonatomic-hi-lo.h | 16 ++++++++++++++++
- include/linux/io-64-nonatomic-lo-hi.h | 16 ++++++++++++++++
- 4 files changed, 38 insertions(+), 60 deletions(-)
-
---
+diff --git a/Documentation/switchtec.txt b/Documentation/switchtec.txt
+index a0a9c7b3d4d5..978a346e1fb3 100644
+--- a/Documentation/switchtec.txt
++++ b/Documentation/switchtec.txt
+@@ -78,3 +78,15 @@ The following IOCTLs are also supported by the device:
+   between PCI Function Framework number (used by the event system)
+   and Switchtec Logic Port ID and Partition number (which is more
+   user friendly).
++
++
++Non-Transparent Bridge (NTB) Driver
++===================================
++
++An NTB driver is provided for the switchtec hardware in switchec_ntb.
++Currently, it only supports switches configured with exactly 2
++partitions. It also requires the following configuration settings:
++
++* Both partitions must be able to access each other's GAS spaces.
++  Thus, the bits in the GAS Access Vector under Management Settings
++  must be set to support this.
+-- 
 2.11.0
+
