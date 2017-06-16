@@ -1,86 +1,65 @@
 Return-Path: <logang@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id q80si219325itb.4.2017.06.16.10.09.14
+        by gmr-mx.google.com with ESMTPS id 23si195195ith.6.2017.06.16.09.47.42
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 16 Jun 2017 10:09:14 -0700 (PDT)
+        Fri, 16 Jun 2017 09:47:42 -0700 (PDT)
 References: <20170615203729.9009-1-logang@deltatee.com>
  <000001d2e6a7$dfc719a0$9f554ce0$@dell.com>
  <daa95888-a786-b6d4-5e56-b9ac5b38a181@deltatee.com>
- <20170616163324.GA15472@mobilestation>
+ <000101d2e6b6$0fcc2880$2f647980$@dell.com>
 From: Logan Gunthorpe <logang@deltatee.com>
-Message-ID: <883bdb76-972c-7de9-0208-2d0933f192d4@deltatee.com>
-Date: Fri, 16 Jun 2017 11:08:52 -0600
+Message-ID: <6c2b819d-d000-38e2-29ee-d532f92909d2@deltatee.com>
+Date: Fri, 16 Jun 2017 10:47:21 -0600
 MIME-Version: 1.0
-In-Reply-To: <20170616163324.GA15472@mobilestation>
-Content-Type: text/plain; charset=windows-1252
+In-Reply-To: <000101d2e6b6$0fcc2880$2f647980$@dell.com>
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Subject: Re: [RFC PATCH 00/13] Switchtec NTB Support
-To: Serge Semin <fancer.lancer@gmail.com>
-Cc: Allen Hubbe <Allen.Hubbe@dell.com>, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org, 'Jon Mason' <jdmason@kudzu.us>, 'Dave Jiang' <dave.jiang@intel.com>, 'Bjorn Helgaas' <bhelgaas@google.com>, 'Greg Kroah-Hartman' <gregkh@linuxfoundation.org>, 'Kurt Schwemmer' <kurt.schwemmer@microsemi.com>, 'Stephen Bates' <sbates@raithlin.com>, Sergey.Semin@t-platforms.ru
+To: Allen Hubbe <Allen.Hubbe@dell.com>, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: 'Jon Mason' <jdmason@kudzu.us>, 'Dave Jiang' <dave.jiang@intel.com>, 'Bjorn Helgaas' <bhelgaas@google.com>, 'Greg Kroah-Hartman' <gregkh@linuxfoundation.org>, 'Kurt Schwemmer' <kurt.schwemmer@microsemi.com>, 'Stephen Bates' <sbates@raithlin.com>, 'Serge Semin' <fancer.lancer@gmail.com>, Sergey.Semin@t-platforms.ru
 List-ID: <linux-ntb.googlegroups.com>
 
 
 
-On 16/06/17 10:33 AM, Serge Semin wrote:
-> New NTB API is going to be merged to mainline kernel within next features
-> merge window, so it's really recommended to use that API for new hardware.
-> Could you please rabase your driver on top of the tree?
-> https://github.com/jonmason/ntb.git
+On 16/06/17 09:34 AM, Allen Hubbe wrote:
+> In code review, I really only have found minor nits.  Overall, the driver looks good.
 
-Yes, Allen's already pointed this out. I'll be sure to fix it up before
-a final submission.
+Great, thanks for such a quick review!
 
-> According to the NTB philosophy, it's not good to have any hardware
-> emulation within hardware driver. Hardware driver must reflect the only
-> hardware abilities, nothing else. Could you please get rid of Scratchpad
-> emulation and add messaging as new NTB API has got a proper callback
-> functions for it?
+> In switchtec_ntb_part_op, there is a delay of up to 50s (1000 * 50ms).  This looks like a thread context, so it could involve the scheduler for the delay instead of spinning for up to 50s before bailing.
 
-I disagree completely. Practicality trumps philosophy in every case. I
-need emulated scratchpads for ntb_transport to work and I'm not getting
-rid of it (thus breaking things that work well) just because of your
-philosophical beliefs.
+Good point. If I were to change this to msleep_interruptible would that
+be acceptable?
 
-> Hmmm, I haven't seen the actual code (see my last comment), but
-> according to my impression of API, it's impossible to have memory window
-> accessed while NTB link is down, but Scratchpads still can be used.
-> In this case, if you got Scratchpads emulated over memory windows,
-> you must have got NTB link enabled before NTB device is registered, which
-> makes ntb_link_* methods kind of being useless unless Switchtec hardware
-> supports NTB link getting up/down for individual memory windows...
+> There are a few instances like this:
+>> +	dev_dbg(&stdev->dev, "%s\n", __func__);
 
-Nothing in-kernel actually uses the peer's scratchpads while the link is
-down and all clients seem specifically designed to wait until the link
-event to set them. So I think you're either wrong about that rule or we
-should change the rule going forward.
+> Where the printing of __func__ could be controlled by dyndbg=+pf.  The debug message could be more useful.
 
-I'm not sure what you're referring to about the link stuff; as
-implemented, our link management works just fine.
+Ok, I'll change that.
 
-> New NTB API is updated so to have access to any of peer ports. IDT driver
-> has got a special translation table to access peer functionality just by
-> providing an index to corresponding API callback. You can use it as
-> reference to have Switchtec driver accordingly altered. It would be vastly
-> useful to have one more multi-port hardware driver in the tree.
+> In switchtec_ntb_db_set_mask and friends, an in-memory copy of the mask bits is protected by a spinlock.  Elsewhere, you noted that the db bits are shared between all ports, so the db bitset is chopped up to be shared between the ports.  Is the db mask also shared, and how is the spinlock sufficient for synchronizing access to the mask bits between multiple ports?
 
-Yes, I expect we will get there eventually, it doesn't sound like much
-work. However, it's client support that's really going to make this
-interesting and worthwhile. That seems like the real challenge right now.
+Well, there are 64 doorbells that are shared between ports but each port
+has it's own in and out registers for the doorbells. So triggering
+doorbell one on one port's ODB actually triggers it on every ports IDB.
+So these are shared only in the sense that each port needs to know which
+dbs it cares about. Seeing each port has their own registers they don't
+have to worry about synchronization.
 
-> If I'm not mistaken, these patches can be combined the way so to have
-> just two big functionally split patches:
-> 1) NTB: Microsemt Switchtec switch management driver alterations for NTB
-> 2) NTB: Add Microsemi Switchtec PCIe-switches support
-> It would really simplify the review. Could you please combine them?
+The mask is only protected by a spin lock seeing multiple callers of
+db_set_mask and db_clr_mask on the same port may step on each others
+toes. So if two processes try to mask different bits they both must get
+masked in the end and therefore some kind of synchronization must be
+involved.
 
-Seems like every time I make a submission, someone either wants patches
-to be smaller and split up more or bigger and combined. I happen to
-agree with the people who prefer smaller patches and I think these
-provide good chunks for reviewers to look at. So, no, I'm not going to
-change this. Feel free to apply the patches to a git tree or view it on
-our github branch if you want to see the code combined.
+> The IDT switch also does not have hardware scratchpads.  Could the code you wrote for emulated scratchpads be made into shared library code for ntb drivers?  Also, some ntb clients may not need scratchpad support.  If it is not natively supported by a driver, can the emulated scratchpad support be an optional feature?
 
-Thanks,
+Hmm, interesting idea. A few pieces could possibly be made common but it
+depends mostly on hardware having the resources to make use of it.
+Switchtec has extra LUT memory windows that made this possible. Unless
+you object I'm inclined to leave it as is and I'd be happy to work with
+the IDT folks to create a common solution in the future.
 
 Logan
