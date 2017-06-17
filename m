@@ -1,145 +1,31 @@
-Return-Path: <gunthorp@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id c67si370994itb.5.2017.06.28.20.26.58
+Return-Path: <gregkh@linuxfoundation.org>
+Received: from mail.linuxfoundation.org (mail.linuxfoundation.org. [140.211.169.12])
+        by gmr-mx.google.com with ESMTPS id i19si1128813wme.2.2017.06.16.22.12.03
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 28 Jun 2017 20:26:59 -0700 (PDT)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Wed, 28 Jun 2017 21:26:46 -0600
-Message-Id: <20170629032648.3073-15-logang@deltatee.com>
-In-Reply-To: <20170629032648.3073-1-logang@deltatee.com>
-References: <20170629032648.3073-1-logang@deltatee.com>
-Subject: [PATCH 14/16] switchtec_ntb: implement scratchpad registers
-To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>, Logan Gunthorpe <logang@deltatee.com>
+        Fri, 16 Jun 2017 22:12:03 -0700 (PDT)
+Date: Sat, 17 Jun 2017 07:11:58 +0200
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: Re: [RFC PATCH 01/13] switchtec: move structure definitions into a
+ common header
+Message-ID: <20170617051158.GE6040@kroah.com>
+References: <20170615203729.9009-1-logang@deltatee.com>
+ <20170615203729.9009-2-logang@deltatee.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170615203729.9009-2-logang@deltatee.com>
+To: Logan Gunthorpe <logang@deltatee.com>
+Cc: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Seeing there is no dedicated hardware for this, we simply add
-these as entries in the shared memory window. Thus, we could support
-any number of them but 128 seems like enough, for now.
+On Thu, Jun 15, 2017 at 02:37:17PM -0600, Logan Gunthorpe wrote:
+> Create the switchtec.h header in include/linux with hardware defines
+> and the switchtec_dev structure moved directly from switchtec.c.
+> This is a prep patch for created an NTB driver for switchtec.
+> 
+> Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+> Reviewed-by: Stephen Bates <sbates@raithlin.com>
+> Reviewed-by: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Reviewed-by: Stephen Bates <sbates@raithlin.com>
-Reviewed-by: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
----
- drivers/ntb/hw/mscc/switchtec_ntb.c | 75 ++++++++++++++++++++++++++++++++++++-
- 1 file changed, 73 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/ntb/hw/mscc/switchtec_ntb.c b/drivers/ntb/hw/mscc/switchtec_ntb.c
-index 980acf2e5b42..a42e80742b52 100644
---- a/drivers/ntb/hw/mscc/switchtec_ntb.c
-+++ b/drivers/ntb/hw/mscc/switchtec_ntb.c
-@@ -69,6 +69,7 @@ struct shared_mw {
- 	u16 nr_direct_mw;
- 	u16 nr_lut_mw;
- 	u64 mw_sizes[MAX_MWS];
-+	u32 spad[128];
- };
- 
- #define MAX_DIRECT_MW ARRAY_SIZE(((struct ntb_ctrl_regs *)(0))->bar_entry)
-@@ -453,22 +454,90 @@ static int switchtec_ntb_peer_db_set(struct ntb_dev *ntb, u64 db_bits)
- 
- static int switchtec_ntb_spad_count(struct ntb_dev *ntb)
- {
--	return 0;
-+	struct switchtec_ntb *sndev = ntb_sndev(ntb);
-+
-+	return ARRAY_SIZE(sndev->self_shared->spad);
- }
- 
- static u32 switchtec_ntb_spad_read(struct ntb_dev *ntb, int idx)
- {
--	return 0;
-+	struct switchtec_ntb *sndev = ntb_sndev(ntb);
-+
-+	if (idx < 0 || idx >= ARRAY_SIZE(sndev->self_shared->spad))
-+		return 0;
-+
-+	if (!sndev->self_shared)
-+		return 0;
-+
-+	return sndev->self_shared->spad[idx];
- }
- 
- static int switchtec_ntb_spad_write(struct ntb_dev *ntb, int idx, u32 val)
- {
-+	struct switchtec_ntb *sndev = ntb_sndev(ntb);
-+
-+	if (idx < 0 || idx >= ARRAY_SIZE(sndev->self_shared->spad))
-+		return -EINVAL;
-+
-+	if (!sndev->self_shared)
-+		return -EIO;
-+
-+	sndev->self_shared->spad[idx] = val;
-+
- 	return 0;
- }
- 
-+static u32 switchtec_ntb_peer_spad_read(struct ntb_dev *ntb, int pidx,
-+					int sidx)
-+{
-+	struct switchtec_ntb *sndev = ntb_sndev(ntb);
-+
-+	if (pidx != NTB_DEF_PEER_IDX)
-+		return -EINVAL;
-+
-+	if (sidx < 0 || sidx >= ARRAY_SIZE(sndev->peer_shared->spad))
-+		return 0;
-+
-+	if (!sndev->peer_shared)
-+		return 0;
-+
-+	return ioread32(&sndev->peer_shared->spad[sidx]);
-+}
-+
- static int switchtec_ntb_peer_spad_write(struct ntb_dev *ntb, int pidx,
- 					 int sidx, u32 val)
- {
-+	struct switchtec_ntb *sndev = ntb_sndev(ntb);
-+
-+	if (pidx != NTB_DEF_PEER_IDX)
-+		return -EINVAL;
-+
-+	if (sidx < 0 || sidx >= ARRAY_SIZE(sndev->peer_shared->spad))
-+		return -EINVAL;
-+
-+	if (!sndev->peer_shared)
-+		return -EIO;
-+
-+	iowrite32(val, &sndev->peer_shared->spad[sidx]);
-+
-+	return 0;
-+}
-+
-+static int switchtec_ntb_peer_spad_addr(struct ntb_dev *ntb, int pidx,
-+					int sidx, phys_addr_t *spad_addr)
-+{
-+	struct switchtec_ntb *sndev = ntb_sndev(ntb);
-+	unsigned long offset;
-+
-+	if (pidx != NTB_DEF_PEER_IDX)
-+		return -EINVAL;
-+
-+	offset = (unsigned long)&sndev->peer_shared->spad[sidx] -
-+		(unsigned long)sndev->stdev->mmio;
-+
-+	if (spad_addr)
-+		*spad_addr = pci_resource_start(ntb->pdev, 0) + offset;
-+
- 	return 0;
- }
- 
-@@ -494,7 +563,9 @@ static const struct ntb_dev_ops switchtec_ntb_ops = {
- 	.spad_count		= switchtec_ntb_spad_count,
- 	.spad_read		= switchtec_ntb_spad_read,
- 	.spad_write		= switchtec_ntb_spad_write,
-+	.peer_spad_read		= switchtec_ntb_peer_spad_read,
- 	.peer_spad_write	= switchtec_ntb_peer_spad_write,
-+	.peer_spad_addr		= switchtec_ntb_peer_spad_addr,
- };
- 
- static void switchtec_ntb_init_sndev(struct switchtec_ntb *sndev)
--- 
-2.11.0
-
+Acked-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
