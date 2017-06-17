@@ -1,65 +1,41 @@
-Return-Path: <jdmason@kudzu.us>
-Received: from mail-qk0-x22e.google.com (mail-qk0-x22e.google.com. [2607:f8b0:400d:c09::22e])
-        by gmr-mx.google.com with ESMTPS id p68si716009ywg.9.2017.06.19.11.42.53
+Return-Path: <logang@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id c67si359959itb.5.2017.06.17.09.20.11
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 19 Jun 2017 11:42:53 -0700 (PDT)
-Received: by mail-qk0-x22e.google.com with SMTP id g83so40401492qkb.3
-        for <linux-ntb@googlegroups.com>; Mon, 19 Jun 2017 11:42:53 -0700 (PDT)
-Return-Path: <jdmason@kudzu.us>
-From: Jon Mason <jdmason@kudzu.us>
-Date: Mon, 19 Jun 2017 14:42:45 -0400
-Subject: [GIT PULL] NTB bug fixes for v4.12
-Message-ID: <20170619184245.GA20187@graymalkin.kudzu.us>
+        Sat, 17 Jun 2017 09:20:11 -0700 (PDT)
+References: <20170615203729.9009-1-logang@deltatee.com>
+ <20170615203729.9009-5-logang@deltatee.com> <20170617051429.GF6040@kroah.com>
+From: Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <f7f59aaf-f525-b03f-7492-9c372bc752b9@deltatee.com>
+Date: Sat, 17 Jun 2017 10:20:00 -0600
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
+In-Reply-To: <20170617051429.GF6040@kroah.com>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Subject: Re: [RFC PATCH 04/13] switchtec: add link event notifier block
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Hello Linus,
-Here are a few NTB bug fixes for 4.12.  Please consider pulling them.
-
-Thanks,
-Jon
 
 
+On 16/06/17 11:14 PM, Greg Kroah-Hartman wrote:
+> You do know about ftrace, right?  It's good to drop debugging code like
+> this for "final" versions.
 
-The following changes since commit 41f1830f5a7af77cf5c86359aba3cbd706687e52:
+I've never actually used it but maybe I should give it a try. I'll
+remove these debug lines.
 
-  Linux 4.12-rc6 (2017-06-19 22:19:37 +0800)
+>> +
+>> +	blocking_notifier_call_chain(&stdev->link_notifier, 0, stdev);
+>> +}
+> 
+> Do you really need a notifier call chain?  How many different things are
+> going to "hook up" to this?  I ask as they tend to get really messy over
+> time while direct callbacks are easier to handle and manage.
 
-are available in the git repository at:
+Ok, understood. I only expect the one callback at this time so I'll
+change it to a single function pointer.
 
-  git://github.com/jonmason/ntb tags/ntb-4.12-bugfixes
-
-for you to fetch changes up to 88931ec3dc11e7dbceb3b0df455693873b508fbe:
-
-  ntb: no sleep in ntb_async_tx_submit (2017-06-19 14:24:41 -0400)
-
-----------------------------------------------------------------
-NTB bug fixes to address the modinfo in ntb_perf, a couple of bugs in
-the NTB transport QP calculations, skx doorbells,  and sleeping in
-ntb_async_tx_submit.
-
-----------------------------------------------------------------
-Allen Hubbe (1):
-      ntb: no sleep in ntb_async_tx_submit
-
-Dave Jiang (1):
-      ntb: ntb_hw_intel: Skylake doorbells should be 32bits, not 64bits
-
-Gary R Hook (1):
-      ntb: Correct modinfo usage statement for ntb_perf
-
-Logan Gunthorpe (3):
-      NTB: ntb_test: fix bug printing ntb_perf results
-      ntb_transport: fix qp count bug
-      ntb_transport: fix bug calculating num_qps_mw
-
- drivers/ntb/hw/intel/ntb_hw_intel.c     |  2 +-
- drivers/ntb/ntb_transport.c             | 58 +++++++--------------------------
- drivers/ntb/test/ntb_perf.c             |  4 +--
- tools/testing/selftests/ntb/ntb_test.sh |  2 +-
- 4 files changed, 15 insertions(+), 51 deletions(-)
+Logan
