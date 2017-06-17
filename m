@@ -1,72 +1,35 @@
-Return-Path: <gunthorp@deltatee.com>
+Return-Path: <logang@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id 125si1512itx.5.2017.06.28.20.26.59
+        by gmr-mx.google.com with ESMTPS id d63si511319itb.2.2017.06.17.09.17.05
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 28 Jun 2017 20:26:59 -0700 (PDT)
+        Sat, 17 Jun 2017 09:17:06 -0700 (PDT)
+References: <20170615203729.9009-1-logang@deltatee.com>
+ <20170615203729.9009-3-logang@deltatee.com> <20170617051145.GD6040@kroah.com>
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Wed, 28 Jun 2017 21:26:38 -0600
-Message-Id: <20170629032648.3073-7-logang@deltatee.com>
-In-Reply-To: <20170629032648.3073-1-logang@deltatee.com>
-References: <20170629032648.3073-1-logang@deltatee.com>
-Subject: [PATCH 06/16] ntb: add check and comment for link up to mw_count and mw_get_align
-To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>, Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <04e01458-e57b-a328-d4ff-c1fbb8664bb1@deltatee.com>
+Date: Sat, 17 Jun 2017 10:16:53 -0600
+MIME-Version: 1.0
+In-Reply-To: <20170617051145.GD6040@kroah.com>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Subject: Re: [RFC PATCH 02/13] switchtec: export class symbol for use in upper
+ layer driver
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-This patch adds a comment and a check to the ntb_mw_get_align and
-ntb_mw_count functions so that they always fail if the function is
-called before the link is up.
 
-This is to prevent accidental mis-use in clients that are testing
-on hardware that this doesn't matter for.
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
----
- include/linux/ntb.h | 11 +++++++++--
- 1 file changed, 9 insertions(+), 2 deletions(-)
+On 16/06/17 11:11 PM, Greg Kroah-Hartman wrote:
+> EXPORT_SYMBOL_GPL()?
+> 
+> And do you really have to move from a dynamic class to a static one?  I
+> know it will work just the same, but I hate seeing static structures
+> that have reference counts on them :)
 
-diff --git a/include/linux/ntb.h b/include/linux/ntb.h
-index 609e232c00da..de4f800c82b6 100644
---- a/include/linux/ntb.h
-+++ b/include/linux/ntb.h
-@@ -730,12 +730,16 @@ static inline int ntb_link_disable(struct ntb_dev *ntb)
-  * Hardware and topology may support a different number of memory windows.
-  * Moreover different peer devices can support different number of memory
-  * windows. Simply speaking this method returns the number of possible inbound
-- * memory windows to share with specified peer device.
-+ * memory windows to share with specified peer device. Note: this must only be
-+ * called when the link is up.
-  *
-  * Return: the number of memory windows.
-  */
- static inline int ntb_mw_count(struct ntb_dev *ntb, int pidx)
- {
-+	if (!(ntb_link_is_up(ntb, NULL, NULL) & (1 << pidx)))
-+		return 0;
-+
- 	return ntb->ops->mw_count(ntb, pidx);
- }
- 
-@@ -751,7 +755,7 @@ static inline int ntb_mw_count(struct ntb_dev *ntb, int pidx)
-  * Get the alignments of an inbound memory window with specified index.
-  * NULL may be given for any output parameter if the value is not needed.
-  * The alignment and size parameters may be used for allocation of proper
-- * shared memory.
-+ * shared memory. Note: this must only be called when the link is up.
-  *
-  * Return: Zero on success, otherwise a negative error number.
-  */
-@@ -760,6 +764,9 @@ static inline int ntb_mw_get_align(struct ntb_dev *ntb, int pidx, int widx,
- 				   resource_size_t *size_align,
- 				   resource_size_t *size_max)
- {
-+	if (!(ntb_link_is_up(ntb, NULL, NULL) & (1 << pidx)))
-+		return -ENOTCONN;
-+
- 	return ntb->ops->mw_get_align(ntb, pidx, widx, addr_align, size_align,
- 				      size_max);
- }
--- 
-2.11.0
+I'll change both for v1. I didn't really need a static one. I just saw
+an example of some other user of class_interface which and it seemed
+appropriate.
 
+Logan
