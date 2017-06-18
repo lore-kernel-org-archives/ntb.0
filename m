@@ -1,52 +1,78 @@
-Return-Path: <gunthorp@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id u187si680913ita.0.2017.06.05.13.01.00
+Return-Path: <gregkh@linuxfoundation.org>
+Received: from mail.linuxfoundation.org (mail.linuxfoundation.org. [140.211.169.12])
+        by gmr-mx.google.com with ESMTPS id f207si1698807wme.5.2017.06.17.17.33.21
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 05 Jun 2017 13:01:00 -0700 (PDT)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Mon,  5 Jun 2017 14:00:52 -0600
-Message-Id: <20170605200053.6912-2-logang@deltatee.com>
-In-Reply-To: <20170605200053.6912-1-logang@deltatee.com>
-References: <20170605200053.6912-1-logang@deltatee.com>
-Subject: [PATCH] ntb_transport: fix qp count bug
-To: linux-ntb@googlegroups.com
-Cc: Logan Gunthorpe <logang@deltatee.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
+        Sat, 17 Jun 2017 17:33:21 -0700 (PDT)
+Date: Sun, 18 Jun 2017 08:33:15 +0800
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: Re: [RFC PATCH 06/13] switchtec_ntb: initialize hardware for memory
+ windows
+Message-ID: <20170618003315.GA5326@kroah.com>
+References: <20170615203729.9009-1-logang@deltatee.com>
+ <20170615203729.9009-7-logang@deltatee.com>
+ <20170617051658.GG6040@kroah.com>
+ <5294be8f-5547-0cd8-2e1d-a9bbfe06dc6f@deltatee.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <5294be8f-5547-0cd8-2e1d-a9bbfe06dc6f@deltatee.com>
+To: Logan Gunthorpe <logang@deltatee.com>
+Cc: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-In cases where there are more mw's than spads/2-2, the mw count gets
-reduced to match the limitation. ntb_transport also tries to ensure that
-there are fewer qps than mws but uses the full mw count instead of
-the reduced one. When this happens, the math in
-'ntb_transport_setup_qp_mw' will get confused and result in a kernel
-paging request bug.
+On Sat, Jun 17, 2017 at 10:39:35AM -0600, Logan Gunthorpe wrote:
+> 
+> 
+> On 16/06/17 11:16 PM, Greg Kroah-Hartman wrote:
+> >> +#ifndef ioread64
+> >> +#ifdef readq
+> >> +#define ioread64 readq
+> >> +#else
+> >> +#define ioread64 _ioread64
+> >> +static inline u64 _ioread64(void __iomem *mmio)
+> >> +{
+> >> +	u64 low, high;
+> >> +
+> >> +	low = ioread32(mmio);
+> >> +	high = ioread32(mmio + sizeof(u32));
+> >> +	return low | (high << 32);
+> >> +}
+> >> +#endif
+> >> +#endif
+> > 
+> > Really?  Don't we have ioread64 in generic code for all arches?  If not,
+> > that should be fixed, don't hide this in a random driver please.  Or
+> > just restrict your driver to only building on those arches that does
+> > provide this api.
+> 
+> Yes, I know these are _very_ ugly. Unfortunately, the other ntb drivers
+> each have the exact same thing. ioread64 is not provided universally at
+> this time and I did spend a bit of time digging and things are a bit
+> messy so I wasn't at all sure of the correct solution.
 
-This patch fixes the bug by reducing qp_count to the reduced mw count
-instead of the full mw count.
+That implies that this needs to be fixed, no driver should ever have to
+define this themselves.  The fact that they all do it at the same time
+is a huge hint that it's wrong.
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Cc: Jon Mason <jdmason@kudzu.us>
-Cc: Dave Jiang <dave.jiang@intel.com>
-Cc: Allen Hubbe <Allen.Hubbe@emc.com>
----
- drivers/ntb/ntb_transport.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+> For starters, ioread64 is only defined on 64 bit machines. They are
+> surrounded by ifdef CONFIG_64BIT and it's not clear to me if the above
+> wrapper (around two ioread32s) would be acceptable universally.
+> 
+> Second, the x86_64 version doesn't even compile. This is because the
+> arch doesn't provide any ioread64 implementation anywhere and the macro
+> in io.h isn't used because CONFIG_GENERIC_IOMAP is defined.
+> 
+> The only arch where I _think_ ioread64 would work is powerpc or any that
+> define CONFIG_64BIT and not CONFIG_GENERIC_IOMAP.
+> 
+> If you have any guidance on this I'd be happy to try and make a patch or
+> two for it.
 
-diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 02ca45fdd892..0a778d2cab94 100644
---- a/drivers/ntb/ntb_transport.c
-+++ b/drivers/ntb/ntb_transport.c
-@@ -1128,8 +1128,8 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
- 	qp_count = ilog2(qp_bitmap);
- 	if (max_num_clients && max_num_clients < qp_count)
- 		qp_count = max_num_clients;
--	else if (mw_count < qp_count)
--		qp_count = mw_count;
-+	else if (nt->mw_count < qp_count)
-+		qp_count = nt->mw_count;
- 
- 	qp_bitmap &= BIT_ULL(qp_count) - 1;
- 
--- 
-2.11.0
+I suggest coming up with something simple like what you have here,
+adding it to the arch-generic code and posting it to the linux-arch
+mailing list and seeing if anyone screams :)
 
+thanks,
+
+greg k-h
