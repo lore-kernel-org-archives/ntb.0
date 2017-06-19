@@ -1,54 +1,130 @@
-Return-Path: <logang@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id 23si458148ith.6.2017.06.19.13.27.48
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-qk0-x244.google.com (mail-qk0-x244.google.com. [2607:f8b0:400d:c09::244])
+        by gmr-mx.google.com with ESMTPS id x80si766640ywg.4.2017.06.19.13.07.11
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 19 Jun 2017 13:27:48 -0700 (PDT)
-References: <20170615203729.9009-1-logang@deltatee.com>
- <20170619200659.GA20437@kudzu.us>
-From: Logan Gunthorpe <logang@deltatee.com>
-Message-ID: <c8ef3317-37cb-f43b-3422-fae89fdc1d0e@deltatee.com>
-Date: Mon, 19 Jun 2017 14:27:41 -0600
-MIME-Version: 1.0
-In-Reply-To: <20170619200659.GA20437@kudzu.us>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+        Mon, 19 Jun 2017 13:07:11 -0700 (PDT)
+Received: by mail-qk0-x244.google.com with SMTP id u8so8323599qka.0
+        for <linux-ntb@googlegroups.com>; Mon, 19 Jun 2017 13:07:11 -0700 (PDT)
+Return-Path: <jdmason@kudzu.us>
+Date: Mon, 19 Jun 2017 16:07:02 -0400
+From: Jon Mason <jdmason@kudzu.us>
 Subject: Re: [RFC PATCH 00/13] Switchtec NTB Support
-To: Jon Mason <jdmason@kudzu.us>
+Message-ID: <20170619200659.GA20437@kudzu.us>
+References: <20170615203729.9009-1-logang@deltatee.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170615203729.9009-1-logang@deltatee.com>
+To: Logan Gunthorpe <logang@deltatee.com>
 Cc: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>
 List-ID: <linux-ntb.googlegroups.com>
 
+On Thu, Jun 15, 2017 at 02:37:16PM -0600, Logan Gunthorpe wrote:
+> Hi,
+> 
+> This patchset implements Non-Transparent Bridge (NTB) support for the
+> Microsemi Switchtec series of switches. We're looking for some
+> review from the community at this point but hope to get it upstreamed
+> for v4.14.
+> 
+> Switchtec NTB support is configured over the same function and bar
+> as the management endpoint. Thus, the new driver hooks into the
+> management driver which we had merged in v4.12. We use the class
+> interface API to register an NTB device for every switchtec device
+> which supports NTB (not all do).
+> 
+> The Switchtec hardware supports doorbells, memory windows and messages.
+> Seeing there is no native scratchpad support, 128 spads are emulated
+> through the use of a pre-setup memory window. The switch has 64
+> doorbells which are shared between the two partitions and a
+> configurable set of memory windows. While the hardware supports more
+> than 2 partitions, this driver only supports the first two seeing
+> the current NTB API only supports two hosts.
+> 
+> The driver has been tested with ntb_netdev and fully passes the
+> ntb_test script.
+> 
+> This patchset is based off of v4.12-rc5 and can be found in this
+> git repo:
+> 
+> https://github.com/sbates130272/linux-p2pmem.git switchtec_ntb
+
+I think this code is of quality enough to go from an RFC to a standard
+patch, and we can nit pick it to death there ;-)
+
+Please rebase on ntb-next (which I believe you are already doing), and
+resbutmit.
+
+Also, we'll need to decide how to handle the patches to
+drivers/pci/switches
+We have 2 options here.
+1.  We can split it up into 2 separate series, and have Bjorn take the
+drivers/pci/switches in his, and I'll take the NTB portions.  The down
+side of this is that I'll have to wait for his to get pulled in first,
+which will push this back a full kernel release (which based on your
+comment above doesn't seem your prefered choice)
+2.  I can pull in the drivers/pci/switches patches into my NTB tree,
+but I'll want Bjorn's ack on those patches before I'll pull them in.  
+
+I'm thinking that we'll want to keep this series all in one place.
+So, #2 sounds like the best option.  But, I need Bjorns $0.02 on this.
 
 
-On 19/06/17 02:07 PM, Jon Mason wrote:
-> I think this code is of quality enough to go from an RFC to a standard
-> patch, and we can nit pick it to death there ;-)
+FYI, I ran smatch on the patches and got this.  Please correct them in
+v2 (or v1 of the non-RFC...however you want to think of it).
+drivers/pci/switch/switchtec.c:484 switchtec_dev_read() error: double unlock 'mutex:&stdev->mrpc_mutex'
+drivers/pci/switch/switchtec.c:506 switchtec_dev_read() error: double unlock 'mutex:&stdev->mrpc_mutex'
+drivers/pci/switch/switchtec.c:513 switchtec_dev_read() warn: inconsistent returns 'mutex:&stdev->mrpc_mutex'.
 
-Thanks!
 
-> Please rebase on ntb-next (which I believe you are already doing), and
-> resbutmit.
+Thanks,
+Jon
 
-I'll try to get the rebase done and all the feedback so far applied by
-the end of the week and resend a v1.
 
-> I'm thinking that we'll want to keep this series all in one place.
-> So, #2 sounds like the best option.  But, I need Bjorns $0.02 on this.
-
-I was thinking #2 was the best choice as well but really it's for you
-maintainers to decide. And, yes, we'd want to get Bjorn's ack.
-
-> FYI, I ran smatch on the patches and got this.  Please correct them in
-> v2 (or v1 of the non-RFC...however you want to think of it).
-> drivers/pci/switch/switchtec.c:484 switchtec_dev_read() error: double unlock 'mutex:&stdev->mrpc_mutex'
-> drivers/pci/switch/switchtec.c:506 switchtec_dev_read() error: double unlock 'mutex:&stdev->mrpc_mutex'
-> drivers/pci/switch/switchtec.c:513 switchtec_dev_read() warn: inconsistent returns 'mutex:&stdev->mrpc_mutex'.
-
-This looks like a false positive to me. The code looks correct. smatch
-may have been confused by the fact that the lock is taken by two calls
-to the static function 'lock_mutex_and_test_alive'.
-
-This is also part of the switchtec management driver that's already in
-the kernel and not part of the NTB related patches I sent.
-
-Logan
+> 
+> Thanks,
+> 
+> Logan
+> 
+> 
+> Logan Gunthorpe (13):
+>   switchtec: move structure definitions into a common header
+>   switchtec: export class symbol for use in upper layer driver
+>   switchtec: add ntb hardware register definitions
+>   switchtec: add link event notifier block
+>   switchtec_ntb: introduce initial ntb driver
+>   switchtec_ntb: initialize hardware for memory windows
+>   switchtec_ntb: initialize hardware for doorbells and messages
+>   switchtec_ntb: add skeleton ntb driver
+>   switchtec_ntb: add link management
+>   switchtec_ntb: implement doorbell registers
+>   switchtec_ntb: implement scratchpad registers
+>   switchtec_ntb: add memory window support
+>   switchtec_ntb: update switchtec documentation with notes for ntb
+> 
+>  Documentation/switchtec.txt         |   12 +
+>  MAINTAINERS                         |    2 +
+>  drivers/ntb/hw/Kconfig              |    1 +
+>  drivers/ntb/hw/Makefile             |    1 +
+>  drivers/ntb/hw/mscc/Kconfig         |    9 +
+>  drivers/ntb/hw/mscc/Makefile        |    1 +
+>  drivers/ntb/hw/mscc/switchtec_ntb.c | 1144 +++++++++++++++++++++++++++++++++++
+>  drivers/pci/switch/switchtec.c      |  319 ++--------
+>  include/linux/ntb.h                 |    3 +
+>  include/linux/switchtec.h           |  365 +++++++++++
+>  10 files changed, 1601 insertions(+), 256 deletions(-)
+>  create mode 100644 drivers/ntb/hw/mscc/Kconfig
+>  create mode 100644 drivers/ntb/hw/mscc/Makefile
+>  create mode 100644 drivers/ntb/hw/mscc/switchtec_ntb.c
+>  create mode 100644 include/linux/switchtec.h
+> 
+> --
+> 2.11.0
+> 
+> -- 
+> You received this message because you are subscribed to the Google Groups "linux-ntb" group.
+> To unsubscribe from this group and stop receiving emails from it, send an email to linux-ntb+unsubscribe@googlegroups.com.
+> To post to this group, send email to linux-ntb@googlegroups.com.
+> To view this discussion on the web visit https://groups.google.com/d/msgid/linux-ntb/20170615203729.9009-1-logang%40deltatee.com.
+> For more options, visit https://groups.google.com/d/optout.
