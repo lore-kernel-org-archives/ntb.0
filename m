@@ -1,41 +1,54 @@
-Return-Path: <linus971@gmail.com>
-Received: from mail-io0-x229.google.com (mail-io0-x229.google.com. [2607:f8b0:4001:c06::229])
-        by gmr-mx.google.com with ESMTPS id 23si984934ith.6.2017.06.21.12.05.51
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-ua0-x243.google.com (mail-ua0-x243.google.com. [2607:f8b0:400c:c08::243])
+        by gmr-mx.google.com with ESMTPS id x196si2415021vkx.6.2017.06.20.07.59.49
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 21 Jun 2017 12:05:51 -0700 (PDT)
-Received: by mail-io0-x229.google.com with SMTP id e63so756735iod.3
-        for <linux-ntb@googlegroups.com>; Wed, 21 Jun 2017 12:05:51 -0700 (PDT)
+        Tue, 20 Jun 2017 07:59:49 -0700 (PDT)
+Received: by mail-ua0-x243.google.com with SMTP id j53so2878406uaa.2
+        for <linux-ntb@googlegroups.com>; Tue, 20 Jun 2017 07:59:49 -0700 (PDT)
 MIME-Version: 1.0
-Sender: linus971@gmail.com
-In-Reply-To: <CAPoiz9yuK1GM1dmx4fPEg=WbDx3paim+FMfgg713ioqX1XW=Vw@mail.gmail.com>
+In-Reply-To: <CA+55aFyghoL++4=b1v6qFV1wN+t6RsQX+oPhxy_w=GmDXFo5Pw@mail.gmail.com>
 References: <20170619184245.GA20187@graymalkin.kudzu.us> <CA+55aFyghoL++4=b1v6qFV1wN+t6RsQX+oPhxy_w=GmDXFo5Pw@mail.gmail.com>
- <CAPoiz9yuK1GM1dmx4fPEg=WbDx3paim+FMfgg713ioqX1XW=Vw@mail.gmail.com>
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Date: Wed, 21 Jun 2017 12:05:50 -0700
-Message-ID: <CA+55aFxdun0-H13L+KCQ-Gn5kVAiyth=a+6NBcwcH5Ff8kHCcQ@mail.gmail.com>
+From: Jon Mason <jdmason@kudzu.us>
+Date: Tue, 20 Jun 2017 10:59:48 -0400
+Message-ID: <CAPoiz9yuK1GM1dmx4fPEg=WbDx3paim+FMfgg713ioqX1XW=Vw@mail.gmail.com>
 Subject: Re: [GIT PULL] NTB bug fixes for v4.12
 Content-Type: text/plain; charset="UTF-8"
-To: Jon Mason <jdmason@kudzu.us>
+To: Linus Torvalds <torvalds@linux-foundation.org>
 Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-On Tue, Jun 20, 2017 at 7:59 AM, Jon Mason <jdmason@kudzu.us> wrote:
+On Mon, Jun 19, 2017 at 11:06 PM, Linus Torvalds
+<torvalds@linux-foundation.org> wrote:
+> On Tue, Jun 20, 2017 at 2:42 AM, Jon Mason <jdmason@kudzu.us> wrote:
+>> Hello Linus,
+>> Here are a few NTB bug fixes for 4.12.
 >
-> This was in my ntb branch since June 9th.  Previously, it was based on
-> v4.12-rc4.  Immediately prior to doing the pull request, I did a
-> rebase to rc6 to avoid any potential issues you might have applying
-> them.
+> So I pulled this, mainly because it removed more lines than it added
+> due to the revert.
+>
+> But generally I absolutely *hate* pulling stuff that I can see was
+> committed just hours ago. Why was that branch so recent? It very
+> obviously cannot have been in any linux-next or 0day or gotten any
+> other exposure. Is there a reason for that behavior? And if there is,
 
-Please don't do that.
+This was in my ntb branch since June 9th.  Previously, it was based on
+v4.12-rc4.  Immediately prior to doing the pull request, I did a
+rebase to rc6 to avoid any potential issues you might have applying
+them.
 
-There are valid reasons for rebasing, but "just because" is not one of
-them. The valid reasons are things like "I noticed that a completely
-broken patch had made it into my queue, so I rebased to remove it" or
-similar.
+> just include it in the "please pull", because if it wasn't for the
+> "removes more lines than adds" I probably would just have decided to
+> ignore this.
 
-One common theme for valid reasons tends to be "..and I needed to
-rerun all the testing", so in general I get very suspicious if things
-are very recent, because clearly they didn't get very well tested.
+In the future, I will endeavor to be more verbose.  I will include the
+previous version that it was based on and the testing done by the NTB
+developer community.  I apologize for not doing this in this pull
+request, and I appreciate you asking me and not simply ignoring my
+email.
 
-                  Linus
+Thanks,
+Jon
+
+>
+>                Linus
