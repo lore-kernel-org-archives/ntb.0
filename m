@@ -1,150 +1,62 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id q80si79162itb.4.2017.06.22.09.49.19
+        by gmr-mx.google.com with ESMTPS id g196si95320itb.1.2017.06.22.09.49.18
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 22 Jun 2017 09:49:20 -0700 (PDT)
+        Thu, 22 Jun 2017 09:49:18 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Thu, 22 Jun 2017 10:48:13 -0600
-Message-Id: <20170622164817.25515-4-logang@deltatee.com>
-In-Reply-To: <20170622164817.25515-1-logang@deltatee.com>
-References: <20170622164817.25515-1-logang@deltatee.com>
-Subject: [PATCH 3/7] asm-generic/io.h: make ioread64 and iowrite64 universally available
+Date: Thu, 22 Jun 2017 10:48:10 -0600
+Message-Id: <20170622164817.25515-1-logang@deltatee.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Subject: [PATCH 0/7] cleanup issues with io{read|write}64
 To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-alpha@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-crypto@vger.kernel.org, dri-devel@lists.freedesktop.org
 Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Stephen Bates <sbates@raithlin.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Currently, ioread64 and iowrite64 are only available io CONFIG_64BIT=y
-and CONFIG_GENERIC_IOMAP=n. Thus, seeing the functions are not
-universally available, it makes them unusable for driver developers.
-This leads to ugly hacks such as those at the top of
+Hi,
 
-drivers/ntb/hw/intel/ntb_hw_intel.c
+Presently, the 64bit IO functions are not very usable in drivers because
+they are not universally available in all architectures. This leads to
+a bunch of hacks in the kernel to work around this. (See the last 3
+patches in this series.) As part of my switchtec_ntb submission which
+added another one of these warts, Greg asked me to look into fixing
+it[1].
 
-This patch adds fallback implementations for when CONFIG_64BIT and
-CONFIG_GENERIC_IOMAP are not set. These functions use two io32 based
-calls to complete the operation.
+So this patchset attempts to solve this issue by filling in the missing
+implementations in iomap.c and io.h. After that, the alpha architecture is
+the only one I found that also needed a fix for this. Finally, this
+patchset removes the hacks that have accumulated in the kernel,
+thus far, for working around this.
 
-Note, we do not use the volatile keyword in these functions like the
-others in the same file. It is necessary to avoid a compiler warning
-on arm.
+This set is based off of v4.12-rc6.
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Cc: Arnd Bergmann <arnd@arndb.de>
----
- include/asm-generic/io.h | 54 +++++++++++++++++++++++++++++++++++++-----------
- 1 file changed, 42 insertions(+), 12 deletions(-)
+Thanks,
 
-diff --git a/include/asm-generic/io.h b/include/asm-generic/io.h
-index 7ef015eb3403..817edaa3da78 100644
---- a/include/asm-generic/io.h
-+++ b/include/asm-generic/io.h
-@@ -585,15 +585,24 @@ static inline u32 ioread32(const volatile void __iomem *addr)
- }
- #endif
- 
--#ifdef CONFIG_64BIT
- #ifndef ioread64
- #define ioread64 ioread64
--static inline u64 ioread64(const volatile void __iomem *addr)
-+#ifdef readq
-+static inline u64 ioread64(const void __iomem *addr)
- {
- 	return readq(addr);
- }
-+#else
-+static inline u64 ioread64(const void __iomem *addr)
-+{
-+	u64 low, high;
-+
-+	low = ioread32(addr);
-+	high = ioread32(addr + sizeof(u32));
-+	return low | (high << 32);
-+}
-+#endif
- #endif
--#endif /* CONFIG_64BIT */
- 
- #ifndef iowrite8
- #define iowrite8 iowrite8
-@@ -619,15 +628,21 @@ static inline void iowrite32(u32 value, volatile void __iomem *addr)
- }
- #endif
- 
--#ifdef CONFIG_64BIT
- #ifndef iowrite64
- #define iowrite64 iowrite64
--static inline void iowrite64(u64 value, volatile void __iomem *addr)
-+#ifdef writeq
-+static inline void iowrite64(u64 value, void __iomem *addr)
- {
- 	writeq(value, addr);
- }
-+#else
-+static inline void iowrite64(u64 value, void __iomem *addr)
-+{
-+	iowrite32(value, addr);
-+	iowrite32(value >> 32, addr + sizeof(u32));
-+}
-+#endif
- #endif
--#endif /* CONFIG_64BIT */
- 
- #ifndef ioread16be
- #define ioread16be ioread16be
-@@ -645,15 +660,24 @@ static inline u32 ioread32be(const volatile void __iomem *addr)
- }
- #endif
- 
--#ifdef CONFIG_64BIT
- #ifndef ioread64be
- #define ioread64be ioread64be
--static inline u64 ioread64be(const volatile void __iomem *addr)
-+#ifdef readq
-+static inline u64 ioread64be(const void __iomem *addr)
- {
- 	return swab64(readq(addr));
- }
-+#else
-+static inline u64 ioread64be(const void __iomem *addr)
-+{
-+	u64 low, high;
-+
-+	low = ioread32be(addr + sizeof(u32));
-+	high = ioread32be(addr);
-+	return low | (high << 32);
-+}
-+#endif
- #endif
--#endif /* CONFIG_64BIT */
- 
- #ifndef iowrite16be
- #define iowrite16be iowrite16be
-@@ -671,15 +695,21 @@ static inline void iowrite32be(u32 value, volatile void __iomem *addr)
- }
- #endif
- 
--#ifdef CONFIG_64BIT
- #ifndef iowrite64be
- #define iowrite64be iowrite64be
--static inline void iowrite64be(u64 value, volatile void __iomem *addr)
-+#ifdef writeq
-+static inline void iowrite64be(u64 value, void __iomem *addr)
- {
- 	writeq(swab64(value), addr);
- }
-+#else
-+static inline void iowrite64be(u64 value, void __iomem *addr)
-+{
-+	iowrite32be(value >> 32, addr);
-+	iowrite32be(value, addr + sizeof(u32));
-+}
-+#endif
- #endif
--#endif /* CONFIG_64BIT */
- 
- #ifndef ioread8_rep
- #define ioread8_rep ioread8_rep
--- 
+Logan
+
+[1] https://marc.info/?l=linux-kernel&m=149774601910663&w=2
+
+Logan Gunthorpe (7):
+  drm/tilcdc: don't use volatile with iowrite64
+  iomap: implement ioread64 and iowrite64
+  asm-generic/io.h: make ioread64 and iowrite64 universally available
+  alpha: provide ioread64 and iowrite64 implementations
+  ntb: ntb_hw_intel: remove ioread64 and iowrite64 hacks
+  drm/tilcdc: clean up ifdef hacks around iowrite64
+  crypto: caam: cleanup CONFIG_64BIT ifdefs when using io{read|write}64
+
+ arch/alpha/include/asm/io.h          |  2 ++
+ arch/alpha/kernel/io.c               | 18 +++++++++++
+ arch/powerpc/include/asm/io.h        |  2 ++
+ drivers/crypto/caam/regs.h           | 29 -----------------
+ drivers/gpu/drm/tilcdc/tilcdc_regs.h |  8 +----
+ drivers/ntb/hw/intel/ntb_hw_intel.c  | 30 -----------------
+ include/asm-generic/io.h             | 54 ++++++++++++++++++++++++-------
+ include/asm-generic/iomap.h          |  4 ---
+ lib/iomap.c                          | 62 ++++++++++++++++++++++++++++++++++++
+ 9 files changed, 127 insertions(+), 82 deletions(-)
+
+--
 2.11.0
-
