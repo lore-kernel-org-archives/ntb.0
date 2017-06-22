@@ -1,38 +1,30 @@
-Return-Path: <gnomes@lxorguk.ukuu.org.uk>
-Received: from fuzix.org (www.llwyncelyn.cymru. [82.70.14.225])
-        by gmr-mx.google.com with ESMTPS id m29si578256wmi.6.2017.06.22.13.08.37
+Return-Path: <logang@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id c67si79353itb.5.2017.06.22.10.30.56
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 22 Jun 2017 13:08:37 -0700 (PDT)
-Date: Thu, 22 Jun 2017 21:08:28 +0100
-From: Alan Cox <gnomes@lxorguk.ukuu.org.uk>
-Subject: Re: [PATCH 4/7] alpha: provide ioread64 and iowrite64
- implementations
-Message-ID: <20170622210828.27304f6a@alans-desktop>
-In-Reply-To: <20170622164817.25515-5-logang@deltatee.com>
+        Thu, 22 Jun 2017 10:30:57 -0700 (PDT)
 References: <20170622164817.25515-1-logang@deltatee.com>
-	<20170622164817.25515-5-logang@deltatee.com>
+ <20170622164817.25515-5-logang@deltatee.com>
+ <E70FB7EB-3A05-4A08-A85E-020F47751E3B@raithlin.com>
+From: Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <0d2f1f7c-d014-5ddf-ad5c-64f13cb5a64a@deltatee.com>
+Date: Thu, 22 Jun 2017 11:30:42 -0600
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+In-Reply-To: <E70FB7EB-3A05-4A08-A85E-020F47751E3B@raithlin.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-To: Logan Gunthorpe <logang@deltatee.com>
-Cc: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-alpha@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-crypto@vger.kernel.org, dri-devel@lists.freedesktop.org, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Stephen Bates <sbates@raithlin.com>, Richard Henderson <rth@twiddle.net>, Ivan Kokshaysky <ink@jurassic.park.msu.ru>, Matt Turner <mattst88@gmail.com>
+Subject: Re: [PATCH 4/7] alpha: provide ioread64 and iowrite64 implementations
+To: Stephen Bates <sbates@raithlin.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arch@vger.kernel.org" <linux-arch@vger.kernel.org>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "linux-alpha@vger.kernel.org" <linux-alpha@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "linux-crypto@vger.kernel.org" <linux-crypto@vger.kernel.org>, "dri-devel@lists.freedesktop.org" <dri-devel@lists.freedesktop.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Richard Henderson <rth@twiddle.net>, Ivan Kokshaysky <ink@jurassic.park.msu.ru>, Matt Turner <mattst88@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Thu, 22 Jun 2017 10:48:14 -0600
-Logan Gunthorpe <logang@deltatee.com> wrote:
+On 6/22/2017 11:29 AM, Stephen  Bates wrote:
+>> +#define iowrite64be(v,p) iowrite32(cpu_to_be64(v), (p))
+>
+> Logan, thanks for taking this cleanup on. I think this should be iowrite64 not iowrite32?
 
-> Alpha implements its own io operation and doesn't use the
-> common library. Thus to make ioread64 and iowrite64 globally
-> available we need to add implementations for alpha.
-> 
-> For this, we simply use calls that chain two 32-bit operations.
-> (mostly because I don't really understand the alpha architecture.)
+Yup, good catch. Thanks. I'll fix it in a v2 of this series.
 
-But this does not do the same thing as an ioread64 with regards to
-atomicity or side effects on the device. The same is true of the other
-hacks. You either have a real 64bit single read/write from MMIO space or
-you don't. You can't fake it.
+Logan
 
-
-Alan
