@@ -1,44 +1,38 @@
-Return-Path: <rth7680@gmail.com>
-Received: from mail-qk0-x241.google.com (mail-qk0-x241.google.com. [2607:f8b0:400d:c09::241])
-        by gmr-mx.google.com with ESMTPS id p68si155497ywg.9.2017.06.22.14.20.51
+Return-Path: <logang@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id f18si232141itf.3.2017.06.22.14.10.34
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 22 Jun 2017 14:20:51 -0700 (PDT)
-Received: by mail-qk0-x241.google.com with SMTP id r62so3884318qkf.3
-        for <linux-ntb@googlegroups.com>; Thu, 22 Jun 2017 14:20:51 -0700 (PDT)
-Return-Path: <rth7680@gmail.com>
-Sender: Richard Henderson <rth7680@gmail.com>
-Subject: Re: [PATCH 4/7] alpha: provide ioread64 and iowrite64 implementations
+        Thu, 22 Jun 2017 14:10:34 -0700 (PDT)
 References: <20170622164817.25515-1-logang@deltatee.com>
  <20170622164817.25515-5-logang@deltatee.com>
-From: Richard Henderson <rth@twiddle.net>
-Message-ID: <a854aa15-3ec7-1605-aeef-e41948996d21@twiddle.net>
-Date: Thu, 22 Jun 2017 14:20:43 -0700
+ <20170622210828.27304f6a@alans-desktop>
+ <401cdb64-6fdb-be30-b8bc-bf51c1a35074@deltatee.com>
+ <CAK8P3a1R-uvjjs=UpbvJjVXnFpD_OL1aRsw0KE_GkvNy+dVj8g@mail.gmail.com>
+From: Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <3ae2d934-1054-cdd1-7eaa-e9758276cf51@deltatee.com>
+Date: Thu, 22 Jun 2017 15:10:20 -0600
 MIME-Version: 1.0
-In-Reply-To: <20170622164817.25515-5-logang@deltatee.com>
+In-Reply-To: <CAK8P3a1R-uvjjs=UpbvJjVXnFpD_OL1aRsw0KE_GkvNy+dVj8g@mail.gmail.com>
 Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
 Content-Transfer-Encoding: 7bit
-To: Logan Gunthorpe <logang@deltatee.com>, linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-alpha@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-crypto@vger.kernel.org, dri-devel@lists.freedesktop.org
-Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Stephen Bates <sbates@raithlin.com>, Ivan Kokshaysky <ink@jurassic.park.msu.ru>, Matt Turner <mattst88@gmail.com>
+Subject: Re: [PATCH 4/7] alpha: provide ioread64 and iowrite64 implementations
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Alan Cox <gnomes@lxorguk.ukuu.org.uk>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-arch <linux-arch@vger.kernel.org>, linux-ntb@googlegroups.com, linux-alpha@vger.kernel.org, linuxppc-dev <linuxppc-dev@lists.ozlabs.org>, linux-crypto@vger.kernel.org, dri-devel <dri-devel@lists.freedesktop.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Stephen Bates <sbates@raithlin.com>, Richard Henderson <rth@twiddle.net>, Ivan Kokshaysky <ink@jurassic.park.msu.ru>, Matt Turner <mattst88@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On 06/22/2017 09:48 AM, Logan Gunthorpe wrote:
-> Alpha implements its own io operation and doesn't use the
-> common library. Thus to make ioread64 and iowrite64 globally
-> available we need to add implementations for alpha.
-> 
-> For this, we simply use calls that chain two 32-bit operations.
-> (mostly because I don't really understand the alpha architecture.)
+On 6/22/2017 3:03 PM, Arnd Bergmann wrote:
+> Drivers that want a non-atomic variant should include either
+> include/linux/io-64-nonatomic-hi-lo.h or include/linux/io-64-nonatomic-lo-hi.h
+> depending on what they need. Drivers that require 64-bit I/O should
+> probably just depend on CONFIG_64BIT and maybe use readq/writeq.
 
-It's not difficult to provide this interface[*].  I believe the only reason I 
-didn't do so from the beginning is that it wasn't used.
+Ok, I will work something like that up.
 
+We'll still need a patch similar to patch 2 (less the non-atomic 
+versions) seeing even CONFIG_GENERIC_IOMAP arches don't actually have a 
+working ioread64/iowrite64 implementation.
 
+Thanks,
 
-r~
-
-
-* At least for systems other than Jensen, which cannot generate 64-bit I/O.  On 
-the other hand, Jensen doesn't have PCI (EISA only), and so won't have any 
-devices that care.
+Logan
