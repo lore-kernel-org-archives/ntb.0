@@ -1,78 +1,82 @@
-Return-Path: <dave.jiang@intel.com>
-Received: from mga07.intel.com (mga07.intel.com. [134.134.136.100])
-        by gmr-mx.google.com with ESMTPS id x4si841974pfe.4.2017.06.22.10.17.47
+Return-Path: <gunthorp@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id n194si81571itg.3.2017.06.22.09.49.22
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 22 Jun 2017 10:17:47 -0700 (PDT)
-From: "Jiang, Dave" <dave.jiang@intel.com>
-Subject: RE: [PATCH 5/7] ntb: ntb_hw_intel: remove ioread64 and iowrite64
- hacks
-Date: Thu, 22 Jun 2017 17:17:46 +0000
-Message-ID: <112A412BB11A1242B37129D931BCE53472F8DFF5@fmsmsx116.amr.corp.intel.com>
+        Thu, 22 Jun 2017 09:49:22 -0700 (PDT)
+From: Logan Gunthorpe <logang@deltatee.com>
+Date: Thu, 22 Jun 2017 10:48:17 -0600
+Message-Id: <20170622164817.25515-8-logang@deltatee.com>
+In-Reply-To: <20170622164817.25515-1-logang@deltatee.com>
 References: <20170622164817.25515-1-logang@deltatee.com>
- <20170622164817.25515-6-logang@deltatee.com>
-In-Reply-To: <20170622164817.25515-6-logang@deltatee.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Return-Path: dave.jiang@intel.com
-To: Logan Gunthorpe <logang@deltatee.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arch@vger.kernel.org" <linux-arch@vger.kernel.org>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "linux-alpha@vger.kernel.org" <linux-alpha@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "linux-crypto@vger.kernel.org" <linux-crypto@vger.kernel.org>, "dri-devel@lists.freedesktop.org" <dri-devel@lists.freedesktop.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Stephen Bates <sbates@raithlin.com>, Jon Mason <jdmason@kudzu.us>, Allen Hubbe <Allen.Hubbe@emc.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+Subject: [PATCH 7/7] crypto: caam: cleanup CONFIG_64BIT ifdefs when using io{read|write}64
+To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-alpha@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-crypto@vger.kernel.org, dri-devel@lists.freedesktop.org
+Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Stephen Bates <sbates@raithlin.com>, Logan Gunthorpe <logang@deltatee.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Dan Douglass <dan.douglass@nxp.com>, Herbert Xu <herbert@gondor.apana.org.au>, "David S. Miller" <davem@davemloft.net>
 List-ID: <linux-ntb.googlegroups.com>
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogbGludXgtbnRiQGdvb2ds
-ZWdyb3Vwcy5jb20gW21haWx0bzpsaW51eC1udGJAZ29vZ2xlZ3JvdXBzLmNvbV0gT24gQmVoYWxm
-IE9mIExvZ2FuIEd1bnRob3JwZQ0KPiBTZW50OiBUaHVyc2RheSwgSnVuZSAyMiwgMjAxNyA5OjQ4
-IEFNDQo+IFRvOiBsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3JnOyBsaW51eC1hcmNoQHZnZXIu
-a2VybmVsLm9yZzsgbGludXgtbnRiQGdvb2dsZWdyb3Vwcy5jb207IGxpbnV4LWFscGhhQHZnZXIu
-a2VybmVsLm9yZzsgbGludXhwcGMtDQo+IGRldkBsaXN0cy5vemxhYnMub3JnOyBsaW51eC1jcnlw
-dG9Admdlci5rZXJuZWwub3JnOyBkcmktZGV2ZWxAbGlzdHMuZnJlZWRlc2t0b3Aub3JnDQo+IENj
-OiBBcm5kIEJlcmdtYW5uIDxhcm5kQGFybmRiLmRlPjsgR3JlZyBLcm9haC1IYXJ0bWFuIDxncmVn
-a2hAbGludXhmb3VuZGF0aW9uLm9yZz47IFN0ZXBoZW4gQmF0ZXMgPHNiYXRlc0ByYWl0aGxpbi5j
-b20+Ow0KPiBMb2dhbiBHdW50aG9ycGUgPGxvZ2FuZ0BkZWx0YXRlZS5jb20+OyBKb24gTWFzb24g
-PGpkbWFzb25Aa3VkenUudXM+OyBKaWFuZywgRGF2ZSA8ZGF2ZS5qaWFuZ0BpbnRlbC5jb20+OyBB
-bGxlbiBIdWJiZQ0KPiA8QWxsZW4uSHViYmVAZW1jLmNvbT4NCj4gU3ViamVjdDogW1BBVENIIDUv
-N10gbnRiOiBudGJfaHdfaW50ZWw6IHJlbW92ZSBpb3JlYWQ2NCBhbmQgaW93cml0ZTY0IGhhY2tz
-DQo+IA0KPiBOb3cgdGhhdCBpb3JlYWQ2NCBhbmQgaW93cml0ZTY0IGFyZSBhdmFpbGFibGUgZ2Vu
-ZXJpY2FsbHkgd2UgY2FuDQo+IHJlbW92ZSB0aGUgaGFjayBhdCB0aGUgdG9wIG9mIG50Yl9od19p
-bnRlbC5jIHRoYXQgcGF0Y2hlcyB0aGVtIGluDQo+IHdoZW4gdGhleSBhcmUgbm90IGF2YWlsYWJs
-ZS4NCj4gDQo+IFNpZ25lZC1vZmYtYnk6IExvZ2FuIEd1bnRob3JwZSA8bG9nYW5nQGRlbHRhdGVl
-LmNvbT4NCj4gQ2M6IEpvbiBNYXNvbiA8amRtYXNvbkBrdWR6dS51cz4NCj4gQ2M6IERhdmUgSmlh
-bmcgPGRhdmUuamlhbmdAaW50ZWwuY29tPg0KPiBDYzogQWxsZW4gSHViYmUgPEFsbGVuLkh1YmJl
-QGVtYy5jb20+DQoNClRoYW5rcyBmb3IgZG9pbmcgdGhpcyBMb2dhbi4gDQoNCkFja2VkLWJ5OiBE
-YXZlIEppYW5nIDxkYXZlLmppYW5nQGludGVsLmNvbT4NCg0KPiAtLS0NCj4gIGRyaXZlcnMvbnRi
-L2h3L2ludGVsL250Yl9od19pbnRlbC5jIHwgMzAgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tDQo+ICAxIGZpbGUgY2hhbmdlZCwgMzAgZGVsZXRpb25zKC0pDQo+IA0KPiBkaWZmIC0tZ2l0
-IGEvZHJpdmVycy9udGIvaHcvaW50ZWwvbnRiX2h3X2ludGVsLmMgYi9kcml2ZXJzL250Yi9ody9p
-bnRlbC9udGJfaHdfaW50ZWwuYw0KPiBpbmRleCBjMDAyMzg0OTE2NzMuLjU2MjIxZDU0MGMyYiAx
-MDA2NDQNCj4gLS0tIGEvZHJpdmVycy9udGIvaHcvaW50ZWwvbnRiX2h3X2ludGVsLmMNCj4gKysr
-IGIvZHJpdmVycy9udGIvaHcvaW50ZWwvbnRiX2h3X2ludGVsLmMNCj4gQEAgLTE1MywzNSArMTUz
-LDYgQEAgTU9EVUxFX1BBUk1fREVTQyh4ZW9uX2IyYl9kc2RfYmFyNV9hZGRyMzIsDQo+ICBzdGF0
-aWMgaW5saW5lIGVudW0gbnRiX3RvcG8geGVvbl9wcGRfdG9wbyhzdHJ1Y3QgaW50ZWxfbnRiX2Rl
-diAqbmRldiwgdTggcHBkKTsNCj4gIHN0YXRpYyBpbnQgeGVvbl9pbml0X2lzcihzdHJ1Y3QgaW50
-ZWxfbnRiX2RldiAqbmRldik7DQo+IA0KPiAtI2lmbmRlZiBpb3JlYWQ2NA0KPiAtI2lmZGVmIHJl
-YWRxDQo+IC0jZGVmaW5lIGlvcmVhZDY0IHJlYWRxDQo+IC0jZWxzZQ0KPiAtI2RlZmluZSBpb3Jl
-YWQ2NCBfaW9yZWFkNjQNCj4gLXN0YXRpYyBpbmxpbmUgdTY0IF9pb3JlYWQ2NCh2b2lkIF9faW9t
-ZW0gKm1taW8pDQo+IC17DQo+IC0JdTY0IGxvdywgaGlnaDsNCj4gLQ0KPiAtCWxvdyA9IGlvcmVh
-ZDMyKG1taW8pOw0KPiAtCWhpZ2ggPSBpb3JlYWQzMihtbWlvICsgc2l6ZW9mKHUzMikpOw0KPiAt
-CXJldHVybiBsb3cgfCAoaGlnaCA8PCAzMik7DQo+IC19DQo+IC0jZW5kaWYNCj4gLSNlbmRpZg0K
-PiAtDQo+IC0jaWZuZGVmIGlvd3JpdGU2NA0KPiAtI2lmZGVmIHdyaXRlcQ0KPiAtI2RlZmluZSBp
-b3dyaXRlNjQgd3JpdGVxDQo+IC0jZWxzZQ0KPiAtI2RlZmluZSBpb3dyaXRlNjQgX2lvd3JpdGU2
-NA0KPiAtc3RhdGljIGlubGluZSB2b2lkIF9pb3dyaXRlNjQodTY0IHZhbCwgdm9pZCBfX2lvbWVt
-ICptbWlvKQ0KPiAtew0KPiAtCWlvd3JpdGUzMih2YWwsIG1taW8pOw0KPiAtCWlvd3JpdGUzMih2
-YWwgPj4gMzIsIG1taW8gKyBzaXplb2YodTMyKSk7DQo+IC19DQo+IC0jZW5kaWYNCj4gLSNlbmRp
-Zg0KPiAtDQo+ICBzdGF0aWMgaW5saW5lIGludCBwZGV2X2lzX2F0b20oc3RydWN0IHBjaV9kZXYg
-KnBkZXYpDQo+ICB7DQo+ICAJc3dpdGNoIChwZGV2LT5kZXZpY2UpIHsNCj4gQEAgLTMwMDgsNCAr
-Mjk3OSwzIEBAIHN0YXRpYyB2b2lkIF9fZXhpdCBpbnRlbF9udGJfcGNpX2RyaXZlcl9leGl0KHZv
-aWQpDQo+ICAJZGVidWdmc19yZW1vdmVfcmVjdXJzaXZlKGRlYnVnZnNfZGlyKTsNCj4gIH0NCj4g
-IG1vZHVsZV9leGl0KGludGVsX250Yl9wY2lfZHJpdmVyX2V4aXQpOw0KPiAtDQo+IC0tDQo+IDIu
-MTEuMA0KPiANCj4gLS0NCj4gWW91IHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBiZWNhdXNlIHlvdSBh
-cmUgc3Vic2NyaWJlZCB0byB0aGUgR29vZ2xlIEdyb3VwcyAibGludXgtbnRiIiBncm91cC4NCj4g
-VG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGdyb3VwIGFuZCBzdG9wIHJlY2VpdmluZyBlbWFpbHMg
-ZnJvbSBpdCwgc2VuZCBhbiBlbWFpbCB0byBsaW51eC1udGIrdW5zdWJzY3JpYmVAZ29vZ2xlZ3Jv
-dXBzLmNvbS4NCj4gVG8gcG9zdCB0byB0aGlzIGdyb3VwLCBzZW5kIGVtYWlsIHRvIGxpbnV4LW50
-YkBnb29nbGVncm91cHMuY29tLg0KPiBUbyB2aWV3IHRoaXMgZGlzY3Vzc2lvbiBvbiB0aGUgd2Vi
-IHZpc2l0IGh0dHBzOi8vZ3JvdXBzLmdvb2dsZS5jb20vZC9tc2dpZC9saW51eC1udGIvMjAxNzA2
-MjIxNjQ4MTcuMjU1MTUtNi0NCj4gbG9nYW5nJTQwZGVsdGF0ZWUuY29tLg0KPiBGb3IgbW9yZSBv
-cHRpb25zLCB2aXNpdCBodHRwczovL2dyb3Vwcy5nb29nbGUuY29tL2Qvb3B0b3V0Lg0K
+Now that ioread64 and iowrite64 are always available we don't
+need the ugly ifdefs to change their implementation when they
+are not.
+
+Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+Cc: "Horia Geantă" <horia.geanta@nxp.com>
+Cc: Dan Douglass <dan.douglass@nxp.com>
+Cc: Herbert Xu <herbert@gondor.apana.org.au>
+Cc: "David S. Miller" <davem@davemloft.net>
+---
+ drivers/crypto/caam/regs.h | 29 -----------------------------
+ 1 file changed, 29 deletions(-)
+
+diff --git a/drivers/crypto/caam/regs.h b/drivers/crypto/caam/regs.h
+index 84d2f838a063..26fc19dd0c39 100644
+--- a/drivers/crypto/caam/regs.h
++++ b/drivers/crypto/caam/regs.h
+@@ -134,7 +134,6 @@ static inline void clrsetbits_32(void __iomem *reg, u32 clear, u32 set)
+  *    base + 0x0000 : least-significant 32 bits
+  *    base + 0x0004 : most-significant 32 bits
+  */
+-#ifdef CONFIG_64BIT
+ static inline void wr_reg64(void __iomem *reg, u64 data)
+ {
+ 	if (caam_little_end)
+@@ -151,34 +150,6 @@ static inline u64 rd_reg64(void __iomem *reg)
+ 		return ioread64be(reg);
+ }
+ 
+-#else /* CONFIG_64BIT */
+-static inline void wr_reg64(void __iomem *reg, u64 data)
+-{
+-#ifndef CONFIG_CRYPTO_DEV_FSL_CAAM_IMX
+-	if (caam_little_end) {
+-		wr_reg32((u32 __iomem *)(reg) + 1, data >> 32);
+-		wr_reg32((u32 __iomem *)(reg), data);
+-	} else
+-#endif
+-	{
+-		wr_reg32((u32 __iomem *)(reg), data >> 32);
+-		wr_reg32((u32 __iomem *)(reg) + 1, data);
+-	}
+-}
+-
+-static inline u64 rd_reg64(void __iomem *reg)
+-{
+-#ifndef CONFIG_CRYPTO_DEV_FSL_CAAM_IMX
+-	if (caam_little_end)
+-		return ((u64)rd_reg32((u32 __iomem *)(reg) + 1) << 32 |
+-			(u64)rd_reg32((u32 __iomem *)(reg)));
+-	else
+-#endif
+-		return ((u64)rd_reg32((u32 __iomem *)(reg)) << 32 |
+-			(u64)rd_reg32((u32 __iomem *)(reg) + 1));
+-}
+-#endif /* CONFIG_64BIT  */
+-
+ #ifdef CONFIG_ARCH_DMA_ADDR_T_64BIT
+ #ifdef CONFIG_SOC_IMX7D
+ #define cpu_to_caam_dma(value) \
+-- 
+2.11.0
+
