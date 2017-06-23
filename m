@@ -1,261 +1,54 @@
-Return-Path: <gunthorp@deltatee.com>
+Return-Path: <logang@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id u13si249716ita.3.2017.06.28.20.27.00
+        by gmr-mx.google.com with ESMTPS id c139si307288itb.2.2017.06.23.16.06.48
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 28 Jun 2017 20:27:00 -0700 (PDT)
+        Fri, 23 Jun 2017 16:06:48 -0700 (PDT)
+References: <20170615203729.9009-1-logang@deltatee.com>
+ <20170619200659.GA20437@kudzu.us>
+ <9615f074-5b81-210b-eb88-218a59d65198@deltatee.com>
+ <000001d2eb85$daecdea0$90c69be0$@dell.com>
+ <8a1ff94c-8689-0d4c-cc33-7b495daa065a@deltatee.com>
+ <000101d2eba4$b45b1e40$1d115ac0$@dell.com>
+ <aec6f161-eaf8-19cf-ee5a-155d67da38ba@deltatee.com>
+ <000201d2eba8$dade4ac0$909ae040$@dell.com>
+ <4d932597-3592-2ce1-5a5f-cb5ba36a3a93@deltatee.com>
+ <000001d2ec23$2bd9f300$838dd900$@dell.com>
+ <5aa9c438-e152-4caa-2c6d-cbbd130a0eb2@deltatee.com>
+ <000101d2ec53$f2830840$d78918c0$@dell.com>
+ <eeaed83a-cd2b-91f1-e199-eaa6452edd17@deltatee.com>
+ <000301d2ec6c$ffe3d4b0$ffab7e10$@dell.com>
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Wed, 28 Jun 2017 21:26:43 -0600
-Message-Id: <20170629032648.3073-12-logang@deltatee.com>
-In-Reply-To: <20170629032648.3073-1-logang@deltatee.com>
-References: <20170629032648.3073-1-logang@deltatee.com>
-Subject: [PATCH 11/16] switchtec_ntb: add skeleton ntb driver
-To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>, Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <ea75d9cf-a6c6-29bc-c553-2f0a965bcaa2@deltatee.com>
+Date: Fri, 23 Jun 2017 17:06:40 -0600
+MIME-Version: 1.0
+In-Reply-To: <000301d2ec6c$ffe3d4b0$ffab7e10$@dell.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Subject: Re: New NTB API Issue
+To: Allen Hubbe <Allen.Hubbe@dell.com>, 'Jon Mason' <jdmason@kudzu.us>
+Cc: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, 'Dave Jiang' <dave.jiang@intel.com>, 'Serge Semin' <fancer.lancer@gmail.com>, 'Kurt Schwemmer' <kurt.schwemmer@microsemi.com>, 'Stephen Bates' <sbates@raithlin.com>, 'Greg Kroah-Hartman' <gregkh@linuxfoundation.org>
 List-ID: <linux-ntb.googlegroups.com>
 
-This patch simply adds a skeleton NTB driver which will be filled
-out in subsequent patches.
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Reviewed-by: Stephen Bates <sbates@raithlin.com>
-Reviewed-by: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
----
- drivers/ntb/hw/mscc/switchtec_ntb.c | 148 +++++++++++++++++++++++++++++++++++-
- include/linux/ntb.h                 |   3 +
- 2 files changed, 150 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/ntb/hw/mscc/switchtec_ntb.c b/drivers/ntb/hw/mscc/switchtec_ntb.c
-index 4f48b34ce0b5..0587b2380bcc 100644
---- a/drivers/ntb/hw/mscc/switchtec_ntb.c
-+++ b/drivers/ntb/hw/mscc/switchtec_ntb.c
-@@ -18,6 +18,7 @@
- #include <linux/delay.h>
- #include <linux/kthread.h>
- #include <linux/interrupt.h>
-+#include <linux/ntb.h>
- 
- MODULE_DESCRIPTION("Microsemi Switchtec(tm) NTB Driver");
- MODULE_VERSION("0.1");
-@@ -73,6 +74,7 @@ struct shared_mw {
- #define LUT_SIZE SZ_64K
- 
- struct switchtec_ntb {
-+	struct ntb_dev ntb;
- 	struct switchtec_dev *stdev;
- 
- 	int self_partition;
-@@ -159,10 +161,148 @@ static int switchtec_ntb_part_op(struct switchtec_ntb *sndev,
- 	return -EIO;
- }
- 
-+static int switchtec_ntb_mw_count(struct ntb_dev *ntb, int pidx)
-+{
-+	return 0;
-+}
-+
-+static int switchtec_ntb_mw_get_align(struct ntb_dev *ntb, int pidx,
-+				      int widx, resource_size_t *addr_align,
-+				      resource_size_t *size_align,
-+				      resource_size_t *size_max)
-+{
-+	return 0;
-+}
-+
-+static int switchtec_ntb_mw_set_trans(struct ntb_dev *ntb, int pidx, int widx,
-+				      dma_addr_t addr, resource_size_t size)
-+{
-+	return 0;
-+}
-+
-+static int switchtec_ntb_peer_mw_count(struct ntb_dev *ntb)
-+{
-+	return 0;
-+}
-+
-+static int switchtec_ntb_peer_mw_get_addr(struct ntb_dev *ntb, int idx,
-+					  phys_addr_t *base,
-+					  resource_size_t *size)
-+{
-+	return 0;
-+}
-+
-+static u64 switchtec_ntb_link_is_up(struct ntb_dev *ntb,
-+				    enum ntb_speed *speed,
-+				    enum ntb_width *width)
-+{
-+	return 0;
-+}
-+
-+static int switchtec_ntb_link_enable(struct ntb_dev *ntb,
-+				     enum ntb_speed max_speed,
-+				     enum ntb_width max_width)
-+{
-+	return 0;
-+}
-+
-+static int switchtec_ntb_link_disable(struct ntb_dev *ntb)
-+{
-+	return 0;
-+}
-+
-+static u64 switchtec_ntb_db_valid_mask(struct ntb_dev *ntb)
-+{
-+	return 0;
-+}
-+
-+static int switchtec_ntb_db_vector_count(struct ntb_dev *ntb)
-+{
-+	return 0;
-+}
-+
-+static u64 switchtec_ntb_db_vector_mask(struct ntb_dev *ntb, int db_vector)
-+{
-+	return 0;
-+}
-+
-+static u64 switchtec_ntb_db_read(struct ntb_dev *ntb)
-+{
-+	return 0;
-+}
-+
-+static int switchtec_ntb_db_clear(struct ntb_dev *ntb, u64 db_bits)
-+{
-+	return 0;
-+}
-+
-+static int switchtec_ntb_db_set_mask(struct ntb_dev *ntb, u64 db_bits)
-+{
-+	return 0;
-+}
-+
-+static int switchtec_ntb_db_clear_mask(struct ntb_dev *ntb, u64 db_bits)
-+{
-+	return 0;
-+}
-+
-+static int switchtec_ntb_peer_db_set(struct ntb_dev *ntb, u64 db_bits)
-+{
-+	return 0;
-+}
-+
-+static int switchtec_ntb_spad_count(struct ntb_dev *ntb)
-+{
-+	return 0;
-+}
-+
-+static u32 switchtec_ntb_spad_read(struct ntb_dev *ntb, int idx)
-+{
-+	return 0;
-+}
-+
-+static int switchtec_ntb_spad_write(struct ntb_dev *ntb, int idx, u32 val)
-+{
-+	return 0;
-+}
-+
-+static int switchtec_ntb_peer_spad_write(struct ntb_dev *ntb, int pidx,
-+					 int sidx, u32 val)
-+{
-+	return 0;
-+}
-+
-+static const struct ntb_dev_ops switchtec_ntb_ops = {
-+	.mw_count		= switchtec_ntb_mw_count,
-+	.mw_get_align		= switchtec_ntb_mw_get_align,
-+	.mw_set_trans		= switchtec_ntb_mw_set_trans,
-+	.peer_mw_count		= switchtec_ntb_peer_mw_count,
-+	.peer_mw_get_addr	= switchtec_ntb_peer_mw_get_addr,
-+	.link_is_up		= switchtec_ntb_link_is_up,
-+	.link_enable		= switchtec_ntb_link_enable,
-+	.link_disable		= switchtec_ntb_link_disable,
-+	.db_valid_mask		= switchtec_ntb_db_valid_mask,
-+	.db_vector_count	= switchtec_ntb_db_vector_count,
-+	.db_vector_mask		= switchtec_ntb_db_vector_mask,
-+	.db_read		= switchtec_ntb_db_read,
-+	.db_clear		= switchtec_ntb_db_clear,
-+	.db_set_mask		= switchtec_ntb_db_set_mask,
-+	.db_clear_mask		= switchtec_ntb_db_clear_mask,
-+	.peer_db_set		= switchtec_ntb_peer_db_set,
-+	.spad_count		= switchtec_ntb_spad_count,
-+	.spad_read		= switchtec_ntb_spad_read,
-+	.spad_write		= switchtec_ntb_spad_write,
-+	.peer_spad_write	= switchtec_ntb_peer_spad_write,
-+};
-+
- static void switchtec_ntb_init_sndev(struct switchtec_ntb *sndev)
- {
- 	u64 part_map;
- 
-+	sndev->ntb.pdev = sndev->stdev->pdev;
-+	sndev->ntb.topo = NTB_TOPO_SWITCH;
-+	sndev->ntb.ops = &switchtec_ntb_ops;
-+
- 	sndev->self_partition = sndev->stdev->partition;
- 
- 	sndev->mmio_ntb = sndev->stdev->mmio_ntb;
-@@ -495,7 +635,6 @@ static int switchtec_ntb_add(struct device *dev,
- 		return -ENOMEM;
- 
- 	sndev->stdev = stdev;
--
- 	switchtec_ntb_init_sndev(sndev);
- 	switchtec_ntb_init_mw(sndev);
- 	switchtec_ntb_init_db(sndev);
-@@ -515,11 +654,17 @@ static int switchtec_ntb_add(struct device *dev,
- 
- 	switchtec_ntb_init_mw(sndev);
- 
-+	rc = ntb_register_device(&sndev->ntb);
-+	if (rc)
-+		goto deinit_and_exit;
-+
- 	stdev->sndev = sndev;
- 	dev_info(dev, "NTB device registered");
- 
- 	return 0;
- 
-+deinit_and_exit:
-+	switchtec_ntb_deinit_db_msg_irq(sndev);
- deinit_shared_and_exit:
- 	switchtec_ntb_deinit_shared_mw(sndev);
- free_and_exit:
-@@ -538,6 +683,7 @@ void switchtec_ntb_remove(struct device *dev,
- 		return;
- 
- 	stdev->sndev = NULL;
-+	ntb_unregister_device(&sndev->ntb);
- 	switchtec_ntb_deinit_db_msg_irq(sndev);
- 	switchtec_ntb_deinit_shared_mw(sndev);
- 	kfree(sndev);
-diff --git a/include/linux/ntb.h b/include/linux/ntb.h
-index de4f800c82b6..bf3dd2d2a821 100644
---- a/include/linux/ntb.h
-+++ b/include/linux/ntb.h
-@@ -70,6 +70,7 @@ struct pci_dev;
-  * @NTB_TOPO_SEC:	On secondary side of remote ntb.
-  * @NTB_TOPO_B2B_USD:	On primary side of local ntb upstream of remote ntb.
-  * @NTB_TOPO_B2B_DSD:	On primary side of local ntb downstream of remote ntb.
-+ * @NTB_TOPO_SWITCH:	Connected via a switch which supports ntb.
-  */
- enum ntb_topo {
- 	NTB_TOPO_NONE = -1,
-@@ -77,6 +78,7 @@ enum ntb_topo {
- 	NTB_TOPO_SEC,
- 	NTB_TOPO_B2B_USD,
- 	NTB_TOPO_B2B_DSD,
-+	NTB_TOPO_SWITCH,
- };
- 
- static inline int ntb_topo_is_b2b(enum ntb_topo topo)
-@@ -97,6 +99,7 @@ static inline char *ntb_topo_string(enum ntb_topo topo)
- 	case NTB_TOPO_SEC:	return "NTB_TOPO_SEC";
- 	case NTB_TOPO_B2B_USD:	return "NTB_TOPO_B2B_USD";
- 	case NTB_TOPO_B2B_DSD:	return "NTB_TOPO_B2B_DSD";
-+	case NTB_TOPO_SWITCH:	return "NTB_TOPO_SWITCH";
- 	}
- 	return "NTB_TOPO_INVALID";
- }
--- 
-2.11.0
+On 23/06/17 04:06 PM, Allen Hubbe wrote:
+> From: Logan Gunthorpe
+>> But any translation can be
+>> programmed by any peer.
+> 
+> That doesn't seem safe.  Even though it can be done as you say, would it not be better to have each specific translation under the control of exactly one driver?
+> 
+> If drivers can reach across and set the translation of any peer bar, they would still need to negotiate among N peers which one sets which other's translation.
+
+Yup. In a dual host setup its not a problem seeing only the one peer
+will ever set any of the memory windows. In the multi-host setup, there
+has to be implicit or explicit negotiation as to which memory window
+connects to which peer.
+
+The hardware also implements locking so if two peers try to mess with
+the same translation, the worst that can happen is the last peer's
+settings will take effect or one peer will see an error.
+
+Logan
 
