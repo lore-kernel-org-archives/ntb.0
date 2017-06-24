@@ -1,61 +1,100 @@
-Return-Path: <jsarha@ti.com>
-Received: from lelnx194.ext.ti.com (lelnx194.ext.ti.com. [198.47.27.80])
-        by gmr-mx.google.com with ESMTPS id h77si312507itb.0.2017.06.26.01.54.43
+Return-Path: <horia.geanta@nxp.com>
+Received: from NAM01-BN3-obe.outbound.protection.outlook.com (mail-bn3nam01on0066.outbound.protection.outlook.com. [104.47.33.66])
+        by gmr-mx.google.com with ESMTPS id t64si111446ywg.10.2017.06.24.04.57.48
         for <linux-ntb@googlegroups.com>
-        (version=TLS1 cipher=AES128-SHA bits=128/128);
-        Mon, 26 Jun 2017 01:54:43 -0700 (PDT)
-Subject: Re: [PATCH 1/7] drm/tilcdc: don't use volatile with iowrite64
-References: <20170622164817.25515-1-logang@deltatee.com>
- <20170622164817.25515-2-logang@deltatee.com>
-From: Jyri Sarha <jsarha@ti.com>
-Message-ID: <33b6c00f-1982-69dd-86b2-107266d238d0@ti.com>
-Date: Mon, 26 Jun 2017 11:54:25 +0300
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
+        Sat, 24 Jun 2017 04:57:48 -0700 (PDT)
+From: =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>
+Subject: [PATCH v2 7/7] crypto: caam: cleanup CONFIG_64BIT ifdefs when using io{read|write}64
+Date: Sat, 24 Jun 2017 14:57:07 +0300
+Message-ID: <20170624115707.30095-1-horia.geanta@nxp.com>
+In-Reply-To: <411c4bb0-2709-1902-778a-bf4d7734e3e1@deltatee.com>
+References: <411c4bb0-2709-1902-778a-bf4d7734e3e1@deltatee.com>
 MIME-Version: 1.0
-In-Reply-To: <20170622164817.25515-2-logang@deltatee.com>
 Content-Type: text/plain; charset="utf-8"
-Content-Language: en-GB
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+Return-Path: horia.geanta@nxp.com
 To: Logan Gunthorpe <logang@deltatee.com>, linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-alpha@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-crypto@vger.kernel.org, dri-devel@lists.freedesktop.org
-Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Stephen Bates <sbates@raithlin.com>, Tomi Valkeinen <tomi.valkeinen@ti.com>, David Airlie <airlied@linux.ie>
+Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Stephen Bates <sbates@raithlin.com>, Dan Douglass <dan.douglass@nxp.com>, Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Radu Solea <radu.solea@nxp.com>, Steve Cornelius <steve.cornelius@nxp.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On 06/22/17 19:48, Logan Gunthorpe wrote:
-> This is a prep patch for adding a universal iowrite64.
-> 
-> The patch is to prevent compiler warnings when we add iowrite64 that
-> would occur because there is an unnecessary volatile in this driver.
-> 
-> Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-> Cc: Jyri Sarha <jsarha@ti.com>
-> Cc: Tomi Valkeinen <tomi.valkeinen@ti.com>
-> Cc: David Airlie <airlied@linux.ie>
+Now that ioread64 and iowrite64 are always available we don't
+need the ugly ifdefs to change their implementation when they
+are not.
 
-Acked-by: Jyri Sarha <jsarha@ti.com>
+Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+Cc: Horia Geantă <horia.geanta@nxp.com>
+Cc: Dan Douglass <dan.douglass@nxp.com>
+Cc: Herbert Xu <herbert@gondor.apana.org.au>
+Cc: "David S. Miller" <davem@davemloft.net>
 
-> ---
->  drivers/gpu/drm/tilcdc/tilcdc_regs.h | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/gpu/drm/tilcdc/tilcdc_regs.h b/drivers/gpu/drm/tilcdc/tilcdc_regs.h
-> index 9d528c0a67a4..e9ce725698a9 100644
-> --- a/drivers/gpu/drm/tilcdc/tilcdc_regs.h
-> +++ b/drivers/gpu/drm/tilcdc/tilcdc_regs.h
-> @@ -131,14 +131,14 @@ static inline void tilcdc_write(struct drm_device *dev, u32 reg, u32 data)
->  static inline void tilcdc_write64(struct drm_device *dev, u32 reg, u64 data)
->  {
->  	struct tilcdc_drm_private *priv = dev->dev_private;
-> -	volatile void __iomem *addr = priv->mmio + reg;
-> +	void __iomem *addr = priv->mmio + reg;
->  
->  #ifdef iowrite64
->  	iowrite64(data, addr);
->  #else
->  	__iowmb();
->  	/* This compiles to strd (=64-bit write) on ARM7 */
-> -	*(volatile u64 __force *)addr = __cpu_to_le64(data);
-> +	*(u64 __force *)addr = __cpu_to_le64(data);
->  #endif
->  }
->  
-> 
+Updated patch such that behaviour does not change
+from i.MX workaround point of view.
+
+Signed-off-by: Horia Geantă <horia.geanta@nxp.com>
+---
+ drivers/crypto/caam/regs.h | 33 ++++-----------------------------
+ 1 file changed, 4 insertions(+), 29 deletions(-)
+
+diff --git a/drivers/crypto/caam/regs.h b/drivers/crypto/caam/regs.h
+index 84d2f838a063..b893ebb24e65 100644
+--- a/drivers/crypto/caam/regs.h
++++ b/drivers/crypto/caam/regs.h
+@@ -134,50 +134,25 @@ static inline void clrsetbits_32(void __iomem *reg, u32 clear, u32 set)
+  *    base + 0x0000 : least-significant 32 bits
+  *    base + 0x0004 : most-significant 32 bits
+  */
+-#ifdef CONFIG_64BIT
+ static inline void wr_reg64(void __iomem *reg, u64 data)
+ {
++#ifndef CONFIG_CRYPTO_DEV_FSL_CAAM_IMX
+ 	if (caam_little_end)
+ 		iowrite64(data, reg);
+ 	else
+-		iowrite64be(data, reg);
+-}
+-
+-static inline u64 rd_reg64(void __iomem *reg)
+-{
+-	if (caam_little_end)
+-		return ioread64(reg);
+-	else
+-		return ioread64be(reg);
+-}
+-
+-#else /* CONFIG_64BIT */
+-static inline void wr_reg64(void __iomem *reg, u64 data)
+-{
+-#ifndef CONFIG_CRYPTO_DEV_FSL_CAAM_IMX
+-	if (caam_little_end) {
+-		wr_reg32((u32 __iomem *)(reg) + 1, data >> 32);
+-		wr_reg32((u32 __iomem *)(reg), data);
+-	} else
+ #endif
+-	{
+-		wr_reg32((u32 __iomem *)(reg), data >> 32);
+-		wr_reg32((u32 __iomem *)(reg) + 1, data);
+-	}
++		iowrite64be(data, reg);
+ }
+ 
+ static inline u64 rd_reg64(void __iomem *reg)
+ {
+ #ifndef CONFIG_CRYPTO_DEV_FSL_CAAM_IMX
+ 	if (caam_little_end)
+-		return ((u64)rd_reg32((u32 __iomem *)(reg) + 1) << 32 |
+-			(u64)rd_reg32((u32 __iomem *)(reg)));
++		return ioread64(reg);
+ 	else
+ #endif
+-		return ((u64)rd_reg32((u32 __iomem *)(reg)) << 32 |
+-			(u64)rd_reg32((u32 __iomem *)(reg) + 1));
++		return ioread64be(reg);
+ }
+-#endif /* CONFIG_64BIT  */
+ 
+ #ifdef CONFIG_ARCH_DMA_ADDR_T_64BIT
+ #ifdef CONFIG_SOC_IMX7D
+-- 
+2.12.0.264.gd6db3f216544
 
