@@ -1,51 +1,66 @@
-Return-Path: <arndbergmann@gmail.com>
-Received: from mail-oi0-x241.google.com (mail-oi0-x241.google.com. [2607:f8b0:4003:c06::241])
-        by gmr-mx.google.com with ESMTPS id f18si58045itf.3.2017.06.26.13.43.40
+Return-Path: <logang@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id t191si7456itb.1.2017.06.26.09.26.47
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 26 Jun 2017 13:43:40 -0700 (PDT)
-Received: by mail-oi0-x241.google.com with SMTP id l130so978434oib.2
-        for <linux-ntb@googlegroups.com>; Mon, 26 Jun 2017 13:43:40 -0700 (PDT)
+        Mon, 26 Jun 2017 09:26:47 -0700 (PDT)
+References: <20170622164817.25515-1-logang@deltatee.com>
+ <20170622164817.25515-7-logang@deltatee.com>
+ <504da99a-838c-48ec-c5b2-6b611d587a10@ti.com>
+From: Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <3ffb5648-00f6-26cb-116a-370085038a0d@deltatee.com>
+Date: Mon, 26 Jun 2017 10:26:35 -0600
 MIME-Version: 1.0
-Sender: arndbergmann@gmail.com
-In-Reply-To: <20170622164817.25515-3-logang@deltatee.com>
-References: <20170622164817.25515-1-logang@deltatee.com> <20170622164817.25515-3-logang@deltatee.com>
-From: Arnd Bergmann <arnd@arndb.de>
-Date: Mon, 26 Jun 2017 22:43:40 +0200
-Message-ID: <CAK8P3a1Uh=PQbGi540KGLpkoEVH+KUW18mzqN3aiijroXwEMWQ@mail.gmail.com>
-Subject: Re: [PATCH 2/7] iomap: implement ioread64 and iowrite64
-Content-Type: text/plain; charset="UTF-8"
-To: Logan Gunthorpe <logang@deltatee.com>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-arch <linux-arch@vger.kernel.org>, linux-ntb@googlegroups.com, linux-alpha@vger.kernel.org, linuxppc-dev <linuxppc-dev@lists.ozlabs.org>, linux-crypto@vger.kernel.org, dri-devel <dri-devel@lists.freedesktop.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Stephen Bates <sbates@raithlin.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, Suresh Warrier <warrier@linux.vnet.ibm.com>, Nicholas Piggin <npiggin@gmail.com>
+In-Reply-To: <504da99a-838c-48ec-c5b2-6b611d587a10@ti.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH 6/7] drm/tilcdc: clean up ifdef hacks around iowrite64
+To: Jyri Sarha <jsarha@ti.com>, linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-alpha@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-crypto@vger.kernel.org, dri-devel@lists.freedesktop.org
+Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Stephen Bates <sbates@raithlin.com>, Tomi Valkeinen <tomi.valkeinen@ti.com>, David Airlie <airlied@linux.ie>
 List-ID: <linux-ntb.googlegroups.com>
 
-> +u64 ioread64(void __iomem *addr)
-> +{
-> +       u64 low, high;
-> +
-> +       low = ioread32(addr);
-> +       high = ioread32(addr + sizeof(u32));
-> +       return low | (high << 32);
-> +}
-> +u64 ioread64be(void __iomem *addr)
-> +{
-> +       u64 low, high;
-> +
-> +       low = ioread32be(addr + sizeof(u32));
-> +       high = ioread32be(addr);
-> +       return low | (high << 32);
-> +}
-> +#endif
+Hi Jyri,
 
-This hardcodes the behavior of include/linux/io-64-nonatomic-hi-lo.h, which
-I find rather confusing, as only about one in five drivers wants this
-behavior.
+Thanks for the ack. However, I'm reworking this patch set to use the
+include/linux/io-64-nonatomic* headers which will explicitly devolve
+into two 32-bit transfers. It's not clear whether this is appropriate
+for the tilcdc driver as it was never setup to use 32-bit transfers
+(unlike the others I had patched).
 
-I'd suggest you don't add it in lib/iomap.c at all for 32-bit architectures,
-but rather use the same logic that we have for readq/writeq in
-io-64-nonatomic-hi-lo.h and io-64-nonatomic-lo-hi.h, adding
-{lo_hi,hi_lo}_{ioread,iowrite}{,be} to the same files, and provide
-the {ioread,iowrite}{,be} macros only if they have not been defined
-at that point.
+If you think it's ok, I can still patch this driver to use the
+non-atomic headers. Otherwise I can leave it out. Please let me know.
 
-       Arnd
+Thanks,
+
+Logan
+
+
+On 26/06/17 02:55 AM, Jyri Sarha wrote:
+> Acked-by: Jyri Sarha <jsarha@ti.com>
+> 
+> And thanks!
+> 
+>> ---
+>>  drivers/gpu/drm/tilcdc/tilcdc_regs.h | 6 ------
+>>  1 file changed, 6 deletions(-)
+>>
+>> diff --git a/drivers/gpu/drm/tilcdc/tilcdc_regs.h b/drivers/gpu/drm/tilcdc/tilcdc_regs.h
+>> index e9ce725698a9..0b901405f30a 100644
+>> --- a/drivers/gpu/drm/tilcdc/tilcdc_regs.h
+>> +++ b/drivers/gpu/drm/tilcdc/tilcdc_regs.h
+>> @@ -133,13 +133,7 @@ static inline void tilcdc_write64(struct drm_device *dev, u32 reg, u64 data)
+>>  	struct tilcdc_drm_private *priv = dev->dev_private;
+>>  	void __iomem *addr = priv->mmio + reg;
+>>  
+>> -#ifdef iowrite64
+>>  	iowrite64(data, addr);
+>> -#else
+>> -	__iowmb();
+>> -	/* This compiles to strd (=64-bit write) on ARM7 */
+>> -	*(u64 __force *)addr = __cpu_to_le64(data);
+>> -#endif
+>>  }
+>>  
+>>  static inline u32 tilcdc_read(struct drm_device *dev, u32 reg)
+>>
+> 
