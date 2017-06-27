@@ -1,64 +1,86 @@
-Return-Path: <jdmason@kudzu.us>
-Received: from mail-qt0-x241.google.com (mail-qt0-x241.google.com. [2607:f8b0:400d:c0d::241])
-        by gmr-mx.google.com with ESMTPS id y7si141389ywd.8.2017.06.09.13.33.18
+Return-Path: <Allen.Hubbe@dell.com>
+Received: from esa5.dell-outbound.iphmx.com (esa5.dell-outbound.iphmx.com. [68.232.153.95])
+        by gmr-mx.google.com with ESMTPS id u9si246898ywe.2.2017.06.27.09.05.17
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 09 Jun 2017 13:33:18 -0700 (PDT)
-Received: by mail-qt0-x241.google.com with SMTP id w1so17487312qtg.0
-        for <linux-ntb@googlegroups.com>; Fri, 09 Jun 2017 13:33:18 -0700 (PDT)
-Return-Path: <jdmason@kudzu.us>
-Date: Fri, 9 Jun 2017 16:33:15 -0400
-From: Jon Mason <jdmason@kudzu.us>
-Subject: Re: [PATCH] ntb: Correct modinfo usage statement for ntb_perf
-Message-ID: <20170609203315.GA9847@kudzu.us>
-References: <20170504163652.6904.47683.stgit@taos.amd.com>
- <c8b3198e-e38a-05a4-fa31-a8d074888f01@intel.com>
+        Tue, 27 Jun 2017 09:05:17 -0700 (PDT)
+From: "Allen Hubbe" <Allen.Hubbe@dell.com>
+References: <20170626195041.6190-1-logang@deltatee.com>
+In-Reply-To: <20170626195041.6190-1-logang@deltatee.com>
+Subject: RE: [PATCH] ntb: use correct mw_count function in ntb_tool and ntb_transport
+Date: Tue, 27 Jun 2017 12:04:54 -0400
+Message-ID: <000001d2ef5f$1ed1e750$5c75b5f0$@dell.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <c8b3198e-e38a-05a4-fa31-a8d074888f01@intel.com>
-To: Dave Jiang <dave.jiang@intel.com>
-Cc: Gary R Hook <gary.hook@amd.com>, linux-ntb@googlegroups.com, Allen.Hubbe@emc.com
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Content-Language: en-us
+To: 'Logan Gunthorpe' <logang@deltatee.com>, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
+Cc: 'Jon Mason' <jdmason@kudzu.us>, 'Dave Jiang' <dave.jiang@intel.com>, 'Serge Semin' <fancer.lancer@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Thu, May 04, 2017 at 09:47:44AM -0700, Dave Jiang wrote:
+From: Logan Gunthorpe
+> After converting to the new API, both ntb_tool and ntb_transport are
+> using ntb_mw_count to iterate through ntb_peer_get_addr when they
+> should be using ntb_peer_mw_count.
 > 
+> This probably isn't an issue with the Intel and AMD drivers but
+> this will matter for any future driver with asymetric memory window
+> counts.
 > 
-> On 05/04/2017 09:36 AM, Gary R Hook wrote:
-> > The order parameters are powers of 2; adjust the usage information
-> > to use correct mathematical representations.
-> > 
-> > Signed-off-by: Gary R Hook <gary.hook@amd.com>
-> Acked-by: Dave Jiang <dave.jiang@intel.com>
+> Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+> Cc: Jon Mason <jdmason@kudzu.us>
+> Cc: Dave Jiang <dave.jiang@intel.com>
+> Cc: Allen Hubbe <Allen.Hubbe@emc.com>
+> Cc: Serge Semin <fancer.lancer@gmail.com>
 
-Sorry, I think I missed this one.  Adding to my ntb branch with the
-following line
+Acked-by: Allen Hubbe <Allen.Hubbe@dell.com>
 
-Fixes: 8a7b6a778a85 ("ntb: ntb perf tool")
-
-This enables the stable kernels it is a bug fix and to pick it up.
-
+> ---
 > 
-> > ---
-> >  drivers/ntb/test/ntb_perf.c |    4 ++--
-> >  1 file changed, 2 insertions(+), 2 deletions(-)
-> > 
-> > diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-> > index 9c4a21f1a9d9..42756a98a728 100644
-> > --- a/drivers/ntb/test/ntb_perf.c
-> > +++ b/drivers/ntb/test/ntb_perf.c
-> > @@ -91,11 +91,11 @@
-> >  
-> >  static unsigned int seg_order = 19; /* 512K */
-> >  module_param(seg_order, uint, 0644);
-> > -MODULE_PARM_DESC(seg_order, "size order [n^2] of buffer segment for testing");
-> > +MODULE_PARM_DESC(seg_order, "size order [2^n] of buffer segment for testing");
-> >  
-> >  static unsigned int run_order = 32; /* 4G */
-> >  module_param(run_order, uint, 0644);
-> > -MODULE_PARM_DESC(run_order, "size order [n^2] of total data to transfer");
-> > +MODULE_PARM_DESC(run_order, "size order [2^n] of total data to transfer");
-> >  
-> >  static bool use_dma; /* default to 0 */
-> >  module_param(use_dma, bool, 0644);
-> > 
+> Hi Guys,
+> 
+> I caught this issue while finishing up the switchtec rebase. (Which is
+> now working again and I'll send the updated series after doing a bit more
+> testing.)
+> 
+> However, seeing this is a bug in the new api patches I feel it should
+> be applied to ntb-next tree before it's merged upstream.
+> 
+> Thanks,
+> 
+> Logan
+> 
+>  drivers/ntb/ntb_transport.c | 2 +-
+>  drivers/ntb/test/ntb_tool.c | 2 +-
+>  2 files changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+> index 9a03c5871efe..b29558ddfe95 100644
+> --- a/drivers/ntb/ntb_transport.c
+> +++ b/drivers/ntb/ntb_transport.c
+> @@ -1059,7 +1059,7 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
+>  	int node;
+>  	int rc, i;
+> 
+> -	mw_count = ntb_mw_count(ndev, PIDX);
+> +	mw_count = ntb_peer_mw_count(ndev);
+> 
+>  	if (!ndev->ops->mw_set_trans) {
+>  		dev_err(&ndev->dev, "Inbound MW based NTB API is required\n");
+> diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c
+> index f002bf48a08d..a69815c45ce6 100644
+> --- a/drivers/ntb/test/ntb_tool.c
+> +++ b/drivers/ntb/test/ntb_tool.c
+> @@ -959,7 +959,7 @@ static int tool_probe(struct ntb_client *self, struct ntb_dev *ntb)
+>  	tc->ntb = ntb;
+>  	init_waitqueue_head(&tc->link_wq);
+> 
+> -	tc->mw_count = min(ntb_mw_count(tc->ntb, PIDX), MAX_MWS);
+> +	tc->mw_count = min(ntb_peer_mw_count(tc->ntb), MAX_MWS);
+>  	for (i = 0; i < tc->mw_count; i++) {
+>  		rc = tool_init_mw(tc, i);
+>  		if (rc)
+> --
+> 2.11.0
+
