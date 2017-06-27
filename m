@@ -1,49 +1,46 @@
-Return-Path: <gunthorp@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id n194si13647itg.3.2017.06.15.13.37.43
+Return-Path: <arndbergmann@gmail.com>
+Received: from mail-io0-x243.google.com (mail-io0-x243.google.com. [2607:f8b0:4001:c06::243])
+        by gmr-mx.google.com with ESMTPS id z4si200760ita.5.2017.06.27.13.40.17
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 15 Jun 2017 13:37:43 -0700 (PDT)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Thu, 15 Jun 2017 14:37:29 -0600
-Message-Id: <20170615203729.9009-14-logang@deltatee.com>
-In-Reply-To: <20170615203729.9009-1-logang@deltatee.com>
-References: <20170615203729.9009-1-logang@deltatee.com>
-Subject: [RFC PATCH 13/13] switchtec_ntb: update switchtec documentation with notes for ntb
-To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Logan Gunthorpe <logang@deltatee.com>
+        Tue, 27 Jun 2017 13:40:17 -0700 (PDT)
+Received: by mail-io0-x243.google.com with SMTP id m19so3610570ioe.1
+        for <linux-ntb@googlegroups.com>; Tue, 27 Jun 2017 13:40:17 -0700 (PDT)
+MIME-Version: 1.0
+Sender: arndbergmann@gmail.com
+In-Reply-To: <3ffb5648-00f6-26cb-116a-370085038a0d@deltatee.com>
+References: <20170622164817.25515-1-logang@deltatee.com> <20170622164817.25515-7-logang@deltatee.com>
+ <504da99a-838c-48ec-c5b2-6b611d587a10@ti.com> <3ffb5648-00f6-26cb-116a-370085038a0d@deltatee.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Date: Tue, 27 Jun 2017 22:40:16 +0200
+Message-ID: <CAK8P3a2HhO_zCnsTzq7hmWSz5La5Thu19FWZpun16iMnyyNreQ@mail.gmail.com>
+Subject: Re: [PATCH 6/7] drm/tilcdc: clean up ifdef hacks around iowrite64
+Content-Type: text/plain; charset="UTF-8"
+To: Logan Gunthorpe <logang@deltatee.com>
+Cc: Jyri Sarha <jsarha@ti.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-arch <linux-arch@vger.kernel.org>, linux-ntb@googlegroups.com, linux-alpha@vger.kernel.org, linuxppc-dev <linuxppc-dev@lists.ozlabs.org>, linux-crypto@vger.kernel.org, dri-devel <dri-devel@lists.freedesktop.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Stephen Bates <sbates@raithlin.com>, Tomi Valkeinen <tomi.valkeinen@ti.com>, David Airlie <airlied@linux.ie>
 List-ID: <linux-ntb.googlegroups.com>
 
-The switchtec_ntb driver has a couple requirements on the switchec's
-hardware configuration so we add these notes to the documentation.
+On Mon, Jun 26, 2017 at 6:26 PM, Logan Gunthorpe <logang@deltatee.com> wrote:
+> Hi Jyri,
+>
+> Thanks for the ack. However, I'm reworking this patch set to use the
+> include/linux/io-64-nonatomic* headers which will explicitly devolve
+> into two 32-bit transfers. It's not clear whether this is appropriate
+> for the tilcdc driver as it was never setup to use 32-bit transfers
+> (unlike the others I had patched).
+>
+> If you think it's ok, I can still patch this driver to use the
+> non-atomic headers. Otherwise I can leave it out. Please let me know.
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Reviewed-by: Stephen Bates <sbates@raithlin.com>
-Reviewed-by: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
----
- Documentation/switchtec.txt | 12 ++++++++++++
- 1 file changed, 12 insertions(+)
+You'd have to first figure out whether this device is of the lo-hi
+or the hi-lo variant, or doesn't allow the I/O to be split at all.
 
-diff --git a/Documentation/switchtec.txt b/Documentation/switchtec.txt
-index a0a9c7b3d4d5..978a346e1fb3 100644
---- a/Documentation/switchtec.txt
-+++ b/Documentation/switchtec.txt
-@@ -78,3 +78,15 @@ The following IOCTLs are also supported by the device:
-   between PCI Function Framework number (used by the event system)
-   and Switchtec Logic Port ID and Partition number (which is more
-   user friendly).
-+
-+
-+Non-Transparent Bridge (NTB) Driver
-+===================================
-+
-+An NTB driver is provided for the switchtec hardware in switchec_ntb.
-+Currently, it only supports switches configured with exactly 2
-+partitions. It also requires the following configuration settings:
-+
-+* Both partitions must be able to access each other's GAS spaces.
-+  Thus, the bits in the GAS Access Vector under Management Settings
-+  must be set to support this.
--- 
-2.11.0
+Note that we could theoretically define ARM to use strd/ldrd
+for writeq/readq, but I would expect that to be wrong with many
+other devices that can use the existing io-64-nonatomic headers.
 
+The comment in set_scanout() suggests that we actually do rely
+on the write64 to be atomic, so we probably don't want to change
+this driver.
+
+         Arnd
