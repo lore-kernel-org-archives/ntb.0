@@ -1,46 +1,53 @@
-Return-Path: <logang@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id 81si425830ith.1.2017.06.28.09.03.05
+Return-Path: <arndbergmann@gmail.com>
+Received: from mail-it0-x241.google.com (mail-it0-x241.google.com. [2607:f8b0:4001:c0b::241])
+        by gmr-mx.google.com with ESMTPS id 23si246537ith.6.2017.06.28.03.20.52
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 28 Jun 2017 09:03:05 -0700 (PDT)
-References: <20170627230204.16410-1-logang@deltatee.com>
- <20170627230204.16410-2-logang@deltatee.com>
- <CAK8P3a2tL5wdCRscpyb6fW+LQVM05urud=YQRS-3+=4w53rmvg@mail.gmail.com>
-From: Logan Gunthorpe <logang@deltatee.com>
-Message-ID: <e32bd057-2069-63c9-b75d-3a97a736d898@deltatee.com>
-Date: Wed, 28 Jun 2017 10:02:57 -0600
+        Wed, 28 Jun 2017 03:20:52 -0700 (PDT)
+Received: by mail-it0-x241.google.com with SMTP id o202so2746846itc.1
+        for <linux-ntb@googlegroups.com>; Wed, 28 Jun 2017 03:20:52 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <CAK8P3a2tL5wdCRscpyb6fW+LQVM05urud=YQRS-3+=4w53rmvg@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Subject: Re: [PATCH v2 1/3] io-64-nonatomic: add io{read|write}64[be] macros
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-arch <linux-arch@vger.kernel.org>, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jyri Sarha <jsarha@ti.com>, Stephen Bates <sbates@raithlin.com>, Christoph Hellwig <hch@lst.de>, Alan Cox <gnomes@lxorguk.ukuu.org.uk>
+Sender: arndbergmann@gmail.com
+In-Reply-To: <20170627230204.16410-4-logang@deltatee.com>
+References: <20170627230204.16410-1-logang@deltatee.com> <20170627230204.16410-4-logang@deltatee.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Date: Wed, 28 Jun 2017 12:20:51 +0200
+Message-ID: <CAK8P3a1mXeH+qdW=MFKO7i4oXw3yfLj-QU=09Y=MvD5y-T4zmw@mail.gmail.com>
+Subject: Re: [PATCH v2 3/3] crypto: caam: cleanup CONFIG_64BIT ifdefs when
+ using io{read|write}64
+Content-Type: text/plain; charset="UTF-8"
+To: Logan Gunthorpe <logang@deltatee.com>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-arch <linux-arch@vger.kernel.org>, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jyri Sarha <jsarha@ti.com>, Stephen Bates <sbates@raithlin.com>, =?UTF-8?Q?Horia_Geant=C4=83?= <horia.geanta@nxp.com>, Dan Douglass <dan.douglass@nxp.com>, Herbert Xu <herbert@gondor.apana.org.au>, "David S. Miller" <davem@davemloft.net>
 List-ID: <linux-ntb.googlegroups.com>
 
+On Wed, Jun 28, 2017 at 1:02 AM, Logan Gunthorpe <logang@deltatee.com> wrote:
+>  #include <linux/types.h>
+>  #include <linux/bitops.h>
+> -#include <linux/io.h>
+> +#include <linux/io-64-nonatomic-hi-lo.h>
 
+Here you include the hi-lo variant unconditionally.
 
-On 28/06/17 04:11 AM, Arnd Bergmann wrote:
-> This is wrong since ioread* is not the same read* on x86 and other
-> architectures that have native PCI PIO accessors, or that require
-> additional barriers for those.
-> 
-> You have to copy hi_lo_readq() here, and call ioread32 twice instead
-> of calling readl() twice. Same for iowrite64.
-> 
->> +#ifndef ioread64be
->> +#define ioread64be(p) be64_to_cpu(ioread64(p))
->> +#endif
-> 
-> This has another problem: ioread64() is defined to access little-endian
-> registers, just like readq(). This means that instead of be64_to_cpu()
-> you need swab64() and always perform the byte swap, otherwise this
-> would be broken on big-endian architectures.
+> -#else /* CONFIG_64BIT */
+> -static inline void wr_reg64(void __iomem *reg, u64 data)
+> -{
+> -#ifndef CONFIG_CRYPTO_DEV_FSL_CAAM_IMX
+> -       if (caam_little_end) {
+> -               wr_reg32((u32 __iomem *)(reg) + 1, data >> 32);
+> -               wr_reg32((u32 __iomem *)(reg), data);
+> -       } else
+>  #endif
+> -       {
+> -               wr_reg32((u32 __iomem *)(reg), data >> 32);
+> -               wr_reg32((u32 __iomem *)(reg) + 1, data);
+> -       }
+> +               iowrite64be(data, reg);
+>  }
 
-Ah, ok, understood. I'll see if I can fix both these issues.
+However, the #else path here uses lo-hi instead. I guess we have
+to decide how to define iowrite64be_lo_hi() first: it could
+either byteswap the 64-bit value first, then write the two halves,
+or it could write the two halves, doing a 32-bit byte swap on
+each.
 
-Thanks,
-
-Logan
-
+       Arnd
