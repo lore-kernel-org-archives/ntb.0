@@ -1,67 +1,58 @@
-Return-Path: <logang@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id c18si462022itb.2.2017.06.29.15.14.59
+Return-Path: <Allen.Hubbe@dell.com>
+Received: from esa4.dell-outbound.iphmx.com (esa4.dell-outbound.iphmx.com. [68.232.149.214])
+        by gmr-mx.google.com with ESMTPS id b198si406236ywa.7.2017.06.29.14.36.13
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 29 Jun 2017 15:14:59 -0700 (PDT)
-References: <20170629032648.3073-1-logang@deltatee.com>
- <20170629032648.3073-7-logang@deltatee.com>
- <000301d2f103$3310ca60$99325f20$@dell.com>
- <079047c1-6612-2814-e147-844fabd56b75@deltatee.com>
- <000401d2f114$3499f2b0$9dcdd810$@dell.com>
- <63c4b0fa-2f03-6313-2d60-c6dab53bc3a5@deltatee.com>
- <000501d2f11f$af340d70$0d9c2850$@dell.com>
-From: Logan Gunthorpe <logang@deltatee.com>
-Message-ID: <470752c9-53f5-aa21-96c5-3fdc9b3d9e7c@deltatee.com>
-Date: Thu, 29 Jun 2017 16:14:51 -0600
+        Thu, 29 Jun 2017 14:36:14 -0700 (PDT)
+From: "Allen Hubbe" <Allen.Hubbe@dell.com>
+References: <20170629032648.3073-1-logang@deltatee.com> <20170629032648.3073-7-logang@deltatee.com> <000301d2f103$3310ca60$99325f20$@dell.com> <079047c1-6612-2814-e147-844fabd56b75@deltatee.com> <000401d2f114$3499f2b0$9dcdd810$@dell.com> <63c4b0fa-2f03-6313-2d60-c6dab53bc3a5@deltatee.com> 
+In-Reply-To: 
+Subject: RE: [PATCH 06/16] ntb: add check and comment for link up to mw_count and mw_get_align
+Date: Thu, 29 Jun 2017 17:35:50 -0400
+Message-ID: <000501d2f11f$af340d70$0d9c2850$@dell.com>
 MIME-Version: 1.0
-In-Reply-To: <000501d2f11f$af340d70$0d9c2850$@dell.com>
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain;
+	charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Subject: Re: [PATCH 06/16] ntb: add check and comment for link up to mw_count
- and mw_get_align
-To: Allen Hubbe <Allen.Hubbe@dell.com>, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Language: en-us
+To: 'Logan Gunthorpe' <logang@deltatee.com>, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: 'Jon Mason' <jdmason@kudzu.us>, 'Dave Jiang' <dave.jiang@intel.com>, 'Bjorn Helgaas' <bhelgaas@google.com>, 'Greg Kroah-Hartman' <gregkh@linuxfoundation.org>, 'Kurt Schwemmer' <kurt.schwemmer@microsemi.com>, 'Stephen Bates' <sbates@raithlin.com>, 'Serge Semin' <fancer.lancer@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On 29/06/17 03:35 PM, Allen Hubbe wrote:
->> It is not a workaround for alignment restrictions of the mws.  It is a restriction to avoid the use of
->> doorbells and scratchpads.  Memory windows are used exclusively.
->>
->> Read msi-x local <addr,data> and send that to the peer:
+Let me try that again...
+
+From: Hubbe, Allen
+> From: Logan Gunthorpe
+> > On 6/29/2017 2:13 PM, Allen Hubbe wrote:
+> > > Unfortunately, it is to work around hardware errata.  That is not so trivial to fix.
+> >
+> > Can you describe more what the work around is doing? Can you share the
+> > code? It seems odd that a workaround is based on the alignment
+> > restrictions of the mws.
 > 
-> https://github.com/ntrdma/ntrdma/blob/master/drivers/ntc/ntc_ntb_msi.c#L583
+> Sure, while not making any claim that this is ready for upstream.
 > 
->> Transform peer's addr to the memory window region:
+> It is not a workaround for alignment restrictions of the mws.  It is a restriction to avoid the use of
+> doorbells and scratchpads.  Memory windows are used exclusively.
 > 
-> https://github.com/ntrdma/ntrdma/blob/master/drivers/ntc/ntc_ntb_msi.c#L603
+> Read msi-x local <addr,data> and send that to the peer:
+
+https://github.com/ntrdma/ntrdma/blob/master/drivers/ntc/ntc_ntb_msi.c#L583
+
+> Transform peer's addr to the memory window region:
+
+https://github.com/ntrdma/ntrdma/blob/master/drivers/ntc/ntc_ntb_msi.c#L603
+
+> Append a dma immediate value operation after other operations, to write the data at addr:
+
+https://github.com/ntrdma/ntrdma/blob/master/drivers/ntc/ntc_ntb_msi.c#L1195
+
 > 
->> Append a dma immediate value operation after other operations, to write the data at addr:
+> Above describes the workaround.
 > 
-> https://github.com/ntrdma/ntrdma/blob/master/drivers/ntc/ntc_ntb_msi.c#L1195
+> Used in the context of a rdma-over-ntb driver here:
+> https://github.com/ntrdma/ntrdma/blob/master/drivers/infiniband/hw/ntrdma/ntrdma_qp.c#L1585
+> 
+> >
+> > Logan
 
-
-Ok, I'm a little bit confused at the links you are pointing me to. The
-patch you nak'd only makes changes to ntb_mw_get_align and ntb_mw_count:
-
-1) ntb_mw_get_align gets the last two parameters of what was formerly
-ntb_mw_get_range. However, the only two uses of get_range I can find in
-the ntrdma code set those two parameters to NULL and thus would not use
-ntb_mw_get_align.
-
-2) ntb_mw_count is technically a new function (ntb_peer_mw_count is
-equivalent to the old function of that name). However, the one place in
-ntrdma where it would be called is during de-initialization. So if the
-link goes down before deinit, the client will not correctly clean up all
-the memory windows.
-
-So, it seems to me that ntb_mw_get_align is fine the way I have it but
-we should probably change ntb_mw_count: I'll get rid of the check for
-link in that function and then have the switchtec driver locally cache
-the peer's memory windows whenever the link goes up. So if the link is
-down it will return the number of mws the last time the link was seen.
-(And if the link was never seen it will return 0).
-
-Thoughts?
-
-Logan
