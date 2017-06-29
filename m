@@ -1,42 +1,97 @@
-Return-Path: <logang@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id 129si520704ith.2.2017.06.29.12.00.19
+Return-Path: <Allen.Hubbe@dell.com>
+Received: from esa8.dell-outbound.iphmx.com (esa8.dell-outbound.iphmx.com. [68.232.149.218])
+        by gmr-mx.google.com with ESMTPS id p67si365931ywg.9.2017.06.29.11.12.11
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 29 Jun 2017 12:00:19 -0700 (PDT)
-References: <20170629032648.3073-1-logang@deltatee.com>
- <20170629032648.3073-7-logang@deltatee.com>
- <000301d2f103$3310ca60$99325f20$@dell.com>
-From: Logan Gunthorpe <logang@deltatee.com>
-Message-ID: <079047c1-6612-2814-e147-844fabd56b75@deltatee.com>
-Date: Thu, 29 Jun 2017 13:00:06 -0600
+        Thu, 29 Jun 2017 11:12:11 -0700 (PDT)
+From: "Allen Hubbe" <Allen.Hubbe@dell.com>
+References: <20170629032648.3073-1-logang@deltatee.com> <20170629032648.3073-7-logang@deltatee.com>
+In-Reply-To: <20170629032648.3073-7-logang@deltatee.com>
+Subject: RE: [PATCH 06/16] ntb: add check and comment for link up to mw_count and mw_get_align
+Date: Thu, 29 Jun 2017 14:11:56 -0400
+Message-ID: <000301d2f103$3310ca60$99325f20$@dell.com>
 MIME-Version: 1.0
-In-Reply-To: <000301d2f103$3310ca60$99325f20$@dell.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Subject: Re: [PATCH 06/16] ntb: add check and comment for link up to mw_count
- and mw_get_align
-To: Allen Hubbe <Allen.Hubbe@dell.com>, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+Content-Language: en-us
+To: 'Logan Gunthorpe' <logang@deltatee.com>, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: 'Jon Mason' <jdmason@kudzu.us>, 'Dave Jiang' <dave.jiang@intel.com>, 'Bjorn Helgaas' <bhelgaas@google.com>, 'Greg Kroah-Hartman' <gregkh@linuxfoundation.org>, 'Kurt Schwemmer' <kurt.schwemmer@microsemi.com>, 'Stephen Bates' <sbates@raithlin.com>, 'Serge Semin' <fancer.lancer@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On 6/29/2017 12:11 PM, Allen Hubbe wrote:
-> Nak.  This breaks a work around for stability issues on some hardware.  I am ok with changing the comment to say, this is only supported when called after link up.  I would still like to allow these to be called at any time.  Specific hardware drivers like Switchtec may return an error.  Upstream drivers, of course, should call these after link up: patch 5/16 part of this set looks good.
+From: Logan Gunthorpe
+> This patch adds a comment and a check to the ntb_mw_get_align and
+> ntb_mw_count functions so that they always fail if the function is
+> called before the link is up.
+>=20
+> This is to prevent accidental mis-use in clients that are testing
+> on hardware that this doesn't matter for.
+>=20
+> Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
 
-If absolutely necessary I can leave this out. But in terms of interface 
-design it's _so_ much better to have it in. This change would bring the 
-score from a 3 to a 5 on Rusty Russel's Hard to Misuse ranking[1]. To 
-quote Rusty:
+Nak.  This breaks a work around for stability issues on some hardware.  =
+I am ok with changing the comment to say, this is only supported when =
+called after link up.  I would still like to allow these to be called at =
+any time.  Specific hardware drivers like Switchtec may return an error. =
+ Upstream drivers, of course, should call these after link up: patch =
+5/16 part of this set looks good.
 
-"3. Read the documentation and you'll get it right.
-People only read instructions after they've already tied themselves into 
-a knot. Then they skim them for keywords and don't read your warnings. I 
-don't give an example of this; if this is the best an interface can get 
-do, it's in trouble."
+> ---
+>  include/linux/ntb.h | 11 +++++++++--
+>  1 file changed, 9 insertions(+), 2 deletions(-)
+>=20
+> diff --git a/include/linux/ntb.h b/include/linux/ntb.h
+> index 609e232c00da..de4f800c82b6 100644
+> --- a/include/linux/ntb.h
+> +++ b/include/linux/ntb.h
+> @@ -730,12 +730,16 @@ static inline int ntb_link_disable(struct =
+ntb_dev *ntb)
+>   * Hardware and topology may support a different number of memory =
+windows.
+>   * Moreover different peer devices can support different number of =
+memory
+>   * windows. Simply speaking this method returns the number of =
+possible inbound
+> - * memory windows to share with specified peer device.
+> + * memory windows to share with specified peer device. Note: this =
+must only be
+> + * called when the link is up.
+>   *
+>   * Return: the number of memory windows.
+>   */
+>  static inline int ntb_mw_count(struct ntb_dev *ntb, int pidx)
+>  {
+> +	if (!(ntb_link_is_up(ntb, NULL, NULL) & (1 << pidx)))
+> +		return 0;
+> +
+>  	return ntb->ops->mw_count(ntb, pidx);
+>  }
+>=20
+> @@ -751,7 +755,7 @@ static inline int ntb_mw_count(struct ntb_dev =
+*ntb, int pidx)
+>   * Get the alignments of an inbound memory window with specified =
+index.
+>   * NULL may be given for any output parameter if the value is not =
+needed.
+>   * The alignment and size parameters may be used for allocation of =
+proper
+> - * shared memory.
+> + * shared memory. Note: this must only be called when the link is up.
+>   *
+>   * Return: Zero on success, otherwise a negative error number.
+>   */
+> @@ -760,6 +764,9 @@ static inline int ntb_mw_get_align(struct ntb_dev =
+*ntb, int pidx, int widx,
+>  				   resource_size_t *size_align,
+>  				   resource_size_t *size_max)
+>  {
+> +	if (!(ntb_link_is_up(ntb, NULL, NULL) & (1 << pidx)))
+> +		return -ENOTCONN;
+> +
+>  	return ntb->ops->mw_get_align(ntb, pidx, widx, addr_align, =
+size_align,
+>  				      size_max);
+>  }
+> --
+> 2.11.0
 
-Can someone not just fix the out-of-tree code? And since when is 
-out-of-tree code reasonable justification for what's done in upstream?
-
-Logan
-
-[1]http://ozlabs.org/~rusty/index.cgi/tech/2008-03-30.html
