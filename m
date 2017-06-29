@@ -1,84 +1,48 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id f203si522264itf.4.2017.06.29.09.10.05
+        by gmr-mx.google.com with ESMTPS id g196si501868itb.1.2017.06.29.09.10.05
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
         Thu, 29 Jun 2017 09:10:05 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Thu, 29 Jun 2017 10:09:59 -0600
-Message-Id: <20170629161000.15563-4-logang@deltatee.com>
-In-Reply-To: <20170629161000.15563-1-logang@deltatee.com>
-References: <20170629161000.15563-1-logang@deltatee.com>
-Subject: [PATCH v3 3/4] ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
+Date: Thu, 29 Jun 2017 10:09:56 -0600
+Message-Id: <20170629161000.15563-1-logang@deltatee.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+Subject: [PATCH v3 0/4] make io{read|write}64 more globally usable
 To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org
-Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Stephen Bates <sbates@raithlin.com>, Logan Gunthorpe <logang@deltatee.com>, Jon Mason <jdmason@kudzu.us>, Allen Hubbe <Allen.Hubbe@emc.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Stephen Bates <sbates@raithlin.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Now that ioread64 and iowrite64 are available in io-64-nonatomic,
-we can remove the hack at the top of ntb_hw_intel.c and replace it
-with an include.
+Hi,
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Cc: Jon Mason <jdmason@kudzu.us>
-Cc: Allen Hubbe <Allen.Hubbe@emc.com>
-Acked-by: Dave Jiang <dave.jiang@intel.com>
----
- drivers/ntb/hw/intel/ntb_hw_intel.c | 31 +------------------------------
- 1 file changed, 1 insertion(+), 30 deletions(-)
+Here's my third attempt. This time we add functions to io-64-nonatomic-*
+which call io{read|write}32 twice so that the pio is done correctly.
 
-diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c b/drivers/ntb/hw/intel/ntb_hw_intel.c
-index 7b3b6fd63d7d..13978bca47b8 100644
---- a/drivers/ntb/hw/intel/ntb_hw_intel.c
-+++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
-@@ -57,6 +57,7 @@
- #include <linux/random.h>
- #include <linux/slab.h>
- #include <linux/ntb.h>
-+#include <linux/io-64-nonatomic-lo-hi.h>
- 
- #include "ntb_hw_intel.h"
- 
-@@ -153,35 +154,6 @@ MODULE_PARM_DESC(xeon_b2b_dsd_bar5_addr32,
- static inline enum ntb_topo xeon_ppd_topo(struct intel_ntb_dev *ndev, u8 ppd);
- static int xeon_init_isr(struct intel_ntb_dev *ndev);
- 
--#ifndef ioread64
--#ifdef readq
--#define ioread64 readq
--#else
--#define ioread64 _ioread64
--static inline u64 _ioread64(void __iomem *mmio)
--{
--	u64 low, high;
--
--	low = ioread32(mmio);
--	high = ioread32(mmio + sizeof(u32));
--	return low | (high << 32);
--}
--#endif
--#endif
--
--#ifndef iowrite64
--#ifdef writeq
--#define iowrite64 writeq
--#else
--#define iowrite64 _iowrite64
--static inline void _iowrite64(u64 val, void __iomem *mmio)
--{
--	iowrite32(val, mmio);
--	iowrite32(val >> 32, mmio + sizeof(u32));
--}
--#endif
--#endif
--
- static inline int pdev_is_atom(struct pci_dev *pdev)
- {
- 	switch (pdev->device) {
-@@ -3008,4 +2980,3 @@ static void __exit intel_ntb_pci_driver_exit(void)
- 	debugfs_remove_recursive(debugfs_dir);
- }
- module_exit(intel_ntb_pci_driver_exit);
--
--- 
+I've also included a patch that adds these functions to the generic iomap
+library so that readq/writeq can be used while still splitting pio
+operations (when appropriate).
+
+Thanks,
+
+Logan
+
+Horia Geantă (1):
+  crypto: caam: cleanup CONFIG_64BIT ifdefs when using io{read|write}64
+
+Logan Gunthorpe (3):
+  iomap: introduce io{read|write}64_{lo_hi|hi_lo}
+  io-64-nonatomic: add io{read|write}64[be]{_lo_hi|_hi_lo} macros
+  ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
+
+ drivers/crypto/caam/regs.h            |  35 ++-------
+ drivers/ntb/hw/intel/ntb_hw_intel.c   |  31 +-------
+ include/asm-generic/iomap.h           |  26 +++++--
+ include/linux/io-64-nonatomic-hi-lo.h |  62 ++++++++++++++++
+ include/linux/io-64-nonatomic-lo-hi.h |  60 ++++++++++++++++
+ lib/iomap.c                           | 132 ++++++++++++++++++++++++++++++++++
+ 6 files changed, 280 insertions(+), 66 deletions(-)
+
+--
 2.11.0
-
