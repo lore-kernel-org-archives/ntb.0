@@ -1,58 +1,46 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id c18si317469itb.2.2017.06.28.20.27.05
+        by gmr-mx.google.com with ESMTPS id n194si1959itg.3.2017.06.28.20.27.04
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 28 Jun 2017 20:27:05 -0700 (PDT)
+        Wed, 28 Jun 2017 20:27:04 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Wed, 28 Jun 2017 21:26:34 -0600
-Message-Id: <20170629032648.3073-3-logang@deltatee.com>
+Date: Wed, 28 Jun 2017 21:26:39 -0600
+Message-Id: <20170629032648.3073-8-logang@deltatee.com>
 In-Reply-To: <20170629032648.3073-1-logang@deltatee.com>
 References: <20170629032648.3073-1-logang@deltatee.com>
-Subject: [PATCH 02/16] switchtec: export class symbol for use in upper layer driver
+Subject: [PATCH 07/16] ntb: ntb_test: ensure the link is up before trying to configure the mws
 To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-We export the class pointer symbol and add an extern define in the
-switchtec header file.
+After the link tests, there is a race on one side of the test for
+the link coming up. It's possible, in some cases, for the test script
+to write to the peer_trans files before the link has come up.
+
+To fix this we simply use the link event file to ensure both sides
+see the link as up before continuning.
 
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Reviewed-by: Stephen Bates <sbates@raithlin.com>
-Reviewed-by: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
 ---
- drivers/pci/switch/switchtec.c | 4 +++-
- include/linux/switchtec.h      | 2 ++
- 2 files changed, 5 insertions(+), 1 deletion(-)
+ tools/testing/selftests/ntb/ntb_test.sh | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-diff --git a/drivers/pci/switch/switchtec.c b/drivers/pci/switch/switchtec.c
-index a27b2bacad5a..fc139ee3fa73 100644
---- a/drivers/pci/switch/switchtec.c
-+++ b/drivers/pci/switch/switchtec.c
-@@ -33,9 +33,11 @@ module_param(max_devices, int, 0644);
- MODULE_PARM_DESC(max_devices, "max number of switchtec device instances");
+diff --git a/tools/testing/selftests/ntb/ntb_test.sh b/tools/testing/selftests/ntb/ntb_test.sh
+index 1c12b5855e4f..5fc7ad359e21 100755
+--- a/tools/testing/selftests/ntb/ntb_test.sh
++++ b/tools/testing/selftests/ntb/ntb_test.sh
+@@ -333,6 +333,10 @@ function ntb_tool_tests()
+ 	link_test $LOCAL_TOOL $REMOTE_TOOL
+ 	link_test $REMOTE_TOOL $LOCAL_TOOL
  
- static dev_t switchtec_devt;
--static struct class *switchtec_class;
- static DEFINE_IDA(switchtec_minor_ida);
- 
-+struct class *switchtec_class;
-+EXPORT_SYMBOL_GPL(switchtec_class);
++	#Ensure the link is up on both sides before continuing
++	write_file Y $LOCAL_TOOL/link_event
++	write_file Y $REMOTE_TOOL/link_event
 +
- enum mrpc_state {
- 	MRPC_IDLE = 0,
- 	MRPC_QUEUED,
-diff --git a/include/linux/switchtec.h b/include/linux/switchtec.h
-index 508cda78a430..24e598ebbcf7 100644
---- a/include/linux/switchtec.h
-+++ b/include/linux/switchtec.h
-@@ -267,4 +267,6 @@ static inline struct switchtec_dev *to_stdev(struct device *dev)
- 	return container_of(dev, struct switchtec_dev, dev);
- }
- 
-+extern struct class *switchtec_class;
-+
- #endif
+ 	for PEER_TRANS in $(ls $LOCAL_TOOL/peer_trans*); do
+ 		PT=$(basename $PEER_TRANS)
+ 		write_file $MW_SIZE $LOCAL_TOOL/$PT
 -- 
 2.11.0
 
