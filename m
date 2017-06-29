@@ -1,133 +1,107 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id c67si370997itb.5.2017.06.28.20.27.00
+        by gmr-mx.google.com with ESMTPS id c18si317459itb.2.2017.06.28.20.27.00
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 28 Jun 2017 20:27:01 -0700 (PDT)
+        Wed, 28 Jun 2017 20:27:00 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Wed, 28 Jun 2017 21:26:35 -0600
-Message-Id: <20170629032648.3073-4-logang@deltatee.com>
-In-Reply-To: <20170629032648.3073-1-logang@deltatee.com>
-References: <20170629032648.3073-1-logang@deltatee.com>
-Subject: [PATCH 03/16] switchtec: add ntb hardware register definitions
+Date: Wed, 28 Jun 2017 21:26:32 -0600
+Message-Id: <20170629032648.3073-1-logang@deltatee.com>
+Subject: [PATCH 00/16]
 To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-There are two additional regions: ctrl and dbmsg. The first is
-for generic ntb control and memory windows. The second for doorbells
-and message registers. This patch also adds a number of related
-constants for using these registers.
+Changes since the rfc:
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Reviewed-by: Stephen Bates <sbates@raithlin.com>
-Reviewed-by: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
----
- include/linux/switchtec.h | 84 +++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 84 insertions(+)
+- Rebased on ntb-next
+- Switched ntb_part_op to use sleep instead of delay
+- Dropped a number of useless dbg __func__ prints
+- Went back to the dynamic instead of the static class
+- Swapped the notifier block for a simple callback
+- Modified the new ntb api so that a couple functions with pidx
+  now must be called after link up. Per our discussion on the list.
 
-diff --git a/include/linux/switchtec.h b/include/linux/switchtec.h
-index 24e598ebbcf7..a75f3d7e6876 100644
---- a/include/linux/switchtec.h
-+++ b/include/linux/switchtec.h
-@@ -147,6 +147,12 @@ struct flash_info_regs {
- 	struct partition_info vendor[8];
- };
- 
-+enum {
-+	SWITCHTEC_NTB_REG_INFO_OFFSET   = 0x0000,
-+	SWITCHTEC_NTB_REG_CTRL_OFFSET   = 0x4000,
-+	SWITCHTEC_NTB_REG_DBMSG_OFFSET  = 0x64000,
-+};
-+
- struct ntb_info_regs {
- 	u8  partition_count;
- 	u8  partition_id;
-@@ -182,6 +188,84 @@ struct part_cfg_regs {
- } __packed;
- 
- enum {
-+	NTB_CTRL_PART_OP_LOCK = 0x1,
-+	NTB_CTRL_PART_OP_CFG = 0x2,
-+	NTB_CTRL_PART_OP_RESET = 0x3,
-+
-+	NTB_CTRL_PART_STATUS_NORMAL = 0x1,
-+	NTB_CTRL_PART_STATUS_LOCKED = 0x2,
-+	NTB_CTRL_PART_STATUS_LOCKING = 0x3,
-+	NTB_CTRL_PART_STATUS_CONFIGURING = 0x4,
-+	NTB_CTRL_PART_STATUS_RESETTING = 0x5,
-+
-+	NTB_CTRL_BAR_VALID = 1 << 0,
-+	NTB_CTRL_BAR_DIR_WIN_EN = 1 << 4,
-+	NTB_CTRL_BAR_LUT_WIN_EN = 1 << 5,
-+
-+	NTB_CTRL_REQ_ID_EN = 1 << 0,
-+
-+	NTB_CTRL_LUT_EN = 1 << 0,
-+
-+	NTB_PART_CTRL_ID_PROT_DIS = 1 << 0,
-+};
-+
-+struct ntb_ctrl_regs {
-+	u32 partition_status;
-+	u32 partition_op;
-+	u32 partition_ctrl;
-+	u32 bar_setup;
-+	u32 bar_error;
-+	u16 lut_table_entries;
-+	u16 lut_table_offset;
-+	u32 lut_error;
-+	u16 req_id_table_size;
-+	u16 req_id_table_offset;
-+	u32 req_id_error;
-+	u32 reserved1[7];
-+	struct {
-+		u32 ctl;
-+		u32 win_size;
-+		u64 xlate_addr;
-+	} bar_entry[6];
-+	u32 reserved2[216];
-+	u32 req_id_table[256];
-+	u32 reserved3[512];
-+	u64 lut_entry[512];
-+} __packed;
-+
-+#define NTB_DBMSG_IMSG_STATUS BIT_ULL(32)
-+#define NTB_DBMSG_IMSG_MASK   BIT_ULL(40)
-+
-+struct ntb_dbmsg_regs {
-+	u32 reserved1[1024];
-+	u64 odb;
-+	u64 odb_mask;
-+	u64 idb;
-+	u64 idb_mask;
-+	u8  idb_vec_map[64];
-+	u32 msg_map;
-+	u32 reserved2;
-+	struct {
-+		u32 msg;
-+		u32 status;
-+	} omsg[4];
-+
-+	struct {
-+		u32 msg;
-+		u8  status;
-+		u8  mask;
-+		u8  src;
-+		u8  reserved;
-+	} imsg[4];
-+
-+	u8 reserved3[3928];
-+	u8 msix_table[1024];
-+	u8 reserved4[3072];
-+	u8 pba[24];
-+	u8 reserved5[4072];
-+} __packed;
-+
-+enum {
- 	SWITCHTEC_PART_CFG_EVENT_RESET = 1 << 0,
- 	SWITCHTEC_PART_CFG_EVENT_MRPC_CMP = 1 << 1,
- 	SWITCHTEC_PART_CFG_EVENT_MRPC_ASYNC_CMP = 1 << 2,
--- 
+Also, please note, the first patch in the series will conflict with
+switchtec patches that are queued up for 4.13. So this shouldn't
+be merged until I can rebase it onto a later kernel. However, it
+is suitable for review.
+
+@Bjorn: per the discussion on the RFC, I think it's best if
+this series goes through the NTB tree. Therefore, we just need an ack
+from you when you have time.
+
+Thanks,
+
+Logan
+
+--
+
+This patchset implements Non-Transparent Bridge (NTB) support for the
+Microsemi Switchtec series of switches. We're looking for some
+review from the community at this point but hope to get it upstreamed
+for v4.14.
+
+Switchtec NTB support is configured over the same function and bar
+as the management endpoint. Thus, the new driver hooks into the
+management driver which we had merged in v4.12. We use the class
+interface API to register an NTB device for every switchtec device
+which supports NTB (not all do).
+
+The Switchtec hardware supports doorbells, memory windows and messages.
+Seeing there is no native scratchpad support, 128 spads are emulated
+through the use of a pre-setup memory window. The switch has 64
+doorbells which are shared between the two partitions and a
+configurable set of memory windows. While the hardware supports more
+than 2 partitions, this driver only supports the first two seeing
+the current NTB API only supports two hosts.
+
+The driver has been tested with ntb_netdev and fully passes the
+ntb_test script.
+
+This patchset is based off of ntb-next and can be found in this
+git repo:
+
+https://github.com/sbates130272/linux-p2pmem.git switchtec_ntb_next
+
+Logan Gunthorpe (16):
+  switchtec: move structure definitions into a common header
+  switchtec: export class symbol for use in upper layer driver
+  switchtec: add ntb hardware register definitions
+  switchtec: add link event notifier callback
+  ntb: ensure ntb_mw_get_align is only called when the link is up
+  ntb: add check and comment for link up to mw_count and mw_get_align
+  ntb: ntb_test: ensure the link is up before trying to configure the
+    mws
+  switchtec_ntb: introduce initial ntb driver
+  switchtec_ntb: initialize hardware for memory windows
+  switchtec_ntb: initialize hardware for doorbells and messages
+  switchtec_ntb: add skeleton ntb driver
+  switchtec_ntb: add link management
+  switchtec_ntb: implement doorbell registers
+  switchtec_ntb: implement scratchpad registers
+  switchtec_ntb: add memory window support
+  switchtec_ntb: update switchtec documentation with notes for ntb
+
+ Documentation/switchtec.txt             |   12 +
+ MAINTAINERS                             |    2 +
+ drivers/ntb/hw/Kconfig                  |    1 +
+ drivers/ntb/hw/Makefile                 |    1 +
+ drivers/ntb/hw/mscc/Kconfig             |    9 +
+ drivers/ntb/hw/mscc/Makefile            |    1 +
+ drivers/ntb/hw/mscc/switchtec_ntb.c     | 1188 +++++++++++++++++++++++++++++++
+ drivers/ntb/ntb_transport.c             |   20 +-
+ drivers/ntb/test/ntb_perf.c             |   18 +-
+ drivers/ntb/test/ntb_tool.c             |    6 +-
+ drivers/pci/switch/switchtec.c          |  304 ++------
+ include/linux/ntb.h                     |   14 +-
+ include/linux/switchtec.h               |  364 ++++++++++
+ tools/testing/selftests/ntb/ntb_test.sh |    4 +
+ 14 files changed, 1670 insertions(+), 274 deletions(-)
+ create mode 100644 drivers/ntb/hw/mscc/Kconfig
+ create mode 100644 drivers/ntb/hw/mscc/Makefile
+ create mode 100644 drivers/ntb/hw/mscc/switchtec_ntb.c
+ create mode 100644 include/linux/switchtec.h
+
+--
 2.11.0
-
