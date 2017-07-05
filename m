@@ -1,148 +1,29 @@
-Return-Path: <gunthorp@deltatee.com>
+Return-Path: <logang@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id z8si652351pfa.4.2017.07.18.09.04.22
+        by gmr-mx.google.com with ESMTPS id 125si1379532itx.5.2017.07.05.12.50.35
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 18 Jul 2017 09:04:22 -0700 (PDT)
+        Wed, 05 Jul 2017 12:50:35 -0700 (PDT)
+References: <20170629032648.3073-1-logang@deltatee.com>
+ <20170705194753.GM13824@bhelgaas-glaptop.roam.corp.google.com>
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Tue, 18 Jul 2017 10:03:57 -0600
-Message-Id: <20170718160409.6493-5-logang@deltatee.com>
-In-Reply-To: <20170718160409.6493-1-logang@deltatee.com>
-References: <20170718160409.6493-1-logang@deltatee.com>
-Subject: [PATCH v2 04/16] switchtec: add link event notifier callback
-To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>, Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <e5b7c6a8-c237-f22e-0cda-4300ce64d40c@deltatee.com>
+Date: Wed, 5 Jul 2017 13:50:22 -0600
+MIME-Version: 1.0
+In-Reply-To: <20170705194753.GM13824@bhelgaas-glaptop.roam.corp.google.com>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH 00/16]
+To: Bjorn Helgaas <helgaas@kernel.org>
+Cc: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-In order for the Switchtec NTB code to handle link change events we
-create a notifier callback in the switchtec code which gets called
-whenever an appropriate event interrupt occurs.
 
-In order to preserve userspace's ability to follow these events,
-we compare the event count with a stored copy from last time we
-checked.
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Reviewed-by: Stephen Bates <sbates@raithlin.com>
-Reviewed-by: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
-Acked-by: Bjorn Helgaas <bhelgaas@google.com>
----
- drivers/pci/switch/switchtec.c | 51 ++++++++++++++++++++++++++++++++++++++++++
- include/linux/switchtec.h      |  4 ++++
- 2 files changed, 55 insertions(+)
+On 05/07/17 01:47 PM, Bjorn Helgaas wrote:
+> Acked-by: Bjorn Helgaas <bhelgaas@google.com>
 
-diff --git a/drivers/pci/switch/switchtec.c b/drivers/pci/switch/switchtec.c
-index 39c9218d733f..807569e62bee 100644
---- a/drivers/pci/switch/switchtec.c
-+++ b/drivers/pci/switch/switchtec.c
-@@ -978,6 +978,49 @@ static const struct file_operations switchtec_fops = {
- 	.compat_ioctl = switchtec_dev_ioctl,
- };
- 
-+static void link_event_work(struct work_struct *work)
-+{
-+	struct switchtec_dev *stdev;
-+
-+	stdev = container_of(work, struct switchtec_dev, link_event_work);
-+
-+	if (stdev->link_notifier)
-+		stdev->link_notifier(stdev);
-+}
-+
-+static void check_link_state_events(struct switchtec_dev *stdev)
-+{
-+	int idx;
-+	u32 reg;
-+	int count;
-+	int occurred = 0;
-+
-+	for (idx = 0; idx < stdev->pff_csr_count; idx++) {
-+		reg = ioread32(&stdev->mmio_pff_csr[idx].link_state_hdr);
-+		dev_dbg(&stdev->dev, "link_state: %d->%08x\n", idx, reg);
-+		count = (reg >> 5) & 0xFF;
-+
-+		if (count != stdev->link_event_count[idx]) {
-+			occurred = 1;
-+			stdev->link_event_count[idx] = count;
-+		}
-+	}
-+
-+	if (occurred)
-+		schedule_work(&stdev->link_event_work);
-+}
-+
-+static void enable_link_state_events(struct switchtec_dev *stdev)
-+{
-+	int idx;
-+
-+	for (idx = 0; idx < stdev->pff_csr_count; idx++) {
-+		iowrite32(SWITCHTEC_EVENT_CLEAR |
-+			  SWITCHTEC_EVENT_EN_IRQ,
-+			  &stdev->mmio_pff_csr[idx].link_state_hdr);
-+	}
-+}
-+
- static void stdev_release(struct device *dev)
- {
- 	struct switchtec_dev *stdev = to_stdev(dev);
-@@ -1030,6 +1073,7 @@ static struct switchtec_dev *stdev_create(struct pci_dev *pdev)
- 	stdev->mrpc_busy = 0;
- 	INIT_WORK(&stdev->mrpc_work, mrpc_event_work);
- 	INIT_DELAYED_WORK(&stdev->mrpc_timeout, mrpc_timeout_work);
-+	INIT_WORK(&stdev->link_event_work, link_event_work);
- 	init_waitqueue_head(&stdev->event_wq);
- 	atomic_set(&stdev->event_cnt, 0);
- 
-@@ -1073,6 +1117,9 @@ static int mask_event(struct switchtec_dev *stdev, int eid, int idx)
- 	if (!(hdr & SWITCHTEC_EVENT_OCCURRED && hdr & SWITCHTEC_EVENT_EN_IRQ))
- 		return 0;
- 
-+	if (eid == SWITCHTEC_IOCTL_EVENT_LINK_STATE)
-+		return 0;
-+
- 	dev_dbg(&stdev->dev, "%s: %d %d %x\n", __func__, eid, idx, hdr);
- 	hdr &= ~(SWITCHTEC_EVENT_EN_IRQ | SWITCHTEC_EVENT_OCCURRED);
- 	iowrite32(hdr, hdr_reg);
-@@ -1092,6 +1139,7 @@ static int mask_all_events(struct switchtec_dev *stdev, int eid)
- 		for (idx = 0; idx < stdev->pff_csr_count; idx++) {
- 			if (!stdev->pff_local[idx])
- 				continue;
-+
- 			count += mask_event(stdev, eid, idx);
- 		}
- 	} else {
-@@ -1116,6 +1164,8 @@ static irqreturn_t switchtec_event_isr(int irq, void *dev)
- 		iowrite32(reg, &stdev->mmio_part_cfg->mrpc_comp_hdr);
- 	}
- 
-+	check_link_state_events(stdev);
-+
- 	for (eid = 0; eid < SWITCHTEC_IOCTL_MAX_EVENTS; eid++)
- 		event_count += mask_all_events(stdev, eid);
- 
-@@ -1242,6 +1292,7 @@ static int switchtec_pci_probe(struct pci_dev *pdev,
- 	iowrite32(SWITCHTEC_EVENT_CLEAR |
- 		  SWITCHTEC_EVENT_EN_IRQ,
- 		  &stdev->mmio_part_cfg->mrpc_comp_hdr);
-+	enable_link_state_events(stdev);
- 
- 	rc = cdev_device_add(&stdev->cdev, &stdev->dev);
- 	if (rc)
-diff --git a/include/linux/switchtec.h b/include/linux/switchtec.h
-index 9c2be7631257..d8159944f013 100644
---- a/include/linux/switchtec.h
-+++ b/include/linux/switchtec.h
-@@ -353,6 +353,10 @@ struct switchtec_dev {
- 
- 	wait_queue_head_t event_wq;
- 	atomic_t event_cnt;
-+
-+	struct work_struct link_event_work;
-+	void (*link_notifier)(struct switchtec_dev *stdev);
-+	u8 link_event_count[SWITCHTEC_MAX_PFF_CSR];
- };
- 
- static inline struct switchtec_dev *to_stdev(struct device *dev)
--- 
-2.11.0
+Thanks Bjorn. I'll make all the changes you've noted in a v2 which I'll
+send after the merge window.
 
+Logan
