@@ -1,106 +1,108 @@
-Return-Path: <gunthorp@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id y5si723493pff.2.2017.07.18.09.04.23
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-qk0-x242.google.com (mail-qk0-x242.google.com. [2607:f8b0:400d:c09::242])
+        by gmr-mx.google.com with ESMTPS id c74si672588ywh.3.2017.07.14.08.54.28
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 18 Jul 2017 09:04:23 -0700 (PDT)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Tue, 18 Jul 2017 10:03:53 -0600
-Message-Id: <20170718160409.6493-1-logang@deltatee.com>
-Subject: [PATCH v2 00/16] Switchtec NTB Support
-To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>, Logan Gunthorpe <logang@deltatee.com>
+        Fri, 14 Jul 2017 08:54:28 -0700 (PDT)
+Received: by mail-qk0-x242.google.com with SMTP id q66so12593962qki.1
+        for <linux-ntb@googlegroups.com>; Fri, 14 Jul 2017 08:54:28 -0700 (PDT)
+Return-Path: <jdmason@kudzu.us>
+From: Jon Mason <jdmason@kudzu.us>
+Date: Fri, 14 Jul 2017 11:54:20 -0400
+Subject: [GIT PULL] NTB bug fixes for v4.13
+Message-ID: <20170714155420.GA24043@graymalkin.kudzu.us>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+To: torvalds@linux-foundation.org
+Cc: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-Changes since v1:
+Hello Linus,
+Here are a number of NTB changes for 4.13.
 
-- Rebased onto latest ntb-next branch (with v4.13-rc1)
-- Reworked ntb_mw_count() function so that it can be called all the
-  time (per discussion with Allen)
-- Various spelling and formatting cleanups from Bjorn
-- Added request_module() call such that the NTB module is automatically
-  loaded when appropriate hardware exists.
+The major change in the series is a rework of the NTB infrastructure to
+all for IDT hardware to be supported (and resulting fallout from that).
+There are also a few clean-ups, etc.
 
---
+This series has been tested very heavily on the previous version of the
+kernel, and is compartmentalized to the ntb code.  So even if something
+was broken, there should be no ill effects to other subsystems.
 
-Changes since the rfc:
+Please consider pulling it.
 
-- Rebased on ntb-next
-- Switched ntb_part_op to use sleep instead of delay
-- Dropped a number of useless dbg __func__ prints
-- Went back to the dynamic instead of the static class
-- Swapped the notifier block for a simple callback
-- Modified the new ntb api so that a couple functions with pidx
-  now must be called after link up. Per our discussion on the list.
+Thanks,
+Jon
 
---
 
-This patchset implements Non-Transparent Bridge (NTB) support for the
-Microsemi Switchtec series of switches. We're looking for some
-review from the community at this point but hope to get it upstreamed
-for v4.14.
 
-Switchtec NTB support is configured over the same function and bar
-as the management endpoint. Thus, the new driver hooks into the
-management driver which we had merged in v4.12. We use the class
-interface API to register an NTB device for every switchtec device
-which supports NTB (not all do).
+The following changes since commit 6f7da290413ba713f0cdd9ff1a2a9bb129ef4f6c:
 
-The Switchtec hardware supports doorbells, memory windows and messages.
-Seeing there is no native scratchpad support, 128 spads are emulated
-through the use of a pre-setup memory window. The switch has 64
-doorbells which are shared between the two partitions and a
-configurable set of memory windows. While the hardware supports more
-than 2 partitions, this driver only supports the first two seeing
-the current NTB API only supports two hosts.
+  Linux 4.12 (2017-07-02 16:07:02 -0700)
 
-The driver has been tested with ntb_netdev and fully passes the
-ntb_test script.
+are available in the git repository at:
 
-This patchset is based off of ntb-next and can be found in this
-git repo:
+  git://github.com/jonmason/ntb tags/ntb-4.13
 
-https://github.com/sbates130272/linux-p2pmem.git switchtec_ntb_v2
+for you to fetch changes up to 854b1dd9c39d8c8c8647a44de47ef18506ae11f9:
 
-Logan Gunthorpe (16):
-  switchtec: move structure definitions into a common header
-  switchtec: export class symbol for use in upper layer driver
-  switchtec: add NTB hardware register definitions
-  switchtec: add link event notifier callback
-  ntb: ensure ntb_mw_get_align() is only called when the link is up
-  ntb: add check and comment for link up to mw_count() and
-    mw_get_align()
-  ntb: ntb_test: ensure the link is up before trying to configure the
-    mws
-  switchtec_ntb: introduce initial NTB driver
-  switchtec_ntb: initialize hardware for memory windows
-  switchtec_ntb: initialize hardware for doorbells and messages
-  switchtec_ntb: add skeleton NTB driver
-  switchtec_ntb: add link management
-  switchtec_ntb: implement doorbell registers
-  switchtec_ntb: implement scratchpad registers
-  switchtec_ntb: add memory window support
-  switchtec_ntb: update switchtec documentation with notes for NTB
+  ntb_netdev: set the net_device's parent (2017-07-06 11:30:08 -0400)
 
- Documentation/switchtec.txt             |   12 +
- MAINTAINERS                             |    2 +
+----------------------------------------------------------------
+New IDT NTB driver and changes to the NTB infrastructure to allow for
+this different kind of NTB HW, some style fixes (per Greg KH
+recommendation), and some ntb_test tweaks.
+
+----------------------------------------------------------------
+Allen Hubbe (2):
+      NTB: ntb_test: modprobe on remote host
+      NTB: ntb_test: add parameter for doorbell bitmask
+
+Gary R Hook (4):
+      ntb: Add a module option to control affinity of DMA channels
+      ntb: Remove debug-fs variables from the context structure
+      ntb: Add more debugfs support for ntb_perf testing options
+      ntb: Add error path/handling to Debug FS entry creation
+
+Logan Gunthorpe (3):
+      ntb_hw_amd: Style fixes: open code macros that just obfuscate code
+      ntb_hw_intel: Style fixes: open code macros that just obfuscate code
+      ntb_netdev: set the net_device's parent
+
+Serge Semin (10):
+      NTB: Make link-state API being declared first
+      NTB: Add indexed ports NTB API
+      NTB: Alter link-state API to support multi-port devices
+      NTB: Alter MW API to support multi-ports devices
+      NTB: Alter Scratchpads API to support multi-ports devices
+      NTB: Add Messaging NTB API
+      NTB: Add new Memory Windows API documentation
+      NTB: Add PCIe Gen4 link speed
+      NTB: Add ntb.h comments
+      NTB: Add IDT 89HPESxNTx PCIe-switches support
+
+ Documentation/ntb.txt                   |   99 +-
+ MAINTAINERS                             |    6 +
+ drivers/net/ntb_netdev.c                |    2 +
  drivers/ntb/hw/Kconfig                  |    1 +
  drivers/ntb/hw/Makefile                 |    1 +
- drivers/ntb/hw/mscc/Kconfig             |    9 +
- drivers/ntb/hw/mscc/Makefile            |    1 +
- drivers/ntb/hw/mscc/switchtec_ntb.c     | 1213 +++++++++++++++++++++++++++++++
- drivers/ntb/ntb_transport.c             |   20 +-
- drivers/ntb/test/ntb_perf.c             |   18 +-
- drivers/ntb/test/ntb_tool.c             |    6 +-
- drivers/pci/switch/switchtec.c          |  316 ++------
- include/linux/ntb.h                     |   11 +-
- include/linux/switchtec.h               |  373 ++++++++++
- tools/testing/selftests/ntb/ntb_test.sh |    4 +
- 14 files changed, 1704 insertions(+), 283 deletions(-)
- create mode 100644 drivers/ntb/hw/mscc/Kconfig
- create mode 100644 drivers/ntb/hw/mscc/Makefile
- create mode 100644 drivers/ntb/hw/mscc/switchtec_ntb.c
- create mode 100644 include/linux/switchtec.h
-
---
-2.11.0
+ drivers/ntb/hw/amd/ntb_hw_amd.c         |  139 +-
+ drivers/ntb/hw/amd/ntb_hw_amd.h         |    3 -
+ drivers/ntb/hw/idt/Kconfig              |   31 +
+ drivers/ntb/hw/idt/Makefile             |    1 +
+ drivers/ntb/hw/idt/ntb_hw_idt.c         | 2712 +++++++++++++++++++++++++++++++
+ drivers/ntb/hw/idt/ntb_hw_idt.h         | 1149 +++++++++++++
+ drivers/ntb/hw/intel/ntb_hw_intel.c     |  298 ++--
+ drivers/ntb/hw/intel/ntb_hw_intel.h     |    3 -
+ drivers/ntb/ntb.c                       |   69 +
+ drivers/ntb/ntb_transport.c             |   42 +-
+ drivers/ntb/test/ntb_perf.c             |  109 +-
+ drivers/ntb/test/ntb_pingpong.c         |   14 +-
+ drivers/ntb/test/ntb_tool.c             |   69 +-
+ include/linux/ntb.h                     |  721 ++++++--
+ tools/testing/selftests/ntb/ntb_test.sh |   11 +-
+ 20 files changed, 5120 insertions(+), 360 deletions(-)
+ create mode 100644 drivers/ntb/hw/idt/Kconfig
+ create mode 100644 drivers/ntb/hw/idt/Makefile
+ create mode 100644 drivers/ntb/hw/idt/ntb_hw_idt.c
+ create mode 100644 drivers/ntb/hw/idt/ntb_hw_idt.h
