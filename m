@@ -1,160 +1,46 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id s18si641965pfs.14.2017.07.18.09.04.23
+        by gmr-mx.google.com with ESMTPS id e70si729165pfb.7.2017.07.18.09.04.23
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 18 Jul 2017 09:04:24 -0700 (PDT)
+        Tue, 18 Jul 2017 09:04:23 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Tue, 18 Jul 2017 10:03:58 -0600
-Message-Id: <20170718160409.6493-6-logang@deltatee.com>
+Date: Tue, 18 Jul 2017 10:04:00 -0600
+Message-Id: <20170718160409.6493-8-logang@deltatee.com>
 In-Reply-To: <20170718160409.6493-1-logang@deltatee.com>
 References: <20170718160409.6493-1-logang@deltatee.com>
-Subject: [PATCH v2 05/16] ntb: ensure ntb_mw_get_align() is only called when the link is up
+Subject: [PATCH v2 07/16] ntb: ntb_test: ensure the link is up before trying to configure the mws
 To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-With Switchtec hardware it's impossible to get the alignment parameters
-for a peer's memory window until the peer's driver has configured it's
-windows. Strictly speaking, the link doesn't have to be up for this,
-but the link being up is the only way the client can tell that
-the otherside has been configured.
+After the link tests, there is a race on one side of the test for
+the link coming up. It's possible, in some cases, for the test script
+to write to the 'peer_trans' files before the link has come up.
 
-This patch converts ntb_transport and ntb_perf to use this function after
-the link goes up. This simplifies these clients slightly because they
-no longer have to store the alignment parameters. It also tweaks
-ntb_tool so that peer_mw_trans will print zero if it is run before
-the link goes up.
+To fix this, we simply use the link event file to ensure both sides
+see the link as up before continuning.
 
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
 ---
- drivers/ntb/ntb_transport.c | 20 ++++++++++----------
- drivers/ntb/test/ntb_perf.c | 18 +++++++++---------
- drivers/ntb/test/ntb_tool.c |  6 +++---
- 3 files changed, 22 insertions(+), 22 deletions(-)
+ tools/testing/selftests/ntb/ntb_test.sh | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index b29558ddfe95..7ed745aaa213 100644
---- a/drivers/ntb/ntb_transport.c
-+++ b/drivers/ntb/ntb_transport.c
-@@ -191,8 +191,6 @@ struct ntb_transport_qp {
- struct ntb_transport_mw {
- 	phys_addr_t phys_addr;
- 	resource_size_t phys_size;
--	resource_size_t xlat_align;
--	resource_size_t xlat_align_size;
- 	void __iomem *vbase;
- 	size_t xlat_size;
- 	size_t buff_size;
-@@ -687,13 +685,20 @@ static int ntb_set_mw(struct ntb_transport_ctx *nt, int num_mw,
- 	struct ntb_transport_mw *mw = &nt->mw_vec[num_mw];
- 	struct pci_dev *pdev = nt->ndev->pdev;
- 	size_t xlat_size, buff_size;
-+	resource_size_t xlat_align;
-+	resource_size_t xlat_align_size;
- 	int rc;
+diff --git a/tools/testing/selftests/ntb/ntb_test.sh b/tools/testing/selftests/ntb/ntb_test.sh
+index 1c12b5855e4f..5fc7ad359e21 100755
+--- a/tools/testing/selftests/ntb/ntb_test.sh
++++ b/tools/testing/selftests/ntb/ntb_test.sh
+@@ -333,6 +333,10 @@ function ntb_tool_tests()
+ 	link_test $LOCAL_TOOL $REMOTE_TOOL
+ 	link_test $REMOTE_TOOL $LOCAL_TOOL
  
- 	if (!size)
- 		return -EINVAL;
- 
--	xlat_size = round_up(size, mw->xlat_align_size);
--	buff_size = round_up(size, mw->xlat_align);
-+	rc = ntb_mw_get_align(nt->ndev, PIDX, num_mw, &xlat_align,
-+			      &xlat_align_size, NULL);
-+	if (rc)
-+		return rc;
++	#Ensure the link is up on both sides before continuing
++	write_file Y $LOCAL_TOOL/link_event
++	write_file Y $REMOTE_TOOL/link_event
 +
-+	xlat_size = round_up(size, xlat_align_size);
-+	buff_size = round_up(size, xlat_align);
- 
- 	/* No need to re-setup */
- 	if (mw->xlat_size == xlat_size)
-@@ -722,7 +727,7 @@ static int ntb_set_mw(struct ntb_transport_ctx *nt, int num_mw,
- 	 * is a requirement of the hardware. It is recommended to setup CMA
- 	 * for BAR sizes equal or greater than 4MB.
- 	 */
--	if (!IS_ALIGNED(mw->dma_addr, mw->xlat_align)) {
-+	if (!IS_ALIGNED(mw->dma_addr, xlat_align)) {
- 		dev_err(&pdev->dev, "DMA memory %pad is not aligned\n",
- 			&mw->dma_addr);
- 		ntb_free_mw(nt, num_mw);
-@@ -1106,11 +1111,6 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
- 	for (i = 0; i < mw_count; i++) {
- 		mw = &nt->mw_vec[i];
- 
--		rc = ntb_mw_get_align(ndev, PIDX, i, &mw->xlat_align,
--				      &mw->xlat_align_size, NULL);
--		if (rc)
--			goto err1;
--
- 		rc = ntb_peer_mw_get_addr(ndev, i, &mw->phys_addr,
- 					  &mw->phys_size);
- 		if (rc)
-diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index 759f772fa00c..427112cf101a 100644
---- a/drivers/ntb/test/ntb_perf.c
-+++ b/drivers/ntb/test/ntb_perf.c
-@@ -108,8 +108,6 @@ MODULE_PARM_DESC(on_node, "Run threads only on NTB device node (default: true)")
- struct perf_mw {
- 	phys_addr_t	phys_addr;
- 	resource_size_t	phys_size;
--	resource_size_t	xlat_align;
--	resource_size_t	xlat_align_size;
- 	void __iomem	*vbase;
- 	size_t		xlat_size;
- 	size_t		buf_size;
-@@ -472,13 +470,20 @@ static int perf_set_mw(struct perf_ctx *perf, resource_size_t size)
- {
- 	struct perf_mw *mw = &perf->mw;
- 	size_t xlat_size, buf_size;
-+	resource_size_t	xlat_align;
-+	resource_size_t	xlat_align_size;
- 	int rc;
- 
- 	if (!size)
- 		return -EINVAL;
- 
--	xlat_size = round_up(size, mw->xlat_align_size);
--	buf_size = round_up(size, mw->xlat_align);
-+	rc = ntb_mw_get_align(perf->ntb, PIDX, 0, &xlat_align,
-+			      &xlat_align_size, NULL);
-+	if (rc)
-+		return rc;
-+
-+	xlat_size = round_up(size, xlat_align_size);
-+	buf_size = round_up(size, xlat_align);
- 
- 	if (mw->xlat_size == xlat_size)
- 		return 0;
-@@ -567,11 +572,6 @@ static int perf_setup_mw(struct ntb_dev *ntb, struct perf_ctx *perf)
- 
- 	mw = &perf->mw;
- 
--	rc = ntb_mw_get_align(ntb, PIDX, 0, &mw->xlat_align,
--			      &mw->xlat_align_size, NULL);
--	if (rc)
--		return rc;
--
- 	rc = ntb_peer_mw_get_addr(ntb, 0, &mw->phys_addr, &mw->phys_size);
- 	if (rc)
- 		return rc;
-diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c
-index a69815c45ce6..91526a986caa 100644
---- a/drivers/ntb/test/ntb_tool.c
-+++ b/drivers/ntb/test/ntb_tool.c
-@@ -753,9 +753,9 @@ static ssize_t tool_peer_mw_trans_read(struct file *filep,
- 
- 	phys_addr_t base;
- 	resource_size_t mw_size;
--	resource_size_t align_addr;
--	resource_size_t align_size;
--	resource_size_t max_size;
-+	resource_size_t align_addr = 0;
-+	resource_size_t align_size = 0;
-+	resource_size_t max_size = 0;
- 
- 	buf_size = min_t(size_t, size, 512);
- 
+ 	for PEER_TRANS in $(ls $LOCAL_TOOL/peer_trans*); do
+ 		PT=$(basename $PEER_TRANS)
+ 		write_file $MW_SIZE $LOCAL_TOOL/$PT
 -- 
 2.11.0
 
