@@ -1,65 +1,59 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id n7si719987pfk.6.2017.07.18.09.04.23
+        by gmr-mx.google.com with ESMTPS id y5si723494pff.2.2017.07.18.09.04.23
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
         Tue, 18 Jul 2017 09:04:23 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Tue, 18 Jul 2017 10:03:59 -0600
-Message-Id: <20170718160409.6493-7-logang@deltatee.com>
+Date: Tue, 18 Jul 2017 10:03:55 -0600
+Message-Id: <20170718160409.6493-3-logang@deltatee.com>
 In-Reply-To: <20170718160409.6493-1-logang@deltatee.com>
 References: <20170718160409.6493-1-logang@deltatee.com>
-Subject: [PATCH v2 06/16] ntb: add check and comment for link up to mw_count() and mw_get_align()
+Subject: [PATCH v2 02/16] switchtec: export class symbol for use in upper layer driver
 To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Adds a comment and a check to ntb_mw_get_align() so that it always fails
-if the function is called before the link is up.
-
-Also adds a comment to ntb_mw_count() to note that it may return 0 if
-it is called before the link is up.
-
-This is to prevent accidental mis-use in clients that are testing
-on hardware that this doesn't matter for.
+We export the class pointer symbol and add an extern define in the
+Switchtec header file.
 
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+Reviewed-by: Stephen Bates <sbates@raithlin.com>
+Reviewed-by: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
+Acked-by: Bjorn Helgaas <bhelgaas@google.com>
 ---
- include/linux/ntb.h | 8 ++++++--
- 1 file changed, 6 insertions(+), 2 deletions(-)
+ drivers/pci/switch/switchtec.c | 4 +++-
+ include/linux/switchtec.h      | 2 ++
+ 2 files changed, 5 insertions(+), 1 deletion(-)
 
-diff --git a/include/linux/ntb.h b/include/linux/ntb.h
-index 609e232c00da..47f2966cfd7f 100644
---- a/include/linux/ntb.h
-+++ b/include/linux/ntb.h
-@@ -730,7 +730,8 @@ static inline int ntb_link_disable(struct ntb_dev *ntb)
-  * Hardware and topology may support a different number of memory windows.
-  * Moreover different peer devices can support different number of memory
-  * windows. Simply speaking this method returns the number of possible inbound
-- * memory windows to share with specified peer device.
-+ * memory windows to share with specified peer device. Note: this may return
-+ * zero if the link is not up yet.
-  *
-  * Return: the number of memory windows.
-  */
-@@ -751,7 +752,7 @@ static inline int ntb_mw_count(struct ntb_dev *ntb, int pidx)
-  * Get the alignments of an inbound memory window with specified index.
-  * NULL may be given for any output parameter if the value is not needed.
-  * The alignment and size parameters may be used for allocation of proper
-- * shared memory.
-+ * shared memory. Note: this must only be called when the link is up.
-  *
-  * Return: Zero on success, otherwise a negative error number.
-  */
-@@ -760,6 +761,9 @@ static inline int ntb_mw_get_align(struct ntb_dev *ntb, int pidx, int widx,
- 				   resource_size_t *size_align,
- 				   resource_size_t *size_max)
- {
-+	if (!(ntb_link_is_up(ntb, NULL, NULL) & (1 << pidx)))
-+		return -ENOTCONN;
+diff --git a/drivers/pci/switch/switchtec.c b/drivers/pci/switch/switchtec.c
+index 5b75d3008ff8..39c9218d733f 100644
+--- a/drivers/pci/switch/switchtec.c
++++ b/drivers/pci/switch/switchtec.c
+@@ -33,9 +33,11 @@ module_param(max_devices, int, 0644);
+ MODULE_PARM_DESC(max_devices, "max number of switchtec device instances");
+ 
+ static dev_t switchtec_devt;
+-static struct class *switchtec_class;
+ static DEFINE_IDA(switchtec_minor_ida);
+ 
++struct class *switchtec_class;
++EXPORT_SYMBOL_GPL(switchtec_class);
 +
- 	return ntb->ops->mw_get_align(ntb, pidx, widx, addr_align, size_align,
- 				      size_max);
+ enum mrpc_state {
+ 	MRPC_IDLE = 0,
+ 	MRPC_QUEUED,
+diff --git a/include/linux/switchtec.h b/include/linux/switchtec.h
+index 1cbd0e63b0ab..18e388101855 100644
+--- a/include/linux/switchtec.h
++++ b/include/linux/switchtec.h
+@@ -276,4 +276,6 @@ static inline struct switchtec_dev *to_stdev(struct device *dev)
+ 	return container_of(dev, struct switchtec_dev, dev);
  }
---
+ 
++extern struct class *switchtec_class;
++
+ #endif
+-- 
 2.11.0
+
