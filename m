@@ -1,15 +1,15 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id t139si604346itb.1.2017.07.25.13.58.00
+        by gmr-mx.google.com with ESMTPS id s18si641955pfs.14.2017.07.18.09.04.22
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 25 Jul 2017 13:58:01 -0700 (PDT)
+        Tue, 18 Jul 2017 09:04:22 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Tue, 25 Jul 2017 14:57:45 -0600
-Message-Id: <20170725205753.4735-9-logang@deltatee.com>
-In-Reply-To: <20170725205753.4735-1-logang@deltatee.com>
-References: <20170725205753.4735-1-logang@deltatee.com>
-Subject: [PATCH v3 08/16] switchtec_ntb: introduce initial NTB driver
+Date: Tue, 18 Jul 2017 10:04:01 -0600
+Message-Id: <20170718160409.6493-9-logang@deltatee.com>
+In-Reply-To: <20170718160409.6493-1-logang@deltatee.com>
+References: <20170718160409.6493-1-logang@deltatee.com>
+Subject: [PATCH v2 08/16] switchtec_ntb: introduce initial NTB driver
 To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
