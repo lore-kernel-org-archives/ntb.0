@@ -1,32 +1,39 @@
-Return-Path: <logang@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id c18si47548itb.2.2017.07.19.09.04.31
+Return-Path: <mpe@ellerman.id.au>
+Received: from ozlabs.org (ozlabs.org. [103.22.144.67])
+        by gmr-mx.google.com with ESMTPS id 193si1060162pfa.13.2017.07.18.22.57.17
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 19 Jul 2017 09:04:31 -0700 (PDT)
-References: <20170718165528.7383-1-logang@deltatee.com>
- <20170718165528.7383-2-logang@deltatee.com>
- <87iniphsug.fsf@concordia.ellerman.id.au>
-From: Logan Gunthorpe <logang@deltatee.com>
-Message-ID: <15b6ea7d-5817-c0cd-aee4-c8a52d8808f9@deltatee.com>
-Date: Wed, 19 Jul 2017 10:04:06 -0600
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Tue, 18 Jul 2017 22:57:17 -0700 (PDT)
+From: Michael Ellerman <mpe@ellerman.id.au>
+Subject: Re: [PATCH v4 1/5] powerpc: io.h: move iomap.h include so that it can use readq/writeq defs
+In-Reply-To: <20170718165528.7383-2-logang@deltatee.com>
+References: <20170718165528.7383-1-logang@deltatee.com> <20170718165528.7383-2-logang@deltatee.com>
+Date: Wed, 19 Jul 2017 15:57:11 +1000
+Message-ID: <87iniphsug.fsf@concordia.ellerman.id.au>
 MIME-Version: 1.0
-In-Reply-To: <87iniphsug.fsf@concordia.ellerman.id.au>
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Subject: Re: [PATCH v4 1/5] powerpc: io.h: move iomap.h include so that it can
- use readq/writeq defs
-To: Michael Ellerman <mpe@ellerman.id.au>, linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org
-Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, =?UTF-8?Q?Horia_Geant=c4=83?= <horia.geanta@nxp.com>, Stephen Bates <sbates@raithlin.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Nicholas Piggin <npiggin@gmail.com>, Suresh Warrier <warrier@linux.vnet.ibm.com>, Oliver O'Halloran <oohall@gmail.com>
+Content-Type: text/plain
+To: Logan Gunthorpe <logang@deltatee.com>, linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org
+Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Horia =?utf-8?Q?Geant=C4=83?= <horia.geanta@nxp.com>, Stephen Bates <sbates@raithlin.com>, Logan Gunthorpe <logang@deltatee.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Nicholas Piggin <npiggin@gmail.com>, Suresh Warrier <warrier@linux.vnet.ibm.com>, Oliver O'Halloran <oohall@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
+Logan Gunthorpe <logang@deltatee.com> writes:
 
+> Subsequent patches in this series makes use of the readq and writeq
+> defines in iomap.h. However, as is, they get missed on the powerpc
+> platform seeing the include comes before the define. This patch
+> moves the include down to fix this.
+>
+> Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+> Cc: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+> Cc: Paul Mackerras <paulus@samba.org>
+> Cc: Michael Ellerman <mpe@ellerman.id.au>
+> Cc: Nicholas Piggin <npiggin@gmail.com>
+> Cc: Suresh Warrier <warrier@linux.vnet.ibm.com>
+> Cc: "Oliver O'Halloran" <oohall@gmail.com>
+> ---
+>  arch/powerpc/include/asm/io.h | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 
-On 18/07/17 11:57 PM, Michael Ellerman wrote:
-> Seems fair enough, have you tested it at all?
+Seems fair enough, have you tested it at all?
 
-It's only been compile tested and the kbuild robot has beat up on it a bit.
-
-Thanks,
-
-Logan
+cheers
