@@ -1,56 +1,45 @@
-Return-Path: <gunthorp@deltatee.com>
+Return-Path: <logang@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id h77si71685itb.0.2017.07.26.16.19.22
+        by gmr-mx.google.com with ESMTPS id t131si161633ita.1.2017.07.20.08.39.51
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 26 Jul 2017 16:19:22 -0700 (PDT)
+        Thu, 20 Jul 2017 08:39:51 -0700 (PDT)
+References: <20170718165528.7383-1-logang@deltatee.com>
+ <20170718165528.7383-2-logang@deltatee.com>
+ <87iniphsug.fsf@concordia.ellerman.id.au>
+ <15b6ea7d-5817-c0cd-aee4-c8a52d8808f9@deltatee.com>
+ <VI1PR0401MB2591205D2621B5FEB4EAE2CC98A70@VI1PR0401MB2591.eurprd04.prod.outlook.com>
+ <VI1PR0401MB259189A76FFD80DC02ACCF8998A70@VI1PR0401MB2591.eurprd04.prod.outlook.com>
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Wed, 26 Jul 2017 17:19:11 -0600
-Message-Id: <20170726231917.6073-1-logang@deltatee.com>
+Message-ID: <edcc1102-d29f-cd19-4103-8ea6719d5f12@deltatee.com>
+Date: Thu, 20 Jul 2017 09:39:33 -0600
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
-Subject: [PATCH v5 0/6] make io{read|write}64 globally usable
-To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org
-Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Stephen Bates <sbates@raithlin.com>, Logan Gunthorpe <logang@deltatee.com>
+In-Reply-To: <VI1PR0401MB259189A76FFD80DC02ACCF8998A70@VI1PR0401MB2591.eurprd04.prod.outlook.com>
+Content-Type: text/plain; charset="iso-8859-2"
+Content-Transfer-Encoding: quoted-printable
+Subject: Re: [PATCH v4 1/5] powerpc: io.h: move iomap.h include so that it can
+ use readq/writeq defs
+To: =?UTF-8?Q?Horia_Geant=c4=83?= <horia.geanta@nxp.com>, Michael Ellerman <mpe@ellerman.id.au>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arch@vger.kernel.org" <linux-arch@vger.kernel.org>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "linux-crypto@vger.kernel.org" <linux-crypto@vger.kernel.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Stephen Bates <sbates@raithlin.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Nicholas Piggin <npiggin@gmail.com>, Suresh Warrier <warrier@linux.vnet.ibm.com>, Oliver O'Halloran <oohall@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Changes since v4:
-- Add functions so the powerpc implementation of iomap.c compiles. (As
-noticed by Horia)
-
-Changes since v3:
-
-- I noticed powerpc didn't use the appropriate functions seeing
-readq/writeq were not defined when iomap.h was included. Thus I've
-included a patch to adjust this
-- Fixed some mistakes with a couple of the defines in io-64-nonatomic*
-headers
-- Fixed a typo noticed by Horia.
-
-(earlier versions were drastically different)
 
 
-Horia Geantă (1):
-  crypto: caam: cleanup CONFIG_64BIT ifdefs when using io{read|write}64
+On 20/07/17 06:36 AM, Horia Geant=EF=BF=BD wrote:
+> include/asm-generic/iomap.h is included before
+> include/linux/io-64-nonatomic-lo-hi.h:
+>=20
+> include/linux/io.h -> arch/powerpc/include/asm/io.h ->
+> include/asm-generic/iomap.h
+>=20
+> Thus, the "extern" version of ioread64_lo_hi and friends will be used
+> (and not the inline version from io-64-nonatomic-lo-hi.h).
+>=20
+> But for this kernel .config:
+> -CONFIG_GENERIC_IOMAP=3Dn and
+> -there is no implementation of io{read|write}64[be]{_lo_hi|_hi_lo} in
+> arch/powerpc/kernel/iomap.c
 
-Logan Gunthorpe (5):
-  powerpc: io.h: move iomap.h include so that it can use readq/writeq
-    defs
-  powerpc: iomap.c: introduce io{read|write}64_{lo_hi|hi_lo}
-  iomap: introduce io{read|write}64_{lo_hi|hi_lo}
-  io-64-nonatomic: add io{read|write}64[be]{_lo_hi|_hi_lo} macros
-  ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
+Ah, thanks for the triage. I'll take a look at fixing this for a v5.
 
- arch/powerpc/include/asm/io.h         |   6 +-
- arch/powerpc/kernel/iomap.c           |  40 +++++++++++
- drivers/crypto/caam/regs.h            |  35 ++-------
- drivers/ntb/hw/intel/ntb_hw_intel.c   |  30 +-------
- include/asm-generic/iomap.h           |  26 +++++--
- include/linux/io-64-nonatomic-hi-lo.h |  60 ++++++++++++++++
- include/linux/io-64-nonatomic-lo-hi.h |  60 ++++++++++++++++
- lib/iomap.c                           | 132 ++++++++++++++++++++++++++++++++++
- 8 files changed, 322 insertions(+), 67 deletions(-)
-
---
-2.11.0
+Logan
