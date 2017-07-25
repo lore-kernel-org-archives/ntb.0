@@ -1,148 +1,260 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id f131si671943itc.3.2017.07.25.13.58.08
+        by gmr-mx.google.com with ESMTPS id h77si644969itb.0.2017.07.25.13.58.08
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 25 Jul 2017 13:58:09 -0700 (PDT)
+        Tue, 25 Jul 2017 13:58:08 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Tue, 25 Jul 2017 14:57:41 -0600
-Message-Id: <20170725205753.4735-5-logang@deltatee.com>
+Date: Tue, 25 Jul 2017 14:57:48 -0600
+Message-Id: <20170725205753.4735-12-logang@deltatee.com>
 In-Reply-To: <20170725205753.4735-1-logang@deltatee.com>
 References: <20170725205753.4735-1-logang@deltatee.com>
-Subject: [PATCH v3 04/16] switchtec: add link event notifier callback
+Subject: [PATCH v3 11/16] switchtec_ntb: add skeleton NTB driver
 To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-In order for the Switchtec NTB code to handle link change events we
-create a notifier callback in the switchtec code which gets called
-whenever an appropriate event interrupt occurs.
-
-In order to preserve userspace's ability to follow these events,
-we compare the event count with a stored copy from last time we
-checked.
+Add a skeleton NTB driver which will be filled out in subsequent patches.
 
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
 Reviewed-by: Stephen Bates <sbates@raithlin.com>
 Reviewed-by: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
-Acked-by: Bjorn Helgaas <bhelgaas@google.com>
 ---
- drivers/pci/switch/switchtec.c | 51 ++++++++++++++++++++++++++++++++++++++++++
- include/linux/switchtec.h      |  4 ++++
- 2 files changed, 55 insertions(+)
+ drivers/ntb/hw/mscc/switchtec_ntb.c | 148 +++++++++++++++++++++++++++++++++++-
+ include/linux/ntb.h                 |   3 +
+ 2 files changed, 150 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/pci/switch/switchtec.c b/drivers/pci/switch/switchtec.c
-index 39c9218d733f..807569e62bee 100644
---- a/drivers/pci/switch/switchtec.c
-+++ b/drivers/pci/switch/switchtec.c
-@@ -978,6 +978,49 @@ static const struct file_operations switchtec_fops = {
- 	.compat_ioctl = switchtec_dev_ioctl,
- };
+diff --git a/drivers/ntb/hw/mscc/switchtec_ntb.c b/drivers/ntb/hw/mscc/switchtec_ntb.c
+index 877337902363..f87c0eef59ef 100644
+--- a/drivers/ntb/hw/mscc/switchtec_ntb.c
++++ b/drivers/ntb/hw/mscc/switchtec_ntb.c
+@@ -18,6 +18,7 @@
+ #include <linux/delay.h>
+ #include <linux/kthread.h>
+ #include <linux/interrupt.h>
++#include <linux/ntb.h>
  
-+static void link_event_work(struct work_struct *work)
+ MODULE_DESCRIPTION("Microsemi Switchtec(tm) NTB Driver");
+ MODULE_VERSION("0.1");
+@@ -71,6 +72,7 @@ struct shared_mw {
+ #define LUT_SIZE SZ_64K
+ 
+ struct switchtec_ntb {
++	struct ntb_dev ntb;
+ 	struct switchtec_dev *stdev;
+ 
+ 	int self_partition;
+@@ -161,10 +163,148 @@ static int switchtec_ntb_part_op(struct switchtec_ntb *sndev,
+ 	return -EIO;
+ }
+ 
++static int switchtec_ntb_mw_count(struct ntb_dev *ntb, int pidx)
 +{
-+	struct switchtec_dev *stdev;
-+
-+	stdev = container_of(work, struct switchtec_dev, link_event_work);
-+
-+	if (stdev->link_notifier)
-+		stdev->link_notifier(stdev);
++	return 0;
 +}
 +
-+static void check_link_state_events(struct switchtec_dev *stdev)
++static int switchtec_ntb_mw_get_align(struct ntb_dev *ntb, int pidx,
++				      int widx, resource_size_t *addr_align,
++				      resource_size_t *size_align,
++				      resource_size_t *size_max)
 +{
-+	int idx;
-+	u32 reg;
-+	int count;
-+	int occurred = 0;
-+
-+	for (idx = 0; idx < stdev->pff_csr_count; idx++) {
-+		reg = ioread32(&stdev->mmio_pff_csr[idx].link_state_hdr);
-+		dev_dbg(&stdev->dev, "link_state: %d->%08x\n", idx, reg);
-+		count = (reg >> 5) & 0xFF;
-+
-+		if (count != stdev->link_event_count[idx]) {
-+			occurred = 1;
-+			stdev->link_event_count[idx] = count;
-+		}
-+	}
-+
-+	if (occurred)
-+		schedule_work(&stdev->link_event_work);
++	return 0;
 +}
 +
-+static void enable_link_state_events(struct switchtec_dev *stdev)
++static int switchtec_ntb_mw_set_trans(struct ntb_dev *ntb, int pidx, int widx,
++				      dma_addr_t addr, resource_size_t size)
 +{
-+	int idx;
-+
-+	for (idx = 0; idx < stdev->pff_csr_count; idx++) {
-+		iowrite32(SWITCHTEC_EVENT_CLEAR |
-+			  SWITCHTEC_EVENT_EN_IRQ,
-+			  &stdev->mmio_pff_csr[idx].link_state_hdr);
-+	}
++	return 0;
 +}
 +
- static void stdev_release(struct device *dev)
++static int switchtec_ntb_peer_mw_count(struct ntb_dev *ntb)
++{
++	return 0;
++}
++
++static int switchtec_ntb_peer_mw_get_addr(struct ntb_dev *ntb, int idx,
++					  phys_addr_t *base,
++					  resource_size_t *size)
++{
++	return 0;
++}
++
++static u64 switchtec_ntb_link_is_up(struct ntb_dev *ntb,
++				    enum ntb_speed *speed,
++				    enum ntb_width *width)
++{
++	return 0;
++}
++
++static int switchtec_ntb_link_enable(struct ntb_dev *ntb,
++				     enum ntb_speed max_speed,
++				     enum ntb_width max_width)
++{
++	return 0;
++}
++
++static int switchtec_ntb_link_disable(struct ntb_dev *ntb)
++{
++	return 0;
++}
++
++static u64 switchtec_ntb_db_valid_mask(struct ntb_dev *ntb)
++{
++	return 0;
++}
++
++static int switchtec_ntb_db_vector_count(struct ntb_dev *ntb)
++{
++	return 0;
++}
++
++static u64 switchtec_ntb_db_vector_mask(struct ntb_dev *ntb, int db_vector)
++{
++	return 0;
++}
++
++static u64 switchtec_ntb_db_read(struct ntb_dev *ntb)
++{
++	return 0;
++}
++
++static int switchtec_ntb_db_clear(struct ntb_dev *ntb, u64 db_bits)
++{
++	return 0;
++}
++
++static int switchtec_ntb_db_set_mask(struct ntb_dev *ntb, u64 db_bits)
++{
++	return 0;
++}
++
++static int switchtec_ntb_db_clear_mask(struct ntb_dev *ntb, u64 db_bits)
++{
++	return 0;
++}
++
++static int switchtec_ntb_peer_db_set(struct ntb_dev *ntb, u64 db_bits)
++{
++	return 0;
++}
++
++static int switchtec_ntb_spad_count(struct ntb_dev *ntb)
++{
++	return 0;
++}
++
++static u32 switchtec_ntb_spad_read(struct ntb_dev *ntb, int idx)
++{
++	return 0;
++}
++
++static int switchtec_ntb_spad_write(struct ntb_dev *ntb, int idx, u32 val)
++{
++	return 0;
++}
++
++static int switchtec_ntb_peer_spad_write(struct ntb_dev *ntb, int pidx,
++					 int sidx, u32 val)
++{
++	return 0;
++}
++
++static const struct ntb_dev_ops switchtec_ntb_ops = {
++	.mw_count		= switchtec_ntb_mw_count,
++	.mw_get_align		= switchtec_ntb_mw_get_align,
++	.mw_set_trans		= switchtec_ntb_mw_set_trans,
++	.peer_mw_count		= switchtec_ntb_peer_mw_count,
++	.peer_mw_get_addr	= switchtec_ntb_peer_mw_get_addr,
++	.link_is_up		= switchtec_ntb_link_is_up,
++	.link_enable		= switchtec_ntb_link_enable,
++	.link_disable		= switchtec_ntb_link_disable,
++	.db_valid_mask		= switchtec_ntb_db_valid_mask,
++	.db_vector_count	= switchtec_ntb_db_vector_count,
++	.db_vector_mask		= switchtec_ntb_db_vector_mask,
++	.db_read		= switchtec_ntb_db_read,
++	.db_clear		= switchtec_ntb_db_clear,
++	.db_set_mask		= switchtec_ntb_db_set_mask,
++	.db_clear_mask		= switchtec_ntb_db_clear_mask,
++	.peer_db_set		= switchtec_ntb_peer_db_set,
++	.spad_count		= switchtec_ntb_spad_count,
++	.spad_read		= switchtec_ntb_spad_read,
++	.spad_write		= switchtec_ntb_spad_write,
++	.peer_spad_write	= switchtec_ntb_peer_spad_write,
++};
++
+ static void switchtec_ntb_init_sndev(struct switchtec_ntb *sndev)
  {
- 	struct switchtec_dev *stdev = to_stdev(dev);
-@@ -1030,6 +1073,7 @@ static struct switchtec_dev *stdev_create(struct pci_dev *pdev)
- 	stdev->mrpc_busy = 0;
- 	INIT_WORK(&stdev->mrpc_work, mrpc_event_work);
- 	INIT_DELAYED_WORK(&stdev->mrpc_timeout, mrpc_timeout_work);
-+	INIT_WORK(&stdev->link_event_work, link_event_work);
- 	init_waitqueue_head(&stdev->event_wq);
- 	atomic_set(&stdev->event_cnt, 0);
+ 	u64 part_map;
  
-@@ -1073,6 +1117,9 @@ static int mask_event(struct switchtec_dev *stdev, int eid, int idx)
- 	if (!(hdr & SWITCHTEC_EVENT_OCCURRED && hdr & SWITCHTEC_EVENT_EN_IRQ))
- 		return 0;
- 
-+	if (eid == SWITCHTEC_IOCTL_EVENT_LINK_STATE)
-+		return 0;
++	sndev->ntb.pdev = sndev->stdev->pdev;
++	sndev->ntb.topo = NTB_TOPO_SWITCH;
++	sndev->ntb.ops = &switchtec_ntb_ops;
 +
- 	dev_dbg(&stdev->dev, "%s: %d %d %x\n", __func__, eid, idx, hdr);
- 	hdr &= ~(SWITCHTEC_EVENT_EN_IRQ | SWITCHTEC_EVENT_OCCURRED);
- 	iowrite32(hdr, hdr_reg);
-@@ -1092,6 +1139,7 @@ static int mask_all_events(struct switchtec_dev *stdev, int eid)
- 		for (idx = 0; idx < stdev->pff_csr_count; idx++) {
- 			if (!stdev->pff_local[idx])
- 				continue;
-+
- 			count += mask_event(stdev, eid, idx);
- 		}
- 	} else {
-@@ -1116,6 +1164,8 @@ static irqreturn_t switchtec_event_isr(int irq, void *dev)
- 		iowrite32(reg, &stdev->mmio_part_cfg->mrpc_comp_hdr);
- 	}
+ 	sndev->self_partition = sndev->stdev->partition;
  
-+	check_link_state_events(stdev);
-+
- 	for (eid = 0; eid < SWITCHTEC_IOCTL_MAX_EVENTS; eid++)
- 		event_count += mask_all_events(stdev, eid);
+ 	sndev->mmio_ntb = sndev->stdev->mmio_ntb;
+@@ -512,7 +652,6 @@ static int switchtec_ntb_add(struct device *dev,
+ 		return -ENOMEM;
  
-@@ -1242,6 +1292,7 @@ static int switchtec_pci_probe(struct pci_dev *pdev,
- 	iowrite32(SWITCHTEC_EVENT_CLEAR |
- 		  SWITCHTEC_EVENT_EN_IRQ,
- 		  &stdev->mmio_part_cfg->mrpc_comp_hdr);
-+	enable_link_state_events(stdev);
- 
- 	rc = cdev_device_add(&stdev->cdev, &stdev->dev);
+ 	sndev->stdev = stdev;
+-
+ 	switchtec_ntb_init_sndev(sndev);
+ 	switchtec_ntb_init_mw(sndev);
+ 	switchtec_ntb_init_db(sndev);
+@@ -530,11 +669,17 @@ static int switchtec_ntb_add(struct device *dev,
  	if (rc)
-diff --git a/include/linux/switchtec.h b/include/linux/switchtec.h
-index 9c2be7631257..d8159944f013 100644
---- a/include/linux/switchtec.h
-+++ b/include/linux/switchtec.h
-@@ -353,6 +353,10 @@ struct switchtec_dev {
+ 		goto deinit_shared_and_exit;
  
- 	wait_queue_head_t event_wq;
- 	atomic_t event_cnt;
++	rc = ntb_register_device(&sndev->ntb);
++	if (rc)
++		goto deinit_and_exit;
 +
-+	struct work_struct link_event_work;
-+	void (*link_notifier)(struct switchtec_dev *stdev);
-+	u8 link_event_count[SWITCHTEC_MAX_PFF_CSR];
+ 	stdev->sndev = sndev;
+ 	dev_info(dev, "NTB device registered");
+ 
+ 	return 0;
+ 
++deinit_and_exit:
++	switchtec_ntb_deinit_db_msg_irq(sndev);
+ deinit_shared_and_exit:
+ 	switchtec_ntb_deinit_shared_mw(sndev);
+ free_and_exit:
+@@ -553,6 +698,7 @@ void switchtec_ntb_remove(struct device *dev,
+ 		return;
+ 
+ 	stdev->sndev = NULL;
++	ntb_unregister_device(&sndev->ntb);
+ 	switchtec_ntb_deinit_db_msg_irq(sndev);
+ 	switchtec_ntb_deinit_shared_mw(sndev);
+ 	kfree(sndev);
+diff --git a/include/linux/ntb.h b/include/linux/ntb.h
+index 47f2966cfd7f..c308964777eb 100644
+--- a/include/linux/ntb.h
++++ b/include/linux/ntb.h
+@@ -70,6 +70,7 @@ struct pci_dev;
+  * @NTB_TOPO_SEC:	On secondary side of remote ntb.
+  * @NTB_TOPO_B2B_USD:	On primary side of local ntb upstream of remote ntb.
+  * @NTB_TOPO_B2B_DSD:	On primary side of local ntb downstream of remote ntb.
++ * @NTB_TOPO_SWITCH:	Connected via a switch which supports ntb.
+  */
+ enum ntb_topo {
+ 	NTB_TOPO_NONE = -1,
+@@ -77,6 +78,7 @@ enum ntb_topo {
+ 	NTB_TOPO_SEC,
+ 	NTB_TOPO_B2B_USD,
+ 	NTB_TOPO_B2B_DSD,
++	NTB_TOPO_SWITCH,
  };
  
- static inline struct switchtec_dev *to_stdev(struct device *dev)
+ static inline int ntb_topo_is_b2b(enum ntb_topo topo)
+@@ -97,6 +99,7 @@ static inline char *ntb_topo_string(enum ntb_topo topo)
+ 	case NTB_TOPO_SEC:	return "NTB_TOPO_SEC";
+ 	case NTB_TOPO_B2B_USD:	return "NTB_TOPO_B2B_USD";
+ 	case NTB_TOPO_B2B_DSD:	return "NTB_TOPO_B2B_DSD";
++	case NTB_TOPO_SWITCH:	return "NTB_TOPO_SWITCH";
+ 	}
+ 	return "NTB_TOPO_INVALID";
+ }
 -- 
 2.11.0
 
