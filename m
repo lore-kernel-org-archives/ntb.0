@@ -1,129 +1,239 @@
-Return-Path: <Allen.Hubbe@dell.com>
-Received: from esa1.dell-outbound.iphmx.com (esa1.dell-outbound.iphmx.com. [68.232.153.90])
-        by gmr-mx.google.com with ESMTPS id l136si963913ywc.5.2017.07.26.06.10.21
+Return-Path: <gunthorp@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id g192si652125ita.8.2017.07.25.13.58.13
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 26 Jul 2017 06:10:21 -0700 (PDT)
-From: "Allen Hubbe" <Allen.Hubbe@dell.com>
-References: <20170725205753.4735-1-logang@deltatee.com>
+        Tue, 25 Jul 2017 13:58:13 -0700 (PDT)
+From: Logan Gunthorpe <logang@deltatee.com>
+Date: Tue, 25 Jul 2017 14:57:49 -0600
+Message-Id: <20170725205753.4735-13-logang@deltatee.com>
 In-Reply-To: <20170725205753.4735-1-logang@deltatee.com>
-Subject: RE: [PATCH v3 00/16] Switchtec NTB Support
-Date: Wed, 26 Jul 2017 09:09:59 -0400
-Message-ID: <000001d30610$7cd65120$7682f360$@dell.com>
-MIME-Version: 1.0
-Content-Type: text/plain;
-	charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Content-Language: en-us
-To: 'Logan Gunthorpe' <logang@deltatee.com>, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: 'Jon Mason' <jdmason@kudzu.us>, 'Dave Jiang' <dave.jiang@intel.com>, 'Bjorn Helgaas' <bhelgaas@google.com>, 'Greg Kroah-Hartman' <gregkh@linuxfoundation.org>, 'Kurt Schwemmer' <kurt.schwemmer@microsemi.com>, 'Stephen Bates' <sbates@raithlin.com>, 'Serge Semin' <fancer.lancer@gmail.com>
+References: <20170725205753.4735-1-logang@deltatee.com>
+Subject: [PATCH v3 12/16] switchtec_ntb: add link management
+To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Logan Gunthorpe
-> Changes since v2:
-> 
-> - Reordered the ntb_test link patch per Allen
-> - Removed an extra call to switchtec_ntb_init_mw
-> - Fixed a typo in the switchtec.txt documentation.
+switchtec_ntb checks for a link by looking at the shared memory
+window. If the magic number is correct and the otherside indicates
+their link is enabled then we take the link to be up.
 
-Patches 5..16 (also 5 [was 6], and 14, objections notwithstanding):
+Whenever we change our local link status we send a msg to the
+otherside to check whether it's up and change their status.
 
-Acked-by: Allen Hubbe <Allen.Hubbe@dell.com>
+The current status is maintained in a flag so ntb_is_link_up
+can return quickly.
 
-> --
-> 
-> Changes since v1:
-> 
-> - Rebased onto latest ntb-next branch (with v4.13-rc1)
-> - Reworked ntb_mw_count() function so that it can be called all the
->   time (per discussion with Allen)
-> - Various spelling and formatting cleanups from Bjorn
-> - Added request_module() call such that the NTB module is automatically
->   loaded when appropriate hardware exists.
-> 
-> --
-> 
-> Changes since the rfc:
-> 
-> - Rebased on ntb-next
-> - Switched ntb_part_op to use sleep instead of delay
-> - Dropped a number of useless dbg __func__ prints
-> - Went back to the dynamic instead of the static class
-> - Swapped the notifier block for a simple callback
-> - Modified the new ntb api so that a couple functions with pidx
->   now must be called after link up. Per our discussion on the list.
-> 
-> --
-> 
-> This patchset implements Non-Transparent Bridge (NTB) support for the
-> Microsemi Switchtec series of switches. We're looking for some
-> review from the community at this point but hope to get it upstreamed
-> for v4.14.
-> 
-> Switchtec NTB support is configured over the same function and bar
-> as the management endpoint. Thus, the new driver hooks into the
-> management driver which we had merged in v4.12. We use the class
-> interface API to register an NTB device for every switchtec device
-> which supports NTB (not all do).
-> 
-> The Switchtec hardware supports doorbells, memory windows and messages.
-> Seeing there is no native scratchpad support, 128 spads are emulated
-> through the use of a pre-setup memory window. The switch has 64
-> doorbells which are shared between the two partitions and a
-> configurable set of memory windows. While the hardware supports more
-> than 2 partitions, this driver only supports the first two seeing
-> the current NTB API only supports two hosts.
-> 
-> The driver has been tested with ntb_netdev and fully passes the
-> ntb_test script.
-> 
-> This patchset is based off of ntb-next and can be found in this
-> git repo:
-> 
-> https://github.com/sbates130272/linux-p2pmem.git switchtec_ntb_v3
-> 
-> *** BLURB HERE ***
-> 
-> Logan Gunthorpe (16):
->   switchtec: move structure definitions into a common header
->   switchtec: export class symbol for use in upper layer driver
->   switchtec: add NTB hardware register definitions
->   switchtec: add link event notifier callback
->   ntb: ntb_test: ensure the link is up before trying to configure the
->     mws
->   ntb: ensure ntb_mw_get_align() is only called when the link is up
->   ntb: add check and comment for link up to mw_count() and
->     mw_get_align()
->   switchtec_ntb: introduce initial NTB driver
->   switchtec_ntb: initialize hardware for memory windows
->   switchtec_ntb: initialize hardware for doorbells and messages
->   switchtec_ntb: add skeleton NTB driver
->   switchtec_ntb: add link management
->   switchtec_ntb: implement doorbell registers
->   switchtec_ntb: implement scratchpad registers
->   switchtec_ntb: add memory window support
->   switchtec_ntb: update switchtec documentation with notes for NTB
-> 
->  Documentation/switchtec.txt             |   12 +
->  MAINTAINERS                             |    2 +
->  drivers/ntb/hw/Kconfig                  |    1 +
->  drivers/ntb/hw/Makefile                 |    1 +
->  drivers/ntb/hw/mscc/Kconfig             |    9 +
->  drivers/ntb/hw/mscc/Makefile            |    1 +
->  drivers/ntb/hw/mscc/switchtec_ntb.c     | 1211 +++++++++++++++++++++++++++++++
->  drivers/ntb/ntb_transport.c             |   20 +-
->  drivers/ntb/test/ntb_perf.c             |   18 +-
->  drivers/ntb/test/ntb_tool.c             |    6 +-
->  drivers/pci/switch/switchtec.c          |  316 ++------
->  include/linux/ntb.h                     |   11 +-
->  include/linux/switchtec.h               |  373 ++++++++++
->  tools/testing/selftests/ntb/ntb_test.sh |    4 +
->  14 files changed, 1702 insertions(+), 283 deletions(-)
->  create mode 100644 drivers/ntb/hw/mscc/Kconfig
->  create mode 100644 drivers/ntb/hw/mscc/Makefile
->  create mode 100644 drivers/ntb/hw/mscc/switchtec_ntb.c
->  create mode 100644 include/linux/switchtec.h
-> 
-> --
-> 2.11.0
+We utilize Switchtec's link status notifier to also check link changes
+when the switch notices a port changes state.
+
+Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+Reviewed-by: Stephen Bates <sbates@raithlin.com>
+Reviewed-by: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
+---
+ drivers/ntb/hw/mscc/switchtec_ntb.c | 130 +++++++++++++++++++++++++++++++++++-
+ 1 file changed, 129 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/ntb/hw/mscc/switchtec_ntb.c b/drivers/ntb/hw/mscc/switchtec_ntb.c
+index f87c0eef59ef..34d69fa8612d 100644
+--- a/drivers/ntb/hw/mscc/switchtec_ntb.c
++++ b/drivers/ntb/hw/mscc/switchtec_ntb.c
+@@ -64,6 +64,7 @@ static inline void _iowrite64(u64 val, void __iomem *mmio)
+ 
+ struct shared_mw {
+ 	u32 magic;
++	u32 link_sta;
+ 	u32 partition_id;
+ 	u64 mw_sizes[MAX_MWS];
+ };
+@@ -104,8 +105,17 @@ struct switchtec_ntb {
+ 	int peer_nr_direct_mw;
+ 	int peer_nr_lut_mw;
+ 	int peer_direct_mw_to_bar[MAX_DIRECT_MW];
++
++	bool link_is_up;
++	enum ntb_speed link_speed;
++	enum ntb_width link_width;
+ };
+ 
++static struct switchtec_ntb *ntb_sndev(struct ntb_dev *ntb)
++{
++	return container_of(ntb, struct switchtec_ntb, ntb);
++}
++
+ static int switchtec_ntb_part_op(struct switchtec_ntb *sndev,
+ 				 struct ntb_ctrl_regs __iomem *ctl,
+ 				 u32 op, int wait_status)
+@@ -163,6 +173,17 @@ static int switchtec_ntb_part_op(struct switchtec_ntb *sndev,
+ 	return -EIO;
+ }
+ 
++static int switchtec_ntb_send_msg(struct switchtec_ntb *sndev, int idx,
++				  u32 val)
++{
++	if (idx < 0 || idx >= ARRAY_SIZE(sndev->mmio_self_dbmsg->omsg))
++		return -EINVAL;
++
++	iowrite32(val, &sndev->mmio_self_dbmsg->omsg[idx].msg);
++
++	return 0;
++}
++
+ static int switchtec_ntb_mw_count(struct ntb_dev *ntb, int pidx)
+ {
+ 	return 0;
+@@ -194,22 +215,124 @@ static int switchtec_ntb_peer_mw_get_addr(struct ntb_dev *ntb, int idx,
+ 	return 0;
+ }
+ 
++static void switchtec_ntb_part_link_speed(struct switchtec_ntb *sndev,
++					  int partition,
++					  enum ntb_speed *speed,
++					  enum ntb_width *width)
++{
++	struct switchtec_dev *stdev = sndev->stdev;
++
++	u32 pff = ioread32(&stdev->mmio_part_cfg[partition].vep_pff_inst_id);
++	u32 linksta = ioread32(&stdev->mmio_pff_csr[pff].pci_cap_region[13]);
++
++	if (speed)
++		*speed = (linksta >> 16) & 0xF;
++
++	if (width)
++		*width = (linksta >> 20) & 0x3F;
++}
++
++static void switchtec_ntb_set_link_speed(struct switchtec_ntb *sndev)
++{
++	enum ntb_speed self_speed, peer_speed;
++	enum ntb_width self_width, peer_width;
++
++	if (!sndev->link_is_up) {
++		sndev->link_speed = NTB_SPEED_NONE;
++		sndev->link_width = NTB_WIDTH_NONE;
++		return;
++	}
++
++	switchtec_ntb_part_link_speed(sndev, sndev->self_partition,
++				      &self_speed, &self_width);
++	switchtec_ntb_part_link_speed(sndev, sndev->peer_partition,
++				      &peer_speed, &peer_width);
++
++	sndev->link_speed = min(self_speed, peer_speed);
++	sndev->link_width = min(self_width, peer_width);
++}
++
++enum {
++	LINK_MESSAGE = 0,
++	MSG_LINK_UP = 1,
++	MSG_LINK_DOWN = 2,
++	MSG_CHECK_LINK = 3,
++};
++
++static void switchtec_ntb_check_link(struct switchtec_ntb *sndev)
++{
++	int link_sta;
++	int old = sndev->link_is_up;
++
++	link_sta = sndev->self_shared->link_sta;
++	if (link_sta) {
++		u64 peer = ioread64(&sndev->peer_shared->magic);
++
++		if ((peer & 0xFFFFFFFF) == SWITCHTEC_NTB_MAGIC)
++			link_sta = peer >> 32;
++		else
++			link_sta = 0;
++	}
++
++	sndev->link_is_up = link_sta;
++	switchtec_ntb_set_link_speed(sndev);
++
++	if (link_sta != old) {
++		switchtec_ntb_send_msg(sndev, LINK_MESSAGE, MSG_CHECK_LINK);
++		ntb_link_event(&sndev->ntb);
++		dev_info(&sndev->stdev->dev, "ntb link %s",
++			 link_sta ? "up" : "down");
++	}
++}
++
++static void switchtec_ntb_link_notification(struct switchtec_dev *stdev)
++{
++	struct switchtec_ntb *sndev = stdev->sndev;
++
++	switchtec_ntb_check_link(sndev);
++}
++
+ static u64 switchtec_ntb_link_is_up(struct ntb_dev *ntb,
+ 				    enum ntb_speed *speed,
+ 				    enum ntb_width *width)
+ {
+-	return 0;
++	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++
++	if (speed)
++		*speed = sndev->link_speed;
++	if (width)
++		*width = sndev->link_width;
++
++	return sndev->link_is_up;
+ }
+ 
+ static int switchtec_ntb_link_enable(struct ntb_dev *ntb,
+ 				     enum ntb_speed max_speed,
+ 				     enum ntb_width max_width)
+ {
++	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++
++	dev_dbg(&sndev->stdev->dev, "enabling link");
++
++	sndev->self_shared->link_sta = 1;
++	switchtec_ntb_send_msg(sndev, LINK_MESSAGE, MSG_LINK_UP);
++
++	switchtec_ntb_check_link(sndev);
++
+ 	return 0;
+ }
+ 
+ static int switchtec_ntb_link_disable(struct ntb_dev *ntb)
+ {
++	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++
++	dev_dbg(&sndev->stdev->dev, "disabling link");
++
++	sndev->self_shared->link_sta = 0;
++	switchtec_ntb_send_msg(sndev, LINK_MESSAGE, MSG_LINK_UP);
++
++	switchtec_ntb_check_link(sndev);
++
+ 	return 0;
+ }
+ 
+@@ -572,6 +695,9 @@ static irqreturn_t switchtec_ntb_message_isr(int irq, void *dev)
+ 			dev_dbg(&sndev->stdev->dev, "message: %d %08x\n", i,
+ 				(u32)msg);
+ 			iowrite8(1, &sndev->mmio_self_dbmsg->imsg[i].status);
++
++			if (i == LINK_MESSAGE)
++				switchtec_ntb_check_link(sndev);
+ 		}
+ 	}
+ 
+@@ -674,6 +800,7 @@ static int switchtec_ntb_add(struct device *dev,
+ 		goto deinit_and_exit;
+ 
+ 	stdev->sndev = sndev;
++	stdev->link_notifier = switchtec_ntb_link_notification;
+ 	dev_info(dev, "NTB device registered");
+ 
+ 	return 0;
+@@ -697,6 +824,7 @@ void switchtec_ntb_remove(struct device *dev,
+ 	if (!sndev)
+ 		return;
+ 
++	stdev->link_notifier = NULL;
+ 	stdev->sndev = NULL;
+ 	ntb_unregister_device(&sndev->ntb);
+ 	switchtec_ntb_deinit_db_msg_irq(sndev);
+-- 
+2.11.0
 
