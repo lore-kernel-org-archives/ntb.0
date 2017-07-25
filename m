@@ -1,160 +1,116 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id 129si627887ith.2.2017.07.25.13.58.05
+        by gmr-mx.google.com with ESMTPS id 71si530705ita.2.2017.07.25.13.58.05
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
         Tue, 25 Jul 2017 13:58:05 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Tue, 25 Jul 2017 14:57:43 -0600
-Message-Id: <20170725205753.4735-7-logang@deltatee.com>
-In-Reply-To: <20170725205753.4735-1-logang@deltatee.com>
-References: <20170725205753.4735-1-logang@deltatee.com>
-Subject: [PATCH v3 06/16] ntb: ensure ntb_mw_get_align() is only called when the link is up
+Date: Tue, 25 Jul 2017 14:57:37 -0600
+Message-Id: <20170725205753.4735-1-logang@deltatee.com>
+Subject: [PATCH v3 00/16] Switchtec NTB Support
 To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-With Switchtec hardware it's impossible to get the alignment parameters
-for a peer's memory window until the peer's driver has configured it's
-windows. Strictly speaking, the link doesn't have to be up for this,
-but the link being up is the only way the client can tell that
-the otherside has been configured.
+Changes since v2:
 
-This patch converts ntb_transport and ntb_perf to use this function after
-the link goes up. This simplifies these clients slightly because they
-no longer have to store the alignment parameters. It also tweaks
-ntb_tool so that peer_mw_trans will print zero if it is run before
-the link goes up.
+- Reordered the ntb_test link patch per Allen
+- Removed an extra call to switchtec_ntb_init_mw
+- Fixed a typo in the switchtec.txt documentation.
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
----
- drivers/ntb/ntb_transport.c | 20 ++++++++++----------
- drivers/ntb/test/ntb_perf.c | 18 +++++++++---------
- drivers/ntb/test/ntb_tool.c |  6 +++---
- 3 files changed, 22 insertions(+), 22 deletions(-)
+--
 
-diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index b29558ddfe95..7ed745aaa213 100644
---- a/drivers/ntb/ntb_transport.c
-+++ b/drivers/ntb/ntb_transport.c
-@@ -191,8 +191,6 @@ struct ntb_transport_qp {
- struct ntb_transport_mw {
- 	phys_addr_t phys_addr;
- 	resource_size_t phys_size;
--	resource_size_t xlat_align;
--	resource_size_t xlat_align_size;
- 	void __iomem *vbase;
- 	size_t xlat_size;
- 	size_t buff_size;
-@@ -687,13 +685,20 @@ static int ntb_set_mw(struct ntb_transport_ctx *nt, int num_mw,
- 	struct ntb_transport_mw *mw = &nt->mw_vec[num_mw];
- 	struct pci_dev *pdev = nt->ndev->pdev;
- 	size_t xlat_size, buff_size;
-+	resource_size_t xlat_align;
-+	resource_size_t xlat_align_size;
- 	int rc;
- 
- 	if (!size)
- 		return -EINVAL;
- 
--	xlat_size = round_up(size, mw->xlat_align_size);
--	buff_size = round_up(size, mw->xlat_align);
-+	rc = ntb_mw_get_align(nt->ndev, PIDX, num_mw, &xlat_align,
-+			      &xlat_align_size, NULL);
-+	if (rc)
-+		return rc;
-+
-+	xlat_size = round_up(size, xlat_align_size);
-+	buff_size = round_up(size, xlat_align);
- 
- 	/* No need to re-setup */
- 	if (mw->xlat_size == xlat_size)
-@@ -722,7 +727,7 @@ static int ntb_set_mw(struct ntb_transport_ctx *nt, int num_mw,
- 	 * is a requirement of the hardware. It is recommended to setup CMA
- 	 * for BAR sizes equal or greater than 4MB.
- 	 */
--	if (!IS_ALIGNED(mw->dma_addr, mw->xlat_align)) {
-+	if (!IS_ALIGNED(mw->dma_addr, xlat_align)) {
- 		dev_err(&pdev->dev, "DMA memory %pad is not aligned\n",
- 			&mw->dma_addr);
- 		ntb_free_mw(nt, num_mw);
-@@ -1106,11 +1111,6 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
- 	for (i = 0; i < mw_count; i++) {
- 		mw = &nt->mw_vec[i];
- 
--		rc = ntb_mw_get_align(ndev, PIDX, i, &mw->xlat_align,
--				      &mw->xlat_align_size, NULL);
--		if (rc)
--			goto err1;
--
- 		rc = ntb_peer_mw_get_addr(ndev, i, &mw->phys_addr,
- 					  &mw->phys_size);
- 		if (rc)
-diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index 759f772fa00c..427112cf101a 100644
---- a/drivers/ntb/test/ntb_perf.c
-+++ b/drivers/ntb/test/ntb_perf.c
-@@ -108,8 +108,6 @@ MODULE_PARM_DESC(on_node, "Run threads only on NTB device node (default: true)")
- struct perf_mw {
- 	phys_addr_t	phys_addr;
- 	resource_size_t	phys_size;
--	resource_size_t	xlat_align;
--	resource_size_t	xlat_align_size;
- 	void __iomem	*vbase;
- 	size_t		xlat_size;
- 	size_t		buf_size;
-@@ -472,13 +470,20 @@ static int perf_set_mw(struct perf_ctx *perf, resource_size_t size)
- {
- 	struct perf_mw *mw = &perf->mw;
- 	size_t xlat_size, buf_size;
-+	resource_size_t	xlat_align;
-+	resource_size_t	xlat_align_size;
- 	int rc;
- 
- 	if (!size)
- 		return -EINVAL;
- 
--	xlat_size = round_up(size, mw->xlat_align_size);
--	buf_size = round_up(size, mw->xlat_align);
-+	rc = ntb_mw_get_align(perf->ntb, PIDX, 0, &xlat_align,
-+			      &xlat_align_size, NULL);
-+	if (rc)
-+		return rc;
-+
-+	xlat_size = round_up(size, xlat_align_size);
-+	buf_size = round_up(size, xlat_align);
- 
- 	if (mw->xlat_size == xlat_size)
- 		return 0;
-@@ -567,11 +572,6 @@ static int perf_setup_mw(struct ntb_dev *ntb, struct perf_ctx *perf)
- 
- 	mw = &perf->mw;
- 
--	rc = ntb_mw_get_align(ntb, PIDX, 0, &mw->xlat_align,
--			      &mw->xlat_align_size, NULL);
--	if (rc)
--		return rc;
--
- 	rc = ntb_peer_mw_get_addr(ntb, 0, &mw->phys_addr, &mw->phys_size);
- 	if (rc)
- 		return rc;
-diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c
-index a69815c45ce6..91526a986caa 100644
---- a/drivers/ntb/test/ntb_tool.c
-+++ b/drivers/ntb/test/ntb_tool.c
-@@ -753,9 +753,9 @@ static ssize_t tool_peer_mw_trans_read(struct file *filep,
- 
- 	phys_addr_t base;
- 	resource_size_t mw_size;
--	resource_size_t align_addr;
--	resource_size_t align_size;
--	resource_size_t max_size;
-+	resource_size_t align_addr = 0;
-+	resource_size_t align_size = 0;
-+	resource_size_t max_size = 0;
- 
- 	buf_size = min_t(size_t, size, 512);
- 
--- 
+Changes since v1:
+
+- Rebased onto latest ntb-next branch (with v4.13-rc1)
+- Reworked ntb_mw_count() function so that it can be called all the
+  time (per discussion with Allen)
+- Various spelling and formatting cleanups from Bjorn
+- Added request_module() call such that the NTB module is automatically
+  loaded when appropriate hardware exists.
+
+--
+
+Changes since the rfc:
+
+- Rebased on ntb-next
+- Switched ntb_part_op to use sleep instead of delay
+- Dropped a number of useless dbg __func__ prints
+- Went back to the dynamic instead of the static class
+- Swapped the notifier block for a simple callback
+- Modified the new ntb api so that a couple functions with pidx
+  now must be called after link up. Per our discussion on the list.
+
+--
+
+This patchset implements Non-Transparent Bridge (NTB) support for the
+Microsemi Switchtec series of switches. We're looking for some
+review from the community at this point but hope to get it upstreamed
+for v4.14.
+
+Switchtec NTB support is configured over the same function and bar
+as the management endpoint. Thus, the new driver hooks into the
+management driver which we had merged in v4.12. We use the class
+interface API to register an NTB device for every switchtec device
+which supports NTB (not all do).
+
+The Switchtec hardware supports doorbells, memory windows and messages.
+Seeing there is no native scratchpad support, 128 spads are emulated
+through the use of a pre-setup memory window. The switch has 64
+doorbells which are shared between the two partitions and a
+configurable set of memory windows. While the hardware supports more
+than 2 partitions, this driver only supports the first two seeing
+the current NTB API only supports two hosts.
+
+The driver has been tested with ntb_netdev and fully passes the
+ntb_test script.
+
+This patchset is based off of ntb-next and can be found in this
+git repo:
+
+https://github.com/sbates130272/linux-p2pmem.git switchtec_ntb_v3
+
+*** BLURB HERE ***
+
+Logan Gunthorpe (16):
+  switchtec: move structure definitions into a common header
+  switchtec: export class symbol for use in upper layer driver
+  switchtec: add NTB hardware register definitions
+  switchtec: add link event notifier callback
+  ntb: ntb_test: ensure the link is up before trying to configure the
+    mws
+  ntb: ensure ntb_mw_get_align() is only called when the link is up
+  ntb: add check and comment for link up to mw_count() and
+    mw_get_align()
+  switchtec_ntb: introduce initial NTB driver
+  switchtec_ntb: initialize hardware for memory windows
+  switchtec_ntb: initialize hardware for doorbells and messages
+  switchtec_ntb: add skeleton NTB driver
+  switchtec_ntb: add link management
+  switchtec_ntb: implement doorbell registers
+  switchtec_ntb: implement scratchpad registers
+  switchtec_ntb: add memory window support
+  switchtec_ntb: update switchtec documentation with notes for NTB
+
+ Documentation/switchtec.txt             |   12 +
+ MAINTAINERS                             |    2 +
+ drivers/ntb/hw/Kconfig                  |    1 +
+ drivers/ntb/hw/Makefile                 |    1 +
+ drivers/ntb/hw/mscc/Kconfig             |    9 +
+ drivers/ntb/hw/mscc/Makefile            |    1 +
+ drivers/ntb/hw/mscc/switchtec_ntb.c     | 1211 +++++++++++++++++++++++++++++++
+ drivers/ntb/ntb_transport.c             |   20 +-
+ drivers/ntb/test/ntb_perf.c             |   18 +-
+ drivers/ntb/test/ntb_tool.c             |    6 +-
+ drivers/pci/switch/switchtec.c          |  316 ++------
+ include/linux/ntb.h                     |   11 +-
+ include/linux/switchtec.h               |  373 ++++++++++
+ tools/testing/selftests/ntb/ntb_test.sh |    4 +
+ 14 files changed, 1702 insertions(+), 283 deletions(-)
+ create mode 100644 drivers/ntb/hw/mscc/Kconfig
+ create mode 100644 drivers/ntb/hw/mscc/Makefile
+ create mode 100644 drivers/ntb/hw/mscc/switchtec_ntb.c
+ create mode 100644 include/linux/switchtec.h
+
+--
 2.11.0
-
