@@ -1,239 +1,133 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id g192si652125ita.8.2017.07.25.13.58.13
+        by gmr-mx.google.com with ESMTPS id e134si643277itc.5.2017.07.25.13.58.11
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 25 Jul 2017 13:58:13 -0700 (PDT)
+        Tue, 25 Jul 2017 13:58:11 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Tue, 25 Jul 2017 14:57:49 -0600
-Message-Id: <20170725205753.4735-13-logang@deltatee.com>
+Date: Tue, 25 Jul 2017 14:57:40 -0600
+Message-Id: <20170725205753.4735-4-logang@deltatee.com>
 In-Reply-To: <20170725205753.4735-1-logang@deltatee.com>
 References: <20170725205753.4735-1-logang@deltatee.com>
-Subject: [PATCH v3 12/16] switchtec_ntb: add link management
+Subject: [PATCH v3 03/16] switchtec: add NTB hardware register definitions
 To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-switchtec_ntb checks for a link by looking at the shared memory
-window. If the magic number is correct and the otherside indicates
-their link is enabled then we take the link to be up.
-
-Whenever we change our local link status we send a msg to the
-otherside to check whether it's up and change their status.
-
-The current status is maintained in a flag so ntb_is_link_up
-can return quickly.
-
-We utilize Switchtec's link status notifier to also check link changes
-when the switch notices a port changes state.
+There are two additional regions: ctrl and dbmsg. The first is
+for generic NTB control and memory windows. The second is for doorbells
+and message registers. This patch also adds a number of related
+constants for using these registers.
 
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
 Reviewed-by: Stephen Bates <sbates@raithlin.com>
 Reviewed-by: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
 ---
- drivers/ntb/hw/mscc/switchtec_ntb.c | 130 +++++++++++++++++++++++++++++++++++-
- 1 file changed, 129 insertions(+), 1 deletion(-)
+ include/linux/switchtec.h | 84 +++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 84 insertions(+)
 
-diff --git a/drivers/ntb/hw/mscc/switchtec_ntb.c b/drivers/ntb/hw/mscc/switchtec_ntb.c
-index f87c0eef59ef..34d69fa8612d 100644
---- a/drivers/ntb/hw/mscc/switchtec_ntb.c
-+++ b/drivers/ntb/hw/mscc/switchtec_ntb.c
-@@ -64,6 +64,7 @@ static inline void _iowrite64(u64 val, void __iomem *mmio)
- 
- struct shared_mw {
- 	u32 magic;
-+	u32 link_sta;
- 	u32 partition_id;
- 	u64 mw_sizes[MAX_MWS];
- };
-@@ -104,8 +105,17 @@ struct switchtec_ntb {
- 	int peer_nr_direct_mw;
- 	int peer_nr_lut_mw;
- 	int peer_direct_mw_to_bar[MAX_DIRECT_MW];
-+
-+	bool link_is_up;
-+	enum ntb_speed link_speed;
-+	enum ntb_width link_width;
+diff --git a/include/linux/switchtec.h b/include/linux/switchtec.h
+index 18e388101855..9c2be7631257 100644
+--- a/include/linux/switchtec.h
++++ b/include/linux/switchtec.h
+@@ -156,6 +156,12 @@ struct flash_info_regs {
+ 	struct partition_info vendor[8];
  };
  
-+static struct switchtec_ntb *ntb_sndev(struct ntb_dev *ntb)
-+{
-+	return container_of(ntb, struct switchtec_ntb, ntb);
-+}
-+
- static int switchtec_ntb_part_op(struct switchtec_ntb *sndev,
- 				 struct ntb_ctrl_regs __iomem *ctl,
- 				 u32 op, int wait_status)
-@@ -163,6 +173,17 @@ static int switchtec_ntb_part_op(struct switchtec_ntb *sndev,
- 	return -EIO;
- }
- 
-+static int switchtec_ntb_send_msg(struct switchtec_ntb *sndev, int idx,
-+				  u32 val)
-+{
-+	if (idx < 0 || idx >= ARRAY_SIZE(sndev->mmio_self_dbmsg->omsg))
-+		return -EINVAL;
-+
-+	iowrite32(val, &sndev->mmio_self_dbmsg->omsg[idx].msg);
-+
-+	return 0;
-+}
-+
- static int switchtec_ntb_mw_count(struct ntb_dev *ntb, int pidx)
- {
- 	return 0;
-@@ -194,22 +215,124 @@ static int switchtec_ntb_peer_mw_get_addr(struct ntb_dev *ntb, int idx,
- 	return 0;
- }
- 
-+static void switchtec_ntb_part_link_speed(struct switchtec_ntb *sndev,
-+					  int partition,
-+					  enum ntb_speed *speed,
-+					  enum ntb_width *width)
-+{
-+	struct switchtec_dev *stdev = sndev->stdev;
-+
-+	u32 pff = ioread32(&stdev->mmio_part_cfg[partition].vep_pff_inst_id);
-+	u32 linksta = ioread32(&stdev->mmio_pff_csr[pff].pci_cap_region[13]);
-+
-+	if (speed)
-+		*speed = (linksta >> 16) & 0xF;
-+
-+	if (width)
-+		*width = (linksta >> 20) & 0x3F;
-+}
-+
-+static void switchtec_ntb_set_link_speed(struct switchtec_ntb *sndev)
-+{
-+	enum ntb_speed self_speed, peer_speed;
-+	enum ntb_width self_width, peer_width;
-+
-+	if (!sndev->link_is_up) {
-+		sndev->link_speed = NTB_SPEED_NONE;
-+		sndev->link_width = NTB_WIDTH_NONE;
-+		return;
-+	}
-+
-+	switchtec_ntb_part_link_speed(sndev, sndev->self_partition,
-+				      &self_speed, &self_width);
-+	switchtec_ntb_part_link_speed(sndev, sndev->peer_partition,
-+				      &peer_speed, &peer_width);
-+
-+	sndev->link_speed = min(self_speed, peer_speed);
-+	sndev->link_width = min(self_width, peer_width);
-+}
-+
 +enum {
-+	LINK_MESSAGE = 0,
-+	MSG_LINK_UP = 1,
-+	MSG_LINK_DOWN = 2,
-+	MSG_CHECK_LINK = 3,
++	SWITCHTEC_NTB_REG_INFO_OFFSET   = 0x0000,
++	SWITCHTEC_NTB_REG_CTRL_OFFSET   = 0x4000,
++	SWITCHTEC_NTB_REG_DBMSG_OFFSET  = 0x64000,
 +};
 +
-+static void switchtec_ntb_check_link(struct switchtec_ntb *sndev)
-+{
-+	int link_sta;
-+	int old = sndev->link_is_up;
-+
-+	link_sta = sndev->self_shared->link_sta;
-+	if (link_sta) {
-+		u64 peer = ioread64(&sndev->peer_shared->magic);
-+
-+		if ((peer & 0xFFFFFFFF) == SWITCHTEC_NTB_MAGIC)
-+			link_sta = peer >> 32;
-+		else
-+			link_sta = 0;
-+	}
-+
-+	sndev->link_is_up = link_sta;
-+	switchtec_ntb_set_link_speed(sndev);
-+
-+	if (link_sta != old) {
-+		switchtec_ntb_send_msg(sndev, LINK_MESSAGE, MSG_CHECK_LINK);
-+		ntb_link_event(&sndev->ntb);
-+		dev_info(&sndev->stdev->dev, "ntb link %s",
-+			 link_sta ? "up" : "down");
-+	}
-+}
-+
-+static void switchtec_ntb_link_notification(struct switchtec_dev *stdev)
-+{
-+	struct switchtec_ntb *sndev = stdev->sndev;
-+
-+	switchtec_ntb_check_link(sndev);
-+}
-+
- static u64 switchtec_ntb_link_is_up(struct ntb_dev *ntb,
- 				    enum ntb_speed *speed,
- 				    enum ntb_width *width)
- {
--	return 0;
-+	struct switchtec_ntb *sndev = ntb_sndev(ntb);
-+
-+	if (speed)
-+		*speed = sndev->link_speed;
-+	if (width)
-+		*width = sndev->link_width;
-+
-+	return sndev->link_is_up;
- }
+ struct ntb_info_regs {
+ 	u8  partition_count;
+ 	u8  partition_id;
+@@ -191,6 +197,84 @@ struct part_cfg_regs {
+ } __packed;
  
- static int switchtec_ntb_link_enable(struct ntb_dev *ntb,
- 				     enum ntb_speed max_speed,
- 				     enum ntb_width max_width)
- {
-+	struct switchtec_ntb *sndev = ntb_sndev(ntb);
+ enum {
++	NTB_CTRL_PART_OP_LOCK = 0x1,
++	NTB_CTRL_PART_OP_CFG = 0x2,
++	NTB_CTRL_PART_OP_RESET = 0x3,
 +
-+	dev_dbg(&sndev->stdev->dev, "enabling link");
++	NTB_CTRL_PART_STATUS_NORMAL = 0x1,
++	NTB_CTRL_PART_STATUS_LOCKED = 0x2,
++	NTB_CTRL_PART_STATUS_LOCKING = 0x3,
++	NTB_CTRL_PART_STATUS_CONFIGURING = 0x4,
++	NTB_CTRL_PART_STATUS_RESETTING = 0x5,
 +
-+	sndev->self_shared->link_sta = 1;
-+	switchtec_ntb_send_msg(sndev, LINK_MESSAGE, MSG_LINK_UP);
++	NTB_CTRL_BAR_VALID = 1 << 0,
++	NTB_CTRL_BAR_DIR_WIN_EN = 1 << 4,
++	NTB_CTRL_BAR_LUT_WIN_EN = 1 << 5,
 +
-+	switchtec_ntb_check_link(sndev);
++	NTB_CTRL_REQ_ID_EN = 1 << 0,
 +
- 	return 0;
- }
- 
- static int switchtec_ntb_link_disable(struct ntb_dev *ntb)
- {
-+	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++	NTB_CTRL_LUT_EN = 1 << 0,
 +
-+	dev_dbg(&sndev->stdev->dev, "disabling link");
++	NTB_PART_CTRL_ID_PROT_DIS = 1 << 0,
++};
 +
-+	sndev->self_shared->link_sta = 0;
-+	switchtec_ntb_send_msg(sndev, LINK_MESSAGE, MSG_LINK_UP);
++struct ntb_ctrl_regs {
++	u32 partition_status;
++	u32 partition_op;
++	u32 partition_ctrl;
++	u32 bar_setup;
++	u32 bar_error;
++	u16 lut_table_entries;
++	u16 lut_table_offset;
++	u32 lut_error;
++	u16 req_id_table_size;
++	u16 req_id_table_offset;
++	u32 req_id_error;
++	u32 reserved1[7];
++	struct {
++		u32 ctl;
++		u32 win_size;
++		u64 xlate_addr;
++	} bar_entry[6];
++	u32 reserved2[216];
++	u32 req_id_table[256];
++	u32 reserved3[512];
++	u64 lut_entry[512];
++} __packed;
 +
-+	switchtec_ntb_check_link(sndev);
++#define NTB_DBMSG_IMSG_STATUS BIT_ULL(32)
++#define NTB_DBMSG_IMSG_MASK   BIT_ULL(40)
 +
- 	return 0;
- }
- 
-@@ -572,6 +695,9 @@ static irqreturn_t switchtec_ntb_message_isr(int irq, void *dev)
- 			dev_dbg(&sndev->stdev->dev, "message: %d %08x\n", i,
- 				(u32)msg);
- 			iowrite8(1, &sndev->mmio_self_dbmsg->imsg[i].status);
++struct ntb_dbmsg_regs {
++	u32 reserved1[1024];
++	u64 odb;
++	u64 odb_mask;
++	u64 idb;
++	u64 idb_mask;
++	u8  idb_vec_map[64];
++	u32 msg_map;
++	u32 reserved2;
++	struct {
++		u32 msg;
++		u32 status;
++	} omsg[4];
 +
-+			if (i == LINK_MESSAGE)
-+				switchtec_ntb_check_link(sndev);
- 		}
- 	}
- 
-@@ -674,6 +800,7 @@ static int switchtec_ntb_add(struct device *dev,
- 		goto deinit_and_exit;
- 
- 	stdev->sndev = sndev;
-+	stdev->link_notifier = switchtec_ntb_link_notification;
- 	dev_info(dev, "NTB device registered");
- 
- 	return 0;
-@@ -697,6 +824,7 @@ void switchtec_ntb_remove(struct device *dev,
- 	if (!sndev)
- 		return;
- 
-+	stdev->link_notifier = NULL;
- 	stdev->sndev = NULL;
- 	ntb_unregister_device(&sndev->ntb);
- 	switchtec_ntb_deinit_db_msg_irq(sndev);
++	struct {
++		u32 msg;
++		u8  status;
++		u8  mask;
++		u8  src;
++		u8  reserved;
++	} imsg[4];
++
++	u8 reserved3[3928];
++	u8 msix_table[1024];
++	u8 reserved4[3072];
++	u8 pba[24];
++	u8 reserved5[4072];
++} __packed;
++
++enum {
+ 	SWITCHTEC_PART_CFG_EVENT_RESET = 1 << 0,
+ 	SWITCHTEC_PART_CFG_EVENT_MRPC_CMP = 1 << 1,
+ 	SWITCHTEC_PART_CFG_EVENT_MRPC_ASYNC_CMP = 1 << 2,
 -- 
 2.11.0
 
