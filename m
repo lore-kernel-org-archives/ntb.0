@@ -1,145 +1,160 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id h77si644960itb.0.2017.07.25.13.58.05
+        by gmr-mx.google.com with ESMTPS id 129si627887ith.2.2017.07.25.13.58.05
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 25 Jul 2017 13:58:06 -0700 (PDT)
+        Tue, 25 Jul 2017 13:58:05 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Tue, 25 Jul 2017 14:57:51 -0600
-Message-Id: <20170725205753.4735-15-logang@deltatee.com>
+Date: Tue, 25 Jul 2017 14:57:43 -0600
+Message-Id: <20170725205753.4735-7-logang@deltatee.com>
 In-Reply-To: <20170725205753.4735-1-logang@deltatee.com>
 References: <20170725205753.4735-1-logang@deltatee.com>
-Subject: [PATCH v3 14/16] switchtec_ntb: implement scratchpad registers
+Subject: [PATCH v3 06/16] ntb: ensure ntb_mw_get_align() is only called when the link is up
 To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Seeing there is no dedicated hardware for this, we simply add
-these as entries in the shared memory window. Thus, we could support
-any number of them but 128 seems like enough, for now.
+With Switchtec hardware it's impossible to get the alignment parameters
+for a peer's memory window until the peer's driver has configured it's
+windows. Strictly speaking, the link doesn't have to be up for this,
+but the link being up is the only way the client can tell that
+the otherside has been configured.
+
+This patch converts ntb_transport and ntb_perf to use this function after
+the link goes up. This simplifies these clients slightly because they
+no longer have to store the alignment parameters. It also tweaks
+ntb_tool so that peer_mw_trans will print zero if it is run before
+the link goes up.
 
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Reviewed-by: Stephen Bates <sbates@raithlin.com>
-Reviewed-by: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
 ---
- drivers/ntb/hw/mscc/switchtec_ntb.c | 75 ++++++++++++++++++++++++++++++++++++-
- 1 file changed, 73 insertions(+), 2 deletions(-)
+ drivers/ntb/ntb_transport.c | 20 ++++++++++----------
+ drivers/ntb/test/ntb_perf.c | 18 +++++++++---------
+ drivers/ntb/test/ntb_tool.c |  6 +++---
+ 3 files changed, 22 insertions(+), 22 deletions(-)
 
-diff --git a/drivers/ntb/hw/mscc/switchtec_ntb.c b/drivers/ntb/hw/mscc/switchtec_ntb.c
-index 3037ca730998..ca403ad2f7ac 100644
---- a/drivers/ntb/hw/mscc/switchtec_ntb.c
-+++ b/drivers/ntb/hw/mscc/switchtec_ntb.c
-@@ -67,6 +67,7 @@ struct shared_mw {
- 	u32 link_sta;
- 	u32 partition_id;
- 	u64 mw_sizes[MAX_MWS];
-+	u32 spad[128];
- };
+diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+index b29558ddfe95..7ed745aaa213 100644
+--- a/drivers/ntb/ntb_transport.c
++++ b/drivers/ntb/ntb_transport.c
+@@ -191,8 +191,6 @@ struct ntb_transport_qp {
+ struct ntb_transport_mw {
+ 	phys_addr_t phys_addr;
+ 	resource_size_t phys_size;
+-	resource_size_t xlat_align;
+-	resource_size_t xlat_align_size;
+ 	void __iomem *vbase;
+ 	size_t xlat_size;
+ 	size_t buff_size;
+@@ -687,13 +685,20 @@ static int ntb_set_mw(struct ntb_transport_ctx *nt, int num_mw,
+ 	struct ntb_transport_mw *mw = &nt->mw_vec[num_mw];
+ 	struct pci_dev *pdev = nt->ndev->pdev;
+ 	size_t xlat_size, buff_size;
++	resource_size_t xlat_align;
++	resource_size_t xlat_align_size;
+ 	int rc;
  
- #define MAX_DIRECT_MW ARRAY_SIZE(((struct ntb_ctrl_regs *)(0))->bar_entry)
-@@ -455,22 +456,90 @@ static int switchtec_ntb_peer_db_set(struct ntb_dev *ntb, u64 db_bits)
+ 	if (!size)
+ 		return -EINVAL;
  
- static int switchtec_ntb_spad_count(struct ntb_dev *ntb)
+-	xlat_size = round_up(size, mw->xlat_align_size);
+-	buff_size = round_up(size, mw->xlat_align);
++	rc = ntb_mw_get_align(nt->ndev, PIDX, num_mw, &xlat_align,
++			      &xlat_align_size, NULL);
++	if (rc)
++		return rc;
++
++	xlat_size = round_up(size, xlat_align_size);
++	buff_size = round_up(size, xlat_align);
+ 
+ 	/* No need to re-setup */
+ 	if (mw->xlat_size == xlat_size)
+@@ -722,7 +727,7 @@ static int ntb_set_mw(struct ntb_transport_ctx *nt, int num_mw,
+ 	 * is a requirement of the hardware. It is recommended to setup CMA
+ 	 * for BAR sizes equal or greater than 4MB.
+ 	 */
+-	if (!IS_ALIGNED(mw->dma_addr, mw->xlat_align)) {
++	if (!IS_ALIGNED(mw->dma_addr, xlat_align)) {
+ 		dev_err(&pdev->dev, "DMA memory %pad is not aligned\n",
+ 			&mw->dma_addr);
+ 		ntb_free_mw(nt, num_mw);
+@@ -1106,11 +1111,6 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
+ 	for (i = 0; i < mw_count; i++) {
+ 		mw = &nt->mw_vec[i];
+ 
+-		rc = ntb_mw_get_align(ndev, PIDX, i, &mw->xlat_align,
+-				      &mw->xlat_align_size, NULL);
+-		if (rc)
+-			goto err1;
+-
+ 		rc = ntb_peer_mw_get_addr(ndev, i, &mw->phys_addr,
+ 					  &mw->phys_size);
+ 		if (rc)
+diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
+index 759f772fa00c..427112cf101a 100644
+--- a/drivers/ntb/test/ntb_perf.c
++++ b/drivers/ntb/test/ntb_perf.c
+@@ -108,8 +108,6 @@ MODULE_PARM_DESC(on_node, "Run threads only on NTB device node (default: true)")
+ struct perf_mw {
+ 	phys_addr_t	phys_addr;
+ 	resource_size_t	phys_size;
+-	resource_size_t	xlat_align;
+-	resource_size_t	xlat_align_size;
+ 	void __iomem	*vbase;
+ 	size_t		xlat_size;
+ 	size_t		buf_size;
+@@ -472,13 +470,20 @@ static int perf_set_mw(struct perf_ctx *perf, resource_size_t size)
  {
--	return 0;
-+	struct switchtec_ntb *sndev = ntb_sndev(ntb);
-+
-+	return ARRAY_SIZE(sndev->self_shared->spad);
- }
+ 	struct perf_mw *mw = &perf->mw;
+ 	size_t xlat_size, buf_size;
++	resource_size_t	xlat_align;
++	resource_size_t	xlat_align_size;
+ 	int rc;
  
- static u32 switchtec_ntb_spad_read(struct ntb_dev *ntb, int idx)
- {
--	return 0;
-+	struct switchtec_ntb *sndev = ntb_sndev(ntb);
-+
-+	if (idx < 0 || idx >= ARRAY_SIZE(sndev->self_shared->spad))
-+		return 0;
-+
-+	if (!sndev->self_shared)
-+		return 0;
-+
-+	return sndev->self_shared->spad[idx];
- }
+ 	if (!size)
+ 		return -EINVAL;
  
- static int switchtec_ntb_spad_write(struct ntb_dev *ntb, int idx, u32 val)
- {
-+	struct switchtec_ntb *sndev = ntb_sndev(ntb);
+-	xlat_size = round_up(size, mw->xlat_align_size);
+-	buf_size = round_up(size, mw->xlat_align);
++	rc = ntb_mw_get_align(perf->ntb, PIDX, 0, &xlat_align,
++			      &xlat_align_size, NULL);
++	if (rc)
++		return rc;
 +
-+	if (idx < 0 || idx >= ARRAY_SIZE(sndev->self_shared->spad))
-+		return -EINVAL;
-+
-+	if (!sndev->self_shared)
-+		return -EIO;
-+
-+	sndev->self_shared->spad[idx] = val;
-+
- 	return 0;
- }
++	xlat_size = round_up(size, xlat_align_size);
++	buf_size = round_up(size, xlat_align);
  
-+static u32 switchtec_ntb_peer_spad_read(struct ntb_dev *ntb, int pidx,
-+					int sidx)
-+{
-+	struct switchtec_ntb *sndev = ntb_sndev(ntb);
-+
-+	if (pidx != NTB_DEF_PEER_IDX)
-+		return -EINVAL;
-+
-+	if (sidx < 0 || sidx >= ARRAY_SIZE(sndev->peer_shared->spad))
-+		return 0;
-+
-+	if (!sndev->peer_shared)
-+		return 0;
-+
-+	return ioread32(&sndev->peer_shared->spad[sidx]);
-+}
-+
- static int switchtec_ntb_peer_spad_write(struct ntb_dev *ntb, int pidx,
- 					 int sidx, u32 val)
- {
-+	struct switchtec_ntb *sndev = ntb_sndev(ntb);
-+
-+	if (pidx != NTB_DEF_PEER_IDX)
-+		return -EINVAL;
-+
-+	if (sidx < 0 || sidx >= ARRAY_SIZE(sndev->peer_shared->spad))
-+		return -EINVAL;
-+
-+	if (!sndev->peer_shared)
-+		return -EIO;
-+
-+	iowrite32(val, &sndev->peer_shared->spad[sidx]);
-+
-+	return 0;
-+}
-+
-+static int switchtec_ntb_peer_spad_addr(struct ntb_dev *ntb, int pidx,
-+					int sidx, phys_addr_t *spad_addr)
-+{
-+	struct switchtec_ntb *sndev = ntb_sndev(ntb);
-+	unsigned long offset;
-+
-+	if (pidx != NTB_DEF_PEER_IDX)
-+		return -EINVAL;
-+
-+	offset = (unsigned long)&sndev->peer_shared->spad[sidx] -
-+		(unsigned long)sndev->stdev->mmio;
-+
-+	if (spad_addr)
-+		*spad_addr = pci_resource_start(ntb->pdev, 0) + offset;
-+
- 	return 0;
- }
+ 	if (mw->xlat_size == xlat_size)
+ 		return 0;
+@@ -567,11 +572,6 @@ static int perf_setup_mw(struct ntb_dev *ntb, struct perf_ctx *perf)
  
-@@ -496,7 +565,9 @@ static const struct ntb_dev_ops switchtec_ntb_ops = {
- 	.spad_count		= switchtec_ntb_spad_count,
- 	.spad_read		= switchtec_ntb_spad_read,
- 	.spad_write		= switchtec_ntb_spad_write,
-+	.peer_spad_read		= switchtec_ntb_peer_spad_read,
- 	.peer_spad_write	= switchtec_ntb_peer_spad_write,
-+	.peer_spad_addr		= switchtec_ntb_peer_spad_addr,
- };
+ 	mw = &perf->mw;
  
- static void switchtec_ntb_init_sndev(struct switchtec_ntb *sndev)
+-	rc = ntb_mw_get_align(ntb, PIDX, 0, &mw->xlat_align,
+-			      &mw->xlat_align_size, NULL);
+-	if (rc)
+-		return rc;
+-
+ 	rc = ntb_peer_mw_get_addr(ntb, 0, &mw->phys_addr, &mw->phys_size);
+ 	if (rc)
+ 		return rc;
+diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c
+index a69815c45ce6..91526a986caa 100644
+--- a/drivers/ntb/test/ntb_tool.c
++++ b/drivers/ntb/test/ntb_tool.c
+@@ -753,9 +753,9 @@ static ssize_t tool_peer_mw_trans_read(struct file *filep,
+ 
+ 	phys_addr_t base;
+ 	resource_size_t mw_size;
+-	resource_size_t align_addr;
+-	resource_size_t align_size;
+-	resource_size_t max_size;
++	resource_size_t align_addr = 0;
++	resource_size_t align_size = 0;
++	resource_size_t max_size = 0;
+ 
+ 	buf_size = min_t(size_t, size, 512);
+ 
 -- 
 2.11.0
 
