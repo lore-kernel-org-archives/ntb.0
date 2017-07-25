@@ -1,241 +1,148 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id 127si479143ith.4.2017.07.25.13.58.09
+        by gmr-mx.google.com with ESMTPS id f131si671943itc.3.2017.07.25.13.58.08
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
         Tue, 25 Jul 2017 13:58:09 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Tue, 25 Jul 2017 14:57:47 -0600
-Message-Id: <20170725205753.4735-11-logang@deltatee.com>
+Date: Tue, 25 Jul 2017 14:57:41 -0600
+Message-Id: <20170725205753.4735-5-logang@deltatee.com>
 In-Reply-To: <20170725205753.4735-1-logang@deltatee.com>
 References: <20170725205753.4735-1-logang@deltatee.com>
-Subject: [PATCH v3 10/16] switchtec_ntb: initialize hardware for doorbells and messages
+Subject: [PATCH v3 04/16] switchtec: add link event notifier callback
 To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Set up some hardware registers and creates interrupt service routines
-for the doorbells and messages.
+In order for the Switchtec NTB code to handle link change events we
+create a notifier callback in the switchtec code which gets called
+whenever an appropriate event interrupt occurs.
 
-There are 64 doorbells in the switch that are shared between all
-partitions. The upper 4 doorbells are also shared with the messages
-and are there for not used. Thus, this provides 28 doorbells for each
-partition.
+In order to preserve userspace's ability to follow these events,
+we compare the event count with a stored copy from last time we
+checked.
 
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
 Reviewed-by: Stephen Bates <sbates@raithlin.com>
 Reviewed-by: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
+Acked-by: Bjorn Helgaas <bhelgaas@google.com>
 ---
- drivers/ntb/hw/mscc/switchtec_ntb.c | 142 ++++++++++++++++++++++++++++++++++++
- 1 file changed, 142 insertions(+)
+ drivers/pci/switch/switchtec.c | 51 ++++++++++++++++++++++++++++++++++++++++++
+ include/linux/switchtec.h      |  4 ++++
+ 2 files changed, 55 insertions(+)
 
-diff --git a/drivers/ntb/hw/mscc/switchtec_ntb.c b/drivers/ntb/hw/mscc/switchtec_ntb.c
-index 1596757413f5..877337902363 100644
---- a/drivers/ntb/hw/mscc/switchtec_ntb.c
-+++ b/drivers/ntb/hw/mscc/switchtec_ntb.c
-@@ -17,6 +17,7 @@
- #include <linux/module.h>
- #include <linux/delay.h>
- #include <linux/kthread.h>
-+#include <linux/interrupt.h>
+diff --git a/drivers/pci/switch/switchtec.c b/drivers/pci/switch/switchtec.c
+index 39c9218d733f..807569e62bee 100644
+--- a/drivers/pci/switch/switchtec.c
++++ b/drivers/pci/switch/switchtec.c
+@@ -978,6 +978,49 @@ static const struct file_operations switchtec_fops = {
+ 	.compat_ioctl = switchtec_dev_ioctl,
+ };
  
- MODULE_DESCRIPTION("Microsemi Switchtec(tm) NTB Driver");
- MODULE_VERSION("0.1");
-@@ -75,6 +76,9 @@ struct switchtec_ntb {
- 	int self_partition;
- 	int peer_partition;
- 
-+	int doorbell_irq;
-+	int message_irq;
-+
- 	struct ntb_info_regs __iomem *mmio_ntb;
- 	struct ntb_ctrl_regs __iomem *mmio_ctrl;
- 	struct ntb_dbmsg_regs __iomem *mmio_dbmsg;
-@@ -86,6 +90,11 @@ struct switchtec_ntb {
- 	struct shared_mw __iomem *peer_shared;
- 	dma_addr_t self_shared_dma;
- 
-+	u64 db_mask;
-+	u64 db_valid_mask;
-+	int db_shift;
-+	int db_peer_shift;
-+
- 	int nr_direct_mw;
- 	int nr_lut_mw;
- 	int direct_mw_to_bar[MAX_DIRECT_MW];
-@@ -215,6 +224,49 @@ static void switchtec_ntb_init_mw(struct switchtec_ntb *sndev)
- 
- }
- 
-+/*
-+ * There are 64 doorbells in the switch hardware but this is
-+ * shared among all partitions. So we must split them in half
-+ * (32 for each partition). However, the message interrupts are
-+ * also shared with the top 4 doorbells so we just limit this to
-+ * 28 doorbells per partition
-+ */
-+static void switchtec_ntb_init_db(struct switchtec_ntb *sndev)
++static void link_event_work(struct work_struct *work)
 +{
-+	sndev->db_valid_mask = 0x0FFFFFFF;
++	struct switchtec_dev *stdev;
 +
-+	if (sndev->self_partition < sndev->peer_partition) {
-+		sndev->db_shift = 0;
-+		sndev->db_peer_shift = 32;
-+	} else {
-+		sndev->db_shift = 32;
-+		sndev->db_peer_shift = 0;
-+	}
++	stdev = container_of(work, struct switchtec_dev, link_event_work);
 +
-+	sndev->db_mask = 0x0FFFFFFFFFFFFFFFULL;
-+	iowrite64(~sndev->db_mask, &sndev->mmio_self_dbmsg->idb_mask);
-+	iowrite64(sndev->db_valid_mask << sndev->db_peer_shift,
-+		  &sndev->mmio_self_dbmsg->odb_mask);
++	if (stdev->link_notifier)
++		stdev->link_notifier(stdev);
 +}
 +
-+static void switchtec_ntb_init_msgs(struct switchtec_ntb *sndev)
++static void check_link_state_events(struct switchtec_dev *stdev)
 +{
-+	int i;
-+	u32 msg_map = 0;
++	int idx;
++	u32 reg;
++	int count;
++	int occurred = 0;
 +
-+	for (i = 0; i < ARRAY_SIZE(sndev->mmio_self_dbmsg->imsg); i++) {
-+		int m = i | sndev->peer_partition << 2;
++	for (idx = 0; idx < stdev->pff_csr_count; idx++) {
++		reg = ioread32(&stdev->mmio_pff_csr[idx].link_state_hdr);
++		dev_dbg(&stdev->dev, "link_state: %d->%08x\n", idx, reg);
++		count = (reg >> 5) & 0xFF;
 +
-+		msg_map |= m << i * 8;
-+	}
-+
-+	iowrite32(msg_map, &sndev->mmio_self_dbmsg->msg_map);
-+
-+	for (i = 0; i < ARRAY_SIZE(sndev->mmio_self_dbmsg->imsg); i++)
-+		iowrite64(NTB_DBMSG_IMSG_STATUS | NTB_DBMSG_IMSG_MASK,
-+			  &sndev->mmio_self_dbmsg->imsg[i]);
-+}
-+
- static int switchtec_ntb_init_req_id_table(struct switchtec_ntb *sndev)
- {
- 	int rc = 0;
-@@ -359,6 +411,87 @@ static void switchtec_ntb_deinit_shared_mw(struct switchtec_ntb *sndev)
- 				  sndev->self_shared_dma);
- }
- 
-+static irqreturn_t switchtec_ntb_doorbell_isr(int irq, void *dev)
-+{
-+	struct switchtec_ntb *sndev = dev;
-+
-+	dev_dbg(&sndev->stdev->dev, "doorbell\n");
-+
-+	return IRQ_HANDLED;
-+}
-+
-+static irqreturn_t switchtec_ntb_message_isr(int irq, void *dev)
-+{
-+	int i;
-+	struct switchtec_ntb *sndev = dev;
-+
-+	for (i = 0; i < ARRAY_SIZE(sndev->mmio_self_dbmsg->imsg); i++) {
-+		u64 msg = ioread64(&sndev->mmio_self_dbmsg->imsg[i]);
-+
-+		if (msg & NTB_DBMSG_IMSG_STATUS) {
-+			dev_dbg(&sndev->stdev->dev, "message: %d %08x\n", i,
-+				(u32)msg);
-+			iowrite8(1, &sndev->mmio_self_dbmsg->imsg[i].status);
++		if (count != stdev->link_event_count[idx]) {
++			occurred = 1;
++			stdev->link_event_count[idx] = count;
 +		}
 +	}
 +
-+	return IRQ_HANDLED;
++	if (occurred)
++		schedule_work(&stdev->link_event_work);
 +}
 +
-+static int switchtec_ntb_init_db_msg_irq(struct switchtec_ntb *sndev)
++static void enable_link_state_events(struct switchtec_dev *stdev)
 +{
-+	int i;
-+	int rc;
-+	int doorbell_irq = 0;
-+	int message_irq = 0;
-+	int event_irq;
-+	int idb_vecs = sizeof(sndev->mmio_self_dbmsg->idb_vec_map);
++	int idx;
 +
-+	event_irq = ioread32(&sndev->stdev->mmio_part_cfg->vep_vector_number);
-+
-+	while (doorbell_irq == event_irq)
-+		doorbell_irq++;
-+	while (message_irq == doorbell_irq ||
-+	       message_irq == event_irq)
-+		message_irq++;
-+
-+	dev_dbg(&sndev->stdev->dev, "irqs - event: %d, db: %d, msgs: %d",
-+		event_irq, doorbell_irq, message_irq);
-+
-+	for (i = 0; i < idb_vecs - 4; i++)
-+		iowrite8(doorbell_irq,
-+			 &sndev->mmio_self_dbmsg->idb_vec_map[i]);
-+
-+	for (; i < idb_vecs; i++)
-+		iowrite8(message_irq,
-+			 &sndev->mmio_self_dbmsg->idb_vec_map[i]);
-+
-+	sndev->doorbell_irq = pci_irq_vector(sndev->stdev->pdev, doorbell_irq);
-+	sndev->message_irq = pci_irq_vector(sndev->stdev->pdev, message_irq);
-+
-+	rc = request_irq(sndev->doorbell_irq,
-+			 switchtec_ntb_doorbell_isr, 0,
-+			 "switchtec_ntb_doorbell", sndev);
-+	if (rc)
-+		return rc;
-+
-+	rc = request_irq(sndev->message_irq,
-+			 switchtec_ntb_message_isr, 0,
-+			 "switchtec_ntb_message", sndev);
-+	if (rc) {
-+		free_irq(sndev->doorbell_irq, sndev);
-+		return rc;
++	for (idx = 0; idx < stdev->pff_csr_count; idx++) {
++		iowrite32(SWITCHTEC_EVENT_CLEAR |
++			  SWITCHTEC_EVENT_EN_IRQ,
++			  &stdev->mmio_pff_csr[idx].link_state_hdr);
 +	}
-+
-+	return 0;
 +}
 +
-+static void switchtec_ntb_deinit_db_msg_irq(struct switchtec_ntb *sndev)
-+{
-+	free_irq(sndev->doorbell_irq, sndev);
-+	free_irq(sndev->message_irq, sndev);
-+}
-+
- static int switchtec_ntb_add(struct device *dev,
- 			     struct class_interface *class_intf)
+ static void stdev_release(struct device *dev)
  {
-@@ -382,6 +515,8 @@ static int switchtec_ntb_add(struct device *dev,
+ 	struct switchtec_dev *stdev = to_stdev(dev);
+@@ -1030,6 +1073,7 @@ static struct switchtec_dev *stdev_create(struct pci_dev *pdev)
+ 	stdev->mrpc_busy = 0;
+ 	INIT_WORK(&stdev->mrpc_work, mrpc_event_work);
+ 	INIT_DELAYED_WORK(&stdev->mrpc_timeout, mrpc_timeout_work);
++	INIT_WORK(&stdev->link_event_work, link_event_work);
+ 	init_waitqueue_head(&stdev->event_wq);
+ 	atomic_set(&stdev->event_cnt, 0);
  
- 	switchtec_ntb_init_sndev(sndev);
- 	switchtec_ntb_init_mw(sndev);
-+	switchtec_ntb_init_db(sndev);
-+	switchtec_ntb_init_msgs(sndev);
+@@ -1073,6 +1117,9 @@ static int mask_event(struct switchtec_dev *stdev, int eid, int idx)
+ 	if (!(hdr & SWITCHTEC_EVENT_OCCURRED && hdr & SWITCHTEC_EVENT_EN_IRQ))
+ 		return 0;
  
- 	rc = switchtec_ntb_init_req_id_table(sndev);
- 	if (rc)
-@@ -391,11 +526,17 @@ static int switchtec_ntb_add(struct device *dev,
- 	if (rc)
- 		goto free_and_exit;
- 
-+	rc = switchtec_ntb_init_db_msg_irq(sndev);
-+	if (rc)
-+		goto deinit_shared_and_exit;
++	if (eid == SWITCHTEC_IOCTL_EVENT_LINK_STATE)
++		return 0;
 +
- 	stdev->sndev = sndev;
- 	dev_info(dev, "NTB device registered");
+ 	dev_dbg(&stdev->dev, "%s: %d %d %x\n", __func__, eid, idx, hdr);
+ 	hdr &= ~(SWITCHTEC_EVENT_EN_IRQ | SWITCHTEC_EVENT_OCCURRED);
+ 	iowrite32(hdr, hdr_reg);
+@@ -1092,6 +1139,7 @@ static int mask_all_events(struct switchtec_dev *stdev, int eid)
+ 		for (idx = 0; idx < stdev->pff_csr_count; idx++) {
+ 			if (!stdev->pff_local[idx])
+ 				continue;
++
+ 			count += mask_event(stdev, eid, idx);
+ 		}
+ 	} else {
+@@ -1116,6 +1164,8 @@ static irqreturn_t switchtec_event_isr(int irq, void *dev)
+ 		iowrite32(reg, &stdev->mmio_part_cfg->mrpc_comp_hdr);
+ 	}
  
- 	return 0;
++	check_link_state_events(stdev);
++
+ 	for (eid = 0; eid < SWITCHTEC_IOCTL_MAX_EVENTS; eid++)
+ 		event_count += mask_all_events(stdev, eid);
  
-+deinit_shared_and_exit:
-+	switchtec_ntb_deinit_shared_mw(sndev);
- free_and_exit:
- 	kfree(sndev);
- 	dev_err(dev, "failed to register ntb device: %d", rc);
-@@ -412,6 +553,7 @@ void switchtec_ntb_remove(struct device *dev,
- 		return;
+@@ -1242,6 +1292,7 @@ static int switchtec_pci_probe(struct pci_dev *pdev,
+ 	iowrite32(SWITCHTEC_EVENT_CLEAR |
+ 		  SWITCHTEC_EVENT_EN_IRQ,
+ 		  &stdev->mmio_part_cfg->mrpc_comp_hdr);
++	enable_link_state_events(stdev);
  
- 	stdev->sndev = NULL;
-+	switchtec_ntb_deinit_db_msg_irq(sndev);
- 	switchtec_ntb_deinit_shared_mw(sndev);
- 	kfree(sndev);
- 	dev_info(dev, "ntb device unregistered");
+ 	rc = cdev_device_add(&stdev->cdev, &stdev->dev);
+ 	if (rc)
+diff --git a/include/linux/switchtec.h b/include/linux/switchtec.h
+index 9c2be7631257..d8159944f013 100644
+--- a/include/linux/switchtec.h
++++ b/include/linux/switchtec.h
+@@ -353,6 +353,10 @@ struct switchtec_dev {
+ 
+ 	wait_queue_head_t event_wq;
+ 	atomic_t event_cnt;
++
++	struct work_struct link_event_work;
++	void (*link_notifier)(struct switchtec_dev *stdev);
++	u8 link_event_count[SWITCHTEC_MAX_PFF_CSR];
+ };
+ 
+ static inline struct switchtec_dev *to_stdev(struct device *dev)
 -- 
 2.11.0
 
