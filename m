@@ -1,66 +1,145 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id 129si627893ith.2.2017.07.25.13.58.07
+        by gmr-mx.google.com with ESMTPS id h77si644960itb.0.2017.07.25.13.58.05
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 25 Jul 2017 13:58:07 -0700 (PDT)
+        Tue, 25 Jul 2017 13:58:06 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Tue, 25 Jul 2017 14:57:44 -0600
-Message-Id: <20170725205753.4735-8-logang@deltatee.com>
+Date: Tue, 25 Jul 2017 14:57:51 -0600
+Message-Id: <20170725205753.4735-15-logang@deltatee.com>
 In-Reply-To: <20170725205753.4735-1-logang@deltatee.com>
 References: <20170725205753.4735-1-logang@deltatee.com>
-Subject: [PATCH v3 07/16] ntb: add check and comment for link up to mw_count() and mw_get_align()
+Subject: [PATCH v3 14/16] switchtec_ntb: implement scratchpad registers
 To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Adds a comment and a check to ntb_mw_get_align() so that it always fails
-if the function is called before the link is up.
-
-Also adds a comment to ntb_mw_count() to note that it may return 0 if
-it is called before the link is up.
-
-This is to prevent accidental mis-use in clients that are testing
-on hardware that this doesn't matter for.
+Seeing there is no dedicated hardware for this, we simply add
+these as entries in the shared memory window. Thus, we could support
+any number of them but 128 seems like enough, for now.
 
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+Reviewed-by: Stephen Bates <sbates@raithlin.com>
+Reviewed-by: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
 ---
- include/linux/ntb.h | 8 ++++++--
- 1 file changed, 6 insertions(+), 2 deletions(-)
+ drivers/ntb/hw/mscc/switchtec_ntb.c | 75 ++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 73 insertions(+), 2 deletions(-)
 
-diff --git a/include/linux/ntb.h b/include/linux/ntb.h
-index 609e232c00da..47f2966cfd7f 100644
---- a/include/linux/ntb.h
-+++ b/include/linux/ntb.h
-@@ -730,7 +730,8 @@ static inline int ntb_link_disable(struct ntb_dev *ntb)
-  * Hardware and topology may support a different number of memory windows.
-  * Moreover different peer devices can support different number of memory
-  * windows. Simply speaking this method returns the number of possible inbound
-- * memory windows to share with specified peer device.
-+ * memory windows to share with specified peer device. Note: this may return
-+ * zero if the link is not up yet.
-  *
-  * Return: the number of memory windows.
-  */
-@@ -751,7 +752,7 @@ static inline int ntb_mw_count(struct ntb_dev *ntb, int pidx)
-  * Get the alignments of an inbound memory window with specified index.
-  * NULL may be given for any output parameter if the value is not needed.
-  * The alignment and size parameters may be used for allocation of proper
-- * shared memory.
-+ * shared memory. Note: this must only be called when the link is up.
-  *
-  * Return: Zero on success, otherwise a negative error number.
-  */
-@@ -760,6 +761,9 @@ static inline int ntb_mw_get_align(struct ntb_dev *ntb, int pidx, int widx,
- 				   resource_size_t *size_align,
- 				   resource_size_t *size_max)
+diff --git a/drivers/ntb/hw/mscc/switchtec_ntb.c b/drivers/ntb/hw/mscc/switchtec_ntb.c
+index 3037ca730998..ca403ad2f7ac 100644
+--- a/drivers/ntb/hw/mscc/switchtec_ntb.c
++++ b/drivers/ntb/hw/mscc/switchtec_ntb.c
+@@ -67,6 +67,7 @@ struct shared_mw {
+ 	u32 link_sta;
+ 	u32 partition_id;
+ 	u64 mw_sizes[MAX_MWS];
++	u32 spad[128];
+ };
+ 
+ #define MAX_DIRECT_MW ARRAY_SIZE(((struct ntb_ctrl_regs *)(0))->bar_entry)
+@@ -455,22 +456,90 @@ static int switchtec_ntb_peer_db_set(struct ntb_dev *ntb, u64 db_bits)
+ 
+ static int switchtec_ntb_spad_count(struct ntb_dev *ntb)
  {
-+	if (!(ntb_link_is_up(ntb, NULL, NULL) & (1 << pidx)))
-+		return -ENOTCONN;
+-	return 0;
++	struct switchtec_ntb *sndev = ntb_sndev(ntb);
 +
- 	return ntb->ops->mw_get_align(ntb, pidx, widx, addr_align, size_align,
- 				      size_max);
++	return ARRAY_SIZE(sndev->self_shared->spad);
  }
+ 
+ static u32 switchtec_ntb_spad_read(struct ntb_dev *ntb, int idx)
+ {
+-	return 0;
++	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++
++	if (idx < 0 || idx >= ARRAY_SIZE(sndev->self_shared->spad))
++		return 0;
++
++	if (!sndev->self_shared)
++		return 0;
++
++	return sndev->self_shared->spad[idx];
+ }
+ 
+ static int switchtec_ntb_spad_write(struct ntb_dev *ntb, int idx, u32 val)
+ {
++	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++
++	if (idx < 0 || idx >= ARRAY_SIZE(sndev->self_shared->spad))
++		return -EINVAL;
++
++	if (!sndev->self_shared)
++		return -EIO;
++
++	sndev->self_shared->spad[idx] = val;
++
+ 	return 0;
+ }
+ 
++static u32 switchtec_ntb_peer_spad_read(struct ntb_dev *ntb, int pidx,
++					int sidx)
++{
++	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++
++	if (pidx != NTB_DEF_PEER_IDX)
++		return -EINVAL;
++
++	if (sidx < 0 || sidx >= ARRAY_SIZE(sndev->peer_shared->spad))
++		return 0;
++
++	if (!sndev->peer_shared)
++		return 0;
++
++	return ioread32(&sndev->peer_shared->spad[sidx]);
++}
++
+ static int switchtec_ntb_peer_spad_write(struct ntb_dev *ntb, int pidx,
+ 					 int sidx, u32 val)
+ {
++	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++
++	if (pidx != NTB_DEF_PEER_IDX)
++		return -EINVAL;
++
++	if (sidx < 0 || sidx >= ARRAY_SIZE(sndev->peer_shared->spad))
++		return -EINVAL;
++
++	if (!sndev->peer_shared)
++		return -EIO;
++
++	iowrite32(val, &sndev->peer_shared->spad[sidx]);
++
++	return 0;
++}
++
++static int switchtec_ntb_peer_spad_addr(struct ntb_dev *ntb, int pidx,
++					int sidx, phys_addr_t *spad_addr)
++{
++	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++	unsigned long offset;
++
++	if (pidx != NTB_DEF_PEER_IDX)
++		return -EINVAL;
++
++	offset = (unsigned long)&sndev->peer_shared->spad[sidx] -
++		(unsigned long)sndev->stdev->mmio;
++
++	if (spad_addr)
++		*spad_addr = pci_resource_start(ntb->pdev, 0) + offset;
++
+ 	return 0;
+ }
+ 
+@@ -496,7 +565,9 @@ static const struct ntb_dev_ops switchtec_ntb_ops = {
+ 	.spad_count		= switchtec_ntb_spad_count,
+ 	.spad_read		= switchtec_ntb_spad_read,
+ 	.spad_write		= switchtec_ntb_spad_write,
++	.peer_spad_read		= switchtec_ntb_peer_spad_read,
+ 	.peer_spad_write	= switchtec_ntb_peer_spad_write,
++	.peer_spad_addr		= switchtec_ntb_peer_spad_addr,
+ };
+ 
+ static void switchtec_ntb_init_sndev(struct switchtec_ntb *sndev)
 -- 
 2.11.0
 
