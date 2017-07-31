@@ -1,47 +1,37 @@
-Return-Path: <dave.jiang@intel.com>
-Received: from mga06.intel.com (mga06.intel.com. [134.134.136.31])
-        by gmr-mx.google.com with ESMTPS id l86si897652pfi.1.2017.07.28.15.10.48
+Return-Path: <helgaas@kernel.org>
+Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
+        by gmr-mx.google.com with ESMTPS id 79si691444iti.6.2017.07.31.15.50.06
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 28 Jul 2017 15:10:48 -0700 (PDT)
-Subject: [PATCH] ntb: transport shouldn't disable link due to bogus values
- in SPADs
-From: Dave Jiang <dave.jiang@intel.com>
-Date: Fri, 28 Jul 2017 15:10:48 -0700
-Message-ID: <150127984807.48385.10962784387437107365.stgit@djiang5-desk3.ch.intel.com>
+        Mon, 31 Jul 2017 15:50:06 -0700 (PDT)
+Date: Mon, 31 Jul 2017 17:50:03 -0500
+From: Bjorn Helgaas <helgaas@kernel.org>
+Subject: Re: [PATCH v3 01/16] switchtec: move structure definitions into a
+ common header
+Message-ID: <20170731225003.GA19800@bhelgaas-glaptop.roam.corp.google.com>
+References: <20170725205753.4735-1-logang@deltatee.com>
+ <20170725205753.4735-2-logang@deltatee.com>
+ <20170731201542.GA9303@bhelgaas-glaptop.roam.corp.google.com>
+ <07990806-349c-669c-ef32-3dc2f6a12296@deltatee.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-To: jdmason@kudzu.us
-Cc: linux-ntb@googlegroups.com, allen.hubbe@emc.com
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <07990806-349c-669c-ef32-3dc2f6a12296@deltatee.com>
+To: Logan Gunthorpe <logang@deltatee.com>
+Cc: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-It seems that under certain scenarios the SPAD can have bogus values caused
-by an agent (i.e. BIOS or other software) that is not the kernel driver, and
-that causes memory window setup failure. This should not cause the link to
-be disabled because if we do that, the driver will never recover again. We
-have verified in testing that this issue happens and prevents proper link
-recovery.
+On Mon, Jul 31, 2017 at 02:51:35PM -0600, Logan Gunthorpe wrote:
+> Hey,
+> 
+> I've never found any consistency in the capitalization and prefixes
+> patch titles. I used to capitalize them all but I've seen many
+> developers use lower case. In any case, I've changed them as you requested.
 
-Signed-off-by: Dave Jiang <dave.jiang@intel.com>
----
- drivers/ntb/ntb_transport.c |    4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
+Thanks!  Granted, most people don't seem to care, but I'm not
+completely alone in this; I try follow Ingo's preferences [1] for
+drivers/pci, so there is some consistency there.
 
-diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 9a03c58..f0dd5a7 100644
---- a/drivers/ntb/ntb_transport.c
-+++ b/drivers/ntb/ntb_transport.c
-@@ -924,10 +924,8 @@ static void ntb_transport_link_work(struct work_struct *work)
- 		ntb_free_mw(nt, i);
- 
- 	/* if there's an actual failure, we should just bail */
--	if (rc < 0) {
--		ntb_link_disable(ndev);
-+	if (rc < 0)
- 		return;
--	}
- 
- out:
- 	if (ntb_link_is_up(ndev, NULL, NULL) == 1)
+Bjorn
 
+[1] http://lkml.kernel.org/r/20120711080446.GA17713@gmail.com
