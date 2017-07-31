@@ -1,44 +1,42 @@
-Return-Path: <dave.jiang@intel.com>
-Received: from mga09.intel.com (mga09.intel.com. [134.134.136.24])
-        by gmr-mx.google.com with ESMTPS id g67si2850148pfj.6.2017.07.28.15.16.05
+Return-Path: <andy.shevchenko@gmail.com>
+Received: from mail-oi0-x242.google.com (mail-oi0-x242.google.com. [2607:f8b0:4003:c06::242])
+        by gmr-mx.google.com with ESMTPS id q20si488823itc.2.2017.07.31.11.11.42
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 28 Jul 2017 15:16:05 -0700 (PDT)
-Subject: [PATCH] ntb: update maintainer list for Intel NTB driver
-From: Dave Jiang <dave.jiang@intel.com>
-Date: Fri, 28 Jul 2017 15:16:04 -0700
-Message-ID: <150128016434.49155.11346214975331646100.stgit@djiang5-desk3.ch.intel.com>
+        Mon, 31 Jul 2017 11:11:42 -0700 (PDT)
+Received: by mail-oi0-x242.google.com with SMTP id b130so8707110oii.3
+        for <linux-ntb@googlegroups.com>; Mon, 31 Jul 2017 11:11:42 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-To: jdmason@kudzu.us
-Cc: linux-ntb@googlegroups.com
+In-Reply-To: <c5208a76-e94b-0203-3591-81b14e7fd888@deltatee.com>
+References: <20170726231917.6073-1-logang@deltatee.com> <20170726231917.6073-4-logang@deltatee.com>
+ <CAHp75Vcv7UCpnGY+mL7CMU5u9hCUxwaYWNsg58BoWBJGAFX4tQ@mail.gmail.com>
+ <5c52d908-3b77-c5c6-99a7-1164d878ac95@deltatee.com> <CAHp75Ve619EE9ePy2zj+MjS7-MW3u_k2BQ5kc9iFBMYYQ9nMWQ@mail.gmail.com>
+ <3a4c9453-20be-8164-85eb-5ad4d596a299@deltatee.com> <CAHp75VdE-xRHDEfmmURtoak6+4Vga4szLnDkGjtJHm47DZRCAQ@mail.gmail.com>
+ <65ca8848-3a99-bda8-5165-9453b70316fa@deltatee.com> <CAHp75VdOh+aa771g=T-f=XMkS5nY-7VFK6miqyxw0dOA8YOJyw@mail.gmail.com>
+ <c5208a76-e94b-0203-3591-81b14e7fd888@deltatee.com>
+From: Andy Shevchenko <andy.shevchenko@gmail.com>
+Date: Mon, 31 Jul 2017 21:11:41 +0300
+Message-ID: <CAHp75VcX7SeYyp6OEYLQLaAk-eHzbFV05wGC+dD2OeCcnxY6TQ@mail.gmail.com>
+Subject: Re: [PATCH v5 3/6] iomap: introduce io{read|write}64_{lo_hi|hi_lo}
+Content-Type: text/plain; charset="UTF-8"
+To: Logan Gunthorpe <logang@deltatee.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Linux-Arch <linux-arch@vger.kernel.org>, linux-ntb@googlegroups.com, linux-crypto <linux-crypto@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, =?UTF-8?Q?Horia_Geant=C4=83?= <horia.geanta@nxp.com>, Stephen Bates <sbates@raithlin.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, Suresh Warrier <warrier@linux.vnet.ibm.com>, Nicholas Piggin <npiggin@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Removing Jon since he no longer works at Intel.
+On Mon, Jul 31, 2017 at 9:04 PM, Logan Gunthorpe <logang@deltatee.com> wrote:
+>
+>
+> On 31/07/17 12:03 PM, Andy Shevchenko wrote:
+>>
+>> Per commit 3a044178cccf they are exactly created for this kind of cases.
+>>
+>
+> Sure, ok, and my patchset provides the same set of functions to satisfy
+> such a use.
 
-Signed-off-by: Dave Jiang <dave.jiang@intel.com>
----
- MAINTAINERS |    5 ++---
- 1 file changed, 2 insertions(+), 3 deletions(-)
+Okay, please, Cc me for next version, I think I need fresh view on it.
+Thanks!
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index f66488d..7a634fb 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -9397,12 +9397,11 @@ S:	Supported
- F:	drivers/ntb/hw/idt/
- 
- NTB INTEL DRIVER
--M:	Jon Mason <jdmason@kudzu.us>
- M:	Dave Jiang <dave.jiang@intel.com>
- L:	linux-ntb@googlegroups.com
- S:	Supported
--W:	https://github.com/jonmason/ntb/wiki
--T:	git git://github.com/jonmason/ntb.git
-+W:	https://github.com/davejiang/linux/wiki
-+T:	git https://github.com/davejiang/linux.git
- F:	drivers/ntb/hw/intel/
- 
- NTFS FILESYSTEM
-
+-- 
+With Best Regards,
+Andy Shevchenko
