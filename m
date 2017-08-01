@@ -1,173 +1,201 @@
 Return-Path: <jdmason@kudzu.us>
-Received: from mail-qt0-x243.google.com (mail-qt0-x243.google.com. [2607:f8b0:400d:c0d::243])
-        by gmr-mx.google.com with ESMTPS id v195si1202471ywg.3.2017.08.01.12.10.54
+Received: from mail-qk0-x243.google.com (mail-qk0-x243.google.com. [2607:f8b0:400d:c09::243])
+        by gmr-mx.google.com with ESMTPS id e186si1585687ywh.4.2017.08.01.11.59.58
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 01 Aug 2017 12:10:54 -0700 (PDT)
-Received: by mail-qt0-x243.google.com with SMTP id u19so2546137qtc.0
-        for <linux-ntb@googlegroups.com>; Tue, 01 Aug 2017 12:10:54 -0700 (PDT)
+        Tue, 01 Aug 2017 11:59:58 -0700 (PDT)
+Received: by mail-qk0-x243.google.com with SMTP id d136so2471462qkg.3
+        for <linux-ntb@googlegroups.com>; Tue, 01 Aug 2017 11:59:58 -0700 (PDT)
 Return-Path: <jdmason@kudzu.us>
-Date: Tue, 1 Aug 2017 15:10:51 -0400
+Date: Tue, 1 Aug 2017 14:59:55 -0400
 From: Jon Mason <jdmason@kudzu.us>
-Subject: Re: [PATCH v3 14/16] switchtec_ntb: implement scratchpad registers
-Message-ID: <20170801191050.GJ4186@kudzu.us>
+Subject: Re: [PATCH v3 13/16] switchtec_ntb: implement doorbell registers
+Message-ID: <20170801185954.GI4186@kudzu.us>
 References: <20170725205753.4735-1-logang@deltatee.com>
- <20170725205753.4735-15-logang@deltatee.com>
+ <20170725205753.4735-14-logang@deltatee.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170725205753.4735-15-logang@deltatee.com>
+In-Reply-To: <20170725205753.4735-14-logang@deltatee.com>
 To: Logan Gunthorpe <logang@deltatee.com>
 Cc: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Tue, Jul 25, 2017 at 02:57:51PM -0600, Logan Gunthorpe wrote:
-> Seeing there is no dedicated hardware for this, we simply add
-> these as entries in the shared memory window. Thus, we could support
-> any number of them but 128 seems like enough, for now.
-
-It would probaly be better if I remarked about the SPADs in the actual
-patch about the SPADS :)
-
-The whole point of using the SPADs in the NTB driver was to workaround
-the problems establishing a connection between the two sides of the
-NTB and where everything lives.  So, using a MW to get around the
-SPADs is sort of backwards (and slightly funny).  I realize you are
-trying to use the existing transport with minimal changes to enable
-your hardware, and thus this makes logical sense to you.  However, if
-the SPADs are not really needed, then we should either remove them
-from the transport (or use them for something else).
-
-Per my comment in the other patch, I'm amenable to take this series
-as-is, assuming you are willing to address this design issue in the
-near future.  Thoughts?
-
-Thanks,
-Jon
-
+On Tue, Jul 25, 2017 at 02:57:50PM -0600, Logan Gunthorpe wrote:
+> Pretty straightforward implementation of doorbell registers.
+> The shift and mask were setup in an earlier patch and this just hooks
+> up the appropriate portion of the IDB register as the local doorbells
+> and the opposite portion of ODB as the peer doorbells. The DB mask is
+> protected by a spinlock to avoid concurrent read-modify-write accesses.
 > 
 > Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
 > Reviewed-by: Stephen Bates <sbates@raithlin.com>
 > Reviewed-by: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
 > ---
->  drivers/ntb/hw/mscc/switchtec_ntb.c | 75 ++++++++++++++++++++++++++++++++++++-
->  1 file changed, 73 insertions(+), 2 deletions(-)
+>  drivers/ntb/hw/mscc/switchtec_ntb.c | 89 +++++++++++++++++++++++++++++++++++--
+>  1 file changed, 85 insertions(+), 4 deletions(-)
 > 
 > diff --git a/drivers/ntb/hw/mscc/switchtec_ntb.c b/drivers/ntb/hw/mscc/switchtec_ntb.c
-> index 3037ca730998..ca403ad2f7ac 100644
+> index 34d69fa8612d..3037ca730998 100644
 > --- a/drivers/ntb/hw/mscc/switchtec_ntb.c
 > +++ b/drivers/ntb/hw/mscc/switchtec_ntb.c
-> @@ -67,6 +67,7 @@ struct shared_mw {
->  	u32 link_sta;
->  	u32 partition_id;
->  	u64 mw_sizes[MAX_MWS];
-> +	u32 spad[128];
->  };
+> @@ -98,6 +98,9 @@ struct switchtec_ntb {
+>  	int db_shift;
+>  	int db_peer_shift;
 >  
->  #define MAX_DIRECT_MW ARRAY_SIZE(((struct ntb_ctrl_regs *)(0))->bar_entry)
-> @@ -455,22 +456,90 @@ static int switchtec_ntb_peer_db_set(struct ntb_dev *ntb, u64 db_bits)
+> +	/* synchronize rmw access of db_mask and hw reg */
+> +	spinlock_t db_mask_lock;
+> +
+>  	int nr_direct_mw;
+>  	int nr_lut_mw;
+>  	int direct_mw_to_bar[MAX_DIRECT_MW];
+> @@ -338,41 +341,115 @@ static int switchtec_ntb_link_disable(struct ntb_dev *ntb)
 >  
->  static int switchtec_ntb_spad_count(struct ntb_dev *ntb)
+>  static u64 switchtec_ntb_db_valid_mask(struct ntb_dev *ntb)
 >  {
 > -	return 0;
 > +	struct switchtec_ntb *sndev = ntb_sndev(ntb);
 > +
-> +	return ARRAY_SIZE(sndev->self_shared->spad);
+> +	return sndev->db_valid_mask;
 >  }
 >  
->  static u32 switchtec_ntb_spad_read(struct ntb_dev *ntb, int idx)
+>  static int switchtec_ntb_db_vector_count(struct ntb_dev *ntb)
+>  {
+> -	return 0;
+> +	return 1;
+>  }
+>  
+>  static u64 switchtec_ntb_db_vector_mask(struct ntb_dev *ntb, int db_vector)
 >  {
 > -	return 0;
 > +	struct switchtec_ntb *sndev = ntb_sndev(ntb);
 > +
-> +	if (idx < 0 || idx >= ARRAY_SIZE(sndev->self_shared->spad))
+> +	if (db_vector < 0 || db_vector > 1)
 > +		return 0;
 > +
-> +	if (!sndev->self_shared)
-> +		return 0;
-> +
-> +	return sndev->self_shared->spad[idx];
+> +	return sndev->db_valid_mask;
 >  }
 >  
->  static int switchtec_ntb_spad_write(struct ntb_dev *ntb, int idx, u32 val)
+>  static u64 switchtec_ntb_db_read(struct ntb_dev *ntb)
+>  {
+> -	return 0;
+> +	u64 ret;
+> +	struct switchtec_ntb *sndev = ntb_sndev(ntb);
+> +
+> +	ret = ioread64(&sndev->mmio_self_dbmsg->idb) >> sndev->db_shift;
+> +
+> +	return ret & sndev->db_valid_mask;
+>  }
+>  
+>  static int switchtec_ntb_db_clear(struct ntb_dev *ntb, u64 db_bits)
 >  {
 > +	struct switchtec_ntb *sndev = ntb_sndev(ntb);
 > +
-> +	if (idx < 0 || idx >= ARRAY_SIZE(sndev->self_shared->spad))
-> +		return -EINVAL;
-> +
-> +	if (!sndev->self_shared)
-> +		return -EIO;
-> +
-> +	sndev->self_shared->spad[idx] = val;
+> +	iowrite64(db_bits << sndev->db_shift, &sndev->mmio_self_dbmsg->idb);
 > +
 >  	return 0;
 >  }
 >  
-> +static u32 switchtec_ntb_peer_spad_read(struct ntb_dev *ntb, int pidx,
-> +					int sidx)
-> +{
-> +	struct switchtec_ntb *sndev = ntb_sndev(ntb);
-> +
-> +	if (pidx != NTB_DEF_PEER_IDX)
-> +		return -EINVAL;
-> +
-> +	if (sidx < 0 || sidx >= ARRAY_SIZE(sndev->peer_shared->spad))
-> +		return 0;
-> +
-> +	if (!sndev->peer_shared)
-> +		return 0;
-> +
-> +	return ioread32(&sndev->peer_shared->spad[sidx]);
-> +}
-> +
->  static int switchtec_ntb_peer_spad_write(struct ntb_dev *ntb, int pidx,
->  					 int sidx, u32 val)
+>  static int switchtec_ntb_db_set_mask(struct ntb_dev *ntb, u64 db_bits)
 >  {
+> +	unsigned long irqflags;
 > +	struct switchtec_ntb *sndev = ntb_sndev(ntb);
 > +
-> +	if (pidx != NTB_DEF_PEER_IDX)
+> +	if (db_bits & ~sndev->db_valid_mask)
 > +		return -EINVAL;
 > +
-> +	if (sidx < 0 || sidx >= ARRAY_SIZE(sndev->peer_shared->spad))
+> +	spin_lock_irqsave(&sndev->db_mask_lock, irqflags);
+> +	{
+> +		sndev->db_mask |= db_bits << sndev->db_shift;
+> +		iowrite64(~sndev->db_mask, &sndev->mmio_self_dbmsg->idb_mask);
+> +	}
+
+unnecessary braces.  Same for below
+
+> +	spin_unlock_irqrestore(&sndev->db_mask_lock, irqflags);
+> +
+>  	return 0;
+>  }
+>  
+>  static int switchtec_ntb_db_clear_mask(struct ntb_dev *ntb, u64 db_bits)
+>  {
+> +	unsigned long irqflags;
+> +	struct switchtec_ntb *sndev = ntb_sndev(ntb);
+> +
+> +	if (db_bits & ~sndev->db_valid_mask)
 > +		return -EINVAL;
 > +
-> +	if (!sndev->peer_shared)
-> +		return -EIO;
-> +
-> +	iowrite32(val, &sndev->peer_shared->spad[sidx]);
+> +	spin_lock_irqsave(&sndev->db_mask_lock, irqflags);
+> +	{
+> +		sndev->db_mask &= ~(db_bits << sndev->db_shift);
+> +		iowrite64(~sndev->db_mask, &sndev->mmio_self_dbmsg->idb_mask);
+> +	}
+> +	spin_unlock_irqrestore(&sndev->db_mask_lock, irqflags);
 > +
 > +	return 0;
 > +}
 > +
-> +static int switchtec_ntb_peer_spad_addr(struct ntb_dev *ntb, int pidx,
-> +					int sidx, phys_addr_t *spad_addr)
+> +static u64 switchtec_ntb_db_read_mask(struct ntb_dev *ntb)
+> +{
+> +	struct switchtec_ntb *sndev = ntb_sndev(ntb);
+> +
+> +	return (sndev->db_mask >> sndev->db_shift) & sndev->db_valid_mask;
+> +}
+> +
+> +static int switchtec_ntb_peer_db_addr(struct ntb_dev *ntb,
+> +				      phys_addr_t *db_addr,
+> +				      resource_size_t *db_size)
 > +{
 > +	struct switchtec_ntb *sndev = ntb_sndev(ntb);
 > +	unsigned long offset;
 > +
-> +	if (pidx != NTB_DEF_PEER_IDX)
-> +		return -EINVAL;
-> +
-> +	offset = (unsigned long)&sndev->peer_shared->spad[sidx] -
+> +	offset = (unsigned long)sndev->mmio_self_dbmsg->odb -
 > +		(unsigned long)sndev->stdev->mmio;
 > +
-> +	if (spad_addr)
-> +		*spad_addr = pci_resource_start(ntb->pdev, 0) + offset;
+> +	offset += sndev->db_shift / 8;
+> +
+> +	if (db_addr)
+> +		*db_addr = pci_resource_start(ntb->pdev, 0) + offset;
+> +	if (db_size)
+> +		*db_size = sizeof(u32);
 > +
 >  	return 0;
 >  }
 >  
-> @@ -496,7 +565,9 @@ static const struct ntb_dev_ops switchtec_ntb_ops = {
+>  static int switchtec_ntb_peer_db_set(struct ntb_dev *ntb, u64 db_bits)
+>  {
+> +	struct switchtec_ntb *sndev = ntb_sndev(ntb);
+> +
+> +	iowrite64(db_bits << sndev->db_peer_shift,
+> +		  &sndev->mmio_self_dbmsg->odb);
+> +
+>  	return 0;
+>  }
+>  
+> @@ -413,6 +490,8 @@ static const struct ntb_dev_ops switchtec_ntb_ops = {
+>  	.db_clear		= switchtec_ntb_db_clear,
+>  	.db_set_mask		= switchtec_ntb_db_set_mask,
+>  	.db_clear_mask		= switchtec_ntb_db_clear_mask,
+> +	.db_read_mask		= switchtec_ntb_db_read_mask,
+> +	.peer_db_addr		= switchtec_ntb_peer_db_addr,
+>  	.peer_db_set		= switchtec_ntb_peer_db_set,
 >  	.spad_count		= switchtec_ntb_spad_count,
 >  	.spad_read		= switchtec_ntb_spad_read,
->  	.spad_write		= switchtec_ntb_spad_write,
-> +	.peer_spad_read		= switchtec_ntb_peer_spad_read,
->  	.peer_spad_write	= switchtec_ntb_peer_spad_write,
-> +	.peer_spad_addr		= switchtec_ntb_peer_spad_addr,
->  };
+> @@ -680,6 +759,8 @@ static irqreturn_t switchtec_ntb_doorbell_isr(int irq, void *dev)
 >  
->  static void switchtec_ntb_init_sndev(struct switchtec_ntb *sndev)
+>  	dev_dbg(&sndev->stdev->dev, "doorbell\n");
+>  
+> +	ntb_db_event(&sndev->ntb, 0);
+> +
+>  	return IRQ_HANDLED;
+>  }
+>  
 > -- 
 > 2.11.0
 > 
+> -- 
+> You received this message because you are subscribed to the Google Groups "linux-ntb" group.
+> To unsubscribe from this group and stop receiving emails from it, send an email to linux-ntb+unsubscribe@googlegroups.com.
+> To post to this group, send email to linux-ntb@googlegroups.com.
+> To view this discussion on the web visit https://groups.google.com/d/msgid/linux-ntb/20170725205753.4735-14-logang%40deltatee.com.
+> For more options, visit https://groups.google.com/d/optout.
