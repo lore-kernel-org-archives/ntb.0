@@ -1,216 +1,75 @@
-Return-Path: <gunthorp@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id s18si641955pfs.14.2017.07.18.09.04.22
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-qk0-x244.google.com (mail-qk0-x244.google.com. [2607:f8b0:400d:c09::244])
+        by gmr-mx.google.com with ESMTPS id q126si379699ywg.13.2017.08.01.10.33.17
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 18 Jul 2017 09:04:22 -0700 (PDT)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Tue, 18 Jul 2017 10:04:01 -0600
-Message-Id: <20170718160409.6493-9-logang@deltatee.com>
-In-Reply-To: <20170718160409.6493-1-logang@deltatee.com>
-References: <20170718160409.6493-1-logang@deltatee.com>
-Subject: [PATCH v2 08/16] switchtec_ntb: introduce initial NTB driver
-To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>, Logan Gunthorpe <logang@deltatee.com>
+        Tue, 01 Aug 2017 10:33:17 -0700 (PDT)
+Received: by mail-qk0-x244.google.com with SMTP id a77so2222906qkb.2
+        for <linux-ntb@googlegroups.com>; Tue, 01 Aug 2017 10:33:17 -0700 (PDT)
+Return-Path: <jdmason@kudzu.us>
+Date: Tue, 1 Aug 2017 13:33:14 -0400
+From: Jon Mason <jdmason@kudzu.us>
+Subject: Re: [PATCH] ntb: transport shouldn't disable link due to bogus
+ values in SPADs
+Message-ID: <20170801173313.GA3124@kudzu.us>
+References: <150127984807.48385.10962784387437107365.stgit@djiang5-desk3.ch.intel.com>
+ <000001d30a0b$d3b52b20$7b1f8160$@dell.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <000001d30a0b$d3b52b20$7b1f8160$@dell.com>
+To: Allen Hubbe <Allen.Hubbe@dell.com>
+Cc: 'Dave Jiang' <dave.jiang@intel.com>, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-Seeing the Switchtec NTB hardware shares the same endpoint as the
-management endpoint we utilize the class_interface API to register
-an NTB driver for every Switchtec device in the system that has the
-NTB class code.
+On Mon, Jul 31, 2017 at 10:46:42AM -0400, Allen Hubbe wrote:
+> From: Dave Jiang
+> > It seems that under certain scenarios the SPAD can have bogus values caused
+> > by an agent (i.e. BIOS or other software) that is not the kernel driver, and
+> > that causes memory window setup failure. This should not cause the link to
+> > be disabled because if we do that, the driver will never recover again. We
+> > have verified in testing that this issue happens and prevents proper link
+> > recovery.
+> > 
+> > Signed-off-by: Dave Jiang <dave.jiang@intel.com>
+> 
+> Acked-by: Allen Hubbe <Allen.Hubbe@dell.com>
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Reviewed-by: Stephen Bates <sbates@raithlin.com>
-Reviewed-by: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
----
- MAINTAINERS                         |  1 +
- drivers/ntb/hw/Kconfig              |  1 +
- drivers/ntb/hw/Makefile             |  1 +
- drivers/ntb/hw/mscc/Kconfig         |  9 +++++
- drivers/ntb/hw/mscc/Makefile        |  1 +
- drivers/ntb/hw/mscc/switchtec_ntb.c | 81 +++++++++++++++++++++++++++++++++++++
- drivers/pci/switch/switchtec.c      |  3 ++
- include/linux/switchtec.h           |  4 ++
- 8 files changed, 101 insertions(+)
- create mode 100644 drivers/ntb/hw/mscc/Kconfig
- create mode 100644 drivers/ntb/hw/mscc/Makefile
- create mode 100644 drivers/ntb/hw/mscc/switchtec_ntb.c
+Added to my ntb branch
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 4ff2ad7c1c7b..6e491ce5e876 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -10147,6 +10147,7 @@ F:	Documentation/ABI/testing/sysfs-class-switchtec
- F:	drivers/pci/switch/switchtec*
- F:	include/uapi/linux/switchtec_ioctl.h
- F:	include/linux/switchtec.h
-+F:	drivers/ntb/hw/mscc/
- 
- PCI DRIVER FOR NVIDIA TEGRA
- M:	Thierry Reding <thierry.reding@gmail.com>
-diff --git a/drivers/ntb/hw/Kconfig b/drivers/ntb/hw/Kconfig
-index a89243c9fdd3..e51b581fd102 100644
---- a/drivers/ntb/hw/Kconfig
-+++ b/drivers/ntb/hw/Kconfig
-@@ -1,3 +1,4 @@
- source "drivers/ntb/hw/amd/Kconfig"
- source "drivers/ntb/hw/idt/Kconfig"
- source "drivers/ntb/hw/intel/Kconfig"
-+source "drivers/ntb/hw/mscc/Kconfig"
-diff --git a/drivers/ntb/hw/Makefile b/drivers/ntb/hw/Makefile
-index 87332c3905f0..923c442db750 100644
---- a/drivers/ntb/hw/Makefile
-+++ b/drivers/ntb/hw/Makefile
-@@ -1,3 +1,4 @@
- obj-$(CONFIG_NTB_AMD)	+= amd/
- obj-$(CONFIG_NTB_IDT)	+= idt/
- obj-$(CONFIG_NTB_INTEL)	+= intel/
-+obj-$(CONFIG_NTB_SWITCHTEC) += mscc/
-diff --git a/drivers/ntb/hw/mscc/Kconfig b/drivers/ntb/hw/mscc/Kconfig
-new file mode 100644
-index 000000000000..013ed6716438
---- /dev/null
-+++ b/drivers/ntb/hw/mscc/Kconfig
-@@ -0,0 +1,9 @@
-+config NTB_SWITCHTEC
-+	tristate "MicroSemi Switchtec Non-Transparent Bridge Support"
-+	select PCI_SW_SWITCHTEC
-+	help
-+	 Enables NTB support for Switchtec PCI switches. This also
-+	 selects the Switchtec management driver as they share the same
-+	 hardware interface.
-+
-+	 If unsure, say N.
-diff --git a/drivers/ntb/hw/mscc/Makefile b/drivers/ntb/hw/mscc/Makefile
-new file mode 100644
-index 000000000000..21907b364e19
---- /dev/null
-+++ b/drivers/ntb/hw/mscc/Makefile
-@@ -0,0 +1 @@
-+obj-$(CONFIG_NTB_SWITCHTEC) += switchtec_ntb.o
-diff --git a/drivers/ntb/hw/mscc/switchtec_ntb.c b/drivers/ntb/hw/mscc/switchtec_ntb.c
-new file mode 100644
-index 000000000000..253efba72275
---- /dev/null
-+++ b/drivers/ntb/hw/mscc/switchtec_ntb.c
-@@ -0,0 +1,81 @@
-+/*
-+ * Microsemi Switchtec(tm) PCIe Management Driver
-+ * Copyright (c) 2017, Microsemi Corporation
-+ *
-+ * This program is free software; you can redistribute it and/or modify it
-+ * under the terms and conditions of the GNU General Public License,
-+ * version 2, as published by the Free Software Foundation.
-+ *
-+ * This program is distributed in the hope it will be useful, but WITHOUT
-+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-+ * more details.
-+ *
-+ */
-+
-+#include <linux/switchtec.h>
-+#include <linux/module.h>
-+
-+MODULE_DESCRIPTION("Microsemi Switchtec(tm) NTB Driver");
-+MODULE_VERSION("0.1");
-+MODULE_LICENSE("GPL");
-+MODULE_AUTHOR("Microsemi Corporation");
-+
-+struct switchtec_ntb {
-+	struct switchtec_dev *stdev;
-+};
-+
-+static int switchtec_ntb_add(struct device *dev,
-+			     struct class_interface *class_intf)
-+{
-+	struct switchtec_dev *stdev = to_stdev(dev);
-+	struct switchtec_ntb *sndev;
-+
-+	stdev->sndev = NULL;
-+
-+	if (stdev->pdev->class != MICROSEMI_NTB_CLASSCODE)
-+		return -ENODEV;
-+
-+	sndev = kzalloc_node(sizeof(*sndev), GFP_KERNEL, dev_to_node(dev));
-+	if (!sndev)
-+		return -ENOMEM;
-+
-+	sndev->stdev = stdev;
-+
-+	stdev->sndev = sndev;
-+	dev_info(dev, "NTB device registered");
-+
-+	return 0;
-+}
-+
-+void switchtec_ntb_remove(struct device *dev,
-+			  struct class_interface *class_intf)
-+{
-+	struct switchtec_dev *stdev = to_stdev(dev);
-+	struct switchtec_ntb *sndev = stdev->sndev;
-+
-+	if (!sndev)
-+		return;
-+
-+	stdev->sndev = NULL;
-+	kfree(sndev);
-+	dev_info(dev, "ntb device unregistered");
-+}
-+
-+static struct class_interface switchtec_interface  = {
-+	.add_dev = switchtec_ntb_add,
-+	.remove_dev = switchtec_ntb_remove,
-+};
-+
-+static int __init switchtec_ntb_init(void)
-+{
-+	switchtec_interface.class = switchtec_class;
-+	return class_interface_register(&switchtec_interface);
-+}
-+module_init(switchtec_ntb_init);
-+
-+static void __exit switchtec_ntb_exit(void)
-+{
-+	class_interface_unregister(&switchtec_interface);
-+}
-+module_exit(switchtec_ntb_exit);
-diff --git a/drivers/pci/switch/switchtec.c b/drivers/pci/switch/switchtec.c
-index 807569e62bee..0666e33c305b 100644
---- a/drivers/pci/switch/switchtec.c
-+++ b/drivers/pci/switch/switchtec.c
-@@ -1275,6 +1275,9 @@ static int switchtec_pci_probe(struct pci_dev *pdev,
- 	struct switchtec_dev *stdev;
- 	int rc;
- 
-+	if (pdev->class == MICROSEMI_NTB_CLASSCODE)
-+		request_module_nowait("switchtec_ntb");
-+
- 	stdev = stdev_create(pdev);
- 	if (IS_ERR(stdev))
- 		return PTR_ERR(stdev);
-diff --git a/include/linux/switchtec.h b/include/linux/switchtec.h
-index d8159944f013..09d73d0d1aa8 100644
---- a/include/linux/switchtec.h
-+++ b/include/linux/switchtec.h
-@@ -320,6 +320,8 @@ struct pff_csr_regs {
- 	u32 reserved4[174];
- } __packed;
- 
-+struct switchtec_ntb;
-+
- struct switchtec_dev {
- 	struct pci_dev *pdev;
- 	struct device dev;
-@@ -357,6 +359,8 @@ struct switchtec_dev {
- 	struct work_struct link_event_work;
- 	void (*link_notifier)(struct switchtec_dev *stdev);
- 	u8 link_event_count[SWITCHTEC_MAX_PFF_CSR];
-+
-+	struct switchtec_ntb *sndev;
- };
- 
- static inline struct switchtec_dev *to_stdev(struct device *dev)
--- 
-2.11.0
+Also, I added this line
+Fixes: 84f766855f61 ("ntb: stop link work when we do not have memory")
 
+Thanks,
+Jon
+
+> > ---
+> >  drivers/ntb/ntb_transport.c |    4 +---
+> >  1 file changed, 1 insertion(+), 3 deletions(-)
+> > 
+> > diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+> > index 9a03c58..f0dd5a7 100644
+> > --- a/drivers/ntb/ntb_transport.c
+> > +++ b/drivers/ntb/ntb_transport.c
+> > @@ -924,10 +924,8 @@ static void ntb_transport_link_work(struct work_struct *work)
+> >  		ntb_free_mw(nt, i);
+> > 
+> >  	/* if there's an actual failure, we should just bail */
+> > -	if (rc < 0) {
+> > -		ntb_link_disable(ndev);
+> > +	if (rc < 0)
+> >  		return;
+> > -	}
+> > 
+> >  out:
+> >  	if (ntb_link_is_up(ndev, NULL, NULL) == 1)
+> > 
+> > --
+> > You received this message because you are subscribed to the Google Groups "linux-ntb" group.
+> > To unsubscribe from this group and stop receiving emails from it, send an email to linux-
+> > ntb+unsubscribe@googlegroups.com.
+> > To post to this group, send email to linux-ntb@googlegroups.com.
+> > To view this discussion on the web visit https://groups.google.com/d/msgid/linux-
+> > ntb/150127984807.48385.10962784387437107365.stgit%40djiang5-desk3.ch.intel.com.
+> > For more options, visit https://groups.google.com/d/optout.
+> 
