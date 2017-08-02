@@ -1,59 +1,67 @@
-Return-Path: <gunthorp@deltatee.com>
+Return-Path: <logang@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id g128si369065itb.9.2017.08.03.11.20.03
+        by gmr-mx.google.com with ESMTPS id 129si263737ith.2.2017.08.02.10.02.19
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 03 Aug 2017 11:20:03 -0700 (PDT)
+        Wed, 02 Aug 2017 10:02:19 -0700 (PDT)
+References: <20170725205753.4735-1-logang@deltatee.com>
+ <20170725205753.4735-15-logang@deltatee.com> <20170801191050.GJ4186@kudzu.us>
+ <dda576ad-d3ca-814b-f0cf-478cbb61adf2@deltatee.com>
+ <000001d30b90$31697f70$943c7e50$@dell.com>
+ <CAPoiz9wy3bFUWkE1udiY7ynkOT5VxvvtoawNw1qRTFnSapcOEQ@mail.gmail.com>
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Thu,  3 Aug 2017 12:19:41 -0600
-Message-Id: <20170803181954.4154-3-logang@deltatee.com>
-In-Reply-To: <20170803181954.4154-1-logang@deltatee.com>
-References: <20170803181954.4154-1-logang@deltatee.com>
-Subject: [PATCH v4 02/15] NTB: switchtec: Export class symbol for use in upper layer driver
-To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>, Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <95cd95ef-cd83-bd31-ddcb-1fcc0f7fbe51@deltatee.com>
+Date: Wed, 2 Aug 2017 11:02:06 -0600
+MIME-Version: 1.0
+In-Reply-To: <CAPoiz9wy3bFUWkE1udiY7ynkOT5VxvvtoawNw1qRTFnSapcOEQ@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
+Subject: Re: [PATCH v3 14/16] switchtec_ntb: implement scratchpad registers
+To: Jon Mason <jdmason@kudzu.us>, Allen Hubbe <Allen.Hubbe@dell.com>
+Cc: linux-ntb@googlegroups.com, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Dave Jiang <dave.jiang@intel.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-We export the class pointer symbol and add an extern define in the
-Switchtec header file.
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Reviewed-by: Stephen Bates <sbates@raithlin.com>
-Reviewed-by: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
-Acked-by: Bjorn Helgaas <bhelgaas@google.com>
----
- drivers/pci/switch/switchtec.c | 4 +++-
- include/linux/switchtec.h      | 2 ++
- 2 files changed, 5 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/pci/switch/switchtec.c b/drivers/pci/switch/switchtec.c
-index 5b75d3008ff8..39c9218d733f 100644
---- a/drivers/pci/switch/switchtec.c
-+++ b/drivers/pci/switch/switchtec.c
-@@ -33,9 +33,11 @@ module_param(max_devices, int, 0644);
- MODULE_PARM_DESC(max_devices, "max number of switchtec device instances");
- 
- static dev_t switchtec_devt;
--static struct class *switchtec_class;
- static DEFINE_IDA(switchtec_minor_ida);
- 
-+struct class *switchtec_class;
-+EXPORT_SYMBOL_GPL(switchtec_class);
-+
- enum mrpc_state {
- 	MRPC_IDLE = 0,
- 	MRPC_QUEUED,
-diff --git a/include/linux/switchtec.h b/include/linux/switchtec.h
-index 1cbd0e63b0ab..18e388101855 100644
---- a/include/linux/switchtec.h
-+++ b/include/linux/switchtec.h
-@@ -276,4 +276,6 @@ static inline struct switchtec_dev *to_stdev(struct device *dev)
- 	return container_of(dev, struct switchtec_dev, dev);
- }
- 
-+extern struct class *switchtec_class;
-+
- #endif
--- 
-2.11.0
+On 02/08/17 10:32 AM, Jon Mason wrote:
+> After a long-ish conversation on IRC, the way we want to go forward
+> would be to provide 2 ways of communicating prior to the MW's being
+> setup:  SPADs and Message Registers.  The HW driver would make
+> available whichever ones are supported by the hardware.  The transport
+> can see which of those are available in the HW driver, select the
+> appropriate one, and use it to setup the NTB connection, MW, etc.
+> similar to how the SPADs are being used today.  This would allow for
+> any current clients to work unmodified, and would require minimal
+> changes to the existing transport layer.
 
+I'm open to this, but I have a couple points:
+
+1) I think there needs to be an ntb library or similar so the client
+just has to say "communicate this setup data to the peer X". We don't
+need every client replicating the decision to use spads or msgs or whatever.
+
+2) In my experience, message registers are a bit of a pain to send
+chunks of data like is being done with spads in the existing clients.
+(Some time ago, I originally tried emulating spads with message
+registers and it did not work well.)  You can only send 32bits at a time
+and you have to have a signal indicating the other side is finished with
+it before sending another message. I think they are best used just for
+signaling infrequent events where if you loose a message it's not an issue.
+
+One thought I had was that maybe we need to just push this decision into
+the drivers. ie if there's an ntb api just for communicating setup data,
+the driver could then determine the most appropriate way to communicate
+it for the hardware (whether via spads, messages or a special memory
+window). However, the difficulty with this is that the driver would have
+to communicate if it's using spad resources it would otherwise advertise
+to the clients.
+
+Though, maybe we don't need spads in the ntb api. Maybe they are the
+wrong abstraction. All the existing clients only use them for setup
+data, so if we dropped the spad api in favor of a setup data api, the
+driver could then just make the decision on how best to communicate it.
+
+Anyway, just my thoughts.
+
+Logan
