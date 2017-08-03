@@ -1,140 +1,302 @@
-Return-Path: <logang@deltatee.com>
+Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id c133si527358itb.7.2017.08.22.09.59.16
+        by gmr-mx.google.com with ESMTPS id h77si430723itb.0.2017.08.03.11.20.09
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Tue, 22 Aug 2017 09:59:16 -0700 (PDT)
-References: <20170803181954.4154-1-logang@deltatee.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 03 Aug 2017 11:20:10 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Message-ID: <58ab6a33-4de5-8fd8-65c2-079f6f6301c4@deltatee.com>
-Date: Tue, 22 Aug 2017 10:59:04 -0600
-MIME-Version: 1.0
+Date: Thu,  3 Aug 2017 12:19:53 -0600
+Message-Id: <20170803181954.4154-15-logang@deltatee.com>
 In-Reply-To: <20170803181954.4154-1-logang@deltatee.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-Subject: Re: [PATCH v4 00/15] Switchtec NTB Support
+References: <20170803181954.4154-1-logang@deltatee.com>
+Subject: [PATCH v4 14/15] NTB: switchtec_ntb: Add memory window support
 To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>
+Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Hi,
+The Switchtec hardware has two types of memory windows: LUTs and Direct.
+The first area in each BAR is for LUT windows and the remaining area is
+for the direct region. The total number of LUT entries is set by a
+configuration setting in hardware and they all must be the same
+size. (This is fixed by switchtec_ntb to be 64K.)
 
-Just wanted to give this a poke as I haven't received any feedback in a 
-couple weeks on v4. What are people's thoughts on this? Is it suitable 
-to make it into the next merge window?
+switchtec_ntb enables the LUTs only for the first BAR and enables the
+highest power of two possible. Seeing the LUTs are at the beginning of
+the BAR, the direct memory window's alignment is affected. Therefore,
+the maximum direct memory window size can not be greater than the number
+of LUTs times 64K. The direct window in other BARs will not have this
+restriction as the LUTs will not be enabled there. LUTs will only be
+exposed through the NTB API if the use_lut_mw parameter is set.
 
-Thanks,
+Seeing the Switchtec hardware, by default, configures BARs to be 4G a
+module parameter is given to limit the size of the advertised memory
+windows. Higher layers tend to allocate the maximum BAR size and this
+has a tendency to fail when they try to allocate 4GB of contiguous
+memory.
 
-Logan
+Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+Reviewed-by: Stephen Bates <sbates@raithlin.com>
+Reviewed-by: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
+Acked-by: Allen Hubbe <Allen.Hubbe@dell.com>
+---
+ drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 213 ++++++++++++++++++++++++++++++++-
+ 1 file changed, 210 insertions(+), 3 deletions(-)
 
+diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+index 205bd9481122..afe8ed6f3b23 100644
+--- a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
++++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+@@ -25,6 +25,11 @@ MODULE_VERSION("0.1");
+ MODULE_LICENSE("GPL");
+ MODULE_AUTHOR("Microsemi Corporation");
+ 
++static ulong max_mw_size = SZ_2M;
++module_param(max_mw_size, ulong, 0644);
++MODULE_PARM_DESC(max_mw_size,
++	"Max memory window size reported to the upper layer");
++
+ static bool use_lut_mws;
+ module_param(use_lut_mws, bool, 0644);
+ MODULE_PARM_DESC(use_lut_mws,
+@@ -190,7 +195,27 @@ static int switchtec_ntb_send_msg(struct switchtec_ntb *sndev, int idx,
+ 
+ static int switchtec_ntb_mw_count(struct ntb_dev *ntb, int pidx)
+ {
+-	return 0;
++	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++	int nr_direct_mw = sndev->peer_nr_direct_mw;
++	int nr_lut_mw = sndev->peer_nr_lut_mw - 1;
++
++	if (pidx != NTB_DEF_PEER_IDX)
++		return -EINVAL;
++
++	if (!use_lut_mws)
++		nr_lut_mw = 0;
++
++	return nr_direct_mw + nr_lut_mw;
++}
++
++static int lut_index(struct switchtec_ntb *sndev, int mw_idx)
++{
++	return mw_idx - sndev->nr_direct_mw + 1;
++}
++
++static int peer_lut_index(struct switchtec_ntb *sndev, int mw_idx)
++{
++	return mw_idx - sndev->peer_nr_direct_mw + 1;
+ }
+ 
+ static int switchtec_ntb_mw_get_align(struct ntb_dev *ntb, int pidx,
+@@ -198,17 +223,192 @@ static int switchtec_ntb_mw_get_align(struct ntb_dev *ntb, int pidx,
+ 				      resource_size_t *size_align,
+ 				      resource_size_t *size_max)
+ {
++	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++	int lut;
++	resource_size_t size;
++
++	if (pidx != NTB_DEF_PEER_IDX)
++		return -EINVAL;
++
++	lut = widx >= sndev->peer_nr_direct_mw;
++	size = ioread64(&sndev->peer_shared->mw_sizes[widx]);
++
++	if (size == 0)
++		return -EINVAL;
++
++	if (addr_align)
++		*addr_align = lut ? size : SZ_4K;
++
++	if (size_align)
++		*size_align = lut ? size : SZ_4K;
++
++	if (size_max)
++		*size_max = size;
++
+ 	return 0;
+ }
+ 
++static void switchtec_ntb_mw_clr_direct(struct switchtec_ntb *sndev, int idx)
++{
++	struct ntb_ctrl_regs __iomem *ctl = sndev->mmio_peer_ctrl;
++	int bar = sndev->peer_direct_mw_to_bar[idx];
++	u32 ctl_val;
++
++	ctl_val = ioread32(&ctl->bar_entry[bar].ctl);
++	ctl_val &= ~NTB_CTRL_BAR_DIR_WIN_EN;
++	iowrite32(ctl_val, &ctl->bar_entry[bar].ctl);
++	iowrite32(0, &ctl->bar_entry[bar].win_size);
++	iowrite64(sndev->self_partition, &ctl->bar_entry[bar].xlate_addr);
++}
++
++static void switchtec_ntb_mw_clr_lut(struct switchtec_ntb *sndev, int idx)
++{
++	struct ntb_ctrl_regs __iomem *ctl = sndev->mmio_peer_ctrl;
++
++	iowrite64(0, &ctl->lut_entry[peer_lut_index(sndev, idx)]);
++}
++
++static void switchtec_ntb_mw_set_direct(struct switchtec_ntb *sndev, int idx,
++					dma_addr_t addr, resource_size_t size)
++{
++	int xlate_pos = ilog2(size);
++	int bar = sndev->peer_direct_mw_to_bar[idx];
++	struct ntb_ctrl_regs __iomem *ctl = sndev->mmio_peer_ctrl;
++	u32 ctl_val;
++
++	ctl_val = ioread32(&ctl->bar_entry[bar].ctl);
++	ctl_val |= NTB_CTRL_BAR_DIR_WIN_EN;
++
++	iowrite32(ctl_val, &ctl->bar_entry[bar].ctl);
++	iowrite32(xlate_pos | size, &ctl->bar_entry[bar].win_size);
++	iowrite64(sndev->self_partition | addr,
++		  &ctl->bar_entry[bar].xlate_addr);
++}
++
++static void switchtec_ntb_mw_set_lut(struct switchtec_ntb *sndev, int idx,
++				     dma_addr_t addr, resource_size_t size)
++{
++	struct ntb_ctrl_regs __iomem *ctl = sndev->mmio_peer_ctrl;
++
++	iowrite64((NTB_CTRL_LUT_EN | (sndev->self_partition << 1) | addr),
++		  &ctl->lut_entry[peer_lut_index(sndev, idx)]);
++}
++
+ static int switchtec_ntb_mw_set_trans(struct ntb_dev *ntb, int pidx, int widx,
+ 				      dma_addr_t addr, resource_size_t size)
+ {
+-	return 0;
++	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++	struct ntb_ctrl_regs __iomem *ctl = sndev->mmio_peer_ctrl;
++	int xlate_pos = ilog2(size);
++	int nr_direct_mw = sndev->peer_nr_direct_mw;
++	int rc;
++
++	if (pidx != NTB_DEF_PEER_IDX)
++		return -EINVAL;
++
++	dev_dbg(&sndev->stdev->dev, "MW %d: part %d addr %pad size %pap",
++		widx, pidx, &addr, &size);
++
++	if (widx >= switchtec_ntb_mw_count(ntb, pidx))
++		return -EINVAL;
++
++	if (xlate_pos < 12)
++		return -EINVAL;
++
++	rc = switchtec_ntb_part_op(sndev, ctl, NTB_CTRL_PART_OP_LOCK,
++				   NTB_CTRL_PART_STATUS_LOCKED);
++	if (rc)
++		return rc;
++
++	if (addr == 0 || size == 0) {
++		if (widx < nr_direct_mw)
++			switchtec_ntb_mw_clr_direct(sndev, widx);
++		else
++			switchtec_ntb_mw_clr_lut(sndev, widx);
++	} else {
++		if (widx < nr_direct_mw)
++			switchtec_ntb_mw_set_direct(sndev, widx, addr, size);
++		else
++			switchtec_ntb_mw_set_lut(sndev, widx, addr, size);
++	}
++
++	rc = switchtec_ntb_part_op(sndev, ctl, NTB_CTRL_PART_OP_CFG,
++				   NTB_CTRL_PART_STATUS_NORMAL);
++
++	if (rc == -EIO) {
++		dev_err(&sndev->stdev->dev,
++			"Hardware reported an error configuring mw %d: %08x",
++			widx, ioread32(&ctl->bar_error));
++
++		if (widx < nr_direct_mw)
++			switchtec_ntb_mw_clr_direct(sndev, widx);
++		else
++			switchtec_ntb_mw_clr_lut(sndev, widx);
++
++		switchtec_ntb_part_op(sndev, ctl, NTB_CTRL_PART_OP_CFG,
++				      NTB_CTRL_PART_STATUS_NORMAL);
++	}
++
++	return rc;
+ }
+ 
+ static int switchtec_ntb_peer_mw_count(struct ntb_dev *ntb)
+ {
++	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++
++	return sndev->nr_direct_mw + (use_lut_mws ? sndev->nr_lut_mw - 1 : 0);
++}
++
++static int switchtec_ntb_direct_get_addr(struct switchtec_ntb *sndev,
++					 int idx, phys_addr_t *base,
++					 resource_size_t *size)
++{
++	int bar = sndev->direct_mw_to_bar[idx];
++	size_t offset = 0;
++
++	if (bar < 0)
++		return -EINVAL;
++
++	if (idx == 0) {
++		/*
++		 * This is the direct BAR shared with the LUTs
++		 * which means the actual window will be offset
++		 * by the size of all the LUT entries.
++		 */
++
++		offset = LUT_SIZE * sndev->nr_lut_mw;
++	}
++
++	if (base)
++		*base = pci_resource_start(sndev->ntb.pdev, bar) + offset;
++
++	if (size) {
++		*size = pci_resource_len(sndev->ntb.pdev, bar) - offset;
++		if (offset && *size > offset)
++			*size = offset;
++
++		if (*size > max_mw_size)
++			*size = max_mw_size;
++	}
++
++	return 0;
++}
++
++static int switchtec_ntb_lut_get_addr(struct switchtec_ntb *sndev,
++				      int idx, phys_addr_t *base,
++				      resource_size_t *size)
++{
++	int bar = sndev->direct_mw_to_bar[0];
++	int offset;
++
++	offset = LUT_SIZE * lut_index(sndev, idx);
++
++	if (base)
++		*base = pci_resource_start(sndev->ntb.pdev, bar) + offset;
++
++	if (size)
++		*size = LUT_SIZE;
++
+ 	return 0;
+ }
+ 
+@@ -216,7 +416,14 @@ static int switchtec_ntb_peer_mw_get_addr(struct ntb_dev *ntb, int idx,
+ 					  phys_addr_t *base,
+ 					  resource_size_t *size)
+ {
+-	return 0;
++	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++
++	if (idx < sndev->nr_direct_mw)
++		return switchtec_ntb_direct_get_addr(sndev, idx, base, size);
++	else if (idx < switchtec_ntb_peer_mw_count(ntb))
++		return switchtec_ntb_lut_get_addr(sndev, idx, base, size);
++	else
++		return -EINVAL;
+ }
+ 
+ static void switchtec_ntb_part_link_speed(struct switchtec_ntb *sndev,
+-- 
+2.11.0
 
-On 03/08/17 12:19 PM, Logan Gunthorpe wrote:
-> Changes since v3:
-> 
-> - Rebased onto the Jon's ntb branch that contains one of the patches
->    that was in v3
-> - Various spelling and commit log mistakes noticed by Bjorn
-> - Renamed switchtec_ntb to ntb_hw_switchtec per Dave's suggestion
-> - Fixed a number of code nits pointed out by Jon
-> 
-> --
-> 
-> Changes since v2:
-> 
-> - Reordered the ntb_test link patch per Allen
-> - Removed an extra call to switchtec_ntb_init_mw
-> - Fixed a typo in the switchtec.txt documentation.
-> 
-> --
-> 
-> Changes since v1:
-> 
-> - Rebased onto latest ntb-next branch (with v4.13-rc1)
-> - Reworked ntb_mw_count() function so that it can be called all the
->    time (per discussion with Allen)
-> - Various spelling and formatting cleanups from Bjorn
-> - Added request_module() call such that the NTB module is automatically
->    loaded when appropriate hardware exists.
-> 
-> --
-> 
-> Changes since the rfc:
-> 
-> - Rebased on ntb-next
-> - Switched ntb_part_op to use sleep instead of delay
-> - Dropped a number of useless dbg __func__ prints
-> - Went back to the dynamic instead of the static class
-> - Swapped the notifier block for a simple callback
-> - Modified the new ntb api so that a couple functions with pidx
->    now must be called after link up. Per our discussion on the list.
-> 
-> --
-> 
-> This patchset implements Non-Transparent Bridge (NTB) support for the
-> Microsemi Switchtec series of switches. We're looking for some
-> review from the community at this point but hope to get it upstreamed
-> for v4.14.
-> 
-> Switchtec NTB support is configured over the same function and bar
-> as the management endpoint. Thus, the new driver hooks into the
-> management driver which we had merged in v4.12. We use the class
-> interface API to register an NTB device for every switchtec device
-> which supports NTB (not all do).
-> 
-> The Switchtec hardware supports doorbells, memory windows and messages.
-> Seeing there is no native scratchpad support, 128 spads are emulated
-> through the use of a pre-setup memory window. The switch has 64
-> doorbells which are shared between the two partitions and a
-> configurable set of memory windows. While the hardware supports more
-> than 2 partitions, this driver only supports the first two seeing
-> the current NTB API only supports two hosts.
-> 
-> The driver has been tested with ntb_netdev and fully passes the
-> ntb_test script.
-> 
-> This patchset is based off of ntb-next and can be found in this
-> git repo:
-> 
-> https://github.com/sbates130272/linux-p2pmem.git switchtec_ntb_v4
-> 
-> Logan Gunthorpe (15):
->    NTB: switchtec: Move structure definitions into a common header
->    NTB: switchtec: Export class symbol for use in upper layer driver
->    NTB: switchtec: Add NTB hardware register definitions
->    NTB: switchtec: Add link event notifier callback
->    NTB: Ensure ntb_mw_get_align() is only called when the link is up
->    NTB: Add check and comment for link up to mw_count() and
->      mw_get_align()
->    NTB: switchtec_ntb: Introduce initial NTB driver
->    NTB: switchtec_ntb: Initialize hardware for memory windows
->    NTB: switchtec_ntb: Initialize hardware for doorbells and messages
->    NTB: switchtec_ntb: Add skeleton NTB driver
->    NTB: switchtec_ntb: Add link management
->    NTB: switchtec_ntb: Implement doorbell registers
->    NTB: switchtec_ntb: Implement scratchpad registers
->    NTB: switchtec_ntb: Add memory window support
->    NTB: switchtec_ntb: Update switchtec documentation with notes for NTB
-> 
->   Documentation/switchtec.txt            |   12 +
->   MAINTAINERS                            |    2 +
->   drivers/ntb/hw/Kconfig                 |    1 +
->   drivers/ntb/hw/Makefile                |    1 +
->   drivers/ntb/hw/mscc/Kconfig            |    9 +
->   drivers/ntb/hw/mscc/Makefile           |    1 +
->   drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 1216 ++++++++++++++++++++++++++++++++
->   drivers/ntb/ntb_transport.c            |   20 +-
->   drivers/ntb/test/ntb_perf.c            |   18 +-
->   drivers/ntb/test/ntb_tool.c            |    6 +-
->   drivers/pci/switch/switchtec.c         |  316 ++-------
->   include/linux/ntb.h                    |   11 +-
->   include/linux/switchtec.h              |  373 ++++++++++
->   13 files changed, 1703 insertions(+), 283 deletions(-)
->   create mode 100644 drivers/ntb/hw/mscc/Kconfig
->   create mode 100644 drivers/ntb/hw/mscc/Makefile
->   create mode 100644 drivers/ntb/hw/mscc/ntb_hw_switchtec.c
->   create mode 100644 include/linux/switchtec.h
-> 
-> --
-> 2.11.0
-> 
