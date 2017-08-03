@@ -1,112 +1,187 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id u65si251308ith.9.2017.08.03.11.30.25
+        by gmr-mx.google.com with ESMTPS id c194si115780itb.5.2017.08.03.11.30.25
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
         Thu, 03 Aug 2017 11:30:25 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Thu,  3 Aug 2017 12:30:18 -0600
-Message-Id: <20170803183018.5889-8-logang@deltatee.com>
+Date: Thu,  3 Aug 2017 12:30:16 -0600
+Message-Id: <20170803183018.5889-6-logang@deltatee.com>
 In-Reply-To: <20170803183018.5889-1-logang@deltatee.com>
 References: <20170803183018.5889-1-logang@deltatee.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
-Subject: [PATCH v6 7/7] crypto: caam: cleanup CONFIG_64BIT ifdefs when using io{read|write}64
+Subject: [PATCH v6 5/7] io-64-nonatomic: add io{read|write}64[be]{_lo_hi|_hi_lo} macros
 To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org
-Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Stephen Bates <sbates@raithlin.com>, Logan Gunthorpe <logang@deltatee.com>, Dan Douglass <dan.douglass@nxp.com>, Herbert Xu <herbert@gondor.apana.org.au>, "David S. Miller" <davem@davemloft.net>
+Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Stephen Bates <sbates@raithlin.com>, Logan Gunthorpe <logang@deltatee.com>, Christoph Hellwig <hch@lst.de>, Alan Cox <gnomes@lxorguk.ukuu.org.uk>
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Horia Geantă <horia.geanta@nxp.com>
+This patch adds generic io{read|write}64[be]{_lo_hi|_hi_lo} macros if
+they are not already defined by the architecture. (As they are provided
+by the generic iomap library).
 
-We can now make use of the io-64-nonatomic-lo-hi header to always
-provide 64 bit IO operations. So this patch cleans up the extra
-CONFIG_64BIT ifdefs.
+The patch also points io{read|write}64[be] to the variant specified by the
+header name.
 
-To be consistent with CAAM engine HW spec: in case of 64-bit registers,
-irrespective of device endianness, the lower address should be read from
-/ written to first, followed by the upper address. Indeed the I/O
-accessors in CAAM driver currently don't follow the spec, however this
-is a good opportunity to fix the code.
+This is because new drivers are encouraged to use ioreadXX, et al instead
+of readX[1], et al -- and mixing ioreadXX with readq is pretty ugly.
 
-Signed-off-by: Horia Geantă <horia.geanta@nxp.com>
+[1] ldd3: section 9.4.2
+
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Cc: Horia Geantă <horia.geanta@nxp.com>
-Cc: Dan Douglass <dan.douglass@nxp.com>
-Cc: Herbert Xu <herbert@gondor.apana.org.au>
-Cc: "David S. Miller" <davem@davemloft.net>
+cc: Christoph Hellwig <hch@lst.de>
+cc: Arnd Bergmann <arnd@arndb.de>
+cc: Alan Cox <gnomes@lxorguk.ukuu.org.uk>
+cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 ---
- drivers/crypto/caam/regs.h | 35 +++++------------------------------
- 1 file changed, 5 insertions(+), 30 deletions(-)
+ include/linux/io-64-nonatomic-hi-lo.h | 64 +++++++++++++++++++++++++++++++++++
+ include/linux/io-64-nonatomic-lo-hi.h | 64 +++++++++++++++++++++++++++++++++++
+ 2 files changed, 128 insertions(+)
 
-diff --git a/drivers/crypto/caam/regs.h b/drivers/crypto/caam/regs.h
-index 84d2f838a063..0c45505458e7 100644
---- a/drivers/crypto/caam/regs.h
-+++ b/drivers/crypto/caam/regs.h
-@@ -9,7 +9,7 @@
- 
- #include <linux/types.h>
- #include <linux/bitops.h>
--#include <linux/io.h>
-+#include <linux/io-64-nonatomic-lo-hi.h>
- 
- /*
-  * Architecture-specific register access methods
-@@ -134,50 +134,25 @@ static inline void clrsetbits_32(void __iomem *reg, u32 clear, u32 set)
-  *    base + 0x0000 : least-significant 32 bits
-  *    base + 0x0004 : most-significant 32 bits
-  */
--#ifdef CONFIG_64BIT
- static inline void wr_reg64(void __iomem *reg, u64 data)
- {
-+#ifndef CONFIG_CRYPTO_DEV_FSL_CAAM_IMX
- 	if (caam_little_end)
- 		iowrite64(data, reg);
- 	else
--		iowrite64be(data, reg);
--}
--
--static inline u64 rd_reg64(void __iomem *reg)
--{
--	if (caam_little_end)
--		return ioread64(reg);
--	else
--		return ioread64be(reg);
--}
--
--#else /* CONFIG_64BIT */
--static inline void wr_reg64(void __iomem *reg, u64 data)
--{
--#ifndef CONFIG_CRYPTO_DEV_FSL_CAAM_IMX
--	if (caam_little_end) {
--		wr_reg32((u32 __iomem *)(reg) + 1, data >> 32);
--		wr_reg32((u32 __iomem *)(reg), data);
--	} else
+diff --git a/include/linux/io-64-nonatomic-hi-lo.h b/include/linux/io-64-nonatomic-hi-lo.h
+index defcc4644ce3..410c8b177080 100644
+--- a/include/linux/io-64-nonatomic-hi-lo.h
++++ b/include/linux/io-64-nonatomic-hi-lo.h
+@@ -54,4 +54,68 @@ static inline void hi_lo_writeq_relaxed(__u64 val, volatile void __iomem *addr)
+ #define writeq_relaxed hi_lo_writeq_relaxed
  #endif
--	{
--		wr_reg32((u32 __iomem *)(reg), data >> 32);
--		wr_reg32((u32 __iomem *)(reg) + 1, data);
--	}
-+		iowrite64be(data, reg);
- }
  
- static inline u64 rd_reg64(void __iomem *reg)
- {
- #ifndef CONFIG_CRYPTO_DEV_FSL_CAAM_IMX
- 	if (caam_little_end)
--		return ((u64)rd_reg32((u32 __iomem *)(reg) + 1) << 32 |
--			(u64)rd_reg32((u32 __iomem *)(reg)));
-+		return ioread64(reg);
- 	else
++#ifndef ioread64_hi_lo
++#define ioread64_hi_lo ioread64_hi_lo
++static inline u64 ioread64_hi_lo(void __iomem *addr)
++{
++	u32 low, high;
++
++	high = ioread32(addr + sizeof(u32));
++	low = ioread32(addr);
++
++	return low + ((u64)high << 32);
++}
++#endif
++
++#ifndef iowrite64_hi_lo
++#define iowrite64_hi_lo iowrite64_hi_lo
++static inline void iowrite64_hi_lo(u64 val, void __iomem *addr)
++{
++	iowrite32(val >> 32, addr + sizeof(u32));
++	iowrite32(val, addr);
++}
++#endif
++
++#ifndef ioread64be_hi_lo
++#define ioread64be_hi_lo ioread64be_hi_lo
++static inline u64 ioread64be_hi_lo(void __iomem *addr)
++{
++	u32 low, high;
++
++	high = ioread32be(addr);
++	low = ioread32be(addr + sizeof(u32));
++
++	return low + ((u64)high << 32);
++}
++#endif
++
++#ifndef iowrite64be_hi_lo
++#define iowrite64be_hi_lo iowrite64be_hi_lo
++static inline void iowrite64be_hi_lo(u64 val, void __iomem *addr)
++{
++	iowrite32be(val >> 32, addr);
++	iowrite32be(val, addr + sizeof(u32));
++}
++#endif
++
++#ifndef ioread64
++#define ioread64_is_nonatomic
++#define ioread64 ioread64_hi_lo
++#endif
++
++#ifndef iowrite64
++#define iowrite64_is_nonatomic
++#define iowrite64 iowrite64_hi_lo
++#endif
++
++#ifndef ioread64be
++#define ioread64be_is_nonatomic
++#define ioread64be ioread64be_hi_lo
++#endif
++
++#ifndef iowrite64be
++#define iowrite64be_is_nonatomic
++#define iowrite64be iowrite64be_hi_lo
++#endif
++
+ #endif	/* _LINUX_IO_64_NONATOMIC_HI_LO_H_ */
+diff --git a/include/linux/io-64-nonatomic-lo-hi.h b/include/linux/io-64-nonatomic-lo-hi.h
+index 084461a4e5ab..acba36812be8 100644
+--- a/include/linux/io-64-nonatomic-lo-hi.h
++++ b/include/linux/io-64-nonatomic-lo-hi.h
+@@ -54,4 +54,68 @@ static inline void lo_hi_writeq_relaxed(__u64 val, volatile void __iomem *addr)
+ #define writeq_relaxed lo_hi_writeq_relaxed
  #endif
--		return ((u64)rd_reg32((u32 __iomem *)(reg)) << 32 |
--			(u64)rd_reg32((u32 __iomem *)(reg) + 1));
-+		return ioread64be(reg);
- }
--#endif /* CONFIG_64BIT  */
  
- #ifdef CONFIG_ARCH_DMA_ADDR_T_64BIT
- #ifdef CONFIG_SOC_IMX7D
++#ifndef ioread64_lo_hi
++#define ioread64_lo_hi ioread64_lo_hi
++static inline u64 ioread64_lo_hi(void __iomem *addr)
++{
++	u32 low, high;
++
++	low = ioread32(addr);
++	high = ioread32(addr + sizeof(u32));
++
++	return low + ((u64)high << 32);
++}
++#endif
++
++#ifndef iowrite64_lo_hi
++#define iowrite64_lo_hi iowrite64_lo_hi
++static inline void iowrite64_lo_hi(u64 val, void __iomem *addr)
++{
++	iowrite32(val, addr);
++	iowrite32(val >> 32, addr + sizeof(u32));
++}
++#endif
++
++#ifndef ioread64be_lo_hi
++#define ioread64be_lo_hi ioread64be_lo_hi
++static inline u64 ioread64be_lo_hi(void __iomem *addr)
++{
++	u32 low, high;
++
++	low = ioread32be(addr + sizeof(u32));
++	high = ioread32be(addr);
++
++	return low + ((u64)high << 32);
++}
++#endif
++
++#ifndef iowrite64be_lo_hi
++#define iowrite64be_lo_hi iowrite64be_lo_hi
++static inline void iowrite64be_lo_hi(u64 val, void __iomem *addr)
++{
++	iowrite32be(val, addr + sizeof(u32));
++	iowrite32be(val >> 32, addr);
++}
++#endif
++
++#ifndef ioread64
++#define ioread64_is_nonatomic
++#define ioread64 ioread64_lo_hi
++#endif
++
++#ifndef iowrite64
++#define iowrite64_is_nonatomic
++#define iowrite64 iowrite64_lo_hi
++#endif
++
++#ifndef ioread64be
++#define ioread64be_is_nonatomic
++#define ioread64be ioread64be_lo_hi
++#endif
++
++#ifndef iowrite64be
++#define iowrite64be_is_nonatomic
++#define iowrite64be iowrite64be_lo_hi
++#endif
++
+ #endif	/* _LINUX_IO_64_NONATOMIC_LO_HI_H_ */
 -- 
 2.11.0
 
