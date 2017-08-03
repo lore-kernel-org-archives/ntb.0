@@ -1,106 +1,264 @@
-Return-Path: <tomi.valkeinen@ti.com>
-Received: from lelnx194.ext.ti.com (lelnx194.ext.ti.com. [198.47.27.80])
-        by gmr-mx.google.com with ESMTPS id d85si72866itb.6.2017.08.04.06.03.27
+Return-Path: <gunthorp@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id f123si394661ita.4.2017.08.03.11.30.27
         for <linux-ntb@googlegroups.com>
-        (version=TLS1 cipher=AES128-SHA bits=128/128);
-        Fri, 04 Aug 2017 06:03:27 -0700 (PDT)
-Subject: Re: [PATCH v6 1/7] drm/tilcdc: ensure nonatomic iowrite64 is not used
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 03 Aug 2017 11:30:27 -0700 (PDT)
+From: Logan Gunthorpe <logang@deltatee.com>
+Date: Thu,  3 Aug 2017 12:30:15 -0600
+Message-Id: <20170803183018.5889-5-logang@deltatee.com>
+In-Reply-To: <20170803183018.5889-1-logang@deltatee.com>
 References: <20170803183018.5889-1-logang@deltatee.com>
- <20170803183018.5889-2-logang@deltatee.com>
-From: Tomi Valkeinen <tomi.valkeinen@ti.com>
-Message-ID: <2b41b02c-07e3-b927-f276-a29480f94285@ti.com>
-Date: Fri, 4 Aug 2017 16:03:12 +0300
-MIME-Version: 1.0
-In-Reply-To: <20170803183018.5889-2-logang@deltatee.com>
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature";
-	boundary="Spb6H6ES3NmNPePXmfAm7upDjVkdPe9QM"
-To: Logan Gunthorpe <logang@deltatee.com>, linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Jyri Sarha <jsarha@ti.com>
-Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?Q?Horia_Geant=c4=83?= <horia.geanta@nxp.com>, Stephen Bates <sbates@raithlin.com>, David Airlie <airlied@linux.ie>
+Subject: [PATCH v6 4/7] iomap: introduce io{read|write}64_{lo_hi|hi_lo}
+To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org
+Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Stephen Bates <sbates@raithlin.com>, Logan Gunthorpe <logang@deltatee.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, Suresh Warrier <warrier@linux.vnet.ibm.com>, Nicholas Piggin <npiggin@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
---Spb6H6ES3NmNPePXmfAm7upDjVkdPe9QM
-Content-Type: multipart/mixed; boundary="LEoF2bXkUPPNRk16ANmfpjIOMtEqioS6n";
- protected-headers="v1"
-From: Tomi Valkeinen <tomi.valkeinen@ti.com>
-To: Logan Gunthorpe <logang@deltatee.com>, linux-kernel@vger.kernel.org,
- linux-arch@vger.kernel.org, linux-ntb@googlegroups.com,
- linux-crypto@vger.kernel.org, Jyri Sarha <jsarha@ti.com>
-Cc: Arnd Bergmann <arnd@arndb.de>,
- Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
- Andy Shevchenko <andy.shevchenko@gmail.com>,
- =?UTF-8?Q?Horia_Geant=c4=83?= <horia.geanta@nxp.com>,
- Stephen Bates <sbates@raithlin.com>, David Airlie <airlied@linux.ie>
-Message-ID: <2b41b02c-07e3-b927-f276-a29480f94285@ti.com>
-Subject: Re: [PATCH v6 1/7] drm/tilcdc: ensure nonatomic iowrite64 is not used
-References: <20170803183018.5889-1-logang@deltatee.com>
- <20170803183018.5889-2-logang@deltatee.com>
-In-Reply-To: <20170803183018.5889-2-logang@deltatee.com>
+In order to provide non-atomic functions for io{read|write}64 that will
+use readq and writeq when appropriate. We define a number of variants
+of these functions in the generic iomap that will do non-atomic
+operations on pio but atomic operations on mmio.
 
---LEoF2bXkUPPNRk16ANmfpjIOMtEqioS6n
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
+These functions are only defined if readq and writeq are defined. If
+they are not, then the wrappers that always use non-atomic operations
+from include/linux/io-64-nonatomic*.h will be used.
 
-On 03/08/17 21:30, Logan Gunthorpe wrote:
-> Add a check to ensure iowrite64 is only used if it is atomic.
->=20
-> It was decided in [1] that the tilcdc driver should not be using an
-> atomic operation (so it was left out of this patchset). However, it tur=
-ns
-> out that through the drm code, a nonatomic header is actually included:=
+Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+Cc: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+Cc: Paul Mackerras <paulus@samba.org>
+Cc: Michael Ellerman <mpe@ellerman.id.au>
+Cc: Arnd Bergmann <arnd@arndb.de>
+Cc: Suresh Warrier <warrier@linux.vnet.ibm.com>
+Cc: Nicholas Piggin <npiggin@gmail.com>
+---
+ arch/powerpc/include/asm/io.h |   2 +
+ include/asm-generic/iomap.h   |  26 +++++++--
+ lib/iomap.c                   | 132 ++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 154 insertions(+), 6 deletions(-)
 
->=20
-> include/linux/io-64-nonatomic-lo-hi.h
-> is included from include/drm/drm_os_linux.h:9:0,
->             from include/drm/drmP.h:74,
->             from include/drm/drm_modeset_helper.h:26,
->             from include/drm/drm_atomic_helper.h:33,
->             from drivers/gpu/drm/tilcdc/tilcdc_crtc.c:19:
->=20
-> And thus, without this change, this patchset would inadvertantly
-> change the behaviour of the tilcdc driver.
+diff --git a/arch/powerpc/include/asm/io.h b/arch/powerpc/include/asm/io.h
+index af074923d598..4cc420cfaa78 100644
+--- a/arch/powerpc/include/asm/io.h
++++ b/arch/powerpc/include/asm/io.h
+@@ -788,8 +788,10 @@ extern void __iounmap_at(void *ea, unsigned long size);
+ 
+ #define mmio_read16be(addr)		readw_be(addr)
+ #define mmio_read32be(addr)		readl_be(addr)
++#define mmio_read64be(addr)		readq_be(addr)
+ #define mmio_write16be(val, addr)	writew_be(val, addr)
+ #define mmio_write32be(val, addr)	writel_be(val, addr)
++#define mmio_write64be(val, addr)	writeq_be(val, addr)
+ #define mmio_insb(addr, dst, count)	readsb(addr, dst, count)
+ #define mmio_insw(addr, dst, count)	readsw(addr, dst, count)
+ #define mmio_insl(addr, dst, count)	readsl(addr, dst, count)
+diff --git a/include/asm-generic/iomap.h b/include/asm-generic/iomap.h
+index 650fede33c25..30edebf627fe 100644
+--- a/include/asm-generic/iomap.h
++++ b/include/asm-generic/iomap.h
+@@ -30,9 +30,16 @@ extern unsigned int ioread16(void __iomem *);
+ extern unsigned int ioread16be(void __iomem *);
+ extern unsigned int ioread32(void __iomem *);
+ extern unsigned int ioread32be(void __iomem *);
+-#ifdef CONFIG_64BIT
+-extern u64 ioread64(void __iomem *);
+-extern u64 ioread64be(void __iomem *);
++
++#ifdef readq
++#define ioread64_lo_hi ioread64_lo_hi
++#define ioread64_hi_lo ioread64_hi_lo
++#define ioread64be_lo_hi ioread64be_lo_hi
++#define ioread64be_hi_lo ioread64be_hi_lo
++extern u64 ioread64_lo_hi(void __iomem *addr);
++extern u64 ioread64_hi_lo(void __iomem *addr);
++extern u64 ioread64be_lo_hi(void __iomem *addr);
++extern u64 ioread64be_hi_lo(void __iomem *addr);
+ #endif
+ 
+ extern void iowrite8(u8, void __iomem *);
+@@ -40,9 +47,16 @@ extern void iowrite16(u16, void __iomem *);
+ extern void iowrite16be(u16, void __iomem *);
+ extern void iowrite32(u32, void __iomem *);
+ extern void iowrite32be(u32, void __iomem *);
+-#ifdef CONFIG_64BIT
+-extern void iowrite64(u64, void __iomem *);
+-extern void iowrite64be(u64, void __iomem *);
++
++#ifdef writeq
++#define iowrite64_lo_hi iowrite64_lo_hi
++#define iowrite64_hi_lo iowrite64_hi_lo
++#define iowrite64be_lo_hi iowrite64be_lo_hi
++#define iowrite64be_hi_lo iowrite64be_hi_lo
++extern void iowrite64_lo_hi(u64 val, void __iomem *addr);
++extern void iowrite64_hi_lo(u64 val, void __iomem *addr);
++extern void iowrite64be_lo_hi(u64 val, void __iomem *addr);
++extern void iowrite64be_hi_lo(u64 val, void __iomem *addr);
+ #endif
+ 
+ /*
+diff --git a/lib/iomap.c b/lib/iomap.c
+index fc3dcb4b238e..845b9c41082c 100644
+--- a/lib/iomap.c
++++ b/lib/iomap.c
+@@ -66,6 +66,7 @@ static void bad_io_access(unsigned long port, const char *access)
+ #ifndef mmio_read16be
+ #define mmio_read16be(addr) be16_to_cpu(__raw_readw(addr))
+ #define mmio_read32be(addr) be32_to_cpu(__raw_readl(addr))
++#define mmio_read64be(addr) be64_to_cpu(__raw_readq(addr))
+ #endif
+ 
+ unsigned int ioread8(void __iomem *addr)
+@@ -99,6 +100,80 @@ EXPORT_SYMBOL(ioread16be);
+ EXPORT_SYMBOL(ioread32);
+ EXPORT_SYMBOL(ioread32be);
+ 
++#ifdef readq
++static u64 pio_read64_lo_hi(unsigned long port)
++{
++	u64 lo, hi;
++
++	lo = inl(port);
++	hi = inl(port + sizeof(u32));
++
++	return lo | (hi << 32);
++}
++
++static u64 pio_read64_hi_lo(unsigned long port)
++{
++	u64 lo, hi;
++
++	hi = inl(port + sizeof(u32));
++	lo = inl(port);
++
++	return lo | (hi << 32);
++}
++
++static u64 pio_read64be_lo_hi(unsigned long port)
++{
++	u64 lo, hi;
++
++	lo = pio_read32be(port + sizeof(u32));
++	hi = pio_read32be(port);
++
++	return lo | (hi << 32);
++}
++
++static u64 pio_read64be_hi_lo(unsigned long port)
++{
++	u64 lo, hi;
++
++	hi = pio_read32be(port);
++	lo = pio_read32be(port + sizeof(u32));
++
++	return lo | (hi << 32);
++}
++
++u64 ioread64_lo_hi(void __iomem *addr)
++{
++	IO_COND(addr, return pio_read64_lo_hi(port), return readq(addr));
++	return 0xffffffffffffffffULL;
++}
++
++u64 ioread64_hi_lo(void __iomem *addr)
++{
++	IO_COND(addr, return pio_read64_hi_lo(port), return readq(addr));
++	return 0xffffffffffffffffULL;
++}
++
++u64 ioread64be_lo_hi(void __iomem *addr)
++{
++	IO_COND(addr, return pio_read64be_lo_hi(port),
++		return mmio_read64be(addr));
++	return 0xffffffffffffffffULL;
++}
++
++u64 ioread64be_hi_lo(void __iomem *addr)
++{
++	IO_COND(addr, return pio_read64be_hi_lo(port),
++		return mmio_read64be(addr));
++	return 0xffffffffffffffffULL;
++}
++
++EXPORT_SYMBOL(ioread64_lo_hi);
++EXPORT_SYMBOL(ioread64_hi_lo);
++EXPORT_SYMBOL(ioread64be_lo_hi);
++EXPORT_SYMBOL(ioread64be_hi_lo);
++
++#endif /* readq */
++
+ #ifndef pio_write16be
+ #define pio_write16be(val,port) outw(swab16(val),port)
+ #define pio_write32be(val,port) outl(swab32(val),port)
+@@ -107,6 +182,7 @@ EXPORT_SYMBOL(ioread32be);
+ #ifndef mmio_write16be
+ #define mmio_write16be(val,port) __raw_writew(be16_to_cpu(val),port)
+ #define mmio_write32be(val,port) __raw_writel(be32_to_cpu(val),port)
++#define mmio_write64be(val,port) __raw_writeq(be64_to_cpu(val),port)
+ #endif
+ 
+ void iowrite8(u8 val, void __iomem *addr)
+@@ -135,6 +211,62 @@ EXPORT_SYMBOL(iowrite16be);
+ EXPORT_SYMBOL(iowrite32);
+ EXPORT_SYMBOL(iowrite32be);
+ 
++#ifdef writeq
++static void pio_write64_lo_hi(u64 val, unsigned long port)
++{
++	outl(val, port);
++	outl(val >> 32, port + sizeof(u32));
++}
++
++static void pio_write64_hi_lo(u64 val, unsigned long port)
++{
++	outl(val >> 32, port + sizeof(u32));
++	outl(val, port);
++}
++
++static void pio_write64be_lo_hi(u64 val, unsigned long port)
++{
++	pio_write32be(val, port + sizeof(u32));
++	pio_write32be(val >> 32, port);
++}
++
++static void pio_write64be_hi_lo(u64 val, unsigned long port)
++{
++	pio_write32be(val >> 32, port);
++	pio_write32be(val, port + sizeof(u32));
++}
++
++void iowrite64_lo_hi(u64 val, void __iomem *addr)
++{
++	IO_COND(addr, pio_write64_lo_hi(val, port),
++		writeq(val, addr));
++}
++
++void iowrite64_hi_lo(u64 val, void __iomem *addr)
++{
++	IO_COND(addr, pio_write64_hi_lo(val, port),
++		writeq(val, addr));
++}
++
++void iowrite64be_lo_hi(u64 val, void __iomem *addr)
++{
++	IO_COND(addr, pio_write64be_lo_hi(val, port),
++		mmio_write64be(val, addr));
++}
++
++void iowrite64be_hi_lo(u64 val, void __iomem *addr)
++{
++	IO_COND(addr, pio_write64be_hi_lo(val, port),
++		mmio_write64be(val, addr));
++}
++
++EXPORT_SYMBOL(iowrite64_lo_hi);
++EXPORT_SYMBOL(iowrite64_hi_lo);
++EXPORT_SYMBOL(iowrite64be_lo_hi);
++EXPORT_SYMBOL(iowrite64be_hi_lo);
++
++#endif /* readq */
++
+ /*
+  * These are the "repeat MMIO read/write" functions.
+  * Note the "__raw" accesses, since we don't want to
+-- 
+2.11.0
 
-I haven't really followed the discussion on this, but if the tilcdc's
-use of iowrite64 causes (real) problems/complications elsewhere, I think
-we could drop it.
-
-The problem is that the HW has a race issue, and the two registers in
-question should be written as close to each other as possible. We
-thought a single 64bit write, writing to both registers in one go, would
-improve that slightly, compared to two 32 bit writes.
-
-Jyri, correct me if I'm wrong, but we have no proof that it actually
-helps, and it might be that even if it helps, the difference is
-theoretical. Probably if we ensure the irqs are off when we do two 32
-bit writes, we're already close enough to the optimal case.
-
- Tomi
-
-
---LEoF2bXkUPPNRk16ANmfpjIOMtEqioS6n--
-
---Spb6H6ES3NmNPePXmfAm7upDjVkdPe9QM
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQIcBAEBCAAGBQJZhHCQAAoJEPo9qoy8lh71MkwQAJ4dK01uGso+/a5bUI3W7cmo
-CXaseZacKsbVQ83FX5jWmF8u7voIDQ1mID6JQZr9WHnunHP6C1W5s+6Q7TYFGKAn
-5JcK/TcpKpmQb8Pz7XiTXNKRcwvm2prXNho2w/QhZn8CQrpA4WA5ROGVENLT5H4l
-5N5ioMylGvaEVKIib83DvVMFbLRqonsn2QedvovsehzY93GftslNjaPs8Up8N3od
-Gbe/t0jwReAshW5eUDJ80OHa1WjDUHsEZcAh7IpaDyvNVid7lXATQlw8twUp0BDr
-ijWUhVwVbcUqzyfMat1IcfYVDozPuFoEbXpGaFijXYMMNLE2ebMMib1JBDkIW6VK
-W83Ij4DQGY0ZiP47xdgsDBxol5G58+RKsbITJKGQ5FYlQI2E4X1A/bAOCcyhrO6W
-l1zGz60j0E9EsswRiiFgl1656aAYtyQArj8O8156w5WLATG/FsVFvif8wG40xaMP
-yDD2zvndtIMFlkn9wNjM9DStudueReRwS2w3J30wymMfO/w6jq3B2x4Gd+UUKJ4T
-6UJ2AAByqwz9U3O61UVsKgBEciNGOq3RclbQX/gUhnOBbCRB0L8mH2GfYH8gwHJJ
-7UpUSje2AUg/LC1/j+NKNQX/ZAvXQZ/Zj+NGEPIhPBS1LGnVkJ8d9oPjvWEFn/Sh
-OUwYWpboyOXN3zOy88Jl
-=U21y
------END PGP SIGNATURE-----
-
---Spb6H6ES3NmNPePXmfAm7upDjVkdPe9QM--
