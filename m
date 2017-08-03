@@ -1,449 +1,185 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id c133si406034itb.7.2017.08.03.11.20.08
+        by gmr-mx.google.com with ESMTPS id u65si250211ith.9.2017.08.03.11.20.08
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 03 Aug 2017 11:20:08 -0700 (PDT)
+        Thu, 03 Aug 2017 11:20:09 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Thu,  3 Aug 2017 12:19:47 -0600
-Message-Id: <20170803181954.4154-9-logang@deltatee.com>
+Date: Thu,  3 Aug 2017 12:19:51 -0600
+Message-Id: <20170803181954.4154-13-logang@deltatee.com>
 In-Reply-To: <20170803181954.4154-1-logang@deltatee.com>
 References: <20170803181954.4154-1-logang@deltatee.com>
-Subject: [PATCH v4 08/15] NTB: switchtec_ntb: Initialize hardware for memory windows
+Subject: [PATCH v4 12/15] NTB: switchtec_ntb: Implement doorbell registers
 To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Add the code to initialize the memory windows in the hardware.
-This includes setting up the requester ID table, and figuring out
-which BAR corresponds to which memory window. (Seeing the switch
-can be configured with any number of BARs.)
-
-Also, seeing the device doesn't have hardware for scratchpads or
-determining the link status, we create a shared memory window that has
-these features. A magic number with a version component will be used
-to determine if the other side's driver is actually up.
-
-The shared memory window also informs the other side of the
-size and count of the local memory windows.
+Pretty straightforward implementation of doorbell registers.
+The shift and mask were setup in an earlier patch and this just hooks
+up the appropriate portion of the IDB register as the local doorbells
+and the opposite portion of ODB as the peer doorbells. The DB mask is
+protected by a spinlock to avoid concurrent read-modify-write accesses.
 
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
 Reviewed-by: Stephen Bates <sbates@raithlin.com>
 Reviewed-by: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
 Acked-by: Allen Hubbe <Allen.Hubbe@dell.com>
 ---
- drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 360 +++++++++++++++++++++++++++++++++
- 1 file changed, 360 insertions(+)
+ drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 89 ++++++++++++++++++++++++++++++++--
+ 1 file changed, 85 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-index 253efba72275..831bfdf40068 100644
+index b477a8915245..4a6125d2f305 100644
 --- a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
 +++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-@@ -15,37 +15,396 @@
+@@ -98,6 +98,9 @@ struct switchtec_ntb {
+ 	int db_shift;
+ 	int db_peer_shift;
  
- #include <linux/switchtec.h>
- #include <linux/module.h>
-+#include <linux/delay.h>
-+#include <linux/kthread.h>
++	/* synchronize rmw access of db_mask and hw reg */
++	spinlock_t db_mask_lock;
++
+ 	int nr_direct_mw;
+ 	int nr_lut_mw;
+ 	int direct_mw_to_bar[MAX_DIRECT_MW];
+@@ -338,41 +341,115 @@ static int switchtec_ntb_link_disable(struct ntb_dev *ntb)
  
- MODULE_DESCRIPTION("Microsemi Switchtec(tm) NTB Driver");
- MODULE_VERSION("0.1");
- MODULE_LICENSE("GPL");
- MODULE_AUTHOR("Microsemi Corporation");
+ static u64 switchtec_ntb_db_valid_mask(struct ntb_dev *ntb)
+ {
+-	return 0;
++	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++
++	return sndev->db_valid_mask;
+ }
  
-+static bool use_lut_mws;
-+module_param(use_lut_mws, bool, 0644);
-+MODULE_PARM_DESC(use_lut_mws,
-+		 "Enable the use of the LUT based memory windows");
-+
-+#ifndef ioread64
-+#ifdef readq
-+#define ioread64 readq
-+#else
-+#define ioread64 _ioread64
-+static inline u64 _ioread64(void __iomem *mmio)
-+{
-+	u64 low, high;
-+
-+	low = ioread32(mmio);
-+	high = ioread32(mmio + sizeof(u32));
-+	return low | (high << 32);
-+}
-+#endif
-+#endif
-+
-+#ifndef iowrite64
-+#ifdef writeq
-+#define iowrite64 writeq
-+#else
-+#define iowrite64 _iowrite64
-+static inline void _iowrite64(u64 val, void __iomem *mmio)
-+{
-+	iowrite32(val, mmio);
-+	iowrite32(val >> 32, mmio + sizeof(u32));
-+}
-+#endif
-+#endif
-+
-+#define SWITCHTEC_NTB_MAGIC 0x45CC0001
-+#define MAX_MWS     128
-+
-+struct shared_mw {
-+	u32 magic;
-+	u32 partition_id;
-+	u64 mw_sizes[MAX_MWS];
-+};
-+
-+#define MAX_DIRECT_MW ARRAY_SIZE(((struct ntb_ctrl_regs *)(0))->bar_entry)
-+#define LUT_SIZE SZ_64K
-+
- struct switchtec_ntb {
- 	struct switchtec_dev *stdev;
-+
-+	int self_partition;
-+	int peer_partition;
-+
-+	struct ntb_info_regs __iomem *mmio_ntb;
-+	struct ntb_ctrl_regs __iomem *mmio_ctrl;
-+	struct ntb_dbmsg_regs __iomem *mmio_dbmsg;
-+	struct ntb_ctrl_regs __iomem *mmio_self_ctrl;
-+	struct ntb_ctrl_regs __iomem *mmio_peer_ctrl;
-+	struct ntb_dbmsg_regs __iomem *mmio_self_dbmsg;
-+
-+	struct shared_mw *self_shared;
-+	struct shared_mw __iomem *peer_shared;
-+	dma_addr_t self_shared_dma;
-+
-+	int nr_direct_mw;
-+	int nr_lut_mw;
-+	int direct_mw_to_bar[MAX_DIRECT_MW];
-+
-+	int peer_nr_direct_mw;
-+	int peer_nr_lut_mw;
-+	int peer_direct_mw_to_bar[MAX_DIRECT_MW];
- };
+ static int switchtec_ntb_db_vector_count(struct ntb_dev *ntb)
+ {
+-	return 0;
++	return 1;
+ }
  
-+static int switchtec_ntb_part_op(struct switchtec_ntb *sndev,
-+				 struct ntb_ctrl_regs __iomem *ctl,
-+				 u32 op, int wait_status)
-+{
-+	static const char * const op_text[] = {
-+		[NTB_CTRL_PART_OP_LOCK] = "lock",
-+		[NTB_CTRL_PART_OP_CFG] = "configure",
-+		[NTB_CTRL_PART_OP_RESET] = "reset",
-+	};
+ static u64 switchtec_ntb_db_vector_mask(struct ntb_dev *ntb, int db_vector)
+ {
+-	return 0;
++	struct switchtec_ntb *sndev = ntb_sndev(ntb);
 +
-+	int i;
-+	u32 ps;
-+	int status;
-+
-+	switch (op) {
-+	case NTB_CTRL_PART_OP_LOCK:
-+		status = NTB_CTRL_PART_STATUS_LOCKING;
-+		break;
-+	case NTB_CTRL_PART_OP_CFG:
-+		status = NTB_CTRL_PART_STATUS_CONFIGURING;
-+		break;
-+	case NTB_CTRL_PART_OP_RESET:
-+		status = NTB_CTRL_PART_STATUS_RESETTING;
-+		break;
-+	default:
-+		return -EINVAL;
-+	}
-+
-+	iowrite32(op, &ctl->partition_op);
-+
-+	for (i = 0; i < 1000; i++) {
-+		if (msleep_interruptible(50) != 0) {
-+			iowrite32(NTB_CTRL_PART_OP_RESET, &ctl->partition_op);
-+			return -EINTR;
-+		}
-+
-+		ps = ioread32(&ctl->partition_status) & 0xFFFF;
-+
-+		if (ps != status)
-+			break;
-+	}
-+
-+	if (ps == wait_status)
++	if (db_vector < 0 || db_vector > 1)
 +		return 0;
 +
-+	if (ps == status) {
-+		dev_err(&sndev->stdev->dev,
-+			"Timed out while peforming %s (%d). (%08x)",
-+			op_text[op], op,
-+			ioread32(&ctl->partition_status));
-+
-+		return -ETIMEDOUT;
-+	}
-+
-+	return -EIO;
-+}
-+
-+static void switchtec_ntb_init_sndev(struct switchtec_ntb *sndev)
-+{
-+	u64 part_map;
-+
-+	sndev->self_partition = sndev->stdev->partition;
-+
-+	sndev->mmio_ntb = sndev->stdev->mmio_ntb;
-+	part_map = ioread64(&sndev->mmio_ntb->ep_map);
-+	part_map &= ~(1 << sndev->self_partition);
-+	sndev->peer_partition = ffs(part_map) - 1;
-+
-+	dev_dbg(&sndev->stdev->dev, "Partition ID %d of %d (%llx)",
-+		sndev->self_partition, sndev->stdev->partition_count,
-+		part_map);
-+
-+	sndev->mmio_ctrl = (void * __iomem)sndev->mmio_ntb +
-+		SWITCHTEC_NTB_REG_CTRL_OFFSET;
-+	sndev->mmio_dbmsg = (void * __iomem)sndev->mmio_ntb +
-+		SWITCHTEC_NTB_REG_DBMSG_OFFSET;
-+
-+	sndev->mmio_self_ctrl = &sndev->mmio_ctrl[sndev->self_partition];
-+	sndev->mmio_peer_ctrl = &sndev->mmio_ctrl[sndev->peer_partition];
-+	sndev->mmio_self_dbmsg = &sndev->mmio_dbmsg[sndev->self_partition];
-+}
-+
-+static int map_bars(int *map, struct ntb_ctrl_regs __iomem *ctrl)
-+{
-+	int i;
-+	int cnt = 0;
-+
-+	for (i = 0; i < ARRAY_SIZE(ctrl->bar_entry); i++) {
-+		u32 r = ioread32(&ctrl->bar_entry[i].ctl);
-+
-+		if (r & NTB_CTRL_BAR_VALID)
-+			map[cnt++] = i;
-+	}
-+
-+	return cnt;
-+}
-+
-+static void switchtec_ntb_init_mw(struct switchtec_ntb *sndev)
-+{
-+	sndev->nr_direct_mw = map_bars(sndev->direct_mw_to_bar,
-+				       sndev->mmio_self_ctrl);
-+
-+	sndev->nr_lut_mw = ioread16(&sndev->mmio_self_ctrl->lut_table_entries);
-+	sndev->nr_lut_mw = rounddown_pow_of_two(sndev->nr_lut_mw);
-+
-+	dev_dbg(&sndev->stdev->dev, "MWs: %d direct, %d lut",
-+		sndev->nr_direct_mw, sndev->nr_lut_mw);
-+
-+	sndev->peer_nr_direct_mw = map_bars(sndev->peer_direct_mw_to_bar,
-+					    sndev->mmio_peer_ctrl);
-+
-+	sndev->peer_nr_lut_mw =
-+		ioread16(&sndev->mmio_peer_ctrl->lut_table_entries);
-+	sndev->peer_nr_lut_mw = rounddown_pow_of_two(sndev->peer_nr_lut_mw);
-+
-+	dev_dbg(&sndev->stdev->dev, "Peer MWs: %d direct, %d lut",
-+		sndev->peer_nr_direct_mw, sndev->peer_nr_lut_mw);
-+
-+}
-+
-+static int switchtec_ntb_init_req_id_table(struct switchtec_ntb *sndev)
-+{
-+	int rc = 0;
-+	u16 req_id;
-+	u32 error;
-+
-+	req_id = ioread16(&sndev->mmio_ntb->requester_id);
-+
-+	if (ioread32(&sndev->mmio_self_ctrl->req_id_table_size) < 2) {
-+		dev_err(&sndev->stdev->dev,
-+			"Not enough requester IDs available.");
-+		return -EFAULT;
-+	}
-+
-+	rc = switchtec_ntb_part_op(sndev, sndev->mmio_self_ctrl,
-+				   NTB_CTRL_PART_OP_LOCK,
-+				   NTB_CTRL_PART_STATUS_LOCKED);
-+	if (rc)
-+		return rc;
-+
-+	iowrite32(NTB_PART_CTRL_ID_PROT_DIS,
-+		  &sndev->mmio_self_ctrl->partition_ctrl);
-+
-+	/*
-+	 * Root Complex Requester ID (which is 0:00.0)
-+	 */
-+	iowrite32(0 << 16 | NTB_CTRL_REQ_ID_EN,
-+		  &sndev->mmio_self_ctrl->req_id_table[0]);
-+
-+	/*
-+	 * Host Bridge Requester ID (as read from the mmap address)
-+	 */
-+	iowrite32(req_id << 16 | NTB_CTRL_REQ_ID_EN,
-+		  &sndev->mmio_self_ctrl->req_id_table[1]);
-+
-+	rc = switchtec_ntb_part_op(sndev, sndev->mmio_self_ctrl,
-+				   NTB_CTRL_PART_OP_CFG,
-+				   NTB_CTRL_PART_STATUS_NORMAL);
-+	if (rc == -EIO) {
-+		error = ioread32(&sndev->mmio_self_ctrl->req_id_error);
-+		dev_err(&sndev->stdev->dev,
-+			"Error setting up the requester ID table: %08x",
-+			error);
-+	}
-+
-+	return rc;
-+}
-+
-+static void switchtec_ntb_init_shared(struct switchtec_ntb *sndev)
-+{
-+	int i;
-+
-+	memset(sndev->self_shared, 0, LUT_SIZE);
-+	sndev->self_shared->magic = SWITCHTEC_NTB_MAGIC;
-+	sndev->self_shared->partition_id = sndev->stdev->partition;
-+
-+	for (i = 0; i < sndev->nr_direct_mw; i++) {
-+		int bar = sndev->direct_mw_to_bar[i];
-+		resource_size_t sz = pci_resource_len(sndev->stdev->pdev, bar);
-+
-+		if (i == 0)
-+			sz = min_t(resource_size_t, sz,
-+				   LUT_SIZE * sndev->nr_lut_mw);
-+
-+		sndev->self_shared->mw_sizes[i] = sz;
-+	}
-+
-+	for (i = 0; i < sndev->nr_lut_mw; i++) {
-+		int idx = sndev->nr_direct_mw + i;
-+
-+		sndev->self_shared->mw_sizes[idx] = LUT_SIZE;
-+	}
-+}
-+
-+static int switchtec_ntb_init_shared_mw(struct switchtec_ntb *sndev)
-+{
-+	struct ntb_ctrl_regs __iomem *ctl = sndev->mmio_peer_ctrl;
-+	int bar = sndev->direct_mw_to_bar[0];
-+	u32 ctl_val;
-+	int rc;
-+
-+	sndev->self_shared = dma_zalloc_coherent(&sndev->stdev->pdev->dev,
-+						 LUT_SIZE,
-+						 &sndev->self_shared_dma,
-+						 GFP_KERNEL);
-+	if (!sndev->self_shared) {
-+		dev_err(&sndev->stdev->dev,
-+			"unable to allocate memory for shared mw");
-+		return -ENOMEM;
-+	}
-+
-+	switchtec_ntb_init_shared(sndev);
-+
-+	rc = switchtec_ntb_part_op(sndev, ctl, NTB_CTRL_PART_OP_LOCK,
-+				   NTB_CTRL_PART_STATUS_LOCKED);
-+	if (rc)
-+		goto unalloc_and_exit;
-+
-+	ctl_val = ioread32(&ctl->bar_entry[bar].ctl);
-+	ctl_val &= 0xFF;
-+	ctl_val |= NTB_CTRL_BAR_LUT_WIN_EN;
-+	ctl_val |= ilog2(LUT_SIZE) << 8;
-+	ctl_val |= (sndev->nr_lut_mw - 1) << 14;
-+	iowrite32(ctl_val, &ctl->bar_entry[bar].ctl);
-+
-+	iowrite64((NTB_CTRL_LUT_EN | (sndev->self_partition << 1) |
-+		   sndev->self_shared_dma),
-+		  &ctl->lut_entry[0]);
-+
-+	rc = switchtec_ntb_part_op(sndev, ctl, NTB_CTRL_PART_OP_CFG,
-+				   NTB_CTRL_PART_STATUS_NORMAL);
-+	if (rc) {
-+		u32 bar_error, lut_error;
-+
-+		bar_error = ioread32(&ctl->bar_error);
-+		lut_error = ioread32(&ctl->lut_error);
-+		dev_err(&sndev->stdev->dev,
-+			"Error setting up shared MW: %08x / %08x",
-+			bar_error, lut_error);
-+		goto unalloc_and_exit;
-+	}
-+
-+	sndev->peer_shared = pci_iomap(sndev->stdev->pdev, bar, LUT_SIZE);
-+	if (!sndev->peer_shared) {
-+		rc = -ENOMEM;
-+		goto unalloc_and_exit;
-+	}
-+
-+	dev_dbg(&sndev->stdev->dev, "Shared MW Ready");
-+	return 0;
-+
-+unalloc_and_exit:
-+	dma_free_coherent(&sndev->stdev->pdev->dev, LUT_SIZE,
-+			  sndev->self_shared, sndev->self_shared_dma);
-+
-+	return rc;
-+}
-+
-+static void switchtec_ntb_deinit_shared_mw(struct switchtec_ntb *sndev)
-+{
-+	if (sndev->peer_shared)
-+		pci_iounmap(sndev->stdev->pdev, sndev->peer_shared);
-+
-+	if (sndev->self_shared)
-+		dma_free_coherent(&sndev->stdev->pdev->dev, LUT_SIZE,
-+				  sndev->self_shared,
-+				  sndev->self_shared_dma);
-+}
-+
- static int switchtec_ntb_add(struct device *dev,
- 			     struct class_interface *class_intf)
++	return sndev->db_valid_mask;
+ }
+ 
+ static u64 switchtec_ntb_db_read(struct ntb_dev *ntb)
  {
- 	struct switchtec_dev *stdev = to_stdev(dev);
- 	struct switchtec_ntb *sndev;
-+	int rc;
- 
- 	stdev->sndev = NULL;
- 
- 	if (stdev->pdev->class != MICROSEMI_NTB_CLASSCODE)
- 		return -ENODEV;
- 
-+	if (stdev->partition_count != 2)
-+		dev_warn(dev, "ntb driver only supports 2 partitions");
+-	return 0;
++	u64 ret;
++	struct switchtec_ntb *sndev = ntb_sndev(ntb);
 +
- 	sndev = kzalloc_node(sizeof(*sndev), GFP_KERNEL, dev_to_node(dev));
- 	if (!sndev)
- 		return -ENOMEM;
- 
- 	sndev->stdev = stdev;
- 
-+	switchtec_ntb_init_sndev(sndev);
-+	switchtec_ntb_init_mw(sndev);
++	ret = ioread64(&sndev->mmio_self_dbmsg->idb) >> sndev->db_shift;
 +
-+	rc = switchtec_ntb_init_req_id_table(sndev);
-+	if (rc)
-+		goto free_and_exit;
-+
-+	rc = switchtec_ntb_init_shared_mw(sndev);
-+	if (rc)
-+		goto free_and_exit;
-+
- 	stdev->sndev = sndev;
- 	dev_info(dev, "NTB device registered");
++	return ret & sndev->db_valid_mask;
+ }
  
+ static int switchtec_ntb_db_clear(struct ntb_dev *ntb, u64 db_bits)
+ {
++	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++
++	iowrite64(db_bits << sndev->db_shift, &sndev->mmio_self_dbmsg->idb);
++
  	return 0;
+ }
+ 
+ static int switchtec_ntb_db_set_mask(struct ntb_dev *ntb, u64 db_bits)
+ {
++	unsigned long irqflags;
++	struct switchtec_ntb *sndev = ntb_sndev(ntb);
 +
-+free_and_exit:
-+	kfree(sndev);
-+	dev_err(dev, "failed to register ntb device: %d", rc);
-+	return rc;
++	if (db_bits & ~sndev->db_valid_mask)
++		return -EINVAL;
++
++	spin_lock_irqsave(&sndev->db_mask_lock, irqflags);
++
++	sndev->db_mask |= db_bits << sndev->db_shift;
++	iowrite64(~sndev->db_mask, &sndev->mmio_self_dbmsg->idb_mask);
++
++	spin_unlock_irqrestore(&sndev->db_mask_lock, irqflags);
++
+ 	return 0;
  }
  
- void switchtec_ntb_remove(struct device *dev,
-@@ -58,6 +417,7 @@ void switchtec_ntb_remove(struct device *dev,
- 		return;
- 
- 	stdev->sndev = NULL;
-+	switchtec_ntb_deinit_shared_mw(sndev);
- 	kfree(sndev);
- 	dev_info(dev, "ntb device unregistered");
+ static int switchtec_ntb_db_clear_mask(struct ntb_dev *ntb, u64 db_bits)
+ {
++	unsigned long irqflags;
++	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++
++	if (db_bits & ~sndev->db_valid_mask)
++		return -EINVAL;
++
++	spin_lock_irqsave(&sndev->db_mask_lock, irqflags);
++
++	sndev->db_mask &= ~(db_bits << sndev->db_shift);
++	iowrite64(~sndev->db_mask, &sndev->mmio_self_dbmsg->idb_mask);
++
++	spin_unlock_irqrestore(&sndev->db_mask_lock, irqflags);
++
++	return 0;
++}
++
++static u64 switchtec_ntb_db_read_mask(struct ntb_dev *ntb)
++{
++	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++
++	return (sndev->db_mask >> sndev->db_shift) & sndev->db_valid_mask;
++}
++
++static int switchtec_ntb_peer_db_addr(struct ntb_dev *ntb,
++				      phys_addr_t *db_addr,
++				      resource_size_t *db_size)
++{
++	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++	unsigned long offset;
++
++	offset = (unsigned long)sndev->mmio_self_dbmsg->odb -
++		(unsigned long)sndev->stdev->mmio;
++
++	offset += sndev->db_shift / 8;
++
++	if (db_addr)
++		*db_addr = pci_resource_start(ntb->pdev, 0) + offset;
++	if (db_size)
++		*db_size = sizeof(u32);
++
+ 	return 0;
  }
+ 
+ static int switchtec_ntb_peer_db_set(struct ntb_dev *ntb, u64 db_bits)
+ {
++	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++
++	iowrite64(db_bits << sndev->db_peer_shift,
++		  &sndev->mmio_self_dbmsg->odb);
++
+ 	return 0;
+ }
+ 
+@@ -413,6 +490,8 @@ static const struct ntb_dev_ops switchtec_ntb_ops = {
+ 	.db_clear		= switchtec_ntb_db_clear,
+ 	.db_set_mask		= switchtec_ntb_db_set_mask,
+ 	.db_clear_mask		= switchtec_ntb_db_clear_mask,
++	.db_read_mask		= switchtec_ntb_db_read_mask,
++	.peer_db_addr		= switchtec_ntb_peer_db_addr,
+ 	.peer_db_set		= switchtec_ntb_peer_db_set,
+ 	.spad_count		= switchtec_ntb_spad_count,
+ 	.spad_read		= switchtec_ntb_spad_read,
+@@ -685,6 +764,8 @@ static irqreturn_t switchtec_ntb_doorbell_isr(int irq, void *dev)
+ 
+ 	dev_dbg(&sndev->stdev->dev, "doorbell\n");
+ 
++	ntb_db_event(&sndev->ntb, 0);
++
+ 	return IRQ_HANDLED;
+ }
+ 
 -- 
 2.11.0
 
