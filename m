@@ -1,185 +1,217 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id u65si250211ith.9.2017.08.03.11.20.08
+        by gmr-mx.google.com with ESMTPS id d81si436286itc.4.2017.08.03.11.20.07
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 03 Aug 2017 11:20:09 -0700 (PDT)
+        Thu, 03 Aug 2017 11:20:07 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Thu,  3 Aug 2017 12:19:51 -0600
-Message-Id: <20170803181954.4154-13-logang@deltatee.com>
+Date: Thu,  3 Aug 2017 12:19:46 -0600
+Message-Id: <20170803181954.4154-8-logang@deltatee.com>
 In-Reply-To: <20170803181954.4154-1-logang@deltatee.com>
 References: <20170803181954.4154-1-logang@deltatee.com>
-Subject: [PATCH v4 12/15] NTB: switchtec_ntb: Implement doorbell registers
+Subject: [PATCH v4 07/15] NTB: switchtec_ntb: Introduce initial NTB driver
 To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Pretty straightforward implementation of doorbell registers.
-The shift and mask were setup in an earlier patch and this just hooks
-up the appropriate portion of the IDB register as the local doorbells
-and the opposite portion of ODB as the peer doorbells. The DB mask is
-protected by a spinlock to avoid concurrent read-modify-write accesses.
+Seeing the Switchtec NTB hardware shares the same endpoint as the
+management endpoint we utilize the class_interface API to register
+an NTB driver for every Switchtec device in the system that has the
+NTB class code.
 
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
 Reviewed-by: Stephen Bates <sbates@raithlin.com>
 Reviewed-by: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
 Acked-by: Allen Hubbe <Allen.Hubbe@dell.com>
 ---
- drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 89 ++++++++++++++++++++++++++++++++--
- 1 file changed, 85 insertions(+), 4 deletions(-)
+ MAINTAINERS                            |  1 +
+ drivers/ntb/hw/Kconfig                 |  1 +
+ drivers/ntb/hw/Makefile                |  1 +
+ drivers/ntb/hw/mscc/Kconfig            |  9 ++++
+ drivers/ntb/hw/mscc/Makefile           |  1 +
+ drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 81 ++++++++++++++++++++++++++++++++++
+ drivers/pci/switch/switchtec.c         |  3 ++
+ include/linux/switchtec.h              |  4 ++
+ 8 files changed, 101 insertions(+)
+ create mode 100644 drivers/ntb/hw/mscc/Kconfig
+ create mode 100644 drivers/ntb/hw/mscc/Makefile
+ create mode 100644 drivers/ntb/hw/mscc/ntb_hw_switchtec.c
 
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 4ff2ad7c1c7b..6e491ce5e876 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -10147,6 +10147,7 @@ F:	Documentation/ABI/testing/sysfs-class-switchtec
+ F:	drivers/pci/switch/switchtec*
+ F:	include/uapi/linux/switchtec_ioctl.h
+ F:	include/linux/switchtec.h
++F:	drivers/ntb/hw/mscc/
+ 
+ PCI DRIVER FOR NVIDIA TEGRA
+ M:	Thierry Reding <thierry.reding@gmail.com>
+diff --git a/drivers/ntb/hw/Kconfig b/drivers/ntb/hw/Kconfig
+index a89243c9fdd3..e51b581fd102 100644
+--- a/drivers/ntb/hw/Kconfig
++++ b/drivers/ntb/hw/Kconfig
+@@ -1,3 +1,4 @@
+ source "drivers/ntb/hw/amd/Kconfig"
+ source "drivers/ntb/hw/idt/Kconfig"
+ source "drivers/ntb/hw/intel/Kconfig"
++source "drivers/ntb/hw/mscc/Kconfig"
+diff --git a/drivers/ntb/hw/Makefile b/drivers/ntb/hw/Makefile
+index 87332c3905f0..923c442db750 100644
+--- a/drivers/ntb/hw/Makefile
++++ b/drivers/ntb/hw/Makefile
+@@ -1,3 +1,4 @@
+ obj-$(CONFIG_NTB_AMD)	+= amd/
+ obj-$(CONFIG_NTB_IDT)	+= idt/
+ obj-$(CONFIG_NTB_INTEL)	+= intel/
++obj-$(CONFIG_NTB_SWITCHTEC) += mscc/
+diff --git a/drivers/ntb/hw/mscc/Kconfig b/drivers/ntb/hw/mscc/Kconfig
+new file mode 100644
+index 000000000000..013ed6716438
+--- /dev/null
++++ b/drivers/ntb/hw/mscc/Kconfig
+@@ -0,0 +1,9 @@
++config NTB_SWITCHTEC
++	tristate "MicroSemi Switchtec Non-Transparent Bridge Support"
++	select PCI_SW_SWITCHTEC
++	help
++	 Enables NTB support for Switchtec PCI switches. This also
++	 selects the Switchtec management driver as they share the same
++	 hardware interface.
++
++	 If unsure, say N.
+diff --git a/drivers/ntb/hw/mscc/Makefile b/drivers/ntb/hw/mscc/Makefile
+new file mode 100644
+index 000000000000..064686ead1ba
+--- /dev/null
++++ b/drivers/ntb/hw/mscc/Makefile
+@@ -0,0 +1 @@
++obj-$(CONFIG_NTB_SWITCHTEC) += ntb_hw_switchtec.o
 diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-index b477a8915245..4a6125d2f305 100644
---- a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+new file mode 100644
+index 000000000000..253efba72275
+--- /dev/null
 +++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-@@ -98,6 +98,9 @@ struct switchtec_ntb {
- 	int db_shift;
- 	int db_peer_shift;
- 
-+	/* synchronize rmw access of db_mask and hw reg */
-+	spinlock_t db_mask_lock;
+@@ -0,0 +1,81 @@
++/*
++ * Microsemi Switchtec(tm) PCIe Management Driver
++ * Copyright (c) 2017, Microsemi Corporation
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms and conditions of the GNU General Public License,
++ * version 2, as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope it will be useful, but WITHOUT
++ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
++ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
++ * more details.
++ *
++ */
 +
- 	int nr_direct_mw;
- 	int nr_lut_mw;
- 	int direct_mw_to_bar[MAX_DIRECT_MW];
-@@ -338,41 +341,115 @@ static int switchtec_ntb_link_disable(struct ntb_dev *ntb)
- 
- static u64 switchtec_ntb_db_valid_mask(struct ntb_dev *ntb)
- {
--	return 0;
-+	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++#include <linux/switchtec.h>
++#include <linux/module.h>
 +
-+	return sndev->db_valid_mask;
- }
- 
- static int switchtec_ntb_db_vector_count(struct ntb_dev *ntb)
- {
--	return 0;
-+	return 1;
- }
- 
- static u64 switchtec_ntb_db_vector_mask(struct ntb_dev *ntb, int db_vector)
- {
--	return 0;
-+	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++MODULE_DESCRIPTION("Microsemi Switchtec(tm) NTB Driver");
++MODULE_VERSION("0.1");
++MODULE_LICENSE("GPL");
++MODULE_AUTHOR("Microsemi Corporation");
 +
-+	if (db_vector < 0 || db_vector > 1)
-+		return 0;
++struct switchtec_ntb {
++	struct switchtec_dev *stdev;
++};
 +
-+	return sndev->db_valid_mask;
- }
- 
- static u64 switchtec_ntb_db_read(struct ntb_dev *ntb)
- {
--	return 0;
-+	u64 ret;
-+	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++static int switchtec_ntb_add(struct device *dev,
++			     struct class_interface *class_intf)
++{
++	struct switchtec_dev *stdev = to_stdev(dev);
++	struct switchtec_ntb *sndev;
 +
-+	ret = ioread64(&sndev->mmio_self_dbmsg->idb) >> sndev->db_shift;
++	stdev->sndev = NULL;
 +
-+	return ret & sndev->db_valid_mask;
- }
- 
- static int switchtec_ntb_db_clear(struct ntb_dev *ntb, u64 db_bits)
- {
-+	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++	if (stdev->pdev->class != MICROSEMI_NTB_CLASSCODE)
++		return -ENODEV;
 +
-+	iowrite64(db_bits << sndev->db_shift, &sndev->mmio_self_dbmsg->idb);
++	sndev = kzalloc_node(sizeof(*sndev), GFP_KERNEL, dev_to_node(dev));
++	if (!sndev)
++		return -ENOMEM;
 +
- 	return 0;
- }
- 
- static int switchtec_ntb_db_set_mask(struct ntb_dev *ntb, u64 db_bits)
- {
-+	unsigned long irqflags;
-+	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++	sndev->stdev = stdev;
 +
-+	if (db_bits & ~sndev->db_valid_mask)
-+		return -EINVAL;
-+
-+	spin_lock_irqsave(&sndev->db_mask_lock, irqflags);
-+
-+	sndev->db_mask |= db_bits << sndev->db_shift;
-+	iowrite64(~sndev->db_mask, &sndev->mmio_self_dbmsg->idb_mask);
-+
-+	spin_unlock_irqrestore(&sndev->db_mask_lock, irqflags);
-+
- 	return 0;
- }
- 
- static int switchtec_ntb_db_clear_mask(struct ntb_dev *ntb, u64 db_bits)
- {
-+	unsigned long irqflags;
-+	struct switchtec_ntb *sndev = ntb_sndev(ntb);
-+
-+	if (db_bits & ~sndev->db_valid_mask)
-+		return -EINVAL;
-+
-+	spin_lock_irqsave(&sndev->db_mask_lock, irqflags);
-+
-+	sndev->db_mask &= ~(db_bits << sndev->db_shift);
-+	iowrite64(~sndev->db_mask, &sndev->mmio_self_dbmsg->idb_mask);
-+
-+	spin_unlock_irqrestore(&sndev->db_mask_lock, irqflags);
++	stdev->sndev = sndev;
++	dev_info(dev, "NTB device registered");
 +
 +	return 0;
 +}
 +
-+static u64 switchtec_ntb_db_read_mask(struct ntb_dev *ntb)
++void switchtec_ntb_remove(struct device *dev,
++			  struct class_interface *class_intf)
 +{
-+	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++	struct switchtec_dev *stdev = to_stdev(dev);
++	struct switchtec_ntb *sndev = stdev->sndev;
 +
-+	return (sndev->db_mask >> sndev->db_shift) & sndev->db_valid_mask;
++	if (!sndev)
++		return;
++
++	stdev->sndev = NULL;
++	kfree(sndev);
++	dev_info(dev, "ntb device unregistered");
 +}
 +
-+static int switchtec_ntb_peer_db_addr(struct ntb_dev *ntb,
-+				      phys_addr_t *db_addr,
-+				      resource_size_t *db_size)
++static struct class_interface switchtec_interface  = {
++	.add_dev = switchtec_ntb_add,
++	.remove_dev = switchtec_ntb_remove,
++};
++
++static int __init switchtec_ntb_init(void)
 +{
-+	struct switchtec_ntb *sndev = ntb_sndev(ntb);
-+	unsigned long offset;
++	switchtec_interface.class = switchtec_class;
++	return class_interface_register(&switchtec_interface);
++}
++module_init(switchtec_ntb_init);
 +
-+	offset = (unsigned long)sndev->mmio_self_dbmsg->odb -
-+		(unsigned long)sndev->stdev->mmio;
-+
-+	offset += sndev->db_shift / 8;
-+
-+	if (db_addr)
-+		*db_addr = pci_resource_start(ntb->pdev, 0) + offset;
-+	if (db_size)
-+		*db_size = sizeof(u32);
-+
- 	return 0;
- }
++static void __exit switchtec_ntb_exit(void)
++{
++	class_interface_unregister(&switchtec_interface);
++}
++module_exit(switchtec_ntb_exit);
+diff --git a/drivers/pci/switch/switchtec.c b/drivers/pci/switch/switchtec.c
+index 807569e62bee..58edc24ea381 100644
+--- a/drivers/pci/switch/switchtec.c
++++ b/drivers/pci/switch/switchtec.c
+@@ -1275,6 +1275,9 @@ static int switchtec_pci_probe(struct pci_dev *pdev,
+ 	struct switchtec_dev *stdev;
+ 	int rc;
  
- static int switchtec_ntb_peer_db_set(struct ntb_dev *ntb, u64 db_bits)
- {
-+	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++	if (pdev->class == MICROSEMI_NTB_CLASSCODE)
++		request_module_nowait("ntb_hw_switchtec");
 +
-+	iowrite64(db_bits << sndev->db_peer_shift,
-+		  &sndev->mmio_self_dbmsg->odb);
+ 	stdev = stdev_create(pdev);
+ 	if (IS_ERR(stdev))
+ 		return PTR_ERR(stdev);
+diff --git a/include/linux/switchtec.h b/include/linux/switchtec.h
+index d8159944f013..09d73d0d1aa8 100644
+--- a/include/linux/switchtec.h
++++ b/include/linux/switchtec.h
+@@ -320,6 +320,8 @@ struct pff_csr_regs {
+ 	u32 reserved4[174];
+ } __packed;
+ 
++struct switchtec_ntb;
 +
- 	return 0;
- }
- 
-@@ -413,6 +490,8 @@ static const struct ntb_dev_ops switchtec_ntb_ops = {
- 	.db_clear		= switchtec_ntb_db_clear,
- 	.db_set_mask		= switchtec_ntb_db_set_mask,
- 	.db_clear_mask		= switchtec_ntb_db_clear_mask,
-+	.db_read_mask		= switchtec_ntb_db_read_mask,
-+	.peer_db_addr		= switchtec_ntb_peer_db_addr,
- 	.peer_db_set		= switchtec_ntb_peer_db_set,
- 	.spad_count		= switchtec_ntb_spad_count,
- 	.spad_read		= switchtec_ntb_spad_read,
-@@ -685,6 +764,8 @@ static irqreturn_t switchtec_ntb_doorbell_isr(int irq, void *dev)
- 
- 	dev_dbg(&sndev->stdev->dev, "doorbell\n");
- 
-+	ntb_db_event(&sndev->ntb, 0);
+ struct switchtec_dev {
+ 	struct pci_dev *pdev;
+ 	struct device dev;
+@@ -357,6 +359,8 @@ struct switchtec_dev {
+ 	struct work_struct link_event_work;
+ 	void (*link_notifier)(struct switchtec_dev *stdev);
+ 	u8 link_event_count[SWITCHTEC_MAX_PFF_CSR];
 +
- 	return IRQ_HANDLED;
- }
++	struct switchtec_ntb *sndev;
+ };
  
+ static inline struct switchtec_dev *to_stdev(struct device *dev)
 -- 
 2.11.0
 
