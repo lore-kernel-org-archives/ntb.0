@@ -1,217 +1,240 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id d81si436286itc.4.2017.08.03.11.20.07
+        by gmr-mx.google.com with ESMTPS id 129si432281ith.2.2017.08.03.11.20.07
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 03 Aug 2017 11:20:07 -0700 (PDT)
+        Thu, 03 Aug 2017 11:20:08 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Thu,  3 Aug 2017 12:19:46 -0600
-Message-Id: <20170803181954.4154-8-logang@deltatee.com>
+Date: Thu,  3 Aug 2017 12:19:50 -0600
+Message-Id: <20170803181954.4154-12-logang@deltatee.com>
 In-Reply-To: <20170803181954.4154-1-logang@deltatee.com>
 References: <20170803181954.4154-1-logang@deltatee.com>
-Subject: [PATCH v4 07/15] NTB: switchtec_ntb: Introduce initial NTB driver
+Subject: [PATCH v4 11/15] NTB: switchtec_ntb: Add link management
 To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Seeing the Switchtec NTB hardware shares the same endpoint as the
-management endpoint we utilize the class_interface API to register
-an NTB driver for every Switchtec device in the system that has the
-NTB class code.
+switchtec_ntb checks for a link by looking at the shared memory
+window. If the magic number is correct and the other side indicates
+their link is enabled then we take the link to be up.
+
+Whenever we change our local link status we send a msg to the
+other side to check whether it's up and change their status.
+
+The current status is maintained in a flag so ntb_is_link_up
+can return quickly.
+
+We utilize Switchtec's link status notifier to also check link changes
+when the switch notices a port changes state.
 
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
 Reviewed-by: Stephen Bates <sbates@raithlin.com>
 Reviewed-by: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
 Acked-by: Allen Hubbe <Allen.Hubbe@dell.com>
 ---
- MAINTAINERS                            |  1 +
- drivers/ntb/hw/Kconfig                 |  1 +
- drivers/ntb/hw/Makefile                |  1 +
- drivers/ntb/hw/mscc/Kconfig            |  9 ++++
- drivers/ntb/hw/mscc/Makefile           |  1 +
- drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 81 ++++++++++++++++++++++++++++++++++
- drivers/pci/switch/switchtec.c         |  3 ++
- include/linux/switchtec.h              |  4 ++
- 8 files changed, 101 insertions(+)
- create mode 100644 drivers/ntb/hw/mscc/Kconfig
- create mode 100644 drivers/ntb/hw/mscc/Makefile
- create mode 100644 drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+ drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 130 ++++++++++++++++++++++++++++++++-
+ 1 file changed, 129 insertions(+), 1 deletion(-)
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 4ff2ad7c1c7b..6e491ce5e876 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -10147,6 +10147,7 @@ F:	Documentation/ABI/testing/sysfs-class-switchtec
- F:	drivers/pci/switch/switchtec*
- F:	include/uapi/linux/switchtec_ioctl.h
- F:	include/linux/switchtec.h
-+F:	drivers/ntb/hw/mscc/
- 
- PCI DRIVER FOR NVIDIA TEGRA
- M:	Thierry Reding <thierry.reding@gmail.com>
-diff --git a/drivers/ntb/hw/Kconfig b/drivers/ntb/hw/Kconfig
-index a89243c9fdd3..e51b581fd102 100644
---- a/drivers/ntb/hw/Kconfig
-+++ b/drivers/ntb/hw/Kconfig
-@@ -1,3 +1,4 @@
- source "drivers/ntb/hw/amd/Kconfig"
- source "drivers/ntb/hw/idt/Kconfig"
- source "drivers/ntb/hw/intel/Kconfig"
-+source "drivers/ntb/hw/mscc/Kconfig"
-diff --git a/drivers/ntb/hw/Makefile b/drivers/ntb/hw/Makefile
-index 87332c3905f0..923c442db750 100644
---- a/drivers/ntb/hw/Makefile
-+++ b/drivers/ntb/hw/Makefile
-@@ -1,3 +1,4 @@
- obj-$(CONFIG_NTB_AMD)	+= amd/
- obj-$(CONFIG_NTB_IDT)	+= idt/
- obj-$(CONFIG_NTB_INTEL)	+= intel/
-+obj-$(CONFIG_NTB_SWITCHTEC) += mscc/
-diff --git a/drivers/ntb/hw/mscc/Kconfig b/drivers/ntb/hw/mscc/Kconfig
-new file mode 100644
-index 000000000000..013ed6716438
---- /dev/null
-+++ b/drivers/ntb/hw/mscc/Kconfig
-@@ -0,0 +1,9 @@
-+config NTB_SWITCHTEC
-+	tristate "MicroSemi Switchtec Non-Transparent Bridge Support"
-+	select PCI_SW_SWITCHTEC
-+	help
-+	 Enables NTB support for Switchtec PCI switches. This also
-+	 selects the Switchtec management driver as they share the same
-+	 hardware interface.
-+
-+	 If unsure, say N.
-diff --git a/drivers/ntb/hw/mscc/Makefile b/drivers/ntb/hw/mscc/Makefile
-new file mode 100644
-index 000000000000..064686ead1ba
---- /dev/null
-+++ b/drivers/ntb/hw/mscc/Makefile
-@@ -0,0 +1 @@
-+obj-$(CONFIG_NTB_SWITCHTEC) += ntb_hw_switchtec.o
 diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-new file mode 100644
-index 000000000000..253efba72275
---- /dev/null
+index 158ed310cbaf..b477a8915245 100644
+--- a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
 +++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-@@ -0,0 +1,81 @@
-+/*
-+ * Microsemi Switchtec(tm) PCIe Management Driver
-+ * Copyright (c) 2017, Microsemi Corporation
-+ *
-+ * This program is free software; you can redistribute it and/or modify it
-+ * under the terms and conditions of the GNU General Public License,
-+ * version 2, as published by the Free Software Foundation.
-+ *
-+ * This program is distributed in the hope it will be useful, but WITHOUT
-+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-+ * more details.
-+ *
-+ */
+@@ -64,6 +64,7 @@ static inline void _iowrite64(u64 val, void __iomem *mmio)
+ 
+ struct shared_mw {
+ 	u32 magic;
++	u32 link_sta;
+ 	u32 partition_id;
+ 	u64 mw_sizes[MAX_MWS];
+ };
+@@ -104,8 +105,17 @@ struct switchtec_ntb {
+ 	int peer_nr_direct_mw;
+ 	int peer_nr_lut_mw;
+ 	int peer_direct_mw_to_bar[MAX_DIRECT_MW];
 +
-+#include <linux/switchtec.h>
-+#include <linux/module.h>
-+
-+MODULE_DESCRIPTION("Microsemi Switchtec(tm) NTB Driver");
-+MODULE_VERSION("0.1");
-+MODULE_LICENSE("GPL");
-+MODULE_AUTHOR("Microsemi Corporation");
-+
-+struct switchtec_ntb {
-+	struct switchtec_dev *stdev;
-+};
-+
-+static int switchtec_ntb_add(struct device *dev,
-+			     struct class_interface *class_intf)
++	bool link_is_up;
++	enum ntb_speed link_speed;
++	enum ntb_width link_width;
+ };
+ 
++static struct switchtec_ntb *ntb_sndev(struct ntb_dev *ntb)
 +{
-+	struct switchtec_dev *stdev = to_stdev(dev);
-+	struct switchtec_ntb *sndev;
++	return container_of(ntb, struct switchtec_ntb, ntb);
++}
 +
-+	stdev->sndev = NULL;
+ static int switchtec_ntb_part_op(struct switchtec_ntb *sndev,
+ 				 struct ntb_ctrl_regs __iomem *ctl,
+ 				 u32 op, int wait_status)
+@@ -163,6 +173,17 @@ static int switchtec_ntb_part_op(struct switchtec_ntb *sndev,
+ 	return -EIO;
+ }
+ 
++static int switchtec_ntb_send_msg(struct switchtec_ntb *sndev, int idx,
++				  u32 val)
++{
++	if (idx < 0 || idx >= ARRAY_SIZE(sndev->mmio_self_dbmsg->omsg))
++		return -EINVAL;
 +
-+	if (stdev->pdev->class != MICROSEMI_NTB_CLASSCODE)
-+		return -ENODEV;
-+
-+	sndev = kzalloc_node(sizeof(*sndev), GFP_KERNEL, dev_to_node(dev));
-+	if (!sndev)
-+		return -ENOMEM;
-+
-+	sndev->stdev = stdev;
-+
-+	stdev->sndev = sndev;
-+	dev_info(dev, "NTB device registered");
++	iowrite32(val, &sndev->mmio_self_dbmsg->omsg[idx].msg);
 +
 +	return 0;
 +}
 +
-+void switchtec_ntb_remove(struct device *dev,
-+			  struct class_interface *class_intf)
+ static int switchtec_ntb_mw_count(struct ntb_dev *ntb, int pidx)
+ {
+ 	return 0;
+@@ -194,22 +215,124 @@ static int switchtec_ntb_peer_mw_get_addr(struct ntb_dev *ntb, int idx,
+ 	return 0;
+ }
+ 
++static void switchtec_ntb_part_link_speed(struct switchtec_ntb *sndev,
++					  int partition,
++					  enum ntb_speed *speed,
++					  enum ntb_width *width)
 +{
-+	struct switchtec_dev *stdev = to_stdev(dev);
-+	struct switchtec_ntb *sndev = stdev->sndev;
++	struct switchtec_dev *stdev = sndev->stdev;
 +
-+	if (!sndev)
-+		return;
++	u32 pff = ioread32(&stdev->mmio_part_cfg[partition].vep_pff_inst_id);
++	u32 linksta = ioread32(&stdev->mmio_pff_csr[pff].pci_cap_region[13]);
 +
-+	stdev->sndev = NULL;
-+	kfree(sndev);
-+	dev_info(dev, "ntb device unregistered");
++	if (speed)
++		*speed = (linksta >> 16) & 0xF;
++
++	if (width)
++		*width = (linksta >> 20) & 0x3F;
 +}
 +
-+static struct class_interface switchtec_interface  = {
-+	.add_dev = switchtec_ntb_add,
-+	.remove_dev = switchtec_ntb_remove,
++static void switchtec_ntb_set_link_speed(struct switchtec_ntb *sndev)
++{
++	enum ntb_speed self_speed, peer_speed;
++	enum ntb_width self_width, peer_width;
++
++	if (!sndev->link_is_up) {
++		sndev->link_speed = NTB_SPEED_NONE;
++		sndev->link_width = NTB_WIDTH_NONE;
++		return;
++	}
++
++	switchtec_ntb_part_link_speed(sndev, sndev->self_partition,
++				      &self_speed, &self_width);
++	switchtec_ntb_part_link_speed(sndev, sndev->peer_partition,
++				      &peer_speed, &peer_width);
++
++	sndev->link_speed = min(self_speed, peer_speed);
++	sndev->link_width = min(self_width, peer_width);
++}
++
++enum {
++	LINK_MESSAGE = 0,
++	MSG_LINK_UP = 1,
++	MSG_LINK_DOWN = 2,
++	MSG_CHECK_LINK = 3,
 +};
 +
-+static int __init switchtec_ntb_init(void)
++static void switchtec_ntb_check_link(struct switchtec_ntb *sndev)
 +{
-+	switchtec_interface.class = switchtec_class;
-+	return class_interface_register(&switchtec_interface);
-+}
-+module_init(switchtec_ntb_init);
++	int link_sta;
++	int old = sndev->link_is_up;
 +
-+static void __exit switchtec_ntb_exit(void)
++	link_sta = sndev->self_shared->link_sta;
++	if (link_sta) {
++		u64 peer = ioread64(&sndev->peer_shared->magic);
++
++		if ((peer & 0xFFFFFFFF) == SWITCHTEC_NTB_MAGIC)
++			link_sta = peer >> 32;
++		else
++			link_sta = 0;
++	}
++
++	sndev->link_is_up = link_sta;
++	switchtec_ntb_set_link_speed(sndev);
++
++	if (link_sta != old) {
++		switchtec_ntb_send_msg(sndev, LINK_MESSAGE, MSG_CHECK_LINK);
++		ntb_link_event(&sndev->ntb);
++		dev_info(&sndev->stdev->dev, "ntb link %s",
++			 link_sta ? "up" : "down");
++	}
++}
++
++static void switchtec_ntb_link_notification(struct switchtec_dev *stdev)
 +{
-+	class_interface_unregister(&switchtec_interface);
++	struct switchtec_ntb *sndev = stdev->sndev;
++
++	switchtec_ntb_check_link(sndev);
 +}
-+module_exit(switchtec_ntb_exit);
-diff --git a/drivers/pci/switch/switchtec.c b/drivers/pci/switch/switchtec.c
-index 807569e62bee..58edc24ea381 100644
---- a/drivers/pci/switch/switchtec.c
-+++ b/drivers/pci/switch/switchtec.c
-@@ -1275,6 +1275,9 @@ static int switchtec_pci_probe(struct pci_dev *pdev,
- 	struct switchtec_dev *stdev;
- 	int rc;
- 
-+	if (pdev->class == MICROSEMI_NTB_CLASSCODE)
-+		request_module_nowait("ntb_hw_switchtec");
 +
- 	stdev = stdev_create(pdev);
- 	if (IS_ERR(stdev))
- 		return PTR_ERR(stdev);
-diff --git a/include/linux/switchtec.h b/include/linux/switchtec.h
-index d8159944f013..09d73d0d1aa8 100644
---- a/include/linux/switchtec.h
-+++ b/include/linux/switchtec.h
-@@ -320,6 +320,8 @@ struct pff_csr_regs {
- 	u32 reserved4[174];
- } __packed;
- 
-+struct switchtec_ntb;
+ static u64 switchtec_ntb_link_is_up(struct ntb_dev *ntb,
+ 				    enum ntb_speed *speed,
+ 				    enum ntb_width *width)
+ {
+-	return 0;
++	struct switchtec_ntb *sndev = ntb_sndev(ntb);
 +
- struct switchtec_dev {
- 	struct pci_dev *pdev;
- 	struct device dev;
-@@ -357,6 +359,8 @@ struct switchtec_dev {
- 	struct work_struct link_event_work;
- 	void (*link_notifier)(struct switchtec_dev *stdev);
- 	u8 link_event_count[SWITCHTEC_MAX_PFF_CSR];
++	if (speed)
++		*speed = sndev->link_speed;
++	if (width)
++		*width = sndev->link_width;
 +
-+	struct switchtec_ntb *sndev;
- };
++	return sndev->link_is_up;
+ }
  
- static inline struct switchtec_dev *to_stdev(struct device *dev)
+ static int switchtec_ntb_link_enable(struct ntb_dev *ntb,
+ 				     enum ntb_speed max_speed,
+ 				     enum ntb_width max_width)
+ {
++	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++
++	dev_dbg(&sndev->stdev->dev, "enabling link");
++
++	sndev->self_shared->link_sta = 1;
++	switchtec_ntb_send_msg(sndev, LINK_MESSAGE, MSG_LINK_UP);
++
++	switchtec_ntb_check_link(sndev);
++
+ 	return 0;
+ }
+ 
+ static int switchtec_ntb_link_disable(struct ntb_dev *ntb)
+ {
++	struct switchtec_ntb *sndev = ntb_sndev(ntb);
++
++	dev_dbg(&sndev->stdev->dev, "disabling link");
++
++	sndev->self_shared->link_sta = 0;
++	switchtec_ntb_send_msg(sndev, LINK_MESSAGE, MSG_LINK_UP);
++
++	switchtec_ntb_check_link(sndev);
++
+ 	return 0;
+ }
+ 
+@@ -577,6 +700,9 @@ static irqreturn_t switchtec_ntb_message_isr(int irq, void *dev)
+ 			dev_dbg(&sndev->stdev->dev, "message: %d %08x\n", i,
+ 				(u32)msg);
+ 			iowrite8(1, &sndev->mmio_self_dbmsg->imsg[i].status);
++
++			if (i == LINK_MESSAGE)
++				switchtec_ntb_check_link(sndev);
+ 		}
+ 	}
+ 
+@@ -679,6 +805,7 @@ static int switchtec_ntb_add(struct device *dev,
+ 		goto deinit_and_exit;
+ 
+ 	stdev->sndev = sndev;
++	stdev->link_notifier = switchtec_ntb_link_notification;
+ 	dev_info(dev, "NTB device registered");
+ 
+ 	return 0;
+@@ -702,6 +829,7 @@ void switchtec_ntb_remove(struct device *dev,
+ 	if (!sndev)
+ 		return;
+ 
++	stdev->link_notifier = NULL;
+ 	stdev->sndev = NULL;
+ 	ntb_unregister_device(&sndev->ntb);
+ 	switchtec_ntb_deinit_db_msg_irq(sndev);
 -- 
 2.11.0
 
