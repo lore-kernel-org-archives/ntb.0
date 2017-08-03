@@ -1,107 +1,112 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id c133si407240itb.7.2017.08.03.11.30.25
+        by gmr-mx.google.com with ESMTPS id u65si251308ith.9.2017.08.03.11.30.25
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 03 Aug 2017 11:30:26 -0700 (PDT)
+        Thu, 03 Aug 2017 11:30:25 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Thu,  3 Aug 2017 12:30:14 -0600
-Message-Id: <20170803183018.5889-4-logang@deltatee.com>
+Date: Thu,  3 Aug 2017 12:30:18 -0600
+Message-Id: <20170803183018.5889-8-logang@deltatee.com>
 In-Reply-To: <20170803183018.5889-1-logang@deltatee.com>
 References: <20170803183018.5889-1-logang@deltatee.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
-Subject: [PATCH v6 3/7] powerpc: iomap.c: introduce io{read|write}64_{lo_hi|hi_lo}
+Subject: [PATCH v6 7/7] crypto: caam: cleanup CONFIG_64BIT ifdefs when using io{read|write}64
 To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org
-Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Stephen Bates <sbates@raithlin.com>, Logan Gunthorpe <logang@deltatee.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>
+Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Stephen Bates <sbates@raithlin.com>, Logan Gunthorpe <logang@deltatee.com>, Dan Douglass <dan.douglass@nxp.com>, Herbert Xu <herbert@gondor.apana.org.au>, "David S. Miller" <davem@davemloft.net>
 List-ID: <linux-ntb.googlegroups.com>
 
-These functions will be introduced into the generic iomap.c so
-they can deal with PIO accesses in hi-lo/lo-hi variants. Thus,
-the powerpc version of iomap.c will need to provide the same
-functions even though, in this arch, they are identical to the
-regular io{read|write}64 functions.
+From: Horia Geantă <horia.geanta@nxp.com>
 
+We can now make use of the io-64-nonatomic-lo-hi header to always
+provide 64 bit IO operations. So this patch cleans up the extra
+CONFIG_64BIT ifdefs.
+
+To be consistent with CAAM engine HW spec: in case of 64-bit registers,
+irrespective of device endianness, the lower address should be read from
+/ written to first, followed by the upper address. Indeed the I/O
+accessors in CAAM driver currently don't follow the spec, however this
+is a good opportunity to fix the code.
+
+Signed-off-by: Horia Geantă <horia.geanta@nxp.com>
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Tested-by: Horia Geantă <horia.geanta@nxp.com>
-Cc: Benjamin Herrenschmidt <benh@kernel.crashing.org>
-Cc: Paul Mackerras <paulus@samba.org>
-Cc: Michael Ellerman <mpe@ellerman.id.au>
+Cc: Horia Geantă <horia.geanta@nxp.com>
+Cc: Dan Douglass <dan.douglass@nxp.com>
+Cc: Herbert Xu <herbert@gondor.apana.org.au>
+Cc: "David S. Miller" <davem@davemloft.net>
 ---
- arch/powerpc/kernel/iomap.c | 40 ++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 40 insertions(+)
+ drivers/crypto/caam/regs.h | 35 +++++------------------------------
+ 1 file changed, 5 insertions(+), 30 deletions(-)
 
-diff --git a/arch/powerpc/kernel/iomap.c b/arch/powerpc/kernel/iomap.c
-index a1854d1ded8b..b43dbadfd24f 100644
---- a/arch/powerpc/kernel/iomap.c
-+++ b/arch/powerpc/kernel/iomap.c
-@@ -44,12 +44,32 @@ u64 ioread64(void __iomem *addr)
- {
- 	return readq(addr);
- }
-+u64 ioread64_lo_hi(void __iomem *addr)
-+{
-+	return readq(addr);
-+}
-+u64 ioread64_hi_lo(void __iomem *addr)
-+{
-+	return readq(addr);
-+}
- u64 ioread64be(void __iomem *addr)
- {
- 	return readq_be(addr);
- }
-+u64 ioread64be_lo_hi(void __iomem *addr)
-+{
-+	return readq_be(addr);
-+}
-+u64 ioread64be_hi_lo(void __iomem *addr)
-+{
-+	return readq_be(addr);
-+}
- EXPORT_SYMBOL(ioread64);
-+EXPORT_SYMBOL(ioread64_lo_hi);
-+EXPORT_SYMBOL(ioread64_hi_lo);
- EXPORT_SYMBOL(ioread64be);
-+EXPORT_SYMBOL(ioread64be_lo_hi);
-+EXPORT_SYMBOL(ioread64be_hi_lo);
- #endif /* __powerpc64__ */
+diff --git a/drivers/crypto/caam/regs.h b/drivers/crypto/caam/regs.h
+index 84d2f838a063..0c45505458e7 100644
+--- a/drivers/crypto/caam/regs.h
++++ b/drivers/crypto/caam/regs.h
+@@ -9,7 +9,7 @@
  
- void iowrite8(u8 val, void __iomem *addr)
-@@ -82,12 +102,32 @@ void iowrite64(u64 val, void __iomem *addr)
- {
- 	writeq(val, addr);
- }
-+void iowrite64_lo_hi(u64 val, void __iomem *addr)
-+{
-+	writeq(val, addr);
-+}
-+void iowrite64_hi_lo(u64 val, void __iomem *addr)
-+{
-+	writeq(val, addr);
-+}
- void iowrite64be(u64 val, void __iomem *addr)
- {
- 	writeq_be(val, addr);
- }
-+void iowrite64be_lo_hi(u64 val, void __iomem *addr)
-+{
-+	writeq_be(val, addr);
-+}
-+void iowrite64be_hi_lo(u64 val, void __iomem *addr)
-+{
-+	writeq_be(val, addr);
-+}
- EXPORT_SYMBOL(iowrite64);
-+EXPORT_SYMBOL(iowrite64_lo_hi);
-+EXPORT_SYMBOL(iowrite64_hi_lo);
- EXPORT_SYMBOL(iowrite64be);
-+EXPORT_SYMBOL(iowrite64be_lo_hi);
-+EXPORT_SYMBOL(iowrite64be_hi_lo);
- #endif /* __powerpc64__ */
+ #include <linux/types.h>
+ #include <linux/bitops.h>
+-#include <linux/io.h>
++#include <linux/io-64-nonatomic-lo-hi.h>
  
  /*
+  * Architecture-specific register access methods
+@@ -134,50 +134,25 @@ static inline void clrsetbits_32(void __iomem *reg, u32 clear, u32 set)
+  *    base + 0x0000 : least-significant 32 bits
+  *    base + 0x0004 : most-significant 32 bits
+  */
+-#ifdef CONFIG_64BIT
+ static inline void wr_reg64(void __iomem *reg, u64 data)
+ {
++#ifndef CONFIG_CRYPTO_DEV_FSL_CAAM_IMX
+ 	if (caam_little_end)
+ 		iowrite64(data, reg);
+ 	else
+-		iowrite64be(data, reg);
+-}
+-
+-static inline u64 rd_reg64(void __iomem *reg)
+-{
+-	if (caam_little_end)
+-		return ioread64(reg);
+-	else
+-		return ioread64be(reg);
+-}
+-
+-#else /* CONFIG_64BIT */
+-static inline void wr_reg64(void __iomem *reg, u64 data)
+-{
+-#ifndef CONFIG_CRYPTO_DEV_FSL_CAAM_IMX
+-	if (caam_little_end) {
+-		wr_reg32((u32 __iomem *)(reg) + 1, data >> 32);
+-		wr_reg32((u32 __iomem *)(reg), data);
+-	} else
+ #endif
+-	{
+-		wr_reg32((u32 __iomem *)(reg), data >> 32);
+-		wr_reg32((u32 __iomem *)(reg) + 1, data);
+-	}
++		iowrite64be(data, reg);
+ }
+ 
+ static inline u64 rd_reg64(void __iomem *reg)
+ {
+ #ifndef CONFIG_CRYPTO_DEV_FSL_CAAM_IMX
+ 	if (caam_little_end)
+-		return ((u64)rd_reg32((u32 __iomem *)(reg) + 1) << 32 |
+-			(u64)rd_reg32((u32 __iomem *)(reg)));
++		return ioread64(reg);
+ 	else
+ #endif
+-		return ((u64)rd_reg32((u32 __iomem *)(reg)) << 32 |
+-			(u64)rd_reg32((u32 __iomem *)(reg) + 1));
++		return ioread64be(reg);
+ }
+-#endif /* CONFIG_64BIT  */
+ 
+ #ifdef CONFIG_ARCH_DMA_ADDR_T_64BIT
+ #ifdef CONFIG_SOC_IMX7D
 -- 
 2.11.0
 
