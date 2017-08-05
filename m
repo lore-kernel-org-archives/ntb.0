@@ -1,79 +1,62 @@
-Return-Path: <gunthorp@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id r76si134343itc.3.2017.08.22.10.02.47
+Return-Path: <jsarha@ti.com>
+Received: from lelnx193.ext.ti.com (lelnx193.ext.ti.com. [198.47.27.77])
+        by gmr-mx.google.com with ESMTPS id u5si169193itd.8.2017.08.05.06.30.53
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Tue, 22 Aug 2017 10:02:48 -0700 (PDT)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Tue, 22 Aug 2017 11:02:27 -0600
-Message-Id: <20170822170228.17196-7-logang@deltatee.com>
-In-Reply-To: <20170822170228.17196-1-logang@deltatee.com>
-References: <20170822170228.17196-1-logang@deltatee.com>
-Subject: [PATCH v7 6/7] ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
-To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org
-Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Stephen Bates <sbates@raithlin.com>, Logan Gunthorpe <logang@deltatee.com>
+        (version=TLS1 cipher=AES128-SHA bits=128/128);
+        Sat, 05 Aug 2017 06:30:54 -0700 (PDT)
+Subject: Re: [PATCH v6 1/7] drm/tilcdc: ensure nonatomic iowrite64 is not used
+References: <20170803183018.5889-1-logang@deltatee.com>
+ <20170803183018.5889-2-logang@deltatee.com>
+ <2b41b02c-07e3-b927-f276-a29480f94285@ti.com>
+From: Jyri Sarha <jsarha@ti.com>
+Message-ID: <cf74e6d6-5028-6d1b-a014-2617b9102a78@ti.com>
+Date: Sat, 5 Aug 2017 16:30:35 +0300
+MIME-Version: 1.0
+In-Reply-To: <2b41b02c-07e3-b927-f276-a29480f94285@ti.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-GB
+Content-Transfer-Encoding: 7bit
+To: Tomi Valkeinen <tomi.valkeinen@ti.com>, Logan Gunthorpe <logang@deltatee.com>, linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org
+Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?Q?Horia_Geant=c4=83?= <horia.geanta@nxp.com>, Stephen Bates <sbates@raithlin.com>, David Airlie <airlied@linux.ie>
 List-ID: <linux-ntb.googlegroups.com>
 
-Now that ioread64 and iowrite64 are available in io-64-nonatomic,
-we can remove the hack at the top of ntb_hw_intel.c and replace it
-with an include.
+On 08/04/17 16:03, Tomi Valkeinen wrote:
+> On 03/08/17 21:30, Logan Gunthorpe wrote:
+>> Add a check to ensure iowrite64 is only used if it is atomic.
+>>
+>> It was decided in [1] that the tilcdc driver should not be using an
+>> atomic operation (so it was left out of this patchset). However, it turns
+>> out that through the drm code, a nonatomic header is actually included:
+>>
+>> include/linux/io-64-nonatomic-lo-hi.h
+>> is included from include/drm/drm_os_linux.h:9:0,
+>>             from include/drm/drmP.h:74,
+>>             from include/drm/drm_modeset_helper.h:26,
+>>             from include/drm/drm_atomic_helper.h:33,
+>>             from drivers/gpu/drm/tilcdc/tilcdc_crtc.c:19:
+>>
+>> And thus, without this change, this patchset would inadvertantly
+>> change the behaviour of the tilcdc driver.
+> 
+> I haven't really followed the discussion on this, but if the tilcdc's
+> use of iowrite64 causes (real) problems/complications elsewhere, I think
+> we could drop it.
+> 
+> The problem is that the HW has a race issue, and the two registers in
+> question should be written as close to each other as possible. We
+> thought a single 64bit write, writing to both registers in one go, would
+> improve that slightly, compared to two 32 bit writes.
+> 
+> Jyri, correct me if I'm wrong, but we have no proof that it actually
+> helps, and it might be that even if it helps, the difference is
+> theoretical. Probably if we ensure the irqs are off when we do two 32
+> bit writes, we're already close enough to the optimal case.
+> 
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Acked-by: Dave Jiang <dave.jiang@intel.com>
-Acked-by: Allen Hubbe <Allen.Hubbe@dell.com>
-Acked-by: Jon Mason <jdmason@kudzu.us>
----
- drivers/ntb/hw/intel/ntb_hw_intel.c | 30 +-----------------------------
- 1 file changed, 1 insertion(+), 29 deletions(-)
+For the sake of this particular case you are right, the atomicity is
+probably not that important here. But in general ARM7 has an atomic
+64bit write and I think it is a shame if it can not be easily used in
+linux kernel.
 
-diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c b/drivers/ntb/hw/intel/ntb_hw_intel.c
-index 2557e2c05b90..606c90f59d4b 100644
---- a/drivers/ntb/hw/intel/ntb_hw_intel.c
-+++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
-@@ -59,6 +59,7 @@
- #include <linux/random.h>
- #include <linux/slab.h>
- #include <linux/ntb.h>
-+#include <linux/io-64-nonatomic-lo-hi.h>
- 
- #include "ntb_hw_intel.h"
- 
-@@ -155,35 +156,6 @@ MODULE_PARM_DESC(xeon_b2b_dsd_bar5_addr32,
- static inline enum ntb_topo xeon_ppd_topo(struct intel_ntb_dev *ndev, u8 ppd);
- static int xeon_init_isr(struct intel_ntb_dev *ndev);
- 
--#ifndef ioread64
--#ifdef readq
--#define ioread64 readq
--#else
--#define ioread64 _ioread64
--static inline u64 _ioread64(void __iomem *mmio)
--{
--	u64 low, high;
--
--	low = ioread32(mmio);
--	high = ioread32(mmio + sizeof(u32));
--	return low | (high << 32);
--}
--#endif
--#endif
--
--#ifndef iowrite64
--#ifdef writeq
--#define iowrite64 writeq
--#else
--#define iowrite64 _iowrite64
--static inline void _iowrite64(u64 val, void __iomem *mmio)
--{
--	iowrite32(val, mmio);
--	iowrite32(val >> 32, mmio + sizeof(u32));
--}
--#endif
--#endif
--
- static inline int pdev_is_atom(struct pci_dev *pdev)
- {
- 	switch (pdev->device) {
--- 
-2.11.0
-
+Best regards,
+Jyri
