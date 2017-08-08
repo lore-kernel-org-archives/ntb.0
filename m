@@ -1,47 +1,203 @@
-Return-Path: <logang@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id 64si61049ith.7.2017.08.08.10.33.03
+Return-Path: <fancer.lancer@gmail.com>
+Received: from mail-lf0-x241.google.com (mail-lf0-x241.google.com. [2a00:1450:4010:c07::241])
+        by gmr-mx.google.com with ESMTPS id x7si325977wmf.8.2017.08.08.03.10.49
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 08 Aug 2017 10:33:03 -0700 (PDT)
-References: <20170808101047.24518-1-fancer.lancer@gmail.com>
-From: Logan Gunthorpe <logang@deltatee.com>
-Message-ID: <8fb6cd0d-65e7-8c63-2dc0-8f5190f05b52@deltatee.com>
-Date: Tue, 8 Aug 2017 11:32:56 -0600
-MIME-Version: 1.0
-In-Reply-To: <20170808101047.24518-1-fancer.lancer@gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-Subject: Re: [PATCH] NTB: Rename NTB messaging API methods
-To: Serge Semin <fancer.lancer@gmail.com>, jdmason@kudzu.us, dave.jiang@intel.com, Allen.Hubbe@emc.com, Shyam-sundar.S-k@amd.com, Xiangliang.Yu@amd.com, gary.hook@amd.com
-Cc: Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
+        Tue, 08 Aug 2017 03:10:49 -0700 (PDT)
+Received: by mail-lf0-x241.google.com with SMTP id o85so2071565lff.1
+        for <linux-ntb@googlegroups.com>; Tue, 08 Aug 2017 03:10:49 -0700 (PDT)
+Return-Path: <fancer.lancer@gmail.com>
+From: Serge Semin <fancer.lancer@gmail.com>
+Subject: [PATCH] NTB: Rename NTB messaging API methods
+Date: Tue,  8 Aug 2017 13:10:47 +0300
+Message-Id: <20170808101047.24518-1-fancer.lancer@gmail.com>
+To: jdmason@kudzu.us, dave.jiang@intel.com, Allen.Hubbe@emc.com, Shyam-sundar.S-k@amd.com, Xiangliang.Yu@amd.com, gary.hook@amd.com, logang@deltatee.com
+Cc: Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Serge Semin <fancer.lancer@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
+There is a common methods signature form used over all the NTB API
+like functions naming scheme, arguments names and order, etc.
+Recently added NTB messaging API IO callbacks were named a bit
+different so should be renamed to be in compliance with the rest
+of the API.
 
+Signed-off-by: Serge Semin <fancer.lancer@gmail.com>
+---
+ drivers/ntb/hw/idt/ntb_hw_idt.c | 27 ++++++++++++---------------
+ include/linux/ntb.h             | 34 ++++++++++++++++------------------
+ 2 files changed, 28 insertions(+), 33 deletions(-)
 
-On 08/08/17 04:10 AM, Serge Semin wrote:
-> There is a common methods signature form used over all the NTB API
-> like functions naming scheme, arguments names and order, etc.
-> Recently added NTB messaging API IO callbacks were named a bit
-> different so should be renamed to be in compliance with the rest
-> of the API.
+diff --git a/drivers/ntb/hw/idt/ntb_hw_idt.c b/drivers/ntb/hw/idt/ntb_hw_idt.c
+index d44d7ef38fe8..4c9ea7ef8f50 100644
+--- a/drivers/ntb/hw/idt/ntb_hw_idt.c
++++ b/drivers/ntb/hw/idt/ntb_hw_idt.c
+@@ -1744,20 +1744,19 @@ static int idt_ntb_msg_clear_mask(struct ntb_dev *ntb, u64 mask_bits)
+  * idt_ntb_msg_read() - read message register with specified index
+  *			(NTB API callback)
+  * @ntb:	NTB device context.
+- * @midx:	Message register index
+  * @pidx:	OUT - Port index of peer device a message retrieved from
+- * @msg:	OUT - Data
++ * @midx:	Message register index
+  *
+  * Read data from the specified message register and source register.
+  *
+- * Return: zero on success, negative error if invalid argument passed.
++ * Return: inbound message register value.
+  */
+-static int idt_ntb_msg_read(struct ntb_dev *ntb, int midx, int *pidx, u32 *msg)
++static u32 idt_ntb_msg_read(struct ntb_dev *ntb, int *pidx, int midx)
+ {
+ 	struct idt_ntb_dev *ndev = to_ndev_ntb(ntb);
+ 
+ 	if (midx < 0 || IDT_MSG_CNT <= midx)
+-		return -EINVAL;
++		return (u32)-1;
+ 
+ 	/* Retrieve source port index of the message */
+ 	if (pidx != NULL) {
+@@ -1772,18 +1771,15 @@ static int idt_ntb_msg_read(struct ntb_dev *ntb, int midx, int *pidx, u32 *msg)
+ 	}
+ 
+ 	/* Retrieve data of the corresponding message register */
+-	if (msg != NULL)
+-		*msg = idt_nt_read(ndev, ntdata_tbl.msgs[midx].in);
+-
+-	return 0;
++	return idt_nt_read(ndev, ntdata_tbl.msgs[midx].in);
+ }
+ 
+ /*
+- * idt_ntb_msg_write() - write data to the specified message register
+- *			 (NTB API callback)
++ * idt_ntb_peer_msg_write() - write data to the specified message register
++ *			      (NTB API callback)
+  * @ntb:	NTB device context.
+- * @midx:	Message register index
+  * @pidx:	Port index of peer device a message being sent to
++ * @midx:	Message register index
+  * @msg:	Data to send
+  *
+  * Just try to send data to a peer. Message status register should be
+@@ -1791,7 +1787,8 @@ static int idt_ntb_msg_read(struct ntb_dev *ntb, int midx, int *pidx, u32 *msg)
+  *
+  * Return: zero on success, negative error if invalid argument passed.
+  */
+-static int idt_ntb_msg_write(struct ntb_dev *ntb, int midx, int pidx, u32 msg)
++static int idt_ntb_peer_msg_write(struct ntb_dev *ntb, int pidx, int midx,
++				  u32 msg)
+ {
+ 	struct idt_ntb_dev *ndev = to_ndev_ntb(ntb);
+ 	unsigned long irqflags;
+@@ -2058,7 +2055,7 @@ static const struct ntb_dev_ops idt_ntb_ops = {
+ 	.msg_set_mask		= idt_ntb_msg_set_mask,
+ 	.msg_clear_mask		= idt_ntb_msg_clear_mask,
+ 	.msg_read		= idt_ntb_msg_read,
+-	.msg_write		= idt_ntb_msg_write
++	.peer_msg_write		= idt_ntb_peer_msg_write
+ };
+ 
+ /*
+@@ -2269,7 +2266,7 @@ static ssize_t idt_dbgfs_info_read(struct file *filp, char __user *ubuf,
+ 		 "Message data:\n");
+ 	for (idx = 0; idx < IDT_MSG_CNT; idx++) {
+ 		int src;
+-		(void)idt_ntb_msg_read(&ndev->ntb, idx, &src, &data);
++		data = idt_ntb_msg_read(&ndev->ntb, &src, idx);
+ 		off += scnprintf(strbuf + off, size - off,
+ 			"\t%hhu. 0x%08x from peer %hhu (Port %hhu)\n",
+ 			idx, data, src, ndev->peers[src].port);
+diff --git a/include/linux/ntb.h b/include/linux/ntb.h
+index 609e232c00da..20c6ce4c45e1 100644
+--- a/include/linux/ntb.h
++++ b/include/linux/ntb.h
+@@ -247,7 +247,7 @@ static inline int ntb_ctx_ops_is_valid(const struct ntb_ctx_ops *ops)
+  * @msg_set_mask:	See ntb_msg_set_mask().
+  * @msg_clear_mask:	See ntb_msg_clear_mask().
+  * @msg_read:		See ntb_msg_read().
+- * @msg_write:		See ntb_msg_write().
++ * @msg_peer_write:	See ntb_peer_msg_write().
+  */
+ struct ntb_dev_ops {
+ 	int (*port_number)(struct ntb_dev *ntb);
+@@ -318,8 +318,8 @@ struct ntb_dev_ops {
+ 	int (*msg_clear_sts)(struct ntb_dev *ntb, u64 sts_bits);
+ 	int (*msg_set_mask)(struct ntb_dev *ntb, u64 mask_bits);
+ 	int (*msg_clear_mask)(struct ntb_dev *ntb, u64 mask_bits);
+-	int (*msg_read)(struct ntb_dev *ntb, int midx, int *pidx, u32 *msg);
+-	int (*msg_write)(struct ntb_dev *ntb, int midx, int pidx, u32 msg);
++	u32 (*msg_read)(struct ntb_dev *ntb, int *pidx, int midx);
++	int (*peer_msg_write)(struct ntb_dev *ntb, int pidx, int midx, u32 msg);
+ };
+ 
+ static inline int ntb_dev_ops_is_valid(const struct ntb_dev_ops *ops)
+@@ -381,7 +381,7 @@ static inline int ntb_dev_ops_is_valid(const struct ntb_dev_ops *ops)
+ 		/* !ops->msg_set_mask == !ops->msg_count	&& */
+ 		/* !ops->msg_clear_mask == !ops->msg_count	&& */
+ 		!ops->msg_read == !ops->msg_count		&&
+-		!ops->msg_write == !ops->msg_count		&&
++		!ops->peer_msg_write == !ops->msg_count		&&
+ 		1;
+ }
+ 
+@@ -1452,31 +1452,29 @@ static inline int ntb_msg_clear_mask(struct ntb_dev *ntb, u64 mask_bits)
+ }
+ 
+ /**
+- * ntb_msg_read() - read message register with specified index
++ * ntb_msg_read() - read inbound message register with specified index
+  * @ntb:	NTB device context.
+- * @midx:	Message register index
+  * @pidx:	OUT - Port index of peer device a message retrieved from
+- * @msg:	OUT - Data
++ * @midx:	Message register index
+  *
+  * Read data from the specified message register. Source port index of a
+  * message is retrieved as well.
+  *
+- * Return: Zero on success, otherwise a negative error number.
++ * Return: The value of the inbound message register.
+  */
+-static inline int ntb_msg_read(struct ntb_dev *ntb, int midx, int *pidx,
+-			       u32 *msg)
++static inline u32 ntb_msg_read(struct ntb_dev *ntb, int *pidx, int midx)
+ {
+ 	if (!ntb->ops->msg_read)
+-		return -EINVAL;
++		return ~(u32)0;
+ 
+-	return ntb->ops->msg_read(ntb, midx, pidx, msg);
++	return ntb->ops->msg_read(ntb, pidx, midx);
+ }
+ 
+ /**
+- * ntb_msg_write() - write data to the specified message register
++ * ntb_peer_msg_write() - write data to the specified peer message register
+  * @ntb:	NTB device context.
+- * @midx:	Message register index
+  * @pidx:	Port index of peer device a message being sent to
++ * @midx:	Message register index
+  * @msg:	Data to send
+  *
+  * Send data to a specified peer device using the defined message register.
+@@ -1485,13 +1483,13 @@ static inline int ntb_msg_read(struct ntb_dev *ntb, int midx, int *pidx,
+  *
+  * Return: Zero on success, otherwise a negative error number.
+  */
+-static inline int ntb_msg_write(struct ntb_dev *ntb, int midx, int pidx,
+-				u32 msg)
++static inline int ntb_peer_msg_write(struct ntb_dev *ntb, int pidx, int midx,
++				     u32 msg)
+ {
+-	if (!ntb->ops->msg_write)
++	if (!ntb->ops->peer_msg_write)
+ 		return -EINVAL;
+ 
+-	return ntb->ops->msg_write(ntb, midx, pidx, msg);
++	return ntb->ops->peer_msg_write(ntb, pidx, midx, msg);
+ }
+ 
+ #endif
+-- 
+2.12.0
 
-This could describe the actual change(s) a bit better and
-justifications. What is this common method signature and why do we
-actually want to make these changes?
-
-> -static inline int ntb_msg_read(struct ntb_dev *ntb, int midx, int *pidx,
-> -			       u32 *msg)
-> +static inline u32 ntb_msg_read(struct ntb_dev *ntb, int *pidx, int midx)
->  {
->  	if (!ntb->ops->msg_read)
-> -		return -EINVAL;
-> +		return ~(u32)0;
-
-I don't like this change at all. It makes error handling impossible to
-do correctly because the msg returned could easily be zero or -1. The
-way you had it originally is much better. Also, dropping the standard
-kernel error codes for 0 and -1 don't seem useful.
-
-Logan
