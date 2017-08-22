@@ -1,227 +1,140 @@
-Return-Path: <helgaas@kernel.org>
-Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id c137si152458ith.4.2017.08.22.12.06.24
+Return-Path: <logang@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id c133si527358itb.7.2017.08.22.09.59.16
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 22 Aug 2017 12:06:24 -0700 (PDT)
-Date: Tue, 22 Aug 2017 14:06:22 -0500
-From: Bjorn Helgaas <helgaas@kernel.org>
-Subject: Re: [PATCH v4 07/15] NTB: switchtec_ntb: Introduce initial NTB driver
-Message-ID: <20170822190622.GC6948@bhelgaas-glaptop.roam.corp.google.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Tue, 22 Aug 2017 09:59:16 -0700 (PDT)
 References: <20170803181954.4154-1-logang@deltatee.com>
- <20170803181954.4154-8-logang@deltatee.com>
+From: Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <58ab6a33-4de5-8fd8-65c2-079f6f6301c4@deltatee.com>
+Date: Tue, 22 Aug 2017 10:59:04 -0600
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170803181954.4154-8-logang@deltatee.com>
-To: Logan Gunthorpe <logang@deltatee.com>
-Cc: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>
+In-Reply-To: <20170803181954.4154-1-logang@deltatee.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH v4 00/15] Switchtec NTB Support
+To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Thu, Aug 03, 2017 at 12:19:46PM -0600, Logan Gunthorpe wrote:
-> Seeing the Switchtec NTB hardware shares the same endpoint as the
-> management endpoint we utilize the class_interface API to register
-> an NTB driver for every Switchtec device in the system that has the
-> NTB class code.
+Hi,
+
+Just wanted to give this a poke as I haven't received any feedback in a 
+couple weeks on v4. What are people's thoughts on this? Is it suitable 
+to make it into the next merge window?
+
+Thanks,
+
+Logan
+
+
+On 03/08/17 12:19 PM, Logan Gunthorpe wrote:
+> Changes since v3:
 > 
-> Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-> Reviewed-by: Stephen Bates <sbates@raithlin.com>
-> Reviewed-by: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
-> Acked-by: Allen Hubbe <Allen.Hubbe@dell.com>
-
-FWIW, since this trivially touches drivers/pci,
-
-Acked-by: Bjorn Helgaas <bhelgaas@google.com>
-
-> ---
->  MAINTAINERS                            |  1 +
->  drivers/ntb/hw/Kconfig                 |  1 +
->  drivers/ntb/hw/Makefile                |  1 +
->  drivers/ntb/hw/mscc/Kconfig            |  9 ++++
->  drivers/ntb/hw/mscc/Makefile           |  1 +
->  drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 81 ++++++++++++++++++++++++++++++++++
->  drivers/pci/switch/switchtec.c         |  3 ++
->  include/linux/switchtec.h              |  4 ++
->  8 files changed, 101 insertions(+)
->  create mode 100644 drivers/ntb/hw/mscc/Kconfig
->  create mode 100644 drivers/ntb/hw/mscc/Makefile
->  create mode 100644 drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+> - Rebased onto the Jon's ntb branch that contains one of the patches
+>    that was in v3
+> - Various spelling and commit log mistakes noticed by Bjorn
+> - Renamed switchtec_ntb to ntb_hw_switchtec per Dave's suggestion
+> - Fixed a number of code nits pointed out by Jon
 > 
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 4ff2ad7c1c7b..6e491ce5e876 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -10147,6 +10147,7 @@ F:	Documentation/ABI/testing/sysfs-class-switchtec
->  F:	drivers/pci/switch/switchtec*
->  F:	include/uapi/linux/switchtec_ioctl.h
->  F:	include/linux/switchtec.h
-> +F:	drivers/ntb/hw/mscc/
->  
->  PCI DRIVER FOR NVIDIA TEGRA
->  M:	Thierry Reding <thierry.reding@gmail.com>
-> diff --git a/drivers/ntb/hw/Kconfig b/drivers/ntb/hw/Kconfig
-> index a89243c9fdd3..e51b581fd102 100644
-> --- a/drivers/ntb/hw/Kconfig
-> +++ b/drivers/ntb/hw/Kconfig
-> @@ -1,3 +1,4 @@
->  source "drivers/ntb/hw/amd/Kconfig"
->  source "drivers/ntb/hw/idt/Kconfig"
->  source "drivers/ntb/hw/intel/Kconfig"
-> +source "drivers/ntb/hw/mscc/Kconfig"
-> diff --git a/drivers/ntb/hw/Makefile b/drivers/ntb/hw/Makefile
-> index 87332c3905f0..923c442db750 100644
-> --- a/drivers/ntb/hw/Makefile
-> +++ b/drivers/ntb/hw/Makefile
-> @@ -1,3 +1,4 @@
->  obj-$(CONFIG_NTB_AMD)	+= amd/
->  obj-$(CONFIG_NTB_IDT)	+= idt/
->  obj-$(CONFIG_NTB_INTEL)	+= intel/
-> +obj-$(CONFIG_NTB_SWITCHTEC) += mscc/
-> diff --git a/drivers/ntb/hw/mscc/Kconfig b/drivers/ntb/hw/mscc/Kconfig
-> new file mode 100644
-> index 000000000000..013ed6716438
-> --- /dev/null
-> +++ b/drivers/ntb/hw/mscc/Kconfig
-> @@ -0,0 +1,9 @@
-> +config NTB_SWITCHTEC
-> +	tristate "MicroSemi Switchtec Non-Transparent Bridge Support"
-> +	select PCI_SW_SWITCHTEC
-> +	help
-> +	 Enables NTB support for Switchtec PCI switches. This also
-> +	 selects the Switchtec management driver as they share the same
-> +	 hardware interface.
-> +
-> +	 If unsure, say N.
-> diff --git a/drivers/ntb/hw/mscc/Makefile b/drivers/ntb/hw/mscc/Makefile
-> new file mode 100644
-> index 000000000000..064686ead1ba
-> --- /dev/null
-> +++ b/drivers/ntb/hw/mscc/Makefile
-> @@ -0,0 +1 @@
-> +obj-$(CONFIG_NTB_SWITCHTEC) += ntb_hw_switchtec.o
-> diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-> new file mode 100644
-> index 000000000000..253efba72275
-> --- /dev/null
-> +++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-> @@ -0,0 +1,81 @@
-> +/*
-> + * Microsemi Switchtec(tm) PCIe Management Driver
-> + * Copyright (c) 2017, Microsemi Corporation
-> + *
-> + * This program is free software; you can redistribute it and/or modify it
-> + * under the terms and conditions of the GNU General Public License,
-> + * version 2, as published by the Free Software Foundation.
-> + *
-> + * This program is distributed in the hope it will be useful, but WITHOUT
-> + * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-> + * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-> + * more details.
-> + *
-> + */
-> +
-> +#include <linux/switchtec.h>
-> +#include <linux/module.h>
-> +
-> +MODULE_DESCRIPTION("Microsemi Switchtec(tm) NTB Driver");
-> +MODULE_VERSION("0.1");
-> +MODULE_LICENSE("GPL");
-> +MODULE_AUTHOR("Microsemi Corporation");
-> +
-> +struct switchtec_ntb {
-> +	struct switchtec_dev *stdev;
-> +};
-> +
-> +static int switchtec_ntb_add(struct device *dev,
-> +			     struct class_interface *class_intf)
-> +{
-> +	struct switchtec_dev *stdev = to_stdev(dev);
-> +	struct switchtec_ntb *sndev;
-> +
-> +	stdev->sndev = NULL;
-> +
-> +	if (stdev->pdev->class != MICROSEMI_NTB_CLASSCODE)
-> +		return -ENODEV;
-> +
-> +	sndev = kzalloc_node(sizeof(*sndev), GFP_KERNEL, dev_to_node(dev));
-> +	if (!sndev)
-> +		return -ENOMEM;
-> +
-> +	sndev->stdev = stdev;
-> +
-> +	stdev->sndev = sndev;
-> +	dev_info(dev, "NTB device registered");
-> +
-> +	return 0;
-> +}
-> +
-> +void switchtec_ntb_remove(struct device *dev,
-> +			  struct class_interface *class_intf)
-> +{
-> +	struct switchtec_dev *stdev = to_stdev(dev);
-> +	struct switchtec_ntb *sndev = stdev->sndev;
-> +
-> +	if (!sndev)
-> +		return;
-> +
-> +	stdev->sndev = NULL;
-> +	kfree(sndev);
-> +	dev_info(dev, "ntb device unregistered");
-> +}
-> +
-> +static struct class_interface switchtec_interface  = {
-> +	.add_dev = switchtec_ntb_add,
-> +	.remove_dev = switchtec_ntb_remove,
-> +};
-> +
-> +static int __init switchtec_ntb_init(void)
-> +{
-> +	switchtec_interface.class = switchtec_class;
-> +	return class_interface_register(&switchtec_interface);
-> +}
-> +module_init(switchtec_ntb_init);
-> +
-> +static void __exit switchtec_ntb_exit(void)
-> +{
-> +	class_interface_unregister(&switchtec_interface);
-> +}
-> +module_exit(switchtec_ntb_exit);
-> diff --git a/drivers/pci/switch/switchtec.c b/drivers/pci/switch/switchtec.c
-> index 807569e62bee..58edc24ea381 100644
-> --- a/drivers/pci/switch/switchtec.c
-> +++ b/drivers/pci/switch/switchtec.c
-> @@ -1275,6 +1275,9 @@ static int switchtec_pci_probe(struct pci_dev *pdev,
->  	struct switchtec_dev *stdev;
->  	int rc;
->  
-> +	if (pdev->class == MICROSEMI_NTB_CLASSCODE)
-> +		request_module_nowait("ntb_hw_switchtec");
-> +
->  	stdev = stdev_create(pdev);
->  	if (IS_ERR(stdev))
->  		return PTR_ERR(stdev);
-> diff --git a/include/linux/switchtec.h b/include/linux/switchtec.h
-> index d8159944f013..09d73d0d1aa8 100644
-> --- a/include/linux/switchtec.h
-> +++ b/include/linux/switchtec.h
-> @@ -320,6 +320,8 @@ struct pff_csr_regs {
->  	u32 reserved4[174];
->  } __packed;
->  
-> +struct switchtec_ntb;
-> +
->  struct switchtec_dev {
->  	struct pci_dev *pdev;
->  	struct device dev;
-> @@ -357,6 +359,8 @@ struct switchtec_dev {
->  	struct work_struct link_event_work;
->  	void (*link_notifier)(struct switchtec_dev *stdev);
->  	u8 link_event_count[SWITCHTEC_MAX_PFF_CSR];
-> +
-> +	struct switchtec_ntb *sndev;
->  };
->  
->  static inline struct switchtec_dev *to_stdev(struct device *dev)
-> -- 
+> --
+> 
+> Changes since v2:
+> 
+> - Reordered the ntb_test link patch per Allen
+> - Removed an extra call to switchtec_ntb_init_mw
+> - Fixed a typo in the switchtec.txt documentation.
+> 
+> --
+> 
+> Changes since v1:
+> 
+> - Rebased onto latest ntb-next branch (with v4.13-rc1)
+> - Reworked ntb_mw_count() function so that it can be called all the
+>    time (per discussion with Allen)
+> - Various spelling and formatting cleanups from Bjorn
+> - Added request_module() call such that the NTB module is automatically
+>    loaded when appropriate hardware exists.
+> 
+> --
+> 
+> Changes since the rfc:
+> 
+> - Rebased on ntb-next
+> - Switched ntb_part_op to use sleep instead of delay
+> - Dropped a number of useless dbg __func__ prints
+> - Went back to the dynamic instead of the static class
+> - Swapped the notifier block for a simple callback
+> - Modified the new ntb api so that a couple functions with pidx
+>    now must be called after link up. Per our discussion on the list.
+> 
+> --
+> 
+> This patchset implements Non-Transparent Bridge (NTB) support for the
+> Microsemi Switchtec series of switches. We're looking for some
+> review from the community at this point but hope to get it upstreamed
+> for v4.14.
+> 
+> Switchtec NTB support is configured over the same function and bar
+> as the management endpoint. Thus, the new driver hooks into the
+> management driver which we had merged in v4.12. We use the class
+> interface API to register an NTB device for every switchtec device
+> which supports NTB (not all do).
+> 
+> The Switchtec hardware supports doorbells, memory windows and messages.
+> Seeing there is no native scratchpad support, 128 spads are emulated
+> through the use of a pre-setup memory window. The switch has 64
+> doorbells which are shared between the two partitions and a
+> configurable set of memory windows. While the hardware supports more
+> than 2 partitions, this driver only supports the first two seeing
+> the current NTB API only supports two hosts.
+> 
+> The driver has been tested with ntb_netdev and fully passes the
+> ntb_test script.
+> 
+> This patchset is based off of ntb-next and can be found in this
+> git repo:
+> 
+> https://github.com/sbates130272/linux-p2pmem.git switchtec_ntb_v4
+> 
+> Logan Gunthorpe (15):
+>    NTB: switchtec: Move structure definitions into a common header
+>    NTB: switchtec: Export class symbol for use in upper layer driver
+>    NTB: switchtec: Add NTB hardware register definitions
+>    NTB: switchtec: Add link event notifier callback
+>    NTB: Ensure ntb_mw_get_align() is only called when the link is up
+>    NTB: Add check and comment for link up to mw_count() and
+>      mw_get_align()
+>    NTB: switchtec_ntb: Introduce initial NTB driver
+>    NTB: switchtec_ntb: Initialize hardware for memory windows
+>    NTB: switchtec_ntb: Initialize hardware for doorbells and messages
+>    NTB: switchtec_ntb: Add skeleton NTB driver
+>    NTB: switchtec_ntb: Add link management
+>    NTB: switchtec_ntb: Implement doorbell registers
+>    NTB: switchtec_ntb: Implement scratchpad registers
+>    NTB: switchtec_ntb: Add memory window support
+>    NTB: switchtec_ntb: Update switchtec documentation with notes for NTB
+> 
+>   Documentation/switchtec.txt            |   12 +
+>   MAINTAINERS                            |    2 +
+>   drivers/ntb/hw/Kconfig                 |    1 +
+>   drivers/ntb/hw/Makefile                |    1 +
+>   drivers/ntb/hw/mscc/Kconfig            |    9 +
+>   drivers/ntb/hw/mscc/Makefile           |    1 +
+>   drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 1216 ++++++++++++++++++++++++++++++++
+>   drivers/ntb/ntb_transport.c            |   20 +-
+>   drivers/ntb/test/ntb_perf.c            |   18 +-
+>   drivers/ntb/test/ntb_tool.c            |    6 +-
+>   drivers/pci/switch/switchtec.c         |  316 ++-------
+>   include/linux/ntb.h                    |   11 +-
+>   include/linux/switchtec.h              |  373 ++++++++++
+>   13 files changed, 1703 insertions(+), 283 deletions(-)
+>   create mode 100644 drivers/ntb/hw/mscc/Kconfig
+>   create mode 100644 drivers/ntb/hw/mscc/Makefile
+>   create mode 100644 drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+>   create mode 100644 include/linux/switchtec.h
+> 
+> --
 > 2.11.0
 > 
