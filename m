@@ -1,31 +1,41 @@
 Return-Path: <logang@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id u1si18738itc.3.2017.08.22.10.58.17
+        by gmr-mx.google.com with ESMTPS id 64si16399ith.7.2017.08.22.10.56.39
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Tue, 22 Aug 2017 10:58:17 -0700 (PDT)
+        Tue, 22 Aug 2017 10:56:39 -0700 (PDT)
 References: <20170822170228.17196-1-logang@deltatee.com>
- <CAHp75Vd6O6vQFgU48tgMswhN0zT47Dqrvtf5JHLPrTVxR_DCrQ@mail.gmail.com>
+ <20170822170228.17196-7-logang@deltatee.com>
+ <CAHp75VfPXjw-gTX=xQsk_0vUhyeTEYiTvoacTzw43RgyGKKaVg@mail.gmail.com>
 From: Logan Gunthorpe <logang@deltatee.com>
-Message-ID: <ce58849d-721f-0aae-6be7-aaedeb4cbe44@deltatee.com>
-Date: Tue, 22 Aug 2017 11:58:11 -0600
+Message-ID: <b4b38bb0-b97f-2240-0ddc-ef5444e289ef@deltatee.com>
+Date: Tue, 22 Aug 2017 11:56:34 -0600
 MIME-Version: 1.0
-In-Reply-To: <CAHp75Vd6O6vQFgU48tgMswhN0zT47Dqrvtf5JHLPrTVxR_DCrQ@mail.gmail.com>
+In-Reply-To: <CAHp75VfPXjw-gTX=xQsk_0vUhyeTEYiTvoacTzw43RgyGKKaVg@mail.gmail.com>
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
-Subject: Re: [PATCH v7 0/7] make io{read|write}64 globally usable
+Subject: Re: [PATCH v7 6/7] ntb: ntb_hw_intel: use io-64-nonatomic instead of
+ in-driver hacks
 To: Andy Shevchenko <andy.shevchenko@gmail.com>
 Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Linux-Arch <linux-arch@vger.kernel.org>, linux-ntb@googlegroups.com, linux-crypto <linux-crypto@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, =?UTF-8?Q?Horia_Geant=c4=83?= <horia.geanta@nxp.com>, Stephen Bates <sbates@raithlin.com>
 List-ID: <linux-ntb.googlegroups.com>
 
 
 
-On 22/08/17 11:43 AM, Andy Shevchenko wrote:
-> Overall quite a good clean up! Thanks!
-> After addressing my comments you may take my
-> Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
+On 22/08/17 11:41 AM, Andy Shevchenko wrote:
+>> @@ -59,6 +59,7 @@
+>>   #include <linux/random.h>
+>>   #include <linux/slab.h>
+>>   #include <linux/ntb.h>
+>> +#include <linux/io-64-nonatomic-lo-hi.h>
+> 
+> I would rather try to squeeze to most alpabetiacelly ordered part of this block.
+> Otherwise it's a pretty nice clean up!
+> 
 
-Great, Thanks!
+I don't understand. The includes were not alphabetically in any order 
+originally and I'd rather not reorder them in my patch.
 
 Logan
+
