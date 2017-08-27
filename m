@@ -1,203 +1,57 @@
-Return-Path: <fancer.lancer@gmail.com>
-Received: from mail-lf0-x241.google.com (mail-lf0-x241.google.com. [2a00:1450:4010:c07::241])
-        by gmr-mx.google.com with ESMTPS id x7si325977wmf.8.2017.08.08.03.10.49
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-qk0-x243.google.com (mail-qk0-x243.google.com. [2607:f8b0:400d:c09::243])
+        by gmr-mx.google.com with ESMTPS id t14si799513ywf.18.2017.08.26.20.50.17
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 08 Aug 2017 03:10:49 -0700 (PDT)
-Received: by mail-lf0-x241.google.com with SMTP id o85so2071565lff.1
-        for <linux-ntb@googlegroups.com>; Tue, 08 Aug 2017 03:10:49 -0700 (PDT)
-Return-Path: <fancer.lancer@gmail.com>
-From: Serge Semin <fancer.lancer@gmail.com>
-Subject: [PATCH] NTB: Rename NTB messaging API methods
-Date: Tue,  8 Aug 2017 13:10:47 +0300
-Message-Id: <20170808101047.24518-1-fancer.lancer@gmail.com>
-To: jdmason@kudzu.us, dave.jiang@intel.com, Allen.Hubbe@emc.com, Shyam-sundar.S-k@amd.com, Xiangliang.Yu@amd.com, gary.hook@amd.com, logang@deltatee.com
-Cc: Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Serge Semin <fancer.lancer@gmail.com>
+        Sat, 26 Aug 2017 20:50:17 -0700 (PDT)
+Received: by mail-qk0-x243.google.com with SMTP id o184so2926307qkc.4
+        for <linux-ntb@googlegroups.com>; Sat, 26 Aug 2017 20:50:17 -0700 (PDT)
+Return-Path: <jdmason@kudzu.us>
+From: Jon Mason <jdmason@kudzu.us>
+Date: Sat, 26 Aug 2017 23:50:14 -0400
+Subject: [GIT PULL] NTB bug fixes for v4.13
+Message-ID: <20170827035014.GA8789@graymalkin.kudzu.us>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+To: torvalds@linux-foundation.org
+Cc: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-There is a common methods signature form used over all the NTB API
-like functions naming scheme, arguments names and order, etc.
-Recently added NTB messaging API IO callbacks were named a bit
-different so should be renamed to be in compliance with the rest
-of the API.
+Hello Linus,
+Here are a few NTB bug fixes for 4.13.  Please consider pulling them.
 
-Signed-off-by: Serge Semin <fancer.lancer@gmail.com>
----
- drivers/ntb/hw/idt/ntb_hw_idt.c | 27 ++++++++++++---------------
- include/linux/ntb.h             | 34 ++++++++++++++++------------------
- 2 files changed, 28 insertions(+), 33 deletions(-)
+Thanks,
+Jon
 
-diff --git a/drivers/ntb/hw/idt/ntb_hw_idt.c b/drivers/ntb/hw/idt/ntb_hw_idt.c
-index d44d7ef38fe8..4c9ea7ef8f50 100644
---- a/drivers/ntb/hw/idt/ntb_hw_idt.c
-+++ b/drivers/ntb/hw/idt/ntb_hw_idt.c
-@@ -1744,20 +1744,19 @@ static int idt_ntb_msg_clear_mask(struct ntb_dev *ntb, u64 mask_bits)
-  * idt_ntb_msg_read() - read message register with specified index
-  *			(NTB API callback)
-  * @ntb:	NTB device context.
-- * @midx:	Message register index
-  * @pidx:	OUT - Port index of peer device a message retrieved from
-- * @msg:	OUT - Data
-+ * @midx:	Message register index
-  *
-  * Read data from the specified message register and source register.
-  *
-- * Return: zero on success, negative error if invalid argument passed.
-+ * Return: inbound message register value.
-  */
--static int idt_ntb_msg_read(struct ntb_dev *ntb, int midx, int *pidx, u32 *msg)
-+static u32 idt_ntb_msg_read(struct ntb_dev *ntb, int *pidx, int midx)
- {
- 	struct idt_ntb_dev *ndev = to_ndev_ntb(ntb);
- 
- 	if (midx < 0 || IDT_MSG_CNT <= midx)
--		return -EINVAL;
-+		return (u32)-1;
- 
- 	/* Retrieve source port index of the message */
- 	if (pidx != NULL) {
-@@ -1772,18 +1771,15 @@ static int idt_ntb_msg_read(struct ntb_dev *ntb, int midx, int *pidx, u32 *msg)
- 	}
- 
- 	/* Retrieve data of the corresponding message register */
--	if (msg != NULL)
--		*msg = idt_nt_read(ndev, ntdata_tbl.msgs[midx].in);
--
--	return 0;
-+	return idt_nt_read(ndev, ntdata_tbl.msgs[midx].in);
- }
- 
- /*
-- * idt_ntb_msg_write() - write data to the specified message register
-- *			 (NTB API callback)
-+ * idt_ntb_peer_msg_write() - write data to the specified message register
-+ *			      (NTB API callback)
-  * @ntb:	NTB device context.
-- * @midx:	Message register index
-  * @pidx:	Port index of peer device a message being sent to
-+ * @midx:	Message register index
-  * @msg:	Data to send
-  *
-  * Just try to send data to a peer. Message status register should be
-@@ -1791,7 +1787,8 @@ static int idt_ntb_msg_read(struct ntb_dev *ntb, int midx, int *pidx, u32 *msg)
-  *
-  * Return: zero on success, negative error if invalid argument passed.
-  */
--static int idt_ntb_msg_write(struct ntb_dev *ntb, int midx, int pidx, u32 msg)
-+static int idt_ntb_peer_msg_write(struct ntb_dev *ntb, int pidx, int midx,
-+				  u32 msg)
- {
- 	struct idt_ntb_dev *ndev = to_ndev_ntb(ntb);
- 	unsigned long irqflags;
-@@ -2058,7 +2055,7 @@ static const struct ntb_dev_ops idt_ntb_ops = {
- 	.msg_set_mask		= idt_ntb_msg_set_mask,
- 	.msg_clear_mask		= idt_ntb_msg_clear_mask,
- 	.msg_read		= idt_ntb_msg_read,
--	.msg_write		= idt_ntb_msg_write
-+	.peer_msg_write		= idt_ntb_peer_msg_write
- };
- 
- /*
-@@ -2269,7 +2266,7 @@ static ssize_t idt_dbgfs_info_read(struct file *filp, char __user *ubuf,
- 		 "Message data:\n");
- 	for (idx = 0; idx < IDT_MSG_CNT; idx++) {
- 		int src;
--		(void)idt_ntb_msg_read(&ndev->ntb, idx, &src, &data);
-+		data = idt_ntb_msg_read(&ndev->ntb, &src, idx);
- 		off += scnprintf(strbuf + off, size - off,
- 			"\t%hhu. 0x%08x from peer %hhu (Port %hhu)\n",
- 			idx, data, src, ndev->peers[src].port);
-diff --git a/include/linux/ntb.h b/include/linux/ntb.h
-index 609e232c00da..20c6ce4c45e1 100644
---- a/include/linux/ntb.h
-+++ b/include/linux/ntb.h
-@@ -247,7 +247,7 @@ static inline int ntb_ctx_ops_is_valid(const struct ntb_ctx_ops *ops)
-  * @msg_set_mask:	See ntb_msg_set_mask().
-  * @msg_clear_mask:	See ntb_msg_clear_mask().
-  * @msg_read:		See ntb_msg_read().
-- * @msg_write:		See ntb_msg_write().
-+ * @msg_peer_write:	See ntb_peer_msg_write().
-  */
- struct ntb_dev_ops {
- 	int (*port_number)(struct ntb_dev *ntb);
-@@ -318,8 +318,8 @@ struct ntb_dev_ops {
- 	int (*msg_clear_sts)(struct ntb_dev *ntb, u64 sts_bits);
- 	int (*msg_set_mask)(struct ntb_dev *ntb, u64 mask_bits);
- 	int (*msg_clear_mask)(struct ntb_dev *ntb, u64 mask_bits);
--	int (*msg_read)(struct ntb_dev *ntb, int midx, int *pidx, u32 *msg);
--	int (*msg_write)(struct ntb_dev *ntb, int midx, int pidx, u32 msg);
-+	u32 (*msg_read)(struct ntb_dev *ntb, int *pidx, int midx);
-+	int (*peer_msg_write)(struct ntb_dev *ntb, int pidx, int midx, u32 msg);
- };
- 
- static inline int ntb_dev_ops_is_valid(const struct ntb_dev_ops *ops)
-@@ -381,7 +381,7 @@ static inline int ntb_dev_ops_is_valid(const struct ntb_dev_ops *ops)
- 		/* !ops->msg_set_mask == !ops->msg_count	&& */
- 		/* !ops->msg_clear_mask == !ops->msg_count	&& */
- 		!ops->msg_read == !ops->msg_count		&&
--		!ops->msg_write == !ops->msg_count		&&
-+		!ops->peer_msg_write == !ops->msg_count		&&
- 		1;
- }
- 
-@@ -1452,31 +1452,29 @@ static inline int ntb_msg_clear_mask(struct ntb_dev *ntb, u64 mask_bits)
- }
- 
- /**
-- * ntb_msg_read() - read message register with specified index
-+ * ntb_msg_read() - read inbound message register with specified index
-  * @ntb:	NTB device context.
-- * @midx:	Message register index
-  * @pidx:	OUT - Port index of peer device a message retrieved from
-- * @msg:	OUT - Data
-+ * @midx:	Message register index
-  *
-  * Read data from the specified message register. Source port index of a
-  * message is retrieved as well.
-  *
-- * Return: Zero on success, otherwise a negative error number.
-+ * Return: The value of the inbound message register.
-  */
--static inline int ntb_msg_read(struct ntb_dev *ntb, int midx, int *pidx,
--			       u32 *msg)
-+static inline u32 ntb_msg_read(struct ntb_dev *ntb, int *pidx, int midx)
- {
- 	if (!ntb->ops->msg_read)
--		return -EINVAL;
-+		return ~(u32)0;
- 
--	return ntb->ops->msg_read(ntb, midx, pidx, msg);
-+	return ntb->ops->msg_read(ntb, pidx, midx);
- }
- 
- /**
-- * ntb_msg_write() - write data to the specified message register
-+ * ntb_peer_msg_write() - write data to the specified peer message register
-  * @ntb:	NTB device context.
-- * @midx:	Message register index
-  * @pidx:	Port index of peer device a message being sent to
-+ * @midx:	Message register index
-  * @msg:	Data to send
-  *
-  * Send data to a specified peer device using the defined message register.
-@@ -1485,13 +1483,13 @@ static inline int ntb_msg_read(struct ntb_dev *ntb, int midx, int *pidx,
-  *
-  * Return: Zero on success, otherwise a negative error number.
-  */
--static inline int ntb_msg_write(struct ntb_dev *ntb, int midx, int pidx,
--				u32 msg)
-+static inline int ntb_peer_msg_write(struct ntb_dev *ntb, int pidx, int midx,
-+				     u32 msg)
- {
--	if (!ntb->ops->msg_write)
-+	if (!ntb->ops->peer_msg_write)
- 		return -EINVAL;
- 
--	return ntb->ops->msg_write(ntb, midx, pidx, msg);
-+	return ntb->ops->peer_msg_write(ntb, pidx, midx, msg);
- }
- 
- #endif
--- 
-2.12.0
 
+
+The following changes since commit 5771a8c08880cdca3bfb4a3fc6d309d6bba20877:
+
+  Linux v4.13-rc1 (2017-07-15 15:22:10 -0700)
+
+are available in the git repository at:
+
+  git://github.com/jonmason/ntb tags/ntb-4.13-bugfixes
+
+for you to fetch changes up to 0eb46345364d7318b11068c46e8a68d5dc10f65e:
+
+  ntb: ntb_test: ensure the link is up before trying to configure the mws (2017-08-01 15:18:59 -0400)
+
+----------------------------------------------------------------
+NTB bug fixes to address an incorrect ntb_mw_count reference in the NTB
+transport, improperly bringing down the link if SPADs are corrupted, and
+an out-of-order issue regarding link negotiation and data passing.
+
+----------------------------------------------------------------
+Dave Jiang (1):
+      ntb: transport shouldn't disable link due to bogus values in SPADs
+
+Logan Gunthorpe (2):
+      ntb: use correct mw_count function in ntb_tool and ntb_transport
+      ntb: ntb_test: ensure the link is up before trying to configure the mws
+
+ drivers/ntb/ntb_transport.c             | 6 ++----
+ drivers/ntb/test/ntb_tool.c             | 2 +-
+ tools/testing/selftests/ntb/ntb_test.sh | 4 ++++
+ 3 files changed, 7 insertions(+), 5 deletions(-)
