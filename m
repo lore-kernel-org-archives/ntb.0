@@ -1,161 +1,88 @@
-Return-Path: <gunthorp@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id u5si335578itd.8.2017.08.03.11.20.02
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-qk0-x244.google.com (mail-qk0-x244.google.com. [2607:f8b0:400d:c09::244])
+        by gmr-mx.google.com with ESMTPS id n10si21846ywl.4.2017.08.31.10.55.58
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 03 Aug 2017 11:20:02 -0700 (PDT)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Thu,  3 Aug 2017 12:19:44 -0600
-Message-Id: <20170803181954.4154-6-logang@deltatee.com>
-In-Reply-To: <20170803181954.4154-1-logang@deltatee.com>
-References: <20170803181954.4154-1-logang@deltatee.com>
-Subject: [PATCH v4 05/15] NTB: Ensure ntb_mw_get_align() is only called when the link is up
-To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>, Logan Gunthorpe <logang@deltatee.com>
+        Thu, 31 Aug 2017 10:55:58 -0700 (PDT)
+Received: by mail-qk0-x244.google.com with SMTP id p67so264053qkd.2
+        for <linux-ntb@googlegroups.com>; Thu, 31 Aug 2017 10:55:58 -0700 (PDT)
+Return-Path: <jdmason@kudzu.us>
+Date: Thu, 31 Aug 2017 13:55:56 -0400
+From: Jon Mason <jdmason@kudzu.us>
+Subject: Re: [PATCH] NTB: make idt_89hpes_cfg const
+Message-ID: <20170831175555.GB28190@kudzu.us>
+References: <1502473663-6136-1-git-send-email-bhumirks@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1502473663-6136-1-git-send-email-bhumirks@gmail.com>
+To: Bhumika Goyal <bhumirks@gmail.com>
+Cc: julia.lawall@lip6.fr, fancer.lancer@gmail.com, dave.jiang@intel.com, Allen.Hubbe@emc.com, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-With Switchtec hardware it's impossible to get the alignment parameters
-for a peer's memory window until the peer's driver has configured its
-windows. Strictly speaking, the link doesn't have to be up for this,
-but the link being up is the only way the client can tell that
-the other side has been configured.
+On Fri, Aug 11, 2017 at 11:17:43PM +0530, Bhumika Goyal wrote:
+> Make these const as they are only used during a copy operation.
+> Done using Coccinelle.
 
-This patch converts ntb_transport and ntb_perf to use this function after
-the link goes up. This simplifies these clients slightly because they
-no longer have to store the alignment parameters. It also tweaks
-ntb_tool so that peer_mw_trans will print zero if it is run before
-the link goes up.
+Pulled into my ntb-next branch
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Acked-by: Allen Hubbe <Allen.Hubbe@dell.com>
----
- drivers/ntb/ntb_transport.c | 20 ++++++++++----------
- drivers/ntb/test/ntb_perf.c | 18 +++++++++---------
- drivers/ntb/test/ntb_tool.c |  6 +++---
- 3 files changed, 22 insertions(+), 22 deletions(-)
+Thanks,
+Jon
 
-diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index f58d8e305323..045e3dd4750e 100644
---- a/drivers/ntb/ntb_transport.c
-+++ b/drivers/ntb/ntb_transport.c
-@@ -191,8 +191,6 @@ struct ntb_transport_qp {
- struct ntb_transport_mw {
- 	phys_addr_t phys_addr;
- 	resource_size_t phys_size;
--	resource_size_t xlat_align;
--	resource_size_t xlat_align_size;
- 	void __iomem *vbase;
- 	size_t xlat_size;
- 	size_t buff_size;
-@@ -687,13 +685,20 @@ static int ntb_set_mw(struct ntb_transport_ctx *nt, int num_mw,
- 	struct ntb_transport_mw *mw = &nt->mw_vec[num_mw];
- 	struct pci_dev *pdev = nt->ndev->pdev;
- 	size_t xlat_size, buff_size;
-+	resource_size_t xlat_align;
-+	resource_size_t xlat_align_size;
- 	int rc;
- 
- 	if (!size)
- 		return -EINVAL;
- 
--	xlat_size = round_up(size, mw->xlat_align_size);
--	buff_size = round_up(size, mw->xlat_align);
-+	rc = ntb_mw_get_align(nt->ndev, PIDX, num_mw, &xlat_align,
-+			      &xlat_align_size, NULL);
-+	if (rc)
-+		return rc;
-+
-+	xlat_size = round_up(size, xlat_align_size);
-+	buff_size = round_up(size, xlat_align);
- 
- 	/* No need to re-setup */
- 	if (mw->xlat_size == xlat_size)
-@@ -722,7 +727,7 @@ static int ntb_set_mw(struct ntb_transport_ctx *nt, int num_mw,
- 	 * is a requirement of the hardware. It is recommended to setup CMA
- 	 * for BAR sizes equal or greater than 4MB.
- 	 */
--	if (!IS_ALIGNED(mw->dma_addr, mw->xlat_align)) {
-+	if (!IS_ALIGNED(mw->dma_addr, xlat_align)) {
- 		dev_err(&pdev->dev, "DMA memory %pad is not aligned\n",
- 			&mw->dma_addr);
- 		ntb_free_mw(nt, num_mw);
-@@ -1104,11 +1109,6 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
- 	for (i = 0; i < mw_count; i++) {
- 		mw = &nt->mw_vec[i];
- 
--		rc = ntb_mw_get_align(ndev, PIDX, i, &mw->xlat_align,
--				      &mw->xlat_align_size, NULL);
--		if (rc)
--			goto err1;
--
- 		rc = ntb_peer_mw_get_addr(ndev, i, &mw->phys_addr,
- 					  &mw->phys_size);
- 		if (rc)
-diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index 759f772fa00c..427112cf101a 100644
---- a/drivers/ntb/test/ntb_perf.c
-+++ b/drivers/ntb/test/ntb_perf.c
-@@ -108,8 +108,6 @@ MODULE_PARM_DESC(on_node, "Run threads only on NTB device node (default: true)")
- struct perf_mw {
- 	phys_addr_t	phys_addr;
- 	resource_size_t	phys_size;
--	resource_size_t	xlat_align;
--	resource_size_t	xlat_align_size;
- 	void __iomem	*vbase;
- 	size_t		xlat_size;
- 	size_t		buf_size;
-@@ -472,13 +470,20 @@ static int perf_set_mw(struct perf_ctx *perf, resource_size_t size)
- {
- 	struct perf_mw *mw = &perf->mw;
- 	size_t xlat_size, buf_size;
-+	resource_size_t	xlat_align;
-+	resource_size_t	xlat_align_size;
- 	int rc;
- 
- 	if (!size)
- 		return -EINVAL;
- 
--	xlat_size = round_up(size, mw->xlat_align_size);
--	buf_size = round_up(size, mw->xlat_align);
-+	rc = ntb_mw_get_align(perf->ntb, PIDX, 0, &xlat_align,
-+			      &xlat_align_size, NULL);
-+	if (rc)
-+		return rc;
-+
-+	xlat_size = round_up(size, xlat_align_size);
-+	buf_size = round_up(size, xlat_align);
- 
- 	if (mw->xlat_size == xlat_size)
- 		return 0;
-@@ -567,11 +572,6 @@ static int perf_setup_mw(struct ntb_dev *ntb, struct perf_ctx *perf)
- 
- 	mw = &perf->mw;
- 
--	rc = ntb_mw_get_align(ntb, PIDX, 0, &mw->xlat_align,
--			      &mw->xlat_align_size, NULL);
--	if (rc)
--		return rc;
--
- 	rc = ntb_peer_mw_get_addr(ntb, 0, &mw->phys_addr, &mw->phys_size);
- 	if (rc)
- 		return rc;
-diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c
-index a69815c45ce6..91526a986caa 100644
---- a/drivers/ntb/test/ntb_tool.c
-+++ b/drivers/ntb/test/ntb_tool.c
-@@ -753,9 +753,9 @@ static ssize_t tool_peer_mw_trans_read(struct file *filep,
- 
- 	phys_addr_t base;
- 	resource_size_t mw_size;
--	resource_size_t align_addr;
--	resource_size_t align_size;
--	resource_size_t max_size;
-+	resource_size_t align_addr = 0;
-+	resource_size_t align_size = 0;
-+	resource_size_t max_size = 0;
- 
- 	buf_size = min_t(size_t, size, 512);
- 
--- 
-2.11.0
-
+> 
+> Signed-off-by: Bhumika Goyal <bhumirks@gmail.com>
+> ---
+>  drivers/ntb/hw/idt/ntb_hw_idt.c | 16 ++++++++--------
+>  1 file changed, 8 insertions(+), 8 deletions(-)
+> 
+> diff --git a/drivers/ntb/hw/idt/ntb_hw_idt.c b/drivers/ntb/hw/idt/ntb_hw_idt.c
+> index d44d7ef..0cd79f3 100644
+> --- a/drivers/ntb/hw/idt/ntb_hw_idt.c
+> +++ b/drivers/ntb/hw/idt/ntb_hw_idt.c
+> @@ -2628,35 +2628,35 @@ static void idt_pci_remove(struct pci_dev *pdev)
+>  /*
+>   * IDT PCIe-switch models ports configuration structures
+>   */
+> -static struct idt_89hpes_cfg idt_89hpes24nt6ag2_config = {
+> +static const struct idt_89hpes_cfg idt_89hpes24nt6ag2_config = {
+>  	.name = "89HPES24NT6AG2",
+>  	.port_cnt = 6, .ports = {0, 2, 4, 6, 8, 12}
+>  };
+> -static struct idt_89hpes_cfg idt_89hpes32nt8ag2_config = {
+> +static const struct idt_89hpes_cfg idt_89hpes32nt8ag2_config = {
+>  	.name = "89HPES32NT8AG2",
+>  	.port_cnt = 8, .ports = {0, 2, 4, 6, 8, 12, 16, 20}
+>  };
+> -static struct idt_89hpes_cfg idt_89hpes32nt8bg2_config = {
+> +static const struct idt_89hpes_cfg idt_89hpes32nt8bg2_config = {
+>  	.name = "89HPES32NT8BG2",
+>  	.port_cnt = 8, .ports = {0, 2, 4, 6, 8, 12, 16, 20}
+>  };
+> -static struct idt_89hpes_cfg idt_89hpes12nt12g2_config = {
+> +static const struct idt_89hpes_cfg idt_89hpes12nt12g2_config = {
+>  	.name = "89HPES12NT12G2",
+>  	.port_cnt = 3, .ports = {0, 8, 16}
+>  };
+> -static struct idt_89hpes_cfg idt_89hpes16nt16g2_config = {
+> +static const struct idt_89hpes_cfg idt_89hpes16nt16g2_config = {
+>  	.name = "89HPES16NT16G2",
+>  	.port_cnt = 4, .ports = {0, 8, 12, 16}
+>  };
+> -static struct idt_89hpes_cfg idt_89hpes24nt24g2_config = {
+> +static const struct idt_89hpes_cfg idt_89hpes24nt24g2_config = {
+>  	.name = "89HPES24NT24G2",
+>  	.port_cnt = 8, .ports = {0, 2, 4, 6, 8, 12, 16, 20}
+>  };
+> -static struct idt_89hpes_cfg idt_89hpes32nt24ag2_config = {
+> +static const struct idt_89hpes_cfg idt_89hpes32nt24ag2_config = {
+>  	.name = "89HPES32NT24AG2",
+>  	.port_cnt = 8, .ports = {0, 2, 4, 6, 8, 12, 16, 20}
+>  };
+> -static struct idt_89hpes_cfg idt_89hpes32nt24bg2_config = {
+> +static const struct idt_89hpes_cfg idt_89hpes32nt24bg2_config = {
+>  	.name = "89HPES32NT24BG2",
+>  	.port_cnt = 8, .ports = {0, 2, 4, 6, 8, 12, 16, 20}
+>  };
+> -- 
+> 1.9.1
+> 
