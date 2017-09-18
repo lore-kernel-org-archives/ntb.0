@@ -1,133 +1,113 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id 71si356601ita.2.2017.08.03.11.20.00
+        by gmr-mx.google.com with ESMTPS id i63si10628ith.9.2017.09.18.16.13.11
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 03 Aug 2017 11:20:00 -0700 (PDT)
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Mon, 18 Sep 2017 16:13:12 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Thu,  3 Aug 2017 12:19:42 -0600
-Message-Id: <20170803181954.4154-4-logang@deltatee.com>
-In-Reply-To: <20170803181954.4154-1-logang@deltatee.com>
-References: <20170803181954.4154-1-logang@deltatee.com>
-Subject: [PATCH v4 03/15] NTB: switchtec: Add NTB hardware register definitions
-To: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Stephen Bates <sbates@raithlin.com>, Serge Semin <fancer.lancer@gmail.com>, Logan Gunthorpe <logang@deltatee.com>
+Date: Mon, 18 Sep 2017 17:12:58 -0600
+Message-Id: <20170918231258.3151-8-logang@deltatee.com>
+In-Reply-To: <20170918231258.3151-1-logang@deltatee.com>
+References: <20170918231258.3151-1-logang@deltatee.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+Subject: [PATCH v8 7/7] crypto: caam: cleanup CONFIG_64BIT ifdefs when using io{read|write}64
+To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org
+Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>, Dan Douglass <dan.douglass@nxp.com>, Herbert Xu <herbert@gondor.apana.org.au>, "David S. Miller" <davem@davemloft.net>
 List-ID: <linux-ntb.googlegroups.com>
 
-There are two additional regions: ctrl and dbmsg. The first is
-for generic NTB control and memory windows. The second is for doorbells
-and message registers. This patch also adds a number of related
-constants for using these registers.
+From: Horia Geantă <horia.geanta@nxp.com>
 
+We can now make use of the io-64-nonatomic-lo-hi header to always
+provide 64 bit IO operations. So this patch cleans up the extra
+CONFIG_64BIT ifdefs.
+
+To be consistent with CAAM engine HW spec: in case of 64-bit registers,
+irrespective of device endianness, the lower address should be read from
+/ written to first, followed by the upper address. Indeed the I/O
+accessors in CAAM driver currently don't follow the spec, however this
+is a good opportunity to fix the code.
+
+Signed-off-by: Horia Geantă <horia.geanta@nxp.com>
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Reviewed-by: Stephen Bates <sbates@raithlin.com>
-Reviewed-by: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
+Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc: Horia Geantă <horia.geanta@nxp.com>
+Cc: Dan Douglass <dan.douglass@nxp.com>
+Cc: Herbert Xu <herbert@gondor.apana.org.au>
+Cc: "David S. Miller" <davem@davemloft.net>
 ---
- include/linux/switchtec.h | 84 +++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 84 insertions(+)
+ drivers/crypto/caam/regs.h | 35 +++++------------------------------
+ 1 file changed, 5 insertions(+), 30 deletions(-)
 
-diff --git a/include/linux/switchtec.h b/include/linux/switchtec.h
-index 18e388101855..9c2be7631257 100644
---- a/include/linux/switchtec.h
-+++ b/include/linux/switchtec.h
-@@ -156,6 +156,12 @@ struct flash_info_regs {
- 	struct partition_info vendor[8];
- };
+diff --git a/drivers/crypto/caam/regs.h b/drivers/crypto/caam/regs.h
+index 2b5efff9ec3c..868ae7fb7c9f 100644
+--- a/drivers/crypto/caam/regs.h
++++ b/drivers/crypto/caam/regs.h
+@@ -9,7 +9,7 @@
  
-+enum {
-+	SWITCHTEC_NTB_REG_INFO_OFFSET   = 0x0000,
-+	SWITCHTEC_NTB_REG_CTRL_OFFSET   = 0x4000,
-+	SWITCHTEC_NTB_REG_DBMSG_OFFSET  = 0x64000,
-+};
-+
- struct ntb_info_regs {
- 	u8  partition_count;
- 	u8  partition_id;
-@@ -191,6 +197,84 @@ struct part_cfg_regs {
- } __packed;
+ #include <linux/types.h>
+ #include <linux/bitops.h>
+-#include <linux/io.h>
++#include <linux/io-64-nonatomic-lo-hi.h>
  
- enum {
-+	NTB_CTRL_PART_OP_LOCK = 0x1,
-+	NTB_CTRL_PART_OP_CFG = 0x2,
-+	NTB_CTRL_PART_OP_RESET = 0x3,
-+
-+	NTB_CTRL_PART_STATUS_NORMAL = 0x1,
-+	NTB_CTRL_PART_STATUS_LOCKED = 0x2,
-+	NTB_CTRL_PART_STATUS_LOCKING = 0x3,
-+	NTB_CTRL_PART_STATUS_CONFIGURING = 0x4,
-+	NTB_CTRL_PART_STATUS_RESETTING = 0x5,
-+
-+	NTB_CTRL_BAR_VALID = 1 << 0,
-+	NTB_CTRL_BAR_DIR_WIN_EN = 1 << 4,
-+	NTB_CTRL_BAR_LUT_WIN_EN = 1 << 5,
-+
-+	NTB_CTRL_REQ_ID_EN = 1 << 0,
-+
-+	NTB_CTRL_LUT_EN = 1 << 0,
-+
-+	NTB_PART_CTRL_ID_PROT_DIS = 1 << 0,
-+};
-+
-+struct ntb_ctrl_regs {
-+	u32 partition_status;
-+	u32 partition_op;
-+	u32 partition_ctrl;
-+	u32 bar_setup;
-+	u32 bar_error;
-+	u16 lut_table_entries;
-+	u16 lut_table_offset;
-+	u32 lut_error;
-+	u16 req_id_table_size;
-+	u16 req_id_table_offset;
-+	u32 req_id_error;
-+	u32 reserved1[7];
-+	struct {
-+		u32 ctl;
-+		u32 win_size;
-+		u64 xlate_addr;
-+	} bar_entry[6];
-+	u32 reserved2[216];
-+	u32 req_id_table[256];
-+	u32 reserved3[512];
-+	u64 lut_entry[512];
-+} __packed;
-+
-+#define NTB_DBMSG_IMSG_STATUS BIT_ULL(32)
-+#define NTB_DBMSG_IMSG_MASK   BIT_ULL(40)
-+
-+struct ntb_dbmsg_regs {
-+	u32 reserved1[1024];
-+	u64 odb;
-+	u64 odb_mask;
-+	u64 idb;
-+	u64 idb_mask;
-+	u8  idb_vec_map[64];
-+	u32 msg_map;
-+	u32 reserved2;
-+	struct {
-+		u32 msg;
-+		u32 status;
-+	} omsg[4];
-+
-+	struct {
-+		u32 msg;
-+		u8  status;
-+		u8  mask;
-+		u8  src;
-+		u8  reserved;
-+	} imsg[4];
-+
-+	u8 reserved3[3928];
-+	u8 msix_table[1024];
-+	u8 reserved4[3072];
-+	u8 pba[24];
-+	u8 reserved5[4072];
-+} __packed;
-+
-+enum {
- 	SWITCHTEC_PART_CFG_EVENT_RESET = 1 << 0,
- 	SWITCHTEC_PART_CFG_EVENT_MRPC_CMP = 1 << 1,
- 	SWITCHTEC_PART_CFG_EVENT_MRPC_ASYNC_CMP = 1 << 2,
+ /*
+  * Architecture-specific register access methods
+@@ -134,50 +134,25 @@ static inline void clrsetbits_32(void __iomem *reg, u32 clear, u32 set)
+  *    base + 0x0000 : least-significant 32 bits
+  *    base + 0x0004 : most-significant 32 bits
+  */
+-#ifdef CONFIG_64BIT
+ static inline void wr_reg64(void __iomem *reg, u64 data)
+ {
++#ifndef CONFIG_CRYPTO_DEV_FSL_CAAM_IMX
+ 	if (caam_little_end)
+ 		iowrite64(data, reg);
+ 	else
+-		iowrite64be(data, reg);
+-}
+-
+-static inline u64 rd_reg64(void __iomem *reg)
+-{
+-	if (caam_little_end)
+-		return ioread64(reg);
+-	else
+-		return ioread64be(reg);
+-}
+-
+-#else /* CONFIG_64BIT */
+-static inline void wr_reg64(void __iomem *reg, u64 data)
+-{
+-#ifndef CONFIG_CRYPTO_DEV_FSL_CAAM_IMX
+-	if (caam_little_end) {
+-		wr_reg32((u32 __iomem *)(reg) + 1, data >> 32);
+-		wr_reg32((u32 __iomem *)(reg), data);
+-	} else
+ #endif
+-	{
+-		wr_reg32((u32 __iomem *)(reg), data >> 32);
+-		wr_reg32((u32 __iomem *)(reg) + 1, data);
+-	}
++		iowrite64be(data, reg);
+ }
+ 
+ static inline u64 rd_reg64(void __iomem *reg)
+ {
+ #ifndef CONFIG_CRYPTO_DEV_FSL_CAAM_IMX
+ 	if (caam_little_end)
+-		return ((u64)rd_reg32((u32 __iomem *)(reg) + 1) << 32 |
+-			(u64)rd_reg32((u32 __iomem *)(reg)));
++		return ioread64(reg);
+ 	else
+ #endif
+-		return ((u64)rd_reg32((u32 __iomem *)(reg)) << 32 |
+-			(u64)rd_reg32((u32 __iomem *)(reg) + 1));
++		return ioread64be(reg);
+ }
+-#endif /* CONFIG_64BIT  */
+ 
+ #ifdef CONFIG_ARCH_DMA_ADDR_T_64BIT
+ #ifdef CONFIG_SOC_IMX7D
 -- 
 2.11.0
 
