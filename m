@@ -1,35 +1,91 @@
-Return-Path: <logang@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id e51si621215qtf.2.2017.10.17.13.57.59
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-vk0-x235.google.com (mail-vk0-x235.google.com. [2607:f8b0:400c:c05::235])
+        by gmr-mx.google.com with ESMTPS id n1si528536ioc.4.2017.10.17.13.25.55
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Tue, 17 Oct 2017 13:58:00 -0700 (PDT)
-References: <1508271773-17827-1-git-send-email-dmeyer@gigaio.com>
- <CAPoiz9y-6kyjF1ypt7p+7K6E-m55_Fra5hgFYy--5YXz7V2PdQ@mail.gmail.com>
-From: Logan Gunthorpe <logang@deltatee.com>
-Message-ID: <03a7e0e1-6863-e1ae-122f-ec630f4209dd@deltatee.com>
-Date: Tue, 17 Oct 2017 14:57:53 -0600
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 17 Oct 2017 13:25:55 -0700 (PDT)
+Received: by mail-vk0-x235.google.com with SMTP id q80so1954862vka.7
+        for <linux-ntb@googlegroups.com>; Tue, 17 Oct 2017 13:25:55 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <CAPoiz9y-6kyjF1ypt7p+7K6E-m55_Fra5hgFYy--5YXz7V2PdQ@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-Subject: Re: [PATCH] NTB: ntb_hw_switchtec: Fix peer BAR bug in
- switchtec_ntb_init_shared_mw
-To: Jon Mason <jdmason@kudzu.us>, D Meyer <dmeyer@gigaio.com>
-Cc: Kurt Schwemmer <kurt.schwemmer@microsemi.com>, stephen.bates@microsemi.com, Dave Jiang <dave.jiang@intel.com>, "Hubbe, Allen" <Allen.Hubbe@emc.com>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, linux-ntb@googlegroups.com, linux-kernel <linux-kernel@vger.kernel.org>
+In-Reply-To: <1508271773-17827-1-git-send-email-dmeyer@gigaio.com>
+References: <1508271773-17827-1-git-send-email-dmeyer@gigaio.com>
+From: Jon Mason <jdmason@kudzu.us>
+Date: Tue, 17 Oct 2017 16:25:54 -0400
+Message-ID: <CAPoiz9y-6kyjF1ypt7p+7K6E-m55_Fra5hgFYy--5YXz7V2PdQ@mail.gmail.com>
+Subject: Re: [PATCH] NTB: ntb_hw_switchtec: Fix peer BAR bug in switchtec_ntb_init_shared_mw
+Content-Type: text/plain; charset="UTF-8"
+To: D Meyer <dmeyer@gigaio.com>
+Cc: Kurt Schwemmer <kurt.schwemmer@microsemi.com>, stephen.bates@microsemi.com, Logan Gunthorpe <logang@deltatee.com>, Dave Jiang <dave.jiang@intel.com>, "Hubbe, Allen" <Allen.Hubbe@emc.com>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, linux-ntb@googlegroups.com, linux-kernel <linux-kernel@vger.kernel.org>
 List-ID: <linux-ntb.googlegroups.com>
 
+On Tue, Oct 17, 2017 at 4:22 PM,  <dmeyer@gigaio.com> wrote:
+> From: Doug Meyer <dmeyer@gigaio.com>
+>
+> This resolves a bug which may incorrectly configure the peer host's
+> LUT for shared memory window access. The code was using the local
+> host's first BAR number, rather than the peer hosts's first BAR
+> number, to determine what peer NT control register to program.
+>
+> The bug will cause the Switchtec NTB link to work only if both peers
+> have the same first NTB BAR configured. In all other configurations,
+> the link will not come up, failing silently.
+>
+> When both hosts have the same first BAR, the configuration works only
+> because the first BAR numbers happent to be the same. When the hosts
+> do not have the same first BAR, then the LUT translation will not be
+> configured in the correct peer LUT and will not give the peer the
+> shared memory window access required for the link to operate.
+>
+> Signed-off-by: Doug Meyer <dmeyer@gigaio.com>
 
+Looks good to me.  I'd prefer to have a "Fixes: " here, but I can add
+it if there are no other objections to this patch.
 
-On 17/10/17 02:25 PM, Jon Mason wrote:
->> Signed-off-by: Doug Meyer <dmeyer@gigaio.com>
+Thanks,
+Jon
 
-Thanks Doug! This looks good to me.
-
-Reviewed-by: Logan Gunthorpe <logang@deltatee.com>
-Fixes: 678784a44ae8 ("NTB: switchtec_ntb: Initialize hardware for memory 
-windows")
-
-
-Logan
+> ---
+>  drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 9 +++++----
+>  1 file changed, 5 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+> index afe8ed6..ca0334a 100644
+> --- a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+> +++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+> @@ -964,7 +964,8 @@ static void switchtec_ntb_init_shared(struct switchtec_ntb *sndev)
+>  static int switchtec_ntb_init_shared_mw(struct switchtec_ntb *sndev)
+>  {
+>         struct ntb_ctrl_regs __iomem *ctl = sndev->mmio_peer_ctrl;
+> -       int bar = sndev->direct_mw_to_bar[0];
+> +       int self_bar = sndev->direct_mw_to_bar[0];
+> +       int peer_bar = sndev->peer_direct_mw_to_bar[0];
+>         u32 ctl_val;
+>         int rc;
+>
+> @@ -985,12 +986,12 @@ static int switchtec_ntb_init_shared_mw(struct switchtec_ntb *sndev)
+>         if (rc)
+>                 goto unalloc_and_exit;
+>
+> -       ctl_val = ioread32(&ctl->bar_entry[bar].ctl);
+> +       ctl_val = ioread32(&ctl->bar_entry[peer_bar].ctl);
+>         ctl_val &= 0xFF;
+>         ctl_val |= NTB_CTRL_BAR_LUT_WIN_EN;
+>         ctl_val |= ilog2(LUT_SIZE) << 8;
+>         ctl_val |= (sndev->nr_lut_mw - 1) << 14;
+> -       iowrite32(ctl_val, &ctl->bar_entry[bar].ctl);
+> +       iowrite32(ctl_val, &ctl->bar_entry[peer_bar].ctl);
+>
+>         iowrite64((NTB_CTRL_LUT_EN | (sndev->self_partition << 1) |
+>                    sndev->self_shared_dma),
+> @@ -1009,7 +1010,7 @@ static int switchtec_ntb_init_shared_mw(struct switchtec_ntb *sndev)
+>                 goto unalloc_and_exit;
+>         }
+>
+> -       sndev->peer_shared = pci_iomap(sndev->stdev->pdev, bar, LUT_SIZE);
+> +       sndev->peer_shared = pci_iomap(sndev->stdev->pdev, self_bar, LUT_SIZE);
+>         if (!sndev->peer_shared) {
+>                 rc = -ENOMEM;
+>                 goto unalloc_and_exit;
+> --
+> 1.8.3.1
+>
