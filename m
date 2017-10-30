@@ -1,80 +1,68 @@
-Return-Path: <gunthorp@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id b2si93870itg.3.2017.09.18.16.13.05
+Return-Path: <keescook@chromium.org>
+Received: from mail-pg0-x243.google.com (mail-pg0-x243.google.com. [2607:f8b0:400e:c05::243])
+        by gmr-mx.google.com with ESMTPS id a13si1266183ywe.0.2017.10.30.14.05.15
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Mon, 18 Sep 2017 16:13:05 -0700 (PDT)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Mon, 18 Sep 2017 17:12:57 -0600
-Message-Id: <20170918231258.3151-7-logang@deltatee.com>
-In-Reply-To: <20170918231258.3151-1-logang@deltatee.com>
-References: <20170918231258.3151-1-logang@deltatee.com>
-Subject: [PATCH v8 6/7] ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
-To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org
-Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 30 Oct 2017 14:05:15 -0700 (PDT)
+Received: by mail-pg0-x243.google.com with SMTP id r25so12717212pgn.4
+        for <linux-ntb@googlegroups.com>; Mon, 30 Oct 2017 14:05:15 -0700 (PDT)
+Return-Path: <keescook@chromium.org>
+Date: Mon, 30 Oct 2017 14:05:12 -0700
+From: Kees Cook <keescook@chromium.org>
+Subject: [PATCH] drivers/net: ntb_netdev: Convert timers to use timer_setup()
+Message-ID: <20171030210512.GA9899@beast>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+To: "David S. Miller" <davem@davemloft.net>
+Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, linux-ntb@googlegroups.com, netdev@vger.kernel.org, linux-kernel@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-Now that ioread64 and iowrite64 are available in io-64-nonatomic,
-we can remove the hack at the top of ntb_hw_intel.c and replace it
-with an include.
+In preparation for unconditionally passing the struct timer_list pointer to
+all timer callbacks, switch to using the new timer_setup() and from_timer()
+to pass the timer pointer explicitly.
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
-Acked-by: Dave Jiang <dave.jiang@intel.com>
-Acked-by: Allen Hubbe <Allen.Hubbe@dell.com>
-Acked-by: Jon Mason <jdmason@kudzu.us>
+Cc: Jon Mason <jdmason@kudzu.us>
+Cc: Dave Jiang <dave.jiang@intel.com>
+Cc: Allen Hubbe <Allen.Hubbe@emc.com>
+Cc: linux-ntb@googlegroups.com
+Cc: netdev@vger.kernel.org
+Signed-off-by: Kees Cook <keescook@chromium.org>
 ---
- drivers/ntb/hw/intel/ntb_hw_intel.c | 30 +-----------------------------
- 1 file changed, 1 insertion(+), 29 deletions(-)
+ drivers/net/ntb_netdev.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c b/drivers/ntb/hw/intel/ntb_hw_intel.c
-index 2557e2c05b90..606c90f59d4b 100644
---- a/drivers/ntb/hw/intel/ntb_hw_intel.c
-+++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
-@@ -59,6 +59,7 @@
- #include <linux/random.h>
- #include <linux/slab.h>
- #include <linux/ntb.h>
-+#include <linux/io-64-nonatomic-lo-hi.h>
+diff --git a/drivers/net/ntb_netdev.c b/drivers/net/ntb_netdev.c
+index 0250aa9ae2cb..9f6f7ccd44f7 100644
+--- a/drivers/net/ntb_netdev.c
++++ b/drivers/net/ntb_netdev.c
+@@ -230,10 +230,10 @@ static netdev_tx_t ntb_netdev_start_xmit(struct sk_buff *skb,
+ 	return NETDEV_TX_BUSY;
+ }
  
- #include "ntb_hw_intel.h"
- 
-@@ -155,35 +156,6 @@ MODULE_PARM_DESC(xeon_b2b_dsd_bar5_addr32,
- static inline enum ntb_topo xeon_ppd_topo(struct intel_ntb_dev *ndev, u8 ppd);
- static int xeon_init_isr(struct intel_ntb_dev *ndev);
- 
--#ifndef ioread64
--#ifdef readq
--#define ioread64 readq
--#else
--#define ioread64 _ioread64
--static inline u64 _ioread64(void __iomem *mmio)
--{
--	u64 low, high;
--
--	low = ioread32(mmio);
--	high = ioread32(mmio + sizeof(u32));
--	return low | (high << 32);
--}
--#endif
--#endif
--
--#ifndef iowrite64
--#ifdef writeq
--#define iowrite64 writeq
--#else
--#define iowrite64 _iowrite64
--static inline void _iowrite64(u64 val, void __iomem *mmio)
--{
--	iowrite32(val, mmio);
--	iowrite32(val >> 32, mmio + sizeof(u32));
--}
--#endif
--#endif
--
- static inline int pdev_is_atom(struct pci_dev *pdev)
+-static void ntb_netdev_tx_timer(unsigned long data)
++static void ntb_netdev_tx_timer(struct timer_list *t)
  {
- 	switch (pdev->device) {
+-	struct net_device *ndev = (struct net_device *)data;
+-	struct ntb_netdev *dev = netdev_priv(ndev);
++	struct ntb_netdev *dev = from_timer(dev, t, tx_timer);
++	struct net_device *ndev = dev->ndev;
+ 
+ 	if (ntb_transport_tx_free_entry(dev->qp) < tx_stop) {
+ 		mod_timer(&dev->tx_timer, jiffies + msecs_to_jiffies(tx_time));
+@@ -269,7 +269,7 @@ static int ntb_netdev_open(struct net_device *ndev)
+ 		}
+ 	}
+ 
+-	setup_timer(&dev->tx_timer, ntb_netdev_tx_timer, (unsigned long)ndev);
++	timer_setup(&dev->tx_timer, ntb_netdev_tx_timer, 0);
+ 
+ 	netif_carrier_off(ndev);
+ 	ntb_transport_link_up(dev->qp);
 -- 
-2.11.0
+2.7.4
 
+
+-- 
+Kees Cook
+Pixel Security
