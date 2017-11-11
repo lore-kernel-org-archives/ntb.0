@@ -1,104 +1,51 @@
-Return-Path: <fancer.lancer@gmail.com>
-Received: from mail-lf0-x234.google.com (mail-lf0-x234.google.com. [2a00:1450:4010:c07::234])
-        by gmr-mx.google.com with ESMTPS id n75si212103ljb.0.2017.11.30.13.39.12
-        for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 30 Nov 2017 13:39:12 -0800 (PST)
-Received: by mail-lf0-x234.google.com with SMTP id f20so9543592lfe.3
-        for <linux-ntb@googlegroups.com>; Thu, 30 Nov 2017 13:39:12 -0800 (PST)
-Return-Path: <fancer.lancer@gmail.com>
-From: Serge Semin <fancer.lancer@gmail.com>
-Subject: [PATCH] NTB: Set dma mask and dma coherent mask to NTB devices
-Date: Fri,  1 Dec 2017 00:39:10 +0300
-Message-Id: <20171130213910.21052-1-fancer.lancer@gmail.com>
-To: jdmason@kudzu.us, dave.jiang@intel.com, Allen.Hubbe@emc.com, Shyam-sundar.S-k@amd.com, Xiangliang.Yu@amd.com
-Cc: Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Serge Semin <fancer.lancer@gmail.com>
+Date: Fri, 10 Nov 2017 18:52:40 -0800 (PST)
+From: lsgunthorpe@gmail.com
+Message-Id: <c75244eb-e9fe-4a18-ac89-b2cc6bd02221@googlegroups.com>
+In-Reply-To: <c182eb3e-a866-4510-b344-de249734f15a@googlegroups.com>
+References: <20170718160409.6493-1-logang@deltatee.com>
+ <c182eb3e-a866-4510-b344-de249734f15a@googlegroups.com>
+Subject: Re: [PATCH v2 00/16] Switchtec NTB Support
+MIME-Version: 1.0
+Content-Type: multipart/mixed; 
+	boundary="----=_Part_673_1140598270.1510368760255"
+To: linux-ntb <linux-ntb@googlegroups.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-The dma_mask and dma_coherent_mask fields of the NTB struct device
-weren't initialized in hardware drivers. In fact it should be done
-instead of PCIe interface usage, since NTB clients are supposed to
-use NTB API and left unaware of real hardware implementation.
-In addition to that ntb_device_register() method shouldn't clear
-the passed ntb_dev structure, since it dma_mask is initialized
-by hardware drivers.
+------=_Part_673_1140598270.1510368760255
+Content-Type: multipart/alternative; 
+	boundary="----=_Part_674_1700211078.1510368760255"
 
-Signed-off-by: Serge Semin <fancer.lancer@gmail.com>
----
- drivers/ntb/hw/amd/ntb_hw_amd.c     | 4 ++++
- drivers/ntb/hw/idt/ntb_hw_idt.c     | 8 +++++++-
- drivers/ntb/hw/intel/ntb_hw_intel.c | 4 ++++
- drivers/ntb/ntb.c                   | 1 -
- 4 files changed, 15 insertions(+), 2 deletions(-)
+------=_Part_674_1700211078.1510368760255
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.c b/drivers/ntb/hw/amd/ntb_hw_amd.c
-index f0788aae05c9..3cfa46876239 100644
---- a/drivers/ntb/hw/amd/ntb_hw_amd.c
-+++ b/drivers/ntb/hw/amd/ntb_hw_amd.c
-@@ -1020,6 +1020,10 @@ static int amd_ntb_init_pci(struct amd_ntb_dev *ndev,
- 			goto err_dma_mask;
- 		dev_warn(&pdev->dev, "Cannot DMA consistent highmem\n");
- 	}
-+	rc = dma_coerce_mask_and_coherent(&ndev->ntb.dev,
-+					  dma_get_mask(&pdev->dev));
-+	if (rc)
-+		goto err_dma_mask;
- 
- 	ndev->self_mmio = pci_iomap(pdev, 0, 0);
- 	if (!ndev->self_mmio) {
-diff --git a/drivers/ntb/hw/idt/ntb_hw_idt.c b/drivers/ntb/hw/idt/ntb_hw_idt.c
-index 6fb87c0f0d97..d87dbd4bc82c 100644
---- a/drivers/ntb/hw/idt/ntb_hw_idt.c
-+++ b/drivers/ntb/hw/idt/ntb_hw_idt.c
-@@ -2426,7 +2426,7 @@ static int idt_init_pci(struct idt_ntb_dev *ndev)
- 	struct pci_dev *pdev = ndev->ntb.pdev;
- 	int ret;
- 
--	/* Initialize the bit mask of DMA */
-+	/* Initialize the bit mask of PCI/NTB DMA */
- 	ret = pci_set_dma_mask(pdev, DMA_BIT_MASK(64));
- 	if (ret != 0) {
- 		ret = pci_set_dma_mask(pdev, DMA_BIT_MASK(32));
-@@ -2447,6 +2447,12 @@ static int idt_init_pci(struct idt_ntb_dev *ndev)
- 		dev_warn(&pdev->dev,
- 			"Cannot set consistent DMA highmem bit mask\n");
- 	}
-+	ret = dma_coerce_mask_and_coherent(&ndev->ntb.dev,
-+					   dma_get_mask(&pdev->dev));
-+	if (ret != 0) {
-+		dev_err(&pdev->dev, "Failed to set NTB device DMA bit mask\n");
-+		return ret;
-+	}
- 
- 	/*
- 	 * Enable the device advanced error reporting. It's not critical to
-diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c b/drivers/ntb/hw/intel/ntb_hw_intel.c
-index 4de074a86073..ea6c82f8655f 100644
---- a/drivers/ntb/hw/intel/ntb_hw_intel.c
-+++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
-@@ -2586,6 +2586,10 @@ static int intel_ntb_init_pci(struct intel_ntb_dev *ndev, struct pci_dev *pdev)
- 			goto err_dma_mask;
- 		dev_warn(&pdev->dev, "Cannot DMA consistent highmem\n");
- 	}
-+	rc = dma_coerce_mask_and_coherent(&ndev->ntb.dev,
-+					  dma_get_mask(&pdev->dev));
-+	if (rc)
-+		goto err_dma_mask;
- 
- 	ndev->self_mmio = pci_iomap(pdev, 0, 0);
- 	if (!ndev->self_mmio) {
-diff --git a/drivers/ntb/ntb.c b/drivers/ntb/ntb.c
-index 03b80d89b980..79e50a5f8902 100644
---- a/drivers/ntb/ntb.c
-+++ b/drivers/ntb/ntb.c
-@@ -112,7 +112,6 @@ int ntb_register_device(struct ntb_dev *ntb)
- 
- 	init_completion(&ntb->released);
- 
--	memset(&ntb->dev, 0, sizeof(ntb->dev));
- 	ntb->dev.bus = &ntb_bus;
- 	ntb->dev.parent = &ntb->pdev->dev;
- 	ntb->dev.release = ntb_dev_release;
--- 
-2.12.0
 
+
+On Friday, November 10, 2017 at 4:27:25 AM UTC-7, cruis...@gmail.com wrote:
+>
+> I am working with Switchtec-NTB from Microsemi.
+> The driver is working fine, but if one side computer recovers from a crash 
+> due to another reason, they will lost connection, and the other side need 
+> to reload the drivers in order to reconnect to the other side.
+>
+> Have you ever gotten this problem before ?
+>
+
+Hmm, I'm just guessing here, but it's possible that in a crash scenario the 
+side that didn't crash never receives a link down event and therefore 
+ignores the subsequent link up event. Thus it doesn't re-initialise 
+anything when the link comes up. Next time I have time I'll take a look at 
+it.
+
+Thanks,
+
+Logan
+
+------=_Part_674_1700211078.1510368760255
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 7bit
+
+<div dir="ltr"><br><br>On Friday, November 10, 2017 at 4:27:25 AM UTC-7, cruis...@gmail.com wrote:<blockquote class="gmail_quote" style="margin: 0;margin-left: 0.8ex;border-left: 1px #ccc solid;padding-left: 1ex;"><div dir="ltr"><div>I am working with Switchtec-NTB from Microsemi.</div><div>The driver is working fine, but if one side computer recovers from a crash due to another reason, they will lost connection, and the other side need to reload the drivers in order to reconnect to the other side.<br><br>Have you ever gotten this problem before ?</div></div></blockquote><div><br></div><div>Hmm, I&#39;m just guessing here, but it&#39;s possible that in a crash scenario the side that didn&#39;t crash never receives a link down event and therefore ignores the subsequent link up event. Thus it doesn&#39;t re-initialise anything when the link comes up. Next time I have time I&#39;ll take a look at it.</div><div><br></div><div>Thanks,</div><div><br></div><div>Logan</div></div>
+------=_Part_674_1700211078.1510368760255--
+
+------=_Part_673_1140598270.1510368760255--
