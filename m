@@ -1,42 +1,55 @@
-Return-Path: <colin.king@canonical.com>
-Received: from youngberry.canonical.com (youngberry.canonical.com. [91.189.89.112])
-        by gmr-mx.google.com with ESMTPS id m13si1152759edc.2.2017.11.21.14.59.54
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-vk0-x242.google.com (mail-vk0-x242.google.com. [2607:f8b0:400c:c05::242])
+        by gmr-mx.google.com with ESMTPS id 105si437936uas.1.2017.11.27.08.33.37
         for <linux-ntb@googlegroups.com>
-        (version=TLS1 cipher=AES128-SHA bits=128/128);
-        Tue, 21 Nov 2017 14:59:54 -0800 (PST)
-From: Colin King <colin.king@canonical.com>
-Subject: [PATCH] NTB: switchtec_ntb: fix spelling mistake: "peforming" -> "performing"
-Date: Tue, 21 Nov 2017 22:59:45 +0000
-Message-Id: <20171121225945.29377-1-colin.king@canonical.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 27 Nov 2017 08:33:37 -0800 (PST)
+Received: by mail-vk0-x242.google.com with SMTP id 22so17770096vkq.4
+        for <linux-ntb@googlegroups.com>; Mon, 27 Nov 2017 08:33:37 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
-To: Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Logan Gunthorpe <logang@deltatee.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, linux-pci@vger.kernel.org, linux-ntb@googlegroups.com
-Cc: kernel-janitors@vger.kernel.org, linux-kernel@vger.kernel.org
+In-Reply-To: <d87f10be-053d-44df-b320-524ef07eaeef@googlegroups.com>
+References: <d87f10be-053d-44df-b320-524ef07eaeef@googlegroups.com>
+From: Jon Mason <jdmason@kudzu.us>
+Date: Mon, 27 Nov 2017 11:33:36 -0500
+Message-ID: <CAPoiz9xoT-bqFT_=1svO-EVOyymOKzAJeUFsF4s9W+cpH7k3eA@mail.gmail.com>
+Subject: Re: PLX NTB driver
+Content-Type: text/plain; charset="UTF-8"
+To: Karl Kao <karl.kao@tintri.com>
+Cc: linux-ntb <linux-ntb@googlegroups.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Colin Ian King <colin.king@canonical.com>
+Hello Karl,
+The process is the standard Linux process. Assuming the code is in
+git, rebase to the latest kernel tag (v4.15-rc1), test, and email this
+mailing list.  We'll make comments for you to correct, you correct
+them, and then you'll email an updated version of the patch (and this
+loops until it is accepted).
 
-Trivial fix to spelling mistake in dev_err error message
+Before emailing, please make sure ./scripts/checkpatch.pl does not
+have any errors (and preferably no warnings).
 
-Signed-off-by: Colin Ian King <colin.king@canonical.com>
----
- drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Thanks,
+Jon
 
-diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-index afe8ed6f3b23..d46d113210b5 100644
---- a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-+++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-@@ -172,7 +172,7 @@ static int switchtec_ntb_part_op(struct switchtec_ntb *sndev,
- 
- 	if (ps == status) {
- 		dev_err(&sndev->stdev->dev,
--			"Timed out while peforming %s (%d). (%08x)",
-+			"Timed out while performing %s (%d). (%08x)",
- 			op_text[op], op,
- 			ioread32(&ctl->partition_status));
- 
--- 
-2.14.1
 
+
+On Mon, Nov 20, 2017 at 11:16 AM, Karl Kao <karl.kao@tintri.com> wrote:
+> Hi Folks,
+>
+> I am preparing the ntb driver for plx switch.
+> Could anyone let me know the process to submit the changes? Should I just
+> send the patch to this group, or create a GitHub tree? What's process about
+> the linux-next?
+>
+> Thanks,
+> Karl
+>
+> --
+> You received this message because you are subscribed to the Google Groups
+> "linux-ntb" group.
+> To unsubscribe from this group and stop receiving emails from it, send an
+> email to linux-ntb+unsubscribe@googlegroups.com.
+> To post to this group, send email to linux-ntb@googlegroups.com.
+> To view this discussion on the web visit
+> https://groups.google.com/d/msgid/linux-ntb/d87f10be-053d-44df-b320-524ef07eaeef%40googlegroups.com.
+> For more options, visit https://groups.google.com/d/optout.
