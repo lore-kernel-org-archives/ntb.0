@@ -1,91 +1,36 @@
-Date: Tue, 10 Oct 2017 05:57:09 -0700 (PDT)
-From: Doug Meyer <dmeyer@gigaio.com>
-Message-Id: <9aa73260-8b02-4e86-b7d4-9bc3afd745a6@googlegroups.com>
-Subject: Is the Scratchpad Implementation Using a LUT Standard?
+Return-Path: <logang@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id e18si79717qtc.5.2017.11.29.08.41.36
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Wed, 29 Nov 2017 08:41:36 -0800 (PST)
+From: Logan Gunthorpe <logang@deltatee.com>
+References: <20171128220144.13294-1-logang@deltatee.com>
+ <f30f393f-3efd-d720-154e-a54bbad89238@deltatee.com>
+ <CAPoiz9zxTgMsRJpQ+fkdsrdREmAA0BcvQd6OJHsv6ErLUU_cSw@mail.gmail.com>
+ <CAJQW-Q5yGaS21iAjL3e4GULDu5jBH1pXmGHm=SXDN6GGG0jV2Q@mail.gmail.com>
+ <4fefc563-0687-9e03-2c82-f9ca163dfb0b@deltatee.com>
+Message-ID: <653a0b04-0dc6-7ac4-34b8-10a0feb8a01c@deltatee.com>
+Date: Wed, 29 Nov 2017 09:41:34 -0700
 MIME-Version: 1.0
-Content-Type: multipart/mixed; 
-	boundary="----=_Part_4347_473635242.1507640229217"
-To: linux-ntb <linux-ntb@googlegroups.com>
+In-Reply-To: <4fefc563-0687-9e03-2c82-f9ca163dfb0b@deltatee.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH] ntb_hw_switchtec: Force down the peer's link before
+ initializing
+To: ThanhTuThai <cruisethai@gmail.com>, Jon Mason <jdmason@kudzu.us>
+Cc: linux-ntb <linux-ntb@googlegroups.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-------=_Part_4347_473635242.1507640229217
-Content-Type: multipart/alternative; 
-	boundary="----=_Part_4348_1661350510.1507640229218"
+Also,
 
-------=_Part_4348_1661350510.1507640229218
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Can you grab the switchtec management utility[1] and send me the output of:
 
-Gents,
+sudo switchtec gas dump > gas_dump.dat
 
-As I continue to gain understanding about the NTB code, I am wondering 
-about the use and requirements surrounding scratchpads, at least as I see 
-things in the Switchtec code.
+On the good host after the bad host came back up?
 
-In there, I see that a LUT (LUT0) is used, the size of the LUTs apparently 
-being hard-coded to 64 KiB, for a shared memory window (struct shared_mw) 
-which contains an array of 128 u32 for the scratchpad. Also, it appears 
-that this is what is used both to determine link status and to pass memory 
-address/size information between hosts (ports, peers). I apologize if I 
-have that wrong. Please correct me.
+Thanks,
 
-The goal here is just to gain understanding... learn about required APIs vs 
-philosophical decisions vs convenience, etc.
-
-My questions are whether this is a fixture of the NTB architecture, or if 
-this is a convenience to support something else (the latter being a 
-requirement)?
-
-In particular,
-
-But most importantly, I'm wondering about struct shared_mw. Could the 
-Switchtec message registers have been used?
-What do people think about how this technique scales when there are more 
-than two peers? Obviously LUTs are a precious resource, and a LUT per peer 
-shared_mw is expensive. A LUT broken up into many shared_mw is a 
-possibility, though there is always risk of trashing stuff.
-Also, if the LUTs need to be much larger (for application use), then a 
-large chunk of the BAR space could be used for a relatively small structure.
-I'd love to hear anyone's thoughts on this.
-
-As an aside, I'm curious why the LUT size is 64 KiB? Was this just a nice 
-number as a starting point?
-
-Thanks again, folks.
-
-Blessings,
-Doug
-
-------=_Part_4348_1661350510.1507640229218
-Content-Type: text/html; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr">Gents,<div><br></div><div>As I continue to gain understand=
-ing about the NTB code, I am wondering about the use and requirements surro=
-unding scratchpads, at least as I see things in the Switchtec code.</div><d=
-iv><br></div><div>In there, I see that a LUT (LUT0) is used, the size of th=
-e LUTs apparently being hard-coded to 64 KiB, for a shared memory window (s=
-truct shared_mw) which contains an array of 128 u32 for the scratchpad. Als=
-o, it appears that this is what is used both to determine link status and t=
-o pass memory address/size information between hosts (ports, peers). I apol=
-ogize if I have that wrong. Please correct me.</div><div><br></div><div>The=
- goal here is just to gain understanding... learn about required APIs vs ph=
-ilosophical decisions vs convenience, etc.</div><div><br></div><div>My ques=
-tions are whether this is a fixture of the NTB architecture, or if this is =
-a convenience to support something else (the latter being a requirement)?</=
-div><div><br></div><div>In particular,</div><div><br></div><div>But most im=
-portantly, I&#39;m wondering about struct shared_mw. Could the Switchtec me=
-ssage registers have been used?</div><div>What do people think about how th=
-is technique scales when there are more than two peers? Obviously LUTs are =
-a precious resource, and a LUT per peer shared_mw is expensive. A LUT broke=
-n up into many shared_mw is a possibility, though there is always risk of t=
-rashing stuff.</div><div>Also, if the LUTs need to be much larger (for appl=
-ication use), then a large chunk of the BAR space could be used for a relat=
-ively small structure.</div><div>I&#39;d love to hear anyone&#39;s thoughts=
- on this.</div><div><br></div><div><div>As an aside, I&#39;m curious why th=
-e LUT size is 64 KiB? Was this just a nice number as a starting point?</div=
-></div><div><br></div><div>Thanks again, folks.</div><div><br></div><div>Bl=
-essings,</div><div>Doug</div></div>
-------=_Part_4348_1661350510.1507640229218--
-
-------=_Part_4347_473635242.1507640229217--
+Logan
