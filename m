@@ -1,131 +1,53 @@
-Return-Path: <gunthorp@deltatee.com>
+Return-Path: <logang@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id b36si141861uah.3.2017.11.29.09.55.51
+        by gmr-mx.google.com with ESMTPS id y25si342829uaa.2.2017.11.30.14.07.55
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Wed, 29 Nov 2017 09:55:52 -0800 (PST)
+        Thu, 30 Nov 2017 14:07:55 -0800 (PST)
+References: <20171130213941.21114-1-fancer.lancer@gmail.com>
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Wed, 29 Nov 2017 10:55:26 -0700
-Message-Id: <20171129175530.31032-4-logang@deltatee.com>
-In-Reply-To: <20171129175530.31032-1-logang@deltatee.com>
-References: <20171129175530.31032-1-logang@deltatee.com>
-Subject: [PATCH 3/7] ntb_hw_switchtec: Create helper function to setup reserved LUT MWs
-To: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Kelvin Cao <kelvin.cao@microsemi.com>, Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <903ec475-1163-efd8-13ea-6b531210b928@deltatee.com>
+Date: Thu, 30 Nov 2017 15:07:52 -0700
+MIME-Version: 1.0
+In-Reply-To: <20171130213941.21114-1-fancer.lancer@gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH] NTB: Fix UB/bug in ntb_mw_get_align()
+To: Serge Semin <fancer.lancer@gmail.com>, jdmason@kudzu.us, dave.jiang@intel.com, Allen.Hubbe@emc.com, Shyam-sundar.S-k@amd.com, Xiangliang.Yu@amd.com
+Cc: Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-This is a prep patch in order to support the crosslink feature which
-will require the driver to use another reserved LUT window. To
-simplify this we move the code which sets up the reserved LUT window
-into a helper function which will be used by the crosslink
-initialization.
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
----
- drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 72 ++++++++++++++++++++--------------
- 1 file changed, 43 insertions(+), 29 deletions(-)
 
-diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-index 51fec6497164..b18e938312e1 100644
---- a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-+++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-@@ -847,6 +847,46 @@ static int switchtec_ntb_init_sndev(struct switchtec_ntb *sndev)
- 	return 0;
- }
- 
-+static int config_rsvd_lut_win(struct switchtec_ntb *sndev,
-+			       struct ntb_ctrl_regs __iomem *ctl,
-+			       int lut_idx, int partition,
-+			       dma_addr_t addr)
-+{
-+	int peer_bar = sndev->peer_direct_mw_to_bar[0];
-+	u32 ctl_val;
-+	int rc;
-+
-+	rc = switchtec_ntb_part_op(sndev, ctl, NTB_CTRL_PART_OP_LOCK,
-+				   NTB_CTRL_PART_STATUS_LOCKED);
-+	if (rc)
-+		return rc;
-+
-+	ctl_val = ioread32(&ctl->bar_entry[peer_bar].ctl);
-+	ctl_val &= 0xFF;
-+	ctl_val |= NTB_CTRL_BAR_LUT_WIN_EN;
-+	ctl_val |= ilog2(LUT_SIZE) << 8;
-+	ctl_val |= (sndev->nr_lut_mw - 1) << 14;
-+	iowrite32(ctl_val, &ctl->bar_entry[peer_bar].ctl);
-+
-+	iowrite64((NTB_CTRL_LUT_EN | (partition << 1) | addr),
-+		  &ctl->lut_entry[lut_idx]);
-+
-+	rc = switchtec_ntb_part_op(sndev, ctl, NTB_CTRL_PART_OP_CFG,
-+				   NTB_CTRL_PART_STATUS_NORMAL);
-+	if (rc) {
-+		u32 bar_error, lut_error;
-+
-+		bar_error = ioread32(&ctl->bar_error);
-+		lut_error = ioread32(&ctl->lut_error);
-+		dev_err(&sndev->stdev->dev,
-+			"Error setting up reserved lut window: %08x / %08x\n",
-+			bar_error, lut_error);
-+		return rc;
-+	}
-+
-+	return 0;
-+}
-+
- static int map_bars(int *map, struct ntb_ctrl_regs __iomem *ctrl)
- {
- 	int i;
-@@ -1004,10 +1044,7 @@ static void switchtec_ntb_init_shared(struct switchtec_ntb *sndev)
- 
- static int switchtec_ntb_init_shared_mw(struct switchtec_ntb *sndev)
- {
--	struct ntb_ctrl_regs __iomem *ctl = sndev->mmio_peer_ctrl;
- 	int self_bar = sndev->direct_mw_to_bar[0];
--	int peer_bar = sndev->peer_direct_mw_to_bar[0];
--	u32 ctl_val;
- 	int rc;
- 
- 	sndev->nr_rsvd_luts++;
-@@ -1023,35 +1060,12 @@ static int switchtec_ntb_init_shared_mw(struct switchtec_ntb *sndev)
- 
- 	switchtec_ntb_init_shared(sndev);
- 
--	rc = switchtec_ntb_part_op(sndev, ctl, NTB_CTRL_PART_OP_LOCK,
--				   NTB_CTRL_PART_STATUS_LOCKED);
-+	rc = config_rsvd_lut_win(sndev, sndev->mmio_peer_ctrl, 0,
-+				 sndev->self_partition,
-+				 sndev->self_shared_dma);
- 	if (rc)
- 		goto unalloc_and_exit;
- 
--	ctl_val = ioread32(&ctl->bar_entry[peer_bar].ctl);
--	ctl_val &= 0xFF;
--	ctl_val |= NTB_CTRL_BAR_LUT_WIN_EN;
--	ctl_val |= ilog2(LUT_SIZE) << 8;
--	ctl_val |= (sndev->nr_lut_mw - 1) << 14;
--	iowrite32(ctl_val, &ctl->bar_entry[peer_bar].ctl);
--
--	iowrite64((NTB_CTRL_LUT_EN | (sndev->self_partition << 1) |
--		   sndev->self_shared_dma),
--		  &ctl->lut_entry[0]);
--
--	rc = switchtec_ntb_part_op(sndev, ctl, NTB_CTRL_PART_OP_CFG,
--				   NTB_CTRL_PART_STATUS_NORMAL);
--	if (rc) {
--		u32 bar_error, lut_error;
--
--		bar_error = ioread32(&ctl->bar_error);
--		lut_error = ioread32(&ctl->lut_error);
--		dev_err(&sndev->stdev->dev,
--			"Error setting up shared MW: %08x / %08x\n",
--			bar_error, lut_error);
--		goto unalloc_and_exit;
--	}
--
- 	sndev->peer_shared = pci_iomap(sndev->stdev->pdev, self_bar, LUT_SIZE);
- 	if (!sndev->peer_shared) {
- 		rc = -ENOMEM;
--- 
-2.11.0
+On 30/11/17 02:39 PM, Serge Semin wrote:
+> Simple (1 << pidx) operation causes undefined behaviour when
+> pidx >= 32. It must be casted to u64 to match the actual return
+> value of ntb_link_is_up() method, so to have all the possible
+> peer indexes covered and to get rid of undefined behaviour.
+> Additionally there are special macros in "linux/bitops.h" to perform
+> the bit-set-shift operations, so it's recommended to have them used
+> for proper bit setting.
+> 
+> Signed-off-by: Serge Semin <fancer.lancer@gmail.com>
 
+Reviewed-by: Logan Gunthorpe <logang@deltatee.com>
+
+> ---
+>   include/linux/ntb.h | 2 +-
+>   1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/include/linux/ntb.h b/include/linux/ntb.h
+> index c1646f2c6344..488e586fb76c 100644
+> --- a/include/linux/ntb.h
+> +++ b/include/linux/ntb.h
+> @@ -764,7 +764,7 @@ static inline int ntb_mw_get_align(struct ntb_dev *ntb, int pidx, int widx,
+>   				   resource_size_t *size_align,
+>   				   resource_size_t *size_max)
+>   {
+> -	if (!(ntb_link_is_up(ntb, NULL, NULL) & (1 << pidx)))
+> +	if (!(ntb_link_is_up(ntb, NULL, NULL) & BIT_ULL(pidx)))
+>   		return -ENOTCONN;
+>   
+>   	return ntb->ops->mw_get_align(ntb, pidx, widx, addr_align, size_align,
+> 
