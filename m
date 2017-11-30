@@ -1,45 +1,76 @@
-Return-Path: <logang@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id y197si325615ywd.2.2017.11.30.14.04.38
+Return-Path: <fancer.lancer@gmail.com>
+Received: from mail-lf0-x229.google.com (mail-lf0-x229.google.com. [2a00:1450:4010:c07::229])
+        by gmr-mx.google.com with ESMTPS id w21si229858edl.5.2017.11.30.13.43.28
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Thu, 30 Nov 2017 14:04:38 -0800 (PST)
-References: <20171130214300.21298-1-fancer.lancer@gmail.com>
-From: Logan Gunthorpe <logang@deltatee.com>
-Message-ID: <923625e8-f071-c9f6-a3e2-c16480d4aea6@deltatee.com>
-Date: Thu, 30 Nov 2017 15:04:29 -0700
-MIME-Version: 1.0
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 30 Nov 2017 13:43:28 -0800 (PST)
+Received: by mail-lf0-x229.google.com with SMTP id f13so9503183lff.12
+        for <linux-ntb@googlegroups.com>; Thu, 30 Nov 2017 13:43:28 -0800 (PST)
+Return-Path: <fancer.lancer@gmail.com>
+From: Serge Semin <fancer.lancer@gmail.com>
+Subject: [PATCH 08/08] NTB: ntb_test: Update ntb_perf tests
+Date: Fri,  1 Dec 2017 00:43:00 +0300
+Message-Id: <20171130214300.21298-8-fancer.lancer@gmail.com>
 In-Reply-To: <20171130214300.21298-1-fancer.lancer@gmail.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-Subject: Re: [PATCH 01/08] NTB: ntb_test: Safely use paths with whitespace
-To: Serge Semin <fancer.lancer@gmail.com>, jdmason@kudzu.us, dave.jiang@intel.com, Allen.Hubbe@emc.com, Shyam-sundar.S-k@amd.com, Xiangliang.Yu@amd.com
-Cc: Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
+References: <20171130214300.21298-1-fancer.lancer@gmail.com>
+To: jdmason@kudzu.us, dave.jiang@intel.com, Allen.Hubbe@emc.com, Shyam-sundar.S-k@amd.com, Xiangliang.Yu@amd.com, logang@deltatee.com
+Cc: Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Serge Semin <fancer.lancer@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Hey,
+ntb_perf driver has been also updated so to have the multi-port
+interface support. User now must specify what peer port is going
+to be used to perform the test.
 
-I took a cursory look at this series and it largely looks good to me. 
-Nice work. If I have time in the next couple days I'll do a more 
-thorough review. However, does the series not depend on changes to 
-ntb_tool? It would have been good to include a cover letter describing 
-the intention/plan.
+Signed-off-by: Serge Semin <fancer.lancer@gmail.com>
+---
+ tools/testing/selftests/ntb/ntb_test.sh | 13 +++++++------
+ 1 file changed, 7 insertions(+), 6 deletions(-)
 
+diff --git a/tools/testing/selftests/ntb/ntb_test.sh b/tools/testing/selftests/ntb/ntb_test.sh
+index 88c8ceb20607..b91497d1291f 100755
+--- a/tools/testing/selftests/ntb/ntb_test.sh
++++ b/tools/testing/selftests/ntb/ntb_test.sh
+@@ -39,15 +39,16 @@ function show_help()
+ 	echo
+ 	echo "Options:"
+ 	echo "  -C              don't cleanup ntb modules on exit"
+-	echo "  -d              run dma tests"
+ 	echo "  -h              show this help message"
+ 	echo "  -l              list available local and remote PCI ids"
+ 	echo "  -r REMOTE_HOST  specify the remote's hostname to connect"
+ 	echo "                  to for the test (using ssh)"
+ 	echo "  -m MW_SIZE      memory window size for ntb_tool"
+ 	echo "                  (default: $MW_SIZE)"
+-	echo "  -p NUM          ntb_perf run order (default: $PERF_RUN_ORDER)"
+-	echo "  -w max_mw_size  maxmium memory window size"
++	echo "  -d              run dma tests for ntb_perf"
++	echo "  -p ORDER        total data order for ntb_perf"
++	echo "                  (default: $PERF_RUN_ORDER)"
++	echo "  -w MAX_MW_SIZE  maxmium memory window size for ntb_perf"
+ 	echo
+ }
+ 
+@@ -460,17 +461,17 @@ function perf_test()
+ 		WITH="without"
+ 	fi
+ 
+-	_modprobe ntb_perf run_order=$PERF_RUN_ORDER \
++	_modprobe ntb_perf total_order=$PERF_RUN_ORDER \
+ 		max_mw_size=$MAX_MW_SIZE use_dma=$USE_DMA
+ 
+ 	echo "Running local perf test $WITH DMA"
+-	write_file "" "$LOCAL_PERF/run"
++	write_file "$LOCAL_PIDX" "$LOCAL_PERF/run"
+ 	echo -n "  "
+ 	read_file "$LOCAL_PERF/run"
+ 	echo "  Passed"
+ 
+ 	echo "Running remote perf test $WITH DMA"
+-	write_file "" "$REMOTE_PERF/run"
++	write_file "$REMOTE_PIDX" "$REMOTE_PERF/run"
+ 	echo -n "  "
+ 	read_file "$REMOTE_PERF/run"
+ 	echo "  Passed"
+-- 
+2.12.0
 
-On 30/11/17 02:42 PM, Serge Semin wrote:
-> If some of variables like LOC/REM or LOCAL_*/REMOTE_* got
-> whitespaces, the script may fail with syntax error.
-> 
-> Signed-off-by: Serge Semin <fancer.lancer@gmail.com>
-
-Seeing this is a bug fix I Ack Patch 1 and suggest it get merged ahead 
-of the series.
-
-Acked-by: Logan Gunthorpe <logang@deltatee.com>
-Fixes: a9c59ef77458 ("ntb_test: Add a selftest script for the NTB 
-subsystem")
-
-Thanks for the fix.
-
-Logan
