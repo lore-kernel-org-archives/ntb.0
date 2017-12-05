@@ -1,16 +1,16 @@
 Return-Path: <fancer.lancer@gmail.com>
-Received: from mail-lf0-x244.google.com (mail-lf0-x244.google.com. [2a00:1450:4010:c07::244])
-        by gmr-mx.google.com with ESMTPS id c69si138192ljd.4.2017.12.05.14.39.39
+Received: from mail-lf0-x241.google.com (mail-lf0-x241.google.com. [2a00:1450:4010:c07::241])
+        by gmr-mx.google.com with ESMTPS id q27si144628lfd.0.2017.12.05.14.39.37
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 05 Dec 2017 14:39:39 -0800 (PST)
-Received: by mail-lf0-x244.google.com with SMTP id r143so2108170lfe.13
-        for <linux-ntb@googlegroups.com>; Tue, 05 Dec 2017 14:39:39 -0800 (PST)
+        Tue, 05 Dec 2017 14:39:37 -0800 (PST)
+Received: by mail-lf0-x241.google.com with SMTP id f18so2122320lfg.8
+        for <linux-ntb@googlegroups.com>; Tue, 05 Dec 2017 14:39:37 -0800 (PST)
 Return-Path: <fancer.lancer@gmail.com>
 From: Serge Semin <fancer.lancer@gmail.com>
-Subject: [PATCH v3 10/15] NTB: ntb_test: Update ntb_tool DB tests
-Date: Wed,  6 Dec 2017 01:39:13 +0300
-Message-Id: <20171205223918.28727-11-fancer.lancer@gmail.com>
+Subject: [PATCH v3 09/15] NTB: ntb_test: Update ntb_tool link tests
+Date: Wed,  6 Dec 2017 01:39:12 +0300
+Message-Id: <20171205223918.28727-10-fancer.lancer@gmail.com>
 In-Reply-To: <20171205223918.28727-1-fancer.lancer@gmail.com>
 References: <20171203191736.3399-1-fancer.lancer@gmail.com>
  <20171205223918.28727-1-fancer.lancer@gmail.com>
@@ -18,99 +18,87 @@ To: jdmason@kudzu.us, dave.jiang@intel.com, Allen.Hubbe@emc.com, Shyam-sundar.S-
 Cc: Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Serge Semin <fancer.lancer@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-DB interface of ntb_tool driver hasn't been changed much, but
-db_valid_mask DebugFS file has still been added. In this case
-it's much better to test all valid DB bits instead of using
-the predefined mask, which may be incorrect in general.
+Link Up and Down methods are used to change NTB link settings on
+local side only for multi-port devices. Link is considered up
+only if both sides local and peer set it up. Intel/AMD hardware
+acts a bit different by assigning the Primary and Secondary roles,
+so Primary device only is able to change the link state. Such behaviour
+should be reflected in the test code.
 
 Signed-off-by: Serge Semin <fancer.lancer@gmail.com>
 ---
- tools/testing/selftests/ntb/ntb_test.sh | 29 ++++++++++++++++++-----------
- 1 file changed, 18 insertions(+), 11 deletions(-)
+
+Changelog v3:
+- Redirect errors to /dev/null instead of /dev/nulle
+
+ tools/testing/selftests/ntb/ntb_test.sh | 26 +++++++++++++++-----------
+ 1 file changed, 15 insertions(+), 11 deletions(-)
 
 diff --git a/tools/testing/selftests/ntb/ntb_test.sh b/tools/testing/selftests/ntb/ntb_test.sh
-index a3942f31c057..ec2e51183f8d 100755
+index 541ba70ad640..a3942f31c057 100755
 --- a/tools/testing/selftests/ntb/ntb_test.sh
 +++ b/tools/testing/selftests/ntb/ntb_test.sh
-@@ -18,7 +18,6 @@ LIST_DEVS=FALSE
- 
- DEBUGFS=${DEBUGFS-/sys/kernel/debug}
- 
--DB_BITMASK=0x7FFF
- PERF_RUN_ORDER=32
- MAX_MW_SIZE=0
- RUN_DMA_TESTS=
-@@ -39,7 +38,6 @@ function show_help()
- 	echo "be highly recommended."
- 	echo
- 	echo "Options:"
--	echo "  -b BITMASK      doorbell clear bitmask for ntb_tool"
- 	echo "  -C              don't cleanup ntb modules on exit"
- 	echo "  -d              run dma tests"
- 	echo "  -h              show this help message"
-@@ -56,7 +54,6 @@ function parse_args()
- 	OPTIND=0
- 	while getopts "b:Cdhlm:r:p:w:" opt; do
- 		case "$opt" in
--		b)  DB_BITMASK=${OPTARG} ;;
- 		C)  DONT_CLEANUP=1 ;;
- 		d)  RUN_DMA_TESTS=1 ;;
- 		h)  show_help; exit 0 ;;
-@@ -215,21 +212,30 @@ function doorbell_test()
- 
- 	echo "Running db tests on: $(basename $LOC) / $(basename $REM)"
- 
--	write_file "c $DB_BITMASK" "$REM/db"
-+	DB_VALID_MASK=$(read_file "$LOC/db_valid_mask")
- 
--	for ((i=1; i <= 8; i++)); do
--		let DB=$(read_file "$REM/db") || true
--		if [[ "$DB" != "$EXP" ]]; then
-+	write_file "c $DB_VALID_MASK" "$REM/db"
-+
-+	for ((i = 0; i < 64; i++)); do
-+		DB=$(read_file "$REM/db")
-+		if [[ "$DB" -ne "$EXP" ]]; then
- 			echo "Doorbell doesn't match expected value $EXP " \
- 			     "in $REM/db" >&2
- 			exit -1
- 		fi
- 
--		let "MASK=1 << ($i-1)" || true
--		let "EXP=$EXP | $MASK" || true
-+		let "MASK = (1 << $i) & $DB_VALID_MASK" || true
-+		let "EXP = $EXP | $MASK" || true
-+
- 		write_file "s $MASK" "$LOC/peer_db"
- 	done
- 
-+	write_file "c $DB_VALID_MASK" "$REM/db_mask"
-+	write_file $DB_VALID_MASK "$REM/db_event"
-+	write_file "s $DB_VALID_MASK" "$REM/db_mask"
-+
-+	write_file "c $DB_VALID_MASK" "$REM/db"
-+
- 	echo "  Passed"
+@@ -138,6 +138,11 @@ function check_file()
+ 	fi
  }
  
-@@ -393,14 +399,15 @@ function ntb_tool_tests()
- 	write_file "Y" "$LOCAL_PEER_TOOL/link_event"
- 	write_file "Y" "$REMOTE_PEER_TOOL/link_event"
- 
-+	doorbell_test "$LOCAL_TOOL" "$REMOTE_TOOL"
-+	doorbell_test "$REMOTE_TOOL" "$LOCAL_TOOL"
++function subdirname()
++{
++	echo $(basename $(dirname $1)) 2> /dev/null
++}
 +
+ function find_pidx()
+ {
+ 	PORT=$1
+@@ -183,9 +188,9 @@ function link_test()
+ 	REM=$2
+ 	EXP=0
+ 
+-	echo "Running link tests on: $(basename $LOC) / $(basename $REM)"
++	echo "Running link tests on: $(subdirname $LOC) / $(subdirname $REM)"
+ 
+-	if ! write_file "N" "$LOC/link" 2> /dev/null; then
++	if ! write_file "N" "$LOC/../link" 2> /dev/null; then
+ 		echo "  Unsupported"
+ 		return
+ 	fi
+@@ -193,12 +198,11 @@ function link_test()
+ 	write_file "N" "$LOC/link_event"
+ 
+ 	if [[ $(read_file "$REM/link") != "N" ]]; then
+-		echo "Expected remote link to be down in $REM/link" >&2
++		echo "Expected link to be down in $REM/link" >&2
+ 		exit -1
+ 	fi
+ 
+-	write_file "Y" "$LOC/link"
+-	write_file "Y" "$LOC/link_event"
++	write_file "Y" "$LOC/../link"
+ 
+ 	echo "  Passed"
+ }
+@@ -379,15 +383,15 @@ function ntb_tool_tests()
+ 
+ 	port_test "$LOCAL_TOOL" "$REMOTE_TOOL"
+ 
+-	write_file "Y" "$LOCAL_TOOL/link_event"
+-	write_file "Y" "$REMOTE_TOOL/link_event"
++	LOCAL_PEER_TOOL="$LOCAL_TOOL/peer$LOCAL_PIDX"
++	REMOTE_PEER_TOOL="$REMOTE_TOOL/peer$REMOTE_PIDX"
+ 
+-	link_test "$LOCAL_TOOL" "$REMOTE_TOOL"
+-	link_test "$REMOTE_TOOL" "$LOCAL_TOOL"
++	link_test "$LOCAL_PEER_TOOL" "$REMOTE_PEER_TOOL"
++	link_test "$REMOTE_PEER_TOOL" "$LOCAL_PEER_TOOL"
+ 
+ 	#Ensure the link is up on both sides before continuing
+-	write_file "Y" "$LOCAL_TOOL/link_event"
+-	write_file "Y" "$REMOTE_TOOL/link_event"
++	write_file "Y" "$LOCAL_PEER_TOOL/link_event"
++	write_file "Y" "$REMOTE_PEER_TOOL/link_event"
+ 
  	for PEER_TRANS in $(ls "$LOCAL_TOOL"/peer_trans*); do
  		PT=$(basename $PEER_TRANS)
- 		write_file $MW_SIZE "$LOCAL_TOOL/$PT"
- 		write_file $MW_SIZE "$REMOTE_TOOL/$PT"
- 	done
- 
--	doorbell_test "$LOCAL_TOOL" "$REMOTE_TOOL"
--	doorbell_test "$REMOTE_TOOL" "$LOCAL_TOOL"
- 	scratchpad_test "$LOCAL_TOOL" "$REMOTE_TOOL"
- 	scratchpad_test "$REMOTE_TOOL" "$LOCAL_TOOL"
- 
 -- 
 2.12.0
 
