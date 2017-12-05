@@ -1,58 +1,58 @@
-Return-Path: <logang@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id f15si52132plr.1.2017.12.05.08.57.52
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-ua0-x243.google.com (mail-ua0-x243.google.com. [2607:f8b0:400c:c08::243])
+        by gmr-mx.google.com with ESMTPS id z18si88664iti.0.2017.12.05.08.52.33
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Tue, 05 Dec 2017 08:57:52 -0800 (PST)
-References: <20171203191736.3399-1-fancer.lancer@gmail.com>
- <000001d36d3b$e9f211d0$bdd63570$@dell.com>
- <20171205155454.GA1701@mobilestation>
-From: Logan Gunthorpe <logang@deltatee.com>
-Message-ID: <c8bf3995-337e-8189-2216-1ec75e93a5c4@deltatee.com>
-Date: Tue, 5 Dec 2017 09:57:44 -0700
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 05 Dec 2017 08:52:33 -0800 (PST)
+Received: by mail-ua0-x243.google.com with SMTP id t24so686911uaa.13
+        for <linux-ntb@googlegroups.com>; Tue, 05 Dec 2017 08:52:33 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <20171205155454.GA1701@mobilestation>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-Subject: Re: [PATCH v2 00/15] NTB: Add full multi-port API support to the test
- drivers
-To: Serge Semin <fancer.lancer@gmail.com>, Allen Hubbe <Allen.Hubbe@dell.com>
-Cc: jdmason@kudzu.us, dave.jiang@intel.com, Shyam-sundar.S-k@amd.com, Xiangliang.Yu@amd.com, gary.hook@amd.com, Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
+In-Reply-To: <20171203191736.3399-4-fancer.lancer@gmail.com>
+References: <20171203191736.3399-1-fancer.lancer@gmail.com> <20171203191736.3399-4-fancer.lancer@gmail.com>
+From: Jon Mason <jdmason@kudzu.us>
+Date: Tue, 5 Dec 2017 11:52:32 -0500
+Message-ID: <CAPoiz9yuX+d1Bt1ioy_u9jLXzkWfHwKjoJ+hH5t4BN88YKrRsQ@mail.gmail.com>
+Subject: Re: [PATCH v2 03/15] NTB: Fix UB/bug in ntb_mw_get_align()
+Content-Type: text/plain; charset="UTF-8"
+To: Serge Semin <fancer.lancer@gmail.com>
+Cc: Dave Jiang <dave.jiang@intel.com>, "Hubbe, Allen" <Allen.Hubbe@emc.com>, "S-k, Shyam-sundar" <Shyam-sundar.S-k@amd.com>, "Yu, Xiangliang" <Xiangliang.Yu@amd.com>, Gary R Hook <gary.hook@amd.com>, Sergey.Semin@t-platforms.ru, linux-ntb <linux-ntb@googlegroups.com>, linux-kernel <linux-kernel@vger.kernel.org>
 List-ID: <linux-ntb.googlegroups.com>
 
+On Sun, Dec 3, 2017 at 2:17 PM, Serge Semin <fancer.lancer@gmail.com> wrote:
+> Simple (1 << pidx) operation causes undefined behaviour when
+> pidx >= 32. It must be casted to u64 to match the actual return
+> value of ntb_link_is_up() method, so to have all the possible
+> peer indexes covered and to get rid of undefined behaviour.
+> Additionally there are special macros in "linux/bitops.h" to perform
+> the bit-set-shift operations, so it's recommended to have them used
+> for proper bit setting.
 
+This looks good to me, but also seems like a bug fix.  Please comment
+on if this is not noticed.
 
-On 05/12/17 08:54 AM, Serge Semin wrote:
-> Yeah, I know that. As I already said, it isn't usual of my patches
-> being so complicated. The reason why I made so many small renamings
-> was the code refactoring. I tried to set all the test drivers code
-> up to the same naming convention, so it would be easier for a code
-> reader to study it. Definitely, such the alterations should have
-> been done within a separate patch. But I started refactoring the
-> code and changing the logic for multi-portness all together, so it
-> would be too painful to unpick one from another after the work was
-> done. It especially concerned the ntb_tool and ntb_perf drivers. Next
-> time the procedures will be separately. Sorry for inconvenience and
-> thanks for understanding.
+Thanks,
+Jon
 
-It's really not that hard, using git, to refactor a patch. If it's such 
-a mess that you can't refactor it then it's probably a good indication 
-that said patch should not be merged. The vast majority of other 
-maintainers in the kernel would never accept such a large convoluted 
-patch as it's too difficult to determine if something unintended changed 
-and it makes debugging and bisecting (once it's merged) more difficult. 
-Not to mention the fact that few developers are willing to put in the 
-time to untangle it enough to properly review.
-
-> Oops. We discussed it in the IRC. We agreed to add commentaries
-> around the types definition, so a reader would better understand their
-> purpose. I just forgot to move the change from my repo to the fork of
-> Jon's one. I'll do it and resend the patch.
-
-I agree with Allen. The unions are completely unnecessary. If there was 
-a space constraint then they could be justified but we really don't have 
-that here. In my opinion, you should just drop them -- a comment doesn't 
-really improve things much.
-
-Logan
+>
+> Signed-off-by: Serge Semin <fancer.lancer@gmail.com>
+> Reviewed-by: Logan Gunthorpe <logang@deltatee.com>
+> ---
+>  include/linux/ntb.h | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/include/linux/ntb.h b/include/linux/ntb.h
+> index c1646f2c6344..488e586fb76c 100644
+> --- a/include/linux/ntb.h
+> +++ b/include/linux/ntb.h
+> @@ -764,7 +764,7 @@ static inline int ntb_mw_get_align(struct ntb_dev *ntb, int pidx, int widx,
+>                                    resource_size_t *size_align,
+>                                    resource_size_t *size_max)
+>  {
+> -       if (!(ntb_link_is_up(ntb, NULL, NULL) & (1 << pidx)))
+> +       if (!(ntb_link_is_up(ntb, NULL, NULL) & BIT_ULL(pidx)))
+>                 return -ENOTCONN;
+>
+>         return ntb->ops->mw_get_align(ntb, pidx, widx, addr_align, size_align,
+> --
+> 2.12.0
+>
