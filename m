@@ -1,60 +1,82 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id b6si84636plm.3.2017.12.05.15.31.19
+        by gmr-mx.google.com with ESMTPS id k4si81250ioc.4.2017.12.05.15.31.18
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Tue, 05 Dec 2017 15:31:20 -0800 (PST)
+        Tue, 05 Dec 2017 15:31:19 -0800 (PST)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Tue,  5 Dec 2017 16:30:51 -0700
-Message-Id: <20171205233058.5365-2-logang@deltatee.com>
-In-Reply-To: <20171205233058.5365-1-logang@deltatee.com>
-References: <20171205233058.5365-1-logang@deltatee.com>
-Subject: [PATCH v9 1/8] drm/tilcdc: ensure nonatomic iowrite64 is not used
+Date: Tue,  5 Dec 2017 16:30:50 -0700
+Message-Id: <20171205233058.5365-1-logang@deltatee.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Subject: [PATCH v9 0/8] Add io{read|write}64 to io-64-atomic headers
 To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org
-Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>, Jyri Sarha <jsarha@ti.com>, Tomi Valkeinen <tomi.valkeinen@ti.com>, David Airlie <airlied@linux.ie>
+Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Add a check to ensure iowrite64 is only used if it is atomic.
+This is v9 of my cleanup series to push a number of instances of people
+defining their own io{read|write}64 functions when they don't exist in
+non-64bit systems. This series adds inline functions to the
+io-64-nonatomic headers and then cleans up the drivers that defined their
+own.
 
-It was decided in [1] that the tilcdc driver should not be using an
-atomic operation (so it was left out of this patchset). However, it turns
-out that through the drm code, a nonatomic header is actually included:
+Changes since v8:
+- Rebased onto v4.15-rc2, as a result rewrote patch 7 seeing someone did
+  some similar cleanup in that area.
+- Added a patch to clean up the Switchtec NTB driver which landed in
+  v4.15-rc1
 
-include/linux/io-64-nonatomic-lo-hi.h
-is included from include/drm/drm_os_linux.h:9:0,
-            from include/drm/drmP.h:74,
-            from include/drm/drm_modeset_helper.h:26,
-            from include/drm/drm_atomic_helper.h:33,
-            from drivers/gpu/drm/tilcdc/tilcdc_crtc.c:19:
+Changes since v7:
+- Fix minor nits from Andy Shevchenko
+- Rebased onto v4.14-rc1
 
-And thus, without this change, this patchset would inadvertantly
-change the behaviour of the tilcdc driver.
+Changes since v6:
+ ** none **
 
-[1] lkml.kernel.org/r/CAK8P3a2HhO_zCnsTzq7hmWSz5La5Thu19FWZpun16iMnyyNreQ@mail.gmail.com
+Changes since v5:
+- Added a fix to the tilcdc driver to ensure it doesn't use the
+  non-atomic operation. (This includes adding io{read|write}64[be]_is_nonatomic
+  defines).
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
-Cc: Jyri Sarha <jsarha@ti.com>
-Cc: Arnd Bergmann <arnd@arndb.de>
-Cc: Tomi Valkeinen <tomi.valkeinen@ti.com>
-Cc: David Airlie <airlied@linux.ie>
----
- drivers/gpu/drm/tilcdc/tilcdc_regs.h | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Changes since v4:
+- Add functions so the powerpc implementation of iomap.c compiles. (As
+  noticed by Horia)
 
-diff --git a/drivers/gpu/drm/tilcdc/tilcdc_regs.h b/drivers/gpu/drm/tilcdc/tilcdc_regs.h
-index 9d528c0a67a4..5048ebb86835 100644
---- a/drivers/gpu/drm/tilcdc/tilcdc_regs.h
-+++ b/drivers/gpu/drm/tilcdc/tilcdc_regs.h
-@@ -133,7 +133,7 @@ static inline void tilcdc_write64(struct drm_device *dev, u32 reg, u64 data)
- 	struct tilcdc_drm_private *priv = dev->dev_private;
- 	volatile void __iomem *addr = priv->mmio + reg;
- 
--#ifdef iowrite64
-+#if defined(iowrite64) && !defined(iowrite64_is_nonatomic)
- 	iowrite64(data, addr);
- #else
- 	__iowmb();
--- 
+Changes since v3:
+
+- I noticed powerpc didn't use the appropriate functions seeing
+  readq/writeq were not defined when iomap.h was included. Thus I've
+  included a patch to adjust this
+- Fixed some mistakes with a couple of the defines in io-64-nonatomic*
+  headers
+- Fixed a typo noticed by Horia.
+
+(earlier versions were drastically different)
+
+Logan Gunthorpe (8):
+  drm/tilcdc: ensure nonatomic iowrite64 is not used
+  powerpc: io.h: move iomap.h include so that it can use readq/writeq
+    defs
+  powerpc: iomap.c: introduce io{read|write}64_{lo_hi|hi_lo}
+  iomap: introduce io{read|write}64_{lo_hi|hi_lo}
+  io-64-nonatomic: add io{read|write}64[be]{_lo_hi|_hi_lo} macros
+  ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
+  crypto: caam: cleanup CONFIG_64BIT ifdefs when using io{read|write}64
+  ntb: ntb_hw_switchtec: Cleanup 64bit IO defines to use the common
+    header
+
+ arch/powerpc/include/asm/io.h          |   6 +-
+ arch/powerpc/kernel/iomap.c            |  40 ++++++++++
+ drivers/crypto/caam/regs.h             |  26 +------
+ drivers/gpu/drm/tilcdc/tilcdc_regs.h   |   2 +-
+ drivers/ntb/hw/intel/ntb_hw_intel.c    |  30 +-------
+ drivers/ntb/hw/mscc/ntb_hw_switchtec.c |  30 +-------
+ include/asm-generic/iomap.h            |  26 +++++--
+ include/linux/io-64-nonatomic-hi-lo.h  |  64 ++++++++++++++++
+ include/linux/io-64-nonatomic-lo-hi.h  |  64 ++++++++++++++++
+ lib/iomap.c                            | 132 +++++++++++++++++++++++++++++++++
+ 10 files changed, 328 insertions(+), 92 deletions(-)
+
+--
 2.11.0
-
