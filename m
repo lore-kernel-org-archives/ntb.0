@@ -1,60 +1,42 @@
 Return-Path: <logang@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id v14si42682pfk.5.2017.12.05.11.38.31
+        by gmr-mx.google.com with ESMTPS id l22si673004ita.2.2017.12.05.11.16.59
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Tue, 05 Dec 2017 11:38:31 -0800 (PST)
+        Tue, 05 Dec 2017 11:16:59 -0800 (PST)
 References: <20171203191736.3399-1-fancer.lancer@gmail.com>
- <20171203191736.3399-11-fancer.lancer@gmail.com>
- <CAPoiz9y9XE-sqK1n9PhD5R=wRQgEMZEeovh8yRN-_MAAyC08Tg@mail.gmail.com>
+ <20171203191736.3399-6-fancer.lancer@gmail.com>
+ <CAPoiz9yy8sMHTHzBYS3AJYArmnfQY-ntHrZa_m3G3-ALxa_QyA@mail.gmail.com>
 From: Logan Gunthorpe <logang@deltatee.com>
-Message-ID: <3fe534b5-cf62-4e7b-eb33-f19b4274156b@deltatee.com>
-Date: Tue, 5 Dec 2017 12:38:28 -0700
+Message-ID: <aa4e3376-7113-9a7a-548c-be0ee685edb5@deltatee.com>
+Date: Tue, 5 Dec 2017 12:16:57 -0700
 MIME-Version: 1.0
-In-Reply-To: <CAPoiz9y9XE-sqK1n9PhD5R=wRQgEMZEeovh8yRN-_MAAyC08Tg@mail.gmail.com>
+In-Reply-To: <CAPoiz9yy8sMHTHzBYS3AJYArmnfQY-ntHrZa_m3G3-ALxa_QyA@mail.gmail.com>
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
-Subject: Re: [PATCH v2 10/15] NTB: ntb_test: Update ntb_tool DB tests
+Subject: Re: [PATCH v2 05/15] NTB: ntb_tool: Add full multi-port NTB API
+ support
 To: Jon Mason <jdmason@kudzu.us>, Serge Semin <fancer.lancer@gmail.com>
 Cc: Dave Jiang <dave.jiang@intel.com>, "Hubbe, Allen" <Allen.Hubbe@emc.com>, "S-k, Shyam-sundar" <Shyam-sundar.S-k@amd.com>, "Yu, Xiangliang" <Xiangliang.Yu@amd.com>, Gary R Hook <gary.hook@amd.com>, Sergey.Semin@t-platforms.ru, linux-ntb <linux-ntb@googlegroups.com>, linux-kernel <linux-kernel@vger.kernel.org>
 List-ID: <linux-ntb.googlegroups.com>
 
 
 
-On 05/12/17 11:27 AM, Jon Mason wrote:
->>          echo "Running db tests on: $(basename $LOC) / $(basename $REM)"
->>
->> -       write_file "c $DB_BITMASK" "$REM/db"
->> +       DB_VALID_MASK=$(read_file "$LOC/db_valid_mask")
->>
->> -       for ((i=1; i <= 8; i++)); do
->> -               let DB=$(read_file "$REM/db") || true
->> -               if [[ "$DB" != "$EXP" ]]; then
->> +       write_file "c $DB_VALID_MASK" "$REM/db"
->> +
->> +       for ((i = 0; i < 64; i++)); do
+On 05/12/17 11:03 AM, Jon Mason wrote:
+>> +static ssize_t tool_fn_read(struct tool_ctx *tc, char __user *ubuf,
+>> +                           size_t size, loff_t *offp,
+>> +                           u64 (*fn_read)(struct ntb_dev *))
+>>   {
+>>          size_t buf_size;
+>> -       char *buf;
+>> -       ssize_t pos, rc;
+>> +       char buf[32];
 > 
-> I'm guessing this should be a tunable variable, for those systems with
-> a different number of doorbells.
+> I would think you would want the malloc like before, but if not then
+> make this a #define and reference it as necessary throughout the code.
 
-That's actually the point of this patch. Serge is using db_valid_mask to 
-test all possible doorbells instead of just the first 8. 64 is just the 
-maximum number.
-
-Looks like a nice improvement.
-
-The only thing that's not clear to me is what this does:
-
-> +	write_file "c $DB_VALID_MASK" "$REM/db_mask"
-> +	write_file $DB_VALID_MASK "$REM/db_event"
-> +	write_file "s $DB_VALID_MASK" "$REM/db_mask"
-> +
-> +	write_file "c $DB_VALID_MASK" "$REM/db"
-
-It would be good to mention it in the commit message (then, as a rule of 
-thumb, commits that do "A" and "B" should actually be two commits). 
-Especially seeing db_event appears to be new and hasn't been discussed 
-in any commit message.
+I disagree. Allocating a small 32-byte buf on the stack is a nice 
+cleanup. I'm not sure what you are referring to about the #define.
 
 Logan
