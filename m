@@ -1,82 +1,52 @@
-Return-Path: <gunthorp@deltatee.com>
+Return-Path: <logang@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id k4si81250ioc.4.2017.12.05.15.31.18
+        by gmr-mx.google.com with ESMTPS id z1si65640pfh.0.2017.12.05.11.46.08
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Tue, 05 Dec 2017 15:31:19 -0800 (PST)
+        Tue, 05 Dec 2017 11:46:09 -0800 (PST)
+References: <20171204175721.10322-1-logang@deltatee.com>
+ <CAPoiz9x=sKryUszkSiPwTGW0fENpHKky_O708bA_zXLYZi0HoA@mail.gmail.com>
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Tue,  5 Dec 2017 16:30:50 -0700
-Message-Id: <20171205233058.5365-1-logang@deltatee.com>
+Message-ID: <e7631424-9274-532d-fe21-bbd55f33958f@deltatee.com>
+Date: Tue, 5 Dec 2017 12:46:06 -0700
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-Subject: [PATCH v9 0/8] Add io{read|write}64 to io-64-atomic headers
-To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org
-Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>
+In-Reply-To: <CAPoiz9x=sKryUszkSiPwTGW0fENpHKky_O708bA_zXLYZi0HoA@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH v2] ntb_hw_switchtec: Force down the link before
+ initializing
+To: Jon Mason <jdmason@kudzu.us>
+Cc: linux-ntb <linux-ntb@googlegroups.com>, ThanhTuThai <cruisethai@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-This is v9 of my cleanup series to push a number of instances of people
-defining their own io{read|write}64 functions when they don't exist in
-non-64bit systems. This series adds inline functions to the
-io-64-nonatomic headers and then cleans up the drivers that defined their
-own.
 
-Changes since v8:
-- Rebased onto v4.15-rc2, as a result rewrote patch 7 seeing someone did
-  some similar cleanup in that area.
-- Added a patch to clean up the Switchtec NTB driver which landed in
-  v4.15-rc1
 
-Changes since v7:
-- Fix minor nits from Andy Shevchenko
-- Rebased onto v4.14-rc1
+On 05/12/17 12:30 PM, Jon Mason wrote:
+> On Mon, Dec 4, 2017 at 12:57 PM, Logan Gunthorpe <logang@deltatee.com> wrote:
+>> If one host crashes and soft reboots, the other host may not see a
+>> link down event. Then when the crashed host comes back up, the
+>> surviving host may not know the link was reset and the NTB clients
+>> may not work without being reset.
+>>
+>> To solve this, we send a LINK_FORCE_DOWN message to each peer every
+>> time we come up, before we register the NTB device. If a surviving
+>> host still thinks the link is up it will take it down immediately.
+>> In this way, once the crashed host comes up fully, it will send a
+>> regular link up event as per usual and the link will be properly
+>> restarted.
+>>
+>> While we are in the area, this also fixes the MSG_LINK_UP message that
+>> was in the link down function that was reported by Doug Meyers.
+> 
+> So, this only applies on the ntb-next branch, and applying it after
+> your multi-partition patch series causes it to fail to apply.  The
+> fixup appears to be trivial, but please double check me.
 
-Changes since v6:
- ** none **
+Oops sorry. I think I checked that v1 merged cleanly but didn't look at 
+v2. I double checked the merged commit in ntb-next and it looks good. 
+I'll do some testing on ntb-next later in the week.
 
-Changes since v5:
-- Added a fix to the tilcdc driver to ensure it doesn't use the
-  non-atomic operation. (This includes adding io{read|write}64[be]_is_nonatomic
-  defines).
+Thanks,
 
-Changes since v4:
-- Add functions so the powerpc implementation of iomap.c compiles. (As
-  noticed by Horia)
-
-Changes since v3:
-
-- I noticed powerpc didn't use the appropriate functions seeing
-  readq/writeq were not defined when iomap.h was included. Thus I've
-  included a patch to adjust this
-- Fixed some mistakes with a couple of the defines in io-64-nonatomic*
-  headers
-- Fixed a typo noticed by Horia.
-
-(earlier versions were drastically different)
-
-Logan Gunthorpe (8):
-  drm/tilcdc: ensure nonatomic iowrite64 is not used
-  powerpc: io.h: move iomap.h include so that it can use readq/writeq
-    defs
-  powerpc: iomap.c: introduce io{read|write}64_{lo_hi|hi_lo}
-  iomap: introduce io{read|write}64_{lo_hi|hi_lo}
-  io-64-nonatomic: add io{read|write}64[be]{_lo_hi|_hi_lo} macros
-  ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
-  crypto: caam: cleanup CONFIG_64BIT ifdefs when using io{read|write}64
-  ntb: ntb_hw_switchtec: Cleanup 64bit IO defines to use the common
-    header
-
- arch/powerpc/include/asm/io.h          |   6 +-
- arch/powerpc/kernel/iomap.c            |  40 ++++++++++
- drivers/crypto/caam/regs.h             |  26 +------
- drivers/gpu/drm/tilcdc/tilcdc_regs.h   |   2 +-
- drivers/ntb/hw/intel/ntb_hw_intel.c    |  30 +-------
- drivers/ntb/hw/mscc/ntb_hw_switchtec.c |  30 +-------
- include/asm-generic/iomap.h            |  26 +++++--
- include/linux/io-64-nonatomic-hi-lo.h  |  64 ++++++++++++++++
- include/linux/io-64-nonatomic-lo-hi.h  |  64 ++++++++++++++++
- lib/iomap.c                            | 132 +++++++++++++++++++++++++++++++++
- 10 files changed, 328 insertions(+), 92 deletions(-)
-
---
-2.11.0
+Logan
