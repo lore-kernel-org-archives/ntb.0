@@ -1,16 +1,16 @@
 Return-Path: <fancer.lancer@gmail.com>
-Received: from mail-lf0-x241.google.com (mail-lf0-x241.google.com. [2a00:1450:4010:c07::241])
-        by gmr-mx.google.com with ESMTPS id q27si144628lfd.0.2017.12.05.14.39.37
+Received: from mail-lf0-x243.google.com (mail-lf0-x243.google.com. [2a00:1450:4010:c07::243])
+        by gmr-mx.google.com with ESMTPS id w21si240447edl.5.2017.12.05.14.39.36
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 05 Dec 2017 14:39:37 -0800 (PST)
-Received: by mail-lf0-x241.google.com with SMTP id f18so2122320lfg.8
-        for <linux-ntb@googlegroups.com>; Tue, 05 Dec 2017 14:39:37 -0800 (PST)
+        Tue, 05 Dec 2017 14:39:36 -0800 (PST)
+Received: by mail-lf0-x243.google.com with SMTP id l81so2130659lfl.6
+        for <linux-ntb@googlegroups.com>; Tue, 05 Dec 2017 14:39:36 -0800 (PST)
 Return-Path: <fancer.lancer@gmail.com>
 From: Serge Semin <fancer.lancer@gmail.com>
-Subject: [PATCH v3 09/15] NTB: ntb_test: Update ntb_tool link tests
-Date: Wed,  6 Dec 2017 01:39:12 +0300
-Message-Id: <20171205223918.28727-10-fancer.lancer@gmail.com>
+Subject: [PATCH v3 08/15] NTB: ntb_test: Add ntb_tool port tests
+Date: Wed,  6 Dec 2017 01:39:11 +0300
+Message-Id: <20171205223918.28727-9-fancer.lancer@gmail.com>
 In-Reply-To: <20171205223918.28727-1-fancer.lancer@gmail.com>
 References: <20171203191736.3399-1-fancer.lancer@gmail.com>
  <20171205223918.28727-1-fancer.lancer@gmail.com>
@@ -18,87 +18,87 @@ To: jdmason@kudzu.us, dave.jiang@intel.com, Allen.Hubbe@emc.com, Shyam-sundar.S-
 Cc: Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Serge Semin <fancer.lancer@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Link Up and Down methods are used to change NTB link settings on
-local side only for multi-port devices. Link is considered up
-only if both sides local and peer set it up. Intel/AMD hardware
-acts a bit different by assigning the Primary and Secondary roles,
-so Primary device only is able to change the link state. Such behaviour
-should be reflected in the test code.
+Multi-port interface is now available in ntb_tool driver. According
+to the new NTB API, there might be more than two devices connected over
+NTB. It means each device can have multiple freely enumerated ports.
+Each port got index assigned by NTB hardware driver. This test is
+performed to determine the local and peer ports as well as their indexes.
 
 Signed-off-by: Serge Semin <fancer.lancer@gmail.com>
 ---
-
-Changelog v3:
-- Redirect errors to /dev/null instead of /dev/nulle
-
- tools/testing/selftests/ntb/ntb_test.sh | 26 +++++++++++++++-----------
- 1 file changed, 15 insertions(+), 11 deletions(-)
+ tools/testing/selftests/ntb/ntb_test.sh | 52 +++++++++++++++++++++++++++++++++
+ 1 file changed, 52 insertions(+)
 
 diff --git a/tools/testing/selftests/ntb/ntb_test.sh b/tools/testing/selftests/ntb/ntb_test.sh
-index 541ba70ad640..a3942f31c057 100755
+index a8647ad891eb..541ba70ad640 100755
 --- a/tools/testing/selftests/ntb/ntb_test.sh
 +++ b/tools/testing/selftests/ntb/ntb_test.sh
-@@ -138,6 +138,11 @@ function check_file()
+@@ -127,6 +127,56 @@ function write_file()
  	fi
  }
  
-+function subdirname()
++function check_file()
 +{
-+	echo $(basename $(dirname $1)) 2> /dev/null
++	split_remote $1
++
++	if [[ "$REMOTE" != "" ]]; then
++		ssh "$REMOTE" "[[ -e ${VPATH} ]]"
++	else
++		[[ -e ${VPATH} ]]
++	fi
 +}
 +
- function find_pidx()
++function find_pidx()
++{
++	PORT=$1
++	PPATH=$2
++
++	for ((i = 0; i < 64; i++)); do
++		PEER_DIR="$PPATH/peer$i"
++
++		check_file ${PEER_DIR} || break
++
++		PEER_PORT=$(read_file "${PEER_DIR}/port")
++		if [[ ${PORT} -eq $PEER_PORT ]]; then
++			echo $i
++			return 0
++		fi
++	done
++
++	return 1
++}
++
++function port_test()
++{
++	LOC=$1
++	REM=$2
++
++	echo "Running port tests on: $(basename $LOC) / $(basename $REM)"
++
++	LOCAL_PORT=$(read_file "$LOC/port")
++	REMOTE_PORT=$(read_file "$REM/port")
++
++	LOCAL_PIDX=$(find_pidx ${REMOTE_PORT} "$LOC")
++	REMOTE_PIDX=$(find_pidx ${LOCAL_PORT} "$REM")
++
++	echo "Local port ${LOCAL_PORT} with index ${REMOTE_PIDX} on remote host"
++	echo "Peer port ${REMOTE_PORT} with index ${LOCAL_PIDX} on local host"
++
++	echo "  Passed"
++}
++
+ function link_test()
  {
- 	PORT=$1
-@@ -183,9 +188,9 @@ function link_test()
- 	REM=$2
- 	EXP=0
+ 	LOC=$1
+@@ -327,6 +377,8 @@ function ntb_tool_tests()
  
--	echo "Running link tests on: $(basename $LOC) / $(basename $REM)"
-+	echo "Running link tests on: $(subdirname $LOC) / $(subdirname $REM)"
+ 	_modprobe ntb_tool
  
--	if ! write_file "N" "$LOC/link" 2> /dev/null; then
-+	if ! write_file "N" "$LOC/../link" 2> /dev/null; then
- 		echo "  Unsupported"
- 		return
- 	fi
-@@ -193,12 +198,11 @@ function link_test()
- 	write_file "N" "$LOC/link_event"
++	port_test "$LOCAL_TOOL" "$REMOTE_TOOL"
++
+ 	write_file "Y" "$LOCAL_TOOL/link_event"
+ 	write_file "Y" "$REMOTE_TOOL/link_event"
  
- 	if [[ $(read_file "$REM/link") != "N" ]]; then
--		echo "Expected remote link to be down in $REM/link" >&2
-+		echo "Expected link to be down in $REM/link" >&2
- 		exit -1
- 	fi
- 
--	write_file "Y" "$LOC/link"
--	write_file "Y" "$LOC/link_event"
-+	write_file "Y" "$LOC/../link"
- 
- 	echo "  Passed"
- }
-@@ -379,15 +383,15 @@ function ntb_tool_tests()
- 
- 	port_test "$LOCAL_TOOL" "$REMOTE_TOOL"
- 
--	write_file "Y" "$LOCAL_TOOL/link_event"
--	write_file "Y" "$REMOTE_TOOL/link_event"
-+	LOCAL_PEER_TOOL="$LOCAL_TOOL/peer$LOCAL_PIDX"
-+	REMOTE_PEER_TOOL="$REMOTE_TOOL/peer$REMOTE_PIDX"
- 
--	link_test "$LOCAL_TOOL" "$REMOTE_TOOL"
--	link_test "$REMOTE_TOOL" "$LOCAL_TOOL"
-+	link_test "$LOCAL_PEER_TOOL" "$REMOTE_PEER_TOOL"
-+	link_test "$REMOTE_PEER_TOOL" "$LOCAL_PEER_TOOL"
- 
- 	#Ensure the link is up on both sides before continuing
--	write_file "Y" "$LOCAL_TOOL/link_event"
--	write_file "Y" "$REMOTE_TOOL/link_event"
-+	write_file "Y" "$LOCAL_PEER_TOOL/link_event"
-+	write_file "Y" "$REMOTE_PEER_TOOL/link_event"
- 
- 	for PEER_TRANS in $(ls "$LOCAL_TOOL"/peer_trans*); do
- 		PT=$(basename $PEER_TRANS)
 -- 
 2.12.0
 
