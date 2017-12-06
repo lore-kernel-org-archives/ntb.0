@@ -1,77 +1,41 @@
-Date: Mon, 11 Dec 2017 01:36:25 -0800 (PST)
-From: Frank Huang <tigerinxm@gmail.com>
-Message-Id: <3cfaccdb-7424-4077-b05f-a294aaebaecd@googlegroups.com>
-Subject: question of ntb_transport dma copy
+Return-Path: <logang@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id z1si195919pfh.0.2017.12.06.09.37.14
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Wed, 06 Dec 2017 09:37:14 -0800 (PST)
+References: <20171206141923.817850-1-arnd@arndb.de>
+From: Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <6cdab766-60a2-0ef9-5495-f842acde8604@deltatee.com>
+Date: Wed, 6 Dec 2017 10:37:06 -0700
 MIME-Version: 1.0
-Content-Type: multipart/mixed; 
-	boundary="----=_Part_6878_1665225643.1512984985507"
-To: linux-ntb <linux-ntb@googlegroups.com>
+In-Reply-To: <20171206141923.817850-1-arnd@arndb.de>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH] ntb_hw_switchtec: fix logic error
+To: Arnd Bergmann <arnd@arndb.de>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
+Cc: Stephen Bates <sbates@raithlin.com>, Colin Ian King <colin.king@canonical.com>, Doug Meyer <dmeyer@gigaio.com>, Kelvin Cao <kelvin.cao@microsemi.com>, linux-pci@vger.kernel.org, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-------=_Part_6878_1665225643.1512984985507
-Content-Type: multipart/alternative; 
-	boundary="----=_Part_6879_950775521.1512984985507"
+Hey,
 
-------=_Part_6879_950775521.1512984985507
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Thanks, nice catch.
 
+On 06/12/17 07:19 AM, Arnd Bergmann wrote:
+> Newer gcc (version 7 and 8 presumably) warn about a statement mixing
+> the << operator with logical and:
+> 
+> drivers/ntb/hw/mscc/ntb_hw_switchtec.c: In function 'switchtec_ntb_init_sndev':
+> drivers/ntb/hw/mscc/ntb_hw_switchtec.c:888:24: error: '<<' in boolean context, did you mean '<' ? [-Werror=int-in-bool-context]
+> 
+> My interpretation here is that the author must have intended a bitmask
+> rather than a comparison, so I'm changing the '&&' to '&', which makes
+> a lot more sense in the context.
+> 
+> Fixes: 1b249475275d ("ntb_hw_switchtec: Allow using Switchtec NTB in multi-partition setups")
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 
->
-> 1647 static void ntb_async_tx(struct ntb_transport_qp *qp,
-> 1648              struct ntb_queue_entry *entry)
-> 1649 {
-> 1650     struct ntb_payload_header __iomem *hdr;
-> 1651     struct dma_chan *chan = qp->tx_dma_chan;
-> 1652     void __iomem *offset;
-> 1653     int res;
-> 1654
-> 1655     entry->tx_index = qp->tx_index;
-> 1656     offset = qp->tx_mw + qp->tx_max_frame * entry->tx_index;
-> 1657     hdr = offset + qp->tx_max_frame - sizeof(struct 
-> ntb_payload_header);
-> 1658     entry->tx_hdr = hdr;
-> 1659
-> 1660     iowrite32(entry->len, &hdr->len);
-> 1661     iowrite32((u32)qp->tx_pkts, &hdr->ver);
-> 1662
-> 1663     if (!chan)
-> 1664         goto err;
+Reviewed-by: Logan Gunthorpe <logang@deltatee.com>
 
-
-
-hi, 
-When I read the ntb source code, I found that ntb_transport support two 
-types of coping:using CPU and DMA. 
-But the ntb_async_tx function will do a dma_chan check ,if fail, it will 
-return error(L1663).
-That's say the ntb_transport only support rx CPU copy, and set the tx using 
-DMA copy default?
-
-------=_Part_6879_950775521.1512984985507
-Content-Type: text/html; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-<blockquote class=3D"gmail_quote" style=3D"margin: 0px 0px 0px 0.8ex; borde=
-r-left: 1px solid rgb(204, 204, 204); padding-left: 1ex;">1647 static void =
-ntb_async_tx(struct ntb_transport_qp *qp,<br>1648=C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 struct ntb_queue_entry *entry)<br>1649 {<br>1650=
-=C2=A0 =C2=A0 =C2=A0struct ntb_payload_header __iomem *hdr;<br>1651=C2=A0 =
-=C2=A0 =C2=A0struct dma_chan *chan =3D qp-&gt;tx_dma_chan;<br>1652=C2=A0 =
-=C2=A0 =C2=A0void __iomem *offset;<br>1653=C2=A0 =C2=A0 =C2=A0int res;<br>1=
-654<br>1655=C2=A0 =C2=A0 =C2=A0entry-&gt;tx_index =3D qp-&gt;tx_index;<br>1=
-656=C2=A0 =C2=A0 =C2=A0offset =3D qp-&gt;tx_mw + qp-&gt;tx_max_frame * entr=
-y-&gt;tx_index;<br>1657=C2=A0 =C2=A0 =C2=A0hdr =3D offset + qp-&gt;tx_max_f=
-rame - sizeof(struct ntb_payload_header);<br>1658=C2=A0 =C2=A0 =C2=A0entry-=
-&gt;tx_hdr =3D hdr;<br>1659<br>1660=C2=A0 =C2=A0 =C2=A0iowrite32(entry-&gt;=
-len, &amp;hdr-&gt;len);<br>1661=C2=A0 =C2=A0 =C2=A0iowrite32((u32)qp-&gt;tx=
-_pkts, &amp;hdr-&gt;ver);<br>1662<br>1663=C2=A0 =C2=A0 =C2=A0if (!chan)<br>=
-1664=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0goto err;</blockquote><div><br></div>=
-<div><br></div><div>hi,=C2=A0</div><div>When I read the ntb source code, I =
-found that ntb_transport support two types of coping:using CPU and DMA.=C2=
-=A0</div><div>But the ntb_async_tx function will do a dma_chan check ,if fa=
-il, it will return error(L1663).</div><div>That&#39;s say the ntb_transport=
- only support rx CPU copy, and set the tx using DMA copy default?</div>
-------=_Part_6879_950775521.1512984985507--
-
-------=_Part_6878_1665225643.1512984985507--
+Logan
