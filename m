@@ -1,16 +1,16 @@
 Return-Path: <fancer.lancer@gmail.com>
 Received: from mail-lf0-x22e.google.com (mail-lf0-x22e.google.com. [2a00:1450:4010:c07::22e])
-        by gmr-mx.google.com with ESMTPS id r58si466608eda.3.2017.12.06.06.32.17
+        by gmr-mx.google.com with ESMTPS id r58si466608eda.3.2017.12.06.06.32.16
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 06 Dec 2017 06:32:17 -0800 (PST)
+        Wed, 06 Dec 2017 06:32:16 -0800 (PST)
 Received: by mail-lf0-x22e.google.com with SMTP id a12so4457692lfe.4
-        for <linux-ntb@googlegroups.com>; Wed, 06 Dec 2017 06:32:17 -0800 (PST)
+        for <linux-ntb@googlegroups.com>; Wed, 06 Dec 2017 06:32:16 -0800 (PST)
 Return-Path: <fancer.lancer@gmail.com>
 From: Serge Semin <fancer.lancer@gmail.com>
-Subject: [PATCH v4 03/15] NTB: Fix UB/bug in ntb_mw_get_align()
-Date: Wed,  6 Dec 2017 17:31:54 +0300
-Message-Id: <20171206143206.14665-4-fancer.lancer@gmail.com>
+Subject: [PATCH v4 02/15] NTB: Set dma mask and dma coherent mask to NTB devices
+Date: Wed,  6 Dec 2017 17:31:53 +0300
+Message-Id: <20171206143206.14665-3-fancer.lancer@gmail.com>
 In-Reply-To: <20171206143206.14665-1-fancer.lancer@gmail.com>
 References: <20171205223918.28727-1-fancer.lancer@gmail.com>
  <20171206143206.14665-1-fancer.lancer@gmail.com>
@@ -18,33 +18,90 @@ To: jdmason@kudzu.us, dave.jiang@intel.com, Allen.Hubbe@emc.com, Shyam-sundar.S-
 Cc: Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Serge Semin <fancer.lancer@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Simple (1 << pidx) operation causes undefined behaviour when
-pidx >= 32. It must be casted to u64 to match the actual return
-value of ntb_link_is_up() method, so to have all the possible
-peer indexes covered and to get rid of undefined behaviour.
-Additionally there are special macros in "linux/bitops.h" to perform
-the bit-set-shift operations, so it's recommended to have them used
-for proper bit setting.
+The dma_mask and dma_coherent_mask fields of the NTB struct device
+weren't initialized in hardware drivers. In fact it should be done
+instead of PCIe interface usage, since NTB clients are supposed to
+use NTB API and left unaware of real hardware implementation.
+In addition to that ntb_device_register() method shouldn't clear
+the passed ntb_dev structure, since it dma_mask is initialized
+by hardware drivers.
 
 Signed-off-by: Serge Semin <fancer.lancer@gmail.com>
-Reviewed-by: Logan Gunthorpe <logang@deltatee.com>
 ---
- include/linux/ntb.h | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/ntb/hw/amd/ntb_hw_amd.c     | 4 ++++
+ drivers/ntb/hw/idt/ntb_hw_idt.c     | 8 +++++++-
+ drivers/ntb/hw/intel/ntb_hw_intel.c | 4 ++++
+ drivers/ntb/ntb.c                   | 1 -
+ 4 files changed, 15 insertions(+), 2 deletions(-)
 
-diff --git a/include/linux/ntb.h b/include/linux/ntb.h
-index 21b1826a0953..181d16601dd9 100644
---- a/include/linux/ntb.h
-+++ b/include/linux/ntb.h
-@@ -767,7 +767,7 @@ static inline int ntb_mw_get_align(struct ntb_dev *ntb, int pidx, int widx,
- 				   resource_size_t *size_align,
- 				   resource_size_t *size_max)
- {
--	if (!(ntb_link_is_up(ntb, NULL, NULL) & (1 << pidx)))
-+	if (!(ntb_link_is_up(ntb, NULL, NULL) & BIT_ULL(pidx)))
- 		return -ENOTCONN;
+diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.c b/drivers/ntb/hw/amd/ntb_hw_amd.c
+index f0788aae05c9..3cfa46876239 100644
+--- a/drivers/ntb/hw/amd/ntb_hw_amd.c
++++ b/drivers/ntb/hw/amd/ntb_hw_amd.c
+@@ -1020,6 +1020,10 @@ static int amd_ntb_init_pci(struct amd_ntb_dev *ndev,
+ 			goto err_dma_mask;
+ 		dev_warn(&pdev->dev, "Cannot DMA consistent highmem\n");
+ 	}
++	rc = dma_coerce_mask_and_coherent(&ndev->ntb.dev,
++					  dma_get_mask(&pdev->dev));
++	if (rc)
++		goto err_dma_mask;
  
- 	return ntb->ops->mw_get_align(ntb, pidx, widx, addr_align, size_align,
+ 	ndev->self_mmio = pci_iomap(pdev, 0, 0);
+ 	if (!ndev->self_mmio) {
+diff --git a/drivers/ntb/hw/idt/ntb_hw_idt.c b/drivers/ntb/hw/idt/ntb_hw_idt.c
+index 24040317bb9c..93d4c9d2a9ad 100644
+--- a/drivers/ntb/hw/idt/ntb_hw_idt.c
++++ b/drivers/ntb/hw/idt/ntb_hw_idt.c
+@@ -2426,7 +2426,7 @@ static int idt_init_pci(struct idt_ntb_dev *ndev)
+ 	struct pci_dev *pdev = ndev->ntb.pdev;
+ 	int ret;
+ 
+-	/* Initialize the bit mask of DMA */
++	/* Initialize the bit mask of PCI/NTB DMA */
+ 	ret = pci_set_dma_mask(pdev, DMA_BIT_MASK(64));
+ 	if (ret != 0) {
+ 		ret = pci_set_dma_mask(pdev, DMA_BIT_MASK(32));
+@@ -2447,6 +2447,12 @@ static int idt_init_pci(struct idt_ntb_dev *ndev)
+ 		dev_warn(&pdev->dev,
+ 			"Cannot set consistent DMA highmem bit mask\n");
+ 	}
++	ret = dma_coerce_mask_and_coherent(&ndev->ntb.dev,
++					   dma_get_mask(&pdev->dev));
++	if (ret != 0) {
++		dev_err(&pdev->dev, "Failed to set NTB device DMA bit mask\n");
++		return ret;
++	}
+ 
+ 	/*
+ 	 * Enable the device advanced error reporting. It's not critical to
+diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c b/drivers/ntb/hw/intel/ntb_hw_intel.c
+index 341a3d5baa3f..156b45cd4a19 100644
+--- a/drivers/ntb/hw/intel/ntb_hw_intel.c
++++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
+@@ -2334,6 +2334,10 @@ static int intel_ntb_init_pci(struct intel_ntb_dev *ndev, struct pci_dev *pdev)
+ 			goto err_dma_mask;
+ 		dev_warn(&pdev->dev, "Cannot DMA consistent highmem\n");
+ 	}
++	rc = dma_coerce_mask_and_coherent(&ndev->ntb.dev,
++					  dma_get_mask(&pdev->dev));
++	if (rc)
++		goto err_dma_mask;
+ 
+ 	ndev->self_mmio = pci_iomap(pdev, 0, 0);
+ 	if (!ndev->self_mmio) {
+diff --git a/drivers/ntb/ntb.c b/drivers/ntb/ntb.c
+index bdcd59b13c1f..2581ab724c34 100644
+--- a/drivers/ntb/ntb.c
++++ b/drivers/ntb/ntb.c
+@@ -111,7 +111,6 @@ int ntb_register_device(struct ntb_dev *ntb)
+ 
+ 	init_completion(&ntb->released);
+ 
+-	memset(&ntb->dev, 0, sizeof(ntb->dev));
+ 	ntb->dev.bus = &ntb_bus;
+ 	ntb->dev.parent = &ntb->pdev->dev;
+ 	ntb->dev.release = ntb_dev_release;
 -- 
 2.12.0
 
