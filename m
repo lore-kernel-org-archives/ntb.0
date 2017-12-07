@@ -1,70 +1,75 @@
-Return-Path: <jdmason@kudzu.us>
-Received: from mail-ua0-x244.google.com (mail-ua0-x244.google.com. [2607:f8b0:400c:c08::244])
-        by gmr-mx.google.com with ESMTPS id t123si73849vkb.1.2017.12.05.11.12.31
+Return-Path: <jsarha@ti.com>
+Received: from lelnx194.ext.ti.com (lelnx194.ext.ti.com. [198.47.27.80])
+        by gmr-mx.google.com with ESMTPS id e18si315362qtc.5.2017.12.07.08.16.10
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 05 Dec 2017 11:12:31 -0800 (PST)
-Received: by mail-ua0-x244.google.com with SMTP id l36so1049378uae.4
-        for <linux-ntb@googlegroups.com>; Tue, 05 Dec 2017 11:12:31 -0800 (PST)
+        (version=TLS1 cipher=AES128-SHA bits=128/128);
+        Thu, 07 Dec 2017 08:16:10 -0800 (PST)
+Subject: Re: [PATCH v9 1/8] drm/tilcdc: ensure nonatomic iowrite64 is not used
+References: <20171205233058.5365-1-logang@deltatee.com>
+ <20171205233058.5365-2-logang@deltatee.com>
+From: Jyri Sarha <jsarha@ti.com>
+Message-ID: <3f3ad132-3b53-0f80-ffe7-3617e3cb78e2@ti.com>
+Date: Thu, 7 Dec 2017 18:15:59 +0200
 MIME-Version: 1.0
-In-Reply-To: <20171129175530.31032-6-logang@deltatee.com>
-References: <20171129175530.31032-1-logang@deltatee.com> <20171129175530.31032-6-logang@deltatee.com>
-From: Jon Mason <jdmason@kudzu.us>
-Date: Tue, 5 Dec 2017 14:12:31 -0500
-Message-ID: <CAPoiz9zaT+agL3KZEqnx7O2N38dM4QqHKLii_gzqDWXgQu1jyw@mail.gmail.com>
-Subject: Re: [PATCH 5/7] ntb_hw_switchtec: Expand PFF CSR registers
-Content-Type: text/plain; charset="UTF-8"
-To: Logan Gunthorpe <logang@deltatee.com>
-Cc: linux-ntb <linux-ntb@googlegroups.com>, linux-kernel <linux-kernel@vger.kernel.org>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Kelvin Cao <kelvin.cao@microsemi.com>
+In-Reply-To: <20171205233058.5365-2-logang@deltatee.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-GB
+Content-Transfer-Encoding: 7bit
+To: Logan Gunthorpe <logang@deltatee.com>, linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org
+Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?Q?Horia_Geant=c4=83?= <horia.geanta@nxp.com>, Tomi Valkeinen <tomi.valkeinen@ti.com>, David Airlie <airlied@linux.ie>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Wed, Nov 29, 2017 at 12:55 PM, Logan Gunthorpe <logang@deltatee.com> wrote:
-> The PFF CSR registers actual mirrors the PCI configuration space
-> for all the ports in the switch. Previously, this was not needed by
-> the driver but will be used by the crosslink code to enumerate the
-> bus in an host-less centre partition.
->
+On 12/06/17 01:30, Logan Gunthorpe wrote:
+> Add a check to ensure iowrite64 is only used if it is atomic.
+> 
+> It was decided in [1] that the tilcdc driver should not be using an
+> atomic operation (so it was left out of this patchset). However, it turns
+> out that through the drm code, a nonatomic header is actually included:
+> 
+> include/linux/io-64-nonatomic-lo-hi.h
+> is included from include/drm/drm_os_linux.h:9:0,
+>             from include/drm/drmP.h:74,
+>             from include/drm/drm_modeset_helper.h:26,
+>             from include/drm/drm_atomic_helper.h:33,
+>             from drivers/gpu/drm/tilcdc/tilcdc_crtc.c:19:
+> 
+> And thus, without this change, this patchset would inadvertantly
+> change the behaviour of the tilcdc driver.
+> 
+> [1] lkml.kernel.org/r/CAK8P3a2HhO_zCnsTzq7hmWSz5La5Thu19FWZpun16iMnyyNreQ@mail.gmail.com
+> 
 > Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-> ---
->  include/linux/switchtec.h | 15 ++++++++++++++-
->  1 file changed, 14 insertions(+), 1 deletion(-)
->
-> diff --git a/include/linux/switchtec.h b/include/linux/switchtec.h
-> index d4a7c18b42cf..6d325a7a0c19 100644
-> --- a/include/linux/switchtec.h
-> +++ b/include/linux/switchtec.h
-> @@ -292,7 +292,20 @@ enum {
->  struct pff_csr_regs {
->         u16 vendor_id;
->         u16 device_id;
-> -       u32 pci_cfg_header[15];
-> +       u16 pcicmd;
-> +       u16 pcists;
-> +       u32 pci_class;
-> +       u32 pci_opts;
-> +       union {
-> +               u32 pci_bar[6];
-> +               u64 pci_bar64[3];
-> +       };
-> +       u32 pci_cardbus;
-> +       u32 pci_subsystem_id;
-> +       u32 pci_expansion_rom;
-> +       u32 pci_cap_ptr;
-> +       u32 reserved1;
-> +       u32 pci_irq;
+> Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
+> Cc: Jyri Sarha <jsarha@ti.com>
+> Cc: Arnd Bergmann <arnd@arndb.de>
+> Cc: Tomi Valkeinen <tomi.valkeinen@ti.com>
+> Cc: David Airlie <airlied@linux.ie>
 
-It sucks that we don't already have a struct for PCI config space we
-can reuse here.  If you find the time, it would be good to add in the
-future to reduce duplicate code here and in the PCI core.  However,
-this patch is fine without it.
+I guess it is about time for me to pick this up for the next pull request.
 
 Thanks,
-Jon
+Jyri
+
+> ---
+>  drivers/gpu/drm/tilcdc/tilcdc_regs.h | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/gpu/drm/tilcdc/tilcdc_regs.h b/drivers/gpu/drm/tilcdc/tilcdc_regs.h
+> index 9d528c0a67a4..5048ebb86835 100644
+> --- a/drivers/gpu/drm/tilcdc/tilcdc_regs.h
+> +++ b/drivers/gpu/drm/tilcdc/tilcdc_regs.h
+> @@ -133,7 +133,7 @@ static inline void tilcdc_write64(struct drm_device *dev, u32 reg, u64 data)
+>  	struct tilcdc_drm_private *priv = dev->dev_private;
+>  	volatile void __iomem *addr = priv->mmio + reg;
+>  
+> -#ifdef iowrite64
+> +#if defined(iowrite64) && !defined(iowrite64_is_nonatomic)
+>  	iowrite64(data, addr);
+>  #else
+>  	__iowmb();
+> 
 
 
->         u32 pci_cap_region[48];
->         u32 pcie_cap_region[448];
->         u32 indirect_gas_window[128];
-> --
-> 2.11.0
->
+-- 
+Texas Instruments Finland Oy, Porkkalankatu 22, 00180 Helsinki.
+Y-tunnus/Business ID: 0615521-4. Kotipaikka/Domicile: Helsinki
