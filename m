@@ -1,60 +1,55 @@
 Return-Path: <logang@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id w194si543830yww.5.2017.12.08.16.02.13
+        by gmr-mx.google.com with ESMTPS id y16si440381pll.0.2017.12.08.16.01.59
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Fri, 08 Dec 2017 16:02:13 -0800 (PST)
+        Fri, 08 Dec 2017 16:01:59 -0800 (PST)
 References: <20171209000106.18259-1-logang@deltatee.com>
- <20171209000106.18259-2-logang@deltatee.com>
 From: Logan Gunthorpe <logang@deltatee.com>
-Message-ID: <205eb69f-9c1c-5391-7145-6cb15a670649@deltatee.com>
-Date: Fri, 8 Dec 2017 17:02:07 -0700
+Message-ID: <9abd06be-fb6e-8acd-a954-db3ddd019ed9@deltatee.com>
+Date: Fri, 8 Dec 2017 17:01:52 -0700
 MIME-Version: 1.0
-In-Reply-To: <20171209000106.18259-2-logang@deltatee.com>
+In-Reply-To: <20171209000106.18259-1-logang@deltatee.com>
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
-Subject: Re: [PATCH] ntb_transport: fix qp count bug
+Subject: Re: [PATCH] ntb_netdev: set the net_device's parent
 To: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
 Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Sorry, ignore this. I sent an old patch.
+Sorry ignore this. I sent an old patch :(
 
 Logan
 
 On 08/12/17 05:01 PM, Logan Gunthorpe wrote:
-> In cases where there are more mw's than spads/2-2, the mw count gets
-> reduced to match the limitation. ntb_transport also tries to ensure that
-> there are fewer qps than mws but uses the full mw count instead of
-> the reduced one. When this happens, the math in
-> 'ntb_transport_setup_qp_mw' will get confused and result in a kernel
-> paging request bug.
+> At present, ntb_netdev devices end up under /sys/devices/virtual/net
+> completely unconnected to the ntb trees below them. This patch sets the
+> parent of the net_device (using SET_NETDEV_DEV) to the client_dev
+> device. This results in a better connected sysfs path for the network
+> device:
 > 
-> This patch fixes the bug by reducing qp_count to the reduced mw count
-> instead of the full mw count.
+> /sys/devices/pci0000:00/0000:00:03.0/0000:03:00.1/0000:03:00.1/ntb_netdev0/net/eth2
 > 
 > Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
 > Cc: Jon Mason <jdmason@kudzu.us>
 > Cc: Dave Jiang <dave.jiang@intel.com>
 > Cc: Allen Hubbe <Allen.Hubbe@emc.com>
 > ---
->   drivers/ntb/ntb_transport.c | 4 ++--
->   1 file changed, 2 insertions(+), 2 deletions(-)
+>   drivers/net/ntb_netdev.c | 2 ++
+>   1 file changed, 2 insertions(+)
 > 
-> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-> index 02ca45fdd892..0a778d2cab94 100644
-> --- a/drivers/ntb/ntb_transport.c
-> +++ b/drivers/ntb/ntb_transport.c
-> @@ -1128,8 +1128,8 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
->   	qp_count = ilog2(qp_bitmap);
->   	if (max_num_clients && max_num_clients < qp_count)
->   		qp_count = max_num_clients;
-> -	else if (mw_count < qp_count)
-> -		qp_count = mw_count;
-> +	else if (nt->mw_count < qp_count)
-> +		qp_count = nt->mw_count;
+> diff --git a/drivers/net/ntb_netdev.c b/drivers/net/ntb_netdev.c
+> index 4daf3d0926a8..0250aa9ae2cb 100644
+> --- a/drivers/net/ntb_netdev.c
+> +++ b/drivers/net/ntb_netdev.c
+> @@ -418,6 +418,8 @@ static int ntb_netdev_probe(struct device *client_dev)
+>   	if (!ndev)
+>   		return -ENOMEM;
 >   
->   	qp_bitmap &= BIT_ULL(qp_count) - 1;
->   
+> +	SET_NETDEV_DEV(ndev, client_dev);
+> +
+>   	dev = netdev_priv(ndev);
+>   	dev->ndev = ndev;
+>   	dev->pdev = pdev;
 > 
