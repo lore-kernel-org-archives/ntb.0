@@ -1,59 +1,76 @@
-Return-Path: <logang@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id z18si407138iti.0.2017.12.11.09.14.51
+Return-Path: <Allen.Hubbe@dell.com>
+Received: from esa8.dell-outbound.iphmx.com (esa8.dell-outbound.iphmx.com. [68.232.149.218])
+        by gmr-mx.google.com with ESMTPS id c125si184232ybf.3.2017.12.11.06.58.54
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Mon, 11 Dec 2017 09:14:51 -0800 (PST)
-References: <20171209000217.18366-1-logang@deltatee.com>
- <20171209000217.18366-2-logang@deltatee.com>
- <000201d37290$81605eb0$84211c10$@dell.com>
-From: Logan Gunthorpe <logang@deltatee.com>
-Message-ID: <d06cf74e-125c-6281-9361-22bac3468251@deltatee.com>
-Date: Mon, 11 Dec 2017 10:14:48 -0700
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 11 Dec 2017 06:58:55 -0800 (PST)
+From: "Allen Hubbe" <Allen.Hubbe@dell.com>
+References: <20171209000217.18366-1-logang@deltatee.com> <20171209000217.18366-2-logang@deltatee.com>
+In-Reply-To: <20171209000217.18366-2-logang@deltatee.com>
+Subject: RE: [PATCH 2/2] ntb_hw_switchtec: Check for alignment of the buffer in mw_set_trans()
+Date: Mon, 11 Dec 2017 09:58:29 -0500
+Message-ID: <000201d37290$81605eb0$84211c10$@dell.com>
 MIME-Version: 1.0
-In-Reply-To: <000201d37290$81605eb0$84211c10$@dell.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-Subject: Re: [PATCH 2/2] ntb_hw_switchtec: Check for alignment of the buffer
- in mw_set_trans()
-To: Allen Hubbe <Allen.Hubbe@dell.com>, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+Content-Language: en-us
+To: 'Logan Gunthorpe' <logang@deltatee.com>, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
 Cc: 'Jon Mason' <jdmason@kudzu.us>
 List-ID: <linux-ntb.googlegroups.com>
 
+From: Logan Gunthorpe
+> With Switchtec hardware, the buffer used for a memory window must be
+> aligned to its size (the hardware only replaces the lower bits). In
+> certain circumstances dma_alloc_coherent() will not provide a buffer
+> that adheres to this requirement like when using the CMA and
+> CONFIG_CMA_ALIGNMENT is set lower than the buffer size.
+>=20
+> When we get an unaligned buffer mw_set_trans() should return an error.
+> We also log an error so we know the cause of the problem.
+>=20
+> Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+> Cc: Jon Mason <jdmason@kudzu.us>
+> ---
+>  drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 13 +++++++++++++
+>  1 file changed, 13 insertions(+)
+>=20
+> diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c =
+b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+> index 709f37fbe232..984b83bc7dd3 100644
+> --- a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+> +++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+> @@ -315,6 +315,19 @@ static int switchtec_ntb_mw_set_trans(struct =
+ntb_dev *ntb, int pidx, int widx,
+>  	if (xlate_pos < 12)
+>  		return -EINVAL;
+>=20
+> +	if (addr & ((1 << xlate_pos) - 1)) {
 
+!IS_ALIGNED(addr, BIT_ULL(xlate_pos))
 
-On 11/12/17 07:58 AM, Allen Hubbe wrote:
-> !IS_ALIGNED(addr, BIT_ULL(xlate_pos))
-> 
+> +		/*
+> +		 * In certain circumstances we can get a buffer that is
+> +		 * not aligned to its size. (Most of the time
+> +		 * dma_alloc_coherent ensures this). This can happen when
+> +		 * using large buffers allocated by the CMA
+> +		 * (see CMA_CONFIG_ALIGNMENT)
+> +		 */
+> +		dev_err(&sndev->stdev->dev,
+> +			"ERROR: Memory window address is not aligned to it's size!\n");
 
-Ok, yes, that's much better. I'll change it. Thanks.
+This would be the only ntb hw driver that prints an error in this =
+situation.  The ntb_mw_get_align() should provide enough information to =
+client drivers to determine the alignment requirements before calling =
+ntb_mw_set_trans().  IMO no need to print here, but let's see what =
+others say.
 
->> +		/*
->> +		 * In certain circumstances we can get a buffer that is
->> +		 * not aligned to its size. (Most of the time
->> +		 * dma_alloc_coherent ensures this). This can happen when
->> +		 * using large buffers allocated by the CMA
->> +		 * (see CMA_CONFIG_ALIGNMENT)
->> +		 */
->> +		dev_err(&sndev->stdev->dev,
->> +			"ERROR: Memory window address is not aligned to it's size!\n");
-> 
-> This would be the only ntb hw driver that prints an error in this situation.  The ntb_mw_get_align() should provide enough information to client drivers to determine the alignment requirements before calling ntb_mw_set_trans().  IMO no need to print here, but let's see what others say.
+> +		return -EINVAL;
+> +	}
+> +
+>  	rc =3D switchtec_ntb_part_op(sndev, ctl, NTB_CTRL_PART_OP_LOCK,
+>  				   NTB_CTRL_PART_STATUS_LOCKED);
+>  	if (rc)
+> --
+> 2.11.0
 
-
-mw_get_align doesn't communicate the fact that the buffer has to be 
-aligned by its size. It may also be that all hardware does not have this 
-restriction (ie. if the hardware adds to the base address instead of 
-just replacing the lower bits).
-
-There is definitely a need to print this error somewhere as I hit this 
-case and it caused very weird behavior. It was a huge pain to debug. 
-Also, it's a security issue and huge bug if we end up mapping the memory 
-we didn't think we were mapping. I don't think it's a good idea for us 
-to require clients to check this as that requires a number of checks and 
-a client author may forget to add it to their driver. I'd maybe go with 
-a check in ntb_mw_set_trans before calling the driver, but that only 
-makes sense if all hardware has the same requirement.
-
-Logan
