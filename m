@@ -1,59 +1,60 @@
-Return-Path: <fancer.lancer@gmail.com>
-Received: from mail-lf0-x242.google.com (mail-lf0-x242.google.com. [2a00:1450:4010:c07::242])
-        by gmr-mx.google.com with ESMTPS id n75si401432ljb.0.2017.12.03.11.17.49
+Return-Path: <gunthorp@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id b68si624153vke.3.2017.12.18.10.25.23
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Sun, 03 Dec 2017 11:17:49 -0800 (PST)
-Received: by mail-lf0-x242.google.com with SMTP id r143so16768713lfe.13
-        for <linux-ntb@googlegroups.com>; Sun, 03 Dec 2017 11:17:49 -0800 (PST)
-Return-Path: <fancer.lancer@gmail.com>
-From: Serge Semin <fancer.lancer@gmail.com>
-Subject: [PATCH v2 00/15] NTB: Add full multi-port API support to the test drivers
-Date: Sun,  3 Dec 2017 22:17:21 +0300
-Message-Id: <20171203191736.3399-1-fancer.lancer@gmail.com>
-To: jdmason@kudzu.us, dave.jiang@intel.com, Allen.Hubbe@emc.com, Shyam-sundar.S-k@amd.com, Xiangliang.Yu@amd.com, gary.hook@amd.com
-Cc: Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Serge Semin <fancer.lancer@gmail.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Mon, 18 Dec 2017 10:25:23 -0800 (PST)
+From: Logan Gunthorpe <logang@deltatee.com>
+Date: Mon, 18 Dec 2017 11:25:06 -0700
+Message-Id: <20171218182506.5219-2-logang@deltatee.com>
+In-Reply-To: <20171218182506.5219-1-logang@deltatee.com>
+References: <20171218182506.5219-1-logang@deltatee.com>
+Subject: [PATCH v2 2/2] ntb_hw_switchtec: Check for alignment of the buffer in mw_set_trans()
+To: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
+Cc: Allen.Hubbe@dell.com, Logan Gunthorpe <logang@deltatee.com>, Jon Mason <jdmason@kudzu.us>
 List-ID: <linux-ntb.googlegroups.com>
 
-The multi-port NTB API was introduced in kernel 4.13 as well as the
-first driver for the true multi-port devices of IDT PCIe-switches
-series. But the test drivers still were left almost unchanged. Yes,
-they didn't fail being used with new NTB API, but they only worked
-with two-ports NTB devices. This patchset is intended to fix the
-issue, by amending the NTB test drivers and script so they would be
-fully compatible with multi-port NTB API.
+With Switchtec hardware, the buffer used for a memory window must be
+aligned to its size (the hardware only replaces the lower bits). In
+certain circumstances dma_alloc_coherent() will not provide a buffer
+that adheres to this requirement like when using the CMA and
+CONFIG_CMA_ALIGNMENT is set lower than the buffer size.
 
-Additionally I found a few NTB subsystem issues while developing the
-submitted patches. So they are also fixed in this patchset.
+When we get an unaligned buffer mw_set_trans() should return an error.
+We also log an error so we know the cause of the problem.
 
-Serge Semin (15):
-  NTB: Rename NTB messaging API methods
-  NTB: Set dma mask and dma coherent mask to NTB devices
-  NTB: Fix UB/bug in ntb_mw_get_align()
-  NTB: ntb_pp: Add full multi-port NTB API support
-  NTB: ntb_tool: Add full multi-port NTB API support
-  NTB: ntb_perf: Add full multi-port NTB API support
-  NTB: ntb_test: Safely use paths with whitespace
-  NTB: ntb_test: Add ntb_tool port tests
-  NTB: ntb_test: Update ntb_tool link tests
-  NTB: ntb_test: Update ntb_tool DB tests
-  NTB: ntb_test: Update ntb_tool Scratchpad tests
-  NTB: ntb_test: Add ntb_tool Message tests
-  NTB: ntb_test: Update ntb_tool MW tests
-  NTB: ntb_test: Update ntb_perf tests
-  NTB: ntb_hw_idt: Set NTB_TOPO_SWITCH topology
+Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+Cc: Jon Mason <jdmason@kudzu.us>
+---
 
- drivers/ntb/hw/amd/ntb_hw_amd.c         |    4 +
- drivers/ntb/hw/idt/ntb_hw_idt.c         |   37 +-
- drivers/ntb/hw/intel/ntb_hw_intel.c     |    4 +
- drivers/ntb/ntb.c                       |    1 -
- drivers/ntb/test/ntb_perf.c             | 1826 +++++++++++++++++++++----------
- drivers/ntb/test/ntb_pingpong.c         |  450 +++++---
- drivers/ntb/test/ntb_tool.c             | 1805 ++++++++++++++++++++----------
- include/linux/ntb.h                     |   36 +-
- tools/testing/selftests/ntb/ntb_test.sh |  307 ++++--
- 9 files changed, 3013 insertions(+), 1457 deletions(-)
+v2: Use IS_ALIGNED macro as suggested by Allen
 
--- 
-2.12.0
+ drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
 
+diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+index bcd5b6fb3800..6c6f991999b5 100644
+--- a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
++++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+@@ -320,6 +320,19 @@ static int switchtec_ntb_mw_set_trans(struct ntb_dev *ntb, int pidx, int widx,
+ 	if (xlate_pos < 12)
+ 		return -EINVAL;
+
++	if (!IS_ALIGNED(addr, BIT_ULL(xlate_pos))) {
++		/*
++		 * In certain circumstances we can get a buffer that is
++		 * not aligned to its size. (Most of the time
++		 * dma_alloc_coherent ensures this). This can happen when
++		 * using large buffers allocated by the CMA
++		 * (see CMA_CONFIG_ALIGNMENT)
++		 */
++		dev_err(&sndev->stdev->dev,
++			"ERROR: Memory window address is not aligned to it's size!\n");
++		return -EINVAL;
++	}
++
+ 	rc = switchtec_ntb_part_op(sndev, ctl, NTB_CTRL_PART_OP_LOCK,
+ 				   NTB_CTRL_PART_STATUS_LOCKED);
+ 	if (rc)
+--
+2.11.0
