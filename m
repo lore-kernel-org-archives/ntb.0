@@ -1,188 +1,60 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id m133si50991ioe.5.2018.01.03.10.06.56
+        by gmr-mx.google.com with ESMTPS id a12si60415qkg.5.2018.01.03.10.06.56
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
         Wed, 03 Jan 2018 10:06:56 -0800 (PST)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Wed,  3 Jan 2018 11:06:15 -0700
-Message-Id: <20180103180618.18401-6-logang@deltatee.com>
+Date: Wed,  3 Jan 2018 11:06:11 -0700
+Message-Id: <20180103180618.18401-2-logang@deltatee.com>
 In-Reply-To: <20180103180618.18401-1-logang@deltatee.com>
 References: <20180103180618.18401-1-logang@deltatee.com>
-Subject: [PATCH v9 5/8] io-64-nonatomic: add io{read|write}64[be]{_lo_hi|_hi_lo} macros
+Subject: [PATCH v9 1/8] drm/tilcdc: ensure nonatomic iowrite64 is not used
 To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>, Christoph Hellwig <hch@lst.de>, Alan Cox <gnomes@lxorguk.ukuu.org.uk>
+Cc: Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>, Jyri Sarha <jsarha@ti.com>, Tomi Valkeinen <tomi.valkeinen@ti.com>, David Airlie <airlied@linux.ie>
 List-ID: <linux-ntb.googlegroups.com>
 
-This patch adds generic io{read|write}64[be]{_lo_hi|_hi_lo} macros if
-they are not already defined by the architecture. (As they are provided
-by the generic iomap library).
+Add a check to ensure iowrite64 is only used if it is atomic.
 
-The patch also points io{read|write}64[be] to the variant specified by the
-header name.
+It was decided in [1] that the tilcdc driver should not be using an
+atomic operation (so it was left out of this patchset). However, it turns
+out that through the drm code, a nonatomic header is actually included:
 
-This is because new drivers are encouraged to use ioreadXX, et al instead
-of readX[1], et al -- and mixing ioreadXX with readq is pretty ugly.
+include/linux/io-64-nonatomic-lo-hi.h
+is included from include/drm/drm_os_linux.h:9:0,
+            from include/drm/drmP.h:74,
+            from include/drm/drm_modeset_helper.h:26,
+            from include/drm/drm_atomic_helper.h:33,
+            from drivers/gpu/drm/tilcdc/tilcdc_crtc.c:19:
 
-[1] LDD3: section 9.4.2
+And thus, without this change, this patchset would inadvertantly
+change the behaviour of the tilcdc driver.
+
+[1] lkml.kernel.org/r/CAK8P3a2HhO_zCnsTzq7hmWSz5La5Thu19FWZpun16iMnyyNreQ@mail.gmail.com
 
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
 Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
-Cc: Christoph Hellwig <hch@lst.de>
+Cc: Jyri Sarha <jsarha@ti.com>
 Cc: Arnd Bergmann <arnd@arndb.de>
-Cc: Alan Cox <gnomes@lxorguk.ukuu.org.uk>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Tomi Valkeinen <tomi.valkeinen@ti.com>
+Cc: David Airlie <airlied@linux.ie>
 ---
- include/linux/io-64-nonatomic-hi-lo.h | 64 +++++++++++++++++++++++++++++++++++
- include/linux/io-64-nonatomic-lo-hi.h | 64 +++++++++++++++++++++++++++++++++++
- 2 files changed, 128 insertions(+)
+ drivers/gpu/drm/tilcdc/tilcdc_regs.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/include/linux/io-64-nonatomic-hi-lo.h b/include/linux/io-64-nonatomic-hi-lo.h
-index 862d786a904f..ae21b72cce85 100644
---- a/include/linux/io-64-nonatomic-hi-lo.h
-+++ b/include/linux/io-64-nonatomic-hi-lo.h
-@@ -55,4 +55,68 @@ static inline void hi_lo_writeq_relaxed(__u64 val, volatile void __iomem *addr)
- #define writeq_relaxed hi_lo_writeq_relaxed
- #endif
+diff --git a/drivers/gpu/drm/tilcdc/tilcdc_regs.h b/drivers/gpu/drm/tilcdc/tilcdc_regs.h
+index 9d528c0a67a4..5048ebb86835 100644
+--- a/drivers/gpu/drm/tilcdc/tilcdc_regs.h
++++ b/drivers/gpu/drm/tilcdc/tilcdc_regs.h
+@@ -133,7 +133,7 @@ static inline void tilcdc_write64(struct drm_device *dev, u32 reg, u64 data)
+ 	struct tilcdc_drm_private *priv = dev->dev_private;
+ 	volatile void __iomem *addr = priv->mmio + reg;
  
-+#ifndef ioread64_hi_lo
-+#define ioread64_hi_lo ioread64_hi_lo
-+static inline u64 ioread64_hi_lo(void __iomem *addr)
-+{
-+	u32 low, high;
-+
-+	high = ioread32(addr + sizeof(u32));
-+	low = ioread32(addr);
-+
-+	return low + ((u64)high << 32);
-+}
-+#endif
-+
-+#ifndef iowrite64_hi_lo
-+#define iowrite64_hi_lo iowrite64_hi_lo
-+static inline void iowrite64_hi_lo(u64 val, void __iomem *addr)
-+{
-+	iowrite32(val >> 32, addr + sizeof(u32));
-+	iowrite32(val, addr);
-+}
-+#endif
-+
-+#ifndef ioread64be_hi_lo
-+#define ioread64be_hi_lo ioread64be_hi_lo
-+static inline u64 ioread64be_hi_lo(void __iomem *addr)
-+{
-+	u32 low, high;
-+
-+	high = ioread32be(addr);
-+	low = ioread32be(addr + sizeof(u32));
-+
-+	return low + ((u64)high << 32);
-+}
-+#endif
-+
-+#ifndef iowrite64be_hi_lo
-+#define iowrite64be_hi_lo iowrite64be_hi_lo
-+static inline void iowrite64be_hi_lo(u64 val, void __iomem *addr)
-+{
-+	iowrite32be(val >> 32, addr);
-+	iowrite32be(val, addr + sizeof(u32));
-+}
-+#endif
-+
-+#ifndef ioread64
-+#define ioread64_is_nonatomic
-+#define ioread64 ioread64_hi_lo
-+#endif
-+
-+#ifndef iowrite64
-+#define iowrite64_is_nonatomic
-+#define iowrite64 iowrite64_hi_lo
-+#endif
-+
-+#ifndef ioread64be
-+#define ioread64be_is_nonatomic
-+#define ioread64be ioread64be_hi_lo
-+#endif
-+
-+#ifndef iowrite64be
-+#define iowrite64be_is_nonatomic
-+#define iowrite64be iowrite64be_hi_lo
-+#endif
-+
- #endif	/* _LINUX_IO_64_NONATOMIC_HI_LO_H_ */
-diff --git a/include/linux/io-64-nonatomic-lo-hi.h b/include/linux/io-64-nonatomic-lo-hi.h
-index d042e7bb5adb..faaa842dbdb9 100644
---- a/include/linux/io-64-nonatomic-lo-hi.h
-+++ b/include/linux/io-64-nonatomic-lo-hi.h
-@@ -55,4 +55,68 @@ static inline void lo_hi_writeq_relaxed(__u64 val, volatile void __iomem *addr)
- #define writeq_relaxed lo_hi_writeq_relaxed
- #endif
- 
-+#ifndef ioread64_lo_hi
-+#define ioread64_lo_hi ioread64_lo_hi
-+static inline u64 ioread64_lo_hi(void __iomem *addr)
-+{
-+	u32 low, high;
-+
-+	low = ioread32(addr);
-+	high = ioread32(addr + sizeof(u32));
-+
-+	return low + ((u64)high << 32);
-+}
-+#endif
-+
-+#ifndef iowrite64_lo_hi
-+#define iowrite64_lo_hi iowrite64_lo_hi
-+static inline void iowrite64_lo_hi(u64 val, void __iomem *addr)
-+{
-+	iowrite32(val, addr);
-+	iowrite32(val >> 32, addr + sizeof(u32));
-+}
-+#endif
-+
-+#ifndef ioread64be_lo_hi
-+#define ioread64be_lo_hi ioread64be_lo_hi
-+static inline u64 ioread64be_lo_hi(void __iomem *addr)
-+{
-+	u32 low, high;
-+
-+	low = ioread32be(addr + sizeof(u32));
-+	high = ioread32be(addr);
-+
-+	return low + ((u64)high << 32);
-+}
-+#endif
-+
-+#ifndef iowrite64be_lo_hi
-+#define iowrite64be_lo_hi iowrite64be_lo_hi
-+static inline void iowrite64be_lo_hi(u64 val, void __iomem *addr)
-+{
-+	iowrite32be(val, addr + sizeof(u32));
-+	iowrite32be(val >> 32, addr);
-+}
-+#endif
-+
-+#ifndef ioread64
-+#define ioread64_is_nonatomic
-+#define ioread64 ioread64_lo_hi
-+#endif
-+
-+#ifndef iowrite64
-+#define iowrite64_is_nonatomic
-+#define iowrite64 iowrite64_lo_hi
-+#endif
-+
-+#ifndef ioread64be
-+#define ioread64be_is_nonatomic
-+#define ioread64be ioread64be_lo_hi
-+#endif
-+
-+#ifndef iowrite64be
-+#define iowrite64be_is_nonatomic
-+#define iowrite64be iowrite64be_lo_hi
-+#endif
-+
- #endif	/* _LINUX_IO_64_NONATOMIC_LO_HI_H_ */
+-#ifdef iowrite64
++#if defined(iowrite64) && !defined(iowrite64_is_nonatomic)
+ 	iowrite64(data, addr);
+ #else
+ 	__iowmb();
 -- 
 2.11.0
 
