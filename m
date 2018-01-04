@@ -1,45 +1,59 @@
-Return-Path: <horia.geanta@nxp.com>
-Received: from EUR01-VE1-obe.outbound.protection.outlook.com (mail-ve1eur01on0067.outbound.protection.outlook.com. [104.47.1.67])
-        by gmr-mx.google.com with ESMTPS id f38si348365uaa.3.2018.01.05.00.01.20
+Return-Path: <gunthorp@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id a2si171442pfa.2.2018.01.04.11.16.56
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Fri, 05 Jan 2018 00:01:21 -0800 (PST)
-From: =?iso-8859-2?Q?Horia_Geant=E3?= <horia.geanta@nxp.com>
-Subject: Re: [PATCH v10 7/8] crypto: caam: cleanup CONFIG_64BIT ifdefs when
- using io{read|write}64
-Date: Fri, 5 Jan 2018 08:01:13 +0000
-Message-ID: <VI1PR0402MB334282217BC0AE1F8DA8BFC3981C0@VI1PR0402MB3342.eurprd04.prod.outlook.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Thu, 04 Jan 2018 11:16:56 -0800 (PST)
+From: Logan Gunthorpe <logang@deltatee.com>
+Date: Thu,  4 Jan 2018 12:16:39 -0700
+Message-Id: <20180104191645.10006-3-logang@deltatee.com>
+In-Reply-To: <20180104191645.10006-1-logang@deltatee.com>
 References: <20180104191645.10006-1-logang@deltatee.com>
- <20180104191645.10006-8-logang@deltatee.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="iso-8859-2"
-Content-Transfer-Encoding: quoted-printable
-MIME-Version: 1.0
-To: Logan Gunthorpe <logang@deltatee.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arch@vger.kernel.org" <linux-arch@vger.kernel.org>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "linux-crypto@vger.kernel.org" <linux-crypto@vger.kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>, Dan Douglass <dan.douglass@nxp.com>, Herbert Xu <herbert@gondor.apana.org.au>, "David S. Miller" <davem@davemloft.net>
+Subject: [PATCH v10 2/8] powerpc: io.h: move iomap.h include so that it can use readq/writeq defs
+To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, Nicholas Piggin <npiggin@gmail.com>, Suresh Warrier <warrier@linux.vnet.ibm.com>, Oliver O'Halloran <oohall@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On 1/4/2018 9:16 PM, Logan Gunthorpe wrote:=0A=
-> Clean up the extra ifdefs which defined the wr_reg64 and rd_reg64=0A=
-> functions in non-64bit cases in favour of the new common=0A=
-> io-64-nonatomic-lo-hi header.=0A=
-> =0A=
-> To be consistent with CAAM engine HW spec: in case of 64-bit registers,=
-=0A=
-> irrespective of device endianness, the lower address should be read from=
-=0A=
-> / written to first, followed by the upper address. Indeed the I/O=0A=
-> accessors in CAAM driver currently don't follow the spec, however this=0A=
-> is a good opportunity to fix the code.=0A=
-> =0A=
-> Signed-off-by: Logan Gunthorpe <logang@deltatee.com>=0A=
-> Cc: Andy Shevchenko <andy.shevchenko@gmail.com>=0A=
-> Cc: Horia Geant=E3 <horia.geanta@nxp.com>=0A=
-> Cc: Dan Douglass <dan.douglass@nxp.com>=0A=
-> Cc: Herbert Xu <herbert@gondor.apana.org.au>=0A=
-> Cc: "David S. Miller" <davem@davemloft.net>=0A=
-Reviewed-by: Horia Geant=E3 <horia.geanta@nxp.com>=0A=
-=0A=
-Thanks,=0A=
-Horia=0A=
-=0A=
+Subsequent patches in this series makes use of the readq and writeq
+defines in iomap.h. However, as is, they get missed on the powerpc
+platform seeing the include comes before the define. This patch
+moves the include down to fix this.
+
+Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+Acked-by: Michael Ellerman <mpe@ellerman.id.au>
+Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+Cc: Paul Mackerras <paulus@samba.org>
+Cc: Michael Ellerman <mpe@ellerman.id.au>
+Cc: Nicholas Piggin <npiggin@gmail.com>
+Cc: Suresh Warrier <warrier@linux.vnet.ibm.com>
+Cc: "Oliver O'Halloran" <oohall@gmail.com>
+---
+ arch/powerpc/include/asm/io.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/powerpc/include/asm/io.h b/arch/powerpc/include/asm/io.h
+index 422f99cf9924..af074923d598 100644
+--- a/arch/powerpc/include/asm/io.h
++++ b/arch/powerpc/include/asm/io.h
+@@ -33,8 +33,6 @@ extern struct pci_dev *isa_bridge_pcidev;
+ #include <asm/mmu.h>
+ #include <asm/ppc_asm.h>
+ 
+-#include <asm-generic/iomap.h>
+-
+ #ifdef CONFIG_PPC64
+ #include <asm/paca.h>
+ #endif
+@@ -663,6 +661,8 @@ static inline void name at					\
+ #define writel_relaxed(v, addr)	writel(v, addr)
+ #define writeq_relaxed(v, addr)	writeq(v, addr)
+ 
++#include <asm-generic/iomap.h>
++
+ #ifdef CONFIG_PPC32
+ #define mmiowb()
+ #else
+-- 
+2.11.0
+
