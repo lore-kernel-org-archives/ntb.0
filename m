@@ -1,104 +1,98 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id y81si210675oia.4.2018.01.04.11.16.53
+        by gmr-mx.google.com with ESMTPS id c125si163276ybf.3.2018.01.04.11.16.52
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Thu, 04 Jan 2018 11:16:53 -0800 (PST)
+        Thu, 04 Jan 2018 11:16:52 -0800 (PST)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Thu,  4 Jan 2018 12:16:44 -0700
-Message-Id: <20180104191645.10006-8-logang@deltatee.com>
+Date: Thu,  4 Jan 2018 12:16:43 -0700
+Message-Id: <20180104191645.10006-7-logang@deltatee.com>
 In-Reply-To: <20180104191645.10006-1-logang@deltatee.com>
 References: <20180104191645.10006-1-logang@deltatee.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
-Subject: [PATCH v10 7/8] crypto: caam: cleanup CONFIG_64BIT ifdefs when using io{read|write}64
+Subject: [PATCH v10 6/8] ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
 To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>, Dan Douglass <dan.douglass@nxp.com>, Herbert Xu <herbert@gondor.apana.org.au>, "David S. Miller" <davem@davemloft.net>
+Cc: Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Clean up the extra ifdefs which defined the wr_reg64 and rd_reg64
-functions in non-64bit cases in favour of the new common
-io-64-nonatomic-lo-hi header.
-
-To be consistent with CAAM engine HW spec: in case of 64-bit registers,
-irrespective of device endianness, the lower address should be read from
-/ written to first, followed by the upper address. Indeed the I/O
-accessors in CAAM driver currently don't follow the spec, however this
-is a good opportunity to fix the code.
+Now that ioread64 and iowrite64 are available in io-64-nonatomic,
+we can remove the hack at the top of ntb_hw_intel.c and replace it
+with an include.
 
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Cc: Andy Shevchenko <andy.shevchenko@gmail.com>
-Cc: Horia Geantă <horia.geanta@nxp.com>
-Cc: Dan Douglass <dan.douglass@nxp.com>
-Cc: Herbert Xu <herbert@gondor.apana.org.au>
-Cc: "David S. Miller" <davem@davemloft.net>
----
- drivers/crypto/caam/regs.h | 30 +++---------------------------
- 1 file changed, 3 insertions(+), 27 deletions(-)
+Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
+Acked-by: Dave Jiang <dave.jiang@intel.com>
+Acked-by: Allen Hubbe <Allen.Hubbe@dell.com>
+Acked-by: Jon Mason <jdmason@kudzu.us>
 
-diff --git a/drivers/crypto/caam/regs.h b/drivers/crypto/caam/regs.h
-index fee363865d88..f887b371040f 100644
---- a/drivers/crypto/caam/regs.h
-+++ b/drivers/crypto/caam/regs.h
-@@ -10,7 +10,7 @@
- 
- #include <linux/types.h>
- #include <linux/bitops.h>
--#include <linux/io.h>
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# Date:      Mon Jun 19 12:18:31 2017 -0600
+#
+# interactive rebase in progress; onto ae64f9bd1d36
+# Last commands done (6 commands done):
+#    pick cf3e4dab2173 io-64-nonatomic: add io{read|write}64[be]{_lo_hi|_hi_lo} macros
+#    r 79b4c4b8490c ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
+# Next commands to do (2 remaining commands):
+#    r 19b6c1f3b15d crypto: caam: cleanup CONFIG_64BIT ifdefs when using io{read|write}64
+#    r f3c8723446ef ntb_hw_switchtec: Cleanup 64bit IO defines to use the common header
+# You are currently editing a commit while rebasing branch 'io64_v9' on 'ae64f9bd1d36'.
+#
+# Changes to be committed:
+#	modified:   drivers/ntb/hw/intel/ntb_hw_intel.c
+#
+---
+ drivers/ntb/hw/intel/ntb_hw_intel.c | 30 +-----------------------------
+ 1 file changed, 1 insertion(+), 29 deletions(-)
+
+diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c b/drivers/ntb/hw/intel/ntb_hw_intel.c
+index 4de074a86073..119cfc45617e 100644
+--- a/drivers/ntb/hw/intel/ntb_hw_intel.c
++++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
+@@ -59,6 +59,7 @@
+ #include <linux/random.h>
+ #include <linux/slab.h>
+ #include <linux/ntb.h>
 +#include <linux/io-64-nonatomic-lo-hi.h>
  
- /*
-  * Architecture-specific register access methods
-@@ -136,10 +136,9 @@ static inline void clrsetbits_32(void __iomem *reg, u32 clear, u32 set)
-  *    base + 0x0000 : least-significant 32 bits
-  *    base + 0x0004 : most-significant 32 bits
-  */
--#ifdef CONFIG_64BIT
- static inline void wr_reg64(void __iomem *reg, u64 data)
- {
--	if (caam_little_end)
-+	if (!caam_imx && caam_little_end)
- 		iowrite64(data, reg);
- 	else
- 		iowrite64be(data, reg);
-@@ -147,35 +146,12 @@ static inline void wr_reg64(void __iomem *reg, u64 data)
+ #include "ntb_hw_intel.h"
  
- static inline u64 rd_reg64(void __iomem *reg)
- {
--	if (caam_little_end)
-+	if (!caam_imx && caam_little_end)
- 		return ioread64(reg);
- 	else
- 		return ioread64be(reg);
- }
+@@ -155,35 +156,6 @@ MODULE_PARM_DESC(xeon_b2b_dsd_bar5_addr32,
+ static inline enum ntb_topo xeon_ppd_topo(struct intel_ntb_dev *ndev, u8 ppd);
+ static int xeon_init_isr(struct intel_ntb_dev *ndev);
  
--#else /* CONFIG_64BIT */
--static inline void wr_reg64(void __iomem *reg, u64 data)
+-#ifndef ioread64
+-#ifdef readq
+-#define ioread64 readq
+-#else
+-#define ioread64 _ioread64
+-static inline u64 _ioread64(void __iomem *mmio)
 -{
--	if (!caam_imx && caam_little_end) {
--		wr_reg32((u32 __iomem *)(reg) + 1, data >> 32);
--		wr_reg32((u32 __iomem *)(reg), data);
--	} else {
--		wr_reg32((u32 __iomem *)(reg), data >> 32);
--		wr_reg32((u32 __iomem *)(reg) + 1, data);
--	}
--}
+-	u64 low, high;
 -
--static inline u64 rd_reg64(void __iomem *reg)
+-	low = ioread32(mmio);
+-	high = ioread32(mmio + sizeof(u32));
+-	return low | (high << 32);
+-}
+-#endif
+-#endif
+-
+-#ifndef iowrite64
+-#ifdef writeq
+-#define iowrite64 writeq
+-#else
+-#define iowrite64 _iowrite64
+-static inline void _iowrite64(u64 val, void __iomem *mmio)
 -{
--	if (!caam_imx && caam_little_end)
--		return ((u64)rd_reg32((u32 __iomem *)(reg) + 1) << 32 |
--			(u64)rd_reg32((u32 __iomem *)(reg)));
--
--	return ((u64)rd_reg32((u32 __iomem *)(reg)) << 32 |
--		(u64)rd_reg32((u32 __iomem *)(reg) + 1));
+-	iowrite32(val, mmio);
+-	iowrite32(val >> 32, mmio + sizeof(u32));
 -}
--#endif /* CONFIG_64BIT  */
+-#endif
+-#endif
 -
- static inline u64 cpu_to_caam_dma64(dma_addr_t value)
+ static inline int pdev_is_atom(struct pci_dev *pdev)
  {
- 	if (caam_imx)
+ 	switch (pdev->device) {
 -- 
 2.11.0
 
