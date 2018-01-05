@@ -1,54 +1,45 @@
-Return-Path: <jdmason@kudzu.us>
-Received: from mail-qt0-x22c.google.com (mail-qt0-x22c.google.com. [2607:f8b0:400d:c0d::22c])
-        by gmr-mx.google.com with ESMTPS id w190si652152qkb.5.2018.01.18.14.29.25
+Return-Path: <horia.geanta@nxp.com>
+Received: from EUR01-VE1-obe.outbound.protection.outlook.com (mail-ve1eur01on0067.outbound.protection.outlook.com. [104.47.1.67])
+        by gmr-mx.google.com with ESMTPS id f38si348365uaa.3.2018.01.05.00.01.20
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 18 Jan 2018 14:29:25 -0800 (PST)
-Received: by mail-qt0-x22c.google.com with SMTP id s3so34277833qtb.10
-        for <linux-ntb@googlegroups.com>; Thu, 18 Jan 2018 14:29:25 -0800 (PST)
-Return-Path: <jdmason@kudzu.us>
-Date: Thu, 18 Jan 2018 17:29:23 -0500
-From: Jon Mason <jdmason@kudzu.us>
-Subject: Re: [PATCH] MAINTAINERS: NTB: Update contact info
-Message-ID: <20180118222922.GB25893@kudzu.us>
-References: <315ed27533409239176ca28ab137fb0b8d55eb63.1513132029.git.Allen.Hubbe@emc.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
+        Fri, 05 Jan 2018 00:01:21 -0800 (PST)
+From: =?iso-8859-2?Q?Horia_Geant=E3?= <horia.geanta@nxp.com>
+Subject: Re: [PATCH v10 7/8] crypto: caam: cleanup CONFIG_64BIT ifdefs when
+ using io{read|write}64
+Date: Fri, 5 Jan 2018 08:01:13 +0000
+Message-ID: <VI1PR0402MB334282217BC0AE1F8DA8BFC3981C0@VI1PR0402MB3342.eurprd04.prod.outlook.com>
+References: <20180104191645.10006-1-logang@deltatee.com>
+ <20180104191645.10006-8-logang@deltatee.com>
+Content-Language: en-US
+Content-Type: text/plain; charset="iso-8859-2"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <315ed27533409239176ca28ab137fb0b8d55eb63.1513132029.git.Allen.Hubbe@emc.com>
-To: Allen Hubbe <Allen.Hubbe@dell.com>
-Cc: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Allen Hubbe <allenbh@gmail.com>
+To: Logan Gunthorpe <logang@deltatee.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arch@vger.kernel.org" <linux-arch@vger.kernel.org>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "linux-crypto@vger.kernel.org" <linux-crypto@vger.kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>, Dan Douglass <dan.douglass@nxp.com>, Herbert Xu <herbert@gondor.apana.org.au>, "David S. Miller" <davem@davemloft.net>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Tue, Dec 12, 2017 at 09:27:52PM -0500, Allen Hubbe wrote:
-> I am no longer employed by Dell EMC.  For the purposes of NTB driver
-> development and maintenance, please contact me via my personal email.
-
-Applied to ntb-next.
-
-Thanks,
-Jon
-
-> 
-> Signed-off-by: Allen Hubbe <allenbh@gmail.com>
-> Signed-off-by: Allen Hubbe <Allen.Hubbe@emc.com>
-> ---
->  MAINTAINERS | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 82ad0eabce4f..cb7344e37fc5 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -9712,7 +9712,7 @@ F:	drivers/ntb/hw/amd/
->  NTB DRIVER CORE
->  M:	Jon Mason <jdmason@kudzu.us>
->  M:	Dave Jiang <dave.jiang@intel.com>
-> -M:	Allen Hubbe <Allen.Hubbe@emc.com>
-> +M:	Allen Hubbe <allenbh@gmail.com>
->  L:	linux-ntb@googlegroups.com
->  S:	Supported
->  W:	https://github.com/jonmason/ntb/wiki
-> -- 
-> 2.14.1
-> 
+On 1/4/2018 9:16 PM, Logan Gunthorpe wrote:=0A=
+> Clean up the extra ifdefs which defined the wr_reg64 and rd_reg64=0A=
+> functions in non-64bit cases in favour of the new common=0A=
+> io-64-nonatomic-lo-hi header.=0A=
+> =0A=
+> To be consistent with CAAM engine HW spec: in case of 64-bit registers,=
+=0A=
+> irrespective of device endianness, the lower address should be read from=
+=0A=
+> / written to first, followed by the upper address. Indeed the I/O=0A=
+> accessors in CAAM driver currently don't follow the spec, however this=0A=
+> is a good opportunity to fix the code.=0A=
+> =0A=
+> Signed-off-by: Logan Gunthorpe <logang@deltatee.com>=0A=
+> Cc: Andy Shevchenko <andy.shevchenko@gmail.com>=0A=
+> Cc: Horia Geant=E3 <horia.geanta@nxp.com>=0A=
+> Cc: Dan Douglass <dan.douglass@nxp.com>=0A=
+> Cc: Herbert Xu <herbert@gondor.apana.org.au>=0A=
+> Cc: "David S. Miller" <davem@davemloft.net>=0A=
+Reviewed-by: Horia Geant=E3 <horia.geanta@nxp.com>=0A=
+=0A=
+Thanks,=0A=
+Horia=0A=
+=0A=
