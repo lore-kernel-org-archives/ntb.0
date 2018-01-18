@@ -1,98 +1,64 @@
-Return-Path: <gunthorp@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id j129si52250oib.5.2018.01.03.10.06.52
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-qt0-x235.google.com (mail-qt0-x235.google.com. [2607:f8b0:400d:c0d::235])
+        by gmr-mx.google.com with ESMTPS id v22si886106oth.1.2018.01.18.14.31.02
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Wed, 03 Jan 2018 10:06:53 -0800 (PST)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Wed,  3 Jan 2018 11:06:16 -0700
-Message-Id: <20180103180618.18401-7-logang@deltatee.com>
-In-Reply-To: <20180103180618.18401-1-logang@deltatee.com>
-References: <20180103180618.18401-1-logang@deltatee.com>
-Subject: [PATCH v9 6/8] ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
-To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 18 Jan 2018 14:31:02 -0800 (PST)
+Received: by mail-qt0-x235.google.com with SMTP id m59so34323735qte.11
+        for <linux-ntb@googlegroups.com>; Thu, 18 Jan 2018 14:31:02 -0800 (PST)
+Return-Path: <jdmason@kudzu.us>
+Date: Thu, 18 Jan 2018 17:30:59 -0500
+From: Jon Mason <jdmason@kudzu.us>
+Subject: Re: [PATCH] [RESEND] ntb_hw_switchtec: fix logic error
+Message-ID: <20180118223058.GE25893@kudzu.us>
+References: <20180116135116.4065102-1-arnd@arndb.de>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180116135116.4065102-1-arnd@arndb.de>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Logan Gunthorpe <logang@deltatee.com>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, Stephen Bates <sbates@raithlin.com>, linux-pci@vger.kernel.org, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-Now that ioread64 and iowrite64 are available in io-64-nonatomic,
-we can remove the hack at the top of ntb_hw_intel.c and replace it
-with an include.
+On Tue, Jan 16, 2018 at 02:50:51PM +0100, Arnd Bergmann wrote:
+> Newer gcc (version 7 and 8 presumably) warn about a statement mixing
+> the << operator with logical and:
+> 
+> drivers/ntb/hw/mscc/ntb_hw_switchtec.c: In function 'switchtec_ntb_init_sndev':
+> drivers/ntb/hw/mscc/ntb_hw_switchtec.c:888:24: error: '<<' in boolean context, did you mean '<' ? [-Werror=int-in-bool-context]
+> 
+> My interpretation here is that the author must have intended a bitmask
+> rather than a comparison, so I'm changing the '&&' to '&', which makes
+> a lot more sense in the context.
+> 
+> Fixes: 1b249475275d ("ntb_hw_switchtec: Allow using Switchtec NTB in multi-partition setups")
+> Reviewed-by: Logan Gunthorpe <logang@deltatee.com>
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> ----
+> Originally sent on Dec 9, but this patch never got picked up
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
-Acked-by: Dave Jiang <dave.jiang@intel.com>
-Acked-by: Allen Hubbe <Allen.Hubbe@dell.com>
-Acked-by: Jon Mason <jdmason@kudzu.us>
+Sorry for missing the patch.  Applied to ntb-next.
 
-# Please enter the commit message for your changes. Lines starting
-# with '#' will be ignored, and an empty message aborts the commit.
-#
-# Date:      Mon Jun 19 12:18:31 2017 -0600
-#
-# interactive rebase in progress; onto ae64f9bd1d36
-# Last commands done (6 commands done):
-#    pick cf3e4dab2173 io-64-nonatomic: add io{read|write}64[be]{_lo_hi|_hi_lo} macros
-#    r 79b4c4b8490c ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
-# Next commands to do (2 remaining commands):
-#    r 19b6c1f3b15d crypto: caam: cleanup CONFIG_64BIT ifdefs when using io{read|write}64
-#    r f3c8723446ef ntb_hw_switchtec: Cleanup 64bit IO defines to use the common header
-# You are currently editing a commit while rebasing branch 'io64_v9' on 'ae64f9bd1d36'.
-#
-# Changes to be committed:
-#	modified:   drivers/ntb/hw/intel/ntb_hw_intel.c
-#
----
- drivers/ntb/hw/intel/ntb_hw_intel.c | 30 +-----------------------------
- 1 file changed, 1 insertion(+), 29 deletions(-)
+Thanks,
+Jon
 
-diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c b/drivers/ntb/hw/intel/ntb_hw_intel.c
-index 4de074a86073..119cfc45617e 100644
---- a/drivers/ntb/hw/intel/ntb_hw_intel.c
-+++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
-@@ -59,6 +59,7 @@
- #include <linux/random.h>
- #include <linux/slab.h>
- #include <linux/ntb.h>
-+#include <linux/io-64-nonatomic-lo-hi.h>
- 
- #include "ntb_hw_intel.h"
- 
-@@ -155,35 +156,6 @@ MODULE_PARM_DESC(xeon_b2b_dsd_bar5_addr32,
- static inline enum ntb_topo xeon_ppd_topo(struct intel_ntb_dev *ndev, u8 ppd);
- static int xeon_init_isr(struct intel_ntb_dev *ndev);
- 
--#ifndef ioread64
--#ifdef readq
--#define ioread64 readq
--#else
--#define ioread64 _ioread64
--static inline u64 _ioread64(void __iomem *mmio)
--{
--	u64 low, high;
--
--	low = ioread32(mmio);
--	high = ioread32(mmio + sizeof(u32));
--	return low | (high << 32);
--}
--#endif
--#endif
--
--#ifndef iowrite64
--#ifdef writeq
--#define iowrite64 writeq
--#else
--#define iowrite64 _iowrite64
--static inline void _iowrite64(u64 val, void __iomem *mmio)
--{
--	iowrite32(val, mmio);
--	iowrite32(val >> 32, mmio + sizeof(u32));
--}
--#endif
--#endif
--
- static inline int pdev_is_atom(struct pci_dev *pdev)
- {
- 	switch (pdev->device) {
--- 
-2.11.0
-
+> ---
+>  drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+> index bcd5b6fb3800..76acb8bba3f2 100644
+> --- a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+> +++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+> @@ -885,7 +885,7 @@ static int switchtec_ntb_init_sndev(struct switchtec_ntb *sndev)
+>  		}
+>  
+>  		sndev->peer_partition = ffs(tpart_vec) - 1;
+> -		if (!(part_map && (1 << sndev->peer_partition))) {
+> +		if (!(part_map & (1 << sndev->peer_partition))) {
+>  			dev_err(&sndev->stdev->dev,
+>  				"ntb target partition is not NT partition\n");
+>  			return -ENODEV;
+> -- 
+> 2.9.0
+> 
