@@ -1,76 +1,55 @@
-Return-Path: <gunthorp@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id v81si65305qkb.1.2018.01.03.10.06.53
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-qt0-x22d.google.com (mail-qt0-x22d.google.com. [2607:f8b0:400d:c0d::22d])
+        by gmr-mx.google.com with ESMTPS id k4si8278iti.1.2018.01.23.20.07.31
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Wed, 03 Jan 2018 10:06:53 -0800 (PST)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Wed,  3 Jan 2018 11:06:18 -0700
-Message-Id: <20180103180618.18401-9-logang@deltatee.com>
-In-Reply-To: <20180103180618.18401-1-logang@deltatee.com>
-References: <20180103180618.18401-1-logang@deltatee.com>
-Subject: [PATCH v9 8/8] ntb: ntb_hw_switchtec: Cleanup 64bit IO defines to use the common header
-To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>, Jon Mason <jdmason@kudzu.us>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 23 Jan 2018 20:07:31 -0800 (PST)
+Received: by mail-qt0-x22d.google.com with SMTP id z11so7200807qtm.3
+        for <linux-ntb@googlegroups.com>; Tue, 23 Jan 2018 20:07:31 -0800 (PST)
+Return-Path: <jdmason@kudzu.us>
+Date: Tue, 23 Jan 2018 23:07:29 -0500
+From: Jon Mason <jdmason@kudzu.us>
+Subject: Re: [PATCH] ntb_perf: Fix an error code in perf_copy_chunk()
+Message-ID: <20180124040728.GC20474@kudzu.us>
+References: <20180123083356.GC10091@mwanda>
+ <20180123085531.GA17853@mobilestation>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180123085531.GA17853@mobilestation>
+To: Serge Semin <fancer.lancer@gmail.com>
+Cc: Dan Carpenter <dan.carpenter@oracle.com>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Gary R Hook <gary.hook@amd.com>, Logan Gunthorpe <logang@deltatee.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-ntb@googlegroups.com, kernel-janitors@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-Clean up the ifdefs which conditionally defined the io{read|write}64
-functions in favour of the new common io-64-nonatomic-lo-hi header.
+On Tue, Jan 23, 2018 at 11:55:31AM +0300, Serge Semin wrote:
+> On Tue, Jan 23, 2018 at 11:33:56AM +0300, Dan Carpenter <dan.carpenter@oracle.com> wrote:
+> > We accidentally return success if dmaengine_submit() fails.  The fix is
+> > to preserve the error code from dma_submit_error().
+> > 
+> 
+> Yep, absolutely right. Thanks!
+> 
+> Acked-by: Serge Semin <fancer.lancer@gmail.com>
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Cc: Jon Mason <jdmason@kudzu.us>
----
- drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 30 +-----------------------------
- 1 file changed, 1 insertion(+), 29 deletions(-)
+Applied to ntb-next
 
-diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-index afe8ed6f3b23..53d3a34cddf3 100644
---- a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-+++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-@@ -19,6 +19,7 @@
- #include <linux/kthread.h>
- #include <linux/interrupt.h>
- #include <linux/ntb.h>
-+#include <linux/io-64-nonatomic-lo-hi.h>
- 
- MODULE_DESCRIPTION("Microsemi Switchtec(tm) NTB Driver");
- MODULE_VERSION("0.1");
-@@ -35,35 +36,6 @@ module_param(use_lut_mws, bool, 0644);
- MODULE_PARM_DESC(use_lut_mws,
- 		 "Enable the use of the LUT based memory windows");
- 
--#ifndef ioread64
--#ifdef readq
--#define ioread64 readq
--#else
--#define ioread64 _ioread64
--static inline u64 _ioread64(void __iomem *mmio)
--{
--	u64 low, high;
--
--	low = ioread32(mmio);
--	high = ioread32(mmio + sizeof(u32));
--	return low | (high << 32);
--}
--#endif
--#endif
--
--#ifndef iowrite64
--#ifdef writeq
--#define iowrite64 writeq
--#else
--#define iowrite64 _iowrite64
--static inline void _iowrite64(u64 val, void __iomem *mmio)
--{
--	iowrite32(val, mmio);
--	iowrite32(val >> 32, mmio + sizeof(u32));
--}
--#endif
--#endif
--
- #define SWITCHTEC_NTB_MAGIC 0x45CC0001
- #define MAX_MWS     128
- 
--- 
-2.11.0
+Thanks,
+Jon
 
+> 
+> > Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+> > 
+> > diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
+> > index 8de72f3fba4d..387e685063fc 100644
+> > --- a/drivers/ntb/test/ntb_perf.c
+> > +++ b/drivers/ntb/test/ntb_perf.c
+> > @@ -828,7 +828,8 @@ static int perf_copy_chunk(struct perf_thread *pthr,
+> >  	tx->callback_param = pthr;
+> >  	dma_set_unmap(tx, unmap);
+> >  
+> > -	if (dma_submit_error(dmaengine_submit(tx))) {
+> > +	ret = dma_submit_error(dmaengine_submit(tx));
+> > +	if (ret) {
+> >  		dmaengine_unmap_put(unmap);
+> >  		goto err_free_resource;
+> >  	}
