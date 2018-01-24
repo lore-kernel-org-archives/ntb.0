@@ -1,136 +1,101 @@
 Return-Path: <fancer.lancer@gmail.com>
-Received: from mail-lf0-x241.google.com (mail-lf0-x241.google.com. [2a00:1450:4010:c07::241])
-        by gmr-mx.google.com with ESMTPS id f6si231235wre.4.2018.01.23.23.49.06
+Received: from mail-lf0-x242.google.com (mail-lf0-x242.google.com. [2a00:1450:4010:c07::242])
+        by gmr-mx.google.com with ESMTPS id h92si259284lfi.3.2018.01.23.23.31.37
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 23 Jan 2018 23:49:06 -0800 (PST)
-Received: by mail-lf0-x241.google.com with SMTP id o89so3921207lfg.10
-        for <linux-ntb@googlegroups.com>; Tue, 23 Jan 2018 23:49:06 -0800 (PST)
+        Tue, 23 Jan 2018 23:31:37 -0800 (PST)
+Received: by mail-lf0-x242.google.com with SMTP id f136so3872999lff.8
+        for <linux-ntb@googlegroups.com>; Tue, 23 Jan 2018 23:31:37 -0800 (PST)
 Return-Path: <fancer.lancer@gmail.com>
+Date: Wed, 24 Jan 2018 10:31:51 +0300
 From: Serge Semin <fancer.lancer@gmail.com>
-Subject: [PATCH v2] NTB: ntb_perf: fix cast to restricted __le32
-Date: Wed, 24 Jan 2018 10:48:45 +0300
-Message-Id: <20180124074845.32125-1-fancer.lancer@gmail.com>
-In-Reply-To: <20180119173044.8013-1-fancer.lancer@gmail.com>
+Subject: Re: [PATCH] NTB: ntb_perf: fix cast to restricted __le32
+Message-ID: <20180124073151.GB31120@mobilestation>
 References: <20180119173044.8013-1-fancer.lancer@gmail.com>
-To: jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com, arnd@arndb.de
-Cc: gary.hook@amd.com, Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Serge Semin <fancer.lancer@gmail.com>
+ <CAK8P3a3SxeON4m8bjehjNKtX_T75udDFEEXnQ4j2KDe3vKz5vA@mail.gmail.com>
+ <20180119210310.GA2284@mobilestation>
+ <CAK8P3a2AUWfhg+srzt9m=oj4_jN4BDg3bWrwK3dDN1tNsGoqMg@mail.gmail.com>
+ <20180124041805.GD20474@kudzu.us>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180124041805.GD20474@kudzu.us>
+To: Jon Mason <jdmason@kudzu.us>
+Cc: Arnd Bergmann <arnd@arndb.de>, Dave Jiang <dave.jiang@intel.com>, Allen.Hubbe@gmail.com, "Hook, Gary" <gary.hook@amd.com>, Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-ID: <linux-ntb.googlegroups.com>
 
-Sparse is whining about the u32 and __le32 mixed usage in the driver
+On Tue, Jan 23, 2018 at 11:18:06PM -0500, Jon Mason <jdmason@kudzu.us> wrote:
+> On Fri, Jan 19, 2018 at 10:26:37PM +0100, Arnd Bergmann wrote:
+> > On Fri, Jan 19, 2018 at 10:03 PM, Serge Semin <fancer.lancer@gmail.com> wrote:
+> > >
+> > > Actually the provided patch is the best solution I could come up with.
+> > > The thing is, that the methods can't be changed. Those functions are
+> > > the part of the NTB API methods used by many drivers. So basically they
+> > > are like pci_{read,write}_config_{byte,word,dword}() methods. We can't
+> > > change their prototypes only because it's suit some driver. The methods
+> > > give an access to the NTB device dummy u32-sized registers, nothing
+> > > else. So endianness is the transmitted data settings in this case.
+> > >
+> > > NTB is the technology to interconnect some two systems with possibly
+> > > different endianness (unlike PCI, which interconnect CPU with LE devices).
+> > > In this case I'd need to set some agreement up between two systems about
+> > > the endianness of the exchanged data like host and network types in
+> > > Linux networking. I've chosen the network data to be little-endian,
+> > > that's why I needed first to convert them from CPU to le32, then on
+> > > remote side convert them back from le32 to CPU.
+> > >
+> > > If you have any better suggestion how the warning can be fixed, I'd
+> > > be glad to stick to it.
+> > 
+> > I don't think your description matches what you actually do: The
+> > underlying ntb hardware drivers (amd, idt, intel, mscc) all treat the
+> > incoming data as CPU-endian and convert it to little-endian on
+> > the register side, so the framework already assumes that whatever
+> > you do here uses a little-endian wire-level protocol.
+> > 
+> > On a little-endian kernel/CPU, nothing is ever swapped here, neither
+> > in the ntb_perf front-end nor in the back-ends. On a big-endian
+> > kernel/CPU, they both swap, so you end up with CPU-endian
+> > data on the wire, so it should be impossible for a big-endian
+> > system to talk to a little-endian one. Have you actually tried that
+> > combination with the current code?
+> 
+> I do not believe anyone has every tried NTB on a big endien system,
+> let alone tried it with one side LE and the other BE.  To my
+> knowledge, this has only ever been used on x86 to x86.
+> 
+> > If my interpretation is correct, then the best solution would be to
+> > completely remove the cpu_to_le32/le32_to_cpu conversions
+> > from ntb_perf, and just define that it works like any other PCI
+> > device, exchanging little-endian data.
+> 
+> Yes, this would be the best solution.  Thank you for the insight.
+> 
+> Serge, when you get a chance, please make this change and resumbit.
+> 
 
-drivers/ntb/test/ntb_perf.c:288:21: warning: cast to restricted __le32
-drivers/ntb/test/ntb_perf.c:295:37: warning: incorrect type in argument 4 (different base types)
-drivers/ntb/test/ntb_perf.c:295:37:    expected unsigned int [unsigned] [usertype] val
-drivers/ntb/test/ntb_perf.c:295:37:    got restricted __le32 [usertype] <noident>
-...
+Ok. I'll do it in an hour.
 
-NTB hardware drivers shall accept CPU-endian data and translate it to
-the portable formate by internal means, so the explicit conversions
-are not necessary before Scratchpad/Messages API usage anymore.
+Regards,
+-Sergey
 
-Fixes: b83003b3fdc1 ("NTB: ntb_perf: Add full multi-port NTB API support")
-Signed-off-by: Serge Semin <fancer.lancer@gmail.com>
----
- drivers/ntb/test/ntb_perf.c | 28 +++++++++++++---------------
- 1 file changed, 13 insertions(+), 15 deletions(-)
-
-diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index 1829a17dd461..3fded6aeda08 100644
---- a/drivers/ntb/test/ntb_perf.c
-+++ b/drivers/ntb/test/ntb_perf.c
-@@ -273,21 +273,21 @@ static int perf_spad_cmd_send(struct perf_peer *peer, enum perf_cmd cmd,
- 
- 		sts = ntb_peer_spad_read(perf->ntb, peer->pidx,
- 					 PERF_SPAD_CMD(perf->gidx));
--		if (le32_to_cpu(sts) != PERF_CMD_INVAL) {
-+		if (sts != PERF_CMD_INVAL) {
- 			usleep_range(MSG_UDELAY_LOW, MSG_UDELAY_HIGH);
- 			continue;
- 		}
- 
- 		ntb_peer_spad_write(perf->ntb, peer->pidx,
- 				    PERF_SPAD_LDATA(perf->gidx),
--				    cpu_to_le32(lower_32_bits(data)));
-+				    lower_32_bits(data));
- 		ntb_peer_spad_write(perf->ntb, peer->pidx,
- 				    PERF_SPAD_HDATA(perf->gidx),
--				    cpu_to_le32(upper_32_bits(data)));
-+				    upper_32_bits(data));
- 		mmiowb();
- 		ntb_peer_spad_write(perf->ntb, peer->pidx,
- 				    PERF_SPAD_CMD(perf->gidx),
--				    cpu_to_le32(cmd));
-+				    cmd);
- 		mmiowb();
- 		ntb_peer_db_set(perf->ntb, PERF_SPAD_NOTIFY(peer->gidx));
- 
-@@ -321,21 +321,20 @@ static int perf_spad_cmd_recv(struct perf_ctx *perf, int *pidx,
- 			continue;
- 
- 		val = ntb_spad_read(perf->ntb, PERF_SPAD_CMD(peer->gidx));
--		val = le32_to_cpu(val);
- 		if (val == PERF_CMD_INVAL)
- 			continue;
- 
- 		*cmd = val;
- 
- 		val = ntb_spad_read(perf->ntb, PERF_SPAD_LDATA(peer->gidx));
--		*data = le32_to_cpu(val);
-+		*data = val;
- 
- 		val = ntb_spad_read(perf->ntb, PERF_SPAD_HDATA(peer->gidx));
--		*data |= (u64)le32_to_cpu(val) << 32;
-+		*data |= (u64)val << 32;
- 
- 		/* Next command can be retrieved from now */
- 		ntb_spad_write(perf->ntb, PERF_SPAD_CMD(peer->gidx),
--			       cpu_to_le32(PERF_CMD_INVAL));
-+			       PERF_CMD_INVAL);
- 
- 		dev_dbg(&perf->ntb->dev, "CMD recv: %d 0x%llx\n", *cmd, *data);
- 
-@@ -371,7 +370,7 @@ static int perf_msg_cmd_send(struct perf_peer *peer, enum perf_cmd cmd,
- 			return ret;
- 
- 		ntb_peer_msg_write(perf->ntb, peer->pidx, PERF_MSG_LDATA,
--			      cpu_to_le32(lower_32_bits(data)));
-+				   lower_32_bits(data));
- 
- 		if (ntb_msg_read_sts(perf->ntb) & outbits) {
- 			usleep_range(MSG_UDELAY_LOW, MSG_UDELAY_HIGH);
-@@ -379,12 +378,11 @@ static int perf_msg_cmd_send(struct perf_peer *peer, enum perf_cmd cmd,
- 		}
- 
- 		ntb_peer_msg_write(perf->ntb, peer->pidx, PERF_MSG_HDATA,
--			      cpu_to_le32(upper_32_bits(data)));
-+				   upper_32_bits(data));
- 		mmiowb();
- 
- 		/* This call shall trigger peer message event */
--		ntb_peer_msg_write(perf->ntb, peer->pidx, PERF_MSG_CMD,
--			      cpu_to_le32(cmd));
-+		ntb_peer_msg_write(perf->ntb, peer->pidx, PERF_MSG_CMD, cmd);
- 
- 		break;
- 	}
-@@ -404,13 +402,13 @@ static int perf_msg_cmd_recv(struct perf_ctx *perf, int *pidx,
- 		return -ENODATA;
- 
- 	val = ntb_msg_read(perf->ntb, pidx, PERF_MSG_CMD);
--	*cmd = le32_to_cpu(val);
-+	*cmd = val;
- 
- 	val = ntb_msg_read(perf->ntb, pidx, PERF_MSG_LDATA);
--	*data = le32_to_cpu(val);
-+	*data = val;
- 
- 	val = ntb_msg_read(perf->ntb, pidx, PERF_MSG_HDATA);
--	*data |= (u64)le32_to_cpu(val) << 32;
-+	*data |= (u64)val << 32;
- 
- 	/* Next command can be retrieved from now */
- 	ntb_msg_clear_sts(perf->ntb, inbits);
--- 
-2.12.0
-
+> Thanks,
+> Jon
+> 
+> 
+> > 
+> > There are two interesting cases to consider though:
+> > 
+> > - if someone wants to implement an NTB based protocol
+> >   using big-endian data on the wire, you probably want to add
+> >   a ntb_peer_spad_read_be()/ntb_peer_msg_write_be()
+> >   set of interfaces, to go along with ioread32_be()/iowrite32_be()
+> >   the same way that ntb_peer_spad_read()/ntb_peer_msg_write()
+> >   ends up doing ioread32()/iowrite32() with the implied little-endian
+> >   behavior.
+> > 
+> > - memcpy_toio()/memcpy_fromio() and ioread32_rep()/iowrite32_rep
+> >   importantly do not do any byteswap, they are meant to
+> >   transfer byte streams.
+> > 
+> >         Arnd
