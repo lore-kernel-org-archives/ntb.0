@@ -1,123 +1,58 @@
-Return-Path: <jdmason@kudzu.us>
-Received: from mail-qt0-x231.google.com (mail-qt0-x231.google.com. [2607:f8b0:400d:c0d::231])
-        by gmr-mx.google.com with ESMTPS id q12si425324ioh.5.2018.02.04.08.09.03
+Return-Path: <logang@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id v40si1082569ote.5.2018.03.06.09.04.05
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Sun, 04 Feb 2018 08:09:03 -0800 (PST)
-Received: by mail-qt0-x231.google.com with SMTP id h4so9064059qtn.13
-        for <linux-ntb@googlegroups.com>; Sun, 04 Feb 2018 08:09:03 -0800 (PST)
-Return-Path: <jdmason@kudzu.us>
-From: Jon Mason <jdmason@kudzu.us>
-Date: Sun, 4 Feb 2018 11:08:59 -0500
-Subject: [GIT PULL] NTB bug fixes for v4.16
-Message-ID: <20180204160859.GA20908@graymalkin.kudzu.us>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Tue, 06 Mar 2018 09:04:06 -0800 (PST)
+References: <20180305190824.847-1-logang@deltatee.com>
+ <20180305190824.847-8-logang@deltatee.com>
+ <CAHp75Vc41MwtDr24-z3po2nx3Hr7_=tFUD0odcrbnVTP4SnJ1g@mail.gmail.com>
+ <20180306114632.GB16784@kroah.com>
+ <CAHp75Vf6sYss8q5FjgLYaQXYN761M4awmLVjZ48Cdd8+NrrhxQ@mail.gmail.com>
+From: Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <18e6f79d-04db-463a-8916-09d7d859d273@deltatee.com>
+Date: Tue, 6 Mar 2018 10:03:55 -0700
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
+In-Reply-To: <CAHp75Vf6sYss8q5FjgLYaQXYN761M4awmLVjZ48Cdd8+NrrhxQ@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH v11 7/7] ntb: ntb_hw_switchtec: Cleanup 64bit IO defines
+ to use the common header
+To: Andy Shevchenko <andy.shevchenko@gmail.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux-Arch <linux-arch@vger.kernel.org>, linux-ntb@googlegroups.com, linux-crypto <linux-crypto@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, =?UTF-8?Q?Horia_Geant=c4=83?= <horia.geanta@nxp.com>, Jon Mason <jdmason@kudzu.us>
 List-ID: <linux-ntb.googlegroups.com>
 
-Hello Linus,
-Here are a few NTB bug fixes, removal of a driver, and updated to the
-NTB tools to take advants of the multiport interface.  They've been in
-linux-next for a little while.  Please consider pulling them for 4.16.
-
-Thanks,
-Jon
 
 
+On 06/03/18 04:57 AM, Andy Shevchenko wrote:
+> On Tue, Mar 6, 2018 at 1:46 PM, Greg Kroah-Hartman
+> <gregkh@linuxfoundation.org> wrote:
+>> On Tue, Mar 06, 2018 at 12:48:29PM +0200, Andy Shevchenko wrote:
+>>> On Mon, Mar 5, 2018 at 9:08 PM, Logan Gunthorpe <logang@deltatee.com> wrote:
+>>>> Clean up the ifdefs which conditionally defined the io{read|write}64
+>>>> functions in favour of the new common io-64-nonatomic-lo-hi header.
+>>>
+>>>>   #include <linux/kthread.h>
+>>>>   #include <linux/interrupt.h>
+>>>>   #include <linux/ntb.h>
+>>>> +#include <linux/io-64-nonatomic-lo-hi.h>
+>>>
+>>> A nit, can we preserve alphabetical ordering?
+>>
+>> Ugh, why, it doesn't matter at all :)
+> 
+> I'm fine with either way, but ordering is a good thing to have in long
+> term prospective.
+> Easy to find what headers are in there, easy to understand if you need
+> another one or not, easy to maintain the list w/o duplications.
+> 
+> I saw already few examples where long list of headers contained
+> duplications b/c it was in messy order.
+> 
 
-The following changes since commit d8a5b80568a9cb66810e75b182018e9edb68e8ff:
+I agree with Greg here. This is a bit silly. The list isn't even 
+alphabetical to begin with so it can't be preserved. However, if I do a 
+v12 I'll make it alphabetical.
 
-  Linux 4.15 (2018-01-28 13:20:33 -0800)
-
-are available in the Git repository at:
-
-  git://github.com/jonmason/ntb tags/ntb-4.16
-
-for you to fetch changes up to 3b28c987fb9547ca9aac73241d0e281cf646387c:
-
-  NTB: ntb_perf: fix cast to restricted __le32 (2018-01-28 22:17:24 -0500)
-
-----------------------------------------------------------------
-Bug fixes galore, removal of the ntb atom driver, and updates to the ntb
-tools and tests to support the multi-port interface
-
-----------------------------------------------------------------
-Allen Hubbe (1):
-      MAINTAINERS: NTB: Update contact info
-
-Arnd Bergmann (2):
-      ntb_hw_switchtec: fix logic error
-      NTB: ntb_perf: fix printing of resource_size_t
-
-Colin Ian King (2):
-      NTB: switchtec_ntb: fix spelling mistake: "peforming" -> "performing"
-      NTB: ntb_tool: fix memory leak on 'buf' on error exit path
-
-Dan Carpenter (1):
-      ntb_perf: Fix an error code in perf_copy_chunk()
-
-Dave Jiang (1):
-      ntb: remove Intel Atom NTB driver support
-
-Doug Meyer (1):
-      NTB: ntb_hw_switchtec: Fix peer BAR bug in switchtec_ntb_init_shared_mw
-
-Greg Kroah-Hartman (1):
-      ntb: remove unneeded DRIVER_LICENSE #defines
-
-Jon Mason (1):
-      NTB: switchtec_ntb: Add new line on appropriate printks
-
-Kelvin Cao (1):
-      ntb_hw_switchtec: Allow using Switchtec NTB in multi-partition setups
-
-Logan Gunthorpe (9):
-      ntb_hw_switchtec: Keep track of the number of LUT windows used by the driver
-      ntb_hw_switchtec: Create helper function to setup reserved LUT MWs
-      ntb_hw_switchtec: Make switchtec_ntb_init_req_id_table() more general
-      ntb_hw_switchtec: Expand PFF CSR registers
-      ntb_hw_switchtec: Add initialization code for crosslink
-      ntb_hw_switchtec: Crosslink doorbells and messages
-      ntb_hw_switchtec: Force down the link before initializing
-      ntb_transport: Fix bug with max_mw_size parameter
-      ntb_hw_switchtec: Check for alignment of the buffer in mw_set_trans()
-
-Serge Semin (16):
-      NTB: Rename NTB messaging API methods
-      NTB: Set dma mask and dma coherent mask to NTB devices
-      NTB: Fix UB/bug in ntb_mw_get_align()
-      NTB: ntb_pp: Add full multi-port NTB API support
-      NTB: ntb_tool: Add full multi-port NTB API support
-      NTB: ntb_perf: Add full multi-port NTB API support
-      NTB: ntb_test: Safely use paths with whitespace
-      NTB: ntb_test: Add ntb_tool port tests
-      NTB: ntb_test: Update ntb_tool link tests
-      NTB: ntb_test: Update ntb_tool DB tests
-      NTB: ntb_test: Update ntb_tool Scratchpad tests
-      NTB: ntb_test: Add ntb_tool Message tests
-      NTB: ntb_test: Update ntb_tool MW tests
-      NTB: ntb_test: Update ntb_perf tests
-      NTB: ntb_hw_idt: Set NTB_TOPO_SWITCH topology
-      NTB: ntb_perf: fix cast to restricted __le32
-
-Wei Yongjun (1):
-      ntb_hw_switchtec: Make function switchtec_ntb_remove() static
-
- MAINTAINERS                             |    2 +-
- drivers/ntb/hw/amd/ntb_hw_amd.c         |    4 +
- drivers/ntb/hw/idt/ntb_hw_idt.c         |   37 +-
- drivers/ntb/hw/intel/ntb_hw_intel.c     |  313 +-----
- drivers/ntb/hw/intel/ntb_hw_intel.h     |   58 -
- drivers/ntb/hw/mscc/ntb_hw_switchtec.c  |  603 ++++++++--
- drivers/ntb/ntb.c                       |    4 +-
- drivers/ntb/ntb_transport.c             |    3 +
- drivers/ntb/test/ntb_perf.c             | 1824 ++++++++++++++++++++----------
- drivers/ntb/test/ntb_pingpong.c         |  450 +++++---
- drivers/ntb/test/ntb_tool.c             | 1827 +++++++++++++++++++++----------
- include/linux/ntb.h                     |   51 +-
- include/linux/switchtec.h               |   23 +-
- tools/testing/selftests/ntb/ntb_test.sh |  307 ++++--
- 14 files changed, 3551 insertions(+), 1955 deletions(-)
+Logan
