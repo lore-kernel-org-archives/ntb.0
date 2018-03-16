@@ -1,65 +1,55 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id 44si682912qtu.1.2018.03.16.08.48.59
+        by gmr-mx.google.com with ESMTPS id t10si525958itf.2.2018.03.16.08.48.59
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
         Fri, 16 Mar 2018 08:48:59 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Fri, 16 Mar 2018 09:48:50 -0600
-Message-Id: <20180316154852.13206-8-logang@deltatee.com>
+Date: Fri, 16 Mar 2018 09:48:52 -0600
+Message-Id: <20180316154852.13206-10-logang@deltatee.com>
 In-Reply-To: <20180316154852.13206-1-logang@deltatee.com>
 References: <20180316154852.13206-1-logang@deltatee.com>
-Subject: [PATCH v12 7/9] ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
+Subject: [PATCH v12 9/9] ntb: ntb_hw_switchtec: Cleanup 64bit IO defines to use the common header
 To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>, Jon Mason <jdmason@kudzu.us>
 List-ID: <linux-ntb.googlegroups.com>
 
-Now that ioread64 and iowrite64 are available in io-64-nonatomic,
-we can remove the hack at the top of ntb_hw_intel.c and replace it
-with an include.
+Clean up the ifdefs which conditionally defined the io{read|write}64
+functions in favour of the new common io-64-nonatomic-lo-hi header.
+
+Per a nit from Andy Shevchenko, the include list is also made
+alphabetical.
 
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
-Acked-by: Dave Jiang <dave.jiang@intel.com>
-Acked-by: Allen Hubbe <Allen.Hubbe@dell.com>
-Acked-by: Jon Mason <jdmason@kudzu.us>
-
-# Please enter the commit message for your changes. Lines starting
-# with '#' will be ignored, and an empty message aborts the commit.
-#
-# Date:      Mon Jun 19 12:18:31 2017 -0600
-#
-# interactive rebase in progress; onto ae64f9bd1d36
-# Last commands done (6 commands done):
-#    pick cf3e4dab2173 io-64-nonatomic: add io{read|write}64[be]{_lo_hi|_hi_lo} macros
-#    r 79b4c4b8490c ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
-# Next commands to do (2 remaining commands):
-#    r 19b6c1f3b15d crypto: caam: cleanup CONFIG_64BIT ifdefs when using io{read|write}64
-#    r f3c8723446ef ntb_hw_switchtec: Cleanup 64bit IO defines to use the common header
-# You are currently editing a commit while rebasing branch 'io64_v9' on 'ae64f9bd1d36'.
-#
-# Changes to be committed:
-#	modified:   drivers/ntb/hw/intel/ntb_hw_intel.c
-#
+Cc: Jon Mason <jdmason@kudzu.us>
 ---
- drivers/ntb/hw/intel/ntb_hw_intel.c | 30 +-----------------------------
- 1 file changed, 1 insertion(+), 29 deletions(-)
+ drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 36 ++++------------------------------
+ 1 file changed, 4 insertions(+), 32 deletions(-)
 
-diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c b/drivers/ntb/hw/intel/ntb_hw_intel.c
-index 156b45cd4a19..5cf40ab21366 100644
---- a/drivers/ntb/hw/intel/ntb_hw_intel.c
-+++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
-@@ -59,6 +59,7 @@
- #include <linux/random.h>
- #include <linux/slab.h>
- #include <linux/ntb.h>
+diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+index f624ae27eabe..f403da24b833 100644
+--- a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
++++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+@@ -13,12 +13,13 @@
+  *
+  */
+ 
+-#include <linux/switchtec.h>
+-#include <linux/module.h>
++#include <linux/interrupt.h>
 +#include <linux/io-64-nonatomic-lo-hi.h>
+ #include <linux/delay.h>
+ #include <linux/kthread.h>
+-#include <linux/interrupt.h>
++#include <linux/module.h>
+ #include <linux/ntb.h>
++#include <linux/switchtec.h>
  
- #include "ntb_hw_intel.h"
- 
-@@ -149,35 +150,6 @@ MODULE_PARM_DESC(xeon_b2b_dsd_bar5_addr32,
- static inline enum ntb_topo xeon_ppd_topo(struct intel_ntb_dev *ndev, u8 ppd);
- static int xeon_init_isr(struct intel_ntb_dev *ndev);
+ MODULE_DESCRIPTION("Microsemi Switchtec(tm) NTB Driver");
+ MODULE_VERSION("0.1");
+@@ -35,35 +36,6 @@ module_param(use_lut_mws, bool, 0644);
+ MODULE_PARM_DESC(use_lut_mws,
+ 		 "Enable the use of the LUT based memory windows");
  
 -#ifndef ioread64
 -#ifdef readq
@@ -90,9 +80,9 @@ index 156b45cd4a19..5cf40ab21366 100644
 -#endif
 -#endif
 -
- static inline int pdev_is_xeon(struct pci_dev *pdev)
- {
- 	switch (pdev->device) {
+ #define SWITCHTEC_NTB_MAGIC 0x45CC0001
+ #define MAX_MWS     128
+ 
 -- 
 2.11.0
 
