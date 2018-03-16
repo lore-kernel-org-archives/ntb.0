@@ -1,73 +1,98 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id g24si560140uaa.0.2018.03.16.08.48.59
+        by gmr-mx.google.com with ESMTPS id 44si682912qtu.1.2018.03.16.08.48.59
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
         Fri, 16 Mar 2018 08:48:59 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Fri, 16 Mar 2018 09:48:44 -0600
-Message-Id: <20180316154852.13206-2-logang@deltatee.com>
+Date: Fri, 16 Mar 2018 09:48:50 -0600
+Message-Id: <20180316154852.13206-8-logang@deltatee.com>
 In-Reply-To: <20180316154852.13206-1-logang@deltatee.com>
 References: <20180316154852.13206-1-logang@deltatee.com>
-Subject: [PATCH v12 1/9] iomap: Fix sparse endian check warnings
+Subject: [PATCH v12 7/9] ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
 To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>, Thomas Gleixner <tglx@linutronix.de>, Philippe Ombredanne <pombredanne@nexb.com>, Kate Stewart <kstewart@linuxfoundation.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Warnings of the form:
-
-lib/iomap.c:84:9: warning: cast to restricted __be16
-
-Are found when running sparse checker with:
-
-make C=2 CF=-D__CHECK_ENDIAN__
-
-This patch casts them with __force to suppress the warnings.
-
-Also, it looks like the wrong conversion function was used in
-the mmio_writeXXbe macros: 'val' is a cpu value to be written to
-a big endian register. Therefore cpu_to_beXX should have been used
-instead of beXX_to_cpu. Both are equivalent, functionally, but have
-different meanings. So there was no real bug just confusion
-for people reading the code and the sparse endian check.
+Now that ioread64 and iowrite64 are available in io-64-nonatomic,
+we can remove the hack at the top of ntb_hw_intel.c and replace it
+with an include.
 
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Philippe Ombredanne <pombredanne@nexb.com>
-Cc: Kate Stewart <kstewart@linuxfoundation.org>
----
- lib/iomap.c | 10 ++++++----
- 1 file changed, 6 insertions(+), 4 deletions(-)
+Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
+Acked-by: Dave Jiang <dave.jiang@intel.com>
+Acked-by: Allen Hubbe <Allen.Hubbe@dell.com>
+Acked-by: Jon Mason <jdmason@kudzu.us>
 
-diff --git a/lib/iomap.c b/lib/iomap.c
-index 541d926da95e..a05d9fa21794 100644
---- a/lib/iomap.c
-+++ b/lib/iomap.c
-@@ -65,8 +65,8 @@ static void bad_io_access(unsigned long port, const char *access)
- #endif
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# Date:      Mon Jun 19 12:18:31 2017 -0600
+#
+# interactive rebase in progress; onto ae64f9bd1d36
+# Last commands done (6 commands done):
+#    pick cf3e4dab2173 io-64-nonatomic: add io{read|write}64[be]{_lo_hi|_hi_lo} macros
+#    r 79b4c4b8490c ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
+# Next commands to do (2 remaining commands):
+#    r 19b6c1f3b15d crypto: caam: cleanup CONFIG_64BIT ifdefs when using io{read|write}64
+#    r f3c8723446ef ntb_hw_switchtec: Cleanup 64bit IO defines to use the common header
+# You are currently editing a commit while rebasing branch 'io64_v9' on 'ae64f9bd1d36'.
+#
+# Changes to be committed:
+#	modified:   drivers/ntb/hw/intel/ntb_hw_intel.c
+#
+---
+ drivers/ntb/hw/intel/ntb_hw_intel.c | 30 +-----------------------------
+ 1 file changed, 1 insertion(+), 29 deletions(-)
+
+diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c b/drivers/ntb/hw/intel/ntb_hw_intel.c
+index 156b45cd4a19..5cf40ab21366 100644
+--- a/drivers/ntb/hw/intel/ntb_hw_intel.c
++++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
+@@ -59,6 +59,7 @@
+ #include <linux/random.h>
+ #include <linux/slab.h>
+ #include <linux/ntb.h>
++#include <linux/io-64-nonatomic-lo-hi.h>
  
- #ifndef mmio_read16be
--#define mmio_read16be(addr) be16_to_cpu(__raw_readw(addr))
--#define mmio_read32be(addr) be32_to_cpu(__raw_readl(addr))
-+#define mmio_read16be(addr) be16_to_cpu((__be16 __force)__raw_readw(addr))
-+#define mmio_read32be(addr) be32_to_cpu((__be32 __force)__raw_readl(addr))
- #endif
+ #include "ntb_hw_intel.h"
  
- unsigned int ioread8(void __iomem *addr)
-@@ -106,8 +106,10 @@ EXPORT_SYMBOL(ioread32be);
- #endif
+@@ -149,35 +150,6 @@ MODULE_PARM_DESC(xeon_b2b_dsd_bar5_addr32,
+ static inline enum ntb_topo xeon_ppd_topo(struct intel_ntb_dev *ndev, u8 ppd);
+ static int xeon_init_isr(struct intel_ntb_dev *ndev);
  
- #ifndef mmio_write16be
--#define mmio_write16be(val,port) __raw_writew(be16_to_cpu(val),port)
--#define mmio_write32be(val,port) __raw_writel(be32_to_cpu(val),port)
-+#define mmio_write16be(val, port) \
-+	__raw_writew((u16 __force)cpu_to_be16(val), port)
-+#define mmio_write32be(val, port) \
-+	__raw_writel((u32 __force)cpu_to_be32(val), port)
- #endif
- 
- void iowrite8(u8 val, void __iomem *addr)
+-#ifndef ioread64
+-#ifdef readq
+-#define ioread64 readq
+-#else
+-#define ioread64 _ioread64
+-static inline u64 _ioread64(void __iomem *mmio)
+-{
+-	u64 low, high;
+-
+-	low = ioread32(mmio);
+-	high = ioread32(mmio + sizeof(u32));
+-	return low | (high << 32);
+-}
+-#endif
+-#endif
+-
+-#ifndef iowrite64
+-#ifdef writeq
+-#define iowrite64 writeq
+-#else
+-#define iowrite64 _iowrite64
+-static inline void _iowrite64(u64 val, void __iomem *mmio)
+-{
+-	iowrite32(val, mmio);
+-	iowrite32(val >> 32, mmio + sizeof(u32));
+-}
+-#endif
+-#endif
+-
+ static inline int pdev_is_xeon(struct pci_dev *pdev)
+ {
+ 	switch (pdev->device) {
 -- 
 2.11.0
 
