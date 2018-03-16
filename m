@@ -1,65 +1,108 @@
-Return-Path: <luc.vanoostenryck@gmail.com>
-Received: from mail-wm0-x243.google.com (mail-wm0-x243.google.com. [2a00:1450:400c:c09::243])
-        by gmr-mx.google.com with ESMTPS id 90si317065wrl.1.2018.03.18.09.13.31
+Return-Path: <gunthorp@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id w12si596977ywa.1.2018.03.16.08.49.05
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Sun, 18 Mar 2018 09:13:31 -0700 (PDT)
-Received: by mail-wm0-x243.google.com with SMTP id f125so2816944wme.4
-        for <linux-ntb@googlegroups.com>; Sun, 18 Mar 2018 09:13:31 -0700 (PDT)
-Return-Path: <luc.vanoostenryck@gmail.com>
-Date: Sun, 18 Mar 2018 17:13:27 +0100
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH v12 1/9] iomap: Fix sparse endian check warnings
-Message-ID: <20180317190311.tdmx2vlcjttsjs5j@ltop.local>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Fri, 16 Mar 2018 08:49:05 -0700 (PDT)
+From: Logan Gunthorpe <logang@deltatee.com>
+Date: Fri, 16 Mar 2018 09:48:47 -0600
+Message-Id: <20180316154852.13206-5-logang@deltatee.com>
+In-Reply-To: <20180316154852.13206-1-logang@deltatee.com>
 References: <20180316154852.13206-1-logang@deltatee.com>
- <20180316154852.13206-2-logang@deltatee.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180316154852.13206-2-logang@deltatee.com>
-To: Logan Gunthorpe <logang@deltatee.com>
-Cc: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>, Horia =?utf-8?Q?Geant=C4=83?= <horia.geanta@nxp.com>, Thomas Gleixner <tglx@linutronix.de>, Philippe Ombredanne <pombredanne@nexb.com>, Kate Stewart <kstewart@linuxfoundation.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+Subject: [PATCH v12 4/9] powerpc: iomap.c: introduce io{read|write}64_{lo_hi|hi_lo}
+To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Fri, Mar 16, 2018 at 09:48:44AM -0600, Logan Gunthorpe wrote:
-> Warnings of the form:
-> 
-> lib/iomap.c:84:9: warning: cast to restricted __be16
-> 
-> Are found when running sparse checker with:
-> 
-> make C=2 CF=-D__CHECK_ENDIAN__
-> 
-> This patch casts them with __force to suppress the warnings.
+These functions will be introduced into the generic iomap.c so
+they can deal with PIO accesses in hi-lo/lo-hi variants. Thus,
+the powerpc version of iomap.c will need to provide the same
+functions even though, in this arch, they are identical to the
+regular io{read|write}64 functions.
+
+Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+Tested-by: Horia Geantă <horia.geanta@nxp.com>
+Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+Cc: Paul Mackerras <paulus@samba.org>
+Cc: Michael Ellerman <mpe@ellerman.id.au>
+---
+ arch/powerpc/kernel/iomap.c | 40 ++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 40 insertions(+)
+
+diff --git a/arch/powerpc/kernel/iomap.c b/arch/powerpc/kernel/iomap.c
+index aab456ed2a00..5ac84efc6ede 100644
+--- a/arch/powerpc/kernel/iomap.c
++++ b/arch/powerpc/kernel/iomap.c
+@@ -45,12 +45,32 @@ u64 ioread64(void __iomem *addr)
+ {
+ 	return readq(addr);
+ }
++u64 ioread64_lo_hi(void __iomem *addr)
++{
++	return readq(addr);
++}
++u64 ioread64_hi_lo(void __iomem *addr)
++{
++	return readq(addr);
++}
+ u64 ioread64be(void __iomem *addr)
+ {
+ 	return readq_be(addr);
+ }
++u64 ioread64be_lo_hi(void __iomem *addr)
++{
++	return readq_be(addr);
++}
++u64 ioread64be_hi_lo(void __iomem *addr)
++{
++	return readq_be(addr);
++}
+ EXPORT_SYMBOL(ioread64);
++EXPORT_SYMBOL(ioread64_lo_hi);
++EXPORT_SYMBOL(ioread64_hi_lo);
+ EXPORT_SYMBOL(ioread64be);
++EXPORT_SYMBOL(ioread64be_lo_hi);
++EXPORT_SYMBOL(ioread64be_hi_lo);
+ #endif /* __powerpc64__ */
  
-Hi,
+ void iowrite8(u8 val, void __iomem *addr)
+@@ -83,12 +103,32 @@ void iowrite64(u64 val, void __iomem *addr)
+ {
+ 	writeq(val, addr);
+ }
++void iowrite64_lo_hi(u64 val, void __iomem *addr)
++{
++	writeq(val, addr);
++}
++void iowrite64_hi_lo(u64 val, void __iomem *addr)
++{
++	writeq(val, addr);
++}
+ void iowrite64be(u64 val, void __iomem *addr)
+ {
+ 	writeq_be(val, addr);
+ }
++void iowrite64be_lo_hi(u64 val, void __iomem *addr)
++{
++	writeq_be(val, addr);
++}
++void iowrite64be_hi_lo(u64 val, void __iomem *addr)
++{
++	writeq_be(val, addr);
++}
+ EXPORT_SYMBOL(iowrite64);
++EXPORT_SYMBOL(iowrite64_lo_hi);
++EXPORT_SYMBOL(iowrite64_hi_lo);
+ EXPORT_SYMBOL(iowrite64be);
++EXPORT_SYMBOL(iowrite64be_lo_hi);
++EXPORT_SYMBOL(iowrite64be_hi_lo);
+ #endif /* __powerpc64__ */
+ 
+ /*
+-- 
+2.11.0
 
-it looks correct but if you should explain why the warning
-is not a valid one. Once done, you can then explain what problem
-you have fixed instead of saying you suppressed a warning.
-
-> Also, it looks like the wrong conversion function was used in
-
-I would suggest to split the patch in two since it does two
-different things which should have their own explanation.
-
-> diff --git a/lib/iomap.c b/lib/iomap.c
-> index 541d926da95e..a05d9fa21794 100644
-> --- a/lib/iomap.c
-> +++ b/lib/iomap.c
-> @@ -106,8 +106,10 @@ EXPORT_SYMBOL(ioread32be);
->  #endif
->  
->  #ifndef mmio_write16be
-> -#define mmio_write16be(val,port) __raw_writew(be16_to_cpu(val),port)
-> -#define mmio_write32be(val,port) __raw_writel(be32_to_cpu(val),port)
-> +#define mmio_write16be(val, port) \
-> +	__raw_writew((u16 __force)cpu_to_be16(val), port)
-> +#define mmio_write32be(val, port) \
-> +	__raw_writel((u32 __force)cpu_to_be32(val), port)
->  #endif
-
-I think that in this sort of replacement, it's better to not split
-the lines (even if larger than 80, that's it).
-
--- Luc Van Oostenryck
