@@ -1,69 +1,55 @@
-Return-Path: <luc.vanoostenryck@gmail.com>
-Received: from mail-wm0-x236.google.com (mail-wm0-x236.google.com. [2a00:1450:400c:c09::236])
-        by gmr-mx.google.com with ESMTPS id r10si180962wmg.2.2018.03.21.10.28.47
+Return-Path: <gunthorp@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id d4si208655pgv.5.2018.03.21.09.37.55
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 21 Mar 2018 10:28:47 -0700 (PDT)
-Received: by mail-wm0-x236.google.com with SMTP id t6so11323351wmt.5
-        for <linux-ntb@googlegroups.com>; Wed, 21 Mar 2018 10:28:47 -0700 (PDT)
-Return-Path: <luc.vanoostenryck@gmail.com>
-Date: Wed, 21 Mar 2018 18:28:44 +0100
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH v13 01/10] iomap: Use correct endian conversion function
- in mmio_writeXXbe
-Message-ID: <20180321172843.p6srgiouvhcyyo4s@ltop.local>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Wed, 21 Mar 2018 09:37:55 -0700 (PDT)
+From: Logan Gunthorpe <logang@deltatee.com>
+Date: Wed, 21 Mar 2018 10:37:36 -0600
+Message-Id: <20180321163745.12286-2-logang@deltatee.com>
+In-Reply-To: <20180321163745.12286-1-logang@deltatee.com>
 References: <20180321163745.12286-1-logang@deltatee.com>
- <20180321163745.12286-2-logang@deltatee.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180321163745.12286-2-logang@deltatee.com>
-To: Logan Gunthorpe <logang@deltatee.com>
-Cc: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>, Horia =?utf-8?Q?Geant=C4=83?= <horia.geanta@nxp.com>, Philippe Ombredanne <pombredanne@nexb.com>, Thomas Gleixner <tglx@linutronix.de>, Kate Stewart <kstewart@linuxfoundation.org>
+Subject: [PATCH v13 01/10] iomap: Use correct endian conversion function in mmio_writeXXbe
+To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>, Philippe Ombredanne <pombredanne@nexb.com>, Thomas Gleixner <tglx@linutronix.de>, Kate Stewart <kstewart@linuxfoundation.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Wed, Mar 21, 2018 at 10:37:36AM -0600, Logan Gunthorpe wrote:
-> The semantics of the iowriteXXbe() functions are to write a
-> value in CPU endianess to an IO register that is known by the
-> caller to be in Big Endian. The mmio_writeXXbe() macro, which
-> is called by iowriteXXbe(), should therefore use cpu_to_beXX()
-> instead of beXX_to_cpu().
-> 
-> Seeing both beXX_to_cpu() and cpu_to_beXX() are both functionally
-> implemented as either null operations or swabXX operations there
-> was no noticable bug here. But it is confusing for both developers
-> and code analysis tools alike.
-> 
-> Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-> Cc: Philippe Ombredanne <pombredanne@nexb.com>
-> Cc: Thomas Gleixner <tglx@linutronix.de>
-> Cc: Kate Stewart <kstewart@linuxfoundation.org>
-> Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-> Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-> ---
->  lib/iomap.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/lib/iomap.c b/lib/iomap.c
-> index 541d926da95e..be120c13d6cc 100644
-> --- a/lib/iomap.c
-> +++ b/lib/iomap.c
-> @@ -106,8 +106,8 @@ EXPORT_SYMBOL(ioread32be);
->  #endif
->  
->  #ifndef mmio_write16be
-> -#define mmio_write16be(val,port) __raw_writew(be16_to_cpu(val),port)
-> -#define mmio_write32be(val,port) __raw_writel(be32_to_cpu(val),port)
-> +#define mmio_write16be(val,port) __raw_writew(cpu_to_be16(val),port)
-> +#define mmio_write32be(val,port) __raw_writel(cpu_to_be32(val),port)
->  #endif
->  
->  void iowrite8(u8 val, void __iomem *addr)
-> -- 
-> 2.11.0
-> 
+The semantics of the iowriteXXbe() functions are to write a
+value in CPU endianess to an IO register that is known by the
+caller to be in Big Endian. The mmio_writeXXbe() macro, which
+is called by iowriteXXbe(), should therefore use cpu_to_beXX()
+instead of beXX_to_cpu().
 
-LGTM, feel free to add my
-Reviewed-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Seeing both beXX_to_cpu() and cpu_to_beXX() are both functionally
+implemented as either null operations or swabXX operations there
+was no noticable bug here. But it is confusing for both developers
+and code analysis tools alike.
 
--- Luc
+Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+Cc: Philippe Ombredanne <pombredanne@nexb.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Kate Stewart <kstewart@linuxfoundation.org>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ lib/iomap.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/lib/iomap.c b/lib/iomap.c
+index 541d926da95e..be120c13d6cc 100644
+--- a/lib/iomap.c
++++ b/lib/iomap.c
+@@ -106,8 +106,8 @@ EXPORT_SYMBOL(ioread32be);
+ #endif
+ 
+ #ifndef mmio_write16be
+-#define mmio_write16be(val,port) __raw_writew(be16_to_cpu(val),port)
+-#define mmio_write32be(val,port) __raw_writel(be32_to_cpu(val),port)
++#define mmio_write16be(val,port) __raw_writew(cpu_to_be16(val),port)
++#define mmio_write32be(val,port) __raw_writel(cpu_to_be32(val),port)
+ #endif
+ 
+ void iowrite8(u8 val, void __iomem *addr)
+-- 
+2.11.0
+
