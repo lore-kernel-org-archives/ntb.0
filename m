@@ -1,88 +1,59 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id f40si329588qta.5.2018.03.21.09.37.52
+        by gmr-mx.google.com with ESMTPS id d85-v6si289771itb.2.2018.03.21.09.37.55
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Wed, 21 Mar 2018 09:37:53 -0700 (PDT)
+        Wed, 21 Mar 2018 09:37:56 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Wed, 21 Mar 2018 10:37:45 -0600
-Message-Id: <20180321163745.12286-11-logang@deltatee.com>
+Date: Wed, 21 Mar 2018 10:37:39 -0600
+Message-Id: <20180321163745.12286-5-logang@deltatee.com>
 In-Reply-To: <20180321163745.12286-1-logang@deltatee.com>
 References: <20180321163745.12286-1-logang@deltatee.com>
-Subject: [PATCH v13 10/10] ntb: ntb_hw_switchtec: Cleanup 64bit IO defines to use the common header
+Subject: [PATCH v13 04/10] powerpc: io.h: move iomap.h include so that it can use readq/writeq defs
 To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>, Jon Mason <jdmason@kudzu.us>
+Cc: Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, Nicholas Piggin <npiggin@gmail.com>, Suresh Warrier <warrier@linux.vnet.ibm.com>, Oliver O'Halloran <oohall@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Clean up the ifdefs which conditionally defined the io{read|write}64
-functions in favour of the new common io-64-nonatomic-lo-hi header.
-
-Per a nit from Andy Shevchenko, the include list is also made
-alphabetical.
+Subsequent patches in this series makes use of the readq and writeq
+defines in iomap.h. However, as is, they get missed on the powerpc
+platform seeing the include comes before the define. This patch
+moves the include down to fix this.
 
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Cc: Jon Mason <jdmason@kudzu.us>
+Acked-by: Michael Ellerman <mpe@ellerman.id.au>
+Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+Cc: Paul Mackerras <paulus@samba.org>
+Cc: Michael Ellerman <mpe@ellerman.id.au>
+Cc: Nicholas Piggin <npiggin@gmail.com>
+Cc: Suresh Warrier <warrier@linux.vnet.ibm.com>
+Cc: "Oliver O'Halloran" <oohall@gmail.com>
 ---
- drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 36 ++++------------------------------
- 1 file changed, 4 insertions(+), 32 deletions(-)
+ arch/powerpc/include/asm/io.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-index f624ae27eabe..f403da24b833 100644
---- a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-+++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-@@ -13,12 +13,13 @@
-  *
-  */
+diff --git a/arch/powerpc/include/asm/io.h b/arch/powerpc/include/asm/io.h
+index 422f99cf9924..af074923d598 100644
+--- a/arch/powerpc/include/asm/io.h
++++ b/arch/powerpc/include/asm/io.h
+@@ -33,8 +33,6 @@ extern struct pci_dev *isa_bridge_pcidev;
+ #include <asm/mmu.h>
+ #include <asm/ppc_asm.h>
  
--#include <linux/switchtec.h>
--#include <linux/module.h>
-+#include <linux/interrupt.h>
-+#include <linux/io-64-nonatomic-lo-hi.h>
- #include <linux/delay.h>
- #include <linux/kthread.h>
--#include <linux/interrupt.h>
-+#include <linux/module.h>
- #include <linux/ntb.h>
-+#include <linux/switchtec.h>
- 
- MODULE_DESCRIPTION("Microsemi Switchtec(tm) NTB Driver");
- MODULE_VERSION("0.1");
-@@ -35,35 +36,6 @@ module_param(use_lut_mws, bool, 0644);
- MODULE_PARM_DESC(use_lut_mws,
- 		 "Enable the use of the LUT based memory windows");
- 
--#ifndef ioread64
--#ifdef readq
--#define ioread64 readq
--#else
--#define ioread64 _ioread64
--static inline u64 _ioread64(void __iomem *mmio)
--{
--	u64 low, high;
+-#include <asm-generic/iomap.h>
 -
--	low = ioread32(mmio);
--	high = ioread32(mmio + sizeof(u32));
--	return low | (high << 32);
--}
--#endif
--#endif
--
--#ifndef iowrite64
--#ifdef writeq
--#define iowrite64 writeq
--#else
--#define iowrite64 _iowrite64
--static inline void _iowrite64(u64 val, void __iomem *mmio)
--{
--	iowrite32(val, mmio);
--	iowrite32(val >> 32, mmio + sizeof(u32));
--}
--#endif
--#endif
--
- #define SWITCHTEC_NTB_MAGIC 0x45CC0001
- #define MAX_MWS     128
+ #ifdef CONFIG_PPC64
+ #include <asm/paca.h>
+ #endif
+@@ -663,6 +661,8 @@ static inline void name at					\
+ #define writel_relaxed(v, addr)	writel(v, addr)
+ #define writeq_relaxed(v, addr)	writeq(v, addr)
  
++#include <asm-generic/iomap.h>
++
+ #ifdef CONFIG_PPC32
+ #define mmiowb()
+ #else
 -- 
 2.11.0
 
