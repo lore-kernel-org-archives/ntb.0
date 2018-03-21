@@ -1,55 +1,88 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id d4si208655pgv.5.2018.03.21.09.37.55
+        by gmr-mx.google.com with ESMTPS id f40si329588qta.5.2018.03.21.09.37.52
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Wed, 21 Mar 2018 09:37:55 -0700 (PDT)
+        Wed, 21 Mar 2018 09:37:53 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Wed, 21 Mar 2018 10:37:36 -0600
-Message-Id: <20180321163745.12286-2-logang@deltatee.com>
+Date: Wed, 21 Mar 2018 10:37:45 -0600
+Message-Id: <20180321163745.12286-11-logang@deltatee.com>
 In-Reply-To: <20180321163745.12286-1-logang@deltatee.com>
 References: <20180321163745.12286-1-logang@deltatee.com>
-Subject: [PATCH v13 01/10] iomap: Use correct endian conversion function in mmio_writeXXbe
+Subject: [PATCH v13 10/10] ntb: ntb_hw_switchtec: Cleanup 64bit IO defines to use the common header
 To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>, Philippe Ombredanne <pombredanne@nexb.com>, Thomas Gleixner <tglx@linutronix.de>, Kate Stewart <kstewart@linuxfoundation.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>, Jon Mason <jdmason@kudzu.us>
 List-ID: <linux-ntb.googlegroups.com>
 
-The semantics of the iowriteXXbe() functions are to write a
-value in CPU endianess to an IO register that is known by the
-caller to be in Big Endian. The mmio_writeXXbe() macro, which
-is called by iowriteXXbe(), should therefore use cpu_to_beXX()
-instead of beXX_to_cpu().
+Clean up the ifdefs which conditionally defined the io{read|write}64
+functions in favour of the new common io-64-nonatomic-lo-hi header.
 
-Seeing both beXX_to_cpu() and cpu_to_beXX() are both functionally
-implemented as either null operations or swabXX operations there
-was no noticable bug here. But it is confusing for both developers
-and code analysis tools alike.
+Per a nit from Andy Shevchenko, the include list is also made
+alphabetical.
 
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Cc: Philippe Ombredanne <pombredanne@nexb.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Kate Stewart <kstewart@linuxfoundation.org>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Jon Mason <jdmason@kudzu.us>
 ---
- lib/iomap.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 36 ++++------------------------------
+ 1 file changed, 4 insertions(+), 32 deletions(-)
 
-diff --git a/lib/iomap.c b/lib/iomap.c
-index 541d926da95e..be120c13d6cc 100644
---- a/lib/iomap.c
-+++ b/lib/iomap.c
-@@ -106,8 +106,8 @@ EXPORT_SYMBOL(ioread32be);
- #endif
+diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+index f624ae27eabe..f403da24b833 100644
+--- a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
++++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+@@ -13,12 +13,13 @@
+  *
+  */
  
- #ifndef mmio_write16be
--#define mmio_write16be(val,port) __raw_writew(be16_to_cpu(val),port)
--#define mmio_write32be(val,port) __raw_writel(be32_to_cpu(val),port)
-+#define mmio_write16be(val,port) __raw_writew(cpu_to_be16(val),port)
-+#define mmio_write32be(val,port) __raw_writel(cpu_to_be32(val),port)
- #endif
+-#include <linux/switchtec.h>
+-#include <linux/module.h>
++#include <linux/interrupt.h>
++#include <linux/io-64-nonatomic-lo-hi.h>
+ #include <linux/delay.h>
+ #include <linux/kthread.h>
+-#include <linux/interrupt.h>
++#include <linux/module.h>
+ #include <linux/ntb.h>
++#include <linux/switchtec.h>
  
- void iowrite8(u8 val, void __iomem *addr)
+ MODULE_DESCRIPTION("Microsemi Switchtec(tm) NTB Driver");
+ MODULE_VERSION("0.1");
+@@ -35,35 +36,6 @@ module_param(use_lut_mws, bool, 0644);
+ MODULE_PARM_DESC(use_lut_mws,
+ 		 "Enable the use of the LUT based memory windows");
+ 
+-#ifndef ioread64
+-#ifdef readq
+-#define ioread64 readq
+-#else
+-#define ioread64 _ioread64
+-static inline u64 _ioread64(void __iomem *mmio)
+-{
+-	u64 low, high;
+-
+-	low = ioread32(mmio);
+-	high = ioread32(mmio + sizeof(u32));
+-	return low | (high << 32);
+-}
+-#endif
+-#endif
+-
+-#ifndef iowrite64
+-#ifdef writeq
+-#define iowrite64 writeq
+-#else
+-#define iowrite64 _iowrite64
+-static inline void _iowrite64(u64 val, void __iomem *mmio)
+-{
+-	iowrite32(val, mmio);
+-	iowrite32(val >> 32, mmio + sizeof(u32));
+-}
+-#endif
+-#endif
+-
+ #define SWITCHTEC_NTB_MAGIC 0x45CC0001
+ #define MAX_MWS     128
+ 
 -- 
 2.11.0
 
