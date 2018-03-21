@@ -1,139 +1,69 @@
-Return-Path: <andy.shevchenko@gmail.com>
-Received: from mail-qt0-x22c.google.com (mail-qt0-x22c.google.com. [2607:f8b0:400d:c0d::22c])
-        by gmr-mx.google.com with ESMTPS id p12si328626ywg.4.2018.03.21.10.40.20
+Return-Path: <luc.vanoostenryck@gmail.com>
+Received: from mail-wm0-x236.google.com (mail-wm0-x236.google.com. [2a00:1450:400c:c09::236])
+        by gmr-mx.google.com with ESMTPS id r10si180962wmg.2.2018.03.21.10.28.47
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 21 Mar 2018 10:40:20 -0700 (PDT)
-Received: by mail-qt0-x22c.google.com with SMTP id i8so6125036qtj.0
-        for <linux-ntb@googlegroups.com>; Wed, 21 Mar 2018 10:40:20 -0700 (PDT)
-MIME-Version: 1.0
-In-Reply-To: <20180321163745.12286-1-logang@deltatee.com>
+        Wed, 21 Mar 2018 10:28:47 -0700 (PDT)
+Received: by mail-wm0-x236.google.com with SMTP id t6so11323351wmt.5
+        for <linux-ntb@googlegroups.com>; Wed, 21 Mar 2018 10:28:47 -0700 (PDT)
+Return-Path: <luc.vanoostenryck@gmail.com>
+Date: Wed, 21 Mar 2018 18:28:44 +0100
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH v13 01/10] iomap: Use correct endian conversion function
+ in mmio_writeXXbe
+Message-ID: <20180321172843.p6srgiouvhcyyo4s@ltop.local>
 References: <20180321163745.12286-1-logang@deltatee.com>
-From: Andy Shevchenko <andy.shevchenko@gmail.com>
-Date: Wed, 21 Mar 2018 19:40:19 +0200
-Message-ID: <CAHp75VdjiBvAROe_rkqqWVZUPSnXQgrURZ0CUq1gxss+vJge3Q@mail.gmail.com>
-Subject: Re: [PATCH v13 00/10] Add io{read|write}64 to io-64-atomic headers
-Content-Type: text/plain; charset="UTF-8"
+ <20180321163745.12286-2-logang@deltatee.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180321163745.12286-2-logang@deltatee.com>
 To: Logan Gunthorpe <logang@deltatee.com>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux-Arch <linux-arch@vger.kernel.org>, linux-ntb@googlegroups.com, linux-crypto <linux-crypto@vger.kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Arnd Bergmann <arnd@arndb.de>, =?UTF-8?Q?Horia_Geant=C4=83?= <horia.geanta@nxp.com>
+Cc: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>, Horia =?utf-8?Q?Geant=C4=83?= <horia.geanta@nxp.com>, Philippe Ombredanne <pombredanne@nexb.com>, Thomas Gleixner <tglx@linutronix.de>, Kate Stewart <kstewart@linuxfoundation.org>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Wed, Mar 21, 2018 at 6:37 PM, Logan Gunthorpe <logang@deltatee.com> wrote:
->
-> This is v13 of my cleanup series to push a number of instances of people
-> defining their own io{read|write}64 functions into common headers seing
-> they don't exist in non-64bit systems. This series adds inline functions to the
-> io-64-nonatomic headers and then cleans up the drivers that defined their
-> own copies.
->
-> This cleanup was originally requested by Greg after he reviewed my
-> Switchtec NTB code. And I hope someone can pick it up or at least give
-> feedback on it soon as it's been around relatively unchanged for a few
-> cycles now and I'm getting a bit tired of resubmitting it with little to
-> no interest.
->
-
-
-The first patches that I didn't reviewed before makes sense to me, the
-rest (at the end) FWIW,
-
-Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
-
-> Thanks,
->
-> Logan
->
-> --
->
-> Changes since v12:
-> - Rebased onto v4.16-rc6
-> - Split patch 0001 into two and reworked the commit log as requested
->   by Luc Van Oostenryck
->
-> Changes since v11:
-> - Rebased onto v4.16-rc5
-> - Added a patch (0001) to fix some old and new sparse warnings
->   that the kbuild robot warned about this cycle. The latest version
->   of sparse was required to reproduce these.
-> - Added a patch (0002) to add io{read|write}64 to parisc which the kbuild
->   robot also found errors for this cycle
->
-> Changes since v10:
-> - Rebased onto v4.16-rc4, this droped the drm/tilcdc patch which was
->   picked up by that tree and is already in 4.16.
->
-> Changes since v9:
-> - Rebased onto v4.15-rc6
-> - Fixed a couple of issues in the new version of the CAAM patch as
->   pointed out by Horia
->
-> Changes since v8:
-> - Rebased onto v4.15-rc2, as a result rewrote patch 7 seeing someone did
->   some similar cleanup in that area.
-> - Added a patch to clean up the Switchtec NTB driver which landed in
->   v4.15-rc1
->
-> Changes since v7:
-> - Fix minor nits from Andy Shevchenko
-> - Rebased onto v4.14-rc1
->
-> Changes since v6:
->  ** none **
->
-> Changes since v5:
-> - Added a fix to the tilcdc driver to ensure it doesn't use the
->   non-atomic operation. (This includes adding io{read|write}64[be]_is_nonatomic
->   defines).
->
-> Changes since v4:
-> - Add functions so the powerpc implementation of iomap.c compiles. (As
->   noticed by Horia)
->
-> Changes since v3:
->
-> - I noticed powerpc didn't use the appropriate functions seeing
->   readq/writeq were not defined when iomap.h was included. Thus I've
->   included a patch to adjust this
-> - Fixed some mistakes with a couple of the defines in io-64-nonatomic*
->   headers
-> - Fixed a typo noticed by Horia.
->
-> (earlier versions were drastically different)
->
-> --
->
-> Logan Gunthorpe (10):
->   iomap: Use correct endian conversion function in mmio_writeXXbe
->   iomap: Fix sparse endian check warnings
->   parisc: iomap: introduce io{read|write}64
->   powerpc: io.h: move iomap.h include so that it can use readq/writeq
->     defs
->   powerpc: iomap.c: introduce io{read|write}64_{lo_hi|hi_lo}
->   iomap: introduce io{read|write}64_{lo_hi|hi_lo}
->   io-64-nonatomic: add io{read|write}64[be]{_lo_hi|_hi_lo} macros
->   ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
->   crypto: caam: cleanup CONFIG_64BIT ifdefs when using io{read|write}64
->   ntb: ntb_hw_switchtec: Cleanup 64bit IO defines to use the common
->     header
->
->  arch/parisc/include/asm/io.h           |   9 +++
->  arch/parisc/lib/iomap.c                |  64 +++++++++++++++
->  arch/powerpc/include/asm/io.h          |   6 +-
->  arch/powerpc/kernel/iomap.c            |  40 ++++++++++
->  drivers/crypto/caam/regs.h             |  30 +------
->  drivers/ntb/hw/intel/ntb_hw_intel.c    |  30 +------
->  drivers/ntb/hw/mscc/ntb_hw_switchtec.c |  36 +--------
->  include/asm-generic/iomap.h            |  26 ++++--
->  include/linux/io-64-nonatomic-hi-lo.h  |  64 +++++++++++++++
->  include/linux/io-64-nonatomic-lo-hi.h  |  64 +++++++++++++++
->  lib/iomap.c                            | 140 ++++++++++++++++++++++++++++++++-
->  11 files changed, 409 insertions(+), 100 deletions(-)
->
-> --
+On Wed, Mar 21, 2018 at 10:37:36AM -0600, Logan Gunthorpe wrote:
+> The semantics of the iowriteXXbe() functions are to write a
+> value in CPU endianess to an IO register that is known by the
+> caller to be in Big Endian. The mmio_writeXXbe() macro, which
+> is called by iowriteXXbe(), should therefore use cpu_to_beXX()
+> instead of beXX_to_cpu().
+> 
+> Seeing both beXX_to_cpu() and cpu_to_beXX() are both functionally
+> implemented as either null operations or swabXX operations there
+> was no noticable bug here. But it is confusing for both developers
+> and code analysis tools alike.
+> 
+> Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+> Cc: Philippe Ombredanne <pombredanne@nexb.com>
+> Cc: Thomas Gleixner <tglx@linutronix.de>
+> Cc: Kate Stewart <kstewart@linuxfoundation.org>
+> Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+> Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+> ---
+>  lib/iomap.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/lib/iomap.c b/lib/iomap.c
+> index 541d926da95e..be120c13d6cc 100644
+> --- a/lib/iomap.c
+> +++ b/lib/iomap.c
+> @@ -106,8 +106,8 @@ EXPORT_SYMBOL(ioread32be);
+>  #endif
+>  
+>  #ifndef mmio_write16be
+> -#define mmio_write16be(val,port) __raw_writew(be16_to_cpu(val),port)
+> -#define mmio_write32be(val,port) __raw_writel(be32_to_cpu(val),port)
+> +#define mmio_write16be(val,port) __raw_writew(cpu_to_be16(val),port)
+> +#define mmio_write32be(val,port) __raw_writel(cpu_to_be32(val),port)
+>  #endif
+>  
+>  void iowrite8(u8 val, void __iomem *addr)
+> -- 
 > 2.11.0
+> 
 
+LGTM, feel free to add my
+Reviewed-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-
--- 
-With Best Regards,
-Andy Shevchenko
+-- Luc
