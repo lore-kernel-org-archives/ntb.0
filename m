@@ -1,89 +1,108 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id c2si285856qkf.3.2018.03.22.10.17.14
+        by gmr-mx.google.com with ESMTPS id l17-v6si563296ybm.0.2018.03.22.10.17.14
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
         Thu, 22 Mar 2018 10:17:14 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Thu, 22 Mar 2018 11:17:03 -0600
-Message-Id: <20180322171703.4300-11-logang@deltatee.com>
+Date: Thu, 22 Mar 2018 11:16:58 -0600
+Message-Id: <20180322171703.4300-6-logang@deltatee.com>
 In-Reply-To: <20180322171703.4300-1-logang@deltatee.com>
 References: <20180322171703.4300-1-logang@deltatee.com>
-Subject: [PATCH v14 10/10] ntb: ntb_hw_switchtec: Cleanup 64bit IO defines to use the common header
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+Subject: [PATCH v14 05/10] powerpc: iomap.c: introduce io{read|write}64_{lo_hi|hi_lo}
 To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>, Jon Mason <jdmason@kudzu.us>
+Cc: Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>
 List-ID: <linux-ntb.googlegroups.com>
 
-Clean up the ifdefs which conditionally defined the io{read|write}64
-functions in favour of the new common io-64-nonatomic-lo-hi header.
-
-Per a nit from Andy Shevchenko, the include list is also made
-alphabetical.
+These functions will be introduced into the generic iomap.c so
+they can deal with PIO accesses in hi-lo/lo-hi variants. Thus,
+the powerpc version of iomap.c will need to provide the same
+functions even though, in this arch, they are identical to the
+regular io{read|write}64 functions.
 
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+Tested-by: Horia Geantă <horia.geanta@nxp.com>
 Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
-Cc: Jon Mason <jdmason@kudzu.us>
+Cc: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+Cc: Paul Mackerras <paulus@samba.org>
+Cc: Michael Ellerman <mpe@ellerman.id.au>
 ---
- drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 36 ++++------------------------------
- 1 file changed, 4 insertions(+), 32 deletions(-)
+ arch/powerpc/kernel/iomap.c | 40 ++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 40 insertions(+)
 
-diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-index f624ae27eabe..f403da24b833 100644
---- a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-+++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-@@ -13,12 +13,13 @@
-  *
-  */
+diff --git a/arch/powerpc/kernel/iomap.c b/arch/powerpc/kernel/iomap.c
+index aab456ed2a00..5ac84efc6ede 100644
+--- a/arch/powerpc/kernel/iomap.c
++++ b/arch/powerpc/kernel/iomap.c
+@@ -45,12 +45,32 @@ u64 ioread64(void __iomem *addr)
+ {
+ 	return readq(addr);
+ }
++u64 ioread64_lo_hi(void __iomem *addr)
++{
++	return readq(addr);
++}
++u64 ioread64_hi_lo(void __iomem *addr)
++{
++	return readq(addr);
++}
+ u64 ioread64be(void __iomem *addr)
+ {
+ 	return readq_be(addr);
+ }
++u64 ioread64be_lo_hi(void __iomem *addr)
++{
++	return readq_be(addr);
++}
++u64 ioread64be_hi_lo(void __iomem *addr)
++{
++	return readq_be(addr);
++}
+ EXPORT_SYMBOL(ioread64);
++EXPORT_SYMBOL(ioread64_lo_hi);
++EXPORT_SYMBOL(ioread64_hi_lo);
+ EXPORT_SYMBOL(ioread64be);
++EXPORT_SYMBOL(ioread64be_lo_hi);
++EXPORT_SYMBOL(ioread64be_hi_lo);
+ #endif /* __powerpc64__ */
  
--#include <linux/switchtec.h>
--#include <linux/module.h>
-+#include <linux/interrupt.h>
-+#include <linux/io-64-nonatomic-lo-hi.h>
- #include <linux/delay.h>
- #include <linux/kthread.h>
--#include <linux/interrupt.h>
-+#include <linux/module.h>
- #include <linux/ntb.h>
-+#include <linux/switchtec.h>
+ void iowrite8(u8 val, void __iomem *addr)
+@@ -83,12 +103,32 @@ void iowrite64(u64 val, void __iomem *addr)
+ {
+ 	writeq(val, addr);
+ }
++void iowrite64_lo_hi(u64 val, void __iomem *addr)
++{
++	writeq(val, addr);
++}
++void iowrite64_hi_lo(u64 val, void __iomem *addr)
++{
++	writeq(val, addr);
++}
+ void iowrite64be(u64 val, void __iomem *addr)
+ {
+ 	writeq_be(val, addr);
+ }
++void iowrite64be_lo_hi(u64 val, void __iomem *addr)
++{
++	writeq_be(val, addr);
++}
++void iowrite64be_hi_lo(u64 val, void __iomem *addr)
++{
++	writeq_be(val, addr);
++}
+ EXPORT_SYMBOL(iowrite64);
++EXPORT_SYMBOL(iowrite64_lo_hi);
++EXPORT_SYMBOL(iowrite64_hi_lo);
+ EXPORT_SYMBOL(iowrite64be);
++EXPORT_SYMBOL(iowrite64be_lo_hi);
++EXPORT_SYMBOL(iowrite64be_hi_lo);
+ #endif /* __powerpc64__ */
  
- MODULE_DESCRIPTION("Microsemi Switchtec(tm) NTB Driver");
- MODULE_VERSION("0.1");
-@@ -35,35 +36,6 @@ module_param(use_lut_mws, bool, 0644);
- MODULE_PARM_DESC(use_lut_mws,
- 		 "Enable the use of the LUT based memory windows");
- 
--#ifndef ioread64
--#ifdef readq
--#define ioread64 readq
--#else
--#define ioread64 _ioread64
--static inline u64 _ioread64(void __iomem *mmio)
--{
--	u64 low, high;
--
--	low = ioread32(mmio);
--	high = ioread32(mmio + sizeof(u32));
--	return low | (high << 32);
--}
--#endif
--#endif
--
--#ifndef iowrite64
--#ifdef writeq
--#define iowrite64 writeq
--#else
--#define iowrite64 _iowrite64
--static inline void _iowrite64(u64 val, void __iomem *mmio)
--{
--	iowrite32(val, mmio);
--	iowrite32(val >> 32, mmio + sizeof(u32));
--}
--#endif
--#endif
--
- #define SWITCHTEC_NTB_MAGIC 0x45CC0001
- #define MAX_MWS     128
- 
+ /*
 -- 
 2.11.0
 
