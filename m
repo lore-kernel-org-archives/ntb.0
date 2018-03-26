@@ -1,132 +1,40 @@
-Return-Path: <gunthorp@deltatee.com>
+Return-Path: <logang@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id d85-v6si1373878itb.2.2018.03.27.16.08.41
+        by gmr-mx.google.com with ESMTPS id q6si1251664oic.5.2018.03.26.13.33.21
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Tue, 27 Mar 2018 16:08:41 -0700 (PDT)
+        Mon, 26 Mar 2018 13:33:21 -0700 (PDT)
+References: <20180321163745.12286-1-logang@deltatee.com>
+ <20180321163745.12286-2-logang@deltatee.com>
+ <CAK8P3a25zQDxyaY3iVv+JmSSzs7F6ssGc+HdBkGs54ZfViX+Fg@mail.gmail.com>
+ <726eb143-2cca-b221-b569-e193a962e357@deltatee.com>
+ <CAK8P3a2HGW=PWBtFL_96rztqa7KUAhuYBHTL3cGKY2VE=Ag1rA@mail.gmail.com>
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Tue, 27 Mar 2018 17:08:25 -0600
-Message-Id: <20180327230834.5931-1-logang@deltatee.com>
+Message-ID: <6a063b65-668a-ef9c-696e-8c378e6b2640@deltatee.com>
+Date: Mon, 26 Mar 2018 14:33:13 -0600
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-Subject: [PATCH v15 0/9] Add io{read|write}64 to io-64-atomic headers
-To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>
+In-Reply-To: <CAK8P3a2HGW=PWBtFL_96rztqa7KUAhuYBHTL3cGKY2VE=Ag1rA@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH v13 01/10] iomap: Use correct endian conversion function
+ in mmio_writeXXbe
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-arch <linux-arch@vger.kernel.org>, linux-ntb@googlegroups.com, "open list:HARDWARE RANDOM NUMBER GENERATOR CORE" <linux-crypto@vger.kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?Q?Horia_Geant=c4=83?= <horia.geanta@nxp.com>, Philippe Ombredanne <pombredanne@nexb.com>, Thomas Gleixner <tglx@linutronix.de>, Kate Stewart <kstewart@linuxfoundation.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-This is v14 of my cleanup series to push a number of instances of people
-defining their own io{read|write}64 functions into common headers seing
-they don't exist in non-64bit systems. This series adds inline functions to the
-io-64-nonatomic headers and then cleans up the drivers that defined their
-own copies.
 
-This cleanup was originally requested by Greg after he reviewed my
-Switchtec NTB code. And I hope someone can pick it up or at least give
-feedback on it soon as it's been around relatively unchanged for a few
-cycles now and I'm getting a bit tired of resubmitting it with little to
-no interest.
+
+On 26/03/18 01:50 PM, Arnd Bergmann wrote:
+> I wouldn't expect it to matter: the byte swap is almost always much
+> cheaper compared to the actual bus access for the MMIO, and I
+> would also guess that modern compilers can eliminate the double
+> byte swap on architectures where writel() is an inline function. Most of
+> the important architectures use ARCH_USE_BUILTIN_BSWAP, which
+> guarantees that.
+
+Fair enough. Sometime this week I'll update my patch set to change that.
 
 Thanks,
 
 Logan
-
---
-
-Changes since v14:
-- Rebased onto v4.16-rc7
-- Replace the first two patches so that instead of correcting the
-  endianness annotations we change to using writeX() and readX() with
-  swabX() calls. This makes the big-endian functions more symmetric
-  with the little-endian versions (with respect to barriers that are
-  not included in the raw functions). As a side effect, it also fixes
-  the kbuild warnings that the first two patches tried to address.
-
-Changes since v13:
-- Changed the subject of patch 0001 to correct a nit pointed out by Luc
-
-Changes since v12:
-- Rebased onto v4.16-rc6
-- Split patch 0001 into two and reworked the commit log as requested
-  by Luc Van Oostenryck
-
-Changes since v11:
-- Rebased onto v4.16-rc5
-- Added a patch (0001) to fix some old and new sparse warnings
-  that the kbuild robot warned about this cycle. The latest version
-  of sparse was required to reproduce these.
-- Added a patch (0002) to add io{read|write}64 to parisc which the kbuild
-  robot also found errors for this cycle
-
-Changes since v10:
-- Rebased onto v4.16-rc4, this droped the drm/tilcdc patch which was
-  picked up by that tree and is already in 4.16.
-
-Changes since v9:
-- Rebased onto v4.15-rc6
-- Fixed a couple of issues in the new version of the CAAM patch as
-  pointed out by Horia
-
-Changes since v8:
-- Rebased onto v4.15-rc2, as a result rewrote patch 7 seeing someone did
-  some similar cleanup in that area.
-- Added a patch to clean up the Switchtec NTB driver which landed in
-  v4.15-rc1
-
-Changes since v7:
-- Fix minor nits from Andy Shevchenko
-- Rebased onto v4.14-rc1
-
-Changes since v6:
- ** none **
-
-Changes since v5:
-- Added a fix to the tilcdc driver to ensure it doesn't use the
-  non-atomic operation. (This includes adding io{read|write}64[be]_is_nonatomic
-  defines).
-
-Changes since v4:
-- Add functions so the powerpc implementation of iomap.c compiles. (As
-  noticed by Horia)
-
-Changes since v3:
-
-- I noticed powerpc didn't use the appropriate functions seeing
-  readq/writeq were not defined when iomap.h was included. Thus I've
-  included a patch to adjust this
-- Fixed some mistakes with a couple of the defines in io-64-nonatomic*
-  headers
-- Fixed a typo noticed by Horia.
-
-(earlier versions were drastically different)
-
---
-
-Logan Gunthorpe (9):
-  iomap: Use non-raw io functions for io{read|write}XXbe
-  parisc: iomap: introduce io{read|write}64
-  powerpc: io.h: move iomap.h include so that it can use readq/writeq
-    defs
-  powerpc: iomap.c: introduce io{read|write}64_{lo_hi|hi_lo}
-  iomap: introduce io{read|write}64_{lo_hi|hi_lo}
-  io-64-nonatomic: add io{read|write}64[be]{_lo_hi|_hi_lo} macros
-  ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
-  crypto: caam: cleanup CONFIG_64BIT ifdefs when using io{read|write}64
-  ntb: ntb_hw_switchtec: Cleanup 64bit IO defines to use the common
-    header
-
- arch/parisc/include/asm/io.h           |   9 +++
- arch/parisc/lib/iomap.c                |  64 +++++++++++++++
- arch/powerpc/include/asm/io.h          |   6 +-
- arch/powerpc/kernel/iomap.c            |  40 ++++++++++
- drivers/crypto/caam/regs.h             |  30 +------
- drivers/ntb/hw/intel/ntb_hw_intel.c    |  30 +------
- drivers/ntb/hw/mscc/ntb_hw_switchtec.c |  36 +--------
- include/asm-generic/iomap.h            |  26 ++++--
- include/linux/io-64-nonatomic-hi-lo.h  |  64 +++++++++++++++
- include/linux/io-64-nonatomic-lo-hi.h  |  64 +++++++++++++++
- lib/iomap.c                            | 140 ++++++++++++++++++++++++++++++++-
- 11 files changed, 409 insertions(+), 100 deletions(-)
-
---
-2.11.0
