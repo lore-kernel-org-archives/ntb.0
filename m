@@ -1,103 +1,108 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id y9si1036570uaf.5.2018.03.05.11.08.44
+        by gmr-mx.google.com with ESMTPS id e125si145685qkd.5.2018.03.27.16.08.53
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Mon, 05 Mar 2018 11:08:45 -0800 (PST)
+        Tue, 27 Mar 2018 16:08:54 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Mon,  5 Mar 2018 12:08:17 -0700
-Message-Id: <20180305190824.847-1-logang@deltatee.com>
+Date: Tue, 27 Mar 2018 17:08:29 -0600
+Message-Id: <20180327230834.5931-5-logang@deltatee.com>
+In-Reply-To: <20180327230834.5931-1-logang@deltatee.com>
+References: <20180327230834.5931-1-logang@deltatee.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
-Subject: [PATCH v11 0/7] Add io{read|write}64 to io-64-atomic headers
+Subject: [PATCH v15 4/9] powerpc: iomap.c: introduce io{read|write}64_{lo_hi|hi_lo}
 To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>
 List-ID: <linux-ntb.googlegroups.com>
 
-This is v11 of my cleanup series to push a number of instances of people
-defining their own io{read|write}64 functions into common headers seing
-they don't exist in non-64bit systems. This series adds inline functions to the
-io-64-nonatomic headers and then cleans up the drivers that defined their
-own.
+These functions will be introduced into the generic iomap.c so
+they can deal with PIO accesses in hi-lo/lo-hi variants. Thus,
+the powerpc version of iomap.c will need to provide the same
+functions even though, in this arch, they are identical to the
+regular io{read|write}64 functions.
 
-This cleanup was originally requested by Greg after he reviewed my
-Switchtec NTB code. And I hope someone can pick it up or at least give
-feedback on it soon as it's been around relatively unchanged for a few
-cycles now and I'm getting a bit tired of resubmitting it with little to
-no interest.
+Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+Tested-by: Horia Geantă <horia.geanta@nxp.com>
+Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+Cc: Paul Mackerras <paulus@samba.org>
+Cc: Michael Ellerman <mpe@ellerman.id.au>
+---
+ arch/powerpc/kernel/iomap.c | 40 ++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 40 insertions(+)
 
-Thanks,
-
-Logan
-
---
-
-Changes since v10:
-- Rebased onto v4.16-rc4, this droped the drm/tilcdc patch which was
-  picked up by that tree and is already in 4.16.
-
-Changes since v9:
-- Rebased onto v4.15-rc6
-- Fixed a couple of issues in the new version of the CAAM patch as
-  pointed out by Horia
-
-Changes since v8:
-- Rebased onto v4.15-rc2, as a result rewrote patch 7 seeing someone did
-  some similar cleanup in that area.
-- Added a patch to clean up the Switchtec NTB driver which landed in
-  v4.15-rc1
-
-Changes since v7:
-- Fix minor nits from Andy Shevchenko
-- Rebased onto v4.14-rc1
-
-Changes since v6:
- ** none **
-
-Changes since v5:
-- Added a fix to the tilcdc driver to ensure it doesn't use the
-  non-atomic operation. (This includes adding io{read|write}64[be]_is_nonatomic
-  defines).
-
-Changes since v4:
-- Add functions so the powerpc implementation of iomap.c compiles. (As
-  noticed by Horia)
-
-Changes since v3:
-
-- I noticed powerpc didn't use the appropriate functions seeing
-  readq/writeq were not defined when iomap.h was included. Thus I've
-  included a patch to adjust this
-- Fixed some mistakes with a couple of the defines in io-64-nonatomic*
-  headers
-- Fixed a typo noticed by Horia.
-
-(earlier versions were drastically different)
-
---
-
-Logan Gunthorpe (7):
-  powerpc: io.h: move iomap.h include so that it can use readq/writeq
-    defs
-  powerpc: iomap.c: introduce io{read|write}64_{lo_hi|hi_lo}
-  iomap: introduce io{read|write}64_{lo_hi|hi_lo}
-  io-64-nonatomic: add io{read|write}64[be]{_lo_hi|_hi_lo} macros
-  ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
-  crypto: caam: cleanup CONFIG_64BIT ifdefs when using io{read|write}64
-  ntb: ntb_hw_switchtec: Cleanup 64bit IO defines to use the common
-    header
-
- arch/powerpc/include/asm/io.h          |   6 +-
- arch/powerpc/kernel/iomap.c            |  40 ++++++++++
- drivers/crypto/caam/regs.h             |  30 +-------
- drivers/ntb/hw/intel/ntb_hw_intel.c    |  30 +-------
- drivers/ntb/hw/mscc/ntb_hw_switchtec.c |  30 +-------
- include/asm-generic/iomap.h            |  26 +++++--
- include/linux/io-64-nonatomic-hi-lo.h  |  64 ++++++++++++++++
- include/linux/io-64-nonatomic-lo-hi.h  |  64 ++++++++++++++++
- lib/iomap.c                            | 132 +++++++++++++++++++++++++++++++++
- 9 files changed, 329 insertions(+), 93 deletions(-)
-
---
+diff --git a/arch/powerpc/kernel/iomap.c b/arch/powerpc/kernel/iomap.c
+index aab456ed2a00..5ac84efc6ede 100644
+--- a/arch/powerpc/kernel/iomap.c
++++ b/arch/powerpc/kernel/iomap.c
+@@ -45,12 +45,32 @@ u64 ioread64(void __iomem *addr)
+ {
+ 	return readq(addr);
+ }
++u64 ioread64_lo_hi(void __iomem *addr)
++{
++	return readq(addr);
++}
++u64 ioread64_hi_lo(void __iomem *addr)
++{
++	return readq(addr);
++}
+ u64 ioread64be(void __iomem *addr)
+ {
+ 	return readq_be(addr);
+ }
++u64 ioread64be_lo_hi(void __iomem *addr)
++{
++	return readq_be(addr);
++}
++u64 ioread64be_hi_lo(void __iomem *addr)
++{
++	return readq_be(addr);
++}
+ EXPORT_SYMBOL(ioread64);
++EXPORT_SYMBOL(ioread64_lo_hi);
++EXPORT_SYMBOL(ioread64_hi_lo);
+ EXPORT_SYMBOL(ioread64be);
++EXPORT_SYMBOL(ioread64be_lo_hi);
++EXPORT_SYMBOL(ioread64be_hi_lo);
+ #endif /* __powerpc64__ */
+ 
+ void iowrite8(u8 val, void __iomem *addr)
+@@ -83,12 +103,32 @@ void iowrite64(u64 val, void __iomem *addr)
+ {
+ 	writeq(val, addr);
+ }
++void iowrite64_lo_hi(u64 val, void __iomem *addr)
++{
++	writeq(val, addr);
++}
++void iowrite64_hi_lo(u64 val, void __iomem *addr)
++{
++	writeq(val, addr);
++}
+ void iowrite64be(u64 val, void __iomem *addr)
+ {
+ 	writeq_be(val, addr);
+ }
++void iowrite64be_lo_hi(u64 val, void __iomem *addr)
++{
++	writeq_be(val, addr);
++}
++void iowrite64be_hi_lo(u64 val, void __iomem *addr)
++{
++	writeq_be(val, addr);
++}
+ EXPORT_SYMBOL(iowrite64);
++EXPORT_SYMBOL(iowrite64_lo_hi);
++EXPORT_SYMBOL(iowrite64_hi_lo);
+ EXPORT_SYMBOL(iowrite64be);
++EXPORT_SYMBOL(iowrite64be_lo_hi);
++EXPORT_SYMBOL(iowrite64be_hi_lo);
+ #endif /* __powerpc64__ */
+ 
+ /*
+-- 
 2.11.0
+
