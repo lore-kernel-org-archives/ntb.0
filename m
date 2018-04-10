@@ -1,76 +1,61 @@
-Return-Path: <gunthorp@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id e132-v6si201629ite.4.2018.04.20.11.24.15
+Return-Path: <baijiaju1990@gmail.com>
+Received: from mail-pl0-x241.google.com (mail-pl0-x241.google.com. [2607:f8b0:400e:c01::241])
+        by gmr-mx.google.com with ESMTPS id p12si109316ywg.4.2018.04.10.06.18.11
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Fri, 20 Apr 2018 11:24:15 -0700 (PDT)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Fri, 20 Apr 2018 12:23:57 -0600
-Message-Id: <20180420182403.9691-2-logang@deltatee.com>
-In-Reply-To: <20180420182403.9691-1-logang@deltatee.com>
-References: <20180420182403.9691-1-logang@deltatee.com>
-Subject: [PATCH v16 1/7] iomap: Use non-raw io functions for io{read|write}XXbe
-To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>, Thomas Gleixner <tglx@linutronix.de>, Kate Stewart <kstewart@linuxfoundation.org>, Philippe Ombredanne <pombredanne@nexb.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 10 Apr 2018 06:18:11 -0700 (PDT)
+Received: by mail-pl0-x241.google.com with SMTP id e22-v6so5738476plj.12
+        for <linux-ntb@googlegroups.com>; Tue, 10 Apr 2018 06:18:11 -0700 (PDT)
+Return-Path: <baijiaju1990@gmail.com>
+From: Jia-Ju Bai <baijiaju1990@gmail.com>
+Subject: [PATCH 2/2] ntb: ntb_transport: Replace GFP_ATOMIC with GFP_KERNEL in ntb_transport_create_queue
+Date: Tue, 10 Apr 2018 21:17:54 +0800
+Message-Id: <1523366274-31737-1-git-send-email-baijiaju1990@gmail.com>
+To: jdmason@kudzu.us, dave.jiang@intel.com, Allen.Hubbe@emc.com
+Cc: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Jia-Ju Bai <baijiaju1990@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Fix an asymmetry in the io{read|write}XXbe functions in that the
-big-endian variants make use of the raw io accessors while the
-little-endian variants use the regular accessors. Some architectures
-implement barriers to order against both spinlocks and DMA accesses
-and for these case, the big-endian variant of the API would not be
-protected.
+ntb_transport_create_queue() is never called in atomic context.
 
-Thus, change the mmio_XXXXbe macros to use the appropriate swab() function
-wrapping the regular accessor. This is similar to what was done for PIO.
+ntb_transport_create_queue() is only called by ntb_netdev_probe(),
+which is set as ".probe" in struct ntb_transport_client.
 
-When this code was originally written, barriers in the IO accessors were
-not common and the accessors simply wrapped the raw functions in a
-conversion to CPU endianness. Since then, barriers have been added in
-some architectures and are now missing in the big endian variant of the
-API.
+Despite never getting called from atomic context,
+ntb_transport_create_queue() calls kzalloc_node() with GFP_ATOMIC,
+which does not sleep for allocation.
+GFP_ATOMIC is not necessary and can be replaced with GFP_KERNEL,
+which can sleep and improve the possibility of sucessful allocation.
 
-This also manages to silence a few sparse warnings that check
-for using the correct endian types which the original code did
-not annotate correctly.
+This is found by a static analysis tool named DCNS written by myself.
+And I also manually check it
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Kate Stewart <kstewart@linuxfoundation.org>
-Cc: Philippe Ombredanne <pombredanne@nexb.com>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Arnd Bergmann <arnd@arndb.de>
-Link: http://lkml.kernel.org/r/CAK8P3a25zQDxyaY3iVv+JmSSzs7F6ssGc+HdBkGs54ZfViX+Fg@mail.gmail.com
+Signed-off-by: Jia-Ju Bai <baijiaju1990@gmail.com>
 ---
- lib/iomap.c | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+ drivers/ntb/ntb_transport.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/lib/iomap.c b/lib/iomap.c
-index 541d926da95e..2c293b22569f 100644
---- a/lib/iomap.c
-+++ b/lib/iomap.c
-@@ -65,8 +65,8 @@ static void bad_io_access(unsigned long port, const char *access)
- #endif
+diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+index f58d8e3..2c0c8bc 100644
+--- a/drivers/ntb/ntb_transport.c
++++ b/drivers/ntb/ntb_transport.c
+@@ -1825,7 +1825,7 @@ struct ntb_transport_qp *
+ 		qp->rx_dma_chan ? "DMA" : "CPU");
  
- #ifndef mmio_read16be
--#define mmio_read16be(addr) be16_to_cpu(__raw_readw(addr))
--#define mmio_read32be(addr) be32_to_cpu(__raw_readl(addr))
-+#define mmio_read16be(addr) swab16(readw(addr))
-+#define mmio_read32be(addr) swab32(readl(addr))
- #endif
+ 	for (i = 0; i < NTB_QP_DEF_NUM_ENTRIES; i++) {
+-		entry = kzalloc_node(sizeof(*entry), GFP_ATOMIC, node);
++		entry = kzalloc_node(sizeof(*entry), GFP_KERNEL, node);
+ 		if (!entry)
+ 			goto err1;
  
- unsigned int ioread8(void __iomem *addr)
-@@ -106,8 +106,8 @@ EXPORT_SYMBOL(ioread32be);
- #endif
+@@ -1836,7 +1836,7 @@ struct ntb_transport_qp *
+ 	qp->rx_alloc_entry = NTB_QP_DEF_NUM_ENTRIES;
  
- #ifndef mmio_write16be
--#define mmio_write16be(val,port) __raw_writew(be16_to_cpu(val),port)
--#define mmio_write32be(val,port) __raw_writel(be32_to_cpu(val),port)
-+#define mmio_write16be(val,port) writew(swab16(val),port)
-+#define mmio_write32be(val,port) writel(swab32(val),port)
- #endif
+ 	for (i = 0; i < qp->tx_max_entry; i++) {
+-		entry = kzalloc_node(sizeof(*entry), GFP_ATOMIC, node);
++		entry = kzalloc_node(sizeof(*entry), GFP_KERNEL, node);
+ 		if (!entry)
+ 			goto err2;
  
- void iowrite8(u8 val, void __iomem *addr)
 -- 
-2.11.0
+1.9.1
 
