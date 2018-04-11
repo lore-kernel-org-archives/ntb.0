@@ -1,1517 +1,542 @@
-Return-Path: <araut@codeaurora.org>
-Received: from smtp.codeaurora.org (smtp.codeaurora.org. [198.145.29.96])
-        by gmr-mx.google.com with ESMTPS id v13-v6si477983ybk.4.2018.04.13.19.13.34
+Return-Path: <allenbh@gmail.com>
+Received: from mail-yw0-x244.google.com (mail-yw0-x244.google.com. [2607:f8b0:4002:c05::244])
+        by gmr-mx.google.com with ESMTPS id q6-v6si188398oic.5.2018.04.11.16.24.41
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 13 Apr 2018 19:13:34 -0700 (PDT)
-Subject: Re: [PATCH] NTB: Add support to message registers based devices
-References: <20180410004822.GA6040@codeaurora.org>
- <CAJ80sauVAeFLfMMQxqnCThUZnYJ1A7Kvy=UogPMe_kWCu_Dw9w@mail.gmail.com>
-From: Atul Raut <araut@codeaurora.org>
-Message-ID: <c4d81c97-71f3-a832-2b6b-52c84b9854ac@codeaurora.org>
-Date: Fri, 13 Apr 2018 19:13:26 -0700
+        Wed, 11 Apr 2018 16:24:41 -0700 (PDT)
+Received: by mail-yw0-x244.google.com with SMTP id i187so1135813ywd.10
+        for <linux-ntb@googlegroups.com>; Wed, 11 Apr 2018 16:24:41 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <CAJ80sauVAeFLfMMQxqnCThUZnYJ1A7Kvy=UogPMe_kWCu_Dw9w@mail.gmail.com>
-Content-Type: text/plain; charset=windows-1252
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-To: Allen Hubbe <allenbh@gmail.com>
+In-Reply-To: <20180410004822.GA6040@codeaurora.org>
+References: <20180410004822.GA6040@codeaurora.org>
+From: Allen Hubbe <allenbh@gmail.com>
+Date: Wed, 11 Apr 2018 19:24:40 -0400
+Message-ID: <CAJ80sauVAeFLfMMQxqnCThUZnYJ1A7Kvy=UogPMe_kWCu_Dw9w@mail.gmail.com>
+Subject: Re: [PATCH] NTB: Add support to message registers based devices
+Content-Type: text/plain; charset="UTF-8"
+To: Atul Raut <araut@codeaurora.org>
 Cc: linux-ntb@googlegroups.com, fancer.lancer@gmail.com, Jon Mason <jdmason@kudzu.us>, dave.jiang@intel.com, atulraut17@gmail.com, rauji.raut@gmail.com
 List-ID: <linux-ntb.googlegroups.com>
 
-Hi Allen,Dave,
+On Mon, Apr 9, 2018 at 8:48 PM, Atul Raut <araut@codeaurora.org> wrote:
+>
+> Hi All,
+>
+> I have added the support to the ntb_transport layer for
+> message registers(e.g. IDT) based devices.
+> Also split ntb_perf module to get library out of it, so that
+> other client can make use of it.
+>
+> Regard,
+> Atul Raut
+>
+> NTB transport driver works only with Scartchpads based devices.
+> This patch add support to devices which uses Message registers
+> for data exchange.
+> Split ntb_perf module to have common code as library which all
+> clients can make used of it.
+>
+> Signed-off-by: Atul Raut <araut@codeaurora.org>
+> ---
+>  drivers/ntb/ntb_transport.c | 356 +++++++++++++++++++++++++++++-----------
+>  drivers/ntb/test/ntb_perf.c | 347 +++++----------------------------------
+>  include/linux/ntb.h         | 385 ++++++++++++++++++++++++++++++++++++++++++++
+>  3 files changed, 684 insertions(+), 404 deletions(-)
+>
 
-I have split the patches & sharing here for review. 
-Also addressing some of comments for ntb.h.
-All three patches are dependent to each other.
-Some comments didnt address, as code derived from ntb_perf
-module so please revisit it again.
+I started review with ntb.h, not looked at transport or perf yet.
+Dave's suggestion to split is good.
 
->> 500 * 2000us = 1s is a long delay for a caller that might not have the
->> luxury of being able to wait.
-Library is derive from ntb_perf module with some modifications 
-to it by removing ntb_perf related stuff & try to make it generic.
- 
->>These functions are complex to keep in the header file.
-Shall I introduce new .[c] as library file here say ntblib.c ?
+> diff --git a/include/linux/ntb.h b/include/linux/ntb.h
+> index 181d166..709b7ee 100644
+> --- a/include/linux/ntb.h
+> +++ b/include/linux/ntb.h
+> @@ -58,6 +58,8 @@
+>
+>  #include <linux/completion.h>
+>  #include <linux/device.h>
+> +#include <linux/delay.h>
+> +#include <linux/io.h>
+>
+>  struct ntb_client;
+>  struct ntb_dev;
+> @@ -163,6 +165,56 @@ enum ntb_default_port {
+>  #define NTB_DEF_PEER_CNT       (1)
+>  #define NTB_DEF_PEER_IDX       (0)
+>
+> +enum nt_cmd {
+> +       NT_CMD_INVAL = -1,/* invalid spad command */
+> +       NT_CMD_SSIZE = 0, /* send out buffer size */
+> +       NT_CMD_RSIZE = 1, /* recv in  buffer size */
+> +       NT_CMD_SXLAT = 2, /* send in  buffer xlat */
+> +       NT_CMD_RXLAT = 3, /* recv out buffer xlat */
+> +       NT_CMD_CLEAR = 4, /* clear allocated memory */
+> +       NT_STS_DONE  = 5, /* init is done */
+> +       NT_STS_LNKUP = 6, /* link up state flag */
+> +       NT_QP_LINKS        = 7, /* available QP link */
+> +       NT_CMD_NUM_MWS        = 8, /* number of memory windows */
+> +       NT_CMD_NUM_QPS        = 9, /* number of QP */
+> +       NT_CMD_NTB_VERSION    = 10, /* ntb version */
+> +};
+> +
+> +struct msg_type {
+> +/* Scratchpad/Message IO operations */
+> +       int (*cmd_send)(struct ntb_dev *nt, int pidx, enum nt_cmd cmd,
+> +                       int cmd_wid, u64 data);
+> +       int (*cmd_recv)(struct ntb_dev *nt, int *pidx, enum nt_cmd *cmd,
+> +                       int *cmd_wid, u64 *data);
+> +};
+> +
+> +#define MSG_TRIES              500
+> +#define MSG_UDELAY_LOW         1000
+> +#define MSG_UDELAY_HIGH                2000
 
-Regards,
-Atul
+500 * 2000us = 1s is a long delay for a caller that might not have the
+luxury of being able to wait.
 
-From 452d7f703fe2cfbd3e31f9a507673975e2dcb1f6 Mon Sep 17 00:00:00 2001
-From: Atul Raut <araut@codeaurora.org>
-Date: Fri, 13 Apr 2018 18:43:47 -0700
-Subject: [PATCH 3/3] NTB :  Introduce message library
+> +
+> +/**
+> + * Scratchpads-base commands interface
+> + */
+> +#define NT_SPAD_CNT(_pcnt) \
+> +       (3*((_pcnt) + 1))
+> +#define NT_SPAD_CMD(_gidx) \
+> +       (3*(_gidx))
+> +#define NT_SPAD_LDATA(_gidx) \
+> +       (3*(_gidx) + 1)
+> +#define NT_SPAD_HDATA(_gidx) \
+> +       (3*(_gidx) + 2)
+> +#define NT_SPAD_NOTIFY(_gidx) \
+> +       (BIT_ULL(_gidx))
+> +
+> +/**
+> + * Messages-base commands interface
+> + */
+> +#define NT_MSG_CMD             0
+> +#define NT_MSG_CMD_WID         1
+> +#define NT_MSG_LDATA           2
+> +#define NT_MSG_HDATA           3
+> +#define NT_MSG_CNT             4
+> +
+>  /**
+>   * struct ntb_client_ops - ntb client operations
+>   * @probe:             Notify client of a new device.
+> @@ -1502,4 +1554,337 @@ static inline int ntb_peer_msg_write(struct ntb_dev *ntb, int pidx, int midx,
+>         return ntb->ops->peer_msg_write(ntb, pidx, midx, msg);
+>  }
+>
+> +/**
+> + * nt_spad_cmd_send() - send messages to peer using spad register.
+> + * @ntb:       NTB device context.
+> + * @pidx:      Port index of peer device.
+> + * @cmd:       ntb commands.
+> + * @cmd_gidx:  Global device index.
+> + * @data:      message data.
+> + *
+> + * Send data to the port specific scratchpad
+> + *
+> + * Perform predefined number of attempts before give up.
+> + * We are sending the data to the port specific scratchpad, so
+> + * to prevent a multi-port access race-condition. Additionally
+> + * there is no need in local locking since only thread-safe
+> + * service work is using this method.
+> + *
+> + * Set peer db to inform data is ready.
+> + *
+> + * Return: Zero on success, otherwise an error number.
+> + */
+> +static int nt_spad_cmd_send(struct ntb_dev *ntb, int pidx, enum nt_cmd cmd,
+> +                           int cmd_gidx, u64 data)
+> +{
+> +       int try;
+> +       u32 sts;
+> +       int gidx = ntb_port_number(ntb);
+> +
+> +       dev_dbg(&ntb->dev, "CMD send: %d 0x%llx\n", cmd, data);
 
-Library created by refactoring common code from
-ntb_perf module so that all client can make use
-of it.
-The library is based on scratchpad and message registers
-based apis.
+vdbg, or not at all.  Probably best to just let the caller log the
+message or not.
 
-Signed-off-by: Atul Raut <araut@codeaurora.org>
----
- include/linux/ntb.h | 360 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 360 insertions(+)
+> +
+> +       for (try = 0; try < MSG_TRIES; try++) {
 
-diff --git a/include/linux/ntb.h b/include/linux/ntb.h
-index 181d166..287afd3 100644
---- a/include/linux/ntb.h
-+++ b/include/linux/ntb.h
-@@ -58,6 +58,8 @@
- 
- #include <linux/completion.h>
- #include <linux/device.h>
-+#include <linux/delay.h>
-+#include <linux/io.h>
- 
- struct ntb_client;
- struct ntb_dev;
-@@ -163,6 +165,56 @@ enum ntb_default_port {
- #define NTB_DEF_PEER_CNT	(1)
- #define NTB_DEF_PEER_IDX	(0)
- 
-+enum nt_cmd {
-+	NT_CMD_INVAL = -1,/* invalid spad command */
-+	NT_CMD_SSIZE = 0, /* send out buffer size */
-+	NT_CMD_RSIZE = 1, /* recv in  buffer size */
-+	NT_CMD_SXLAT = 2, /* send in  buffer xlat */
-+	NT_CMD_RXLAT = 3, /* recv out buffer xlat */
-+	NT_CMD_CLEAR = 4, /* clear allocated memory */
-+	NT_STS_DONE  = 5, /* init is done */
-+	NT_STS_LNKUP = 6, /* link up state flag */
-+	NT_QP_LINKS        = 7, /* available QP link */
-+	NT_CMD_NUM_MWS        = 8, /* number of memory windows */
-+	NT_CMD_NUM_QPS        = 9, /* number of QP */
-+	NT_CMD_NTB_VERSION    = 10, /* ntb version */
-+};
-+
-+struct msg_type {
-+/* Scratchpad/Message IO operations */
-+	int (*cmd_send)(struct ntb_dev *nt, int pidx, enum nt_cmd cmd,
-+			int cmd_wid, u64 data);
-+	int (*cmd_recv)(struct ntb_dev *nt, int *pidx, enum nt_cmd *cmd,
-+			int *cmd_wid, u64 *data);
-+};
-+
-+#define MSG_TRIES		50
-+#define MSG_UDELAY_LOW		1000
-+#define MSG_UDELAY_HIGH		2000
-+
-+/**
-+ * Scratchpads-base commands interface
-+ */
-+#define NT_SPAD_CNT(_pcnt) \
-+	(3*((_pcnt) + 1))
-+#define NT_SPAD_CMD(_gidx) \
-+	(3*(_gidx))
-+#define NT_SPAD_LDATA(_gidx) \
-+	(3*(_gidx) + 1)
-+#define NT_SPAD_HDATA(_gidx) \
-+	(3*(_gidx) + 2)
-+#define NT_SPAD_NOTIFY(_gidx) \
-+	(BIT_ULL(_gidx))
-+
-+/**
-+ * Messages-base commands interface
-+ */
-+#define NT_MSG_CMD		0
-+#define NT_MSG_CMD_WID	        1
-+#define NT_MSG_LDATA		2
-+#define NT_MSG_HDATA		3
-+#define NT_MSG_CNT		4
-+
- /**
-  * struct ntb_client_ops - ntb client operations
-  * @probe:		Notify client of a new device.
-@@ -1502,4 +1554,312 @@ static inline int ntb_peer_msg_write(struct ntb_dev *ntb, int pidx, int midx,
- 	return ntb->ops->peer_msg_write(ntb, pidx, midx, msg);
- }
- 
-+/**
-+ * nt_spad_cmd_send() - send messages to peer using spad register.
-+ * @ntb:	NTB device context.
-+ * @pidx:	Port index of peer device.
-+ * @cmd:	ntb commands.
-+ * @cmd_gidx:	Global device index.
-+ * @data:	message data.
-+ *
-+ * Send data to the port specific scratchpad
-+ *
-+ * Perform predefined number of attempts before give up.
-+ * We are sending the data to the port specific scratchpad, so
-+ * to prevent a multi-port access race-condition. Additionally
-+ * there is no need in local locking since only thread-safe
-+ * service work is using this method.
-+ *
-+ * Set peer db to inform data is ready.
-+ *
-+ * Return: Zero on success, otherwise an error number.
-+ */
-+static int nt_spad_cmd_send(struct ntb_dev *ntb, int pidx, enum nt_cmd cmd,
-+			    int cmd_gidx, u64 data)
-+{
-+	int try;
-+	u32 sts;
-+	int gidx = ntb_port_number(ntb);
-+
-+	for (try = 0; try < MSG_TRIES; try++) {
-+		if (!ntb_link_is_up(ntb, NULL, NULL))
-+			return -ENOLINK;
-+
-+		sts = ntb_peer_spad_read(ntb, pidx,
-+					 NT_SPAD_CMD(gidx));
-+		if (sts != NT_CMD_INVAL) {
-+			usleep_range(MSG_UDELAY_LOW, MSG_UDELAY_HIGH);
-+			continue;
-+		}
-+
-+		ntb_peer_spad_write(ntb, pidx,
-+				    NT_SPAD_LDATA(gidx),
-+				    lower_32_bits(data));
-+		ntb_peer_spad_write(ntb, pidx,
-+				    NT_SPAD_HDATA(gidx),
-+				    upper_32_bits(data));
-+		mmiowb();
-+		ntb_peer_spad_write(ntb, pidx,
-+				    NT_SPAD_CMD(gidx),
-+				    cmd);
-+
-+		ntb_peer_db_set(ntb, NT_SPAD_NOTIFY(cmd_gidx));
-+
-+		break;
-+	}
-+
-+	return try < MSG_TRIES ? 0 : -EAGAIN;
-+}
-+
-+/**
-+ * nt_spad_cmd_recv() - Receive the messages using spad register.
-+ * @ntb:	NTB device context.
-+ * @pidx:	Port index of peer device a message being receive
-+ * @cmd:	NTB command
-+ * @cmd_wid:	Gloable device Index
-+ * @data:	Received data
-+ *
-+ * Clear bits in the peer doorbell register, arming the bits for the next
-+ * doorbell.
-+ *
-+ * We start scanning all over, since cleared DB may have been set
-+ * by any peer. Yes, it makes peer with smaller index being
-+ * serviced with greater priority, but it's convenient for spad
-+ * and message code unification and simplicity.
-+ *
-+ * Return: Zero on success, otherwise an error number.
-+ */
-+static int nt_spad_cmd_recv(struct ntb_dev *ntb, int *pidx,
-+			enum nt_cmd *cmd, int *cmd_wid, u64 *data)
-+{
-+	u32 val;
-+	int gidx = 0;
-+	int key = ntb_port_number(ntb);
-+
-+	ntb_db_clear(ntb, NT_SPAD_NOTIFY(key));
-+
-+	for (*pidx = 0; *pidx < ntb_peer_port_count(ntb); (*pidx)++, gidx++) {
-+		if ((*pidx) == key)
-+			++gidx;
-+
-+		if (!ntb_link_is_up(ntb, NULL, NULL))
-+			continue;
-+
-+		val = ntb_spad_read(ntb, NT_SPAD_CMD(gidx));
-+		if (val == NT_CMD_INVAL)
-+			continue;
-+
-+		*cmd = val;
-+
-+		val = ntb_spad_read(ntb, NT_SPAD_LDATA(gidx));
-+		*data = val;
-+
-+		val = ntb_spad_read(ntb, NT_SPAD_HDATA(gidx));
-+		*data |= (u64)val << 32;
-+
-+		/* Next command can be retrieved from now */
-+		ntb_spad_write(ntb, NT_SPAD_CMD(gidx),
-+			NT_CMD_INVAL);
-+
-+		return 0;
-+	}
-+
-+	return -ENODATA;
-+}
-+
-+/**
-+ * nt_msg_cmd_send() - send messages to peer using message register.
-+ * @ntb:	NTB device context.
-+ * @pidx:	Port index of peer device.
-+ * @cmd:	ntb commands.
-+ * @cmd_gidx:	Memory window index.
-+ * @data:	message data.
-+ *
-+ * Perform predefined number of attempts before give up. Message
-+ * registers are free of race-condition problem when accessed
-+ * from different ports, so we don't need splitting registers
-+ * by global device index. We also won't have local locking,
-+ * since the method is used from service work only.
-+ *
-+ * Return: Zero on success, otherwise an error number.
-+ */
-+static int nt_msg_cmd_send(struct ntb_dev *nt, int pidx, enum nt_cmd cmd,
-+int cmd_wid, u64 data)
-+{
-+	int try, ret;
-+	u64 outbits;
-+
-+	outbits = ntb_msg_outbits(nt);
-+	for (try = 0; try < MSG_TRIES; try++) {
-+		if (!ntb_link_is_up(nt, NULL, NULL))
-+			return -ENOLINK;
-+
-+		ret = ntb_msg_clear_sts(nt, outbits);
-+		if (ret)
-+			return ret;
-+
-+		ntb_peer_msg_write(nt, pidx, NT_MSG_LDATA,
-+			cpu_to_le32(lower_32_bits(data)));
-+
-+		if (ntb_msg_read_sts(nt) & outbits) {
-+			usleep_range(MSG_UDELAY_LOW, MSG_UDELAY_HIGH);
-+			continue;
-+		}
-+
-+		ntb_peer_msg_write(nt, pidx, NT_MSG_HDATA,
-+			cpu_to_le32(upper_32_bits(data)));
-+		mmiowb();
-+
-+		ntb_peer_msg_write(nt, pidx, NT_MSG_CMD_WID,
-+			cpu_to_le32(cmd_wid));
-+
-+		/* This call shall trigger peer message event */
-+		ntb_peer_msg_write(nt, pidx, NT_MSG_CMD,
-+			cpu_to_le32(cmd));
-+
-+		break;
-+	}
-+
-+	return try < MSG_TRIES ? 0 : -EAGAIN;
-+}
-+
-+/**
-+ * nt_msg_cmd_recv() - Receive the messages using message register.
-+ * @ntb:	NTB device context.
-+ * @pidx:	Port index of peer device a message being receive
-+ * @cmd:	NT command
-+ * @cmd_wid:	Memory window Index
-+ * @data:	Received data
-+ *
-+ * Get memory window index and data.
-+ *
-+ * Return: Zero on success, otherwise an error number.
-+ */
-+static int nt_msg_cmd_recv(struct ntb_dev *nt, int *pidx,
-+			enum nt_cmd *cmd, int *cmd_wid, u64 *data)
-+{
-+	u64 inbits;
-+	u32 val;
-+
-+	inbits = ntb_msg_inbits(nt);
-+
-+	if (hweight64(ntb_msg_read_sts(nt) & inbits) < 4)
-+		return -ENODATA;
-+
-+	val = ntb_msg_read(nt, pidx, NT_MSG_CMD);
-+	*cmd = le32_to_cpu(val);
-+
-+	val = ntb_msg_read(nt, pidx, NT_MSG_CMD_WID);
-+	*cmd_wid = le32_to_cpu(val);
-+
-+	val = ntb_msg_read(nt, pidx, NT_MSG_LDATA);
-+	*data = le32_to_cpu(val);
-+
-+	val = ntb_msg_read(nt, pidx, NT_MSG_HDATA);
-+	*data |= (u64)le32_to_cpu(val) << 32;
-+
-+	/* Next command can be retrieved from now */
-+	ntb_msg_clear_sts(nt, inbits);
-+
-+	return 0;
-+}
-+
-+/**
-+ * nt_enable_messaging() - Enable messaging support.
-+ * @ntb:	NTB device context.
-+ * @gitx:	Global device Index.
-+ *
-+ * Check which messaging support to enable
-+ *
-+ * Return: Zero on success, otherwise an error number.
-+ */
-+static int nt_enable_messaging(struct ntb_dev *ndev, int gidx)
-+{
-+	u64 mask, incmd_bit;
-+	int ret, sidx, scnt;
-+
-+	mask = ntb_db_valid_mask(ndev);
-+	(void)ntb_db_set_mask(ndev, mask);
-+
-+	if (ntb_msg_count(ndev) >= NT_MSG_CNT) {
-+		u64 inbits, outbits;
-+
-+		inbits = ntb_msg_inbits(ndev);
-+		outbits = ntb_msg_outbits(ndev);
-+		(void)ntb_msg_set_mask(ndev, inbits | outbits);
-+
-+		incmd_bit = BIT_ULL(__ffs64(inbits));
-+		ret = ntb_msg_clear_mask(ndev, incmd_bit);
-+	} else {
-+		scnt = ntb_spad_count(ndev);
-+		for (sidx = 0; sidx < scnt; sidx++)
-+			ntb_spad_write(ndev, sidx, NT_CMD_INVAL);
-+		incmd_bit = NT_SPAD_NOTIFY(gidx);
-+		ret = ntb_db_clear_mask(ndev, incmd_bit);
-+	}
-+
-+	return ret;
-+}
-+
-+/**
-+ * nt_disable_messaging() - Disable messaging support.
-+ * @ntb:	NTB device context.
-+ * @gidx:	Global device Index
-+ *
-+ * Check message type(spad/message) and disable messaging support.
-+ *
-+ */
-+static void nt_disable_messaging(struct ntb_dev *ndev, int gidx)
-+{
-+	if (ntb_msg_count(ndev) >= NT_MSG_CNT) {
-+		u64 inbits;
-+
-+		inbits = ntb_msg_inbits(ndev);
-+		(void)ntb_msg_set_mask(ndev, inbits);
-+	} else {
-+		(void)ntb_db_set_mask(ndev, NT_SPAD_NOTIFY(gidx));
-+	}
-+
-+}
-+
-+/**
-+ * nt_init_messaging() - Enable Messaging
-+ * @ntb:	NTB device context.
-+ * @msg_ptr:	Handle to function pointers Scratchpad or Message.
-+ *
-+ *
-+ * Enable Scratchpad/Message IO operations.
-+ *
-+ * Return: Zero on success, otherwise an error number.
-+ */
-+static int nt_init_messaging(struct ntb_dev *ndev, struct msg_type *msg_ptr)
-+{
-+	u64 mask;
-+	int pcnt = ntb_peer_port_count(ndev);
-+
-+	if (ntb_peer_mw_count(ndev) < (pcnt + 1)) {
-+		dev_err(&ndev->dev, "Not enough memory windows\n");
-+		return -EINVAL;
-+	}
-+
-+	if (ntb_msg_count(ndev) >= NT_MSG_CNT) {
-+		msg_ptr->cmd_send = nt_msg_cmd_send;
-+		msg_ptr->cmd_recv = nt_msg_cmd_recv;
-+
-+		return 0;
-+	}
-+
-+	mask = GENMASK_ULL(pcnt, 0);
-+	if (ntb_spad_count(ndev) >= NT_SPAD_CNT(pcnt) &&
-+	    (ntb_db_valid_mask(ndev) & mask) == mask) {
-+		msg_ptr->cmd_send = nt_spad_cmd_send;
-+		msg_ptr->cmd_recv = nt_spad_cmd_recv;
-+
-+		return 0;
-+	}
-+	dev_err(&ndev->dev, "Command services unsupported\n");
-+
-+	return -EINVAL;
-+}
-+
- #endif
--- 
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project
+Maybe one try, or msg_tries is a parameter instead of constant.
 
-From bebfcf43703048acba81fa150c29846db23e5af1 Mon Sep 17 00:00:00 2001
-From: Atul Raut <araut@codeaurora.org>
-Date: Fri, 13 Apr 2018 18:40:55 -0700
-Subject: [PATCH 2/3] NTB : Add support to message registers based devices
+> +               if (ntb_link_is_up(ntb, NULL, NULL) != 1)
+> +                       return -ENOLINK;
+> +
+> +               sts = ntb_peer_spad_read(ntb, pidx,
+> +                                        NT_SPAD_CMD(gidx));
 
-ntb_transport driver works only with Scartchpads based devices.
-This patch add support to devices which uses Message registers
-for data exchange.
+Can it be done without reading peer spads?
 
-Signed-off-by: Atul Raut <araut@codeaurora.org>
----
- drivers/ntb/ntb_transport.c | 357 ++++++++++++++++++++++++++++++++------------
- 1 file changed, 260 insertions(+), 97 deletions(-)
+> +               if (sts != NT_CMD_INVAL) {
+> +                       usleep_range(MSG_UDELAY_LOW, MSG_UDELAY_HIGH);
 
-diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 9878c48..b8dcd29 100644
---- a/drivers/ntb/ntb_transport.c
-+++ b/drivers/ntb/ntb_transport.c
-@@ -47,8 +47,8 @@
-  * Contact Information:
-  * Jon Mason <jon.mason@intel.com>
-  */
-+
- #include <linux/debugfs.h>
--#include <linux/delay.h>
- #include <linux/dmaengine.h>
- #include <linux/dma-mapping.h>
- #include <linux/errno.h>
-@@ -189,6 +189,7 @@ struct ntb_transport_qp {
- };
- 
- struct ntb_transport_mw {
-+	u64 outbuf_xlat;
- 	phys_addr_t phys_addr;
- 	resource_size_t phys_size;
- 	void __iomem *vbase;
-@@ -222,6 +223,16 @@ struct ntb_transport_ctx {
- 	struct work_struct link_cleanup;
- 
- 	struct dentry *debugfs_node_dir;
-+	struct msg_type handle;
-+
-+	unsigned int peer_mw_count;
-+	unsigned int peer_qp_count;
-+	unsigned int peer_qp_links;
-+	u32 peer_ntb_version;
-+
-+	/* NTB connection setup service */
-+	struct work_struct	service;
-+	unsigned long	sts;
- };
- 
- enum {
-@@ -254,6 +265,9 @@ enum {
- #define NTB_QP_DEF_NUM_ENTRIES	100
- #define NTB_LINK_DOWN_TIMEOUT	10
- 
-+#define to_ntb_transport_service(__work) \
-+	container_of(__work, struct ntb_transport_ctx, service)
-+
- static void ntb_transport_rxc_db(unsigned long data);
- static const struct ntb_ctx_ops ntb_transport_ops;
- static struct ntb_client ntb_transport_client;
-@@ -263,7 +277,6 @@ static int ntb_async_tx_submit(struct ntb_transport_qp *qp,
- static int ntb_async_rx_submit(struct ntb_queue_entry *entry, void *offset);
- static void ntb_memcpy_rx(struct ntb_queue_entry *entry, void *offset);
- 
--
- static int ntb_transport_bus_match(struct device *dev,
- 				   struct device_driver *drv)
- {
-@@ -679,19 +692,50 @@ static void ntb_free_mw(struct ntb_transport_ctx *nt, int num_mw)
- 	mw->virt_addr = NULL;
- }
- 
--static int ntb_set_mw(struct ntb_transport_ctx *nt, int num_mw,
--		      resource_size_t size)
-+static int ntb_transport_cmd_exec(struct ntb_transport_ctx *nt, enum nt_cmd cmd)
-+{
-+	struct pci_dev *pdev = nt->ndev->pdev;
-+
-+	switch (cmd) {
-+	case NT_CMD_SSIZE:
-+	case NT_CMD_RSIZE:
-+	case NT_CMD_SXLAT:
-+	case NT_CMD_RXLAT:
-+	case NT_CMD_CLEAR:
-+	case NT_CMD_NUM_MWS:
-+	case NT_CMD_NUM_QPS:
-+	case NT_CMD_NTB_VERSION:
-+		break;
-+	default:
-+		dev_err(&pdev->dev, "Exec invalid command\n");
-+		return -EINVAL;
-+	}
-+
-+	/* No need of memory barrier, since bit ops have invernal lock */
-+	set_bit(cmd, &nt->sts);
-+
-+	dev_dbg(&pdev->dev, "CMD exec: %d\n", cmd);
-+
-+	(void)queue_work(system_highpri_wq, &nt->service);
-+
-+	return 0;
-+}
-+
-+static int ntb_set_mw(struct ntb_transport_ctx *nt, int num_mw)
- {
- 	struct ntb_transport_mw *mw = &nt->mw_vec[num_mw];
- 	struct pci_dev *pdev = nt->ndev->pdev;
- 	size_t xlat_size, buff_size;
- 	resource_size_t xlat_align;
- 	resource_size_t xlat_align_size;
-+	resource_size_t size;
- 	int rc;
- 
-+	size = mw->buff_size;
- 	if (!size)
- 		return -EINVAL;
- 
-+	/* Get inbound MW parameters */
- 	rc = ntb_mw_get_align(nt->ndev, PIDX, num_mw, &xlat_align,
- 			      &xlat_align_size, NULL);
- 	if (rc)
-@@ -743,9 +787,72 @@ static int ntb_set_mw(struct ntb_transport_ctx *nt, int num_mw,
- 		return -EIO;
- 	}
- 
-+	if (num_mw ==  (nt->mw_count-1)) {
-+		set_bit(NT_STS_DONE, &nt->sts);
-+		dev_dbg(&pdev->dev, " NT_STS_DONE sts = %d\n", nt->sts);
-+		(void)ntb_transport_cmd_exec(nt, NT_CMD_SXLAT);
-+	}
-+
- 	return 0;
- }
- 
-+static int ntb_transport_cmd_send(struct ntb_transport_ctx *nt, enum nt_cmd cmd,
-+		int cmd_wid, u64 data)
-+{
-+	struct pci_dev *pdev = nt->ndev->pdev;
-+	struct ntb_dev *ndev = nt->ndev;
-+
-+	if (cmd == NT_CMD_SSIZE || cmd == NT_CMD_SXLAT || cmd == NT_CMD_NUM_MWS
-+		|| cmd == NT_CMD_NUM_QPS || cmd == NT_CMD_NTB_VERSION
-+		|| cmd == NT_QP_LINKS)
-+		return nt->handle.cmd_send(ndev, PIDX, cmd, cmd_wid, data);
-+
-+	dev_err(&pdev->dev, "Send invalid command\n");
-+	return -EINVAL;
-+}
-+
-+static int ntb_transport_cmd_recv(struct ntb_transport_ctx *nt)
-+{
-+	struct pci_dev *pdev = nt->ndev->pdev;
-+	struct ntb_dev *ndev = nt->ndev;
-+	int ret, pidx, cmd, cmd_wid;
-+	u64 data;
-+
-+	while (!(ret = nt->handle.cmd_recv(ndev, &pidx, &cmd, &cmd_wid,
-+			&data))) {
-+		switch (cmd) {
-+		case NT_CMD_SSIZE:
-+			nt->mw_vec[cmd_wid].buff_size = data;
-+			return ntb_transport_cmd_exec(nt, NT_CMD_RSIZE);
-+		case NT_CMD_SXLAT:
-+			nt->mw_vec[cmd_wid].outbuf_xlat = data;
-+			if (cmd_wid ==  (nt->mw_count-1))
-+				return ntb_transport_cmd_exec(nt, NT_CMD_RXLAT);
-+			break;
-+		case NT_CMD_NUM_MWS:
-+			nt->peer_mw_count = data;
-+			break;
-+		case NT_CMD_NUM_QPS:
-+			nt->peer_qp_count = data;
-+			break;
-+		case NT_CMD_NTB_VERSION:
-+			if (data == NTB_TRANSPORT_VERSION)
-+				nt->peer_ntb_version  = data;
-+			break;
-+		case NT_QP_LINKS:
-+			nt->peer_qp_links = data;
-+			break;
-+		default:
-+			dev_dbg(&pdev->dev, "[%s] Recv invalid command cmd-> %d\n",
-+				__func__, cmd);
-+			return -EINVAL;
-+		}
-+	}
-+
-+	/* Return 0 if no data left to process, otherwise an error */
-+	return ret == -ENODATA ? 0 : ret;
-+}
-+
- static void ntb_qp_link_down_reset(struct ntb_transport_qp *qp)
- {
- 	qp->link_is_up = false;
-@@ -839,6 +946,94 @@ static void ntb_transport_link_cleanup_work(struct work_struct *work)
- 	ntb_transport_link_cleanup(nt);
- }
- 
-+static int ntb_transport_setup_outbuf(struct ntb_transport_ctx *nt, int num_mw)
-+{
-+	struct ntb_dev *ndev = nt->ndev;
-+	int ret;
-+
-+	/* Outbuf size can be unaligned due to custom max_mw_size */
-+	ret = ntb_peer_mw_set_trans(nt->ndev, PIDX, num_mw,
-+		nt->mw_vec[num_mw].outbuf_xlat, nt->mw_vec[num_mw].phys_size);
-+	if (ret) {
-+		dev_err(&ndev->dev, "Failed to set outbuf translation\n");
-+		return ret;
-+	}
-+
-+	return 0;
-+}
-+
-+static void ntb_qp_link_work(struct work_struct *work)
-+{
-+	struct ntb_transport_qp *qp = container_of(work,
-+						   struct ntb_transport_qp,
-+						   link_work.work);
-+	struct pci_dev *pdev = qp->ndev->pdev;
-+	struct ntb_transport_ctx *nt = qp->transport;
-+	u64 qp_bitmap_alloc;
-+	int val = -1;
-+
-+	WARN_ON(!nt->link_is_up);
-+
-+	qp_bitmap_alloc = (nt->qp_bitmap & ~nt->qp_bitmap_free);
-+	ntb_transport_cmd_send(nt, NT_QP_LINKS, 0, qp_bitmap_alloc);
-+	if (nt->peer_qp_links)
-+		val = nt->peer_qp_links;
-+
-+	/* See if the remote side is up */
-+	if (val & BIT(qp->qp_num)) {
-+		dev_info(&pdev->dev, "qp %d: Link Up\n", qp->qp_num);
-+		qp->link_is_up = true;
-+		qp->active = true;
-+
-+		if (qp->event_handler)
-+			qp->event_handler(qp->cb_data, qp->link_is_up);
-+
-+		if (qp->active)
-+			tasklet_schedule(&qp->rxc_db_work);
-+	} else if (nt->link_is_up)
-+		schedule_delayed_work(&qp->link_work,
-+				      msecs_to_jiffies(NTB_LINK_DOWN_TIMEOUT));
-+}
-+
-+static void ntb_transport_service_work(struct work_struct *work)
-+{
-+	struct ntb_transport_ctx *nt = to_ntb_transport_service(work);
-+	resource_size_t size;
-+	int i;
-+
-+	if (test_and_clear_bit(NT_CMD_SSIZE, &nt->sts)) {
-+		for (i = 0; i < nt->mw_count; i++) {
-+			size = nt->mw_vec[i].phys_size;
-+			if (max_mw_size && size > max_mw_size)
-+				size = max_mw_size;
-+			ntb_transport_cmd_send(nt, NT_CMD_SSIZE, i, size);
-+		}
-+	}
-+
-+	if (test_and_clear_bit(NT_CMD_RSIZE, &nt->sts))
-+		for (i = 0; i < nt->mw_count; i++)
-+			ntb_set_mw(nt, i);
-+
-+	if (test_and_clear_bit(NT_CMD_SXLAT, &nt->sts))
-+		for (i = 0; i < nt->mw_count; i++)
-+			ntb_transport_cmd_send(nt, NT_CMD_SXLAT, i,
-+				nt->mw_vec[i].dma_addr);
-+
-+	if (test_and_clear_bit(NT_CMD_RXLAT, &nt->sts))
-+		for (i = 0; i < nt->mw_count; i++)
-+			ntb_transport_setup_outbuf(nt, i);
-+
-+	if (test_and_clear_bit(NT_CMD_NUM_MWS, &nt->sts))
-+		ntb_transport_cmd_send(nt, NT_CMD_NUM_MWS, 0, nt->mw_count);
-+
-+	if (test_and_clear_bit(NT_CMD_NUM_QPS, &nt->sts))
-+		ntb_transport_cmd_send(nt, NT_CMD_NUM_QPS, 0,  nt->qp_count);
-+
-+	if (test_and_clear_bit(NT_CMD_NTB_VERSION, &nt->sts))
-+		ntb_transport_cmd_send(nt, NT_CMD_NTB_VERSION, 0,
-+			NTB_TRANSPORT_VERSION);
-+}
-+
- static void ntb_transport_event_callback(void *data)
- {
- 	struct ntb_transport_ctx *nt = data;
-@@ -855,72 +1050,43 @@ static void ntb_transport_link_work(struct work_struct *work)
- 		container_of(work, struct ntb_transport_ctx, link_work.work);
- 	struct ntb_dev *ndev = nt->ndev;
- 	struct pci_dev *pdev = ndev->pdev;
--	resource_size_t size;
--	u32 val;
--	int rc = 0, i, spad;
-+	int rc = 0, i;
- 
- 	/* send the local info, in the opposite order of the way we read it */
--	for (i = 0; i < nt->mw_count; i++) {
--		size = nt->mw_vec[i].phys_size;
--
--		if (max_mw_size && size > max_mw_size)
--			size = max_mw_size;
--
--		spad = MW0_SZ_HIGH + (i * 2);
--		ntb_peer_spad_write(ndev, PIDX, spad, upper_32_bits(size));
--
--		spad = MW0_SZ_LOW + (i * 2);
--		ntb_peer_spad_write(ndev, PIDX, spad, lower_32_bits(size));
--	}
--
--	ntb_peer_spad_write(ndev, PIDX, NUM_MWS, nt->mw_count);
--
--	ntb_peer_spad_write(ndev, PIDX, NUM_QPS, nt->qp_count);
--
--	ntb_peer_spad_write(ndev, PIDX, VERSION, NTB_TRANSPORT_VERSION);
-+	ntb_transport_cmd_exec(nt, NT_CMD_SSIZE);
-+	ntb_transport_cmd_exec(nt, NT_CMD_NUM_MWS);
-+	ntb_transport_cmd_exec(nt, NT_CMD_NUM_QPS);
-+	ntb_transport_cmd_exec(nt, NT_CMD_NTB_VERSION);
- 
- 	/* Query the remote side for its info */
--	val = ntb_spad_read(ndev, VERSION);
--	dev_dbg(&pdev->dev, "Remote version = %d\n", val);
--	if (val != NTB_TRANSPORT_VERSION)
-+	dev_dbg(&pdev->dev, "Remote version = %d\n", nt->peer_ntb_version);
-+	if (nt->peer_ntb_version != NTB_TRANSPORT_VERSION)
- 		goto out;
- 
--	val = ntb_spad_read(ndev, NUM_QPS);
--	dev_dbg(&pdev->dev, "Remote max number of qps = %d\n", val);
--	if (val != nt->qp_count)
-+	dev_dbg(&pdev->dev, "Remote max number of qps = %d\n",
-+	nt->peer_qp_count);
-+	if (nt->peer_qp_count != nt->qp_count)
- 		goto out;
- 
--	val = ntb_spad_read(ndev, NUM_MWS);
--	dev_dbg(&pdev->dev, "Remote number of mws = %d\n", val);
--	if (val != nt->mw_count)
-+	dev_dbg(&pdev->dev, "Remote number of mws = %d\n", nt->peer_mw_count);
-+	if (nt->peer_mw_count != nt->mw_count)
- 		goto out;
- 
--	for (i = 0; i < nt->mw_count; i++) {
--		u64 val64;
-+	if (test_and_clear_bit(NT_STS_DONE, &nt->sts)) {
-+		nt->link_is_up = true;
- 
--		val = ntb_spad_read(ndev, MW0_SZ_HIGH + (i * 2));
--		val64 = (u64)val << 32;
-+		for (i = 0; i < nt->qp_count; i++) {
-+			struct ntb_transport_qp *qp = &nt->qp_vec[i];
- 
--		val = ntb_spad_read(ndev, MW0_SZ_LOW + (i * 2));
--		val64 |= val;
--
--		dev_dbg(&pdev->dev, "Remote MW%d size = %#llx\n", i, val64);
--
--		rc = ntb_set_mw(nt, i, val64);
-+		rc = ntb_transport_setup_qp_mw(nt, i);
- 		if (rc)
- 			goto out1;
--	}
--
--	nt->link_is_up = true;
--
--	for (i = 0; i < nt->qp_count; i++) {
--		struct ntb_transport_qp *qp = &nt->qp_vec[i];
--
--		ntb_transport_setup_qp_mw(nt, i);
- 
- 		if (qp->client_ready)
- 			schedule_delayed_work(&qp->link_work, 0);
--	}
-+		}
-+	} else
-+		goto out;
- 
- 	return;
- 
-@@ -938,40 +1104,6 @@ static void ntb_transport_link_work(struct work_struct *work)
- 				      msecs_to_jiffies(NTB_LINK_DOWN_TIMEOUT));
- }
- 
--static void ntb_qp_link_work(struct work_struct *work)
--{
--	struct ntb_transport_qp *qp = container_of(work,
--						   struct ntb_transport_qp,
--						   link_work.work);
--	struct pci_dev *pdev = qp->ndev->pdev;
--	struct ntb_transport_ctx *nt = qp->transport;
--	int val;
--
--	WARN_ON(!nt->link_is_up);
--
--	val = ntb_spad_read(nt->ndev, QP_LINKS);
--
--	ntb_peer_spad_write(nt->ndev, PIDX, QP_LINKS, val | BIT(qp->qp_num));
--
--	/* query remote spad for qp ready bits */
--	dev_dbg_ratelimited(&pdev->dev, "Remote QP link status = %x\n", val);
--
--	/* See if the remote side is up */
--	if (val & BIT(qp->qp_num)) {
--		dev_info(&pdev->dev, "qp %d: Link Up\n", qp->qp_num);
--		qp->link_is_up = true;
--		qp->active = true;
--
--		if (qp->event_handler)
--			qp->event_handler(qp->cb_data, qp->link_is_up);
--
--		if (qp->active)
--			tasklet_schedule(&qp->rxc_db_work);
--	} else if (nt->link_is_up)
--		schedule_delayed_work(&qp->link_work,
--				      msecs_to_jiffies(NTB_LINK_DOWN_TIMEOUT));
--}
--
- static int ntb_transport_init_queue(struct ntb_transport_ctx *nt,
- 				    unsigned int qp_num)
- {
-@@ -1060,14 +1192,14 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
- {
- 	struct ntb_transport_ctx *nt;
- 	struct ntb_transport_mw *mw;
--	unsigned int mw_count, qp_count, spad_count, max_mw_count_for_spads;
-+	unsigned int mw_count, qp_count, msg_count, max_mw_count_for_spads;
- 	u64 qp_bitmap;
- 	int node;
- 	int rc, i;
- 
- 	mw_count = ntb_peer_mw_count(ndev);
- 
--	if (!ndev->ops->mw_set_trans) {
-+	if (!ndev->ops->mw_set_trans && !ndev->ops->peer_mw_set_trans) {
- 		dev_err(&ndev->dev, "Inbound MW based NTB API is required\n");
- 		return -EINVAL;
- 	}
-@@ -1089,18 +1221,25 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
- 		return -ENOMEM;
- 
- 	nt->ndev = ndev;
--	spad_count = ntb_spad_count(ndev);
-+	if (ntb_msg_count(ndev) >= NT_MSG_CNT)
-+		msg_count = ntb_msg_count(ndev);
-+	else
-+		msg_count = ntb_spad_count(ndev);
- 
- 	/* Limit the MW's based on the availability of scratchpads */
- 
--	if (spad_count < NTB_TRANSPORT_MIN_SPADS) {
-+	if (msg_count < NTB_TRANSPORT_MIN_SPADS && msg_count < NT_MSG_CNT) {
- 		nt->mw_count = 0;
- 		rc = -EINVAL;
- 		goto err;
- 	}
- 
--	max_mw_count_for_spads = (spad_count - MW0_SZ_HIGH) / 2;
--	nt->mw_count = min(mw_count, max_mw_count_for_spads);
-+	if (ntb_msg_count(ndev)) {
-+		nt->mw_count = msg_count;
-+	} else {
-+		max_mw_count_for_spads = (msg_count - MW0_SZ_HIGH) / 2;
-+		nt->mw_count = min(mw_count, max_mw_count_for_spads);
-+	}
- 
- 	nt->mw_vec = kzalloc_node(mw_count * sizeof(*nt->mw_vec),
- 				  GFP_KERNEL, node);
-@@ -1128,6 +1267,7 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
- 		mw->virt_addr = NULL;
- 		mw->dma_addr = 0;
- 	}
-+	INIT_WORK(&nt->service, ntb_transport_service_work);
- 
- 	qp_bitmap = ntb_db_valid_mask(ndev);
- 
-@@ -1142,6 +1282,7 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
- 	nt->qp_count = qp_count;
- 	nt->qp_bitmap = qp_bitmap;
- 	nt->qp_bitmap_free = qp_bitmap;
-+	nt->peer_qp_links = -1;
- 
- 	nt->qp_vec = kzalloc_node(qp_count * sizeof(*nt->qp_vec),
- 				  GFP_KERNEL, node);
-@@ -1169,6 +1310,15 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
- 	if (rc)
- 		goto err2;
- 
-+	/* Enable Messaging */
-+	rc = nt_init_messaging(ndev, &nt->handle);
-+	if (rc)
-+		goto err2;
-+
-+	rc = nt_enable_messaging(ndev, ntb_port_number(ndev));
-+	if (rc)
-+		goto err2;
-+
- 	INIT_LIST_HEAD(&nt->client_devs);
- 	rc = ntb_bus_init(nt);
- 	if (rc)
-@@ -1217,6 +1367,7 @@ static void ntb_transport_free(struct ntb_client *self, struct ntb_dev *ndev)
- 	}
- 
- 	ntb_link_disable(ndev);
-+	nt_disable_messaging(ndev, ntb_port_number(ndev));
- 	ntb_clear_ctx(ndev);
- 
- 	ntb_bus_remove(nt);
-@@ -2100,16 +2251,16 @@ void ntb_transport_link_up(struct ntb_transport_qp *qp)
-  */
- void ntb_transport_link_down(struct ntb_transport_qp *qp)
- {
--	int val;
-+	u64 qp_bitmap_alloc;
- 
- 	if (!qp)
- 		return;
-+	struct ntb_transport_ctx *nt = qp->transport;
- 
- 	qp->client_ready = false;
- 
--	val = ntb_spad_read(qp->ndev, QP_LINKS);
--
--	ntb_peer_spad_write(qp->ndev, PIDX, QP_LINKS, val & ~BIT(qp->qp_num));
-+	qp_bitmap_alloc = (nt->qp_bitmap & ~nt->qp_bitmap_free);
-+	ntb_transport_cmd_send(nt, NT_QP_LINKS, 0, qp_bitmap_alloc);
- 
- 	if (qp->link_is_up)
- 		ntb_send_link_down(qp);
-@@ -2213,9 +2364,21 @@ static void ntb_transport_doorbell_callback(void *data, int vector)
- 	}
- }
- 
-+static void ntb_transport_msg_event_callback(void *data)
-+{
-+	struct ntb_transport_ctx *nt = data;
-+
-+	dev_dbg(&nt->ndev->dev, "Msg status bits %#llx\n",
-+		ntb_msg_read_sts(nt->ndev));
-+
-+	/* Messages are only sent one-by-one */
-+	(void)ntb_transport_cmd_recv(nt);
-+}
-+
- static const struct ntb_ctx_ops ntb_transport_ops = {
- 	.link_event = ntb_transport_event_callback,
- 	.db_event = ntb_transport_doorbell_callback,
-+	.msg_event = ntb_transport_msg_event_callback,
- };
- 
- static struct ntb_client ntb_transport_client = {
--- 
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project
+Even though it doesn't sleep, the delay limits what context this can
+reasonably be called in.  Imagine if any kind of interrupts were
+disabled in the caller (eg rcu_read_lock or spin_lock_bh), and then
+the call in the ntb api delays the caller for 1s, that's not very
+nice.
 
-From 26ccc2fbc3685f988177fb513a427fec960b5bbb Mon Sep 17 00:00:00 2001
-From: Atul Raut <araut@codeaurora.org>
-Date: Fri, 13 Apr 2018 18:38:49 -0700
-Subject: [PATCH 1/3] NTB : Modification to ntb_perf module
+How bad would it be to take out the retries, or would it just stop working.
 
-Refactor ntb_perf module to get library code
-so that other client can make use of it.
+If taking out the retries breaks it, is there a better way to design
+the whole thing to be less fragile with respect to timing?  Or maybe
+schedule_timeout_interruptible would be ok, and just require the
+caller to be in a context where that is allowed.
 
-Signed-off-by: Atul Raut <araut@codeaurora.org>
----
- drivers/ntb/test/ntb_perf.c | 347 +++++---------------------------------------
- 1 file changed, 40 insertions(+), 307 deletions(-)
+> +                       continue;
+> +               }
+> +
+> +               ntb_peer_spad_write(ntb, pidx,
+> +                                   NT_SPAD_LDATA(gidx),
+> +                                   lower_32_bits(data));
+> +               ntb_peer_spad_write(ntb, pidx,
+> +                                   NT_SPAD_HDATA(gidx),
+> +                                   upper_32_bits(data));
+> +               mmiowb();
 
-diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index 2a9d6b0..c65f81e 100644
---- a/drivers/ntb/test/ntb_perf.c
-+++ b/drivers/ntb/test/ntb_perf.c
-@@ -100,10 +100,6 @@
- #define DMA_TRIES		100
- #define DMA_MDELAY		10
- 
--#define MSG_TRIES		500
--#define MSG_UDELAY_LOW		1000
--#define MSG_UDELAY_HIGH		2000
--
- #define PERF_BUF_LEN 1024
- 
- static unsigned long max_mw_size;
-@@ -127,17 +123,6 @@
-  *==============================================================================
-  */
- 
--enum perf_cmd {
--	PERF_CMD_INVAL = -1,/* invalid spad command */
--	PERF_CMD_SSIZE = 0, /* send out buffer size */
--	PERF_CMD_RSIZE = 1, /* recv in  buffer size */
--	PERF_CMD_SXLAT = 2, /* send in  buffer xlat */
--	PERF_CMD_RXLAT = 3, /* recv out buffer xlat */
--	PERF_CMD_CLEAR = 4, /* clear allocated memory */
--	PERF_STS_DONE  = 5, /* init is done */
--	PERF_STS_LNKUP = 6, /* link up state flag */
--};
--
- struct perf_ctx;
- 
- struct perf_peer {
-@@ -197,36 +182,11 @@ struct perf_ctx {
- 	struct perf_peer *test_peer;
- 	struct perf_thread threads[MAX_THREADS_CNT];
- 
--	/* Scratchpad/Message IO operations */
--	int (*cmd_send)(struct perf_peer *peer, enum perf_cmd cmd, u64 data);
--	int (*cmd_recv)(struct perf_ctx *perf, int *pidx, enum perf_cmd *cmd,
--			u64 *data);
-+	struct msg_type handle;
- 
- 	struct dentry *dbgfs_dir;
- };
- 
--/*
-- * Scratchpads-base commands interface
-- */
--#define PERF_SPAD_CNT(_pcnt) \
--	(3*((_pcnt) + 1))
--#define PERF_SPAD_CMD(_gidx) \
--	(3*(_gidx))
--#define PERF_SPAD_LDATA(_gidx) \
--	(3*(_gidx) + 1)
--#define PERF_SPAD_HDATA(_gidx) \
--	(3*(_gidx) + 2)
--#define PERF_SPAD_NOTIFY(_gidx) \
--	(BIT_ULL(_gidx))
--
--/*
-- * Messages-base commands interface
-- */
--#define PERF_MSG_CNT		3
--#define PERF_MSG_CMD		0
--#define PERF_MSG_LDATA		1
--#define PERF_MSG_HDATA		2
--
- /*==============================================================================
-  *                           Static data declarations
-  *==============================================================================
-@@ -251,192 +211,27 @@ static inline bool perf_link_is_up(struct perf_peer *peer)
- 	return !!(link & BIT_ULL_MASK(peer->pidx));
- }
- 
--static int perf_spad_cmd_send(struct perf_peer *peer, enum perf_cmd cmd,
--			      u64 data)
--{
--	struct perf_ctx *perf = peer->perf;
--	int try;
--	u32 sts;
--
--	dev_dbg(&perf->ntb->dev, "CMD send: %d 0x%llx\n", cmd, data);
--
--	/*
--	 * Perform predefined number of attempts before give up.
--	 * We are sending the data to the port specific scratchpad, so
--	 * to prevent a multi-port access race-condition. Additionally
--	 * there is no need in local locking since only thread-safe
--	 * service work is using this method.
--	 */
--	for (try = 0; try < MSG_TRIES; try++) {
--		if (!perf_link_is_up(peer))
--			return -ENOLINK;
--
--		sts = ntb_peer_spad_read(perf->ntb, peer->pidx,
--					 PERF_SPAD_CMD(perf->gidx));
--		if (sts != PERF_CMD_INVAL) {
--			usleep_range(MSG_UDELAY_LOW, MSG_UDELAY_HIGH);
--			continue;
--		}
--
--		ntb_peer_spad_write(perf->ntb, peer->pidx,
--				    PERF_SPAD_LDATA(perf->gidx),
--				    lower_32_bits(data));
--		ntb_peer_spad_write(perf->ntb, peer->pidx,
--				    PERF_SPAD_HDATA(perf->gidx),
--				    upper_32_bits(data));
--		mmiowb();
--		ntb_peer_spad_write(perf->ntb, peer->pidx,
--				    PERF_SPAD_CMD(perf->gidx),
--				    cmd);
--		mmiowb();
--		ntb_peer_db_set(perf->ntb, PERF_SPAD_NOTIFY(peer->gidx));
--
--		dev_dbg(&perf->ntb->dev, "DB ring peer %#llx\n",
--			PERF_SPAD_NOTIFY(peer->gidx));
--
--		break;
--	}
--
--	return try < MSG_TRIES ? 0 : -EAGAIN;
--}
--
--static int perf_spad_cmd_recv(struct perf_ctx *perf, int *pidx,
--			      enum perf_cmd *cmd, u64 *data)
--{
--	struct perf_peer *peer;
--	u32 val;
--
--	ntb_db_clear(perf->ntb, PERF_SPAD_NOTIFY(perf->gidx));
--
--	/*
--	 * We start scanning all over, since cleared DB may have been set
--	 * by any peer. Yes, it makes peer with smaller index being
--	 * serviced with greater priority, but it's convenient for spad
--	 * and message code unification and simplicity.
--	 */
--	for (*pidx = 0; *pidx < perf->pcnt; (*pidx)++) {
--		peer = &perf->peers[*pidx];
--
--		if (!perf_link_is_up(peer))
--			continue;
--
--		val = ntb_spad_read(perf->ntb, PERF_SPAD_CMD(peer->gidx));
--		if (val == PERF_CMD_INVAL)
--			continue;
--
--		*cmd = val;
--
--		val = ntb_spad_read(perf->ntb, PERF_SPAD_LDATA(peer->gidx));
--		*data = val;
--
--		val = ntb_spad_read(perf->ntb, PERF_SPAD_HDATA(peer->gidx));
--		*data |= (u64)val << 32;
--
--		/* Next command can be retrieved from now */
--		ntb_spad_write(perf->ntb, PERF_SPAD_CMD(peer->gidx),
--			       PERF_CMD_INVAL);
--
--		dev_dbg(&perf->ntb->dev, "CMD recv: %d 0x%llx\n", *cmd, *data);
--
--		return 0;
--	}
--
--	return -ENODATA;
--}
--
--static int perf_msg_cmd_send(struct perf_peer *peer, enum perf_cmd cmd,
--			     u64 data)
--{
--	struct perf_ctx *perf = peer->perf;
--	int try, ret;
--	u64 outbits;
--
--	dev_dbg(&perf->ntb->dev, "CMD send: %d 0x%llx\n", cmd, data);
--
--	/*
--	 * Perform predefined number of attempts before give up. Message
--	 * registers are free of race-condition problem when accessed
--	 * from different ports, so we don't need splitting registers
--	 * by global device index. We also won't have local locking,
--	 * since the method is used from service work only.
--	 */
--	outbits = ntb_msg_outbits(perf->ntb);
--	for (try = 0; try < MSG_TRIES; try++) {
--		if (!perf_link_is_up(peer))
--			return -ENOLINK;
--
--		ret = ntb_msg_clear_sts(perf->ntb, outbits);
--		if (ret)
--			return ret;
--
--		ntb_peer_msg_write(perf->ntb, peer->pidx, PERF_MSG_LDATA,
--				   lower_32_bits(data));
--
--		if (ntb_msg_read_sts(perf->ntb) & outbits) {
--			usleep_range(MSG_UDELAY_LOW, MSG_UDELAY_HIGH);
--			continue;
--		}
--
--		ntb_peer_msg_write(perf->ntb, peer->pidx, PERF_MSG_HDATA,
--				   upper_32_bits(data));
--		mmiowb();
--
--		/* This call shall trigger peer message event */
--		ntb_peer_msg_write(perf->ntb, peer->pidx, PERF_MSG_CMD, cmd);
--
--		break;
--	}
--
--	return try < MSG_TRIES ? 0 : -EAGAIN;
--}
--
--static int perf_msg_cmd_recv(struct perf_ctx *perf, int *pidx,
--			     enum perf_cmd *cmd, u64 *data)
--{
--	u64 inbits;
--	u32 val;
--
--	inbits = ntb_msg_inbits(perf->ntb);
--
--	if (hweight64(ntb_msg_read_sts(perf->ntb) & inbits) < 3)
--		return -ENODATA;
--
--	val = ntb_msg_read(perf->ntb, pidx, PERF_MSG_CMD);
--	*cmd = val;
--
--	val = ntb_msg_read(perf->ntb, pidx, PERF_MSG_LDATA);
--	*data = val;
--
--	val = ntb_msg_read(perf->ntb, pidx, PERF_MSG_HDATA);
--	*data |= (u64)val << 32;
--
--	/* Next command can be retrieved from now */
--	ntb_msg_clear_sts(perf->ntb, inbits);
--
--	dev_dbg(&perf->ntb->dev, "CMD recv: %d 0x%llx\n", *cmd, *data);
--
--	return 0;
--}
--
--static int perf_cmd_send(struct perf_peer *peer, enum perf_cmd cmd, u64 data)
-+static int perf_cmd_send(struct perf_peer *peer, enum nt_cmd cmd,
-+		int cmd_wid, u64 data)
- {
- 	struct perf_ctx *perf = peer->perf;
- 
--	if (cmd == PERF_CMD_SSIZE || cmd == PERF_CMD_SXLAT)
--		return perf->cmd_send(peer, cmd, data);
-+	if (cmd == NT_CMD_SSIZE || cmd == NT_CMD_SXLAT)
-+		return perf->handle.cmd_send(perf->ntb, peer->pidx,
-+			cmd, cmd_wid, data);
- 
- 	dev_err(&perf->ntb->dev, "Send invalid command\n");
- 	return -EINVAL;
- }
- 
--static int perf_cmd_exec(struct perf_peer *peer, enum perf_cmd cmd)
-+static int perf_cmd_exec(struct perf_peer *peer, enum nt_cmd cmd)
- {
- 	switch (cmd) {
--	case PERF_CMD_SSIZE:
--	case PERF_CMD_RSIZE:
--	case PERF_CMD_SXLAT:
--	case PERF_CMD_RXLAT:
--	case PERF_CMD_CLEAR:
-+	case NT_CMD_SSIZE:
-+	case NT_CMD_RSIZE:
-+	case NT_CMD_SXLAT:
-+	case NT_CMD_RXLAT:
-+	case NT_CMD_CLEAR:
- 		break;
- 	default:
- 		dev_err(&peer->perf->ntb->dev, "Exec invalid command\n");
-@@ -456,19 +251,20 @@ static int perf_cmd_exec(struct perf_peer *peer, enum perf_cmd cmd)
- static int perf_cmd_recv(struct perf_ctx *perf)
- {
- 	struct perf_peer *peer;
--	int ret, pidx, cmd;
-+	int ret, pidx, cmd, cmd_wid;
- 	u64 data;
- 
--	while (!(ret = perf->cmd_recv(perf, &pidx, &cmd, &data))) {
-+	while (!(ret = perf->handle.cmd_recv(perf->ntb, &pidx, &cmd,
-+			&cmd_wid, &data))) {
- 		peer = &perf->peers[pidx];
- 
- 		switch (cmd) {
--		case PERF_CMD_SSIZE:
-+		case NT_CMD_SSIZE:
- 			peer->inbuf_size = data;
--			return perf_cmd_exec(peer, PERF_CMD_RSIZE);
--		case PERF_CMD_SXLAT:
-+			return perf_cmd_exec(peer, NT_CMD_RSIZE);
-+		case NT_CMD_SXLAT:
- 			peer->outbuf_xlat = data;
--			return perf_cmd_exec(peer, PERF_CMD_RXLAT);
-+			return perf_cmd_exec(peer, NT_CMD_RXLAT);
- 		default:
- 			dev_err(&perf->ntb->dev, "Recv invalid command\n");
- 			return -EINVAL;
-@@ -492,11 +288,11 @@ static void perf_link_event(void *ctx)
- 		lnk_up = perf_link_is_up(peer);
- 
- 		if (lnk_up &&
--		    !test_and_set_bit(PERF_STS_LNKUP, &peer->sts)) {
--			perf_cmd_exec(peer, PERF_CMD_SSIZE);
-+		    !test_and_set_bit(NT_STS_LNKUP, &peer->sts)) {
-+			perf_cmd_exec(peer, NT_CMD_SSIZE);
- 		} else if (!lnk_up &&
--			   test_and_clear_bit(PERF_STS_LNKUP, &peer->sts)) {
--			perf_cmd_exec(peer, PERF_CMD_CLEAR);
-+			   test_and_clear_bit(NT_STS_LNKUP, &peer->sts)) {
-+			perf_cmd_exec(peer, NT_CMD_CLEAR);
- 		}
- 	}
- }
-@@ -548,7 +344,7 @@ static int perf_setup_outbuf(struct perf_peer *peer)
- 	}
- 
- 	/* Initialization is finally done */
--	set_bit(PERF_STS_DONE, &peer->sts);
-+	set_bit(NT_STS_DONE, &peer->sts);
- 
- 	return 0;
- }
-@@ -612,7 +408,7 @@ static int perf_setup_inbuf(struct perf_peer *peer)
- 	 * the code architecture, even though this method is called from service
- 	 * work itself so the command will be executed right after it returns.
- 	 */
--	(void)perf_cmd_exec(peer, PERF_CMD_SXLAT);
-+	(void)perf_cmd_exec(peer, NT_CMD_SXLAT);
- 
- 	return 0;
- 
-@@ -626,20 +422,21 @@ static void perf_service_work(struct work_struct *work)
- {
- 	struct perf_peer *peer = to_peer_service(work);
- 
--	if (test_and_clear_bit(PERF_CMD_SSIZE, &peer->sts))
--		perf_cmd_send(peer, PERF_CMD_SSIZE, peer->outbuf_size);
-+	if (test_and_clear_bit(NT_CMD_SSIZE, &peer->sts))
-+		perf_cmd_send(peer, NT_CMD_SSIZE, peer->gidx,
-+			peer->outbuf_size);
- 
--	if (test_and_clear_bit(PERF_CMD_RSIZE, &peer->sts))
-+	if (test_and_clear_bit(NT_CMD_RSIZE, &peer->sts))
- 		perf_setup_inbuf(peer);
- 
--	if (test_and_clear_bit(PERF_CMD_SXLAT, &peer->sts))
--		perf_cmd_send(peer, PERF_CMD_SXLAT, peer->inbuf_xlat);
-+	if (test_and_clear_bit(NT_CMD_SXLAT, &peer->sts))
-+		perf_cmd_send(peer, NT_CMD_SXLAT, peer->gidx, peer->inbuf_xlat);
- 
--	if (test_and_clear_bit(PERF_CMD_RXLAT, &peer->sts))
-+	if (test_and_clear_bit(NT_CMD_RXLAT, &peer->sts))
- 		perf_setup_outbuf(peer);
- 
--	if (test_and_clear_bit(PERF_CMD_CLEAR, &peer->sts)) {
--		clear_bit(PERF_STS_DONE, &peer->sts);
-+	if (test_and_clear_bit(NT_CMD_CLEAR, &peer->sts)) {
-+		clear_bit(NT_STS_DONE, &peer->sts);
- 		if (test_bit(0, &peer->perf->busy_flag) &&
- 		    peer == peer->perf->test_peer) {
- 			dev_warn(&peer->perf->ntb->dev,
-@@ -651,44 +448,6 @@ static void perf_service_work(struct work_struct *work)
- 	}
- }
- 
--static int perf_init_service(struct perf_ctx *perf)
--{
--	u64 mask;
--
--	if (ntb_peer_mw_count(perf->ntb) < perf->pcnt + 1) {
--		dev_err(&perf->ntb->dev, "Not enough memory windows\n");
--		return -EINVAL;
--	}
--
--	if (ntb_msg_count(perf->ntb) >= PERF_MSG_CNT) {
--		perf->cmd_send = perf_msg_cmd_send;
--		perf->cmd_recv = perf_msg_cmd_recv;
--
--		dev_dbg(&perf->ntb->dev, "Message service initialized\n");
--
--		return 0;
--	}
--
--	dev_dbg(&perf->ntb->dev, "Message service unsupported\n");
--
--	mask = GENMASK_ULL(perf->pcnt, 0);
--	if (ntb_spad_count(perf->ntb) >= PERF_SPAD_CNT(perf->pcnt) &&
--	    (ntb_db_valid_mask(perf->ntb) & mask) == mask) {
--		perf->cmd_send = perf_spad_cmd_send;
--		perf->cmd_recv = perf_spad_cmd_recv;
--
--		dev_dbg(&perf->ntb->dev, "Scratchpad service initialized\n");
--
--		return 0;
--	}
--
--	dev_dbg(&perf->ntb->dev, "Scratchpad service unsupported\n");
--
--	dev_err(&perf->ntb->dev, "Command services unsupported\n");
--
--	return -EINVAL;
--}
--
- static int perf_enable_service(struct perf_ctx *perf)
- {
- 	u64 mask, incmd_bit;
-@@ -701,26 +460,7 @@ static int perf_enable_service(struct perf_ctx *perf)
- 	if (ret)
- 		return ret;
- 
--	if (perf->cmd_send == perf_msg_cmd_send) {
--		u64 inbits, outbits;
--
--		inbits = ntb_msg_inbits(perf->ntb);
--		outbits = ntb_msg_outbits(perf->ntb);
--		(void)ntb_msg_set_mask(perf->ntb, inbits | outbits);
--
--		incmd_bit = BIT_ULL(__ffs64(inbits));
--		ret = ntb_msg_clear_mask(perf->ntb, incmd_bit);
--
--		dev_dbg(&perf->ntb->dev, "MSG sts unmasked %#llx\n", incmd_bit);
--	} else {
--		scnt = ntb_spad_count(perf->ntb);
--		for (sidx = 0; sidx < scnt; sidx++)
--			ntb_spad_write(perf->ntb, sidx, PERF_CMD_INVAL);
--		incmd_bit = PERF_SPAD_NOTIFY(perf->gidx);
--		ret = ntb_db_clear_mask(perf->ntb, incmd_bit);
--
--		dev_dbg(&perf->ntb->dev, "DB bits unmasked %#llx\n", incmd_bit);
--	}
-+	ret = nt_enable_messaging(perf->ntb, perf->gidx);
- 	if (ret) {
- 		ntb_clear_ctx(perf->ntb);
- 		return ret;
-@@ -739,19 +479,12 @@ static void perf_disable_service(struct perf_ctx *perf)
- 
- 	ntb_link_disable(perf->ntb);
- 
--	if (perf->cmd_send == perf_msg_cmd_send) {
--		u64 inbits;
--
--		inbits = ntb_msg_inbits(perf->ntb);
--		(void)ntb_msg_set_mask(perf->ntb, inbits);
--	} else {
--		(void)ntb_db_set_mask(perf->ntb, PERF_SPAD_NOTIFY(perf->gidx));
--	}
-+	nt_disable_messaging(perf->ntb, perf->gidx);
- 
- 	ntb_clear_ctx(perf->ntb);
- 
- 	for (pidx = 0; pidx < perf->pcnt; pidx++)
--		perf_cmd_exec(&perf->peers[pidx], PERF_CMD_CLEAR);
-+		perf_cmd_exec(&perf->peers[pidx], NT_CMD_CLEAR);
- 
- 	for (pidx = 0; pidx < perf->pcnt; pidx++)
- 		flush_work(&perf->peers[pidx].service);
-@@ -1046,7 +779,7 @@ static int perf_submit_test(struct perf_peer *peer)
- 	struct perf_thread *pthr;
- 	int tidx, ret;
- 
--	if (!test_bit(PERF_STS_DONE, &peer->sts))
-+	if (!test_bit(NT_STS_DONE, &peer->sts))
- 		return -ENOLINK;
- 
- 	if (test_and_set_bit_lock(0, &perf->busy_flag))
-@@ -1184,7 +917,7 @@ static ssize_t perf_dbgfs_read_info(struct file *filep, char __user *ubuf,
- 
- 		pos += scnprintf(buf + pos, buf_size - pos,
- 			"\tLink status: %s\n",
--			test_bit(PERF_STS_LNKUP, &peer->sts) ? "up" : "down");
-+			test_bit(NT_STS_LNKUP, &peer->sts) ? "up" : "down");
- 
- 		pos += scnprintf(buf + pos, buf_size - pos,
- 			"\tOut buffer addr 0x%pK\n", peer->outbuf);
-@@ -1443,7 +1176,7 @@ static int perf_probe(struct ntb_client *client, struct ntb_dev *ntb)
- 
- 	perf_init_threads(perf);
- 
--	ret = perf_init_service(perf);
-+	ret = nt_init_messaging(ntb, &perf->handle);
- 	if (ret)
- 		return ret;
- 
--- 
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project
+spad_write is like iowrite32, so writes are ordered without extra mmiowb.
 
+> +               ntb_peer_spad_write(ntb, pidx,
+> +                                   NT_SPAD_CMD(gidx),
+> +                                   cmd);
+> +               mmiowb();
+> +               ntb_peer_db_set(ntb, NT_SPAD_NOTIFY(cmd_gidx));
+> +
+> +               dev_dbg(&ntb->dev, "DB ring peer %#llx\n",
+> +                       NT_SPAD_NOTIFY(cmd_gidx));
+> +
+> +               break;
+> +       }
+> +
+> +       return try < MSG_TRIES ? 0 : -EAGAIN;
+> +}
 
+These functions are complex to keep in the header file.
 
-On 04/11/2018 04:24 PM, Allen Hubbe wrote:
-> 00us = 1s is a long delay for a caller that might not have the
-> luxury of being able to wait.
+> +
+> +/**
+> + * nt_spad_cmd_recv() - Receive the messages using spad register.
+> + * @ntb:       NTB device context.
+> + * @pidx:      Port index of peer device a message being receive
+> + * @cmd:       NTB command
+> + * @cmd_wid:   Gloable device Index
+> + * @data:      Received data
+> + *
+> + * Clear bits in the peer doorbell register, arming the bits for the next
+> + * doorbell.
+> + *
+> + * We start scanning all over, since cleared DB may have been set
+> + * by any peer. Yes, it makes peer with smaller index being
+> + * serviced with greater priority, but it's convenient for spad
+> + * and message code unification and simplicity.
+> + *
+> + * Return: Zero on success, otherwise an error number.
+> + */
+> +static int nt_spad_cmd_recv(struct ntb_dev *ntb, int *pidx,
+> +                       enum nt_cmd *cmd, int *cmd_wid, u64 *data)
+> +{
+> +       u32 val;
+> +       int gidx = 0;
+> +       int key = ntb_port_number(ntb);
+> +
+> +       ntb_db_clear(ntb, NT_SPAD_NOTIFY(key));
+> +
+> +       for (*pidx = 0; *pidx < ntb_peer_port_count(ntb); (*pidx)++, gidx++) {
 
--- 
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-Linux Foundation Collaborative Project
+There could be fairness issues with lower pidx always checked before
+higher pidx.  A chatty low-numbered peer could starve a higher
+numbered peer.
+
+> +               if ((*pidx) == key)
+> +                       ++gidx;
+> +
+> +               if (ntb_link_is_up(ntb, NULL, NULL) != 1)
+> +                       continue;
+
+if (!ntb_link_is_up())
+
+> +
+> +               val = ntb_spad_read(ntb, NT_SPAD_CMD(gidx));
+> +               if (val == NT_CMD_INVAL)
+> +                       continue;
+> +
+> +               *cmd = val;
+> +
+> +               val = ntb_spad_read(ntb, NT_SPAD_LDATA(gidx));
+> +               *data = val;
+> +
+> +               val = ntb_spad_read(ntb, NT_SPAD_HDATA(gidx));
+> +               *data |= (u64)val << 32;
+> +
+> +               /* Next command can be retrieved from now */
+> +               ntb_spad_write(ntb, NT_SPAD_CMD(gidx),
+> +                       NT_CMD_INVAL);
+> +
+> +               dev_dbg(&ntb->dev, "CMD recv: %d 0x%llx\n", *cmd, *data);
+
+vdbg, or not at all, leave it to the caller.
+
+> +
+> +               return 0;
+> +       }
+> +
+> +       return -ENODATA;
+> +}
+> +
+> +/**
+> + * nt_msg_cmd_send() - send messages to peer using message register.
+> + * @ntb:       NTB device context.
+> + * @pidx:      Port index of peer device.
+> + * @cmd:       ntb commands.
+> + * @cmd_gidx:  Memory window index.
+> + * @data:      message data.
+> + *
+> + * Perform predefined number of attempts before give up. Message
+> + * registers are free of race-condition problem when accessed
+> + * from different ports, so we don't need splitting registers
+> + * by global device index. We also won't have local locking,
+> + * since the method is used from service work only.
+> + *
+> + * Return: Zero on success, otherwise an error number.
+> + */
+> +static int nt_msg_cmd_send(struct ntb_dev *nt, int pidx, enum nt_cmd cmd,
+> +int cmd_wid, u64 data)
+> +{
+> +       int try, ret;
+> +       u64 outbits;
+> +
+> +       dev_dbg(&nt->dev, "CMD send: %d 0x%llx\n", cmd, data);
+> +
+> +       outbits = ntb_msg_outbits(nt);
+> +       for (try = 0; try < MSG_TRIES; try++) {
+
+Same comment about retry and usleep.
+
+> +               if (ntb_link_is_up(nt, NULL, NULL) == 0)
+> +                       return -ENOLINK;
+> +
+> +               ret = ntb_msg_clear_sts(nt, outbits);
+> +               if (ret)
+> +                       return ret;
+> +
+> +               ntb_peer_msg_write(nt, pidx, NT_MSG_LDATA,
+> +                       cpu_to_le32(lower_32_bits(data)));
+> +
+
+That looks like a race.  Anything stopping two threads from racing,
+both clearing sts, and then both writing/overwriting the same msg
+register?
+
+> +               if (ntb_msg_read_sts(nt) & outbits) {
+
+And what if the other thread, racing, clears outbits just prior to the read_sts?
+
+Should it be something like:
+
+spin_lock
+if (read_sts & outbits)
+        unlock and try again;
+msg_write first message
+spin_unlock
+
+msg_write rest of
+msg_write message
+
+> +                       usleep_range(MSG_UDELAY_LOW, MSG_UDELAY_HIGH);
+> +                       continue;
+> +               }
+> +
+> +               ntb_peer_msg_write(nt, pidx, NT_MSG_HDATA,
+> +                       cpu_to_le32(upper_32_bits(data)));
+> +               mmiowb();
+
+msg_write should also be like iowrite imo, and not require extra mmiowb.
+
+> +
+> +               ntb_peer_msg_write(nt, pidx, NT_MSG_CMD_WID,
+> +                       cpu_to_le32(cmd_wid));
+> +
+> +               /* This call shall trigger peer message event */
+> +               ntb_peer_msg_write(nt, pidx, NT_MSG_CMD,
+> +                       cpu_to_le32(cmd));
+> +
+> +               break;
+> +       }
+> +
+> +       return try < MSG_TRIES ? 0 : -EAGAIN;
+> +}
+> +
+> +/**
+> + * nt_msg_cmd_recv() - Receive the messages using message register.
+> + * @ntb:       NTB device context.
+> + * @pidx:      Port index of peer device a message being receive
+> + * @cmd:       NT command
+> + * @cmd_wid:   Memory window Index
+> + * @data:      Received data
+> + *
+> + * Get memory window index and data.
+> + *
+> + * Return: Zero on success, otherwise an error number.
+> + */
+> +static int nt_msg_cmd_recv(struct ntb_dev *nt, int *pidx,
+> +                       enum nt_cmd *cmd, int *cmd_wid, u64 *data)
+> +{
+> +       u64 inbits;
+> +       u32 val;
+> +
+> +       inbits = ntb_msg_inbits(nt);
+> +
+> +       if (hweight64(ntb_msg_read_sts(nt) & inbits) < 4)
+> +               return -ENODATA;
+> +
+> +       val = ntb_msg_read(nt, pidx, NT_MSG_CMD);
+> +       *cmd = le32_to_cpu(val);
+> +
+> +       val = ntb_msg_read(nt, pidx, NT_MSG_CMD_WID);
+> +       *cmd_wid = le32_to_cpu(val);
+> +
+> +       val = ntb_msg_read(nt, pidx, NT_MSG_LDATA);
+> +       *data = le32_to_cpu(val);
+> +
+> +       val = ntb_msg_read(nt, pidx, NT_MSG_HDATA);
+> +       *data |= (u64)le32_to_cpu(val) << 32;
+> +
+> +       /* Next command can be retrieved from now */
+> +       ntb_msg_clear_sts(nt, inbits);
+> +
+> +       dev_dbg(&nt->dev, "CMD recv: %d 0x%llx\n", *cmd, *data);
+> +
+> +       return 0;
+> +}
+> +
+> +/**
+> + * nt_enable_messaging() - Enable messaging support.
+> + * @ntb:       NTB device context.
+> + * @gitx:      Global device Index.
+> + *
+> + * Check which messaging support to enable
+> + *
+> + * Return: Zero on success, otherwise an error number.
+> + */
+> +static int nt_enable_messaging(struct ntb_dev *ndev, int gidx)
+> +{
+> +       u64 mask, incmd_bit;
+> +       int ret, sidx, scnt;
+> +
+> +       mask = ntb_db_valid_mask(ndev);
+> +       (void)ntb_db_set_mask(ndev, mask);
+> +
+> +       if (ntb_msg_count(ndev) >= NT_MSG_CNT) {
+> +               u64 inbits, outbits;
+> +
+> +               inbits = ntb_msg_inbits(ndev);
+> +               outbits = ntb_msg_outbits(ndev);
+> +               (void)ntb_msg_set_mask(ndev, inbits | outbits);
+> +
+> +               incmd_bit = BIT_ULL(__ffs64(inbits));
+> +               ret = ntb_msg_clear_mask(ndev, incmd_bit);
+> +
+> +               dev_dbg(&ndev->dev, "MSG sts unmasked %#llx\n", incmd_bit);
+> +       } else {
+> +               scnt = ntb_spad_count(ndev);
+> +               for (sidx = 0; sidx < scnt; sidx++)
+> +                       ntb_spad_write(ndev, sidx, NT_CMD_INVAL);
+> +               incmd_bit = NT_SPAD_NOTIFY(gidx);
+> +               ret = ntb_db_clear_mask(ndev, incmd_bit);
+> +
+> +               dev_dbg(&ndev->dev, "DB bits unmasked %#llx\n", incmd_bit);
+> +       }
+> +       if (ret)
+> +               return ret;
+> +
+> +       return 0;
+
+just return ret;
+
+> +}
+> +
+> +/**
+> + * nt_disable_messaging() - Disable messaging support.
+> + * @ntb:       NTB device context.
+> + * @gidx:      Global device Index
+> + *
+> + * Check message type(spad/message) and disable messaging support.
+> + *
+> + */
+> +static void nt_disable_messaging(struct ntb_dev *ndev, int gidx)
+> +{
+> +       if (ntb_msg_count(ndev) >= NT_MSG_CNT) {
+> +               u64 inbits;
+> +
+> +               inbits = ntb_msg_inbits(ndev);
+> +               (void)ntb_msg_set_mask(ndev, inbits);
+> +       } else {
+> +               (void)ntb_db_set_mask(ndev, NT_SPAD_NOTIFY(gidx));
+> +       }
+> +
+> +}
+> +
+> +/**
+> + * nt_init_messaging() - Enable Messaging
+> + * @ntb:       NTB device context.
+> + * @msg_ptr:   Handle to function pointers Scratchpad or Message.
+> + *
+> + *
+> + * Enable Scratchpad/Message IO operations.
+> + *
+> + * Return: Zero on success, otherwise an error number.
+> + */
+> +static int nt_init_messaging(struct ntb_dev *ndev, struct msg_type *msg_ptr)
+> +{
+> +       u64 mask;
+> +       int pcnt = ntb_peer_port_count(ndev);
+> +
+> +       if (ntb_peer_mw_count(ndev) < (pcnt + 1)) {
+> +               dev_err(&ndev->dev, "Not enough memory windows\n");
+> +               return -EINVAL;
+> +       }
+> +
+> +       if (ntb_msg_count(ndev) >= NT_MSG_CNT) {
+> +               msg_ptr->cmd_send = nt_msg_cmd_send;
+> +               msg_ptr->cmd_recv = nt_msg_cmd_recv;
+> +
+> +               dev_dbg(&ndev->dev, "Message service initialized\n");
+> +
+> +               return 0;
+> +       }
+> +
+> +       dev_dbg(&ndev->dev, "Message service unsupported\n");
+> +
+> +       mask = GENMASK_ULL(pcnt, 0);
+> +       if (ntb_spad_count(ndev) >= NT_SPAD_CNT(pcnt) &&
+> +           (ntb_db_valid_mask(ndev) & mask) == mask) {
+> +               msg_ptr->cmd_send = nt_spad_cmd_send;
+> +               msg_ptr->cmd_recv = nt_spad_cmd_recv;
+> +
+> +               dev_dbg(&ndev->dev, "Scratchpad service initialized\n");
+> +
+> +               return 0;
+> +       }
+> +       dev_dbg(&ndev->dev, "Scratchpad service initialized\n");
+
+This dev_dbg looks misplaced.  In general the dev_dbgs seem overkill,
+because caller should handle the return value.
+
+> +
+> +       dev_err(&ndev->dev, "Command services unsupported\n");
+> +
+> +       return NULL;
+
+This probably warns about NULL is not an integer.  Ignoring the
+warning, NULL == zero, which means this actually returns success.
+
+> +}
+> +
+>  #endif
+> --
+> The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
+> a Linux Foundation Collaborative Project
+>
