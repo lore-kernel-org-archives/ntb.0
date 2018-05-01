@@ -1,47 +1,66 @@
-Return-Path: <wsa+renesas@sang-engineering.com>
-Received: from pokefinder.org (sauhun.de. [88.99.104.3])
-        by gmr-mx.google.com with ESMTP id i18-v6si425586wrh.0.2018.05.06.04.24.07
-        for <linux-ntb@googlegroups.com>;
-        Sun, 06 May 2018 04:24:07 -0700 (PDT)
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH 0/9] tree-wide: fix typo 'can by' to 'can be'
-Date: Sun,  6 May 2018 13:23:44 +0200
-Message-Id: <20180506112404.24872-1-wsa+renesas@sang-engineering.com>
-To: trivial@kernel.org
-Cc: linux-renesas-soc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, devicetree@vger.kernel.org, linux-hwmon@vger.kernel.org, linux-i2c@vger.kernel.org, linux-input@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linuxppc-dev@lists.ozlabs.org, netdev@vger.kernel.org, reiserfs-devel@vger.kernel.org
+Date: Tue, 1 May 2018 06:07:48 -0700 (PDT)
+From: Boris Glimcher <glimchb@gmail.com>
+Message-Id: <9d068d57-9f92-439e-b102-05d08faa9c0b@googlegroups.com>
+In-Reply-To: <86e878a1-f5b1-4f90-ab0f-3d33cccac0fb@googlegroups.com>
+References: <86e878a1-f5b1-4f90-ab0f-3d33cccac0fb@googlegroups.com>
+Subject: Re: ntb user space driver
+MIME-Version: 1.0
+Content-Type: multipart/mixed; 
+	boundary="----=_Part_24523_959519475.1525180069042"
+To: linux-ntb <linux-ntb@googlegroups.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-I found this kind of typo when reading the documentation for device_remove().
-So, I checked the tree for it.
+------=_Part_24523_959519475.1525180069042
+Content-Type: multipart/alternative; 
+	boundary="----=_Part_24524_2099004733.1525180069042"
 
-CCing all the subsystems directly, and I'd think the leftover ones could be
-picked up by the trivial tree. Or would it be more convenient if trivial would
-pick up all? I don't mind.
+------=_Part_24524_2099004733.1525180069042
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-Based on v4.17-rc3.
+Hi,
 
-Wolfram Sang (9):
-  dt-bindings: i2c: fix typo 'can by' to 'can be'
-  powerpc/watchdog: fix typo 'can by' to 'can be'
-  base: core: fix typo 'can by' to 'can be'
-  hwmon: fschmd: fix typo 'can by' to 'can be'
-  input: ati_remote2: fix typo 'can by' to 'can be'
-  NTB: ntb_hw_idt: fix typo 'can by' to 'can be'
-  reiserfs: journal: fix typo 'can by' to 'can be'
-  net: flow_dissector: fix typo 'can by' to 'can be'
-  objtool: fix typo 'can by' to 'can be'
+Did you end up developing it? I'm also interested in using user-space ntb 
+driver.
 
- Documentation/devicetree/bindings/i2c/i2c-davinci.txt | 2 +-
- arch/powerpc/kernel/watchdog.c                        | 2 +-
- drivers/base/core.c                                   | 2 +-
- drivers/hwmon/fschmd.c                                | 2 +-
- drivers/input/misc/ati_remote2.c                      | 2 +-
- drivers/ntb/hw/idt/ntb_hw_idt.c                       | 2 +-
- fs/reiserfs/journal.c                                 | 2 +-
- include/net/flow_dissector.h                          | 2 +-
- tools/objtool/Documentation/stack-validation.txt      | 2 +-
- 9 files changed, 9 insertions(+), 9 deletions(-)
+Thanks, 
+Boris
 
--- 
-2.11.0
+On Saturday, December 16, 2017 at 6:05:33 AM UTC+2, Frank Huang wrote:
+>
+> Hi, all
+>
+> I plan to develop a user space ntb driver. I choose the uio_pci_generic 
+> driver framework. Now I have some questions
+>
+> 1. Does the ntb driver compact with uio_pci_generic?
+>
+> 2. Does the ntb configurations  aslo place on BAR0 ?
+>
+> 3. When do the unbind from kernel and rebind to UIO, do I need to do the 
+> probe initialization for specific hardware on the userspace?
+>
+> Thank,
+> Frank
+>
 
+------=_Part_24524_2099004733.1525180069042
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">Hi,<div><br></div><div>Did you end up developing it? I&#39=
+;m also interested in using user-space ntb driver.</div><div><br></div><div=
+>Thanks,=C2=A0</div><div>Boris<br><br>On Saturday, December 16, 2017 at 6:0=
+5:33 AM UTC+2, Frank Huang wrote:<blockquote class=3D"gmail_quote" style=3D=
+"margin: 0;margin-left: 0.8ex;border-left: 1px #ccc solid;padding-left: 1ex=
+;"><div dir=3D"ltr">Hi, all<div><br></div><div>I plan to develop a user spa=
+ce ntb driver. I choose the uio_pci_generic driver framework. Now I have so=
+me questions</div><div><br></div><div>1. Does the ntb driver compact with u=
+io_pci_generic?</div><div><br></div><div>2. Does the ntb configurations=C2=
+=A0 aslo place on BAR0 ?</div><div><br></div><div>3. When do the unbind fro=
+m kernel and rebind to UIO, do I need to do the probe initialization for sp=
+ecific hardware on the userspace?</div><div><br></div><div>Thank,</div><div=
+>Frank</div></div></blockquote></div></div>
+------=_Part_24524_2099004733.1525180069042--
+
+------=_Part_24523_959519475.1525180069042--
