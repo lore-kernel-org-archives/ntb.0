@@ -1,281 +1,237 @@
 Return-Path: <araut@codeaurora.org>
 Received: from smtp.codeaurora.org (smtp.codeaurora.org. [198.145.29.96])
-        by gmr-mx.google.com with ESMTPS id s193-v6si1474456oih.4.2018.05.04.19.48.31
+        by gmr-mx.google.com with ESMTPS id d13-v6si911835iop.2.2018.05.04.19.42.49
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 04 May 2018 19:48:31 -0700 (PDT)
-Subject: [PATCH 2/4] NTB : Add message library NTB API
+        Fri, 04 May 2018 19:42:49 -0700 (PDT)
+Subject: Re: [PATCH 1/4] NTB : Introduce message library
 References: <20180410004822.GA6040@codeaurora.org>
  <CAJ80sauVAeFLfMMQxqnCThUZnYJ1A7Kvy=UogPMe_kWCu_Dw9w@mail.gmail.com>
  <c4d81c97-71f3-a832-2b6b-52c84b9854ac@codeaurora.org>
  <3dbf0543-8a0c-5493-54d3-116514a55a1b@intel.com>
 From: Atul Raut <araut@codeaurora.org>
-Message-ID: <9e5b999d-c98a-14ea-28ab-478bfd225ea9@codeaurora.org>
-Date: Fri, 4 May 2018 19:48:29 -0700
+Message-ID: <7815b9ce-a445-bf49-dd3c-c84c6879ed1d@codeaurora.org>
+Date: Fri, 4 May 2018 19:42:46 -0700
 MIME-Version: 1.0
 In-Reply-To: <3dbf0543-8a0c-5493-54d3-116514a55a1b@intel.com>
 Content-Type: text/plain; charset=windows-1252
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
 To: Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>
-Cc: linux-ntb@googlegroups.com, jdmason@kudzu.us, fancer.lancer@gmail.com, fancer.lancer@gmail.com, Jon Mason <jdmason@kudzu.us>, atulraut17@gmail.com, rauji.raut@gmail.com
+Cc: "linux-ntb@googlegroups.com; fancer.lancer@gmail.com;jdmason"@kudzu.us, fancer.lancer@gmail.com, Jon Mason <jdmason@kudzu.us>, atulraut17@gmail.com, rauji.raut@gmail.com
 List-ID: <linux-ntb.googlegroups.com>
 
 Hi all,
 
-This second patch out of four patches.
-This patch has function definition for NTB api library
-based on scratchpad and message registers.
-
+Have split up the patches & sharing again for review.
+This is first patch out of four patches.
+This is header file patch where function prototypes defined.
+ 
 Regards,
-Atul
+Atul    
 
-From 57bb5656479770b83fdfebd731fa161bd0903dab Mon Sep 17 00:00:00 2001
+From 4bbcffda753806afd7da021ed6a0c52f058a9c7c Mon Sep 17 00:00:00 2001
 From: Atul Raut <araut@codeaurora.org>
-Date: Fri, 4 May 2018 19:26:18 -0700
-Subject: [PATCH 2/4] NTB :  Add message library NTB API
+Date: Fri, 4 May 2018 19:12:53 -0700
+Subject: [PATCH 1/4] NTB : Introduce message library
 
-This patch brings in function definations for
-the NTB library API.
+Library created by refactoring common code from
+ntb_perf module so that all client can make use
+of it.
+The library is based on scratchpad and message registers
+based apis.
 
 Signed-off-by: Atul Raut <araut@codeaurora.org>
 ---
- drivers/ntb/ntb.c | 222 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 222 insertions(+)
+ include/linux/ntb.h | 163 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 163 insertions(+)
 
-diff --git a/drivers/ntb/ntb.c b/drivers/ntb/ntb.c
-index 2581ab7..c025e03 100644
---- a/drivers/ntb/ntb.c
-+++ b/drivers/ntb/ntb.c
-@@ -258,6 +258,228 @@ int ntb_default_peer_port_idx(struct ntb_dev *ntb, int port)
- }
- EXPORT_SYMBOL(ntb_default_peer_port_idx);
+diff --git a/include/linux/ntb.h b/include/linux/ntb.h
+index 181d166..19fe973 100644
+--- a/include/linux/ntb.h
++++ b/include/linux/ntb.h
+@@ -58,6 +58,8 @@
  
+ #include <linux/completion.h>
+ #include <linux/device.h>
++#include <linux/delay.h>
++#include <linux/io.h>
+ 
+ struct ntb_client;
+ struct ntb_dev;
+@@ -163,6 +165,56 @@ enum ntb_default_port {
+ #define NTB_DEF_PEER_CNT	(1)
+ #define NTB_DEF_PEER_IDX	(0)
+ 
++enum nt_cmd {
++	NT_CMD_INVAL = -1,/* invalid spad command */
++	NT_CMD_SSIZE = 0, /* send out buffer size */
++	NT_CMD_RSIZE = 1, /* recv in  buffer size */
++	NT_CMD_SXLAT = 2, /* send in  buffer xlat */
++	NT_CMD_RXLAT = 3, /* recv out buffer xlat */
++	NT_CMD_CLEAR = 4, /* clear allocated memory */
++	NT_STS_DONE  = 5, /* init is done */
++	NT_STS_LNKUP = 6, /* link up state flag */
++	NT_QP_LINKS        = 7, /* available QP link */
++	NT_CMD_NUM_MWS        = 8, /* number of memory windows */
++	NT_CMD_NUM_QPS        = 9, /* number of QP */
++	NT_CMD_NTB_VERSION    = 10, /* ntb version */
++};
++
++struct msg_type {
++/* Scratchpad/Message IO operations */
++	int (*cmd_send)(struct ntb_dev *nt, int pidx, enum nt_cmd cmd,
++			int cmd_wid, u64 data);
++	int (*cmd_recv)(struct ntb_dev *nt, int *pidx, enum nt_cmd *cmd,
++			int *cmd_wid, u64 *data);
++};
++
++#define MSG_TRIES		50
++#define MSG_UDELAY_LOW		1000
++#define MSG_UDELAY_HIGH		2000
++
++/**
++ * Scratchpads-base commands interface
++ */
++#define NT_SPAD_CNT(_pcnt) \
++	(3*((_pcnt) + 1))
++#define NT_SPAD_CMD(_gidx) \
++	(3*(_gidx))
++#define NT_SPAD_LDATA(_gidx) \
++	(3*(_gidx) + 1)
++#define NT_SPAD_HDATA(_gidx) \
++	(3*(_gidx) + 2)
++#define NT_SPAD_NOTIFY(_gidx) \
++	(BIT_ULL(_gidx))
++
++/**
++ * Messages-base commands interface
++ */
++#define NT_MSG_CMD		0
++#define NT_MSG_CMD_WID	        1
++#define NT_MSG_LDATA		2
++#define NT_MSG_HDATA		3
++#define NT_MSG_CNT		4
++
+ /**
+  * struct ntb_client_ops - ntb client operations
+  * @probe:		Notify client of a new device.
+@@ -1502,4 +1554,115 @@ static inline int ntb_peer_msg_write(struct ntb_dev *ntb, int pidx, int midx,
+ 	return ntb->ops->peer_msg_write(ntb, pidx, midx, msg);
+ }
+ 
++/**
++ * nt_spad_cmd_send() - send messages to peer using spad register.
++ * @ntb:	NTB device context.
++ * @pidx:	Port index of peer device.
++ * @cmd:	ntb commands.
++ * @cmd_gidx:	Global device index.
++ * @data:	message data.
++ *
++ * Send data to the port specific scratchpad
++ *
++ * Perform predefined number of attempts before give up.
++ * We are sending the data to the port specific scratchpad, so
++ * to prevent a multi-port access race-condition. Additionally
++ * there is no need in local locking since only thread-safe
++ * service work is using this method.
++ *
++ * Set peer db to inform data is ready.
++ *
++ * Return: Zero on success, otherwise an error number.
++ */
 +int nt_spad_cmd_send(struct ntb_dev *ntb, int pidx, enum nt_cmd cmd,
-+			    int cmd_gidx, u64 data)
-+{
-+	int try;
-+	u32 sts;
-+	int gidx = ntb_port_number(ntb);
++		     int cmd_gidx, u64 data);
 +
-+	for (try = 0; try < MSG_TRIES; try++) {
-+		if (!ntb_link_is_up(ntb, NULL, NULL))
-+			return -ENOLINK;
-+
-+		sts = ntb_peer_spad_read(ntb, pidx,
-+					 NT_SPAD_CMD(gidx));
-+		if (sts != NT_CMD_INVAL) {
-+			usleep_range(MSG_UDELAY_LOW, MSG_UDELAY_HIGH);
-+			continue;
-+		}
-+
-+		ntb_peer_spad_write(ntb, pidx,
-+				    NT_SPAD_LDATA(gidx),
-+				    lower_32_bits(data));
-+		ntb_peer_spad_write(ntb, pidx,
-+				    NT_SPAD_HDATA(gidx),
-+				    upper_32_bits(data));
-+		mmiowb();
-+		ntb_peer_spad_write(ntb, pidx,
-+				    NT_SPAD_CMD(gidx),
-+				    cmd);
-+
-+		ntb_peer_db_set(ntb, NT_SPAD_NOTIFY(cmd_gidx));
-+
-+		break;
-+	}
-+
-+	return try < MSG_TRIES ? 0 : -EAGAIN;
-+}
-+EXPORT_SYMBOL(nt_spad_cmd_send);
-+
++/**
++ * nt_spad_cmd_recv() - Receive the messages using spad register.
++ * @ntb:	NTB device context.
++ * @pidx:	Port index of peer device a message being receive
++ * @cmd:	NTB command
++ * @cmd_wid:	Gloable device Index
++ * @data:	Received data
++ *
++ * Clear bits in the peer doorbell register, arming the bits for the next
++ * doorbell.
++ *
++ * We start scanning all over, since cleared DB may have been set
++ * by any peer. Yes, it makes peer with smaller index being
++ * serviced with greater priority, but it's convenient for spad
++ * and message code unification and simplicity.
++ *
++ * Return: Zero on success, otherwise an error number.
++ */
 +int nt_spad_cmd_recv(struct ntb_dev *ntb, int *pidx,
-+			enum nt_cmd *cmd, int *cmd_wid, u64 *data)
-+{
-+	u32 val;
-+	int gidx = 0;
-+	int key = ntb_port_number(ntb);
++		     enum nt_cmd *cmd, int *cmd_wid, u64 *data);
 +
-+	ntb_db_clear(ntb, NT_SPAD_NOTIFY(key));
-+
-+	for (*pidx = 0; *pidx < ntb_peer_port_count(ntb); (*pidx)++, gidx++) {
-+		if ((*pidx) == key)
-+			++gidx;
-+
-+		if (!ntb_link_is_up(ntb, NULL, NULL))
-+			continue;
-+
-+		val = ntb_spad_read(ntb, NT_SPAD_CMD(gidx));
-+		if (val == NT_CMD_INVAL)
-+			continue;
-+
-+		*cmd = val;
-+
-+		val = ntb_spad_read(ntb, NT_SPAD_LDATA(gidx));
-+		*data = val;
-+
-+		val = ntb_spad_read(ntb, NT_SPAD_HDATA(gidx));
-+		*data |= (u64)val << 32;
-+
-+		/* Next command can be retrieved from now */
-+		ntb_spad_write(ntb, NT_SPAD_CMD(gidx),
-+			NT_CMD_INVAL);
-+
-+		return 0;
-+	}
-+
-+	return -ENODATA;
-+}
-+EXPORT_SYMBOL(nt_spad_cmd_recv);
-+
++/**
++ * nt_msg_cmd_send() - send messages to peer using message register.
++ * @ntb:	NTB device context.
++ * @pidx:	Port index of peer device.
++ * @cmd:	ntb commands.
++ * @cmd_gidx:	Memory window index.
++ * @data:	message data.
++ *
++ * Perform predefined number of attempts before give up. Message
++ * registers are free of race-condition problem when accessed
++ * from different ports, so we don't need splitting registers
++ * by global device index. We also won't have local locking,
++ * since the method is used from service work only.
++ *
++ * Return: Zero on success, otherwise an error number.
++ */
 +int nt_msg_cmd_send(struct ntb_dev *nt, int pidx, enum nt_cmd cmd,
-+int cmd_wid, u64 data)
-+{
-+	int try, ret;
-+	u64 outbits;
++		    int cmd_wid, u64 data);
 +
-+	outbits = ntb_msg_outbits(nt);
-+	for (try = 0; try < MSG_TRIES; try++) {
-+		if (!ntb_link_is_up(nt, NULL, NULL))
-+			return -ENOLINK;
-+
-+		ret = ntb_msg_clear_sts(nt, outbits);
-+		if (ret)
-+			return ret;
-+
-+		ntb_peer_msg_write(nt, pidx, NT_MSG_LDATA,
-+			cpu_to_le32(lower_32_bits(data)));
-+
-+		if (ntb_msg_read_sts(nt) & outbits) {
-+			usleep_range(MSG_UDELAY_LOW, MSG_UDELAY_HIGH);
-+			continue;
-+		}
-+
-+		ntb_peer_msg_write(nt, pidx, NT_MSG_HDATA,
-+			cpu_to_le32(upper_32_bits(data)));
-+		mmiowb();
-+
-+		ntb_peer_msg_write(nt, pidx, NT_MSG_CMD_WID,
-+			cpu_to_le32(cmd_wid));
-+
-+		/* This call shall trigger peer message event */
-+		ntb_peer_msg_write(nt, pidx, NT_MSG_CMD,
-+			cpu_to_le32(cmd));
-+
-+		break;
-+	}
-+
-+	return try < MSG_TRIES ? 0 : -EAGAIN;
-+}
-+EXPORT_SYMBOL(nt_msg_cmd_send);
-+
++/**
++ * nt_msg_cmd_recv() - Receive the messages using message register.
++ * @ntb:	NTB device context.
++ * @pidx:	Port index of peer device a message being receive
++ * @cmd:	NT command
++ * @cmd_wid:	Memory window Index
++ * @data:	Received data
++ *
++ * Get memory window index and data.
++ *
++ * Return: Zero on success, otherwise an error number.
++ */
 +int nt_msg_cmd_recv(struct ntb_dev *nt, int *pidx,
-+			enum nt_cmd *cmd, int *cmd_wid, u64 *data)
-+{
-+	u64 inbits;
-+	u32 val;
++		    enum nt_cmd *cmd, int *cmd_wid, u64 *data);
 +
-+	inbits = ntb_msg_inbits(nt);
++/**
++ * nt_enable_messaging() - Enable messaging support.
++ * @ntb:	NTB device context.
++ * @gitx:	Global device Index.
++ *
++ * Check which messaging support to enable
++ *
++ * Return: Zero on success, otherwise an error number.
++ */
++int nt_enable_messaging(struct ntb_dev *ndev, int gidx);
 +
-+	if (hweight64(ntb_msg_read_sts(nt) & inbits) < 4)
-+		return -ENODATA;
++/**
++ * nt_disable_messaging() - Disable messaging support.
++ * @ntb:	NTB device context.
++ * @gidx:	Global device Index
++ *
++ * Check message type(spad/message) and disable messaging support.
++ *
++ */
++void nt_disable_messaging(struct ntb_dev *ndev, int gidx);
 +
-+	val = ntb_msg_read(nt, pidx, NT_MSG_CMD);
-+	*cmd = le32_to_cpu(val);
++/**
++ * nt_init_messaging() - Enable Messaging
++ * @ntb:	NTB device context.
++ * @msg_ptr:	Handle to function pointers Scratchpad or Message.
++ *
++ *
++ * Enable Scratchpad/Message IO operations.
++ *
++ * Return: Zero on success, otherwise an error number.
++ */
++int nt_init_messaging(struct ntb_dev *ndev, struct msg_type *msg_ptr);
 +
-+	val = ntb_msg_read(nt, pidx, NT_MSG_CMD_WID);
-+	*cmd_wid = le32_to_cpu(val);
-+
-+	val = ntb_msg_read(nt, pidx, NT_MSG_LDATA);
-+	*data = le32_to_cpu(val);
-+
-+	val = ntb_msg_read(nt, pidx, NT_MSG_HDATA);
-+	*data |= (u64)le32_to_cpu(val) << 32;
-+
-+	/* Next command can be retrieved from now */
-+	ntb_msg_clear_sts(nt, inbits);
-+
-+	return 0;
-+}
-+EXPORT_SYMBOL(nt_msg_cmd_recv);
-+
-+int nt_enable_messaging(struct ntb_dev *ndev, int gidx)
-+{
-+	u64 mask, incmd_bit;
-+	int ret, sidx, scnt;
-+
-+	mask = ntb_db_valid_mask(ndev);
-+	(void)ntb_db_set_mask(ndev, mask);
-+
-+	if (ntb_msg_count(ndev) >= NT_MSG_CNT) {
-+		u64 inbits, outbits;
-+
-+		inbits = ntb_msg_inbits(ndev);
-+		outbits = ntb_msg_outbits(ndev);
-+		(void)ntb_msg_set_mask(ndev, inbits | outbits);
-+
-+		incmd_bit = BIT_ULL(__ffs64(inbits));
-+		ret = ntb_msg_clear_mask(ndev, incmd_bit);
-+	} else {
-+		scnt = ntb_spad_count(ndev);
-+		for (sidx = 0; sidx < scnt; sidx++)
-+			ntb_spad_write(ndev, sidx, NT_CMD_INVAL);
-+		incmd_bit = NT_SPAD_NOTIFY(gidx);
-+		ret = ntb_db_clear_mask(ndev, incmd_bit);
-+	}
-+
-+	return ret;
-+}
-+EXPORT_SYMBOL(nt_enable_messaging);
-+
-+void nt_disable_messaging(struct ntb_dev *ndev, int gidx)
-+{
-+	if (ntb_msg_count(ndev) >= NT_MSG_CNT) {
-+		u64 inbits;
-+
-+		inbits = ntb_msg_inbits(ndev);
-+		(void)ntb_msg_set_mask(ndev, inbits);
-+	} else {
-+		(void)ntb_db_set_mask(ndev, NT_SPAD_NOTIFY(gidx));
-+	}
-+
-+}
-+EXPORT_SYMBOL(nt_disable_messaging);
-+
-+int nt_init_messaging(struct ntb_dev *ndev, struct msg_type *msg_ptr)
-+{
-+	u64 mask;
-+	int pcnt = ntb_peer_port_count(ndev);
-+
-+	if (ntb_peer_mw_count(ndev) < (pcnt + 1)) {
-+		dev_err(&ndev->dev, "Not enough memory windows\n");
-+		return -EINVAL;
-+	}
-+
-+	if (ntb_msg_count(ndev) >= NT_MSG_CNT) {
-+		msg_ptr->cmd_send = nt_msg_cmd_send;
-+		msg_ptr->cmd_recv = nt_msg_cmd_recv;
-+
-+		return 0;
-+	}
-+
-+	mask = GENMASK_ULL(pcnt, 0);
-+	if (ntb_spad_count(ndev) >= NT_SPAD_CNT(pcnt) &&
-+	    (ntb_db_valid_mask(ndev) & mask) == mask) {
-+		msg_ptr->cmd_send = nt_spad_cmd_send;
-+		msg_ptr->cmd_recv = nt_spad_cmd_recv;
-+
-+		return 0;
-+	}
-+	dev_err(&ndev->dev, "Command services unsupported\n");
-+
-+	return -EINVAL;
-+}
-+EXPORT_SYMBOL(nt_init_messaging);
-+
- static int ntb_probe(struct device *dev)
- {
- 	struct ntb_dev *ntb;
+ #endif
 -- 
 The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
 a Linux Foundation Collaborative Project
