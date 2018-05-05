@@ -1,35 +1,36 @@
 Return-Path: <araut@codeaurora.org>
 Received: from smtp.codeaurora.org (smtp.codeaurora.org. [198.145.29.96])
-        by gmr-mx.google.com with ESMTPS id r17si166417uak.1.2018.05.04.19.57.21
+        by gmr-mx.google.com with ESMTPS id g48si542730uaa.5.2018.05.04.19.54.16
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 04 May 2018 19:57:21 -0700 (PDT)
+        Fri, 04 May 2018 19:54:17 -0700 (PDT)
 Subject: [PATCH 4/4] NTB : Add support to message registers based devices
 References: <20180410004822.GA6040@codeaurora.org>
  <CAJ80sauVAeFLfMMQxqnCThUZnYJ1A7Kvy=UogPMe_kWCu_Dw9w@mail.gmail.com>
  <c4d81c97-71f3-a832-2b6b-52c84b9854ac@codeaurora.org>
  <3dbf0543-8a0c-5493-54d3-116514a55a1b@intel.com>
 From: Atul Raut <araut@codeaurora.org>
-Message-ID: <9eaa5215-ff9a-90ab-dc0f-eae7e0f2921d@codeaurora.org>
-Date: Fri, 4 May 2018 19:57:18 -0700
+Message-ID: <7062f71e-2e9d-a688-e575-b22e489db3cc@codeaurora.org>
+Date: Fri, 4 May 2018 19:54:13 -0700
 MIME-Version: 1.0
 In-Reply-To: <3dbf0543-8a0c-5493-54d3-116514a55a1b@intel.com>
 Content-Type: text/plain; charset=windows-1252
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
 To: Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>
-Cc: linux-ntb@googlegroups.com, fancer.lancer@gmail.com, Jon Mason <jdmason@kudzu.us>, atulraut17@gmail.com, rauji.raut@gmail.com
+Cc: "linux-ntb@googlegroups.com; fancer.lancer@gmail.com;jdmason"@kudzu.us, fancer.lancer@gmail.com, Jon Mason <jdmason@kudzu.us>, atulraut17@gmail.com, rauji.raut@gmail.com
 List-ID: <linux-ntb.googlegroups.com>
 
-Hi All,
+Hi all,
 
-This is last patch of four series patches.
+This last patch of four series patches.
 This modify ntb_transport layer to add support
-to message register based devices.
-Please ignore other patch.
+for message register based devices.
 
 Regards,
-AtulFrom 9f607fbd2d51ed7c58641a18f7924a03824ca83b Mon Sep 17 00:00:00 2001
+Atul
+
+From 9f607fbd2d51ed7c58641a18f7924a03824ca83b Mon Sep 17 00:00:00 2001
 From: Atul Raut <araut@codeaurora.org>
 Date: Fri, 4 May 2018 19:32:20 -0700
 Subject: [PATCH 4/4] NTB : Add support to message registers based devices
@@ -588,4 +589,5 @@ index 9878c48..b8dcd29 100644
 -- 
 The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
 a Linux Foundation Collaborative Project
+
 
