@@ -1,36 +1,47 @@
 Return-Path: <wsa+renesas@sang-engineering.com>
 Received: from pokefinder.org (sauhun.de. [88.99.104.3])
-        by gmr-mx.google.com with ESMTP id g12-v6si46794wrm.4.2018.05.06.04.24.22
+        by gmr-mx.google.com with ESMTP id i18-v6si425586wrh.0.2018.05.06.04.24.07
         for <linux-ntb@googlegroups.com>;
-        Sun, 06 May 2018 04:24:22 -0700 (PDT)
+        Sun, 06 May 2018 04:24:07 -0700 (PDT)
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH 6/9] NTB: ntb_hw_idt: fix typo 'can by' to 'can be'
-Date: Sun,  6 May 2018 13:23:50 +0200
-Message-Id: <20180506112404.24872-7-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20180506112404.24872-1-wsa+renesas@sang-engineering.com>
-References: <20180506112404.24872-1-wsa+renesas@sang-engineering.com>
+Subject: [PATCH 0/9] tree-wide: fix typo 'can by' to 'can be'
+Date: Sun,  6 May 2018 13:23:44 +0200
+Message-Id: <20180506112404.24872-1-wsa+renesas@sang-engineering.com>
 To: trivial@kernel.org
-Cc: linux-renesas-soc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, Serge Semin <fancer.lancer@gmail.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <Allen.Hubbe@emc.com>, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
+Cc: linux-renesas-soc@vger.kernel.org, Wolfram Sang <wsa+renesas@sang-engineering.com>, devicetree@vger.kernel.org, linux-hwmon@vger.kernel.org, linux-i2c@vger.kernel.org, linux-input@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linuxppc-dev@lists.ozlabs.org, netdev@vger.kernel.org, reiserfs-devel@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
- drivers/ntb/hw/idt/ntb_hw_idt.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+I found this kind of typo when reading the documentation for device_remove().
+So, I checked the tree for it.
 
-diff --git a/drivers/ntb/hw/idt/ntb_hw_idt.c b/drivers/ntb/hw/idt/ntb_hw_idt.c
-index 8d98872d0983b7..dbe72f116017ab 100644
---- a/drivers/ntb/hw/idt/ntb_hw_idt.c
-+++ b/drivers/ntb/hw/idt/ntb_hw_idt.c
-@@ -1401,7 +1401,7 @@ static int idt_ntb_peer_mw_clear_trans(struct ntb_dev *ntb, int pidx,
-  *                          5. Doorbell operations
-  *
-  *    Doorbell functionality of IDT PCIe-switches is pretty unusual. First of
-- * all there is global doorbell register which state can by changed by any
-+ * all there is global doorbell register which state can be changed by any
-  * NT-function of the IDT device in accordance with global permissions. These
-  * permissions configs are not supported by NTB API, so it must be done by
-  * either BIOS or EEPROM settings. In the same way the state of the global
+CCing all the subsystems directly, and I'd think the leftover ones could be
+picked up by the trivial tree. Or would it be more convenient if trivial would
+pick up all? I don't mind.
+
+Based on v4.17-rc3.
+
+Wolfram Sang (9):
+  dt-bindings: i2c: fix typo 'can by' to 'can be'
+  powerpc/watchdog: fix typo 'can by' to 'can be'
+  base: core: fix typo 'can by' to 'can be'
+  hwmon: fschmd: fix typo 'can by' to 'can be'
+  input: ati_remote2: fix typo 'can by' to 'can be'
+  NTB: ntb_hw_idt: fix typo 'can by' to 'can be'
+  reiserfs: journal: fix typo 'can by' to 'can be'
+  net: flow_dissector: fix typo 'can by' to 'can be'
+  objtool: fix typo 'can by' to 'can be'
+
+ Documentation/devicetree/bindings/i2c/i2c-davinci.txt | 2 +-
+ arch/powerpc/kernel/watchdog.c                        | 2 +-
+ drivers/base/core.c                                   | 2 +-
+ drivers/hwmon/fschmd.c                                | 2 +-
+ drivers/input/misc/ati_remote2.c                      | 2 +-
+ drivers/ntb/hw/idt/ntb_hw_idt.c                       | 2 +-
+ fs/reiserfs/journal.c                                 | 2 +-
+ include/net/flow_dissector.h                          | 2 +-
+ tools/objtool/Documentation/stack-validation.txt      | 2 +-
+ 9 files changed, 9 insertions(+), 9 deletions(-)
+
 -- 
 2.11.0
 
