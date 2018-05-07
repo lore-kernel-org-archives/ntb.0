@@ -1,66 +1,80 @@
-Date: Tue, 1 May 2018 06:07:48 -0700 (PDT)
-From: Boris Glimcher <glimchb@gmail.com>
-Message-Id: <9d068d57-9f92-439e-b102-05d08faa9c0b@googlegroups.com>
-In-Reply-To: <86e878a1-f5b1-4f90-ab0f-3d33cccac0fb@googlegroups.com>
-References: <86e878a1-f5b1-4f90-ab0f-3d33cccac0fb@googlegroups.com>
-Subject: Re: ntb user space driver
-MIME-Version: 1.0
-Content-Type: multipart/mixed; 
-	boundary="----=_Part_24523_959519475.1525180069042"
-To: linux-ntb <linux-ntb@googlegroups.com>
+Return-Path: <gunthorp@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id d67si1242437qkh.5.2018.05.07.13.36.11
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Mon, 07 May 2018 13:36:11 -0700 (PDT)
+From: Logan Gunthorpe <logang@deltatee.com>
+Date: Mon,  7 May 2018 14:36:03 -0600
+Message-Id: <20180507203605.15865-6-logang@deltatee.com>
+In-Reply-To: <20180507203605.15865-1-logang@deltatee.com>
+References: <20180507203605.15865-1-logang@deltatee.com>
+Subject: [PATCH v17 5/7] ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
+To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-------=_Part_24523_959519475.1525180069042
-Content-Type: multipart/alternative; 
-	boundary="----=_Part_24524_2099004733.1525180069042"
+Now that ioread64 and iowrite64 are available in io-64-nonatomic,
+we can remove the hack at the top of ntb_hw_intel.c and replace it
+with an include.
 
-------=_Part_24524_2099004733.1525180069042
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
+Acked-by: Dave Jiang <dave.jiang@intel.com>
+Acked-by: Allen Hubbe <Allen.Hubbe@dell.com>
+Acked-by: Jon Mason <jdmason@kudzu.us>
+---
+ drivers/ntb/hw/intel/ntb_hw_intel.c | 30 +-----------------------------
+ 1 file changed, 1 insertion(+), 29 deletions(-)
 
-Hi,
+diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c b/drivers/ntb/hw/intel/ntb_hw_intel.c
+index 156b45cd4a19..5cf40ab21366 100644
+--- a/drivers/ntb/hw/intel/ntb_hw_intel.c
++++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
+@@ -59,6 +59,7 @@
+ #include <linux/random.h>
+ #include <linux/slab.h>
+ #include <linux/ntb.h>
++#include <linux/io-64-nonatomic-lo-hi.h>
+ 
+ #include "ntb_hw_intel.h"
+ 
+@@ -149,35 +150,6 @@ MODULE_PARM_DESC(xeon_b2b_dsd_bar5_addr32,
+ static inline enum ntb_topo xeon_ppd_topo(struct intel_ntb_dev *ndev, u8 ppd);
+ static int xeon_init_isr(struct intel_ntb_dev *ndev);
+ 
+-#ifndef ioread64
+-#ifdef readq
+-#define ioread64 readq
+-#else
+-#define ioread64 _ioread64
+-static inline u64 _ioread64(void __iomem *mmio)
+-{
+-	u64 low, high;
+-
+-	low = ioread32(mmio);
+-	high = ioread32(mmio + sizeof(u32));
+-	return low | (high << 32);
+-}
+-#endif
+-#endif
+-
+-#ifndef iowrite64
+-#ifdef writeq
+-#define iowrite64 writeq
+-#else
+-#define iowrite64 _iowrite64
+-static inline void _iowrite64(u64 val, void __iomem *mmio)
+-{
+-	iowrite32(val, mmio);
+-	iowrite32(val >> 32, mmio + sizeof(u32));
+-}
+-#endif
+-#endif
+-
+ static inline int pdev_is_xeon(struct pci_dev *pdev)
+ {
+ 	switch (pdev->device) {
+-- 
+2.11.0
 
-Did you end up developing it? I'm also interested in using user-space ntb 
-driver.
-
-Thanks, 
-Boris
-
-On Saturday, December 16, 2017 at 6:05:33 AM UTC+2, Frank Huang wrote:
->
-> Hi, all
->
-> I plan to develop a user space ntb driver. I choose the uio_pci_generic 
-> driver framework. Now I have some questions
->
-> 1. Does the ntb driver compact with uio_pci_generic?
->
-> 2. Does the ntb configurations  aslo place on BAR0 ?
->
-> 3. When do the unbind from kernel and rebind to UIO, do I need to do the 
-> probe initialization for specific hardware on the userspace?
->
-> Thank,
-> Frank
->
-
-------=_Part_24524_2099004733.1525180069042
-Content-Type: text/html; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr">Hi,<div><br></div><div>Did you end up developing it? I&#39=
-;m also interested in using user-space ntb driver.</div><div><br></div><div=
->Thanks,=C2=A0</div><div>Boris<br><br>On Saturday, December 16, 2017 at 6:0=
-5:33 AM UTC+2, Frank Huang wrote:<blockquote class=3D"gmail_quote" style=3D=
-"margin: 0;margin-left: 0.8ex;border-left: 1px #ccc solid;padding-left: 1ex=
-;"><div dir=3D"ltr">Hi, all<div><br></div><div>I plan to develop a user spa=
-ce ntb driver. I choose the uio_pci_generic driver framework. Now I have so=
-me questions</div><div><br></div><div>1. Does the ntb driver compact with u=
-io_pci_generic?</div><div><br></div><div>2. Does the ntb configurations=C2=
-=A0 aslo place on BAR0 ?</div><div><br></div><div>3. When do the unbind fro=
-m kernel and rebind to UIO, do I need to do the probe initialization for sp=
-ecific hardware on the userspace?</div><div><br></div><div>Thank,</div><div=
->Frank</div></div></blockquote></div></div>
-------=_Part_24524_2099004733.1525180069042--
-
-------=_Part_24523_959519475.1525180069042--
