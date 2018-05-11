@@ -1,248 +1,154 @@
 Return-Path: <fancer.lancer@gmail.com>
-Received: from mail-lf0-x244.google.com (mail-lf0-x244.google.com. [2a00:1450:4010:c07::244])
-        by gmr-mx.google.com with ESMTPS id x17-v6si51631wmd.0.2018.05.11.15.40.23
+Received: from mail-lf0-x234.google.com (mail-lf0-x234.google.com. [2a00:1450:4010:c07::234])
+        by gmr-mx.google.com with ESMTPS id n12-v6si87187lja.4.2018.05.11.15.39.21
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 11 May 2018 15:40:23 -0700 (PDT)
-Received: by mail-lf0-x244.google.com with SMTP id p85-v6so10012429lfg.7
-        for <linux-ntb@googlegroups.com>; Fri, 11 May 2018 15:40:23 -0700 (PDT)
+        Fri, 11 May 2018 15:39:21 -0700 (PDT)
+Received: by mail-lf0-x234.google.com with SMTP id r25-v6so10025377lfd.1
+        for <linux-ntb@googlegroups.com>; Fri, 11 May 2018 15:39:21 -0700 (PDT)
 Return-Path: <fancer.lancer@gmail.com>
-Date: Sat, 12 May 2018 01:40:27 +0300
+Date: Sat, 12 May 2018 01:39:25 +0300
 From: Serge Semin <fancer.lancer@gmail.com>
-Subject: Re: [PATCH v2 1/4] NTB : Introduce message library
-Message-ID: <20180511224027.GA25768@mobilestation>
+Subject: Re: [PATCH v2 0/4] NTB : Introduce message library
+Message-ID: <20180511223925.GB24717@mobilestation>
 References: <1525634420-19370-1-git-send-email-araut@codeaurora.org>
- <1525634420-19370-2-git-send-email-araut@codeaurora.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1525634420-19370-2-git-send-email-araut@codeaurora.org>
+In-Reply-To: <1525634420-19370-1-git-send-email-araut@codeaurora.org>
 To: Atul Raut <araut@codeaurora.org>
 Cc: linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-On Sun, May 06, 2018 at 12:20:17PM -0700, Atul Raut <araut@codeaurora.org> wrote:
-> Library created by refactoring common code from
-> ntb_perf module so that all client can make use
-> of it.
-> The library is based on scratchpad and message registers
-> based apis.
-> 
+Hello Atul,
+Thanks for the patchset and work you've done in the framework of it.
+We really appreciate this.
 
-See the comment in the cover letter. I suggest to have a separate header file
-for the library interface somewhere like:
-include/linux/ntb_lib_exch.h
+First of all I'll give you a generic review of the whole library design.
+The specific comments will be added within the particular code.
 
-> Signed-off-by: Atul Raut <araut@codeaurora.org>
-> ---
->  include/linux/ntb.h | 163 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 163 insertions(+)
-> 
-> diff --git a/include/linux/ntb.h b/include/linux/ntb.h
-> index 181d166..19fe973 100644
-> --- a/include/linux/ntb.h
-> +++ b/include/linux/ntb.h
-> @@ -58,6 +58,8 @@
->  
->  #include <linux/completion.h>
->  #include <linux/device.h>
-> +#include <linux/delay.h>
-> +#include <linux/io.h>
->  
->  struct ntb_client;
->  struct ntb_dev;
-> @@ -163,6 +165,56 @@ enum ntb_default_port {
->  #define NTB_DEF_PEER_CNT	(1)
->  #define NTB_DEF_PEER_IDX	(0)
->  
-> +enum nt_cmd {
-> +	NT_CMD_INVAL = -1,/* invalid spad command */
-> +	NT_CMD_SSIZE = 0, /* send out buffer size */
-> +	NT_CMD_RSIZE = 1, /* recv in  buffer size */
-> +	NT_CMD_SXLAT = 2, /* send in  buffer xlat */
-> +	NT_CMD_RXLAT = 3, /* recv out buffer xlat */
-> +	NT_CMD_CLEAR = 4, /* clear allocated memory */
-> +	NT_STS_DONE  = 5, /* init is done */
-> +	NT_STS_LNKUP = 6, /* link up state flag */
-> +	NT_QP_LINKS        = 7, /* available QP link */
-> +	NT_CMD_NUM_MWS        = 8, /* number of memory windows */
-> +	NT_CMD_NUM_QPS        = 9, /* number of QP */
-> +	NT_CMD_NTB_VERSION    = 10, /* ntb version */
-> +};
-> +
-> +struct msg_type {
-> +/* Scratchpad/Message IO operations */
-> +	int (*cmd_send)(struct ntb_dev *nt, int pidx, enum nt_cmd cmd,
-> +			int cmd_wid, u64 data);
-> +	int (*cmd_recv)(struct ntb_dev *nt, int *pidx, enum nt_cmd *cmd,
-> +			int *cmd_wid, u64 *data);
-> +};
-> +
-> +#define MSG_TRIES		50
-> +#define MSG_UDELAY_LOW		1000
-> +#define MSG_UDELAY_HIGH		2000
-> +
+As I already told you in the chat, the ntb_perf driver can be used as a basis
+or as a reference for the whole library:
 
->> Allen Hubbe
->> 500 * 2000us = 1s is a long delay for a caller that might not have the
->> luxury of being able to wait.
+>> [2018-03-14 04:54:10] <fancer> rauji: regarding the library. You can find the
+>> reference code in the new ntb_perf driver in the section named service. At least
+>> it is the basic functionality which implements the cross-interface communications.
+>> [2018-03-14 04:58:00] <fancer> Regarding the whole library interface and ntb.h
+>> alterations I'd strongly recommend to discuss the architecture here so to avoid
+>> an excess patchets iterations and make all of us happy about the change)
+>> [2018-03-14 20:34:02] <rauji> hi fancer : yes
+>> [2018-03-14 20:34:10] <rauji> am using ntb_perf as reference and already implemented
+>> it, right now just refactoring the code
+>> [2018-03-14 20:40:11] <rauji> fancer: I am following your suggestions so there wont
+>> be any issues with architectural changes,
 
-Since this is the driver configurable parameter we can make it available
-in the kernel config menu. Allen?
+Definitely I didn't tell you just to copy-and-paste the whole service functions
+from ntb_perf. One of the ntb_perf driver purpose was to create an example of
+possible cross-interface communication code, which turned to be the "service"
+subsystem of the driver. My idea was to have it used as a proof of concept and
+a stably working code for the future cross-iface library. The library is going
+to be a part of the NTB API itself - a part of the generic interface for the
+whole NTB subsystem, so I recommended to have the design discussed first, otherwise
+you'd risk to face review requests which would cause a serious code refactoring.
+As far as I can see, it turned out to be true.
 
-> +/**
-> + * Scratchpads-base commands interface
-> + */
-> +#define NT_SPAD_CNT(_pcnt) \
-> +	(3*((_pcnt) + 1))
-> +#define NT_SPAD_CMD(_gidx) \
-> +	(3*(_gidx))
-> +#define NT_SPAD_LDATA(_gidx) \
-> +	(3*(_gidx) + 1)
-> +#define NT_SPAD_HDATA(_gidx) \
-> +	(3*(_gidx) + 2)
-> +#define NT_SPAD_NOTIFY(_gidx) \
-> +	(BIT_ULL(_gidx))
-> +
-> +/**
-> + * Messages-base commands interface
-> + */
-> +#define NT_MSG_CMD		0
-> +#define NT_MSG_CMD_WID	        1
-> +#define NT_MSG_LDATA		2
-> +#define NT_MSG_HDATA		3
-> +#define NT_MSG_CNT		4
-> +
+The whole idea of the cross-iface library was to encapsulate the
+scratchpad/message registers interface, so to have a generic way of data
+exchange between NTB peers before NTB link is actually initialized and up for
+MW usage. The main purpose, of course, was to send/receive memory-window
+information across, but in general the hardware doesn't prevent it from
+sending any type of data. A lot of scenario come to my mind, when the random
+data exchange can be utilized before actual MW initialization. For instance
+imagine if you first needed to identify a peer (by using an rsa-key or
+something else) before you'd sent a pure memory region base address.
 
-These macro are specific to the client drivers, particularly to the
-ntb_perf driver, so they need to stay there and being used on top
-of the Cross-Interface library.
+Even though this more like a "philosophic" part, but this time Logan's opinion
+happens to agree with the design we discussed a while ago with the rest of the
+NTB maintainers:
 
->  /**
->   * struct ntb_client_ops - ntb client operations
->   * @probe:		Notify client of a new device.
-> @@ -1502,4 +1554,115 @@ static inline int ntb_peer_msg_write(struct ntb_dev *ntb, int pidx, int midx,
->  	return ntb->ops->peer_msg_write(ntb, pidx, midx, msg);
->  }
->  
-> +/**
-> + * nt_spad_cmd_send() - send messages to peer using spad register.
-> + * @ntb:	NTB device context.
-> + * @pidx:	Port index of peer device.
-> + * @cmd:	ntb commands.
-> + * @cmd_gidx:	Global device index.
-> + * @data:	message data.
-> + *
-> + * Send data to the port specific scratchpad
-> + *
-> + * Perform predefined number of attempts before give up.
-> + * We are sending the data to the port specific scratchpad, so
-> + * to prevent a multi-port access race-condition. Additionally
-> + * there is no need in local locking since only thread-safe
-> + * service work is using this method.
-> + *
-> + * Set peer db to inform data is ready.
-> + *
-> + * Return: Zero on success, otherwise an error number.
-> + */
-> +int nt_spad_cmd_send(struct ntb_dev *ntb, int pidx, enum nt_cmd cmd,
-> +		     int cmd_gidx, u64 data);
-> +
-> +/**
-> + * nt_spad_cmd_recv() - Receive the messages using spad register.
-> + * @ntb:	NTB device context.
-> + * @pidx:	Port index of peer device a message being receive
-> + * @cmd:	NTB command
-> + * @cmd_wid:	Gloable device Index
-> + * @data:	Received data
-> + *
-> + * Clear bits in the peer doorbell register, arming the bits for the next
-> + * doorbell.
-> + *
-> + * We start scanning all over, since cleared DB may have been set
-> + * by any peer. Yes, it makes peer with smaller index being
-> + * serviced with greater priority, but it's convenient for spad
-> + * and message code unification and simplicity.
-> + *
-> + * Return: Zero on success, otherwise an error number.
-> + */
-> +int nt_spad_cmd_recv(struct ntb_dev *ntb, int *pidx,
-> +		     enum nt_cmd *cmd, int *cmd_wid, u64 *data);
-> +
-> +/**
-> + * nt_msg_cmd_send() - send messages to peer using message register.
-> + * @ntb:	NTB device context.
-> + * @pidx:	Port index of peer device.
-> + * @cmd:	ntb commands.
-> + * @cmd_gidx:	Memory window index.
-> + * @data:	message data.
-> + *
-> + * Perform predefined number of attempts before give up. Message
-> + * registers are free of race-condition problem when accessed
-> + * from different ports, so we don't need splitting registers
-> + * by global device index. We also won't have local locking,
-> + * since the method is used from service work only.
-> + *
-> + * Return: Zero on success, otherwise an error number.
-> + */
-> +int nt_msg_cmd_send(struct ntb_dev *nt, int pidx, enum nt_cmd cmd,
-> +		    int cmd_wid, u64 data);
-> +
-> +/**
-> + * nt_msg_cmd_recv() - Receive the messages using message register.
-> + * @ntb:	NTB device context.
-> + * @pidx:	Port index of peer device a message being receive
-> + * @cmd:	NT command
-> + * @cmd_wid:	Memory window Index
-> + * @data:	Received data
-> + *
-> + * Get memory window index and data.
-> + *
-> + * Return: Zero on success, otherwise an error number.
-> + */
-> +int nt_msg_cmd_recv(struct ntb_dev *nt, int *pidx,
-> +		    enum nt_cmd *cmd, int *cmd_wid, u64 *data);
-> +
-> +/**
-> + * nt_enable_messaging() - Enable messaging support.
-> + * @ntb:	NTB device context.
-> + * @gitx:	Global device Index.
-> + *
-> + * Check which messaging support to enable
-> + *
-> + * Return: Zero on success, otherwise an error number.
-> + */
-> +int nt_enable_messaging(struct ntb_dev *ndev, int gidx);
-> +
-> +/**
-> + * nt_disable_messaging() - Disable messaging support.
-> + * @ntb:	NTB device context.
-> + * @gidx:	Global device Index
-> + *
-> + * Check message type(spad/message) and disable messaging support.
-> + *
-> + */
-> +void nt_disable_messaging(struct ntb_dev *ndev, int gidx);
-> +
-> +/**
-> + * nt_init_messaging() - Enable Messaging
-> + * @ntb:	NTB device context.
-> + * @msg_ptr:	Handle to function pointers Scratchpad or Message.
-> + *
-> + *
-> + * Enable Scratchpad/Message IO operations.
-> + *
-> + * Return: Zero on success, otherwise an error number.
-> + */
-> +int nt_init_messaging(struct ntb_dev *ndev, struct msg_type *msg_ptr);
-> +
+1) Send/receive random data by means of the library 
+2) Use either Scratchpads or Message registers for data exchange. If both
+types of registers are available (like in case of IDT 89HPES8NT2) it's better
+to use the Message ones, since they are better suitable for the library concept.
+3) Use something like the following methods as the library interface:
+- ntb_lib_exch_capability(ntb_dev) - return the maximum length of the data
+array, which can be sent over the NTB device (or an error).
+- ntb_lib_exch_init(ntb_dev, ntb_data_recv) - initialize the Cross-Iface library of
+NTB device. It initializes the library for the specified NTB-device and sets the
+callback method to have the client driver notified when an incoming data is
+available,
+- ntb_lib_exch_clear(ntb_dev) - clear the library: discard the library descriptor,
+make sure there is no data pending to send/retrieve, the callback handler can be
+safely discarded,
+- ntb_lib_exch_send_sync(ntb_dev, pidx, len, data) - send data array of the passed
+length over the NTB device using the Cross-Iface library. The method can sleep, so
+can't be used in the atomic context,
+- ntb_lib_exch_send_async(ntb_dev, pidx, len, data, callback) - the same function
+as before, but can be executed with IRQs disable. When data is sent, the
+callback method is executed for instance to free the memory allocated for the data.
+- ntb_data_recv(ntb_dev, pidx, len, data) - callback method passed to the
+ntb_lib_exch_init() function and called when new data arrived from the peer with
+pidx index.
 
-See the cover letter comment with the design considerations.
+* the naming is of course discussable as well as the whole design, since we
+were talking about it nearly 10 months ago.
+
+Here are some notes personally from me with a suggestion of the design specifics:
+- I'd add a race-protected pointer to the Cross-Iface library descriptor
+(something like struct ntb_lib_exch) in the ntb_dev structure and have it
+dynamically allocated in the ntb_lib_exch_init(). This way we wouldn't waste
+a memory in case if client driver didn't use the library
+- I'd declare the data type being u8 instead of dword (definitely not u64).
+- Despite of the ntb_perf service subsystem design, I would better use pure
+Scratchpads for the library functions implementation without Doorbell
+utilization. The only drawback of this is to have one byte of some
+Scratchpad register being reserved to be used for full/empty status.
+Additional there must be a status checking work-thread running to poll
+the status.
+
+There are also additional notes from me about the library code in general:
+1) Use ntb_-prefix in all the functions/types within NTB API including the library.
+It is something like an unspoken API convention, which as you can see is followed
+all over the NTB API code.
+2) I'd suggest to move the library code into a separate directory:
+drivers/ntb/lib/exchange.c
+and create a separate header file in:
+include/linux/ntb_lib_exchange.h
+This way we'd have a special place to put an abstractive libraries like this
+one and for future ones, for instance, for possible scratchpads emulation
+library and so on.
+
+Atul, if you refactored your code, so it would have fitted something similar to
+the design presented here, it would be definitely accepted (with possible minor
+code alterations=)).
 
 Regards,
 -Sergey
 
->  #endif
+On Sun, May 06, 2018 at 12:20:16PM -0700, Atul Raut <araut@codeaurora.org> wrote:
+> Hi All,
+> 
+> This is v2 of cleanup series, where have enabled support to ntb_transport layer
+> for message register based devices. Refactor ntb_perf module to get library
+> out of it, so that the other client module can make use of it.
+> 
+> This cleanup addresses some of comments by Allen and Dave.
+> 
+> Thanks & Regards,
+> Atul Raut
+> 
+> Atul Raut (4):
+>   NTB : Introduce message library
+>   NTB :  Add message library NTB API
+>   NTB : Modification to ntb_perf module
+>   NTB : Add support to message registers based devices
+> 
+>  drivers/ntb/ntb.c           | 222 +++++++++++++++++++++++++++
+>  drivers/ntb/ntb_transport.c | 357 ++++++++++++++++++++++++++++++++------------
+>  drivers/ntb/test/ntb_perf.c | 347 +++++-------------------------------------
+>  include/linux/ntb.h         | 163 ++++++++++++++++++++
+>  4 files changed, 685 insertions(+), 404 deletions(-)
+> 
 > -- 
 > The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
 > a Linux Foundation Collaborative Project
@@ -251,5 +157,5 @@ Regards,
 > You received this message because you are subscribed to the Google Groups "linux-ntb" group.
 > To unsubscribe from this group and stop receiving emails from it, send an email to linux-ntb+unsubscribe@googlegroups.com.
 > To post to this group, send email to linux-ntb@googlegroups.com.
-> To view this discussion on the web visit https://groups.google.com/d/msgid/linux-ntb/1525634420-19370-2-git-send-email-araut%40codeaurora.org.
+> To view this discussion on the web visit https://groups.google.com/d/msgid/linux-ntb/1525634420-19370-1-git-send-email-araut%40codeaurora.org.
 > For more options, visit https://groups.google.com/d/optout.
