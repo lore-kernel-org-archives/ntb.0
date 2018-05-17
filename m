@@ -1,116 +1,81 @@
-Return-Path: <dmeyer@gigaio.com>
-Received: from mail-ua0-x22e.google.com (mail-ua0-x22e.google.com. [2607:f8b0:400c:c08::22e])
-        by gmr-mx.google.com with ESMTPS id x3-v6si1368920ybp.5.2018.05.22.14.02.15
+Return-Path: <logang@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id d67-v6si387617qkh.5.2018.05.17.09.06.20
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 22 May 2018 14:02:15 -0700 (PDT)
-Received: by mail-ua0-x22e.google.com with SMTP id f22-v6so13295901uam.1
-        for <linux-ntb@googlegroups.com>; Tue, 22 May 2018 14:02:15 -0700 (PDT)
-MIME-Version: 1.0
-In-Reply-To: <a0997fec-ba06-0d1d-a43d-fcc1600484f5@deltatee.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Thu, 17 May 2018 09:06:21 -0700 (PDT)
 References: <1526558413-23113-1-git-send-email-dmeyer@gigaio.com>
- <1526558413-23113-3-git-send-email-dmeyer@gigaio.com> <a0997fec-ba06-0d1d-a43d-fcc1600484f5@deltatee.com>
-From: Doug Meyer <dmeyer@gigaio.com>
-Date: Tue, 22 May 2018 14:02:15 -0700
-Message-ID: <CA+GK6enroS==oadiOTBfz9DiC6Pc-VJks3Mg7reaSzQzAigc7w@mail.gmail.com>
+ <1526558413-23113-3-git-send-email-dmeyer@gigaio.com>
+ <20180517134521.GC19955@bhelgaas-glaptop.roam.corp.google.com>
+From: Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <9dd68ac0-5b9e-b257-49d2-20327c2ab282@deltatee.com>
+Date: Thu, 17 May 2018 10:06:09 -0600
+MIME-Version: 1.0
+In-Reply-To: <20180517134521.GC19955@bhelgaas-glaptop.roam.corp.google.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Subject: Re: [PATCH 2/2] NTB: PCI Quirk to Enable Switchtec NT Functionality
  with IOMMU On
-Content-Type: multipart/alternative; boundary="000000000000a2c986056cd1bbea"
-To: Logan Gunthorpe <logang@deltatee.com>
-Cc: kurt.schwemmer@microsemi.com, linux-pci@vger.kernel.org, linux-ntb <linux-ntb@googlegroups.com>, Bjorn Helgaas <bhelgaas@google.com>, Jon Mason <jdmason@kudzu.us>, "Jiang, Dave" <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-kernel@vger.kernel.org
+To: Bjorn Helgaas <helgaas@kernel.org>, dmeyer@gigaio.com
+Cc: kurt.schwemmer@microsemi.com, linux-pci@vger.kernel.org, linux-ntb@googlegroups.com, bhelgaas@google.com, jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com, linux-kernel@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
---000000000000a2c986056cd1bbea
-Content-Type: text/plain; charset="UTF-8"
-
-On Thu, May 17, 2018 at 8:48 AM, Logan Gunthorpe <logang@deltatee.com>
-wrote:
-
-> Thanks for your hard work on this Doug!
->
-> On 17/05/18 06:00 AM, dmeyer@gigaio.com wrote:
->
-> > +     if (pci_enable_device(pdev)) {
-> > +             dev_err(&pdev->dev, "Cannot enable Switchtec device\n");
-> > +             return;
-> > +     }
->
-> I suspect we should probably cass pci_disable_device() before leaving
-> this function so it's in the same state we started. Just like we unmap
-> the mmio.
->
-
-Dear Logan,
-
-I agree. I'll add it.
-
-Blessings,
-Doug
 
 
+On 17/05/18 07:45 AM, Bjorn Helgaas wrote:
+> On Thu, May 17, 2018 at 05:00:13AM -0700, dmeyer@gigaio.com wrote:
+>> From: Doug Meyer <dmeyer@gigaio.com>
+>>
+>> Here we add the PCI quirk for the Microsemi Switchtec parts to allow
+>> non-transparent bridging to work when the IOMMU is turned on.
+> 
+> I'm not an NTB expert, but it *sounds* like you're specifically fixing
+> DMA initiated by an NT endpoint.  I assume other aspects of
+> non-transparent bridging, e.g., routing of config accesses,
+> interrupts, doorbells, etc., might work even without this quirk.
 
->
-> Logan
->
-> --
-> You received this message because you are subscribed to the Google Groups
-> "linux-ntb" group.
-> To unsubscribe from this group and stop receiving emails from it, send an
-> email to linux-ntb+unsubscribe@googlegroups.com.
-> To post to this group, send email to linux-ntb@googlegroups.com.
-> To view this discussion on the web visit https://groups.google.com/d/
-> msgid/linux-ntb/a0997fec-ba06-0d1d-a43d-fcc1600484f5%40deltatee.com.
-> For more options, visit https://groups.google.com/d/optout.
->
+Yes, that's correct.
 
---000000000000a2c986056cd1bbea
-Content-Type: text/html; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+>> When a requestor on one NT endpoint accesses memory on another NT
+>> endpoint, it does this via a devfn proxy ID. Proxy IDs are uniquely
+>> assigned on a per-requestor basis within the NT hardware, and are not
+>> visible via PCI enumeration. As a result, a memory access from a peer
+>> NT endpoint will have an unrecognized requestor ID devfn which the
+>> IOMMU will reject.
+> 
+> It would be very helpful if you could include a reference to the
+> relevant section of a publicly available spec.
 
-<div dir=3D"ltr"><br><div class=3D"gmail_extra"><br><div class=3D"gmail_quo=
-te">On Thu, May 17, 2018 at 8:48 AM, Logan Gunthorpe <span dir=3D"ltr">&lt;=
-<a href=3D"mailto:logang@deltatee.com" target=3D"_blank">logang@deltatee.co=
-m</a>&gt;</span> wrote:<br><blockquote class=3D"gmail_quote" style=3D"margi=
-n:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">Thanks for your h=
-ard work on this Doug!<br>
-<span class=3D""><br>
-On 17/05/18 06:00 AM, <a href=3D"mailto:dmeyer@gigaio.com">dmeyer@gigaio.co=
-m</a> wrote:<br>
-<br>
-&gt; +=C2=A0 =C2=A0 =C2=A0if (pci_enable_device(pdev)) {<br>
-&gt; +=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0dev_err(&amp;pdev-&gt=
-;dev, &quot;Cannot enable Switchtec device\n&quot;);<br>
-&gt; +=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0return;<br>
-&gt; +=C2=A0 =C2=A0 =C2=A0}<br>
-<br>
-</span>I suspect we should probably cass pci_disable_device() before leavin=
-g<br>
-this function so it&#39;s in the same state we started. Just like we unmap<=
-br>
-the mmio.<br></blockquote><div><br></div><div>Dear Logan,</div><div><br></d=
-iv><div>I agree. I&#39;ll add it.</div><div><br></div><div>Blessings,</div>=
-<div>Doug</div><div><br></div><div>=C2=A0</div><blockquote class=3D"gmail_q=
-uote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1e=
-x">
-<span class=3D"HOEnZb"><font color=3D"#888888"><br>
-Logan<br>
-<br>
--- <br>
-You received this message because you are subscribed to the Google Groups &=
-quot;linux-ntb&quot; group.<br>
-To unsubscribe from this group and stop receiving emails from it, send an e=
-mail to <a href=3D"mailto:linux-ntb%2Bunsubscribe@googlegroups.com">linux-n=
-tb+unsubscribe@<wbr>googlegroups.com</a>.<br>
-To post to this group, send email to <a href=3D"mailto:linux-ntb@googlegrou=
-ps.com">linux-ntb@googlegroups.com</a>.<br>
-To view this discussion on the web visit <a href=3D"https://groups.google.c=
-om/d/msgid/linux-ntb/a0997fec-ba06-0d1d-a43d-fcc1600484f5%40deltatee.com" r=
-el=3D"noreferrer" target=3D"_blank">https://groups.google.com/d/<wbr>msgid/=
-linux-ntb/a0997fec-ba06-<wbr>0d1d-a43d-fcc1600484f5%<wbr>40deltatee.com</a>=
-.<br>
-For more options, visit <a href=3D"https://groups.google.com/d/optout" rel=
-=3D"noreferrer" target=3D"_blank">https://groups.google.com/d/<wbr>optout</=
-a>.<br>
-</font></span></blockquote></div><br></div></div>
+I'm not aware of any public specs on this. The basic idea is that a peer
+accesses a BAR memory window on it's own side and the NTB translates it
+to a memory request on the local side. This request has it's requester
+ID translated through a LUT seeing the requester ID on the initiating
+side isn't valid on the receiving side. The LUT has multiple entries so
+that multiple requester IDs can be translated and the responses routed
+back to the original requester.
 
---000000000000a2c986056cd1bbea--
+> Who assigns these proxy IDs?  Quirks run before drivers claim the
+> device, so it looks like this assumes the proxy ID assignments are
+> either hard-wired into the device or programmed by firmware.  If the
+> latter, how would they be programmed for hot-added NTBs?
+
+The local side of the requester ID LUT are fixed by the hardware so we
+can determine all the possible IDs coming from the NTB device just by
+reading some registers. The peer's side of the LUT are programmed with
+all possible source requester IDs by the driver but these don't have any
+effect on the ID's on the receiving side.
+
+> I'm wondering if all this could or should be done in the switchtec
+> driver instead of in a quirk.  But I really don't know how that driver
+> works.
+
+We'd like it to be done in the driver too but it seems
+pci_add_dma_alias() must be called before the driver is initialized and
+therefore in a quirk. Presently, it seems nearly all calls to that
+function are in quirks.c for this reason.
+
+Thanks,
+
+Logan
+
