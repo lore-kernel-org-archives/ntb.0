@@ -1,74 +1,64 @@
-Return-Path: <helgaas@kernel.org>
-Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id s3-v6si1112399qkb.4.2018.05.23.06.33.24
+Return-Path: <logang@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id d13-v6si1656595iop.2.2018.05.22.15.23.21
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 23 May 2018 06:33:24 -0700 (PDT)
-Date: Wed, 23 May 2018 08:33:21 -0500
-From: Bjorn Helgaas <helgaas@kernel.org>
-Subject: Re: [PATCH 2/2] NTB: PCI Quirk to Enable Switchtec NT Functionality
- with IOMMU On
-Message-ID: <20180523133321.GA150632@bhelgaas-glaptop.roam.corp.google.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Tue, 22 May 2018 15:23:22 -0700 (PDT)
 References: <1526558413-23113-1-git-send-email-dmeyer@gigaio.com>
  <1526558413-23113-3-git-send-email-dmeyer@gigaio.com>
  <20180517134521.GC19955@bhelgaas-glaptop.roam.corp.google.com>
  <9dd68ac0-5b9e-b257-49d2-20327c2ab282@deltatee.com>
  <CA+GK6en+g+T9H0sOMdVXv-_aD3rRcuzZ1JdfK0moEoTuuJnrqQ@mail.gmail.com>
  <20180522215126.GA22385@bhelgaas-glaptop.roam.corp.google.com>
- <598f5880-22b2-bbb4-4a37-5a60bae2348b@deltatee.com>
+From: Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <598f5880-22b2-bbb4-4a37-5a60bae2348b@deltatee.com>
+Date: Tue, 22 May 2018 16:23:13 -0600
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <598f5880-22b2-bbb4-4a37-5a60bae2348b@deltatee.com>
-To: Logan Gunthorpe <logang@deltatee.com>
-Cc: Doug Meyer <dmeyer@gigaio.com>, kurt.schwemmer@microsemi.com, linux-pci@vger.kernel.org, linux-ntb <linux-ntb@googlegroups.com>, Bjorn Helgaas <bhelgaas@google.com>, Jon Mason <jdmason@kudzu.us>, "Jiang, Dave" <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-kernel@vger.kernel.org, Alex Williamson <alex.williamson@redhat.com>
+In-Reply-To: <20180522215126.GA22385@bhelgaas-glaptop.roam.corp.google.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH 2/2] NTB: PCI Quirk to Enable Switchtec NT Functionality
+ with IOMMU On
+To: Bjorn Helgaas <helgaas@kernel.org>, Doug Meyer <dmeyer@gigaio.com>
+Cc: kurt.schwemmer@microsemi.com, linux-pci@vger.kernel.org, linux-ntb <linux-ntb@googlegroups.com>, Bjorn Helgaas <bhelgaas@google.com>, Jon Mason <jdmason@kudzu.us>, "Jiang, Dave" <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-kernel@vger.kernel.org, Alex Williamson <alex.williamson@redhat.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Tue, May 22, 2018 at 04:23:13PM -0600, Logan Gunthorpe wrote:
-> On 22/05/18 03:51 PM, Bjorn Helgaas wrote:
-> > I don't think the question of when the aliases need to be added is
-> > quite closed.  Logan said "it seems pci_add_dma_alias() must be called
-> > before the driver is initialized and therefore in a quirk", but that
-> > doesn't make clear *why* the alias needs to be added before the driver
-> > is initialized.  The alias shouldn't be needed until the device does a
-> > DMA, and it shouldn't do that until after the driver initializes.
-> 
-> No, Doug tried it in the driver first and it didn't work. The symbol is
-> also not exported which was probably done because it can't be used in
-> the driver.
-> 
-> > I suspect the reason the existing quirks are in drivers/pci/quirks.c
-> > is because the IOMMU driver is in the host OS, but the host may not
-> > have a driver for the device if the device is passed through to a
-> > guest OS.  In that case, the only way to add the alias is by using a
-> > quirk that is always built into the host OS.
-> 
-> Digging into the code a bit, it's not because it must be done by the
-> Host OS but because it must be done before the IOMMU groups are created.
-> The IOMMU code registers a bus_notifier and creates the groups based on
-> the dma_alias mask when it receives the BUS_NOTIFY_ADD_DEVICE event.
-> This event is notified in device_add() just before a call to
-> bus_probe_device()[1]. Therefore, if a driver attempts to use
-> pci_add_dma_alias() as part of it's probe routine, it will be too late
-> as the IOMMU has already setup the groups based on the original version
-> of the dma_alias_mask.
 
-This (and Alex's) analysis is very useful and I'd like to capture it
-somehow, perhaps by expanding the poor pci_add_dma_alias() function
-comment I added with f0af9593372a ("PCI: Add pci_add_dma_alias() to
-abstract implementation").
 
-The admonition to "call early" without any details about *how* early
-or *why* it needs to be called early is not really very useful.
+On 22/05/18 03:51 PM, Bjorn Helgaas wrote:
+> I don't think the question of when the aliases need to be added is
+> quite closed.  Logan said "it seems pci_add_dma_alias() must be called
+> before the driver is initialized and therefore in a quirk", but that
+> doesn't make clear *why* the alias needs to be added before the driver
+> is initialized.  The alias shouldn't be needed until the device does a
+> DMA, and it shouldn't do that until after the driver initializes.
 
-If we added your analysis, it would be a great help to anybody who
-reworks IOMMU groups in the future.
+No, Doug tried it in the driver first and it didn't work. The symbol is
+also not exported which was probably done because it can't be used in
+the driver.
 
-> I suspect this is by design as the groups must be created before and any
-> dma_maps are done on the device and some drivers may create dma_maps
-> during probe.
-> 
-> Logan
-> 
-> [1]
-> https://elixir.bootlin.com/linux/v4.17-rc6/source/drivers/base/core.c#L1863
+> I suspect the reason the existing quirks are in drivers/pci/quirks.c
+> is because the IOMMU driver is in the host OS, but the host may not
+> have a driver for the device if the device is passed through to a
+> guest OS.  In that case, the only way to add the alias is by using a
+> quirk that is always built into the host OS.
+
+Digging into the code a bit, it's not because it must be done by the
+Host OS but because it must be done before the IOMMU groups are created.
+The IOMMU code registers a bus_notifier and creates the groups based on
+the dma_alias mask when it receives the BUS_NOTIFY_ADD_DEVICE event.
+This event is notified in device_add() just before a call to
+bus_probe_device()[1]. Therefore, if a driver attempts to use
+pci_add_dma_alias() as part of it's probe routine, it will be too late
+as the IOMMU has already setup the groups based on the original version
+of the dma_alias_mask.
+
+I suspect this is by design as the groups must be created before and any
+dma_maps are done on the device and some drivers may create dma_maps
+during probe.
+
+Logan
+
+[1]
+https://elixir.bootlin.com/linux/v4.17-rc6/source/drivers/base/core.c#L1863
