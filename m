@@ -1,60 +1,74 @@
-Return-Path: <dmeyer@gigaio.com>
-Received: from mail-pg0-x244.google.com (mail-pg0-x244.google.com. [2607:f8b0:400e:c05::244])
-        by gmr-mx.google.com with ESMTPS id s3-v6si1182854qkb.4.2018.05.23.13.18.34
+Return-Path: <helgaas@kernel.org>
+Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
+        by gmr-mx.google.com with ESMTPS id s3-v6si1112399qkb.4.2018.05.23.06.33.24
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 23 May 2018 13:18:34 -0700 (PDT)
-Received: by mail-pg0-x244.google.com with SMTP id c22-v6so9230362pgn.11
-        for <linux-ntb@googlegroups.com>; Wed, 23 May 2018 13:18:34 -0700 (PDT)
-Return-Path: <dmeyer@gigaio.com>
-From: dmeyer@gigaio.com
-Subject: [PATCH v2 0/2] PCI Quirk Patchset for Microsemi Switchtec NTB
-Date: Wed, 23 May 2018 13:18:04 -0700
-Message-Id: <1527106686-18852-1-git-send-email-dmeyer@gigaio.com>
-To: logang@deltatee.com, kurt.schwemmer@microsemi.com, linux-pci@vger.kernel.org, linux-ntb@googlegroups.com
-Cc: bhelgaas@google.com, jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com, linux-kernel@vger.kernel.org, Doug Meyer <dmeyer@gigaio.com>
+        Wed, 23 May 2018 06:33:24 -0700 (PDT)
+Date: Wed, 23 May 2018 08:33:21 -0500
+From: Bjorn Helgaas <helgaas@kernel.org>
+Subject: Re: [PATCH 2/2] NTB: PCI Quirk to Enable Switchtec NT Functionality
+ with IOMMU On
+Message-ID: <20180523133321.GA150632@bhelgaas-glaptop.roam.corp.google.com>
+References: <1526558413-23113-1-git-send-email-dmeyer@gigaio.com>
+ <1526558413-23113-3-git-send-email-dmeyer@gigaio.com>
+ <20180517134521.GC19955@bhelgaas-glaptop.roam.corp.google.com>
+ <9dd68ac0-5b9e-b257-49d2-20327c2ab282@deltatee.com>
+ <CA+GK6en+g+T9H0sOMdVXv-_aD3rRcuzZ1JdfK0moEoTuuJnrqQ@mail.gmail.com>
+ <20180522215126.GA22385@bhelgaas-glaptop.roam.corp.google.com>
+ <598f5880-22b2-bbb4-4a37-5a60bae2348b@deltatee.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <598f5880-22b2-bbb4-4a37-5a60bae2348b@deltatee.com>
+To: Logan Gunthorpe <logang@deltatee.com>
+Cc: Doug Meyer <dmeyer@gigaio.com>, kurt.schwemmer@microsemi.com, linux-pci@vger.kernel.org, linux-ntb <linux-ntb@googlegroups.com>, Bjorn Helgaas <bhelgaas@google.com>, Jon Mason <jdmason@kudzu.us>, "Jiang, Dave" <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-kernel@vger.kernel.org, Alex Williamson <alex.williamson@redhat.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Doug Meyer <dmeyer@gigaio.com>
+On Tue, May 22, 2018 at 04:23:13PM -0600, Logan Gunthorpe wrote:
+> On 22/05/18 03:51 PM, Bjorn Helgaas wrote:
+> > I don't think the question of when the aliases need to be added is
+> > quite closed.  Logan said "it seems pci_add_dma_alias() must be called
+> > before the driver is initialized and therefore in a quirk", but that
+> > doesn't make clear *why* the alias needs to be added before the driver
+> > is initialized.  The alias shouldn't be needed until the device does a
+> > DMA, and it shouldn't do that until after the driver initializes.
+> 
+> No, Doug tried it in the driver first and it didn't work. The symbol is
+> also not exported which was probably done because it can't be used in
+> the driver.
+> 
+> > I suspect the reason the existing quirks are in drivers/pci/quirks.c
+> > is because the IOMMU driver is in the host OS, but the host may not
+> > have a driver for the device if the device is passed through to a
+> > guest OS.  In that case, the only way to add the alias is by using a
+> > quirk that is always built into the host OS.
+> 
+> Digging into the code a bit, it's not because it must be done by the
+> Host OS but because it must be done before the IOMMU groups are created.
+> The IOMMU code registers a bus_notifier and creates the groups based on
+> the dma_alias mask when it receives the BUS_NOTIFY_ADD_DEVICE event.
+> This event is notified in device_add() just before a call to
+> bus_probe_device()[1]. Therefore, if a driver attempts to use
+> pci_add_dma_alias() as part of it's probe routine, it will be too late
+> as the IOMMU has already setup the groups based on the original version
+> of the dma_alias_mask.
 
-This is a resend of the patch series to enable Microsemi Switchtec
-NTB configurations to run with the IOMMU in the hosts turned on.
-Because of the nature PCI Quirk implementation, it was preferable
-to migrate the Microsemi PCI vendor and device definitions to the
-Linux canonical location. Logan Gunthorpe requested that this
-migration be done as a separate patch in a set, and so this patch
-series was created as shown here.
+This (and Alex's) analysis is very useful and I'd like to capture it
+somehow, perhaps by expanding the poor pci_add_dma_alias() function
+comment I added with f0af9593372a ("PCI: Add pci_add_dma_alias() to
+abstract implementation").
 
-The first patch encapsulates the movement of constants from
-switchtec.h to pci_ids.h, with commensurate changes to the source
-files. This patch is not dependent on any other work.
+The admonition to "call early" without any details about *how* early
+or *why* it needs to be called early is not really very useful.
 
-The second patch is the PCI quirk implementation itself, and is
-completely dependent upon the first patch in this series.
+If we added your analysis, it would be a great help to anybody who
+reworks IOMMU groups in the future.
 
-Testing of the quirk was done on with a 2-host x86-64 system
-with all combinations of IOMMU off/on. The ntb_perf module was
-used as test stimulus. 
-
-Blessings,
-Doug Meyer
-
-Changes since v1:
-- Call pci_device_disable() at return points to clean up properly.
-- Changed all dev_* print macros to pci_* macros.
-- Removed superfluous variable initializations.
-
-Doug Meyer (2):
-  NTB: Migrate PCI Constants to Cannonical PCI Header
-  NTB: PCI Quirk to Enable Switchtec NT Functionality with IOMMU On
-
- drivers/ntb/hw/mscc/ntb_hw_switchtec.c |   3 +-
- drivers/pci/quirks.c                   | 197 +++++++++++++++++++++++++++++++++
- drivers/pci/switch/switchtec.c         |  15 ++-
- include/linux/pci_ids.h                |  32 ++++++
- include/linux/switchtec.h              |   4 -
- 5 files changed, 238 insertions(+), 13 deletions(-)
-
--- 
-1.8.3.1
-
+> I suspect this is by design as the groups must be created before and any
+> dma_maps are done on the device and some drivers may create dma_maps
+> during probe.
+> 
+> Logan
+> 
+> [1]
+> https://elixir.bootlin.com/linux/v4.17-rc6/source/drivers/base/core.c#L1863
