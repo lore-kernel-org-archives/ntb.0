@@ -1,80 +1,63 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id d67si1242437qkh.5.2018.05.07.13.36.11
+        by gmr-mx.google.com with ESMTPS id g1-v6si973914qto.4.2018.05.30.13.13.17
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Mon, 07 May 2018 13:36:11 -0700 (PDT)
+        Wed, 30 May 2018 13:13:17 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Mon,  7 May 2018 14:36:03 -0600
-Message-Id: <20180507203605.15865-6-logang@deltatee.com>
-In-Reply-To: <20180507203605.15865-1-logang@deltatee.com>
-References: <20180507203605.15865-1-logang@deltatee.com>
-Subject: [PATCH v17 5/7] ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
-To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>
+Date: Wed, 30 May 2018 14:13:11 -0600
+Message-Id: <20180530201311.11274-1-logang@deltatee.com>
+Subject: [PATCH v3] PCI: Expand documentation for pci_add_dma_alias()
+To: linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, linux-ntb@googlegroups.com
+Cc: Logan Gunthorpe <logang@deltatee.com>, Bjorn Helgaas <bhelgaas@google.com>, Alex Williamson <alex.williamson@redhat.com>, Doug Meyer <dmeyer@gigaio.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Now that ioread64 and iowrite64 are available in io-64-nonatomic,
-we can remove the hack at the top of ntb_hw_intel.c and replace it
-with an include.
+Seeing there's been some confusion about the use of pci_add_dma_alias(),
+expand the comment to describe why it must be called early and how
+early it must be called.
+
+Also, expand on the purpose of this function and common reasons it would
+be used.
+
+[The comment was reworded to some extent by Alex Williamson]
 
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
-Acked-by: Dave Jiang <dave.jiang@intel.com>
-Acked-by: Allen Hubbe <Allen.Hubbe@dell.com>
-Acked-by: Jon Mason <jdmason@kudzu.us>
+Cc: Bjorn Helgaas <bhelgaas@google.com>
+Cc: Alex Williamson <alex.williamson@redhat.com>
+Cc: Doug Meyer <dmeyer@gigaio.com>
 ---
- drivers/ntb/hw/intel/ntb_hw_intel.c | 30 +-----------------------------
- 1 file changed, 1 insertion(+), 29 deletions(-)
 
-diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c b/drivers/ntb/hw/intel/ntb_hw_intel.c
-index 156b45cd4a19..5cf40ab21366 100644
---- a/drivers/ntb/hw/intel/ntb_hw_intel.c
-+++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
-@@ -59,6 +59,7 @@
- #include <linux/random.h>
- #include <linux/slab.h>
- #include <linux/ntb.h>
-+#include <linux/io-64-nonatomic-lo-hi.h>
- 
- #include "ntb_hw_intel.h"
- 
-@@ -149,35 +150,6 @@ MODULE_PARM_DESC(xeon_b2b_dsd_bar5_addr32,
- static inline enum ntb_topo xeon_ppd_topo(struct intel_ntb_dev *ndev, u8 ppd);
- static int xeon_init_isr(struct intel_ntb_dev *ndev);
- 
--#ifndef ioread64
--#ifdef readq
--#define ioread64 readq
--#else
--#define ioread64 _ioread64
--static inline u64 _ioread64(void __iomem *mmio)
--{
--	u64 low, high;
--
--	low = ioread32(mmio);
--	high = ioread32(mmio + sizeof(u32));
--	return low | (high << 32);
--}
--#endif
--#endif
--
--#ifndef iowrite64
--#ifdef writeq
--#define iowrite64 writeq
--#else
--#define iowrite64 _iowrite64
--static inline void _iowrite64(u64 val, void __iomem *mmio)
--{
--	iowrite32(val, mmio);
--	iowrite32(val >> 32, mmio + sizeof(u32));
--}
--#endif
--#endif
--
- static inline int pdev_is_xeon(struct pci_dev *pdev)
+v3: Fixed some typos pointed out by Randy
+v2: Reworked the patch with Alex's suggested wording
+
+drivers/pci/pci.c | 15 +++++++++++++--
+ 1 file changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/pci/pci.c b/drivers/pci/pci.c
+index dbfe7c4f3776..2d8650253cc9 100644
+--- a/drivers/pci/pci.c
++++ b/drivers/pci/pci.c
+@@ -5395,8 +5395,19 @@ int pci_set_vga_state(struct pci_dev *dev, bool decode,
+  * @dev: the PCI device for which alias is added
+  * @devfn: alias slot and function
+  *
+- * This helper encodes 8-bit devfn as bit number in dma_alias_mask.
+- * It should be called early, preferably as PCI fixup header quirk.
++ * This helper encodes an 8-bit devfn as a bit number in dma_alias_mask
++ * which is used to program permissible bus-devfn source addresses for DMA
++ * requests in an IOMMU. These aliases factor into IOMMU group creation
++ * and are useful for devices generating DMA requests beyond or different
++ * from their logical bus-devfn. Examples include device quirks where the
++ * device simply uses the wrong devfn, as well as non-transparent bridges
++ * where the alias may be a proxy for devices in another domain.
++ *
++ * IOMMU group creation is performed during device discovery or addition,
++ * prior to any potential DMA mapping and therefore prior to driver probing
++ * (especially for userspace assigned devices where IOMMU group definition
++ * cannot be left as a userspace activity). DMA aliases should therefore
++ * be configured via quirks, such as the PCI fixup header quirk.
+  */
+ void pci_add_dma_alias(struct pci_dev *dev, u8 devfn)
  {
- 	switch (pdev->device) {
--- 
+--
 2.11.0
-
