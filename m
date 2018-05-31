@@ -1,219 +1,320 @@
-Return-Path: <Boris.Glimcher@dell.com>
-Received: from esa3.dell-outbound.iphmx.com (esa3.dell-outbound.iphmx.com. [68.232.153.94])
-        by gmr-mx.google.com with ESMTPS id q6-v6si988420plr.5.2018.05.31.12.42.58
+Return-Path: <dave.jiang@intel.com>
+Received: from mga07.intel.com (mga07.intel.com. [134.134.136.100])
+        by gmr-mx.google.com with ESMTPS id x1-v6si220438pgp.4.2018.05.31.12.31.10
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 31 May 2018 12:42:58 -0700 (PDT)
-From: "Glimcher, Boris" <Boris.Glimcher@dell.com>
-Subject: RE: ntb_tool cannot dma_alloc_coherent with CMA (over switchtec)
-Date: Thu, 31 May 2018 19:42:40 +0000
-Message-ID: <8A1F3ACA2F40C04FBF91985D6F491D7C017665F7@MX302CL01.corp.emc.com>
+        Thu, 31 May 2018 12:31:10 -0700 (PDT)
+Subject: Re: ntb_tool cannot dma_alloc_coherent with CMA (over switchtec)
 References: <8A1F3ACA2F40C04FBF91985D6F491D7C0176649B@MX302CL01.corp.emc.com>
- <52648710-cf4a-9072-c03b-9a0f3fe7c19d@deltatee.com>
-In-Reply-To: <52648710-cf4a-9072-c03b-9a0f3fe7c19d@deltatee.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Dave Jiang <dave.jiang@intel.com>
+Message-ID: <1f327d5f-5bd9-12ee-2569-8f66eb0034c2@intel.com>
+Date: Thu, 31 May 2018 12:31:09 -0700
 MIME-Version: 1.0
-To: Logan Gunthorpe <logang@deltatee.com>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
+In-Reply-To: <8A1F3ACA2F40C04FBF91985D6F491D7C0176649B@MX302CL01.corp.emc.com>
+Content-Type: multipart/alternative;
+ boundary="------------3CFF2E0C1BF77A943B2399DE"
+Content-Language: en-US
+To: "Glimcher, Boris" <Boris.Glimcher@dell.com>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-TG9nYW4sDQoNClllcywgaXQgaXMgeDg2IG1hY2hpbmUuDQoNCldoZW4gdXNpbmcgc21hbGxlciBi
-dWZmZXIgc2l6ZSBldmVyeXRoaW5nIHdvcmtzIGZpbmU6DQoNCiQgZWNobyA4MTkyID4gL3N5cy9r
-ZXJuZWwvZGVidWcvbnRiX3Rvb2wvMDAwMFw6M2JcOjAwLjEvcGVlcl90cmFuczENCg0KJCBjYXQg
-L3N5cy9rZXJuZWwvZGVidWcvbnRiX3Rvb2wvMDAwMFw6M2JcOjAwLjEvcGVlcl90cmFuczENClBl
-ZXIgTVcgMSBJbmZvcm1hdGlvbjoNClBoeXNpY2FsIEFkZHJlc3MgICAgICAJMHgwMDAwMWFmNDAw
-MDAwMDAwW3BdDQpXaW5kb3cgU2l6ZSAgICAgICAgICAgCTE3MTc5ODY5MTg0DQpBbGlnbm1lbnQg
-ICAgICAgICAgICAgCTQwOTYNClNpemUgQWxpZ25tZW50ICAgICAgICAJNDA5Ng0KU2l6ZSBNYXgg
-ICAgICAgICAgICAgIAkxNzE3OTg2OTE4NA0KUmVhZHkgICAgICAgICAgICAgICAgIAlZDQpBbGxv
-Y2F0ZWQgU2l6ZSAgICAgICAJODE5Mg0KDQpEbWVzZzoNClsgIDIxMS40MTcxNTJdIHN3aXRjaHRl
-YzogbG9hZGluZyBvdXQtb2YtdHJlZSBtb2R1bGUgdGFpbnRzIGtlcm5lbC4NClsgIDIxMS40MTcy
-MjJdIHN3aXRjaHRlYzogbW9kdWxlIHZlcmlmaWNhdGlvbiBmYWlsZWQ6IHNpZ25hdHVyZSBhbmQv
-b3IgcmVxdWlyZWQga2V5IG1pc3NpbmcgLSB0YWludGluZyBrZXJuZWwNClsgIDIxMS40MTg1MTld
-IHN3aXRjaHRlYyAwMDAwOjNiOjAwLjE6IGVuYWJsaW5nIGRldmljZSAoMDE0MCAtPiAwMTQyKQ0K
-WyAgMjExLjQyMTI5NF0gc3dpdGNodGVjIHN3aXRjaHRlYzA6IE1hbmFnZW1lbnQgZGV2aWNlIHJl
-Z2lzdGVyZWQuDQpbICAyMTEuNDIxNTU2XSBzd2l0Y2h0ZWMgMDAwMDo4NjowMC4xOiBlbmFibGlu
-ZyBkZXZpY2UgKDAxNDAgLT4gMDE0MikNClsgIDIxMS40MjQzODldIHN3aXRjaHRlYyBzd2l0Y2h0
-ZWMxOiBNYW5hZ2VtZW50IGRldmljZSByZWdpc3RlcmVkLg0KWyAgMjExLjQyNDQzOV0gc3dpdGNo
-dGVjOiBsb2FkZWQuDQpbICAyMTEuNDI4NTU4XSBudGJfaHdfc3dpdGNodGVjOnN3aXRjaHRlY19u
-dGJfaW5pdF9zbmRldjo5MTM6IHN3aXRjaHRlYyBzd2l0Y2h0ZWMwOiBQYXJ0aXRpb24gSUQgMCBv
-ZiA0DQpbICAyMTEuNDI4NzEzXSBudGJfaHdfc3dpdGNodGVjOnN3aXRjaHRlY19udGJfaW5pdF9t
-dzoxMjI3OiBzd2l0Y2h0ZWMgc3dpdGNodGVjMDogTVdzOiAyIGRpcmVjdCwgMzIgbHV0DQpbICAy
-MTEuNDI4ODI4XSBudGJfaHdfc3dpdGNodGVjOnN3aXRjaHRlY19udGJfaW5pdF9tdzoxMjM3OiBz
-d2l0Y2h0ZWMgc3dpdGNodGVjMDogUGVlciBNV3M6IDIgZGlyZWN0LCAzMiBsdXQNClsgIDIxMS40
-ODAxMTJdIG50Yl9od19zd2l0Y2h0ZWM6Y29uZmlnX3JlcV9pZF90YWJsZTo5OTk6IHN3aXRjaHRl
-YyBzd2l0Y2h0ZWMwOiBSZXF1ZXN0ZXIgSUQgMDA6MDAuMCAtPiBCQjowMS4wDQpbICAyMTEuNDgw
-MTM0XSBudGJfaHdfc3dpdGNodGVjOmNvbmZpZ19yZXFfaWRfdGFibGU6OTk5OiBzd2l0Y2h0ZWMg
-c3dpdGNodGVjMDogUmVxdWVzdGVyIElEIDNBOjAwLjAgLT4gQkI6MDEuMQ0KWyAgMjExLjUzMjAy
-Ml0gc3dpdGNodGVjIHN3aXRjaHRlYzA6IFVzaW5nIGNyb3NzbGluayBjb25maWd1cmF0aW9uDQpb
-ICAyMTEuNTMyMDk5XSBudGJfaHdfc3dpdGNodGVjOmNyb3NzbGlua19lbnVtX3BhcnRpdGlvbjox
-MTI4OiBzd2l0Y2h0ZWMgc3dpdGNodGVjMDogQ3Jvc3NsaW5rIEJBUjAgYWRkcjogMA0KWyAgMjEx
-LjUzMjEzNV0gbnRiX2h3X3N3aXRjaHRlYzpjcm9zc2xpbmtfZW51bV9wYXJ0aXRpb246MTEyODog
-c3dpdGNodGVjIHN3aXRjaHRlYzA6IENyb3NzbGluayBCQVIyIGFkZHI6IDEwMDAwMDAwMDANClsg
-IDIxMS41MzIxNzJdIG50Yl9od19zd2l0Y2h0ZWM6Y3Jvc3NsaW5rX2VudW1fcGFydGl0aW9uOjEx
-Mjg6IHN3aXRjaHRlYyBzd2l0Y2h0ZWMwOiBDcm9zc2xpbmsgQkFSNCBhZGRyOiAyMDAwMDAwMDAw
-DQpbICAyMTEuNzkyMDM0XSBudGJfaHdfc3dpdGNodGVjOmNvbmZpZ19yZXFfaWRfdGFibGU6OTk5
-OiBzd2l0Y2h0ZWMgc3dpdGNodGVjMDogUmVxdWVzdGVyIElEIDAwOjAxLjAgLT4gQkI6MDIuMA0K
-WyAgMjExLjc5MjA1Nl0gbnRiX2h3X3N3aXRjaHRlYzpjb25maWdfcmVxX2lkX3RhYmxlOjk5OTog
-c3dpdGNodGVjIHN3aXRjaHRlYzA6IFJlcXVlc3RlciBJRCAwMDowMS4xIC0+IEJCOjAyLjENClsg
-IDIxMS44NDQwMzddIG50Yl9od19zd2l0Y2h0ZWM6c3dpdGNodGVjX250Yl9pbml0X2RiOjEyNzQ6
-IHN3aXRjaHRlYyBzd2l0Y2h0ZWMwOiBkYnM6IHNoaWZ0IDAvMCwgbWFzayAwZmZmZmZmZmZmZmZm
-ZmZmDQpbICAyMTEuOTQ4MDA2XSBudGJfaHdfc3dpdGNodGVjOnN3aXRjaHRlY19udGJfaW5pdF9z
-aGFyZWRfbXc6MTM3MDogc3dpdGNodGVjIHN3aXRjaHRlYzA6IFNoYXJlZCBNVyBSZWFkeQ0KWyAg
-MjExLjk0ODAyOV0gbnRiX2h3X3N3aXRjaHRlYzpzd2l0Y2h0ZWNfbnRiX2luaXRfZGJfbXNnX2ly
-cToxNDQyOiBzd2l0Y2h0ZWMgc3dpdGNodGVjMDogaXJxcyAtIGV2ZW50OiAyLCBkYjogMCwgbXNn
-czogMQ0KWyAgMjExLjk0ODA4MF0gc3dpdGNodGVjIHN3aXRjaHRlYzA6IE5UQiBkZXZpY2UgcmVn
-aXN0ZXJlZA0KWyAgMjExLjk0ODEzMV0gbnRiX2h3X3N3aXRjaHRlYzpzd2l0Y2h0ZWNfbnRiX2lu
-aXRfc25kZXY6OTEzOiBzd2l0Y2h0ZWMgc3dpdGNodGVjMTogUGFydGl0aW9uIElEIDEgb2YgNA0K
-WyAgMjExLjk0ODI1M10gbnRiX2h3X3N3aXRjaHRlYzpzd2l0Y2h0ZWNfbnRiX2luaXRfbXc6MTIy
-Nzogc3dpdGNodGVjIHN3aXRjaHRlYzE6IE1XczogMiBkaXJlY3QsIDMyIGx1dA0KWyAgMjExLjk0
-ODM3M10gbnRiX2h3X3N3aXRjaHRlYzpzd2l0Y2h0ZWNfbnRiX2luaXRfbXc6MTIzNzogc3dpdGNo
-dGVjIHN3aXRjaHRlYzE6IFBlZXIgTVdzOiAyIGRpcmVjdCwgMzIgbHV0DQpbICAyMTIuMDAwMDQ5
-XSBudGJfaHdfc3dpdGNodGVjOmNvbmZpZ19yZXFfaWRfdGFibGU6OTk5OiBzd2l0Y2h0ZWMgc3dp
-dGNodGVjMTogUmVxdWVzdGVyIElEIDAwOjAwLjAgLT4gQkI6MDEuNA0KWyAgMjEyLjAwMDA3Ml0g
-bnRiX2h3X3N3aXRjaHRlYzpjb25maWdfcmVxX2lkX3RhYmxlOjk5OTogc3dpdGNodGVjIHN3aXRj
-aHRlYzE6IFJlcXVlc3RlciBJRCA4NTowMC4wIC0+IEJCOjAxLjUNClsgIDIxMi4wNTE5OTNdIHN3
-aXRjaHRlYyBzd2l0Y2h0ZWMxOiBVc2luZyBjcm9zc2xpbmsgY29uZmlndXJhdGlvbg0KWyAgMjEy
-LjA1MjA2OV0gbnRiX2h3X3N3aXRjaHRlYzpjcm9zc2xpbmtfZW51bV9wYXJ0aXRpb246MTEyODog
-c3dpdGNodGVjIHN3aXRjaHRlYzE6IENyb3NzbGluayBCQVIwIGFkZHI6IDANClsgIDIxMi4wNTIx
-MDZdIG50Yl9od19zd2l0Y2h0ZWM6Y3Jvc3NsaW5rX2VudW1fcGFydGl0aW9uOjExMjg6IHN3aXRj
-aHRlYyBzd2l0Y2h0ZWMxOiBDcm9zc2xpbmsgQkFSMiBhZGRyOiAxMDAwMDAwMDAwDQpbICAyMTIu
-MDUyMTQzXSBudGJfaHdfc3dpdGNodGVjOmNyb3NzbGlua19lbnVtX3BhcnRpdGlvbjoxMTI4OiBz
-d2l0Y2h0ZWMgc3dpdGNodGVjMTogQ3Jvc3NsaW5rIEJBUjQgYWRkcjogMjAwMDAwMDAwMA0KWyAg
-MjEyLjMxMjAwNl0gbnRiX2h3X3N3aXRjaHRlYzpjb25maWdfcmVxX2lkX3RhYmxlOjk5OTogc3dp
-dGNodGVjIHN3aXRjaHRlYzE6IFJlcXVlc3RlciBJRCAwMDowMS40IC0+IEJCOjAyLjQNClsgIDIx
-Mi4zMTIwMjhdIG50Yl9od19zd2l0Y2h0ZWM6Y29uZmlnX3JlcV9pZF90YWJsZTo5OTk6IHN3aXRj
-aHRlYyBzd2l0Y2h0ZWMxOiBSZXF1ZXN0ZXIgSUQgMDA6MDEuNSAtPiBCQjowMi41DQpbICAyMTIu
-MzYzOTkwXSBudGJfaHdfc3dpdGNodGVjOnN3aXRjaHRlY19udGJfaW5pdF9kYjoxMjc0OiBzd2l0
-Y2h0ZWMgc3dpdGNodGVjMTogZGJzOiBzaGlmdCAwLzAsIG1hc2sgMGZmZmZmZmZmZmZmZmZmZg0K
-WyAgMjEyLjQ2ODAwOV0gbnRiX2h3X3N3aXRjaHRlYzpzd2l0Y2h0ZWNfbnRiX2luaXRfc2hhcmVk
-X213OjEzNzA6IHN3aXRjaHRlYyBzd2l0Y2h0ZWMxOiBTaGFyZWQgTVcgUmVhZHkNClsgIDIxMi40
-NjgwMzRdIG50Yl9od19zd2l0Y2h0ZWM6c3dpdGNodGVjX250Yl9pbml0X2RiX21zZ19pcnE6MTQ0
-Mjogc3dpdGNodGVjIHN3aXRjaHRlYzE6IGlycXMgLSBldmVudDogMiwgZGI6IDAsIG1zZ3M6IDEN
-ClsgIDIxMi40NjgxMTVdIHN3aXRjaHRlYyBzd2l0Y2h0ZWMxOiBOVEIgZGV2aWNlIHJlZ2lzdGVy
-ZWQNClsgIDIxMi40NzQ2OTZdIG50Yl9od19zd2l0Y2h0ZWM6c3dpdGNodGVjX250Yl9saW5rX2Vu
-YWJsZTo2MDM6IHN3aXRjaHRlYyBzd2l0Y2h0ZWMwOiBlbmFibGluZyBsaW5rDQpbICAyMTIuNDc0
-NzAwXSBudGJfdG9vbDp0b29sX2xpbmtfZXZlbnQ6MTcwOiBudGJfdG9vbCAwMDAwOjNiOjAwLjE6
-IGxpbmsgaXMgZG93biBzcGVlZCAwIHdpZHRoIDANClsgIDIxMi40NzQ3NzFdIG50Yl9od19zd2l0
-Y2h0ZWM6c3dpdGNodGVjX250Yl9saW5rX2VuYWJsZTo2MDM6IHN3aXRjaHRlYyBzd2l0Y2h0ZWMx
-OiBlbmFibGluZyBsaW5rDQpbICAyMTIuNDc0Nzc0XSBudGJfdG9vbDp0b29sX2xpbmtfZXZlbnQ6
-MTcwOiBudGJfdG9vbCAwMDAwOjg2OjAwLjE6IGxpbmsgaXMgZG93biBzcGVlZCAwIHdpZHRoIDAN
-ClsgIDIxMi40OTM2NjVdIG50Yl9od19zd2l0Y2h0ZWM6c3dpdGNodGVjX250Yl9td19zZXRfdHJh
-bnM6MzE5OiBzd2l0Y2h0ZWMgc3dpdGNodGVjMDogTVcgMTogcGFydCAwIGFkZHIgMHgwMDAwMDAw
-MDM0YzAyMDAwIHNpemUgMHgwMDAwMDAwMDAwMDAyMDAwDQoNCiQgZWNobyAyMDk3MTUyMCA+IC9z
-eXMva2VybmVsL2RlYnVnL250Yl90b29sLzAwMDBcOjNiXDowMC4xL3BlZXJfdHJhbnMxDQoNClsg
-IDExMy44NDg5MDBdIHN3aXRjaHRlYzogbG9hZGluZyBvdXQtb2YtdHJlZSBtb2R1bGUgdGFpbnRz
-IGtlcm5lbC4NClsgIDExMy44NDg5NDddIHN3aXRjaHRlYzogbW9kdWxlIHZlcmlmaWNhdGlvbiBm
-YWlsZWQ6IHNpZ25hdHVyZSBhbmQvb3IgcmVxdWlyZWQga2V5IG1pc3NpbmcgLSB0YWludGluZyBr
-ZXJuZWwNClsgIDExMy44NTAyMzldIHN3aXRjaHRlYyAwMDAwOjNiOjAwLjE6IGVuYWJsaW5nIGRl
-dmljZSAoMDE0MCAtPiAwMTQyKQ0KWyAgMTEzLjg1MjkzNV0gc3dpdGNodGVjIHN3aXRjaHRlYzA6
-IE1hbmFnZW1lbnQgZGV2aWNlIHJlZ2lzdGVyZWQuDQpbICAxMTMuODUzMTY2XSBzd2l0Y2h0ZWMg
-MDAwMDo4NjowMC4xOiBlbmFibGluZyBkZXZpY2UgKDAxNDAgLT4gMDE0MikNClsgIDExMy44NTYw
-MjRdIHN3aXRjaHRlYyBzd2l0Y2h0ZWMxOiBNYW5hZ2VtZW50IGRldmljZSByZWdpc3RlcmVkLg0K
-WyAgMTEzLjg1NjA4OV0gc3dpdGNodGVjOiBsb2FkZWQuDQpbICAxMTMuODYwMTk4XSBudGJfaHdf
-c3dpdGNodGVjOnN3aXRjaHRlY19udGJfaW5pdF9zbmRldjo5MTM6IHN3aXRjaHRlYyBzd2l0Y2h0
-ZWMwOiBQYXJ0aXRpb24gSUQgMCBvZiA0DQpbICAxMTMuODYwMzQ4XSBudGJfaHdfc3dpdGNodGVj
-OnN3aXRjaHRlY19udGJfaW5pdF9tdzoxMjI3OiBzd2l0Y2h0ZWMgc3dpdGNodGVjMDogTVdzOiAy
-IGRpcmVjdCwgMzIgbHV0DQpbICAxMTMuODYwNDY0XSBudGJfaHdfc3dpdGNodGVjOnN3aXRjaHRl
-Y19udGJfaW5pdF9tdzoxMjM3OiBzd2l0Y2h0ZWMgc3dpdGNodGVjMDogUGVlciBNV3M6IDIgZGly
-ZWN0LCAzMiBsdXQNClsgIDExMy45MTE3OTddIG50Yl9od19zd2l0Y2h0ZWM6Y29uZmlnX3JlcV9p
-ZF90YWJsZTo5OTk6IHN3aXRjaHRlYyBzd2l0Y2h0ZWMwOiBSZXF1ZXN0ZXIgSUQgMDA6MDAuMCAt
-PiBCQjowMS4wDQpbICAxMTMuOTExODE5XSBudGJfaHdfc3dpdGNodGVjOmNvbmZpZ19yZXFfaWRf
-dGFibGU6OTk5OiBzd2l0Y2h0ZWMgc3dpdGNodGVjMDogUmVxdWVzdGVyIElEIDNBOjAwLjAgLT4g
-QkI6MDEuMQ0KWyAgMTEzLjk2MzcxMV0gc3dpdGNodGVjIHN3aXRjaHRlYzA6IFVzaW5nIGNyb3Nz
-bGluayBjb25maWd1cmF0aW9uDQpbICAxMTMuOTYzNzg3XSBudGJfaHdfc3dpdGNodGVjOmNyb3Nz
-bGlua19lbnVtX3BhcnRpdGlvbjoxMTI4OiBzd2l0Y2h0ZWMgc3dpdGNodGVjMDogQ3Jvc3NsaW5r
-IEJBUjAgYWRkcjogMA0KWyAgMTEzLjk2MzgyNF0gbnRiX2h3X3N3aXRjaHRlYzpjcm9zc2xpbmtf
-ZW51bV9wYXJ0aXRpb246MTEyODogc3dpdGNodGVjIHN3aXRjaHRlYzA6IENyb3NzbGluayBCQVIy
-IGFkZHI6IDEwMDAwMDAwMDANClsgIDExMy45NjM4NjBdIG50Yl9od19zd2l0Y2h0ZWM6Y3Jvc3Ns
-aW5rX2VudW1fcGFydGl0aW9uOjExMjg6IHN3aXRjaHRlYyBzd2l0Y2h0ZWMwOiBDcm9zc2xpbmsg
-QkFSNCBhZGRyOiAyMDAwMDAwMDAwDQpbICAxMTQuMjIzNzIzXSBudGJfaHdfc3dpdGNodGVjOmNv
-bmZpZ19yZXFfaWRfdGFibGU6OTk5OiBzd2l0Y2h0ZWMgc3dpdGNodGVjMDogUmVxdWVzdGVyIElE
-IDAwOjAxLjAgLT4gQkI6MDIuMA0KWyAgMTE0LjIyMzc0NV0gbnRiX2h3X3N3aXRjaHRlYzpjb25m
-aWdfcmVxX2lkX3RhYmxlOjk5OTogc3dpdGNodGVjIHN3aXRjaHRlYzA6IFJlcXVlc3RlciBJRCAw
-MDowMS4xIC0+IEJCOjAyLjENClsgIDExNC4yNzU3MzFdIG50Yl9od19zd2l0Y2h0ZWM6c3dpdGNo
-dGVjX250Yl9pbml0X2RiOjEyNzQ6IHN3aXRjaHRlYyBzd2l0Y2h0ZWMwOiBkYnM6IHNoaWZ0IDAv
-MCwgbWFzayAwZmZmZmZmZmZmZmZmZmZmDQpbICAxMTQuMzc5NjkzXSBudGJfaHdfc3dpdGNodGVj
-OnN3aXRjaHRlY19udGJfaW5pdF9zaGFyZWRfbXc6MTM3MDogc3dpdGNodGVjIHN3aXRjaHRlYzA6
-IFNoYXJlZCBNVyBSZWFkeQ0KWyAgMTE0LjM3OTcxNV0gbnRiX2h3X3N3aXRjaHRlYzpzd2l0Y2h0
-ZWNfbnRiX2luaXRfZGJfbXNnX2lycToxNDQyOiBzd2l0Y2h0ZWMgc3dpdGNodGVjMDogaXJxcyAt
-IGV2ZW50OiAyLCBkYjogMCwgbXNnczogMQ0KWyAgMTE0LjM3OTc2OF0gc3dpdGNodGVjIHN3aXRj
-aHRlYzA6IE5UQiBkZXZpY2UgcmVnaXN0ZXJlZA0KWyAgMTE0LjM3OTgxOV0gbnRiX2h3X3N3aXRj
-aHRlYzpzd2l0Y2h0ZWNfbnRiX2luaXRfc25kZXY6OTEzOiBzd2l0Y2h0ZWMgc3dpdGNodGVjMTog
-UGFydGl0aW9uIElEIDEgb2YgNA0KWyAgMTE0LjM3OTk0MF0gbnRiX2h3X3N3aXRjaHRlYzpzd2l0
-Y2h0ZWNfbnRiX2luaXRfbXc6MTIyNzogc3dpdGNodGVjIHN3aXRjaHRlYzE6IE1XczogMiBkaXJl
-Y3QsIDMyIGx1dA0KWyAgMTE0LjM4MDA2MF0gbnRiX2h3X3N3aXRjaHRlYzpzd2l0Y2h0ZWNfbnRi
-X2luaXRfbXc6MTIzNzogc3dpdGNodGVjIHN3aXRjaHRlYzE6IFBlZXIgTVdzOiAyIGRpcmVjdCwg
-MzIgbHV0DQpbICAxMTQuNDMxNzQxXSBudGJfaHdfc3dpdGNodGVjOmNvbmZpZ19yZXFfaWRfdGFi
-bGU6OTk5OiBzd2l0Y2h0ZWMgc3dpdGNodGVjMTogUmVxdWVzdGVyIElEIDAwOjAwLjAgLT4gQkI6
-MDEuNA0KWyAgMTE0LjQzMTc2NF0gbnRiX2h3X3N3aXRjaHRlYzpjb25maWdfcmVxX2lkX3RhYmxl
-Ojk5OTogc3dpdGNodGVjIHN3aXRjaHRlYzE6IFJlcXVlc3RlciBJRCA4NTowMC4wIC0+IEJCOjAx
-LjUNClsgIDExNC40ODM2ODZdIHN3aXRjaHRlYyBzd2l0Y2h0ZWMxOiBVc2luZyBjcm9zc2xpbmsg
-Y29uZmlndXJhdGlvbg0KWyAgMTE0LjQ4Mzc1NF0gbnRiX2h3X3N3aXRjaHRlYzpjcm9zc2xpbmtf
-ZW51bV9wYXJ0aXRpb246MTEyODogc3dpdGNodGVjIHN3aXRjaHRlYzE6IENyb3NzbGluayBCQVIw
-IGFkZHI6IDANClsgIDExNC40ODM3OTJdIG50Yl9od19zd2l0Y2h0ZWM6Y3Jvc3NsaW5rX2VudW1f
-cGFydGl0aW9uOjExMjg6IHN3aXRjaHRlYyBzd2l0Y2h0ZWMxOiBDcm9zc2xpbmsgQkFSMiBhZGRy
-OiAxMDAwMDAwMDAwDQpbICAxMTQuNDgzODI5XSBudGJfaHdfc3dpdGNodGVjOmNyb3NzbGlua19l
-bnVtX3BhcnRpdGlvbjoxMTI4OiBzd2l0Y2h0ZWMgc3dpdGNodGVjMTogQ3Jvc3NsaW5rIEJBUjQg
-YWRkcjogMjAwMDAwMDAwMA0KWyAgMTE0Ljc0MzcwNV0gbnRiX2h3X3N3aXRjaHRlYzpjb25maWdf
-cmVxX2lkX3RhYmxlOjk5OTogc3dpdGNodGVjIHN3aXRjaHRlYzE6IFJlcXVlc3RlciBJRCAwMDow
-MS40IC0+IEJCOjAyLjQNClsgIDExNC43NDM3MjddIG50Yl9od19zd2l0Y2h0ZWM6Y29uZmlnX3Jl
-cV9pZF90YWJsZTo5OTk6IHN3aXRjaHRlYyBzd2l0Y2h0ZWMxOiBSZXF1ZXN0ZXIgSUQgMDA6MDEu
-NSAtPiBCQjowMi41DQpbICAxMTQuNzk1Njg2XSBudGJfaHdfc3dpdGNodGVjOnN3aXRjaHRlY19u
-dGJfaW5pdF9kYjoxMjc0OiBzd2l0Y2h0ZWMgc3dpdGNodGVjMTogZGJzOiBzaGlmdCAwLzAsIG1h
-c2sgMGZmZmZmZmZmZmZmZmZmZg0KWyAgMTE0Ljg5OTY2NF0gbnRiX2h3X3N3aXRjaHRlYzpzd2l0
-Y2h0ZWNfbnRiX2luaXRfc2hhcmVkX213OjEzNzA6IHN3aXRjaHRlYyBzd2l0Y2h0ZWMxOiBTaGFy
-ZWQgTVcgUmVhZHkNClsgIDExNC44OTk2ODhdIG50Yl9od19zd2l0Y2h0ZWM6c3dpdGNodGVjX250
-Yl9pbml0X2RiX21zZ19pcnE6MTQ0Mjogc3dpdGNodGVjIHN3aXRjaHRlYzE6IGlycXMgLSBldmVu
-dDogMiwgZGI6IDAsIG1zZ3M6IDENClsgIDExNC44OTk3MzFdIHN3aXRjaHRlYyBzd2l0Y2h0ZWMx
-OiBOVEIgZGV2aWNlIHJlZ2lzdGVyZWQNClsgIDExNC45MDYxMTZdIG50Yl9od19zd2l0Y2h0ZWM6
-c3dpdGNodGVjX250Yl9saW5rX2VuYWJsZTo2MDM6IHN3aXRjaHRlYyBzd2l0Y2h0ZWMwOiBlbmFi
-bGluZyBsaW5rDQpbICAxMTQuOTA2MTIwXSBudGJfdG9vbDp0b29sX2xpbmtfZXZlbnQ6MTcwOiBu
-dGJfdG9vbCAwMDAwOjNiOjAwLjE6IGxpbmsgaXMgZG93biBzcGVlZCAwIHdpZHRoIDANClsgIDEx
-NC45MDYxODVdIG50Yl9od19zd2l0Y2h0ZWM6c3dpdGNodGVjX250Yl9saW5rX2VuYWJsZTo2MDM6
-IHN3aXRjaHRlYyBzd2l0Y2h0ZWMxOiBlbmFibGluZyBsaW5rDQpbICAxMTQuOTA2MTg4XSBudGJf
-dG9vbDp0b29sX2xpbmtfZXZlbnQ6MTcwOiBudGJfdG9vbCAwMDAwOjg2OjAwLjE6IGxpbmsgaXMg
-ZG93biBzcGVlZCAwIHdpZHRoIDANClsgIDExNC45MjU3NzhdIHN3aXRjaHRlYyAwMDAwOjNiOjAw
-LjE6IHN3aW90bGIgYnVmZmVyIGlzIGZ1bGwgKHN6OiAyMDk3MTUyMCBieXRlcykNClsgIDExNC45
-MjU3NzldIHN3aW90bGI6IGNvaGVyZW50IGFsbG9jYXRpb24gZmFpbGVkIGZvciBkZXZpY2UgMDAw
-MDozYjowMC4xIHNpemU9MjA5NzE1MjANClsgIDExNC45MjU3ODFdIENQVTogMzAgUElEOiAxODYy
-IENvbW06IG50Yl9kcml2ZXJfc2V0dSBUYWludGVkOiBHICAgICAgICAgICBPRSAgIDQuMTQuMTcg
-IzINCiBbICAxMTQuOTI1NzgzXSBDYWxsIFRyYWNlOg0KWyAgMTE0LjkyNTc5Ml0gIGR1bXBfc3Rh
-Y2srMHg1Yy8weDgzDQpbICAxMTQuOTI1Nzk4XSAgc3dpb3RsYl9hbGxvY19jb2hlcmVudCsweDE0
-Yy8weDE2MA0KWyAgMTE0LjkyNTgwNF0gIHRvb2xfcGVlcl9td190cmFuc193cml0ZSsweDFiMi8w
-eDMyMCBbbnRiX3Rvb2xdDQpbICAxMTQuOTI1ODA4XSAgPyBwZXJmX3RyYWNlX21tX2NvbXBhY3Rp
-b25fbWlncmF0ZXBhZ2VzKzB4NWEvMHgxMjANClsgIDExNC45MjU4MTRdICBmdWxsX3Byb3h5X3dy
-aXRlKzB4NWEvMHhhMA0KWyAgMTE0LjkyNTgyMF0gIF9fdmZzX3dyaXRlKzB4MzMvMHgxNzANClsg
-IDExNC45MjU4MjRdICA/IGhhbmRsZV9tbV9mYXVsdCsweGM0LzB4MWQwDQpbICAxMTQuOTI1ODMw
-XSAgPyBfX2F1ZGl0X3N5c2NhbGxfZW50cnkrMHhhZi8weDEwMA0KWyAgMTE0LjkyNTgzMV0gIHZm
-c193cml0ZSsweGFkLzB4MWEwDQpbICAxMTQuOTI1ODMzXSAgU3lTX3dyaXRlKzB4NTIvMHhjMA0K
-WyAgMTE0LjkyNTgzOF0gIGRvX3N5c2NhbGxfNjQrMHg2MS8weDFhMA0KWyAgMTE0LjkyNTg0NF0g
-IGVudHJ5X1NZU0NBTEw2NF9zbG93X3BhdGgrMHgyNS8weDI1DQpbICAxMTQuOTI1ODQ2XSBSSVA6
-IDAwMzM6MHg3ZWZmYjM4ZTY4NDANClsgIDExNC45MjU4NDddIFJTUDogMDAyYjowMDAwN2ZmZWZi
-YWU4M2Y4IEVGTEFHUzogMDAwMDAyNDYgT1JJR19SQVg6IDAwMDAwMDAwMDAwMDAwMDENClsgIDEx
-NC45MjU4NDldIFJBWDogZmZmZmZmZmZmZmZmZmZkYSBSQlg6IDAwMDAwMDAwMDAwMDAwMDkgUkNY
-OiAwMDAwN2VmZmIzOGU2ODQwDQpbICAxMTQuOTI1ODQ5XSBSRFg6IDAwMDAwMDAwMDAwMDAwMDkg
-UlNJOiAwMDAwN2VmZmI0MjA1MDAwIFJESTogMDAwMDAwMDAwMDAwMDAwMQ0KWyAgMTE0LjkyNTg1
-MF0gUkJQOiAwMDAwN2VmZmI0MjA1MDAwIFIwODogMDAwMDAwMDAwMDAwMDAwYSBSMDk6IDAwMDA3
-ZWZmYjQxZmY3NDANClsgIDExNC45MjU4NTFdIFIxMDogMDAwMDdmZmVmYmFlODFhMCBSMTE6IDAw
-MDAwMDAwMDAwMDAyNDYgUjEyOiAwMDAwN2VmZmIzYmJhNDAwDQpbICAxMTQuOTI1ODUyXSBSMTM6
-IDAwMDAwMDAwMDAwMDAwMDkgUjE0OiAwMDAwMDAwMDAwMDAwMDAxIFIxNTogMDAwMDAwMDAwMDAw
-MDAwMA0KDQotLQ0KQmVzdCByZWdhcmRzLCBCb3Jpcw0KTGV0IG1lIGdvb2dsZSB0aGF0IGZvciB5
-b3UNCg0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogbGludXgtbnRiQGdvb2ds
-ZWdyb3Vwcy5jb20gW21haWx0bzpsaW51eC1udGJAZ29vZ2xlZ3JvdXBzLmNvbV0gT24gQmVoYWxm
-IE9mIExvZ2FuIEd1bnRob3JwZQ0KU2VudDogVGh1cnNkYXksIE1heSAzMSwgMjAxOCAyMTo0OQ0K
-VG86IEdsaW1jaGVyLCBCb3JpczsgbGludXgtbnRiQGdvb2dsZWdyb3Vwcy5jb20NClN1YmplY3Q6
-IFJlOiBudGJfdG9vbCBjYW5ub3QgZG1hX2FsbG9jX2NvaGVyZW50IHdpdGggQ01BIChvdmVyIHN3
-aXRjaHRlYykNCg0KDQpPbiAzMS8wNS8xOCAxMDozMiBBTSwgR2xpbWNoZXIsIEJvcmlzIHdyb3Rl
-Og0KPiBJ4oCZbSB0cnlpbmcgdG8gZW5sYXJnZSBidWZmZXJzIEkgdXNlIGluIG50Yl90b29sIGJ5
-IHVzaW5nIGNtYToNCg0KSG1tLCBub3Qgc3VyZSB3aGF0IHRoZSBwcm9ibGVtIGlzLiBJcyB0aGlz
-IHg4Nj8NCg0KSXQgd291bGQgYWxzbyBiZSB1c2VmdWwgdG8gc2VlIGEgY29tcGxldGUgZG1lc2cg
-dHJhY2UuDQoNCkxvZ2FuDQoNCi0tIA0KWW91IHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBiZWNhdXNl
-IHlvdSBhcmUgc3Vic2NyaWJlZCB0byB0aGUgR29vZ2xlIEdyb3VwcyAibGludXgtbnRiIiBncm91
-cC4NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBncm91cCBhbmQgc3RvcCByZWNlaXZpbmcgZW1h
-aWxzIGZyb20gaXQsIHNlbmQgYW4gZW1haWwgdG8gbGludXgtbnRiK3Vuc3Vic2NyaWJlQGdvb2ds
-ZWdyb3Vwcy5jb20uDQpUbyBwb3N0IHRvIHRoaXMgZ3JvdXAsIHNlbmQgZW1haWwgdG8gbGludXgt
-bnRiQGdvb2dsZWdyb3Vwcy5jb20uDQpUbyB2aWV3IHRoaXMgZGlzY3Vzc2lvbiBvbiB0aGUgd2Vi
-IHZpc2l0IGh0dHBzOi8vZ3JvdXBzLmdvb2dsZS5jb20vZC9tc2dpZC9saW51eC1udGIvNTI2NDg3
-MTAtY2Y0YS05MDcyLWMwM2ItOWEwZjNmZTdjMTlkJTQwZGVsdGF0ZWUuY29tLg0KRm9yIG1vcmUg
-b3B0aW9ucywgdmlzaXQgaHR0cHM6Ly9ncm91cHMuZ29vZ2xlLmNvbS9kL29wdG91dC4NCg==
+This is a multi-part message in MIME format.
+--------------3CFF2E0C1BF77A943B2399DE
+Content-Type: text/plain; charset="utf-8"; format="flowed"
+Content-Transfer-Encoding: 8bit
+
+
+On 5/31/2018 9:32 AM, Glimcher, Boris wrote:
+>
+> Hi,
+>
+> I’m trying to enlarge buffers I use in ntb_tool by using cma:
+>
+> $ dmesg | grep cma
+>
+> [    0.000000] Command line: BOOT_IMAGE=/vmlinuz-4.14.17 
+> root=UUID=71fb5fd6-0242-444e-8e17-d31d65051f61 ro crashkernel=auto 
+> rhgb quiet cma=32G hugepages=100000 intel_pstate=disable
+>
+> [    0.000000] cma: Reserved 32768 MiB at 0x000000f87fc00000
+>
+> [    0.000000] Kernel command line: BOOT_IMAGE=/vmlinuz-4.14.17 
+> root=UUID=71fb5fd6-0242-444e-8e17-d31d65051f61 ro crashkernel=auto 
+> rhgb quiet cma=32G hugepages=100000 intel_pstate=disable
+>
+> [    0.000000] Memory: 6057140K/1073389456K available (10252K kernel 
+> code, 2231K rwdata, 3476K rodata, 2252K init, 3040K bss, 17104596K 
+> reserved, 33554432K cma-reserved)
+>
+> grep -i cma /proc/meminfo
+>
+> CmaTotal: 33554432 kB
+>
+> CmaFree: 33501788 kB
+>
+> After loading drivers I allocate memory (uses dma_alloc_coherent):
+>
+> echo 20971520 > /sys/kernel/debug/ntb_tool/0000\:3b\:00.1/peer_trans1
+>
+> I get this stack:
+>
+> [  313.224544] switchtec 0000:3b:00.1: swiotlb buffer is full (sz: 
+> 20971520 bytes)
+>
+> [  313.224546] swiotlb: coherent allocation failed for device 
+> 0000:3b:00.1 size=20971520
+>
+So it's quite difficult to allocate CMA memory on x86 without iommu 
+enabled as I discovered. Anything larger than 4M and you are pretty much 
+doing it by luck. When you turn the iommu on it does not go through 
+swiotlb and that seems to work fairly well.
+
+
+> [  313.224550] Call Trace:
+>
+> [  313.224560]  dump_stack+0x5c/0x83
+>
+> [  313.224567] swiotlb_alloc_coherent+0x14c/0x160
+>
+> [  313.224572] tool_peer_mw_trans_write+0x1b2/0x320 [ntb_tool]
+>
+> [  313.224578]  ? perf_trace_mm_compaction_migratepages+0x5a/0x120
+>
+> [  313.224584] full_proxy_write+0x5a/0xa0
+>
+> [  313.224589]  __vfs_write+0x33/0x170
+>
+> [  313.224594]  ? handle_mm_fault+0xc4/0x1d0
+>
+> [  313.224599]  ? __audit_syscall_entry+0xaf/0x100
+>
+> [  313.224601]  vfs_write+0xad/0x1a0
+>
+> [  313.224603]  SyS_write+0x52/0xc0
+>
+> [  313.224608]  do_syscall_64+0x61/0x1a0
+>
+> [  313.224614] entry_SYSCALL64_slow_path+0x25/0x25
+>
+> [  313.224616] RIP: 0033:0x7f79ac50e840
+>
+> [  313.224617] RSP: 002b:00007ffc8e89afe8 EFLAGS: 00000246 ORIG_RAX: 
+> 0000000000000001
+>
+> [  313.224619] RAX: ffffffffffffffda RBX: 0000000000000009 RCX: 
+> 00007f79ac50e840
+>
+> [  313.224619] RDX: 0000000000000009 RSI: 00007f79ace2d000 RDI: 
+> 0000000000000001
+>
+> [  313.224620] RBP: 00007f79ace2d000 R08: 000000000000000a R09: 
+> 00007f79ace27740
+>
+> [  313.224621] R10: 00007ffc8e89ad90 R11: 0000000000000246 R12: 
+> 00007f79ac7e2400
+>
+> [  313.224622] R13: 0000000000000009 R14: 0000000000000001 R15: 
+> 0000000000000000
+>
+> Any help please?
+>
+> --
+>
+> Best regards, Boris
+>
+> -- 
+> You received this message because you are subscribed to the Google 
+> Groups "linux-ntb" group.
+> To unsubscribe from this group and stop receiving emails from it, send 
+> an email to linux-ntb+unsubscribe@googlegroups.com 
+> <mailto:linux-ntb+unsubscribe@googlegroups.com>.
+> To post to this group, send email to linux-ntb@googlegroups.com 
+> <mailto:linux-ntb@googlegroups.com>.
+> To view this discussion on the web visit 
+> https://groups.google.com/d/msgid/linux-ntb/8A1F3ACA2F40C04FBF91985D6F491D7C0176649B%40MX302CL01.corp.emc.com 
+> <https://groups.google.com/d/msgid/linux-ntb/8A1F3ACA2F40C04FBF91985D6F491D7C0176649B%40MX302CL01.corp.emc.com?utm_medium=email&utm_source=footer>.
+> For more options, visit https://groups.google.com/d/optout.
+
+--------------3CFF2E0C1BF77A943B2399DE
+Content-Type: text/html; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  </head>
+  <body text="#000000" bgcolor="#FFFFFF">
+    <p><br>
+    </p>
+    <div class="moz-cite-prefix">On 5/31/2018 9:32 AM, Glimcher, Boris
+      wrote:<br>
+    </div>
+    <blockquote type="cite"
+cite="mid:8A1F3ACA2F40C04FBF91985D6F491D7C0176649B@MX302CL01.corp.emc.com">
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <meta name="Generator" content="Microsoft Word 15 (filtered
+        medium)">
+      <style><!--
+/* Font Definitions */
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+/* Style Definitions */
+p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin:0in;
+	margin-bottom:.0001pt;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+a:link, span.MsoHyperlink
+	{mso-style-priority:99;
+	color:#0563C1;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{mso-style-priority:99;
+	color:#954F72;
+	text-decoration:underline;}
+p.MsoPlainText, li.MsoPlainText, div.MsoPlainText
+	{mso-style-priority:99;
+	mso-style-link:"Plain Text Char";
+	margin:0in;
+	margin-bottom:.0001pt;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+span.EmailStyle17
+	{mso-style-type:personal-compose;
+	font-family:"Calibri",sans-serif;
+	color:windowtext;}
+span.PlainTextChar
+	{mso-style-name:"Plain Text Char";
+	mso-style-priority:99;
+	mso-style-link:"Plain Text";
+	font-family:"Calibri",sans-serif;}
+.MsoChpDefault
+	{mso-style-type:export-only;
+	font-family:"Calibri",sans-serif;}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.0in 1.0in 1.0in;}
+div.WordSection1
+	{page:WordSection1;}
+--></style><!--[if gte mso 9]><xml>
+<o:shapedefaults v:ext="edit" spidmax="1026" />
+</xml><![endif]--><!--[if gte mso 9]><xml>
+<o:shapelayout v:ext="edit">
+<o:idmap v:ext="edit" data="1" />
+</o:shapelayout></xml><![endif]-->
+      <div class="WordSection1">
+        <p class="MsoPlainText">Hi,<o:p></o:p></p>
+        <p class="MsoPlainText"><o:p> </o:p></p>
+        <p class="MsoPlainText">I’m trying to enlarge buffers I use in
+          ntb_tool by using cma:<o:p></o:p></p>
+        <p class="MsoPlainText" style="text-indent:.5in">$ dmesg | grep
+          cma<o:p></o:p></p>
+        <p class="MsoPlainText" style="text-indent:.5in">[    0.000000]
+          Command line: BOOT_IMAGE=/vmlinuz-4.14.17
+          root=UUID=71fb5fd6-0242-444e-8e17-d31d65051f61 ro
+          crashkernel=auto rhgb quiet cma=32G hugepages=100000
+          intel_pstate=disable<o:p></o:p></p>
+        <p class="MsoPlainText" style="text-indent:.5in">[    0.000000]
+          cma: Reserved 32768 MiB at 0x000000f87fc00000<o:p></o:p></p>
+        <p class="MsoPlainText" style="text-indent:.5in">[    0.000000]
+          Kernel command line: BOOT_IMAGE=/vmlinuz-4.14.17
+          root=UUID=71fb5fd6-0242-444e-8e17-d31d65051f61 ro
+          crashkernel=auto rhgb quiet cma=32G hugepages=100000
+          intel_pstate=disable<o:p></o:p></p>
+        <p class="MsoPlainText" style="text-indent:.5in">[    0.000000]
+          Memory: 6057140K/1073389456K available (10252K kernel code,
+          2231K rwdata, 3476K rodata, 2252K init, 3040K bss, 17104596K
+          reserved, 33554432K cma-reserved)<o:p></o:p></p>
+        <p class="MsoPlainText"><o:p> </o:p></p>
+        <p class="MsoPlainText">grep -i cma /proc/meminfo <o:p></o:p></p>
+        <p class="MsoPlainText" style="text-indent:.5in">CmaTotal:      
+          33554432 kB<o:p></o:p></p>
+        <p class="MsoPlainText" style="text-indent:.5in">CmaFree:       
+          33501788 kB<o:p></o:p></p>
+        <p class="MsoPlainText"><o:p> </o:p></p>
+        <p class="MsoPlainText">After loading drivers I allocate memory
+          (uses dma_alloc_coherent):<o:p></o:p></p>
+        <p class="MsoPlainText" style="text-indent:.5in">echo 20971520
+          &gt; /sys/kernel/debug/ntb_tool/0000\:3b\:00.1/peer_trans1<o:p></o:p></p>
+        <p class="MsoPlainText"><o:p> </o:p></p>
+        <p class="MsoPlainText">I get this stack:<o:p></o:p></p>
+        <p class="MsoPlainText"><o:p> </o:p></p>
+        <p class="MsoPlainText">[  313.224544] switchtec 0000:3b:00.1:
+          swiotlb buffer is full (sz: 20971520 bytes)<o:p></o:p></p>
+        <p class="MsoPlainText">[  313.224546] swiotlb: coherent
+          allocation failed for device 0000:3b:00.1 size=20971520<o:p></o:p></p>
+      </div>
+    </blockquote>
+    <p>So it's quite difficult to allocate CMA memory on x86 without
+      iommu enabled as I discovered. Anything larger than 4M and you are
+      pretty much doing it by luck. When you turn the iommu on it does
+      not go through swiotlb and that seems to work fairly well. <br>
+    </p>
+    <p><br>
+    </p>
+    <blockquote type="cite"
+cite="mid:8A1F3ACA2F40C04FBF91985D6F491D7C0176649B@MX302CL01.corp.emc.com">
+      <div class="WordSection1">
+        <p class="MsoPlainText">[  313.224550] Call Trace:<o:p></o:p></p>
+        <p class="MsoPlainText">[  313.224560]  dump_stack+0x5c/0x83<o:p></o:p></p>
+        <p class="MsoPlainText">[  313.224567] 
+          swiotlb_alloc_coherent+0x14c/0x160<o:p></o:p></p>
+        <p class="MsoPlainText">[  313.224572] 
+          tool_peer_mw_trans_write+0x1b2/0x320 [ntb_tool]<o:p></o:p></p>
+        <p class="MsoPlainText">[  313.224578]  ?
+          perf_trace_mm_compaction_migratepages+0x5a/0x120<o:p></o:p></p>
+        <p class="MsoPlainText">[  313.224584] 
+          full_proxy_write+0x5a/0xa0<o:p></o:p></p>
+        <p class="MsoPlainText">[  313.224589]  __vfs_write+0x33/0x170<o:p></o:p></p>
+        <p class="MsoPlainText">[  313.224594]  ?
+          handle_mm_fault+0xc4/0x1d0<o:p></o:p></p>
+        <p class="MsoPlainText">[  313.224599]  ?
+          __audit_syscall_entry+0xaf/0x100<o:p></o:p></p>
+        <p class="MsoPlainText">[  313.224601]  vfs_write+0xad/0x1a0<o:p></o:p></p>
+        <p class="MsoPlainText">[  313.224603]  SyS_write+0x52/0xc0<o:p></o:p></p>
+        <p class="MsoPlainText">[  313.224608]  do_syscall_64+0x61/0x1a0<o:p></o:p></p>
+        <p class="MsoPlainText">[  313.224614] 
+          entry_SYSCALL64_slow_path+0x25/0x25<o:p></o:p></p>
+        <p class="MsoPlainText">[  313.224616] RIP: 0033:0x7f79ac50e840<o:p></o:p></p>
+        <p class="MsoPlainText">[  313.224617] RSP:
+          002b:00007ffc8e89afe8 EFLAGS: 00000246 ORIG_RAX:
+          0000000000000001<o:p></o:p></p>
+        <p class="MsoPlainText">[  313.224619] RAX: ffffffffffffffda
+          RBX: 0000000000000009 RCX: 00007f79ac50e840<o:p></o:p></p>
+        <p class="MsoPlainText">[  313.224619] RDX: 0000000000000009
+          RSI: 00007f79ace2d000 RDI: 0000000000000001<o:p></o:p></p>
+        <p class="MsoPlainText">[  313.224620] RBP: 00007f79ace2d000
+          R08: 000000000000000a R09: 00007f79ace27740<o:p></o:p></p>
+        <p class="MsoPlainText">[  313.224621] R10: 00007ffc8e89ad90
+          R11: 0000000000000246 R12: 00007f79ac7e2400<o:p></o:p></p>
+        <p class="MsoPlainText">[  313.224622] R13: 0000000000000009
+          R14: 0000000000000001 R15: 0000000000000000<o:p></o:p></p>
+        <p class="MsoNormal"><o:p> </o:p></p>
+        <p class="MsoNormal">Any help please?<o:p></o:p></p>
+        <p class="MsoNormal"><o:p> </o:p></p>
+        <p class="MsoNormal">--<o:p></o:p></p>
+        <p class="MsoNormal">Best regards, Boris<o:p></o:p></p>
+        <p class="MsoNormal"><o:p> </o:p></p>
+      </div>
+      -- <br>
+      You received this message because you are subscribed to the Google
+      Groups "linux-ntb" group.<br>
+      To unsubscribe from this group and stop receiving emails from it,
+      send an email to <a
+        href="mailto:linux-ntb+unsubscribe@googlegroups.com"
+        moz-do-not-send="true">linux-ntb+unsubscribe@googlegroups.com</a>.<br>
+      To post to this group, send email to <a
+        href="mailto:linux-ntb@googlegroups.com" moz-do-not-send="true">linux-ntb@googlegroups.com</a>.<br>
+      To view this discussion on the web visit <a
+href="https://groups.google.com/d/msgid/linux-ntb/8A1F3ACA2F40C04FBF91985D6F491D7C0176649B%40MX302CL01.corp.emc.com?utm_medium=email&amp;utm_source=footer"
+        moz-do-not-send="true">https://groups.google.com/d/msgid/linux-ntb/8A1F3ACA2F40C04FBF91985D6F491D7C0176649B%40MX302CL01.corp.emc.com</a>.<br>
+      For more options, visit <a
+        href="https://groups.google.com/d/optout" moz-do-not-send="true">https://groups.google.com/d/optout</a>.<br>
+    </blockquote>
+  </body>
+</html>
+
+--------------3CFF2E0C1BF77A943B2399DE--
