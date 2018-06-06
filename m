@@ -1,7 +1,11 @@
-Date: Fri, 8 Jun 2018 02:23:17 -0700 (PDT)
-From: vk en <yato.iacs@gmail.com>
-Message-Id: <5f6f69df-378d-4fd8-84b0-f0fff08c7575@googlegroups.com>
-In-Reply-To: <d87bda21-29a6-4ce2-678a-79d07220a089@intel.com>
+Return-Path: <dave.jiang@intel.com>
+Received: from mga05.intel.com (mga05.intel.com. [192.55.52.43])
+        by gmr-mx.google.com with ESMTPS id x3-v6si565699ybp.5.2018.06.06.09.46.01
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 06 Jun 2018 09:46:02 -0700 (PDT)
+Subject: Re: Problem with the connection status (Link-status) after loading
+ the driver ntb_hw_intel
 References: <e46a0926-7118-4009-886f-c1252cb93d62@googlegroups.com>
  <CAJ80sasPx7HFT2wgD7tMpmEVKPraHg+oQJ-zoUkNyRpnB8to+Q@mail.gmail.com>
  <62e8a338-e07b-4174-927c-f4f70a54949b@googlegroups.com>
@@ -13,63 +17,38 @@ References: <e46a0926-7118-4009-886f-c1252cb93d62@googlegroups.com>
  <9058dedf-ec3a-42d4-9eaa-40d95740fcc0@googlegroups.com>
  <0fe77341-d309-479f-177c-c18b0193926e@intel.com>
  <b6723ca5-2f8b-4fcf-812e-20c4f40c73c2@googlegroups.com>
- <d87bda21-29a6-4ce2-678a-79d07220a089@intel.com>
-Subject: Re: Problem with the connection status (Link-status) after loading
- the driver ntb_hw_intel
+From: Dave Jiang <dave.jiang@intel.com>
+Message-ID: <d87bda21-29a6-4ce2-678a-79d07220a089@intel.com>
+Date: Wed, 6 Jun 2018 09:46:00 -0700
 MIME-Version: 1.0
-Content-Type: multipart/mixed; 
-	boundary="----=_Part_10354_1375871543.1528449797710"
-To: linux-ntb <linux-ntb@googlegroups.com>
+In-Reply-To: <b6723ca5-2f8b-4fcf-812e-20c4f40c73c2@googlegroups.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
+To: vk en <yato.iacs@gmail.com>, linux-ntb <linux-ntb@googlegroups.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-------=_Part_10354_1375871543.1528449797710
-Content-Type: multipart/alternative; 
-	boundary="----=_Part_10355_1688199958.1528449797710"
+On 06/06/2018 02:06 AM, vk en wrote:
+> 
+> 
+> вторник, 5 июня 2018 г., 19:16:48 UTC+3 пользователь dave.jiang написал:
+> 
+>     On 06/05/2018 01:21 AM, vk en wrote:
+>     > 1. I did not find the CBDMA in BIOS, it's not there.
+>     > But we wrote to the manufacturer to find out where to find CBDMA.
+> 
+>     That is pretty unusual. All Intel E5 or higher based Xeon (or whatever
+>     the equivalent is now, thanks marketing) has ioatdma (CBDMA). It's a
+>     matter of whether your BIOS enable it or not. Of course if your
+>     platform
+>     has NTB, then you should have the DMA engine as well as they are
+>     part of
+>     the platform storage extension features. Which Xeon platform are you on
+>     and who is your supplier?
+> 
+>  System Gooxi, Intel® Xeon® E5-2603 v4
 
-------=_Part_10355_1688199958.1528449797710
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-
-Hey.
-
-1. I changed the system to a new one
-it has 2 controllers with 2 processors each.  (before 2 controllers one 
-processor each)
-
-2. I successfully created ntrdma device, without any errors.
-
-Problems:
-1. If only 1 controller works, then the Status link in ntb_hw_intel still 
-shows UP. 
-So it should not be, since I need to connect 2 controllers. (On the first 
-system, this worked correctly, if I turned off one controller or switched 
-off (ntb_transport), then the link had the status of DOWN)
-Why is this so?
-
-2. I successfully created the device, but I did not manage to connect the 
-clusters with each other.
-NTRDMA also created an interface, but after their configuration, there is 
-no ping between clusters.
-
-What have I done wrong? or can I be something I forgot to do?
-
-------=_Part_10355_1688199958.1528449797710
-Content-Type: text/html; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr"><div>Hey.</div><div><br></div><div>1. I changed the system=
- to a new one</div><div>it has 2 controllers with 2 processors each.=C2=A0=
-=C2=A0(before 2 controllers one processor each)</div><div><br></div><div>2.=
- I successfully created ntrdma device, without any errors.</div><div><br></=
-div><div>Problems:</div><div>1. If only 1 controller works, then the Status=
- link in ntb_hw_intel still shows UP.=C2=A0</div><div>So it should not be, =
-since I need to connect 2 controllers. (On the first system, this worked co=
-rrectly, if I turned off one controller or switched off (ntb_transport), th=
-en the link had the status of DOWN)</div><div>Why is this so?<br><br></div>=
-<div>2. I successfully created the device, but I did not manage to connect =
-the clusters with each other.</div><div>NTRDMA also created an interface, b=
-ut after their configuration, there is no ping between clusters.<br><br>Wha=
-t have I done wrong? or can I be something I forgot to do?<br></div></div>
-------=_Part_10355_1688199958.1528449797710--
-
-------=_Part_10354_1375871543.1528449797710--
+Ok yes so you need to inquire with your vendor about your BIOS enabling
+to turn the CBDMA devices on. I'm surprised it's not there since it's a
+standard feature for E5 and is enabled in the base BIOS code that Intel
+provides to BIOS vendors.
