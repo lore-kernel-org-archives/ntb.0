@@ -1,54 +1,71 @@
-Return-Path: <logang@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id m4-v6si43527ybo.3.2018.06.07.17.05.25
+Return-Path: <fancer.lancer@gmail.com>
+Received: from mail-lf0-x229.google.com (mail-lf0-x229.google.com. [2a00:1450:4010:c07::229])
+        by gmr-mx.google.com with ESMTPS id x3-v6si1314816wrn.0.2018.06.07.17.04.50
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Thu, 07 Jun 2018 17:05:25 -0700 (PDT)
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 07 Jun 2018 17:04:50 -0700 (PDT)
+Received: by mail-lf0-x229.google.com with SMTP id d24-v6so17301009lfa.8
+        for <linux-ntb@googlegroups.com>; Thu, 07 Jun 2018 17:04:50 -0700 (PDT)
+Return-Path: <fancer.lancer@gmail.com>
+Date: Fri, 8 Jun 2018 03:04:46 +0300
+From: Serge Semin <fancer.lancer@gmail.com>
+Subject: Re: dma_alloc_coherent bug in latest ntb_tool changes
+Message-ID: <20180608000446.GB28442@mobilestation>
 References: <e4743cee-5c10-4e16-5b8a-2090db3f9791@deltatee.com>
  <0a9adce4-dd06-652d-19ae-72929fa386f6@intel.com>
- <20180607235735.GA28442@mobilestation>
-From: Logan Gunthorpe <logang@deltatee.com>
-Message-ID: <a607b7b3-fa69-4b8b-7b1e-ae9759ea54f8@deltatee.com>
-Date: Thu, 7 Jun 2018 18:05:20 -0600
 MIME-Version: 1.0
-In-Reply-To: <20180607235735.GA28442@mobilestation>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-Subject: Re: dma_alloc_coherent bug in latest ntb_tool changes
-To: Serge Semin <fancer.lancer@gmail.com>, Dave Jiang <dave.jiang@intel.com>
-Cc: linux-ntb <linux-ntb@googlegroups.com>, Jon Mason <jdmason@kudzu.us>, Allen Hubbe <allenbh@gmail.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <0a9adce4-dd06-652d-19ae-72929fa386f6@intel.com>
+To: Dave Jiang <dave.jiang@intel.com>
+Cc: Logan Gunthorpe <logang@deltatee.com>, linux-ntb <linux-ntb@googlegroups.com>, Jon Mason <jdmason@kudzu.us>, Allen Hubbe <allenbh@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
+On Thu, Jun 07, 2018 at 04:17:02PM -0700, Dave Jiang <dave.jiang@intel.com> wrote:
+> 
+> 
+> On 06/07/2018 04:10 PM, Logan Gunthorpe wrote:
+> > Hey,
+> > 
+> > I'm just running ntb_test on recent kernels with switchtec hardware and
+> > found that ntb_tool and ntb_perf no longer work. I get this kernel warning:
+> > 
+> > [   64.077406] WARNING: CPU: 3 PID: 2231 at
+> > ./include/linux/dma-mapping.h:516 tool_mw_trans_write+0x16d/0x332 [ntb_tool]
+> > 
+> > Indicating that the dma_coherent mask is not set on the device. (Not
+> > sure how much testing that patch set got before it was merged upstream...)
+> > 
+> > It seems one of the changes that slipped through is that it now
+> > allocates DMA memory using the NTB struct device instead of the PCI
+> > struct device that was used before the patchset.
+> > 
+> > Seeing nothing in the NTB tree sets the coherent mask on the NTB device
+> > we get a warning and fail to allocate DMA-able memory.
+> > 
+> > I'm not sure the proper fix here: should we be using the NTB device for
+> > DMA operations or roll back to using the PCI device? It seems cleaner to
+> > use the NTB device but then we at least have to set the coherent_mask to
+> > something sane (probably safe to set it to 64bits for NTB hardware).
+> > However, I'm not sure if, for all arches, DMA ops depend on anything in
+> > the device besides the mask.
+> > 
+> > Logan
+> > 
+> 
+> I seem to recall having this discussion previously but don't remember
+> the outcome. I still think we should be dealing with the PCI device when
+> it comes to hardware stuff like DMA since that is the actual device. The
+> NTB device is just a an abstract device to make it work with the NTB bus
+> isn't it?
 
+>> The NTB device is just a an abstract device to make it work with the NTB bus isn't it?
 
-On 07/06/18 05:57 PM, Serge Semin wrote:
-> The outcome was to use dma_coerce_mask_and_coherent() to set the proper mask
-> of the NTB device (copy of PCI-device mask) and use NTB device for DMA allocations.
-> My patchset concerned IDT, Intel and AMD hw code only in this matter. The change
-> worked for all of them. It wasn't tested on AMDs though, since well to be honest
-> we don't even know whether such hardware exists. I can't remember why the Switchtec driver
-> wasn't altered. It might be, the code hadn't been merged yet before I sent/prepared
-> the patchset.
+It is, and due to being abstraction, the client drivers shouldn't know, what
+is hidden behind the scene. It might be PCIe, but may be something else. That's
+why we decided to use dma_coerce_mask_and_coherent() and to use NTB device for
+DMA allocations. I even had to alter ntb.c file so the ntb_register_device()
+wouldn't memset the ntb-structure with zeros.
 
-Well, I kind of agree with Dave and should probably stick with using the
-PCI device as we don't know what else all arches need for properly
-allocating the DMA memory.
+-Sergey
 
-If we want to stick with this solution, I'd suggest we set the coherent
-mask in ntb_register given that all the drivers are doing the exact same
-thing. Then we won't have to worry about missing one.
-
-> I can't remember why the Switchtec driver
-> wasn't altered. It might be, the code hadn't been merged yet before I sent/prepared
-> the patchset.
-
-The switchtec driver was in ntb-next well before this patch set
-materialized. In fact, the code in kernel v4.15 works fine.
-
-It would have also been nice for this type of change to be in it's own
-commit with a full description of the decisions made. Then, when we
-bisect to find these issues we don't have to scratch our heads and
-wonder what we were thinking.
-
-Logan
