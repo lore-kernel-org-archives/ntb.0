@@ -1,54 +1,119 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id x4-v6si665805ybk.2.2018.06.08.17.08.28
+        by gmr-mx.google.com with ESMTPS id e23-v6si1068315ybb.4.2018.06.08.17.08.28
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
         Fri, 08 Jun 2018 17:08:28 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Fri,  8 Jun 2018 18:08:11 -0600
-Message-Id: <20180609000819.13883-2-logang@deltatee.com>
+Date: Fri,  8 Jun 2018 18:08:12 -0600
+Message-Id: <20180609000819.13883-3-logang@deltatee.com>
 In-Reply-To: <20180609000819.13883-1-logang@deltatee.com>
 References: <20180609000819.13883-1-logang@deltatee.com>
-Subject: [PATCH 1/8] NTB: ntb_tool: reading the link file should not end in a NULL byte
+Subject: [PATCH 2/8] NTB: Setup the DMA mask globally for all drivers
 To: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
 Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Serge Semin <fancer.lancer@gmail.com>, Shyam Sundar S K <Shyam-sundar.S-k@amd.com>, Shuah Khan <shuah@kernel.org>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-When running ntb_test this warning is issued:
+Commit  417cf39cfea9 ("NTB: Set dma mask and dma coherent mask to NTB
+devices") added code to set the DMA mask for the NTB device
+to each driver individually. However, it neglected to set it for the
+Switchtec driver. So when the monolithic commit 7f46c8b3a552 ("NTB:
+ntb_tool: Add full multi-port NTB API support") started allocating
+DMA memory against the NTB device it broke the Switchtec driver.
 
-./ntb_test.sh: line 200: warning: command substitution: ignored null
-byte in input
-
-This is caused by the kernel returning one more byte than is necessary
-when reading the link file.
-
-Reduce the number of bytes read back to 2 as it was before the
-commit that regressed this.
+Seeing this is setting up a property of the NTB device, it should be
+done by the common NTB code (inside ntb_register_device()) so we can be
+sure it's done properly for all drivers. This avoids each driver needing
+to duplicate the code and helps prevent us from inadvertently breaking
+one of the drivers in the future if we have to make changes in this area.
 
 Fixes: 7f46c8b3a552 ("NTB: ntb_tool: Add full multi-port NTB API support")
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
 ---
- drivers/ntb/test/ntb_tool.c | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+ drivers/ntb/hw/amd/ntb_hw_amd.c     |  4 ----
+ drivers/ntb/hw/idt/ntb_hw_idt.c     |  6 ------
+ drivers/ntb/hw/intel/ntb_hw_intel.c |  4 ----
+ drivers/ntb/ntb.c                   | 13 ++++++++++++-
+ 4 files changed, 12 insertions(+), 15 deletions(-)
 
-diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c
-index d592c0ffbd19..ec5cf095cdb9 100644
---- a/drivers/ntb/test/ntb_tool.c
-+++ b/drivers/ntb/test/ntb_tool.c
-@@ -504,7 +504,7 @@ static ssize_t tool_peer_link_read(struct file *filep, char __user *ubuf,
- 	buf[1] = '\n';
- 	buf[2] = '\0';
+diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.c b/drivers/ntb/hw/amd/ntb_hw_amd.c
+index 3cfa46876239..f0788aae05c9 100644
+--- a/drivers/ntb/hw/amd/ntb_hw_amd.c
++++ b/drivers/ntb/hw/amd/ntb_hw_amd.c
+@@ -1020,10 +1020,6 @@ static int amd_ntb_init_pci(struct amd_ntb_dev *ndev,
+ 			goto err_dma_mask;
+ 		dev_warn(&pdev->dev, "Cannot DMA consistent highmem\n");
+ 	}
+-	rc = dma_coerce_mask_and_coherent(&ndev->ntb.dev,
+-					  dma_get_mask(&pdev->dev));
+-	if (rc)
+-		goto err_dma_mask;
  
--	return simple_read_from_buffer(ubuf, size, offp, buf, 3);
-+	return simple_read_from_buffer(ubuf, size, offp, buf, 2);
- }
+ 	ndev->self_mmio = pci_iomap(pdev, 0, 0);
+ 	if (!ndev->self_mmio) {
+diff --git a/drivers/ntb/hw/idt/ntb_hw_idt.c b/drivers/ntb/hw/idt/ntb_hw_idt.c
+index 8d98872d0983..1918a2db1c43 100644
+--- a/drivers/ntb/hw/idt/ntb_hw_idt.c
++++ b/drivers/ntb/hw/idt/ntb_hw_idt.c
+@@ -2447,12 +2447,6 @@ static int idt_init_pci(struct idt_ntb_dev *ndev)
+ 		dev_warn(&pdev->dev,
+ 			"Cannot set consistent DMA highmem bit mask\n");
+ 	}
+-	ret = dma_coerce_mask_and_coherent(&ndev->ntb.dev,
+-					   dma_get_mask(&pdev->dev));
+-	if (ret != 0) {
+-		dev_err(&pdev->dev, "Failed to set NTB device DMA bit mask\n");
+-		return ret;
+-	}
  
- static TOOL_FOPS_RDWR(tool_peer_link_fops,
-@@ -1690,4 +1690,3 @@ static void __exit tool_exit(void)
- 	debugfs_remove_recursive(tool_dbgfs_topdir);
+ 	/*
+ 	 * Enable the device advanced error reporting. It's not critical to
+diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.c b/drivers/ntb/hw/intel/ntb_hw_intel.c
+index 156b45cd4a19..341a3d5baa3f 100644
+--- a/drivers/ntb/hw/intel/ntb_hw_intel.c
++++ b/drivers/ntb/hw/intel/ntb_hw_intel.c
+@@ -2334,10 +2334,6 @@ static int intel_ntb_init_pci(struct intel_ntb_dev *ndev, struct pci_dev *pdev)
+ 			goto err_dma_mask;
+ 		dev_warn(&pdev->dev, "Cannot DMA consistent highmem\n");
+ 	}
+-	rc = dma_coerce_mask_and_coherent(&ndev->ntb.dev,
+-					  dma_get_mask(&pdev->dev));
+-	if (rc)
+-		goto err_dma_mask;
+ 
+ 	ndev->self_mmio = pci_iomap(pdev, 0, 0);
+ 	if (!ndev->self_mmio) {
+diff --git a/drivers/ntb/ntb.c b/drivers/ntb/ntb.c
+index 2581ab724c34..93f24440d11d 100644
+--- a/drivers/ntb/ntb.c
++++ b/drivers/ntb/ntb.c
+@@ -100,6 +100,8 @@ EXPORT_SYMBOL(ntb_unregister_client);
+ 
+ int ntb_register_device(struct ntb_dev *ntb)
+ {
++	int ret;
++
+ 	if (!ntb)
+ 		return -EINVAL;
+ 	if (!ntb->pdev)
+@@ -120,7 +122,16 @@ int ntb_register_device(struct ntb_dev *ntb)
+ 	ntb->ctx_ops = NULL;
+ 	spin_lock_init(&ntb->ctx_lock);
+ 
+-	return device_register(&ntb->dev);
++	device_initialize(&ntb->dev);
++
++	ret = dma_coerce_mask_and_coherent(&ntb->dev,
++					   dma_get_mask(&ntb->pdev->dev));
++	if (ret != 0) {
++		dev_err(&ntb->dev, "Failed to set NTB device DMA bit mask\n");
++		return ret;
++	}
++
++	return device_add(&ntb->dev);
  }
- module_exit(tool_exit);
--
+ EXPORT_SYMBOL(ntb_register_device);
+ 
 -- 
 2.11.0
 
