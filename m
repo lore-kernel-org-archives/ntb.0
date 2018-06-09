@@ -1,84 +1,74 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id s125-v6si1158193oih.0.2018.06.08.17.08.26
+        by gmr-mx.google.com with ESMTPS id o70-v6si365822ito.1.2018.06.08.17.08.27
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
         Fri, 08 Jun 2018 17:08:27 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Fri,  8 Jun 2018 18:08:18 -0600
-Message-Id: <20180609000819.13883-9-logang@deltatee.com>
+Date: Fri,  8 Jun 2018 18:08:14 -0600
+Message-Id: <20180609000819.13883-5-logang@deltatee.com>
 In-Reply-To: <20180609000819.13883-1-logang@deltatee.com>
 References: <20180609000819.13883-1-logang@deltatee.com>
-Subject: [PATCH 7/8] NTB: perf: Fix race condition when run with ntb_test
+Subject: [PATCH 4/8] NTB: ntb_pingpong: Choose doorbells based on port number
 To: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
 Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Serge Semin <fancer.lancer@gmail.com>, Shyam Sundar S K <Shyam-sundar.S-k@amd.com>, Shuah Khan <shuah@kernel.org>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-When running ntb_test, the script tries to run the ntb_perf test
-immediately after probing the modules. Since adding multi-port support,
-this fails seeing the new initialization procedure in ntb_perf
-can not complete instantly.
+This commit fixes pingpong support for existing drivers that do not
+implement ntb_default_port_number() and ntb_default_peer_port_number().
+This is required for hardware (like the crosslink topology of
+switchtec) which cannot assign reasonable port numbers to each port due
+to its perfect symmetry.
 
-To fix this we add a completion which is waited on when a test is
-started. In this way, run can be written any time after the module is
-loaded and it will wait for the initialization to complete instead of
-sending an error.
+Instead of picking the doorbell to use based on the the index of the
+peer, we use the peer's port number. This is a bit clearer and easier
+to understand.
 
-Fixes: 5648e56d03fa ("NTB: ntb_perf: Add full multi-port NTB API support")
+Fixes: c7aeb0afdcc2 ("NTB: ntb_pp: Add full multi-port NTB API support")
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
 ---
- drivers/ntb/test/ntb_perf.c | 10 ++++++++--
- 1 file changed, 8 insertions(+), 2 deletions(-)
+ drivers/ntb/test/ntb_pingpong.c | 14 ++++++--------
+ 1 file changed, 6 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index 6285cb8515ac..8e2b7630ecc9 100644
---- a/drivers/ntb/test/ntb_perf.c
-+++ b/drivers/ntb/test/ntb_perf.c
-@@ -158,6 +158,8 @@ struct perf_peer {
- 	/* NTB connection setup service */
- 	struct work_struct	service;
- 	unsigned long		sts;
+diff --git a/drivers/ntb/test/ntb_pingpong.c b/drivers/ntb/test/ntb_pingpong.c
+index 65865e460ab8..18d00eec7b02 100644
+--- a/drivers/ntb/test/ntb_pingpong.c
++++ b/drivers/ntb/test/ntb_pingpong.c
+@@ -121,15 +121,14 @@ static int pp_find_next_peer(struct pp_ctx *pp)
+ 	link = ntb_link_is_up(pp->ntb, NULL, NULL);
+ 
+ 	/* Find next available peer */
+-	if (link & pp->nmask) {
++	if (link & pp->nmask)
+ 		pidx = __ffs64(link & pp->nmask);
+-		out_db = BIT_ULL(pidx + 1);
+-	} else if (link & pp->pmask) {
++	else if (link & pp->pmask)
+ 		pidx = __ffs64(link & pp->pmask);
+-		out_db = BIT_ULL(pidx);
+-	} else {
++	else
+ 		return -ENODEV;
+-	}
 +
-+	struct completion init_comp;
- };
- #define to_peer_service(__work) \
- 	container_of(__work, struct perf_peer, service)
-@@ -549,6 +551,7 @@ static int perf_setup_outbuf(struct perf_peer *peer)
++	out_db = BIT_ULL(ntb_peer_port_number(pp->ntb, pidx));
  
- 	/* Initialization is finally done */
- 	set_bit(PERF_STS_DONE, &peer->sts);
-+	complete_all(&peer->init_comp);
- 
- 	return 0;
- }
-@@ -639,6 +642,7 @@ static void perf_service_work(struct work_struct *work)
- 		perf_setup_outbuf(peer);
- 
- 	if (test_and_clear_bit(PERF_CMD_CLEAR, &peer->sts)) {
-+		init_completion(&peer->init_comp);
- 		clear_bit(PERF_STS_DONE, &peer->sts);
- 		if (test_bit(0, &peer->perf->busy_flag) &&
- 		    peer == peer->perf->test_peer) {
-@@ -1046,8 +1050,9 @@ static int perf_submit_test(struct perf_peer *peer)
- 	struct perf_thread *pthr;
- 	int tidx, ret;
- 
--	if (!test_bit(PERF_STS_DONE, &peer->sts))
--		return -ENOLINK;
-+	ret = wait_for_completion_interruptible(&peer->init_comp);
-+	if (ret < 0)
-+		return ret;
- 
- 	if (test_and_set_bit_lock(0, &perf->busy_flag))
- 		return -EBUSY;
-@@ -1413,6 +1418,7 @@ static int perf_init_peers(struct perf_ctx *perf)
- 			peer->gidx = pidx;
- 		}
- 		INIT_WORK(&peer->service, perf_service_work);
-+		init_completion(&peer->init_comp);
+ 	spin_lock(&pp->lock);
+ 	pp->out_pidx = pidx;
+@@ -303,7 +302,7 @@ static void pp_init_flds(struct pp_ctx *pp)
+ 			break;
  	}
- 	if (perf->gidx == -1)
- 		perf->gidx = pidx;
+ 
+-	pp->in_db = BIT_ULL(pidx);
++	pp->in_db = BIT_ULL(lport);
+ 	pp->pmask = GENMASK_ULL(pidx, 0) >> 1;
+ 	pp->nmask = GENMASK_ULL(pcnt - 1, pidx);
+ 
+@@ -435,4 +434,3 @@ static void __exit pp_exit(void)
+ 	debugfs_remove_recursive(pp_dbgfs_topdir);
+ }
+ module_exit(pp_exit);
+-
 -- 
 2.11.0
 
