@@ -1,7 +1,13 @@
-Date: Wed, 13 Jun 2018 04:27:10 -0700 (PDT)
-From: vk en <yato.iacs@gmail.com>
-Message-Id: <b80ce669-f36a-4ced-963f-81fbf59fb068@googlegroups.com>
-In-Reply-To: <CAJ80sasLr8z188sARgKTEnGZWVFdV3Khot12juh6JHyPTO4QSA@mail.gmail.com>
+Return-Path: <allenbh@gmail.com>
+Received: from mail-wr0-x231.google.com (mail-wr0-x231.google.com. [2a00:1450:400c:c0c::231])
+        by gmr-mx.google.com with ESMTPS id y2-v6si641755lfi.5.2018.06.09.18.56.48
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Sat, 09 Jun 2018 18:56:48 -0700 (PDT)
+Received: by mail-wr0-x231.google.com with SMTP id v13-v6so16856703wrp.13
+        for <linux-ntb@googlegroups.com>; Sat, 09 Jun 2018 18:56:48 -0700 (PDT)
+MIME-Version: 1.0
+In-Reply-To: <5f6f69df-378d-4fd8-84b0-f0fff08c7575@googlegroups.com>
 References: <e46a0926-7118-4009-886f-c1252cb93d62@googlegroups.com>
  <CAJ80sasPx7HFT2wgD7tMpmEVKPraHg+oQJ-zoUkNyRpnB8to+Q@mail.gmail.com>
  <62e8a338-e07b-4174-927c-f4f70a54949b@googlegroups.com> <CAJ80sauCYYOUak+1sQ=3kx_mK10pvL3pLCs_hEq-MPUaNgSD-g@mail.gmail.com>
@@ -10,51 +16,36 @@ References: <e46a0926-7118-4009-886f-c1252cb93d62@googlegroups.com>
  <b05ac043-38ab-7439-1ede-7348f1b7e3bd@intel.com> <9058dedf-ec3a-42d4-9eaa-40d95740fcc0@googlegroups.com>
  <0fe77341-d309-479f-177c-c18b0193926e@intel.com> <b6723ca5-2f8b-4fcf-812e-20c4f40c73c2@googlegroups.com>
  <d87bda21-29a6-4ce2-678a-79d07220a089@intel.com> <5f6f69df-378d-4fd8-84b0-f0fff08c7575@googlegroups.com>
- <CAJ80sasLr8z188sARgKTEnGZWVFdV3Khot12juh6JHyPTO4QSA@mail.gmail.com>
+From: Allen Hubbe <allenbh@gmail.com>
+Date: Sat, 9 Jun 2018 21:56:47 -0400
+Message-ID: <CAJ80sasLr8z188sARgKTEnGZWVFdV3Khot12juh6JHyPTO4QSA@mail.gmail.com>
 Subject: Re: Problem with the connection status (Link-status) after loading
  the driver ntb_hw_intel
-MIME-Version: 1.0
-Content-Type: multipart/mixed; 
-	boundary="----=_Part_119887_2012824630.1528889230406"
-To: linux-ntb <linux-ntb@googlegroups.com>
+Content-Type: text/plain; charset="UTF-8"
+To: vk en <yato.iacs@gmail.com>
+Cc: linux-ntb <linux-ntb@googlegroups.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-------=_Part_119887_2012824630.1528889230406
-Content-Type: multipart/alternative; 
-	boundary="----=_Part_119888_413369390.1528889230406"
-
-------=_Part_119888_413369390.1528889230406
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-
-
-
-> What is meant by controller? 
+On Fri, Jun 8, 2018 at 5:23 AM vk en <yato.iacs@gmail.com> wrote:
 >
-SAN has 2 units. (controller = unit)
- 
-
-> More information would help.  Can you share the debugfs "info" files 
-> for ntb_hw_intel, ntc, and ntrdma? 
+> Hey.
 >
+> 1. I changed the system to a new one
+> it has 2 controllers with 2 processors each.  (before 2 controllers one processor each)
+>
+> 2. I successfully created ntrdma device, without any errors.
+>
+> Problems:
+> 1. If only 1 controller works, then the Status link in ntb_hw_intel still shows UP.
+> So it should not be, since I need to connect 2 controllers. (On the first system, this worked correctly, if I turned off one controller or switched off (ntb_transport), then the link had the status of DOWN)
+> Why is this so?
 
- We found some problems on the physical level. And when they are 
-eliminated, we will try again.
+What is meant by controller?
 
-------=_Part_119888_413369390.1528889230406
-Content-Type: text/html; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+> 2. I successfully created the device, but I did not manage to connect the clusters with each other.
+> NTRDMA also created an interface, but after their configuration, there is no ping between clusters.
+>
+> What have I done wrong? or can I be something I forgot to do?
 
-<div dir=3D"ltr"><br><blockquote class=3D"gmail_quote" style=3D"margin: 0;m=
-argin-left: 0.8ex;border-left: 1px #ccc solid;padding-left: 1ex;">What is m=
-eant by controller?
-<br></blockquote><div>SAN has 2 units. (controller =3D unit)<br></div><div>=
-=C2=A0</div><blockquote class=3D"gmail_quote" style=3D"margin: 0;margin-lef=
-t: 0.8ex;border-left: 1px #ccc solid;padding-left: 1ex;">More information w=
-ould help. =C2=A0Can you share the debugfs &quot;info&quot; files
-<br>for ntb_hw_intel, ntc, and ntrdma?
-<br></blockquote><div><br></div><div>=C2=A0We found some problems on the ph=
-ysical level. And when they are eliminated, we will try again.</div></div>
-------=_Part_119888_413369390.1528889230406--
-
-------=_Part_119887_2012824630.1528889230406--
+More information would help.  Can you share the debugfs "info" files
+for ntb_hw_intel, ntc, and ntrdma?
