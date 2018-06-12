@@ -1,77 +1,64 @@
-Return-Path: <fancer.lancer@gmail.com>
-Received: from mail-lf0-x242.google.com (mail-lf0-x242.google.com. [2a00:1450:4010:c07::242])
-        by gmr-mx.google.com with ESMTPS id v25-v6si152506wmh.2.2018.06.15.12.47.10
+Return-Path: <logang@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id s13-v6si36162plp.1.2018.06.12.09.30.23
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 15 Jun 2018 12:47:11 -0700 (PDT)
-Received: by mail-lf0-x242.google.com with SMTP id p23-v6so4537087lfh.11
-        for <linux-ntb@googlegroups.com>; Fri, 15 Jun 2018 12:47:10 -0700 (PDT)
-Return-Path: <fancer.lancer@gmail.com>
-Date: Fri, 15 Jun 2018 22:47:17 +0300
-From: Serge Semin <fancer.lancer@gmail.com>
-Subject: Re: [PATCH 0/8] Fix breakage caused by the NTB multi-port patchset
-Message-ID: <20180615194717.GA15240@mobilestation>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Tue, 12 Jun 2018 09:30:23 -0700 (PDT)
 References: <20180609000819.13883-1-logang@deltatee.com>
+ <20180609000819.13883-4-logang@deltatee.com>
+ <CAPoiz9yF1c8ybJzA1ViUkvgxo2=u9ytTn6+kYuKv1HZSsUOuWw@mail.gmail.com>
+From: Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <f64a72ea-d7c8-5dd4-f41c-b43cb4af337f@deltatee.com>
+Date: Tue, 12 Jun 2018 10:30:17 -0600
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180609000819.13883-1-logang@deltatee.com>
-To: Logan Gunthorpe <logang@deltatee.com>
-Cc: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Shyam Sundar S K <Shyam-sundar.S-k@amd.com>, Shuah Khan <shuah@kernel.org>
+In-Reply-To: <CAPoiz9yF1c8ybJzA1ViUkvgxo2=u9ytTn6+kYuKv1HZSsUOuWw@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH 3/8] NTB: Fix the default port and peer numbers for legacy
+ drivers
+To: Jon Mason <jdmason@kudzu.us>
+Cc: linux-kernel <linux-kernel@vger.kernel.org>, linux-ntb <linux-ntb@googlegroups.com>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Serge Semin <fancer.lancer@gmail.com>, Shyam Sundar S K <Shyam-sundar.S-k@amd.com>, Shuah Khan <shuah@kernel.org>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Fri, Jun 08, 2018 at 06:08:10PM -0600, Logan Gunthorpe <logang@deltatee.com> wrote:
 
-Good day, Logan.
-Thanks for the patchset you submitted. My hopefully useful comments are
-under the corresponding patches.
 
-Regards,
--Sergey
+On 12/06/18 09:59 AM, Jon Mason wrote:
+>> Patches for ntb_pingpong and ntb_perf follow (which are broken
+>> otherwise) to support hardware that doesn't have port numbers. This is
+>> important not only to not break support with existing drivers but for
+>> the cross link topology which, due to its perfect symmetry, cannot
+>> assign unique port numbers to each side.
+> 
+> This is a very long way of saying "no clients are checking the error
+> codes, so removing them". :)
 
-> Hey,
-> 
-> Here are all the fixes required to get ntb_test on switchtec working
-> again after the multi-port test patches were merged.
-> 
-> I'd appreciate it if future changes can be a) more careful about
-> not breaking things, b) communicated more clearly so that better
-> review can be done, and c) not merged until sufficient review actually
-> is done.
-> 
-> Note, I sent the first patch in this series earlier; please disregard
-> the earlier one.
-> 
-> Thanks,
-> 
-> Logan
-> 
-> Logan Gunthorpe (8):
->   NTB: ntb_tool: reading the link file should not end in a NULL byte
->   NTB: Setup the DMA mask globally for all drivers
->   NTB: Fix the default port and peer numbers for legacy drivers
->   NTB: ntb_pingpong: Choose doorbells based on port number
->   NTB: perf: Don't require one more memory window than number of peers
->   NTB: perf: Fix support for hardware that doesn't have port numbers
->   NTB: perf: Fix race condition when run with ntb_test
->   NTB: ntb_test: Fix bug when counting remote files
-> 
->  drivers/ntb/hw/amd/ntb_hw_amd.c         |  4 ----
->  drivers/ntb/hw/idt/ntb_hw_idt.c         |  6 ------
->  drivers/ntb/hw/intel/ntb_hw_intel.c     |  4 ----
->  drivers/ntb/ntb.c                       | 22 ++++++++++++++--------
->  drivers/ntb/test/ntb_perf.c             | 22 +++++++++++++++++++---
->  drivers/ntb/test/ntb_pingpong.c         | 14 ++++++--------
->  drivers/ntb/test/ntb_tool.c             |  3 +--
->  tools/testing/selftests/ntb/ntb_test.sh |  2 +-
->  8 files changed, 41 insertions(+), 36 deletions(-)
-> 
-> --
-> 2.11.0
-> 
-> -- 
-> You received this message because you are subscribed to the Google Groups "linux-ntb" group.
-> To unsubscribe from this group and stop receiving emails from it, send an email to linux-ntb+unsubscribe@googlegroups.com.
-> To post to this group, send email to linux-ntb@googlegroups.com.
-> To view this discussion on the web visit https://groups.google.com/d/msgid/linux-ntb/20180609000819.13883-1-logang%40deltatee.com.
-> For more options, visit https://groups.google.com/d/optout.
+Well, clients not checking the error code made this harder to debug for
+sure, but removing the error code is a side effect and not what is
+happening here (in fact someone should probably still go back and add
+error checking because these functions can still return errors but
+that's not really something I have time to do). After the next couple
+patches, the clients will use this change to detect that there are no
+port numbers and handle things similarly to the way they did before they
+were broken by the multiport changes.
+
+> I think the history and references to follow-on patches are not
+> necessary in the commit message and belong more in a 0/X.
+
+This is the opposite of what I've ever heard before. Having a commit
+message that explains what led up to this commit is a good thing and
+allows people debugging in the future to better understand the decisions
+made. People debugging commits will never find the 0/X cover letter
+which is just intended to introduce the series to reviewers and describe
+changes if the series is posted multiple times.
+
+> This is more of a feature than a bug fix.  Can you break this (and the
+> pingpong and perf changes caused by this) off into a separate series,
+> as I'll want to apply this to the ntb-next and not bugfixes branch?
+
+No this is not a feature request. This is fixing a regression that broke
+previously working code in the only sensible way I can come up with. If
+you have a better way to fix this, I'd be glad to hear it. But this
+should *not* be treated as a feature request.
+
+Logan
