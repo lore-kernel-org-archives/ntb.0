@@ -1,64 +1,47 @@
 Return-Path: <logang@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id s13-v6si36162plp.1.2018.06.12.09.30.23
+        by gmr-mx.google.com with ESMTPS id s14-v6si40119qkl.1.2018.06.12.09.18.17
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Tue, 12 Jun 2018 09:30:23 -0700 (PDT)
+        Tue, 12 Jun 2018 09:18:18 -0700 (PDT)
 References: <20180609000819.13883-1-logang@deltatee.com>
- <20180609000819.13883-4-logang@deltatee.com>
- <CAPoiz9yF1c8ybJzA1ViUkvgxo2=u9ytTn6+kYuKv1HZSsUOuWw@mail.gmail.com>
+ <20180609000819.13883-3-logang@deltatee.com>
+ <CAPoiz9ykPufmQi=fhhA8k=CXdXwdo0v7+UPQwNwnkokXU-vWjw@mail.gmail.com>
 From: Logan Gunthorpe <logang@deltatee.com>
-Message-ID: <f64a72ea-d7c8-5dd4-f41c-b43cb4af337f@deltatee.com>
-Date: Tue, 12 Jun 2018 10:30:17 -0600
+Message-ID: <ba7e652f-493c-eb92-042b-f60897b79045@deltatee.com>
+Date: Tue, 12 Jun 2018 10:18:12 -0600
 MIME-Version: 1.0
-In-Reply-To: <CAPoiz9yF1c8ybJzA1ViUkvgxo2=u9ytTn6+kYuKv1HZSsUOuWw@mail.gmail.com>
+In-Reply-To: <CAPoiz9ykPufmQi=fhhA8k=CXdXwdo0v7+UPQwNwnkokXU-vWjw@mail.gmail.com>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
-Subject: Re: [PATCH 3/8] NTB: Fix the default port and peer numbers for legacy
- drivers
+Subject: Re: [PATCH 2/8] NTB: Setup the DMA mask globally for all drivers
 To: Jon Mason <jdmason@kudzu.us>
 Cc: linux-kernel <linux-kernel@vger.kernel.org>, linux-ntb <linux-ntb@googlegroups.com>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Serge Semin <fancer.lancer@gmail.com>, Shyam Sundar S K <Shyam-sundar.S-k@amd.com>, Shuah Khan <shuah@kernel.org>
 List-ID: <linux-ntb.googlegroups.com>
 
 
 
-On 12/06/18 09:59 AM, Jon Mason wrote:
->> Patches for ntb_pingpong and ntb_perf follow (which are broken
->> otherwise) to support hardware that doesn't have port numbers. This is
->> important not only to not break support with existing drivers but for
->> the cross link topology which, due to its perfect symmetry, cannot
->> assign unique port numbers to each side.
-> 
-> This is a very long way of saying "no clients are checking the error
-> codes, so removing them". :)
+On 12/06/18 09:48 AM, Jon Mason wrote:
+> ntb.c is more of a glue layer, and this is more device specific.
+> While I like adding it here for more common code, it should probably
+> reside in the ntb_hw_*.c files to enforce the hw specific code all
+> reside in that layer.  So, this probably needs to be replaced with a
+> patch which adds the setting of the mask to the switchtec driver.
 
-Well, clients not checking the error code made this harder to debug for
-sure, but removing the error code is a side effect and not what is
-happening here (in fact someone should probably still go back and add
-error checking because these functions can still return errors but
-that's not really something I have time to do). After the next couple
-patches, the clients will use this change to detect that there are no
-port numbers and handle things similarly to the way they did before they
-were broken by the multiport changes.
+I disagree strongly. You can tell it's not device specific seeing we
+have 4 devices that need the exact same code. In fact, there is nothing
+device specific in those lines of code as the device specific part comes
+when a driver sets the PCI parent device's DMA mask. These lines just
+initialize the dma_mask for the new NTB device with its parent's mask.
+This is just sensible given that nothing now works if it is not done and
+trusting driver writers to get it right is not a good idea seeing we
+already screwed it up once. Furthermore, it violates DRY (do not repeat
+yourself).
 
-> I think the history and references to follow-on patches are not
-> necessary in the commit message and belong more in a 0/X.
-
-This is the opposite of what I've ever heard before. Having a commit
-message that explains what led up to this commit is a good thing and
-allows people debugging in the future to better understand the decisions
-made. People debugging commits will never find the 0/X cover letter
-which is just intended to introduce the series to reviewers and describe
-changes if the series is posted multiple times.
-
-> This is more of a feature than a bug fix.  Can you break this (and the
-> pingpong and perf changes caused by this) off into a separate series,
-> as I'll want to apply this to the ntb-next and not bugfixes branch?
-
-No this is not a feature request. This is fixing a regression that broke
-previously working code in the only sensible way I can come up with. If
-you have a better way to fix this, I'd be glad to hear it. But this
-should *not* be treated as a feature request.
+If there is something driver specific that must be done (although I
+can't actually imagine what this would be) the drivers are free to
+change the mask after calling ntb_register but getting the common case
+setup in common code is just good design.
 
 Logan
