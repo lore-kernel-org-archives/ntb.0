@@ -1,85 +1,60 @@
-Return-Path: <helgaas@kernel.org>
-Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id s15-v6si670289iog.0.2018.06.29.18.50.04
-        for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 29 Jun 2018 18:50:04 -0700 (PDT)
-Date: Fri, 29 Jun 2018 20:50:02 -0500
-From: Bjorn Helgaas <helgaas@kernel.org>
-Subject: Re: [PATCH v2 0/2] PCI Quirk Patchset for Microsemi Switchtec NTB
-Message-ID: <20180630015002.GL40928@bhelgaas-glaptop.roam.corp.google.com>
-References: <1527106686-18852-1-git-send-email-dmeyer@gigaio.com>
+Date: Wed, 13 Jun 2018 04:27:10 -0700 (PDT)
+From: vk en <yato.iacs@gmail.com>
+Message-Id: <b80ce669-f36a-4ced-963f-81fbf59fb068@googlegroups.com>
+In-Reply-To: <CAJ80sasLr8z188sARgKTEnGZWVFdV3Khot12juh6JHyPTO4QSA@mail.gmail.com>
+References: <e46a0926-7118-4009-886f-c1252cb93d62@googlegroups.com>
+ <CAJ80sasPx7HFT2wgD7tMpmEVKPraHg+oQJ-zoUkNyRpnB8to+Q@mail.gmail.com>
+ <62e8a338-e07b-4174-927c-f4f70a54949b@googlegroups.com> <CAJ80sauCYYOUak+1sQ=3kx_mK10pvL3pLCs_hEq-MPUaNgSD-g@mail.gmail.com>
+ <32bfb787-223c-41c1-9df6-3cf57045f918@googlegroups.com> <1ed5452b-678e-4881-a82c-182413c12954@googlegroups.com>
+ <CAJ80sav0RepYOu+C5-hzVdsKYpzrZuHP0M_Q=h+2P-L1LeUDbA@mail.gmail.com>
+ <b05ac043-38ab-7439-1ede-7348f1b7e3bd@intel.com> <9058dedf-ec3a-42d4-9eaa-40d95740fcc0@googlegroups.com>
+ <0fe77341-d309-479f-177c-c18b0193926e@intel.com> <b6723ca5-2f8b-4fcf-812e-20c4f40c73c2@googlegroups.com>
+ <d87bda21-29a6-4ce2-678a-79d07220a089@intel.com> <5f6f69df-378d-4fd8-84b0-f0fff08c7575@googlegroups.com>
+ <CAJ80sasLr8z188sARgKTEnGZWVFdV3Khot12juh6JHyPTO4QSA@mail.gmail.com>
+Subject: Re: Problem with the connection status (Link-status) after loading
+ the driver ntb_hw_intel
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1527106686-18852-1-git-send-email-dmeyer@gigaio.com>
-To: dmeyer@gigaio.com
-Cc: logang@deltatee.com, kurt.schwemmer@microsemi.com, linux-pci@vger.kernel.org, linux-ntb@googlegroups.com, bhelgaas@google.com, jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com, linux-kernel@vger.kernel.org
+Content-Type: multipart/mixed; 
+	boundary="----=_Part_119887_2012824630.1528889230406"
+To: linux-ntb <linux-ntb@googlegroups.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Wed, May 23, 2018 at 01:18:04PM -0700, dmeyer@gigaio.com wrote:
-> From: Doug Meyer <dmeyer@gigaio.com>
-> 
-> This is a resend of the patch series to enable Microsemi Switchtec
-> NTB configurations to run with the IOMMU in the hosts turned on.
-> Because of the nature PCI Quirk implementation, it was preferable
-> to migrate the Microsemi PCI vendor and device definitions to the
-> Linux canonical location. Logan Gunthorpe requested that this
-> migration be done as a separate patch in a set, and so this patch
-> series was created as shown here.
-> 
-> The first patch encapsulates the movement of constants from
-> switchtec.h to pci_ids.h, with commensurate changes to the source
-> files. This patch is not dependent on any other work.
-> 
-> The second patch is the PCI quirk implementation itself, and is
-> completely dependent upon the first patch in this series.
-> 
-> Testing of the quirk was done on with a 2-host x86-64 system
-> with all combinations of IOMMU off/on. The ntb_perf module was
-> used as test stimulus. 
-> 
-> Blessings,
-> Doug Meyer
-> 
-> Changes since v1:
-> - Call pci_device_disable() at return points to clean up properly.
-> - Changed all dev_* print macros to pci_* macros.
-> - Removed superfluous variable initializations.
-> 
-> Doug Meyer (2):
->   NTB: Migrate PCI Constants to Cannonical PCI Header
->   NTB: PCI Quirk to Enable Switchtec NT Functionality with IOMMU On
-> 
->  drivers/ntb/hw/mscc/ntb_hw_switchtec.c |   3 +-
->  drivers/pci/quirks.c                   | 197 +++++++++++++++++++++++++++++++++
->  drivers/pci/switch/switchtec.c         |  15 ++-
->  include/linux/pci_ids.h                |  32 ++++++
->  include/linux/switchtec.h              |   4 -
->  5 files changed, 238 insertions(+), 13 deletions(-)
+------=_Part_119887_2012824630.1528889230406
+Content-Type: multipart/alternative; 
+	boundary="----=_Part_119888_413369390.1528889230406"
 
-I applied these with Logan's reviewed-by to my pci/switchtec branch for
-v4.19 with the following updates:
+------=_Part_119888_413369390.1528889230406
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-  - You removed the SPDX tag from drivers/pci/switch/switchtec.c.  I assume
-    that was a mistake, so I restored it.
 
-  - I moved the PCI_VENDOR_ID_MICROSEMI definition to keep the file sorted.
 
-  - I dropped the Device ID definitions per the policy at the top of the
-    file (which I mentioned on your v1 posting).
+> What is meant by controller? 
+>
+SAN has 2 units. (controller = unit)
+ 
 
-  - I converted all the Device ID definition uses to raw hex constants.  I
-    noticed that the following were defined by your patch, but not used:
+> More information would help.  Can you share the debugfs "info" files 
+> for ntb_hw_intel, ntc, and ntrdma? 
+>
 
-      PCI_DEVICE_ID_MICROSEMI_PSX24XG3
-      PCI_DEVICE_ID_MICROSEMI_PSX32XG3
+ We found some problems on the physical level. And when they are 
+eliminated, we will try again.
 
-    I can't tell whether the quirk is supposed to apply to them or not.
+------=_Part_119888_413369390.1528889230406
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-Please review and holler if I broke something.
+<div dir=3D"ltr"><br><blockquote class=3D"gmail_quote" style=3D"margin: 0;m=
+argin-left: 0.8ex;border-left: 1px #ccc solid;padding-left: 1ex;">What is m=
+eant by controller?
+<br></blockquote><div>SAN has 2 units. (controller =3D unit)<br></div><div>=
+=C2=A0</div><blockquote class=3D"gmail_quote" style=3D"margin: 0;margin-lef=
+t: 0.8ex;border-left: 1px #ccc solid;padding-left: 1ex;">More information w=
+ould help. =C2=A0Can you share the debugfs &quot;info&quot; files
+<br>for ntb_hw_intel, ntc, and ntrdma?
+<br></blockquote><div><br></div><div>=C2=A0We found some problems on the ph=
+ysical level. And when they are eliminated, we will try again.</div></div>
+------=_Part_119888_413369390.1528889230406--
 
-This touches drivers/ntb/hw/..., which isn't my area.  Let me know if you'd
-rather take these through a different tree.
-
-Bjorn
+------=_Part_119887_2012824630.1528889230406--
