@@ -1,74 +1,77 @@
 Return-Path: <fancer.lancer@gmail.com>
 Received: from mail-lf0-x242.google.com (mail-lf0-x242.google.com. [2a00:1450:4010:c07::242])
-        by gmr-mx.google.com with ESMTPS id v25-v6si152506wmh.2.2018.06.15.12.47.40
+        by gmr-mx.google.com with ESMTPS id v25-v6si152506wmh.2.2018.06.15.12.47.10
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 15 Jun 2018 12:47:40 -0700 (PDT)
+        Fri, 15 Jun 2018 12:47:11 -0700 (PDT)
 Received: by mail-lf0-x242.google.com with SMTP id p23-v6so4537087lfh.11
-        for <linux-ntb@googlegroups.com>; Fri, 15 Jun 2018 12:47:40 -0700 (PDT)
+        for <linux-ntb@googlegroups.com>; Fri, 15 Jun 2018 12:47:10 -0700 (PDT)
 Return-Path: <fancer.lancer@gmail.com>
-Date: Fri, 15 Jun 2018 22:47:48 +0300
+Date: Fri, 15 Jun 2018 22:47:17 +0300
 From: Serge Semin <fancer.lancer@gmail.com>
-Subject: Re: [PATCH 1/8] NTB: ntb_tool: reading the link file should not end
- in a NULL byte
-Message-ID: <20180615194748.GA15481@mobilestation>
+Subject: Re: [PATCH 0/8] Fix breakage caused by the NTB multi-port patchset
+Message-ID: <20180615194717.GA15240@mobilestation>
 References: <20180609000819.13883-1-logang@deltatee.com>
- <20180609000819.13883-2-logang@deltatee.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180609000819.13883-2-logang@deltatee.com>
+In-Reply-To: <20180609000819.13883-1-logang@deltatee.com>
 To: Logan Gunthorpe <logang@deltatee.com>
 Cc: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Shyam Sundar S K <Shyam-sundar.S-k@amd.com>, Shuah Khan <shuah@kernel.org>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Fri, Jun 08, 2018 at 06:08:11PM -0600, Logan Gunthorpe <logang@deltatee.com> wrote:
-> When running ntb_test this warning is issued:
-> 
-> ./ntb_test.sh: line 200: warning: command substitution: ignored null
-> byte in input
-> 
+On Fri, Jun 08, 2018 at 06:08:10PM -0600, Logan Gunthorpe <logang@deltatee.com> wrote:
 
-This is weird. Neither me nor the folks' who tested the script saw this warning.
-I tried it on my laptop with bash and on a target device with busybox-shell. The
-warning never occurred. I even tried a simple command like:
-[[ $(echo -ne "\x4e\x0a\00") == "N" ]] && echo "True"
+Good day, Logan.
+Thanks for the patchset you submitted. My hopefully useful comments are
+under the corresponding patches.
 
-It might be that your bash is more modern than mine. Anyway if this patch solves the
-problem you see, that's great. Thanks for it.
-
+Regards,
 -Sergey
 
-> This is caused by the kernel returning one more byte than is necessary
-> when reading the link file.
+> Hey,
 > 
-> Reduce the number of bytes read back to 2 as it was before the
-> commit that regressed this.
+> Here are all the fixes required to get ntb_test on switchtec working
+> again after the multi-port test patches were merged.
 > 
-> Fixes: 7f46c8b3a552 ("NTB: ntb_tool: Add full multi-port NTB API support")
-> Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-> ---
->  drivers/ntb/test/ntb_tool.c | 3 +--
->  1 file changed, 1 insertion(+), 2 deletions(-)
+> I'd appreciate it if future changes can be a) more careful about
+> not breaking things, b) communicated more clearly so that better
+> review can be done, and c) not merged until sufficient review actually
+> is done.
 > 
-> diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c
-> index d592c0ffbd19..ec5cf095cdb9 100644
-> --- a/drivers/ntb/test/ntb_tool.c
-> +++ b/drivers/ntb/test/ntb_tool.c
-> @@ -504,7 +504,7 @@ static ssize_t tool_peer_link_read(struct file *filep, char __user *ubuf,
->  	buf[1] = '\n';
->  	buf[2] = '\0';
->  
-> -	return simple_read_from_buffer(ubuf, size, offp, buf, 3);
-> +	return simple_read_from_buffer(ubuf, size, offp, buf, 2);
->  }
->  
->  static TOOL_FOPS_RDWR(tool_peer_link_fops,
-> @@ -1690,4 +1690,3 @@ static void __exit tool_exit(void)
->  	debugfs_remove_recursive(tool_dbgfs_topdir);
->  }
->  module_exit(tool_exit);
-> -
-> -- 
+> Note, I sent the first patch in this series earlier; please disregard
+> the earlier one.
+> 
+> Thanks,
+> 
+> Logan
+> 
+> Logan Gunthorpe (8):
+>   NTB: ntb_tool: reading the link file should not end in a NULL byte
+>   NTB: Setup the DMA mask globally for all drivers
+>   NTB: Fix the default port and peer numbers for legacy drivers
+>   NTB: ntb_pingpong: Choose doorbells based on port number
+>   NTB: perf: Don't require one more memory window than number of peers
+>   NTB: perf: Fix support for hardware that doesn't have port numbers
+>   NTB: perf: Fix race condition when run with ntb_test
+>   NTB: ntb_test: Fix bug when counting remote files
+> 
+>  drivers/ntb/hw/amd/ntb_hw_amd.c         |  4 ----
+>  drivers/ntb/hw/idt/ntb_hw_idt.c         |  6 ------
+>  drivers/ntb/hw/intel/ntb_hw_intel.c     |  4 ----
+>  drivers/ntb/ntb.c                       | 22 ++++++++++++++--------
+>  drivers/ntb/test/ntb_perf.c             | 22 +++++++++++++++++++---
+>  drivers/ntb/test/ntb_pingpong.c         | 14 ++++++--------
+>  drivers/ntb/test/ntb_tool.c             |  3 +--
+>  tools/testing/selftests/ntb/ntb_test.sh |  2 +-
+>  8 files changed, 41 insertions(+), 36 deletions(-)
+> 
+> --
 > 2.11.0
 > 
+> -- 
+> You received this message because you are subscribed to the Google Groups "linux-ntb" group.
+> To unsubscribe from this group and stop receiving emails from it, send an email to linux-ntb+unsubscribe@googlegroups.com.
+> To post to this group, send email to linux-ntb@googlegroups.com.
+> To view this discussion on the web visit https://groups.google.com/d/msgid/linux-ntb/20180609000819.13883-1-logang%40deltatee.com.
+> For more options, visit https://groups.google.com/d/optout.
