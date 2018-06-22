@@ -1,47 +1,56 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id l15-v6si486221otk.3.2018.06.22.12.47.57
+        by gmr-mx.google.com with ESMTPS id g1-v6si393258qto.4.2018.06.22.12.47.58
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Fri, 22 Jun 2018 12:47:57 -0700 (PDT)
+        Fri, 22 Jun 2018 12:47:58 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Fri, 22 Jun 2018 13:47:50 -0600
-Message-Id: <20180622194752.11221-6-logang@deltatee.com>
+Date: Fri, 22 Jun 2018 13:47:52 -0600
+Message-Id: <20180622194752.11221-8-logang@deltatee.com>
 In-Reply-To: <20180622194752.11221-1-logang@deltatee.com>
 References: <20180622194752.11221-1-logang@deltatee.com>
-Subject: [PATCH v18 5/7] ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
+Subject: [PATCH v18 7/7] ntb: ntb_hw_switchtec: Cleanup 64bit IO defines to use the common header
 To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>, Jon Mason <jdmason@kudzu.us>
 List-ID: <linux-ntb.googlegroups.com>
 
-Now that ioread64 and iowrite64 are available in io-64-nonatomic,
-we can remove the hack at the top of ntb_hw_intel.c and replace it
-with an include.
+Clean up the ifdefs which conditionally defined the io{read|write}64
+functions in favour of the new common io-64-nonatomic-lo-hi header.
+
+Per a nit from Andy Shevchenko, the include list is also made
+alphabetical.
 
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
 Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
-Acked-by: Dave Jiang <dave.jiang@intel.com>
-Acked-by: Allen Hubbe <Allen.Hubbe@dell.com>
-Acked-by: Jon Mason <jdmason@kudzu.us>
+Cc: Jon Mason <jdmason@kudzu.us>
 ---
- drivers/ntb/hw/intel/ntb_hw_intel.h | 30 +-----------------------------
- 1 file changed, 1 insertion(+), 29 deletions(-)
+ drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 36 ++++------------------------------
+ 1 file changed, 4 insertions(+), 32 deletions(-)
 
-diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.h b/drivers/ntb/hw/intel/ntb_hw_intel.h
-index c49ff8970ce3..e071e28bca3f 100644
---- a/drivers/ntb/hw/intel/ntb_hw_intel.h
-+++ b/drivers/ntb/hw/intel/ntb_hw_intel.h
-@@ -53,6 +53,7 @@
+diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+index f624ae27eabe..f403da24b833 100644
+--- a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
++++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+@@ -13,12 +13,13 @@
+  *
+  */
  
- #include <linux/ntb.h>
- #include <linux/pci.h>
+-#include <linux/switchtec.h>
+-#include <linux/module.h>
++#include <linux/interrupt.h>
 +#include <linux/io-64-nonatomic-lo-hi.h>
+ #include <linux/delay.h>
+ #include <linux/kthread.h>
+-#include <linux/interrupt.h>
++#include <linux/module.h>
+ #include <linux/ntb.h>
++#include <linux/switchtec.h>
  
- /* PCI device IDs */
- #define PCI_DEVICE_ID_INTEL_NTB_B2B_JSF	0x3725
-@@ -218,33 +219,4 @@ static inline int pdev_is_gen3(struct pci_dev *pdev)
- 	return 0;
- }
+ MODULE_DESCRIPTION("Microsemi Switchtec(tm) NTB Driver");
+ MODULE_VERSION("0.1");
+@@ -35,35 +36,6 @@ module_param(use_lut_mws, bool, 0644);
+ MODULE_PARM_DESC(use_lut_mws,
+ 		 "Enable the use of the LUT based memory windows");
  
 -#ifndef ioread64
 -#ifdef readq
@@ -72,7 +81,9 @@ index c49ff8970ce3..e071e28bca3f 100644
 -#endif
 -#endif
 -
- #endif
+ #define SWITCHTEC_NTB_MAGIC 0x45CC0001
+ #define MAX_MWS     128
+ 
 -- 
 2.11.0
 
