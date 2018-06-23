@@ -1,74 +1,35 @@
-Return-Path: <gunthorp@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id o70-v6si365822ito.1.2018.06.08.17.08.27
+Return-Path: <davem@davemloft.net>
+Received: from shards.monkeyblade.net (shards.monkeyblade.net. [2620:137:e000::1:9])
+        by gmr-mx.google.com with ESMTPS id t1-v6si465352ybc.1.2018.06.22.18.51.07
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Fri, 08 Jun 2018 17:08:27 -0700 (PDT)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Fri,  8 Jun 2018 18:08:14 -0600
-Message-Id: <20180609000819.13883-5-logang@deltatee.com>
-In-Reply-To: <20180609000819.13883-1-logang@deltatee.com>
-References: <20180609000819.13883-1-logang@deltatee.com>
-Subject: [PATCH 4/8] NTB: ntb_pingpong: Choose doorbells based on port number
-To: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Serge Semin <fancer.lancer@gmail.com>, Shyam Sundar S K <Shyam-sundar.S-k@amd.com>, Shuah Khan <shuah@kernel.org>, Logan Gunthorpe <logang@deltatee.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 22 Jun 2018 18:51:07 -0700 (PDT)
+Date: Sat, 23 Jun 2018 10:50:55 +0900 (KST)
+Message-Id: <20180623.105055.470247977870986966.davem@davemloft.net>
+Subject: Re: [PATCH] net: drivers/net: Convert random_ether_addr to
+ eth_random_addr
+From: David Miller <davem@davemloft.net>
+In-Reply-To: <c558b59181756dfe647bcdeaf659c386701c0948.1529689773.git.joe@perches.com>
+References: <c558b59181756dfe647bcdeaf659c386701c0948.1529689773.git.joe@perches.com>
+Mime-Version: 1.0
+Content-Type: Text/Plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+To: joe@perches.com
+Cc: derek.chickles@caviumnetworks.com, satananda.burla@caviumnetworks.com, felix.manlunas@caviumnetworks.com, raghu.vatsavayi@caviumnetworks.com, ulli.kroll@googlemail.com, linus.walleij@linaro.org, yisen.zhuang@huawei.com, salil.mehta@huawei.com, jeffrey.t.kirsher@intel.com, bryan.whitehead@microchip.com, UNGLinuxDriver@microchip.com, harish.patil@cavium.com, manish.chopra@cavium.com, Dept-GELinuxNICDev@cavium.com, linux-net-drivers@solarflare.com, ecree@solarflare.com, bkenward@solarflare.com, grygorii.strashko@ti.com, w-kwok2@ti.com, m-karicheri2@ti.com, jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com, woojung.huh@microchip.com, ath9k-devel@qca.qualcomm.com, mareklindner@neomailbox.ch, sw@simonwunderlich.de, a@unstable.cc, kvalo@codeaurora.org, netdev@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, intel-wired-lan@lists.osuosl.org, linux-omap@vger.kernel.org, linux-ntb@googlegroups.com, linux-usb@vger.kernel.org, linux-wireless@vger.kernel.org, b.a.t.m.a.n@lists.open-mesh.org
 List-ID: <linux-ntb.googlegroups.com>
 
-This commit fixes pingpong support for existing drivers that do not
-implement ntb_default_port_number() and ntb_default_peer_port_number().
-This is required for hardware (like the crosslink topology of
-switchtec) which cannot assign reasonable port numbers to each port due
-to its perfect symmetry.
+From: Joe Perches <joe@perches.com>
+Date: Fri, 22 Jun 2018 10:51:00 -0700
 
-Instead of picking the doorbell to use based on the the index of the
-peer, we use the peer's port number. This is a bit clearer and easier
-to understand.
+> random_ether_addr is a #define for eth_random_addr which is
+> generally preferred in kernel code by ~3:1
+> 
+> Convert the uses of random_ether_addr to enable removing the #define
+> 
+> Miscellanea:
+> 
+> o Convert &vfmac[0] to equivalent vfmac and avoid unnecessary line wrap
+> 
+> Signed-off-by: Joe Perches <joe@perches.com>
 
-Fixes: c7aeb0afdcc2 ("NTB: ntb_pp: Add full multi-port NTB API support")
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
----
- drivers/ntb/test/ntb_pingpong.c | 14 ++++++--------
- 1 file changed, 6 insertions(+), 8 deletions(-)
-
-diff --git a/drivers/ntb/test/ntb_pingpong.c b/drivers/ntb/test/ntb_pingpong.c
-index 65865e460ab8..18d00eec7b02 100644
---- a/drivers/ntb/test/ntb_pingpong.c
-+++ b/drivers/ntb/test/ntb_pingpong.c
-@@ -121,15 +121,14 @@ static int pp_find_next_peer(struct pp_ctx *pp)
- 	link = ntb_link_is_up(pp->ntb, NULL, NULL);
- 
- 	/* Find next available peer */
--	if (link & pp->nmask) {
-+	if (link & pp->nmask)
- 		pidx = __ffs64(link & pp->nmask);
--		out_db = BIT_ULL(pidx + 1);
--	} else if (link & pp->pmask) {
-+	else if (link & pp->pmask)
- 		pidx = __ffs64(link & pp->pmask);
--		out_db = BIT_ULL(pidx);
--	} else {
-+	else
- 		return -ENODEV;
--	}
-+
-+	out_db = BIT_ULL(ntb_peer_port_number(pp->ntb, pidx));
- 
- 	spin_lock(&pp->lock);
- 	pp->out_pidx = pidx;
-@@ -303,7 +302,7 @@ static void pp_init_flds(struct pp_ctx *pp)
- 			break;
- 	}
- 
--	pp->in_db = BIT_ULL(pidx);
-+	pp->in_db = BIT_ULL(lport);
- 	pp->pmask = GENMASK_ULL(pidx, 0) >> 1;
- 	pp->nmask = GENMASK_ULL(pcnt - 1, pidx);
- 
-@@ -435,4 +434,3 @@ static void __exit pp_exit(void)
- 	debugfs_remove_recursive(pp_dbgfs_topdir);
- }
- module_exit(pp_exit);
--
--- 
-2.11.0
-
+I'll apply this to net-next, thanks Joe.
