@@ -1,238 +1,367 @@
-Return-Path: <joe@perches.com>
-Received: from smtprelay.hostedemail.com (smtprelay0158.hostedemail.com. [216.40.44.158])
-        by gmr-mx.google.com with ESMTPS id h15-v6si474325ual.2.2018.06.22.10.51.12
+Return-Path: <helgaas@kernel.org>
+Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
+        by gmr-mx.google.com with ESMTPS id y123-v6si598826vkd.3.2018.06.30.11.57.29
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 22 Jun 2018 10:51:12 -0700 (PDT)
-From: Joe Perches <joe@perches.com>
-Subject: [PATCH] net: drivers/net: Convert random_ether_addr to eth_random_addr
-Date: Fri, 22 Jun 2018 10:51:00 -0700
-Message-Id: <c558b59181756dfe647bcdeaf659c386701c0948.1529689773.git.joe@perches.com>
-To: Derek Chickles <derek.chickles@caviumnetworks.com>, Satanand Burla <satananda.burla@caviumnetworks.com>, Felix Manlunas <felix.manlunas@caviumnetworks.com>, Raghu Vatsavayi <raghu.vatsavayi@caviumnetworks.com>, Hans Ulli Kroll <ulli.kroll@googlemail.com>, Linus Walleij <linus.walleij@linaro.org>, Yisen Zhuang <yisen.zhuang@huawei.com>, Salil Mehta <salil.mehta@huawei.com>, Jeff Kirsher <jeffrey.t.kirsher@intel.com>, Bryan Whitehead <bryan.whitehead@microchip.com>, Microchip Linux Driver Support <UNGLinuxDriver@microchip.com>, Harish Patil <harish.patil@cavium.com>, Manish Chopra <manish.chopra@cavium.com>, Dept-GELinuxNICDev@cavium.com, Solarflare linux maintainers <linux-net-drivers@solarflare.com>, Edward Cree <ecree@solarflare.com>, Bert Kenward <bkenward@solarflare.com>, Grygorii Strashko <grygorii.strashko@ti.com>, Wingman Kwok <w-kwok2@ti.com>, Murali Karicheri <m-karicheri2@ti.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, "David S. Miller" <davem@davemloft.net>, Woojung Huh <woojung.huh@microchip.com>, QCA ath9k Development <ath9k-devel@qca.qualcomm.com>, Marek Lindner <mareklindner@neomailbox.ch>, Simon Wunderlich <sw@simonwunderlich.de>, Antonio Quartulli <a@unstable.cc>
-Cc: Kalle Valo <kvalo@codeaurora.org>, netdev@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, intel-wired-lan@lists.osuosl.org, linux-omap@vger.kernel.org, linux-ntb@googlegroups.com, linux-usb@vger.kernel.org, linux-wireless@vger.kernel.org, b.a.t.m.a.n@lists.open-mesh.org
+        Sat, 30 Jun 2018 11:57:29 -0700 (PDT)
+Date: Sat, 30 Jun 2018 13:57:26 -0500
+From: Bjorn Helgaas <helgaas@kernel.org>
+Subject: Re: [PATCH v2 0/2] PCI Quirk Patchset for Microsemi Switchtec NTB
+Message-ID: <20180630185726.GA9547@bhelgaas-glaptop.roam.corp.google.com>
+References: <1527106686-18852-1-git-send-email-dmeyer@gigaio.com>
+ <20180630015002.GL40928@bhelgaas-glaptop.roam.corp.google.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180630015002.GL40928@bhelgaas-glaptop.roam.corp.google.com>
+To: dmeyer@gigaio.com
+Cc: logang@deltatee.com, kurt.schwemmer@microsemi.com, linux-pci@vger.kernel.org, linux-ntb@googlegroups.com, bhelgaas@google.com, jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com, linux-kernel@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-random_ether_addr is a #define for eth_random_addr which is
-generally preferred in kernel code by ~3:1
+On Fri, Jun 29, 2018 at 08:50:02PM -0500, Bjorn Helgaas wrote:
+> On Wed, May 23, 2018 at 01:18:04PM -0700, dmeyer@gigaio.com wrote:
+> > From: Doug Meyer <dmeyer@gigaio.com>
+> > 
+> > This is a resend of the patch series to enable Microsemi Switchtec
+> > NTB configurations to run with the IOMMU in the hosts turned on.
+> > Because of the nature PCI Quirk implementation, it was preferable
+> > to migrate the Microsemi PCI vendor and device definitions to the
+> > Linux canonical location. Logan Gunthorpe requested that this
+> > migration be done as a separate patch in a set, and so this patch
+> > series was created as shown here.
+> > 
+> > The first patch encapsulates the movement of constants from
+> > switchtec.h to pci_ids.h, with commensurate changes to the source
+> > files. This patch is not dependent on any other work.
+> > 
+> > The second patch is the PCI quirk implementation itself, and is
+> > completely dependent upon the first patch in this series.
+> > 
+> > Testing of the quirk was done on with a 2-host x86-64 system
+> > with all combinations of IOMMU off/on. The ntb_perf module was
+> > used as test stimulus. 
+> > 
+> > Blessings,
+> > Doug Meyer
+> > 
+> > Changes since v1:
+> > - Call pci_device_disable() at return points to clean up properly.
+> > - Changed all dev_* print macros to pci_* macros.
+> > - Removed superfluous variable initializations.
+> > 
+> > Doug Meyer (2):
+> >   NTB: Migrate PCI Constants to Cannonical PCI Header
+> >   NTB: PCI Quirk to Enable Switchtec NT Functionality with IOMMU On
+> > 
+> >  drivers/ntb/hw/mscc/ntb_hw_switchtec.c |   3 +-
+> >  drivers/pci/quirks.c                   | 197 +++++++++++++++++++++++++++++++++
+> >  drivers/pci/switch/switchtec.c         |  15 ++-
+> >  include/linux/pci_ids.h                |  32 ++++++
+> >  include/linux/switchtec.h              |   4 -
+> >  5 files changed, 238 insertions(+), 13 deletions(-)
+> 
+> I applied these with Logan's reviewed-by to my pci/switchtec branch for
+> v4.19 with the following updates:
+> 
+>   - You removed the SPDX tag from drivers/pci/switch/switchtec.c.  I assume
+>     that was a mistake, so I restored it.
+> 
+>   - I moved the PCI_VENDOR_ID_MICROSEMI definition to keep the file sorted.
+> 
+>   - I dropped the Device ID definitions per the policy at the top of the
+>     file (which I mentioned on your v1 posting).
+> 
+>   - I converted all the Device ID definition uses to raw hex constants.  I
+>     noticed that the following were defined by your patch, but not used:
+> 
+>       PCI_DEVICE_ID_MICROSEMI_PSX24XG3
+>       PCI_DEVICE_ID_MICROSEMI_PSX32XG3
+> 
+>     I can't tell whether the quirk is supposed to apply to them or not.
+> 
+> Please review and holler if I broke something.
+> 
+> This touches drivers/ntb/hw/..., which isn't my area.  Let me know if you'd
+> rather take these through a different tree.
 
-Convert the uses of random_ether_addr to enable removing the #define
+I also:
 
-Miscellanea:
+  - Fixed the sparse warnings reported by the kbuild test robot.
 
-o Convert &vfmac[0] to equivalent vfmac and avoid unnecessary line wrap
+  - Removed some (void * __iomem) casts in the ioread32() parameters and
+    the (u64) cast on the return value.  I noticed that
+    switchtec_ntb_init_sndev() does an ioread64() of ep_map instead of two
+    ioread32() calls.  I suspect both places could and should do it the
+    same way.
 
-Signed-off-by: Joe Perches <joe@perches.com>
----
- drivers/net/ethernet/cavium/liquidio/lio_main.c          | 5 ++---
- drivers/net/ethernet/cortina/gemini.c                    | 2 +-
- drivers/net/ethernet/hisilicon/hip04_eth.c               | 2 +-
- drivers/net/ethernet/intel/i40e/i40e_main.c              | 2 +-
- drivers/net/ethernet/microchip/lan743x_main.c            | 2 +-
- drivers/net/ethernet/qlogic/qlcnic/qlcnic_sriov_common.c | 2 +-
- drivers/net/ethernet/qualcomm/rmnet/rmnet_vnd.c          | 2 +-
- drivers/net/ethernet/sfc/ef10_sriov.c                    | 2 +-
- drivers/net/ethernet/ti/cpsw.c                           | 2 +-
- drivers/net/ethernet/ti/netcp_core.c                     | 4 ++--
- drivers/net/ntb_netdev.c                                 | 2 +-
- drivers/net/usb/lan78xx.c                                | 2 +-
- drivers/net/wireless/ath/ath9k/hw.c                      | 2 +-
- net/batman-adv/bridge_loop_avoidance.c                   | 2 +-
- 14 files changed, 16 insertions(+), 17 deletions(-)
+  - Used %02x.%d instead of %02d.%d when printing the DMA alias, so it
+    matches the other places that print PCI device addresses.
 
-diff --git a/drivers/net/ethernet/cavium/liquidio/lio_main.c b/drivers/net/ethernet/cavium/liquidio/lio_main.c
-index 8a815bb57177..7cb4e753829b 100644
---- a/drivers/net/ethernet/cavium/liquidio/lio_main.c
-+++ b/drivers/net/ethernet/cavium/liquidio/lio_main.c
-@@ -3569,9 +3569,8 @@ static int setup_nic_devices(struct octeon_device *octeon_dev)
- 		for (j = 0; j < octeon_dev->sriov_info.max_vfs; j++) {
- 			u8 vfmac[ETH_ALEN];
+  - Replaced DECLARE_PCI_FIXUP_CLASS_FINAL with DECLARE_PCI_FIXUP_FINAL,
+    since it should be sufficient to filter on Vendor and Device ID,
+    without worrying about the class.
+
+Here's the diff from what you originally posted to what's currently on my
+pci/switchtec branch:
+
+diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
+index f178cecdc001..d54a182a09cf 100644
+--- a/drivers/pci/quirks.c
++++ b/drivers/pci/quirks.c
+@@ -4787,14 +4787,13 @@ static void quirk_switchtec_ntb_dma_alias(struct pci_dev *pdev)
+ 	pci_info(pdev, "Setting Switchtec proxy ID aliases\n");
  
--			random_ether_addr(&vfmac[0]);
--			if (__liquidio_set_vf_mac(netdev, j,
--						  &vfmac[0], false)) {
-+			eth_random_addr(vfmac);
-+			if (__liquidio_set_vf_mac(netdev, j, vfmac, false)) {
- 				dev_err(&octeon_dev->pci_dev->dev,
- 					"Error setting VF%d MAC address\n",
- 					j);
-diff --git a/drivers/net/ethernet/cortina/gemini.c b/drivers/net/ethernet/cortina/gemini.c
-index 6d7404f66f84..ce1f04fdbf70 100644
---- a/drivers/net/ethernet/cortina/gemini.c
-+++ b/drivers/net/ethernet/cortina/gemini.c
-@@ -2435,7 +2435,7 @@ static int gemini_ethernet_port_probe(struct platform_device *pdev)
- 			port->mac_addr[0], port->mac_addr[1],
- 			port->mac_addr[2]);
- 		dev_info(dev, "using a random ethernet address\n");
--		random_ether_addr(netdev->dev_addr);
-+		eth_random_addr(netdev->dev_addr);
- 	}
- 	gmac_write_mac_address(netdev);
+ 	mmio_ntb = mmio + SWITCHTEC_GAS_NTB_OFFSET;
+-	mmio_ctrl = (void * __iomem) mmio_ntb + SWITCHTEC_NTB_REG_CTRL_OFFSET;
++	mmio_ctrl = (void __iomem *) mmio_ntb + SWITCHTEC_NTB_REG_CTRL_OFFSET;
+ 	mmio_sys_info = mmio + SWITCHTEC_GAS_SYS_INFO_OFFSET;
  
-diff --git a/drivers/net/ethernet/hisilicon/hip04_eth.c b/drivers/net/ethernet/hisilicon/hip04_eth.c
-index 340e28211135..14374a856d30 100644
---- a/drivers/net/ethernet/hisilicon/hip04_eth.c
-+++ b/drivers/net/ethernet/hisilicon/hip04_eth.c
-@@ -904,7 +904,7 @@ static int hip04_mac_probe(struct platform_device *pdev)
- 		hip04_config_port(ndev, SPEED_100, DUPLEX_FULL);
+ 	partition = ioread8(&mmio_ntb->partition_id);
  
- 	hip04_config_fifo(priv);
--	random_ether_addr(ndev->dev_addr);
-+	eth_random_addr(ndev->dev_addr);
- 	hip04_update_mac_address(ndev);
+-	partition_map = (u64) ioread32((void * __iomem) &mmio_ntb->ep_map);
+-	partition_map |=
+-		((u64) ioread32((void * __iomem) &mmio_ntb->ep_map + 4)) << 32;
++	partition_map = ioread32(&mmio_ntb->ep_map);
++	partition_map |= ((u64) ioread32(&mmio_ntb->ep_map + 4)) << 32;
+ 	partition_map &= ~(1ULL << partition);
  
- 	ret = hip04_alloc_ring(ndev, d);
-diff --git a/drivers/net/ethernet/intel/i40e/i40e_main.c b/drivers/net/ethernet/intel/i40e/i40e_main.c
-index c944bd10b03d..95e9dfbe9839 100644
---- a/drivers/net/ethernet/intel/i40e/i40e_main.c
-+++ b/drivers/net/ethernet/intel/i40e/i40e_main.c
-@@ -11978,7 +11978,7 @@ static int i40e_config_netdev(struct i40e_vsi *vsi)
- 		snprintf(netdev->name, IFNAMSIZ, "%.*sv%%d",
- 			 IFNAMSIZ - 4,
- 			 pf->vsi[pf->lan_vsi]->netdev->name);
--		random_ether_addr(mac_addr);
-+		eth_random_addr(mac_addr);
- 
- 		spin_lock_bh(&vsi->mac_filter_hash_lock);
- 		i40e_add_mac_filter(vsi, mac_addr);
-diff --git a/drivers/net/ethernet/microchip/lan743x_main.c b/drivers/net/ethernet/microchip/lan743x_main.c
-index dd947e4dd3ce..e1747a490066 100644
---- a/drivers/net/ethernet/microchip/lan743x_main.c
-+++ b/drivers/net/ethernet/microchip/lan743x_main.c
-@@ -828,7 +828,7 @@ static int lan743x_mac_init(struct lan743x_adapter *adapter)
- 	}
- 
- 	if (!mac_address_valid)
--		random_ether_addr(adapter->mac_address);
-+		eth_random_addr(adapter->mac_address);
- 	lan743x_mac_set_address(adapter, adapter->mac_address);
- 	ether_addr_copy(netdev->dev_addr, adapter->mac_address);
- 	return 0;
-diff --git a/drivers/net/ethernet/qlogic/qlcnic/qlcnic_sriov_common.c b/drivers/net/ethernet/qlogic/qlcnic/qlcnic_sriov_common.c
-index 0c744b9c6e0a..77e386ebff09 100644
---- a/drivers/net/ethernet/qlogic/qlcnic/qlcnic_sriov_common.c
-+++ b/drivers/net/ethernet/qlogic/qlcnic/qlcnic_sriov_common.c
-@@ -212,7 +212,7 @@ int qlcnic_sriov_init(struct qlcnic_adapter *adapter, int num_vfs)
- 			vp->max_tx_bw = MAX_BW;
- 			vp->min_tx_bw = MIN_BW;
- 			vp->spoofchk = false;
--			random_ether_addr(vp->mac);
-+			eth_random_addr(vp->mac);
- 			dev_info(&adapter->pdev->dev,
- 				 "MAC Address %pM is configured for VF %d\n",
- 				 vp->mac, i);
-diff --git a/drivers/net/ethernet/qualcomm/rmnet/rmnet_vnd.c b/drivers/net/ethernet/qualcomm/rmnet/rmnet_vnd.c
-index b9a7548ec6a0..0afc3d335d56 100644
---- a/drivers/net/ethernet/qualcomm/rmnet/rmnet_vnd.c
-+++ b/drivers/net/ethernet/qualcomm/rmnet/rmnet_vnd.c
-@@ -210,7 +210,7 @@ void rmnet_vnd_setup(struct net_device *rmnet_dev)
- 	rmnet_dev->netdev_ops = &rmnet_vnd_ops;
- 	rmnet_dev->mtu = RMNET_DFLT_PACKET_SIZE;
- 	rmnet_dev->needed_headroom = RMNET_NEEDED_HEADROOM;
--	random_ether_addr(rmnet_dev->dev_addr);
-+	eth_random_addr(rmnet_dev->dev_addr);
- 	rmnet_dev->tx_queue_len = RMNET_TX_QUEUE_LEN;
- 
- 	/* Raw IP mode */
-diff --git a/drivers/net/ethernet/sfc/ef10_sriov.c b/drivers/net/ethernet/sfc/ef10_sriov.c
-index 019cef1d3cf7..8820be83ce85 100644
---- a/drivers/net/ethernet/sfc/ef10_sriov.c
-+++ b/drivers/net/ethernet/sfc/ef10_sriov.c
-@@ -199,7 +199,7 @@ static int efx_ef10_sriov_alloc_vf_vswitching(struct efx_nic *efx)
- 		return -ENOMEM;
- 
- 	for (i = 0; i < efx->vf_count; i++) {
--		random_ether_addr(nic_data->vf[i].mac);
-+		eth_random_addr(nic_data->vf[i].mac);
- 		nic_data->vf[i].efx = NULL;
- 		nic_data->vf[i].vlan = EFX_EF10_NO_VLAN;
- 
-diff --git a/drivers/net/ethernet/ti/cpsw.c b/drivers/net/ethernet/ti/cpsw.c
-index 358edab9e72e..093998124149 100644
---- a/drivers/net/ethernet/ti/cpsw.c
-+++ b/drivers/net/ethernet/ti/cpsw.c
-@@ -2927,7 +2927,7 @@ static int cpsw_probe_dual_emac(struct cpsw_priv *priv)
- 		dev_info(cpsw->dev, "cpsw: Detected MACID = %pM\n",
- 			 priv_sl2->mac_addr);
- 	} else {
--		random_ether_addr(priv_sl2->mac_addr);
-+		eth_random_addr(priv_sl2->mac_addr);
- 		dev_info(cpsw->dev, "cpsw: Random MACID = %pM\n",
- 			 priv_sl2->mac_addr);
- 	}
-diff --git a/drivers/net/ethernet/ti/netcp_core.c b/drivers/net/ethernet/ti/netcp_core.c
-index e40aa3e31af2..6ebf110cd594 100644
---- a/drivers/net/ethernet/ti/netcp_core.c
-+++ b/drivers/net/ethernet/ti/netcp_core.c
-@@ -2052,7 +2052,7 @@ static int netcp_create_interface(struct netcp_device *netcp_device,
- 		if (is_valid_ether_addr(efuse_mac_addr))
- 			ether_addr_copy(ndev->dev_addr, efuse_mac_addr);
- 		else
--			random_ether_addr(ndev->dev_addr);
-+			eth_random_addr(ndev->dev_addr);
- 
- 		devm_iounmap(dev, efuse);
- 		devm_release_mem_region(dev, res.start, size);
-@@ -2061,7 +2061,7 @@ static int netcp_create_interface(struct netcp_device *netcp_device,
- 		if (mac_addr)
- 			ether_addr_copy(ndev->dev_addr, mac_addr);
- 		else
--			random_ether_addr(ndev->dev_addr);
-+			eth_random_addr(ndev->dev_addr);
- 	}
- 
- 	ret = of_property_read_string(node_interface, "rx-channel",
-diff --git a/drivers/net/ntb_netdev.c b/drivers/net/ntb_netdev.c
-index 306a662eba94..df8d49ad48c3 100644
---- a/drivers/net/ntb_netdev.c
-+++ b/drivers/net/ntb_netdev.c
-@@ -430,7 +430,7 @@ static int ntb_netdev_probe(struct device *client_dev)
- 	ndev->hw_features = ndev->features;
- 	ndev->watchdog_timeo = msecs_to_jiffies(NTB_TX_TIMEOUT_MS);
- 
--	random_ether_addr(ndev->perm_addr);
-+	eth_random_addr(ndev->perm_addr);
- 	memcpy(ndev->dev_addr, ndev->perm_addr, ndev->addr_len);
- 
- 	ndev->netdev_ops = &ntb_netdev_ops;
-diff --git a/drivers/net/usb/lan78xx.c b/drivers/net/usb/lan78xx.c
-index 8dff87ec6d99..a89570f34937 100644
---- a/drivers/net/usb/lan78xx.c
-+++ b/drivers/net/usb/lan78xx.c
-@@ -1720,7 +1720,7 @@ static void lan78xx_init_mac_address(struct lan78xx_net *dev)
- 				  "MAC address read from EEPROM");
- 		} else {
- 			/* generate random MAC */
--			random_ether_addr(addr);
-+			eth_random_addr(addr);
- 			netif_dbg(dev, ifup, dev->net,
- 				  "MAC address set to random addr");
+ 	for (pp = 0; pp < (sizeof(partition_map) * 8); pp++) {
+@@ -4829,7 +4828,7 @@ static void quirk_switchtec_ntb_dma_alias(struct pci_dev *pdev)
+ 			rid_entry = ioread32(&mmio_peer_ctrl->req_id_table[te]);
+ 			devfn = (rid_entry >> 1) & 0xFF;
+ 			pci_dbg(pdev,
+-				"Aliasing Partition %d Proxy ID %02d.%d\n",
++				"Aliasing Partition %d Proxy ID %02x.%d\n",
+ 				pp, PCI_SLOT(devfn), PCI_FUNC(devfn));
+ 			pci_add_dma_alias(pdev, devfn);
  		}
-diff --git a/drivers/net/wireless/ath/ath9k/hw.c b/drivers/net/wireless/ath/ath9k/hw.c
-index e60bea4604e4..1665066f4e24 100644
---- a/drivers/net/wireless/ath/ath9k/hw.c
-+++ b/drivers/net/wireless/ath/ath9k/hw.c
-@@ -496,7 +496,7 @@ static void ath9k_hw_init_macaddr(struct ath_hw *ah)
- 	ath_err(common, "eeprom contains invalid mac address: %pM\n",
- 		common->macaddr);
+@@ -4838,115 +4837,59 @@ static void quirk_switchtec_ntb_dma_alias(struct pci_dev *pdev)
+ 	pci_iounmap(pdev, mmio);
+ 	pci_disable_device(pdev);
+ }
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PFX24XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PFX32XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PFX48XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PFX64XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PFX80XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PFX96XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PSX48XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PSX64XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PSX80XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PSX96XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PAX24XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PAX32XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PAX48XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PAX64XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PAX80XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PAX96XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PFXL24XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PFXL32XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PFXL48XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PFXL64XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PFXL80XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PFXL96XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PFXI24XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PFXI32XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PFXI48XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PFXI64XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PFXI80XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
+-DECLARE_PCI_FIXUP_CLASS_FINAL(PCI_VENDOR_ID_MICROSEMI,
+-			      PCI_DEVICE_ID_MICROSEMI_PFXI96XG3,
+-			      PCI_CLASS_BRIDGE_OTHER, 8,
+-			      quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8531,
++			quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8532,
++			quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8533,
++			quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8534,
++			quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8535,
++			quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8536,
++			quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8543,
++			quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8544,
++			quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8545,
++			quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8546,
++			quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8551,
++			quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8552,
++			quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8553,
++			quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8554,
++			quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8555,
++			quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8556,
++			quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8561,
++			quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8562,
++			quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8563,
++			quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8564,
++			quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8565,
++			quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8566,
++			quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8571,
++			quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8572,
++			quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8573,
++			quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8574,
++			quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8575,
++			quirk_switchtec_ntb_dma_alias);
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MICROSEMI, 0x8576,
++			quirk_switchtec_ntb_dma_alias);
+diff --git a/drivers/pci/switch/switchtec.c b/drivers/pci/switch/switchtec.c
+index 07a03b90498e..9940cc70f38b 100644
+--- a/drivers/pci/switch/switchtec.c
++++ b/drivers/pci/switch/switchtec.c
+@@ -1,3 +1,4 @@
++// SPDX-License-Identifier: GPL-2.0
+ /*
+  * Microsemi Switchtec(tm) PCIe Management Driver
+  * Copyright (c) 2017, Microsemi Corporation
+diff --git a/include/linux/pci_ids.h b/include/linux/pci_ids.h
+index 7bc61402d28b..80aec5b9a6c1 100644
+--- a/include/linux/pci_ids.h
++++ b/include/linux/pci_ids.h
+@@ -1668,6 +1668,7 @@
+ #define PCI_DEVICE_ID_COMPEX_ENET100VG4	0x0112
  
--	random_ether_addr(common->macaddr);
-+	eth_random_addr(common->macaddr);
- 	ath_err(common, "random mac address will be used: %pM\n",
- 		common->macaddr);
+ #define PCI_VENDOR_ID_PMC_Sierra	0x11f8
++#define PCI_VENDOR_ID_MICROSEMI		0x11f8
  
-diff --git a/net/batman-adv/bridge_loop_avoidance.c b/net/batman-adv/bridge_loop_avoidance.c
-index a2de5a44bd41..ff9659af6b91 100644
---- a/net/batman-adv/bridge_loop_avoidance.c
-+++ b/net/batman-adv/bridge_loop_avoidance.c
-@@ -1449,7 +1449,7 @@ static void batadv_bla_periodic_work(struct work_struct *work)
- 		 * detection frames. Set the locally administered bit to avoid
- 		 * collisions with users mac addresses.
- 		 */
--		random_ether_addr(bat_priv->bla.loopdetect_addr);
-+		eth_random_addr(bat_priv->bla.loopdetect_addr);
- 		bat_priv->bla.loopdetect_addr[0] = 0xba;
- 		bat_priv->bla.loopdetect_addr[1] = 0xbe;
- 		bat_priv->bla.loopdetect_lasttime = jiffies;
--- 
-2.15.0
-
+ #define PCI_VENDOR_ID_RP		0x11fe
+ #define PCI_DEVICE_ID_RP32INTF		0x0001
+@@ -3082,36 +3083,4 @@
+ 
+ #define PCI_VENDOR_ID_OCZ		0x1b85
+ 
+-#define PCI_VENDOR_ID_MICROSEMI			0x11f8
+-#define PCI_DEVICE_ID_MICROSEMI_PFX24XG3	0x8531
+-#define PCI_DEVICE_ID_MICROSEMI_PFX32XG3	0x8532
+-#define PCI_DEVICE_ID_MICROSEMI_PFX48XG3	0x8533
+-#define PCI_DEVICE_ID_MICROSEMI_PFX64XG3	0x8534
+-#define PCI_DEVICE_ID_MICROSEMI_PFX80XG3	0x8535
+-#define PCI_DEVICE_ID_MICROSEMI_PFX96XG3	0x8536
+-#define PCI_DEVICE_ID_MICROSEMI_PSX24XG3	0x8541
+-#define PCI_DEVICE_ID_MICROSEMI_PSX32XG3	0x8542
+-#define PCI_DEVICE_ID_MICROSEMI_PSX48XG3	0x8543
+-#define PCI_DEVICE_ID_MICROSEMI_PSX64XG3	0x8544
+-#define PCI_DEVICE_ID_MICROSEMI_PSX80XG3	0x8545
+-#define PCI_DEVICE_ID_MICROSEMI_PSX96XG3	0x8546
+-#define PCI_DEVICE_ID_MICROSEMI_PAX24XG3	0x8551
+-#define PCI_DEVICE_ID_MICROSEMI_PAX32XG3	0x8552
+-#define PCI_DEVICE_ID_MICROSEMI_PAX48XG3	0x8553
+-#define PCI_DEVICE_ID_MICROSEMI_PAX64XG3	0x8554
+-#define PCI_DEVICE_ID_MICROSEMI_PAX80XG3	0x8555
+-#define PCI_DEVICE_ID_MICROSEMI_PAX96XG3	0x8556
+-#define PCI_DEVICE_ID_MICROSEMI_PFXL24XG3	0x8561
+-#define PCI_DEVICE_ID_MICROSEMI_PFXL32XG3	0x8562
+-#define PCI_DEVICE_ID_MICROSEMI_PFXL48XG3	0x8563
+-#define PCI_DEVICE_ID_MICROSEMI_PFXL64XG3	0x8564
+-#define PCI_DEVICE_ID_MICROSEMI_PFXL80XG3	0x8565
+-#define PCI_DEVICE_ID_MICROSEMI_PFXL96XG3	0x8566
+-#define PCI_DEVICE_ID_MICROSEMI_PFXI24XG3	0x8571
+-#define PCI_DEVICE_ID_MICROSEMI_PFXI32XG3	0x8572
+-#define PCI_DEVICE_ID_MICROSEMI_PFXI48XG3	0x8573
+-#define PCI_DEVICE_ID_MICROSEMI_PFXI64XG3	0x8574
+-#define PCI_DEVICE_ID_MICROSEMI_PFXI80XG3	0x8575
+-#define PCI_DEVICE_ID_MICROSEMI_PFXI96XG3	0x8576
+-
+ #endif /* _LINUX_PCI_IDS_H */
