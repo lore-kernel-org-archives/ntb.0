@@ -1,72 +1,72 @@
-Return-Path: <jdmason@kudzu.us>
-Received: from mail-yw0-x241.google.com (mail-yw0-x241.google.com. [2607:f8b0:4002:c05::241])
-        by gmr-mx.google.com with ESMTPS id b68-v6si1345818qkg.5.2018.06.11.20.11.21
+Return-Path: <helgaas@kernel.org>
+Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
+        by gmr-mx.google.com with ESMTPS id z132-v6si578415vkd.0.2018.06.29.19.04.54
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 11 Jun 2018 20:11:21 -0700 (PDT)
-Received: by mail-yw0-x241.google.com with SMTP id u124-v6so7039273ywg.0
-        for <linux-ntb@googlegroups.com>; Mon, 11 Jun 2018 20:11:21 -0700 (PDT)
-Return-Path: <jdmason@kudzu.us>
-From: Jon Mason <jdmason@kudzu.us>
-Date: Mon, 11 Jun 2018 23:11:18 -0400
-Subject: [GIT PULL] NTB changes for v4.18
-Message-ID: <20180612031118.GA11519@graymalkin.kudzu.us>
+        Fri, 29 Jun 2018 19:04:55 -0700 (PDT)
+Date: Fri, 29 Jun 2018 21:04:52 -0500
+From: Bjorn Helgaas <helgaas@kernel.org>
+Subject: Re: [PATCH v3] PCI: Expand documentation for pci_add_dma_alias()
+Message-ID: <20180630020452.GO40928@bhelgaas-glaptop.roam.corp.google.com>
+References: <20180530201311.11274-1-logang@deltatee.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
+In-Reply-To: <20180530201311.11274-1-logang@deltatee.com>
+To: Logan Gunthorpe <logang@deltatee.com>
+Cc: linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, linux-ntb@googlegroups.com, Bjorn Helgaas <bhelgaas@google.com>, Alex Williamson <alex.williamson@redhat.com>, Doug Meyer <dmeyer@gigaio.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Hello Linus,
-Here are a few NTB changes for v4.18.  They were tested earlier today by
-Dave Jiang, and have been in linux-next for some time.  Please consider
-pulling them.
+On Wed, May 30, 2018 at 02:13:11PM -0600, Logan Gunthorpe wrote:
+> Seeing there's been some confusion about the use of pci_add_dma_alias(),
+> expand the comment to describe why it must be called early and how
+> early it must be called.
+> 
+> Also, expand on the purpose of this function and common reasons it would
+> be used.
+> 
+> [The comment was reworded to some extent by Alex Williamson]
+> 
+> Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
 
-Thanks,
-Jon
+Applied to pci/switchtec for v4.19, thanks!
 
-
-
-The following changes since commit 29dcea88779c856c7dc92040a0c01233263101d4:
-
-  Linux 4.17 (2018-06-03 14:15:21 -0700)
-
-are available in the Git repository at:
-
-  git://github.com/jonmason/ntb tags/ntb-4.18
-
-for you to fetch changes up to c9160b69258ef46ab62c27a09decb8fef311e700:
-
-  ntb: ntb_transport: Replace GFP_ATOMIC with GFP_KERNEL in ntb_transport_create_queue (2018-06-11 15:20:59 -0400)
-
-----------------------------------------------------------------
-Reorg and clean-up of the Intel NTB driver, a trivial comment change,
-and changes of GFP_ATOMIC to GFP_KERNEL where appropriate.
-
-----------------------------------------------------------------
-Dave Jiang (3):
-      ntb: intel: header definitions refactor
-      ntb: intel: split out the gen3 code
-      ntb: intel: change references of skx to gen3
-
-Jia-Ju Bai (2):
-      ntb: ntb_transport: Replace GFP_ATOMIC with GFP_KERNEL in ntb_transport_setup_qp_mw
-      ntb: ntb_transport: Replace GFP_ATOMIC with GFP_KERNEL in ntb_transport_create_queue
-
-Wolfram Sang (1):
-      NTB: ntb_hw_idt: fix typo 'can by' to 'can be'
-
- drivers/ntb/hw/idt/ntb_hw_idt.c                    |   2 +-
- drivers/ntb/hw/intel/Makefile                      |   1 +
- .../ntb/hw/intel/{ntb_hw_intel.c => ntb_hw_gen1.c} | 713 ++-------------------
- drivers/ntb/hw/intel/ntb_hw_gen1.h                 | 182 ++++++
- drivers/ntb/hw/intel/ntb_hw_gen3.c                 | 597 +++++++++++++++++
- drivers/ntb/hw/intel/ntb_hw_gen3.h                 | 110 ++++
- drivers/ntb/hw/intel/ntb_hw_intel.h                | 203 ++----
- drivers/ntb/ntb_transport.c                        |   6 +-
- 8 files changed, 1001 insertions(+), 813 deletions(-)
- rename drivers/ntb/hw/intel/{ntb_hw_intel.c => ntb_hw_gen1.c} (74%)
- create mode 100644 drivers/ntb/hw/intel/ntb_hw_gen1.h
- create mode 100644 drivers/ntb/hw/intel/ntb_hw_gen3.c
- create mode 100644 drivers/ntb/hw/intel/ntb_hw_gen3.h
+> Cc: Bjorn Helgaas <bhelgaas@google.com>
+> Cc: Alex Williamson <alex.williamson@redhat.com>
+> Cc: Doug Meyer <dmeyer@gigaio.com>
+> ---
+> 
+> v3: Fixed some typos pointed out by Randy
+> v2: Reworked the patch with Alex's suggested wording
+> 
+> drivers/pci/pci.c | 15 +++++++++++++--
+>  1 file changed, 13 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/pci/pci.c b/drivers/pci/pci.c
+> index dbfe7c4f3776..2d8650253cc9 100644
+> --- a/drivers/pci/pci.c
+> +++ b/drivers/pci/pci.c
+> @@ -5395,8 +5395,19 @@ int pci_set_vga_state(struct pci_dev *dev, bool decode,
+>   * @dev: the PCI device for which alias is added
+>   * @devfn: alias slot and function
+>   *
+> - * This helper encodes 8-bit devfn as bit number in dma_alias_mask.
+> - * It should be called early, preferably as PCI fixup header quirk.
+> + * This helper encodes an 8-bit devfn as a bit number in dma_alias_mask
+> + * which is used to program permissible bus-devfn source addresses for DMA
+> + * requests in an IOMMU. These aliases factor into IOMMU group creation
+> + * and are useful for devices generating DMA requests beyond or different
+> + * from their logical bus-devfn. Examples include device quirks where the
+> + * device simply uses the wrong devfn, as well as non-transparent bridges
+> + * where the alias may be a proxy for devices in another domain.
+> + *
+> + * IOMMU group creation is performed during device discovery or addition,
+> + * prior to any potential DMA mapping and therefore prior to driver probing
+> + * (especially for userspace assigned devices where IOMMU group definition
+> + * cannot be left as a userspace activity). DMA aliases should therefore
+> + * be configured via quirks, such as the PCI fixup header quirk.
+>   */
+>  void pci_add_dma_alias(struct pci_dev *dev, u8 devfn)
+>  {
+> --
+> 2.11.0
