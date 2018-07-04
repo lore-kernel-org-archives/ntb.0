@@ -1,81 +1,48 @@
-Return-Path: <groeck7@gmail.com>
-Received: from mail-pf0-x243.google.com (mail-pf0-x243.google.com. [2607:f8b0:400e:c00::243])
-        by gmr-mx.google.com with ESMTPS id w10-v6si1359537ybp.4.2018.07.13.16.38.34
+Return-Path: <logang@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id y123-v6si198430vkd.3.2018.07.04.10.36.44
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 13 Jul 2018 16:38:34 -0700 (PDT)
-Received: by mail-pf0-x243.google.com with SMTP id s21-v6so23457750pfm.6
-        for <linux-ntb@googlegroups.com>; Fri, 13 Jul 2018 16:38:34 -0700 (PDT)
-Return-Path: <groeck7@gmail.com>
-Sender: Guenter Roeck <groeck7@gmail.com>
-Date: Fri, 13 Jul 2018 16:38:31 -0700
-From: Guenter Roeck <linux@roeck-us.net>
-Subject: Re: [v18,3/7] iomap: introduce io{read|write}64_{lo_hi|hi_lo}
-Message-ID: <20180713233831.GA2946@roeck-us.net>
-References: <20180622194752.11221-4-logang@deltatee.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Wed, 04 Jul 2018 10:36:45 -0700 (PDT)
+References: <20180622194752.11221-1-logang@deltatee.com>
+ <20180622194752.11221-7-logang@deltatee.com>
+ <CAOMZO5DpwPsidKQ9wfe8mNTgdOpkdHHgqHMa4yQBx9uRrfFmww@mail.gmail.com>
+ <CAHp75VcCNsx2sHcYG2aNiw354exTvO=NUOS9P_BTmcM3siAepg@mail.gmail.com>
+ <13ea3f97-4a33-3a24-1b7e-b819be73d867@deltatee.com>
+ <CAOMZO5CfUfNZd0kG=VVnH4BjP+XMpGh3bPCUrTwi_4w6YEGX7g@mail.gmail.com>
+ <CAHp75VcDudrwV4kRnVR+vtddFhxHsU672YqOJgPPchuLvPV3nA@mail.gmail.com>
+ <CAOMZO5A4bsu9dXCPb4QeSbnnLi=pr1=WYWn8p2AfU3rEG=RWXg@mail.gmail.com>
+ <6e5224b9-343f-990c-19bd-fe37c6fbdc9b@deltatee.com>
+ <CAOMZO5CJ_iG=p_+xL=Q_Rv3F5vtGggsgatar4XVTL+UFVnHBTA@mail.gmail.com>
+ <7ddda181-6337-32cc-7a0d-43fc6a7ba78b@deltatee.com>
+ <CAHp75VcN=pUkFK6=_7yErMRGNS3WsgBhkWMSwP0Cw_ZmGR=RJg@mail.gmail.com>
+ <991b2298-bb3f-dad3-c93b-b43ee5f372de@deltatee.com>
+ <VI1PR0402MB3485F76DD56D221EB256B4F698410@VI1PR0402MB3485.eurprd04.prod.outlook.com>
+ <CAHp75VdcPORzYzw+Q7EdnwEzWE3Adkqc-XcZVS6Z9W6ibNmhtQ@mail.gmail.com>
+From: Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <50740401-c46e-79ab-807b-c3d1a7226f89@deltatee.com>
+Date: Wed, 4 Jul 2018 11:36:37 -0600
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180622194752.11221-4-logang@deltatee.com>
-To: Logan Gunthorpe <logang@deltatee.com>
-Cc: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, Horia =?utf-8?Q?Geant=C4=83?= <horia.geanta@nxp.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, Suresh Warrier <warrier@linux.vnet.ibm.com>, Nicholas Piggin <npiggin@gmail.com>
+In-Reply-To: <CAHp75VdcPORzYzw+Q7EdnwEzWE3Adkqc-XcZVS6Z9W6ibNmhtQ@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH v18 6/7] crypto: caam: cleanup CONFIG_64BIT ifdefs when
+ using io{read|write}64
+To: Andy Shevchenko <andy.shevchenko@gmail.com>, Horia Geanta <horia.geanta@nxp.com>
+Cc: Fabio Estevam <festevam@gmail.com>, Aymen Sghaier <aymen.sghaier@nxp.com>, Andrew Morton <akpm@linux-foundation.org>, linux-kernel <linux-kernel@vger.kernel.org>, Linux-Arch <linux-arch@vger.kernel.org>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "open list:HARDWARE RANDOM NUMBER GENERATOR CORE" <linux-crypto@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Dan Douglass <dan.douglass@nxp.com>, Herbert Xu <herbert@gondor.apana.org.au>, "David S. Miller" <davem@davemloft.net>
 List-ID: <linux-ntb.googlegroups.com>
 
-Hi,
-
-On Fri, Jun 22, 2018 at 01:47:48PM -0600, Logan Gunthorpe wrote:
-> In order to provide non-atomic functions for io{read|write}64 that will
-> use readq and writeq when appropriate. We define a number of variants
-> of these functions in the generic iomap that will do non-atomic
-> operations on pio but atomic operations on mmio.
+On 7/4/2018 11:32 AM, Andy Shevchenko wrote:
+> It means it would be invariant to LE BE accessors, right?
 > 
-> These functions are only defined if readq and writeq are defined. If
-> they are not, then the wrappers that always use non-atomic operations
-> from include/linux/io-64-nonatomic*.h will be used.
-> 
+> lo-hi: LE (0x0 0x4) BE (0x4 0x0)
+> hi-lo: LE (0x4 0x0) BE (0x0 0x4)
 
-This patch causes a build failure in -next when building
-ppc:corenet64_smp_defconfig.
 
-In file included from drivers/crypto/caam/qi.c:14:0:
-drivers/crypto/caam/regs.h: In function 'wr_reg64':
-drivers/crypto/caam/regs.h:143:3:
-	error: implicit declaration of function 'iowrite64'; did you mean 'iowrite32'?
+Ok, well, given that this is what I implemented originally and the
+argument seems a little bike-sheddy. I vote we just leave the current
+patch as is.
 
-Several files are afected; this is only the first error reported.
+Logan
 
-Bisect log is attached.
-
-Guenter
-
----
-# bad: [483d835c8189f0566a4cbbe47e74ffa314430e98] Add linux-next specific files for 20180713
-# good: [1e4b044d22517cae7047c99038abb444423243ca] Linux 4.18-rc4
-git bisect start 'HEAD' 'v4.18-rc4'
-# good: [a5da8bf5df4436f40f4e28f0be51a4678830fe23] Merge remote-tracking branch 'crypto/master'
-git bisect good a5da8bf5df4436f40f4e28f0be51a4678830fe23
-# good: [34f19afdf1f94450c325da94559d07f746e9043d] Merge remote-tracking branch 'tip/auto-latest'
-git bisect good 34f19afdf1f94450c325da94559d07f746e9043d
-# good: [7aac4471307ac631685599b820616fd4c47edf29] Merge remote-tracking branch 'staging/staging-next'
-git bisect good 7aac4471307ac631685599b820616fd4c47edf29
-# good: [6b674574d58a738035fdf29008a308bee9235a16] Merge remote-tracking branch 'ntb/ntb-next'
-git bisect good 6b674574d58a738035fdf29008a308bee9235a16
-# bad: [013d0c6f50169c75eb37549f705604103cbeaa0b] module: allow symbol exports to be disabled
-git bisect bad 013d0c6f50169c75eb37549f705604103cbeaa0b
-# good: [205a106bac127145a4defae7d0d35945001fe924] kernel/memremap, kasan: make ZONE_DEVICE with work with KASAN
-git bisect good 205a106bac127145a4defae7d0d35945001fe924
-# good: [89ce5b41242240e43de867b0469b71c6b8aa9d5f] mm, swap: fix race between swapoff and some swap operations
-git bisect good 89ce5b41242240e43de867b0469b71c6b8aa9d5f
-# good: [9760a955e6173bd0c2f58f1507fec8c88aaffc68] proc: fix BUILD_BUG_ON breakage on powerpc64-allyesconfig
-git bisect good 9760a955e6173bd0c2f58f1507fec8c88aaffc68
-# good: [696b14958b4d620ae7431351b667fd79397d550d] include/asm-generic/bug.h: clarify valid uses of WARN()
-git bisect good 696b14958b4d620ae7431351b667fd79397d550d
-# good: [e018a02ca17fbe4c34515bec58eceb8b0be94ec6] parisc: iomap: introduce io{read|write}64
-git bisect good e018a02ca17fbe4c34515bec58eceb8b0be94ec6
-# bad: [e18963b65c6397fdba51416ff70c33197f6c1a84] ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
-git bisect bad e18963b65c6397fdba51416ff70c33197f6c1a84
-# bad: [8f6432de3dbe1d1d222d2998380a495e04ba5fef] io-64-nonatomic: add io{read|write}64[be]{_lo_hi|_hi_lo} macros
-git bisect bad 8f6432de3dbe1d1d222d2998380a495e04ba5fef
-# bad: [d189c7f6b4a0dec224652af6d868eebb57553345] iomap: introduce io{read|write}64_{lo_hi|hi_lo}
-git bisect bad d189c7f6b4a0dec224652af6d868eebb57553345
-# first bad commit: [d189c7f6b4a0dec224652af6d868eebb57553345] iomap: introduce io{read|write}64_{lo_hi|hi_lo}
