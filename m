@@ -1,58 +1,36 @@
 Return-Path: <logang@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id x26-v6si106981qtp.2.2018.07.20.09.33.47
+        by gmr-mx.google.com with ESMTPS id i11-v6si306208uak.0.2018.07.05.09.56.54
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Fri, 20 Jul 2018 09:33:47 -0700 (PDT)
-References: <20180609000819.13883-1-logang@deltatee.com>
- <20180609000819.13883-10-logang@deltatee.com>
- <20180615195152.GA25605@mobilestation>
+        Thu, 05 Jul 2018 09:56:54 -0700 (PDT)
+References: <1527106686-18852-1-git-send-email-dmeyer@gigaio.com>
+ <20180630015002.GL40928@bhelgaas-glaptop.roam.corp.google.com>
 From: Logan Gunthorpe <logang@deltatee.com>
-Message-ID: <641e5245-9e77-7e8e-aa70-6c7e73636a22@deltatee.com>
-Date: Fri, 20 Jul 2018 10:33:36 -0600
+Message-ID: <2e882f94-3ac6-3e27-b670-4996b350cae5@deltatee.com>
+Date: Thu, 5 Jul 2018 10:56:45 -0600
 MIME-Version: 1.0
-In-Reply-To: <20180615195152.GA25605@mobilestation>
+In-Reply-To: <20180630015002.GL40928@bhelgaas-glaptop.roam.corp.google.com>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
-Subject: Re: [PATCH 8/8] NTB: ntb_test: Fix bug when counting remote files
-To: Serge Semin <fancer.lancer@gmail.com>
-Cc: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Shyam Sundar S K <Shyam-sundar.S-k@amd.com>, Shuah Khan <shuah@kernel.org>
+Subject: Re: [PATCH v2 0/2] PCI Quirk Patchset for Microsemi Switchtec NTB
+To: Bjorn Helgaas <helgaas@kernel.org>, dmeyer@gigaio.com
+Cc: kurt.schwemmer@microsemi.com, linux-pci@vger.kernel.org, linux-ntb@googlegroups.com, bhelgaas@google.com, jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com, linux-kernel@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
+Thanks for cleaning this up Bjorn.
 
+On 29/06/18 07:50 PM, Bjorn Helgaas wrote:
+> Please review and holler if I broke something.
 
-On 15/06/18 01:51 PM, Serge Semin wrote:
-> I also tested this script in the looped-back setup. It is the case when two
-> NTB-device ports are available at the same RootComplex. So the NTB can be
-> configured from the single executional context. In this case the REMOTE_HOST is left
-> empty, so the colon is left prepended to the corresponding paths and causes multiple
-> errors including the one fixed by this patch. In order to fix it, we need to discard
-> the colon for remote-less case, for instance, by the next patch:
-> 
-> @@ -482,7 +495,11 @@ function perf_test()
->  function ntb_tool_tests()
->  {
->  	LOCAL_TOOL="$DEBUGFS/ntb_tool/$LOCAL_DEV"
-> -	REMOTE_TOOL="$REMOTE_HOST:$DEBUGFS/ntb_tool/$REMOTE_DEV"
-> +	if [[ "${REMOTE_HOST}" != "" ]]; then
-> +		REMOTE_TOOL="$REMOTE_HOST:$DEBUGFS/ntb_tool/$REMOTE_DEV"
-> +	else
-> +		REMOTE_TOOL="$DEBUGFS/ntb_tool/$REMOTE_DEV"
-> +	fi
->  
->  	echo "Starting ntb_tool tests..."
->  
-> And so on for REMOTE_PP and REMOTE_PERF. It is necessary for NTB devices, which ports
-> are looped-back to the same Root-Port. Would you be amenable if you resent this patch
-> together with the fix I suggested?
-I took a closer look at this and it's not necessary. (Note: I do the
-majority of my testing in a looped-back setup).
+I pulled your branch, reviewed it and lightly tested it. Everything
+looks good to me.
 
-What you didn't notice is that split_remote() separates the colon
-whether there is a host or not. It's not passed to ssh or cat (or
-whatever) directly. So the change you propose will actually break the
-how it was designed.
+> This touches drivers/ntb/hw/..., which isn't my area.  Let me know if you'd
+> rather take these through a different tree.
+
+The NTB change is very minor, and there's nothing this will conflict
+with so I think it's fine to go through the PCI tree.
 
 Logan
-
