@@ -1,55 +1,65 @@
-Return-Path: <gunthorp@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id x26-v6si114153qtp.2.2018.07.20.11.00.42
+Return-Path: <allenbh@gmail.com>
+Received: from mail-wm0-x235.google.com (mail-wm0-x235.google.com. [2a00:1450:400c:c09::235])
+        by gmr-mx.google.com with ESMTPS id q17-v6si795308lfc.4.2018.07.13.11.31.54
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Fri, 20 Jul 2018 11:00:42 -0700 (PDT)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Fri, 20 Jul 2018 12:00:32 -0600
-Message-Id: <20180720180034.3964-7-logang@deltatee.com>
-In-Reply-To: <20180720180034.3964-1-logang@deltatee.com>
-References: <20180720180034.3964-1-logang@deltatee.com>
-Subject: [PATCH v2 6/8] NTB: perf: Fix support for hardware that doesn't have port numbers
-To: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, Jon Mason <jdmason@kudzu.us>
-Cc: Allen Hubbe <allenbh@gmail.com>, Serge Semin <fancer.lancer@gmail.com>, Shyam Sundar S K <Shyam-sundar.S-k@amd.com>, Shuah Khan <shuah@kernel.org>, Doug Meyer <dmeyer@gigaio.com>, Logan Gunthorpe <logang@deltatee.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 13 Jul 2018 11:31:54 -0700 (PDT)
+Received: by mail-wm0-x235.google.com with SMTP id s9-v6so2327795wmh.3
+        for <linux-ntb@googlegroups.com>; Fri, 13 Jul 2018 11:31:54 -0700 (PDT)
+MIME-Version: 1.0
+References: <20180711163224.30892-1-fancer.lancer@gmail.com> <20180711204051.26139-1-fancer.lancer@gmail.com>
+In-Reply-To: <20180711204051.26139-1-fancer.lancer@gmail.com>
+From: Allen Hubbe <allenbh@gmail.com>
+Date: Fri, 13 Jul 2018 14:31:43 -0400
+Message-ID: <CAJ80savarHn+aoo7bQqwREjebS8=XU4h6jUkTUJDqBRTb8CW-Q@mail.gmail.com>
+Subject: Re: [PATCH v2] ntb: idt: Set PCIe bus address to BARLIMITx
+Content-Type: text/plain; charset="UTF-8"
+To: fancer.lancer@gmail.com
+Cc: Jon Mason <jdmason@kudzu.us>, dave.jiang@intel.com, Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-Legacy drivers do not have port numbers (but is reliably only two ports)
-and was broken by the recent commit that added mult-port support to
-ntb_perf. This is especially important to support the cross link
-topology which is perfectly symmetric and cannot assign unique port
-numbers easily.
+On Wed, Jul 11, 2018 at 4:40 PM Serge Semin <fancer.lancer@gmail.com> wrote:
+> IDT NTB driver sets the upper limit of actual translation address
+> being written to the corresponding memory window setup. It is achieved
+> by BARLIMITx register initialization. Needless to say, that the register
+> works within PCIe bus address space.
+>
+> In general CPU and PCIe address spaces are different. It means,
+> that addresses used for Memory TLPs routine can be different from
+> CPU addresses. While in most of cases they are the same, there are
+> exceptions when the proper mapping must be performed to have the
+> portable driver code. There used to be a virt_to_bus()/bus_to_virt()
+> interface for this purpose. But it's deprecated now. It was also a
+> mistake to use pci_resource_start() since the return address of the
+> method is at the CPU address space. In order to achieve the desired
+> purpose we need to use pci_bus_address() helper. This method shall
+> return a PCIe bus base address of the corresponding BAR resource.
+>
+> Signed-off-by: Serge Semin <fancer.lancer@gmail.com>
 
-Hardware that returns zero for both the local port and the peer should
-just always use gidx=0 for the only peer.
+Acked-by: Allen Hubbe <allenbh@gmail.com>
 
-Fixes: 5648e56d03fa ("NTB: ntb_perf: Add full multi-port NTB API support")
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
----
- drivers/ntb/test/ntb_perf.c | 10 ++++++++++
- 1 file changed, 10 insertions(+)
-
-diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index fe27412ffe91..6285cb8515ac 100644
---- a/drivers/ntb/test/ntb_perf.c
-+++ b/drivers/ntb/test/ntb_perf.c
-@@ -1417,6 +1417,16 @@ static int perf_init_peers(struct perf_ctx *perf)
- 	if (perf->gidx == -1)
- 		perf->gidx = pidx;
- 
-+	/*
-+	 * Hardware with only two ports may not have unique port
-+	 * numbers. In this case, the gidxs should all be zero.
-+	 */
-+	if (perf->pcnt == 1 &&  ntb_port_number(perf->ntb) == 0 &&
-+	    ntb_peer_port_number(perf->ntb, 0) == 0) {
-+		perf->gidx = 0;
-+		perf->peers[0].gidx = 0;
-+	}
-+
- 	for (pidx = 0; pidx < perf->pcnt; pidx++) {
- 		ret = perf_setup_peer_mw(&perf->peers[pidx]);
- 		if (ret)
--- 
-2.11.0
-
+>
+> ---
+>
+> Changelog v2:
+> - Replace pcibios_resource_to_bus() with pci_bus_address() helper.
+>
+>  drivers/ntb/hw/idt/ntb_hw_idt.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/ntb/hw/idt/ntb_hw_idt.c b/drivers/ntb/hw/idt/ntb_hw_idt.c
+> index dbe72f116017..fb2c44ac9c69 100644
+> --- a/drivers/ntb/hw/idt/ntb_hw_idt.c
+> +++ b/drivers/ntb/hw/idt/ntb_hw_idt.c
+> @@ -1320,7 +1320,7 @@ static int idt_ntb_peer_mw_set_trans(struct ntb_dev *ntb, int pidx, int widx,
+>                 idt_nt_write(ndev, bar->ltbase, (u32)addr);
+>                 idt_nt_write(ndev, bar->utbase, (u32)(addr >> 32));
+>                 /* Set the custom BAR aperture limit */
+> -               limit = pci_resource_start(ntb->pdev, mw_cfg->bar) + size;
+> +               limit = pci_bus_address(ntb->pdev, mw_cfg->bar) + size;
+>                 idt_nt_write(ndev, bar->limit, (u32)limit);
+>                 if (IS_FLD_SET(BARSETUP_TYPE, data, 64))
+>                         idt_nt_write(ndev, (bar + 1)->limit, (limit >> 32));
+> --
+> 2.12.0
