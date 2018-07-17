@@ -1,36 +1,92 @@
-Return-Path: <logang@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id i11-v6si306208uak.0.2018.07.05.09.56.54
+Return-Path: <fancer.lancer@gmail.com>
+Received: from mail-lj1-x22a.google.com (mail-lj1-x22a.google.com. [2a00:1450:4864:20::22a])
+        by gmr-mx.google.com with ESMTPS id s14-v6si25127ljh.0.2018.07.17.02.25.01
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Thu, 05 Jul 2018 09:56:54 -0700 (PDT)
-References: <1527106686-18852-1-git-send-email-dmeyer@gigaio.com>
- <20180630015002.GL40928@bhelgaas-glaptop.roam.corp.google.com>
-From: Logan Gunthorpe <logang@deltatee.com>
-Message-ID: <2e882f94-3ac6-3e27-b670-4996b350cae5@deltatee.com>
-Date: Thu, 5 Jul 2018 10:56:45 -0600
-MIME-Version: 1.0
-In-Reply-To: <20180630015002.GL40928@bhelgaas-glaptop.roam.corp.google.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-Subject: Re: [PATCH v2 0/2] PCI Quirk Patchset for Microsemi Switchtec NTB
-To: Bjorn Helgaas <helgaas@kernel.org>, dmeyer@gigaio.com
-Cc: kurt.schwemmer@microsemi.com, linux-pci@vger.kernel.org, linux-ntb@googlegroups.com, bhelgaas@google.com, jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com, linux-kernel@vger.kernel.org
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 17 Jul 2018 02:25:01 -0700 (PDT)
+Received: by mail-lj1-x22a.google.com with SMTP id j19-v6so377712ljc.7
+        for <linux-ntb@googlegroups.com>; Tue, 17 Jul 2018 02:25:01 -0700 (PDT)
+Return-Path: <fancer.lancer@gmail.com>
+From: Serge Semin <fancer.lancer@gmail.com>
+Subject: [PATCH v2 4/4] ntb: idt: Alter the driver info comments
+Date: Tue, 17 Jul 2018 12:24:37 +0300
+Message-Id: <20180717092437.18918-5-fancer.lancer@gmail.com>
+In-Reply-To: <20180717092437.18918-1-fancer.lancer@gmail.com>
+References: <20180714115834.3350-1-fancer.lancer@gmail.com>
+ <20180717092437.18918-1-fancer.lancer@gmail.com>
+To: jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com
+Cc: Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Serge Semin <fancer.lancer@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Thanks for cleaning this up Bjorn.
+Since IDT PCIe-switch temperature sensor is now always available
+irregardless of the EEPROM/BIOS settings, Kconfig and in-code
+description should be properly altered. In addition lets update
+the driver copyright lines.
 
-On 29/06/18 07:50 PM, Bjorn Helgaas wrote:
-> Please review and holler if I broke something.
+Signed-off-by: Serge Semin <fancer.lancer@gmail.com>
+---
+ drivers/ntb/hw/idt/Kconfig      |  4 +---
+ drivers/ntb/hw/idt/ntb_hw_idt.c | 11 ++++++-----
+ drivers/ntb/hw/idt/ntb_hw_idt.h |  2 +-
+ 3 files changed, 8 insertions(+), 9 deletions(-)
 
-I pulled your branch, reviewed it and lightly tested it. Everything
-looks good to me.
+diff --git a/drivers/ntb/hw/idt/Kconfig b/drivers/ntb/hw/idt/Kconfig
+index 2ed147368fa8..f8948cf515ce 100644
+--- a/drivers/ntb/hw/idt/Kconfig
++++ b/drivers/ntb/hw/idt/Kconfig
+@@ -24,9 +24,7 @@ config NTB_IDT
+ 	 BAR settings of peer NT-functions, the BAR setups can't be done over
+ 	 kernel PCI fixups. That's why the alternative pre-initialization
+ 	 techniques like BIOS using SMBus interface or EEPROM should be
+-	 utilized. Additionally if one needs to have temperature sensor
+-	 information printed to system log, the corresponding registers must
+-	 be initialized within BIOS/EEPROM as well.
++	 utilized.
+ 
+ 	 If unsure, say N.
+ 
+diff --git a/drivers/ntb/hw/idt/ntb_hw_idt.c b/drivers/ntb/hw/idt/ntb_hw_idt.c
+index 55321086d59a..8706b8e0864a 100644
+--- a/drivers/ntb/hw/idt/ntb_hw_idt.c
++++ b/drivers/ntb/hw/idt/ntb_hw_idt.c
+@@ -4,7 +4,7 @@
+  *
+  *   GPL LICENSE SUMMARY
+  *
+- *   Copyright (C) 2016 T-Platforms All Rights Reserved.
++ *   Copyright (C) 2016-2018 T-Platforms JSC All Rights Reserved.
+  *
+  *   This program is free software; you can redistribute it and/or modify it
+  *   under the terms and conditions of the GNU General Public License,
+@@ -1824,10 +1824,11 @@ static int idt_ntb_peer_msg_write(struct ntb_dev *ntb, int pidx, int midx,
+  *                      7. Temperature sensor operations
+  *
+  *    IDT PCIe-switch has an embedded temperature sensor, which can be used to
+- * warn a user-space of possible chip overheating. Since workload temperature
+- * can be different on different platforms, temperature thresholds as well as
+- * general sensor settings must be setup in the framework of BIOS/EEPROM
+- * initializations. It includes the actual sensor enabling as well.
++ * check current chip core temperature. Since a workload environment can be
++ * different on different platforms, an offset and ADC/filter settings can be
++ * specified. Although the offset configuration is only exposed to the sysfs
++ * hwmon interface at the moment. The rest of the settings can be adjusted
++ * for instance by the BIOS/EEPROM firmware.
+  *=============================================================================
+  */
+ 
+diff --git a/drivers/ntb/hw/idt/ntb_hw_idt.h b/drivers/ntb/hw/idt/ntb_hw_idt.h
+index 3517cd2e2baa..2f1aa121b0cf 100644
+--- a/drivers/ntb/hw/idt/ntb_hw_idt.h
++++ b/drivers/ntb/hw/idt/ntb_hw_idt.h
+@@ -4,7 +4,7 @@
+  *
+  *   GPL LICENSE SUMMARY
+  *
+- *   Copyright (C) 2016 T-Platforms All Rights Reserved.
++ *   Copyright (C) 2016-2018 T-Platforms JSC All Rights Reserved.
+  *
+  *   This program is free software; you can redistribute it and/or modify it
+  *   under the terms and conditions of the GNU General Public License,
+-- 
+2.12.0
 
-> This touches drivers/ntb/hw/..., which isn't my area.  Let me know if you'd
-> rather take these through a different tree.
-
-The NTB change is very minor, and there's nothing this will conflict
-with so I think it's fine to go through the PCI tree.
-
-Logan
