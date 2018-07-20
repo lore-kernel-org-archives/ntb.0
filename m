@@ -1,55 +1,77 @@
-Return-Path: <fancer.lancer@gmail.com>
-Received: from mail-lj1-x232.google.com (mail-lj1-x232.google.com. [2a00:1450:4864:20::232])
-        by gmr-mx.google.com with ESMTPS id d18-v6si698952wrq.4.2018.07.14.04.58.57
+Return-Path: <gunthorp@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id s15-v6si94076iog.0.2018.07.20.11.00.40
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Sat, 14 Jul 2018 04:58:57 -0700 (PDT)
-Received: by mail-lj1-x232.google.com with SMTP id 203-v6so15301678ljj.13
-        for <linux-ntb@googlegroups.com>; Sat, 14 Jul 2018 04:58:57 -0700 (PDT)
-Return-Path: <fancer.lancer@gmail.com>
-From: Serge Semin <fancer.lancer@gmail.com>
-Subject: [PATCH 0/4] ntb: idt: Add hwmon temperature sensor interface
-Date: Sat, 14 Jul 2018 14:58:30 +0300
-Message-Id: <20180714115834.3350-1-fancer.lancer@gmail.com>
-To: jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com
-Cc: Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Serge Semin <fancer.lancer@gmail.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Fri, 20 Jul 2018 11:00:41 -0700 (PDT)
+From: Logan Gunthorpe <logang@deltatee.com>
+Date: Fri, 20 Jul 2018 12:00:29 -0600
+Message-Id: <20180720180034.3964-4-logang@deltatee.com>
+In-Reply-To: <20180720180034.3964-1-logang@deltatee.com>
+References: <20180720180034.3964-1-logang@deltatee.com>
+Subject: [PATCH v2 3/8] NTB: Fix the default port and peer numbers for legacy drivers
+To: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, Jon Mason <jdmason@kudzu.us>
+Cc: Allen Hubbe <allenbh@gmail.com>, Serge Semin <fancer.lancer@gmail.com>, Shyam Sundar S K <Shyam-sundar.S-k@amd.com>, Shuah Khan <shuah@kernel.org>, Doug Meyer <dmeyer@gigaio.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-IDT PCIe-switches are equipped with an embedded temperature sensor. It
-works within the range [0; 127.5]C with a resolution of 0.5C. It can
-be used to monitor the chip core temperature so to have prevent it from
-possible overheating. It might be very topical for the chip, since it
-gets heated like in hell especially if ASPM isn't enabled.
+When the commit adding ntb_default_port_number() and
+ntb_default_peer_port_number()  entered the kernel there was no
+users of it so it was impossible to tell what the API needed.
 
-Other than the current sampled temperatur, the sensor interface exposes
-history registors with lowest and highest measured temperature, thresholds
-and alarm IRQs enabled/disable bits, ADC/filter settings. The device manual
-states that the switch is able to generate a msi interrupt on PCIe upstreams
-if the temperature crosses one of three configurable thresholds. But in
-practice we discovered that the enable/disable threshold IRQs bits interface
-is very broken (see the third patch commit message), so it can't be used
-to create the hwmon alarm interface. As the result we had to remove the
-already available temperature sensor IRQ handler and disable the corresponding
-interrupt.
+When a user finally landed a year later (ntb_pingpong) there were
+more NTB topologies were created and no consideration was considered
+to how other drivers had changed.
 
-Current version of the driver provides following standard hwmon sysfs
-files: temperature input, lowest and highest measured temperature
-with possibility to reset the history, temperature offset. The rest of the
-nodes can't be safely implemented for the chip due to the described issues.
+Now that there is a user it can be fixed to provide a sensible default
+for the legacy drivers that do not implement ntb_{peer_}port_number().
+Seeing ntb_pingpong doesn't check error codes returning EINVAL was also
+not sensible.
 
-Signed-off-by: Serge Semin <fancer.lancer@gmail.com>
+Patches for ntb_pingpong and ntb_perf follow (which are broken
+otherwise) to support hardware that doesn't have port numbers. This is
+important not only to not break support with existing drivers but for
+the cross link topology which, due to its perfect symmetry, cannot
+assign unique port numbers to each side.
 
-Serge Semin (4):
-  ntb: idt: Alter temperature read method
-  ntb: idt: Add basic hwmon sysfs interface
-  ntb: idt: Discard temperature sensor IRQ handler
-  ntb: idt: Alter the driver info comments
+Fixes: 1e5301196a88 ("NTB: Add indexed ports NTB API")
+Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+---
+ drivers/ntb/ntb.c | 9 ++-------
+ 1 file changed, 2 insertions(+), 7 deletions(-)
 
- drivers/ntb/hw/idt/Kconfig      |   4 +-
- drivers/ntb/hw/idt/ntb_hw_idt.c | 317 ++++++++++++++++++++++++++++++++++------
- drivers/ntb/hw/idt/ntb_hw_idt.h |  87 ++++++++++-
- 3 files changed, 353 insertions(+), 55 deletions(-)
-
+diff --git a/drivers/ntb/ntb.c b/drivers/ntb/ntb.c
+index 93f24440d11d..d955a92a095a 100644
+--- a/drivers/ntb/ntb.c
++++ b/drivers/ntb/ntb.c
+@@ -225,10 +225,8 @@ int ntb_default_port_number(struct ntb_dev *ntb)
+ 	case NTB_TOPO_B2B_DSD:
+ 		return NTB_PORT_SEC_DSD;
+ 	default:
+-		break;
++		return 0;
+ 	}
+-
+-	return -EINVAL;
+ }
+ EXPORT_SYMBOL(ntb_default_port_number);
+ 
+@@ -251,10 +249,8 @@ int ntb_default_peer_port_number(struct ntb_dev *ntb, int pidx)
+ 	case NTB_TOPO_B2B_DSD:
+ 		return NTB_PORT_PRI_USD;
+ 	default:
+-		break;
++		return 0;
+ 	}
+-
+-	return -EINVAL;
+ }
+ EXPORT_SYMBOL(ntb_default_peer_port_number);
+ 
+@@ -326,4 +322,3 @@ static void __exit ntb_driver_exit(void)
+ 	bus_unregister(&ntb_bus);
+ }
+ module_exit(ntb_driver_exit);
+-
 -- 
-2.12.0
+2.11.0
 
