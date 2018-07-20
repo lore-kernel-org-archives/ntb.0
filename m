@@ -1,42 +1,125 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id u83-v6si124933oig.1.2018.07.20.11.00.44
+        by gmr-mx.google.com with ESMTPS id u5-v6si103328pgv.4.2018.07.20.11.00.44
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
         Fri, 20 Jul 2018 11:00:44 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Fri, 20 Jul 2018 12:00:34 -0600
-Message-Id: <20180720180034.3964-9-logang@deltatee.com>
+Date: Fri, 20 Jul 2018 12:00:28 -0600
+Message-Id: <20180720180034.3964-3-logang@deltatee.com>
 In-Reply-To: <20180720180034.3964-1-logang@deltatee.com>
 References: <20180720180034.3964-1-logang@deltatee.com>
-Subject: [PATCH v2 8/8] NTB: ntb_test: Fix bug when counting remote files
+Subject: [PATCH v2 2/8] NTB: Setup the DMA mask globally for all drivers
 To: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, Jon Mason <jdmason@kudzu.us>
 Cc: Allen Hubbe <allenbh@gmail.com>, Serge Semin <fancer.lancer@gmail.com>, Shyam Sundar S K <Shyam-sundar.S-k@amd.com>, Shuah Khan <shuah@kernel.org>, Doug Meyer <dmeyer@gigaio.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-When remote files are counted in get_files_count, without using SSH,
-the code returns 0 because there is a colon prepended to $LOC. $VPATH
-should have been used instead of $LOC.
+Commit  417cf39cfea9 ("NTB: Set dma mask and dma coherent mask to NTB
+devices") added code to set the DMA mask for the NTB device
+to each driver individually. However, it neglected to set it for the
+Switchtec driver. So when the monolithic commit 7f46c8b3a552 ("NTB:
+ntb_tool: Add full multi-port NTB API support") started allocating
+DMA memory against the NTB device it broke the Switchtec driver.
 
-Fixes: 06bd0407d06c ("NTB: ntb_test: Update ntb_tool Scratchpad tests")
+Seeing this is setting up a property of the NTB device, it should be
+done by the common NTB code (inside ntb_register_device()) so we can be
+sure it's done properly for all drivers. This avoids each driver needing
+to duplicate the code and helps prevent us from inadvertently breaking
+one of the drivers in the future if we have to make changes in this area.
+
+Additionally, all existing drivers are setting a property of the
+struct device before calling device_initialize() which works fine now,
+but may not be the safest choice if someone decides to change
+something such that the propery is overridden by the initialization.
+
+Fixes: 7f46c8b3a552 ("NTB: ntb_tool: Add full multi-port NTB API support")
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+Acked-by: Dave Jiang <dave.jiang@intel.com>
 ---
- tools/testing/selftests/ntb/ntb_test.sh | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/ntb/hw/amd/ntb_hw_amd.c    |  4 ----
+ drivers/ntb/hw/idt/ntb_hw_idt.c    |  6 ------
+ drivers/ntb/hw/intel/ntb_hw_gen1.c |  4 ----
+ drivers/ntb/ntb.c                  | 13 ++++++++++++-
+ 4 files changed, 12 insertions(+), 15 deletions(-)
 
-diff --git a/tools/testing/selftests/ntb/ntb_test.sh b/tools/testing/selftests/ntb/ntb_test.sh
-index 08cbfbbc7029..17ca36403d04 100755
---- a/tools/testing/selftests/ntb/ntb_test.sh
-+++ b/tools/testing/selftests/ntb/ntb_test.sh
-@@ -250,7 +250,7 @@ function get_files_count()
- 	split_remote $LOC
+diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.c b/drivers/ntb/hw/amd/ntb_hw_amd.c
+index efb214fc545a..16c10dfe0919 100644
+--- a/drivers/ntb/hw/amd/ntb_hw_amd.c
++++ b/drivers/ntb/hw/amd/ntb_hw_amd.c
+@@ -1020,10 +1020,6 @@ static int amd_ntb_init_pci(struct amd_ntb_dev *ndev,
+ 			goto err_dma_mask;
+ 		dev_warn(&pdev->dev, "Cannot DMA consistent highmem\n");
+ 	}
+-	rc = dma_coerce_mask_and_coherent(&ndev->ntb.dev,
+-					  dma_get_mask(&pdev->dev));
+-	if (rc)
+-		goto err_dma_mask;
  
- 	if [[ "$REMOTE" == "" ]]; then
--		echo $(ls -1 "$LOC"/${NAME}* 2>/dev/null | wc -l)
-+		echo $(ls -1 "$VPATH"/${NAME}* 2>/dev/null | wc -l)
- 	else
- 		echo $(ssh "$REMOTE" "ls -1 \"$VPATH\"/${NAME}* | \
- 		       wc -l" 2> /dev/null)
+ 	ndev->self_mmio = pci_iomap(pdev, 0, 0);
+ 	if (!ndev->self_mmio) {
+diff --git a/drivers/ntb/hw/idt/ntb_hw_idt.c b/drivers/ntb/hw/idt/ntb_hw_idt.c
+index dbe72f116017..576a2a986085 100644
+--- a/drivers/ntb/hw/idt/ntb_hw_idt.c
++++ b/drivers/ntb/hw/idt/ntb_hw_idt.c
+@@ -2447,12 +2447,6 @@ static int idt_init_pci(struct idt_ntb_dev *ndev)
+ 		dev_warn(&pdev->dev,
+ 			"Cannot set consistent DMA highmem bit mask\n");
+ 	}
+-	ret = dma_coerce_mask_and_coherent(&ndev->ntb.dev,
+-					   dma_get_mask(&pdev->dev));
+-	if (ret != 0) {
+-		dev_err(&pdev->dev, "Failed to set NTB device DMA bit mask\n");
+-		return ret;
+-	}
+ 
+ 	/*
+ 	 * Enable the device advanced error reporting. It's not critical to
+diff --git a/drivers/ntb/hw/intel/ntb_hw_gen1.c b/drivers/ntb/hw/intel/ntb_hw_gen1.c
+index 6aa573227279..805845fa614b 100644
+--- a/drivers/ntb/hw/intel/ntb_hw_gen1.c
++++ b/drivers/ntb/hw/intel/ntb_hw_gen1.c
+@@ -1770,10 +1770,6 @@ static int intel_ntb_init_pci(struct intel_ntb_dev *ndev, struct pci_dev *pdev)
+ 			goto err_dma_mask;
+ 		dev_warn(&pdev->dev, "Cannot DMA consistent highmem\n");
+ 	}
+-	rc = dma_coerce_mask_and_coherent(&ndev->ntb.dev,
+-					  dma_get_mask(&pdev->dev));
+-	if (rc)
+-		goto err_dma_mask;
+ 
+ 	ndev->self_mmio = pci_iomap(pdev, 0, 0);
+ 	if (!ndev->self_mmio) {
+diff --git a/drivers/ntb/ntb.c b/drivers/ntb/ntb.c
+index 2581ab724c34..93f24440d11d 100644
+--- a/drivers/ntb/ntb.c
++++ b/drivers/ntb/ntb.c
+@@ -100,6 +100,8 @@ EXPORT_SYMBOL(ntb_unregister_client);
+ 
+ int ntb_register_device(struct ntb_dev *ntb)
+ {
++	int ret;
++
+ 	if (!ntb)
+ 		return -EINVAL;
+ 	if (!ntb->pdev)
+@@ -120,7 +122,16 @@ int ntb_register_device(struct ntb_dev *ntb)
+ 	ntb->ctx_ops = NULL;
+ 	spin_lock_init(&ntb->ctx_lock);
+ 
+-	return device_register(&ntb->dev);
++	device_initialize(&ntb->dev);
++
++	ret = dma_coerce_mask_and_coherent(&ntb->dev,
++					   dma_get_mask(&ntb->pdev->dev));
++	if (ret != 0) {
++		dev_err(&ntb->dev, "Failed to set NTB device DMA bit mask\n");
++		return ret;
++	}
++
++	return device_add(&ntb->dev);
+ }
+ EXPORT_SYMBOL(ntb_register_device);
+ 
 -- 
 2.11.0
 
