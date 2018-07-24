@@ -1,77 +1,76 @@
-Return-Path: <gunthorp@deltatee.com>
+Return-Path: <logang@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id s15-v6si94076iog.0.2018.07.20.11.00.40
+        by gmr-mx.google.com with ESMTPS id s85-v6si348680pfk.4.2018.07.24.11.23.19
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Fri, 20 Jul 2018 11:00:41 -0700 (PDT)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Fri, 20 Jul 2018 12:00:29 -0600
-Message-Id: <20180720180034.3964-4-logang@deltatee.com>
-In-Reply-To: <20180720180034.3964-1-logang@deltatee.com>
+        Tue, 24 Jul 2018 11:23:19 -0700 (PDT)
 References: <20180720180034.3964-1-logang@deltatee.com>
-Subject: [PATCH v2 3/8] NTB: Fix the default port and peer numbers for legacy drivers
-To: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, Jon Mason <jdmason@kudzu.us>
-Cc: Allen Hubbe <allenbh@gmail.com>, Serge Semin <fancer.lancer@gmail.com>, Shyam Sundar S K <Shyam-sundar.S-k@amd.com>, Shuah Khan <shuah@kernel.org>, Doug Meyer <dmeyer@gigaio.com>, Logan Gunthorpe <logang@deltatee.com>
+ <20180720180034.3964-5-logang@deltatee.com>
+ <CAJ80sat2gx3jaDi3LVDG6GhZ6qKmuKWxyaP_0VoR5k3VfGybqw@mail.gmail.com>
+ <b14a3c42-4a23-bff5-3e1b-9a1423611230@deltatee.com>
+ <CAJ80saunKS6hbNFBKjbQqSo32+KeLZurksCtnHNw-C35Zjq2Xw@mail.gmail.com>
+ <8809f02e-93de-f81a-31e0-90f2c1983b70@deltatee.com>
+ <CAJ80sauPtUBJ5q9iSGPArwvetBwEkjNaRmS_6adP5moK5ejLqg@mail.gmail.com>
+From: Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <8bc2ed4f-f032-c969-2e7f-f00135f567ec@deltatee.com>
+Date: Tue, 24 Jul 2018 12:23:13 -0600
+MIME-Version: 1.0
+In-Reply-To: <CAJ80sauPtUBJ5q9iSGPArwvetBwEkjNaRmS_6adP5moK5ejLqg@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH v2 4/8] NTB: ntb_pingpong: Choose doorbells based on port
+ number
+To: Allen Hubbe <allenbh@gmail.com>
+Cc: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, Jon Mason <jdmason@kudzu.us>, fancer.lancer@gmail.com, Shyam-sundar.S-k@amd.com, shuah@kernel.org, dmeyer@gigaio.com
 List-ID: <linux-ntb.googlegroups.com>
 
-When the commit adding ntb_default_port_number() and
-ntb_default_peer_port_number()  entered the kernel there was no
-users of it so it was impossible to tell what the API needed.
 
-When a user finally landed a year later (ntb_pingpong) there were
-more NTB topologies were created and no consideration was considered
-to how other drivers had changed.
 
-Now that there is a user it can be fixed to provide a sensible default
-for the legacy drivers that do not implement ntb_{peer_}port_number().
-Seeing ntb_pingpong doesn't check error codes returning EINVAL was also
-not sensible.
+On 24/07/18 12:12 PM, Allen Hubbe wrote:
+> On Tue, Jul 24, 2018 at 1:37 PM Logan Gunthorpe <logang@deltatee.com> wrote:
+>> Not really. Given that we know there are only two peers, we always use
+>> the other side's doorbell register. You'd only use the nearby doorbell
+>> register if you wanted to trigger your own interrupt -- that would be
+>> weird and we don't really have the API sophistication to do that.
+>>
+>> If we wanted to support multiple peers with some number in crosslink
+>> then we'd need to revamp things _significantly_. In this case we'd have
+>> multiple doorbell registers which each apply to a different subset of
+>> peers. This gets _very_ complicated and hurts my head.
+> 
+> ...huh, looks like peer index was omitted from ntb_peer_db_set and
+> friends.  Adding peer index there would make the interface consistent
+> with other ntb_peer functions.  Peer index would allow the hw driver
+> to select which doorbell register to use for each peer.  Adding a
+> ntb_peer_db_valid_bits to that would allow a subset of bits in the
+> shared register to be associated with each peer.
 
-Patches for ntb_pingpong and ntb_perf follow (which are broken
-otherwise) to support hardware that doesn't have port numbers. This is
-important not only to not break support with existing drivers but for
-the cross link topology which, due to its perfect symmetry, cannot
-assign unique port numbers to each side.
+The way the switch hardware works (switchtec and I assume IDT) is that
+there is only one doorbell register for all peers which can trigger any
+peer that doesn't have the corresponding bit masked. So the way it was
+designed without the index maxes sense except when we start to add
+multi-peer crosslink insanity. I don't think adding a peer index would
+be sufficient as the clients would need to know which peers share which
+doorbells.
 
-Fixes: 1e5301196a88 ("NTB: Add indexed ports NTB API")
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
----
- drivers/ntb/ntb.c | 9 ++-------
- 1 file changed, 2 insertions(+), 7 deletions(-)
+If I were to attempt something like this, I'd probably look at
+introducing a segment index to the entire API. So that each switch in a
+crosslink topology is it's own segment with it's own set of peers, peer
+index space, doorbell registers, etc. But that's all very complicated
+and messy and probably something I wouldn't even look at until we have
+finished with traditional multi-host setups.
 
-diff --git a/drivers/ntb/ntb.c b/drivers/ntb/ntb.c
-index 93f24440d11d..d955a92a095a 100644
---- a/drivers/ntb/ntb.c
-+++ b/drivers/ntb/ntb.c
-@@ -225,10 +225,8 @@ int ntb_default_port_number(struct ntb_dev *ntb)
- 	case NTB_TOPO_B2B_DSD:
- 		return NTB_PORT_SEC_DSD;
- 	default:
--		break;
-+		return 0;
- 	}
--
--	return -EINVAL;
- }
- EXPORT_SYMBOL(ntb_default_port_number);
- 
-@@ -251,10 +249,8 @@ int ntb_default_peer_port_number(struct ntb_dev *ntb, int pidx)
- 	case NTB_TOPO_B2B_DSD:
- 		return NTB_PORT_PRI_USD;
- 	default:
--		break;
-+		return 0;
- 	}
--
--	return -EINVAL;
- }
- EXPORT_SYMBOL(ntb_default_peer_port_number);
- 
-@@ -326,4 +322,3 @@ static void __exit ntb_driver_exit(void)
- 	bus_unregister(&ntb_bus);
- }
- module_exit(ntb_driver_exit);
--
--- 
-2.11.0
+> I thought for sure ntb_peer_db_set already had peer index, and I was
+> wrong.  Go ahead with the change as in your patch, I won't force the
+> issue or that you to do that extra work and touch all the drivers
+> again for this.  It can be addressed when there is renued interest in
+> making things work more than one peer.
+> 
+> This patch, and the others in this series:
+> Acked-by: Allen Hubbe <allenbh@gmail.com>
+
+Thanks!
+
+Logan
 
