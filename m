@@ -1,145 +1,42 @@
-Return-Path: <gunthorp@deltatee.com>
+Return-Path: <logang@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id v14-v6si122643ybe.5.2018.09.12.17.08.23
+        by gmr-mx.google.com with ESMTPS id v76-v6si794742vke.4.2018.09.17.09.06.49
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Wed, 12 Sep 2018 17:08:23 -0700 (PDT)
+        Mon, 17 Sep 2018 09:06:49 -0700 (PDT)
+References: <20180720180034.3964-1-logang@deltatee.com>
+ <20180917151622.lnlckvkiyqqxlt4c@alfbook-pro.local>
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Wed, 12 Sep 2018 18:08:09 -0600
-Message-Id: <20180913000815.3824-1-logang@deltatee.com>
+Message-ID: <cdf8ac35-75d3-afd2-1bcb-f9d5ac256459@deltatee.com>
+Date: Mon, 17 Sep 2018 10:06:39 -0600
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Subject: [PATCH v21 0/6]  Add io{read|write}64 to io-64-atomic headers
-To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>
+In-Reply-To: <20180917151622.lnlckvkiyqqxlt4c@alfbook-pro.local>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH v2 0/8] Fix breakage caused by the NTB multi-port patchset
+To: Alexander Fomichev <fomichev.ru@gmail.com>
+Cc: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, Jon Mason <jdmason@kudzu.us>, Allen Hubbe <allenbh@gmail.com>, Serge Semin <fancer.lancer@gmail.com>, Shyam Sundar S K <Shyam-sundar.S-k@amd.com>, Shuah Khan <shuah@kernel.org>, Doug Meyer <dmeyer@gigaio.com>, linux@yadro.com
 List-ID: <linux-ntb.googlegroups.com>
 
-This is just a resend:
 
-Andrew, can you please pick this set up again so it can get into
-linux-next again this cycle?
 
-Thanks,
+On 17/09/18 09:16 AM, Alexander Fomichev wrote:
+>> Logan Gunthorpe (8):
+>>   NTB: ntb_tool: reading the link file should not end in a NULL byte
+>>   NTB: Setup the DMA mask globally for all drivers
+>>   NTB: Fix the default port and peer numbers for legacy drivers
+>>   NTB: ntb_pingpong: Choose doorbells based on port number
+>>   NTB: perf: Don't require one more memory window than number of peers
+>>   NTB: perf: Fix support for hardware that doesn't have port numbers
+>>   NTB: perf: Fix race condition when run with ntb_test
+>>   NTB: ntb_test: Fix bug when counting remote files
+> 
+> Tested successfully on i5-based desktop PC, NTB on PM8535 chip, both
+> ends are on the local system.
+> 
+> Tested-by: Alexander Fomichev <fomichev.ru@gmail.com>
+
+Thanks Alexander!
 
 Logan
-
---
-
-Changes since v20:
-- Rebased onto v4.19-rc3 (No Changes)
-
-Changes since v19:
-- Rebased onto v4.19-rc1 (No Changes)
-
-Changes since v18:
-- Dropped the CAAM patch as it was subtly wrong and broke when people
-  tested it in linux-next. Seeing the code is much trickier than it
-  appears, we'll leave it to its maintainers to clean it up,
-  should they chose.
-- Restored the ioread64/iowrite64 extern prototypes as despite
-  appearing to be unusued, they are in fact used in a rare corner case
-  by the caam driver on 64bit powerpc. This was reported by Guenter testing
-  on linux-next.
-- Rebased onto v4.18-rc4 (No Changes)
-
-Changes since v17:
-- Rebased onto v4.18-rc1 (No Changes)
-
-Changes since v16:
-- Rebased onto v4.17-rc4 (No Changes)
-
-Changes since v15:
-- Rebased onto v4.17-rc1, dropping the powerpc patches which were
-  picked up by Michael
-
-Changes since v14:
-- Rebased onto v4.16-rc7
-- Replace the first two patches so that instead of correcting the
-  endianness annotations we change to using writeX() and readX() with
-  swabX() calls. This makes the big-endian functions more symmetric
-  with the little-endian versions (with respect to barriers that are
-  not included in the raw functions). As a side effect, it also fixes
-  the kbuild warnings that the first two patches tried to address.
-
-Changes since v13:
-- Changed the subject of patch 0001 to correct a nit pointed out by Luc
-
-Changes since v12:
-- Rebased onto v4.16-rc6
-- Split patch 0001 into two and reworked the commit log as requested
-  by Luc Van Oostenryck
-
-Changes since v11:
-- Rebased onto v4.16-rc5
-- Added a patch (0001) to fix some old and new sparse warnings
-  that the kbuild robot warned about this cycle. The latest version
-  of sparse was required to reproduce these.
-- Added a patch (0002) to add io{read|write}64 to parisc which the kbuild
-  robot also found errors for this cycle
-
-Changes since v10:
-- Rebased onto v4.16-rc4, this droped the drm/tilcdc patch which was
-  picked up by that tree and is already in 4.16.
-
-Changes since v9:
-- Rebased onto v4.15-rc6
-- Fixed a couple of issues in the new version of the CAAM patch as
-  pointed out by Horia
-
-Changes since v8:
-- Rebased onto v4.15-rc2, as a result rewrote patch 7 seeing someone did
-  some similar cleanup in that area.
-- Added a patch to clean up the Switchtec NTB driver which landed in
-  v4.15-rc1
-
-Changes since v7:
-- Fix minor nits from Andy Shevchenko
-- Rebased onto v4.14-rc1
-
-Changes since v6:
- ** none **
-
-Changes since v5:
-- Added a fix to the tilcdc driver to ensure it doesn't use the
-  non-atomic operation. (This includes adding io{read|write}64[be]_is_nonatomic
-  defines).
-
-Changes since v4:
-- Add functions so the powerpc implementation of iomap.c compiles. (As
-  noticed by Horia)
-
-Changes since v3:
-
-- I noticed powerpc didn't use the appropriate functions seeing
-  readq/writeq were not defined when iomap.h was included. Thus I've
-  included a patch to adjust this
-- Fixed some mistakes with a couple of the defines in io-64-nonatomic*
-  headers
-- Fixed a typo noticed by Horia.
-
-(earlier versions were drastically different)
-
---
-
-Logan Gunthorpe (6):
-  iomap: Use non-raw io functions for io{read|write}XXbe
-  parisc: iomap: introduce io{read|write}64
-  iomap: introduce io{read|write}64_{lo_hi|hi_lo}
-  io-64-nonatomic: add io{read|write}64[be]{_lo_hi|_hi_lo} macros
-  ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
-  ntb: ntb_hw_switchtec: Cleanup 64bit IO defines to use the common
-    header
-
- arch/parisc/include/asm/io.h           |   9 ++
- arch/parisc/lib/iomap.c                |  64 +++++++++++
- arch/powerpc/include/asm/io.h          |   2 +
- drivers/ntb/hw/intel/ntb_hw_intel.h    |  30 +-----
- drivers/ntb/hw/mscc/ntb_hw_switchtec.c |  36 +------
- include/asm-generic/iomap.h            |  22 ++++
- include/linux/io-64-nonatomic-hi-lo.h  |  64 +++++++++++
- include/linux/io-64-nonatomic-lo-hi.h  |  64 +++++++++++
- lib/iomap.c                            | 140 ++++++++++++++++++++++++-
- 9 files changed, 366 insertions(+), 65 deletions(-)
-
---
-2.19.0
