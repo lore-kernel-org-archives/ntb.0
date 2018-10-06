@@ -1,33 +1,64 @@
-Return-Path: <asierra@xes-inc.com>
-Received: from mail.xes-mad.com (xes-mad.com. [162.248.234.2])
-        by gmr-mx.google.com with ESMTP id a84-v6si109584oii.1.2018.10.12.13.20.18
-        for <linux-ntb@googlegroups.com>;
-        Fri, 12 Oct 2018 13:20:18 -0700 (PDT)
-From: Aaron Sierra <asierra@xes-inc.com>
-Subject: [PATCH 0/2] NTB: Stash private data in transport client device
-Date: Fri, 12 Oct 2018 15:20:16 -0500
-Message-Id: <1539375618-6782-1-git-send-email-asierra@xes-inc.com>
-To: linux-ntb@googlegroups.com
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, "David S. Miller" <davem@davemloft.net>
+Return-Path: <mpe@ellerman.id.au>
+Received: from ozlabs.org (ozlabs.org. [2401:3900:2:1::2])
+        by gmr-mx.google.com with ESMTPS id u20-v6si493493pfm.2.2018.10.06.04.56.19
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Sat, 06 Oct 2018 04:56:20 -0700 (PDT)
+From: Michael Ellerman <mpe@ellerman.id.au>
+Subject: Re: [PATCH v22 3/6] iomap: introduce io{read|write}64_{lo_hi|hi_lo}
+In-Reply-To: <20181002224108.3321-4-logang@deltatee.com>
+References: <20181002224108.3321-1-logang@deltatee.com> <20181002224108.3321-4-logang@deltatee.com>
+Date: Sat, 06 Oct 2018 21:56:13 +1000
+Message-ID: <877eivjnky.fsf@concordia.ellerman.id.au>
+MIME-Version: 1.0
+Content-Type: text/plain
+To: Logan Gunthorpe <logang@deltatee.com>, linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, Horia =?utf-8?Q?Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Suresh Warrier <warrier@linux.vnet.ibm.com>, Nicholas Piggin <npiggin@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Support NTB transport client device drivers stashing a reference to
-their private device representation within the transport client device
-for trivial lookup.
+Logan Gunthorpe <logang@deltatee.com> writes:
 
-Use the new stashing mechanism to simplify ntb_netdev device probe
-and remove. This optimization will also benefit any out-of-tree
-drivers that care to use it.
+> In order to provide non-atomic functions for io{read|write}64 that will
+> use readq and writeq when appropriate. We define a number of variants
+> of these functions in the generic iomap that will do non-atomic
+> operations on pio but atomic operations on mmio.
+>
+> These functions are only defined if readq and writeq are defined. If
+> they are not, then the wrappers that always use non-atomic operations
+> from include/linux/io-64-nonatomic*.h will be used.
+>
+> Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+> Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
+> Cc: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+> Cc: Paul Mackerras <paulus@samba.org>
+> Cc: Michael Ellerman <mpe@ellerman.id.au>
+> Cc: Arnd Bergmann <arnd@arndb.de>
+> Cc: Suresh Warrier <warrier@linux.vnet.ibm.com>
+> Cc: Nicholas Piggin <npiggin@gmail.com>
+> ---
+>  arch/powerpc/include/asm/io.h |   2 +
+>  include/asm-generic/iomap.h   |  22 ++++++
+>  lib/iomap.c                   | 132 ++++++++++++++++++++++++++++++++++
+>  3 files changed, 156 insertions(+)
+>
+> diff --git a/arch/powerpc/include/asm/io.h b/arch/powerpc/include/asm/io.h
+> index e0331e754568..20fe5d7515db 100644
+> --- a/arch/powerpc/include/asm/io.h
+> +++ b/arch/powerpc/include/asm/io.h
+> @@ -798,8 +798,10 @@ extern void __iounmap_at(void *ea, unsigned long size);
+>  
+>  #define mmio_read16be(addr)		readw_be(addr)
+>  #define mmio_read32be(addr)		readl_be(addr)
+> +#define mmio_read64be(addr)		readq_be(addr)
+>  #define mmio_write16be(val, addr)	writew_be(val, addr)
+>  #define mmio_write32be(val, addr)	writel_be(val, addr)
+> +#define mmio_write64be(val, addr)	writeq_be(val, addr)
+>  #define mmio_insb(addr, dst, count)	readsb(addr, dst, count)
+>  #define mmio_insw(addr, dst, count)	readsw(addr, dst, count)
+>  #define mmio_insl(addr, dst, count)	readsl(addr, dst, count)
 
-Aaron Sierra (2):
-  NTB: transport: Support client device private data
-  ntb_netdev: Simplify remove with client private data
+For the powerpc part:
 
- drivers/net/ntb_netdev.c      | 28 +++-------------------------
- drivers/ntb/ntb_transport.c   | 19 +++++++++++++++++++
- include/linux/ntb_transport.h |  2 ++
- 3 files changed, 24 insertions(+), 25 deletions(-)
+Acked-by: Michael Ellerman <mpe@ellerman.id.au> (powerpc)
 
--- 
-2.7.4
-
+cheers
