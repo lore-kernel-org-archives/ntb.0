@@ -1,20 +1,16 @@
-Return-Path: <wesley.sheng@microchip.com>
-Received: from NAM01-BN3-obe.outbound.protection.outlook.com (mail-bn3nam01on0045.outbound.protection.outlook.com. [104.47.33.45])
-        by gmr-mx.google.com with ESMTPS id h13-v6si364140pfd.2.2018.10.10.01.30.59
-        for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Wed, 10 Oct 2018 01:30:59 -0700 (PDT)
-From: Wesley Sheng <wesley.sheng@microchip.com>
+Return-Path: <wesleyshenggit@sina.com>
+Received: from mail7-214.sinamail.sina.com.cn (mail7-214.sinamail.sina.com.cn. [202.108.7.214])
+        by gmr-mx.google.com with SMTP id y4si1291612vsa.2.2018.10.09.23.50.48
+        for <linux-ntb@googlegroups.com>;
+        Tue, 09 Oct 2018 23:50:49 -0700 (PDT)
+From: Wesley Sheng <wesleyshenggit@sina.com>
 Subject: [PATCH v3] NTB: switchtec_ntb: Update switchtec documentation with pre-requisites for NTB
-Date: Wed, 10 Oct 2018 22:42:55 +0800
-Message-ID: <1539182575-26851-1-git-send-email-wesley.sheng@microchip.com>
-Return-Path: wesley.sheng@microchip.com
-MIME-Version: 1.0
-Content-Type: text/plain
-To: bhelgaas@google.com, corbet@lwn.net, logang@deltatee.com, kurt.schwemmer@microsemi.com
-Cc: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, Wesley Yung <wesley.yung@microchip.com>, Kelvin Cao <kelvin.cao@microchip.com>, Wesley
- Sheng <wesley.sheng@microchip.com>
+Date: Wed, 10 Oct 2018 21:47:47 +0800
+Message-Id: <1539179267-26534-1-git-send-email-wesleyshenggit@sina.com>
+To: kurt.schwemmer@microsemi.com, bhelgaas@google.com, logang@deltatee.com, corbet@lwn.net
+Cc: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, Wesley Yung <wesley.yung@microchip.com>, Kelvin Cao <kelvin.cao@microchip.com>, Wesley Sheng <wesleyshenggit@sina.com>
 List-ID: <linux-ntb.googlegroups.com>
+
 
 From: Wesley Yung <wesley.yung@microchip.com>
 
@@ -24,7 +20,7 @@ other sentences in the documentation.
 
 Signed-off-by: Wesley Yung <wesley.yung@microchip.com>
 Signed-off-by: Kelvin Cao <kelvin.cao@microchip.com>
-Signed-off-by: Wesley Sheng <wesley.sheng@microchip.com>
+Signed-off-by: Wesley Sheng <wesleyshenggit@sina.com>
 ---
  Documentation/switchtec.txt | 30 ++++++++++++++++++++----------
  1 file changed, 20 insertions(+), 10 deletions(-)
@@ -93,4 +89,5 @@ index f788264..d6f04dcc 100644
 +Hardware Driver in this stack.
 -- 
 2.7.4
+
 
