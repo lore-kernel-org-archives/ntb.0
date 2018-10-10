@@ -1,14 +1,14 @@
 Return-Path: <wesleyshenggit@sina.com>
-Received: from mail7-214.sinamail.sina.com.cn (mail7-214.sinamail.sina.com.cn. [202.108.7.214])
-        by gmr-mx.google.com with SMTP id y4si1291612vsa.2.2018.10.09.23.50.48
+Received: from mail7-212.sinamail.sina.com.cn (mail7-212.sinamail.sina.com.cn. [202.108.7.212])
+        by gmr-mx.google.com with SMTP id q49-v6si420946qte.3.2018.10.09.22.36.00
         for <linux-ntb@googlegroups.com>;
-        Tue, 09 Oct 2018 23:50:49 -0700 (PDT)
+        Tue, 09 Oct 2018 22:36:01 -0700 (PDT)
 From: Wesley Sheng <wesleyshenggit@sina.com>
 Subject: [PATCH v3] NTB: switchtec_ntb: Update switchtec documentation with pre-requisites for NTB
-Date: Wed, 10 Oct 2018 21:47:47 +0800
-Message-Id: <1539179267-26534-1-git-send-email-wesleyshenggit@sina.com>
-To: kurt.schwemmer@microsemi.com, bhelgaas@google.com, logang@deltatee.com, corbet@lwn.net
-Cc: linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, Wesley Yung <wesley.yung@microchip.com>, Kelvin Cao <kelvin.cao@microchip.com>, Wesley Sheng <wesleyshenggit@sina.com>
+Date: Wed, 10 Oct 2018 20:33:08 +0800
+Message-Id: <1539174788-25878-1-git-send-email-wesleyshenggit@sina.com>
+To: kurt.schwemmer@microsemi.com, logang@deltatee.com, corbet@lwn.net, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, bhelgaas@google.com, linux-ntb@googlegroups.com
+Cc: Wesley Yung <wesley.yung@microchip.com>, Kelvin Cao <kelvin.cao@microchip.com>, Wesley Sheng <wesleyshenggit@sina.com>
 List-ID: <linux-ntb.googlegroups.com>
 
 
