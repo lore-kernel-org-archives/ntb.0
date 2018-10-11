@@ -1,37 +1,47 @@
-Return-Path: <corbet@lwn.net>
-Received: from ms.lwn.net (ms.lwn.net. [45.79.88.28])
-        by gmr-mx.google.com with ESMTPS id b71-v6si65817ywb.3.2018.10.12.10.30.43
+Return-Path: <logang@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id i5-v6si83319pfi.1.2018.10.11.09.36.44
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 12 Oct 2018 10:30:43 -0700 (PDT)
-Date: Fri, 12 Oct 2018 11:30:40 -0600
-From: Jonathan Corbet <corbet@lwn.net>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Thu, 11 Oct 2018 09:36:45 -0700 (PDT)
+References: <1539182575-26851-1-git-send-email-wesley.sheng@microchip.com>
+ <20181011162747.GP5906@bhelgaas-glaptop.roam.corp.google.com>
+From: Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <f601ab82-7bcc-01cf-70d5-67c4de6a5abb@deltatee.com>
+Date: Thu, 11 Oct 2018 10:36:41 -0600
+MIME-Version: 1.0
+In-Reply-To: <20181011162747.GP5906@bhelgaas-glaptop.roam.corp.google.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-CA
+Content-Transfer-Encoding: 7bit
 Subject: Re: [PATCH v3] NTB: switchtec_ntb: Update switchtec documentation
  with pre-requisites for NTB
-Message-ID: <20181012113040.52bfff58@lwn.net>
-In-Reply-To: <1539174788-25878-1-git-send-email-wesleyshenggit@sina.com>
-References: <1539174788-25878-1-git-send-email-wesleyshenggit@sina.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 8bit
-To: Wesley Sheng <wesleyshenggit@sina.com>
-Cc: kurt.schwemmer@microsemi.com, logang@deltatee.com, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, bhelgaas@google.com, linux-ntb@googlegroups.com, Wesley Yung <wesley.yung@microchip.com>, Kelvin Cao <kelvin.cao@microchip.com>
+To: Bjorn Helgaas <helgaas@kernel.org>, Wesley Sheng <wesley.sheng@microchip.com>
+Cc: bhelgaas@google.com, corbet@lwn.net, kurt.schwemmer@microsemi.com, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, Wesley Yung <wesley.yung@microchip.com>, Kelvin Cao <kelvin.cao@microchip.com>, Jon Mason <jdmason@kudzu.us>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Wed, 10 Oct 2018 20:33:08 +0800
-Wesley Sheng <wesleyshenggit@sina.com> wrote:
 
-> The ntb_hw_switchtec driver has requirements on kernel configuration
-> so we add these notes to the documentation and also clean up a few 
-> other sentences in the documentation.
+
+On 2018-10-11 10:27 a.m., Bjorn Helgaas wrote:
+> I'm not sure who should really own this file:
 > 
-> Signed-off-by: Wesley Yung <wesley.yung@microchip.com>
-> Signed-off-by: Kelvin Cao <kelvin.cao@microchip.com>
-> Signed-off-by: Wesley Sheng <wesleyshenggit@sina.com>
+>   $ ./scripts/get_maintainer.pl -f Documentation/switchtec.txt
+>   Kurt Schwemmer <kurt.schwemmer@microsemi.com> (maintainer:PCI DRIVER FOR MICROSEMI SWITCHTEC)
+>   Logan Gunthorpe <logang@deltatee.com> (maintainer:PCI DRIVER FOR MICROSEMI SWITCHTEC)
+>   Jonathan Corbet <corbet@lwn.net> (maintainer:DOCUMENTATION)
+>   linux-pci@vger.kernel.org (open list:PCI DRIVER FOR MICROSEMI SWITCHTEC)
+>   linux-doc@vger.kernel.org (open list:DOCUMENTATION)
+>   linux-kernel@vger.kernel.org (open list)
+> 
+> and Jon (NTB driver core maintainer) has applied recent updates
+> to it.
+> 
+> But in the interest of forward progress, I applied this patch with
+> Logan's ack to pci/misc for v4.20.
 
-So why all of these signoffs for such a small patch?  Who is the actual
-author of the patch?
+Thanks. I'm not really sure what's going on in the NTB tree these days
+as Jon hasn't picked up anything in a while so it's probably better this
+went through PCI. It was originally created through the PCI tree, there
+shouldn't be any conflicts, and I can't see anyone else objecting.
 
-Thanks,
-
-jon
+Logan
