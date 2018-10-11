@@ -1,81 +1,83 @@
-Return-Path: <Omer.Margolin@dell.com>
-Received: from esa7.dell-outbound.iphmx.com (esa7.dell-outbound.iphmx.com. [68.232.153.96])
-        by gmr-mx.google.com with ESMTPS id 137-v6si245460ita.0.2018.10.14.05.24.06
+Return-Path: <allenbh@gmail.com>
+Received: from mail-lj1-x22f.google.com (mail-lj1-x22f.google.com. [2a00:1450:4864:20::22f])
+        by gmr-mx.google.com with ESMTPS id h20-v6si282939ljj.5.2018.10.10.19.50.40
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Sun, 14 Oct 2018 05:24:06 -0700 (PDT)
-Received: from pps.filterd (m0090351.ppops.net [127.0.0.1])
-	by mx0b-00154901.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w9ECO5VS046925
-	for <linux-ntb@googlegroups.com>; Sun, 14 Oct 2018 08:24:05 -0400
-Received: from esa3.dell-outbound2.iphmx.com (esa3.dell-outbound2.iphmx.com [68.232.154.63])
-	by mx0b-00154901.pphosted.com with ESMTP id 2n3d2hbg9r-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <linux-ntb@googlegroups.com>; Sun, 14 Oct 2018 08:24:05 -0400
-From: "Margolin, Omer" <Omer.Margolin@dell.com>
-Subject: RE: Inbound translation setting failure in coherent allocation
-Date: Sun, 14 Oct 2018 12:17:04 +0000
-Message-ID: <8C51E45097385D46B526390C84E223A34EE64CE3@MX202CL01.corp.emc.com>
-References: <8C51E45097385D46B526390C84E223A34EE561EB@MX202CL01.corp.emc.com>
- <762f4d04-b879-8e71-483d-3cd9310185eb@intel.com>
- <CAJ80savJ4DZw4SvKaatR7ZU8ML0ncMRH+t_sMLewUsaoVHQE7g@mail.gmail.com>
-In-Reply-To: <CAJ80savJ4DZw4SvKaatR7ZU8ML0ncMRH+t_sMLewUsaoVHQE7g@mail.gmail.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+        Wed, 10 Oct 2018 19:50:40 -0700 (PDT)
+Received: by mail-lj1-x22f.google.com with SMTP id j17-v6so6794233lja.1
+        for <linux-ntb@googlegroups.com>; Wed, 10 Oct 2018 19:50:40 -0700 (PDT)
 MIME-Version: 1.0
-To: Allen Hubbe <allenbh@gmail.com>, "dave.jiang@intel.com" <dave.jiang@intel.com>
-Cc: "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "fancer.lancer@gmail.com" <fancer.lancer@gmail.com>, "Glimcher, Boris" <Boris.Glimcher@dell.com>, "Zekri, Ishay" <Ishay.Zekri@dell.com>
+References: <8C51E45097385D46B526390C84E223A34EE561EB@MX202CL01.corp.emc.com> <762f4d04-b879-8e71-483d-3cd9310185eb@intel.com>
+In-Reply-To: <762f4d04-b879-8e71-483d-3cd9310185eb@intel.com>
+From: Allen Hubbe <allenbh@gmail.com>
+Date: Wed, 10 Oct 2018 22:50:28 -0400
+Message-ID: <CAJ80savJ4DZw4SvKaatR7ZU8ML0ncMRH+t_sMLewUsaoVHQE7g@mail.gmail.com>
+Subject: Re: Inbound translation setting failure in coherent allocation
+Content-Type: text/plain; charset="UTF-8"
+To: dave.jiang@intel.com
+Cc: Omer.Margolin@dell.com, linux-ntb@googlegroups.com, fancer.lancer@gmail.com, Boris.Glimcher@dell.com, Ishay.Zekri@dell.com
 List-ID: <linux-ntb.googlegroups.com>
 
-SGksDQoNCkFmdGVyIGNoYW5naW5nIHBlcmYtPmdpZHggdG8gcGVlci0+Z2lkeA0KV2UgZ2V0IGZh
-aWx1cmUgb24gYWxpZ25tZW50Og0KWyAxMzQ5LjQxNTczOF0gbnRiX3BlcmYgMDAwMDo4MjowMC4w
-OiBVbmFsaWduZWQgaW5idWYgYWxsb2NhdGVkDQoNCldlIGFyZSBsb29raW5nIGludG8gaXQuDQoN
-CkJlc3QgUmVnYXJkcywNCk9tZXINCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206
-IEFsbGVuIEh1YmJlIFttYWlsdG86YWxsZW5iaEBnbWFpbC5jb21dIA0KU2VudDogVGh1cnNkYXks
-IE9jdG9iZXIgMTEsIDIwMTggNTo1MCBBTQ0KVG86IGRhdmUuamlhbmdAaW50ZWwuY29tDQpDYzog
-TWFyZ29saW4sIE9tZXI7IGxpbnV4LW50YkBnb29nbGVncm91cHMuY29tOyBmYW5jZXIubGFuY2Vy
-QGdtYWlsLmNvbTsgR2xpbWNoZXIsIEJvcmlzOyBaZWtyaSwgSXNoYXkNClN1YmplY3Q6IFJlOiBJ
-bmJvdW5kIHRyYW5zbGF0aW9uIHNldHRpbmcgZmFpbHVyZSBpbiBjb2hlcmVudCBhbGxvY2F0aW9u
-DQoNCg0KW0VYVEVSTkFMIEVNQUlMXSANClBsZWFzZSByZXBvcnQgYW55IHN1c3BpY2lvdXMgYXR0
-YWNobWVudHMsIGxpbmtzLCBvciByZXF1ZXN0cyBmb3Igc2Vuc2l0aXZlIGluZm9ybWF0aW9uLg0K
-DQoNCk9uIFdlZCwgT2N0IDEwLCAyMDE4IGF0IDExOjU1IEFNIERhdmUgSmlhbmcgPGRhdmUuamlh
-bmdAaW50ZWwuY29tPiB3cm90ZToNCj4gT24gMTAvMTAvMjAxOCAwNjoxMSBBTSwgTWFyZ29saW4s
-IE9tZXIgd3JvdGU6DQo+ID4gSGVsbG8sDQo+ID4NCj4gPiBUcnlpbmcgdG8gZXZhbHVhdGUgdGhl
-IHJhdyBwZXJmb3JtYW5jZSBvZiBJbnRlbCBOVEIgdXNpbmcgbnRiX3BlcmYgdGVzdA0KPiA+IHRv
-b2wgd2UgZ2V0IGEgZmFpbHVyZSBpbiBjb2hlcmVudCBhbGxvY2F0aW9uLg0KPiA+DQo+ID4gcmVz
-cG9uc2UgZnJvbSBEYXZlIEppYW5nIGRhdmUuamlhbmdAaW50ZWwuY29tIDxtYWlsdG86ZGF2ZS5q
-aWFuZ0BpbnRlbC5jb20+Og0KPiA+ICJIZWxsby4gVXBzdHJlYW0gaGFzIGJlZW4gbWFraW5nIHF1
-aXRlIGEgYml0IG9mIGNoYW5nZXMgcmVjZW50bHkgdG8NCj4gPiBudGJfcGVyZi4gSWYgaXQncyBm
-YWlsaW5nIGZvciB5b3UgY2FuIHlvdSBwbGVhc2UgcG9zdCBpdCB0byB0aGUgbnRiDQo+ID4gbWFp
-bGluZyBsaXN0IGFuZCBpbnF1aXJlIHRoZXJlPyBIb3BlZnVsbHkgaXQncyBqdXN0IHNvbWV0aGlu
-ZyBTZXJnZWkgZGlkDQo+ID4gYW5kIGhlIGNhbiBoZWxwIHlvdSBmaXguIFRoYW5rcyEiDQo+ID4N
-Cj4gPiBTZXJnZWkgY2FuIHlvdSBwbGVhc2UgY2hlY2sgaWYgdGhpcyBpcyBhIHJlc3VsdCBvZiBs
-YXRlc3QgY2hhbmdlcz8NCj4gPg0KPiA+DQo+ID4NCj4gPiBEZXRhaWxzOg0KPiA+DQo+ID4gbnRi
-X3BlcmYgbW9kdWxlIHdhcyBsb2FkZWQgdXNpbmcgdGhlIGNvbW1hbmQgYmVsb3cgb24gYm90aCBz
-aWRlcyBvZiB0aGUNCj4gPiBOVEIgY29ubmVjdGlvbjoNCj4gPiBtb2Rwcm9iZSBudGJfaHdfaW50
-ZWwgYjJiX213X2lkeD0wIGIyYl9td19zaGFyZT0wIGR5bmRiZz0rcG1mbA0KPiA+DQo+ID4gRmFp
-bHVyZSBpbiBzZXR0aW5nIGluYnVmIHRyYW5zbGF0aW9uLg0KPiA+IFsgNTUzLjgxNjI0Ml0gbnRi
-X3BlcmYgMDAwMDo4MjowMC4wOiBGYWlsZWQgdG8gc2V0IGluYnVmIHRyYW5zbGF0aW9uDQo+DQo+
-IFNlcmdlLA0KPiBUaGlzIGlzIG9kZCBiZWNhdXNlIHRoZSBJbnRlbCBkcml2ZXIgZG9lcyBub3Qg
-aGF2ZSBwZWVyX213X3NldF90cmFucygpLg0KPiBJdCBzaG91bGQndmUganVzdCByZXR1cm5lZCAw
-LiBUaG91Z2h0cz8NCg0KSXQncyBmYWlsaW5nIGZvciBtd19zZXRfdHJhbnMsIG5vdCBwZWVyX213
-X3NldF90cmFucy4gIFRoZSBpbnRlbA0KZHJpdmVyIGRvZXMgaGF2ZSB0aGlzIG1ldGhvZC4NCg0K
-PiA+IFVzaW5nIHRoZSBNVyAoYWxsb2NhdGlvbiBhbmQgdHJhbnNsYXRpb24pIHdvcmtzIHVzaW5n
-IG50Yl90b29sDQoNCg0KVGhlIG50YiB0b29sIGhhcyB0aGlzOiBub3RlIHNhbWUgd2lkeCBwYXJh
-bSBpbiBib3RoIGNhbGxzLg0KDQpyZXQgPSBudGJfbXdfZ2V0X2FsaWduKHRjLT5udGIsIHBpZHgs
-IHdpZHgsICZhZGRyX2FsaWduLCAmc2l6ZV9hbGlnbiwgJnNpemUpOw0KLi4uDQpyZXQgPSBudGJf
-bXdfc2V0X3RyYW5zKHRjLT5udGIsIHBpZHgsIHdpZHgsIGlubXctPmRtYV9iYXNlLCBpbm13LT5z
-aXplKTsNCmh0dHBzOi8vZWxpeGlyLmJvb3RsaW4uY29tL2xpbnV4L2xhdGVzdC9zb3VyY2UvZHJp
-dmVycy9udGIvdGVzdC9udGJfdG9vbC5jI0w1ODUNCg0KDQpCdXQgbnRiIHBlcmYgaGFzIHRoaXM6
-IG5vdGUgdGhlIGRpZmZlcmVuY2Ugd2l0aCBwZXJmLT5naWR4IHZzDQpwZWVyLT5naWR4LCB0aGly
-ZCBwYXJhbWV0ZXIuDQoNCnJldCA9IG50Yl9td19nZXRfYWxpZ24ocGVyZi0+bnRiLCBwZWVyLT5w
-aWR4LCBwZXJmLT5naWR4LCAmeGxhdF9hbGlnbiwNCiZzaXplX2FsaWduLCAmc2l6ZV9tYXgpOw0K
-Li4uDQpyZXQgPSBudGJfbXdfc2V0X3RyYW5zKHBlcmYtPm50YiwgcGVlci0+cGlkeCwgcGVlci0+
-Z2lkeCwNCnBlZXItPmluYnVmX3hsYXQsIHBlZXItPmluYnVmX3NpemUpOw0KaHR0cHM6Ly9lbGl4
-aXIuYm9vdGxpbi5jb20vbGludXgvbGF0ZXN0L3NvdXJjZS9kcml2ZXJzL250Yi90ZXN0L250Yl9w
-ZXJmLmMjTDU3NA0KDQoNCkl0IG1heSBiZSB0aGF0IGluIG50YiBwZXJmIHRoZSBzaXplIGFuZCBh
-bGlnbm1lbnQgcmVxdWlyZW1lbnRzIG9mIG9uZQ0Kd2luZG93IGFyZSBiZWluZyBhcHBsaWVkIHRv
-IGFub3RoZXIgd2luZG93LCBzbyB0aGF0IHZhbGlkYXRpb24gZmFpbHMNCmluIHRoZSBpbnRlbCBu
-dGIgZHJpdmVyLg0KDQpUcnkgY2hhbmdpbmcgcGVyZi0+Z2lkeCB0byBwZWVyLT5naWR4IChJIHRo
-aW5rLCBvciB2aWNlIHZlcnNhIGlmIHRoYXQNCmRvZXNuJ3Qgd29yaykuICBJZiBpdCB3b3JrcyBj
-YW4geW91IHNlbmQgYSBwYXRjaD8NCg0KQWxsZW4NCg==
+On Wed, Oct 10, 2018 at 11:55 AM Dave Jiang <dave.jiang@intel.com> wrote:
+> On 10/10/2018 06:11 AM, Margolin, Omer wrote:
+> > Hello,
+> >
+> > Trying to evaluate the raw performance of Intel NTB using ntb_perf test
+> > tool we get a failure in coherent allocation.
+> >
+> > response from Dave Jiang dave.jiang@intel.com <mailto:dave.jiang@intel.com>:
+> > "Hello. Upstream has been making quite a bit of changes recently to
+> > ntb_perf. If it's failing for you can you please post it to the ntb
+> > mailing list and inquire there? Hopefully it's just something Sergei did
+> > and he can help you fix. Thanks!"
+> >
+> > Sergei can you please check if this is a result of latest changes?
+> >
+> >
+> >
+> > Details:
+> >
+> > ntb_perf module was loaded using the command below on both sides of the
+> > NTB connection:
+> > modprobe ntb_hw_intel b2b_mw_idx=0 b2b_mw_share=0 dyndbg=+pmfl
+> >
+> > Failure in setting inbuf translation.
+> > [ 553.816242] ntb_perf 0000:82:00.0: Failed to set inbuf translation
+>
+> Serge,
+> This is odd because the Intel driver does not have peer_mw_set_trans().
+> It should've just returned 0. Thoughts?
+
+It's failing for mw_set_trans, not peer_mw_set_trans.  The intel
+driver does have this method.
+
+> > Using the MW (allocation and translation) works using ntb_tool
+
+
+The ntb tool has this: note same widx param in both calls.
+
+ret = ntb_mw_get_align(tc->ntb, pidx, widx, &addr_align, &size_align, &size);
+...
+ret = ntb_mw_set_trans(tc->ntb, pidx, widx, inmw->dma_base, inmw->size);
+https://elixir.bootlin.com/linux/latest/source/drivers/ntb/test/ntb_tool.c#L585
+
+
+But ntb perf has this: note the difference with perf->gidx vs
+peer->gidx, third parameter.
+
+ret = ntb_mw_get_align(perf->ntb, peer->pidx, perf->gidx, &xlat_align,
+&size_align, &size_max);
+...
+ret = ntb_mw_set_trans(perf->ntb, peer->pidx, peer->gidx,
+peer->inbuf_xlat, peer->inbuf_size);
+https://elixir.bootlin.com/linux/latest/source/drivers/ntb/test/ntb_perf.c#L574
+
+
+It may be that in ntb perf the size and alignment requirements of one
+window are being applied to another window, so that validation fails
+in the intel ntb driver.
+
+Try changing perf->gidx to peer->gidx (I think, or vice versa if that
+doesn't work).  If it works can you send a patch?
+
+Allen
