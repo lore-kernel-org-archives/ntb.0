@@ -1,47 +1,118 @@
-Return-Path: <logang@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id i5-v6si83319pfi.1.2018.10.11.09.36.44
+Return-Path: <helgaas@kernel.org>
+Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
+        by gmr-mx.google.com with ESMTPS id b81-v6si653374itb.1.2018.10.11.09.27.49
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Thu, 11 Oct 2018 09:36:45 -0700 (PDT)
-References: <1539182575-26851-1-git-send-email-wesley.sheng@microchip.com>
- <20181011162747.GP5906@bhelgaas-glaptop.roam.corp.google.com>
-From: Logan Gunthorpe <logang@deltatee.com>
-Message-ID: <f601ab82-7bcc-01cf-70d5-67c4de6a5abb@deltatee.com>
-Date: Thu, 11 Oct 2018 10:36:41 -0600
-MIME-Version: 1.0
-In-Reply-To: <20181011162747.GP5906@bhelgaas-glaptop.roam.corp.google.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-CA
-Content-Transfer-Encoding: 7bit
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 11 Oct 2018 09:27:49 -0700 (PDT)
+Date: Thu, 11 Oct 2018 11:27:47 -0500
+From: Bjorn Helgaas <helgaas@kernel.org>
 Subject: Re: [PATCH v3] NTB: switchtec_ntb: Update switchtec documentation
  with pre-requisites for NTB
-To: Bjorn Helgaas <helgaas@kernel.org>, Wesley Sheng <wesley.sheng@microchip.com>
-Cc: bhelgaas@google.com, corbet@lwn.net, kurt.schwemmer@microsemi.com, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, Wesley Yung <wesley.yung@microchip.com>, Kelvin Cao <kelvin.cao@microchip.com>, Jon Mason <jdmason@kudzu.us>
+Message-ID: <20181011162747.GP5906@bhelgaas-glaptop.roam.corp.google.com>
+References: <1539182575-26851-1-git-send-email-wesley.sheng@microchip.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1539182575-26851-1-git-send-email-wesley.sheng@microchip.com>
+To: Wesley Sheng <wesley.sheng@microchip.com>
+Cc: bhelgaas@google.com, corbet@lwn.net, logang@deltatee.com, kurt.schwemmer@microsemi.com, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, Wesley Yung <wesley.yung@microchip.com>, Kelvin Cao <kelvin.cao@microchip.com>, Jon Mason <jdmason@kudzu.us>
 List-ID: <linux-ntb.googlegroups.com>
 
+[+cc Jon Mason]
 
-
-On 2018-10-11 10:27 a.m., Bjorn Helgaas wrote:
-> I'm not sure who should really own this file:
+On Wed, Oct 10, 2018 at 10:42:55PM +0800, Wesley Sheng wrote:
+> From: Wesley Yung <wesley.yung@microchip.com>
 > 
->   $ ./scripts/get_maintainer.pl -f Documentation/switchtec.txt
->   Kurt Schwemmer <kurt.schwemmer@microsemi.com> (maintainer:PCI DRIVER FOR MICROSEMI SWITCHTEC)
->   Logan Gunthorpe <logang@deltatee.com> (maintainer:PCI DRIVER FOR MICROSEMI SWITCHTEC)
->   Jonathan Corbet <corbet@lwn.net> (maintainer:DOCUMENTATION)
->   linux-pci@vger.kernel.org (open list:PCI DRIVER FOR MICROSEMI SWITCHTEC)
->   linux-doc@vger.kernel.org (open list:DOCUMENTATION)
->   linux-kernel@vger.kernel.org (open list)
+> The ntb_hw_switchtec driver has requirements on kernel configuration
+> so we add these notes to the documentation and also clean up a few 
+> other sentences in the documentation.
 > 
-> and Jon (NTB driver core maintainer) has applied recent updates
-> to it.
+> Signed-off-by: Wesley Yung <wesley.yung@microchip.com>
+> Signed-off-by: Kelvin Cao <kelvin.cao@microchip.com>
+> Signed-off-by: Wesley Sheng <wesley.sheng@microchip.com>
+
+I'm not sure who should really own this file:
+
+  $ ./scripts/get_maintainer.pl -f Documentation/switchtec.txt
+  Kurt Schwemmer <kurt.schwemmer@microsemi.com> (maintainer:PCI DRIVER FOR MICROSEMI SWITCHTEC)
+  Logan Gunthorpe <logang@deltatee.com> (maintainer:PCI DRIVER FOR MICROSEMI SWITCHTEC)
+  Jonathan Corbet <corbet@lwn.net> (maintainer:DOCUMENTATION)
+  linux-pci@vger.kernel.org (open list:PCI DRIVER FOR MICROSEMI SWITCHTEC)
+  linux-doc@vger.kernel.org (open list:DOCUMENTATION)
+  linux-kernel@vger.kernel.org (open list)
+
+and Jon (NTB driver core maintainer) has applied recent updates
+to it.
+
+But in the interest of forward progress, I applied this patch with
+Logan's ack to pci/misc for v4.20.
+
+> ---
+>  Documentation/switchtec.txt | 30 ++++++++++++++++++++----------
+>  1 file changed, 20 insertions(+), 10 deletions(-)
 > 
-> But in the interest of forward progress, I applied this patch with
-> Logan's ack to pci/misc for v4.20.
-
-Thanks. I'm not really sure what's going on in the NTB tree these days
-as Jon hasn't picked up anything in a while so it's probably better this
-went through PCI. It was originally created through the PCI tree, there
-shouldn't be any conflicts, and I can't see anyone else objecting.
-
-Logan
+> diff --git a/Documentation/switchtec.txt b/Documentation/switchtec.txt
+> index f788264..d6f04dcc 100644
+> --- a/Documentation/switchtec.txt
+> +++ b/Documentation/switchtec.txt
+> @@ -23,7 +23,7 @@ The primary means of communicating with the Switchtec management firmware is
+>  through the Memory-mapped Remote Procedure Call (MRPC) interface.
+>  Commands are submitted to the interface with a 4-byte command
+>  identifier and up to 1KB of command specific data. The firmware will
+> -respond with a 4 bytes return code and up to 1KB of command specific
+> +respond with a 4-byte return code and up to 1KB of command specific
+>  data. The interface only processes a single command at a time.
+>  
+>  
+> @@ -36,8 +36,8 @@ device: /dev/switchtec#, one for each management endpoint in the system.
+>  The char device has the following semantics:
+>  
+>  * A write must consist of at least 4 bytes and no more than 1028 bytes.
+> -  The first four bytes will be interpreted as the command to run and
+> -  the remainder will be used as the input data. A write will send the
+> +  The first 4 bytes will be interpreted as the Command ID and the
+> +  remainder will be used as the input data. A write will send the
+>    command to the firmware to begin processing.
+>  
+>  * Each write must be followed by exactly one read. Any double write will
+> @@ -45,9 +45,9 @@ The char device has the following semantics:
+>    produce an error.
+>  
+>  * A read will block until the firmware completes the command and return
+> -  the four bytes of status plus up to 1024 bytes of output data. (The
+> -  length will be specified by the size parameter of the read call --
+> -  reading less than 4 bytes will produce an error.
+> +  the 4-byte Command Return Value plus up to 1024 bytes of output
+> +  data. (The length will be specified by the size parameter of the read
+> +  call -- reading less than 4 bytes will produce an error.)
+>  
+>  * The poll call will also be supported for userspace applications that
+>    need to do other things while waiting for the command to complete.
+> @@ -83,10 +83,20 @@ The following IOCTLs are also supported by the device:
+>  Non-Transparent Bridge (NTB) Driver
+>  ===================================
+>  
+> -An NTB driver is provided for the switchtec hardware in switchtec_ntb.
+> -Currently, it only supports switches configured with exactly 2
+> -partitions. It also requires the following configuration settings:
+> +An NTB hardware driver is provided for the Switchtec hardware in
+> +ntb_hw_switchtec. Currently, it only supports switches configured with
+> +exactly 2 NT partitions and zero or more non-NT partitions. It also requires
+> +the following configuration settings:
+>  
+> -* Both partitions must be able to access each other's GAS spaces.
+> +* Both NT partitions must be able to access each other's GAS spaces.
+>    Thus, the bits in the GAS Access Vector under Management Settings
+>    must be set to support this.
+> +* Kernel configuration MUST include support for NTB (CONFIG_NTB needs
+> +  to be set)
+> +
+> +NT EP BAR 2 will be dynamically configured as a Direct Window, and
+> +the configuration file does not need to configure it explicitly.
+> +
+> +Please refer to Documentation/ntb.txt in Linux source tree for an overall
+> +understanding of the Linux NTB stack. ntb_hw_switchtec works as an NTB
+> +Hardware Driver in this stack.
+> -- 
+> 2.7.4
+> 
