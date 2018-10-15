@@ -1,84 +1,33 @@
-Return-Path: <asierra@xes-inc.com>
-Received: from mail.xes-mad.com (xes-mad.com. [162.248.234.2])
-        by gmr-mx.google.com with ESMTP id c188-v6si169830ite.0.2018.10.12.13.20.18
-        for <linux-ntb@googlegroups.com>;
-        Fri, 12 Oct 2018 13:20:18 -0700 (PDT)
-From: Aaron Sierra <asierra@xes-inc.com>
-Subject: [PATCH 1/2] NTB: transport: Support client device private data
-Date: Fri, 12 Oct 2018 15:20:17 -0500
-Message-Id: <1539375618-6782-2-git-send-email-asierra@xes-inc.com>
-In-Reply-To: <1539375618-6782-1-git-send-email-asierra@xes-inc.com>
+Return-Path: <logang@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id v207-v6si543142oia.3.2018.10.15.13.42.44
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Mon, 15 Oct 2018 13:42:45 -0700 (PDT)
 References: <1539375618-6782-1-git-send-email-asierra@xes-inc.com>
-To: linux-ntb@googlegroups.com
+ <1539635567-13523-1-git-send-email-asierra@xes-inc.com>
+From: Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <fd250881-5331-1426-8e1f-b2492966107a@deltatee.com>
+Date: Mon, 15 Oct 2018 14:42:38 -0600
+MIME-Version: 1.0
+In-Reply-To: <1539635567-13523-1-git-send-email-asierra@xes-inc.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-CA
+Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH] ntb_netdev: Simplify remove with client device drvdata
+To: Aaron Sierra <asierra@xes-inc.com>, linux-ntb@googlegroups.com
 Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, "David S. Miller" <davem@davemloft.net>
 List-ID: <linux-ntb.googlegroups.com>
 
-Support NTB transport client device drivers stashing a reference to
-their private device representation within the transport client device
-for trivial lookup. This capability is provided by most other busses
-(PCI, platform, VME, etc.).
 
-This patch introduces two new exported functions:
 
-  void ntb_transport_client_set_pdata(struct device *dev, void *pdata);
-  void *ntb_transport_client_get_pdata(struct device *dev);
+On 2018-10-15 2:32 p.m., Aaron Sierra wrote:
+> Replace the elaborate private structure global linked-list used in
+> ntb_netdev_probe() and ntb_netdev_remove() by stashing our private
+> data in the NTB transport client device.
+> 
+> Signed-off-by: Aaron Sierra <asierra@xes-inc.com>
 
-Signed-off-by: Aaron Sierra <asierra@xes-inc.com>
----
- drivers/ntb/ntb_transport.c   | 19 +++++++++++++++++++
- include/linux/ntb_transport.h |  2 ++
- 2 files changed, 21 insertions(+)
+Looks good to me. Thanks.
 
-diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 9398959..812efd4 100644
---- a/drivers/ntb/ntb_transport.c
-+++ b/drivers/ntb/ntb_transport.c
-@@ -202,6 +202,9 @@ struct ntb_transport_client_dev {
- 	struct list_head entry;
- 	struct ntb_transport_ctx *nt;
- 	struct device dev;
-+
-+	/* client private data */
-+	void *private_data;
- };
- 
- struct ntb_transport_ctx {
-@@ -410,6 +413,22 @@ int ntb_transport_register_client_dev(char *device_name)
- }
- EXPORT_SYMBOL_GPL(ntb_transport_register_client_dev);
- 
-+void ntb_transport_client_set_pdata(struct device *dev, void *pdata)
-+{
-+	struct ntb_transport_client_dev *client_dev = dev_client_dev(dev);
-+
-+	client_dev->private_data = pdata;
-+}
-+EXPORT_SYMBOL_GPL(ntb_transport_client_set_pdata);
-+
-+void *ntb_transport_client_get_pdata(struct device *dev)
-+{
-+	struct ntb_transport_client_dev *client_dev = dev_client_dev(dev);
-+
-+	return client_dev->private_data;
-+}
-+EXPORT_SYMBOL_GPL(ntb_transport_client_get_pdata);
-+
- /**
-  * ntb_transport_register_client - Register NTB client driver
-  * @drv: NTB client driver to be registered
-diff --git a/include/linux/ntb_transport.h b/include/linux/ntb_transport.h
-index 7243eb9..16c2a73 100644
---- a/include/linux/ntb_transport.h
-+++ b/include/linux/ntb_transport.h
-@@ -60,6 +60,8 @@ int ntb_transport_register_client(struct ntb_transport_client *drvr);
- void ntb_transport_unregister_client(struct ntb_transport_client *drvr);
- int ntb_transport_register_client_dev(char *device_name);
- void ntb_transport_unregister_client_dev(char *device_name);
-+void ntb_transport_client_set_pdata(struct device *dev, void *pdata);
-+void *ntb_transport_client_get_pdata(struct device *dev);
- 
- struct ntb_queue_handlers {
- 	void (*rx_handler)(struct ntb_transport_qp *qp, void *qp_data,
--- 
-2.7.4
-
+Reviewed-by: Logan Gunthorpe <logang@deltatee.com>
