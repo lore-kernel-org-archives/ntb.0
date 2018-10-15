@@ -1,33 +1,87 @@
-Return-Path: <logang@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id v207-v6si543142oia.3.2018.10.15.13.42.44
-        for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Mon, 15 Oct 2018 13:42:45 -0700 (PDT)
+Return-Path: <asierra@xes-inc.com>
+Received: from mail.xes-mad.com (xes-mad.com. [162.248.234.2])
+        by gmr-mx.google.com with ESMTP id c4-v6si474142pls.4.2018.10.15.13.32.48
+        for <linux-ntb@googlegroups.com>;
+        Mon, 15 Oct 2018 13:32:48 -0700 (PDT)
+From: Aaron Sierra <asierra@xes-inc.com>
+Subject: [PATCH] ntb_netdev: Simplify remove with client device drvdata
+Date: Mon, 15 Oct 2018 15:32:47 -0500
+Message-Id: <1539635567-13523-1-git-send-email-asierra@xes-inc.com>
+In-Reply-To: <1539375618-6782-1-git-send-email-asierra@xes-inc.com>
 References: <1539375618-6782-1-git-send-email-asierra@xes-inc.com>
- <1539635567-13523-1-git-send-email-asierra@xes-inc.com>
-From: Logan Gunthorpe <logang@deltatee.com>
-Message-ID: <fd250881-5331-1426-8e1f-b2492966107a@deltatee.com>
-Date: Mon, 15 Oct 2018 14:42:38 -0600
-MIME-Version: 1.0
-In-Reply-To: <1539635567-13523-1-git-send-email-asierra@xes-inc.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-CA
-Content-Transfer-Encoding: 7bit
-Subject: Re: [PATCH] ntb_netdev: Simplify remove with client device drvdata
-To: Aaron Sierra <asierra@xes-inc.com>, linux-ntb@googlegroups.com
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, "David S. Miller" <davem@davemloft.net>
+To: linux-ntb@googlegroups.com
+Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, "David S. Miller" <davem@davemloft.net>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
+Replace the elaborate private structure global linked-list used in
+ntb_netdev_probe() and ntb_netdev_remove() by stashing our private
+data in the NTB transport client device.
 
+Signed-off-by: Aaron Sierra <asierra@xes-inc.com>
+---
+ drivers/net/ntb_netdev.c | 28 +++-------------------------
+ 1 file changed, 3 insertions(+), 25 deletions(-)
 
-On 2018-10-15 2:32 p.m., Aaron Sierra wrote:
-> Replace the elaborate private structure global linked-list used in
-> ntb_netdev_probe() and ntb_netdev_remove() by stashing our private
-> data in the NTB transport client device.
-> 
-> Signed-off-by: Aaron Sierra <asierra@xes-inc.com>
+diff --git a/drivers/net/ntb_netdev.c b/drivers/net/ntb_netdev.c
+index b12023b..378eb0f 100644
+--- a/drivers/net/ntb_netdev.c
++++ b/drivers/net/ntb_netdev.c
+@@ -71,7 +71,6 @@ static unsigned int tx_start = 10;
+ static unsigned int tx_stop = 5;
+ 
+ struct ntb_netdev {
+-	struct list_head list;
+ 	struct pci_dev *pdev;
+ 	struct net_device *ndev;
+ 	struct ntb_transport_qp *qp;
+@@ -81,8 +80,6 @@ struct ntb_netdev {
+ #define	NTB_TX_TIMEOUT_MS	1000
+ #define	NTB_RXQ_SIZE		100
+ 
+-static LIST_HEAD(dev_list);
+-
+ static void ntb_netdev_event_handler(void *data, int link_is_up)
+ {
+ 	struct net_device *ndev = data;
+@@ -452,7 +449,7 @@ static int ntb_netdev_probe(struct device *client_dev)
+ 	if (rc)
+ 		goto err1;
+ 
+-	list_add(&dev->list, &dev_list);
++	dev_set_drvdata(client_dev, ndev);
+ 	dev_info(&pdev->dev, "%s created\n", ndev->name);
+ 	return 0;
+ 
+@@ -465,27 +462,8 @@ static int ntb_netdev_probe(struct device *client_dev)
+ 
+ static void ntb_netdev_remove(struct device *client_dev)
+ {
+-	struct ntb_dev *ntb;
+-	struct net_device *ndev;
+-	struct pci_dev *pdev;
+-	struct ntb_netdev *dev;
+-	bool found = false;
+-
+-	ntb = dev_ntb(client_dev->parent);
+-	pdev = ntb->pdev;
+-
+-	list_for_each_entry(dev, &dev_list, list) {
+-		if (dev->pdev == pdev) {
+-			found = true;
+-			break;
+-		}
+-	}
+-	if (!found)
+-		return;
+-
+-	list_del(&dev->list);
+-
+-	ndev = dev->ndev;
++	struct net_device *ndev = dev_get_drvdata(client_dev);
++	struct ntb_netdev *dev = netdev_priv(ndev);
+ 
+ 	unregister_netdev(ndev);
+ 	ntb_transport_free_queue(dev->qp);
+-- 
+2.7.4
 
-Looks good to me. Thanks.
-
-Reviewed-by: Logan Gunthorpe <logang@deltatee.com>
