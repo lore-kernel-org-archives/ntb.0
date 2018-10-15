@@ -1,87 +1,50 @@
-Return-Path: <asierra@xes-inc.com>
-Received: from mail.xes-mad.com (xes-mad.com. [162.248.234.2])
-        by gmr-mx.google.com with ESMTP id c4-v6si474142pls.4.2018.10.15.13.32.48
-        for <linux-ntb@googlegroups.com>;
-        Mon, 15 Oct 2018 13:32:48 -0700 (PDT)
-From: Aaron Sierra <asierra@xes-inc.com>
-Subject: [PATCH] ntb_netdev: Simplify remove with client device drvdata
-Date: Mon, 15 Oct 2018 15:32:47 -0500
-Message-Id: <1539635567-13523-1-git-send-email-asierra@xes-inc.com>
-In-Reply-To: <1539375618-6782-1-git-send-email-asierra@xes-inc.com>
+Return-Path: <logang@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id o26-v6si593062qto.1.2018.10.15.10.55.55
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Mon, 15 Oct 2018 10:55:55 -0700 (PDT)
 References: <1539375618-6782-1-git-send-email-asierra@xes-inc.com>
-To: linux-ntb@googlegroups.com
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, "David S. Miller" <davem@davemloft.net>, Logan Gunthorpe <logang@deltatee.com>
+ <CAJ80savCdO_VM_0As28+H5KB6ejapbFV2OVoRpPnU9bLyijqRw@mail.gmail.com>
+ <1171724234.130293.1539620853528.JavaMail.zimbra@xes-inc.com>
+From: Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <a06eb3b3-7e49-a72f-df21-5c36c592c88d@deltatee.com>
+Date: Mon, 15 Oct 2018 11:55:46 -0600
+MIME-Version: 1.0
+In-Reply-To: <1171724234.130293.1539620853528.JavaMail.zimbra@xes-inc.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-CA
+Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH 0/2] NTB: Stash private data in transport client device
+To: Aaron Sierra <asierra@xes-inc.com>, Allen Hubbe <allenbh@gmail.com>
+Cc: linux-ntb <linux-ntb@googlegroups.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, davem@davemloft.net
 List-ID: <linux-ntb.googlegroups.com>
 
-Replace the elaborate private structure global linked-list used in
-ntb_netdev_probe() and ntb_netdev_remove() by stashing our private
-data in the NTB transport client device.
 
-Signed-off-by: Aaron Sierra <asierra@xes-inc.com>
----
- drivers/net/ntb_netdev.c | 28 +++-------------------------
- 1 file changed, 3 insertions(+), 25 deletions(-)
 
-diff --git a/drivers/net/ntb_netdev.c b/drivers/net/ntb_netdev.c
-index b12023b..378eb0f 100644
---- a/drivers/net/ntb_netdev.c
-+++ b/drivers/net/ntb_netdev.c
-@@ -71,7 +71,6 @@ static unsigned int tx_start = 10;
- static unsigned int tx_stop = 5;
- 
- struct ntb_netdev {
--	struct list_head list;
- 	struct pci_dev *pdev;
- 	struct net_device *ndev;
- 	struct ntb_transport_qp *qp;
-@@ -81,8 +80,6 @@ struct ntb_netdev {
- #define	NTB_TX_TIMEOUT_MS	1000
- #define	NTB_RXQ_SIZE		100
- 
--static LIST_HEAD(dev_list);
--
- static void ntb_netdev_event_handler(void *data, int link_is_up)
- {
- 	struct net_device *ndev = data;
-@@ -452,7 +449,7 @@ static int ntb_netdev_probe(struct device *client_dev)
- 	if (rc)
- 		goto err1;
- 
--	list_add(&dev->list, &dev_list);
-+	dev_set_drvdata(client_dev, ndev);
- 	dev_info(&pdev->dev, "%s created\n", ndev->name);
- 	return 0;
- 
-@@ -465,27 +462,8 @@ static int ntb_netdev_probe(struct device *client_dev)
- 
- static void ntb_netdev_remove(struct device *client_dev)
- {
--	struct ntb_dev *ntb;
--	struct net_device *ndev;
--	struct pci_dev *pdev;
--	struct ntb_netdev *dev;
--	bool found = false;
--
--	ntb = dev_ntb(client_dev->parent);
--	pdev = ntb->pdev;
--
--	list_for_each_entry(dev, &dev_list, list) {
--		if (dev->pdev == pdev) {
--			found = true;
--			break;
--		}
--	}
--	if (!found)
--		return;
--
--	list_del(&dev->list);
--
--	ndev = dev->ndev;
-+	struct net_device *ndev = dev_get_drvdata(client_dev);
-+	struct ntb_netdev *dev = netdev_priv(ndev);
- 
- 	unregister_netdev(ndev);
- 	ntb_transport_free_queue(dev->qp);
--- 
-2.7.4
+On 2018-10-15 10:27 a.m., Aaron Sierra wrote:
+>> On Fri, Oct 12, 2018 at 4:20 PM Aaron Sierra <asierra@xes-inc.com> wrote:
+>>> Support NTB transport client device drivers stashing a reference to
+>>> their private device representation within the transport client device
+>>> for trivial lookup.
+>>
+>> Can dev_get/set_drvdata() be used instead?
+> 
+> Allen, sure that would work just fine. You're asking for dev_get_drvdata
+> and dev_set_drvdata to be used behind-the-scenes as an implementation
+> detail, right?
 
+I agree with Allen that the drvdata functions already fill this need.
+There's no reason to create NTB specific wrappers for them. Just use
+them directly.
+
+The cleanup for ntb_netdev_remove() is very nice and I'll be happy to
+add my review when it uses drvdata.
+
+> I'd like to add this cleanup as a call to ntb_transport_client_set_pdata()
+> in ntb_transport_client_release(), so all transport client drivers get it for
+> free if that's alright with you.
+
+IMO setting it to NULL right before kfree-ing the structure is  unnecessary.
+
+Logan
