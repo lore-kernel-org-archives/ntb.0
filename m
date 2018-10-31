@@ -1,93 +1,69 @@
-Return-Path: <wesleyshenggit@sina.com>
-Received: from mail7-212.sinamail.sina.com.cn (mail7-212.sinamail.sina.com.cn. [202.108.7.212])
-        by gmr-mx.google.com with SMTP id q49-v6si420946qte.3.2018.10.09.22.36.00
-        for <linux-ntb@googlegroups.com>;
-        Tue, 09 Oct 2018 22:36:01 -0700 (PDT)
-From: Wesley Sheng <wesleyshenggit@sina.com>
-Subject: [PATCH v3] NTB: switchtec_ntb: Update switchtec documentation with pre-requisites for NTB
-Date: Wed, 10 Oct 2018 20:33:08 +0800
-Message-Id: <1539174788-25878-1-git-send-email-wesleyshenggit@sina.com>
-To: kurt.schwemmer@microsemi.com, logang@deltatee.com, corbet@lwn.net, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, bhelgaas@google.com, linux-ntb@googlegroups.com
-Cc: Wesley Yung <wesley.yung@microchip.com>, Kelvin Cao <kelvin.cao@microchip.com>, Wesley Sheng <wesleyshenggit@sina.com>
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-yb1-xb41.google.com (mail-yb1-xb41.google.com. [2607:f8b0:4864:20::b41])
+        by gmr-mx.google.com with ESMTPS id q14si115406otg.1.2018.10.31.14.27.25
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 31 Oct 2018 14:27:25 -0700 (PDT)
+Received: by mail-yb1-xb41.google.com with SMTP id f15-v6so6786540ybq.13
+        for <linux-ntb@googlegroups.com>; Wed, 31 Oct 2018 14:27:25 -0700 (PDT)
+Return-Path: <jdmason@kudzu.us>
+Date: Wed, 31 Oct 2018 17:27:22 -0400
+From: Jon Mason <jdmason@kudzu.us>
+Subject: Re: [PATCH 0/4] ntb: idt: Add hwmon temperature sensor interface
+Message-ID: <20181031212721.GA2565@kudzu.us>
+References: <20180714115834.3350-1-fancer.lancer@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180714115834.3350-1-fancer.lancer@gmail.com>
+To: Serge Semin <fancer.lancer@gmail.com>
+Cc: dave.jiang@intel.com, allenbh@gmail.com, Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
+On Sat, Jul 14, 2018 at 02:58:30PM +0300, Serge Semin wrote:
+> IDT PCIe-switches are equipped with an embedded temperature sensor. It
+> works within the range [0; 127.5]C with a resolution of 0.5C. It can
+> be used to monitor the chip core temperature so to have prevent it from
+> possible overheating. It might be very topical for the chip, since it
+> gets heated like in hell especially if ASPM isn't enabled.
+> 
+> Other than the current sampled temperatur, the sensor interface exposes
+> history registors with lowest and highest measured temperature, thresholds
+> and alarm IRQs enabled/disable bits, ADC/filter settings. The device manual
+> states that the switch is able to generate a msi interrupt on PCIe upstreams
+> if the temperature crosses one of three configurable thresholds. But in
+> practice we discovered that the enable/disable threshold IRQs bits interface
+> is very broken (see the third patch commit message), so it can't be used
+> to create the hwmon alarm interface. As the result we had to remove the
+> already available temperature sensor IRQ handler and disable the corresponding
+> interrupt.
+> 
+> Current version of the driver provides following standard hwmon sysfs
+> files: temperature input, lowest and highest measured temperature
+> with possibility to reset the history, temperature offset. The rest of the
+> nodes can't be safely implemented for the chip due to the described issues.
+> 
+> Signed-off-by: Serge Semin <fancer.lancer@gmail.com>
 
-From: Wesley Yung <wesley.yung@microchip.com>
+FYI, I'm waiting on you to correct the kbuild issues.  I have been
+assuming you knew this, but given the lack of follow-up patches I am
+beginning to this you might believe I'm ignoring them.  I'm not :)
 
-The ntb_hw_switchtec driver has requirements on kernel configuration
-so we add these notes to the documentation and also clean up a few 
-other sentences in the documentation.
+Thanks,
+Jon
 
-Signed-off-by: Wesley Yung <wesley.yung@microchip.com>
-Signed-off-by: Kelvin Cao <kelvin.cao@microchip.com>
-Signed-off-by: Wesley Sheng <wesleyshenggit@sina.com>
----
- Documentation/switchtec.txt | 30 ++++++++++++++++++++----------
- 1 file changed, 20 insertions(+), 10 deletions(-)
-
-diff --git a/Documentation/switchtec.txt b/Documentation/switchtec.txt
-index f788264..d6f04dcc 100644
---- a/Documentation/switchtec.txt
-+++ b/Documentation/switchtec.txt
-@@ -23,7 +23,7 @@ The primary means of communicating with the Switchtec management firmware is
- through the Memory-mapped Remote Procedure Call (MRPC) interface.
- Commands are submitted to the interface with a 4-byte command
- identifier and up to 1KB of command specific data. The firmware will
--respond with a 4 bytes return code and up to 1KB of command specific
-+respond with a 4-byte return code and up to 1KB of command specific
- data. The interface only processes a single command at a time.
- 
- 
-@@ -36,8 +36,8 @@ device: /dev/switchtec#, one for each management endpoint in the system.
- The char device has the following semantics:
- 
- * A write must consist of at least 4 bytes and no more than 1028 bytes.
--  The first four bytes will be interpreted as the command to run and
--  the remainder will be used as the input data. A write will send the
-+  The first 4 bytes will be interpreted as the Command ID and the
-+  remainder will be used as the input data. A write will send the
-   command to the firmware to begin processing.
- 
- * Each write must be followed by exactly one read. Any double write will
-@@ -45,9 +45,9 @@ The char device has the following semantics:
-   produce an error.
- 
- * A read will block until the firmware completes the command and return
--  the four bytes of status plus up to 1024 bytes of output data. (The
--  length will be specified by the size parameter of the read call --
--  reading less than 4 bytes will produce an error.
-+  the 4-byte Command Return Value plus up to 1024 bytes of output
-+  data. (The length will be specified by the size parameter of the read
-+  call -- reading less than 4 bytes will produce an error.)
- 
- * The poll call will also be supported for userspace applications that
-   need to do other things while waiting for the command to complete.
-@@ -83,10 +83,20 @@ The following IOCTLs are also supported by the device:
- Non-Transparent Bridge (NTB) Driver
- ===================================
- 
--An NTB driver is provided for the switchtec hardware in switchtec_ntb.
--Currently, it only supports switches configured with exactly 2
--partitions. It also requires the following configuration settings:
-+An NTB hardware driver is provided for the Switchtec hardware in
-+ntb_hw_switchtec. Currently, it only supports switches configured with
-+exactly 2 NT partitions and zero or more non-NT partitions. It also requires
-+the following configuration settings:
- 
--* Both partitions must be able to access each other's GAS spaces.
-+* Both NT partitions must be able to access each other's GAS spaces.
-   Thus, the bits in the GAS Access Vector under Management Settings
-   must be set to support this.
-+* Kernel configuration MUST include support for NTB (CONFIG_NTB needs
-+  to be set)
-+
-+NT EP BAR 2 will be dynamically configured as a Direct Window, and
-+the configuration file does not need to configure it explicitly.
-+
-+Please refer to Documentation/ntb.txt in Linux source tree for an overall
-+understanding of the Linux NTB stack. ntb_hw_switchtec works as an NTB
-+Hardware Driver in this stack.
--- 
-2.7.4
-
-
+> 
+> Serge Semin (4):
+>   ntb: idt: Alter temperature read method
+>   ntb: idt: Add basic hwmon sysfs interface
+>   ntb: idt: Discard temperature sensor IRQ handler
+>   ntb: idt: Alter the driver info comments
+> 
+>  drivers/ntb/hw/idt/Kconfig      |   4 +-
+>  drivers/ntb/hw/idt/ntb_hw_idt.c | 317 ++++++++++++++++++++++++++++++++++------
+>  drivers/ntb/hw/idt/ntb_hw_idt.h |  87 ++++++++++-
+>  3 files changed, 353 insertions(+), 55 deletions(-)
+> 
+> -- 
+> 2.12.0
+> 
