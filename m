@@ -1,87 +1,61 @@
-Return-Path: <asierra@xes-inc.com>
-Received: from mail.xes-mad.com (xes-mad.com. [162.248.234.2])
-        by gmr-mx.google.com with ESMTP id n124-v6si1109115itb.0.2018.10.12.13.20.18
-        for <linux-ntb@googlegroups.com>;
-        Fri, 12 Oct 2018 13:20:18 -0700 (PDT)
-From: Aaron Sierra <asierra@xes-inc.com>
-Subject: [PATCH 2/2] ntb_netdev: Simplify remove with client private data
-Date: Fri, 12 Oct 2018 15:20:18 -0500
-Message-Id: <1539375618-6782-3-git-send-email-asierra@xes-inc.com>
-In-Reply-To: <1539375618-6782-1-git-send-email-asierra@xes-inc.com>
-References: <1539375618-6782-1-git-send-email-asierra@xes-inc.com>
-To: linux-ntb@googlegroups.com
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, "David S. Miller" <davem@davemloft.net>
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-yw1-xc42.google.com (mail-yw1-xc42.google.com. [2607:f8b0:4864:20::c42])
+        by gmr-mx.google.com with ESMTPS id z137-v6si805880iof.2.2018.10.31.13.13.58
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 31 Oct 2018 13:13:58 -0700 (PDT)
+Received: by mail-yw1-xc42.google.com with SMTP id v1-v6so7010758ywv.6
+        for <linux-ntb@googlegroups.com>; Wed, 31 Oct 2018 13:13:58 -0700 (PDT)
+Return-Path: <jdmason@kudzu.us>
+Date: Wed, 31 Oct 2018 16:13:55 -0400
+From: Jon Mason <jdmason@kudzu.us>
+Subject: Re: [PATCH] ntb: intel: fix return value for ndev_vec_mask()
+Message-ID: <20181031201354.GA22474@kudzu.us>
+References: <153550163921.39832.16483542818926290854.stgit@djiang5-desk3.ch.intel.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <153550163921.39832.16483542818926290854.stgit@djiang5-desk3.ch.intel.com>
+To: Dave Jiang <dave.jiang@intel.com>
+Cc: linux-ntb@googlegroups.com, allenbh@gmail.com, lucas.van@intel.com
 List-ID: <linux-ntb.googlegroups.com>
 
-Replace the elaborate private structure global linked-list used in
-ntb_netdev_probe() and ntb_netdev_remove() by using the new private
-data stashing mechanism available to NTB transport client devices.
+On Tue, Aug 28, 2018 at 05:13:59PM -0700, Dave Jiang wrote:
+> ndev_vec_mask() should be returning u64 mask value instead of int.
+> Otherwise the mask value returned can be incorrect for larger
+> vectors.
+> 
+> Fixes: e26a5843f7f5 ("NTB: Split ntb_hw_intel and ntb_transport drivers")
+> 
+> Signed-off-by: Dave Jiang <dave.jiang@intel.com>
+> Tested-by: Lucas Van <lucas.van@intel.com>
 
-Signed-off-by: Aaron Sierra <asierra@xes-inc.com>
----
- drivers/net/ntb_netdev.c | 28 +++-------------------------
- 1 file changed, 3 insertions(+), 25 deletions(-)
+Pulled into my ntb branch
 
-diff --git a/drivers/net/ntb_netdev.c b/drivers/net/ntb_netdev.c
-index b12023b..1e76f7c 100644
---- a/drivers/net/ntb_netdev.c
-+++ b/drivers/net/ntb_netdev.c
-@@ -71,7 +71,6 @@ static unsigned int tx_start = 10;
- static unsigned int tx_stop = 5;
- 
- struct ntb_netdev {
--	struct list_head list;
- 	struct pci_dev *pdev;
- 	struct net_device *ndev;
- 	struct ntb_transport_qp *qp;
-@@ -81,8 +80,6 @@ struct ntb_netdev {
- #define	NTB_TX_TIMEOUT_MS	1000
- #define	NTB_RXQ_SIZE		100
- 
--static LIST_HEAD(dev_list);
--
- static void ntb_netdev_event_handler(void *data, int link_is_up)
- {
- 	struct net_device *ndev = data;
-@@ -452,7 +449,7 @@ static int ntb_netdev_probe(struct device *client_dev)
- 	if (rc)
- 		goto err1;
- 
--	list_add(&dev->list, &dev_list);
-+	ntb_transport_client_set_pdata(client_dev, ndev);
- 	dev_info(&pdev->dev, "%s created\n", ndev->name);
- 	return 0;
- 
-@@ -465,27 +462,8 @@ static int ntb_netdev_probe(struct device *client_dev)
- 
- static void ntb_netdev_remove(struct device *client_dev)
- {
--	struct ntb_dev *ntb;
--	struct net_device *ndev;
--	struct pci_dev *pdev;
--	struct ntb_netdev *dev;
--	bool found = false;
--
--	ntb = dev_ntb(client_dev->parent);
--	pdev = ntb->pdev;
--
--	list_for_each_entry(dev, &dev_list, list) {
--		if (dev->pdev == pdev) {
--			found = true;
--			break;
--		}
--	}
--	if (!found)
--		return;
--
--	list_del(&dev->list);
--
--	ndev = dev->ndev;
-+	struct net_device *ndev = ntb_transport_client_get_pdata(client_dev);
-+	struct ntb_netdev *dev = netdev_priv(ndev);
- 
- 	unregister_netdev(ndev);
- 	ntb_transport_free_queue(dev->qp);
--- 
-2.7.4
+Thanks,
+Jon
 
+> ---
+>  drivers/ntb/hw/intel/ntb_hw_gen1.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/ntb/hw/intel/ntb_hw_gen1.c b/drivers/ntb/hw/intel/ntb_hw_gen1.c
+> index 6aa573227279..2ad263f708da 100644
+> --- a/drivers/ntb/hw/intel/ntb_hw_gen1.c
+> +++ b/drivers/ntb/hw/intel/ntb_hw_gen1.c
+> @@ -265,7 +265,7 @@ static inline int ndev_db_clear_mask(struct intel_ntb_dev *ndev, u64 db_bits,
+>  	return 0;
+>  }
+>  
+> -static inline int ndev_vec_mask(struct intel_ntb_dev *ndev, int db_vector)
+> +static inline u64 ndev_vec_mask(struct intel_ntb_dev *ndev, int db_vector)
+>  {
+>  	u64 shift, mask;
+>  
+> 
+> -- 
+> You received this message because you are subscribed to the Google Groups "linux-ntb" group.
+> To unsubscribe from this group and stop receiving emails from it, send an email to linux-ntb+unsubscribe@googlegroups.com.
+> To post to this group, send email to linux-ntb@googlegroups.com.
+> To view this discussion on the web visit https://groups.google.com/d/msgid/linux-ntb/153550163921.39832.16483542818926290854.stgit%40djiang5-desk3.ch.intel.com.
+> For more options, visit https://groups.google.com/d/optout.
