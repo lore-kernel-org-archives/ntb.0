@@ -1,69 +1,73 @@
 Return-Path: <jdmason@kudzu.us>
-Received: from mail-yb1-xb41.google.com (mail-yb1-xb41.google.com. [2607:f8b0:4864:20::b41])
-        by gmr-mx.google.com with ESMTPS id q14si115406otg.1.2018.10.31.14.27.25
+Received: from mail-yb1-xb36.google.com (mail-yb1-xb36.google.com. [2607:f8b0:4864:20::b36])
+        by gmr-mx.google.com with ESMTPS id 3si1154230ott.3.2018.10.31.13.34.45
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 31 Oct 2018 14:27:25 -0700 (PDT)
-Received: by mail-yb1-xb41.google.com with SMTP id f15-v6so6786540ybq.13
-        for <linux-ntb@googlegroups.com>; Wed, 31 Oct 2018 14:27:25 -0700 (PDT)
+        Wed, 31 Oct 2018 13:34:45 -0700 (PDT)
+Received: by mail-yb1-xb36.google.com with SMTP id t13-v6so1086375ybb.8
+        for <linux-ntb@googlegroups.com>; Wed, 31 Oct 2018 13:34:45 -0700 (PDT)
 Return-Path: <jdmason@kudzu.us>
-Date: Wed, 31 Oct 2018 17:27:22 -0400
+Date: Wed, 31 Oct 2018 16:34:42 -0400
 From: Jon Mason <jdmason@kudzu.us>
-Subject: Re: [PATCH 0/4] ntb: idt: Add hwmon temperature sensor interface
-Message-ID: <20181031212721.GA2565@kudzu.us>
-References: <20180714115834.3350-1-fancer.lancer@gmail.com>
+Subject: Re: [PATCH] NTB: ntb_hw_idt: replace IS_ERR_OR_NULL with regular
+ NULL checks
+Message-ID: <20181031203441.GB22474@kudzu.us>
+References: <20180827221306.GA8936@embeddedor.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180714115834.3350-1-fancer.lancer@gmail.com>
-To: Serge Semin <fancer.lancer@gmail.com>
-Cc: dave.jiang@intel.com, allenbh@gmail.com, Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
+In-Reply-To: <20180827221306.GA8936@embeddedor.com>
+To: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
+Cc: Serge Semin <fancer.lancer@gmail.com>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-On Sat, Jul 14, 2018 at 02:58:30PM +0300, Serge Semin wrote:
-> IDT PCIe-switches are equipped with an embedded temperature sensor. It
-> works within the range [0; 127.5]C with a resolution of 0.5C. It can
-> be used to monitor the chip core temperature so to have prevent it from
-> possible overheating. It might be very topical for the chip, since it
-> gets heated like in hell especially if ASPM isn't enabled.
+On Mon, Aug 27, 2018 at 05:13:06PM -0500, Gustavo A. R. Silva wrote:
+> Both devm_kcalloc() and devm_kzalloc() return NULL on error. They
+> never return error pointers.
 > 
-> Other than the current sampled temperatur, the sensor interface exposes
-> history registors with lowest and highest measured temperature, thresholds
-> and alarm IRQs enabled/disable bits, ADC/filter settings. The device manual
-> states that the switch is able to generate a msi interrupt on PCIe upstreams
-> if the temperature crosses one of three configurable thresholds. But in
-> practice we discovered that the enable/disable threshold IRQs bits interface
-> is very broken (see the third patch commit message), so it can't be used
-> to create the hwmon alarm interface. As the result we had to remove the
-> already available temperature sensor IRQ handler and disable the corresponding
-> interrupt.
+> The use of IS_ERR_OR_NULL is currently applied to the wrong
+> context.
 > 
-> Current version of the driver provides following standard hwmon sysfs
-> files: temperature input, lowest and highest measured temperature
-> with possibility to reset the history, temperature offset. The rest of the
-> nodes can't be safely implemented for the chip due to the described issues.
+> Fix this by replacing IS_ERR_OR_NULL with regular NULL checks.
 > 
-> Signed-off-by: Serge Semin <fancer.lancer@gmail.com>
+> Fixes: bf2a952d31d2 ("NTB: Add IDT 89HPESxNTx PCIe-switches support")
+> Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
 
-FYI, I'm waiting on you to correct the kbuild issues.  I have been
-assuming you knew this, but given the lack of follow-up patches I am
-beginning to this you might believe I'm ignoring them.  I'm not :)
+Applied to my ntb branch
 
 Thanks,
 Jon
 
+> ---
+>  drivers/ntb/hw/idt/ntb_hw_idt.c | 8 ++++----
+>  1 file changed, 4 insertions(+), 4 deletions(-)
 > 
-> Serge Semin (4):
->   ntb: idt: Alter temperature read method
->   ntb: idt: Add basic hwmon sysfs interface
->   ntb: idt: Discard temperature sensor IRQ handler
->   ntb: idt: Alter the driver info comments
-> 
->  drivers/ntb/hw/idt/Kconfig      |   4 +-
->  drivers/ntb/hw/idt/ntb_hw_idt.c | 317 ++++++++++++++++++++++++++++++++++------
->  drivers/ntb/hw/idt/ntb_hw_idt.h |  87 ++++++++++-
->  3 files changed, 353 insertions(+), 55 deletions(-)
-> 
+> diff --git a/drivers/ntb/hw/idt/ntb_hw_idt.c b/drivers/ntb/hw/idt/ntb_hw_idt.c
+> index dbe72f1..a67ef23 100644
+> --- a/drivers/ntb/hw/idt/ntb_hw_idt.c
+> +++ b/drivers/ntb/hw/idt/ntb_hw_idt.c
+> @@ -1105,9 +1105,9 @@ static struct idt_mw_cfg *idt_scan_mws(struct idt_ntb_dev *ndev, int port,
+>  	}
+>  
+>  	/* Allocate memory for memory window descriptors */
+> -	ret_mws = devm_kcalloc(&ndev->ntb.pdev->dev, *mw_cnt,
+> -				sizeof(*ret_mws), GFP_KERNEL);
+> -	if (IS_ERR_OR_NULL(ret_mws))
+> +	ret_mws = devm_kcalloc(&ndev->ntb.pdev->dev, *mw_cnt, sizeof(*ret_mws),
+> +			       GFP_KERNEL);
+> +	if (!ret_mws)
+>  		return ERR_PTR(-ENOMEM);
+>  
+>  	/* Copy the info of detected memory windows */
+> @@ -2390,7 +2390,7 @@ static struct idt_ntb_dev *idt_create_dev(struct pci_dev *pdev,
+>  
+>  	/* Allocate memory for the IDT PCIe-device descriptor */
+>  	ndev = devm_kzalloc(&pdev->dev, sizeof(*ndev), GFP_KERNEL);
+> -	if (IS_ERR_OR_NULL(ndev)) {
+> +	if (!ndev) {
+>  		dev_err(&pdev->dev, "Memory allocation failed for descriptor");
+>  		return ERR_PTR(-ENOMEM);
+>  	}
 > -- 
-> 2.12.0
+> 2.7.4
 > 
