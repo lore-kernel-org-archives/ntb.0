@@ -1,32 +1,41 @@
 Return-Path: <jdmason@kudzu.us>
-Received: from mail-yw1-xc41.google.com (mail-yw1-xc41.google.com. [2607:f8b0:4864:20::c41])
-        by gmr-mx.google.com with ESMTPS id n22si524018vso.0.2018.11.03.21.00.05
+Received: from mail-yw1-xc42.google.com (mail-yw1-xc42.google.com. [2607:f8b0:4864:20::c42])
+        by gmr-mx.google.com with ESMTPS id p9-v6si1682220qte.4.2018.11.01.10.29.56
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Sat, 03 Nov 2018 21:00:05 -0700 (PDT)
-Received: by mail-yw1-xc41.google.com with SMTP id l66-v6so1966995ywl.7
-        for <linux-ntb@googlegroups.com>; Sat, 03 Nov 2018 21:00:05 -0700 (PDT)
+        Thu, 01 Nov 2018 10:29:56 -0700 (PDT)
+Received: by mail-yw1-xc42.google.com with SMTP id i185-v6so8207135ywa.12
+        for <linux-ntb@googlegroups.com>; Thu, 01 Nov 2018 10:29:56 -0700 (PDT)
 Return-Path: <jdmason@kudzu.us>
+Received: from graymalkin (76-230-155-4.lightspeed.rlghnc.sbcglobal.net. [76.230.155.4])
+        by smtp.gmail.com with ESMTPSA id 207-v6sm8035244ywi.0.2018.11.01.10.29.53
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Thu, 01 Nov 2018 10:29:54 -0700 (PDT)
 From: Jon Mason <jdmason@kudzu.us>
-Date: Sun, 4 Nov 2018 00:00:02 -0400
-Subject: [GIT PULL] NTB patches for v4.20
-Message-ID: <20181104040002.GA2439@graymalkin.kudzu.us>
+Date: Thu, 1 Nov 2018 13:29:53 -0400
+Subject: NTB patches for v4.20
+Message-ID: <20181101172953.GA15846@graymalkin.kudzu.us>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
+To: linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-Hello Linus,
-Here are a few NTB patches for v4.20.  Fairly minor changes and bug
-fixes.  Please consider pulling them.
 
+Everyone, please test.  It is my intention to send the following pull
+request to Linus tomorrow afternoon.  So barring someone telling me that
+it is non-functional, this is what will happen.
+
+If there are any outstanding patches not in the pull request below, they
+need to be resent.
 
 Thanks,
 Jon
 
+
 ---
+
 
 The following changes since commit 84df9525b0c27f3ebc2ebb1864fa62a97fdedb7d:
 
