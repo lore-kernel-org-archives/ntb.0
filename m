@@ -1,80 +1,75 @@
-Return-Path: <gunthorp@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id m5-v6si859969iok.3.2018.11.06.12.52.38
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-yw1-xc2d.google.com (mail-yw1-xc2d.google.com. [2607:f8b0:4864:20::c2d])
+        by gmr-mx.google.com with ESMTPS id v9-v6si1135048plp.1.2018.11.01.07.35.23
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Tue, 06 Nov 2018 12:52:38 -0800 (PST)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Tue,  6 Nov 2018 13:52:33 -0700
-Message-Id: <20181106205234.25792-6-logang@deltatee.com>
-In-Reply-To: <20181106205234.25792-1-logang@deltatee.com>
-References: <20181106205234.25792-1-logang@deltatee.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 01 Nov 2018 07:35:23 -0700 (PDT)
+Received: by mail-yw1-xc2d.google.com with SMTP id d126-v6so7966722ywa.5
+        for <linux-ntb@googlegroups.com>; Thu, 01 Nov 2018 07:35:22 -0700 (PDT)
+Return-Path: <jdmason@kudzu.us>
+Date: Thu, 1 Nov 2018 10:35:20 -0400
+From: Jon Mason <jdmason@kudzu.us>
+Subject: Re: [PATCH v2 0/4] ntb: idt: Add hwmon temperature sensor interface
+Message-ID: <20181101143520.GA1939@kudzu.us>
+References: <20180714115834.3350-1-fancer.lancer@gmail.com>
+ <20180717092437.18918-1-fancer.lancer@gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Subject: [PATCH v23 5/6] ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
-To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180717092437.18918-1-fancer.lancer@gmail.com>
+To: Serge Semin <fancer.lancer@gmail.com>
+Cc: dave.jiang@intel.com, allenbh@gmail.com, Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-Now that ioread64 and iowrite64 are available in io-64-nonatomic,
-we can remove the hack at the top of ntb_hw_intel.c and replace it
-with an include.
+On Tue, Jul 17, 2018 at 12:24:33PM +0300, Serge Semin wrote:
+> IDT PCIe-switches are equipped with an embedded temperature sensor. It
+> works within the range [0; 127.5]C with a resolution of 0.5C. It can
+> be used to monitor the chip core temperature so to have prevent it from
+> possible overheating. It might be very topical for the chip, since it
+> gets heated like in hell especially if ASPM isn't enabled.
+> 
+> Other than the current sampled temperatur, the sensor interface exposes
+> history registors with lowest and highest measured temperature, thresholds
+> and alarm IRQs enabled/disable bits, ADC/filter settings. The device manual
+> states that the switch is able to generate a msi interrupt on PCIe upstreams
+> if the temperature crosses one of three configurable thresholds. But in
+> practice we discovered that the enable/disable threshold IRQs bits interface
+> is very broken (see the third patch commit message), so it can't be used
+> to create the hwmon alarm interface. As the result we had to remove the
+> already available temperature sensor IRQ handler and disable the corresponding
+> interrupt.
+> 
+> Current version of the driver provides following standard hwmon sysfs
+> files: temperature input, lowest and highest measured temperature
+> with possibility to reset the history, temperature offset. The rest of the
+> nodes can't be safely implemented for the chip due to the described issues.
+> 
+> Changelog v2:
+> - Add "select HWMON" to the NTB_IDT kconfig
+> 
+> Signed-off-by: Serge Semin <fancer.lancer@gmail.com>
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
-Acked-by: Dave Jiang <dave.jiang@intel.com>
-Acked-by: Allen Hubbe <Allen.Hubbe@dell.com>
-Acked-by: Jon Mason <jdmason@kudzu.us>
----
- drivers/ntb/hw/intel/ntb_hw_intel.h | 30 +----------------------------
- 1 file changed, 1 insertion(+), 29 deletions(-)
+ was waiting on you to address the kbuild errors, and it appears you
+ did already.  Somehow I missed v2 of this series and just found it now.
+ Sorry :(
 
-diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.h b/drivers/ntb/hw/intel/ntb_hw_intel.h
-index c49ff8970ce3..e071e28bca3f 100644
---- a/drivers/ntb/hw/intel/ntb_hw_intel.h
-+++ b/drivers/ntb/hw/intel/ntb_hw_intel.h
-@@ -53,6 +53,7 @@
- 
- #include <linux/ntb.h>
- #include <linux/pci.h>
-+#include <linux/io-64-nonatomic-lo-hi.h>
- 
- /* PCI device IDs */
- #define PCI_DEVICE_ID_INTEL_NTB_B2B_JSF	0x3725
-@@ -218,33 +219,4 @@ static inline int pdev_is_gen3(struct pci_dev *pdev)
- 	return 0;
- }
- 
--#ifndef ioread64
--#ifdef readq
--#define ioread64 readq
--#else
--#define ioread64 _ioread64
--static inline u64 _ioread64(void __iomem *mmio)
--{
--	u64 low, high;
--
--	low = ioread32(mmio);
--	high = ioread32(mmio + sizeof(u32));
--	return low | (high << 32);
--}
--#endif
--#endif
--
--#ifndef iowrite64
--#ifdef writeq
--#define iowrite64 writeq
--#else
--#define iowrite64 _iowrite64
--static inline void _iowrite64(u64 val, void __iomem *mmio)
--{
--	iowrite32(val, mmio);
--	iowrite32(val >> 32, mmio + sizeof(u32));
--}
--#endif
--#endif
--
- #endif
--- 
-2.19.0
+Applied to the ntb-next branch
 
+Thanks,
+Jon
+
+> 
+> Serge Semin (4):
+>   ntb: idt: Alter temperature read method
+>   ntb: idt: Add basic hwmon sysfs interface
+>   ntb: idt: Discard temperature sensor IRQ handler
+>   ntb: idt: Alter the driver info comments
+> 
+>  drivers/ntb/hw/idt/Kconfig      |   4 +-
+>  drivers/ntb/hw/idt/ntb_hw_idt.c | 317 ++++++++++++++++++++++++++++++++++------
+>  drivers/ntb/hw/idt/ntb_hw_idt.h |  87 ++++++++++-
+>  3 files changed, 353 insertions(+), 55 deletions(-)
+> 
+> -- 
+> 2.12.0
+> 
