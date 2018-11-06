@@ -1,75 +1,190 @@
-Return-Path: <jdmason@kudzu.us>
-Received: from mail-yw1-xc2d.google.com (mail-yw1-xc2d.google.com. [2607:f8b0:4864:20::c2d])
-        by gmr-mx.google.com with ESMTPS id v9-v6si1135048plp.1.2018.11.01.07.35.23
+Return-Path: <gunthorp@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id a195-v6si2237133qkb.1.2018.11.06.12.52.43
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 01 Nov 2018 07:35:23 -0700 (PDT)
-Received: by mail-yw1-xc2d.google.com with SMTP id d126-v6so7966722ywa.5
-        for <linux-ntb@googlegroups.com>; Thu, 01 Nov 2018 07:35:22 -0700 (PDT)
-Return-Path: <jdmason@kudzu.us>
-Date: Thu, 1 Nov 2018 10:35:20 -0400
-From: Jon Mason <jdmason@kudzu.us>
-Subject: Re: [PATCH v2 0/4] ntb: idt: Add hwmon temperature sensor interface
-Message-ID: <20181101143520.GA1939@kudzu.us>
-References: <20180714115834.3350-1-fancer.lancer@gmail.com>
- <20180717092437.18918-1-fancer.lancer@gmail.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Tue, 06 Nov 2018 12:52:43 -0800 (PST)
+From: Logan Gunthorpe <logang@deltatee.com>
+Date: Tue,  6 Nov 2018 13:52:32 -0700
+Message-Id: <20181106205234.25792-5-logang@deltatee.com>
+In-Reply-To: <20181106205234.25792-1-logang@deltatee.com>
+References: <20181106205234.25792-1-logang@deltatee.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180717092437.18918-1-fancer.lancer@gmail.com>
-To: Serge Semin <fancer.lancer@gmail.com>
-Cc: dave.jiang@intel.com, allenbh@gmail.com, Sergey.Semin@t-platforms.ru, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
+Content-Transfer-Encoding: 8bit
+Subject: [PATCH v23 4/6] io-64-nonatomic: add io{read|write}64[be]{_lo_hi|_hi_lo} macros
+To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>, Christoph Hellwig <hch@lst.de>, Alan Cox <gnomes@lxorguk.ukuu.org.uk>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Tue, Jul 17, 2018 at 12:24:33PM +0300, Serge Semin wrote:
-> IDT PCIe-switches are equipped with an embedded temperature sensor. It
-> works within the range [0; 127.5]C with a resolution of 0.5C. It can
-> be used to monitor the chip core temperature so to have prevent it from
-> possible overheating. It might be very topical for the chip, since it
-> gets heated like in hell especially if ASPM isn't enabled.
-> 
-> Other than the current sampled temperatur, the sensor interface exposes
-> history registors with lowest and highest measured temperature, thresholds
-> and alarm IRQs enabled/disable bits, ADC/filter settings. The device manual
-> states that the switch is able to generate a msi interrupt on PCIe upstreams
-> if the temperature crosses one of three configurable thresholds. But in
-> practice we discovered that the enable/disable threshold IRQs bits interface
-> is very broken (see the third patch commit message), so it can't be used
-> to create the hwmon alarm interface. As the result we had to remove the
-> already available temperature sensor IRQ handler and disable the corresponding
-> interrupt.
-> 
-> Current version of the driver provides following standard hwmon sysfs
-> files: temperature input, lowest and highest measured temperature
-> with possibility to reset the history, temperature offset. The rest of the
-> nodes can't be safely implemented for the chip due to the described issues.
-> 
-> Changelog v2:
-> - Add "select HWMON" to the NTB_IDT kconfig
-> 
-> Signed-off-by: Serge Semin <fancer.lancer@gmail.com>
+This patch adds generic io{read|write}64[be]{_lo_hi|_hi_lo} macros if
+they are not already defined by the architecture. (As they are provided
+by the generic iomap library).
 
- was waiting on you to address the kbuild errors, and it appears you
- did already.  Somehow I missed v2 of this series and just found it now.
- Sorry :(
+The patch also points io{read|write}64[be] to the variant specified by the
+header name.
 
-Applied to the ntb-next branch
+This is because new drivers are encouraged to use ioreadXX, et al instead
+of readX[1], et al -- and mixing ioreadXX with readq is pretty ugly.
 
-Thanks,
-Jon
+[1] LDD3: section 9.4.2
 
-> 
-> Serge Semin (4):
->   ntb: idt: Alter temperature read method
->   ntb: idt: Add basic hwmon sysfs interface
->   ntb: idt: Discard temperature sensor IRQ handler
->   ntb: idt: Alter the driver info comments
-> 
->  drivers/ntb/hw/idt/Kconfig      |   4 +-
->  drivers/ntb/hw/idt/ntb_hw_idt.c | 317 ++++++++++++++++++++++++++++++++++------
->  drivers/ntb/hw/idt/ntb_hw_idt.h |  87 ++++++++++-
->  3 files changed, 353 insertions(+), 55 deletions(-)
-> 
-> -- 
-> 2.12.0
-> 
+Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc: Christoph Hellwig <hch@lst.de>
+Cc: Arnd Bergmann <arnd@arndb.de>
+Cc: Alan Cox <gnomes@lxorguk.ukuu.org.uk>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+---
+ include/linux/io-64-nonatomic-hi-lo.h | 64 +++++++++++++++++++++++++++
+ include/linux/io-64-nonatomic-lo-hi.h | 64 +++++++++++++++++++++++++++
+ 2 files changed, 128 insertions(+)
+
+diff --git a/include/linux/io-64-nonatomic-hi-lo.h b/include/linux/io-64-nonatomic-hi-lo.h
+index 862d786a904f..ae21b72cce85 100644
+--- a/include/linux/io-64-nonatomic-hi-lo.h
++++ b/include/linux/io-64-nonatomic-hi-lo.h
+@@ -55,4 +55,68 @@ static inline void hi_lo_writeq_relaxed(__u64 val, volatile void __iomem *addr)
+ #define writeq_relaxed hi_lo_writeq_relaxed
+ #endif
+ 
++#ifndef ioread64_hi_lo
++#define ioread64_hi_lo ioread64_hi_lo
++static inline u64 ioread64_hi_lo(void __iomem *addr)
++{
++	u32 low, high;
++
++	high = ioread32(addr + sizeof(u32));
++	low = ioread32(addr);
++
++	return low + ((u64)high << 32);
++}
++#endif
++
++#ifndef iowrite64_hi_lo
++#define iowrite64_hi_lo iowrite64_hi_lo
++static inline void iowrite64_hi_lo(u64 val, void __iomem *addr)
++{
++	iowrite32(val >> 32, addr + sizeof(u32));
++	iowrite32(val, addr);
++}
++#endif
++
++#ifndef ioread64be_hi_lo
++#define ioread64be_hi_lo ioread64be_hi_lo
++static inline u64 ioread64be_hi_lo(void __iomem *addr)
++{
++	u32 low, high;
++
++	high = ioread32be(addr);
++	low = ioread32be(addr + sizeof(u32));
++
++	return low + ((u64)high << 32);
++}
++#endif
++
++#ifndef iowrite64be_hi_lo
++#define iowrite64be_hi_lo iowrite64be_hi_lo
++static inline void iowrite64be_hi_lo(u64 val, void __iomem *addr)
++{
++	iowrite32be(val >> 32, addr);
++	iowrite32be(val, addr + sizeof(u32));
++}
++#endif
++
++#ifndef ioread64
++#define ioread64_is_nonatomic
++#define ioread64 ioread64_hi_lo
++#endif
++
++#ifndef iowrite64
++#define iowrite64_is_nonatomic
++#define iowrite64 iowrite64_hi_lo
++#endif
++
++#ifndef ioread64be
++#define ioread64be_is_nonatomic
++#define ioread64be ioread64be_hi_lo
++#endif
++
++#ifndef iowrite64be
++#define iowrite64be_is_nonatomic
++#define iowrite64be iowrite64be_hi_lo
++#endif
++
+ #endif	/* _LINUX_IO_64_NONATOMIC_HI_LO_H_ */
+diff --git a/include/linux/io-64-nonatomic-lo-hi.h b/include/linux/io-64-nonatomic-lo-hi.h
+index d042e7bb5adb..faaa842dbdb9 100644
+--- a/include/linux/io-64-nonatomic-lo-hi.h
++++ b/include/linux/io-64-nonatomic-lo-hi.h
+@@ -55,4 +55,68 @@ static inline void lo_hi_writeq_relaxed(__u64 val, volatile void __iomem *addr)
+ #define writeq_relaxed lo_hi_writeq_relaxed
+ #endif
+ 
++#ifndef ioread64_lo_hi
++#define ioread64_lo_hi ioread64_lo_hi
++static inline u64 ioread64_lo_hi(void __iomem *addr)
++{
++	u32 low, high;
++
++	low = ioread32(addr);
++	high = ioread32(addr + sizeof(u32));
++
++	return low + ((u64)high << 32);
++}
++#endif
++
++#ifndef iowrite64_lo_hi
++#define iowrite64_lo_hi iowrite64_lo_hi
++static inline void iowrite64_lo_hi(u64 val, void __iomem *addr)
++{
++	iowrite32(val, addr);
++	iowrite32(val >> 32, addr + sizeof(u32));
++}
++#endif
++
++#ifndef ioread64be_lo_hi
++#define ioread64be_lo_hi ioread64be_lo_hi
++static inline u64 ioread64be_lo_hi(void __iomem *addr)
++{
++	u32 low, high;
++
++	low = ioread32be(addr + sizeof(u32));
++	high = ioread32be(addr);
++
++	return low + ((u64)high << 32);
++}
++#endif
++
++#ifndef iowrite64be_lo_hi
++#define iowrite64be_lo_hi iowrite64be_lo_hi
++static inline void iowrite64be_lo_hi(u64 val, void __iomem *addr)
++{
++	iowrite32be(val, addr + sizeof(u32));
++	iowrite32be(val >> 32, addr);
++}
++#endif
++
++#ifndef ioread64
++#define ioread64_is_nonatomic
++#define ioread64 ioread64_lo_hi
++#endif
++
++#ifndef iowrite64
++#define iowrite64_is_nonatomic
++#define iowrite64 iowrite64_lo_hi
++#endif
++
++#ifndef ioread64be
++#define ioread64be_is_nonatomic
++#define ioread64be ioread64be_lo_hi
++#endif
++
++#ifndef iowrite64be
++#define iowrite64be_is_nonatomic
++#define iowrite64be iowrite64be_lo_hi
++#endif
++
+ #endif	/* _LINUX_IO_64_NONATOMIC_LO_HI_H_ */
+-- 
+2.19.0
+
