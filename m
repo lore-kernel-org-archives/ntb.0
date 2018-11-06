@@ -1,18 +1,18 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id 23si296408pgc.4.2018.11.30.09.06.11
+        by gmr-mx.google.com with ESMTPS id m5-v6si859969iok.3.2018.11.06.12.52.38
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Fri, 30 Nov 2018 09:06:11 -0800 (PST)
+        Tue, 06 Nov 2018 12:52:38 -0800 (PST)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Fri, 30 Nov 2018 10:06:05 -0700
-Message-Id: <20181130170606.17252-6-logang@deltatee.com>
-In-Reply-To: <20181130170606.17252-1-logang@deltatee.com>
-References: <20181130170606.17252-1-logang@deltatee.com>
+Date: Tue,  6 Nov 2018 13:52:33 -0700
+Message-Id: <20181106205234.25792-6-logang@deltatee.com>
+In-Reply-To: <20181106205234.25792-1-logang@deltatee.com>
+References: <20181106205234.25792-1-logang@deltatee.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Subject: [PATCH v24 5/6] ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
-To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, linux-mm@kvack.org, Andrew Morton <akpm@linux-foundation.org>
+Subject: [PATCH v23 5/6] ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
+To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
 Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
