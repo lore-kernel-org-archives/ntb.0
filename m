@@ -1,144 +1,263 @@
-Return-Path: <asierra@xes-inc.com>
-Received: from mail.xes-mad.com (xes-mad.com. [162.248.234.2])
-        by gmr-mx.google.com with ESMTP id b133-v6si1342521itc.3.2018.10.12.13.35.03
-        for <linux-ntb@googlegroups.com>;
-        Fri, 12 Oct 2018 13:35:03 -0700 (PDT)
-From: Aaron Sierra <asierra@xes-inc.com>
-Subject: [PATCH] NTB: transport: Try harder to alloc an aligned MW buffer
-Date: Fri, 12 Oct 2018 15:35:03 -0500
-Message-Id: <1539376503-7917-1-git-send-email-asierra@xes-inc.com>
-To: linux-ntb@googlegroups.com
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>
+Return-Path: <gunthorp@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id o12-v6si534361pfk.4.2018.11.06.12.52.44
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Tue, 06 Nov 2018 12:52:45 -0800 (PST)
+From: Logan Gunthorpe <logang@deltatee.com>
+Date: Tue,  6 Nov 2018 13:52:31 -0700
+Message-Id: <20181106205234.25792-4-logang@deltatee.com>
+In-Reply-To: <20181106205234.25792-1-logang@deltatee.com>
+References: <20181106205234.25792-1-logang@deltatee.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Subject: [PATCH v23 3/6] iomap: introduce io{read|write}64_{lo_hi|hi_lo}
+To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, Suresh Warrier <warrier@linux.vnet.ibm.com>, Nicholas Piggin <npiggin@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Be a little wasteful if the (likely CMA) message window buffer is not
-suitably aligned after our first attempt; allocate a buffer twice as big
-as we need and manually align our MW buffer within it.
+In order to provide non-atomic functions for io{read|write}64 that will
+use readq and writeq when appropriate. We define a number of variants
+of these functions in the generic iomap that will do non-atomic
+operations on pio but atomic operations on mmio.
 
-This was needed on Intel Broadwell DE platforms with intel_iommu=off
+These functions are only defined if readq and writeq are defined. If
+they are not, then the wrappers that always use non-atomic operations
+from include/linux/io-64-nonatomic*.h will be used.
 
-Signed-off-by: Aaron Sierra <asierra@xes-inc.com>
+Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+Cc: Paul Mackerras <paulus@samba.org>
+Cc: Michael Ellerman <mpe@ellerman.id.au>
+Cc: Arnd Bergmann <arnd@arndb.de>
+Cc: Suresh Warrier <warrier@linux.vnet.ibm.com>
+Cc: Nicholas Piggin <npiggin@gmail.com>
 ---
- drivers/ntb/ntb_transport.c | 86 +++++++++++++++++++++++++++++++++------------
- 1 file changed, 63 insertions(+), 23 deletions(-)
+ arch/powerpc/include/asm/io.h |   2 +
+ include/asm-generic/iomap.h   |  22 ++++++
+ lib/iomap.c                   | 132 ++++++++++++++++++++++++++++++++++
+ 3 files changed, 156 insertions(+)
 
-diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 812efd4..c503a9e 100644
---- a/drivers/ntb/ntb_transport.c
-+++ b/drivers/ntb/ntb_transport.c
-@@ -194,6 +194,8 @@ struct ntb_transport_mw {
- 	void __iomem *vbase;
- 	size_t xlat_size;
- 	size_t buff_size;
-+	size_t alloc_size;
-+	void *alloc_addr;
- 	void *virt_addr;
- 	dma_addr_t dma_addr;
- };
-@@ -691,13 +693,59 @@ static void ntb_free_mw(struct ntb_transport_ctx *nt, int num_mw)
- 		return;
+diff --git a/arch/powerpc/include/asm/io.h b/arch/powerpc/include/asm/io.h
+index 3ef40b703c4a..fe76ea99ad0d 100644
+--- a/arch/powerpc/include/asm/io.h
++++ b/arch/powerpc/include/asm/io.h
+@@ -787,8 +787,10 @@ extern void __iounmap_at(void *ea, unsigned long size);
  
- 	ntb_mw_clear_trans(nt->ndev, PIDX, num_mw);
--	dma_free_coherent(&pdev->dev, mw->buff_size,
--			  mw->virt_addr, mw->dma_addr);
-+	dma_free_coherent(&pdev->dev, mw->alloc_size,
-+			  mw->alloc_addr, mw->dma_addr);
- 	mw->xlat_size = 0;
- 	mw->buff_size = 0;
-+	mw->alloc_size = 0;
-+	mw->alloc_addr = NULL;
- 	mw->virt_addr = NULL;
- }
+ #define mmio_read16be(addr)		readw_be(addr)
+ #define mmio_read32be(addr)		readl_be(addr)
++#define mmio_read64be(addr)		readq_be(addr)
+ #define mmio_write16be(val, addr)	writew_be(val, addr)
+ #define mmio_write32be(val, addr)	writel_be(val, addr)
++#define mmio_write64be(val, addr)	writeq_be(val, addr)
+ #define mmio_insb(addr, dst, count)	readsb(addr, dst, count)
+ #define mmio_insw(addr, dst, count)	readsw(addr, dst, count)
+ #define mmio_insl(addr, dst, count)	readsl(addr, dst, count)
+diff --git a/include/asm-generic/iomap.h b/include/asm-generic/iomap.h
+index 5b63b94ef6b5..a008f504a2d0 100644
+--- a/include/asm-generic/iomap.h
++++ b/include/asm-generic/iomap.h
+@@ -36,6 +36,17 @@ extern u64 ioread64(void __iomem *);
+ extern u64 ioread64be(void __iomem *);
+ #endif
  
-+static int ntb_alloc_mw_buffer(struct ntb_transport_mw *mw,
-+			       struct device *dma_dev, size_t align)
++#ifdef readq
++#define ioread64_lo_hi ioread64_lo_hi
++#define ioread64_hi_lo ioread64_hi_lo
++#define ioread64be_lo_hi ioread64be_lo_hi
++#define ioread64be_hi_lo ioread64be_hi_lo
++extern u64 ioread64_lo_hi(void __iomem *addr);
++extern u64 ioread64_hi_lo(void __iomem *addr);
++extern u64 ioread64be_lo_hi(void __iomem *addr);
++extern u64 ioread64be_hi_lo(void __iomem *addr);
++#endif
++
+ extern void iowrite8(u8, void __iomem *);
+ extern void iowrite16(u16, void __iomem *);
+ extern void iowrite16be(u16, void __iomem *);
+@@ -46,6 +57,17 @@ extern void iowrite64(u64, void __iomem *);
+ extern void iowrite64be(u64, void __iomem *);
+ #endif
+ 
++#ifdef writeq
++#define iowrite64_lo_hi iowrite64_lo_hi
++#define iowrite64_hi_lo iowrite64_hi_lo
++#define iowrite64be_lo_hi iowrite64be_lo_hi
++#define iowrite64be_hi_lo iowrite64be_hi_lo
++extern void iowrite64_lo_hi(u64 val, void __iomem *addr);
++extern void iowrite64_hi_lo(u64 val, void __iomem *addr);
++extern void iowrite64be_lo_hi(u64 val, void __iomem *addr);
++extern void iowrite64be_hi_lo(u64 val, void __iomem *addr);
++#endif
++
+ /*
+  * "string" versions of the above. Note that they
+  * use native byte ordering for the accesses (on
+diff --git a/lib/iomap.c b/lib/iomap.c
+index 2c293b22569f..e909ab71e995 100644
+--- a/lib/iomap.c
++++ b/lib/iomap.c
+@@ -67,6 +67,7 @@ static void bad_io_access(unsigned long port, const char *access)
+ #ifndef mmio_read16be
+ #define mmio_read16be(addr) swab16(readw(addr))
+ #define mmio_read32be(addr) swab32(readl(addr))
++#define mmio_read64be(addr) swab64(readq(addr))
+ #endif
+ 
+ unsigned int ioread8(void __iomem *addr)
+@@ -100,6 +101,80 @@ EXPORT_SYMBOL(ioread16be);
+ EXPORT_SYMBOL(ioread32);
+ EXPORT_SYMBOL(ioread32be);
+ 
++#ifdef readq
++static u64 pio_read64_lo_hi(unsigned long port)
 +{
-+	dma_addr_t dma_addr;
-+	void *alloc_addr, *virt_addr;
-+	int rc;
++	u64 lo, hi;
 +
-+	alloc_addr = dma_alloc_coherent(dma_dev, mw->alloc_size,
-+					&dma_addr, GFP_KERNEL);
-+	if (!alloc_addr) {
-+		dev_err(dma_dev, "Unable to alloc MW buff of size %zu\n",
-+			mw->alloc_size);
-+		return -ENOMEM;
-+	}
-+	virt_addr = alloc_addr;
++	lo = inl(port);
++	hi = inl(port + sizeof(u32));
 +
-+	/*
-+	 * we must ensure that the memory address allocated is BAR size
-+	 * aligned in order for the XLAT register to take the value. This
-+	 * is a requirement of the hardware. It is recommended to setup CMA
-+	 * for BAR sizes equal or greater than 4MB.
-+	 */
-+	if (!IS_ALIGNED(dma_addr, align)) {
-+		if (mw->alloc_size > mw->buff_size) {
-+			virt_addr = PTR_ALIGN(alloc_addr, align);
-+			dma_addr = ALIGN(dma_addr, align);
-+		} else {
-+			rc = -ENOMEM;
-+			goto err;
-+		}
-+	}
-+
-+	mw->alloc_addr = alloc_addr;
-+	mw->virt_addr = virt_addr;
-+	mw->dma_addr = dma_addr;
-+
-+	return 0;
-+
-+err:
-+	dma_free_coherent(dma_dev, mw->alloc_size, alloc_addr, dma_addr);
-+
-+	return rc;
++	return lo | (hi << 32);
 +}
 +
- static int ntb_set_mw(struct ntb_transport_ctx *nt, int num_mw,
- 		      resource_size_t size)
- {
-@@ -729,28 +777,20 @@ static int ntb_set_mw(struct ntb_transport_ctx *nt, int num_mw,
- 	/* Alloc memory for receiving data.  Must be aligned */
- 	mw->xlat_size = xlat_size;
- 	mw->buff_size = buff_size;
-+	mw->alloc_size = buff_size;
++static u64 pio_read64_hi_lo(unsigned long port)
++{
++	u64 lo, hi;
++
++	hi = inl(port + sizeof(u32));
++	lo = inl(port);
++
++	return lo | (hi << 32);
++}
++
++static u64 pio_read64be_lo_hi(unsigned long port)
++{
++	u64 lo, hi;
++
++	lo = pio_read32be(port + sizeof(u32));
++	hi = pio_read32be(port);
++
++	return lo | (hi << 32);
++}
++
++static u64 pio_read64be_hi_lo(unsigned long port)
++{
++	u64 lo, hi;
++
++	hi = pio_read32be(port);
++	lo = pio_read32be(port + sizeof(u32));
++
++	return lo | (hi << 32);
++}
++
++u64 ioread64_lo_hi(void __iomem *addr)
++{
++	IO_COND(addr, return pio_read64_lo_hi(port), return readq(addr));
++	return 0xffffffffffffffffULL;
++}
++
++u64 ioread64_hi_lo(void __iomem *addr)
++{
++	IO_COND(addr, return pio_read64_hi_lo(port), return readq(addr));
++	return 0xffffffffffffffffULL;
++}
++
++u64 ioread64be_lo_hi(void __iomem *addr)
++{
++	IO_COND(addr, return pio_read64be_lo_hi(port),
++		return mmio_read64be(addr));
++	return 0xffffffffffffffffULL;
++}
++
++u64 ioread64be_hi_lo(void __iomem *addr)
++{
++	IO_COND(addr, return pio_read64be_hi_lo(port),
++		return mmio_read64be(addr));
++	return 0xffffffffffffffffULL;
++}
++
++EXPORT_SYMBOL(ioread64_lo_hi);
++EXPORT_SYMBOL(ioread64_hi_lo);
++EXPORT_SYMBOL(ioread64be_lo_hi);
++EXPORT_SYMBOL(ioread64be_hi_lo);
++
++#endif /* readq */
++
+ #ifndef pio_write16be
+ #define pio_write16be(val,port) outw(swab16(val),port)
+ #define pio_write32be(val,port) outl(swab32(val),port)
+@@ -108,6 +183,7 @@ EXPORT_SYMBOL(ioread32be);
+ #ifndef mmio_write16be
+ #define mmio_write16be(val,port) writew(swab16(val),port)
+ #define mmio_write32be(val,port) writel(swab32(val),port)
++#define mmio_write64be(val,port) writeq(swab64(val),port)
+ #endif
  
--	mw->virt_addr = dma_alloc_coherent(&pdev->dev, buff_size,
--					   &mw->dma_addr, GFP_KERNEL);
--	if (!mw->virt_addr) {
--		mw->xlat_size = 0;
--		mw->buff_size = 0;
--		dev_err(&pdev->dev, "Unable to alloc MW buff of size %zu\n",
--			buff_size);
--		return -ENOMEM;
--	}
--
--	/*
--	 * we must ensure that the memory address allocated is BAR size
--	 * aligned in order for the XLAT register to take the value. This
--	 * is a requirement of the hardware. It is recommended to setup CMA
--	 * for BAR sizes equal or greater than 4MB.
--	 */
--	if (!IS_ALIGNED(mw->dma_addr, xlat_align)) {
--		dev_err(&pdev->dev, "DMA memory %pad is not aligned\n",
--			&mw->dma_addr);
--		ntb_free_mw(nt, num_mw);
--		return -ENOMEM;
-+	rc = ntb_alloc_mw_buffer(mw, &pdev->dev, xlat_align);
-+	if (rc) {
-+		mw->alloc_size *= 2;
-+		rc = ntb_alloc_mw_buffer(mw, &pdev->dev, xlat_align);
-+		if (rc) {
-+			dev_err(&pdev->dev,
-+				"Unable to alloc aligned MW buff\n");
-+			mw->xlat_size = 0;
-+			mw->buff_size = 0;
-+			mw->alloc_size = 0;
-+			return rc;
-+		}
- 	}
+ void iowrite8(u8 val, void __iomem *addr)
+@@ -136,6 +212,62 @@ EXPORT_SYMBOL(iowrite16be);
+ EXPORT_SYMBOL(iowrite32);
+ EXPORT_SYMBOL(iowrite32be);
  
- 	/* Notify HW the memory location of the receive buffer */
++#ifdef writeq
++static void pio_write64_lo_hi(u64 val, unsigned long port)
++{
++	outl(val, port);
++	outl(val >> 32, port + sizeof(u32));
++}
++
++static void pio_write64_hi_lo(u64 val, unsigned long port)
++{
++	outl(val >> 32, port + sizeof(u32));
++	outl(val, port);
++}
++
++static void pio_write64be_lo_hi(u64 val, unsigned long port)
++{
++	pio_write32be(val, port + sizeof(u32));
++	pio_write32be(val >> 32, port);
++}
++
++static void pio_write64be_hi_lo(u64 val, unsigned long port)
++{
++	pio_write32be(val >> 32, port);
++	pio_write32be(val, port + sizeof(u32));
++}
++
++void iowrite64_lo_hi(u64 val, void __iomem *addr)
++{
++	IO_COND(addr, pio_write64_lo_hi(val, port),
++		writeq(val, addr));
++}
++
++void iowrite64_hi_lo(u64 val, void __iomem *addr)
++{
++	IO_COND(addr, pio_write64_hi_lo(val, port),
++		writeq(val, addr));
++}
++
++void iowrite64be_lo_hi(u64 val, void __iomem *addr)
++{
++	IO_COND(addr, pio_write64be_lo_hi(val, port),
++		mmio_write64be(val, addr));
++}
++
++void iowrite64be_hi_lo(u64 val, void __iomem *addr)
++{
++	IO_COND(addr, pio_write64be_hi_lo(val, port),
++		mmio_write64be(val, addr));
++}
++
++EXPORT_SYMBOL(iowrite64_lo_hi);
++EXPORT_SYMBOL(iowrite64_hi_lo);
++EXPORT_SYMBOL(iowrite64be_lo_hi);
++EXPORT_SYMBOL(iowrite64be_hi_lo);
++
++#endif /* readq */
++
+ /*
+  * These are the "repeat MMIO read/write" functions.
+  * Note the "__raw" accesses, since we don't want to
 -- 
-2.7.4
+2.19.0
 
