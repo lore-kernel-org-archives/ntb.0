@@ -1,13 +1,13 @@
 Return-Path: <wesley.sheng@microchip.com>
-Received: from NAM01-BN3-obe.outbound.protection.outlook.com (mail-eopbgr740049.outbound.protection.outlook.com. [40.107.74.49])
-        by gmr-mx.google.com with ESMTPS id t124si362938ywf.4.2018.11.21.19.19.31
+Received: from NAM04-SN1-obe.outbound.protection.outlook.com (mail-sn1nam04on0603.outbound.protection.outlook.com. [2a01:111:f400:fe4c::603])
+        by gmr-mx.google.com with ESMTPS id 69si346143wrb.1.2018.11.21.19.19.27
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Wed, 21 Nov 2018 19:19:31 -0800 (PST)
+        Wed, 21 Nov 2018 19:19:27 -0800 (PST)
 From: Wesley Sheng <wesley.sheng@microchip.com>
-Subject: [PATCH 2/3] ntb_hw_switchtec: Added support of >=4G memory windows
-Date: Thu, 22 Nov 2018 17:02:01 +0800
-Message-ID: <1542877322-24548-3-git-send-email-wesley.sheng@microchip.com>
+Subject: [PATCH 1/3] ntb_hw_switchtec: debug print 64bit aligned crosslink BAR Numbers
+Date: Thu, 22 Nov 2018 17:02:00 +0800
+Message-ID: <1542877322-24548-2-git-send-email-wesley.sheng@microchip.com>
 In-Reply-To: <1542877322-24548-1-git-send-email-wesley.sheng@microchip.com>
 References: <1542877322-24548-1-git-send-email-wesley.sheng@microchip.com>
 Return-Path: wesley.sheng@microchip.com
@@ -19,72 +19,29 @@ List-ID: <linux-ntb.googlegroups.com>
 
 From: Paul Selles <paul.selles@microchip.com>
 
-Current Switchtec's BAR setup registers are limited to 32bits,
-corresponding to the maximum MW (memory window) size is <4G.
+Switchtec NTB crosslink BARs are 64bit addressed but they are printed as
+32bit addressed BARs. Fix debug log to increment the BAR numbers by 2 to
+reflect the 64bit address alignment.
 
-Increase the MW sizes with the addition of the BAR Setup Extension
-Register for the upper 32bits of a 64bits MW size. This increases the MW
-range to between 4K and 2^63.
-
-Reported-by: Boris Glimcher <boris.glimcher@emc.com>
 Signed-off-by: Paul Selles <paul.selles@microchip.com>
 Signed-off-by: Wesley Sheng <wesley.sheng@microchip.com>
 ---
- drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 9 +++++++--
- include/linux/switchtec.h              | 6 +++++-
- 2 files changed, 12 insertions(+), 3 deletions(-)
+ drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-index 9916bc5..32850fb 100644
+index 5ee5f40..9916bc5 100644
 --- a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
 +++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-@@ -264,6 +264,7 @@ static void switchtec_ntb_mw_clr_direct(struct switchtec_ntb *sndev, int idx)
- 	ctl_val &= ~NTB_CTRL_BAR_DIR_WIN_EN;
- 	iowrite32(ctl_val, &ctl->bar_entry[bar].ctl);
- 	iowrite32(0, &ctl->bar_entry[bar].win_size);
-+	iowrite32(0, &ctl->bar_ext_entry[bar].win_size);
- 	iowrite64(sndev->self_partition, &ctl->bar_entry[bar].xlate_addr);
- }
+@@ -1120,7 +1120,7 @@ static int crosslink_enum_partition(struct switchtec_ntb *sndev,
  
-@@ -286,7 +287,9 @@ static void switchtec_ntb_mw_set_direct(struct switchtec_ntb *sndev, int idx,
- 	ctl_val |= NTB_CTRL_BAR_DIR_WIN_EN;
+ 		dev_dbg(&sndev->stdev->dev,
+ 			"Crosslink BAR%d addr: %llx\n",
+-			i, bar_addr);
++			i*2, bar_addr);
  
- 	iowrite32(ctl_val, &ctl->bar_entry[bar].ctl);
--	iowrite32(xlate_pos | size, &ctl->bar_entry[bar].win_size);
-+	iowrite32(xlate_pos | (size & 0xFFFFF000),
-+		  &ctl->bar_entry[bar].win_size);
-+	iowrite32(size >> 32, &ctl->bar_ext_entry[bar].win_size);
- 	iowrite64(sndev->self_partition | addr,
- 		  &ctl->bar_entry[bar].xlate_addr);
- }
-@@ -1053,7 +1056,9 @@ static int crosslink_setup_mws(struct switchtec_ntb *sndev, int ntb_lut_idx,
- 		ctl_val |= NTB_CTRL_BAR_DIR_WIN_EN;
- 
- 		iowrite32(ctl_val, &ctl->bar_entry[bar].ctl);
--		iowrite32(xlate_pos | size, &ctl->bar_entry[bar].win_size);
-+		iowrite32(xlate_pos | (size & 0xFFFFF000),
-+			  &ctl->bar_entry[bar].win_size);
-+		iowrite32(size >> 32, &ctl->bar_ext_entry[bar].win_size);
- 		iowrite64(sndev->peer_partition | addr,
- 			  &ctl->bar_entry[bar].xlate_addr);
- 	}
-diff --git a/include/linux/switchtec.h b/include/linux/switchtec.h
-index eee0412..1e6e333 100644
---- a/include/linux/switchtec.h
-+++ b/include/linux/switchtec.h
-@@ -248,7 +248,11 @@ struct ntb_ctrl_regs {
- 		u32 win_size;
- 		u64 xlate_addr;
- 	} bar_entry[6];
--	u32 reserved2[216];
-+	struct {
-+		u32 win_size;
-+		u32 reserved[3];
-+	} bar_ext_entry[6];
-+	u32 reserved2[192];
- 	u32 req_id_table[256];
- 	u32 reserved3[512];
- 	u64 lut_entry[512];
+ 		if (bar_addr != bar_space * i)
+ 			continue;
 -- 
 2.7.4
 
