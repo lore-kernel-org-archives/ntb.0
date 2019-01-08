@@ -1,115 +1,58 @@
-Return-Path: <gunthorp@deltatee.com>
+Return-Path: <logang@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id f79si332746oic.0.2019.01.18.16.10.11
+        by gmr-mx.google.com with ESMTPS id y15si3383870qtn.4.2019.01.07.17.16.10
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Fri, 18 Jan 2019 16:10:11 -0800 (PST)
+        Mon, 07 Jan 2019 17:16:10 -0800 (PST)
+References: <1546830776-3138-1-git-send-email-joey.zhang@microchip.com>
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Fri, 18 Jan 2019 17:10:01 -0700
-Message-Id: <20190119001001.13087-1-logang@deltatee.com>
+Message-ID: <2dccf9e6-d9d7-200e-f689-56c962ea5e7e@deltatee.com>
+Date: Mon, 7 Jan 2019 18:16:02 -0700
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Subject: [PATCH] NTB: ntb_transport: Ensure the destination buffer is mapped for TX DMA
-To: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
-Cc: Logan Gunthorpe <logang@deltatee.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>
+In-Reply-To: <1546830776-3138-1-git-send-email-joey.zhang@microchip.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH] NTB: ntb_transport: Free MWs in
+ ntb_transport_link_cleanup()
+To: Joey Zhang <joey.zhang@microchip.com>, jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-Presently, when ntb_transport is used with DMA and the IOMMU turned on,
-it fails with errors from the IOMMU such as:
 
-  DMAR: DRHD: handling fault status reg 202
-  DMAR: [DMA Write] Request device [00:04.0] fault addr
-	381fc0340000 [fault reason 05] PTE Write access is not set
 
-This is because ntb_transport does not map the BAR space with the IOMMU.
+On 06/01/19 08:12 PM, Joey Zhang wrote:
+> If NTB peer host crashes or reboots, the NTB transport link will be
+> down and the MWs of NTB transport will be invalid. But the
+> ntb_transport_link_cleanup() does not free these invalid MWs. When
+> the NTB peer host is recovered later, NTB transport link will be
+> up and the ntb_set_mw() will not reset up MWs. Because the MWs of
+> NTB transport are invalid, the NTB transport will not work.
+> 
+> We can fix it by freeing MWs when NTB transport link is down, then
+> the ntb_set_mw() will reset up MWs when NTB transport link is up.
+> 
+> Signed-off-by: Joey Zhang <joey.zhang@microchip.com>
 
-To fix this, we map the entire MW region for each QP after we assign
-the DMA channel. This prevents needing an extra DMA map in the fast
-path.
+Looks ok to me.
 
-Link: https://lore.kernel.org/linux-pci/499934e7-3734-1aee-37dd-b42a5d2a2608@intel.com/
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Cc: Jon Mason <jdmason@kudzu.us>
-Cc: Dave Jiang <dave.jiang@intel.com>
-Cc: Allen Hubbe <allenbh@gmail.com>
----
- drivers/ntb/ntb_transport.c | 28 ++++++++++++++++++++++++++--
- 1 file changed, 26 insertions(+), 2 deletions(-)
+Reviewed By: Logan Gunthorpe <logang@deltatee.com>
 
-diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 3bfdb4562408..526b65afc16a 100644
---- a/drivers/ntb/ntb_transport.c
-+++ b/drivers/ntb/ntb_transport.c
-@@ -144,7 +144,9 @@ struct ntb_transport_qp {
- 	struct list_head tx_free_q;
- 	spinlock_t ntb_tx_free_q_lock;
- 	void __iomem *tx_mw;
--	dma_addr_t tx_mw_phys;
-+	phys_addr_t tx_mw_phys;
-+	size_t tx_mw_size;
-+	dma_addr_t tx_mw_dma_addr;
- 	unsigned int tx_index;
- 	unsigned int tx_max_entry;
- 	unsigned int tx_max_frame;
-@@ -1049,6 +1051,7 @@ static int ntb_transport_init_queue(struct ntb_transport_ctx *nt,
- 	tx_size = (unsigned int)mw_size / num_qps_mw;
- 	qp_offset = tx_size * (qp_num / mw_count);
- 
-+	qp->tx_mw_size = tx_size;
- 	qp->tx_mw = nt->mw_vec[mw_num].vbase + qp_offset;
- 	if (!qp->tx_mw)
- 		return -EINVAL;
-@@ -1644,7 +1647,7 @@ static int ntb_async_tx_submit(struct ntb_transport_qp *qp,
- 	dma_cookie_t cookie;
- 
- 	device = chan->device;
--	dest = qp->tx_mw_phys + qp->tx_max_frame * entry->tx_index;
-+	dest = qp->tx_mw_dma_addr + qp->tx_max_frame * entry->tx_index;
- 	buff_off = (size_t)buf & ~PAGE_MASK;
- 	dest_off = (size_t)dest & ~PAGE_MASK;
- 
-@@ -1863,6 +1866,18 @@ ntb_transport_create_queue(void *data, struct device *client_dev,
- 		qp->rx_dma_chan = NULL;
- 	}
- 
-+	if (qp->tx_dma_chan) {
-+		qp->tx_mw_dma_addr =
-+			dma_map_resource(qp->tx_dma_chan->device->dev,
-+					 qp->tx_mw_phys, qp->tx_mw_size,
-+					 DMA_FROM_DEVICE, 0);
-+		if (dma_mapping_error(qp->tx_dma_chan->device->dev,
-+				      qp->tx_mw_dma_addr)) {
-+			qp->tx_mw_dma_addr = 0;
-+			goto err1;
-+		}
-+	}
-+
- 	dev_dbg(&pdev->dev, "Using %s memcpy for TX\n",
- 		qp->tx_dma_chan ? "DMA" : "CPU");
- 
-@@ -1904,6 +1919,10 @@ ntb_transport_create_queue(void *data, struct device *client_dev,
- 	qp->rx_alloc_entry = 0;
- 	while ((entry = ntb_list_rm(&qp->ntb_rx_q_lock, &qp->rx_free_q)))
- 		kfree(entry);
-+	if (qp->tx_mw_dma_addr)
-+		dma_unmap_resource(qp->tx_dma_chan->device->dev,
-+				   qp->tx_mw_dma_addr, qp->tx_mw_size,
-+				   DMA_FROM_DEVICE, 0);
- 	if (qp->tx_dma_chan)
- 		dma_release_channel(qp->tx_dma_chan);
- 	if (qp->rx_dma_chan)
-@@ -1945,6 +1964,11 @@ void ntb_transport_free_queue(struct ntb_transport_qp *qp)
- 		 */
- 		dma_sync_wait(chan, qp->last_cookie);
- 		dmaengine_terminate_all(chan);
-+
-+		dma_unmap_resource(chan->device->dev,
-+				   qp->tx_mw_dma_addr, qp->tx_mw_size,
-+				   DMA_FROM_DEVICE, 0);
-+
- 		dma_release_channel(chan);
- 	}
- 
--- 
-2.19.0
-
+> ---
+>  drivers/ntb/ntb_transport.c | 3 +++
+>  1 file changed, 3 insertions(+)
+> 
+> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+> index 3bfdb45..6e8902d 100644
+> --- a/drivers/ntb/ntb_transport.c
+> +++ b/drivers/ntb/ntb_transport.c
+> @@ -862,6 +862,9 @@ static void ntb_transport_link_cleanup(struct ntb_transport_ctx *nt)
+>  	if (!nt->link_is_up)
+>  		cancel_delayed_work_sync(&nt->link_work);
+>  
+> +	for (i = 0; i < nt->mw_count; i++)
+> +		ntb_free_mw(nt, i);
+> +
+>  	/* The scratchpad registers keep the values if the remote side
+>  	 * goes down, blast them now to give them a sane value the next
+>  	 * time they are accessed
+> 
