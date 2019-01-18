@@ -1,143 +1,84 @@
-Return-Path: <lsun@mellanox.com>
-Received: from EUR03-DB5-obe.outbound.protection.outlook.com (mail-eopbgr40082.outbound.protection.outlook.com. [40.107.4.82])
-        by gmr-mx.google.com with ESMTPS id 187si5715871vkc.1.2019.01.21.11.22.46
+Return-Path: <arndbergmann@gmail.com>
+Received: from mail-qk1-f193.google.com (mail-qk1-f193.google.com. [209.85.222.193])
+        by gmr-mx.google.com with ESMTPS id h203si5892931vkh.0.2019.01.18.08.02.39
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 21 Jan 2019 11:22:47 -0800 (PST)
-From: Liming Sun <lsun@mellanox.com>
-Subject: RE: [PATCH v6 5/9] soc: mellanox: host: Add the common host side
- Rshim driver
-Date: Mon, 21 Jan 2019 19:22:41 +0000
-Message-ID: 
- <DB6PR05MB32233FF89600716711441C04A19F0@DB6PR05MB3223.eurprd05.prod.outlook.com>
-References: 
- <b143b40446c1870fb8d422b364ead95d54552be9.1527264077.git.lsun@mellanox.com>
- <1541089538-175682-1-git-send-email-lsun@mellanox.com>
- <1541089538-175682-5-git-send-email-lsun@mellanox.com>
- <CAK8P3a2NRbEaS_EJNtBaZ3GCUtRiH2rUDRzJFjvcw2ZacZM1qw@mail.gmail.com>
-In-Reply-To: 
- <CAK8P3a2NRbEaS_EJNtBaZ3GCUtRiH2rUDRzJFjvcw2ZacZM1qw@mail.gmail.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+        Fri, 18 Jan 2019 08:02:39 -0800 (PST)
+Received: by mail-qk1-f193.google.com with SMTP id w204so8337125qka.2
+        for <linux-ntb@googlegroups.com>; Fri, 18 Jan 2019 08:02:39 -0800 (PST)
 MIME-Version: 1.0
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Olof Johansson <olof@lixom.net>, David Woods <dwoods@mellanox.com>, Robin Murphy <robin.murphy@arm.com>, arm-soc <arm@kernel.org>, DTML <devicetree@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Vincent Whitchurch <vincent.whitchurch@axis.com>, linux-pci <linux-pci@vger.kernel.org>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, Christoph Hellwig <hch@lst.de>
+References: <b143b40446c1870fb8d422b364ead95d54552be9.1527264077.git.lsun@mellanox.com>
+ <1541089538-175682-1-git-send-email-lsun@mellanox.com> <1541089538-175682-5-git-send-email-lsun@mellanox.com>
+In-Reply-To: <1541089538-175682-5-git-send-email-lsun@mellanox.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Date: Fri, 18 Jan 2019 17:02:21 +0100
+Message-ID: <CAK8P3a2NRbEaS_EJNtBaZ3GCUtRiH2rUDRzJFjvcw2ZacZM1qw@mail.gmail.com>
+Subject: Re: [PATCH v6 5/9] soc: mellanox: host: Add the common host side
+ Rshim driver
+Content-Type: text/plain; charset="UTF-8"
+To: Liming Sun <lsun@mellanox.com>
+Cc: Olof Johansson <olof@lixom.net>, David Woods <dwoods@mellanox.com>, Robin Murphy <robin.murphy@arm.com>, arm-soc <arm@kernel.org>, DTML <devicetree@vger.kernel.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Vincent Whitchurch <vincent.whitchurch@axis.com>, linux-pci <linux-pci@vger.kernel.org>, linux-ntb@googlegroups.com, Christoph Hellwig <hch@lst.de>
 List-ID: <linux-ntb.googlegroups.com>
 
-VGhhbmtzIEFybmQgZm9yIHRoZSBjb21tZW50cy4gVGhlIDAvOSBlbWFpbCB3YXMgc2VudCBvdXQg
-anVzdCBub3cgdG8NCmFkZCBtb3JlIGRldGFpbHMgYWJvdXQgdGhlIGRlc2lnbiBhbmQgY2hhbmdl
-cy4gUGxlYXNlIGFsc28gc2VlIG15IHJlc3BvbnNlDQpiZWxvdy4NCg0KLSBMaW1pbmcNCg0KPiAt
-LS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBcm5kIEJlcmdtYW5uIDxhcm5kQGFy
-bmRiLmRlPg0KPiBTZW50OiBGcmlkYXksIEphbnVhcnkgMTgsIDIwMTkgMTE6MDIgQU0NCj4gVG86
-IExpbWluZyBTdW4gPGxzdW5AbWVsbGFub3guY29tPg0KPiBDYzogT2xvZiBKb2hhbnNzb24gPG9s
-b2ZAbGl4b20ubmV0PjsgRGF2aWQgV29vZHMgPGR3b29kc0BtZWxsYW5veC5jb20+OyBSb2JpbiBN
-dXJwaHkgPHJvYmluLm11cnBoeUBhcm0uY29tPjsgYXJtLXNvYw0KPiA8YXJtQGtlcm5lbC5vcmc+
-OyBEVE1MIDxkZXZpY2V0cmVlQHZnZXIua2VybmVsLm9yZz47IExpbnV4IEFSTSA8bGludXgtYXJt
-LWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnPjsgVmluY2VudCBXaGl0Y2h1cmNoDQo+IDx2aW5j
-ZW50LndoaXRjaHVyY2hAYXhpcy5jb20+OyBsaW51eC1wY2kgPGxpbnV4LXBjaUB2Z2VyLmtlcm5l
-bC5vcmc+OyBsaW51eC1udGJAZ29vZ2xlZ3JvdXBzLmNvbTsgQ2hyaXN0b3BoIEhlbGx3aWcgPGhj
-aEBsc3QuZGU+DQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggdjYgNS85XSBzb2M6IG1lbGxhbm94OiBo
-b3N0OiBBZGQgdGhlIGNvbW1vbiBob3N0IHNpZGUgUnNoaW0gZHJpdmVyDQo+IA0KPiBPbiBUaHUs
-IE5vdiAxLCAyMDE4IGF0IDU6NDkgUE0gTGltaW5nIFN1biA8bHN1bkBtZWxsYW5veC5jb20+IHdy
-b3RlOg0KPiA+DQo+ID4gQW4gZXh0ZXJuYWwgaG9zdCBjYW4gY29ubmVjdCB0byBhIE1lbGxhbm94
-IEJsdWVGaWVsZCBTb0MgdmlhIGFuDQo+ID4gaW50ZXJmYWNlIGNhbGxlZCBSc2hpbS4gVGhlIFJz
-aGltIGRyaXZlciBwcm92aWRlcyBib290LCBjb25zb2xlLA0KPiA+IGFuZCBuZXR3b3JraW5nIHNl
-cnZpY2VzIG92ZXIgdGhpcyBpbnRlcmZhY2UuIFRoaXMgY29tbWl0IGlzDQo+ID4gdGhlIGNvbW1v
-biBkcml2ZXIgd2hlcmUgdGhlIG90aGVyIGJhY2tlbmQgKHRyYW5zcG9ydCkgZHJpdmVyIHdpbGwN
-Cj4gPiB1c2UuDQo+ID4NCj4gPiBSZXZpZXdlZC1ieTogRGF2aWQgV29vZHMgPGR3b29kc0BtZWxs
-YW5veC5jb20+DQo+ID4gU2lnbmVkLW9mZi1ieTogTGltaW5nIFN1biA8bHN1bkBtZWxsYW5veC5j
-b20+DQo+IA0KPiBIaSBMaW1pbmcsDQo+IA0KPiBJJ3ZlIHRha2VuIGEgbmV3IGxvb2sgYXQgeW91
-ciBwYXRjaCBzZXJpZXMgZm9yIGRyaXZlcnMvc29jLyBub3csDQo+IHRoYW5rcyBmb3IgeW91ciBj
-b250aW51ZWQgc3VibWlzc2lvbnMuDQo+IA0KPiBUaGlzIGlzIGFnYWluIGp1c3QgYSBzZXQgb2Yg
-dmVyeSBoaWdoLWxldmVsIGNvbW1lbnRzLCBidXQgSSB0aGluayB3ZQ0KPiBzaG91bGQgcmVzb2x2
-ZSBzb21lIG9mIHRoZSBmdW5kYW1lbnRhbCBxdWVzdGlvbnMgZmlyc3QuDQo+IEluY2lkZW50YWxs
-eSwgVmluY2VudCBXaGl0Y2h1cmNoIGhhcyByZWNlbnRseSBwb3N0ZWQgYW5vdGhlcg0KPiBwYXRj
-aCBzZXJpZXMgd2l0aCBhIHZlcnkgc2ltaWxhciBpbnRlbnRpb24sIGJ1dCBmb3Igb3RoZXIgaGFy
-ZHdhcmUNCj4gYW5kIHRha2luZyBhIGRpZmZlcmVudCBhcHByb2FjaC4NCj4gDQo+IEluIGJvdGgg
-Y2FzZXMsIHRoZSBpZGVhIGlzIHRvIHVzZSB2aXJ0aW8gYmFzZWQgZHJpdmVycyB0byBwcm92aWRl
-DQo+IHNlcnZpY2VzIGZyb20gYSBob3N0IG1hY2hpbmUgaW50byBhbm90aGVyIExpbnV4IGluc3Rh
-bmNlIHJ1bm5pbmcNCj4gb24gYW4gZW1iZWRkZWQgc3lzdGVtIGJlaGluZCBhIFBDSWUgc2xvdCBv
-ciBzaW1pbGFyLiBZb3VyDQo+IEJsdWVmaWVsZCBTb0MgcGF0Y2hlcyBhcmUgd2VsbCB3cml0dGVu
-LCBidXQgYXJlIGludGVudGlvbmFsbHkNCj4ga2VwdCBzcGVjaWZpYyB0byBhIHBhcnRpY3VsYXIg
-dXNlIGNhc2UgYW5kIHRpZWQgdG8gb25lIHBpZWNlDQo+IG9mIGhhcmR3YXJlLiBJbiBjb250cmFz
-dCwgVmluY2VudCB1c2VzIHRoZSBleGlzdGluZyBjb2RlIGZyb20NCj4gZHJpdmVycy9taXNjL21p
-Yy92b3AvIHRoYXQgaXMgZXF1YWxseSBoYXJkd2FyZSBzcGVjaWZpYywgYnV0IGhlDQo+IGV4dGVu
-ZHMgaXQgdG8gYmUgYXBwbGljYWJsZSB0byBvdGhlciBoYXJkd2FyZSBhcyB3ZWxsLg0KPiANCj4g
-SXQgd291bGQgYmUgZ29vZCBpZiB5b3UgY291bGQgbG9vayBhdCBlYWNoIG90aGVyJ3MgYXBwcm9h
-Y2hlcw0KPiB0byBzZWUgd2hlcmUgd2UgY291bGQgdGFrZSBpdCBmcm9tIGhlcmUuIEkgdGhpbmsg
-aWRlYWxseSB3ZQ0KPiBzaG91bGQgaGF2ZSBhIGNvbW1vbiBkcml2ZXIgZnJhbWV3b3JrIGZvciBk
-b2luZyB0aGUgc2FtZQ0KPiB0aGluZyBhY3Jvc3MgYm90aCBvZiB5b3VyIGRldmljZXMgYW5kIGFz
-IHdlbGwgYXMgb3RoZXJzLg0KDQpZZXMsIEkgY2hlY2tlZCBkcml2ZXJzL21pc2MvbWljL3ZvcCBh
-bmQgVmluY2VudCBXaGl0Y2h1cmNoJ3MgcGF0Y2hlcyANCihWaXJ0aW8tb3Zlci1QQ0llIG9uIG5v
-bi1NSUMpIGFuZCByZWxhdGVkIGNvbW1lbnRzLiBJIGtpbmQgb2YgZmVlbCANCnRoYXQgYmVzaWRl
-cyB0aGUgY29tbW9uIHZpcnRpbyBpbmZyYXN0cnVjdHVyZSwgdGhlcmUgc2VlbXMgbm90IG11Y2gN
-CnRvIGJlIHJldXNlZCBpbiB0aGUgcmVzdCBvZiBpbXBsZW1lbnRhdGlvbiB5ZXQsIHRob3VnaCB0
-aGV5IGFyZSB0cnlpbmcNCnRvIGRvIHRoZSBzaW1pbGFyIHRoaW5ncy4gIChGZWVsIGZyZWUgdG8g
-Y29ycmVjdCBtZSBpZiBJIG1pc3VuZGVyc3Rvb2QgaXQuKQ0KDQpJIGp1c3Qgc3VibWl0dGVkIHRo
-ZSBwYXRjaCAwLzkgdG8gZXhwbGFpbiBzb21lIGRldGFpbHMgb2YgdGhlIHJzaGltDQpjb21wb25l
-bnQgYW5kIHRoZSBkcml2ZXIgcGF0Y2hlcy4gQ291bGQgeW91IGhlbHAgdGFrZSBhIGxvb2s/DQoN
-ClRoZSByc2hpbSBkcml2ZXIgb2YgQmx1ZUZpZWxkIFNvQyBoYXMgYSBmZXcgbW9yZSBmdW5jdGlv
-bmFsaXRpZXMgDQp3aGljaCBhcmUgdmVyeSBIVy1zcGVjaWZpYy4gU29tZSBuZWVkcyBkcml2ZXIg
-c3VwcG9ydCBmcm9tIGJvdGggDQpBUk0gdGFyZ2V0IGFuZCB0aGUgZXh0ZXJuYWwgaG9zdCwgc29t
-ZSBvbmx5IG5lZWRzIGV4dGVybmFsIGhvc3QgDQpkcml2ZXIgc3VwcG9ydC4NCg0KQXMgZm9yIGNv
-bW1vbiBmcmFtZXdvcmssIHdlIHVzZWQgdG8gaW1wbGVtZW50IHRoZSBkcml2ZXJzIGJhc2VkIG9u
-DQp0aGUgcmVtb3RlIHByb2MgKERvY3VtZW50YXRpb24vcmVtb3RlcHJvYy50eHQpLCB3aGljaCBz
-ZWVtcyBtb3JlDQpjbG9zZSB0byB3aGF0IHdlIHdhbnRlZCAoaW4gbXkgaHVtYmxlIG9waW5pb24p
-LiBMYXRlciBkdWUgdG8gbW9yZSANCmZ1bmN0aW9uYWxpdGllcyB0byBhZGQgYW5kIHRoZSBsYWNr
-IG9mIHJlbW90ZSBwcm9jIGluIG9sZCBrZXJuZWxzLCB3ZSANCmNoYW5nZWQgdG8gdXNlIHZpcnRp
-byBmcmFtZXdvcmsgZGlyZWN0bHksIHdoaWNoIHNlZW1zIHZlcnkgaGVscGZ1bCBhbmQNCnNhdmVk
-IHF1aXRlIHNvbWUgZHJpdmVyIHdvcmsuDQoNCj4gDQo+IFRoYXQgd291bGQgYWxzbyByZXNvbHZl
-IG15IG1haW4gY29uY2VybiBhYm91dCB0aGUgZHJpdmVycywNCj4gd2hpY2ggaXMgdGhlIHBsYWNl
-bWVudCBpbiBkcml2ZXJzL3NvYy8gZm9yIGEgc2V0IG9mIGRyaXZlcnMNCj4gdGhhdCBhcmUgdW5s
-aWtlIG1vc3QgZHJpdmVycyBpbiB0aGF0IGRpcmVjdG9yeSBub3QgbWVhbiBmb3INCj4gcnVubmlu
-ZyBvbiB0aGUgU29DIGl0c2VsZiBpbiBvcmRlciBkcml2ZSB1bnVzdWFsIGZ1bmN0aW9uYWxpdHkN
-Cj4gb24gdGhlIFNvQywgYnV0IGFyZSAoYXQgbGVhc3QgcGFydGlhbGx5KSBtZWFudCBmb3IgcnVu
-bmluZyBvbg0KPiBhIGhvc3QgbWFjaGluZSB0byBjb21tdW5pY2F0ZSB3aXRoIHRoYXQgU29DIG92
-ZXIgUENJZQ0KPiBvciBVU0IuDQo+IA0KPiBBcyBhbiBleGFtcGxlLCB5b3VyIG5ldHdvcmsgZHJp
-dmVyIHNob3VsZCByZWFsbHkgYmUgcGxhY2VkDQo+IGluIGRyaXZlcnMvbmV0LywgdGhvdWdoIGl0
-IGlzIHVuY2xlYXIgdG8gbWUgaG93IGl0IHJlbGF0ZXMNCj4gdG8gdGhlIGV4aXN0aW5nIHZpcnRp
-b19uZXQgZHJpdmVyLiBJbiB0aGUgY2FzZSBvZiBtaWMvdm9wLA0KPiB0aGUgaWRlYSBpcyB0byB1
-c2UgdmlydGlvX25ldCBvbiB0aGUgZGV2aWNlIHNpZGUsIGJ1dCBoYXZlDQo+IHZob3N0X25ldCBv
-ciBhIHVzZXIgc3BhY2UgaW1wbGVtZW50YXRpb24gb24gdGhlIGhvc3Qgc2lkZSwNCj4gYnV0IHRo
-YXQgaXMgYXBwYXJlbnRseSBub3Qgd2hhdCB5b3UgZG8gaGVyZS4gQ2FuIHlvdQ0KPiBleHBsYWlu
-IHdoeT8NCg0KWWVzLCBJIGFjdHVhbGx5IGhhdmUgdGhlIHNhbWUgY29uY2VybnMgd2hlcmUgdGhl
-IGhvc3Qgc2lkZQ0KZHJpdmVycyBzaG91bGQgZ28uICBGb3Igbm93IHRoZXIncmUganVzdCBhZGRl
-ZCBmb3IgY29kZSByZXZpZXcNCnB1cnBvc2UuIGRyaXZlcnMvc29jLyBzZWVtcyBub3QgYSBnb29k
-IHBsYWNlLiBPbmUgdGhvdWdodA0KaXMgdG8gbW92ZSB0aGUgcnNoaW1fbmV0LCByc2hpbV9wY2ll
-IGFuZCByc2hpbV9wY2llX2xmIGJhY2tlbmQNCmRyaXZlciB0byBkcml2ZXJzL25ldC9ldGhlcm5l
-dC9NZWxsYW5veC9yc2hpbS8gYW5kIG1vdmUgdGhlDQpyc2hpbSBjb21tb24gZHJpdmVyIHRvIGRy
-aXZlcnMvY2hhciBhcyBpdCBjcmVhdGVzIHRoZSBjaGFyYWN0ZXINCmRldmljZXM/DQoNClRoZSBk
-ZXZpY2Ugc2lkZSBvZiB0aGlzIHBhdGNoIHVzZXMgdGhlIHZpcnRpb19uZXQgZHJpdmVyIGFzIHdl
-bGwuIA0KDQpUaGUgaG9zdCBzaWRlIGlzIG5vdCBqdXN0IGZvciBuZXR3b3JraW5nLCB3aGljaCB3
-YXMgbWVudGlvbmVkIA0KaW4gdGhlIDAvOSBwYXRjaC4gVGhlIGhvc3Qgc2lkZSBkcml2ZXIgbWFu
-YWdlcyB0aGUgd2hvbGUgcnNoaW0NCmNvbXBvbmVudCBhbmQgaXMgY2FsbGVkIHRoZSAncnNoaW0n
-IGRyaXZlci4gSXQgaW5jbHVkZXMgZHJpdmVyDQp0byBhY2Nlc3MgdGhlIFRtRmlmbywgd2hlcmUg
-dmlydGlvX25ldCBpcyB1c2VkIHRvIHByb3ZpZGUgDQpuZXR3b3JraW5nIHN1cHBvcnQuIEl0IG5l
-ZWRzIHRvIHRhbGsgdG8gdGhlIGNvbW1vbg0KZHJpdmVyIHRoZW4gdGhlIFVTQiBvciBQQ0llIGJh
-Y2tlbmQgZHJpdmVyLiAgSXQgc2VlbXMgdG8gbWUgdGhhdA0Kdmhvc3RfbmV0IGRvZXNuJ3QgcXVp
-dGUgZml0IHRoaXMgbW9kZWwgYW5kIG1pZ2h0IG1ha2UgaXQgDQpvdmVyLWNvbXBsaWNhdGVkLg0K
-DQo+IA0KPiBBbm90aGVyIGhpZ2gtbGV2ZWwgcXVlc3Rpb24gSSBoYXZlIGlzIG9uIGhvdyB5b3Vy
-IHZhcmlvdXMNCj4gZHJpdmVycyByZWxhdGUgdG8gb25lIGFub3RoZXIuIFRoaXMgc2hvdWxkIG5v
-cm1hbGx5IGJlDQo+IGV4cGxhaW5lZCBpbiB0aGUgMC85IGVtYWlsLCBidXQgSSBkb24ndCBzZWVt
-IHRvIGhhdmUgcmVjZWl2ZWQNCj4gc3VjaCBhIG1haWwuIEkgc2VlIHRoYXQgeW91IGhhdmUgbXVs
-dGlwbGUgYmFjay1lbmQgZHJpdmVycw0KPiBmb3IgdGhlIHVuZGVybHlpbmcgdHJhbnNwb3J0LCB3
-aXRoIG9uZSBvZiB0aGVtIGJhc2VkIG9uIFVTQi4NCj4gSGF2ZSB5b3UgY29tZSB1cCB3aXRoIGEg
-d2F5IHRvIHVzZSB0aGUgc2FtZSBoaWdoLWxldmVsDQo+IGRyaXZlciBzdWNoIGFzIHRoZSBuZXR3
-b3JrIGxpbmsgb3ZlciB0aGlzIFVTQiBiYWNrLWVuZCwNCj4gb3IgaXMgdGhpcyBmb3Igc29tZXRo
-aW5nIGVsc2U/DQoNClllcywgMC85IGhhcyBiZWVuIHNlbnQuIFNvcnJ5IEkgc2hvdWxkIGhhdmUg
-cHJvdmlkZWQgc2luY2UgYmVnaW5uaW5nLg0KDQpUaGUgVVNCIChvciBQQ0llKSBwcm92aWRlIHRo
-ZSBnZW5lcmFsIHRyYW5zcG9ydCB0byBhY2Nlc3MgdGhlIFJTaGltDQpjb21wb25lbnQsIGZvciBu
-ZXR3b3JraW5nLCBjb25zb2xlLCByZWdpc3RlciBhY2Nlc3MsIGJvb3Qgc2VydmljZSwNCmV0Yy4g
-U28gaXQncyBub3QganVzdCBmb3IgbmV0d29yayBsaW5rLiBUaGUgaW1wbGVtZW50YXRpb24gc2Vl
-bXMgdmVyeQ0KSFcgc3BlY2lmaWMsIHN1Y2ggYXMgcHJvdmlkaW5nIEFQSXMgbGlrZSByc2hpbV91
-c2JfcmVhZF9yc2hpbSgpDQphbmQgcnNoaW1fdXNiX3dyaXRlX3JzaGltKCkuIEluIFBDSWUgYmFj
-a2VuZCBpdCBoYXMgc2ltaWxhciBBUElzDQpsaWtlIHJzaGltX3BjaWVfcmVhZCgpLCByc2hpbV9w
-Y2llX3dyaXRlKCkuDQoNCk5vdCB2ZXJ5IGNsZWFyIGFib3V0IHdoYXQgeW91IG1lYW50IHRoZSAi
-IHRoZSBzYW1lIGhpZ2gtbGV2ZWwgZHJpdmVyIA0Kc3VjaCBhcyB0aGUgbmV0d29yayBsaW5rIG92
-ZXIgdGhpcyBVU0IgYmFjay1lbmQiLiBEbyB5b3UgbWVhbiB1c2luZw0KYW55IGV4aXN0aW5nIG5l
-dHdvcmsgb3ZlciBVU0IgZnJhbWV3b3JrIG9yIHByb3ZpZGUgc29tZSBtZWNoYW5pc20NCnRvIGJl
-IHJldXNlZCBieSBvdGhlciBuZXR3b3JrIG92ZXIgVVNCIGRyaXZlcj8NCg0KQnkgdGhlIHdheSwg
-dGhlIDAvOSBoYXMgYmVlbiBzZW50LiBDb3VsZCB5b3UgaGVscCB0YWtlIGEgbG9vayB3aGV0aGVy
-IA0KaXQgY2xhcmlmaWVzIGEgbGl0dGxlIGJpdCBvciBub3Q/DQoNCj4gDQo+ICAgICAgIEFybmQN
-Cg==
+On Thu, Nov 1, 2018 at 5:49 PM Liming Sun <lsun@mellanox.com> wrote:
+>
+> An external host can connect to a Mellanox BlueField SoC via an
+> interface called Rshim. The Rshim driver provides boot, console,
+> and networking services over this interface. This commit is
+> the common driver where the other backend (transport) driver will
+> use.
+>
+> Reviewed-by: David Woods <dwoods@mellanox.com>
+> Signed-off-by: Liming Sun <lsun@mellanox.com>
+
+Hi Liming,
+
+I've taken a new look at your patch series for drivers/soc/ now,
+thanks for your continued submissions.
+
+This is again just a set of very high-level comments, but I think we
+should resolve some of the fundamental questions first.
+Incidentally, Vincent Whitchurch has recently posted another
+patch series with a very similar intention, but for other hardware
+and taking a different approach.
+
+In both cases, the idea is to use virtio based drivers to provide
+services from a host machine into another Linux instance running
+on an embedded system behind a PCIe slot or similar. Your
+Bluefield SoC patches are well written, but are intentionally
+kept specific to a particular use case and tied to one piece
+of hardware. In contrast, Vincent uses the existing code from
+drivers/misc/mic/vop/ that is equally hardware specific, but he
+extends it to be applicable to other hardware as well.
+
+It would be good if you could look at each other's approaches
+to see where we could take it from here. I think ideally we
+should have a common driver framework for doing the same
+thing across both of your devices and as well as others.
+
+That would also resolve my main concern about the drivers,
+which is the placement in drivers/soc/ for a set of drivers
+that are unlike most drivers in that directory not mean for
+running on the SoC itself in order drive unusual functionality
+on the SoC, but are (at least partially) meant for running on
+a host machine to communicate with that SoC over PCIe
+or USB.
+
+As an example, your network driver should really be placed
+in drivers/net/, though it is unclear to me how it relates
+to the existing virtio_net driver. In the case of mic/vop,
+the idea is to use virtio_net on the device side, but have
+vhost_net or a user space implementation on the host side,
+but that is apparently not what you do here. Can you
+explain why?
+
+Another high-level question I have is on how your various
+drivers relate to one another. This should normally be
+explained in the 0/9 email, but I don't seem to have received
+such a mail. I see that you have multiple back-end drivers
+for the underlying transport, with one of them based on USB.
+Have you come up with a way to use the same high-level
+driver such as the network link over this USB back-end,
+or is this for something else?
+
+      Arnd
