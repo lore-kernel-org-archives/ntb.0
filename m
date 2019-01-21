@@ -1,166 +1,75 @@
-Return-Path: <gunthorp@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id v17si349551pfk.4.2019.01.16.10.25.30
+Return-Path: <vincent.whitchurch@axis.com>
+Received: from bastet.se.axis.com (bastet.se.axis.com. [195.60.68.11])
+        by gmr-mx.google.com with ESMTPS id t23si918478wmt.1.2019.01.21.08.25.08
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Wed, 16 Jan 2019 10:25:31 -0800 (PST)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Wed, 16 Jan 2019 11:25:17 -0700
-Message-Id: <20190116182523.19446-1-logang@deltatee.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 21 Jan 2019 08:25:09 -0800 (PST)
+Date: Mon, 21 Jan 2019 17:25:05 +0100
+From: Vincent Whitchurch <vincent.whitchurch@axis.com>
+Subject: Re: [PATCH 0/8] Virtio-over-PCIe on non-MIC
+Message-ID: <20190121162505.lbbxrjkqmoqe6cx7@axis.com>
+References: <20190116163253.23780-1-vincent.whitchurch@axis.com>
+ <e22d901d-f92f-90a4-eaa5-a350e3f817f1@wwwdotorg.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Subject: [PATCH v25 0/6] Add io{read|write}64 to io-64-atomic headers
-To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-ntb@googlegroups.com, linux-crypto@vger.kernel.org, linux-mm@kvack.org, Andrew Morton <akpm@linux-foundation.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andy Shevchenko <andy.shevchenko@gmail.com>, =?UTF-8?q?Horia=20Geant=C4=83?= <horia.geanta@nxp.com>, Logan Gunthorpe <logang@deltatee.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <e22d901d-f92f-90a4-eaa5-a350e3f817f1@wwwdotorg.org>
+To: Stephen Warren <swarren@wwwdotorg.org>
+Cc: sudeep.dutt@intel.com, ashutosh.dixit@intel.com, gregkh@linuxfoundation.org, arnd@arndb.de, linux-kernel@vger.kernel.org, "ABRAHAM, KISHON VIJAY" <kishon@ti.com>, Lorenzo Pieralisi <Lorenzo.Pieralisi@arm.com>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, linux-ntb@googlegroups.com, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Christoph Hellwig <hch@infradead.org>, virtualization@lists.linux-foundation.org
 List-ID: <linux-ntb.googlegroups.com>
 
-This is resend number 6 since the last change to this series.
+On Fri, Jan 18, 2019 at 04:49:16PM -0700, Stephen Warren wrote:
+> On 1/16/19 9:32 AM, Vincent Whitchurch wrote:
+> > The Virtio-over-PCIe framework living under drivers/misc/mic/vop implements a
+> > generic framework to use virtio between two Linux systems, given shared memory
+> > and a couple of interrupts.  It does not actually require the Intel MIC
+> > hardware, x86-64, or even PCIe for that matter.  This patch series makes it
+> > buildable on more systems and adds a loopback driver to test it without special
+> > hardware.
+> > 
+> > Note that I don't have access to Intel MIC hardware so some testing of the
+> > patchset (especially the patch "vop: Use consistent DMA") on that platform
+> > would be appreciated, to ensure that the series does not break anything there.
+> 
+> So a while ago I took a look at running virtio over PCIe. I found virtio
+> basically had two parts:
+> 
+> 1) The protocol used to enumerate which virtio devices exist, and perhaps
+> configure them.
+> 
+> 2) The ring buffer protocol that actually transfers the data.
+> 
+> I recall that data transfer was purely based on simple shared memory and
+> interrupts, and hence could run over PCIe (e.g. via the PCIe endpoint
+> subsystem in the kernel) without issue.
+> 
+> However, the enumeration/configuration protocol requires the host to be able
+> to do all kinds of strange things that can't possibly be emulated over PCIe;
+> IIRC the configuration data contains "registers" that when written select
+> the data other "registers" access. When the virtio device is exposed by a
+> hypervisor, and all the accesses are emulated synchronously through a trap,
+> this is easy enough to implement. However, if the two ends of this
+> configuration parsing are on different ends of a PCIe bus, there's no way
+> this can work.
 
-This cleanup was requested by Greg KH back in June of 2017. I've resent the series
-a couple times a cycle since then, updating and fixing as feedback was slowly
-recieved some patches were alread accepted by specific arches. In June 2018,
-Andrew picked the remainder of this up and it was in linux-next for a
-couple weeks. There were a couple problems that were identified and addressed
-back then and I'd really like to get the ball rolling again. A year
-and a half of sending this without much feedback is far too long.
+Correct, and that's why the MIC "Virtio-over-PCIe framework" does not
+try to implement the standard "Virtio Over PCI Bus".  (Yes, it's
+confusing.)
 
-@Andrew, can you please pick this set up again so it can get into
-linux-next? Or let me know if there's something else I should be doing.
+> Are you thinking of doing something different for enumeration/configuration,
+> and just using the virtio ring buffer protocol over PCIe?
 
-Thanks,
+The mic/vop code already does this.  See
+Documentation/mic/mic_overview.txt for some information.
 
-Logan
+> I did post asking about this quite a while back, but IIRC I didn't receive
+> much of a response. Yes, here it is:
+> 
+> > https://lists.linuxfoundation.org/pipermail/virtualization/2018-March/037276.html
+> "virtio over SW-defined/CPU-driven PCIe endpoint"
 
---
+I came to essentialy the same conclusions before I found the MIC code.
 
-Changes since v24:
-- Rebased onto v5.0-rc2 (No Changes)
-
-Changes since v23:
-- Rebased onto v4.20-rc4 (No Changes)
-
-Changes since v22:
-- Rebased onto v4.20-rc1 (No Changes)
-
-Changes since v21:
-- Rebased onto v4.19-rc6 (No Changes)
-
-Changes since v20:
-- Rebased onto v4.19-rc3 (No Changes)
-
-Changes since v19:
-- Rebased onto v4.19-rc1 (No Changes)
-
-Changes since v18:
-- Dropped the CAAM patch as it was subtly wrong and broke when people
-  tested it in linux-next. Seeing the code is much trickier than it
-  appears, we'll leave it to its maintainers to clean it up,
-  should they chose.
-- Restored the ioread64/iowrite64 extern prototypes as despite
-  appearing to be unusued, they are in fact used in a rare corner case
-  by the caam driver on 64bit powerpc. This was reported by Guenter testing
-  on linux-next.
-- Rebased onto v4.18-rc4 (No Changes)
-
-Changes since v17:
-- Rebased onto v4.18-rc1 (No Changes)
-
-Changes since v16:
-- Rebased onto v4.17-rc4 (No Changes)
-
-Changes since v15:
-- Rebased onto v4.17-rc1, dropping the powerpc patches which were
-  picked up by Michael
-
-Changes since v14:
-- Rebased onto v4.16-rc7
-- Replace the first two patches so that instead of correcting the
-  endianness annotations we change to using writeX() and readX() with
-  swabX() calls. This makes the big-endian functions more symmetric
-  with the little-endian versions (with respect to barriers that are
-  not included in the raw functions). As a side effect, it also fixes
-  the kbuild warnings that the first two patches tried to address.
-
-Changes since v13:
-- Changed the subject of patch 0001 to correct a nit pointed out by Luc
-
-Changes since v12:
-- Rebased onto v4.16-rc6
-- Split patch 0001 into two and reworked the commit log as requested
-  by Luc Van Oostenryck
-
-Changes since v11:
-- Rebased onto v4.16-rc5
-- Added a patch (0001) to fix some old and new sparse warnings
-  that the kbuild robot warned about this cycle. The latest version
-  of sparse was required to reproduce these.
-- Added a patch (0002) to add io{read|write}64 to parisc which the kbuild
-  robot also found errors for this cycle
-
-Changes since v10:
-- Rebased onto v4.16-rc4, this droped the drm/tilcdc patch which was
-  picked up by that tree and is already in 4.16.
-
-Changes since v9:
-- Rebased onto v4.15-rc6
-- Fixed a couple of issues in the new version of the CAAM patch as
-  pointed out by Horia
-
-Changes since v8:
-- Rebased onto v4.15-rc2, as a result rewrote patch 7 seeing someone did
-  some similar cleanup in that area.
-- Added a patch to clean up the Switchtec NTB driver which landed in
-  v4.15-rc1
-
-Changes since v7:
-- Fix minor nits from Andy Shevchenko
-- Rebased onto v4.14-rc1
-
-Changes since v6:
- ** none **
-
-Changes since v5:
-- Added a fix to the tilcdc driver to ensure it doesn't use the
-  non-atomic operation. (This includes adding io{read|write}64[be]_is_nonatomic
-  defines).
-
-Changes since v4:
-- Add functions so the powerpc implementation of iomap.c compiles. (As
-  noticed by Horia)
-
-Changes since v3:
-
-- I noticed powerpc didn't use the appropriate functions seeing
-  readq/writeq were not defined when iomap.h was included. Thus I've
-  included a patch to adjust this
-- Fixed some mistakes with a couple of the defines in io-64-nonatomic*
-  headers
-- Fixed a typo noticed by Horia.
-
-(earlier versions were drastically different)
-
-
---
-
-Logan Gunthorpe (6):
-  iomap: Use non-raw io functions for io{read|write}XXbe
-  parisc: iomap: introduce io{read|write}64
-  iomap: introduce io{read|write}64_{lo_hi|hi_lo}
-  io-64-nonatomic: add io{read|write}64[be]{_lo_hi|_hi_lo} macros
-  ntb: ntb_hw_intel: use io-64-nonatomic instead of in-driver hacks
-  ntb: ntb_hw_switchtec: Cleanup 64bit IO defines to use the common
-    header
-
- arch/parisc/include/asm/io.h           |   9 ++
- arch/parisc/lib/iomap.c                |  64 +++++++++++
- arch/powerpc/include/asm/io.h          |   2 +
- drivers/ntb/hw/intel/ntb_hw_intel.h    |  30 +-----
- drivers/ntb/hw/mscc/ntb_hw_switchtec.c |  36 +------
- include/asm-generic/iomap.h            |  22 ++++
- include/linux/io-64-nonatomic-hi-lo.h  |  64 +++++++++++
- include/linux/io-64-nonatomic-lo-hi.h  |  64 +++++++++++
- lib/iomap.c                            | 140 ++++++++++++++++++++++++-
- 9 files changed, 366 insertions(+), 65 deletions(-)
-
---
-2.19.0
+(Your "aside" in that email about virtio doing PCIe reads instead of
+ writes is not solved by the MIC code, since that is how the standard
+ virtio devices/drivers work.)
