@@ -1,127 +1,59 @@
-Return-Path: <gunthorp@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id c6si1092960ybo.0.2019.02.13.09.55.03
+Return-Path: <helgaas@kernel.org>
+Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
+        by gmr-mx.google.com with ESMTPS id s34si642771qtk.1.2019.02.01.11.23.26
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Wed, 13 Feb 2019 09:55:03 -0800 (PST)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Wed, 13 Feb 2019 10:54:53 -0700
-Message-Id: <20190213175454.7506-12-logang@deltatee.com>
-In-Reply-To: <20190213175454.7506-1-logang@deltatee.com>
-References: <20190213175454.7506-1-logang@deltatee.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 01 Feb 2019 11:23:26 -0800 (PST)
+Date: Fri, 1 Feb 2019 13:23:23 -0600
+From: Bjorn Helgaas <helgaas@kernel.org>
+Subject: Re: [PATCH 2/9] PCI/MSI: Support allocating virtual MSI interrupts
+Message-ID: <20190201192323.GS229773@google.com>
+References: <20190131185656.17972-1-logang@deltatee.com>
+ <20190131185656.17972-3-logang@deltatee.com>
+ <20190131223932.GR229773@google.com>
+ <74993e67-cdc5-234a-d26c-5c0177a0299a@deltatee.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Subject: [PATCH v2 11/12] NTB: Add ntb_msi_test support to ntb_test
-To: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, iommu@lists.linux-foundation.org, linux-kselftest@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Bjorn Helgaas <bhelgaas@google.com>, Joerg Roedel <joro@8bytes.org>
-Cc: Allen Hubbe <allenbh@gmail.com>, Dave Jiang <dave.jiang@intel.com>, Serge Semin <fancer.lancer@gmail.com>, Eric Pilmore <epilmore@gigaio.com>, Logan Gunthorpe <logang@deltatee.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <74993e67-cdc5-234a-d26c-5c0177a0299a@deltatee.com>
+To: Logan Gunthorpe <logang@deltatee.com>, g@google.com
+Cc: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, iommu@lists.linux-foundation.org, linux-kselftest@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Joerg Roedel <joro@8bytes.org>, Allen Hubbe <allenbh@gmail.com>, Dave Jiang <dave.jiang@intel.com>, Serge Semin <fancer.lancer@gmail.com>, Eric Pilmore <epilmore@gigaio.com>, Thomas Gleixner <tglx@linutronix.de>, Marc Zyngier <marc.zyngier@arm.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-When the ntb_msi_test module is available, the test code will trigger
-each of the interrupts and ensure the corresponding occurrences files
-gets incremented.
+On Thu, Jan 31, 2019 at 03:52:09PM -0700, Logan Gunthorpe wrote:
+> On 2019-01-31 3:39 p.m., Bjorn Helgaas wrote:
+> >> diff --git a/include/linux/msi.h b/include/linux/msi.h
+> >> index 784fb52b9900..6458ab049852 100644
+> >> --- a/include/linux/msi.h
+> >> +++ b/include/linux/msi.h
+> >> @@ -88,6 +88,7 @@ struct msi_desc {
+> >>  				__u8	multi_cap	: 3;
+> >>  				__u8	maskbit		: 1;
+> >>  				__u8	is_64		: 1;
+> >> +				__u8    is_virtual      : 1;
+> > 
+> > You did the right thing by using the same style as what's already
+> > here, but does anybody know why are we using __u8 and __u16 here?
+> > 
+> > Those typedefs are in include/uapi/asm-generic/int-l64.h, which
+> > suggests they're for things exported to user space, but I don't think
+> > that's the case here, so I'm wondering if we could someday replace
+> > these with u8 and u16.  Obviously that wouldn't be part of *this*
+> > series.
+> 
+> Yes, I was also confused by this. But I always follow the "when-in-rome"
+> rule. 
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Cc: Jon Mason <jdmason@kudzu.us>
-Cc: Dave Jiang <dave.jiang@intel.com>
-Cc: Allen Hubbe <allenbh@gmail.com>
----
- tools/testing/selftests/ntb/ntb_test.sh | 54 ++++++++++++++++++++++++-
- 1 file changed, 52 insertions(+), 2 deletions(-)
+Thanks for following the "when-in-rome" rule.  That seems so obvious
+that it wouldn't even need to be written down, but it is often
+ignored.
 
-diff --git a/tools/testing/selftests/ntb/ntb_test.sh b/tools/testing/selftests/ntb/ntb_test.sh
-index 17ca36403d04..1a10b8f67727 100755
---- a/tools/testing/selftests/ntb/ntb_test.sh
-+++ b/tools/testing/selftests/ntb/ntb_test.sh
-@@ -87,10 +87,10 @@ set -e
- 
- function _modprobe()
- {
--	modprobe "$@"
-+	modprobe "$@" || return 1
- 
- 	if [[ "$REMOTE_HOST" != "" ]]; then
--		ssh "$REMOTE_HOST" modprobe "$@"
-+		ssh "$REMOTE_HOST" modprobe "$@" || return 1
- 	fi
- }
- 
-@@ -451,6 +451,30 @@ function pingpong_test()
- 	echo "  Passed"
- }
- 
-+function msi_test()
-+{
-+	LOC=$1
-+	REM=$2
-+
-+	write_file 1 $LOC/ready
-+
-+	echo "Running MSI interrupt tests on: $(subdirname $LOC) / $(subdirname $REM)"
-+
-+	CNT=$(read_file "$LOC/count")
-+	for ((i = 0; i < $CNT; i++)); do
-+		START=$(read_file $REM/../irq${i}_occurrences)
-+		write_file $i $LOC/trigger
-+		END=$(read_file $REM/../irq${i}_occurrences)
-+
-+		if [[ $(($END - $START)) != 1 ]]; then
-+			echo "MSI did not trigger the interrupt on the remote side!" >&2
-+			exit 1
-+		fi
-+	done
-+
-+	echo "  Passed"
-+}
-+
- function perf_test()
- {
- 	USE_DMA=$1
-@@ -529,6 +553,29 @@ function ntb_pingpong_tests()
- 	_modprobe -r ntb_pingpong
- }
- 
-+function ntb_msi_tests()
-+{
-+	LOCAL_MSI="$DEBUGFS/ntb_msi_test/$LOCAL_DEV"
-+	REMOTE_MSI="$REMOTE_HOST:$DEBUGFS/ntb_msi_test/$REMOTE_DEV"
-+
-+	echo "Starting ntb_msi_test tests..."
-+
-+	if ! _modprobe ntb_msi_test 2> /dev/null; then
-+		echo "  Not doing MSI tests seeing the module is not available."
-+		return
-+	fi
-+
-+	port_test $LOCAL_MSI $REMOTE_MSI
-+
-+	LOCAL_PEER="$LOCAL_MSI/peer$LOCAL_PIDX"
-+	REMOTE_PEER="$REMOTE_MSI/peer$REMOTE_PIDX"
-+
-+	msi_test $LOCAL_PEER $REMOTE_PEER
-+	msi_test $REMOTE_PEER $LOCAL_PEER
-+
-+	_modprobe -r ntb_msi_test
-+}
-+
- function ntb_perf_tests()
- {
- 	LOCAL_PERF="$DEBUGFS/ntb_perf/$LOCAL_DEV"
-@@ -550,6 +597,7 @@ function cleanup()
- 	_modprobe -r ntb_perf 2> /dev/null
- 	_modprobe -r ntb_pingpong 2> /dev/null
- 	_modprobe -r ntb_transport 2> /dev/null
-+	_modprobe -r ntb_msi_test 2> /dev/null
- 	set -e
- }
- 
-@@ -586,5 +634,7 @@ ntb_tool_tests
- echo
- ntb_pingpong_tests
- echo
-+ntb_msi_tests
-+echo
- ntb_perf_tests
- echo
--- 
-2.19.0
+> My understanding is the same as yours is that __u8 should be used
+> for userspace compatibility which doesn't apply here. If there is
+> consensus on this being wrong, I'd be happy to write a cleanup patch
+> that fixes it separate from this series.
 
+That'd be awesome.  There are also a couple more in pci-driver.c that
+could be fixed at the same time.
+
+Bjorn
