@@ -1,90 +1,59 @@
-Return-Path: <gunthorp@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id b186si933030vsd.0.2019.02.13.09.55.06
+Return-Path: <jacob.jun.pan@linux.intel.com>
+Received: from mga03.intel.com (mga03.intel.com. [134.134.136.65])
+        by gmr-mx.google.com with ESMTPS id j26si264887uag.1.2019.02.05.15.57.00
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Wed, 13 Feb 2019 09:55:06 -0800 (PST)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Wed, 13 Feb 2019 10:54:46 -0700
-Message-Id: <20190213175454.7506-5-logang@deltatee.com>
-In-Reply-To: <20190213175454.7506-1-logang@deltatee.com>
-References: <20190213175454.7506-1-logang@deltatee.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 05 Feb 2019 15:57:00 -0800 (PST)
+Date: Tue, 5 Feb 2019 15:58:59 -0800
+From: Jacob Pan <jacob.jun.pan@linux.intel.com>
+Subject: Re: [PATCH 1/9] iommu/vt-d: Allow interrupts from the entire bus
+ for aliased devices
+Message-ID: <20190205155859.0e96dd4f@jacob-builder>
+In-Reply-To: <d097d98b-0b8b-5b29-c411-a5dc3949a3e7@deltatee.com>
+References: <20190131185656.17972-1-logang@deltatee.com>
+	<20190131185656.17972-2-logang@deltatee.com>
+	<20190201164401.GT32526@8bytes.org>
+	<398e6a0a-9cbd-c218-e20e-ed91f74a653d@deltatee.com>
+	<20190205111939.6f91739e@jacob-builder>
+	<d097d98b-0b8b-5b29-c411-a5dc3949a3e7@deltatee.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Subject: [PATCH v2 04/12] iommu/vt-d: Allow interrupts from the entire bus for aliased devices
-To: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, iommu@lists.linux-foundation.org, linux-kselftest@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Bjorn Helgaas <bhelgaas@google.com>, Joerg Roedel <joro@8bytes.org>
-Cc: Allen Hubbe <allenbh@gmail.com>, Dave Jiang <dave.jiang@intel.com>, Serge Semin <fancer.lancer@gmail.com>, Eric Pilmore <epilmore@gigaio.com>, Logan Gunthorpe <logang@deltatee.com>, David Woodhouse <dwmw2@infradead.org>, Jacob Pan <jacob.jun.pan@linux.intel.com>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+To: Logan Gunthorpe <logang@deltatee.com>
+Cc: Joerg Roedel <joro@8bytes.org>, Allen Hubbe <allenbh@gmail.com>, Dave Jiang <dave.jiang@intel.com>, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org, Serge Semin <fancer.lancer@gmail.com>, Eric Pilmore <epilmore@gigaio.com>, iommu@lists.linux-foundation.org, linux-kselftest@vger.kernel.org, Bjorn Helgaas <bhelgaas@google.com>, linux-ntb@googlegroups.com, David Woodhouse <dwmw2@infradead.org>, jacob.jun.pan@linux.intel.com
 List-ID: <linux-ntb.googlegroups.com>
 
-When a device has multiple aliases that all are from the same bus,
-we program the IRTE to accept requests from any matching device on the
-bus.
+On Tue, 5 Feb 2019 13:40:36 -0700
+Logan Gunthorpe <logang@deltatee.com> wrote:
 
-This is so NTB devices which can have requests from multiple bus-devfns
-can pass MSI interrupts through across the bridge.
-
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Cc: David Woodhouse <dwmw2@infradead.org>
-Cc: Joerg Roedel <joro@8bytes.org>
-Cc: Jacob Pan <jacob.jun.pan@linux.intel.com>
----
- drivers/iommu/intel_irq_remapping.c | 15 +++++++++++++++
- 1 file changed, 15 insertions(+)
-
-diff --git a/drivers/iommu/intel_irq_remapping.c b/drivers/iommu/intel_irq_remapping.c
-index 5a55bef8e379..2d74641b7f7b 100644
---- a/drivers/iommu/intel_irq_remapping.c
-+++ b/drivers/iommu/intel_irq_remapping.c
-@@ -368,6 +368,8 @@ static int set_hpet_sid(struct irte *irte, u8 id)
- struct set_msi_sid_data {
- 	struct pci_dev *pdev;
- 	u16 alias;
-+	int count;
-+	int busmatch_count;
- };
- 
- static int set_msi_sid_cb(struct pci_dev *pdev, u16 alias, void *opaque)
-@@ -376,6 +378,10 @@ static int set_msi_sid_cb(struct pci_dev *pdev, u16 alias, void *opaque)
- 
- 	data->pdev = pdev;
- 	data->alias = alias;
-+	data->count++;
-+
-+	if (PCI_BUS_NUM(alias) == pdev->bus->number)
-+		data->busmatch_count++;
- 
- 	return 0;
- }
-@@ -387,6 +393,8 @@ static int set_msi_sid(struct irte *irte, struct pci_dev *dev)
- 	if (!irte || !dev)
- 		return -1;
- 
-+	data.count = 0;
-+	data.busmatch_count = 0;
- 	pci_for_each_dma_alias(dev, set_msi_sid_cb, &data);
- 
- 	/*
-@@ -395,6 +403,11 @@ static int set_msi_sid(struct irte *irte, struct pci_dev *dev)
- 	 * device is the case of a PCIe-to-PCI bridge, where the alias is for
- 	 * the subordinate bus.  In this case we can only verify the bus.
- 	 *
-+	 * If there are multiple aliases, all with the same bus number,
-+	 * then all we can do is verify the bus. This is typical in NTB
-+	 * hardware which use proxy IDs where the device will generate traffic
-+	 * from multiple devfn numbers on the same bus.
-+	 *
- 	 * If the alias device is on a different bus than our source device
- 	 * then we have a topology based alias, use it.
- 	 *
-@@ -405,6 +418,8 @@ static int set_msi_sid(struct irte *irte, struct pci_dev *dev)
- 	if (PCI_BUS_NUM(data.alias) != data.pdev->bus->number)
- 		set_irte_verify_bus(irte, PCI_BUS_NUM(data.alias),
- 				    dev->bus->number);
-+	else if (data.count >= 2 && data.busmatch_count == data.count)
-+		set_irte_verify_bus(irte, dev->bus->number, dev->bus->number);
- 	else if (data.pdev->bus->number != dev->bus->number)
- 		set_irte_sid(irte, SVT_VERIFY_SID_SQ, SQ_ALL_16, data.alias);
- 	else
--- 
-2.19.0
-
+> On 2019-02-05 12:19 p.m., Jacob Pan wrote:
+> > On Fri, 1 Feb 2019 10:27:29 -0700
+> > Logan Gunthorpe <logang@deltatee.com> wrote:
+> >   
+> >> On 2019-02-01 9:44 a.m., Joerg Roedel wrote:  
+> >>> On Thu, Jan 31, 2019 at 11:56:48AM -0700, Logan Gunthorpe
+> >>> wrote:    
+> >>>> @@ -394,6 +402,10 @@ static int set_msi_sid(struct irte *irte,
+> >>>> struct pci_dev *dev) set_irte_sid(irte, SVT_VERIFY_BUS,
+> >>>> SQ_ALL_16, PCI_DEVID(PCI_BUS_NUM(data.alias),
+> >>>>  				       dev->bus->number));  
+> > I guess devfn can be removed also. but that is separate cleanup.  
+> 
+> Actually, no, I've dug into this and we *do* need the devfn here but
+> it's needlessly confusing. We should not be using PCI_DEVID() as we
+> aren't actually representing a DEVID in this case...
+> 
+> According to the Intel VT-D spec, when using SVT_VERIFY_BUS, the MSB
+> of the SID field represents the starting bus number and the LSB
+> represents the end bus number. The requester id's bus number must
+> then be within that range. The PCI_DEVID macro matches these
+> semantics if you assume the devfn is the end bus, but doesn't really
+> make sense here and just confuses the issue.
+> 
+> So the code was correct, I'll just try to clean it up to make it less
+> confusing.
+> 
+you are right, thanks for explaining.
+> Thanks,
+> 
+> Logan
