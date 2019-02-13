@@ -1,60 +1,90 @@
-Return-Path: <fomichev.ru@gmail.com>
-Received: from mail-lj1-x244.google.com (mail-lj1-x244.google.com. [2a00:1450:4864:20::244])
-        by gmr-mx.google.com with ESMTPS id i11si727741wmb.2.2019.02.05.07.47.41
+Return-Path: <gunthorp@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id b186si933030vsd.0.2019.02.13.09.55.06
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 05 Feb 2019 07:47:41 -0800 (PST)
-Received: by mail-lj1-x244.google.com with SMTP id n18-v6so3302746lji.7
-        for <linux-ntb@googlegroups.com>; Tue, 05 Feb 2019 07:47:41 -0800 (PST)
-Return-Path: <fomichev.ru@gmail.com>
-Date: Tue, 5 Feb 2019 18:47:38 +0300
-From: Alexander Fomichev <fomichev.ru@gmail.com>
-Subject: Re: [RFC PATCH] ntb core: copy device archdata on create
-Message-ID: <20190205154736.nbt6knoepnc2cfxu@alfbook-pro.local>
-References: <20190130112058.h5qhboivcbkt3itl@alfbook-pro.local>
- <3cf50650-f105-cacb-69ae-ca79a7e4af9e@deltatee.com>
- <20190131095439.cyfqw6ymjlmgtykk@alfbook-pro.local>
- <f5e91ec1-7427-e880-b27a-4d46071df652@deltatee.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Wed, 13 Feb 2019 09:55:06 -0800 (PST)
+From: Logan Gunthorpe <logang@deltatee.com>
+Date: Wed, 13 Feb 2019 10:54:46 -0700
+Message-Id: <20190213175454.7506-5-logang@deltatee.com>
+In-Reply-To: <20190213175454.7506-1-logang@deltatee.com>
+References: <20190213175454.7506-1-logang@deltatee.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <f5e91ec1-7427-e880-b27a-4d46071df652@deltatee.com>
-To: linux-ntb@googlegroups.com, Logan Gunthorpe <logang@deltatee.com>
-Cc: linux@yadro.com
+Content-Transfer-Encoding: 8bit
+Subject: [PATCH v2 04/12] iommu/vt-d: Allow interrupts from the entire bus for aliased devices
+To: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, iommu@lists.linux-foundation.org, linux-kselftest@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Bjorn Helgaas <bhelgaas@google.com>, Joerg Roedel <joro@8bytes.org>
+Cc: Allen Hubbe <allenbh@gmail.com>, Dave Jiang <dave.jiang@intel.com>, Serge Semin <fancer.lancer@gmail.com>, Eric Pilmore <epilmore@gigaio.com>, Logan Gunthorpe <logang@deltatee.com>, David Woodhouse <dwmw2@infradead.org>, Jacob Pan <jacob.jun.pan@linux.intel.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Thu, Jan 31, 2019 at 10:07:22AM -0700, Logan Gunthorpe wrote:
-> 
-> 
-> > On Wed, Jan 30, 2019 at 10:25:27AM -0700, Logan Gunthorpe wrote:
-> >>
-> >>
-> >> We should revert back to using the pci device for DMA allocations and I
-> >> already posted a patch for that here [1].
-> >>
-> >> Logan
-> >>
-> >> [1]
-> >> https://lore.kernel.org/lkml/20190109192233.5752-3-logang@deltatee.com/T/#u
-> >>
-> > 
-> 
-> With that patch we are not moving dma_coerce_mask_and_coherent(); we are
-> removing it.
-> 
-> If we do DMA operations on the PCI device (as is pretty much universal
-> in other drivers[1]), then we don't need to set the DMA mask for the
-> virtual device anymore and thus that patch removes that code -- it does
-> not move it.
-> 
+When a device has multiple aliases that all are from the same bus,
+we program the IRTE to accept requests from any matching device on the
+bus.
 
-Sorry, my bad.
-It seems to me that using PCI device struct for DMA-related operations is a
-preferred solution. No need to play with dma_mask. And also dma_alloc_* works on
-powerpc systems as good as on x86.
-If Logan's patchset is applied into mainline kernel then my patch will
-be unnecessary.
+This is so NTB devices which can have requests from multiple bus-devfns
+can pass MSI interrupts through across the bridge.
 
+Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+Cc: David Woodhouse <dwmw2@infradead.org>
+Cc: Joerg Roedel <joro@8bytes.org>
+Cc: Jacob Pan <jacob.jun.pan@linux.intel.com>
+---
+ drivers/iommu/intel_irq_remapping.c | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+diff --git a/drivers/iommu/intel_irq_remapping.c b/drivers/iommu/intel_irq_remapping.c
+index 5a55bef8e379..2d74641b7f7b 100644
+--- a/drivers/iommu/intel_irq_remapping.c
++++ b/drivers/iommu/intel_irq_remapping.c
+@@ -368,6 +368,8 @@ static int set_hpet_sid(struct irte *irte, u8 id)
+ struct set_msi_sid_data {
+ 	struct pci_dev *pdev;
+ 	u16 alias;
++	int count;
++	int busmatch_count;
+ };
+ 
+ static int set_msi_sid_cb(struct pci_dev *pdev, u16 alias, void *opaque)
+@@ -376,6 +378,10 @@ static int set_msi_sid_cb(struct pci_dev *pdev, u16 alias, void *opaque)
+ 
+ 	data->pdev = pdev;
+ 	data->alias = alias;
++	data->count++;
++
++	if (PCI_BUS_NUM(alias) == pdev->bus->number)
++		data->busmatch_count++;
+ 
+ 	return 0;
+ }
+@@ -387,6 +393,8 @@ static int set_msi_sid(struct irte *irte, struct pci_dev *dev)
+ 	if (!irte || !dev)
+ 		return -1;
+ 
++	data.count = 0;
++	data.busmatch_count = 0;
+ 	pci_for_each_dma_alias(dev, set_msi_sid_cb, &data);
+ 
+ 	/*
+@@ -395,6 +403,11 @@ static int set_msi_sid(struct irte *irte, struct pci_dev *dev)
+ 	 * device is the case of a PCIe-to-PCI bridge, where the alias is for
+ 	 * the subordinate bus.  In this case we can only verify the bus.
+ 	 *
++	 * If there are multiple aliases, all with the same bus number,
++	 * then all we can do is verify the bus. This is typical in NTB
++	 * hardware which use proxy IDs where the device will generate traffic
++	 * from multiple devfn numbers on the same bus.
++	 *
+ 	 * If the alias device is on a different bus than our source device
+ 	 * then we have a topology based alias, use it.
+ 	 *
+@@ -405,6 +418,8 @@ static int set_msi_sid(struct irte *irte, struct pci_dev *dev)
+ 	if (PCI_BUS_NUM(data.alias) != data.pdev->bus->number)
+ 		set_irte_verify_bus(irte, PCI_BUS_NUM(data.alias),
+ 				    dev->bus->number);
++	else if (data.count >= 2 && data.busmatch_count == data.count)
++		set_irte_verify_bus(irte, dev->bus->number, dev->bus->number);
+ 	else if (data.pdev->bus->number != dev->bus->number)
+ 		set_irte_sid(irte, SVT_VERIFY_SID_SQ, SQ_ALL_16, data.alias);
+ 	else
 -- 
-Regards,
-  Alexander
+2.19.0
+
