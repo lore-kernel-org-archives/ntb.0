@@ -1,84 +1,124 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id y7si120467iof.5.2019.02.13.09.55.07
+        by gmr-mx.google.com with ESMTPS id n70si681671vkn.0.2019.02.13.09.55.06
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Wed, 13 Feb 2019 09:55:07 -0800 (PST)
+        Wed, 13 Feb 2019 09:55:06 -0800 (PST)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Wed, 13 Feb 2019 10:54:45 -0700
-Message-Id: <20190213175454.7506-4-logang@deltatee.com>
-In-Reply-To: <20190213175454.7506-1-logang@deltatee.com>
-References: <20190213175454.7506-1-logang@deltatee.com>
+Date: Wed, 13 Feb 2019 10:54:42 -0700
+Message-Id: <20190213175454.7506-1-logang@deltatee.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Subject: [PATCH v2 03/12] iommu/vt-d: Add helper to set an IRTE to verify only the bus number
+Subject: [PATCH v2 00/12] Support using MSI interrupts in ntb_transport
 To: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, iommu@lists.linux-foundation.org, linux-kselftest@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Bjorn Helgaas <bhelgaas@google.com>, Joerg Roedel <joro@8bytes.org>
-Cc: Allen Hubbe <allenbh@gmail.com>, Dave Jiang <dave.jiang@intel.com>, Serge Semin <fancer.lancer@gmail.com>, Eric Pilmore <epilmore@gigaio.com>, Logan Gunthorpe <logang@deltatee.com>, David Woodhouse <dwmw2@infradead.org>, Jacob Pan <jacob.jun.pan@linux.intel.com>
+Cc: Allen Hubbe <allenbh@gmail.com>, Dave Jiang <dave.jiang@intel.com>, Serge Semin <fancer.lancer@gmail.com>, Eric Pilmore <epilmore@gigaio.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-The current code uses set_irte_sid() with SVT_VERIFY_BUS and PCI_DEVID
-to set the SID value. However, this is very confusing because, with
-SVT_VERIFY_BUS, the SID value is not a PCI devfn address, but the start
-and end bus numbers to match against.
+Note: this version will likely trivially conflict with some cleanup
+patches I sent to Bjorn. So this is meant for review purposes only.
+If there are no objections, I'd like to look at getting it merged in
+the next cycle through the NTB tree.
 
-According to the Intel Virtualization Technology for Directed I/O
-Architecture Specification, Rev. 3.0, page 9-36:
+--
 
-  The most significant 8-bits of the SID field contains the Startbus#,
-  and the least significant 8-bits of the SID field contains the Endbus#.
-  Interrupt requests that reference this IRTE must have a requester-id
-  whose bus# (most significant 8-bits of requester-id) has a value equal
-  to or within the Startbus# to Endbus# range.
+Changes in v2:
 
-So to make this more clear, introduce a new set_irte_verify_bus() that
-explicitly takes a start bus and end bus so that we can stop abusing
-the PCI_DEVID macro.
+* Cleaned up the changes in intel_irq_remapping.c to make them
+  less confusing and add a comment. (Per discussion with Jacob and
+  Joerg)
 
-This helper function will be called a second time in an subsequent patch.
+* Fixed a nit from Bjorn and collected his Ack
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Cc: David Woodhouse <dwmw2@infradead.org>
-Cc: Joerg Roedel <joro@8bytes.org>
-Cc: Jacob Pan <jacob.jun.pan@linux.intel.com>
----
- drivers/iommu/intel_irq_remapping.c | 17 ++++++++++++++---
- 1 file changed, 14 insertions(+), 3 deletions(-)
+* Added a Kconfig dependancy on CONFIG_PCI_MSI for CONFIG_NTB_MSI
+  as the Kbuild robot hit a random config that didn't build
+  without it.
 
-diff --git a/drivers/iommu/intel_irq_remapping.c b/drivers/iommu/intel_irq_remapping.c
-index 24d45b07f425..5a55bef8e379 100644
---- a/drivers/iommu/intel_irq_remapping.c
-+++ b/drivers/iommu/intel_irq_remapping.c
-@@ -294,6 +294,18 @@ static void set_irte_sid(struct irte *irte, unsigned int svt,
- 	irte->sid = sid;
- }
- 
-+/*
-+ * Set an IRTE to match only the bus number. Interrupt requests that reference
-+ * this IRTE must have a requester-id whose bus number is between or equal
-+ * to the start_bus and end_bus arguments.
-+ */
-+static void set_irte_verify_bus(struct irte *irte, unsigned int start_bus,
-+				unsigned int end_bus)
-+{
-+	set_irte_sid(irte, SVT_VERIFY_BUS, SQ_ALL_16,
-+		     (start_bus << 8) | end_bus);
-+}
-+
- static int set_ioapic_sid(struct irte *irte, int apic)
- {
- 	int i;
-@@ -391,9 +403,8 @@ static int set_msi_sid(struct irte *irte, struct pci_dev *dev)
- 	 * original device.
- 	 */
- 	if (PCI_BUS_NUM(data.alias) != data.pdev->bus->number)
--		set_irte_sid(irte, SVT_VERIFY_BUS, SQ_ALL_16,
--			     PCI_DEVID(PCI_BUS_NUM(data.alias),
--				       dev->bus->number));
-+		set_irte_verify_bus(irte, PCI_BUS_NUM(data.alias),
-+				    dev->bus->number);
- 	else if (data.pdev->bus->number != dev->bus->number)
- 		set_irte_sid(irte, SVT_VERIFY_SID_SQ, SQ_ALL_16, data.alias);
- 	else
--- 
+* Worked in a callback for when the MSI descriptor changes so that
+  the clients can resend the new address and data values to the peer.
+  On my test system this was never necessary, but there may be
+  other platforms where this can occur. I tested this by hacking
+  in a path to rewrite the MSI descriptor when I change the cpu
+  affinity of an IRQ. There's a bit of uncertainty over the latency
+  of the change, but without hardware this can acctually occur on
+  we can't test this. This was the result of a discussion with Dave.
+
+--
+
+This patch series adds optional support for using MSI interrupts instead
+of NTB doorbells in ntb_transport. This is desirable seeing doorbells on
+current hardware are quite slow and therefore switching to MSI interrupts
+provides a significant performance gain. On switchtec hardware, a simple
+apples-to-apples comparison shows ntb_netdev/iperf numbers going from
+3.88Gb/s to 14.1Gb/s when switching to MSI interrupts.
+
+To do this, a couple changes are required outside of the NTB tree:
+
+1) The IOMMU must know to accept MSI requests from aliased bused numbers
+seeing NTB hardware typically sends proxied request IDs through
+additional requester IDs. The first patch in this series adds support
+for the Intel IOMMU. A quirk to add these aliases for switchtec hardware
+was already accepted. See commit ad281ecf1c7d ("PCI: Add DMA alias quirk
+for Microsemi Switchtec NTB") for a description of NTB proxy IDs and why
+this is necessary.
+
+2) NTB transport (and other clients) may often need more MSI interrupts
+than the NTB hardware actually advertises support for. However, seeing
+these interrupts will not be triggered by the hardware but through an
+NTB memory window, the hardware does not actually need support or need
+to know about them. Therefore we add the concept of Virtual MSI
+interrupts which are allocated just like any other MSI interrupt but
+are not programmed into the hardware's MSI table. This is done in
+Patch 2 and then made use of in Patch 3.
+
+The remaining patches in this series add a library for dealing with MSI
+interrupts, a test client and finally support in ntb_transport.
+
+The series is based off of v5.0-rc4 and I've tested it on top of a
+of the patches I've already sent to the NTB tree (though they are
+independent changes). A git repo is available here:
+
+https://github.com/sbates130272/linux-p2pmem/ ntb_transport_msi_v2
+
+Thanks,
+
+Logan
+
+--
+
+Logan Gunthorpe (12):
+  iommu/vt-d: Implement dma_[un]map_resource()
+  NTB: ntb_transport: Ensure the destination buffer is mapped for TX DMA
+  iommu/vt-d: Add helper to set an IRTE to verify only the bus number
+  iommu/vt-d: Allow interrupts from the entire bus for aliased devices
+  PCI/MSI: Support allocating virtual MSI interrupts
+  PCI/switchtec: Add module parameter to request more interrupts
+  NTB: Introduce functions to calculate multi-port resource index
+  NTB: Rename ntb.c to support multiple source files in the module
+  NTB: Introduce MSI library
+  NTB: Introduce NTB MSI Test Client
+  NTB: Add ntb_msi_test support to ntb_test
+  NTB: Add MSI interrupt support to ntb_transport
+
+ drivers/iommu/intel-iommu.c             |  23 +-
+ drivers/iommu/intel_irq_remapping.c     |  32 +-
+ drivers/ntb/Kconfig                     |  11 +
+ drivers/ntb/Makefile                    |   3 +
+ drivers/ntb/{ntb.c => core.c}           |   0
+ drivers/ntb/msi.c                       | 415 +++++++++++++++++++++++
+ drivers/ntb/ntb_transport.c             | 197 ++++++++++-
+ drivers/ntb/test/Kconfig                |   9 +
+ drivers/ntb/test/Makefile               |   1 +
+ drivers/ntb/test/ntb_msi_test.c         | 433 ++++++++++++++++++++++++
+ drivers/pci/msi.c                       |  55 ++-
+ drivers/pci/switch/switchtec.c          |  12 +-
+ include/linux/msi.h                     |   8 +
+ include/linux/ntb.h                     | 143 ++++++++
+ include/linux/pci.h                     |   9 +
+ tools/testing/selftests/ntb/ntb_test.sh |  54 ++-
+ 16 files changed, 1379 insertions(+), 26 deletions(-)
+ rename drivers/ntb/{ntb.c => core.c} (100%)
+ create mode 100644 drivers/ntb/msi.c
+ create mode 100644 drivers/ntb/test/ntb_msi_test.c
+
+--
 2.19.0
-
