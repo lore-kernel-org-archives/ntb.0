@@ -1,65 +1,49 @@
-Return-Path: <gunthorp@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id g23si936098otk.0.2019.02.13.09.55.04
+Return-Path: <Sanju.Mehta@amd.com>
+Received: from NAM02-SN1-obe.outbound.protection.outlook.com (mail-eopbgr770070.outbound.protection.outlook.com. [40.107.77.70])
+        by gmr-mx.google.com with ESMTPS id s3-v6si248097ljg.5.2019.02.15.01.20.10
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Wed, 13 Feb 2019 09:55:04 -0800 (PST)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Wed, 13 Feb 2019 10:54:48 -0700
-Message-Id: <20190213175454.7506-7-logang@deltatee.com>
-In-Reply-To: <20190213175454.7506-1-logang@deltatee.com>
-References: <20190213175454.7506-1-logang@deltatee.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
+        Fri, 15 Feb 2019 01:20:10 -0800 (PST)
+From: "Mehta, Sanju" <Sanju.Mehta@amd.com>
+Subject: [PATCH 1/4] NTB: ntb_perf: Increased the number of message retries to
+ 1000
+Date: Fri, 15 Feb 2019 09:20:07 +0000
+Message-ID: <1550222279-27216-1-git-send-email-Sanju.Mehta@amd.com>
+Content-Language: en-US
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Subject: [PATCH v2 06/12] PCI/switchtec: Add module parameter to request more interrupts
-To: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, iommu@lists.linux-foundation.org, linux-kselftest@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Bjorn Helgaas <bhelgaas@google.com>, Joerg Roedel <joro@8bytes.org>
-Cc: Allen Hubbe <allenbh@gmail.com>, Dave Jiang <dave.jiang@intel.com>, Serge Semin <fancer.lancer@gmail.com>, Eric Pilmore <epilmore@gigaio.com>, Logan Gunthorpe <logang@deltatee.com>
+To: "S-k, Shyam-sundar" <Shyam-sundar.S-k@amd.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "dave.jiang@intel.com" <dave.jiang@intel.com>, "allenbh@gmail.com" <allenbh@gmail.com>
+Cc: "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Mehta, Sanju" <Sanju.Mehta@amd.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Seeing the we want to use more interrupts in the NTB MSI code
-we need to be able allocate more (sometimes virtual) interrupts
-in the switchtec driver. Therefore add a module parameter to
-request to allocate additional interrupts.
+From: Sanjay R Mehta <sanju.mehta@amd.com>
 
-This puts virtually no limit on the number of MSI interrupts available
-to NTB clients.
+while waiting for the peer ntb_perf to initialize scratchpad
+registers, local side ntb_perf  might have already exhausted the
+maximum number of retries which is currently set to 500. To avoid
+this and to give little more time to the peer ntb_perf for scratchpad
+initialization, increased the number of retries to 1000
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Cc: Bjorn Helgaas <bhelgaas@google.com>
+Signed-off-by: Sanjay R Mehta <sanju.mehta@amd.com>
 ---
- drivers/pci/switch/switchtec.c | 12 ++++++++++--
- 1 file changed, 10 insertions(+), 2 deletions(-)
+ drivers/ntb/test/ntb_perf.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/pci/switch/switchtec.c b/drivers/pci/switch/switchtec.c
-index e22766c79fe9..8b1db78197d9 100644
---- a/drivers/pci/switch/switchtec.c
-+++ b/drivers/pci/switch/switchtec.c
-@@ -30,6 +30,10 @@ module_param(use_dma_mrpc, bool, 0644);
- MODULE_PARM_DESC(use_dma_mrpc,
- 		 "Enable the use of the DMA MRPC feature");
- 
-+static int nirqs = 32;
-+module_param(nirqs, int, 0644);
-+MODULE_PARM_DESC(nirqs, "number of interrupts to allocate (more may be useful for NTB applications)");
-+
- static dev_t switchtec_devt;
- static DEFINE_IDA(switchtec_minor_ida);
- 
-@@ -1247,8 +1251,12 @@ static int switchtec_init_isr(struct switchtec_dev *stdev)
- 	int dma_mrpc_irq;
- 	int rc;
- 
--	nvecs = pci_alloc_irq_vectors(stdev->pdev, 1, 4,
--				      PCI_IRQ_MSIX | PCI_IRQ_MSI);
-+	if (nirqs < 4)
-+		nirqs = 4;
-+
-+	nvecs = pci_alloc_irq_vectors(stdev->pdev, 1, nirqs,
-+				      PCI_IRQ_MSIX | PCI_IRQ_MSI |
-+				      PCI_IRQ_VIRTUAL);
- 	if (nvecs < 0)
- 		return nvecs;
- 
--- 
-2.19.0
+diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
+index 2a9d6b0..a828d0e 100644
+--- a/drivers/ntb/test/ntb_perf.c
++++ b/drivers/ntb/test/ntb_perf.c
+@@ -100,7 +100,7 @@ MODULE_DESCRIPTION("PCIe NTB Performance Measurement To=
+ol");
+ #define DMA_TRIES		100
+ #define DMA_MDELAY		10
+=20
+-#define MSG_TRIES		500
++#define MSG_TRIES		1000
+ #define MSG_UDELAY_LOW		1000
+ #define MSG_UDELAY_HIGH		2000
+=20
+--=20
+2.7.4
 
