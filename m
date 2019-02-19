@@ -1,49 +1,57 @@
-Return-Path: <Sanju.Mehta@amd.com>
-Received: from NAM02-SN1-obe.outbound.protection.outlook.com (mail-eopbgr770070.outbound.protection.outlook.com. [40.107.77.70])
-        by gmr-mx.google.com with ESMTPS id s3-v6si248097ljg.5.2019.02.15.01.20.10
+Return-Path: <gunthorp@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id i11si114771qkk.4.2019.02.19.11.56.43
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Fri, 15 Feb 2019 01:20:10 -0800 (PST)
-From: "Mehta, Sanju" <Sanju.Mehta@amd.com>
-Subject: [PATCH 1/4] NTB: ntb_perf: Increased the number of message retries to
- 1000
-Date: Fri, 15 Feb 2019 09:20:07 +0000
-Message-ID: <1550222279-27216-1-git-send-email-Sanju.Mehta@amd.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Tue, 19 Feb 2019 11:56:43 -0800 (PST)
+From: Logan Gunthorpe <logang@deltatee.com>
+Date: Tue, 19 Feb 2019 12:56:36 -0700
+Message-Id: <20190219195636.1485-1-logang@deltatee.com>
 MIME-Version: 1.0
-To: "S-k, Shyam-sundar" <Shyam-sundar.S-k@amd.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "dave.jiang@intel.com" <dave.jiang@intel.com>, "allenbh@gmail.com" <allenbh@gmail.com>
-Cc: "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Mehta, Sanju" <Sanju.Mehta@amd.com>
+Content-Transfer-Encoding: 8bit
+Subject: [PATCH] NTB: ntb_transport: Ensure qp->tx_mw_dma_addr is initaliazed
+To: linux-ntb@googlegroups.com
+Cc: Logan Gunthorpe <logang@deltatee.com>, Dan Carpenter <dan.carpenter@oracle.com>, Jon Mason <jdmason@kudzu.us>
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Sanjay R Mehta <sanju.mehta@amd.com>
+Dan Carpenter's static checker reported:
 
-while waiting for the peer ntb_perf to initialize scratchpad
-registers, local side ntb_perf  might have already exhausted the
-maximum number of retries which is currently set to 500. To avoid
-this and to give little more time to the peer ntb_perf for scratchpad
-initialization, increased the number of retries to 1000
+    drivers/ntb/ntb_transport.c:1926 ntb_transport_create_queue()
+    error: we previously assumed 'qp->tx_dma_chan' could be null (see line 1872)
 
-Signed-off-by: Sanjay R Mehta <sanju.mehta@amd.com>
+This is because the tx_mw_dma_addr is uninitialized in this function and
+may be incorrectly released using a NULL DMA channel.
+
+In practice this bug will not likely be seen. I'd guess you could hit
+this if you loaded ntb_netdev with use_dma=True, then unloaded it and
+loaded it again after setting the module parameter to use_dma=False.
+
+To fix this, we simply ensure that tx_mw_dma_addr is always
+initialized to zero. This is the safest in case any other part of the
+code operates on it if it is non-zero.
+
+Fixes: c27ccb899219 ("NTB: ntb_transport: Ensure the destination buffer is mapped for TX DMA")
+Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+Cc: Dan Carpenter <dan.carpenter@oracle.com>
+Cc: Jon Mason <jdmason@kudzu.us>
 ---
- drivers/ntb/test/ntb_perf.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/ntb/ntb_transport.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index 2a9d6b0..a828d0e 100644
---- a/drivers/ntb/test/ntb_perf.c
-+++ b/drivers/ntb/test/ntb_perf.c
-@@ -100,7 +100,7 @@ MODULE_DESCRIPTION("PCIe NTB Performance Measurement To=
-ol");
- #define DMA_TRIES		100
- #define DMA_MDELAY		10
-=20
--#define MSG_TRIES		500
-+#define MSG_TRIES		1000
- #define MSG_UDELAY_LOW		1000
- #define MSG_UDELAY_HIGH		2000
-=20
---=20
-2.7.4
+@Jon, it would be best if you can squash this with the commit that
+introduced the bug in ntb-next. Thanks.
 
+diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+index 526b65afc16a..e8a8304a42df 100644
+--- a/drivers/ntb/ntb_transport.c
++++ b/drivers/ntb/ntb_transport.c
+@@ -1866,6 +1866,7 @@ ntb_transport_create_queue(void *data, struct device *client_dev,
+ 		qp->rx_dma_chan = NULL;
+ 	}
+
++	qp->tx_mw_dma_addr = 0;
+ 	if (qp->tx_dma_chan) {
+ 		qp->tx_mw_dma_addr =
+ 			dma_map_resource(qp->tx_dma_chan->device->dev,
+--
+2.19.0
