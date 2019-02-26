@@ -1,72 +1,34 @@
-Return-Path: <jdmason@kudzu.us>
-Received: from mail-yw1-xc33.google.com (mail-yw1-xc33.google.com. [2607:f8b0:4864:20::c33])
-        by gmr-mx.google.com with ESMTPS id m189si514907pfb.0.2019.02.11.06.35.01
+Return-Path: <logang@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id s73si715271vkd.1.2019.02.26.08.18.45
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 11 Feb 2019 06:35:01 -0800 (PST)
-Received: by mail-yw1-xc33.google.com with SMTP id n12so4229561ywn.13
-        for <linux-ntb@googlegroups.com>; Mon, 11 Feb 2019 06:35:01 -0800 (PST)
-Return-Path: <jdmason@kudzu.us>
-Date: Mon, 11 Feb 2019 09:34:58 -0500
-From: Jon Mason <jdmason@kudzu.us>
-Subject: Re: [PATCH] NTB: ntb_transport: Free MWs in
- ntb_transport_link_cleanup()
-Message-ID: <20190211143458.GA13951@kudzu.us>
-References: <1546830776-3138-1-git-send-email-joey.zhang@microchip.com>
- <2dccf9e6-d9d7-200e-f689-56c962ea5e7e@deltatee.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Tue, 26 Feb 2019 08:18:45 -0800 (PST)
+References: <20190213175454.7506-1-logang@deltatee.com>
+ <20190226093445.GC19617@8bytes.org>
+From: Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <f0eaeb8d-caf2-d20a-5687-2a3995407bdb@deltatee.com>
+Date: Tue, 26 Feb 2019 09:18:30 -0700
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <2dccf9e6-d9d7-200e-f689-56c962ea5e7e@deltatee.com>
-To: Logan Gunthorpe <logang@deltatee.com>
-Cc: Joey Zhang <joey.zhang@microchip.com>, dave.jiang@intel.com, allenbh@gmail.com, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
+In-Reply-To: <20190226093445.GC19617@8bytes.org>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH v2 00/12] Support using MSI interrupts in ntb_transport
+To: Joerg Roedel <joro@8bytes.org>
+Cc: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, iommu@lists.linux-foundation.org, linux-kselftest@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Bjorn Helgaas <bhelgaas@google.com>, Allen Hubbe <allenbh@gmail.com>, Dave Jiang <dave.jiang@intel.com>, Serge Semin <fancer.lancer@gmail.com>, Eric Pilmore <epilmore@gigaio.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Mon, Jan 07, 2019 at 06:16:02PM -0700, Logan Gunthorpe wrote:
+
+
+On 2019-02-26 2:34 a.m., Joerg Roedel wrote:
+> On Wed, Feb 13, 2019 at 10:54:42AM -0700, Logan Gunthorpe wrote:
+>>   iommu/vt-d: Add helper to set an IRTE to verify only the bus number
+>>   iommu/vt-d: Allow interrupts from the entire bus for aliased devices
 > 
+> Applied these two to the iommu tree, thanks.
 > 
-> On 06/01/19 08:12 PM, Joey Zhang wrote:
-> > If NTB peer host crashes or reboots, the NTB transport link will be
-> > down and the MWs of NTB transport will be invalid. But the
-> > ntb_transport_link_cleanup() does not free these invalid MWs. When
-> > the NTB peer host is recovered later, NTB transport link will be
-> > up and the ntb_set_mw() will not reset up MWs. Because the MWs of
-> > NTB transport are invalid, the NTB transport will not work.
-> > 
-> > We can fix it by freeing MWs when NTB transport link is down, then
-> > the ntb_set_mw() will reset up MWs when NTB transport link is up.
-> > 
-> > Signed-off-by: Joey Zhang <joey.zhang@microchip.com>
-> 
-> Looks ok to me.
 
-Added to the ntb branch, thanks!
+Thanks!
 
-> Reviewed By: Logan Gunthorpe <logang@deltatee.com>
-
-Looks like your missed the '-' ;-)
-I took the liberity of adding it
-
-Thanks,
-Jon
-
-> 
-> > ---
-> >  drivers/ntb/ntb_transport.c | 3 +++
-> >  1 file changed, 3 insertions(+)
-> > 
-> > diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-> > index 3bfdb45..6e8902d 100644
-> > --- a/drivers/ntb/ntb_transport.c
-> > +++ b/drivers/ntb/ntb_transport.c
-> > @@ -862,6 +862,9 @@ static void ntb_transport_link_cleanup(struct ntb_transport_ctx *nt)
-> >  	if (!nt->link_is_up)
-> >  		cancel_delayed_work_sync(&nt->link_work);
-> >  
-> > +	for (i = 0; i < nt->mw_count; i++)
-> > +		ntb_free_mw(nt, i);
-> > +
-> >  	/* The scratchpad registers keep the values if the remote side
-> >  	 * goes down, blast them now to give them a sane value the next
-> >  	 * time they are accessed
-> > 
+Logan
