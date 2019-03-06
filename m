@@ -1,152 +1,552 @@
-Return-Path: <logang@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id b19si127174vkf.3.2019.03.06.13.36.05
+Return-Path: <fancer.lancer@gmail.com>
+Received: from mail-lj1-x232.google.com (mail-lj1-x232.google.com. [2a00:1450:4864:20::232])
+        by gmr-mx.google.com with ESMTPS id a7si135344edb.1.2019.03.06.12.44.04
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Wed, 06 Mar 2019 13:36:05 -0800 (PST)
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 06 Mar 2019 12:44:04 -0800 (PST)
+Received: by mail-lj1-x232.google.com with SMTP id d14so12171457ljl.9
+        for <linux-ntb@googlegroups.com>; Wed, 06 Mar 2019 12:44:04 -0800 (PST)
+Return-Path: <fancer.lancer@gmail.com>
+Date: Wed, 6 Mar 2019 23:44:01 +0300
+From: Serge Semin <fancer.lancer@gmail.com>
+Subject: Re: [PATCH v2 10/12] NTB: Introduce NTB MSI Test Client
+Message-ID: <20190306204400.hzpizimya7fq6swi@mobilestation>
 References: <20190213175454.7506-1-logang@deltatee.com>
- <20190213175454.7506-10-logang@deltatee.com>
- <20190306202631.3vc3b64e45ackcna@mobilestation>
-From: Logan Gunthorpe <logang@deltatee.com>
-Message-ID: <5b420eb7-5010-aae3-e9bd-1c612af409ae@deltatee.com>
-Date: Wed, 6 Mar 2019 14:35:53 -0700
+ <20190213175454.7506-11-logang@deltatee.com>
 MIME-Version: 1.0
-In-Reply-To: <20190306202631.3vc3b64e45ackcna@mobilestation>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-CA
-Content-Transfer-Encoding: 7bit
-Subject: Re: [PATCH v2 09/12] NTB: Introduce MSI library
-To: Serge Semin <fancer.lancer@gmail.com>, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, iommu@lists.linux-foundation.org, linux-kselftest@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Bjorn Helgaas <bhelgaas@google.com>, Joerg Roedel <joro@8bytes.org>, Allen Hubbe <allenbh@gmail.com>, Dave Jiang <dave.jiang@intel.com>, Eric Pilmore <epilmore@gigaio.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190213175454.7506-11-logang@deltatee.com>
+To: Logan Gunthorpe <logang@deltatee.com>
+Cc: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, iommu@lists.linux-foundation.org, linux-kselftest@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Bjorn Helgaas <bhelgaas@google.com>, Joerg Roedel <joro@8bytes.org>, Allen Hubbe <allenbh@gmail.com>, Dave Jiang <dave.jiang@intel.com>, Eric Pilmore <epilmore@gigaio.com>
 List-ID: <linux-ntb.googlegroups.com>
 
+Hi
 
-
-On 2019-03-06 1:26 p.m., Serge Semin wrote:
-> First of all, It might be unsafe to have some resources consumed by NTB
-> MSI or some other library without a simple way to warn NTB client drivers
-> about their attempts to access that resources, since it might lead to random
-> errors. When I thought about implementing a transport library based on the
-> Message/Spad+Doorbell registers, I had in mind to create an internal bits-field
-> array with the resources busy-flags. If, for instance, some message or
-> scratchpad register is occupied by the library (MSI, transport or some else),
-> then it would be impossible to access these resources directly through NTB API
-> methods. So NTB client driver shall retrieve an error in an attempt to
-> write/read data to/from busy message or scratchpad register, or in an attempt
-> to set some occupied doorbell bit. The same thing can be done for memory windows.
-
-Yes, it would be nice to have a generic library to manage all the
-resources, but right now we don't and it's unfair to expect us to take
-on this work to get the features we care about merged. Right now, it's
-not at all unsafe as the client is quite capable of ensuring it has the
-resources for the MSI library. The changes for ntb_transport to ensure
-this are quite reasonable.
-
-> Second tiny concern is about documentation. Since there is a special file for
-> all NTB-related doc, it would be good to have some description about the
-> NTB MSI library there as well:
-> Documentation/ntb.txt
-
-Sure, I'll add a short blurb for v3. Though, I noticed it's quite out of
-date since your changes. Especially in the ntb_tool section...
-
->> +	u32 *peer_mws[];
+On Wed, Feb 13, 2019 at 10:54:52AM -0700, Logan Gunthorpe wrote:
+> Introduce a tool to test NTB MSI interrupts similar to the other
+> NTB test tools. This tool creates a debugfs directory for each
+> NTB device with the following files:
 > 
-> Shouldn't we use the __iomem attribute here since later the devm_ioremap() is
-> used to map MWs at these pointers?
-
-Yes, will change for v3.
-
-
-> Simpler and faster cleanup-code would be:
-
-> + unroll:
-> + 	for (--i; i >= 0; --i)
-> + 		devm_iounmap(&ntb->dev, ntb->msi->peer_mws[i]);
-
-Faster, maybe, but I would not consider this simpler. It's much more
-complicated to reason about and ensure it's correct. I prefer my way
-because I don't care about speed, but I do care about readability.
-
-
-> Alas calling the ntb_mw_set_trans() method isn't enough to fully initialize
-> NTB Memory Windows. Yes, the library will work for Intel/AMD/Switchtec
-> (two-ports legacy configuration), but will fail for IDT due to being based on
-> the outbound MW xlat interface. So the library at this stage isn't portable
-> across all NTB hardware. In order to make it working the translation address is
-> supposed to be transferred to the peer side, where a peer code should call
-> ntb_peer_mw_set_trans() method with the retrieved xlat address.
-> See documentation for details:
-
-> https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/Documentation/ntb.txt
+> port
+> irqX_occurrences
+> peerX/port
+> peerX/count
+> peerX/trigger
 > 
-> ntb_perf driver can be also used as a reference of the portable NTB MWs setup.
+> The 'port' file tells the user the local port number and the
+> 'occurrences' files tell the number of local interrupts that
+> have been received for each interrupt.
+> 
+> For each peer, the 'port' file and the 'count' file tell you the
+> peer's port number and number of interrupts respectively. Writing
+> the interrupt number to the 'trigger' file triggers the interrupt
+> handler for the peer which should increment their corresponding
+> 'occurrences' file. The 'ready' file indicates if a peer is ready,
+> writing to this file blocks until it is ready.
+> 
+> The module parameter num_irqs can be used to set the number of
+> local interrupts. By default this is 4. This is only limited by
+> the number of unused MSI interrupts registered by the hardware
+> (this will require support of the hardware driver) and there must
+> be at least 2*num_irqs + 1 spads registers available.
+> 
 
-Gross. Well, given that ntb_transport doesn't even support this and we
-don't really have a sensible library to transfer this information, I'm
-going to leave it as is for now. Someone can update ntb_msi when they
-update ntb_transport, preferably after we have a nice library to handle
-the transfers for us seeing I absolutely do not want to replicate the
-mess in ntb_perf.
+Alas the test driver is not going to work with IDT NTB hardware,
+since it uses Spad only, which aren't supported by IDT devices. IDT NTB
+PCIe functions provide message registers to communicate with peers. See
+ntb_perf driver code for reference of portable driver design.
 
-Actually, if we had a generic spad/msg communication library, it would
-probably be better to have a common ntb_mw_set_trans() function that
-uses the communications library to send the data and automatically call
-ntb_peer_mw_set_trans() on the peer. That way we don't have to push this
-mess into the clients.
+In order to make the test driver portable the following alterations
+are needed:
+1) Add NTB Message register API usage together with Scratchpad+Doorbell.
+2) When NTB MSI library is updated with functions like
+ntb_msi_peer_setup_mws()/ntb_msi_peer_clear_mws() they are needed to be
+utilized in the test driver as well to set a translation address on the
+peer side.
 
-> The same cleanup pattern can be utilized here:
-> +error_out:
-> +	for (--peer; peer >= 0; --peer) {
-> +		peer_widx = ntb_peer_highest_mw_idx(ntb, peer);
-> +		ntb_mw_clear_trans(ntb, i, peer_widx);
+> Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+> Cc: Jon Mason <jdmason@kudzu.us>
+> Cc: Dave Jiang <dave.jiang@intel.com>
+> Cc: Allen Hubbe <allenbh@gmail.com>
+> ---
+>  drivers/ntb/test/Kconfig        |   9 +
+>  drivers/ntb/test/Makefile       |   1 +
+>  drivers/ntb/test/ntb_msi_test.c | 433 ++++++++++++++++++++++++++++++++
+>  3 files changed, 443 insertions(+)
+>  create mode 100644 drivers/ntb/test/ntb_msi_test.c
+> 
+> diff --git a/drivers/ntb/test/Kconfig b/drivers/ntb/test/Kconfig
+> index a5d0eda44438..a3f3e2638935 100644
+> --- a/drivers/ntb/test/Kconfig
+> +++ b/drivers/ntb/test/Kconfig
+> @@ -25,3 +25,12 @@ config NTB_PERF
+>  	 to and from the window without additional software interaction.
+>  
+>  	 If unsure, say N.
+> +
+> +config NTB_MSI_TEST
+> +	tristate "NTB MSI Test Client"
+> +	depends on NTB_MSI
+> +	help
+> +	  This tool demonstrates the use of the NTB MSI library to
+> +	  send MSI interrupts between peers.
+> +
+> +	  If unsure, say N.
+> diff --git a/drivers/ntb/test/Makefile b/drivers/ntb/test/Makefile
+> index 9e77e0b761c2..d2895ca995e4 100644
+> --- a/drivers/ntb/test/Makefile
+> +++ b/drivers/ntb/test/Makefile
+> @@ -1,3 +1,4 @@
+>  obj-$(CONFIG_NTB_PINGPONG) += ntb_pingpong.o
+>  obj-$(CONFIG_NTB_TOOL) += ntb_tool.o
+>  obj-$(CONFIG_NTB_PERF) += ntb_perf.o
+> +obj-$(CONFIG_NTB_MSI_TEST) += ntb_msi_test.o
+> diff --git a/drivers/ntb/test/ntb_msi_test.c b/drivers/ntb/test/ntb_msi_test.c
+> new file mode 100644
+> index 000000000000..99d826ed9c34
+> --- /dev/null
+> +++ b/drivers/ntb/test/ntb_msi_test.c
+> @@ -0,0 +1,433 @@
+> +// SPDX-License-Identifier: (GPL-2.0 OR BSD-3-Clause)
+> +
+> +#include <linux/module.h>
+> +#include <linux/debugfs.h>
+> +#include <linux/ntb.h>
+> +#include <linux/pci.h>
+> +#include <linux/radix-tree.h>
+> +#include <linux/workqueue.h>
+> +
+> +MODULE_LICENSE("Dual BSD/GPL");
+> +MODULE_VERSION("0.1");
+> +MODULE_AUTHOR("Logan Gunthorpe <logang@deltatee.com>");
+> +MODULE_DESCRIPTION("Test for sending MSI interrupts over an NTB memory window");
+> +
+> +static int num_irqs = 4;
+> +module_param(num_irqs, int, 0644);
+> +MODULE_PARM_DESC(num_irqs, "number of irqs to use");
+> +
+> +struct ntb_msit_ctx {
+> +	struct ntb_dev *ntb;
+> +	struct dentry *dbgfs_dir;
+> +	struct work_struct setup_work;
+> +
+> +	struct ntb_msit_isr_ctx {
+> +		int irq_idx;
+> +		int irq_num;
+> +		int occurrences;
+> +		struct ntb_msit_ctx *nm;
+> +		struct ntb_msi_desc desc;
+> +	} *isr_ctx;
+> +
+> +	struct ntb_msit_peer {
+> +		struct ntb_msit_ctx *nm;
+> +		int pidx;
+> +		int num_irqs;
+> +		struct completion init_comp;
+> +		struct ntb_msi_desc *msi_desc;
+> +	} peers[];
+> +};
+> +
+> +static struct dentry *ntb_msit_dbgfs_topdir;
+> +
+> +static irqreturn_t ntb_msit_isr(int irq, void *dev)
+> +{
+> +	struct ntb_msit_isr_ctx *isr_ctx = dev;
+> +	struct ntb_msit_ctx *nm = isr_ctx->nm;
+> +
+> +	dev_dbg(&nm->ntb->dev, "Interrupt Occurred: %d",
+> +		isr_ctx->irq_idx);
+> +
+> +	isr_ctx->occurrences++;
+> +
+> +	return IRQ_HANDLED;
+> +}
+> +
+> +static void ntb_msit_setup_work(struct work_struct *work)
+> +{
+> +	struct ntb_msit_ctx *nm = container_of(work, struct ntb_msit_ctx,
+> +					       setup_work);
+> +	int irq_count = 0;
+> +	int irq;
+> +	int ret;
+> +	uintptr_t i;
+> +
+> +	ret = ntb_msi_setup_mws(nm->ntb);
+> +	if (ret) {
+> +		dev_err(&nm->ntb->dev, "Unable to setup MSI windows: %d\n",
+> +			ret);
+> +		return;
 > +	}
+> +
+> +	for (i = 0; i < num_irqs; i++) {
+> +		nm->isr_ctx[i].irq_idx = i;
+> +		nm->isr_ctx[i].nm = nm;
+> +
+> +		if (!nm->isr_ctx[i].irq_num) {
+> +			irq = ntbm_msi_request_irq(nm->ntb, ntb_msit_isr,
+> +						   KBUILD_MODNAME,
+> +						   &nm->isr_ctx[i],
+> +						   &nm->isr_ctx[i].desc);
+> +			if (irq < 0)
+> +				break;
+> +
+> +			nm->isr_ctx[i].irq_num = irq;
+> +		}
+> +
+> +		ret = ntb_spad_write(nm->ntb, 2 * i + 1,
+> +				     nm->isr_ctx[i].desc.addr_offset);
+> +		if (ret)
+> +			break;
+> +
+> +		ret = ntb_spad_write(nm->ntb, 2 * i + 2,
+> +				     nm->isr_ctx[i].desc.data);
+> +		if (ret)
+> +			break;
+> +
+> +		irq_count++;
+> +	}
+> +
+> +	ntb_spad_write(nm->ntb, 0, irq_count);
+> +	ntb_peer_db_set(nm->ntb, BIT(ntb_port_number(nm->ntb)));
+> +}
+> +
+> +static void ntb_msit_desc_changed(void *ctx)
+> +{
+> +	struct ntb_msit_ctx *nm = ctx;
+> +	int i;
+> +
+> +	dev_dbg(&nm->ntb->dev, "MSI Descriptors Changed\n");
+> +
+> +	for (i = 0; i < num_irqs; i++) {
+> +		ntb_spad_write(nm->ntb, 2 * i + 1,
+> +			       nm->isr_ctx[i].desc.addr_offset);
+> +		ntb_spad_write(nm->ntb, 2 * i + 2,
+> +			       nm->isr_ctx[i].desc.data);
+> +	}
+> +
+> +	ntb_peer_db_set(nm->ntb, BIT(ntb_port_number(nm->ntb)));
+> +}
+> +
+> +static void ntb_msit_link_event(void *ctx)
+> +{
+> +	struct ntb_msit_ctx *nm = ctx;
+> +
+> +	if (!ntb_link_is_up(nm->ntb, NULL, NULL))
+> +		return;
+> +
+> +	schedule_work(&nm->setup_work);
+> +}
+> +
+> +static void ntb_msit_copy_peer_desc(struct ntb_msit_ctx *nm, int peer)
+> +{
+> +	int i;
+> +	struct ntb_msi_desc *desc = nm->peers[peer].msi_desc;
+> +	int irq_count = nm->peers[peer].num_irqs;
+> +
+> +	for (i = 0; i < irq_count; i++) {
+> +		desc[i].addr_offset = ntb_peer_spad_read(nm->ntb, peer,
+> +							 2 * i + 1);
+> +		desc[i].data = ntb_peer_spad_read(nm->ntb, peer, 2 * i + 2);
+> +	}
+> +
+> +	dev_info(&nm->ntb->dev, "Found %d interrupts on peer %d\n",
+> +		 irq_count, peer);
+> +
+> +	complete_all(&nm->peers[peer].init_comp);
+> +}
+> +
+> +static void ntb_msit_db_event(void *ctx, int vec)
+> +{
+> +	struct ntb_msit_ctx *nm = ctx;
+> +	struct ntb_msi_desc *desc;
+> +	u64 peer_mask = ntb_db_read(nm->ntb);
+> +	u32 irq_count;
+> +	int peer;
+> +
+> +	ntb_db_clear(nm->ntb, peer_mask);
+> +
+> +	for (peer = 0; peer < sizeof(peer_mask) * 8; peer++) {
+> +		if (!(peer_mask & BIT(peer)))
+> +			continue;
+> +
+> +		irq_count = ntb_peer_spad_read(nm->ntb, peer, 0);
+> +		if (irq_count == -1)
+> +			continue;
+> +
+> +		desc = kcalloc(irq_count, sizeof(*desc), GFP_ATOMIC);
+> +		if (!desc)
+> +			continue;
+> +
+> +		kfree(nm->peers[peer].msi_desc);
+> +		nm->peers[peer].msi_desc = desc;
+> +		nm->peers[peer].num_irqs = irq_count;
+> +
+> +		ntb_msit_copy_peer_desc(nm, peer);
+> +	}
+> +}
+> +
+> +static const struct ntb_ctx_ops ntb_msit_ops = {
+> +	.link_event = ntb_msit_link_event,
+> +	.db_event = ntb_msit_db_event,
+> +};
+> +
+> +static int ntb_msit_dbgfs_trigger(void *data, u64 idx)
+> +{
+> +	struct ntb_msit_peer *peer = data;
+> +
+> +	if (idx >= peer->num_irqs)
+> +		return -EINVAL;
+> +
+> +	dev_dbg(&peer->nm->ntb->dev, "trigger irq %llu on peer %u\n",
+> +		idx, peer->pidx);
+> +
+> +	return ntb_msi_peer_trigger(peer->nm->ntb, peer->pidx,
+> +				    &peer->msi_desc[idx]);
+> +}
+> +
+> +DEFINE_DEBUGFS_ATTRIBUTE(ntb_msit_trigger_fops, NULL,
+> +			 ntb_msit_dbgfs_trigger, "%llu\n");
+> +
+> +static int ntb_msit_dbgfs_port_get(void *data, u64 *port)
+> +{
+> +	struct ntb_msit_peer *peer = data;
+> +
+> +	*port = ntb_peer_port_number(peer->nm->ntb, peer->pidx);
+> +
+> +	return 0;
+> +}
+> +
+> +DEFINE_DEBUGFS_ATTRIBUTE(ntb_msit_port_fops, ntb_msit_dbgfs_port_get,
+> +			 NULL, "%llu\n");
+> +
+> +static int ntb_msit_dbgfs_count_get(void *data, u64 *count)
+> +{
+> +	struct ntb_msit_peer *peer = data;
+> +
+> +	*count = peer->num_irqs;
+> +
+> +	return 0;
+> +}
+> +
+> +DEFINE_DEBUGFS_ATTRIBUTE(ntb_msit_count_fops, ntb_msit_dbgfs_count_get,
+> +			 NULL, "%llu\n");
+> +
+> +static int ntb_msit_dbgfs_ready_get(void *data, u64 *ready)
+> +{
+> +	struct ntb_msit_peer *peer = data;
+> +
+> +	*ready = try_wait_for_completion(&peer->init_comp);
+> +
+> +	return 0;
+> +}
+> +
+> +static int ntb_msit_dbgfs_ready_set(void *data, u64 ready)
+> +{
+> +	struct ntb_msit_peer *peer = data;
+> +
+> +	return wait_for_completion_interruptible(&peer->init_comp);
+> +}
+> +
+> +DEFINE_DEBUGFS_ATTRIBUTE(ntb_msit_ready_fops, ntb_msit_dbgfs_ready_get,
+> +			 ntb_msit_dbgfs_ready_set, "%llu\n");
+> +
+> +static int ntb_msit_dbgfs_occurrences_get(void *data, u64 *occurrences)
+> +{
+> +	struct ntb_msit_isr_ctx *isr_ctx = data;
+> +
+> +	*occurrences = isr_ctx->occurrences;
+> +
+> +	return 0;
+> +}
+> +
+> +DEFINE_DEBUGFS_ATTRIBUTE(ntb_msit_occurrences_fops,
+> +			 ntb_msit_dbgfs_occurrences_get,
+> +			 NULL, "%llu\n");
+> +
+> +static int ntb_msit_dbgfs_local_port_get(void *data, u64 *port)
+> +{
+> +	struct ntb_msit_ctx *nm = data;
+> +
+> +	*port = ntb_port_number(nm->ntb);
+> +
+> +	return 0;
+> +}
+> +
+> +DEFINE_DEBUGFS_ATTRIBUTE(ntb_msit_local_port_fops,
+> +			 ntb_msit_dbgfs_local_port_get,
+> +			 NULL, "%llu\n");
+> +
+> +static void ntb_msit_create_dbgfs(struct ntb_msit_ctx *nm)
+> +{
+> +	struct pci_dev *pdev = nm->ntb->pdev;
+> +	char buf[32];
+> +	int i;
+> +	struct dentry *peer_dir;
+> +
+> +	nm->dbgfs_dir = debugfs_create_dir(pci_name(pdev),
+> +					   ntb_msit_dbgfs_topdir);
+> +	debugfs_create_file("port", 0400, nm->dbgfs_dir, nm,
+> +			    &ntb_msit_local_port_fops);
+> +
+> +	for (i = 0; i < ntb_peer_port_count(nm->ntb); i++) {
+> +		nm->peers[i].pidx = i;
+> +		nm->peers[i].nm = nm;
+> +		init_completion(&nm->peers[i].init_comp);
+> +
+> +		snprintf(buf, sizeof(buf), "peer%d", i);
+> +		peer_dir = debugfs_create_dir(buf, nm->dbgfs_dir);
+> +
+> +		debugfs_create_file_unsafe("trigger", 0200, peer_dir,
+> +					   &nm->peers[i],
+> +					   &ntb_msit_trigger_fops);
+> +
+> +		debugfs_create_file_unsafe("port", 0400, peer_dir,
+> +					   &nm->peers[i], &ntb_msit_port_fops);
+> +
+> +		debugfs_create_file_unsafe("count", 0400, peer_dir,
+> +					   &nm->peers[i],
+> +					   &ntb_msit_count_fops);
+> +
+> +		debugfs_create_file_unsafe("ready", 0600, peer_dir,
+> +					   &nm->peers[i],
+> +					   &ntb_msit_ready_fops);
+> +	}
+> +
+> +	for (i = 0; i < num_irqs; i++) {
+> +		snprintf(buf, sizeof(buf), "irq%d_occurrences", i);
+> +		debugfs_create_file_unsafe(buf, 0400, nm->dbgfs_dir,
+> +					   &nm->isr_ctx[i],
+> +					   &ntb_msit_occurrences_fops);
+> +	}
+> +}
+> +
+> +static void ntb_msit_remove_dbgfs(struct ntb_msit_ctx *nm)
+> +{
+> +	debugfs_remove_recursive(nm->dbgfs_dir);
+> +}
+> +
+> +static int ntb_msit_probe(struct ntb_client *client, struct ntb_dev *ntb)
+> +{
+> +	struct ntb_msit_ctx *nm;
+> +	size_t struct_size;
+> +	int peers;
+> +	int ret;
+> +
+> +	peers = ntb_peer_port_count(ntb);
+> +	if (peers <= 0)
+> +		return -EINVAL;
+> +
+> +	if (ntb_spad_is_unsafe(ntb) || ntb_spad_count(ntb) < 2 * num_irqs + 1) {
+> +		dev_err(&ntb->dev, "NTB MSI test requires at least %d spads for %d irqs\n",
+> +			2 * num_irqs + 1, num_irqs);
+> +		return -EFAULT;
+> +	}
+> +
+> +	ret = ntb_spad_write(ntb, 0, -1);
+> +	if (ret) {
+> +		dev_err(&ntb->dev, "Unable to write spads: %d\n", ret);
+> +		return ret;
+> +	}
+> +
+> +	ret = ntb_db_clear_mask(ntb, GENMASK(peers - 1, 0));
+> +	if (ret) {
+> +		dev_err(&ntb->dev, "Unable to clear doorbell mask: %d\n", ret);
+> +		return ret;
+> +	}
+> +
+> +	ret = ntb_msi_init(ntb, ntb_msit_desc_changed);
+> +	if (ret) {
+> +		dev_err(&ntb->dev, "Unable to initialize MSI library: %d\n",
+> +			ret);
+> +		return ret;
+> +	}
+> +
+> +	struct_size = sizeof(*nm) + sizeof(*nm->peers) * peers;
+> +
+> +	nm = devm_kzalloc(&ntb->dev, struct_size, GFP_KERNEL);
+> +	if (!nm)
+> +		return -ENOMEM;
+> +
+> +	nm->isr_ctx = devm_kcalloc(&ntb->dev, num_irqs, sizeof(*nm->isr_ctx),
+> +				   GFP_KERNEL);
+> +	if (!nm->isr_ctx)
+> +		return -ENOMEM;
+> +
+> +	INIT_WORK(&nm->setup_work, ntb_msit_setup_work);
+> +	nm->ntb = ntb;
+> +
+> +	ntb_msit_create_dbgfs(nm);
+> +
+> +	ret = ntb_set_ctx(ntb, nm, &ntb_msit_ops);
+> +	if (ret)
+> +		goto remove_dbgfs;
+> +
+> +	if (!nm->isr_ctx)
+> +		goto remove_dbgfs;
+> +
+> +	ntb_link_enable(ntb, NTB_SPEED_AUTO, NTB_WIDTH_AUTO);
+> +
+> +	return 0;
+> +
+> +remove_dbgfs:
+> +	ntb_msit_remove_dbgfs(nm);
+> +	devm_kfree(&ntb->dev, nm->isr_ctx);
+> +	devm_kfree(&ntb->dev, nm);
+> +	return ret;
+> +}
+> +
+> +static void ntb_msit_remove(struct ntb_client *client, struct ntb_dev *ntb)
+> +{
+> +	struct ntb_msit_ctx *nm = ntb->ctx;
+> +	int i;
+> +
+> +	ntb_link_disable(ntb);
+> +	ntb_db_set_mask(ntb, ntb_db_valid_mask(ntb));
+> +	ntb_msi_clear_mws(ntb);
+> +
+> +	for (i = 0; i < ntb_peer_port_count(ntb); i++)
+> +		kfree(nm->peers[i].msi_desc);
+> +
+> +	ntb_clear_ctx(ntb);
+> +	ntb_msit_remove_dbgfs(nm);
+> +}
+> +
+> +static struct ntb_client ntb_msit_client = {
+> +	.ops = {
+> +		.probe = ntb_msit_probe,
+> +		.remove = ntb_msit_remove
+> +	}
+> +};
+> +
+> +static int __init ntb_msit_init(void)
+> +{
+> +	int ret;
+> +
+> +	if (debugfs_initialized())
+> +		ntb_msit_dbgfs_topdir = debugfs_create_dir(KBUILD_MODNAME,
+> +							   NULL);
+> +
+> +	ret = ntb_register_client(&ntb_msit_client);
+> +	if (ret)
+> +		debugfs_remove_recursive(ntb_msit_dbgfs_topdir);
+> +
+> +	return ret;
+> +}
+> +module_init(ntb_msit_init);
+> +
+> +static void __exit ntb_msit_exit(void)
+> +{
+> +	ntb_unregister_client(&ntb_msit_client);
+> +	debugfs_remove_recursive(ntb_msit_dbgfs_topdir);
+> +}
+> +module_exit(ntb_msit_exit);
+> -- 
+> 2.19.0
 > 
-> So you won't need "i" variable here anymore. You also don't need to check the
-> return value of ntb_peer_highest_mw_idx() in the cleanup loop because it
-> was already checked in the main algo code.
-
-See above.
-
->> +EXPORT_SYMBOL(ntb_msi_clear_mws);
->> +
-> 
-> Similarly something like ntb_msi_peer_clear_mws() should be added to
-> unset a translation address on the peer side.
-
-Well, we can table that for when ntb_msi supports the peer MW setting
-functions.
->> +int ntb_msi_peer_trigger(struct ntb_dev *ntb, int peer,
->> +			 struct ntb_msi_desc *desc)
->> +{
->> +	int idx;
->> +
->> +	if (!ntb->msi)
->> +		return -EINVAL;
->> +
->> +	idx = desc->addr_offset / sizeof(*ntb->msi->peer_mws[peer]);
->> +
->> +	ntb->msi->peer_mws[peer][idx] = desc->data;
->> +
-> 
-> Shouldn't we use iowrite32() here instead of direct access to the IO-memory?
-
-Yes, as above I'll fix it for v3.
-
->> @@ -425,6 +427,10 @@ struct ntb_dev {
->>  	spinlock_t			ctx_lock;
->>  	/* block unregister until device is fully released */
->>  	struct completion		released;
->> +
->> +	#ifdef CONFIG_NTB_MSI
->> +	struct ntb_msi *msi;
->> +	#endif
-> 
-> I'd align the macro-condition to the most left position:
-> +#ifdef CONFIG_NTB_MSI
-> +	struct ntb_msi *msi;
-> +#endif
-
-Fixed for v3.
-
-
-Logan
+> -- 
+> You received this message because you are subscribed to the Google Groups "linux-ntb" group.
+> To unsubscribe from this group and stop receiving emails from it, send an email to linux-ntb+unsubscribe@googlegroups.com.
+> To post to this group, send email to linux-ntb@googlegroups.com.
+> To view this discussion on the web visit https://groups.google.com/d/msgid/linux-ntb/20190213175454.7506-11-logang%40deltatee.com.
+> For more options, visit https://groups.google.com/d/optout.
