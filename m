@@ -1,21 +1,16 @@
 Return-Path: <info@metux.net>
-Received: from mout.kundenserver.de (mout.kundenserver.de. [217.72.192.74])
-        by gmr-mx.google.com with ESMTPS id n21si126029lfl.2.2019.03.06.14.03.03
+Received: from mout.kundenserver.de (mout.kundenserver.de. [217.72.192.73])
+        by gmr-mx.google.com with ESMTPS id r15si128752wmc.4.2019.03.06.10.51.12
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 06 Mar 2019 14:03:03 -0800 (PST)
+        Wed, 06 Mar 2019 10:51:12 -0800 (PST)
 From: "Enrico Weigelt, metux IT consult" <info@metux.net>
-Subject: [PATCH v2] drivers: ntb: Kconfig: pedantic cleanups
-Date: Wed,  6 Mar 2019 23:02:54 +0100
-Message-Id: <1551909774-24030-1-git-send-email-info@metux.net>
-In-Reply-To: <1551898265-18909-1-git-send-email-info@metux.net>
-References: <1551898265-18909-1-git-send-email-info@metux.net>
+Subject: [PATCH] drivers: ntb: Kconfig: pedantic cleanups
+Date: Wed,  6 Mar 2019 19:51:05 +0100
+Message-Id: <1551898265-18909-1-git-send-email-info@metux.net>
 To: linux-kernel@vger.kernel.org
 Cc: kurt.schwemmer@microsemi.com, logang@deltatee.com, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
-
-Formatting of Kconfig files doesn't look so pretty, so just
-take damp cloth and clean it up.
 
 Signed-off-by: Enrico Weigelt, metux IT consult <info@metux.net>
 ---
