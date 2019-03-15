@@ -1,49 +1,28 @@
-Return-Path: <yuehaibing@huawei.com>
-Received: from huawei.com (szxga06-in.huawei.com. [45.249.212.32])
-        by gmr-mx.google.com with ESMTPS id e124si125242pgc.3.2019.03.20.07.21.17
+Return-Path: <pr-tracker-bot@kernel.org>
+Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
+        by gmr-mx.google.com with ESMTPS id gn23si222946plb.0.2019.03.15.14.45.22
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 20 Mar 2019 07:21:17 -0700 (PDT)
-From: Yue Haibing <yuehaibing@huawei.com>
-Subject: [PATCH -next] ntb: intel: Make intel_ntb3_peer_db_addr static
-Date: Wed, 20 Mar 2019 22:08:12 +0800
-Message-ID: <20190320140812.5952-1-yuehaibing@huawei.com>
-MIME-Version: 1.0
-Content-Type: text/plain
-To: dave.jiang@intel.com, jdmason@kudzu.us, allenbh@gmail.com
-Cc: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, YueHaibing <yuehaibing@huawei.com>
+        Fri, 15 Mar 2019 14:45:22 -0700 (PDT)
+Subject: Re: [GIT PULL] NTB bug fixes for v5.1
+From: pr-tracker-bot@kernel.org
+In-Reply-To: <20190315202609.GA30826@graymalkin.kudzu.us>
+References: <20190315202609.GA30826@graymalkin.kudzu.us>
+Message-Id: <155268632245.16247.17574634127221898364.pr-tracker-bot@kernel.org>
+Date: Fri, 15 Mar 2019 21:45:22 +0000
+To: Jon Mason <jdmason@kudzu.us>
+Cc: torvalds@linux-foundation.org, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-From: YueHaibing <yuehaibing@huawei.com>
+The pull request you sent on Fri, 15 Mar 2019 16:26:09 -0400:
 
-Fix sparse warning:
+> git://github.com/jonmason/ntb tags/ntb-5.1
 
-drivers/ntb/hw/intel/ntb_hw_gen3.c:535:5: warning:
- symbol 'intel_ntb3_peer_db_addr' was not declared. Should it be static?
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/e8a71a38668919c53e6ca9dd1bfa977e5690523f
 
-Signed-off-by: YueHaibing <yuehaibing@huawei.com>
----
- drivers/ntb/hw/intel/ntb_hw_gen3.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+Thank you!
 
-diff --git a/drivers/ntb/hw/intel/ntb_hw_gen3.c b/drivers/ntb/hw/intel/ntb_hw_gen3.c
-index f475b56..c339716 100644
---- a/drivers/ntb/hw/intel/ntb_hw_gen3.c
-+++ b/drivers/ntb/hw/intel/ntb_hw_gen3.c
-@@ -532,9 +532,9 @@ static int intel_ntb3_mw_set_trans(struct ntb_dev *ntb, int pidx, int idx,
- 	return 0;
- }
- 
--int intel_ntb3_peer_db_addr(struct ntb_dev *ntb, phys_addr_t *db_addr,
--				resource_size_t *db_size,
--				u64 *db_data, int db_bit)
-+static int intel_ntb3_peer_db_addr(struct ntb_dev *ntb, phys_addr_t *db_addr,
-+				   resource_size_t *db_size,
-+				   u64 *db_data, int db_bit)
- {
- 	phys_addr_t db_addr_base;
- 	struct intel_ntb_dev *ndev = ntb_ndev(ntb);
 -- 
-2.7.0
-
-
+Deet-doot-dot, I am a bot.
+https://korg.wiki.kernel.org/userdoc/prtracker
