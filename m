@@ -1,33 +1,33 @@
 Return-Path: <helgaas@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id l10si173591vkl.2.2019.03.20.14.15.21
+        by gmr-mx.google.com with ESMTPS id v2si197279qka.0.2019.03.20.14.13.34
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 20 Mar 2019 14:15:21 -0700 (PDT)
-Date: Wed, 20 Mar 2019 16:15:18 -0500
+        Wed, 20 Mar 2019 14:13:34 -0700 (PDT)
+Date: Wed, 20 Mar 2019 16:13:31 -0500
 From: Bjorn Helgaas <helgaas@kernel.org>
-Subject: Re: [PATCH v2] drivers: ntb: Kconfig: pedantic cleanups
-Message-ID: <20190320211517.GG251185@google.com>
+Subject: Re: [PATCH] drivers: ntb: Kconfig: pedantic cleanups
+Message-ID: <20190320211331.GF251185@google.com>
 References: <1551898265-18909-1-git-send-email-info@metux.net>
- <1551909774-24030-1-git-send-email-info@metux.net>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1551909774-24030-1-git-send-email-info@metux.net>
+In-Reply-To: <1551898265-18909-1-git-send-email-info@metux.net>
 To: "Enrico Weigelt, metux IT consult" <info@metux.net>
 Cc: linux-kernel@vger.kernel.org, kurt.schwemmer@microsemi.com, logang@deltatee.com, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-[+cc Jon, Dave, Allen]
+[+cc Jon, Dave, Allen (NTB core maintainers)]
 
-On Wed, Mar 06, 2019 at 11:02:54PM +0100, Enrico Weigelt, metux IT consult wrote:
-> Formatting of Kconfig files doesn't look so pretty, so just
-> take damp cloth and clean it up.
+Hi Enrico,
 
-Oops, I didn't notice that this was a v2.  I first thought this was a
-2/2 patch.  Sorry for the noise.  Most of my comments still apply
-here, I think.
+I added the NTB maintainers, who will deal with these, but since
+you're fixing pedantic issues, I'll give you some pedantic comments :)
 
+The first is that you might put something here in the commit log, eg,
+"fix Kconfig help text indentation" or whatever you're doing.
+
+On Wed, Mar 06, 2019 at 07:51:05PM +0100, Enrico Weigelt, metux IT consult wrote:
 > Signed-off-by: Enrico Weigelt, metux IT consult <info@metux.net>
 > ---
 >  drivers/ntb/Kconfig          | 20 ++++++++++----------
@@ -52,9 +52,19 @@ here, I think.
 > -	 ntb Linux driver uses this point-to-point communication as a method to
 > -	 transfer data from one system to the other.
 > +	  The PCI-E Non-transparent bridge hardware is a point-to-point PCI-E bus
+
+The usual spelling is "PCIe" instead of "PCI-E".
+
+s/Non-transparent bridge/non-transparent bridge/
+
+A "point-to-point PCIe bus" is usually called a "PCIe Link".
+
 > +	  connecting 2 systems.  When configured, writes to the device's PCI
 > +	  mapped memory will be mirrored to a buffer on the remote system.  The
 > +	  ntb Linux driver uses this point-to-point communication as a method to
+
+s/ntb Linux driver/Linux ntb driver/
+
 > +	  transfer data from one system to the other.
 >  
 > -	 If unsure, say N.
@@ -71,6 +81,13 @@ here, I think.
 > -	 to client drivers.
 > +	  This is a transport driver that enables connected systems to exchange
 > +	  messages over the ntb hardware.  The transport exposes a queue pair api
+
+s/ntb hardware/NTB hardware/
+
+(I think it makes sense to use "ntb" when referring to the driver,
+since that's its name, but when referring to the hardware, "NTB" is
+being used as an acronym and probably should be capitalized.)
+
 > +	  to client drivers.
 >  
 > -	 If unsure, say N.
@@ -109,8 +126,21 @@ here, I think.
 > -	 finished in Linux kernel.
 > +	  Some of the pre-initializations must be made before IDT PCIe-switch
 > +	  exposes it NT-functions correctly. It should be done by either proper
+
+s/it/its/
+
+s/correctly//
+s/proper//
+
+I always think "correct" and "proper" are sort of useless in comments.
+Who wants to write incorrect or improper code?  Besides, they don't
+convey any specific information.
+
 > +	  initialisation of EEPROM connected to master smbus of the switch or
 > +	  by BIOS using slave-SMBus interface changing corresponding registers
+
+Capitalize "smbus/SMBus" consistently.  I think "SMBus" is typical.
+
 > +	  value. Evidently it must be done before PCI bus enumeration is
 > +	  finished in Linux kernel.
 >  
@@ -122,6 +152,9 @@ here, I think.
 > -	 accepted by a BAR. Note that BAR0 must map PCI configuration space
 > -	 registers.
 > +	  First of all partitions must be activated and properly assigned to all
+
+s/properly// again :)
+
 > +	  the ports with NT-functions intended to be activated (see SWPARTxCTL
 > +	  and SWPORTxCTL registers). Then all NT-function BARs must be enabled
 > +	  with chosen valid aperture. For memory windows related BARs the
@@ -137,6 +170,9 @@ here, I think.
 > -
 > -	 If unsure, say N.
 > +	  It's worth to note, that since a part of this driver relies on the
+
+s/note,/note/
+
 > +	  BAR settings of peer NT-functions, the BAR setups can't be done over
 > +	  kernel PCI fixups. That's why the alternative pre-initialization
 > +	  techniques like BIOS using SMBus interface or EEPROM should be
@@ -187,7 +223,9 @@ here, I think.
 > +	  This is a simple ping pong driver that exercises the scratchpads and
 > +	  doorbells of the ntb hardware.  This driver may be used to test that
 > +	  your ntb hardware and drivers are functioning at a basic level.
->  
+
+s/ntb/NTB/ (twice)
+
 > -	 If unsure, say N.
 > +	  If unsure, say N.
 >  
@@ -204,7 +242,9 @@ here, I think.
 > +	  enables more complicated debugging to be scripted from user space.
 > +	  This driver may be used to test that your ntb hardware and drivers are
 > +	  functioning at a basic level.
->  
+
+s/ntb/NTB/
+
 > -	 If unsure, say N.
 > +	  If unsure, say N.
 >  
