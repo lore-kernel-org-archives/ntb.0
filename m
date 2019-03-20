@@ -1,127 +1,73 @@
-Return-Path: <gunthorp@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id 71si460434ita.0.2019.03.21.17.06.53
+Return-Path: <dave.jiang@intel.com>
+Received: from mga04.intel.com (mga04.intel.com. [192.55.52.120])
+        by gmr-mx.google.com with ESMTPS id d62si107372pgc.5.2019.03.20.08.20.45
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Thu, 21 Mar 2019 17:06:53 -0700 (PDT)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Thu, 21 Mar 2019 18:06:43 -0600
-Message-Id: <20190322000645.15580-9-logang@deltatee.com>
-In-Reply-To: <20190322000645.15580-1-logang@deltatee.com>
-References: <20190322000645.15580-1-logang@deltatee.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 20 Mar 2019 08:20:45 -0700 (PDT)
+From: "Jiang, Dave" <dave.jiang@intel.com>
+Subject: RE: [PATCH -next] ntb: intel: Make intel_ntb3_peer_db_addr static
+Date: Wed, 20 Mar 2019 15:20:43 +0000
+Message-ID: <112A412BB11A1242B37129D931BCE5348445D71E@fmsmsx117.amr.corp.intel.com>
+References: <20190320140812.5952-1-yuehaibing@huawei.com>
+In-Reply-To: <20190320140812.5952-1-yuehaibing@huawei.com>
+Content-Language: en-US
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Subject: [PATCH v3 08/10] NTB: Add ntb_msi_test support to ntb_test
-To: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, iommu@lists.linux-foundation.org, linux-kselftest@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Joerg Roedel <joro@8bytes.org>
-Cc: Bjorn Helgaas <bhelgaas@google.com>, Allen Hubbe <allenbh@gmail.com>, Dave Jiang <dave.jiang@intel.com>, Serge Semin <fancer.lancer@gmail.com>, Eric Pilmore <epilmore@gigaio.com>, Logan Gunthorpe <logang@deltatee.com>
+Return-Path: dave.jiang@intel.com
+To: Yue Haibing <yuehaibing@huawei.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "allenbh@gmail.com" <allenbh@gmail.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-When the ntb_msi_test module is available, the test code will trigger
-each of the interrupts and ensure the corresponding occurrences files
-gets incremented.
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Cc: Jon Mason <jdmason@kudzu.us>
-Cc: Dave Jiang <dave.jiang@intel.com>
-Cc: Allen Hubbe <allenbh@gmail.com>
----
- tools/testing/selftests/ntb/ntb_test.sh | 54 ++++++++++++++++++++++++-
- 1 file changed, 52 insertions(+), 2 deletions(-)
 
-diff --git a/tools/testing/selftests/ntb/ntb_test.sh b/tools/testing/selftests/ntb/ntb_test.sh
-index 17ca36403d04..1a10b8f67727 100755
---- a/tools/testing/selftests/ntb/ntb_test.sh
-+++ b/tools/testing/selftests/ntb/ntb_test.sh
-@@ -87,10 +87,10 @@ set -e
- 
- function _modprobe()
- {
--	modprobe "$@"
-+	modprobe "$@" || return 1
- 
- 	if [[ "$REMOTE_HOST" != "" ]]; then
--		ssh "$REMOTE_HOST" modprobe "$@"
-+		ssh "$REMOTE_HOST" modprobe "$@" || return 1
- 	fi
- }
- 
-@@ -451,6 +451,30 @@ function pingpong_test()
- 	echo "  Passed"
- }
- 
-+function msi_test()
-+{
-+	LOC=$1
-+	REM=$2
-+
-+	write_file 1 $LOC/ready
-+
-+	echo "Running MSI interrupt tests on: $(subdirname $LOC) / $(subdirname $REM)"
-+
-+	CNT=$(read_file "$LOC/count")
-+	for ((i = 0; i < $CNT; i++)); do
-+		START=$(read_file $REM/../irq${i}_occurrences)
-+		write_file $i $LOC/trigger
-+		END=$(read_file $REM/../irq${i}_occurrences)
-+
-+		if [[ $(($END - $START)) != 1 ]]; then
-+			echo "MSI did not trigger the interrupt on the remote side!" >&2
-+			exit 1
-+		fi
-+	done
-+
-+	echo "  Passed"
-+}
-+
- function perf_test()
- {
- 	USE_DMA=$1
-@@ -529,6 +553,29 @@ function ntb_pingpong_tests()
- 	_modprobe -r ntb_pingpong
- }
- 
-+function ntb_msi_tests()
-+{
-+	LOCAL_MSI="$DEBUGFS/ntb_msi_test/$LOCAL_DEV"
-+	REMOTE_MSI="$REMOTE_HOST:$DEBUGFS/ntb_msi_test/$REMOTE_DEV"
-+
-+	echo "Starting ntb_msi_test tests..."
-+
-+	if ! _modprobe ntb_msi_test 2> /dev/null; then
-+		echo "  Not doing MSI tests seeing the module is not available."
-+		return
-+	fi
-+
-+	port_test $LOCAL_MSI $REMOTE_MSI
-+
-+	LOCAL_PEER="$LOCAL_MSI/peer$LOCAL_PIDX"
-+	REMOTE_PEER="$REMOTE_MSI/peer$REMOTE_PIDX"
-+
-+	msi_test $LOCAL_PEER $REMOTE_PEER
-+	msi_test $REMOTE_PEER $LOCAL_PEER
-+
-+	_modprobe -r ntb_msi_test
-+}
-+
- function ntb_perf_tests()
- {
- 	LOCAL_PERF="$DEBUGFS/ntb_perf/$LOCAL_DEV"
-@@ -550,6 +597,7 @@ function cleanup()
- 	_modprobe -r ntb_perf 2> /dev/null
- 	_modprobe -r ntb_pingpong 2> /dev/null
- 	_modprobe -r ntb_transport 2> /dev/null
-+	_modprobe -r ntb_msi_test 2> /dev/null
- 	set -e
- }
- 
-@@ -586,5 +634,7 @@ ntb_tool_tests
- echo
- ntb_pingpong_tests
- echo
-+ntb_msi_tests
-+echo
- ntb_perf_tests
- echo
--- 
-2.20.1
+> -----Original Message-----
+> From: Yue Haibing [mailto:yuehaibing@huawei.com]
+> Sent: Wednesday, March 20, 2019 7:08 AM
+> To: Jiang, Dave <dave.jiang@intel.com>; jdmason@kudzu.us;
+> allenbh@gmail.com
+> Cc: linux-kernel@vger.kernel.org; linux-ntb@googlegroups.com; YueHaibing
+> <yuehaibing@huawei.com>
+> Subject: [PATCH -next] ntb: intel: Make intel_ntb3_peer_db_addr static
+>=20
+> From: YueHaibing <yuehaibing@huawei.com>
+>=20
+> Fix sparse warning:
+>=20
+> drivers/ntb/hw/intel/ntb_hw_gen3.c:535:5: warning:
+>  symbol 'intel_ntb3_peer_db_addr' was not declared. Should it be static?
+
+For now yes. Thanks!
+
+Acked-by: Dave Jiang <dave.jiang@intel.com>
+
+>=20
+> Signed-off-by: YueHaibing <yuehaibing@huawei.com>
+> ---
+>  drivers/ntb/hw/intel/ntb_hw_gen3.c | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
+>=20
+> diff --git a/drivers/ntb/hw/intel/ntb_hw_gen3.c
+> b/drivers/ntb/hw/intel/ntb_hw_gen3.c
+> index f475b56..c339716 100644
+> --- a/drivers/ntb/hw/intel/ntb_hw_gen3.c
+> +++ b/drivers/ntb/hw/intel/ntb_hw_gen3.c
+> @@ -532,9 +532,9 @@ static int intel_ntb3_mw_set_trans(struct ntb_dev
+> *ntb, int pidx, int idx,
+>  	return 0;
+>  }
+>=20
+> -int intel_ntb3_peer_db_addr(struct ntb_dev *ntb, phys_addr_t *db_addr,
+> -				resource_size_t *db_size,
+> -				u64 *db_data, int db_bit)
+> +static int intel_ntb3_peer_db_addr(struct ntb_dev *ntb, phys_addr_t
+> *db_addr,
+> +				   resource_size_t *db_size,
+> +				   u64 *db_data, int db_bit)
+>  {
+>  	phys_addr_t db_addr_base;
+>  	struct intel_ntb_dev *ndev =3D ntb_ndev(ntb);
+> --
+> 2.7.0
+>=20
 
