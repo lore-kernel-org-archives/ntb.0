@@ -1,71 +1,60 @@
-Return-Path: <jdmason@kudzu.us>
-Received: from mail-yw1-xc35.google.com (mail-yw1-xc35.google.com. [2607:f8b0:4864:20::c35])
-        by gmr-mx.google.com with ESMTPS id d192si151370qkb.4.2019.03.20.11.17.12
+Return-Path: <helgaas@kernel.org>
+Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
+        by gmr-mx.google.com with ESMTPS id t17si708867itb.2.2019.03.22.09.51.14
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 20 Mar 2019 11:17:12 -0700 (PDT)
-Received: by mail-yw1-xc35.google.com with SMTP id z191so2760059ywa.6
-        for <linux-ntb@googlegroups.com>; Wed, 20 Mar 2019 11:17:12 -0700 (PDT)
-Return-Path: <jdmason@kudzu.us>
-Date: Wed, 20 Mar 2019 14:17:10 -0400
-From: Jon Mason <jdmason@kudzu.us>
-Subject: Re: [PATCH] NTB: ntb_transport: Ensure qp->tx_mw_dma_addr is
- initaliazed
-Message-ID: <20190320181709.GA1201@kudzu.us>
-References: <20190219195636.1485-1-logang@deltatee.com>
+        Fri, 22 Mar 2019 09:51:14 -0700 (PDT)
+Date: Fri, 22 Mar 2019 11:51:12 -0500
+From: Bjorn Helgaas <helgaas@kernel.org>
+Subject: Re: [PATCH v3 03/10] NTB: Introduce helper functions to calculate
+ logical port number
+Message-ID: <20190322165111.GO251185@google.com>
+References: <20190322000645.15580-1-logang@deltatee.com>
+ <20190322000645.15580-4-logang@deltatee.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190219195636.1485-1-logang@deltatee.com>
+In-Reply-To: <20190322000645.15580-4-logang@deltatee.com>
 To: Logan Gunthorpe <logang@deltatee.com>
-Cc: linux-ntb@googlegroups.com, Dan Carpenter <dan.carpenter@oracle.com>
+Cc: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, iommu@lists.linux-foundation.org, linux-kselftest@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Joerg Roedel <joro@8bytes.org>, Allen Hubbe <allenbh@gmail.com>, Dave Jiang <dave.jiang@intel.com>, Serge Semin <fancer.lancer@gmail.com>, Eric Pilmore <epilmore@gigaio.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Tue, Feb 19, 2019 at 12:56:36PM -0700, Logan Gunthorpe wrote:
-> Dan Carpenter's static checker reported:
+On Thu, Mar 21, 2019 at 06:06:38PM -0600, Logan Gunthorpe wrote:
+> This patch introduces the "Logical Port Number" which is similar to the
+> "Port Number" in that it enumerates the ports in the system.
 > 
->     drivers/ntb/ntb_transport.c:1926 ntb_transport_create_queue()
->     error: we previously assumed 'qp->tx_dma_chan' could be null (see line 1872)
-> 
-> This is because the tx_mw_dma_addr is uninitialized in this function and
-> may be incorrectly released using a NULL DMA channel.
-> 
-> In practice this bug will not likely be seen. I'd guess you could hit
-> this if you loaded ntb_netdev with use_dma=True, then unloaded it and
-> loaded it again after setting the module parameter to use_dma=False.
-> 
-> To fix this, we simply ensure that tx_mw_dma_addr is always
-> initialized to zero. This is the safest in case any other part of the
-> code operates on it if it is non-zero.
-> 
-> Fixes: c27ccb899219 ("NTB: ntb_transport: Ensure the destination buffer is mapped for TX DMA")
-> Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-> Cc: Dan Carpenter <dan.carpenter@oracle.com>
-> Cc: Jon Mason <jdmason@kudzu.us>
+> The original (or Physical) "Port Number" can be any number used by the
+> hardware to uniquley identify a port in the system. The "Logical Port
 
-Included in the ntb branch.
+s/uniquley/uniquely/
 
-Thanks,
-Jon
+> Number" enumerates all ports in the system from 0 to the number of
+> ports minus one.
+> 
+> For example a system with 5 ports might have the following port numbers
+> which would be enumareted thusly:
 
-> ---
->  drivers/ntb/ntb_transport.c | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> @Jon, it would be best if you can squash this with the commit that
-> introduced the bug in ntb-next. Thanks.
-> 
-> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-> index 526b65afc16a..e8a8304a42df 100644
-> --- a/drivers/ntb/ntb_transport.c
-> +++ b/drivers/ntb/ntb_transport.c
-> @@ -1866,6 +1866,7 @@ ntb_transport_create_queue(void *data, struct device *client_dev,
->  		qp->rx_dma_chan = NULL;
->  	}
-> 
-> +	qp->tx_mw_dma_addr = 0;
->  	if (qp->tx_dma_chan) {
->  		qp->tx_mw_dma_addr =
->  			dma_map_resource(qp->tx_dma_chan->device->dev,
-> --
-> 2.19.0
+s/enumareted/enumerated/
+
+> + * ntb_logical_port_number() - get the logical port number of the local port
+> + * @ntb:	NTB device context.
+> + *
+> + * The Logical Port Number is defined to be a unique number for each
+> + * port starting from zero through to the number of ports minus one.
+> + * This is in contrast to the Port Number where each port can be assigned
+> + * any unqique physical number by the hardware.
+
+s/unqique/unique/
+
+> + * ntb_peer_logical_port_number() - get the logical peer port by given index
+> + * @ntb:	NTB device context.
+> + * @pidx:	Peer port index.
+> + *
+> + * The Logical Port Number is defined to be a unique number for each
+> + * port starting from zero through to the number of ports minus one.
+> + * This is in contrast to the Port Number where each port can be assigned
+> + * any unqique physical number by the hardware.
+
+s/unqique/unique/
+
+Bjorn
