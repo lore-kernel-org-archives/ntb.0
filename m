@@ -1,62 +1,121 @@
-Return-Path: <Sanju.Mehta@amd.com>
-Received: from NAM01-BY2-obe.outbound.protection.outlook.com (mail-eopbgr810073.outbound.protection.outlook.com. [40.107.81.73])
-        by gmr-mx.google.com with ESMTPS id e23si100289ybb.1.2019.03.29.04.32.53
+Return-Path: <gunthorp@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id p8si357163oig.5.2019.03.21.17.06.53
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Fri, 29 Mar 2019 04:32:53 -0700 (PDT)
-From: "Mehta, Sanju" <Sanju.Mehta@amd.com>
-Subject: [PATCH] point to right memory window index
-Date: Fri, 29 Mar 2019 11:32:50 +0000
-Message-ID: <1553859137-4439-1-git-send-email-Sanju.Mehta@amd.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Thu, 21 Mar 2019 17:06:53 -0700 (PDT)
+From: Logan Gunthorpe <logang@deltatee.com>
+Date: Thu, 21 Mar 2019 18:06:39 -0600
+Message-Id: <20190322000645.15580-5-logang@deltatee.com>
+In-Reply-To: <20190322000645.15580-1-logang@deltatee.com>
+References: <20190322000645.15580-1-logang@deltatee.com>
 MIME-Version: 1.0
-To: "S-k, Shyam-sundar" <Shyam-sundar.S-k@amd.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "dave.jiang@intel.com" <dave.jiang@intel.com>, "allenbh@gmail.com" <allenbh@gmail.com>
-Cc: "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Mehta, Sanju" <Sanju.Mehta@amd.com>
+Content-Transfer-Encoding: 8bit
+Subject: [PATCH v3 04/10] NTB: Introduce functions to calculate multi-port resource index
+To: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, iommu@lists.linux-foundation.org, linux-kselftest@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Joerg Roedel <joro@8bytes.org>
+Cc: Bjorn Helgaas <bhelgaas@google.com>, Allen Hubbe <allenbh@gmail.com>, Dave Jiang <dave.jiang@intel.com>, Serge Semin <fancer.lancer@gmail.com>, Eric Pilmore <epilmore@gigaio.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Sanjay R Mehta <sanju.mehta@amd.com>
+When using multi-ports each port uses resources (dbs, msgs, mws, etc)
+on every other port. Creating a mapping for these resources such that
+each port has a corresponding resource on every other port is a bit
+tricky.
 
-second parameter of ntb_peer_mw_get_addr is pointing to wrong memory
-window index by passing "peer gidx" instead of "local gidx".
+Introduce the ntb_peer_resource_idx() function for this purpose.
+It returns the peer resource number that will correspond with the
+local peer index on the remote peer.
 
-For ex, "local gidx" value is '0' and "peer gidx" value is '1', then
+Also, introduce ntb_peer_highest_mw_idx() which will use
+ntb_peer_resource_idx() but return the MW index starting with the
+highest index and working down.
 
-on peer side ntb_mw_set_trans() api is used as below with gidx pointing to
-local side gidx which is '0', so memroy window '0' is chosen and XLAT '0'
-will be programmed by peer side.
-
-    ntb_mw_set_trans(perf->ntb, peer->pidx, peer->gidx, peer->inbuf_xlat,
-                    peer->inbuf_size);
-
-Now, on local side ntb_peer_mw_get_addr() is been used as below with gidx
-pointing to "peer gidx" which is '1', so pointing to memory window '1'
-instead of memory window '0'.
-
-    ntb_peer_mw_get_addr(perf->ntb,  peer->gidx, &phys_addr,
-                        &peer->outbuf_size);
-
-So this patch pass "local gidx" as parameter to ntb_peer_mw_get_addr().
-
-Signed-off-by: Sanjay R Mehta <sanju.mehta@amd.com>
+Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+Cc: Jon Mason <jdmason@kudzu.us>
+Cc: Dave Jiang <dave.jiang@intel.com>
+Cc: Allen Hubbe <allenbh@gmail.com>
 ---
- drivers/ntb/test/ntb_perf.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ include/linux/ntb.h | 70 +++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 70 insertions(+)
 
-diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index c7d1a48..08e18d7 100644
---- a/drivers/ntb/test/ntb_perf.c
-+++ b/drivers/ntb/test/ntb_perf.c
-@@ -1381,7 +1381,7 @@ static int perf_setup_peer_mw(struct perf_peer *peer)
- 	int ret;
-=20
- 	/* Get outbound MW parameters and map it */
--	ret =3D ntb_peer_mw_get_addr(perf->ntb, peer->gidx, &phys_addr,
-+	ret =3D ntb_peer_mw_get_addr(perf->ntb, perf->gidx, &phys_addr,
- 				   &peer->outbuf_size);
- 	if (ret)
- 		return ret;
---=20
-2.7.4
+diff --git a/include/linux/ntb.h b/include/linux/ntb.h
+index 52060b2130b6..a14a43b17952 100644
+--- a/include/linux/ntb.h
++++ b/include/linux/ntb.h
+@@ -1557,4 +1557,74 @@ static inline int ntb_peer_msg_write(struct ntb_dev *ntb, int pidx, int midx,
+ 	return ntb->ops->peer_msg_write(ntb, pidx, midx, msg);
+ }
+ 
++/**
++ * ntb_peer_resource_idx() - get a resource index for a given peer idx
++ * @ntb:	NTB device context.
++ * @pidx:	Peer port index.
++ *
++ * When constructing a graph of peers, each remote peer must use a different
++ * resource index (mw, doorbell, etc) to communicate with each other
++ * peer.
++ *
++ * In a two peer system, this function should always return 0 such that
++ * resource 0 points to the remote peer on both ports.
++ *
++ * In a 5 peer system, this function will return the following matrix
++ *
++ * pidx \ port    0    1    2    3    4
++ * 0              0    0    1    2    3
++ * 1              0    1    1    2    3
++ * 2              0    1    2    2    3
++ * 3              0    1    2    3    3
++ *
++ * For example, if this function is used to program peer's memory
++ * windows, port 0 will program MW 0 on all it's peers to point to itself.
++ * port 1 will program MW 0 in port 0 to point to itself and MW 1 on all
++ * other ports. etc.
++ *
++ * For the legacy two host case, ntb_port_number() and ntb_peer_port_number()
++ * both return zero and therefore this function will always return zero.
++ * So MW 0 on each host would be programmed to point to the other host.
++ *
++ * Return: the resource index to use for that peer.
++ */
++static inline int ntb_peer_resource_idx(struct ntb_dev *ntb, int pidx)
++{
++	int local_port, peer_port;
++
++	if (pidx >= ntb_peer_port_count(ntb))
++		return -EINVAL;
++
++	local_port = ntb_logical_port_number(ntb);
++	peer_port = ntb_peer_logical_port_number(ntb, pidx);
++
++	if (peer_port < local_port)
++		return local_port - 1;
++	else
++		return local_port;
++}
++
++/**
++ * ntb_peer_highest_mw_idx() - get a memory window index for a given peer idx
++ *	using the highest index memory windows first
++ *
++ * @ntb:	NTB device context.
++ * @pidx:	Peer port index.
++ *
++ * Like ntb_peer_resource_idx(), except it returns indexes starting with
++ * last memory window index.
++ *
++ * Return: the resource index to use for that peer.
++ */
++static inline int ntb_peer_highest_mw_idx(struct ntb_dev *ntb, int pidx)
++{
++	int ret;
++
++	ret = ntb_peer_resource_idx(ntb, pidx);
++	if (ret < 0)
++		return ret;
++
++	return ntb_mw_count(ntb, pidx) - ret - 1;
++}
++
+ #endif
+-- 
+2.20.1
 
