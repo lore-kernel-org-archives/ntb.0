@@ -1,36 +1,67 @@
-Date: Sat, 2 Mar 2019 07:42:35 -0800 (PST)
-From: reza.salkhordeh@gmail.com
-Message-Id: <1f9d57ce-fcb4-47b2-9213-62607e96ad72@googlegroups.com>
-Subject: Compatibility with board-to-board connection
+Return-Path: <gunthorp@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id p1si446921qkg.3.2019.03.21.17.06.54
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Thu, 21 Mar 2019 17:06:55 -0700 (PDT)
+From: Logan Gunthorpe <logang@deltatee.com>
+Date: Thu, 21 Mar 2019 18:06:45 -0600
+Message-Id: <20190322000645.15580-11-logang@deltatee.com>
+In-Reply-To: <20190322000645.15580-1-logang@deltatee.com>
+References: <20190322000645.15580-1-logang@deltatee.com>
 MIME-Version: 1.0
-Content-Type: multipart/mixed; 
-	boundary="----=_Part_819_276440613.1551541355591"
-To: linux-ntb <linux-ntb@googlegroups.com>
+Content-Transfer-Encoding: 8bit
+Subject: [PATCH v3 10/10] NTB: Describe the ntb_msi_test client in the documentation.
+To: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, iommu@lists.linux-foundation.org, linux-kselftest@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Joerg Roedel <joro@8bytes.org>
+Cc: Bjorn Helgaas <bhelgaas@google.com>, Allen Hubbe <allenbh@gmail.com>, Dave Jiang <dave.jiang@intel.com>, Serge Semin <fancer.lancer@gmail.com>, Eric Pilmore <epilmore@gigaio.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-------=_Part_819_276440613.1551541355591
-Content-Type: multipart/alternative; 
-	boundary="----=_Part_820_1775572933.1551541355591"
+Add a blurb in Documentation/ntb.txt to describe the ntb_msi_test tool's
+debugfs interface. Similar to the (out of date) ntb_tool description.
 
-------=_Part_820_1775572933.1551541355591
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+---
+ Documentation/ntb.txt | 27 +++++++++++++++++++++++++++
+ 1 file changed, 27 insertions(+)
 
-Hi,
+diff --git a/Documentation/ntb.txt b/Documentation/ntb.txt
+index a043854d28df..802a539f1592 100644
+--- a/Documentation/ntb.txt
++++ b/Documentation/ntb.txt
+@@ -194,6 +194,33 @@ Debugfs Files:
+ 	This file is used to read and write peer scratchpads.  See
+ 	*spad* for details.
+ 
++NTB MSI Test Client (ntb\_msi\_test)
++------------------------------------
++
++The MSI test client serves to test and debug the MSI library which
++allows for passing MSI interrupts across NTB memory windows. The
++test client is interacted with through the debugfs filesystem:
++
++* *debugfs*/ntb\_tool/*hw*/
++	A directory in debugfs will be created for each
++	NTB device probed by the tool.  This directory is shortened to *hw*
++	below.
++* *hw*/port
++	This file describes the local port number
++* *hw*/irq*_occurrences
++	One occurrences file exists for each interrupt and, when read,
++	returns the number of times the interrupt has been triggered.
++* *hw*/peer*/port
++	This file describes the port number for each peer
++* *hw*/peer*/count
++	This file describes the number of interrupts that can be
++	triggered on each peer
++* *hw*/peer*/trigger
++	Writing an interrupt number (any number less than the value
++	specified in count) will trigger the interrupt on the
++	specified peer. That peer's interrupt's occurrence file
++	should be incremented.
++
+ NTB Hardware Drivers
+ ====================
+ 
+-- 
+2.20.1
 
-I wanted to know if anyone has experience on running ntb_netdev with 
-board-to-board connections similar to this one using E5v4 CPU:
-
-https://www.supermicro.com/products/system/4U/6048/SSG-6048R-DE2CR24L.cfm?parts=SHOW#jump
-
-Kind Regards,
-Reza
-
-------=_Part_820_1775572933.1551541355591
-Content-Type: text/html; charset=utf-8
-Content-Transfer-Encoding: 7bit
-
-<div dir="ltr"><div>Hi,</div><div><br></div><div>I wanted to know if anyone has experience on running ntb_netdev with board-to-board connections similar to this one using E5v4 CPU:<br></div><div><br></div><div>https://www.supermicro.com/products/system/4U/6048/SSG-6048R-DE2CR24L.cfm?parts=SHOW#jump</div><div><br></div><div>Kind Regards,</div><div>Reza<br></div></div>
-------=_Part_820_1775572933.1551541355591--
-
-------=_Part_819_276440613.1551541355591--
