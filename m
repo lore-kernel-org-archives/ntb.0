@@ -1,32 +1,48 @@
-Return-Path: <Shyam-sundar.S-k@amd.com>
-Received: from NAM03-BY2-obe.outbound.protection.outlook.com (mail-eopbgr780053.outbound.protection.outlook.com. [40.107.78.53])
-        by gmr-mx.google.com with ESMTPS id e74si1232715ite.1.2019.03.25.22.46.45
+Return-Path: <dan.carpenter@oracle.com>
+Received: from aserp2130.oracle.com (aserp2130.oracle.com. [141.146.126.79])
+        by gmr-mx.google.com with ESMTPS id 62si1288707ybf.2.2019.03.25.02.23.40
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Mon, 25 Mar 2019 22:46:45 -0700 (PDT)
-From: "S-k, Shyam-sundar" <Shyam-sundar.S-k@amd.com>
-Subject: Re: [PATCH] NTB: amd: Silence shift wrapping warning in
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 25 Mar 2019 02:23:40 -0700 (PDT)
+Date: Mon, 25 Mar 2019 12:23:26 +0300
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: [PATCH] NTB: amd: Silence shift wrapping warning in
  amd_ntb_db_vector_mask()
-Date: Tue, 26 Mar 2019 05:46:44 +0000
-Message-ID: <af8b8b48-ad5e-75c2-d3fe-674b14a0b9af@amd.com>
-References: <20190325092326.GE16023@kadam>
-In-Reply-To: <20190325092326.GE16023@kadam>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <E6CD28DDF8FFC5459B91B993E1C43EFE@namprd12.prod.outlook.com>
-Content-Transfer-Encoding: base64
+Message-ID: <20190325092326.GE16023@kadam>
 MIME-Version: 1.0
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "kernel-janitors@vger.kernel.org" <kernel-janitors@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+To: Shyam Sundar S K <Shyam-sundar.S-k@amd.com>
+Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com, kernel-janitors@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-T24gMy8yNS8yMDE5IDI6NTMgUE0sIERhbiBDYXJwZW50ZXIgd3JvdGU6DQo+IFRoaXMgY29kZSB0
-cmlnZ2VycyBhIFNtYXRjaCB3YXJuaW5nOg0KPg0KPiAgICAgZHJpdmVycy9udGIvaHcvYW1kL250
-Yl9od19hbWQuYzozMzYgYW1kX250Yl9kYl92ZWN0b3JfbWFzaygpDQo+ICAgICB3YXJuOiBzaG91
-bGQgJygxIDw8IGRiX3ZlY3RvciknIGJlIGEgNjQgYml0IHR5cGU/DQo+DQo+IEkgZG9uJ3QgdGhp
-bmsgImRiX3ZlY3RvciIgY2FuIGJlIGhpZ2hlciB0aGFuIDE2IHNvIHRoaXMgZG9lc24ndCBhZmZl
-Y3QNCj4gcnVudGltZSwgYnV0IGl0J3MgbmljZSB0byBzaWxlbmNlIHRoZSBzdGF0aWMgY2hlY2tl
-ciB3YXJuaW5nIGFuZCB3ZQ0KPiBtaWdodCBpbmNyZWFzZSAibmRldi0+ZGJfY291bnQiIGluIHRo
-ZSBmdXR1cmUuDQo+DQo+IFNpZ25lZC1vZmYtYnk6IERhbiBDYXJwZW50ZXIgPGRhbi5jYXJwZW50
-ZXJAb3JhY2xlLmNvbT4NCkFja2VkLWJ5OiBTaHlhbSBTdW5kYXIgUyBLIDxTaHlhbS1zdW5kYXIu
-Uy1rQGFtZC5jb20+DQo=
+This code triggers a Smatch warning:
+
+    drivers/ntb/hw/amd/ntb_hw_amd.c:336 amd_ntb_db_vector_mask()
+    warn: should '(1 << db_vector)' be a 64 bit type?
+
+I don't think "db_vector" can be higher than 16 so this doesn't affect
+runtime, but it's nice to silence the static checker warning and we
+might increase "ndev->db_count" in the future.
+
+Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+---
+ drivers/ntb/hw/amd/ntb_hw_amd.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.c b/drivers/ntb/hw/amd/ntb_hw_amd.c
+index 16c10dfe0919..84aec5500df3 100644
+--- a/drivers/ntb/hw/amd/ntb_hw_amd.c
++++ b/drivers/ntb/hw/amd/ntb_hw_amd.c
+@@ -333,7 +333,7 @@ static u64 amd_ntb_db_vector_mask(struct ntb_dev *ntb, int db_vector)
+ 	if (db_vector < 0 || db_vector > ndev->db_count)
+ 		return 0;
+ 
+-	return ntb_ndev(ntb)->db_valid_mask & (1 << db_vector);
++	return ntb_ndev(ntb)->db_valid_mask & (1ULL << db_vector);
+ }
+ 
+ static u64 amd_ntb_db_read(struct ntb_dev *ntb)
+-- 
+2.17.1
+
