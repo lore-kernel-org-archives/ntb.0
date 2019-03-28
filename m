@@ -1,524 +1,235 @@
-Return-Path: <gunthorp@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id 65si691845itx.1.2019.03.21.17.06.53
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-it1-x129.google.com (mail-it1-x129.google.com. [2607:f8b0:4864:20::129])
+        by gmr-mx.google.com with ESMTPS id w136si56155itb.2.2019.03.28.04.45.39
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Thu, 21 Mar 2019 17:06:53 -0700 (PDT)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Thu, 21 Mar 2019 18:06:42 -0600
-Message-Id: <20190322000645.15580-8-logang@deltatee.com>
-In-Reply-To: <20190322000645.15580-1-logang@deltatee.com>
-References: <20190322000645.15580-1-logang@deltatee.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 28 Mar 2019 04:45:39 -0700 (PDT)
+Received: by mail-it1-x129.google.com with SMTP id e24so5477223itl.1
+        for <linux-ntb@googlegroups.com>; Thu, 28 Mar 2019 04:45:39 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Subject: [PATCH v3 07/10] NTB: Introduce NTB MSI Test Client
-To: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, iommu@lists.linux-foundation.org, linux-kselftest@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Joerg Roedel <joro@8bytes.org>
-Cc: Bjorn Helgaas <bhelgaas@google.com>, Allen Hubbe <allenbh@gmail.com>, Dave Jiang <dave.jiang@intel.com>, Serge Semin <fancer.lancer@gmail.com>, Eric Pilmore <epilmore@gigaio.com>, Logan Gunthorpe <logang@deltatee.com>
+References: <1551898265-18909-1-git-send-email-info@metux.net>
+ <1551909774-24030-1-git-send-email-info@metux.net> <20190320211517.GG251185@google.com>
+In-Reply-To: <20190320211517.GG251185@google.com>
+From: Jon Mason <jdmason@kudzu.us>
+Date: Thu, 28 Mar 2019 11:45:28 +0000
+Message-ID: <CAPoiz9x6bSdFpE-cuOBinE7WdNvzaD5R+tsweUqWe+KsL87GQw@mail.gmail.com>
+Subject: Re: [PATCH v2] drivers: ntb: Kconfig: pedantic cleanups
+Content-Type: text/plain; charset="UTF-8"
+To: Bjorn Helgaas <helgaas@kernel.org>
+Cc: "Enrico Weigelt, metux IT consult" <info@metux.net>, linux-kernel <linux-kernel@vger.kernel.org>, Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Logan Gunthorpe <logang@deltatee.com>, linux-ntb <linux-ntb@googlegroups.com>, linux-pci@vger.kernel.org, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Introduce a tool to test NTB MSI interrupts similar to the other
-NTB test tools. This tool creates a debugfs directory for each
-NTB device with the following files:
+On Wed, Mar 20, 2019 at 9:15 PM Bjorn Helgaas <helgaas@kernel.org> wrote:
+>
+> [+cc Jon, Dave, Allen]
+>
+> On Wed, Mar 06, 2019 at 11:02:54PM +0100, Enrico Weigelt, metux IT consult wrote:
+> > Formatting of Kconfig files doesn't look so pretty, so just
+> > take damp cloth and clean it up.
+>
+> Oops, I didn't notice that this was a v2.  I first thought this was a
+> 2/2 patch.  Sorry for the noise.  Most of my comments still apply
+> here, I think.
 
-port
-irqX_occurrences
-peerX/port
-peerX/count
-peerX/trigger
+I 100% agree with the comments form Bjorn.  Though most of the
+comments were from previous versions, but if you are going to change
+it then might as well make it right.  :)
+Assuming you make the changes, I'll pull it in.
 
-The 'port' file tells the user the local port number and the
-'occurrences' files tell the number of local interrupts that
-have been received for each interrupt.
+Thanks,
+Jon
 
-For each peer, the 'port' file and the 'count' file tell you the
-peer's port number and number of interrupts respectively. Writing
-the interrupt number to the 'trigger' file triggers the interrupt
-handler for the peer which should increment their corresponding
-'occurrences' file. The 'ready' file indicates if a peer is ready,
-writing to this file blocks until it is ready.
-
-The module parameter num_irqs can be used to set the number of
-local interrupts. By default this is 4. This is only limited by
-the number of unused MSI interrupts registered by the hardware
-(this will require support of the hardware driver) and there must
-be at least 2*num_irqs + 1 spads registers available.
-
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Cc: Jon Mason <jdmason@kudzu.us>
-Cc: Dave Jiang <dave.jiang@intel.com>
-Cc: Allen Hubbe <allenbh@gmail.com>
----
- drivers/ntb/test/Kconfig        |   9 +
- drivers/ntb/test/Makefile       |   1 +
- drivers/ntb/test/ntb_msi_test.c | 433 ++++++++++++++++++++++++++++++++
- 3 files changed, 443 insertions(+)
- create mode 100644 drivers/ntb/test/ntb_msi_test.c
-
-diff --git a/drivers/ntb/test/Kconfig b/drivers/ntb/test/Kconfig
-index a5d0eda44438..a3f3e2638935 100644
---- a/drivers/ntb/test/Kconfig
-+++ b/drivers/ntb/test/Kconfig
-@@ -25,3 +25,12 @@ config NTB_PERF
- 	 to and from the window without additional software interaction.
- 
- 	 If unsure, say N.
-+
-+config NTB_MSI_TEST
-+	tristate "NTB MSI Test Client"
-+	depends on NTB_MSI
-+	help
-+	  This tool demonstrates the use of the NTB MSI library to
-+	  send MSI interrupts between peers.
-+
-+	  If unsure, say N.
-diff --git a/drivers/ntb/test/Makefile b/drivers/ntb/test/Makefile
-index 9e77e0b761c2..d2895ca995e4 100644
---- a/drivers/ntb/test/Makefile
-+++ b/drivers/ntb/test/Makefile
-@@ -1,3 +1,4 @@
- obj-$(CONFIG_NTB_PINGPONG) += ntb_pingpong.o
- obj-$(CONFIG_NTB_TOOL) += ntb_tool.o
- obj-$(CONFIG_NTB_PERF) += ntb_perf.o
-+obj-$(CONFIG_NTB_MSI_TEST) += ntb_msi_test.o
-diff --git a/drivers/ntb/test/ntb_msi_test.c b/drivers/ntb/test/ntb_msi_test.c
-new file mode 100644
-index 000000000000..99d826ed9c34
---- /dev/null
-+++ b/drivers/ntb/test/ntb_msi_test.c
-@@ -0,0 +1,433 @@
-+// SPDX-License-Identifier: (GPL-2.0 OR BSD-3-Clause)
-+
-+#include <linux/module.h>
-+#include <linux/debugfs.h>
-+#include <linux/ntb.h>
-+#include <linux/pci.h>
-+#include <linux/radix-tree.h>
-+#include <linux/workqueue.h>
-+
-+MODULE_LICENSE("Dual BSD/GPL");
-+MODULE_VERSION("0.1");
-+MODULE_AUTHOR("Logan Gunthorpe <logang@deltatee.com>");
-+MODULE_DESCRIPTION("Test for sending MSI interrupts over an NTB memory window");
-+
-+static int num_irqs = 4;
-+module_param(num_irqs, int, 0644);
-+MODULE_PARM_DESC(num_irqs, "number of irqs to use");
-+
-+struct ntb_msit_ctx {
-+	struct ntb_dev *ntb;
-+	struct dentry *dbgfs_dir;
-+	struct work_struct setup_work;
-+
-+	struct ntb_msit_isr_ctx {
-+		int irq_idx;
-+		int irq_num;
-+		int occurrences;
-+		struct ntb_msit_ctx *nm;
-+		struct ntb_msi_desc desc;
-+	} *isr_ctx;
-+
-+	struct ntb_msit_peer {
-+		struct ntb_msit_ctx *nm;
-+		int pidx;
-+		int num_irqs;
-+		struct completion init_comp;
-+		struct ntb_msi_desc *msi_desc;
-+	} peers[];
-+};
-+
-+static struct dentry *ntb_msit_dbgfs_topdir;
-+
-+static irqreturn_t ntb_msit_isr(int irq, void *dev)
-+{
-+	struct ntb_msit_isr_ctx *isr_ctx = dev;
-+	struct ntb_msit_ctx *nm = isr_ctx->nm;
-+
-+	dev_dbg(&nm->ntb->dev, "Interrupt Occurred: %d",
-+		isr_ctx->irq_idx);
-+
-+	isr_ctx->occurrences++;
-+
-+	return IRQ_HANDLED;
-+}
-+
-+static void ntb_msit_setup_work(struct work_struct *work)
-+{
-+	struct ntb_msit_ctx *nm = container_of(work, struct ntb_msit_ctx,
-+					       setup_work);
-+	int irq_count = 0;
-+	int irq;
-+	int ret;
-+	uintptr_t i;
-+
-+	ret = ntb_msi_setup_mws(nm->ntb);
-+	if (ret) {
-+		dev_err(&nm->ntb->dev, "Unable to setup MSI windows: %d\n",
-+			ret);
-+		return;
-+	}
-+
-+	for (i = 0; i < num_irqs; i++) {
-+		nm->isr_ctx[i].irq_idx = i;
-+		nm->isr_ctx[i].nm = nm;
-+
-+		if (!nm->isr_ctx[i].irq_num) {
-+			irq = ntbm_msi_request_irq(nm->ntb, ntb_msit_isr,
-+						   KBUILD_MODNAME,
-+						   &nm->isr_ctx[i],
-+						   &nm->isr_ctx[i].desc);
-+			if (irq < 0)
-+				break;
-+
-+			nm->isr_ctx[i].irq_num = irq;
-+		}
-+
-+		ret = ntb_spad_write(nm->ntb, 2 * i + 1,
-+				     nm->isr_ctx[i].desc.addr_offset);
-+		if (ret)
-+			break;
-+
-+		ret = ntb_spad_write(nm->ntb, 2 * i + 2,
-+				     nm->isr_ctx[i].desc.data);
-+		if (ret)
-+			break;
-+
-+		irq_count++;
-+	}
-+
-+	ntb_spad_write(nm->ntb, 0, irq_count);
-+	ntb_peer_db_set(nm->ntb, BIT(ntb_port_number(nm->ntb)));
-+}
-+
-+static void ntb_msit_desc_changed(void *ctx)
-+{
-+	struct ntb_msit_ctx *nm = ctx;
-+	int i;
-+
-+	dev_dbg(&nm->ntb->dev, "MSI Descriptors Changed\n");
-+
-+	for (i = 0; i < num_irqs; i++) {
-+		ntb_spad_write(nm->ntb, 2 * i + 1,
-+			       nm->isr_ctx[i].desc.addr_offset);
-+		ntb_spad_write(nm->ntb, 2 * i + 2,
-+			       nm->isr_ctx[i].desc.data);
-+	}
-+
-+	ntb_peer_db_set(nm->ntb, BIT(ntb_port_number(nm->ntb)));
-+}
-+
-+static void ntb_msit_link_event(void *ctx)
-+{
-+	struct ntb_msit_ctx *nm = ctx;
-+
-+	if (!ntb_link_is_up(nm->ntb, NULL, NULL))
-+		return;
-+
-+	schedule_work(&nm->setup_work);
-+}
-+
-+static void ntb_msit_copy_peer_desc(struct ntb_msit_ctx *nm, int peer)
-+{
-+	int i;
-+	struct ntb_msi_desc *desc = nm->peers[peer].msi_desc;
-+	int irq_count = nm->peers[peer].num_irqs;
-+
-+	for (i = 0; i < irq_count; i++) {
-+		desc[i].addr_offset = ntb_peer_spad_read(nm->ntb, peer,
-+							 2 * i + 1);
-+		desc[i].data = ntb_peer_spad_read(nm->ntb, peer, 2 * i + 2);
-+	}
-+
-+	dev_info(&nm->ntb->dev, "Found %d interrupts on peer %d\n",
-+		 irq_count, peer);
-+
-+	complete_all(&nm->peers[peer].init_comp);
-+}
-+
-+static void ntb_msit_db_event(void *ctx, int vec)
-+{
-+	struct ntb_msit_ctx *nm = ctx;
-+	struct ntb_msi_desc *desc;
-+	u64 peer_mask = ntb_db_read(nm->ntb);
-+	u32 irq_count;
-+	int peer;
-+
-+	ntb_db_clear(nm->ntb, peer_mask);
-+
-+	for (peer = 0; peer < sizeof(peer_mask) * 8; peer++) {
-+		if (!(peer_mask & BIT(peer)))
-+			continue;
-+
-+		irq_count = ntb_peer_spad_read(nm->ntb, peer, 0);
-+		if (irq_count == -1)
-+			continue;
-+
-+		desc = kcalloc(irq_count, sizeof(*desc), GFP_ATOMIC);
-+		if (!desc)
-+			continue;
-+
-+		kfree(nm->peers[peer].msi_desc);
-+		nm->peers[peer].msi_desc = desc;
-+		nm->peers[peer].num_irqs = irq_count;
-+
-+		ntb_msit_copy_peer_desc(nm, peer);
-+	}
-+}
-+
-+static const struct ntb_ctx_ops ntb_msit_ops = {
-+	.link_event = ntb_msit_link_event,
-+	.db_event = ntb_msit_db_event,
-+};
-+
-+static int ntb_msit_dbgfs_trigger(void *data, u64 idx)
-+{
-+	struct ntb_msit_peer *peer = data;
-+
-+	if (idx >= peer->num_irqs)
-+		return -EINVAL;
-+
-+	dev_dbg(&peer->nm->ntb->dev, "trigger irq %llu on peer %u\n",
-+		idx, peer->pidx);
-+
-+	return ntb_msi_peer_trigger(peer->nm->ntb, peer->pidx,
-+				    &peer->msi_desc[idx]);
-+}
-+
-+DEFINE_DEBUGFS_ATTRIBUTE(ntb_msit_trigger_fops, NULL,
-+			 ntb_msit_dbgfs_trigger, "%llu\n");
-+
-+static int ntb_msit_dbgfs_port_get(void *data, u64 *port)
-+{
-+	struct ntb_msit_peer *peer = data;
-+
-+	*port = ntb_peer_port_number(peer->nm->ntb, peer->pidx);
-+
-+	return 0;
-+}
-+
-+DEFINE_DEBUGFS_ATTRIBUTE(ntb_msit_port_fops, ntb_msit_dbgfs_port_get,
-+			 NULL, "%llu\n");
-+
-+static int ntb_msit_dbgfs_count_get(void *data, u64 *count)
-+{
-+	struct ntb_msit_peer *peer = data;
-+
-+	*count = peer->num_irqs;
-+
-+	return 0;
-+}
-+
-+DEFINE_DEBUGFS_ATTRIBUTE(ntb_msit_count_fops, ntb_msit_dbgfs_count_get,
-+			 NULL, "%llu\n");
-+
-+static int ntb_msit_dbgfs_ready_get(void *data, u64 *ready)
-+{
-+	struct ntb_msit_peer *peer = data;
-+
-+	*ready = try_wait_for_completion(&peer->init_comp);
-+
-+	return 0;
-+}
-+
-+static int ntb_msit_dbgfs_ready_set(void *data, u64 ready)
-+{
-+	struct ntb_msit_peer *peer = data;
-+
-+	return wait_for_completion_interruptible(&peer->init_comp);
-+}
-+
-+DEFINE_DEBUGFS_ATTRIBUTE(ntb_msit_ready_fops, ntb_msit_dbgfs_ready_get,
-+			 ntb_msit_dbgfs_ready_set, "%llu\n");
-+
-+static int ntb_msit_dbgfs_occurrences_get(void *data, u64 *occurrences)
-+{
-+	struct ntb_msit_isr_ctx *isr_ctx = data;
-+
-+	*occurrences = isr_ctx->occurrences;
-+
-+	return 0;
-+}
-+
-+DEFINE_DEBUGFS_ATTRIBUTE(ntb_msit_occurrences_fops,
-+			 ntb_msit_dbgfs_occurrences_get,
-+			 NULL, "%llu\n");
-+
-+static int ntb_msit_dbgfs_local_port_get(void *data, u64 *port)
-+{
-+	struct ntb_msit_ctx *nm = data;
-+
-+	*port = ntb_port_number(nm->ntb);
-+
-+	return 0;
-+}
-+
-+DEFINE_DEBUGFS_ATTRIBUTE(ntb_msit_local_port_fops,
-+			 ntb_msit_dbgfs_local_port_get,
-+			 NULL, "%llu\n");
-+
-+static void ntb_msit_create_dbgfs(struct ntb_msit_ctx *nm)
-+{
-+	struct pci_dev *pdev = nm->ntb->pdev;
-+	char buf[32];
-+	int i;
-+	struct dentry *peer_dir;
-+
-+	nm->dbgfs_dir = debugfs_create_dir(pci_name(pdev),
-+					   ntb_msit_dbgfs_topdir);
-+	debugfs_create_file("port", 0400, nm->dbgfs_dir, nm,
-+			    &ntb_msit_local_port_fops);
-+
-+	for (i = 0; i < ntb_peer_port_count(nm->ntb); i++) {
-+		nm->peers[i].pidx = i;
-+		nm->peers[i].nm = nm;
-+		init_completion(&nm->peers[i].init_comp);
-+
-+		snprintf(buf, sizeof(buf), "peer%d", i);
-+		peer_dir = debugfs_create_dir(buf, nm->dbgfs_dir);
-+
-+		debugfs_create_file_unsafe("trigger", 0200, peer_dir,
-+					   &nm->peers[i],
-+					   &ntb_msit_trigger_fops);
-+
-+		debugfs_create_file_unsafe("port", 0400, peer_dir,
-+					   &nm->peers[i], &ntb_msit_port_fops);
-+
-+		debugfs_create_file_unsafe("count", 0400, peer_dir,
-+					   &nm->peers[i],
-+					   &ntb_msit_count_fops);
-+
-+		debugfs_create_file_unsafe("ready", 0600, peer_dir,
-+					   &nm->peers[i],
-+					   &ntb_msit_ready_fops);
-+	}
-+
-+	for (i = 0; i < num_irqs; i++) {
-+		snprintf(buf, sizeof(buf), "irq%d_occurrences", i);
-+		debugfs_create_file_unsafe(buf, 0400, nm->dbgfs_dir,
-+					   &nm->isr_ctx[i],
-+					   &ntb_msit_occurrences_fops);
-+	}
-+}
-+
-+static void ntb_msit_remove_dbgfs(struct ntb_msit_ctx *nm)
-+{
-+	debugfs_remove_recursive(nm->dbgfs_dir);
-+}
-+
-+static int ntb_msit_probe(struct ntb_client *client, struct ntb_dev *ntb)
-+{
-+	struct ntb_msit_ctx *nm;
-+	size_t struct_size;
-+	int peers;
-+	int ret;
-+
-+	peers = ntb_peer_port_count(ntb);
-+	if (peers <= 0)
-+		return -EINVAL;
-+
-+	if (ntb_spad_is_unsafe(ntb) || ntb_spad_count(ntb) < 2 * num_irqs + 1) {
-+		dev_err(&ntb->dev, "NTB MSI test requires at least %d spads for %d irqs\n",
-+			2 * num_irqs + 1, num_irqs);
-+		return -EFAULT;
-+	}
-+
-+	ret = ntb_spad_write(ntb, 0, -1);
-+	if (ret) {
-+		dev_err(&ntb->dev, "Unable to write spads: %d\n", ret);
-+		return ret;
-+	}
-+
-+	ret = ntb_db_clear_mask(ntb, GENMASK(peers - 1, 0));
-+	if (ret) {
-+		dev_err(&ntb->dev, "Unable to clear doorbell mask: %d\n", ret);
-+		return ret;
-+	}
-+
-+	ret = ntb_msi_init(ntb, ntb_msit_desc_changed);
-+	if (ret) {
-+		dev_err(&ntb->dev, "Unable to initialize MSI library: %d\n",
-+			ret);
-+		return ret;
-+	}
-+
-+	struct_size = sizeof(*nm) + sizeof(*nm->peers) * peers;
-+
-+	nm = devm_kzalloc(&ntb->dev, struct_size, GFP_KERNEL);
-+	if (!nm)
-+		return -ENOMEM;
-+
-+	nm->isr_ctx = devm_kcalloc(&ntb->dev, num_irqs, sizeof(*nm->isr_ctx),
-+				   GFP_KERNEL);
-+	if (!nm->isr_ctx)
-+		return -ENOMEM;
-+
-+	INIT_WORK(&nm->setup_work, ntb_msit_setup_work);
-+	nm->ntb = ntb;
-+
-+	ntb_msit_create_dbgfs(nm);
-+
-+	ret = ntb_set_ctx(ntb, nm, &ntb_msit_ops);
-+	if (ret)
-+		goto remove_dbgfs;
-+
-+	if (!nm->isr_ctx)
-+		goto remove_dbgfs;
-+
-+	ntb_link_enable(ntb, NTB_SPEED_AUTO, NTB_WIDTH_AUTO);
-+
-+	return 0;
-+
-+remove_dbgfs:
-+	ntb_msit_remove_dbgfs(nm);
-+	devm_kfree(&ntb->dev, nm->isr_ctx);
-+	devm_kfree(&ntb->dev, nm);
-+	return ret;
-+}
-+
-+static void ntb_msit_remove(struct ntb_client *client, struct ntb_dev *ntb)
-+{
-+	struct ntb_msit_ctx *nm = ntb->ctx;
-+	int i;
-+
-+	ntb_link_disable(ntb);
-+	ntb_db_set_mask(ntb, ntb_db_valid_mask(ntb));
-+	ntb_msi_clear_mws(ntb);
-+
-+	for (i = 0; i < ntb_peer_port_count(ntb); i++)
-+		kfree(nm->peers[i].msi_desc);
-+
-+	ntb_clear_ctx(ntb);
-+	ntb_msit_remove_dbgfs(nm);
-+}
-+
-+static struct ntb_client ntb_msit_client = {
-+	.ops = {
-+		.probe = ntb_msit_probe,
-+		.remove = ntb_msit_remove
-+	}
-+};
-+
-+static int __init ntb_msit_init(void)
-+{
-+	int ret;
-+
-+	if (debugfs_initialized())
-+		ntb_msit_dbgfs_topdir = debugfs_create_dir(KBUILD_MODNAME,
-+							   NULL);
-+
-+	ret = ntb_register_client(&ntb_msit_client);
-+	if (ret)
-+		debugfs_remove_recursive(ntb_msit_dbgfs_topdir);
-+
-+	return ret;
-+}
-+module_init(ntb_msit_init);
-+
-+static void __exit ntb_msit_exit(void)
-+{
-+	ntb_unregister_client(&ntb_msit_client);
-+	debugfs_remove_recursive(ntb_msit_dbgfs_topdir);
-+}
-+module_exit(ntb_msit_exit);
--- 
-2.20.1
-
+>
+> > Signed-off-by: Enrico Weigelt, metux IT consult <info@metux.net>
+> > ---
+> >  drivers/ntb/Kconfig          | 20 ++++++++++----------
+> >  drivers/ntb/hw/amd/Kconfig   |  4 ++--
+> >  drivers/ntb/hw/idt/Kconfig   | 41 ++++++++++++++++++++---------------------
+> >  drivers/ntb/hw/intel/Kconfig |  4 ++--
+> >  drivers/ntb/hw/mscc/Kconfig  |  8 ++++----
+> >  drivers/ntb/test/Kconfig     | 26 +++++++++++++-------------
+> >  6 files changed, 51 insertions(+), 52 deletions(-)
+> >
+> > diff --git a/drivers/ntb/Kconfig b/drivers/ntb/Kconfig
+> > index 95944e5..5ce3fdd 100644
+> > --- a/drivers/ntb/Kconfig
+> > +++ b/drivers/ntb/Kconfig
+> > @@ -2,13 +2,13 @@ menuconfig NTB
+> >       tristate "Non-Transparent Bridge support"
+> >       depends on PCI
+> >       help
+> > -      The PCI-E Non-transparent bridge hardware is a point-to-point PCI-E bus
+> > -      connecting 2 systems.  When configured, writes to the device's PCI
+> > -      mapped memory will be mirrored to a buffer on the remote system.  The
+> > -      ntb Linux driver uses this point-to-point communication as a method to
+> > -      transfer data from one system to the other.
+> > +       The PCI-E Non-transparent bridge hardware is a point-to-point PCI-E bus
+> > +       connecting 2 systems.  When configured, writes to the device's PCI
+> > +       mapped memory will be mirrored to a buffer on the remote system.  The
+> > +       ntb Linux driver uses this point-to-point communication as a method to
+> > +       transfer data from one system to the other.
+> >
+> > -      If unsure, say N.
+> > +       If unsure, say N.
+> >
+> >  if NTB
+> >
+> > @@ -19,10 +19,10 @@ source "drivers/ntb/test/Kconfig"
+> >  config NTB_TRANSPORT
+> >       tristate "NTB Transport Client"
+> >       help
+> > -      This is a transport driver that enables connected systems to exchange
+> > -      messages over the ntb hardware.  The transport exposes a queue pair api
+> > -      to client drivers.
+> > +       This is a transport driver that enables connected systems to exchange
+> > +       messages over the ntb hardware.  The transport exposes a queue pair api
+> > +       to client drivers.
+> >
+> > -      If unsure, say N.
+> > +       If unsure, say N.
+> >
+> >  endif # NTB
+> > diff --git a/drivers/ntb/hw/amd/Kconfig b/drivers/ntb/hw/amd/Kconfig
+> > index cfe903c..9a90f17 100644
+> > --- a/drivers/ntb/hw/amd/Kconfig
+> > +++ b/drivers/ntb/hw/amd/Kconfig
+> > @@ -2,6 +2,6 @@ config NTB_AMD
+> >       tristate "AMD Non-Transparent Bridge support"
+> >       depends on X86_64
+> >       help
+> > -      This driver supports AMD NTB on capable Zeppelin hardware.
+> > +       This driver supports AMD NTB on capable Zeppelin hardware.
+> >
+> > -      If unsure, say N.
+> > +       If unsure, say N.
+> > diff --git a/drivers/ntb/hw/idt/Kconfig b/drivers/ntb/hw/idt/Kconfig
+> > index f8948cf..5d106ac 100644
+> > --- a/drivers/ntb/hw/idt/Kconfig
+> > +++ b/drivers/ntb/hw/idt/Kconfig
+> > @@ -3,28 +3,27 @@ config NTB_IDT
+> >       depends on PCI
+> >       select HWMON
+> >       help
+> > -      This driver supports NTB of cappable IDT PCIe-switches.
+> > +       This driver supports NTB of cappable IDT PCIe-switches.
+> >
+> > -      Some of the pre-initializations must be made before IDT PCIe-switch
+> > -      exposes it NT-functions correctly. It should be done by either proper
+> > -      initialisation of EEPROM connected to master smbus of the switch or
+> > -      by BIOS using slave-SMBus interface changing corresponding registers
+> > -      value. Evidently it must be done before PCI bus enumeration is
+> > -      finished in Linux kernel.
+> > +       Some of the pre-initializations must be made before IDT PCIe-switch
+> > +       exposes it NT-functions correctly. It should be done by either proper
+> > +       initialisation of EEPROM connected to master smbus of the switch or
+> > +       by BIOS using slave-SMBus interface changing corresponding registers
+> > +       value. Evidently it must be done before PCI bus enumeration is
+> > +       finished in Linux kernel.
+> >
+> > -      First of all partitions must be activated and properly assigned to all
+> > -      the ports with NT-functions intended to be activated (see SWPARTxCTL
+> > -      and SWPORTxCTL registers). Then all NT-function BARs must be enabled
+> > -      with chosen valid aperture. For memory windows related BARs the
+> > -      aperture settings shall determine the maximum size of memory windows
+> > -      accepted by a BAR. Note that BAR0 must map PCI configuration space
+> > -      registers.
+> > +       First of all partitions must be activated and properly assigned to all
+> > +       the ports with NT-functions intended to be activated (see SWPARTxCTL
+> > +       and SWPORTxCTL registers). Then all NT-function BARs must be enabled
+> > +       with chosen valid aperture. For memory windows related BARs the
+> > +       aperture settings shall determine the maximum size of memory windows
+> > +       accepted by a BAR. Note that BAR0 must map PCI configuration space
+> > +       registers.
+> >
+> > -      It's worth to note, that since a part of this driver relies on the
+> > -      BAR settings of peer NT-functions, the BAR setups can't be done over
+> > -      kernel PCI fixups. That's why the alternative pre-initialization
+> > -      techniques like BIOS using SMBus interface or EEPROM should be
+> > -      utilized.
+> > -
+> > -      If unsure, say N.
+> > +       It's worth to note, that since a part of this driver relies on the
+> > +       BAR settings of peer NT-functions, the BAR setups can't be done over
+> > +       kernel PCI fixups. That's why the alternative pre-initialization
+> > +       techniques like BIOS using SMBus interface or EEPROM should be
+> > +       utilized.
+> >
+> > +       If unsure, say N.
+> > diff --git a/drivers/ntb/hw/intel/Kconfig b/drivers/ntb/hw/intel/Kconfig
+> > index 91f995e..c166d50 100644
+> > --- a/drivers/ntb/hw/intel/Kconfig
+> > +++ b/drivers/ntb/hw/intel/Kconfig
+> > @@ -2,6 +2,6 @@ config NTB_INTEL
+> >       tristate "Intel Non-Transparent Bridge support"
+> >       depends on X86_64
+> >       help
+> > -      This driver supports Intel NTB on capable Xeon and Atom hardware.
+> > +       This driver supports Intel NTB on capable Xeon and Atom hardware.
+> >
+> > -      If unsure, say N.
+> > +       If unsure, say N.
+> > diff --git a/drivers/ntb/hw/mscc/Kconfig b/drivers/ntb/hw/mscc/Kconfig
+> > index 013ed67..74ec015 100644
+> > --- a/drivers/ntb/hw/mscc/Kconfig
+> > +++ b/drivers/ntb/hw/mscc/Kconfig
+> > @@ -2,8 +2,8 @@ config NTB_SWITCHTEC
+> >       tristate "MicroSemi Switchtec Non-Transparent Bridge Support"
+> >       select PCI_SW_SWITCHTEC
+> >       help
+> > -      Enables NTB support for Switchtec PCI switches. This also
+> > -      selects the Switchtec management driver as they share the same
+> > -      hardware interface.
+> > +       Enables NTB support for Switchtec PCI switches. This also
+> > +       selects the Switchtec management driver as they share the same
+> > +       hardware interface.
+> >
+> > -      If unsure, say N.
+> > +       If unsure, say N.
+> > diff --git a/drivers/ntb/test/Kconfig b/drivers/ntb/test/Kconfig
+> > index a5d0eda..416ab56 100644
+> > --- a/drivers/ntb/test/Kconfig
+> > +++ b/drivers/ntb/test/Kconfig
+> > @@ -1,27 +1,27 @@
+> >  config NTB_PINGPONG
+> >       tristate "NTB Ping Pong Test Client"
+> >       help
+> > -      This is a simple ping pong driver that exercises the scratchpads and
+> > -      doorbells of the ntb hardware.  This driver may be used to test that
+> > -      your ntb hardware and drivers are functioning at a basic level.
+> > +       This is a simple ping pong driver that exercises the scratchpads and
+> > +       doorbells of the ntb hardware.  This driver may be used to test that
+> > +       your ntb hardware and drivers are functioning at a basic level.
+> >
+> > -      If unsure, say N.
+> > +       If unsure, say N.
+> >
+> >  config NTB_TOOL
+> >       tristate "NTB Debugging Tool Test Client"
+> >       help
+> > -      This is a simple debugging driver that enables the doorbell and
+> > -      scratchpad registers to be read and written from the debugfs.  This
+> > -      enables more complicated debugging to be scripted from user space.
+> > -      This driver may be used to test that your ntb hardware and drivers are
+> > -      functioning at a basic level.
+> > +       This is a simple debugging driver that enables the doorbell and
+> > +       scratchpad registers to be read and written from the debugfs.  This
+> > +       enables more complicated debugging to be scripted from user space.
+> > +       This driver may be used to test that your ntb hardware and drivers are
+> > +       functioning at a basic level.
+> >
+> > -      If unsure, say N.
+> > +       If unsure, say N.
+> >
+> >  config NTB_PERF
+> >       tristate "NTB RAW Perf Measuring Tool"
+> >       help
+> > -      This is a tool to measure raw NTB performance by transferring data
+> > -      to and from the window without additional software interaction.
+> > +       This is a tool to measure raw NTB performance by transferring data
+> > +       to and from the window without additional software interaction.
+> >
+> > -      If unsure, say N.
+> > +       If unsure, say N.
+> > --
+> > 1.9.1
+> >
