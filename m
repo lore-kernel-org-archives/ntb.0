@@ -1,207 +1,62 @@
-Return-Path: <info@metux.net>
-Received: from mout.kundenserver.de (mout.kundenserver.de. [217.72.192.73])
-        by gmr-mx.google.com with ESMTPS id r15si128752wmc.4.2019.03.06.10.51.12
+Return-Path: <Sanju.Mehta@amd.com>
+Received: from NAM01-BY2-obe.outbound.protection.outlook.com (mail-eopbgr810073.outbound.protection.outlook.com. [40.107.81.73])
+        by gmr-mx.google.com with ESMTPS id e23si100289ybb.1.2019.03.29.04.32.53
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 06 Mar 2019 10:51:12 -0800 (PST)
-From: "Enrico Weigelt, metux IT consult" <info@metux.net>
-Subject: [PATCH] drivers: ntb: Kconfig: pedantic cleanups
-Date: Wed,  6 Mar 2019 19:51:05 +0100
-Message-Id: <1551898265-18909-1-git-send-email-info@metux.net>
-To: linux-kernel@vger.kernel.org
-Cc: kurt.schwemmer@microsemi.com, logang@deltatee.com, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
+        Fri, 29 Mar 2019 04:32:53 -0700 (PDT)
+From: "Mehta, Sanju" <Sanju.Mehta@amd.com>
+Subject: [PATCH] point to right memory window index
+Date: Fri, 29 Mar 2019 11:32:50 +0000
+Message-ID: <1553859137-4439-1-git-send-email-Sanju.Mehta@amd.com>
+Content-Language: en-US
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+To: "S-k, Shyam-sundar" <Shyam-sundar.S-k@amd.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "dave.jiang@intel.com" <dave.jiang@intel.com>, "allenbh@gmail.com" <allenbh@gmail.com>
+Cc: "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Mehta, Sanju" <Sanju.Mehta@amd.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Signed-off-by: Enrico Weigelt, metux IT consult <info@metux.net>
----
- drivers/ntb/Kconfig          | 20 ++++++++++----------
- drivers/ntb/hw/amd/Kconfig   |  4 ++--
- drivers/ntb/hw/idt/Kconfig   | 41 ++++++++++++++++++++---------------------
- drivers/ntb/hw/intel/Kconfig |  4 ++--
- drivers/ntb/hw/mscc/Kconfig  |  8 ++++----
- drivers/ntb/test/Kconfig     | 26 +++++++++++++-------------
- 6 files changed, 51 insertions(+), 52 deletions(-)
+From: Sanjay R Mehta <sanju.mehta@amd.com>
 
-diff --git a/drivers/ntb/Kconfig b/drivers/ntb/Kconfig
-index 95944e5..5ce3fdd 100644
---- a/drivers/ntb/Kconfig
-+++ b/drivers/ntb/Kconfig
-@@ -2,13 +2,13 @@ menuconfig NTB
- 	tristate "Non-Transparent Bridge support"
- 	depends on PCI
- 	help
--	 The PCI-E Non-transparent bridge hardware is a point-to-point PCI-E bus
--	 connecting 2 systems.  When configured, writes to the device's PCI
--	 mapped memory will be mirrored to a buffer on the remote system.  The
--	 ntb Linux driver uses this point-to-point communication as a method to
--	 transfer data from one system to the other.
-+	  The PCI-E Non-transparent bridge hardware is a point-to-point PCI-E bus
-+	  connecting 2 systems.  When configured, writes to the device's PCI
-+	  mapped memory will be mirrored to a buffer on the remote system.  The
-+	  ntb Linux driver uses this point-to-point communication as a method to
-+	  transfer data from one system to the other.
- 
--	 If unsure, say N.
-+	  If unsure, say N.
- 
- if NTB
- 
-@@ -19,10 +19,10 @@ source "drivers/ntb/test/Kconfig"
- config NTB_TRANSPORT
- 	tristate "NTB Transport Client"
- 	help
--	 This is a transport driver that enables connected systems to exchange
--	 messages over the ntb hardware.  The transport exposes a queue pair api
--	 to client drivers.
-+	  This is a transport driver that enables connected systems to exchange
-+	  messages over the ntb hardware.  The transport exposes a queue pair api
-+	  to client drivers.
- 
--	 If unsure, say N.
-+	  If unsure, say N.
- 
- endif # NTB
-diff --git a/drivers/ntb/hw/amd/Kconfig b/drivers/ntb/hw/amd/Kconfig
-index cfe903c..9a90f17 100644
---- a/drivers/ntb/hw/amd/Kconfig
-+++ b/drivers/ntb/hw/amd/Kconfig
-@@ -2,6 +2,6 @@ config NTB_AMD
- 	tristate "AMD Non-Transparent Bridge support"
- 	depends on X86_64
- 	help
--	 This driver supports AMD NTB on capable Zeppelin hardware.
-+	  This driver supports AMD NTB on capable Zeppelin hardware.
- 
--	 If unsure, say N.
-+	  If unsure, say N.
-diff --git a/drivers/ntb/hw/idt/Kconfig b/drivers/ntb/hw/idt/Kconfig
-index f8948cf..5d106ac 100644
---- a/drivers/ntb/hw/idt/Kconfig
-+++ b/drivers/ntb/hw/idt/Kconfig
-@@ -3,28 +3,27 @@ config NTB_IDT
- 	depends on PCI
- 	select HWMON
- 	help
--	 This driver supports NTB of cappable IDT PCIe-switches.
-+	  This driver supports NTB of cappable IDT PCIe-switches.
- 
--	 Some of the pre-initializations must be made before IDT PCIe-switch
--	 exposes it NT-functions correctly. It should be done by either proper
--	 initialisation of EEPROM connected to master smbus of the switch or
--	 by BIOS using slave-SMBus interface changing corresponding registers
--	 value. Evidently it must be done before PCI bus enumeration is
--	 finished in Linux kernel.
-+	  Some of the pre-initializations must be made before IDT PCIe-switch
-+	  exposes it NT-functions correctly. It should be done by either proper
-+	  initialisation of EEPROM connected to master smbus of the switch or
-+	  by BIOS using slave-SMBus interface changing corresponding registers
-+	  value. Evidently it must be done before PCI bus enumeration is
-+	  finished in Linux kernel.
- 
--	 First of all partitions must be activated and properly assigned to all
--	 the ports with NT-functions intended to be activated (see SWPARTxCTL
--	 and SWPORTxCTL registers). Then all NT-function BARs must be enabled
--	 with chosen valid aperture. For memory windows related BARs the
--	 aperture settings shall determine the maximum size of memory windows
--	 accepted by a BAR. Note that BAR0 must map PCI configuration space
--	 registers.
-+	  First of all partitions must be activated and properly assigned to all
-+	  the ports with NT-functions intended to be activated (see SWPARTxCTL
-+	  and SWPORTxCTL registers). Then all NT-function BARs must be enabled
-+	  with chosen valid aperture. For memory windows related BARs the
-+	  aperture settings shall determine the maximum size of memory windows
-+	  accepted by a BAR. Note that BAR0 must map PCI configuration space
-+	  registers.
- 
--	 It's worth to note, that since a part of this driver relies on the
--	 BAR settings of peer NT-functions, the BAR setups can't be done over
--	 kernel PCI fixups. That's why the alternative pre-initialization
--	 techniques like BIOS using SMBus interface or EEPROM should be
--	 utilized.
--
--	 If unsure, say N.
-+	  It's worth to note, that since a part of this driver relies on the
-+	  BAR settings of peer NT-functions, the BAR setups can't be done over
-+	  kernel PCI fixups. That's why the alternative pre-initialization
-+	  techniques like BIOS using SMBus interface or EEPROM should be
-+	  utilized.
- 
-+	  If unsure, say N.
-diff --git a/drivers/ntb/hw/intel/Kconfig b/drivers/ntb/hw/intel/Kconfig
-index 91f995e..c166d50 100644
---- a/drivers/ntb/hw/intel/Kconfig
-+++ b/drivers/ntb/hw/intel/Kconfig
-@@ -2,6 +2,6 @@ config NTB_INTEL
- 	tristate "Intel Non-Transparent Bridge support"
- 	depends on X86_64
- 	help
--	 This driver supports Intel NTB on capable Xeon and Atom hardware.
-+	  This driver supports Intel NTB on capable Xeon and Atom hardware.
- 
--	 If unsure, say N.
-+	  If unsure, say N.
-diff --git a/drivers/ntb/hw/mscc/Kconfig b/drivers/ntb/hw/mscc/Kconfig
-index 013ed67..74ec015 100644
---- a/drivers/ntb/hw/mscc/Kconfig
-+++ b/drivers/ntb/hw/mscc/Kconfig
-@@ -2,8 +2,8 @@ config NTB_SWITCHTEC
- 	tristate "MicroSemi Switchtec Non-Transparent Bridge Support"
- 	select PCI_SW_SWITCHTEC
- 	help
--	 Enables NTB support for Switchtec PCI switches. This also
--	 selects the Switchtec management driver as they share the same
--	 hardware interface.
-+	  Enables NTB support for Switchtec PCI switches. This also
-+	  selects the Switchtec management driver as they share the same
-+	  hardware interface.
- 
--	 If unsure, say N.
-+	  If unsure, say N.
-diff --git a/drivers/ntb/test/Kconfig b/drivers/ntb/test/Kconfig
-index a5d0eda..416ab56 100644
---- a/drivers/ntb/test/Kconfig
-+++ b/drivers/ntb/test/Kconfig
-@@ -1,27 +1,27 @@
- config NTB_PINGPONG
- 	tristate "NTB Ping Pong Test Client"
- 	help
--	 This is a simple ping pong driver that exercises the scratchpads and
--	 doorbells of the ntb hardware.  This driver may be used to test that
--	 your ntb hardware and drivers are functioning at a basic level.
-+	  This is a simple ping pong driver that exercises the scratchpads and
-+	  doorbells of the ntb hardware.  This driver may be used to test that
-+	  your ntb hardware and drivers are functioning at a basic level.
- 
--	 If unsure, say N.
-+	  If unsure, say N.
- 
- config NTB_TOOL
- 	tristate "NTB Debugging Tool Test Client"
- 	help
--	 This is a simple debugging driver that enables the doorbell and
--	 scratchpad registers to be read and written from the debugfs.  This
--	 enables more complicated debugging to be scripted from user space.
--	 This driver may be used to test that your ntb hardware and drivers are
--	 functioning at a basic level.
-+	  This is a simple debugging driver that enables the doorbell and
-+	  scratchpad registers to be read and written from the debugfs.  This
-+	  enables more complicated debugging to be scripted from user space.
-+	  This driver may be used to test that your ntb hardware and drivers are
-+	  functioning at a basic level.
- 
--	 If unsure, say N.
-+	  If unsure, say N.
- 
- config NTB_PERF
- 	tristate "NTB RAW Perf Measuring Tool"
- 	help
--	 This is a tool to measure raw NTB performance by transferring data
--	 to and from the window without additional software interaction.
-+	  This is a tool to measure raw NTB performance by transferring data
-+	  to and from the window without additional software interaction.
- 
--	 If unsure, say N.
-+	  If unsure, say N.
--- 
-1.9.1
+second parameter of ntb_peer_mw_get_addr is pointing to wrong memory
+window index by passing "peer gidx" instead of "local gidx".
+
+For ex, "local gidx" value is '0' and "peer gidx" value is '1', then
+
+on peer side ntb_mw_set_trans() api is used as below with gidx pointing to
+local side gidx which is '0', so memroy window '0' is chosen and XLAT '0'
+will be programmed by peer side.
+
+    ntb_mw_set_trans(perf->ntb, peer->pidx, peer->gidx, peer->inbuf_xlat,
+                    peer->inbuf_size);
+
+Now, on local side ntb_peer_mw_get_addr() is been used as below with gidx
+pointing to "peer gidx" which is '1', so pointing to memory window '1'
+instead of memory window '0'.
+
+    ntb_peer_mw_get_addr(perf->ntb,  peer->gidx, &phys_addr,
+                        &peer->outbuf_size);
+
+So this patch pass "local gidx" as parameter to ntb_peer_mw_get_addr().
+
+Signed-off-by: Sanjay R Mehta <sanju.mehta@amd.com>
+---
+ drivers/ntb/test/ntb_perf.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
+index c7d1a48..08e18d7 100644
+--- a/drivers/ntb/test/ntb_perf.c
++++ b/drivers/ntb/test/ntb_perf.c
+@@ -1381,7 +1381,7 @@ static int perf_setup_peer_mw(struct perf_peer *peer)
+ 	int ret;
+=20
+ 	/* Get outbound MW parameters and map it */
+-	ret =3D ntb_peer_mw_get_addr(perf->ntb, peer->gidx, &phys_addr,
++	ret =3D ntb_peer_mw_get_addr(perf->ntb, perf->gidx, &phys_addr,
+ 				   &peer->outbuf_size);
+ 	if (ret)
+ 		return ret;
+--=20
+2.7.4
 
