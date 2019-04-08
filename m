@@ -1,13 +1,13 @@
 Return-Path: <wesley.sheng@microchip.com>
-Received: from esa2.microchip.iphmx.com (esa2.microchip.iphmx.com. [68.232.149.84])
-        by gmr-mx.google.com with ESMTPS id z204si1846086ywa.2.2019.04.07.23.46.37
+Received: from esa4.microchip.iphmx.com (esa4.microchip.iphmx.com. [68.232.154.123])
+        by gmr-mx.google.com with ESMTPS id t201si523665itb.2.2019.04.07.23.46.33
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Sun, 07 Apr 2019 23:46:37 -0700 (PDT)
+        Sun, 07 Apr 2019 23:46:34 -0700 (PDT)
 From: Wesley Sheng <wesley.sheng@microchip.com>
-Subject: [PATCH 2/3] ntb_hw_switchtec: Skip unnecessary re-setup of shared memory window for crosslink case
-Date: Mon, 8 Apr 2019 22:45:21 +0800
-Message-ID: <1554734722-7833-3-git-send-email-wesley.sheng@microchip.com>
+Subject: [PATCH 1/3] ntb_hw_switchtec: Remove redundant steps of switchtec_ntb_reinit_peer() function
+Date: Mon, 8 Apr 2019 22:45:20 +0800
+Message-ID: <1554734722-7833-2-git-send-email-wesley.sheng@microchip.com>
 In-Reply-To: <1554734722-7833-1-git-send-email-wesley.sheng@microchip.com>
 References: <1554734722-7833-1-git-send-email-wesley.sheng@microchip.com>
 Return-Path: wesley.sheng@microchip.com
@@ -17,29 +17,43 @@ To: kurt.schwemmer@microsemi.com, logang@deltatee.com, jdmason@kudzu.us, dave.ji
 Cc: wesleyshenggit@sina.com, wesley.sheng@microchip.com, kelvin.cao@microchip.com
 List-ID: <linux-ntb.googlegroups.com>
 
-In case of NTB crosslink topology, the setting of shared memory window in
-the virtual partition doesn't reset on peer's reboot. So skip the
-unnecessary re-setup of shared memory window for that case.
+From: Joey Zhang <joey.zhang@microchip.com>
 
+When a re-initialization is caused by a link event, the driver will
+re-setup the shared memory window. But at that time, the shared memory
+is still valid, and it's unnecessary to free, reallocate and then
+initialize it again. We only need to reconfigure the hardware
+registers. Remove the redundant steps from
+switchtec_ntb_reinit_peer() function.
+
+Signed-off-by: Joey Zhang <joey.zhang@microchip.com>
 Signed-off-by: Wesley Sheng <wesley.sheng@microchip.com>
 ---
- drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 3 +++
- 1 file changed, 3 insertions(+)
+ drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-index 947ed0b..6cf15c18 100644
+index d905d36..947ed0b 100644
 --- a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
 +++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-@@ -1459,6 +1459,9 @@ static int switchtec_ntb_reinit_peer(struct switchtec_ntb *sndev)
- {
- 	int rc;
+@@ -1457,10 +1457,13 @@ static void switchtec_ntb_deinit_db_msg_irq(struct switchtec_ntb *sndev)
  
-+	if (crosslink_is_enabled(sndev))
-+		return 0;
+ static int switchtec_ntb_reinit_peer(struct switchtec_ntb *sndev)
+ {
+-	dev_info(&sndev->stdev->dev, "peer reinitialized\n");
+-	switchtec_ntb_deinit_shared_mw(sndev);
+-	switchtec_ntb_init_mw(sndev);
+-	return switchtec_ntb_init_shared_mw(sndev);
++	int rc;
 +
- 	dev_info(&sndev->stdev->dev, "reinitialize shared memory window\n");
- 	rc = config_rsvd_lut_win(sndev, sndev->mmio_peer_ctrl, 0,
- 				 sndev->self_partition,
++	dev_info(&sndev->stdev->dev, "reinitialize shared memory window\n");
++	rc = config_rsvd_lut_win(sndev, sndev->mmio_peer_ctrl, 0,
++				 sndev->self_partition,
++				 sndev->self_shared_dma);
++	return rc;
+ }
+ 
+ static int switchtec_ntb_add(struct device *dev,
 -- 
 2.7.4
 
