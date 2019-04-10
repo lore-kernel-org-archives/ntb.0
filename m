@@ -1,119 +1,82 @@
-Return-Path: <epilmore@gigaio.com>
-Received: from mail-wr1-x42f.google.com (mail-wr1-x42f.google.com. [2a00:1450:4864:20::42f])
-        by gmr-mx.google.com with ESMTPS id z70si993610wmc.2.2019.04.24.15.46.20
+Return-Path: <Sanju.Mehta@amd.com>
+Received: from NAM02-BL2-obe.outbound.protection.outlook.com (mail-eopbgr750088.outbound.protection.outlook.com. [40.107.75.88])
+        by gmr-mx.google.com with ESMTPS id r1si65450ybb.0.2019.04.10.03.24.05
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 24 Apr 2019 15:46:20 -0700 (PDT)
-Received: by mail-wr1-x42f.google.com with SMTP id a9so9767716wrp.6
-        for <linux-ntb@googlegroups.com>; Wed, 24 Apr 2019 15:46:20 -0700 (PDT)
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
+        Wed, 10 Apr 2019 03:24:05 -0700 (PDT)
+From: "Mehta, Sanju" <Sanju.Mehta@amd.com>
+Subject: RE: [PATCH] point to right memory window index
+Date: Wed, 10 Apr 2019 10:24:03 +0000
+Message-ID: 
+ <MN2PR12MB3455BFCFE060E38FEDF686E1E52E0@MN2PR12MB3455.namprd12.prod.outlook.com>
+References: <1553859137-4439-1-git-send-email-Sanju.Mehta@amd.com>
+In-Reply-To: <1553859137-4439-1-git-send-email-Sanju.Mehta@amd.com>
+Content-Language: en-US
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-From: Eric Pilmore <epilmore@gigaio.com>
-Date: Wed, 24 Apr 2019 15:46:09 -0700
-Message-ID: <CAOQPn8vMn4h=oGWWKa3Uge7WYMkmRAmTyhR6RPjGVtrR1hfhOQ@mail.gmail.com>
-Subject: NVMe peer2peer TLPs over NTB getting split
-Content-Type: text/plain; charset="UTF-8"
-To: linux-ntb <linux-ntb@googlegroups.com>, linux-pci@vger.kernel.org
-Cc: Armen Baloyan <abaloyan@gigaio.com>, D Meyer <dmeyer@gigaio.com>, S Taylor <staylor@gigaio.com>, E Pilmore <epilmore@gigaio.com>
+To: "jdmason@kudzu.us" <jdmason@kudzu.us>, "dave.jiang@intel.com" <dave.jiang@intel.com>, "allenbh@gmail.com" <allenbh@gmail.com>
+Cc: "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "S-k,
+ Shyam-sundar" <Shyam-sundar.S-k@amd.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Hi Folks,
+Hi All,
 
-Does anybody know why a Host Bridge might break up a full-sized (max
-payload) TLP into single byte TLPs when those TLPs are traveling from
-peer-to-peer?
+Any comments on below patch?
 
-Some context. This issue involves a NVMe drive writing (DMA)
-"directly" to the remote memory in a server across a NTB. The
-following diagram is intended to show the layout:
+Thanks & Regards,
+Sanjay Mehta
 
-     Host                 Host
-   (port 8)             (port 0)
-     /  \                 /  \
-    /    \               /    \
-    |    |               |    |
-..+-+--+-+--+..........+-+--+-+--+..
-: | NT | US |          | NT | US | :
-: +-+--+-+--+          +-+--+-+--+ :
-:   |                    |    |    :
-:   |                    |    |    :
-:   +--------------------+    |    :
-:                           +-+--+ :
-............................| DS |..
-    switch                  +-+--+
-                              |
-                              |
-                              |
-                             NVMe
-                           (port 32)
+-----Original Message-----
+From: Mehta, Sanju <Sanju.Mehta@amd.com>=20
+Sent: Friday, March 29, 2019 5:03 PM
+To: S-k, Shyam-sundar <Shyam-sundar.S-k@amd.com>; jdmason@kudzu.us; dave.ji=
+ang@intel.com; allenbh@gmail.com
+Cc: linux-ntb@googlegroups.com; linux-kernel@vger.kernel.org; Mehta, Sanju =
+<Sanju.Mehta@amd.com>
+Subject: [PATCH] point to right memory window index
 
-Sorry if my ascii art did not translate.  In a nutshell:
-- PCIe switch in play here is a Switchtec device.
-- 3 ports of PCIe switch configured (ports 0, 8, 32).
-- Port 8 configured as NT+USP and connected to a Host and in its own partition.
-- Port 0 configured as NT+USP and connected to a Host and in its own partition.
-- Port 32 configured as a DSP and in the same partition as the host on
-Port 0. Thus the NVMe drive is directly accessible by Port 0 Host and
-visible in his PCIe tree.
-- IOMMU is enabled on both hosts.
+From: Sanjay R Mehta <sanju.mehta@amd.com>
 
-The NVMe drive is instructed to send (DMA Write) some data into
-buffers that reside in Port 8 Host. The destination address for this
-DMA is a PCI BAR based address for the NT interface that Port 0 Host
-is plugged into. Under the covers, the NT interface on Port 0 will
-translate incoming addresses into a physical DRAM address in Port 8
-Host.
+second parameter of ntb_peer_mw_get_addr is pointing to wrong memory window=
+ index by passing "peer gidx" instead of "local gidx".
 
-The Switchtec device supports a tool that allows us to capture Ingres
-(only) TLPs that are entering the switch. As such, for the data path
-NVMe -> Port 8 Host, I can capture the TLPs being sent by the NVMe as
-well as the same packets getting redirected into the NT on Port 0
-Host.
+For ex, "local gidx" value is '0' and "peer gidx" value is '1', then
 
-Now for the mystery! The TLP packet capture shows full size (256 byte)
-TLPs coming from the NVMe drive into the switch, as we would expect.
-However, the packets captured coming from Port 0 host, which are the
-relayed packets based on the destination address, are just ONE byte
-TLPs!! Note that these TLPs coming through the NT for Port 0 Host have
-a RequesterID of the respective Host Bridge, which is presumably
-because the transactions had to travel through the IOMMU.
+on peer side ntb_mw_set_trans() api is used as below with gidx pointing to =
+local side gidx which is '0', so memroy window '0' is chosen and XLAT '0'
+will be programmed by peer side.
 
-A sample TLP (header) from originating NVMe (port 32):
-"60 00 00 40 92 00 00 ff 00 00 02 f0 fe d8 70 00 "
-   - BDF of NVMe drive = 92.00
-   - TLP size = 0x40 = 64 words = 256 bytes
+    ntb_mw_set_trans(perf->ntb, peer->pidx, peer->gidx, peer->inbuf_xlat,
+                    peer->inbuf_size);
 
-Sample TLP (header) captured from Port 0 host NT:
-"60 00 00 01 00 00 00 01 00 00 02 f0 fe d9 60 14 "
-"60 00 00 01 00 00 01 02 00 00 02 f0 fe d9 60 14 "
-"60 00 00 01 00 00 02 04 00 00 02 f0 fe d9 60 14 "
-"60 00 00 01 00 00 03 08 00 00 02 f0 fe d9 60 14 "
-    - BDF of originator = 00.00 (host bridge)
-    - TLP size = 0x01 = 1 word = 4 bytes, however 1st BE only has 1
-bit set indicating, just one byte in word is valid.
+Now, on local side ntb_peer_mw_get_addr() is been used as below with gidx p=
+ointing to "peer gidx" which is '1', so pointing to memory window '1'
+instead of memory window '0'.
 
-As you can see, 4 TLPs, each writing one byte (note the 1st BE field
-01->02->04->08)
+    ntb_peer_mw_get_addr(perf->ntb,  peer->gidx, &phys_addr,
+                        &peer->outbuf_size);
 
-Does anybody know why these TLPs might get split up like this? Is it
-an oddity of having to go through the IOMMU?  Maybe something related
-to endian swapping? Something related to attempting to go
-peer-to-peer? Our switch is configured with a TLP max payload of 256
-bytes
+So this patch pass "local gidx" as parameter to ntb_peer_mw_get_addr().
 
-Sorry for the long email, but any assistance is greatly appreciated.
-Thanks,
-Eric
+Signed-off-by: Sanjay R Mehta <sanju.mehta@amd.com>
+---
+ drivers/ntb/test/ntb_perf.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
--- 
-Eric Pilmore
-epilmore@gigaio.com
-http://gigaio.com
-Phone: (858) 775 2514
+diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c inde=
+x c7d1a48..08e18d7 100644
+--- a/drivers/ntb/test/ntb_perf.c
++++ b/drivers/ntb/test/ntb_perf.c
+@@ -1381,7 +1381,7 @@ static int perf_setup_peer_mw(struct perf_peer *peer)
+ 	int ret;
+=20
+ 	/* Get outbound MW parameters and map it */
+-	ret =3D ntb_peer_mw_get_addr(perf->ntb, peer->gidx, &phys_addr,
++	ret =3D ntb_peer_mw_get_addr(perf->ntb, perf->gidx, &phys_addr,
+ 				   &peer->outbuf_size);
+ 	if (ret)
+ 		return ret;
+--
+2.7.4
 
-This e-mail message is intended only for the individual(s) to whom
-it is addressed and may contain information that is privileged,
-confidential, proprietary, or otherwise exempt from disclosure under
-applicable law. If you believe you have received this message in
-error, please advise the sender by return e-mail and delete it from
-your mailbox.
-Thank you.
