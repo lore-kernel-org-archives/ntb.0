@@ -1,56 +1,65 @@
-Return-Path: <wesley.sheng@microchip.com>
-Received: from esa2.microchip.iphmx.com (esa2.microchip.iphmx.com. [68.232.149.84])
-        by gmr-mx.google.com with ESMTPS id 141si1725968pgb.1.2019.04.07.23.46.29
+Return-Path: <gunthorp@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id x2si733927otp.5.2019.04.22.14.05.36
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Sun, 07 Apr 2019 23:46:29 -0700 (PDT)
-From: Wesley Sheng <wesley.sheng@microchip.com>
-Subject: [PATCH 0/3] Redundant steps removal and bug fix of ntb_hw_switchtec
-Date: Mon, 8 Apr 2019 22:45:19 +0800
-Message-ID: <1554734722-7833-1-git-send-email-wesley.sheng@microchip.com>
-Return-Path: wesley.sheng@microchip.com
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Mon, 22 Apr 2019 14:05:36 -0700 (PDT)
+From: Logan Gunthorpe <logang@deltatee.com>
+Date: Mon, 22 Apr 2019 15:05:20 -0600
+Message-Id: <20190422210528.15289-3-logang@deltatee.com>
+In-Reply-To: <20190422210528.15289-1-logang@deltatee.com>
+References: <20190422210528.15289-1-logang@deltatee.com>
 MIME-Version: 1.0
-Content-Type: text/plain
-To: kurt.schwemmer@microsemi.com, logang@deltatee.com, jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com, linux-pci@vger.kernel.org, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
-Cc: wesleyshenggit@sina.com, wesley.sheng@microchip.com, kelvin.cao@microchip.com
+Content-Transfer-Encoding: 8bit
+Subject: [PATCH v4 02/10] PCI/switchtec: Add module parameter to request more interrupts
+To: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, iommu@lists.linux-foundation.org, linux-kselftest@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Joerg Roedel <joro@8bytes.org>
+Cc: Bjorn Helgaas <bhelgaas@google.com>, Allen Hubbe <allenbh@gmail.com>, Dave Jiang <dave.jiang@intel.com>, Serge Semin <fancer.lancer@gmail.com>, Eric Pilmore <epilmore@gigaio.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Hi, Everyone,
+Seeing the we want to use more interrupts in the NTB MSI code
+we need to be able allocate more (sometimes virtual) interrupts
+in the switchtec driver. Therefore add a module parameter to
+request to allocate additional interrupts.
 
-This patch series remove redundant steps and fix one bug of the 
-ntb_hw_switchtec module.
+This puts virtually no limit on the number of MSI interrupts available
+to NTB clients.
 
-When a re-initialization is caused by a link event, the driver will
-re-setup the shared memory windows. But at that time, the shared memory
-is still valid, and it's unnecessary to free, reallocate and then
-initialize it again. Remove these redundant steps.
+Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+Cc: Bjorn Helgaas <bhelgaas@google.com>
+---
+ drivers/pci/switch/switchtec.c | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
 
-In case of NTB crosslink topology, the setting of shared memory window
-in the virtual partition doesn't reset on peer's reboot. So skip the
-re-setup of shared memory window for that case.
-
-Switchtec does not support setting multiple MWs simultaneously. However,
-there's a race condition when a re-initialization is caused by a link 
-event, the driver will re-setup the shared memory window asynchronously
-and this races with the client setting up its memory windows on the 
-link up event. Fix this by ensure do the entire initialization in a work
-queue and signal the client once it's done. 
-
-Regard,
-Wesley
-
-Joey Zhang (2):
-  ntb_hw_switchtec: Remove redundant steps of
-    switchtec_ntb_reinit_peer() function
-  ntb_hw_switchtec: Fix setup MW with failure bug
-
-Wesley Sheng (1):
-  ntb_hw_switchtec: Skip unnecessary re-setup of shared memory window
-    for crosslink case
-
- drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 80 +++++++++++++++++++++-------------
- 1 file changed, 49 insertions(+), 31 deletions(-)
-
+diff --git a/drivers/pci/switch/switchtec.c b/drivers/pci/switch/switchtec.c
+index e22766c79fe9..8b1db78197d9 100644
+--- a/drivers/pci/switch/switchtec.c
++++ b/drivers/pci/switch/switchtec.c
+@@ -30,6 +30,10 @@ module_param(use_dma_mrpc, bool, 0644);
+ MODULE_PARM_DESC(use_dma_mrpc,
+ 		 "Enable the use of the DMA MRPC feature");
+ 
++static int nirqs = 32;
++module_param(nirqs, int, 0644);
++MODULE_PARM_DESC(nirqs, "number of interrupts to allocate (more may be useful for NTB applications)");
++
+ static dev_t switchtec_devt;
+ static DEFINE_IDA(switchtec_minor_ida);
+ 
+@@ -1247,8 +1251,12 @@ static int switchtec_init_isr(struct switchtec_dev *stdev)
+ 	int dma_mrpc_irq;
+ 	int rc;
+ 
+-	nvecs = pci_alloc_irq_vectors(stdev->pdev, 1, 4,
+-				      PCI_IRQ_MSIX | PCI_IRQ_MSI);
++	if (nirqs < 4)
++		nirqs = 4;
++
++	nvecs = pci_alloc_irq_vectors(stdev->pdev, 1, nirqs,
++				      PCI_IRQ_MSIX | PCI_IRQ_MSI |
++				      PCI_IRQ_VIRTUAL);
+ 	if (nvecs < 0)
+ 		return nvecs;
+ 
 -- 
-2.7.4
+2.20.1
 
