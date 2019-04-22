@@ -1,64 +1,121 @@
-Return-Path: <wesley.sheng@microchip.com>
-Received: from esa1.microchip.iphmx.com (esa1.microchip.iphmx.com. [68.232.147.91])
-        by gmr-mx.google.com with ESMTPS id x2si623416otp.5.2019.04.21.23.44.01
+Return-Path: <gunthorp@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id w12si699482plz.3.2019.04.22.14.05.40
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Sun, 21 Apr 2019 23:44:01 -0700 (PDT)
-From: Wesley Sheng <wesley.sheng@microchip.com>
-Subject: [PATCH 0/3] Redundant steps removal and bug fix of ntb_hw_switchtec
-Date: Mon, 22 Apr 2019 22:42:55 +0800
-Message-ID: <1555944178-1957-1-git-send-email-wesley.sheng@microchip.com>
-Return-Path: wesley.sheng@microchip.com
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Mon, 22 Apr 2019 14:05:40 -0700 (PDT)
+From: Logan Gunthorpe <logang@deltatee.com>
+Date: Mon, 22 Apr 2019 15:05:21 -0600
+Message-Id: <20190422210528.15289-4-logang@deltatee.com>
+In-Reply-To: <20190422210528.15289-1-logang@deltatee.com>
+References: <20190422210528.15289-1-logang@deltatee.com>
 MIME-Version: 1.0
-Content-Type: text/plain
-To: kurt.schwemmer@microsemi.com, logang@deltatee.com, jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com, linux-pci@vger.kernel.org, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
-Cc: wesleyshenggit@sina.com, wesley.sheng@microchip.com, kelvin.cao@microchip.com
+Content-Transfer-Encoding: 8bit
+Subject: [PATCH v4 03/10] NTB: Introduce helper functions to calculate logical port number
+To: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, iommu@lists.linux-foundation.org, linux-kselftest@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Joerg Roedel <joro@8bytes.org>
+Cc: Bjorn Helgaas <bhelgaas@google.com>, Allen Hubbe <allenbh@gmail.com>, Dave Jiang <dave.jiang@intel.com>, Serge Semin <fancer.lancer@gmail.com>, Eric Pilmore <epilmore@gigaio.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Hi, Everyone,
+This patch introduces the "Logical Port Number" which is similar to the
+"Port Number" in that it enumerates the ports in the system.
 
-This patch series remove redundant steps and fix one bug of the 
-ntb_hw_switchtec module.
+The original (or Physical) "Port Number" can be any number used by the
+hardware to uniquely identify a port in the system. The "Logical Port
+Number" enumerates all ports in the system from 0 to the number of
+ports minus one.
 
-When a re-initialization is caused by a link event, the driver will
-re-setup the shared memory windows. But at that time, the shared memory
-is still valid, and it's unnecessary to free, reallocate and then
-initialize it again. Remove these redundant steps.
+For example a system with 5 ports might have the following port numbers
+which would be enumerated thusly:
 
-In case of NTB crosslink topology, the setting of shared memory window
-in the virtual partition doesn't reset on peer's reboot. So skip the
-re-setup of shared memory window for that case.
+Port Number:           1  2  5  7  116
+Logical Port Number:   0  1  2  3  4
 
-Switchtec does not support setting multiple MWs simultaneously. However,
-there's a race condition when a re-initialization is caused by a link 
-event, the driver will re-setup the shared memory window asynchronously
-and this races with the client setting up its memory windows on the 
-link up event. Fix this by ensure do the entire initialization in a work
-queue and signal the client once it's done. 
+The logical port number is useful when calculating which resources
+to use for which peers. So we thus define two helper functions:
+ntb_logical_port_number() and ntb_peer_logical_port_number() which
+provide the "Logical Port Number" for the local port and any peer
+respectively.
 
-Regard,
-Wesley
+Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+Cc: Jon Mason <jdmason@kudzu.us>
+Cc: Dave Jiang <dave.jiang@intel.com>
+Cc: Allen Hubbe <allenbh@gmail.com>
+Cc: Serge Semin <fancer.lancer@gmail.com>
+---
+ include/linux/ntb.h | 53 ++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 52 insertions(+), 1 deletion(-)
 
---
-
-Changed since v1:
-  - It's a resend of v1
-
---
-
-
-Joey Zhang (2):
-  ntb_hw_switchtec: Remove redundant steps of
-    switchtec_ntb_reinit_peer() function
-  ntb_hw_switchtec: Fix setup MW with failure bug
-
-Wesley Sheng (1):
-  ntb_hw_switchtec: Skip unnecessary re-setup of shared memory window
-    for crosslink case
-
- drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 80 +++++++++++++++++++++-------------
- 1 file changed, 49 insertions(+), 31 deletions(-)
-
+diff --git a/include/linux/ntb.h b/include/linux/ntb.h
+index 56a92e3ae3ae..91cf492b16a0 100644
+--- a/include/linux/ntb.h
++++ b/include/linux/ntb.h
+@@ -616,7 +616,6 @@ static inline int ntb_port_number(struct ntb_dev *ntb)
+ 
+ 	return ntb->ops->port_number(ntb);
+ }
+-
+ /**
+  * ntb_peer_port_count() - get the number of peer device ports
+  * @ntb:	NTB device context.
+@@ -653,6 +652,58 @@ static inline int ntb_peer_port_number(struct ntb_dev *ntb, int pidx)
+ 	return ntb->ops->peer_port_number(ntb, pidx);
+ }
+ 
++/**
++ * ntb_logical_port_number() - get the logical port number of the local port
++ * @ntb:	NTB device context.
++ *
++ * The Logical Port Number is defined to be a unique number for each
++ * port starting from zero through to the number of ports minus one.
++ * This is in contrast to the Port Number where each port can be assigned
++ * any unique physical number by the hardware.
++ *
++ * The logical port number is useful for calculating the resource indexes
++ * used by peers.
++ *
++ * Return: the logical port number or negative value indicating an error
++ */
++static inline int ntb_logical_port_number(struct ntb_dev *ntb)
++{
++	int lport = ntb_port_number(ntb);
++	int pidx;
++
++	if (lport < 0)
++		return lport;
++
++	for (pidx = 0; pidx < ntb_peer_port_count(ntb); pidx++)
++		if (lport <= ntb_peer_port_number(ntb, pidx))
++			return pidx;
++
++	return pidx;
++}
++
++/**
++ * ntb_peer_logical_port_number() - get the logical peer port by given index
++ * @ntb:	NTB device context.
++ * @pidx:	Peer port index.
++ *
++ * The Logical Port Number is defined to be a unique number for each
++ * port starting from zero through to the number of ports minus one.
++ * This is in contrast to the Port Number where each port can be assigned
++ * any unique physical number by the hardware.
++ *
++ * The logical port number is useful for calculating the resource indexes
++ * used by peers.
++ *
++ * Return: the peer's logical port number or negative value indicating an error
++ */
++static inline int ntb_peer_logical_port_number(struct ntb_dev *ntb, int pidx)
++{
++	if (ntb_peer_port_number(ntb, pidx) < ntb_port_number(ntb))
++		return pidx;
++	else
++		return pidx + 1;
++}
++
+ /**
+  * ntb_peer_port_idx() - get the peer device port index by given port number
+  * @ntb:	NTB device context.
 -- 
-2.7.4
+2.20.1
 
