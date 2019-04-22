@@ -1,121 +1,297 @@
 Return-Path: <gunthorp@deltatee.com>
 Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id 205si986654ita.1.2019.04.22.14.05.37
+        by gmr-mx.google.com with ESMTPS id s22si323923iot.1.2019.04.22.14.05.37
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
         Mon, 22 Apr 2019 14:05:37 -0700 (PDT)
 From: Logan Gunthorpe <logang@deltatee.com>
-Date: Mon, 22 Apr 2019 15:05:22 -0600
-Message-Id: <20190422210528.15289-5-logang@deltatee.com>
+Date: Mon, 22 Apr 2019 15:05:27 -0600
+Message-Id: <20190422210528.15289-10-logang@deltatee.com>
 In-Reply-To: <20190422210528.15289-1-logang@deltatee.com>
 References: <20190422210528.15289-1-logang@deltatee.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Subject: [PATCH v4 04/10] NTB: Introduce functions to calculate multi-port resource index
+Subject: [PATCH v4 09/10] NTB: Add MSI interrupt support to ntb_transport
 To: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, iommu@lists.linux-foundation.org, linux-kselftest@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Joerg Roedel <joro@8bytes.org>
 Cc: Bjorn Helgaas <bhelgaas@google.com>, Allen Hubbe <allenbh@gmail.com>, Dave Jiang <dave.jiang@intel.com>, Serge Semin <fancer.lancer@gmail.com>, Eric Pilmore <epilmore@gigaio.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-When using multi-ports each port uses resources (dbs, msgs, mws, etc)
-on every other port. Creating a mapping for these resources such that
-each port has a corresponding resource on every other port is a bit
-tricky.
+Introduce the module parameter 'use_msi' which, when set, uses
+MSI interrupts instead of doorbells for each queue pair (QP). The
+parameter is only available if NTB MSI support is configured into
+the kernel. We also require there to be more than one memory window
+(MW) so that an extra one is available to forward the APIC region.
 
-Introduce the ntb_peer_resource_idx() function for this purpose.
-It returns the peer resource number that will correspond with the
-local peer index on the remote peer.
+To use MSIs, we request one interrupt per QP and forward the MSI address
+and data to the peer using scratch pad registers (SPADS) above the MW
+SPADS. (If there are not enough SPADS the MSI interrupt will not be used.)
 
-Also, introduce ntb_peer_highest_mw_idx() which will use
-ntb_peer_resource_idx() but return the MW index starting with the
-highest index and working down.
+Once registered, we simply use ntb_msi_peer_trigger and the receiving
+ISR simply queues up the rxc_db_work for the queue.
+
+This addition can significantly improve performance of ntb_transport.
+In a simple, untuned, apples-to-apples comparision using ntb_netdev
+and iperf with switchtec hardware, I see 3.88Gb/s without MSI
+interrupts and 14.1Gb/s wit MSI, which is a more than 3x improvement.
 
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
 Cc: Jon Mason <jdmason@kudzu.us>
 Cc: Dave Jiang <dave.jiang@intel.com>
 Cc: Allen Hubbe <allenbh@gmail.com>
 ---
- include/linux/ntb.h | 70 +++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 70 insertions(+)
+ drivers/ntb/ntb_transport.c | 169 +++++++++++++++++++++++++++++++++++-
+ 1 file changed, 168 insertions(+), 1 deletion(-)
 
-diff --git a/include/linux/ntb.h b/include/linux/ntb.h
-index 91cf492b16a0..66552830544b 100644
---- a/include/linux/ntb.h
-+++ b/include/linux/ntb.h
-@@ -1557,4 +1557,74 @@ static inline int ntb_peer_msg_write(struct ntb_dev *ntb, int pidx, int midx,
- 	return ntb->ops->peer_msg_write(ntb, pidx, midx, msg);
+diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+index d4f39ba1d976..f1cf0942cb99 100644
+--- a/drivers/ntb/ntb_transport.c
++++ b/drivers/ntb/ntb_transport.c
+@@ -93,6 +93,12 @@ static bool use_dma;
+ module_param(use_dma, bool, 0644);
+ MODULE_PARM_DESC(use_dma, "Use DMA engine to perform large data copy");
+ 
++static bool use_msi;
++#ifdef CONFIG_NTB_MSI
++module_param(use_msi, bool, 0644);
++MODULE_PARM_DESC(use_msi, "Use MSI interrupts instead of doorbells");
++#endif
++
+ static struct dentry *nt_debugfs_dir;
+ 
+ /* Only two-ports NTB devices are supported */
+@@ -188,6 +194,11 @@ struct ntb_transport_qp {
+ 	u64 tx_err_no_buf;
+ 	u64 tx_memcpy;
+ 	u64 tx_async;
++
++	bool use_msi;
++	int msi_irq;
++	struct ntb_msi_desc msi_desc;
++	struct ntb_msi_desc peer_msi_desc;
+ };
+ 
+ struct ntb_transport_mw {
+@@ -221,6 +232,10 @@ struct ntb_transport_ctx {
+ 	u64 qp_bitmap;
+ 	u64 qp_bitmap_free;
+ 
++	bool use_msi;
++	unsigned int msi_spad_offset;
++	u64 msi_db_mask;
++
+ 	bool link_is_up;
+ 	struct delayed_work link_work;
+ 	struct work_struct link_cleanup;
+@@ -667,6 +682,114 @@ static int ntb_transport_setup_qp_mw(struct ntb_transport_ctx *nt,
+ 	return 0;
  }
  
-+/**
-+ * ntb_peer_resource_idx() - get a resource index for a given peer idx
-+ * @ntb:	NTB device context.
-+ * @pidx:	Peer port index.
-+ *
-+ * When constructing a graph of peers, each remote peer must use a different
-+ * resource index (mw, doorbell, etc) to communicate with each other
-+ * peer.
-+ *
-+ * In a two peer system, this function should always return 0 such that
-+ * resource 0 points to the remote peer on both ports.
-+ *
-+ * In a 5 peer system, this function will return the following matrix
-+ *
-+ * pidx \ port    0    1    2    3    4
-+ * 0              0    0    1    2    3
-+ * 1              0    1    1    2    3
-+ * 2              0    1    2    2    3
-+ * 3              0    1    2    3    3
-+ *
-+ * For example, if this function is used to program peer's memory
-+ * windows, port 0 will program MW 0 on all it's peers to point to itself.
-+ * port 1 will program MW 0 in port 0 to point to itself and MW 1 on all
-+ * other ports. etc.
-+ *
-+ * For the legacy two host case, ntb_port_number() and ntb_peer_port_number()
-+ * both return zero and therefore this function will always return zero.
-+ * So MW 0 on each host would be programmed to point to the other host.
-+ *
-+ * Return: the resource index to use for that peer.
-+ */
-+static inline int ntb_peer_resource_idx(struct ntb_dev *ntb, int pidx)
++static irqreturn_t ntb_transport_isr(int irq, void *dev)
 +{
-+	int local_port, peer_port;
++	struct ntb_transport_qp *qp = dev;
 +
-+	if (pidx >= ntb_peer_port_count(ntb))
-+		return -EINVAL;
++	tasklet_schedule(&qp->rxc_db_work);
 +
-+	local_port = ntb_logical_port_number(ntb);
-+	peer_port = ntb_peer_logical_port_number(ntb, pidx);
++	return IRQ_HANDLED;
++}
 +
-+	if (peer_port < local_port)
-+		return local_port - 1;
++static void ntb_transport_setup_qp_peer_msi(struct ntb_transport_ctx *nt,
++					    unsigned int qp_num)
++{
++	struct ntb_transport_qp *qp = &nt->qp_vec[qp_num];
++	int spad = qp_num * 2 + nt->msi_spad_offset;
++
++	if (!nt->use_msi)
++		return;
++
++	if (spad >= ntb_spad_count(nt->ndev))
++		return;
++
++	qp->peer_msi_desc.addr_offset =
++		ntb_peer_spad_read(qp->ndev, PIDX, spad);
++	qp->peer_msi_desc.data =
++		ntb_peer_spad_read(qp->ndev, PIDX, spad + 1);
++
++	dev_dbg(&qp->ndev->pdev->dev, "QP%d Peer MSI addr=%x data=%x\n",
++		qp_num, qp->peer_msi_desc.addr_offset, qp->peer_msi_desc.data);
++
++	if (qp->peer_msi_desc.addr_offset) {
++		qp->use_msi = true;
++		dev_info(&qp->ndev->pdev->dev,
++			 "Using MSI interrupts for QP%d\n", qp_num);
++	}
++}
++
++static void ntb_transport_setup_qp_msi(struct ntb_transport_ctx *nt,
++				       unsigned int qp_num)
++{
++	struct ntb_transport_qp *qp = &nt->qp_vec[qp_num];
++	int spad = qp_num * 2 + nt->msi_spad_offset;
++	int rc;
++
++	if (!nt->use_msi)
++		return;
++
++	if (spad >= ntb_spad_count(nt->ndev)) {
++		dev_warn_once(&qp->ndev->pdev->dev,
++			      "Not enough SPADS to use MSI interrupts\n");
++		return;
++	}
++
++	ntb_spad_write(qp->ndev, spad, 0);
++	ntb_spad_write(qp->ndev, spad + 1, 0);
++
++	if (!qp->msi_irq) {
++		qp->msi_irq = ntbm_msi_request_irq(qp->ndev, ntb_transport_isr,
++						   KBUILD_MODNAME, qp,
++						   &qp->msi_desc);
++		if (qp->msi_irq < 0) {
++			dev_warn(&qp->ndev->pdev->dev,
++				 "Unable to allocate MSI interrupt for qp%d\n",
++				 qp_num);
++			return;
++		}
++	}
++
++	rc = ntb_spad_write(qp->ndev, spad, qp->msi_desc.addr_offset);
++	if (rc)
++		goto err_free_interrupt;
++
++	rc = ntb_spad_write(qp->ndev, spad + 1, qp->msi_desc.data);
++	if (rc)
++		goto err_free_interrupt;
++
++	dev_dbg(&qp->ndev->pdev->dev, "QP%d MSI %d addr=%x data=%x\n",
++		qp_num, qp->msi_irq, qp->msi_desc.addr_offset,
++		qp->msi_desc.data);
++
++	return;
++
++err_free_interrupt:
++	devm_free_irq(&nt->ndev->dev, qp->msi_irq, qp);
++}
++
++static void ntb_transport_msi_peer_desc_changed(struct ntb_transport_ctx *nt)
++{
++	int i;
++
++	dev_dbg(&nt->ndev->pdev->dev, "Peer MSI descriptors changed");
++
++	for (i = 0; i < nt->qp_count; i++)
++		ntb_transport_setup_qp_peer_msi(nt, i);
++}
++
++static void ntb_transport_msi_desc_changed(void *data)
++{
++	struct ntb_transport_ctx *nt = data;
++	int i;
++
++	dev_dbg(&nt->ndev->pdev->dev, "MSI descriptors changed");
++
++	for (i = 0; i < nt->qp_count; i++)
++		ntb_transport_setup_qp_msi(nt, i);
++
++	ntb_peer_db_set(nt->ndev, nt->msi_db_mask);
++}
++
+ static void ntb_free_mw(struct ntb_transport_ctx *nt, int num_mw)
+ {
+ 	struct ntb_transport_mw *mw = &nt->mw_vec[num_mw];
+@@ -905,6 +1028,20 @@ static void ntb_transport_link_work(struct work_struct *work)
+ 	int rc = 0, i, spad;
+ 
+ 	/* send the local info, in the opposite order of the way we read it */
++
++	if (nt->use_msi) {
++		rc = ntb_msi_setup_mws(ndev);
++		if (rc) {
++			dev_warn(&pdev->dev,
++				 "Failed to register MSI memory window: %d\n",
++				 rc);
++			nt->use_msi = false;
++		}
++	}
++
++	for (i = 0; i < nt->qp_count; i++)
++		ntb_transport_setup_qp_msi(nt, i);
++
+ 	for (i = 0; i < nt->mw_count; i++) {
+ 		size = nt->mw_vec[i].phys_size;
+ 
+@@ -962,6 +1099,7 @@ static void ntb_transport_link_work(struct work_struct *work)
+ 		struct ntb_transport_qp *qp = &nt->qp_vec[i];
+ 
+ 		ntb_transport_setup_qp_mw(nt, i);
++		ntb_transport_setup_qp_peer_msi(nt, i);
+ 
+ 		if (qp->client_ready)
+ 			schedule_delayed_work(&qp->link_work, 0);
+@@ -1135,6 +1273,19 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
+ 		return -ENOMEM;
+ 
+ 	nt->ndev = ndev;
++
++	/*
++	 * If we are using MSI, and have at least one extra memory window,
++	 * we will reserve the last MW for the MSI window.
++	 */
++	if (use_msi && mw_count > 1) {
++		rc = ntb_msi_init(ndev, ntb_transport_msi_desc_changed);
++		if (!rc) {
++			mw_count -= 1;
++			nt->use_msi = true;
++		}
++	}
++
+ 	spad_count = ntb_spad_count(ndev);
+ 
+ 	/* Limit the MW's based on the availability of scratchpads */
+@@ -1148,6 +1299,8 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
+ 	max_mw_count_for_spads = (spad_count - MW0_SZ_HIGH) / 2;
+ 	nt->mw_count = min(mw_count, max_mw_count_for_spads);
+ 
++	nt->msi_spad_offset = nt->mw_count * 2 + MW0_SZ_HIGH;
++
+ 	nt->mw_vec = kcalloc_node(mw_count, sizeof(*nt->mw_vec),
+ 				  GFP_KERNEL, node);
+ 	if (!nt->mw_vec) {
+@@ -1178,6 +1331,12 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
+ 	qp_bitmap = ntb_db_valid_mask(ndev);
+ 
+ 	qp_count = ilog2(qp_bitmap);
++	if (nt->use_msi) {
++		qp_count -= 1;
++		nt->msi_db_mask = 1 << qp_count;
++		ntb_db_clear_mask(ndev, nt->msi_db_mask);
++	}
++
+ 	if (max_num_clients && max_num_clients < qp_count)
+ 		qp_count = max_num_clients;
+ 	else if (nt->mw_count < qp_count)
+@@ -1601,7 +1760,10 @@ static void ntb_tx_copy_callback(void *data,
+ 
+ 	iowrite32(entry->flags | DESC_DONE_FLAG, &hdr->flags);
+ 
+-	ntb_peer_db_set(qp->ndev, BIT_ULL(qp->qp_num));
++	if (qp->use_msi)
++		ntb_msi_peer_trigger(qp->ndev, PIDX, &qp->peer_msi_desc);
 +	else
-+		return local_port;
-+}
++		ntb_peer_db_set(qp->ndev, BIT_ULL(qp->qp_num));
+ 
+ 	/* The entry length can only be zero if the packet is intended to be a
+ 	 * "link down" or similar.  Since no payload is being sent in these
+@@ -2268,6 +2430,11 @@ static void ntb_transport_doorbell_callback(void *data, int vector)
+ 	u64 db_bits;
+ 	unsigned int qp_num;
+ 
++	if (ntb_db_read(nt->ndev) & nt->msi_db_mask) {
++		ntb_transport_msi_peer_desc_changed(nt);
++		ntb_db_clear(nt->ndev, nt->msi_db_mask);
++	}
 +
-+/**
-+ * ntb_peer_highest_mw_idx() - get a memory window index for a given peer idx
-+ *	using the highest index memory windows first
-+ *
-+ * @ntb:	NTB device context.
-+ * @pidx:	Peer port index.
-+ *
-+ * Like ntb_peer_resource_idx(), except it returns indexes starting with
-+ * last memory window index.
-+ *
-+ * Return: the resource index to use for that peer.
-+ */
-+static inline int ntb_peer_highest_mw_idx(struct ntb_dev *ntb, int pidx)
-+{
-+	int ret;
-+
-+	ret = ntb_peer_resource_idx(ntb, pidx);
-+	if (ret < 0)
-+		return ret;
-+
-+	return ntb_mw_count(ntb, pidx) - ret - 1;
-+}
-+
- #endif
+ 	db_bits = (nt->qp_bitmap & ~nt->qp_bitmap_free &
+ 		   ntb_db_vector_mask(nt->ndev, vector));
+ 
 -- 
 2.20.1
 
