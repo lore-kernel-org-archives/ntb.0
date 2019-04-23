@@ -1,46 +1,104 @@
-Return-Path: <epilmore@gigaio.com>
-Received: from mail-wr1-x42b.google.com (mail-wr1-x42b.google.com. [2a00:1450:4864:20::42b])
-        by gmr-mx.google.com with ESMTPS id y72si18364wmd.3.2019.04.24.15.04.16
+Return-Path: <Sanju.Mehta@amd.com>
+Received: from NAM04-SN1-obe.outbound.protection.outlook.com (mail-sn1nam04on0611.outbound.protection.outlook.com. [2a01:111:f400:fe4c::611])
+        by gmr-mx.google.com with ESMTPS id z185si1071427wmb.0.2019.04.23.04.00.37
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 24 Apr 2019 15:04:16 -0700 (PDT)
-Received: by mail-wr1-x42b.google.com with SMTP id f7so4635325wrs.2
-        for <linux-ntb@googlegroups.com>; Wed, 24 Apr 2019 15:04:16 -0700 (PDT)
-MIME-Version: 1.0
-References: <CAOQPn8sX2G-Db-ZiFpP2SMKbkQnPyk63UZijAY0we+DoZsmDtQ@mail.gmail.com>
- <CAADLhr49ke_3s25gW11qZ+H-Jjje-E00WMHiMDbKU=mcCQtb3g@mail.gmail.com> <cdcd00e9-056b-3364-cfbc-5bcb5bcff91e@amd.com>
-In-Reply-To: <cdcd00e9-056b-3364-cfbc-5bcb5bcff91e@amd.com>
-From: Eric Pilmore <epilmore@gigaio.com>
-Date: Wed, 24 Apr 2019 15:04:05 -0700
-Message-ID: <CAOQPn8sQ+B97UptHpxJgdmcMxBZrqGynQR8qTc3q77fAODRH-A@mail.gmail.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
+        Tue, 23 Apr 2019 04:00:38 -0700 (PDT)
+From: Sanjay R Mehta <sanmehta@amd.com>
 Subject: Re: Fwd: AMD IO_PAGE_FAULT w/NTB on Write ops?
-Content-Type: text/plain; charset="UTF-8"
-To: Sanjay R Mehta <sanmehta@amd.com>
-Cc: S Taylor <staylor@gigaio.com>, D Meyer <dmeyer@gigaio.com>, linux-ntb <linux-ntb@googlegroups.com>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>
+Date: Tue, 23 Apr 2019 11:00:35 +0000
+Message-ID: <cdcd00e9-056b-3364-cfbc-5bcb5bcff91e@amd.com>
+References: 
+ <CAOQPn8sX2G-Db-ZiFpP2SMKbkQnPyk63UZijAY0we+DoZsmDtQ@mail.gmail.com>
+ <CAADLhr49ke_3s25gW11qZ+H-Jjje-E00WMHiMDbKU=mcCQtb3g@mail.gmail.com>
+In-Reply-To: 
+ <CAADLhr49ke_3s25gW11qZ+H-Jjje-E00WMHiMDbKU=mcCQtb3g@mail.gmail.com>
+Content-Language: en-US
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <761C8483CD5C47449A9CB655B1A2ED35@namprd12.prod.outlook.com>
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
+To: "epilmore@gigaio.com" <epilmore@gigaio.com>, S Taylor <staylor@gigaio.com>, D Meyer <dmeyer@gigaio.com>, linux-ntb <linux-ntb@googlegroups.com>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Tue, Apr 23, 2019 at 4:00 AM Sanjay R Mehta <sanmehta@amd.com> wrote:
->
->
-> > AMD-Vi: Event logged [IO_PAGE_FAULT device=23:01.2 domain=0x0000
-> > address=0x00000000fde1c18c flags=0x0070]
->
-> the address in the above log looks to be physical address of memory window. Am I Right?
->
-> If yes then, the first parameter of dma_alloc_coherent() to be passed as below,
->
-> dma_alloc_coherent(&ntb->pdev->dev, ...)instead of dma_alloc_coherent(&ntb->dev, ...).
->
-> Hope this should solve your problem.
-
-Hi Sanjay,
-
-Thanks the for the response.  We are using the correct device for the
-dma_alloc_coherent(). Upon further investigation what we are finding
-is that apparently the AMD IOMMU support can only manage one alias, as
-opposed to Intel IOMMU support which can support multiple. Not clear
-at this time if it's a software limitation in the AMD IOMMU kernel
-support or an imposed limitation of the hardware. Still investigating.
-
-Thanks,
-Eric
+DQo+IEZyb206ICpFcmljIFBpbG1vcmUqIDxlcGlsbW9yZUBnaWdhaW8uY29tIDxtYWlsdG86ZXBp
+bG1vcmVAZ2lnYWlvLmNvbT4+DQo+IERhdGU6IFNhdCwgQXByIDIwLCAyMDE5IGF0IDI6MzYgUE0N
+Cj4gU3ViamVjdDogQU1EIElPX1BBR0VfRkFVTFQgdy9OVEIgb24gV3JpdGUgb3BzPw0KPiBUbzog
+bGludXgtbnRiIDxsaW51eC1udGJAZ29vZ2xlZ3JvdXBzLmNvbSA8bWFpbHRvOmxpbnV4LW50YkBn
+b29nbGVncm91cHMuY29tPj4sIDxsaW51eC1wY2lAdmdlci5rZXJuZWwub3JnIDxtYWlsdG86bGlu
+dXgtcGNpQHZnZXIua2VybmVsLm9yZz4+DQo+IENjOiBTIFRheWxvciA8c3RheWxvckBnaWdhaW8u
+Y29tIDxtYWlsdG86c3RheWxvckBnaWdhaW8uY29tPj4sIEQgTWV5ZXIgPGRtZXllckBnaWdhaW8u
+Y29tIDxtYWlsdG86ZG1leWVyQGdpZ2Fpby5jb20+Pg0KPg0KPg0KPiBIaSBGb2xrcywNCj4NCj4g
+QmVmb3JlIEkgYXNrIG15IHF1ZXN0aW9ucywgaGVyZSBpcyBhIGxpdHRsZSBiYWNrZ3JvdW5kIG9u
+IHRoZQ0KPiBlbnZpcm9ubWVudCBJIGhhdmU6DQo+IC0gMiBob3N0czogMSBYZW9uIGJhc2VkIChJ
+bnRlbChSKSBYZW9uKFIpIEdvbGQgNTExNSBDUFUgQCAyLjQwR0h6KSwNCj4gwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqAgMSBBTUQgYmFzZWQgKEFNRCBFUFlDIDc0MDEgMjQtQ29yZSBQcm9jZXNzb3Ip
+DQo+IC0gRWFjaCBob3N0IGlzIGludGVyY29ubmVjdGVkIHZpYSBhbiBleHRlcm5hbCBQQ0ktZSAo
+c3dpdGNodGVjKSBzd2l0Y2guDQo+IC0gVGhlIHR3byBob3N0cyBhcmUgZXhwb3J0aW5nIG1lbW9y
+eSB0byBlYWNoIG90aGVyIHZpYSBOVEIuDQo+IC0gSU9NTVUgaXMgZW5hYmxlZCBpbiBib3RoIGhv
+c3RzLiBUaGUgWGVvbiBwbGF0Zm9ybSByZXF1aXJlcyBzb21lIEJJT1MNCj4gc2V0dGluZ3MgYW5k
+IGEga2VybmVsIHBhcmFtZXRlciAoaW50ZWxfaW9tbXU9b24pLCBob3dldmVyIGFzIGZhciBhcyBJ
+DQo+IGhhdmUgYmVlbiBhYmxlIHRvIGRldGVybWluZSwgdGhlIEFNRCBvbmx5IHJlcXVpcmVzIHRo
+ZSBJT01NVSBCSU9TDQo+IHNldHRpbmcgdG8gYmUgZW5hYmxlZCBhbmQgbm8gc3BlY2lhbCBrZXJu
+ZWwgYm9vdCBwYXJhbWV0ZXJzLiBEb2VzIHRoYXQNCj4gc291bmQgcmlnaHQgZm9yIEFNRD8NClll
+cy4geW91IGFyZSBjb3JyZWN0IEVyaWMuDQo+IC0gUmVnaW9uIG9mIG1lbW9yeSBleHBvcnRlZCB0
+byBlYWNoIGhvc3QgaXMgYWNxdWlyZWQvbWFwcGVkIHZpYQ0KPiBkbWFfYWxsb2NfY29oZXJlbnQo
+KSB1c2luZyB0aGUgImRldmljZSIgb2YgdGhlIHJlc3BlY3RpdmUgZXh0ZXJuYWwNCj4gUENJLWUg
+c3dpdGNoLg0KPiAtIFRoZSBkbWFfYWRkciByZXR1cm5lZCBmcm9tIHRoZSBkbWFfYWxsb2NfY29o
+ZXJlbnQgaXMgcmVsYXllZCB0byB0aGUNCj4gcGVlciBob3N0IHdobyB0aGVuIGFkZHMgdGhhdCB2
+YWx1ZSAoaS5lLiBJT1ZBIG9mZnNldCkgdG8gaXQncyBsb2NhbA0KPiBQQ0kgQkFSIHJlcHJlc2Vu
+dGluZyB0aGUgc3dpdGNoLCBhbmQgdGhlbiBpb3JlbWFwKCkncyB0aGF0IHJlc3VsdGluZw0KPiBh
+ZGRyZXNzIHRvIGdldCBhIENQVSB2aXJ0dWFsIGFkZHJlc3MgdG8gd2hpY2ggaXQgY2FuIG5vdyBw
+ZXJmb3JtDQo+IGlvcmVhZC9pb3dyaXRlIG9wZXJhdGlvbnMuDQo+DQo+IFdoYXQgd2UgaGF2ZSBm
+b3VuZCBpcyB0aGF0IHRoZSBYZW9uIGJhc2VkIGhvc3QgY2FuIHN1Y2Nlc3NmdWxseSBpb3JlYWQN
+Cj4gdG8gdGhpcyBtYXBwZWQgc2hhcmVkIGJ1ZmZlciwgYnV0IHdoZW5ldmVyIGl0IGF0dGVtcHRz
+IGFuIGlvd3JpdGUgdG8NCj4gdGhpcyByZWdpb24sIGl0IHJlc3VsdHMgaW4gYW4gSU9fUEFHRV9G
+QVVMVCBvbiB0aGUgQU1EIGJhc2VkIGhvc3Q6DQo+DQo+IEFNRC1WaTogRXZlbnQgbG9nZ2VkIFtJ
+T19QQUdFX0ZBVUxUIGRldmljZT0yMzowMS4yIGRvbWFpbj0weDAwMDANCj4gYWRkcmVzcz0weDAw
+MDAwMDAwZmRlMWMxOGMgZmxhZ3M9MHgwMDcwXQ0KDQp0aGUgYWRkcmVzcyBpbiB0aGUgYWJvdmUg
+bG9nIGxvb2tzIHRvIGJlIHBoeXNpY2FsIGFkZHJlc3Mgb2YgbWVtb3J5IHdpbmRvdy4gQW0gSSBS
+aWdodD8NCg0KSWYgeWVzIHRoZW4sIHRoZSBmaXJzdCBwYXJhbWV0ZXIgb2YgZG1hX2FsbG9jX2Nv
+aGVyZW50KCkgdG8gYmUgcGFzc2VkIGFzIGJlbG93LA0KDQpkbWFfYWxsb2NfY29oZXJlbnQoJm50
+Yi0+cGRldi0+ZGV2LCAuLi4paW5zdGVhZCBvZiBkbWFfYWxsb2NfY29oZXJlbnQoJm50Yi0+ZGV2
+LCAuLi4pLg0KDQpIb3BlIHRoaXMgc2hvdWxkIHNvbHZlIHlvdXIgcHJvYmxlbS4NCg0KPg0KPiBH
+b2luZyBpbiB0aGUgb3Bwb3NpdGUgZGlyZWN0aW9uIHRoZXJlIGFyZSBubyBpc3N1ZXMsIGkuZS4g
+dGhlIEFNRA0KPiBiYXNlZCBob3N0IGNhbiBzdWNjZXNzZnVsbHkgaW9yZWFkL2lvd3JpdGUgdG8g
+dGhlIG1hcHBlZCBpbiBidWZmZXINCj4gZXhwb3J0ZWQgYnkgdGhlIFhlb24gaG9zdC7CoCBPciBp
+ZiBib3RoIGhvc3RzIGFyZSBYZW9uJ3MsIHRoZW4NCj4gZXZlcnl0aGluZyB3b3JrcyBmaW5lIGFs
+c28uDQo+DQo+IEkgaGF2ZSBsb29rZWQgaGlnaCBhbmQgbG93LCBhbmQgaGF2ZSBub3QgYmVlbiBh
+YmxlIHRvIGludGVycHJldCB3aGF0DQo+IHRoZSAiZmxhZ3M9MHgwMDcwIiByZXByZXNlbnQuIEkg
+YXNzdW1lIHRoZXkgYXJlIGluZGljYXRpbmcgc29tZSB3cml0ZQ0KPiBwZXJtaXNzaW9uIGVycm9y
+LCBidXQgd2FzIHdvbmRlcmluZyBpZiBhbnlib2R5IGhlcmUgbWlnaHQga25vdz8NCj4NCj4gTW9y
+ZSBpbXBvcnRhbnRseSwgZG9lcyBhbnlib2R5IGtub3cgd2h5IHRoZSBBTUQgSU9NTVUgbWlnaHQg
+c2VlbWluZ2x5DQo+IGRlZmF1bHQgdG8gbm90IGFsbG93IFdyaXRlIG9wZXJhdGlvbnMgdG8gdGhl
+IGV4cG9ydGVkIG1lbW9yeT8gSXMgdGhlcmUNCj4gc29tZSBhZGRpdGlvbmFsIEJJT1Mgb3Iga2Vy
+bmVsIGJvb3QgcGFyYW1ldGVyIHNldHRpbmcgdGhhdCBuZWVkcyB0byBiZQ0KPiBzZXQ/DQo+DQo+
+IGxzcGNpIG9uIHRoZSBBTUQgaG9zdHMgb2YgdGhlIGV4dGVybmFsIFBDSS1lIHN3aXRjaDoNCj4g
+wqAgwqAyMzowMC4wIFBDSSBicmlkZ2U6IFBNQy1TaWVycmEgSW5jLiBEZXZpY2UgODUzNg0KPiDC
+oCDCoDIzOjAwLjEgQnJpZGdlOiBQTUMtU2llcnJhIEluYy4gRGV2aWNlIDg1MzYNCj4NCj4gVGhl
+IDIzOjAwLjEgQkRGIGlzIHRoZSBOVEIgYnJpZGdlLiBUaGUgQkRGICgyMzowMS4yKSBpbiB0aGUg
+ZXJyb3INCj4gbWVzc2FnZSByZXByZXNlbnRzIHRoZSAiTlRCIHRyYW5zbGF0ZWQiIEJERiBvZiB0
+aGUgcmVxdWVzdCB0aGF0IGNhbWUNCj4gZnJvbSB0aGUgcGVlciwgaS5lLiB0aGUgMDEuMiBpcyB0
+aGUgcHJveHktaWQuIElzIHRoZXJlIGEgY2hhbmNlIHRoYXQNCj4gdGhpcyBwcm94eS1pZCBpcyBj
+YXVzaW5nIHNvbWUgY29uZnVzaW9uIGZvciB0aGUgQU1EIElPTU1VPw0KPg0KPiBXb3VsZCBncmVh
+dGx5IGFwcHJlY2lhdGUgYW55IGFzc2lzdGFuY2UhDQo+DQo+IFRoYW5rcyENCj4NCj4gLS0gDQo+
+IEVyaWMgUGlsbW9yZQ0KPiBlcGlsbW9yZUBnaWdhaW8uY29tIDxtYWlsdG86ZXBpbG1vcmVAZ2ln
+YWlvLmNvbT4NCj4gaHR0cDovL2dpZ2Fpby5jb20NCj4gUGhvbmU6ICg4NTgpIDc3NSAyNTE0DQo+
+DQo+IFRoaXMgZS1tYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIGluZGl2aWR1
+YWwocykgdG8gd2hvbSBpdA0KPiBpcyBhZGRyZXNzZWQgYW5kDQo+IG1heSBjb250YWluIGluZm9y
+bWF0aW9uIHRoYXQgaXMgcHJpdmlsZWdlZCwgY29uZmlkZW50aWFsLCBwcm9wcmlldGFyeSwNCj4g
+b3Igb3RoZXJ3aXNlIGV4ZW1wdA0KPiBmcm9tIGRpc2Nsb3N1cmUgdW5kZXIgYXBwbGljYWJsZSBs
+YXcuIElmIHlvdSBiZWxpZXZlIHlvdSBoYXZlIHJlY2VpdmVkDQo+IHRoaXMgbWVzc2FnZSBpbg0K
+PiBlcnJvciwgcGxlYXNlIGFkdmlzZSB0aGUgc2VuZGVyIGJ5IHJldHVybiBlLW1haWwgYW5kIGRl
+bGV0ZSBpdCBmcm9tDQo+IHlvdXIgbWFpbGJveC4NCj4gVGhhbmsgeW91Lg0KPg0KPiAtLSANCj4g
+WW91IHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBiZWNhdXNlIHlvdSBhcmUgc3Vic2NyaWJlZCB0byB0
+aGUgR29vZ2xlIEdyb3VwcyAibGludXgtbnRiIiBncm91cC4NCj4gVG8gdW5zdWJzY3JpYmUgZnJv
+bSB0aGlzIGdyb3VwIGFuZCBzdG9wIHJlY2VpdmluZyBlbWFpbHMgZnJvbSBpdCwgc2VuZCBhbiBl
+bWFpbCB0byBsaW51eC1udGIrdW5zdWJzY3JpYmVAZ29vZ2xlZ3JvdXBzLmNvbSA8bWFpbHRvOmxp
+bnV4LW50YiUyQnVuc3Vic2NyaWJlQGdvb2dsZWdyb3Vwcy5jb20+Lg0KPiBUbyBwb3N0IHRvIHRo
+aXMgZ3JvdXAsIHNlbmQgZW1haWwgdG8gbGludXgtbnRiQGdvb2dsZWdyb3Vwcy5jb20gPG1haWx0
+bzpsaW51eC1udGJAZ29vZ2xlZ3JvdXBzLmNvbT4uDQo+IFRvIHZpZXcgdGhpcyBkaXNjdXNzaW9u
+IG9uIHRoZSB3ZWIgdmlzaXQgaHR0cHM6Ly9ncm91cHMuZ29vZ2xlLmNvbS9kL21zZ2lkL2xpbnV4
+LW50Yi9DQU9RUG44c1gyRy1EYi1aaUZwUDJTTUtia1FuUHlrNjNVWmlqQVkwd2UlMkJEb1pzbUR0
+USU0MG1haWwuZ21haWwuY29tLg0KPiBGb3IgbW9yZSBvcHRpb25zLCB2aXNpdCBodHRwczovL2dy
+b3Vwcy5nb29nbGUuY29tL2Qvb3B0b3V0Lg0K
