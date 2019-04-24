@@ -1,65 +1,46 @@
-Return-Path: <gunthorp@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id x2si733927otp.5.2019.04.22.14.05.36
+Return-Path: <epilmore@gigaio.com>
+Received: from mail-wr1-x42b.google.com (mail-wr1-x42b.google.com. [2a00:1450:4864:20::42b])
+        by gmr-mx.google.com with ESMTPS id y72si18364wmd.3.2019.04.24.15.04.16
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Mon, 22 Apr 2019 14:05:36 -0700 (PDT)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Mon, 22 Apr 2019 15:05:20 -0600
-Message-Id: <20190422210528.15289-3-logang@deltatee.com>
-In-Reply-To: <20190422210528.15289-1-logang@deltatee.com>
-References: <20190422210528.15289-1-logang@deltatee.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 24 Apr 2019 15:04:16 -0700 (PDT)
+Received: by mail-wr1-x42b.google.com with SMTP id f7so4635325wrs.2
+        for <linux-ntb@googlegroups.com>; Wed, 24 Apr 2019 15:04:16 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Subject: [PATCH v4 02/10] PCI/switchtec: Add module parameter to request more interrupts
-To: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, iommu@lists.linux-foundation.org, linux-kselftest@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Joerg Roedel <joro@8bytes.org>
-Cc: Bjorn Helgaas <bhelgaas@google.com>, Allen Hubbe <allenbh@gmail.com>, Dave Jiang <dave.jiang@intel.com>, Serge Semin <fancer.lancer@gmail.com>, Eric Pilmore <epilmore@gigaio.com>, Logan Gunthorpe <logang@deltatee.com>
+References: <CAOQPn8sX2G-Db-ZiFpP2SMKbkQnPyk63UZijAY0we+DoZsmDtQ@mail.gmail.com>
+ <CAADLhr49ke_3s25gW11qZ+H-Jjje-E00WMHiMDbKU=mcCQtb3g@mail.gmail.com> <cdcd00e9-056b-3364-cfbc-5bcb5bcff91e@amd.com>
+In-Reply-To: <cdcd00e9-056b-3364-cfbc-5bcb5bcff91e@amd.com>
+From: Eric Pilmore <epilmore@gigaio.com>
+Date: Wed, 24 Apr 2019 15:04:05 -0700
+Message-ID: <CAOQPn8sQ+B97UptHpxJgdmcMxBZrqGynQR8qTc3q77fAODRH-A@mail.gmail.com>
+Subject: Re: Fwd: AMD IO_PAGE_FAULT w/NTB on Write ops?
+Content-Type: text/plain; charset="UTF-8"
+To: Sanjay R Mehta <sanmehta@amd.com>
+Cc: S Taylor <staylor@gigaio.com>, D Meyer <dmeyer@gigaio.com>, linux-ntb <linux-ntb@googlegroups.com>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>
 List-ID: <linux-ntb.googlegroups.com>
 
-Seeing the we want to use more interrupts in the NTB MSI code
-we need to be able allocate more (sometimes virtual) interrupts
-in the switchtec driver. Therefore add a module parameter to
-request to allocate additional interrupts.
+On Tue, Apr 23, 2019 at 4:00 AM Sanjay R Mehta <sanmehta@amd.com> wrote:
+>
+>
+> > AMD-Vi: Event logged [IO_PAGE_FAULT device=23:01.2 domain=0x0000
+> > address=0x00000000fde1c18c flags=0x0070]
+>
+> the address in the above log looks to be physical address of memory window. Am I Right?
+>
+> If yes then, the first parameter of dma_alloc_coherent() to be passed as below,
+>
+> dma_alloc_coherent(&ntb->pdev->dev, ...)instead of dma_alloc_coherent(&ntb->dev, ...).
+>
+> Hope this should solve your problem.
 
-This puts virtually no limit on the number of MSI interrupts available
-to NTB clients.
+Hi Sanjay,
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Cc: Bjorn Helgaas <bhelgaas@google.com>
----
- drivers/pci/switch/switchtec.c | 12 ++++++++++--
- 1 file changed, 10 insertions(+), 2 deletions(-)
+Thanks the for the response.  We are using the correct device for the
+dma_alloc_coherent(). Upon further investigation what we are finding
+is that apparently the AMD IOMMU support can only manage one alias, as
+opposed to Intel IOMMU support which can support multiple. Not clear
+at this time if it's a software limitation in the AMD IOMMU kernel
+support or an imposed limitation of the hardware. Still investigating.
 
-diff --git a/drivers/pci/switch/switchtec.c b/drivers/pci/switch/switchtec.c
-index e22766c79fe9..8b1db78197d9 100644
---- a/drivers/pci/switch/switchtec.c
-+++ b/drivers/pci/switch/switchtec.c
-@@ -30,6 +30,10 @@ module_param(use_dma_mrpc, bool, 0644);
- MODULE_PARM_DESC(use_dma_mrpc,
- 		 "Enable the use of the DMA MRPC feature");
- 
-+static int nirqs = 32;
-+module_param(nirqs, int, 0644);
-+MODULE_PARM_DESC(nirqs, "number of interrupts to allocate (more may be useful for NTB applications)");
-+
- static dev_t switchtec_devt;
- static DEFINE_IDA(switchtec_minor_ida);
- 
-@@ -1247,8 +1251,12 @@ static int switchtec_init_isr(struct switchtec_dev *stdev)
- 	int dma_mrpc_irq;
- 	int rc;
- 
--	nvecs = pci_alloc_irq_vectors(stdev->pdev, 1, 4,
--				      PCI_IRQ_MSIX | PCI_IRQ_MSI);
-+	if (nirqs < 4)
-+		nirqs = 4;
-+
-+	nvecs = pci_alloc_irq_vectors(stdev->pdev, 1, nirqs,
-+				      PCI_IRQ_MSIX | PCI_IRQ_MSI |
-+				      PCI_IRQ_VIRTUAL);
- 	if (nvecs < 0)
- 		return nvecs;
- 
--- 
-2.20.1
-
+Thanks,
+Eric
