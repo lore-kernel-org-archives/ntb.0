@@ -1,127 +1,51 @@
-Return-Path: <gunthorp@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id j74si666868ybj.3.2019.04.22.14.05.37
+Return-Path: <wesley.sheng@microchip.com>
+Received: from esa5.microchip.iphmx.com (esa5.microchip.iphmx.com. [216.71.150.166])
+        by gmr-mx.google.com with ESMTPS id d2si1157383otb.1.2019.04.29.19.06.00
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Mon, 22 Apr 2019 14:05:37 -0700 (PDT)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Mon, 22 Apr 2019 15:05:26 -0600
-Message-Id: <20190422210528.15289-9-logang@deltatee.com>
-In-Reply-To: <20190422210528.15289-1-logang@deltatee.com>
-References: <20190422210528.15289-1-logang@deltatee.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 29 Apr 2019 19:06:01 -0700 (PDT)
+From: Wesley Sheng <wesley.sheng@microchip.com>
+Subject: [PATCH] NTB: correct ntb_dev_ops and ntb_dev comment typos
+Date: Tue, 30 Apr 2019 18:04:29 +0800
+Message-ID: <1556618669-2434-1-git-send-email-wesley.sheng@microchip.com>
+Return-Path: wesley.sheng@microchip.com
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Subject: [PATCH v4 08/10] NTB: Add ntb_msi_test support to ntb_test
-To: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, iommu@lists.linux-foundation.org, linux-kselftest@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Joerg Roedel <joro@8bytes.org>
-Cc: Bjorn Helgaas <bhelgaas@google.com>, Allen Hubbe <allenbh@gmail.com>, Dave Jiang <dave.jiang@intel.com>, Serge Semin <fancer.lancer@gmail.com>, Eric Pilmore <epilmore@gigaio.com>, Logan Gunthorpe <logang@deltatee.com>
+Content-Type: text/plain
+To: jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
+Cc: wesleyshenggit@sina.com, logang@deltatee.com, Wesley Sheng <wesley.sheng@microchip.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-When the ntb_msi_test module is available, the test code will trigger
-each of the interrupts and ensure the corresponding occurrences files
-gets incremented.
+The comment for ntb_dev_ops and ntb_dev incorrectly referred to
+ntb_ctx_ops and ntb_device.
 
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Cc: Jon Mason <jdmason@kudzu.us>
-Cc: Dave Jiang <dave.jiang@intel.com>
-Cc: Allen Hubbe <allenbh@gmail.com>
+Signed-off-by: Wesley Sheng <wesley.sheng@microchip.com>
+Reviewed-by: Logan Gunthorpe <logang@deltatee.com>
 ---
- tools/testing/selftests/ntb/ntb_test.sh | 54 ++++++++++++++++++++++++-
- 1 file changed, 52 insertions(+), 2 deletions(-)
+ include/linux/ntb.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/tools/testing/selftests/ntb/ntb_test.sh b/tools/testing/selftests/ntb/ntb_test.sh
-index 17ca36403d04..1a10b8f67727 100755
---- a/tools/testing/selftests/ntb/ntb_test.sh
-+++ b/tools/testing/selftests/ntb/ntb_test.sh
-@@ -87,10 +87,10 @@ set -e
- 
- function _modprobe()
- {
--	modprobe "$@"
-+	modprobe "$@" || return 1
- 
- 	if [[ "$REMOTE_HOST" != "" ]]; then
--		ssh "$REMOTE_HOST" modprobe "$@"
-+		ssh "$REMOTE_HOST" modprobe "$@" || return 1
- 	fi
+diff --git a/include/linux/ntb.h b/include/linux/ntb.h
+index 56a92e3..604abc8 100644
+--- a/include/linux/ntb.h
++++ b/include/linux/ntb.h
+@@ -205,7 +205,7 @@ static inline int ntb_ctx_ops_is_valid(const struct ntb_ctx_ops *ops)
  }
  
-@@ -451,6 +451,30 @@ function pingpong_test()
- 	echo "  Passed"
- }
+ /**
+- * struct ntb_ctx_ops - ntb device operations
++ * struct ntb_dev_ops - ntb device operations
+  * @port_number:	See ntb_port_number().
+  * @peer_port_count:	See ntb_peer_port_count().
+  * @peer_port_number:	See ntb_peer_port_number().
+@@ -404,7 +404,7 @@ struct ntb_client {
+ #define drv_ntb_client(__drv) container_of((__drv), struct ntb_client, drv)
  
-+function msi_test()
-+{
-+	LOC=$1
-+	REM=$2
-+
-+	write_file 1 $LOC/ready
-+
-+	echo "Running MSI interrupt tests on: $(subdirname $LOC) / $(subdirname $REM)"
-+
-+	CNT=$(read_file "$LOC/count")
-+	for ((i = 0; i < $CNT; i++)); do
-+		START=$(read_file $REM/../irq${i}_occurrences)
-+		write_file $i $LOC/trigger
-+		END=$(read_file $REM/../irq${i}_occurrences)
-+
-+		if [[ $(($END - $START)) != 1 ]]; then
-+			echo "MSI did not trigger the interrupt on the remote side!" >&2
-+			exit 1
-+		fi
-+	done
-+
-+	echo "  Passed"
-+}
-+
- function perf_test()
- {
- 	USE_DMA=$1
-@@ -529,6 +553,29 @@ function ntb_pingpong_tests()
- 	_modprobe -r ntb_pingpong
- }
- 
-+function ntb_msi_tests()
-+{
-+	LOCAL_MSI="$DEBUGFS/ntb_msi_test/$LOCAL_DEV"
-+	REMOTE_MSI="$REMOTE_HOST:$DEBUGFS/ntb_msi_test/$REMOTE_DEV"
-+
-+	echo "Starting ntb_msi_test tests..."
-+
-+	if ! _modprobe ntb_msi_test 2> /dev/null; then
-+		echo "  Not doing MSI tests seeing the module is not available."
-+		return
-+	fi
-+
-+	port_test $LOCAL_MSI $REMOTE_MSI
-+
-+	LOCAL_PEER="$LOCAL_MSI/peer$LOCAL_PIDX"
-+	REMOTE_PEER="$REMOTE_MSI/peer$REMOTE_PIDX"
-+
-+	msi_test $LOCAL_PEER $REMOTE_PEER
-+	msi_test $REMOTE_PEER $LOCAL_PEER
-+
-+	_modprobe -r ntb_msi_test
-+}
-+
- function ntb_perf_tests()
- {
- 	LOCAL_PERF="$DEBUGFS/ntb_perf/$LOCAL_DEV"
-@@ -550,6 +597,7 @@ function cleanup()
- 	_modprobe -r ntb_perf 2> /dev/null
- 	_modprobe -r ntb_pingpong 2> /dev/null
- 	_modprobe -r ntb_transport 2> /dev/null
-+	_modprobe -r ntb_msi_test 2> /dev/null
- 	set -e
- }
- 
-@@ -586,5 +634,7 @@ ntb_tool_tests
- echo
- ntb_pingpong_tests
- echo
-+ntb_msi_tests
-+echo
- ntb_perf_tests
- echo
+ /**
+- * struct ntb_device - ntb device
++ * struct ntb_dev - ntb device
+  * @dev:		Linux device object.
+  * @pdev:		PCI device entry of the ntb.
+  * @topo:		Detected topology of the ntb.
 -- 
-2.20.1
+2.7.4
 
