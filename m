@@ -1,51 +1,67 @@
-Return-Path: <wesley.sheng@microchip.com>
-Received: from esa5.microchip.iphmx.com (esa5.microchip.iphmx.com. [216.71.150.166])
-        by gmr-mx.google.com with ESMTPS id d2si1157383otb.1.2019.04.29.19.06.00
+Return-Path: <gunthorp@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id e23si74546otr.0.2019.05.23.15.31.14
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 29 Apr 2019 19:06:01 -0700 (PDT)
-From: Wesley Sheng <wesley.sheng@microchip.com>
-Subject: [PATCH] NTB: correct ntb_dev_ops and ntb_dev comment typos
-Date: Tue, 30 Apr 2019 18:04:29 +0800
-Message-ID: <1556618669-2434-1-git-send-email-wesley.sheng@microchip.com>
-Return-Path: wesley.sheng@microchip.com
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Thu, 23 May 2019 15:31:14 -0700 (PDT)
+From: Logan Gunthorpe <logang@deltatee.com>
+Date: Thu, 23 May 2019 16:31:00 -0600
+Message-Id: <20190523223100.5526-11-logang@deltatee.com>
+In-Reply-To: <20190523223100.5526-1-logang@deltatee.com>
+References: <20190523223100.5526-1-logang@deltatee.com>
 MIME-Version: 1.0
-Content-Type: text/plain
-To: jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
-Cc: wesleyshenggit@sina.com, logang@deltatee.com, Wesley Sheng <wesley.sheng@microchip.com>
+Content-Transfer-Encoding: 8bit
+Subject: [PATCH v5 10/10] NTB: Describe the ntb_msi_test client in the documentation.
+To: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, iommu@lists.linux-foundation.org, linux-kselftest@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Joerg Roedel <joro@8bytes.org>
+Cc: Bjorn Helgaas <bhelgaas@google.com>, Allen Hubbe <allenbh@gmail.com>, Dave Jiang <dave.jiang@intel.com>, Serge Semin <fancer.lancer@gmail.com>, Eric Pilmore <epilmore@gigaio.com>, Logan Gunthorpe <logang@deltatee.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-The comment for ntb_dev_ops and ntb_dev incorrectly referred to
-ntb_ctx_ops and ntb_device.
+Add a blurb in Documentation/ntb.txt to describe the ntb_msi_test tool's
+debugfs interface. Similar to the (out of date) ntb_tool description.
 
-Signed-off-by: Wesley Sheng <wesley.sheng@microchip.com>
-Reviewed-by: Logan Gunthorpe <logang@deltatee.com>
+Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
 ---
- include/linux/ntb.h | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ Documentation/ntb.txt | 27 +++++++++++++++++++++++++++
+ 1 file changed, 27 insertions(+)
 
-diff --git a/include/linux/ntb.h b/include/linux/ntb.h
-index 56a92e3..604abc8 100644
---- a/include/linux/ntb.h
-+++ b/include/linux/ntb.h
-@@ -205,7 +205,7 @@ static inline int ntb_ctx_ops_is_valid(const struct ntb_ctx_ops *ops)
- }
+diff --git a/Documentation/ntb.txt b/Documentation/ntb.txt
+index a043854d28df..802a539f1592 100644
+--- a/Documentation/ntb.txt
++++ b/Documentation/ntb.txt
+@@ -194,6 +194,33 @@ Debugfs Files:
+ 	This file is used to read and write peer scratchpads.  See
+ 	*spad* for details.
  
- /**
-- * struct ntb_ctx_ops - ntb device operations
-+ * struct ntb_dev_ops - ntb device operations
-  * @port_number:	See ntb_port_number().
-  * @peer_port_count:	See ntb_peer_port_count().
-  * @peer_port_number:	See ntb_peer_port_number().
-@@ -404,7 +404,7 @@ struct ntb_client {
- #define drv_ntb_client(__drv) container_of((__drv), struct ntb_client, drv)
++NTB MSI Test Client (ntb\_msi\_test)
++------------------------------------
++
++The MSI test client serves to test and debug the MSI library which
++allows for passing MSI interrupts across NTB memory windows. The
++test client is interacted with through the debugfs filesystem:
++
++* *debugfs*/ntb\_tool/*hw*/
++	A directory in debugfs will be created for each
++	NTB device probed by the tool.  This directory is shortened to *hw*
++	below.
++* *hw*/port
++	This file describes the local port number
++* *hw*/irq*_occurrences
++	One occurrences file exists for each interrupt and, when read,
++	returns the number of times the interrupt has been triggered.
++* *hw*/peer*/port
++	This file describes the port number for each peer
++* *hw*/peer*/count
++	This file describes the number of interrupts that can be
++	triggered on each peer
++* *hw*/peer*/trigger
++	Writing an interrupt number (any number less than the value
++	specified in count) will trigger the interrupt on the
++	specified peer. That peer's interrupt's occurrence file
++	should be incremented.
++
+ NTB Hardware Drivers
+ ====================
  
- /**
-- * struct ntb_device - ntb device
-+ * struct ntb_dev - ntb device
-  * @dev:		Linux device object.
-  * @pdev:		PCI device entry of the ntb.
-  * @topo:		Detected topology of the ntb.
 -- 
-2.7.4
+2.20.1
 
