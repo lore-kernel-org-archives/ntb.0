@@ -1,52 +1,43 @@
-Date: Mon, 6 May 2019 07:43:07 -0700 (PDT)
-From: trifundroid94@gmail.com
-Message-Id: <dfedc9af-85cd-4b78-9249-3ce794fbe3b5@googlegroups.com>
-Subject: NTB connectivity issue under heavy load
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-yb1-xb44.google.com (mail-yb1-xb44.google.com. [2607:f8b0:4864:20::b44])
+        by gmr-mx.google.com with ESMTPS id s128si62247pfs.5.2019.06.13.06.26.42
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_3 cipher=AEAD-AES128-GCM-SHA256 bits=128/128);
+        Thu, 13 Jun 2019 06:26:42 -0700 (PDT)
+Received: by mail-yb1-xb44.google.com with SMTP id g62so7817562ybg.7
+        for <linux-ntb@googlegroups.com>; Thu, 13 Jun 2019 06:26:42 -0700 (PDT)
+Return-Path: <jdmason@kudzu.us>
+Date: Thu, 13 Jun 2019 09:26:39 -0400
+From: Jon Mason <jdmason@kudzu.us>
+Subject: Re: [PATCH] NTB: amd: Silence shift wrapping warning in
+ amd_ntb_db_vector_mask()
+Message-ID: <20190613132638.GD1572@kudzu.us>
+References: <20190325092326.GE16023@kadam>
+ <af8b8b48-ad5e-75c2-d3fe-674b14a0b9af@amd.com>
 MIME-Version: 1.0
-Content-Type: multipart/mixed; 
-	boundary="----=_Part_1936_941372203.1557153787637"
-To: linux-ntb <linux-ntb@googlegroups.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <af8b8b48-ad5e-75c2-d3fe-674b14a0b9af@amd.com>
+To: "S-k, Shyam-sundar" <Shyam-sundar.S-k@amd.com>
+Cc: Dan Carpenter <dan.carpenter@oracle.com>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "kernel-janitors@vger.kernel.org" <kernel-janitors@vger.kernel.org>
 List-ID: <linux-ntb.googlegroups.com>
 
-------=_Part_1936_941372203.1557153787637
-Content-Type: multipart/alternative; 
-	boundary="----=_Part_1937_1705440660.1557153787637"
+On Tue, Mar 26, 2019 at 05:46:44AM +0000, S-k, Shyam-sundar wrote:
+> On 3/25/2019 2:53 PM, Dan Carpenter wrote:
+> > This code triggers a Smatch warning:
+> >
+> >     drivers/ntb/hw/amd/ntb_hw_amd.c:336 amd_ntb_db_vector_mask()
+> >     warn: should '(1 << db_vector)' be a 64 bit type?
+> >
+> > I don't think "db_vector" can be higher than 16 so this doesn't affect
+> > runtime, but it's nice to silence the static checker warning and we
+> > might increase "ndev->db_count" in the future.
+> >
+> > Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+> Acked-by: Shyam Sundar S K <Shyam-sundar.S-k@amd.com>
 
-------=_Part_1937_1705440660.1557153787637
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Sorry for the delay.  The patch is now in the ntb branch.  We've
+missed window for 5.2, but it will be in the 5.3 pull request.
 
-Hello everyone,
-
-I am not sure if this is the right place to ask but I am going to anyway 
-since this problem has been bothering us for quite some time now.
-
-A PC running kernel 4.16.7 and TI's ARM based SoC running kernel 4.14 are 
-connected via NTB.
-The ntb_netdev drivers are correctly loaded on both sides and the hosts are 
-able to ping each other indefinitely. However, when under some heavier 
-load, the connection breaks. At first we thought that it only happens when 
-running TCP but it also happened for UDP as a transport protocol. 
-The Wireshark logs show that the hosts simply forget where the other side 
-is regarding ARP protocol. In other words, they know the IP of the peer but 
-not its MAC address. We have not found a way to somehow hardcode this, 
-especially knowing that the MAC address of the virtual eth made by 
-ntb_netdev driver is randomized. The only solution is to restart the whole 
-system and start again which is unacceptable.
-
-Has this behavior been observed before? Is there any fix for this?
-
-Thank you in advance.
-
-------=_Part_1937_1705440660.1557153787637
-Content-Type: text/html; charset=utf-8
-Content-Transfer-Encoding: 7bit
-
-<div dir="ltr"><div>Hello everyone,</div><div><br></div><div>I am not sure if this is the right place to ask but I am going to anyway since this problem has been bothering us for quite some time now.</div><div><br></div><div> A PC running kernel 4.16.7 and TI&#39;s ARM based SoC running kernel 4.14 
-are connected via NTB.</div><div>The ntb_netdev drivers are correctly loaded on both sides and the hosts 
-are able to ping each other indefinitely. However, when under some 
-heavier load, the connection breaks. At first we thought that it only 
-happens when running TCP but it also happened for UDP as a transport protocol. <br></div><div>The Wireshark logs show that the hosts simply forget where the other side is regarding ARP protocol. In other words, they know the IP of the peer but not its MAC address. We have not found a way to somehow hardcode this, especially knowing that the MAC address of the virtual eth made by ntb_netdev driver is randomized. The only solution is to restart the whole system and start again which is unacceptable.</div><div><br></div><div>Has this behavior been observed before? Is there any fix for this?</div><div><br></div><div>Thank you in advance.<br></div></div>
-------=_Part_1937_1705440660.1557153787637--
-
-------=_Part_1936_941372203.1557153787637--
+Thanks,
+Jon
