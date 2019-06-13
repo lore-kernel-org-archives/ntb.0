@@ -1,187 +1,64 @@
 Return-Path: <jdmason@kudzu.us>
-Received: from mail-yw1-xc43.google.com (mail-yw1-xc43.google.com. [2607:f8b0:4864:20::c43])
-        by gmr-mx.google.com with ESMTPS id 63si225503vkn.0.2019.06.13.06.30.18
+Received: from mail-yb1-xb41.google.com (mail-yb1-xb41.google.com. [2607:f8b0:4864:20::b41])
+        by gmr-mx.google.com with ESMTPS id v141si149391oif.2.2019.06.13.06.23.18
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=AEAD-AES128-GCM-SHA256 bits=128/128);
-        Thu, 13 Jun 2019 06:30:18 -0700 (PDT)
-Received: by mail-yw1-xc43.google.com with SMTP id l79so510232ywe.11
-        for <linux-ntb@googlegroups.com>; Thu, 13 Jun 2019 06:30:18 -0700 (PDT)
+        Thu, 13 Jun 2019 06:23:18 -0700 (PDT)
+Received: by mail-yb1-xb41.google.com with SMTP id c7so7807350ybs.9
+        for <linux-ntb@googlegroups.com>; Thu, 13 Jun 2019 06:23:18 -0700 (PDT)
 Return-Path: <jdmason@kudzu.us>
-Date: Thu, 13 Jun 2019 09:30:15 -0400
+Date: Thu, 13 Jun 2019 09:23:15 -0400
 From: Jon Mason <jdmason@kudzu.us>
-Subject: Re: [PATCH v5 00/10]  Support using MSI interrupts in ntb_transport
-Message-ID: <20190613133014.GE1572@kudzu.us>
-References: <20190523223100.5526-1-logang@deltatee.com>
+Subject: Re: [PATCH] NTB: correct ntb_dev_ops and ntb_dev comment typos
+Message-ID: <20190613132314.GB1572@kudzu.us>
+References: <1556618669-2434-1-git-send-email-wesley.sheng@microchip.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190523223100.5526-1-logang@deltatee.com>
-To: Logan Gunthorpe <logang@deltatee.com>
-Cc: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, iommu@lists.linux-foundation.org, linux-kselftest@vger.kernel.org, Joerg Roedel <joro@8bytes.org>, Bjorn Helgaas <bhelgaas@google.com>, Allen Hubbe <allenbh@gmail.com>, Dave Jiang <dave.jiang@intel.com>, Serge Semin <fancer.lancer@gmail.com>, Eric Pilmore <epilmore@gigaio.com>
+In-Reply-To: <1556618669-2434-1-git-send-email-wesley.sheng@microchip.com>
+To: Wesley Sheng <wesley.sheng@microchip.com>
+Cc: dave.jiang@intel.com, allenbh@gmail.com, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, wesleyshenggit@sina.com, logang@deltatee.com
 List-ID: <linux-ntb.googlegroups.com>
 
-On Thu, May 23, 2019 at 04:30:50PM -0600, Logan Gunthorpe wrote:
-> This is another resend as there has been no feedback since v4.
-> Seems Jon has been MIA this past cycle so hopefully he appears on the
-> list soon.
+On Tue, Apr 30, 2019 at 06:04:29PM +0800, Wesley Sheng wrote:
+> The comment for ntb_dev_ops and ntb_dev incorrectly referred to
+> ntb_ctx_ops and ntb_device.
 > 
-> I've addressed the feedback so far and rebased on the latest kernel
-> and would like this to be considered for merging this cycle.
-> 
-> The only outstanding issue I know of is that it still will not work
-> with IDT hardware, but ntb_transport doesn't work with IDT hardware
-> and there is still no sensible common infrastructure to support
-> ntb_peer_mw_set_trans(). Thus, I decline to consider that complication
-> in this patchset. However, I'll be happy to review work that adds this
-> feature in the future.
-> 
-> Also, as the port number and resource index stuff is a bit complicated,
-> I made a quick out of tree test fixture to ensure it's correct[1]. As
-> an excerise I also wrote some test code[2] using the upcomming KUnit
-> feature.
+> Signed-off-by: Wesley Sheng <wesley.sheng@microchip.com>
+> Reviewed-by: Logan Gunthorpe <logang@deltatee.com>
 
-Sorry for the delay.  The patch is now in the ntb-next branch.  We've
-missed window for 5.2, but it will be in the 5.3 pull request (barring
-last minute comments).
+Sorry for the delay.  The series is now in the ntb branch.  We've
+missed window for 5.2, but it will be in the 5.3 pull request.
 
 Thanks,
 Jon
 
+> ---
+>  include/linux/ntb.h | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 > 
-> Logan
+> diff --git a/include/linux/ntb.h b/include/linux/ntb.h
+> index 56a92e3..604abc8 100644
+> --- a/include/linux/ntb.h
+> +++ b/include/linux/ntb.h
+> @@ -205,7 +205,7 @@ static inline int ntb_ctx_ops_is_valid(const struct ntb_ctx_ops *ops)
+>  }
+>  
+>  /**
+> - * struct ntb_ctx_ops - ntb device operations
+> + * struct ntb_dev_ops - ntb device operations
+>   * @port_number:	See ntb_port_number().
+>   * @peer_port_count:	See ntb_peer_port_count().
+>   * @peer_port_number:	See ntb_peer_port_number().
+> @@ -404,7 +404,7 @@ struct ntb_client {
+>  #define drv_ntb_client(__drv) container_of((__drv), struct ntb_client, drv)
+>  
+>  /**
+> - * struct ntb_device - ntb device
+> + * struct ntb_dev - ntb device
+>   * @dev:		Linux device object.
+>   * @pdev:		PCI device entry of the ntb.
+>   * @topo:		Detected topology of the ntb.
+> -- 
+> 2.7.4
 > 
-> [1] https://repl.it/repls/ExcitingPresentFile
-> [2] https://github.com/sbates130272/linux-p2pmem/commits/ntb_kunit
-> 
-> --
-> 
-> Changes in v5:
-> 
-> * Rebased onto v5.2-rc1 (plus the patches in ntb-next)
-> 
-> --
-> 
-> Changes in v4:
-> 
-> * Rebased onto v5.1-rc6 (No changes)
-> 
-> * Numerous grammar and spelling mistakes spotted by Bjorn
-> 
-> --
-> 
-> Changes in v3:
-> 
-> * Rebased onto v5.1-rc1 (Dropped the first two patches as they have
->   been merged, and cleaned up some minor conflicts in the PCI tree)
-> 
-> * Added a new patch (#3) to calculate logical port numbers that
->   are port numbers from 0 to (number of ports - 1). This is
->   then used in ntb_peer_resource_idx() to fix the issues brought
->   up by Serge.
-> 
-> * Fixed missing __iomem and iowrite calls (as noticed by Serge)
-> 
-> * Added patch 10 which describes ntb_msi_test in the documentation
->   file (as requested by Serge)
-> 
-> * A couple other minor nits and documentation fixes
-> 
-> --
-> 
-> Changes in v2:
-> 
-> * Cleaned up the changes in intel_irq_remapping.c to make them
->   less confusing and add a comment. (Per discussion with Jacob and
->   Joerg)
-> 
-> * Fixed a nit from Bjorn and collected his Ack
-> 
-> * Added a Kconfig dependancy on CONFIG_PCI_MSI for CONFIG_NTB_MSI
->   as the Kbuild robot hit a random config that didn't build
->   without it.
-> 
-> * Worked in a callback for when the MSI descriptor changes so that
->   the clients can resend the new address and data values to the peer.
->   On my test system this was never necessary, but there may be
->   other platforms where this can occur. I tested this by hacking
->   in a path to rewrite the MSI descriptor when I change the cpu
->   affinity of an IRQ. There's a bit of uncertainty over the latency
->   of the change, but without hardware this can acctually occur on
->   we can't test this. This was the result of a discussion with Dave.
-> 
-> --
-> 
-> This patch series adds optional support for using MSI interrupts instead
-> of NTB doorbells in ntb_transport. This is desirable seeing doorbells on
-> current hardware are quite slow and therefore switching to MSI interrupts
-> provides a significant performance gain. On switchtec hardware, a simple
-> apples-to-apples comparison shows ntb_netdev/iperf numbers going from
-> 3.88Gb/s to 14.1Gb/s when switching to MSI interrupts.
-> 
-> To do this, a couple changes are required outside of the NTB tree:
-> 
-> 1) The IOMMU must know to accept MSI requests from aliased bused numbers
-> seeing NTB hardware typically sends proxied request IDs through
-> additional requester IDs. The first patch in this series adds support
-> for the Intel IOMMU. A quirk to add these aliases for switchtec hardware
-> was already accepted. See commit ad281ecf1c7d ("PCI: Add DMA alias quirk
-> for Microsemi Switchtec NTB") for a description of NTB proxy IDs and why
-> this is necessary.
-> 
-> 2) NTB transport (and other clients) may often need more MSI interrupts
-> than the NTB hardware actually advertises support for. However, seeing
-> these interrupts will not be triggered by the hardware but through an
-> NTB memory window, the hardware does not actually need support or need
-> to know about them. Therefore we add the concept of Virtual MSI
-> interrupts which are allocated just like any other MSI interrupt but
-> are not programmed into the hardware's MSI table. This is done in
-> Patch 2 and then made use of in Patch 3.
-> 
-> The remaining patches in this series add a library for dealing with MSI
-> interrupts, a test client and finally support in ntb_transport.
-> 
-> The series is based off of v5.1-rc6 plus the patches in ntb-next.
-> A git repo is available here:
-> 
-> https://github.com/sbates130272/linux-p2pmem/ ntb_transport_msi_v4
-> 
-> Thanks,
-> 
-> Logan
-> 
-> --
-> 
-> Logan Gunthorpe (10):
->   PCI/MSI: Support allocating virtual MSI interrupts
->   PCI/switchtec: Add module parameter to request more interrupts
->   NTB: Introduce helper functions to calculate logical port number
->   NTB: Introduce functions to calculate multi-port resource index
->   NTB: Rename ntb.c to support multiple source files in the module
->   NTB: Introduce MSI library
->   NTB: Introduce NTB MSI Test Client
->   NTB: Add ntb_msi_test support to ntb_test
->   NTB: Add MSI interrupt support to ntb_transport
->   NTB: Describe the ntb_msi_test client in the documentation.
-> 
->  Documentation/ntb.txt                   |  27 ++
->  drivers/ntb/Kconfig                     |  11 +
->  drivers/ntb/Makefile                    |   3 +
->  drivers/ntb/{ntb.c => core.c}           |   0
->  drivers/ntb/msi.c                       | 415 +++++++++++++++++++++++
->  drivers/ntb/ntb_transport.c             | 169 ++++++++-
->  drivers/ntb/test/Kconfig                |   9 +
->  drivers/ntb/test/Makefile               |   1 +
->  drivers/ntb/test/ntb_msi_test.c         | 433 ++++++++++++++++++++++++
->  drivers/pci/msi.c                       |  54 ++-
->  drivers/pci/switch/switchtec.c          |  12 +-
->  include/linux/msi.h                     |   8 +
->  include/linux/ntb.h                     | 196 ++++++++++-
->  include/linux/pci.h                     |   9 +
->  tools/testing/selftests/ntb/ntb_test.sh |  54 ++-
->  15 files changed, 1386 insertions(+), 15 deletions(-)
->  rename drivers/ntb/{ntb.c => core.c} (100%)
->  create mode 100644 drivers/ntb/msi.c
->  create mode 100644 drivers/ntb/test/ntb_msi_test.c
-> 
-> --
-> 2.20.1
