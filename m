@@ -1,77 +1,70 @@
-Return-Path: <gunthorp@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id z9si2448704pjp.0.2019.07.26.11.31.36
+Return-Path: <yamada.masahiro@socionext.com>
+Received: from conssluserg-03.nifty.com (conssluserg-03.nifty.com. [210.131.2.82])
+        by gmr-mx.google.com with ESMTPS id f131si149118ybf.5.2019.07.15.23.03.32
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Fri, 26 Jul 2019 11:31:36 -0700 (PDT)
-From: Logan Gunthorpe <logang@deltatee.com>
-Date: Fri, 26 Jul 2019 12:31:30 -0600
-Message-Id: <20190726183130.9424-1-logang@deltatee.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 15 Jul 2019 23:03:32 -0700 (PDT)
+Received: from mail-vs1-f42.google.com (mail-vs1-f42.google.com [209.85.217.42]) (authenticated)
+	by conssluserg-03.nifty.com with ESMTP id x6G636iI027203
+	for <linux-ntb@googlegroups.com>; Tue, 16 Jul 2019 15:03:07 +0900
+Received: by mail-vs1-f42.google.com with SMTP id k9so13099319vso.5
+        for <linux-ntb@googlegroups.com>; Mon, 15 Jul 2019 23:03:06 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Subject: [PATCH] NTB/msi: remove incorrect MODULE defines
-To: LKML <linux-kernel@vger.kernel.org>, linux-ntb@googlegroups.com, Jon Mason <jdmason@kudzu.us>
-Cc: lkp@01.org, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Linus Torvalds <torvalds@linux-foundation.org>, Logan Gunthorpe <logang@deltatee.com>, kernel test robot <lkp@intel.com>
+References: <20190716130341.03b02792@canb.auug.org.au>
+In-Reply-To: <20190716130341.03b02792@canb.auug.org.au>
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Date: Tue, 16 Jul 2019 15:02:30 +0900
+Message-ID: <CAK7LNASTDPG6bDeXj9GfWQVB559D6GEsZiUaiqCfzcPpteZxZw@mail.gmail.com>
+Subject: Re: linux-next: build warning after merge of the ntb tree
+Content-Type: text/plain; charset="UTF-8"
+To: Stephen Rothwell <sfr@canb.auug.org.au>
+Cc: Jon Mason <jdmason@kudzu.us>, NTB Mailing List <linux-ntb@googlegroups.com>, Linux Next Mailing List <linux-next@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-ID: <linux-ntb.googlegroups.com>
 
-msi.c is not a module on its own right and should not have the
-MODULE_[LICENSE|VERSION|AUTHOR|DESCRIPTION] definitions.
+On Tue, Jul 16, 2019 at 12:03 PM Stephen Rothwell <sfr@canb.auug.org.au> wrote:
+>
+> Hi all,
+>
+> After merging the ntb tree, today's linux-next build (x86_64 allmodconfig)
+> produced this warning:
+>
+> WARNING: could not open /home/sfr/next/next/drivers/ntb/ntb.c: No such file or directory
+>
+> The only thing I could see that might be relevant is commit
+>
+>   56dce8121e97 ("kbuild: split out *.mod out of {single,multi}-used-m rules")
+>
+> and some others in the kbuild tree. Nothing has changed recently in the
+> ntb tree ...
+>
+> drievrs/ntb builds a module called ntb but there is no ntb.c file.
+>
+> Any ideas?
 
-This caused a regression noticed by lkp with the following back
-trace:
+commit 0539f970a8427138026d4738a7a32d869f1be300
+Author: Masahiro Yamada <yamada.masahiro@socionext.com>
+Date:   Thu Jul 11 14:44:31 2019 +0900
 
-   WARNING: CPU: 0 PID: 1 at kernel/params.c:861 param_sysfs_init+0xb1/0x20a
-   Modules linked in:
-   CPU: 0 PID: 1 Comm: swapper/0 Not tainted 5.2.0-rc1-00018-g26b3a37b928457 #2
-   Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.10.2-1 04/01/2014
-   RIP: 0010:param_sysfs_init+0xb1/0x20a
-   Code: 24 38 e8 ec 17 2e fd 49 8b 7c 24 38 e8 76 fe ff ff 48 85 c0 48 89 c5 74 25 31 d2 4c 89 e6 48 89 c7 e8 6d 6f 3c fd 85 c0 74 02 <0f> 0b 48 89 ef 31 f6 e8 5d 70 a7 fe 48 89 ef e8 95 52 a7 fe 48 83
-   RSP: 0000:ffff88806b0ffe30 EFLAGS: 00010282
-   RAX: 00000000ffffffef RBX: ffffffff83774220 RCX: ffff88806a85e880
-   RDX: 00000000ffffffef RSI: ffff88806b000400 RDI: ffff88806a8608c0
-   RBP: ffff88806b392000 R08: ffffed100d61ff59 R09: ffffed100d61ff59
-   R10: 0000000000000001 R11: ffffed100d61ff58 R12: ffffffff83974bc0
-   R13: 0000000000000004 R14: 0000000000000028 R15: 00000000000003b9
-   FS:  0000000000000000(0000) GS:ffff88806b800000(0000) knlGS:0000000000000000
-   CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-   CR2: 0000000000000000 CR3: 000000000380e000 CR4: 00000000000406b0
-   DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
-   DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
-   Call Trace:
-    ? file_caps_disable+0x10/0x10
-    ? locate_module_kobject+0xf2/0xf2
-    do_one_initcall+0x47/0x1f0
-    kernel_init_freeable+0x1b1/0x243
-    ? rest_init+0xd0/0xd0
-    kernel_init+0xa/0x130
-    ? calculate_sigpending+0x63/0x80
-    ? rest_init+0xd0/0xd0
-    ret_from_fork+0x1f/0x30
-   ---[ end trace 78201497ae74cc91 ]---
+    kbuild: create *.mod with full directory path and remove MODVERDIR
 
-Reported-by: kernel test robot <lkp@intel.com>
-Fixes: 26b3a37b9284 ("NTB: Introduce MSI library")
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
----
- drivers/ntb/msi.c | 5 -----
- 1 file changed, 5 deletions(-)
+is the first bad commit.
 
-diff --git a/drivers/ntb/msi.c b/drivers/ntb/msi.c
-index 9dddf133658f..0a5e884a920c 100644
---- a/drivers/ntb/msi.c
-+++ b/drivers/ntb/msi.c
-@@ -6,11 +6,6 @@
- #include <linux/msi.h>
- #include <linux/pci.h>
- 
--MODULE_LICENSE("Dual BSD/GPL");
--MODULE_VERSION("0.1");
--MODULE_AUTHOR("Logan Gunthorpe <logang@deltatee.com>");
--MODULE_DESCRIPTION("NTB MSI Interrupt Library");
--
- struct ntb_msi {
- 	u64 base_addr;
- 	u64 end_addr;
+
+drivers/ntb/core.c defines MODULE_VERSION().
+
+When CONFIG_DEBUG_SECTION_MISMATCH=y,
+scripts/mod/sum.c tries to open the non-existing old
+source based on the stale *.mod file
+during the directory descending.
+
+
+I will kill cmd_secanalysis for tomorrow's linux-next.
+
+
+Thanks for catching various bugs!
+
+
+
 -- 
-2.20.1
-
+Best Regards
+Masahiro Yamada
