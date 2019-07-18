@@ -1,27 +1,29 @@
 Return-Path: <jdmason@kudzu.us>
-Received: from mail-yw1-xc44.google.com (mail-yw1-xc44.google.com. [2607:f8b0:4864:20::c44])
-        by gmr-mx.google.com with ESMTPS id t12si1304239iol.0.2019.07.20.14.58.32
+Received: from mail-yw1-xc34.google.com (mail-yw1-xc34.google.com. [2607:f8b0:4864:20::c34])
+        by gmr-mx.google.com with ESMTPS id v127si1339117ywv.2.2019.07.18.13.17.21
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=AEAD-AES128-GCM-SHA256 bits=128/128);
-        Sat, 20 Jul 2019 14:58:32 -0700 (PDT)
-Received: by mail-yw1-xc44.google.com with SMTP id i138so14658066ywg.8
-        for <linux-ntb@googlegroups.com>; Sat, 20 Jul 2019 14:58:32 -0700 (PDT)
+        Thu, 18 Jul 2019 13:17:21 -0700 (PDT)
+Received: by mail-yw1-xc34.google.com with SMTP id b143so12728175ywb.7
+        for <linux-ntb@googlegroups.com>; Thu, 18 Jul 2019 13:17:21 -0700 (PDT)
 Return-Path: <jdmason@kudzu.us>
+Received: from graymalkin (76-230-155-4.lightspeed.rlghnc.sbcglobal.net. [76.230.155.4])
+        by smtp.gmail.com with ESMTPSA id 197sm6556447ywb.56.2019.07.18.13.17.19
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_3 cipher=AEAD-AES256-GCM-SHA384 bits=256/256);
+        Thu, 18 Jul 2019 13:17:20 -0700 (PDT)
 From: Jon Mason <jdmason@kudzu.us>
-Date: Sat, 20 Jul 2019 17:58:29 -0400
-Subject: [GIT PULL] NTB changes for v5.3
-Message-ID: <20190720215829.GA10213@graymalkin>
+Date: Thu, 18 Jul 2019 16:17:18 -0400
+Subject: NTB changes for v5.3
+Message-ID: <20190718201718.GA20276@graymalkin>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
+To: linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-Hello Linus,
-Here are the NTB changes for v5.3.  The big change is adding the virtual
-MSI interface for NTB (reviewed and acked by Bjorn).  Also, there are
-some bug fixes.  Please consider pulling them.
+Here is the proposed pull request that I will be sending tomorrow for
+v5.3.  Please test and scream if any issues are encountered.
 
 Thanks,
 Jon
