@@ -1,45 +1,28 @@
-Return-Path: <colin.king@canonical.com>
-Received: from youngberry.canonical.com (youngberry.canonical.com. [91.189.89.112])
-        by gmr-mx.google.com with ESMTPS id g7si721617wmk.0.2019.08.18.11.53.51
+Return-Path: <pr-tracker-bot@kernel.org>
+Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
+        by gmr-mx.google.com with ESMTPS id h14si4881353plr.2.2019.08.11.10.50.07
         for <linux-ntb@googlegroups.com>
-        (version=TLS1 cipher=AES128-SHA bits=128/128);
-        Sun, 18 Aug 2019 11:53:51 -0700 (PDT)
-From: Colin King <colin.king@canonical.com>
-Subject: [PATCH] NTB: ntb_transport: remove redundant assignment to rc
-Date: Sun, 18 Aug 2019 19:53:49 +0100
-Message-Id: <20190818185349.15275-1-colin.king@canonical.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
-To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com
-Cc: kernel-janitors@vger.kernel.org, linux-kernel@vger.kernel.org
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Sun, 11 Aug 2019 10:50:07 -0700 (PDT)
+Subject: Re: [GIT PULL] NTB bug fixes for v5.3
+From: pr-tracker-bot@kernel.org
+In-Reply-To: <20190811141703.GA12153@graymalkin>
+References: <20190811141703.GA12153@graymalkin>
+Message-Id: <156554580721.21169.6349916023834124246.pr-tracker-bot@kernel.org>
+Date: Sun, 11 Aug 2019 17:50:07 +0000
+To: Jon Mason <jdmason@kudzu.us>
+Cc: torvalds@linux-foundation.org, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Colin Ian King <colin.king@canonical.com>
+The pull request you sent on Sun, 11 Aug 2019 10:17:03 -0400:
 
-Variable rc is initialized to a value that is never read and it
-is re-assigned later. The initialization is redundant and can be
-removed.
+> git://github.com/jonmason/ntb tags/ntb-5.3-bugfixes
 
-Addresses-Coverity: ("Unused value")
-Signed-off-by: Colin Ian King <colin.king@canonical.com>
----
- drivers/ntb/ntb_transport.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/f6192cb7429211bfaac1178c35607b0c989900b8
 
-diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 40c90ca10729..00a5d5764993 100644
---- a/drivers/ntb/ntb_transport.c
-+++ b/drivers/ntb/ntb_transport.c
-@@ -292,7 +292,7 @@ static int ntb_transport_bus_match(struct device *dev,
- static int ntb_transport_bus_probe(struct device *dev)
- {
- 	const struct ntb_transport_client *client;
--	int rc = -EINVAL;
-+	int rc;
- 
- 	get_device(dev);
- 
+Thank you!
+
 -- 
-2.20.1
-
+Deet-doot-dot, I am a bot.
+https://korg.wiki.kernel.org/userdoc/prtracker
