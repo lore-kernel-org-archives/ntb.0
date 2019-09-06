@@ -1,53 +1,70 @@
-Return-Path: <rdunlap@infradead.org>
-Received: from bombadil.infradead.org (bombadil.infradead.org. [2607:7c80:54:e::133])
-        by gmr-mx.google.com with ESMTPS id o3si943186yba.5.2019.09.18.13.58.37
+Return-Path: <kchow@gigaio.com>
+Received: from mail-oi1-x232.google.com (mail-oi1-x232.google.com. [2607:f8b0:4864:20::232])
+        by gmr-mx.google.com with ESMTPS id w72si457424pfd.2.2019.09.06.16.48.37
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 18 Sep 2019 13:58:37 -0700 (PDT)
-From: Randy Dunlap <rdunlap@infradead.org>
-Subject: [PATCH] NTB: fix IDT Kconfig typos/spellos
-Message-ID: <55f2fb85-9d4d-f78d-e6dd-70b09d7667e4@infradead.org>
-Date: Wed, 18 Sep 2019 13:58:31 -0700
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 06 Sep 2019 16:48:37 -0700 (PDT)
+Received: by mail-oi1-x232.google.com with SMTP id 7so6441097oip.5
+        for <linux-ntb@googlegroups.com>; Fri, 06 Sep 2019 16:48:37 -0700 (PDT)
+Return-Path: <kchow@gigaio.com>
+Subject: Re: AMD Epyc iperf perfomance issues over NTB
+References: <CAOQPn8sX2G-Db-ZiFpP2SMKbkQnPyk63UZijAY0we+DoZsmDtQ@mail.gmail.com>
+ <a5a2d312-f6af-f20f-0594-98a7f80c7a9d@deltatee.com>
+ <bce9a1d6-1c37-b9f8-a613-2ba68211fee1@deltatee.com>
+From: Kit Chow <kchow@gigaio.com>
+Message-ID: <d719f986-f9ce-a0c3-f9a1-1fe06a3cc0cc@gigaio.com>
+Date: Fri, 6 Sep 2019 16:48:32 -0700
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+In-Reply-To: <bce9a1d6-1c37-b9f8-a613-2ba68211fee1@deltatee.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
-To: LKML <linux-kernel@vger.kernel.org>, linux-ntb@googlegroups.com
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Serge Semin <fancer.lancer@gmail.com>
+To: linux-ntb <linux-ntb@googlegroups.com>, linux-pci@vger.kernel.org
+Cc: Logan Gunthorpe <logang@deltatee.com>, "Eric Pilmore (GigaIO)" <epilmore@gigaio.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Randy Dunlap <rdunlap@infradead.org>
+This is a follow-up of the initial problems encountered trying to get 
+the AMD Epyc 7401server to do host to host communication through NTB. 
+(please see thread for background info).
 
-Fix typos in drivers/ntb/hw/idt/Kconfig.
-Use consistent spelling and capitalization.
+The IO_PAGE_FAULT flags=0x0070 seen on write ops was in fact related to 
+proxy ID setup as Logan had suggested. The AMD iommu code only processed 
+the 'last' proxy ID/dma alias; the last proxy ID was associated with 
+Reads and this allowed Read ops to succeed and Write ops to fail. Adding 
+support to process all of the proxy IDs in the AMD iommu code (plus 
+adding dma_map_resource support), the AMD Epyc server can now be 
+configured in a 4 host NTB setup and communicate over NTB (tcp/ip over 
+ntb_netdev) to the other 3 hosts.
 
-Fixes: bf2a952d31d2 ("NTB: Add IDT 89HPESxNTx PCIe-switches support")
-Signed-off-by: Randy Dunlap <rdunlap@infradead.org>
-Cc: Jon Mason <jdmason@kudzu.us>
-Cc: Dave Jiang <dave.jiang@intel.com>
-Cc: Allen Hubbe <allenbh@gmail.com>
-Cc: Serge Semin <fancer.lancer@gmail.com>
-Cc: linux-ntb@googlegroups.com
----
- drivers/ntb/hw/idt/Kconfig |    6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+The problem that we are now experiencing, for which I can use some help, 
+with the AMD Epyc 7401 server is very poor iperf performance over 
+NTB/ntb_netdev.
 
---- lnx-53.orig/drivers/ntb/hw/idt/Kconfig
-+++ lnx-53/drivers/ntb/hw/idt/Kconfig
-@@ -4,11 +4,11 @@ config NTB_IDT
- 	depends on PCI
- 	select HWMON
- 	help
--	 This driver supports NTB of cappable IDT PCIe-switches.
-+	 This driver supports NTB of capable IDT PCIe-switches.
- 
- 	 Some of the pre-initializations must be made before IDT PCIe-switch
--	 exposes it NT-functions correctly. It should be done by either proper
--	 initialisation of EEPROM connected to master smbus of the switch or
-+	 exposes its NT-functions correctly. It should be done by either proper
-+	 initialization of EEPROM connected to master SMbus of the switch or
- 	 by BIOS using slave-SMBus interface changing corresponding registers
- 	 value. Evidently it must be done before PCI bus enumeration is
- 	 finished in Linux kernel.
+The iperf numbers over NTB start off initially at around 800 Mbits/s and 
+quickly degrades down to the 20 Mbits/s range. Running 'top' during 
+iperf, I see many instances (up to 25+) of ksoftirqd running which 
+suggests that interrupts are overwhelming the interrupt processing.
+
+/proc/interrupts show lots of 'ccp-5' dma interrupt activity as well as 
+ntb_netdev interrupt activity. After eliminating netdev interrupts by 
+configuring netdev to 'use_poll' and leaving ccp, the poor iperf 
+performance persists.
+
+As a comparison, I can replace the ccp dma with the plx dma (found on 
+the host adapter card) on the AMD server and get a steady 9.4 Gbits/s 
+with iperf over NTB.
+
+I've optmimized for numa via numactl in all test runs.
+
+So it appears that the iperf NTB performance issues on the AMD Epyc 
+server are related to the ccp dma and its interrupt processing.
 
 
+Does anyone have any experience with the ccp dma that might be able to help?
+
+Any help or suggestions on how to proceed would be very much appreciated.
+
+Thanks
+Kit
+
+kchow@gigaio.com
