@@ -1,52 +1,63 @@
 Return-Path: <jdmason@kudzu.us>
-Received: from mail-io1-xd41.google.com (mail-io1-xd41.google.com. [2607:f8b0:4864:20::d41])
-        by gmr-mx.google.com with ESMTPS id w131si779926oif.2.2019.09.10.10.02.35
+Received: from mail-io1-xd42.google.com (mail-io1-xd42.google.com. [2607:f8b0:4864:20::d42])
+        by gmr-mx.google.com with ESMTPS id h184si869123vka.3.2019.09.23.15.12.41
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 10 Sep 2019 10:02:35 -0700 (PDT)
-Received: by mail-io1-xd41.google.com with SMTP id j4so39166698iog.11
-        for <linux-ntb@googlegroups.com>; Tue, 10 Sep 2019 10:02:35 -0700 (PDT)
+        Mon, 23 Sep 2019 15:12:41 -0700 (PDT)
+Received: by mail-io1-xd42.google.com with SMTP id n197so37412149iod.9
+        for <linux-ntb@googlegroups.com>; Mon, 23 Sep 2019 15:12:41 -0700 (PDT)
 MIME-Version: 1.0
-References: <20190818185349.15275-1-colin.king@canonical.com>
-In-Reply-To: <20190818185349.15275-1-colin.king@canonical.com>
+References: <55f2fb85-9d4d-f78d-e6dd-70b09d7667e4@infradead.org>
+In-Reply-To: <55f2fb85-9d4d-f78d-e6dd-70b09d7667e4@infradead.org>
 From: Jon Mason <jdmason@kudzu.us>
-Date: Tue, 10 Sep 2019 18:02:27 +0100
-Message-ID: <CAPoiz9z-e_oK2urbkWcoa2qqybAFbR54SR7gGzU1EA19zrxc=A@mail.gmail.com>
-Subject: Re: [PATCH] NTB: ntb_transport: remove redundant assignment to rc
+Date: Mon, 23 Sep 2019 15:12:30 -0700
+Message-ID: <CAPoiz9zWo+LuzWG29kSYCrs9FdwvzDycWBEmg_GHL3W5c3QRuQ@mail.gmail.com>
+Subject: Re: [PATCH] NTB: fix IDT Kconfig typos/spellos
 Content-Type: text/plain; charset="UTF-8"
-To: Colin King <colin.king@canonical.com>
-Cc: Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb <linux-ntb@googlegroups.com>, kernel-janitors@vger.kernel.org, linux-kernel <linux-kernel@vger.kernel.org>
+To: Randy Dunlap <rdunlap@infradead.org>
+Cc: LKML <linux-kernel@vger.kernel.org>, linux-ntb <linux-ntb@googlegroups.com>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Serge Semin <fancer.lancer@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Sun, Aug 18, 2019 at 7:53 PM Colin King <colin.king@canonical.com> wrote:
+On Wed, Sep 18, 2019 at 1:58 PM Randy Dunlap <rdunlap@infradead.org> wrote:
 >
-> From: Colin Ian King <colin.king@canonical.com>
+> From: Randy Dunlap <rdunlap@infradead.org>
 >
-> Variable rc is initialized to a value that is never read and it
-> is re-assigned later. The initialization is redundant and can be
-> removed.
+> Fix typos in drivers/ntb/hw/idt/Kconfig.
+> Use consistent spelling and capitalization.
+>
+> Fixes: bf2a952d31d2 ("NTB: Add IDT 89HPESxNTx PCIe-switches support")
+> Signed-off-by: Randy Dunlap <rdunlap@infradead.org>
+> Cc: Jon Mason <jdmason@kudzu.us>
+> Cc: Dave Jiang <dave.jiang@intel.com>
+> Cc: Allen Hubbe <allenbh@gmail.com>
+> Cc: Serge Semin <fancer.lancer@gmail.com>
+> Cc: linux-ntb@googlegroups.com
 
-Applied to ntb-next, thanks
+Pulled into the ntb branch.
 
-> Addresses-Coverity: ("Unused value")
-> Signed-off-by: Colin Ian King <colin.king@canonical.com>
+Thanks,
+Jon
+
 > ---
->  drivers/ntb/ntb_transport.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  drivers/ntb/hw/idt/Kconfig |    6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
 >
-> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-> index 40c90ca10729..00a5d5764993 100644
-> --- a/drivers/ntb/ntb_transport.c
-> +++ b/drivers/ntb/ntb_transport.c
-> @@ -292,7 +292,7 @@ static int ntb_transport_bus_match(struct device *dev,
->  static int ntb_transport_bus_probe(struct device *dev)
->  {
->         const struct ntb_transport_client *client;
-> -       int rc = -EINVAL;
-> +       int rc;
+> --- lnx-53.orig/drivers/ntb/hw/idt/Kconfig
+> +++ lnx-53/drivers/ntb/hw/idt/Kconfig
+> @@ -4,11 +4,11 @@ config NTB_IDT
+>         depends on PCI
+>         select HWMON
+>         help
+> -        This driver supports NTB of cappable IDT PCIe-switches.
+> +        This driver supports NTB of capable IDT PCIe-switches.
 >
->         get_device(dev);
+>          Some of the pre-initializations must be made before IDT PCIe-switch
+> -        exposes it NT-functions correctly. It should be done by either proper
+> -        initialisation of EEPROM connected to master smbus of the switch or
+> +        exposes its NT-functions correctly. It should be done by either proper
+> +        initialization of EEPROM connected to master SMbus of the switch or
+>          by BIOS using slave-SMBus interface changing corresponding registers
+>          value. Evidently it must be done before PCI bus enumeration is
+>          finished in Linux kernel.
 >
-> --
-> 2.20.1
 >
