@@ -1,13 +1,13 @@
 Return-Path: <kishon@ti.com>
-Received: from lelv0143.ext.ti.com (lelv0143.ext.ti.com. [198.47.23.248])
-        by gmr-mx.google.com with ESMTPS id n67si76453qkc.1.2019.09.26.04.31.12
+Received: from fllv0015.ext.ti.com (fllv0015.ext.ti.com. [198.47.19.141])
+        by gmr-mx.google.com with ESMTPS id d134si125542ybc.2.2019.09.26.04.31.07
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 26 Sep 2019 04:31:12 -0700 (PDT)
+        Thu, 26 Sep 2019 04:31:07 -0700 (PDT)
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [RFC PATCH 08/21] PCI: endpoint: Make *_get_first_free_bar() take into account 64 bit BAR
-Date: Thu, 26 Sep 2019 16:59:20 +0530
-Message-ID: <20190926112933.8922-9-kishon@ti.com>
+Subject: [RFC PATCH 07/21] PCI: endpoint: Add "pci-epf-bus" driver
+Date: Thu, 26 Sep 2019 16:59:19 +0530
+Message-ID: <20190926112933.8922-8-kishon@ti.com>
 In-Reply-To: <20190926112933.8922-1-kishon@ti.com>
 References: <20190926112933.8922-1-kishon@ti.com>
 MIME-Version: 1.0
@@ -16,46 +16,88 @@ To: Bjorn Helgaas <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, Rob H
 Cc: Mark Rutland <mark.rutland@arm.com>, kishon@ti.com, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-pci_epc_get_first_free_bar() uses only "reserved_bar" member in
-epc_features to get the first unreserved BAR. However if the
-reserved BAR is also a 64-bit BAR, then the next BAR shouldn't be
-returned (since 64-bit BAR uses two BARs).
-
-Make pci_epc_get_first_free_bar() take into account 64 bit BAR while
-returning the first free unreserved BAR.
+Add "pci-epf-bus" driver that helps to create EPF device from
+device tree. This is added in order to define an endpoint function
+completely from device tree.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- drivers/pci/endpoint/pci-epc-core.c | 12 ++++++++++--
- 1 file changed, 10 insertions(+), 2 deletions(-)
+ drivers/pci/endpoint/Makefile      |  3 +-
+ drivers/pci/endpoint/pci-epf-bus.c | 54 ++++++++++++++++++++++++++++++
+ 2 files changed, 56 insertions(+), 1 deletion(-)
+ create mode 100644 drivers/pci/endpoint/pci-epf-bus.c
 
-diff --git a/drivers/pci/endpoint/pci-epc-core.c b/drivers/pci/endpoint/pci-epc-core.c
-index 0c2fdd39090c..7eae7dcaebf9 100644
---- a/drivers/pci/endpoint/pci-epc-core.c
-+++ b/drivers/pci/endpoint/pci-epc-core.c
-@@ -153,12 +153,20 @@ EXPORT_SYMBOL_GPL(of_pci_epc_get_by_name);
- unsigned int pci_epc_get_first_free_bar(const struct pci_epc_features
- 					*epc_features)
- {
--	int free_bar;
-+	unsigned long free_bar;
+diff --git a/drivers/pci/endpoint/Makefile b/drivers/pci/endpoint/Makefile
+index 95b2fe47e3b0..36cf33cf975c 100644
+--- a/drivers/pci/endpoint/Makefile
++++ b/drivers/pci/endpoint/Makefile
+@@ -5,4 +5,5 @@
  
- 	if (!epc_features)
- 		return 0;
- 
--	free_bar = ffz(epc_features->reserved_bar);
-+	/* Find if the reserved BAR is also a 64-bit BAR */
-+	free_bar = epc_features->reserved_bar & epc_features->bar_fixed_64bit;
+ obj-$(CONFIG_PCI_ENDPOINT_CONFIGFS)	+= pci-ep-cfs.o
+ obj-$(CONFIG_PCI_ENDPOINT)		+= pci-epc-core.o pci-epf-core.o\
+-					   pci-epc-mem.o functions/
++					   pci-epc-mem.o pci-epf-bus.o \
++					   functions/
+diff --git a/drivers/pci/endpoint/pci-epf-bus.c b/drivers/pci/endpoint/pci-epf-bus.c
+new file mode 100644
+index 000000000000..c47eeae7fe7a
+--- /dev/null
++++ b/drivers/pci/endpoint/pci-epf-bus.c
+@@ -0,0 +1,54 @@
++// SPDX-License-Identifier: GPL-2.0
++/**
++ * PCI Endpoint *Function* Bus Driver
++ *
++ * Copyright (C) 2019 Texas Instruments
++ * Author: Kishon Vijay Abraham I <kishon@ti.com>
++ */
 +
-+	/* Set the adjacent bit if the reserved BAR is also a 64-bit BAR */
-+	free_bar <<= 1;
-+	free_bar |= epc_features->reserved_bar;
++#include <linux/err.h>
++#include <linux/module.h>
++#include <linux/of.h>
++#include <linux/pci-epf.h>
++#include <linux/platform_device.h>
 +
-+	/* Now find the free BAR */
-+	free_bar = ffz(free_bar);
- 	if (free_bar > 5)
- 		return 0;
- 
++static int pci_epf_bus_probe(struct platform_device *pdev)
++{
++	struct device *dev = &pdev->dev;
++	struct device_node *node = of_node_get(dev->of_node);
++	struct device_node *child;
++	struct pci_epf *epf;
++
++	for_each_child_of_node(node, child) {
++		epf = devm_pci_epf_of_create(dev, child);
++		if (IS_ERR(epf)) {
++			dev_err(dev, "Failed to create PCI EPF device %s\n",
++				node->full_name);
++			of_node_put(child);
++			break;
++		}
++	}
++	of_node_put(node);
++
++	return 0;
++}
++
++static const struct of_device_id pci_epf_bus_id_table[] = {
++	{ .compatible = "pci-epf-bus" },
++	{}
++};
++MODULE_DEVICE_TABLE(of, pci_epf_bus_id_table);
++
++static struct platform_driver pci_epf_bus_driver = {
++	.probe		= pci_epf_bus_probe,
++	.driver		= {
++		.name	= "pci-epf-bus",
++		.of_match_table = of_match_ptr(pci_epf_bus_id_table),
++	},
++};
++
++module_platform_driver(pci_epf_bus_driver);
++
++MODULE_AUTHOR("Texas Instruments Inc.");
++MODULE_DESCRIPTION("PCI EPF Bus Driver");
++MODULE_LICENSE("GPL v2");
 -- 
 2.17.1
 
