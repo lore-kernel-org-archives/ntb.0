@@ -1,15 +1,15 @@
 Return-Path: <sashal@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id k184si1026587oih.0.2019.10.01.09.42.09
+        by gmr-mx.google.com with ESMTPS id k13si135836vkd.1.2019.10.01.09.40.11
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 01 Oct 2019 09:42:09 -0700 (PDT)
+        Tue, 01 Oct 2019 09:40:11 -0700 (PDT)
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.2 29/63] ntb: point to right memory window index
-Date: Tue,  1 Oct 2019 12:40:51 -0400
-Message-Id: <20191001164125.15398-29-sashal@kernel.org>
-In-Reply-To: <20191001164125.15398-1-sashal@kernel.org>
-References: <20191001164125.15398-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.3 32/71] ntb: point to right memory window index
+Date: Tue,  1 Oct 2019 12:38:42 -0400
+Message-Id: <20191001163922.14735-32-sashal@kernel.org>
+In-Reply-To: <20191001163922.14735-1-sashal@kernel.org>
+References: <20191001163922.14735-1-sashal@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
@@ -49,10 +49,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index 11a6cd3740049..c6a1dee3c429b 100644
+index d028331558ea7..e9b7c2dfc7301 100644
 --- a/drivers/ntb/test/ntb_perf.c
 +++ b/drivers/ntb/test/ntb_perf.c
-@@ -1370,7 +1370,7 @@ static int perf_setup_peer_mw(struct perf_peer *peer)
+@@ -1378,7 +1378,7 @@ static int perf_setup_peer_mw(struct perf_peer *peer)
  	int ret;
  
  	/* Get outbound MW parameters and map it */
