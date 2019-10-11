@@ -1,66 +1,56 @@
-Return-Path: <sashal@kernel.org>
+Return-Path: <gregkh@linuxfoundation.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id k13si135836vkd.1.2019.10.01.09.40.11
+        by gmr-mx.google.com with ESMTPS id t186si229052qkf.3.2019.10.11.06.19.24
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 01 Oct 2019 09:40:11 -0700 (PDT)
-From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.3 32/71] ntb: point to right memory window index
-Date: Tue,  1 Oct 2019 12:38:42 -0400
-Message-Id: <20191001163922.14735-32-sashal@kernel.org>
-In-Reply-To: <20191001163922.14735-1-sashal@kernel.org>
-References: <20191001163922.14735-1-sashal@kernel.org>
+        Fri, 11 Oct 2019 06:19:25 -0700 (PDT)
+Date: Fri, 11 Oct 2019 15:19:19 +0200
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH] ntb: ntb_pingpong: no need to check the return value of
+ debugfs calls
+Message-ID: <20191011131919.GA1174815@kroah.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Sanjay R Mehta <sanju.mehta@amd.com>, Jon Mason <jdmason@kudzu.us>, Sasha Levin <sashal@kernel.org>, linux-ntb@googlegroups.com
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>
+Cc: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Sanjay R Mehta <sanju.mehta@amd.com>
+There is no need to check the return value of debugfs_create_atomic_t as
+nothing happens with the error.  Also, the code will never return NULL,
+so this check has never caught anything :)
 
-[ Upstream commit ae89339b08f3fe02457ec9edd512ddc3d246d0f8 ]
+Fix this by removing the check entirely.
 
-second parameter of ntb_peer_mw_get_addr is pointing to wrong memory
-window index by passing "peer gidx" instead of "local gidx".
-
-For ex, "local gidx" value is '0' and "peer gidx" value is '1', then
-
-on peer side ntb_mw_set_trans() api is used as below with gidx pointing to
-local side gidx which is '0', so memroy window '0' is chosen and XLAT '0'
-will be programmed by peer side.
-
-    ntb_mw_set_trans(perf->ntb, peer->pidx, peer->gidx, peer->inbuf_xlat,
-                    peer->inbuf_size);
-
-Now, on local side ntb_peer_mw_get_addr() is been used as below with gidx
-pointing to "peer gidx" which is '1', so pointing to memory window '1'
-instead of memory window '0'.
-
-    ntb_peer_mw_get_addr(perf->ntb,  peer->gidx, &phys_addr,
-                        &peer->outbuf_size);
-
-So this patch pass "local gidx" as parameter to ntb_peer_mw_get_addr().
-
-Signed-off-by: Sanjay R Mehta <sanju.mehta@amd.com>
-Signed-off-by: Jon Mason <jdmason@kudzu.us>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
+Cc: Jon Mason <jdmason@kudzu.us>
+Cc: Dave Jiang <dave.jiang@intel.com>
+Cc: Allen Hubbe <allenbh@gmail.com>
+Cc: linux-ntb@googlegroups.com
+Cc: linux-kernel@vger.kernel.org
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 ---
- drivers/ntb/test/ntb_perf.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/ntb/test/ntb_pingpong.c | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
 
-diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index d028331558ea7..e9b7c2dfc7301 100644
---- a/drivers/ntb/test/ntb_perf.c
-+++ b/drivers/ntb/test/ntb_perf.c
-@@ -1378,7 +1378,7 @@ static int perf_setup_peer_mw(struct perf_peer *peer)
- 	int ret;
+diff --git a/drivers/ntb/test/ntb_pingpong.c b/drivers/ntb/test/ntb_pingpong.c
+index 65865e460ab8..04dd46647db3 100644
+--- a/drivers/ntb/test/ntb_pingpong.c
++++ b/drivers/ntb/test/ntb_pingpong.c
+@@ -354,13 +354,10 @@ static void pp_clear_ctx(struct pp_ctx *pp)
+ static void pp_setup_dbgfs(struct pp_ctx *pp)
+ {
+ 	struct pci_dev *pdev = pp->ntb->pdev;
+-	void *ret;
  
- 	/* Get outbound MW parameters and map it */
--	ret = ntb_peer_mw_get_addr(perf->ntb, peer->gidx, &phys_addr,
-+	ret = ntb_peer_mw_get_addr(perf->ntb, perf->gidx, &phys_addr,
- 				   &peer->outbuf_size);
- 	if (ret)
- 		return ret;
+ 	pp->dbgfs_dir = debugfs_create_dir(pci_name(pdev), pp_dbgfs_topdir);
+ 
+-	ret = debugfs_create_atomic_t("count", 0600, pp->dbgfs_dir, &pp->count);
+-	if (!ret)
+-		dev_warn(&pp->ntb->dev, "DebugFS unsupported\n");
++	debugfs_create_atomic_t("count", 0600, pp->dbgfs_dir, &pp->count);
+ }
+ 
+ static void pp_clear_dbgfs(struct pp_ctx *pp)
 -- 
-2.20.1
+2.23.0
 
