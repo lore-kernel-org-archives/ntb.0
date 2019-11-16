@@ -1,56 +1,51 @@
-Return-Path: <gregkh@linuxfoundation.org>
+Return-Path: <sashal@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id t186si229052qkf.3.2019.10.11.06.19.24
+        by gmr-mx.google.com with ESMTPS id b15si735513pgw.5.2019.11.16.07.55.10
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 11 Oct 2019 06:19:25 -0700 (PDT)
-Date: Fri, 11 Oct 2019 15:19:19 +0200
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH] ntb: ntb_pingpong: no need to check the return value of
- debugfs calls
-Message-ID: <20191011131919.GA1174815@kroah.com>
+        Sat, 16 Nov 2019 07:55:10 -0800 (PST)
+From: Sasha Levin <sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.4 54/77] ntb_netdev: fix sleep time mismatch
+Date: Sat, 16 Nov 2019 10:53:16 -0500
+Message-Id: <20191116155339.11909-54-sashal@kernel.org>
+In-Reply-To: <20191116155339.11909-1-sashal@kernel.org>
+References: <20191116155339.11909-1-sashal@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>
-Cc: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
+Content-Transfer-Encoding: 8bit
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: Jon Mason <jdmason@kudzu.us>, "Gerd W . Haeussler" <gerd.haeussler@cesys-it.com>, Dave Jiang <dave.jiang@intel.com>, Sasha Levin <sashal@kernel.org>, linux-ntb@googlegroups.com, netdev@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-There is no need to check the return value of debugfs_create_atomic_t as
-nothing happens with the error.  Also, the code will never return NULL,
-so this check has never caught anything :)
+From: Jon Mason <jdmason@kudzu.us>
 
-Fix this by removing the check entirely.
+[ Upstream commit a861594b1b7ffd630f335b351c4e9f938feadb8e ]
 
-Cc: Jon Mason <jdmason@kudzu.us>
-Cc: Dave Jiang <dave.jiang@intel.com>
-Cc: Allen Hubbe <allenbh@gmail.com>
-Cc: linux-ntb@googlegroups.com
-Cc: linux-kernel@vger.kernel.org
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+The tx_time should be in usecs (according to the comment above the
+variable), but the setting of the timer during the rearming is done in
+msecs.  Change it to match the expected units.
+
+Fixes: e74bfeedad08 ("NTB: Add flow control to the ntb_netdev")
+Suggested-by: Gerd W. Haeussler <gerd.haeussler@cesys-it.com>
+Signed-off-by: Jon Mason <jdmason@kudzu.us>
+Acked-by: Dave Jiang <dave.jiang@intel.com>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/ntb/test/ntb_pingpong.c | 5 +----
- 1 file changed, 1 insertion(+), 4 deletions(-)
+ drivers/net/ntb_netdev.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/ntb/test/ntb_pingpong.c b/drivers/ntb/test/ntb_pingpong.c
-index 65865e460ab8..04dd46647db3 100644
---- a/drivers/ntb/test/ntb_pingpong.c
-+++ b/drivers/ntb/test/ntb_pingpong.c
-@@ -354,13 +354,10 @@ static void pp_clear_ctx(struct pp_ctx *pp)
- static void pp_setup_dbgfs(struct pp_ctx *pp)
- {
- 	struct pci_dev *pdev = pp->ntb->pdev;
--	void *ret;
+diff --git a/drivers/net/ntb_netdev.c b/drivers/net/ntb_netdev.c
+index a9acf71568555..03009f1becddc 100644
+--- a/drivers/net/ntb_netdev.c
++++ b/drivers/net/ntb_netdev.c
+@@ -236,7 +236,7 @@ static void ntb_netdev_tx_timer(unsigned long data)
+ 	struct ntb_netdev *dev = netdev_priv(ndev);
  
- 	pp->dbgfs_dir = debugfs_create_dir(pci_name(pdev), pp_dbgfs_topdir);
- 
--	ret = debugfs_create_atomic_t("count", 0600, pp->dbgfs_dir, &pp->count);
--	if (!ret)
--		dev_warn(&pp->ntb->dev, "DebugFS unsupported\n");
-+	debugfs_create_atomic_t("count", 0600, pp->dbgfs_dir, &pp->count);
- }
- 
- static void pp_clear_dbgfs(struct pp_ctx *pp)
+ 	if (ntb_transport_tx_free_entry(dev->qp) < tx_stop) {
+-		mod_timer(&dev->tx_timer, jiffies + msecs_to_jiffies(tx_time));
++		mod_timer(&dev->tx_timer, jiffies + usecs_to_jiffies(tx_time));
+ 	} else {
+ 		/* Make sure anybody stopping the queue after this sees the new
+ 		 * value of ntb_transport_tx_free_entry()
 -- 
-2.23.0
+2.20.1
 
