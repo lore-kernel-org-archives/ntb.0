@@ -1,15 +1,15 @@
 Return-Path: <sashal@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id b15si735513pgw.5.2019.11.16.07.55.10
+        by gmr-mx.google.com with ESMTPS id p16si872500ota.3.2019.11.16.07.52.59
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Sat, 16 Nov 2019 07:55:10 -0800 (PST)
+        Sat, 16 Nov 2019 07:52:59 -0800 (PST)
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.4 54/77] ntb_netdev: fix sleep time mismatch
-Date: Sat, 16 Nov 2019 10:53:16 -0500
-Message-Id: <20191116155339.11909-54-sashal@kernel.org>
-In-Reply-To: <20191116155339.11909-1-sashal@kernel.org>
-References: <20191116155339.11909-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.9 70/99] ntb_netdev: fix sleep time mismatch
+Date: Sat, 16 Nov 2019 10:50:33 -0500
+Message-Id: <20191116155103.10971-70-sashal@kernel.org>
+In-Reply-To: <20191116155103.10971-1-sashal@kernel.org>
+References: <20191116155103.10971-1-sashal@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
