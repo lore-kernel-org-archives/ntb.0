@@ -1,51 +1,183 @@
-Return-Path: <sashal@kernel.org>
-Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id p16si871676ota.3.2019.11.16.07.46.05
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-io1-xd42.google.com (mail-io1-xd42.google.com. [2607:f8b0:4864:20::d42])
+        by gmr-mx.google.com with ESMTPS id x65si781911oig.5.2019.11.17.15.43.19
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Sat, 16 Nov 2019 07:46:05 -0800 (PST)
-From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 172/237] ntb_netdev: fix sleep time mismatch
-Date: Sat, 16 Nov 2019 10:40:07 -0500
-Message-Id: <20191116154113.7417-172-sashal@kernel.org>
-In-Reply-To: <20191116154113.7417-1-sashal@kernel.org>
-References: <20191116154113.7417-1-sashal@kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 17 Nov 2019 15:43:19 -0800 (PST)
+Received: by mail-io1-xd42.google.com with SMTP id i13so16686773ioj.5
+        for <linux-ntb@googlegroups.com>; Sun, 17 Nov 2019 15:43:19 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Jon Mason <jdmason@kudzu.us>, "Gerd W . Haeussler" <gerd.haeussler@cesys-it.com>, Dave Jiang <dave.jiang@intel.com>, Sasha Levin <sashal@kernel.org>, linux-ntb@googlegroups.com, netdev@vger.kernel.org
+References: <20190926112933.8922-1-kishon@ti.com>
+In-Reply-To: <20190926112933.8922-1-kishon@ti.com>
+From: Jon Mason <jdmason@kudzu.us>
+Date: Sun, 17 Nov 2019 18:43:08 -0500
+Message-ID: <CAPoiz9x1LsXEeK2n98+4Rm9oTCiowrMUO5d6PPtc4SQG3mP9uA@mail.gmail.com>
+Subject: Re: [RFC PATCH 00/21] Implement NTB Controller using multiple PCI
+Content-Type: text/plain; charset="UTF-8"
+To: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: Bjorn Helgaas <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, Rob Herring <robh+dt@kernel.org>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Mark Rutland <mark.rutland@arm.com>, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel <linux-kernel@vger.kernel.org>, devicetree@vger.kernel.org, linux-ntb <linux-ntb@googlegroups.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Jon Mason <jdmason@kudzu.us>
+On Thu, Sep 26, 2019 at 7:30 AM 'Kishon Vijay Abraham I' via linux-ntb
+<linux-ntb@googlegroups.com> wrote:
+>
+> This series is sent as RFC since this series is dependent on
+> [1] (cannot be merged before that series) and to get early review
+> comments.
+>
+> I'll also split this series into smaller chunk when I post the
+> next revision.
+>
+> This series is about implementing SW defined NTB using
+> multiple endpoint instances. This series has been tested using
+> 2 endpoint instances in J7 connected to two DRA7 boards.
+>
+> This was presented in Linux Plumbers Conference. The presentation
+> can be found @ [2]
+>
+> This series:
+>   *) Add support to define endpoint function using device tree
+>   *) Add a specification for implementing NTB controller using
+>      multiple endpoint instances.
+>   *) Add a NTB endpoint function driver and a NTB host side PCI
+>      driver that follows the specification.
+>   *) Add support in PCIe endpoint core to support secondary
+>      interface.
+>   *) Add a device tree overlay file to configure J7 as NTB
+>
+> The test setup is something like below
+>    +-------------+                                   +-------------+
+>    |             |                                   |             |
+>    |    DRA72    |                                   |    DRA76    |
+>    |             |                                   |             |
+>    +------^------+                                   +------^------+
+>           |                                                 |
+>           |                                                 |
+> +---------|-------------------------------------------------|---------+
+> |  +------v------+                                   +------v------+  |
+> |  |             |                                   |             |  |
+> |  |     EP      |                                   |     EP      |  |
+> |  | CONTROLLER1 |                                   | CONTROLLER2 |  |
+> |  |             <----------------------------------->             |  |
+> |  |             |                                   |             |  |
+> |  |             |                                   |             |  |
+> |  |             |                 J7                |             |  |
+> |  |             |  (Configured using NTB Function)  |             |  |
+> |  +-------------+                                   +-------------+  |
+> +---------------------------------------------------------------------+
+>
+> Here DRA72 and DRA76 could be replaced with *any* PCI host.
+>
+> EP side (J7):
+> =============
+>
+> In the kernel:
+>         cd /sys/kernel/config/pci_ep/
+>         echo 1 > controllers/d800000.pcie-ep/start
+>         echo 1 > controllers/d000000.pcie-ep/start
+>
+> RC side (DRA7):
+> ===============
+>         echo 0000:01:00.0 > /sys/bus/pci/devices/0000\:01\:00.0/driver/unbind
+>         echo 0000:01:00.0 > /sys/bus/pci/drivers/ntb_hw_epf/bind
+>         modprobe ntb_transport
+>         modprobe ntb_netdev
+>
+> On each of the hosts Ethernet Interface will be created.
+>
+> Provide an IP address to each of the hosts:
+> HOST1 (dra72):
+> ifconfig eth2 192.168.1.2 up
+>
+> HOST2 (dra76):
+> ifconfig eth2 192.168.1.1 up
+>
+> Once this is done standard network utilities like ping or iperf can be
+> used.
+>
+> root@dra7xx-evm:~# iperf -c 192.168.1.2
+> ------------------------------------------------------------
+> Client connecting to 192.168.1.2, TCP port 5001
+> TCP window size: 2.50 MByte (default)
+> ------------------------------------------------------------
+> [  3] local 192.168.1.1 port 60814 connected with 192.168.1.2 port 5001
+> [ ID] Interval       Transfer     Bandwidth
+> [  3]  0.0-10.0 sec   705 MBytes   591 Mbits/sec
+>
+> [1] -> http://lore.kernel.org/r/20190604131516.13596-1-kishon@ti.com
+> [2] -> https://www.linuxplumbersconf.org/event/4/contributions/395/attachments/284/481/Implementing_NTB_Controller_Using_PCIe_Endpoint_-_final.pdf
 
-[ Upstream commit a861594b1b7ffd630f335b351c4e9f938feadb8e ]
 
-The tx_time should be in usecs (according to the comment above the
-variable), but the setting of the timer during the rearming is done in
-msecs.  Change it to match the expected units.
+I had a few nits, but I think this series looks good enough to be sent
+out for inclusion.
 
-Fixes: e74bfeedad08 ("NTB: Add flow control to the ntb_netdev")
-Suggested-by: Gerd W. Haeussler <gerd.haeussler@cesys-it.com>
-Signed-off-by: Jon Mason <jdmason@kudzu.us>
-Acked-by: Dave Jiang <dave.jiang@intel.com>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- drivers/net/ntb_netdev.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Thanks,
+Jon
 
-diff --git a/drivers/net/ntb_netdev.c b/drivers/net/ntb_netdev.c
-index b12023bc2cab5..df8d49ad48c38 100644
---- a/drivers/net/ntb_netdev.c
-+++ b/drivers/net/ntb_netdev.c
-@@ -236,7 +236,7 @@ static void ntb_netdev_tx_timer(struct timer_list *t)
- 	struct net_device *ndev = dev->ndev;
- 
- 	if (ntb_transport_tx_free_entry(dev->qp) < tx_stop) {
--		mod_timer(&dev->tx_timer, jiffies + msecs_to_jiffies(tx_time));
-+		mod_timer(&dev->tx_timer, jiffies + usecs_to_jiffies(tx_time));
- 	} else {
- 		/* Make sure anybody stopping the queue after this sees the new
- 		 * value of ntb_transport_tx_free_entry()
--- 
-2.20.1
-
+> Kishon Vijay Abraham I (21):
+>   dt-bindings: PCI: Endpoint: Add DT bindings for PCI EPF Bus
+>   dt-bindings: PCI: Endpoint: Add DT bindings for PCI EPF Device
+>   dt-bindings: PCI: Endpoint: Add DT bindings for PCI EPF NTB Device
+>   Documentation: PCI: Add specification for the *PCI NTB* function
+>     device
+>   PCI: endpoint: Add API to get reference to EPC from device-tree
+>   PCI: endpoint: Add API to create EPF device from device tree
+>   PCI: endpoint: Add "pci-epf-bus" driver
+>   PCI: endpoint: Make *_get_first_free_bar() take into account 64 bit
+>     BAR
+>   PCI: endpoint: Add helper API to get the 'next' unreserved BAR
+>   PCI: endpoint: Make pci_epf_driver ops optional
+>   PCI: endpoint: Add helper API to populate header with values from DT
+>   PCI: endpoint: Add support to associate secondary EPC with EPF
+>   PCI: endpoint: Add pci_epc_ops to map MSI irq
+>   PCI: cadence: Implement ->msi_map_irq() ops
+>   PCI: endpoint: Remove unused pci_epf_match_device()
+>   PCI: endpoint: Fix missing mutex_unlock in error case
+>   PCI: endpoint: *_free_bar() to return error codes on failure
+>   PCI: endpoint: Add EP function driver to provide NTB functionality
+>   PCI: Add TI J721E device to pci ids
+>   NTB: Add support for EPF PCI-Express Non-Transparent Bridge
+>   NTB: tool: Enable the NTB/PCIe link on the local or remote side of
+>     bridge
+>
+>  Documentation/PCI/endpoint/pci-test-ntb.txt   |  315 +++++
+>  .../bindings/pci/endpoint/pci-epf-bus.txt     |   27 +
+>  .../bindings/pci/endpoint/pci-epf-ntb.txt     |   31 +
+>  .../bindings/pci/endpoint/pci-epf.txt         |   28 +
+>  drivers/ntb/hw/Kconfig                        |    1 +
+>  drivers/ntb/hw/Makefile                       |    1 +
+>  drivers/ntb/hw/epf/Kconfig                    |    5 +
+>  drivers/ntb/hw/epf/Makefile                   |    1 +
+>  drivers/ntb/hw/epf/ntb_hw_epf.c               |  648 ++++++++++
+>  drivers/ntb/test/ntb_tool.c                   |    1 +
+>  drivers/pci/controller/pcie-cadence-ep.c      |   59 +
+>  drivers/pci/endpoint/Makefile                 |    3 +-
+>  drivers/pci/endpoint/functions/Kconfig        |   12 +
+>  drivers/pci/endpoint/functions/Makefile       |    1 +
+>  drivers/pci/endpoint/functions/pci-epf-ntb.c  | 1143 +++++++++++++++++
+>  drivers/pci/endpoint/functions/pci-epf-test.c |   12 +-
+>  drivers/pci/endpoint/pci-ep-cfs.c             |    6 +-
+>  drivers/pci/endpoint/pci-epc-core.c           |  221 +++-
+>  drivers/pci/endpoint/pci-epf-bus.c            |   54 +
+>  drivers/pci/endpoint/pci-epf-core.c           |  133 +-
+>  include/linux/pci-epc.h                       |   42 +-
+>  include/linux/pci-epf.h                       |   35 +-
+>  include/linux/pci_ids.h                       |    1 +
+>  23 files changed, 2715 insertions(+), 65 deletions(-)
+>  create mode 100644 Documentation/PCI/endpoint/pci-test-ntb.txt
+>  create mode 100644 Documentation/devicetree/bindings/pci/endpoint/pci-epf-bus.txt
+>  create mode 100644 Documentation/devicetree/bindings/pci/endpoint/pci-epf-ntb.txt
+>  create mode 100644 Documentation/devicetree/bindings/pci/endpoint/pci-epf.txt
+>  create mode 100644 drivers/ntb/hw/epf/Kconfig
+>  create mode 100644 drivers/ntb/hw/epf/Makefile
+>  create mode 100644 drivers/ntb/hw/epf/ntb_hw_epf.c
+>  create mode 100644 drivers/pci/endpoint/functions/pci-epf-ntb.c
+>  create mode 100644 drivers/pci/endpoint/pci-epf-bus.c
+>
+> --
+> 2.17.1
+>
+> --
+> You received this message because you are subscribed to the Google Groups "linux-ntb" group.
+> To unsubscribe from this group and stop receiving emails from it, send an email to linux-ntb+unsubscribe@googlegroups.com.
+> To view this discussion on the web visit https://groups.google.com/d/msgid/linux-ntb/20190926112933.8922-1-kishon%40ti.com.
