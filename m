@@ -1,128 +1,146 @@
-Return-Path: <linjiasen@hygon.cn>
-Received: from spam1.hygon.cn ([110.188.70.11])
-        by gmr-mx.google.com with ESMTPS id i1si60159pfr.2.2019.11.06.19.40.38
+Return-Path: <Arindam.Nath@amd.com>
+Received: from NAM05-CO1-obe.outbound.protection.outlook.com (mail-eopbgr720079.outbound.protection.outlook.com. [40.107.72.79])
+        by gmr-mx.google.com with ESMTPS id f184si518542ybg.3.2019.11.26.06.35.25
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 06 Nov 2019 19:40:39 -0800 (PST)
-From: Jiasen Lin <linjiasen@hygon.cn>
-Subject: [PATCH] NTB: ntb_perf: Fix address err in perf_copy_chunk
-Date: Wed, 6 Nov 2019 19:38:33 -0800
-Message-ID: <1573097913-104555-1-git-send-email-linjiasen@hygon.cn>
+        Tue, 26 Nov 2019 06:35:26 -0800 (PST)
+From: "Nath, Arindam" <Arindam.Nath@amd.com>
+Subject: RE: Fwd: [PATCH] NTB: Fix an error in get link status
+Date: Tue, 26 Nov 2019 14:35:23 +0000
+Message-ID: 
+ <MN2PR12MB323225CC169836056288CAA39C450@MN2PR12MB3232.namprd12.prod.outlook.com>
+References: <1573119336-107732-1-git-send-email-linjiasen@hygon.cn>
+ <CAPoiz9wAJz=Hqb6Os=9AHHv_NGpZ8uCaAuOC=aUTkASKdfs9WQ@mail.gmail.com>
+ <933f74c7-7249-618c-13dc-9e4e47ad75d7@hygon.cn>
+ <11b355a8-0fe0-f256-c510-ddf106017703@hygon.cn>
+ <CAADLhr7bpb-F0eF1UFXy7AcN=z061mno_QsqGE8z-mvWKvUyCQ@mail.gmail.com>
+ <04b4d1ed-ea47-819e-a7e4-b729fa463506@amd.com>
+ <5c3155b5-6eed-d955-b18b-59b0cb1c513b@hygon.cn>
+ <740bb924-b258-8dda-6469-bc1bee90291f@hygon.cn>
+ <c5adca66-024f-8d37-3187-ffba73102ac4@amd.com>
+In-Reply-To: <c5adca66-024f-8d37-3187-ffba73102ac4@amd.com>
+Content-Language: en-US
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Content-Type: text/plain
-To: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, jdmason@kudzu.us
-Cc: allenbh@gmail.com, dave.jiang@intel.com, linjiasen@hygon.cn
+To: "Mehta, Sanju" <Sanju.Mehta@amd.com>, Jiasen Lin <linjiasen@hygon.cn>
+Cc: "S-k, Shyam-sundar <Shyam-sundar.S-k@amd.com> Dave Jiang" <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-kernel <linux-kernel@vger.kernel.org>, linux-ntb <linux-ntb@googlegroups.com>, "linjiasen007@gmail.com" <linjiasen007@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-peer->outbuf is a virtual address which is get by ioremap, it can not
-be converted to a physical address by virt_to_page and page_to_phys.
-This conversion will result in DMA error, because the destination address
-which is converted by page_to_phys is invalid.
-
-We Save the physical address in perf_setup_peer_mw, it is MMIO address
-of NTB BARx. Then fill the destination address of DMA descriptor with
-this physical address to guarantee that the address of memory write
-requests fall in memory window of NBT BARx.
-
-Signed-off-by: Jiasen Lin <linjiasen@hygon.cn>
----
- drivers/ntb/test/ntb_perf.c | 28 +++++++++++++++++++++++-----
- 1 file changed, 23 insertions(+), 5 deletions(-)
-
-diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index e9b7c2d..1c2fd1a 100644
---- a/drivers/ntb/test/ntb_perf.c
-+++ b/drivers/ntb/test/ntb_perf.c
-@@ -149,6 +149,7 @@ struct perf_peer {
- 	u64 outbuf_xlat;
- 	resource_size_t outbuf_size;
- 	void __iomem *outbuf;
-+	phys_addr_t out_phys_addr;
- 
- 	/* Inbound MW params */
- 	dma_addr_t inbuf_xlat;
-@@ -776,7 +777,8 @@ static void perf_dma_copy_callback(void *data)
- }
- 
- static int perf_copy_chunk(struct perf_thread *pthr,
--			   void __iomem *dst, void *src, size_t len)
-+			   void __iomem *dst, void *src, size_t len,
-+			   phys_addr_t dst_phys_addr)
- {
- 	struct dma_async_tx_descriptor *tx;
- 	struct dmaengine_unmap_data *unmap;
-@@ -807,8 +809,7 @@ static int perf_copy_chunk(struct perf_thread *pthr,
- 	}
- 	unmap->to_cnt = 1;
- 
--	unmap->addr[1] = dma_map_page(dma_dev, virt_to_page(dst),
--		offset_in_page(dst), len, DMA_FROM_DEVICE);
-+	unmap->addr[1] = dst_phys_addr;
- 	if (dma_mapping_error(dma_dev, unmap->addr[1])) {
- 		ret = -EIO;
- 		goto err_free_resource;
-@@ -901,6 +902,8 @@ static int perf_run_test(struct perf_thread *pthr)
- 	u64 total_size, chunk_size;
- 	void *flt_src;
- 	int ret = 0;
-+	phys_addr_t flt_phys_addr;
-+	phys_addr_t bnd_phys_addr;
- 
- 	total_size = 1ULL << total_order;
- 	chunk_size = 1ULL << chunk_order;
-@@ -909,12 +912,15 @@ static int perf_run_test(struct perf_thread *pthr)
- 	flt_src = pthr->src;
- 	bnd_dst = peer->outbuf + peer->outbuf_size;
- 	flt_dst = peer->outbuf;
-+	bnd_phys_addr = peer->out_phys_addr + peer->outbuf_size;
-+	flt_phys_addr = peer->out_phys_addr;
- 
- 	pthr->duration = ktime_get();
- 
- 	/* Copied field is cleared on test launch stage */
- 	while (pthr->copied < total_size) {
--		ret = perf_copy_chunk(pthr, flt_dst, flt_src, chunk_size);
-+		ret = perf_copy_chunk(pthr, flt_dst, flt_src, chunk_size,
-+				flt_phys_addr);
- 		if (ret) {
- 			dev_err(&perf->ntb->dev, "%d: Got error %d on test\n",
- 				pthr->tidx, ret);
-@@ -925,8 +931,15 @@ static int perf_run_test(struct perf_thread *pthr)
- 
- 		flt_dst += chunk_size;
- 		flt_src += chunk_size;
--		if (flt_dst >= bnd_dst || flt_dst < peer->outbuf) {
-+		flt_phys_addr += chunk_size;
-+
-+		if (flt_dst >= bnd_dst ||
-+		    flt_dst < peer->outbuf ||
-+		    flt_phys_addr >= bnd_phys_addr ||
-+		    flt_phys_addr < peer->out_phys_addr) {
-+
- 			flt_dst = peer->outbuf;
-+			flt_phys_addr = peer->out_phys_addr;
- 			flt_src = pthr->src;
- 		}
- 
-@@ -1195,6 +1208,9 @@ static ssize_t perf_dbgfs_read_info(struct file *filep, char __user *ubuf,
- 			"\tOut buffer addr 0x%pK\n", peer->outbuf);
- 
- 		pos += scnprintf(buf + pos, buf_size - pos,
-+			"\tOut buff phys addr %pa[p]\n", &peer->out_phys_addr);
-+
-+		pos += scnprintf(buf + pos, buf_size - pos,
- 			"\tOut buffer size %pa\n", &peer->outbuf_size);
- 
- 		pos += scnprintf(buf + pos, buf_size - pos,
-@@ -1388,6 +1404,8 @@ static int perf_setup_peer_mw(struct perf_peer *peer)
- 	if (!peer->outbuf)
- 		return -ENOMEM;
- 
-+	peer->out_phys_addr = phys_addr;
-+
- 	if (max_mw_size && peer->outbuf_size > max_mw_size) {
- 		peer->outbuf_size = max_mw_size;
- 		dev_warn(&peer->perf->ntb->dev,
--- 
-2.7.4
-
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBNZWh0YSwgU2FuanUgPFNhbmp1
+Lk1laHRhQGFtZC5jb20+DQo+IFNlbnQ6IFR1ZXNkYXksIE5vdmVtYmVyIDI2LCAyMDE5IDE4OjQw
+DQo+IFRvOiBKaWFzZW4gTGluIDxsaW5qaWFzZW5AaHlnb24uY24+DQo+IENjOiBTLWssIFNoeWFt
+LXN1bmRhciA8U2h5YW0tc3VuZGFyLlMta0BhbWQuY29tPiBEYXZlIEppYW5nDQo+IDxkYXZlLmpp
+YW5nQGludGVsLmNvbT47IE5hdGgsIEFyaW5kYW0gPEFyaW5kYW0uTmF0aEBhbWQuY29tPjsgQWxs
+ZW4NCj4gSHViYmUgPGFsbGVuYmhAZ21haWwuY29tPjsgbGludXgta2VybmVsIDxsaW51eC1rZXJu
+ZWxAdmdlci5rZXJuZWwub3JnPjsNCj4gbGludXgtbnRiIDxsaW51eC1udGJAZ29vZ2xlZ3JvdXBz
+LmNvbT47IGxpbmppYXNlbjAwN0BnbWFpbC5jb20NCj4gU3ViamVjdDogUmU6IEZ3ZDogW1BBVENI
+XSBOVEI6IEZpeCBhbiBlcnJvciBpbiBnZXQgbGluayBzdGF0dXMNCj4gDQo+IA0KPiA+IEhpIFNh
+bmpheSBSIE1laHRhDQo+ID4NCj4gPiBJbiBtb3JlIGNvbXBsZXggdG9wb2xvZ3ksIHJlYWQgdGhl
+IExpbmsgU3RhdHVzIGFuZCBDb250cm9sIHJlZ2lzdGVyIG9mDQo+ID4gUlAgaXMgYWxzbyB3cm9u
+Zy4gU3VwcG9zZSB0aGF0IGEgUENJZSBzd2l0Y2ggYnJpZGdlIHRvIHRoZSBTZWNvbmRhcnkgUlAs
+DQo+ID4gYW5kIFNlY29uZGFyeSBpbnRlcm5hbCBTVy5kcyBpcyBhIGNoaWxkIGRldmljZSBmb3Ig
+c3dpdGNoJ3MgZG93bnN0cmVhbQ0KPiA+IHBvcnQgYXMgaWxsdXN0cmF0ZWQgaW4gdGhlIGZvbGxv
+d2luZyB0b3BvbG9neS4NCj4gPg0KPiA+IEluIHNlY29uZGFyeSBQQ0kgZG9tYWluOg0KPiA+IFNl
+Y29uZGFyeSBSUC0tU3dpdGNoIFVQLS1Td2l0Y2ggRFAtLVNlY29uZGFyeSBpbnRlcm5hbCBTVy51
+cy0tDQo+IFNlY29uZGFyeQ0KPiA+IGludGVybmFsIFNXLmRzLS1TZWNvbmRhcnkgTlRCDQo+ID4N
+Cj4gPiBwY2lfcnAgPSBwY2lfZmluZF9wY2llX3Jvb3RfcG9ydChuZGV2LT5udGIucGRldikgd2ls
+bCByZXR1cm4gdGhlDQo+ID4gU2Vjb25kYXJ5IFJQLCBhbmQgcGNpZV9jYXBhYmlsaXR5X3JlYWRf
+ZHdvcmQocGNpX3JwLA0KPiA+IFBDSV9FWFBfTE5LQ1RMLCZzdGF0KSB3aWxsIGdldCB0aGUgbGlu
+ayBzdGF0dXMgYmV0d2VlbiBTZWNvbmRhcnkgUlAgYW5kDQo+ID4gU3dpdGNoIFVQLiBNYXliZSwg
+cmVhZCB0aGUgTGluayBTdGF0dXMgYW5kIGNvbnRyb2wgcmVnaXN0ZXIgb2YgU2Vjb25kYXJ5DQo+
+ID4gaW50ZXJuYWwgU1cudXMgaXMgYXBwcm9wcmlhdGUuDQo+ID4NCj4gSGkgSmlhbnNlbiBMaW4s
+DQo+IA0KPiBJIG1vZGlmaWVkIHRoZSBjb2RlIGFzIHBlciB5b3VyIHN1Z2dlc3Rpb24gYW5kIGlz
+IHdvcmtpbmcgZmluZS4NCj4gQWRkaW5nIEFyaW5kYW0gZm9yIGNvbW1lbnRzIHdobyB3YXMgdGhl
+IGNvLWF1dGhvciBvZiB0aGUgcGF0Y2ggSSB3YXMNCj4gYWJvdXQgdG8gc2VuZCBmb3IgdXBzdHJl
+YW0gcmV2aWV3Lg0KDQpIaSBKaWFuc2VuIExpbiwNCg0KSSBhbSBva2F5IHdpdGggdGhlIGNoYW5n
+ZXMgcHJvcG9zZWQgYnkgeW91LiBCdXQgb25lIHRoaW5nIHdlIG5lZWQgdG8ga2VlcA0KaW4gbWlu
+ZCBpcyB0aGF0LCB0aGUgY29uZmlndXJhdGlvbiBTV1VTK1NXRFMrRVAgYXMgdmlzaWJsZSBmcm9t
+IHRoZSBOVEINCnNlY29uZGFyeSwgbWlnaHQgY2hhbmdlIGluIGZ1dHVyZSBBTUQgaW1wbGVtZW50
+YXRpb25zIHdoZXJlIHRoZXNlIGludGVybmFsDQpzd2l0Y2hlcyBhcmUgbm90IHByZXNlbnQgYW55
+bW9yZS4gU28gd2UgbWlnaHQgaGF2ZSB0byByZS12aXNpdCB0aGUgcGF0Y2gNCmFnYWluIGxhdGVy
+Lg0KDQpUaGFua3MsDQpBcmluZGFtDQoNCj4gDQo+IFRoYW5rcywNCj4gU2FuamF5IE1laHRhDQo+
+ID4gc3RydWN0IHBjaV9kZXYgKnBjaV91cCA9IE5VTEw7DQo+ID4gc3RydWN0IHBjaV9kZXYgKnBj
+aV9kcCA9IE5VTEw7DQo+ID4NCj4gPiBpZiAobmRldi0+bnRiLnRvcG8gPT0gTlRCX1RPUE9fU0VD
+KSB7DQo+ID4gwqDCoMKgIC8qIExvY2F0ZSB0aGUgcG9pbnRlciB0byBTZWNvbmRhcnkgdXAgZm9y
+IHRoaXMgZGV2aWNlICovDQo+ID4gwqDCoMKgIHBjaV9kcCA9IHBjaV91cHN0cmVhbV9icmlkZ2Uo
+bmRldi0+bnRiLnBkZXYpOw0KPiA+IMKgwqDCoCAvKiBSZWFkIHRoZSBQQ0llIExpbmsgQ29udHJv
+bCBhbmQgU3RhdHVzIHJlZ2lzdGVyICovDQo+ID4gwqDCoMKgIGlmIChwY2lfZHApIHsNCj4gPiDC
+oMKgwqDCoMKgwqAgcGNpX3VwID0gcGNpX3Vwc3RyZWFtX2JyaWRnZShwY2lfZHApOw0KPiA+IMKg
+wqDCoMKgwqDCoCBpZiAocGNpX3VwKSB7DQo+ID4gwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oCByYyA9IHBjaWVfY2FwYWJpbGl0eV9yZWFkX2R3b3JkKHBjaV91cCwgUENJX0VYUF9MTktDVEws
+DQo+ID4gwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCAmc3Rh
+dCk7DQo+ID4gwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCBpZiAocmMpDQo+ID4gwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAgcmV0dXJuIDA7DQo+ID4gwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCB9DQo+ID4gwqDCoMKgwqDCoMKgIH0NCj4gPiB9DQo+
+ID4NCj4gPiBUaGFua3MsDQo+ID4gSmlhbnNlbiBMaW4NCj4gPg0KPiA+PiBJIGhhdmUgbW9kaWZp
+ZWQgdGhlIGNvZGUgYWNjb3JkaW5nIHRvIHlvdXIgc3VnZ2VzdGlvbiBhbmQgdGVzdGVkIGl0DQo+
+ID4+IG9uIERoeWFuYSBwbGF0Zm9ybSwgaXQgd29ya3Mgd2VsbCwgZXhwZWN0IHRvIHJlY2VpY2Ug
+eW91ciBwYXRjaC4NCj4gPj4NCj4gPj4gQmVmb3JlIG1vZGlmeSB0aGUgY29kZSwgcmVhZCB0aGUg
+TGluayBTdGF0dXMgYW5kIGNvbnRyb2wgcmVnaXN0ZXIgb2YgdGhlDQo+ID4+IHNlY29uZGFyeSBO
+VEIgZGV2aWNlIHRvIGdldCBsaW5rIHN0YXR1cy4NCj4gPj4NCj4gPj4gY2F0IC9zeXMva2VybmVs
+L2RlYnVnL250Yl9od19hbWQvMDAwMFw6NDNcOjAwLjEvaW5mbw0KPiA+PiBOVEIgRGV2aWNlIElu
+Zm9ybWF0aW9uOg0KPiA+PiBDb25uZWN0aW9uIFRvcG9sb2d5IC3CoMKgIE5UQl9UT1BPX1NFQw0K
+PiA+PiBMTksgU1RBIC3CoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgIDB4MTEwMzAwNDINCj4g
+Pj4gTGluayBTdGF0dXMgLcKgwqDCoMKgwqDCoMKgwqDCoMKgIFVwDQo+ID4+IExpbmsgU3BlZWQg
+LcKgwqDCoMKgwqDCoMKgwqDCoMKgwqAgUENJLUUgR2VuIDMNCj4gPj4gTGluayBXaWR0aCAtwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoCB4MTYNCj4gPj4NCj4gPj4gQWZ0ZXIgbW9kaWZ5IHRoZSBjb2Rl
+LCByZWFkIHRoZSBMaW5rIFN0YXR1cyBhbmQgY29udHJvbCByZWdpc3RlciBvZiB0aGUNCj4gPj4g
+c2Vjb25kYXJ5IFJQIHRvIGdldCBsaW5rIHN0YXR1cy4NCj4gPj4NCj4gPj4gY2F0IC9zeXMva2Vy
+bmVsL2RlYnVnL250Yl9od19hbWQvMDAwMFw6NDNcOjAwLjEvaW5mbw0KPiA+PiBOVEIgRGV2aWNl
+IEluZm9ybWF0aW9uOg0KPiA+PiBDb25uZWN0aW9uIFRvcG9sb2d5IC3CoMKgIE5UQl9UT1BPX1NF
+Qw0KPiA+PiBMTksgU1RBIC3CoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgIDB4NzA4MzAwNDIN
+Cj4gPj4gTGluayBTdGF0dXMgLcKgwqDCoMKgwqDCoMKgwqDCoMKgIFVwDQo+ID4+IExpbmsgU3Bl
+ZWQgLcKgwqDCoMKgwqDCoMKgwqDCoMKgwqAgUENJLUUgR2VuIDMNCj4gPj4gTGluayBXaWR0aCAt
+wqDCoMKgwqDCoMKgwqDCoMKgwqDCoCB4OA0KPiA+Pg0KPiA+PiBUaGFua3MsDQo+ID4+IEppYXNl
+biBMaW4NCj4gPj4NCj4gPj4+IC0tLQ0KPiA+Pj4gwqAgZHJpdmVycy9udGIvaHcvYW1kL250Yl9o
+d19hbWQuYyB8IDI3DQo+ICsrKysrKysrKysrKysrKysrKysrKysrLS0tLQ0KPiA+Pj4gwqAgZHJp
+dmVycy9udGIvaHcvYW1kL250Yl9od19hbWQuaCB8wqAgMSAtDQo+ID4+PiDCoCAyIGZpbGVzIGNo
+YW5nZWQsIDIzIGluc2VydGlvbnMoKyksIDUgZGVsZXRpb25zKC0pDQo+ID4+Pg0KPiA+Pj4gZGlm
+ZiAtLWdpdCBhL2RyaXZlcnMvbnRiL2h3L2FtZC9udGJfaHdfYW1kLmMNCj4gPj4+IGIvZHJpdmVy
+cy9udGIvaHcvYW1kL250Yl9od19hbWQuYw0KPiA+Pj4gaW5kZXggMTRhZDY5Yy4uOTFlMTk2NiAx
+MDA2NDQNCj4gPj4+IC0tLSBhL2RyaXZlcnMvbnRiL2h3L2FtZC9udGJfaHdfYW1kLmMNCj4gPj4+
+ICsrKyBiL2RyaXZlcnMvbnRiL2h3L2FtZC9udGJfaHdfYW1kLmMNCj4gPj4+IEBAIC04NDIsNiAr
+ODQyLDggQEAgc3RhdGljIGlubGluZSB2b2lkIG5kZXZfaW5pdF9zdHJ1Y3Qoc3RydWN0DQo+ID4+
+PiBhbWRfbnRiX2RldiAqbmRldiwNCj4gPj4+IMKgIHN0YXRpYyBpbnQgYW1kX3BvbGxfbGluayhz
+dHJ1Y3QgYW1kX250Yl9kZXYgKm5kZXYpDQo+ID4+PiDCoCB7DQo+ID4+PiDCoMKgwqDCoMKgIHZv
+aWQgX19pb21lbSAqbW1pbyA9IG5kZXYtPnBlZXJfbW1pbzsNCj4gPj4+ICvCoMKgwqAgc3RydWN0
+IHBjaV9kZXYgKnBjaV9ycCA9IE5VTEw7DQo+ID4+PiArwqDCoMKgIHN0cnVjdCBwY2lfZGV2ICpw
+ZGV2ID0gTlVMTDsNCj4gPj4+IMKgwqDCoMKgwqAgdTMyIHJlZywgc3RhdDsNCj4gPj4+IMKgwqDC
+oMKgwqAgaW50IHJjOw0KPiA+Pj4gQEAgLTg1NSwxMCArODU3LDI3IEBAIHN0YXRpYyBpbnQgYW1k
+X3BvbGxfbGluayhzdHJ1Y3QgYW1kX250Yl9kZXYNCj4gKm5kZXYpDQo+ID4+PiDCoMKgwqDCoMKg
+IG5kZXYtPmNudGxfc3RhID0gcmVnOw0KPiA+Pj4gLcKgwqDCoCByYyA9IHBjaV9yZWFkX2NvbmZp
+Z19kd29yZChuZGV2LT5udGIucGRldiwNCj4gPj4+IC3CoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqAgQU1EX0xJTktfU1RBVFVTX09GRlNFVCwgJnN0YXQpOw0KPiA+Pj4gLcKgwqDC
+oCBpZiAocmMpDQo+ID4+PiAtwqDCoMKgwqDCoMKgwqAgcmV0dXJuIDA7DQo+ID4+PiArwqDCoMKg
+IGlmIChuZGV2LT5udGIudG9wbyA9PSBOVEJfVE9QT19TRUMpIHsNCj4gPj4+ICvCoMKgwqDCoMKg
+wqDCoCAvKiBMb2NhdGUgdGhlIHBvaW50ZXIgdG8gUENJZSBSb290IFBvcnQgZm9yIHRoaXMgZGV2
+aWNlICovDQo+ID4+PiArwqDCoMKgwqDCoMKgwqAgcGNpX3JwID0gcGNpX2ZpbmRfcGNpZV9yb290
+X3BvcnQobmRldi0+bnRiLnBkZXYpOw0KPiA+Pj4gK8KgwqDCoMKgwqDCoMKgIC8qIFJlYWQgdGhl
+IFBDSWUgTGluayBDb250cm9sIGFuZCBTdGF0dXMgcmVnaXN0ZXIgKi8NCj4gPj4+ICvCoMKgwqDC
+oMKgwqDCoCBpZiAocGNpX3JwKSB7DQo+ID4+PiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCByYyA9
+IHBjaWVfY2FwYWJpbGl0eV9yZWFkX2R3b3JkKHBjaV9ycCwgUENJX0VYUF9MTktDVEwsDQo+ID4+
+PiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+ICZzdGF0KTsNCj4gPj4+ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKgIGlmIChyYykNCj4gPj4+ICvC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAgcmV0dXJuIDA7DQo+ID4+PiArwqDCoMKgwqDC
+oMKgwqAgfQ0KPiA+Pj4gK8KgwqDCoCB9IGVsc2UgaWYgKG5kZXYtPm50Yi50b3BvID09IE5UQl9U
+T1BPX1BSSSkgew0KPiA+Pj4gK8KgwqDCoMKgwqDCoMKgIC8qDQo+ID4+PiArwqDCoMKgwqDCoMKg
+wqDCoCAqIEZvciBOVEIgcHJpbWFyeSwgd2Ugc2ltcGx5IHJlYWQgdGhlIExpbmsgU3RhdHVzIGFu
+ZCBjb250cm9sDQo+ID4+PiArwqDCoMKgwqDCoMKgwqDCoCAqIHJlZ2lzdGVyIG9mIHRoZSBOVEIg
+ZGV2aWNlIGl0c2VsZi4NCj4gPj4+ICvCoMKgwqDCoMKgwqDCoMKgICovDQo+ID4+PiArwqDCoMKg
+wqDCoMKgwqAgcGRldiA9IG5kZXYtPm50Yi5wZGV2Ow0KPiA+Pj4gK8KgwqDCoMKgwqDCoMKgIHJj
+ID0gcGNpZV9jYXBhYmlsaXR5X3JlYWRfZHdvcmQocGRldiwgUENJX0VYUF9MTktDVEwsICZzdGF0
+KTsNCj4gPj4+ICvCoMKgwqDCoMKgwqDCoCBpZiAocmMpDQo+ID4+PiArwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoCByZXR1cm4gMDsNCj4gPj4+ICvCoMKgwqAgfQ0KPiA+Pj4gKw0KPiA+Pj4gwqDCoMKg
+wqDCoCBuZGV2LT5sbmtfc3RhID0gc3RhdDsNCj4gPj4+IMKgwqDCoMKgwqAgcmV0dXJuIDE7DQo+
+ID4+PiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9udGIvaHcvYW1kL250Yl9od19hbWQuaA0KPiA+Pj4g
+Yi9kcml2ZXJzL250Yi9ody9hbWQvbnRiX2h3X2FtZC5oDQo+ID4+PiBpbmRleCAxMzlhMzA3Li4z
+OWU1ZDE4IDEwMDY0NA0KPiA+Pj4gLS0tIGEvZHJpdmVycy9udGIvaHcvYW1kL250Yl9od19hbWQu
+aA0KPiA+Pj4gKysrIGIvZHJpdmVycy9udGIvaHcvYW1kL250Yl9od19hbWQuaA0KPiA+Pj4gQEAg
+LTUzLDcgKzUzLDYgQEANCj4gPj4+IMKgICNpbmNsdWRlIDxsaW51eC9wY2kuaD4NCj4gPj4+IMKg
+ICNkZWZpbmUgQU1EX0xJTktfSEJfVElNRU9VVMKgwqDCoCBtc2Vjc190b19qaWZmaWVzKDEwMDAp
+DQo+ID4+PiAtI2RlZmluZSBBTURfTElOS19TVEFUVVNfT0ZGU0VUwqDCoMKgIDB4NjgNCj4gPj4+
+IMKgICNkZWZpbmUgTlRCX0xJTl9TVEFfQUNUSVZFX0JJVMKgwqDCoCAweDAwMDAwMDAyDQo+ID4+
+PiDCoCAjZGVmaW5lIE5UQl9MTktfU1RBX1NQRUVEX01BU0vCoMKgwqAgMHgwMDBGMDAwMA0KPiA+
+Pj4gwqAgI2RlZmluZSBOVEJfTE5LX1NUQV9XSURUSF9NQVNLwqDCoMKgIDB4MDNGMDAwMDANCj4g
+Pj4+DQo=
