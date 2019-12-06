@@ -1,81 +1,107 @@
-Date: Mon, 2 Dec 2019 07:23:23 -0800 (PST)
-From: lravich@gmail.com
-Message-Id: <e71c7a5d-ad80-46c4-b76c-7a6fba4fe666@googlegroups.com>
-Subject: Physical continues memory for NTB
+Return-Path: <vermasachin09@gmail.com>
 MIME-Version: 1.0
-Content-Type: multipart/mixed; 
-	boundary="----=_Part_4163_1075273769.1575300203965"
-To: linux-ntb <linux-ntb@googlegroups.com>
+From: sachin verma <vermasachin09@gmail.com>
+Date: Fri, 6 Dec 2019 21:51:36 +0530
+Message-ID: <CA+YOsKJ-ejSNp8htq3+r2kmdW=9Q7UAsb0fLugyX_1VbzmaRfA@mail.gmail.com>
+Subject: Flashed Kernel for Pixel2 but changes not appears
+Content-Type: multipart/alternative; boundary="00000000000040faea05990b71d8"
+To: kasan-dev@googlegroups.com, linux-kbuild@vger.kernel.org, linux-ntb@googlegroups.com, android-building@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-------=_Part_4163_1075273769.1575300203965
-Content-Type: multipart/alternative; 
-	boundary="----=_Part_4164_479213502.1575300203965"
+--00000000000040faea05990b71d8
+Content-Type: text/plain; charset="UTF-8"
 
-------=_Part_4164_479213502.1575300203965
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Hi,
+I have flashed android10 kernel for Pixel 2 with some changes(additional
+logs) but the logs are not appearing in kmsg or dmesg, *Even I have append
+the existing log(the logs which are printing on original build) but could
+not get modified logs only original's one printing.* It Seems modified code
+(modified logs) not flashing in the system.
 
-Hi guys , 
 
-I would like to get your opinion regarding NTB memory windows usage in a 
-production , 
-most of my experience is on Intel Skylake NTB which is limited to 2 NTB 
-memory windows and has hard  restrictions
+*Here are the steps I am doing:*
 
-the naive way to use NTB is to set translate windows to all the physical 
-memory rage, this way entire physical memory will be exposed to peer node , 
-call me a paranoid but I not feeling this is the way to go , 
-the other way is to expose only relevant part of memory  but such memory 
-should be physical continues memory  (trying to avoid going to IOMMU 
-direction) to get such physical continues memory I cant use 
-kmalloc  or other slob friends because they are limited in max size and 
-anyway the chance to get such a big chunk after init is low, so the only 
-way I see is to reserve the memory on kernel init , 
+Downloaded AOSP10 and build for aosp_walleye-userdebug
+Downloaded the kernel code from *repo branch android-msm-wahoo-4.4-*
+*android10-qpr1*.
+Compile the kernel by *build/build.sh *from kernel root directory.
+Copy the Image.lz4-dtb file generated with build/build.sh to the AOSP
+kernel folder of my device i.e /device/google/wahoo-kernel, substituting
+the existing one.
+run m bootimage to generate boot.img
+adb reboot bootloader
+fastboot flashall -w to flash the build
+Now I can see the kernel build which shows the latest date of kernel build
+in device Settings, means kernel flash is successful. But my changes are
+not appearing means modified logs are not appearing.
 
-currently known to me technics to go this way:
-1) "out of kernel memory" (memmap boot parameter) , this is the easiest way 
-to go but we getting out of kernel memory , which has its disadvantages ex: 
-there is many flows in kernel based on pining memory with get_user_pages 
-which will fail with  "out of kernel memory" 
-2)  CMA -  this feature support only generic memory region allocation with 
-boot parameters  which will be shared by all dma allocs in kernel (at least 
-for Intel) , anyway looks like overkill for my simple requirements.
 
-love to hear your opinion guys , 
+Here are the files I have added/modified the logs
+drivers/staging/qca-wifi-host-cmn/wmi/src/wmi_unified_tlv.c
+drivers/staging/qcacld-3.0/Kbuild
+drivers/staging/qcacld-3.0/core/hdd/src/wlan_hdd_cfg80211.c
+drivers/staging/qcacld-3.0/core/hdd/src/wlan_hdd_main.c
+drivers/staging/qcacld-3.0/core/wma/src/wma_dev_if.c
+drivers/staging/qcacld-3.0/core/wma/src/wma_mgmt.c
 
-Thanks
-Leonid 
 
-------=_Part_4164_479213502.1575300203965
-Content-Type: text/html; charset=utf-8
+*One example of my changes(append msg in existing log):*
+-       hdd_info("Disabling queues, adapter device mode:
+%s(%d)",hdd_device_mode_to_string(adapter->device_mode),
+                 adapter->device_mode);   *---->*
++       hdd_info("*Modified* ...Disabling queues, adapter device mode:
+%s(%d)",hdd_device_mode_to_string(adapter->device_mode),
+                 adapter->device_mode);
+So I am not getting modified versions. while I have checked in kernel
+source there's no other place for this log.
+
+Please let me know if any prebuilt binary are there in kernel source for
+*staging* module or If I am missing some configuration during compilation.
+
+Thanks,
+Sachin
+
+--00000000000040faea05990b71d8
+Content-Type: text/html; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-<div dir=3D"ltr">Hi guys ,=C2=A0<div><br></div><div>I would like to get you=
-r opinion regarding NTB memory windows usage in a production ,=C2=A0</div><=
-div>most of my experience is on Intel Skylake NTB which is limited to 2 NTB=
- memory windows and has hard=C2=A0 <span style=3D"color: rgb(51, 51, 51); f=
-ont-family: Assistant; font-size: 14px;">restrictions</span></div><div><br>=
-</div><div>the naive way to use NTB is to set translate windows to all the =
-physical memory rage, this way entire physical memory will be exposed to pe=
-er node , call me a paranoid but I not feeling this is the way to go ,=C2=
-=A0</div><div>the other way is to expose only relevant part of memory=C2=A0=
- but such memory should be physical continues memory=C2=A0 (trying to avoid=
- going to IOMMU direction) to get such physical continues memory I cant use=
-=C2=A0</div><div>kmalloc=C2=A0 or other slob friends because they are limit=
-ed in max size and anyway the chance to get such a big chunk after init is =
-low, so the only way I see is to reserve the memory on kernel init ,=C2=A0<=
-/div><div><br></div><div>currently known to me technics to go this way:</di=
-v><div>1) &quot;out of kernel memory&quot; (memmap boot parameter) , this i=
-s the easiest way to go but we getting out of kernel memory , which has its=
- disadvantages ex: there is many flows in kernel based on pining memory wit=
-h get_user_pages which will fail with=C2=A0 &quot;out of kernel memory&quot=
-;=C2=A0</div><div>2)=C2=A0 CMA -=C2=A0 this feature support only generic me=
-mory region allocation with boot parameters=C2=A0 which will be shared by a=
-ll dma allocs in kernel (at least for Intel) , anyway looks like overkill f=
-or my simple requirements.</div><div><br></div><div>love to hear your opini=
-on guys ,=C2=A0</div><div><br></div><div>Thanks</div><div>Leonid=C2=A0</div=
-></div>
-------=_Part_4164_479213502.1575300203965--
+<div dir=3D"ltr"><div>Hi,</div><div>I have flashed android10 kernel for Pix=
+el 2 with some changes(additional logs) but the logs are not appearing in k=
+msg or dmesg, <b>Even I have append the existing log(the logs which are pri=
+nting on original build) but could not get modified logs only original&#39;=
+s one printing.</b> It Seems modified code (modified logs) not flashing in =
+the system.</div><div><b><br></b></div><div><b><br></b></div><div><b>Here a=
+re the steps I am doing:</b></div><div><b><br></b></div><div>Downloaded AOS=
+P10 and build for aosp_walleye-userdebug</div><div>Downloaded the kernel co=
+de from <b>repo branch android-msm-wahoo-4.4-</b><b>android10-qpr1</b>.</di=
+v><div>Compile the kernel by <b>build/build.sh </b>from kernel root directo=
+ry.<b><br></b></div><div>Copy the Image.lz4-dtb file generated with build/b=
+uild.sh to the
+AOSP kernel folder of my device i.e /device/google/wahoo-kernel, substituti=
+ng the existing one.</div><div>run m bootimage to generate boot.img <br></d=
+iv><div>adb reboot bootloader</div><div>fastboot flashall -w to flash the b=
+uild</div><div>Now I can see the kernel build which shows the latest date o=
+f kernel build in device Settings, means kernel flash is successful. But my=
+ changes are not appearing means modified logs are not appearing.</div><div=
+><br></div><div><br></div><div>Here are the files I have added/modified the=
+ logs</div><div>	drivers/staging/qca-wifi-host-cmn/wmi/src/wmi_unified_tlv.=
+c<br>	drivers/staging/qcacld-3.0/Kbuild<br>drivers/staging/qcacld-3.0/core/=
+hdd/src/wlan_hdd_cfg80211.c<br>drivers/staging/qcacld-3.0/core/hdd/src/wlan=
+_hdd_main.c<br>	drivers/staging/qcacld-3.0/core/wma/src/wma_dev_if.c<br>	dr=
+ivers/staging/qcacld-3.0/core/wma/src/wma_mgmt.c</div><div><br></div><div><=
+br></div><div><b>One example of my changes(append msg in existing log):</b>=
+<br></div><div>- =C2=A0 =C2=A0 =C2=A0 hdd_info(&quot;Disabling queues, adap=
+ter device mode: %s(%d)&quot;,hdd_device_mode_to_string(adapter-&gt;device_=
+mode),<br>=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0ada=
+pter-&gt;device_mode);=C2=A0=C2=A0 <b>----&gt;</b><br>+ =C2=A0 =C2=A0 =C2=
+=A0 hdd_info(&quot;<b>Modified</b> ...Disabling queues, adapter device mode=
+: %s(%d)&quot;,hdd_device_mode_to_string(adapter-&gt;device_mode),<br>=C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0adapter-&gt;devi=
+ce_mode);</div><div>So I am not getting modified versions. while I have che=
+cked in kernel source there&#39;s no other place for this log.</div><div><b=
+r></div><div>Please let me know if any prebuilt binary are there in kernel =
+source for <b>staging</b> module or If I am missing some configuration duri=
+ng compilation.</div><div><br></div><div>Thanks,</div><div>Sachin<br></div>=
+<div> <br></div><div><br></div><br>=C2=A0<br></div>
 
-------=_Part_4163_1075273769.1575300203965--
+--00000000000040faea05990b71d8--
