@@ -1,107 +1,64 @@
-Return-Path: <vermasachin09@gmail.com>
+Return-Path: <linjiasen@hygon.cn>
+Received: from spam2.hygon.cn ([110.188.70.11])
+        by gmr-mx.google.com with ESMTPS id z5si68151ywg.5.2019.12.17.23.35.04
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 17 Dec 2019 23:35:05 -0800 (PST)
+Subject: Re: [PATCH] NTB: ntb_perf: Add more debugfs entries for ntb_perf
+References: <1576550536-84697-1-git-send-email-linjiasen@hygon.cn>
+ <d4f679cd-739b-fd80-8344-7da475937835@deltatee.com>
+From: Jiasen Lin <linjiasen@hygon.cn>
+Message-ID: <fd3efeba-40f0-3933-af48-d74486ddea86@hygon.cn>
+Date: Wed, 18 Dec 2019 15:32:11 +0800
 MIME-Version: 1.0
-From: sachin verma <vermasachin09@gmail.com>
-Date: Fri, 6 Dec 2019 21:51:36 +0530
-Message-ID: <CA+YOsKJ-ejSNp8htq3+r2kmdW=9Q7UAsb0fLugyX_1VbzmaRfA@mail.gmail.com>
-Subject: Flashed Kernel for Pixel2 but changes not appears
-Content-Type: multipart/alternative; boundary="00000000000040faea05990b71d8"
-To: kasan-dev@googlegroups.com, linux-kbuild@vger.kernel.org, linux-ntb@googlegroups.com, android-building@googlegroups.com
+In-Reply-To: <d4f679cd-739b-fd80-8344-7da475937835@deltatee.com>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+To: Logan Gunthorpe <logang@deltatee.com>, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, jdmason@kudzu.us
+Cc: allenbh@gmail.com, dave.jiang@intel.com, sanju.mehta@amd.com
 List-ID: <linux-ntb.googlegroups.com>
 
---00000000000040faea05990b71d8
-Content-Type: text/plain; charset="UTF-8"
-
-Hi,
-I have flashed android10 kernel for Pixel 2 with some changes(additional
-logs) but the logs are not appearing in kmsg or dmesg, *Even I have append
-the existing log(the logs which are printing on original build) but could
-not get modified logs only original's one printing.* It Seems modified code
-(modified logs) not flashing in the system.
 
 
-*Here are the steps I am doing:*
+On 2019/12/18 0:42, Logan Gunthorpe wrote:
+> 
+> 
+> On 2019-12-16 7:42 p.m., Jiasen Lin wrote:
+>> Currently, read input and output buffer is not supported yet in
+>> debugfs of ntb_perf. We can not confirm whether the output data is
+>> transmitted to the input buffer at peer memory through NTB.
+>>
+>> This patch add new entries in debugfs which implement interface to read
+>> a part of input and out buffer. User can dump output and input data at
+>> local and peer system by hexdump command, and then compare them manually.
+> 
+> Do we even initialize inbuf and outbuf? Probably not a good idea to
+> expose them to userspace if it's not initialized.
+> 
 
-Downloaded AOSP10 and build for aosp_walleye-userdebug
-Downloaded the kernel code from *repo branch android-msm-wahoo-4.4-*
-*android10-qpr1*.
-Compile the kernel by *build/build.sh *from kernel root directory.
-Copy the Image.lz4-dtb file generated with build/build.sh to the AOSP
-kernel folder of my device i.e /device/google/wahoo-kernel, substituting
-the existing one.
-run m bootimage to generate boot.img
-adb reboot bootloader
-fastboot flashall -w to flash the build
-Now I can see the kernel build which shows the latest date of kernel build
-in device Settings, means kernel flash is successful. But my changes are
-not appearing means modified logs are not appearing.
+Good catch! Input buffer(peer->inbuf) should be initialized after call
+dma_alloc_coherent in perf_setup_inbuf, but output buffer(peer->outbuf)
+that point to NTB BARx MMIO address can not be initialized. The address 
+of memory request that fall in NTB memory windown will be translated 
+into an address that point to input buffer at peer memory system through 
+NTB XLAT register in ntb_perf. In other words, only input buffer should 
+be initialized.
+Will fix it for v2 as a separate patch.
 
+> Really, ntb_tool should be used to check if memory windows work,
+> ntb_perf is just to see the maximum transfer rate.
+> 
 
-Here are the files I have added/modified the logs
-drivers/staging/qca-wifi-host-cmn/wmi/src/wmi_unified_tlv.c
-drivers/staging/qcacld-3.0/Kbuild
-drivers/staging/qcacld-3.0/core/hdd/src/wlan_hdd_cfg80211.c
-drivers/staging/qcacld-3.0/core/hdd/src/wlan_hdd_main.c
-drivers/staging/qcacld-3.0/core/wma/src/wma_dev_if.c
-drivers/staging/qcacld-3.0/core/wma/src/wma_mgmt.c
-
-
-*One example of my changes(append msg in existing log):*
--       hdd_info("Disabling queues, adapter device mode:
-%s(%d)",hdd_device_mode_to_string(adapter->device_mode),
-                 adapter->device_mode);   *---->*
-+       hdd_info("*Modified* ...Disabling queues, adapter device mode:
-%s(%d)",hdd_device_mode_to_string(adapter->device_mode),
-                 adapter->device_mode);
-So I am not getting modified versions. while I have checked in kernel
-source there's no other place for this log.
-
-Please let me know if any prebuilt binary are there in kernel source for
-*staging* module or If I am missing some configuration during compilation.
+Yes, you are right! ntb_tool could be used to check memory window
+by hexdmup mw and peer_mw after write mw_trans and peer_mw_trans,
+but this is only one ntb client be probed although we can insmod both
+ntb_tool.ko and ntb_perf.ko, That's to say, only one modulue can create
+files in debugFS. So, I suggest that add debugfs entries that can read
+input and output buffer in ntb_perf.
 
 Thanks,
-Sachin
+Jiasen Lin
 
---00000000000040faea05990b71d8
-Content-Type: text/html; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr"><div>Hi,</div><div>I have flashed android10 kernel for Pix=
-el 2 with some changes(additional logs) but the logs are not appearing in k=
-msg or dmesg, <b>Even I have append the existing log(the logs which are pri=
-nting on original build) but could not get modified logs only original&#39;=
-s one printing.</b> It Seems modified code (modified logs) not flashing in =
-the system.</div><div><b><br></b></div><div><b><br></b></div><div><b>Here a=
-re the steps I am doing:</b></div><div><b><br></b></div><div>Downloaded AOS=
-P10 and build for aosp_walleye-userdebug</div><div>Downloaded the kernel co=
-de from <b>repo branch android-msm-wahoo-4.4-</b><b>android10-qpr1</b>.</di=
-v><div>Compile the kernel by <b>build/build.sh </b>from kernel root directo=
-ry.<b><br></b></div><div>Copy the Image.lz4-dtb file generated with build/b=
-uild.sh to the
-AOSP kernel folder of my device i.e /device/google/wahoo-kernel, substituti=
-ng the existing one.</div><div>run m bootimage to generate boot.img <br></d=
-iv><div>adb reboot bootloader</div><div>fastboot flashall -w to flash the b=
-uild</div><div>Now I can see the kernel build which shows the latest date o=
-f kernel build in device Settings, means kernel flash is successful. But my=
- changes are not appearing means modified logs are not appearing.</div><div=
-><br></div><div><br></div><div>Here are the files I have added/modified the=
- logs</div><div>	drivers/staging/qca-wifi-host-cmn/wmi/src/wmi_unified_tlv.=
-c<br>	drivers/staging/qcacld-3.0/Kbuild<br>drivers/staging/qcacld-3.0/core/=
-hdd/src/wlan_hdd_cfg80211.c<br>drivers/staging/qcacld-3.0/core/hdd/src/wlan=
-_hdd_main.c<br>	drivers/staging/qcacld-3.0/core/wma/src/wma_dev_if.c<br>	dr=
-ivers/staging/qcacld-3.0/core/wma/src/wma_mgmt.c</div><div><br></div><div><=
-br></div><div><b>One example of my changes(append msg in existing log):</b>=
-<br></div><div>- =C2=A0 =C2=A0 =C2=A0 hdd_info(&quot;Disabling queues, adap=
-ter device mode: %s(%d)&quot;,hdd_device_mode_to_string(adapter-&gt;device_=
-mode),<br>=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0ada=
-pter-&gt;device_mode);=C2=A0=C2=A0 <b>----&gt;</b><br>+ =C2=A0 =C2=A0 =C2=
-=A0 hdd_info(&quot;<b>Modified</b> ...Disabling queues, adapter device mode=
-: %s(%d)&quot;,hdd_device_mode_to_string(adapter-&gt;device_mode),<br>=C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0adapter-&gt;devi=
-ce_mode);</div><div>So I am not getting modified versions. while I have che=
-cked in kernel source there&#39;s no other place for this log.</div><div><b=
-r></div><div>Please let me know if any prebuilt binary are there in kernel =
-source for <b>staging</b> module or If I am missing some configuration duri=
-ng compilation.</div><div><br></div><div>Thanks,</div><div>Sachin<br></div>=
-<div> <br></div><div><br></div><br>=C2=A0<br></div>
-
---00000000000040faea05990b71d8--
+> Logan
+> 
