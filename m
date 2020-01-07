@@ -1,13 +1,13 @@
 Return-Path: <krzk@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id i4si15608ioi.1.2020.01.07.08.54.41
+        by gmr-mx.google.com with ESMTPS id k9si19768ili.4.2020.01.07.08.54.32
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 07 Jan 2020 08:54:41 -0800 (PST)
+        Tue, 07 Jan 2020 08:54:32 -0800 (PST)
 From: Krzysztof Kozlowski <krzk@kernel.org>
-Subject: [RFT 06/13] arc: Constify ioreadX() iomem argument (as in generic implementation)
-Date: Tue,  7 Jan 2020 17:53:05 +0100
-Message-Id: <1578415992-24054-9-git-send-email-krzk@kernel.org>
+Subject: [RFT 05/13] powerpc: Constify ioreadX() iomem argument (as in generic implementation)
+Date: Tue,  7 Jan 2020 17:53:04 +0100
+Message-Id: <1578415992-24054-8-git-send-email-krzk@kernel.org>
 In-Reply-To: <1578415992-24054-1-git-send-email-krzk@kernel.org>
 References: <1578415992-24054-1-git-send-email-krzk@kernel.org>
 To: Richard Henderson <rth@twiddle.net>, Ivan Kokshaysky <ink@jurassic.park.msu.ru>, Matt Turner <mattst88@gmail.com>, Alexey Brodkin <abrodkin@synopsys.com>, Vineet Gupta <vgupta@synopsys.com>, "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>, Helge Deller <deller@gmx.de>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, Yoshinori Sato <ysato@users.sourceforge.jp>, Rich Felker <dalias@libc.org>, Dave Airlie <airlied@redhat.com>, David Airlie <airlied@linux.ie>, Daniel Vetter <daniel@ffwll.ch>, Ben Skeggs <bskeggs@redhat.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, Jiri Slaby <jirislaby@gmail.com>, Nick Kossifidis <mickflemm@gmail.com>, Luis Chamberlain <mcgrof@kernel.org>, Kalle Valo <kvalo@codeaurora.org>, "David S. Miller" <davem@davemloft.net>, Dave Jiang <dave.jiang@intel.com>, Jon Mason <jdmason@kudzu.us>, Allen Hubbe <allenbh@gmail.com>, "Michael S. Tsirkin" <mst@redhat.com>, Jason Wang <jasowang@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Andrew Morton <akpm@linux-foundation.org>, Thomas Gleixner <tglx@linutronix.de>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-alpha@vger.kernel.org, linux-kernel@vger.kernel.org, linux-snps-arc@lists.infradead.org, linux-parisc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-sh@vger.kernel.org, dri-devel@lists.freedesktop.org, nouveau@lists.freedesktop.org, linux-media@vger.kernel.org, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, linux-ntb@googlegroups.com, virtualization@lists.linux-foundation.org, linux-arch@vger.kernel.org
@@ -17,37 +17,82 @@ List-ID: <linux-ntb.googlegroups.com>
 The ioreadX() helpers have inconsistent interface.  On some architectures
 void *__iomem address argument is a pointer to const, on some not.
 
-Implementations of ioreadX() do not modify the memory under the
-address so they can be converted to a "const" version for const-safety
-and consistency among architectures.
+Implementations of ioreadX() do not modify the memory under the address
+so they can be converted to a "const" version for const-safety and
+consistency among architectures.
 
 Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
 ---
- arch/arc/plat-axs10x/axs10x.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ arch/powerpc/kernel/iomap.c | 22 +++++++++++-----------
+ 1 file changed, 11 insertions(+), 11 deletions(-)
 
-diff --git a/arch/arc/plat-axs10x/axs10x.c b/arch/arc/plat-axs10x/axs10x.c
-index 63ea5a606ecd..180c260a8221 100644
---- a/arch/arc/plat-axs10x/axs10x.c
-+++ b/arch/arc/plat-axs10x/axs10x.c
-@@ -84,7 +84,7 @@ static void __init axs10x_print_board_ver(unsigned int creg, const char *str)
- 		unsigned int val;
- 	} board;
- 
--	board.val = ioread32((void __iomem *)creg);
-+	board.val = ioread32((const void __iomem *)creg);
- 	pr_info("AXS: %s FPGA Date: %u-%u-%u\n", str, board.d, board.m,
- 		board.y);
+diff --git a/arch/powerpc/kernel/iomap.c b/arch/powerpc/kernel/iomap.c
+index 5ac84efc6ede..de8da1c3496f 100644
+--- a/arch/powerpc/kernel/iomap.c
++++ b/arch/powerpc/kernel/iomap.c
+@@ -15,23 +15,23 @@
+  * Here comes the ppc64 implementation of the IOMAP 
+  * interfaces.
+  */
+-unsigned int ioread8(void __iomem *addr)
++unsigned int ioread8(const void __iomem *addr)
+ {
+ 	return readb(addr);
  }
-@@ -95,7 +95,7 @@ static void __init axs10x_early_init(void)
- 	char mb[32];
- 
- 	/* Determine motherboard version */
--	if (ioread32((void __iomem *) CREG_MB_CONFIG) & (1 << 28))
-+	if (ioread32((const void __iomem *) CREG_MB_CONFIG) & (1 << 28))
- 		mb_rev = 3;	/* HT-3 (rev3.0) */
- 	else
- 		mb_rev = 2;	/* HT-2 (rev2.0) */
+-unsigned int ioread16(void __iomem *addr)
++unsigned int ioread16(const void __iomem *addr)
+ {
+ 	return readw(addr);
+ }
+-unsigned int ioread16be(void __iomem *addr)
++unsigned int ioread16be(const void __iomem *addr)
+ {
+ 	return readw_be(addr);
+ }
+-unsigned int ioread32(void __iomem *addr)
++unsigned int ioread32(const void __iomem *addr)
+ {
+ 	return readl(addr);
+ }
+-unsigned int ioread32be(void __iomem *addr)
++unsigned int ioread32be(const void __iomem *addr)
+ {
+ 	return readl_be(addr);
+ }
+@@ -41,27 +41,27 @@ EXPORT_SYMBOL(ioread16be);
+ EXPORT_SYMBOL(ioread32);
+ EXPORT_SYMBOL(ioread32be);
+ #ifdef __powerpc64__
+-u64 ioread64(void __iomem *addr)
++u64 ioread64(const void __iomem *addr)
+ {
+ 	return readq(addr);
+ }
+-u64 ioread64_lo_hi(void __iomem *addr)
++u64 ioread64_lo_hi(const void __iomem *addr)
+ {
+ 	return readq(addr);
+ }
+-u64 ioread64_hi_lo(void __iomem *addr)
++u64 ioread64_hi_lo(const void __iomem *addr)
+ {
+ 	return readq(addr);
+ }
+-u64 ioread64be(void __iomem *addr)
++u64 ioread64be(const void __iomem *addr)
+ {
+ 	return readq_be(addr);
+ }
+-u64 ioread64be_lo_hi(void __iomem *addr)
++u64 ioread64be_lo_hi(const void __iomem *addr)
+ {
+ 	return readq_be(addr);
+ }
+-u64 ioread64be_hi_lo(void __iomem *addr)
++u64 ioread64be_hi_lo(const void __iomem *addr)
+ {
+ 	return readq_be(addr);
+ }
 -- 
 2.7.4
 
