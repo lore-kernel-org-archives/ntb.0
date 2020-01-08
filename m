@@ -1,84 +1,63 @@
-Return-Path: <geert.uytterhoeven@gmail.com>
-Received: from mail-ot1-f66.google.com (mail-ot1-f66.google.com. [209.85.210.66])
-        by gmr-mx.google.com with ESMTPS id s12si32797pjo.0.2020.01.08.00.43.15
+Return-Path: <christophe.leroy@c-s.fr>
+Received: from pegase1.c-s.fr (pegase1.c-s.fr. [93.17.236.30])
+        by gmr-mx.google.com with ESMTPS id 68si96063lfi.3.2020.01.08.00.36.00
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 08 Jan 2020 00:43:15 -0800 (PST)
-Received: by mail-ot1-f66.google.com with SMTP id a15so2864369otf.1
-        for <linux-ntb@googlegroups.com>; Wed, 08 Jan 2020 00:43:15 -0800 (PST)
-MIME-Version: 1.0
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 08 Jan 2020 00:36:00 -0800 (PST)
+Subject: Re: [RFT 00/13] iomap: Constify ioreadX() iomem argument
 References: <1578415992-24054-1-git-send-email-krzk@kernel.org>
  <CAMuHMdW4ek0OYQDrrbcpZjNUTTP04nSbwkmiZvBmKcU=PQM9qA@mail.gmail.com>
  <CAMuHMdUBmYtJKtSYzS_5u67hVZOqcKSgFY1rDGme6gLNRBJ_gA@mail.gmail.com>
- <CAJKOXPfq9vS4kSyx1jOPHBvi9_HjviRv0LU2A8ZwdmqgUuebHQ@mail.gmail.com> <2355489c-a207-1927-54cf-85c04b62f18f@c-s.fr>
-In-Reply-To: <2355489c-a207-1927-54cf-85c04b62f18f@c-s.fr>
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Date: Wed, 8 Jan 2020 09:43:04 +0100
-Message-ID: <CAMuHMdV=-m-eN4rOa=XQhk2oBDZZwgXXMU6RMVQRVsc6ALyeoA@mail.gmail.com>
-Subject: Re: [RFT 00/13] iomap: Constify ioreadX() iomem argument
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-To: Christophe Leroy <christophe.leroy@c-s.fr>
-Cc: Krzysztof Kozlowski <krzk@kernel.org>, Rich Felker <dalias@libc.org>, Jiri Slaby <jirislaby@gmail.com>, "Michael S. Tsirkin" <mst@redhat.com>, David Airlie <airlied@linux.ie>, Jason Wang <jasowang@redhat.com>, DRI Development <dri-devel@lists.freedesktop.org>, virtualization@lists.linux-foundation.org, "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>, netdev <netdev@vger.kernel.org>, Paul Mackerras <paulus@samba.org>, Linux-Arch <linux-arch@vger.kernel.org>, Dave Jiang <dave.jiang@intel.com>, Yoshinori Sato <ysato@users.sourceforge.jp>, Helge Deller <deller@gmx.de>, Linux-sh list <linux-sh@vger.kernel.org>, Alexey Brodkin <abrodkin@synopsys.com>, Ben Skeggs <bskeggs@redhat.com>, nouveau@lists.freedesktop.org, Dave Airlie <airlied@redhat.com>, Matt Turner <mattst88@gmail.com>, arcml <linux-snps-arc@lists.infradead.org>, Nick Kossifidis <mickflemm@gmail.com>, Allen Hubbe <allenbh@gmail.com>, Arnd Bergmann <arnd@arndb.de>, alpha <linux-alpha@vger.kernel.org>, Ivan Kokshaysky <ink@jurassic.park.msu.ru>, Thomas Gleixner <tglx@linutronix.de>, Mauro Carvalho Chehab <mchehab@kernel.org>, Kalle Valo <kvalo@codeaurora.org>, Richard Henderson <rth@twiddle.net>, Parisc List <linux-parisc@vger.kernel.org>, Vineet Gupta <vgupta@synopsys.com>, linux-wireless <linux-wireless@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Luis Chamberlain <mcgrof@kernel.org>, Daniel Vetter <daniel@ffwll.ch>, Jon Mason <jdmason@kudzu.us>, linux-ntb@googlegroups.com, Andrew Morton <akpm@linux-foundation.org>, Linux Media Mailing List <linux-media@vger.kernel.org>, linuxppc-dev <linuxppc-dev@lists.ozlabs.org>, "David S. Miller" <davem@davemloft.net>
+ <CAJKOXPfq9vS4kSyx1jOPHBvi9_HjviRv0LU2A8ZwdmqgUuebHQ@mail.gmail.com>
+From: Christophe Leroy <christophe.leroy@c-s.fr>
+Message-ID: <2355489c-a207-1927-54cf-85c04b62f18f@c-s.fr>
+Date: Wed, 8 Jan 2020 09:35:54 +0100
+MIME-Version: 1.0
+In-Reply-To: <CAJKOXPfq9vS4kSyx1jOPHBvi9_HjviRv0LU2A8ZwdmqgUuebHQ@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"; format="flowed"
+Content-Language: fr
+Content-Transfer-Encoding: 8bit
+To: Krzysztof Kozlowski <krzk@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Rich Felker <dalias@libc.org>, Jiri Slaby <jirislaby@gmail.com>, "Michael S. Tsirkin" <mst@redhat.com>, David Airlie <airlied@linux.ie>, Jason Wang <jasowang@redhat.com>, DRI Development <dri-devel@lists.freedesktop.org>, virtualization@lists.linux-foundation.org, "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>, netdev <netdev@vger.kernel.org>, Paul Mackerras <paulus@samba.org>, Linux-Arch <linux-arch@vger.kernel.org>, Dave Jiang <dave.jiang@intel.com>, Yoshinori Sato <ysato@users.sourceforge.jp>, Helge Deller <deller@gmx.de>, Linux-sh list <linux-sh@vger.kernel.org>, Alexey Brodkin <abrodkin@synopsys.com>, Ben Skeggs <bskeggs@redhat.com>, nouveau@lists.freedesktop.org, Dave Airlie <airlied@redhat.com>, Matt Turner <mattst88@gmail.com>, arcml <linux-snps-arc@lists.infradead.org>, Nick Kossifidis <mickflemm@gmail.com>, Allen Hubbe <allenbh@gmail.com>, Arnd Bergmann <arnd@arndb.de>, alpha <linux-alpha@vger.kernel.org>, Ivan Kokshaysky <ink@jurassic.park.msu.ru>, Thomas Gleixner <tglx@linutronix.de>, Mauro Carvalho Chehab <mchehab@kernel.org>, Kalle Valo <kvalo@codeaurora.org>, Richard Henderson <rth@twiddle.net>, Parisc List <linux-parisc@vger.kernel.org>, Vineet Gupta <vgupta@synopsys.com>, linux-wireless <linux-wireless@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Luis Chamberlain <mcgrof@kernel.org>, Daniel Vetter <daniel@ffwll.ch>, Jon Mason <jdmason@kudzu.us>, linux-ntb@googlegroups.com, Andrew Morton <akpm@linux-foundation.org>, Linux Media Mailing List <linux-media@vger.kernel.org>, linuxppc-dev <linuxppc-dev@lists.ozlabs.org>, "David S. Miller" <davem@davemloft.net>
 List-ID: <linux-ntb.googlegroups.com>
 
-Hi Christophe,
 
-On Wed, Jan 8, 2020 at 9:35 AM Christophe Leroy <christophe.leroy@c-s.fr> w=
-rote:
-> Le 08/01/2020 =C3=A0 09:18, Krzysztof Kozlowski a =C3=A9crit :
-> > On Wed, 8 Jan 2020 at 09:13, Geert Uytterhoeven <geert@linux-m68k.org> =
-wrote:
-> >> On Wed, Jan 8, 2020 at 9:07 AM Geert Uytterhoeven <geert@linux-m68k.or=
-g> wrote:
-> >>> On Tue, Jan 7, 2020 at 5:53 PM Krzysztof Kozlowski <krzk@kernel.org> =
-wrote:
-> >>>> The ioread8/16/32() and others have inconsistent interface among the
-> >>>> architectures: some taking address as const, some not.
-> >>>>
-> >>>> It seems there is nothing really stopping all of them to take
-> >>>> pointer to const.
-> >>>
-> >>> Shouldn't all of them take const volatile __iomem pointers?
-> >>> It seems the "volatile" is missing from all but the implementations i=
-n
-> >>> include/asm-generic/io.h.
-> >>
-> >> As my "volatile" comment applies to iowrite*(), too, probably that sho=
-uld be
-> >> done in a separate patch.
-> >>
-> >> Hence with patches 1-5 squashed, and for patches 11-13:
-> >> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
-> >
-> > I'll add to this one also changes to ioreadX_rep() and add another
-> > patch for volatile for reads and writes. I guess your review will be
-> > appreciated once more because of ioreadX_rep()
->
-> volatile should really only be used where deemed necessary:
->
-> https://www.kernel.org/doc/html/latest/process/volatile-considered-harmfu=
-l.html
->
-> It is said: " ...  accessor functions might use volatile on
-> architectures where direct I/O memory access does work. Essentially,
-> each accessor call becomes a little critical section on its own and
-> ensures that the access happens as expected by the programmer."
 
-That is exactly the use case here: all above are accessor functions.
+Le 08/01/2020 à 09:18, Krzysztof Kozlowski a écrit :
+> On Wed, 8 Jan 2020 at 09:13, Geert Uytterhoeven <geert@linux-m68k.org> wrote:
+>>
+>> Hi Krzysztof,
+>>
+>> On Wed, Jan 8, 2020 at 9:07 AM Geert Uytterhoeven <geert@linux-m68k.org> wrote:
+>>> On Tue, Jan 7, 2020 at 5:53 PM Krzysztof Kozlowski <krzk@kernel.org> wrote:
+>>>> The ioread8/16/32() and others have inconsistent interface among the
+>>>> architectures: some taking address as const, some not.
+>>>>
+>>>> It seems there is nothing really stopping all of them to take
+>>>> pointer to const.
+>>>
+>>> Shouldn't all of them take const volatile __iomem pointers?
+>>> It seems the "volatile" is missing from all but the implementations in
+>>> include/asm-generic/io.h.
+>>
+>> As my "volatile" comment applies to iowrite*(), too, probably that should be
+>> done in a separate patch.
+>>
+>> Hence with patches 1-5 squashed, and for patches 11-13:
+>> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> 
+> I'll add to this one also changes to ioreadX_rep() and add another
+> patch for volatile for reads and writes. I guess your review will be
+> appreciated once more because of ioreadX_rep()
+> 
 
-Why would ioreadX() not need volatile, while readY() does?
+volatile should really only be used where deemed necessary:
 
-Gr{oetje,eeting}s,
+https://www.kernel.org/doc/html/latest/process/volatile-considered-harmful.html
 
-                        Geert
+It is said: " ...  accessor functions might use volatile on 
+architectures where direct I/O memory access does work. Essentially, 
+each accessor call becomes a little critical section on its own and 
+ensures that the access happens as expected by the programmer."
 
---=20
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k=
-.org
-
-In personal conversations with technical people, I call myself a hacker. Bu=
-t
-when I'm talking to journalists I just say "programmer" or something like t=
-hat.
-                                -- Linus Torvalds
+Christophe
