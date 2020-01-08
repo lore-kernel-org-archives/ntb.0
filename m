@@ -1,13 +1,13 @@
 Return-Path: <krzk@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id r62si135824qkc.6.2020.01.08.12.06.15
+        by gmr-mx.google.com with ESMTPS id z5si245576ywg.5.2020.01.08.12.06.05
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 08 Jan 2020 12:06:15 -0800 (PST)
+        Wed, 08 Jan 2020 12:06:06 -0800 (PST)
 From: Krzysztof Kozlowski <krzk@kernel.org>
-Subject: [PATCH v2 3/9] ntb: intel: Constify ioreadX() iomem argument (as in generic implementation)
-Date: Wed,  8 Jan 2020 21:05:22 +0100
-Message-Id: <20200108200528.4614-4-krzk@kernel.org>
+Subject: [PATCH v2 2/9] net: wireless: rtl818x: Constify ioreadX() iomem argument (as in generic implementation)
+Date: Wed,  8 Jan 2020 21:05:21 +0100
+Message-Id: <20200108200528.4614-3-krzk@kernel.org>
 In-Reply-To: <20200108200528.4614-1-krzk@kernel.org>
 References: <20200108200528.4614-1-krzk@kernel.org>
 To: Richard Henderson <rth@twiddle.net>, Ivan Kokshaysky <ink@jurassic.park.msu.ru>, Matt Turner <mattst88@gmail.com>, Alexey Brodkin <abrodkin@synopsys.com>, Vineet Gupta <vgupta@synopsys.com>, "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>, Helge Deller <deller@gmx.de>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, Yoshinori Sato <ysato@users.sourceforge.jp>, Rich Felker <dalias@libc.org>, Dave Airlie <airlied@redhat.com>, David Airlie <airlied@linux.ie>, Daniel Vetter <daniel@ffwll.ch>, Ben Skeggs <bskeggs@redhat.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, Jiri Slaby <jirislaby@gmail.com>, Nick Kossifidis <mickflemm@gmail.com>, Luis Chamberlain <mcgrof@kernel.org>, Kalle Valo <kvalo@codeaurora.org>, "David S. Miller" <davem@davemloft.net>, Dave Jiang <dave.jiang@intel.com>, Jon Mason <jdmason@kudzu.us>, Allen Hubbe <allenbh@gmail.com>, "Michael S. Tsirkin" <mst@redhat.com>, Jason Wang <jasowang@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Krzysztof Kozlowski <krzk@kernel.org>, Geert Uytterhoeven <geert+renesas@glider.be>, Thomas Gleixner <tglx@linutronix.de>, linux-alpha@vger.kernel.org, linux-kernel@vger.kernel.org, linux-snps-arc@lists.infradead.org, linux-parisc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-sh@vger.kernel.org, dri-devel@lists.freedesktop.org, nouveau@lists.freedesktop.org, linux-media@vger.kernel.org, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, linux-ntb@googlegroups.com, virtualization@lists.linux-foundation.org, linux-arch@vger.kernel.org
@@ -28,50 +28,34 @@ Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
 Changes since v1:
 1. Add Geert's review.
 ---
- drivers/ntb/hw/intel/ntb_hw_gen1.c  | 2 +-
- drivers/ntb/hw/intel/ntb_hw_gen3.h  | 2 +-
- drivers/ntb/hw/intel/ntb_hw_intel.h | 2 +-
- 3 files changed, 3 insertions(+), 3 deletions(-)
+ drivers/net/wireless/realtek/rtl818x/rtl8180/rtl8180.h | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/ntb/hw/intel/ntb_hw_gen1.c b/drivers/ntb/hw/intel/ntb_hw_gen1.c
-index bb57ec239029..9202502a9787 100644
---- a/drivers/ntb/hw/intel/ntb_hw_gen1.c
-+++ b/drivers/ntb/hw/intel/ntb_hw_gen1.c
-@@ -1202,7 +1202,7 @@ int intel_ntb_peer_spad_write(struct ntb_dev *ntb, int pidx, int sidx,
- 			       ndev->peer_reg->spad);
+diff --git a/drivers/net/wireless/realtek/rtl818x/rtl8180/rtl8180.h b/drivers/net/wireless/realtek/rtl818x/rtl8180/rtl8180.h
+index 7948a2da195a..2ff00800d45b 100644
+--- a/drivers/net/wireless/realtek/rtl818x/rtl8180/rtl8180.h
++++ b/drivers/net/wireless/realtek/rtl818x/rtl8180/rtl8180.h
+@@ -150,17 +150,17 @@ void rtl8180_write_phy(struct ieee80211_hw *dev, u8 addr, u32 data);
+ void rtl8180_set_anaparam(struct rtl8180_priv *priv, u32 anaparam);
+ void rtl8180_set_anaparam2(struct rtl8180_priv *priv, u32 anaparam2);
+ 
+-static inline u8 rtl818x_ioread8(struct rtl8180_priv *priv, u8 __iomem *addr)
++static inline u8 rtl818x_ioread8(struct rtl8180_priv *priv, const u8 __iomem *addr)
+ {
+ 	return ioread8(addr);
  }
  
--static u64 xeon_db_ioread(void __iomem *mmio)
-+static u64 xeon_db_ioread(const void __iomem *mmio)
+-static inline u16 rtl818x_ioread16(struct rtl8180_priv *priv, __le16 __iomem *addr)
++static inline u16 rtl818x_ioread16(struct rtl8180_priv *priv, const __le16 __iomem *addr)
  {
- 	return (u64)ioread16(mmio);
+ 	return ioread16(addr);
  }
-diff --git a/drivers/ntb/hw/intel/ntb_hw_gen3.h b/drivers/ntb/hw/intel/ntb_hw_gen3.h
-index 75fb86ca27bb..d1455f24ec99 100644
---- a/drivers/ntb/hw/intel/ntb_hw_gen3.h
-+++ b/drivers/ntb/hw/intel/ntb_hw_gen3.h
-@@ -91,7 +91,7 @@
- #define GEN3_DB_TOTAL_SHIFT		33
- #define GEN3_SPAD_COUNT			16
  
--static inline u64 gen3_db_ioread(void __iomem *mmio)
-+static inline u64 gen3_db_ioread(const void __iomem *mmio)
+-static inline u32 rtl818x_ioread32(struct rtl8180_priv *priv, __le32 __iomem *addr)
++static inline u32 rtl818x_ioread32(struct rtl8180_priv *priv, const __le32 __iomem *addr)
  {
- 	return ioread64(mmio);
+ 	return ioread32(addr);
  }
-diff --git a/drivers/ntb/hw/intel/ntb_hw_intel.h b/drivers/ntb/hw/intel/ntb_hw_intel.h
-index e071e28bca3f..3c0a5a2da241 100644
---- a/drivers/ntb/hw/intel/ntb_hw_intel.h
-+++ b/drivers/ntb/hw/intel/ntb_hw_intel.h
-@@ -102,7 +102,7 @@ struct intel_ntb_dev;
- struct intel_ntb_reg {
- 	int (*poll_link)(struct intel_ntb_dev *ndev);
- 	int (*link_is_up)(struct intel_ntb_dev *ndev);
--	u64 (*db_ioread)(void __iomem *mmio);
-+	u64 (*db_ioread)(const void __iomem *mmio);
- 	void (*db_iowrite)(u64 db_bits, void __iomem *mmio);
- 	unsigned long			ntb_ctl;
- 	resource_size_t			db_size;
 -- 
 2.17.1
 
