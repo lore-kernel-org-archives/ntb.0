@@ -1,18 +1,18 @@
 Return-Path: <bounce+688589.be9e4a-linux-ntb=googlegroups.com@mg.codeaurora.org>
-Received: from mail26.static.mailgun.info (mail26.static.mailgun.info. [104.130.122.26])
-        by gmr-mx.google.com with UTF8SMTPS id d14si60742pfo.4.2020.01.10.05.33.29
+Received: from mail25.static.mailgun.info (mail25.static.mailgun.info. [104.130.122.25])
+        by gmr-mx.google.com with UTF8SMTPS id d12si287383pjv.0.2020.01.10.05.32.31
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 10 Jan 2020 05:33:29 -0800 (PST)
+        Fri, 10 Jan 2020 05:32:32 -0800 (PST)
 Sender: kvalo=codeaurora.org@mg.codeaurora.org
 From: Kalle Valo <kvalo@codeaurora.org>
-Subject: Re: [PATCH v2 9/9] net: wireless: ath5k: Constify ioreadX() iomem argument (as in generic implementation)
+Subject: Re: [PATCH v2 2/9] net: wireless: rtl818x: Constify ioreadX() iomem argument (as in generic implementation)
 References: <20200108200528.4614-1-krzk@kernel.org>
-	<20200108200528.4614-10-krzk@kernel.org>
-Date: Fri, 10 Jan 2020 15:33:11 +0200
-In-Reply-To: <20200108200528.4614-10-krzk@kernel.org> (Krzysztof Kozlowski's
-	message of "Wed, 8 Jan 2020 21:05:28 +0100")
-Message-ID: <87eew7sag8.fsf@codeaurora.org>
+	<20200108200528.4614-3-krzk@kernel.org>
+Date: Fri, 10 Jan 2020 15:32:13 +0200
+In-Reply-To: <20200108200528.4614-3-krzk@kernel.org> (Krzysztof Kozlowski's
+	message of "Wed, 8 Jan 2020 21:05:21 +0100")
+Message-ID: <87imljsahu.fsf@codeaurora.org>
 MIME-Version: 1.0
 Content-Type: text/plain
 To: Krzysztof Kozlowski <krzk@kernel.org>
@@ -29,11 +29,21 @@ Krzysztof Kozlowski <krzk@kernel.org> writes:
 > consistency among architectures.
 >
 > Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
+> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+>
 > ---
->  drivers/net/wireless/ath/ath5k/ahb.c | 10 +++++-----
->  1 file changed, 5 insertions(+), 5 deletions(-)
+>
+> Changes since v1:
+> 1. Add Geert's review.
+> ---
+>  drivers/net/wireless/realtek/rtl818x/rtl8180/rtl8180.h | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
 
-No need to have "net: wireless: " in the title, otherwise looks good.
+No need to have "net: wireless: " in the title, this is enough.
+
+rtl818x: Constify ioreadX() iomem argument (as in generic implementation)
+
+I assume someone else will take this so here's my ack:
 
 Acked-by: Kalle Valo <kvalo@codeaurora.org>
 
