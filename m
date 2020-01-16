@@ -1,15 +1,15 @@
 Return-Path: <sashal@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id f85si1078991ilg.2.2020.01.16.09.17.41
+        by gmr-mx.google.com with ESMTPS id c4si882332plr.4.2020.01.16.08.55.57
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 16 Jan 2020 09:17:41 -0800 (PST)
+        Thu, 16 Jan 2020 08:55:57 -0800 (PST)
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.14 016/371] NTB: ntb_hw_idt: replace IS_ERR_OR_NULL with regular NULL checks
-Date: Thu, 16 Jan 2020 12:11:24 -0500
-Message-Id: <20200116171719.16965-16-sashal@kernel.org>
-In-Reply-To: <20200116171719.16965-1-sashal@kernel.org>
-References: <20200116171719.16965-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 045/671] NTB: ntb_hw_idt: replace IS_ERR_OR_NULL with regular NULL checks
+Date: Thu, 16 Jan 2020 11:44:36 -0500
+Message-Id: <20200116165502.8838-45-sashal@kernel.org>
+In-Reply-To: <20200116165502.8838-1-sashal@kernel.org>
+References: <20200116165502.8838-1-sashal@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
@@ -37,7 +37,7 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/ntb/hw/idt/ntb_hw_idt.c b/drivers/ntb/hw/idt/ntb_hw_idt.c
-index d44d7ef38fe8..b68e2cad74cc 100644
+index dbe72f116017..a67ef23e81bc 100644
 --- a/drivers/ntb/hw/idt/ntb_hw_idt.c
 +++ b/drivers/ntb/hw/idt/ntb_hw_idt.c
 @@ -1105,9 +1105,9 @@ static struct idt_mw_cfg *idt_scan_mws(struct idt_ntb_dev *ndev, int port,
@@ -53,7 +53,7 @@ index d44d7ef38fe8..b68e2cad74cc 100644
  		return ERR_PTR(-ENOMEM);
  
  	/* Copy the info of detected memory windows */
-@@ -2393,7 +2393,7 @@ static struct idt_ntb_dev *idt_create_dev(struct pci_dev *pdev,
+@@ -2390,7 +2390,7 @@ static struct idt_ntb_dev *idt_create_dev(struct pci_dev *pdev,
  
  	/* Allocate memory for the IDT PCIe-device descriptor */
  	ndev = devm_kzalloc(&pdev->dev, sizeof(*ndev), GFP_KERNEL);
