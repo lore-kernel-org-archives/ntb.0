@@ -1,103 +1,55 @@
-Return-Path: <krzk@kernel.org>
+Return-Path: <sashal@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id q188si21600oic.5.2020.01.07.08.53.30
+        by gmr-mx.google.com with ESMTPS id f85si1077771ilg.2.2020.01.16.09.08.37
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 07 Jan 2020 08:53:30 -0800 (PST)
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Subject: [RFT 00/13] iomap: Constify ioreadX() iomem argument
-Date: Tue,  7 Jan 2020 17:52:57 +0100
-Message-Id: <1578415992-24054-1-git-send-email-krzk@kernel.org>
-To: Richard Henderson <rth@twiddle.net>, Ivan Kokshaysky <ink@jurassic.park.msu.ru>, Matt Turner <mattst88@gmail.com>, Alexey Brodkin <abrodkin@synopsys.com>, Vineet Gupta <vgupta@synopsys.com>, "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>, Helge Deller <deller@gmx.de>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, Yoshinori Sato <ysato@users.sourceforge.jp>, Rich Felker <dalias@libc.org>, Dave Airlie <airlied@redhat.com>, David Airlie <airlied@linux.ie>, Daniel Vetter <daniel@ffwll.ch>, Ben Skeggs <bskeggs@redhat.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, Jiri Slaby <jirislaby@gmail.com>, Nick Kossifidis <mickflemm@gmail.com>, Luis Chamberlain <mcgrof@kernel.org>, Kalle Valo <kvalo@codeaurora.org>, "David S. Miller" <davem@davemloft.net>, Dave Jiang <dave.jiang@intel.com>, Jon Mason <jdmason@kudzu.us>, Allen Hubbe <allenbh@gmail.com>, "Michael S. Tsirkin" <mst@redhat.com>, Jason Wang <jasowang@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Andrew Morton <akpm@linux-foundation.org>, Thomas Gleixner <tglx@linutronix.de>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-alpha@vger.kernel.org, linux-kernel@vger.kernel.org, linux-snps-arc@lists.infradead.org, linux-parisc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-sh@vger.kernel.org, dri-devel@lists.freedesktop.org, nouveau@lists.freedesktop.org, linux-media@vger.kernel.org, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, linux-ntb@googlegroups.com, virtualization@lists.linux-foundation.org, linux-arch@vger.kernel.org
-Cc: Krzysztof Kozlowski <krzk@kernel.org>
+        Thu, 16 Jan 2020 09:08:37 -0800 (PST)
+From: Sasha Levin <sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 409/671] ntb_hw_switchtec: potential shift wrapping bug in switchtec_ntb_init_sndev()
+Date: Thu, 16 Jan 2020 12:00:47 -0500
+Message-Id: <20200116170509.12787-146-sashal@kernel.org>
+In-Reply-To: <20200116170509.12787-1-sashal@kernel.org>
+References: <20200116170509.12787-1-sashal@kernel.org>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: Dan Carpenter <dan.carpenter@oracle.com>, Logan Gunthorpe <logang@deltatee.com>, Jon Mason <jdmason@kudzu.us>, Sasha Levin <sashal@kernel.org>, linux-pci@vger.kernel.org, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-Hi,
+From: Dan Carpenter <dan.carpenter@oracle.com>
 
-The ioread8/16/32() and others have inconsistent interface among the
-architectures: some taking address as const, some not.
+[ Upstream commit ff148d8ac53e59802645bd3200c811620317eb9f ]
 
-It seems there is nothing really stopping all of them to take
-pointer to const.
+This code triggers a Smatch warning:
 
-Patchset was really tested on all affected architectures.
-Build testing is in progress - I hope auto-builders will point any issues.
+    drivers/ntb/hw/mscc/ntb_hw_switchtec.c:884 switchtec_ntb_init_sndev()
+    warn: should '(1 << sndev->peer_partition)' be a 64 bit type?
 
+The "part_map" and "tpart_vec" variables are u64 type so this seems like
+a valid warning.
 
-Todo
-====
-Convert also string versions (ioread16_rep() etc) if this aproach looks OK.
+Fixes: 3df54c870f52 ("ntb_hw_switchtec: Allow using Switchtec NTB in multi-partition setups")
+Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+Reviewed-by: Logan Gunthorpe <logang@deltatee.com>
+Signed-off-by: Jon Mason <jdmason@kudzu.us>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-
-Merging
-=======
-The first 5 patches - iomap, alpha, sh, parisc and powerpc - should probably go
-via one tree, or even squashed into one.
-
-All other can go separately after these get merged.
-
-Best regards,
-Krzysztof
-
-
-Krzysztof Kozlowski (13):
-  iomap: Constify ioreadX() iomem argument (as in generic
-    implementation)
-  alpha: Constify ioreadX() iomem argument (as in generic
-    implementation)
-  sh: Constify ioreadX() iomem argument (as in generic implementation)
-  parisc: Constify ioreadX() iomem argument (as in generic
-    implementation)
-  powerpc: Constify ioreadX() iomem argument (as in generic
-    implementation)
-  arc: Constify ioreadX() iomem argument (as in generic implementation)
-  drm/mgag200: Constify ioreadX() iomem argument (as in generic
-    implementation)
-  drm/nouveau: Constify ioreadX() iomem argument (as in generic
-    implementation)
-  media: fsl-viu: Constify ioreadX() iomem argument (as in generic
-    implementation)
-  net: wireless: ath5k: Constify ioreadX() iomem argument (as in generic
-    implementation)
-  net: wireless: rtl818x: Constify ioreadX() iomem argument (as in
-    generic implementation)
-  ntb: intel: Constify ioreadX() iomem argument (as in generic
-    implementation)
-  virtio: pci: Constify ioreadX() iomem argument (as in generic
-    implementation)
-
- arch/alpha/include/asm/core_apecs.h                |  6 +--
- arch/alpha/include/asm/core_cia.h                  |  6 +--
- arch/alpha/include/asm/core_lca.h                  |  6 +--
- arch/alpha/include/asm/core_marvel.h               |  4 +-
- arch/alpha/include/asm/core_mcpcia.h               |  6 +--
- arch/alpha/include/asm/core_t2.h                   |  2 +-
- arch/alpha/include/asm/io.h                        | 12 +++---
- arch/alpha/include/asm/io_trivial.h                | 16 ++++----
- arch/alpha/include/asm/jensen.h                    |  2 +-
- arch/alpha/include/asm/machvec.h                   |  6 +--
- arch/alpha/kernel/core_marvel.c                    |  2 +-
- arch/alpha/kernel/io.c                             |  6 +--
- arch/arc/plat-axs10x/axs10x.c                      |  4 +-
- arch/parisc/include/asm/io.h                       |  4 +-
- arch/parisc/lib/iomap.c                            | 48 +++++++++++-----------
- arch/powerpc/kernel/iomap.c                        | 22 +++++-----
- arch/sh/kernel/iomap.c                             | 10 ++---
- drivers/gpu/drm/mgag200/mgag200_drv.h              |  4 +-
- drivers/gpu/drm/nouveau/nouveau_bo.c               |  2 +-
- drivers/media/platform/fsl-viu.c                   |  2 +-
- drivers/net/wireless/ath/ath5k/ahb.c               | 10 ++---
- .../net/wireless/realtek/rtl818x/rtl8180/rtl8180.h |  6 +--
- drivers/ntb/hw/intel/ntb_hw_gen1.c                 |  2 +-
- drivers/ntb/hw/intel/ntb_hw_gen3.h                 |  2 +-
- drivers/ntb/hw/intel/ntb_hw_intel.h                |  2 +-
- drivers/virtio/virtio_pci_modern.c                 |  6 +--
- include/asm-generic/iomap.h                        | 22 +++++-----
- include/linux/io-64-nonatomic-hi-lo.h              |  4 +-
- include/linux/io-64-nonatomic-lo-hi.h              |  4 +-
- lib/iomap.c                                        | 18 ++++----
- 30 files changed, 123 insertions(+), 123 deletions(-)
-
+diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+index 9916bc5b6759..313f6258c424 100644
+--- a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
++++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+@@ -899,7 +899,7 @@ static int switchtec_ntb_init_sndev(struct switchtec_ntb *sndev)
+ 		}
+ 
+ 		sndev->peer_partition = ffs(tpart_vec) - 1;
+-		if (!(part_map & (1 << sndev->peer_partition))) {
++		if (!(part_map & (1ULL << sndev->peer_partition))) {
+ 			dev_err(&sndev->stdev->dev,
+ 				"ntb target partition is not NT partition\n");
+ 			return -ENODEV;
 -- 
-2.7.4
+2.20.1
 
