@@ -1,74 +1,67 @@
-Return-Path: <deller@gmx.de>
-Received: from mout.gmx.net (mout.gmx.net. [212.227.17.22])
-        by gmr-mx.google.com with ESMTPS id z16si593399ljk.0.2020.01.14.11.22.52
+Return-Path: <sashal@kernel.org>
+Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
+        by gmr-mx.google.com with ESMTPS id f85si1078991ilg.2.2020.01.16.09.17.41
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 14 Jan 2020 11:22:52 -0800 (PST)
-Date: Tue, 14 Jan 2020 20:22:47 +0100
-From: Helge Deller <deller@gmx.de>
-Subject: [PATCH] ntb_tool: Fix printk format
-Message-ID: <20200114192247.GA30840@ls3530.fritz.box>
+        Thu, 16 Jan 2020 09:17:41 -0800 (PST)
+From: Sasha Levin <sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.14 016/371] NTB: ntb_hw_idt: replace IS_ERR_OR_NULL with regular NULL checks
+Date: Thu, 16 Jan 2020 12:11:24 -0500
+Message-Id: <20200116171719.16965-16-sashal@kernel.org>
+In-Reply-To: <20200116171719.16965-1-sashal@kernel.org>
+References: <20200116171719.16965-1-sashal@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com, Serge Semin <fancer.lancer@gmail.com>
-Cc: linux-kernel@vger.kernel.org
+Content-Transfer-Encoding: 8bit
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: "Gustavo A. R. Silva" <gustavo@embeddedor.com>, Jon Mason <jdmason@kudzu.us>, Sasha Levin <sashal@kernel.org>, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-The correct printk format is %pa or %pap, but not %pa[p].
+From: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
 
-Signed-off-by: Helge Deller <deller@gmx.de>
-Fixes: 7f46c8b3a5523 ("NTB: ntb_tool: Add full multi-port NTB API support"=
-)
+[ Upstream commit 1b7619828d0c341612f58683e73f279c37e70bbc ]
 
-diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c
-index d592c0ffbd19..69da758fe64c 100644
-=2D-- a/drivers/ntb/test/ntb_tool.c
-+++ b/drivers/ntb/test/ntb_tool.c
-@@ -678,19 +678,19 @@ static ssize_t tool_mw_trans_read(struct file *filep=
-, char __user *ubuf,
- 			 &inmw->dma_base);
+Both devm_kcalloc() and devm_kzalloc() return NULL on error. They
+never return error pointers.
 
- 	off +=3D scnprintf(buf + off, buf_size - off,
--			 "Window Size    \t%pa[p]\n",
-+			 "Window Size    \t%pap\n",
- 			 &inmw->size);
+The use of IS_ERR_OR_NULL is currently applied to the wrong
+context.
 
- 	off +=3D scnprintf(buf + off, buf_size - off,
--			 "Alignment      \t%pa[p]\n",
-+			 "Alignment      \t%pap\n",
- 			 &addr_align);
+Fix this by replacing IS_ERR_OR_NULL with regular NULL checks.
 
- 	off +=3D scnprintf(buf + off, buf_size - off,
--			 "Size Alignment \t%pa[p]\n",
-+			 "Size Alignment \t%pap\n",
- 			 &size_align);
+Fixes: bf2a952d31d2 ("NTB: Add IDT 89HPESxNTx PCIe-switches support")
+Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
+Signed-off-by: Jon Mason <jdmason@kudzu.us>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ drivers/ntb/hw/idt/ntb_hw_idt.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
- 	off +=3D scnprintf(buf + off, buf_size - off,
--			 "Size Max       \t%pa[p]\n",
-+			 "Size Max       \t%pap\n",
- 			 &size_max);
+diff --git a/drivers/ntb/hw/idt/ntb_hw_idt.c b/drivers/ntb/hw/idt/ntb_hw_idt.c
+index d44d7ef38fe8..b68e2cad74cc 100644
+--- a/drivers/ntb/hw/idt/ntb_hw_idt.c
++++ b/drivers/ntb/hw/idt/ntb_hw_idt.c
+@@ -1105,9 +1105,9 @@ static struct idt_mw_cfg *idt_scan_mws(struct idt_ntb_dev *ndev, int port,
+ 	}
+ 
+ 	/* Allocate memory for memory window descriptors */
+-	ret_mws = devm_kcalloc(&ndev->ntb.pdev->dev, *mw_cnt,
+-				sizeof(*ret_mws), GFP_KERNEL);
+-	if (IS_ERR_OR_NULL(ret_mws))
++	ret_mws = devm_kcalloc(&ndev->ntb.pdev->dev, *mw_cnt, sizeof(*ret_mws),
++			       GFP_KERNEL);
++	if (!ret_mws)
+ 		return ERR_PTR(-ENOMEM);
+ 
+ 	/* Copy the info of detected memory windows */
+@@ -2393,7 +2393,7 @@ static struct idt_ntb_dev *idt_create_dev(struct pci_dev *pdev,
+ 
+ 	/* Allocate memory for the IDT PCIe-device descriptor */
+ 	ndev = devm_kzalloc(&pdev->dev, sizeof(*ndev), GFP_KERNEL);
+-	if (IS_ERR_OR_NULL(ndev)) {
++	if (!ndev) {
+ 		dev_err(&pdev->dev, "Memory allocation failed for descriptor");
+ 		return ERR_PTR(-ENOMEM);
+ 	}
+-- 
+2.20.1
 
- 	ret =3D simple_read_from_buffer(ubuf, size, offp, buf, off);
-@@ -907,16 +907,16 @@ static ssize_t tool_peer_mw_trans_read(struct file *=
-filep, char __user *ubuf,
- 			 "Virtual address     \t0x%pK\n", outmw->io_base);
-
- 	off +=3D scnprintf(buf + off, buf_size - off,
--			 "Phys Address        \t%pa[p]\n", &map_base);
-+			 "Phys Address        \t%pap\n", &map_base);
-
- 	off +=3D scnprintf(buf + off, buf_size - off,
--			 "Mapping Size        \t%pa[p]\n", &map_size);
-+			 "Mapping Size        \t%pap\n", &map_size);
-
- 	off +=3D scnprintf(buf + off, buf_size - off,
- 			 "Translation Address \t0x%016llx\n", outmw->tr_base);
-
- 	off +=3D scnprintf(buf + off, buf_size - off,
--			 "Window Size         \t%pa[p]\n", &outmw->size);
-+			 "Window Size         \t%pap\n", &outmw->size);
-
- 	ret =3D simple_read_from_buffer(ubuf, size, offp, buf, off);
- 	kfree(buf);
