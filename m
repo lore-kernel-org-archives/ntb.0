@@ -1,67 +1,40 @@
-Return-Path: <sashal@kernel.org>
-Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id c4si882332plr.4.2020.01.16.08.55.57
+Return-Path: <bounce+688589.be9e4a-linux-ntb=googlegroups.com@mg.codeaurora.org>
+Received: from mail25.static.mailgun.info (mail25.static.mailgun.info. [104.130.122.25])
+        by gmr-mx.google.com with UTF8SMTPS id x13si656684pgt.3.2020.01.26.07.11.42
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 16 Jan 2020 08:55:57 -0800 (PST)
-From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 045/671] NTB: ntb_hw_idt: replace IS_ERR_OR_NULL with regular NULL checks
-Date: Thu, 16 Jan 2020 11:44:36 -0500
-Message-Id: <20200116165502.8838-45-sashal@kernel.org>
-In-Reply-To: <20200116165502.8838-1-sashal@kernel.org>
-References: <20200116165502.8838-1-sashal@kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 26 Jan 2020 07:11:43 -0800 (PST)
+Sender: kvalo=codeaurora.org@mg.codeaurora.org
+Content-Type: text/plain; charset="utf-8"
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: "Gustavo A. R. Silva" <gustavo@embeddedor.com>, Jon Mason <jdmason@kudzu.us>, Sasha Levin <sashal@kernel.org>, linux-ntb@googlegroups.com
+Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH v2 2/9] net: wireless: rtl818x: Constify ioreadX() iomem
+ argument (as in generic implementation)
+From: Kalle Valo <kvalo@codeaurora.org>
+In-Reply-To: <20200108200528.4614-3-krzk@kernel.org>
+References: <20200108200528.4614-3-krzk@kernel.org>
+Message-Id: <20200126151137.6B3F1C43383@smtp.codeaurora.org>
+Date: Sun, 26 Jan 2020 15:11:37 +0000 (UTC)
+To: Krzysztof Kozlowski <krzk@kernel.org>
+Cc: Richard Henderson <rth@twiddle.net>, Ivan Kokshaysky <ink@jurassic.park.msu.ru>, Matt Turner <mattst88@gmail.com>, Alexey Brodkin <abrodkin@synopsys.com>, Vineet Gupta <vgupta@synopsys.com>, "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>, Helge Deller <deller@gmx.de>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, Yoshinori Sato <ysato@users.sourceforge.jp>, Rich Felker <dalias@libc.org>, Dave Airlie <airlied@redhat.com>, David Airlie <airlied@linux.ie>, Daniel Vetter <daniel@ffwll.ch>, Ben Skeggs <bskeggs@redhat.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, Jiri Slaby <jirislaby@gmail.com>, Nick Kossifidis <mickflemm@gmail.com>, Luis Chamberlain <mcgrof@kernel.org>, "David S. Miller" <davem@davemloft.net>, Dave Jiang <dave.jiang@intel.com>, Jon Mason <jdmason@kudzu.us>, Allen Hubbe <allenbh@gmail.com>, "Michael S. Tsirkin" <mst@redhat.com>, Jason Wang <jasowang@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Krzysztof Kozlowski <krzk@kernel.org>, Geert Uytterhoeven <geert+renesas@glider.be>, Thomas Gleixner <tglx@linutronix.de>, linux-alpha@vger.kernel.org, linux-kernel@vger.kernel.org, linux-snps-arc@lists.infradead.org, linux-parisc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-sh@vger.kernel.org, dri-devel@lists.freedesktop.org, nouveau@lists.freedesktop.org, linux-media@vger.kernel.org, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, linux-ntb@googlegroups.com, virtualization@lists.linux-foundation.org, linux-arch@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-From: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
+Krzysztof Kozlowski <krzk@kernel.org> wrote:
 
-[ Upstream commit 1b7619828d0c341612f58683e73f279c37e70bbc ]
+> The ioreadX() helpers have inconsistent interface.  On some architectures
+> void *__iomem address argument is a pointer to const, on some not.
+> 
+> Implementations of ioreadX() do not modify the memory under the address
+> so they can be converted to a "const" version for const-safety and
+> consistency among architectures.
+> 
+> Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
+> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-Both devm_kcalloc() and devm_kzalloc() return NULL on error. They
-never return error pointers.
+I assume this and patch 9 are going via some other tree so dropping them
+from my patchwork queue.
 
-The use of IS_ERR_OR_NULL is currently applied to the wrong
-context.
-
-Fix this by replacing IS_ERR_OR_NULL with regular NULL checks.
-
-Fixes: bf2a952d31d2 ("NTB: Add IDT 89HPESxNTx PCIe-switches support")
-Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
-Signed-off-by: Jon Mason <jdmason@kudzu.us>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- drivers/ntb/hw/idt/ntb_hw_idt.c | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/ntb/hw/idt/ntb_hw_idt.c b/drivers/ntb/hw/idt/ntb_hw_idt.c
-index dbe72f116017..a67ef23e81bc 100644
---- a/drivers/ntb/hw/idt/ntb_hw_idt.c
-+++ b/drivers/ntb/hw/idt/ntb_hw_idt.c
-@@ -1105,9 +1105,9 @@ static struct idt_mw_cfg *idt_scan_mws(struct idt_ntb_dev *ndev, int port,
- 	}
- 
- 	/* Allocate memory for memory window descriptors */
--	ret_mws = devm_kcalloc(&ndev->ntb.pdev->dev, *mw_cnt,
--				sizeof(*ret_mws), GFP_KERNEL);
--	if (IS_ERR_OR_NULL(ret_mws))
-+	ret_mws = devm_kcalloc(&ndev->ntb.pdev->dev, *mw_cnt, sizeof(*ret_mws),
-+			       GFP_KERNEL);
-+	if (!ret_mws)
- 		return ERR_PTR(-ENOMEM);
- 
- 	/* Copy the info of detected memory windows */
-@@ -2390,7 +2390,7 @@ static struct idt_ntb_dev *idt_create_dev(struct pci_dev *pdev,
- 
- 	/* Allocate memory for the IDT PCIe-device descriptor */
- 	ndev = devm_kzalloc(&pdev->dev, sizeof(*ndev), GFP_KERNEL);
--	if (IS_ERR_OR_NULL(ndev)) {
-+	if (!ndev) {
- 		dev_err(&pdev->dev, "Memory allocation failed for descriptor");
- 		return ERR_PTR(-ENOMEM);
- 	}
 -- 
-2.20.1
+https://patchwork.kernel.org/patch/11324461/
 
+https://wireless.wiki.kernel.org/en/developers/documentation/submittingpatches
