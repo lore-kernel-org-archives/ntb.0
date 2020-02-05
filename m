@@ -1,17 +1,17 @@
 Return-Path: <anath.amd@gmail.com>
-Received: from mail-pg1-x544.google.com (mail-pg1-x544.google.com. [2607:f8b0:4864:20::544])
-        by gmr-mx.google.com with ESMTPS id i27si28389uat.1.2020.02.05.09.17.47
+Received: from mail-pf1-x444.google.com (mail-pf1-x444.google.com. [2607:f8b0:4864:20::444])
+        by gmr-mx.google.com with ESMTPS id d12si385846pjv.0.2020.02.05.09.17.44
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 05 Feb 2020 09:17:47 -0800 (PST)
-Received: by mail-pg1-x544.google.com with SMTP id j4so1284307pgi.1
-        for <linux-ntb@googlegroups.com>; Wed, 05 Feb 2020 09:17:47 -0800 (PST)
+        Wed, 05 Feb 2020 09:17:44 -0800 (PST)
+Received: by mail-pf1-x444.google.com with SMTP id s1so1526776pfh.10
+        for <linux-ntb@googlegroups.com>; Wed, 05 Feb 2020 09:17:44 -0800 (PST)
 Return-Path: <anath.amd@gmail.com>
 Sender: Arindam Nath <anath.amd@gmail.com>
 From: Arindam Nath <arindam.nath@amd.com>
-Subject: [PATCH 3/4] ntb_perf: pass correct struct device to dma_alloc_coherent
-Date: Wed,  5 Feb 2020 22:46:57 +0530
-Message-Id: <aa4e69feffab2fd3cd846569e0546c5cf8f8f6b4.1580921119.git.arindam.nath@amd.com>
+Subject: [PATCH 2/4] ntb_perf: send command in response to EAGAIN
+Date: Wed,  5 Feb 2020 22:46:56 +0530
+Message-Id: <a7db6b564428dd1d4d2e93fab76f8f582f63fb9a.1580921119.git.arindam.nath@amd.com>
 In-Reply-To: <cover.1580921119.git.arindam.nath@amd.com>
 References: <cover.1580921119.git.arindam.nath@amd.com>
 In-Reply-To: <cover.1580921119.git.arindam.nath@amd.com>
@@ -20,49 +20,58 @@ To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe
 Cc: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Arindam Nath <arindam.nath@amd.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Sanjay R Mehta <sanju.mehta@amd.com>
+perf_spad_cmd_send() and perf_msg_cmd_send() return
+-EAGAIN after trying to send commands for a maximum
+of MSG_TRIES re-tries. But currently there is no
+handling for this error. These functions are invoked
+from perf_service_work() through function pointers,
+so rather than simply call these functions is not
+enough. We need to make sure to invoke them again in
+case of -EAGAIN. Since peer status bits were cleared
+before calling these functions, we set the same status
+bits before queueing the work again for later invocation.
+This way we simply won't go ahead and initialize the
+XLAT registers wrongfully in case sending the very first
+command itself fails.
 
-Currently, ntb->dev is passed to dma_alloc_coherent
-and dma_free_coherent calls. The returned dma_addr_t
-is the CPU physical address. This works fine as long
-as IOMMU is disabled. But when IOMMU is enabled, we
-need to make sure that IOVA is returned for dma_addr_t.
-So the correct way to achieve this is by changing the
-first parameter of dma_alloc_coherent() as ntb->pdev->dev
-instead.
-
-Fixes: 5648e56 ("NTB: ntb_perf: Add full multi-port NTB API support")
-Signed-off-by: Sanjay R Mehta <sanju.mehta@amd.com>
 Signed-off-by: Arindam Nath <arindam.nath@amd.com>
 ---
- drivers/ntb/test/ntb_perf.c | 7 ++++---
- 1 file changed, 4 insertions(+), 3 deletions(-)
+ drivers/ntb/test/ntb_perf.c | 18 ++++++++++++++----
+ 1 file changed, 14 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index 5116655f0211..65501f24b742 100644
+index 0e9b9efe74a4..5116655f0211 100644
 --- a/drivers/ntb/test/ntb_perf.c
 +++ b/drivers/ntb/test/ntb_perf.c
-@@ -558,7 +558,7 @@ static void perf_free_inbuf(struct perf_peer *peer)
- 		return;
+@@ -625,14 +625,24 @@ static void perf_service_work(struct work_struct *work)
+ {
+ 	struct perf_peer *peer = to_peer_service(work);
  
- 	(void)ntb_mw_clear_trans(peer->perf->ntb, peer->pidx, peer->gidx);
--	dma_free_coherent(&peer->perf->ntb->dev, peer->inbuf_size,
-+	dma_free_coherent(&peer->perf->ntb->pdev->dev, peer->inbuf_size,
- 			  peer->inbuf, peer->inbuf_xlat);
- 	peer->inbuf = NULL;
- }
-@@ -587,8 +587,9 @@ static int perf_setup_inbuf(struct perf_peer *peer)
+-	if (test_and_clear_bit(PERF_CMD_SSIZE, &peer->sts))
+-		perf_cmd_send(peer, PERF_CMD_SSIZE, peer->outbuf_size);
++	if (test_and_clear_bit(PERF_CMD_SSIZE, &peer->sts)) {
++		if (perf_cmd_send(peer, PERF_CMD_SSIZE, peer->outbuf_size)
++		    == -EAGAIN) {
++			set_bit(PERF_CMD_SSIZE, &peer->sts);
++			(void)queue_work(system_highpri_wq, &peer->service);
++		}
++	}
  
- 	perf_free_inbuf(peer);
+ 	if (test_and_clear_bit(PERF_CMD_RSIZE, &peer->sts))
+ 		perf_setup_inbuf(peer);
  
--	peer->inbuf = dma_alloc_coherent(&perf->ntb->dev, peer->inbuf_size,
--					 &peer->inbuf_xlat, GFP_KERNEL);
-+	peer->inbuf = dma_alloc_coherent(&perf->ntb->pdev->dev,
-+					 peer->inbuf_size, &peer->inbuf_xlat,
-+					 GFP_KERNEL);
- 	if (!peer->inbuf) {
- 		dev_err(&perf->ntb->dev, "Failed to alloc inbuf of %pa\n",
- 			&peer->inbuf_size);
+-	if (test_and_clear_bit(PERF_CMD_SXLAT, &peer->sts))
+-		perf_cmd_send(peer, PERF_CMD_SXLAT, peer->inbuf_xlat);
++	if (test_and_clear_bit(PERF_CMD_SXLAT, &peer->sts)) {
++		if (perf_cmd_send(peer, PERF_CMD_SXLAT, peer->inbuf_xlat)
++		    == -EAGAIN) {
++			set_bit(PERF_CMD_SXLAT, &peer->sts);
++			(void)queue_work(system_highpri_wq, &peer->service);
++		}
++	}
+ 
+ 	if (test_and_clear_bit(PERF_CMD_RXLAT, &peer->sts))
+ 		perf_setup_outbuf(peer);
 -- 
 2.17.1
 
