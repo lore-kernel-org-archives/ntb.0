@@ -1,17 +1,17 @@
 Return-Path: <anath.amd@gmail.com>
-Received: from mail-pf1-x444.google.com (mail-pf1-x444.google.com. [2607:f8b0:4864:20::444])
-        by gmr-mx.google.com with ESMTPS id s131si6473ybc.0.2020.02.05.07.55.07
+Received: from mail-pf1-x442.google.com (mail-pf1-x442.google.com. [2607:f8b0:4864:20::442])
+        by gmr-mx.google.com with ESMTPS id w4si12312vse.2.2020.02.05.07.55.04
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 05 Feb 2020 07:55:07 -0800 (PST)
-Received: by mail-pf1-x444.google.com with SMTP id y73so1423316pfg.2
-        for <linux-ntb@googlegroups.com>; Wed, 05 Feb 2020 07:55:07 -0800 (PST)
+        Wed, 05 Feb 2020 07:55:04 -0800 (PST)
+Received: by mail-pf1-x442.google.com with SMTP id p14so1421018pfn.4
+        for <linux-ntb@googlegroups.com>; Wed, 05 Feb 2020 07:55:04 -0800 (PST)
 Return-Path: <anath.amd@gmail.com>
 Sender: Arindam Nath <anath.amd@gmail.com>
 From: Arindam Nath <arindam.nath@amd.com>
-Subject: [PATCH 06/15] NTB: set peer_sta within event handler itself
-Date: Wed,  5 Feb 2020 21:24:23 +0530
-Message-Id: <cb8fdfc226493dd9e80be514c201f92378608081.1580914232.git.arindam.nath@amd.com>
+Subject: [PATCH 05/15] NTB: return the side info status from amd_poll_link
+Date: Wed,  5 Feb 2020 21:24:22 +0530
+Message-Id: <a6bacf6fc59017acf02ba5c69c85da2192365a59.1580914232.git.arindam.nath@amd.com>
 In-Reply-To: <cover.1580914232.git.arindam.nath@amd.com>
 References: <cover.1580914232.git.arindam.nath@amd.com>
 In-Reply-To: <cover.1580914232.git.arindam.nath@amd.com>
@@ -20,58 +20,71 @@ To: Shyam Sundar S K <Shyam-sundar.S-k@amd.com>, Jon Mason <jdmason@kudzu.us>, D
 Cc: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Arindam Nath <arindam.nath@amd.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-amd_ack_smu() should only set the corresponding
-bits into SMUACK register. Setting the bitmask
-of peer_sta should be done within the event handler.
-They are two different things, and so should be
-handled differently and at different places.
+Bit 1 of SIDE_INFO register is an indication that
+the driver on the other side of link is ready. We
+set this bit during driver initialization sequence.
+So rather than having separate macros to return the
+status, we can simply return the status of this bit
+from amd_poll_link(). So a return of 1 or 0 from
+this function will indicate to the caller whether
+the driver on the other side of link is ready or not,
+respectively.
 
 Signed-off-by: Arindam Nath <arindam.nath@amd.com>
 ---
- drivers/ntb/hw/amd/ntb_hw_amd.c | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+ drivers/ntb/hw/amd/ntb_hw_amd.c | 11 +++++------
+ drivers/ntb/hw/amd/ntb_hw_amd.h |  2 --
+ 2 files changed, 5 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.c b/drivers/ntb/hw/amd/ntb_hw_amd.c
-index 84723420d70b..b85af150f2c6 100644
+index f50537e0917b..84723420d70b 100644
 --- a/drivers/ntb/hw/amd/ntb_hw_amd.c
 +++ b/drivers/ntb/hw/amd/ntb_hw_amd.c
-@@ -541,8 +541,6 @@ static void amd_ack_smu(struct amd_ntb_dev *ndev, u32 bit)
- 	reg = readl(mmio + AMD_SMUACK_OFFSET);
- 	reg |= bit;
- 	writel(reg, mmio + AMD_SMUACK_OFFSET);
+@@ -246,7 +246,7 @@ static int amd_ntb_get_link_status(struct amd_ntb_dev *ndev)
+ static int amd_link_is_up(struct amd_ntb_dev *ndev)
+ {
+ 	if (!ndev->peer_sta)
+-		return NTB_LNK_STA_ACTIVE(ndev->cntl_sta);
++		return ndev->cntl_sta;
+ 
+ 	if (ndev->peer_sta & AMD_LINK_UP_EVENT) {
+ 		ndev->peer_sta = 0;
+@@ -896,16 +896,15 @@ static int amd_poll_link(struct amd_ntb_dev *ndev)
+ 	u32 reg;
+ 
+ 	reg = readl(mmio + AMD_SIDEINFO_OFFSET);
+-	reg &= NTB_LIN_STA_ACTIVE_BIT;
++	reg &= AMD_SIDE_READY;
+ 
+ 	dev_dbg(&ndev->ntb.pdev->dev, "%s: reg_val = 0x%x.\n", __func__, reg);
+ 
+-	if (reg == ndev->cntl_sta)
+-		return 0;
 -
--	ndev->peer_sta |= bit;
+ 	ndev->cntl_sta = reg;
+ 
+-	return amd_ntb_get_link_status(ndev);
++	amd_ntb_get_link_status(ndev);
++
++	return ndev->cntl_sta;
  }
  
- static void amd_handle_event(struct amd_ntb_dev *ndev, int vec)
-@@ -560,9 +558,11 @@ static void amd_handle_event(struct amd_ntb_dev *ndev, int vec)
- 	status &= AMD_EVENT_INTMASK;
- 	switch (status) {
- 	case AMD_PEER_FLUSH_EVENT:
-+		ndev->peer_sta |= AMD_PEER_FLUSH_EVENT;
- 		dev_info(dev, "Flush is done.\n");
- 		break;
- 	case AMD_PEER_RESET_EVENT:
-+		ndev->peer_sta |= AMD_PEER_RESET_EVENT;
- 		amd_ack_smu(ndev, AMD_PEER_RESET_EVENT);
+ static void amd_link_hb(struct work_struct *work)
+diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.h b/drivers/ntb/hw/amd/ntb_hw_amd.h
+index 39e5d18e12ff..156a4a92b803 100644
+--- a/drivers/ntb/hw/amd/ntb_hw_amd.h
++++ b/drivers/ntb/hw/amd/ntb_hw_amd.h
+@@ -53,10 +53,8 @@
+ #include <linux/pci.h>
  
- 		/* link down first */
-@@ -575,6 +575,7 @@ static void amd_handle_event(struct amd_ntb_dev *ndev, int vec)
- 	case AMD_PEER_PMETO_EVENT:
- 	case AMD_LINK_UP_EVENT:
- 	case AMD_LINK_DOWN_EVENT:
-+		ndev->peer_sta |= status;
- 		amd_ack_smu(ndev, status);
+ #define AMD_LINK_HB_TIMEOUT	msecs_to_jiffies(1000)
+-#define NTB_LIN_STA_ACTIVE_BIT	0x00000002
+ #define NTB_LNK_STA_SPEED_MASK	0x000F0000
+ #define NTB_LNK_STA_WIDTH_MASK	0x03F00000
+-#define NTB_LNK_STA_ACTIVE(x)	(!!((x) & NTB_LIN_STA_ACTIVE_BIT))
+ #define NTB_LNK_STA_SPEED(x)	(((x) & NTB_LNK_STA_SPEED_MASK) >> 16)
+ #define NTB_LNK_STA_WIDTH(x)	(((x) & NTB_LNK_STA_WIDTH_MASK) >> 20)
  
- 		/* link down */
-@@ -588,6 +589,7 @@ static void amd_handle_event(struct amd_ntb_dev *ndev, int vec)
- 		if (status & 0x1)
- 			dev_info(dev, "Wakeup is done.\n");
- 
-+		ndev->peer_sta |= AMD_PEER_D0_EVENT;
- 		amd_ack_smu(ndev, AMD_PEER_D0_EVENT);
- 
- 		/* start a timer to poll link status */
 -- 
 2.17.1
 
