@@ -1,17 +1,17 @@
 Return-Path: <anath.amd@gmail.com>
 Received: from mail-pg1-x544.google.com (mail-pg1-x544.google.com. [2607:f8b0:4864:20::544])
-        by gmr-mx.google.com with ESMTPS id c13si684pfi.3.2020.02.05.07.55.18
+        by gmr-mx.google.com with ESMTPS id x127si3097vkc.0.2020.02.05.07.55.16
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 05 Feb 2020 07:55:18 -0800 (PST)
-Received: by mail-pg1-x544.google.com with SMTP id a33so1163007pgm.5
-        for <linux-ntb@googlegroups.com>; Wed, 05 Feb 2020 07:55:18 -0800 (PST)
+        Wed, 05 Feb 2020 07:55:16 -0800 (PST)
+Received: by mail-pg1-x544.google.com with SMTP id j4so1171696pgi.1
+        for <linux-ntb@googlegroups.com>; Wed, 05 Feb 2020 07:55:15 -0800 (PST)
 Return-Path: <anath.amd@gmail.com>
 Sender: Arindam Nath <anath.amd@gmail.com>
 From: Arindam Nath <arindam.nath@amd.com>
-Subject: [PATCH 10/15] NTB: move ntb_ctrl handling to init and deinit
-Date: Wed,  5 Feb 2020 21:24:27 +0530
-Message-Id: <62c2d386903e1ec4a6a1b6a097ec7f5faade72e6.1580914232.git.arindam.nath@amd.com>
+Subject: [PATCH 09/15] NTB: handle link up, D0 and D3 events correctly
+Date: Wed,  5 Feb 2020 21:24:26 +0530
+Message-Id: <4c07c3e337fe2343d9fa0ff234c2d85543198274.1580914232.git.arindam.nath@amd.com>
 In-Reply-To: <cover.1580914232.git.arindam.nath@amd.com>
 References: <cover.1580914232.git.arindam.nath@amd.com>
 In-Reply-To: <cover.1580914232.git.arindam.nath@amd.com>
@@ -20,97 +20,40 @@ To: Shyam Sundar S K <Shyam-sundar.S-k@amd.com>, Jon Mason <jdmason@kudzu.us>, D
 Cc: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Arindam Nath <arindam.nath@amd.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-It does not really make sense to enable or disable
-the bits of NTB_CTRL register only during enable
-and disable link callbacks. They should be done
-independent of these callbacks. The correct placement
-for that is during the amd_init_side_info() and
-amd_deinit_side_info() functions, which are invoked
-during probe and remove respectively.
+Just like for Link-Down event, Link-Up and D3 events
+are also mutually exclusive to Link-Down and D0 events
+respectively. So we clear the bitmasks in peer_sta
+depending on event type.
 
 Signed-off-by: Arindam Nath <arindam.nath@amd.com>
 ---
- drivers/ntb/hw/amd/ntb_hw_amd.c | 20 ++++++++++----------
- 1 file changed, 10 insertions(+), 10 deletions(-)
+ drivers/ntb/hw/amd/ntb_hw_amd.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
 diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.c b/drivers/ntb/hw/amd/ntb_hw_amd.c
-index a1c4a21c58c3..621a69a0cff2 100644
+index d933a1dffdc6..a1c4a21c58c3 100644
 --- a/drivers/ntb/hw/amd/ntb_hw_amd.c
 +++ b/drivers/ntb/hw/amd/ntb_hw_amd.c
-@@ -290,7 +290,6 @@ static int amd_ntb_link_enable(struct ntb_dev *ntb,
- {
- 	struct amd_ntb_dev *ndev = ntb_ndev(ntb);
- 	void __iomem *mmio = ndev->self_mmio;
--	u32 ntb_ctl;
- 
- 	/* Enable event interrupt */
- 	ndev->int_mask &= ~AMD_EVENT_INTMASK;
-@@ -300,10 +299,6 @@ static int amd_ntb_link_enable(struct ntb_dev *ntb,
- 		return -EINVAL;
- 	dev_dbg(&ntb->pdev->dev, "Enabling Link.\n");
- 
--	ntb_ctl = readl(mmio + AMD_CNTL_OFFSET);
--	ntb_ctl |= (PMM_REG_CTL | SMM_REG_CTL);
--	writel(ntb_ctl, mmio + AMD_CNTL_OFFSET);
--
- 	return 0;
- }
- 
-@@ -311,7 +306,6 @@ static int amd_ntb_link_disable(struct ntb_dev *ntb)
- {
- 	struct amd_ntb_dev *ndev = ntb_ndev(ntb);
- 	void __iomem *mmio = ndev->self_mmio;
--	u32 ntb_ctl;
- 
- 	/* Disable event interrupt */
- 	ndev->int_mask |= AMD_EVENT_INTMASK;
-@@ -321,10 +315,6 @@ static int amd_ntb_link_disable(struct ntb_dev *ntb)
- 		return -EINVAL;
- 	dev_dbg(&ntb->pdev->dev, "Enabling Link.\n");
- 
--	ntb_ctl = readl(mmio + AMD_CNTL_OFFSET);
--	ntb_ctl &= ~(PMM_REG_CTL | SMM_REG_CTL);
--	writel(ntb_ctl, mmio + AMD_CNTL_OFFSET);
--
- 	return 0;
- }
- 
-@@ -927,18 +917,24 @@ static void amd_init_side_info(struct amd_ntb_dev *ndev)
- {
- 	void __iomem *mmio = ndev->self_mmio;
- 	unsigned int reg;
-+	u32 ntb_ctl;
- 
- 	reg = readl(mmio + AMD_SIDEINFO_OFFSET);
- 	if (!(reg & AMD_SIDE_READY)) {
- 		reg |= AMD_SIDE_READY;
- 		writel(reg, mmio + AMD_SIDEINFO_OFFSET);
- 	}
+@@ -568,6 +568,11 @@ static void amd_handle_event(struct amd_ntb_dev *ndev, int vec)
+ 	case AMD_PEER_PMETO_EVENT:
+ 	case AMD_LINK_UP_EVENT:
+ 		ndev->peer_sta |= status;
++		if (status == AMD_LINK_UP_EVENT)
++			ndev->peer_sta &= ~AMD_LINK_DOWN_EVENT;
++		else if (status == AMD_PEER_D3_EVENT)
++			ndev->peer_sta &= ~AMD_PEER_D0_EVENT;
 +
-+	ntb_ctl = readl(mmio + AMD_CNTL_OFFSET);
-+	ntb_ctl |= (PMM_REG_CTL | SMM_REG_CTL);
-+	writel(ntb_ctl, mmio + AMD_CNTL_OFFSET);
- }
+ 		amd_ack_smu(ndev, status);
  
- static void amd_deinit_side_info(struct amd_ntb_dev *ndev)
- {
- 	void __iomem *mmio = ndev->self_mmio;
- 	unsigned int reg;
-+	u32 ntb_ctl;
+ 		/* link down */
+@@ -582,6 +587,7 @@ static void amd_handle_event(struct amd_ntb_dev *ndev, int vec)
+ 			dev_info(dev, "Wakeup is done.\n");
  
- 	reg = readl(mmio + AMD_SIDEINFO_OFFSET);
- 	if (reg & AMD_SIDE_READY) {
-@@ -946,6 +942,10 @@ static void amd_deinit_side_info(struct amd_ntb_dev *ndev)
- 		writel(reg, mmio + AMD_SIDEINFO_OFFSET);
- 		readl(mmio + AMD_SIDEINFO_OFFSET);
- 	}
-+
-+	ntb_ctl = readl(mmio + AMD_CNTL_OFFSET);
-+	ntb_ctl &= ~(PMM_REG_CTL | SMM_REG_CTL);
-+	writel(ntb_ctl, mmio + AMD_CNTL_OFFSET);
- }
+ 		ndev->peer_sta |= AMD_PEER_D0_EVENT;
++		ndev->peer_sta &= ~AMD_PEER_D3_EVENT;
+ 		amd_ack_smu(ndev, AMD_PEER_D0_EVENT);
  
- static int amd_init_ntb(struct amd_ntb_dev *ndev)
+ 		/* start a timer to poll link status */
 -- 
 2.17.1
 
