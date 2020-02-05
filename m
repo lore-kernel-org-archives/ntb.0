@@ -1,17 +1,17 @@
 Return-Path: <anath.amd@gmail.com>
-Received: from mail-pf1-x443.google.com (mail-pf1-x443.google.com. [2607:f8b0:4864:20::443])
-        by gmr-mx.google.com with ESMTPS id t18si9969otq.5.2020.02.05.07.55.09
+Received: from mail-pf1-x444.google.com (mail-pf1-x444.google.com. [2607:f8b0:4864:20::444])
+        by gmr-mx.google.com with ESMTPS id s131si6473ybc.0.2020.02.05.07.55.07
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 05 Feb 2020 07:55:09 -0800 (PST)
-Received: by mail-pf1-x443.google.com with SMTP id 84so1413936pfy.6
-        for <linux-ntb@googlegroups.com>; Wed, 05 Feb 2020 07:55:09 -0800 (PST)
+        Wed, 05 Feb 2020 07:55:07 -0800 (PST)
+Received: by mail-pf1-x444.google.com with SMTP id y73so1423316pfg.2
+        for <linux-ntb@googlegroups.com>; Wed, 05 Feb 2020 07:55:07 -0800 (PST)
 Return-Path: <anath.amd@gmail.com>
 Sender: Arindam Nath <anath.amd@gmail.com>
 From: Arindam Nath <arindam.nath@amd.com>
-Subject: [PATCH 07/15] NTB: remove handling of peer_sta from amd_link_is_up
-Date: Wed,  5 Feb 2020 21:24:24 +0530
-Message-Id: <7239c2cfca73382562ba8c6579e262b308143304.1580914232.git.arindam.nath@amd.com>
+Subject: [PATCH 06/15] NTB: set peer_sta within event handler itself
+Date: Wed,  5 Feb 2020 21:24:23 +0530
+Message-Id: <cb8fdfc226493dd9e80be514c201f92378608081.1580914232.git.arindam.nath@amd.com>
 In-Reply-To: <cover.1580914232.git.arindam.nath@amd.com>
 References: <cover.1580914232.git.arindam.nath@amd.com>
 In-Reply-To: <cover.1580914232.git.arindam.nath@amd.com>
@@ -20,37 +20,58 @@ To: Shyam Sundar S K <Shyam-sundar.S-k@amd.com>, Jon Mason <jdmason@kudzu.us>, D
 Cc: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Arindam Nath <arindam.nath@amd.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-amd_link_is_up() is a callback to inquire whether
-the NTB link is up or not. So it should not indulge
-itself into clearing the bitmasks of peer_sta.
+amd_ack_smu() should only set the corresponding
+bits into SMUACK register. Setting the bitmask
+of peer_sta should be done within the event handler.
+They are two different things, and so should be
+handled differently and at different places.
 
 Signed-off-by: Arindam Nath <arindam.nath@amd.com>
 ---
- drivers/ntb/hw/amd/ntb_hw_amd.c | 11 -----------
- 1 file changed, 11 deletions(-)
+ drivers/ntb/hw/amd/ntb_hw_amd.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.c b/drivers/ntb/hw/amd/ntb_hw_amd.c
-index b85af150f2c6..e964442ae2c3 100644
+index 84723420d70b..b85af150f2c6 100644
 --- a/drivers/ntb/hw/amd/ntb_hw_amd.c
 +++ b/drivers/ntb/hw/amd/ntb_hw_amd.c
-@@ -253,17 +253,6 @@ static int amd_link_is_up(struct amd_ntb_dev *ndev)
- 		return 1;
- 	}
- 
--	/* If peer_sta is reset or D0 event, the ISR has
--	 * started a timer to check link status of hardware.
--	 * So here just clear status bit. And if peer_sta is
--	 * D3 or PME_TO, D0/reset event will be happened when
--	 * system wakeup/poweron, so do nothing here.
--	 */
--	if (ndev->peer_sta & AMD_PEER_RESET_EVENT)
--		ndev->peer_sta &= ~AMD_PEER_RESET_EVENT;
--	else if (ndev->peer_sta & (AMD_PEER_D0_EVENT | AMD_LINK_DOWN_EVENT))
--		ndev->peer_sta = 0;
+@@ -541,8 +541,6 @@ static void amd_ack_smu(struct amd_ntb_dev *ndev, u32 bit)
+ 	reg = readl(mmio + AMD_SMUACK_OFFSET);
+ 	reg |= bit;
+ 	writel(reg, mmio + AMD_SMUACK_OFFSET);
 -
- 	return 0;
+-	ndev->peer_sta |= bit;
  }
  
+ static void amd_handle_event(struct amd_ntb_dev *ndev, int vec)
+@@ -560,9 +558,11 @@ static void amd_handle_event(struct amd_ntb_dev *ndev, int vec)
+ 	status &= AMD_EVENT_INTMASK;
+ 	switch (status) {
+ 	case AMD_PEER_FLUSH_EVENT:
++		ndev->peer_sta |= AMD_PEER_FLUSH_EVENT;
+ 		dev_info(dev, "Flush is done.\n");
+ 		break;
+ 	case AMD_PEER_RESET_EVENT:
++		ndev->peer_sta |= AMD_PEER_RESET_EVENT;
+ 		amd_ack_smu(ndev, AMD_PEER_RESET_EVENT);
+ 
+ 		/* link down first */
+@@ -575,6 +575,7 @@ static void amd_handle_event(struct amd_ntb_dev *ndev, int vec)
+ 	case AMD_PEER_PMETO_EVENT:
+ 	case AMD_LINK_UP_EVENT:
+ 	case AMD_LINK_DOWN_EVENT:
++		ndev->peer_sta |= status;
+ 		amd_ack_smu(ndev, status);
+ 
+ 		/* link down */
+@@ -588,6 +589,7 @@ static void amd_handle_event(struct amd_ntb_dev *ndev, int vec)
+ 		if (status & 0x1)
+ 			dev_info(dev, "Wakeup is done.\n");
+ 
++		ndev->peer_sta |= AMD_PEER_D0_EVENT;
+ 		amd_ack_smu(ndev, AMD_PEER_D0_EVENT);
+ 
+ 		/* start a timer to poll link status */
 -- 
 2.17.1
 
