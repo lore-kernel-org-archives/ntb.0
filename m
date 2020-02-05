@@ -1,17 +1,17 @@
 Return-Path: <anath.amd@gmail.com>
-Received: from mail-pf1-x442.google.com (mail-pf1-x442.google.com. [2607:f8b0:4864:20::442])
-        by gmr-mx.google.com with ESMTPS id w4si12312vse.2.2020.02.05.07.55.04
+Received: from mail-pg1-x543.google.com (mail-pg1-x543.google.com. [2607:f8b0:4864:20::543])
+        by gmr-mx.google.com with ESMTPS id z20si8186ill.5.2020.02.05.07.55.01
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 05 Feb 2020 07:55:04 -0800 (PST)
-Received: by mail-pf1-x442.google.com with SMTP id p14so1421018pfn.4
-        for <linux-ntb@googlegroups.com>; Wed, 05 Feb 2020 07:55:04 -0800 (PST)
+        Wed, 05 Feb 2020 07:55:01 -0800 (PST)
+Received: by mail-pg1-x543.google.com with SMTP id w21so1155489pgl.9
+        for <linux-ntb@googlegroups.com>; Wed, 05 Feb 2020 07:55:01 -0800 (PST)
 Return-Path: <anath.amd@gmail.com>
 Sender: Arindam Nath <anath.amd@gmail.com>
 From: Arindam Nath <arindam.nath@amd.com>
-Subject: [PATCH 05/15] NTB: return the side info status from amd_poll_link
-Date: Wed,  5 Feb 2020 21:24:22 +0530
-Message-Id: <a6bacf6fc59017acf02ba5c69c85da2192365a59.1580914232.git.arindam.nath@amd.com>
+Subject: [PATCH 04/15] NTB: define a new function to get link status
+Date: Wed,  5 Feb 2020 21:24:21 +0530
+Message-Id: <d775a8653d3f4550adfdbfaaf03c269ad2896273.1580914232.git.arindam.nath@amd.com>
 In-Reply-To: <cover.1580914232.git.arindam.nath@amd.com>
 References: <cover.1580914232.git.arindam.nath@amd.com>
 In-Reply-To: <cover.1580914232.git.arindam.nath@amd.com>
@@ -20,71 +20,133 @@ To: Shyam Sundar S K <Shyam-sundar.S-k@amd.com>, Jon Mason <jdmason@kudzu.us>, D
 Cc: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Arindam Nath <arindam.nath@amd.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Bit 1 of SIDE_INFO register is an indication that
-the driver on the other side of link is ready. We
-set this bit during driver initialization sequence.
-So rather than having separate macros to return the
-status, we can simply return the status of this bit
-from amd_poll_link(). So a return of 1 or 0 from
-this function will indicate to the caller whether
-the driver on the other side of link is ready or not,
-respectively.
+Since getting the status of link is a logically separate
+operation, we simply create a new function which will
+store the link status to be used later.
 
 Signed-off-by: Arindam Nath <arindam.nath@amd.com>
 ---
- drivers/ntb/hw/amd/ntb_hw_amd.c | 11 +++++------
- drivers/ntb/hw/amd/ntb_hw_amd.h |  2 --
- 2 files changed, 5 insertions(+), 8 deletions(-)
+ drivers/ntb/hw/amd/ntb_hw_amd.c | 93 ++++++++++++++++++---------------
+ 1 file changed, 50 insertions(+), 43 deletions(-)
 
 diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.c b/drivers/ntb/hw/amd/ntb_hw_amd.c
-index f50537e0917b..84723420d70b 100644
+index 111f33ff2bd7..f50537e0917b 100644
 --- a/drivers/ntb/hw/amd/ntb_hw_amd.c
 +++ b/drivers/ntb/hw/amd/ntb_hw_amd.c
-@@ -246,7 +246,7 @@ static int amd_ntb_get_link_status(struct amd_ntb_dev *ndev)
+@@ -195,6 +195,54 @@ static int amd_ntb_mw_set_trans(struct ntb_dev *ntb, int pidx, int idx,
+ 	return 0;
+ }
+ 
++static int amd_ntb_get_link_status(struct amd_ntb_dev *ndev)
++{
++	struct pci_dev *pdev = NULL;
++	struct pci_dev *pci_swds = NULL;
++	struct pci_dev *pci_swus = NULL;
++	u32 stat;
++	int rc;
++
++	if (ndev->ntb.topo == NTB_TOPO_SEC) {
++		/* Locate the pointer to Downstream Switch for this device */
++		pci_swds = pci_upstream_bridge(ndev->ntb.pdev);
++		if (pci_swds) {
++			/*
++			 * Locate the pointer to Upstream Switch for
++			 * the Downstream Switch.
++			 */
++			pci_swus = pci_upstream_bridge(pci_swds);
++			if (pci_swus) {
++				rc = pcie_capability_read_dword(pci_swus,
++								PCI_EXP_LNKCTL,
++								&stat);
++				if (rc)
++					return 0;
++			} else {
++				return 0;
++			}
++		} else {
++			return 0;
++		}
++	} else if (ndev->ntb.topo == NTB_TOPO_PRI) {
++		/*
++		 * For NTB primary, we simply read the Link Status and control
++		 * register of the NTB device itself.
++		 */
++		pdev = ndev->ntb.pdev;
++		rc = pcie_capability_read_dword(pdev, PCI_EXP_LNKCTL, &stat);
++		if (rc)
++			return 0;
++	} else {
++		/* Catch all for everything else */
++		return 0;
++	}
++
++	ndev->lnk_sta = stat;
++
++	return 1;
++}
++
  static int amd_link_is_up(struct amd_ntb_dev *ndev)
  {
  	if (!ndev->peer_sta)
--		return NTB_LNK_STA_ACTIVE(ndev->cntl_sta);
-+		return ndev->cntl_sta;
- 
- 	if (ndev->peer_sta & AMD_LINK_UP_EVENT) {
- 		ndev->peer_sta = 0;
-@@ -896,16 +896,15 @@ static int amd_poll_link(struct amd_ntb_dev *ndev)
- 	u32 reg;
+@@ -845,11 +893,7 @@ static inline void ndev_init_struct(struct amd_ntb_dev *ndev,
+ static int amd_poll_link(struct amd_ntb_dev *ndev)
+ {
+ 	void __iomem *mmio = ndev->peer_mmio;
+-	struct pci_dev *pdev = NULL;
+-	struct pci_dev *pci_swds = NULL;
+-	struct pci_dev *pci_swus = NULL;
+-	u32 reg, stat;
+-	int rc;
++	u32 reg;
  
  	reg = readl(mmio + AMD_SIDEINFO_OFFSET);
--	reg &= NTB_LIN_STA_ACTIVE_BIT;
-+	reg &= AMD_SIDE_READY;
+ 	reg &= NTB_LIN_STA_ACTIVE_BIT;
+@@ -861,44 +905,7 @@ static int amd_poll_link(struct amd_ntb_dev *ndev)
  
- 	dev_dbg(&ndev->ntb.pdev->dev, "%s: reg_val = 0x%x.\n", __func__, reg);
- 
--	if (reg == ndev->cntl_sta)
--		return 0;
--
  	ndev->cntl_sta = reg;
  
--	return amd_ntb_get_link_status(ndev);
-+	amd_ntb_get_link_status(ndev);
-+
-+	return ndev->cntl_sta;
+-	if (ndev->ntb.topo == NTB_TOPO_SEC) {
+-		/* Locate the pointer to Downstream Switch for this device */
+-		pci_swds = pci_upstream_bridge(ndev->ntb.pdev);
+-		if (pci_swds) {
+-			/*
+-			 * Locate the pointer to Upstream Switch for
+-			 * the Downstream Switch.
+-			 */
+-			pci_swus = pci_upstream_bridge(pci_swds);
+-			if (pci_swus) {
+-				rc = pcie_capability_read_dword(pci_swus,
+-								PCI_EXP_LNKCTL,
+-								&stat);
+-				if (rc)
+-					return 0;
+-			} else {
+-				return 0;
+-			}
+-		} else {
+-			return 0;
+-		}
+-	} else if (ndev->ntb.topo == NTB_TOPO_PRI) {
+-		/*
+-		 * For NTB primary, we simply read the Link Status and control
+-		 * register of the NTB device itself.
+-		 */
+-		pdev = ndev->ntb.pdev;
+-		rc = pcie_capability_read_dword(pdev, PCI_EXP_LNKCTL, &stat);
+-		if (rc)
+-			return 0;
+-	} else {
+-		/* Catch all for everything else */
+-		return 0;
+-	}
+-
+-	ndev->lnk_sta = stat;
+-
+-	return 1;
++	return amd_ntb_get_link_status(ndev);
  }
  
  static void amd_link_hb(struct work_struct *work)
-diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.h b/drivers/ntb/hw/amd/ntb_hw_amd.h
-index 39e5d18e12ff..156a4a92b803 100644
---- a/drivers/ntb/hw/amd/ntb_hw_amd.h
-+++ b/drivers/ntb/hw/amd/ntb_hw_amd.h
-@@ -53,10 +53,8 @@
- #include <linux/pci.h>
- 
- #define AMD_LINK_HB_TIMEOUT	msecs_to_jiffies(1000)
--#define NTB_LIN_STA_ACTIVE_BIT	0x00000002
- #define NTB_LNK_STA_SPEED_MASK	0x000F0000
- #define NTB_LNK_STA_WIDTH_MASK	0x03F00000
--#define NTB_LNK_STA_ACTIVE(x)	(!!((x) & NTB_LIN_STA_ACTIVE_BIT))
- #define NTB_LNK_STA_SPEED(x)	(((x) & NTB_LNK_STA_SPEED_MASK) >> 16)
- #define NTB_LNK_STA_WIDTH(x)	(((x) & NTB_LNK_STA_WIDTH_MASK) >> 20)
- 
 -- 
 2.17.1
 
