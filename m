@@ -1,17 +1,17 @@
 Return-Path: <anath.amd@gmail.com>
-Received: from mail-pf1-x442.google.com (mail-pf1-x442.google.com. [2607:f8b0:4864:20::442])
-        by gmr-mx.google.com with ESMTPS id h2si365770pju.2.2020.02.05.07.55.24
+Received: from mail-pg1-x542.google.com (mail-pg1-x542.google.com. [2607:f8b0:4864:20::542])
+        by gmr-mx.google.com with ESMTPS id h4si10766ilf.3.2020.02.05.07.55.21
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 05 Feb 2020 07:55:24 -0800 (PST)
-Received: by mail-pf1-x442.google.com with SMTP id 185so1418845pfv.3
-        for <linux-ntb@googlegroups.com>; Wed, 05 Feb 2020 07:55:24 -0800 (PST)
+        Wed, 05 Feb 2020 07:55:21 -0800 (PST)
+Received: by mail-pg1-x542.google.com with SMTP id g3so1149929pgs.11
+        for <linux-ntb@googlegroups.com>; Wed, 05 Feb 2020 07:55:21 -0800 (PST)
 Return-Path: <anath.amd@gmail.com>
 Sender: Arindam Nath <anath.amd@gmail.com>
 From: Arindam Nath <arindam.nath@amd.com>
-Subject: [PATCH 12/15] NTB: return link up status correctly for PRI and SEC
-Date: Wed,  5 Feb 2020 21:24:29 +0530
-Message-Id: <542aee58e6c78f240da80b3de84f8fa0b88ae6ad.1580914232.git.arindam.nath@amd.com>
+Subject: [PATCH 11/15] NTB: add helper functions to set and clear sideinfo
+Date: Wed,  5 Feb 2020 21:24:28 +0530
+Message-Id: <08593511a6c9c4a4ce937e2c92c08638c051c70f.1580914232.git.arindam.nath@amd.com>
 In-Reply-To: <cover.1580914232.git.arindam.nath@amd.com>
 References: <cover.1580914232.git.arindam.nath@amd.com>
 In-Reply-To: <cover.1580914232.git.arindam.nath@amd.com>
@@ -20,123 +20,103 @@ To: Shyam Sundar S K <Shyam-sundar.S-k@amd.com>, Jon Mason <jdmason@kudzu.us>, D
 Cc: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Arindam Nath <arindam.nath@amd.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Since NTB connects two physically separate systems,
-there can be scenarios where one system goes down
-while the other one remains active. In case of NTB
-primary, if the NTB secondary goes down, a Link-Down
-event is received. For the NTB secondary, if the
-NTB primary goes down, the PCIe hotplug mechanism
-ensures that the driver on the secondary side is also
-unloaded.
-
-But there are other scenarios to consider as well,
-when suppose the physical link remains active, but
-the driver on primary or secondary side is loaded
-or un-loaded.
-
-When the driver is loaded, on either side, it sets
-SIDE_READY bit(bit-1) of SIDE_INFO register. Similarly,
-when the driver is un-loaded, it resets the same bit.
-
-We consider the NTB link to be up and operational
-only when the driver on both sides of link are loaded
-and ready. But we also need to take account of
-Link Up and Down events which signify the physical
-link status. So amd_link_is_up() is modified to take
-care of the above scenarios.
+We define two new helper functions to set and clear
+sideinfo registers respectively. These functions
+take an additional boolean parameter which signifies
+whether we want to set/clear the sideinfo register
+of the peer(true) or local host(false).
 
 Signed-off-by: Arindam Nath <arindam.nath@amd.com>
 ---
- drivers/ntb/hw/amd/ntb_hw_amd.c | 64 ++++++++++++++++++++++++++++++---
- drivers/ntb/hw/amd/ntb_hw_amd.h |  1 +
- 2 files changed, 60 insertions(+), 5 deletions(-)
+ drivers/ntb/hw/amd/ntb_hw_amd.c | 44 +++++++++++++++++++++++++--------
+ drivers/ntb/hw/amd/ntb_hw_amd.h |  3 +++
+ 2 files changed, 37 insertions(+), 10 deletions(-)
 
 diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.c b/drivers/ntb/hw/amd/ntb_hw_amd.c
-index d4029d531466..8a9852343de6 100644
+index 621a69a0cff2..d4029d531466 100644
 --- a/drivers/ntb/hw/amd/ntb_hw_amd.c
 +++ b/drivers/ntb/hw/amd/ntb_hw_amd.c
-@@ -245,12 +245,66 @@ static int amd_ntb_get_link_status(struct amd_ntb_dev *ndev)
+@@ -913,28 +913,32 @@ static int amd_init_isr(struct amd_ntb_dev *ndev)
+ 	return ndev_init_isr(ndev, AMD_DB_CNT, AMD_MSIX_VECTOR_CNT);
+ }
  
- static int amd_link_is_up(struct amd_ntb_dev *ndev)
+-static void amd_init_side_info(struct amd_ntb_dev *ndev)
++static void amd_set_side_info_reg(struct amd_ntb_dev *ndev, bool peer)
  {
--	if (!ndev->peer_sta)
--		return ndev->cntl_sta;
-+	int ret;
+-	void __iomem *mmio = ndev->self_mmio;
++	void __iomem *mmio = NULL;
+ 	unsigned int reg;
+-	u32 ntb_ctl;
 +
-+	/*
-+	 * We consider the link to be up under two conditions:
-+	 *
-+	 *   - When a link-up event is received. This is indicated by
-+	 *     AMD_LINK_UP_EVENT set in peer_sta.
-+	 *   - When driver on both sides of the link have been loaded.
-+	 *     This is indicated by bit 1 being set in the peer
-+	 *     SIDEINFO register.
-+	 *
-+	 * This function should return 1 when the latter of the above
-+	 * two conditions is true.
-+	 *
-+	 * Now consider the sequence of events - Link-Up event occurs,
-+	 * then the peer side driver loads. In this case, we would have
-+	 * received LINK_UP event and bit 1 of peer SIDEINFO is also
-+	 * set. What happens now if the link goes down? Bit 1 of
-+	 * peer SIDEINFO remains set, but LINK_DOWN bit is set in
-+	 * peer_sta. So we should return 0 from this function. Not only
-+	 * that, we clear bit 1 of peer SIDEINFO to 0, since the peer
-+	 * side driver did not even get a chance to clear it before
-+	 * the link went down. This can be the case of surprise link
-+	 * removal.
-+	 *
-+	 * LINK_UP event will always occur before the peer side driver
-+	 * gets loaded the very first time. So there can be a case when
-+	 * the LINK_UP event has occurred, but the peer side driver hasn't
-+	 * yet loaded. We return 0 in that case.
-+	 *
-+	 * There is also a special case when the primary side driver is
-+	 * unloaded and then loaded again. Since there is no change in
-+	 * the status of NTB secondary in this case, there is no Link-Up
-+	 * or Link-Down notification received. We recognize this condition
-+	 * with peer_sta being set to 0.
-+	 *
-+	 * If bit 1 of peer SIDEINFO register is not set, then we
-+	 * simply return 0 irrespective of the link up or down status
-+	 * set in peer_sta.
-+	 */
-+	ret = amd_poll_link(ndev);
-+	if (ret) {
-+		/*
-+		 * We need to check the below only for NTB primary. For NTB
-+		 * secondary, simply checking the result of PSIDE_INFO
-+		 * register will suffice.
-+		 */
-+		if (ndev->ntb.topo == NTB_TOPO_PRI) {
-+			if ((ndev->peer_sta & AMD_LINK_UP_EVENT) ||
-+			    (ndev->peer_sta == 0))
-+				return ret;
-+			else if (ndev->peer_sta & AMD_LINK_DOWN_EVENT) {
-+				/* Clear peer sideinfo register */
-+				amd_clear_side_info_reg(ndev, true);
++	if (peer)
++		mmio = ndev->peer_mmio;
++	else
++		mmio = ndev->self_mmio;
  
--	if (ndev->peer_sta & AMD_LINK_UP_EVENT) {
--		ndev->peer_sta = 0;
--		return 1;
-+				return 0;
-+			}
-+		} else { /* NTB_TOPO_SEC */
-+			return ret;
-+		}
+ 	reg = readl(mmio + AMD_SIDEINFO_OFFSET);
+ 	if (!(reg & AMD_SIDE_READY)) {
+ 		reg |= AMD_SIDE_READY;
+ 		writel(reg, mmio + AMD_SIDEINFO_OFFSET);
  	}
+-
+-	ntb_ctl = readl(mmio + AMD_CNTL_OFFSET);
+-	ntb_ctl |= (PMM_REG_CTL | SMM_REG_CTL);
+-	writel(ntb_ctl, mmio + AMD_CNTL_OFFSET);
+ }
  
- 	return 0;
+-static void amd_deinit_side_info(struct amd_ntb_dev *ndev)
++static void amd_clear_side_info_reg(struct amd_ntb_dev *ndev, bool peer)
+ {
+-	void __iomem *mmio = ndev->self_mmio;
++	void __iomem *mmio = NULL;
+ 	unsigned int reg;
+-	u32 ntb_ctl;
++
++	if (peer)
++		mmio = ndev->peer_mmio;
++	else
++		mmio = ndev->self_mmio;
+ 
+ 	reg = readl(mmio + AMD_SIDEINFO_OFFSET);
+ 	if (reg & AMD_SIDE_READY) {
+@@ -942,6 +946,26 @@ static void amd_deinit_side_info(struct amd_ntb_dev *ndev)
+ 		writel(reg, mmio + AMD_SIDEINFO_OFFSET);
+ 		readl(mmio + AMD_SIDEINFO_OFFSET);
+ 	}
++}
++
++static void amd_init_side_info(struct amd_ntb_dev *ndev)
++{
++	void __iomem *mmio = ndev->self_mmio;
++	u32 ntb_ctl;
++
++	amd_set_side_info_reg(ndev, false);
++
++	ntb_ctl = readl(mmio + AMD_CNTL_OFFSET);
++	ntb_ctl |= (PMM_REG_CTL | SMM_REG_CTL);
++	writel(ntb_ctl, mmio + AMD_CNTL_OFFSET);
++}
++
++static void amd_deinit_side_info(struct amd_ntb_dev *ndev)
++{
++	void __iomem *mmio = ndev->self_mmio;
++	u32 ntb_ctl;
++
++	amd_clear_side_info_reg(ndev, false);
+ 
+ 	ntb_ctl = readl(mmio + AMD_CNTL_OFFSET);
+ 	ntb_ctl &= ~(PMM_REG_CTL | SMM_REG_CTL);
 diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.h b/drivers/ntb/hw/amd/ntb_hw_amd.h
-index 62ffdf35b683..73959c0b9972 100644
+index 156a4a92b803..62ffdf35b683 100644
 --- a/drivers/ntb/hw/amd/ntb_hw_amd.h
 +++ b/drivers/ntb/hw/amd/ntb_hw_amd.h
-@@ -217,5 +217,6 @@ struct amd_ntb_dev {
+@@ -215,4 +215,7 @@ struct amd_ntb_dev {
+ #define ntb_ndev(__ntb) container_of(__ntb, struct amd_ntb_dev, ntb)
+ #define hb_ndev(__work) container_of(__work, struct amd_ntb_dev, hb_timer.work)
  
- static void amd_set_side_info_reg(struct amd_ntb_dev *ndev, bool peer);
- static void amd_clear_side_info_reg(struct amd_ntb_dev *ndev, bool peer);
-+static int amd_poll_link(struct amd_ntb_dev *ndev);
- 
++static void amd_set_side_info_reg(struct amd_ntb_dev *ndev, bool peer);
++static void amd_clear_side_info_reg(struct amd_ntb_dev *ndev, bool peer);
++
  #endif
 -- 
 2.17.1
