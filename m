@@ -1,115 +1,71 @@
-Return-Path: <krzk@kernel.org>
-Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id i16si361616pju.1.2020.02.19.09.51.04
+Return-Path: <Arindam.Nath@amd.com>
+Received: from NAM12-BN8-obe.outbound.protection.outlook.com (mail-bn8nam12on20620.outbound.protection.outlook.com. [2a01:111:f400:fe5b::620])
+        by gmr-mx.google.com with ESMTPS id f3si350407pjw.0.2020.02.07.00.40.36
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 19 Feb 2020 09:51:04 -0800 (PST)
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Subject: [RESEND PATCH v2 0/9] iomap: Constify ioreadX() iomem argument
-Date: Wed, 19 Feb 2020 18:49:58 +0100
-Message-Id: <20200219175007.13627-1-krzk@kernel.org>
-To: Richard Henderson <rth@twiddle.net>, Ivan Kokshaysky <ink@jurassic.park.msu.ru>, Matt Turner <mattst88@gmail.com>, Alexey Brodkin <abrodkin@synopsys.com>, Vineet Gupta <vgupta@synopsys.com>, "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>, Helge Deller <deller@gmx.de>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, Yoshinori Sato <ysato@users.sourceforge.jp>, Rich Felker <dalias@libc.org>, Dave Airlie <airlied@redhat.com>, David Airlie <airlied@linux.ie>, Daniel Vetter <daniel@ffwll.ch>, Ben Skeggs <bskeggs@redhat.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, Jiri Slaby <jirislaby@gmail.com>, Nick Kossifidis <mickflemm@gmail.com>, Luis Chamberlain <mcgrof@kernel.org>, Kalle Valo <kvalo@codeaurora.org>, "David S. Miller" <davem@davemloft.net>, Dave Jiang <dave.jiang@intel.com>, Jon Mason <jdmason@kudzu.us>, Allen Hubbe <allenbh@gmail.com>, "Michael S. Tsirkin" <mst@redhat.com>, Jason Wang <jasowang@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Geert Uytterhoeven <geert+renesas@glider.be>, Andrew Morton <akpm@linux-foundation.org>, Thomas Gleixner <tglx@linutronix.de>, linux-alpha@vger.kernel.org, linux-kernel@vger.kernel.org, linux-snps-arc@lists.infradead.org, linux-parisc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-sh@vger.kernel.org, dri-devel@lists.freedesktop.org, nouveau@lists.freedesktop.org, linux-media@vger.kernel.org, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, linux-ntb@googlegroups.com, virtualization@lists.linux-foundation.org, linux-arch@vger.kernel.org
-Cc: Krzysztof Kozlowski <krzk@kernel.org>
+        Fri, 07 Feb 2020 00:40:36 -0800 (PST)
+From: "Nath, Arindam" <Arindam.Nath@amd.com>
+Subject: RE: [PATCH 3/4] ntb_perf: pass correct struct device to
+ dma_alloc_coherent
+Date: Fri, 7 Feb 2020 08:40:34 +0000
+Message-ID: 
+ <MN2PR12MB323292771789FEBE5EEFCD439C1C0@MN2PR12MB3232.namprd12.prod.outlook.com>
+References: <cover.1580921119.git.arindam.nath@amd.com>
+ <aa4e69feffab2fd3cd846569e0546c5cf8f8f6b4.1580921119.git.arindam.nath@amd.com>
+ <761e76e0-2e5e-6c71-3384-1ec10dcf8e88@deltatee.com>
+In-Reply-To: <761e76e0-2e5e-6c71-3384-1ec10dcf8e88@deltatee.com>
+Content-Language: en-US
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
+To: Logan Gunthorpe <logang@deltatee.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, "Mehta, Sanju" <Sanju.Mehta@amd.com>
+Cc: "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-ID: <linux-ntb.googlegroups.com>
 
-Hi,
-
-
-Changes since v1
-================
-https://lore.kernel.org/lkml/1578415992-24054-1-git-send-email-krzk@kernel.org/
-1. Constify also ioreadX_rep() and mmio_insX(),
-2. Squash lib+alpha+powerpc+parisc+sh into one patch for bisectability,
-3. Add acks and reviews,
-4. Re-order patches so all optional driver changes are at the end.
-
-
-Description
-===========
-The ioread8/16/32() and others have inconsistent interface among the
-architectures: some taking address as const, some not.
-
-It seems there is nothing really stopping all of them to take
-pointer to const.
-
-Patchset was only compile tested on affected architectures.  No real
-testing.
-
-
-volatile
-========
-There is still interface inconsistency between architectures around
-"volatile" qualifier:
- - include/asm-generic/io.h:static inline u32 ioread32(const volatile void __iomem *addr)
- - include/asm-generic/iomap.h:extern unsigned int ioread32(const void __iomem *);
-
-This is still discussed and out of scope of this patchset.
-
-
-Merging
-=======
-Multiple architectures are affected in first patch so acks are welcomed.
-
-1. All patches depend on first patch,
-2. Patches 2-4 unify the interface also in few drivers,
-3. PAtches 5-9 are optional cleanup, without actual impact.
-
-
-Best regards,
-Krzysztof
-
-
-Krzysztof Kozlowski (9):
-  iomap: Constify ioreadX() iomem argument (as in generic
-    implementation)
-  rtl818x: Constify ioreadX() iomem argument (as in generic
-    implementation)
-  ntb: intel: Constify ioreadX() iomem argument (as in generic
-    implementation)
-  virtio: pci: Constify ioreadX() iomem argument (as in generic
-    implementation)
-  arc: Constify ioreadX() iomem argument (as in generic implementation)
-  drm/mgag200: Constify ioreadX() iomem argument (as in generic
-    implementation)
-  drm/nouveau: Constify ioreadX() iomem argument (as in generic
-    implementation)
-  media: fsl-viu: Constify ioreadX() iomem argument (as in generic
-    implementation)
-  ath5k: Constify ioreadX() iomem argument (as in generic
-    implementation)
-
- arch/alpha/include/asm/core_apecs.h           |  6 +-
- arch/alpha/include/asm/core_cia.h             |  6 +-
- arch/alpha/include/asm/core_lca.h             |  6 +-
- arch/alpha/include/asm/core_marvel.h          |  4 +-
- arch/alpha/include/asm/core_mcpcia.h          |  6 +-
- arch/alpha/include/asm/core_t2.h              |  2 +-
- arch/alpha/include/asm/io.h                   | 12 ++--
- arch/alpha/include/asm/io_trivial.h           | 16 ++---
- arch/alpha/include/asm/jensen.h               |  2 +-
- arch/alpha/include/asm/machvec.h              |  6 +-
- arch/alpha/kernel/core_marvel.c               |  2 +-
- arch/alpha/kernel/io.c                        | 12 ++--
- arch/arc/plat-axs10x/axs10x.c                 |  4 +-
- arch/parisc/include/asm/io.h                  |  4 +-
- arch/parisc/lib/iomap.c                       | 72 +++++++++----------
- arch/powerpc/kernel/iomap.c                   | 28 ++++----
- arch/sh/kernel/iomap.c                        | 22 +++---
- drivers/gpu/drm/mgag200/mgag200_drv.h         |  4 +-
- drivers/gpu/drm/nouveau/nouveau_bo.c          |  2 +-
- drivers/media/platform/fsl-viu.c              |  2 +-
- drivers/net/wireless/ath/ath5k/ahb.c          | 10 +--
- .../realtek/rtl818x/rtl8180/rtl8180.h         |  6 +-
- drivers/ntb/hw/intel/ntb_hw_gen1.c            |  2 +-
- drivers/ntb/hw/intel/ntb_hw_gen3.h            |  2 +-
- drivers/ntb/hw/intel/ntb_hw_intel.h           |  2 +-
- drivers/virtio/virtio_pci_modern.c            |  6 +-
- include/asm-generic/iomap.h                   | 28 ++++----
- include/linux/io-64-nonatomic-hi-lo.h         |  4 +-
- include/linux/io-64-nonatomic-lo-hi.h         |  4 +-
- lib/iomap.c                                   | 30 ++++----
- 30 files changed, 156 insertions(+), 156 deletions(-)
-
--- 
-2.17.1
-
+W0FNRCBPZmZpY2lhbCBVc2UgT25seSAtIEludGVybmFsIERpc3RyaWJ1dGlvbiBPbmx5XQ0KDQo+
+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IExvZ2FuIEd1bnRob3JwZSA8bG9n
+YW5nQGRlbHRhdGVlLmNvbT4NCj4gU2VudDogVGh1cnNkYXksIEZlYnJ1YXJ5IDYsIDIwMjAgMDA6
+MTQNCj4gVG86IE5hdGgsIEFyaW5kYW0gPEFyaW5kYW0uTmF0aEBhbWQuY29tPjsgSm9uIE1hc29u
+DQo+IDxqZG1hc29uQGt1ZHp1LnVzPjsgRGF2ZSBKaWFuZyA8ZGF2ZS5qaWFuZ0BpbnRlbC5jb20+
+OyBBbGxlbiBIdWJiZQ0KPiA8YWxsZW5iaEBnbWFpbC5jb20+OyBNZWh0YSwgU2FuanUgPFNhbmp1
+Lk1laHRhQGFtZC5jb20+DQo+IENjOiBsaW51eC1udGJAZ29vZ2xlZ3JvdXBzLmNvbTsgbGludXgt
+a2VybmVsQHZnZXIua2VybmVsLm9yZw0KPiBTdWJqZWN0OiBSZTogW1BBVENIIDMvNF0gbnRiX3Bl
+cmY6IHBhc3MgY29ycmVjdCBzdHJ1Y3QgZGV2aWNlIHRvDQo+IGRtYV9hbGxvY19jb2hlcmVudA0K
+PiANCj4gDQo+IA0KPiBPbiAyMDIwLTAyLTA1IDEwOjE2IGEubS4sIEFyaW5kYW0gTmF0aCB3cm90
+ZToNCj4gPiBGcm9tOiBTYW5qYXkgUiBNZWh0YSA8c2FuanUubWVodGFAYW1kLmNvbT4NCj4gPg0K
+PiA+IEN1cnJlbnRseSwgbnRiLT5kZXYgaXMgcGFzc2VkIHRvIGRtYV9hbGxvY19jb2hlcmVudA0K
+PiA+IGFuZCBkbWFfZnJlZV9jb2hlcmVudCBjYWxscy4gVGhlIHJldHVybmVkIGRtYV9hZGRyX3QN
+Cj4gPiBpcyB0aGUgQ1BVIHBoeXNpY2FsIGFkZHJlc3MuIFRoaXMgd29ya3MgZmluZSBhcyBsb25n
+DQo+ID4gYXMgSU9NTVUgaXMgZGlzYWJsZWQuIEJ1dCB3aGVuIElPTU1VIGlzIGVuYWJsZWQsIHdl
+DQo+ID4gbmVlZCB0byBtYWtlIHN1cmUgdGhhdCBJT1ZBIGlzIHJldHVybmVkIGZvciBkbWFfYWRk
+cl90Lg0KPiA+IFNvIHRoZSBjb3JyZWN0IHdheSB0byBhY2hpZXZlIHRoaXMgaXMgYnkgY2hhbmdp
+bmcgdGhlDQo+ID4gZmlyc3QgcGFyYW1ldGVyIG9mIGRtYV9hbGxvY19jb2hlcmVudCgpIGFzIG50
+Yi0+cGRldi0+ZGV2DQo+ID4gaW5zdGVhZC4NCj4gPg0KPiA+IEZpeGVzOiA1NjQ4ZTU2ICgiTlRC
+OiBudGJfcGVyZjogQWRkIGZ1bGwgbXVsdGktcG9ydCBOVEIgQVBJIHN1cHBvcnQiKQ0KPiA+IFNp
+Z25lZC1vZmYtYnk6IFNhbmpheSBSIE1laHRhIDxzYW5qdS5tZWh0YUBhbWQuY29tPg0KPiA+IFNp
+Z25lZC1vZmYtYnk6IEFyaW5kYW0gTmF0aCA8YXJpbmRhbS5uYXRoQGFtZC5jb20+DQo+IA0KPiBV
+Z2gsIHRoaXMgaGFzIGJlZW4gZml4ZWQgcmVwZWF0ZWRseSBhbmQgaW5kZXBlbmRlbnRseSBieSBh
+IG51bWJlciBvZg0KPiBwZW9wbGUuIEkgc2VudCBhIGZpeFsxXSBpbiBtb3JlIHRoYW4gYSB5ZWFy
+IGFnbyBhbmQgU2FuamF5IHJlcGVhdGVkIHRoZQ0KPiBlZmZvcnQgYSBjb3VwbGUgbW9udGhzIGFn
+b1syXS4NCj4gDQo+IEkgaGF2ZSB0aGUgc2FtZSBmZWVkIGJhY2sgZm9yIHlvdSB0aGF0IEkgaGFk
+IGZvciBoaW06IG9uY2Ugd2UgZml4IHRoZQ0KPiBidWcgd2Ugc2hvdWxkIGFsc28gZ28gaW4gYW5k
+IHJlbW92ZSB0aGUgbm93IHVubmVjZXNzYXJ5DQo+IGRtYV9jb2VyY2VfbWFza19hbmRfY29oZXJl
+bnQoKSBjYWxscyBpbiB0aGUgZHJpdmVycyBhdCB0aGUgc2FtZSB0aW1lDQo+IHNlZWluZyBpdCBu
+byBsb25nZXIgbWFrZXMgYW55IHNlbnNlLiBNeSBwYXRjaCBkaWQgdGhpcyBhbHJlYWR5Lg0KDQpU
+aGFua3MgTG9nYW4uIEkgd2lsbCBpbmNsdWRlIHlvdXIgcGF0Y2hlcyBpbiBteSBuZXh0IHZlcnNp
+b24gb2YgdGhlIHNldCwNCmFuZCBtZW50aW9uIHlvdSBpbiB0aGUgIkZyb20iIHRhZy4NCg0KQXJp
+bmRhbQ0KDQo+IA0KPiBUaGFua3MsDQo+IA0KPiBMb2dhbg0KPiANCj4gWzFdDQo+IGh0dHBzOi8v
+bmFtMTEuc2FmZWxpbmtzLnByb3RlY3Rpb24ub3V0bG9vay5jb20vP3VybD1odHRwcyUzQSUyRiUy
+RmxvcmUuDQo+IGtlcm5lbC5vcmclMkZsa21sJTJGMjAxOTAxMDkxOTIyMzMuNTc1Mi0zLQ0KPiBs
+b2dhbmclNDBkZWx0YXRlZS5jb20lMkYmYW1wO2RhdGE9MDIlN0MwMSU3Q2FyaW5kYW0ubmF0aCU0
+MGFtZC4NCj4gY29tJTdDYWJjNzI5OGM4NmM1NGI4MmRiMWEwOGQ3YWE2YjY2YWElN0MzZGQ4OTYx
+ZmU0ODg0ZTYwOGUxMWE4Mg0KPiBkOTk0ZTE4M2QlN0MwJTdDMCU3QzYzNzE2NTI1MTAwNDE5Mzk2
+OSZhbXA7c2RhdGE9NTJET1RIcEtqc2VaanYNCj4gRTZqbVdXVlZMUUxlUmlheWtiVlRRaXBHUWJM
+VDAlM0QmYW1wO3Jlc2VydmVkPTANCj4gWzJdDQo+IGh0dHBzOi8vbmFtMTEuc2FmZWxpbmtzLnBy
+b3RlY3Rpb24ub3V0bG9vay5jb20vP3VybD1odHRwcyUzQSUyRiUyRmxvcmUuDQo+IGtlcm5lbC5v
+cmclMkZsa21sJTJGMTU3NTk4MzI1NS03MDM3Ny0xLWdpdC1zZW5kLWVtYWlsLQ0KPiBTYW5qdS5N
+ZWh0YSU0MGFtZC5jb20lMkYmYW1wO2RhdGE9MDIlN0MwMSU3Q2FyaW5kYW0ubmF0aCU0MGFtDQo+
+IGQuY29tJTdDYWJjNzI5OGM4NmM1NGI4MmRiMWEwOGQ3YWE2YjY2YWElN0MzZGQ4OTYxZmU0ODg0
+ZTYwOGUxMWENCj4gODJkOTk0ZTE4M2QlN0MwJTdDMCU3QzYzNzE2NTI1MTAwNDE5Mzk2OSZhbXA7
+c2RhdGE9UkZSJTJCTEZwNWENCj4gT04xTUE0RXJ4NHNvcUw5cExIYyUyQkxXVk51TFkwJTJCMHpj
+Ym8lM0QmYW1wO3Jlc2VydmVkPTANCg==
