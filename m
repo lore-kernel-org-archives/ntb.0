@@ -1,71 +1,56 @@
-Return-Path: <k.kozlowski.k@gmail.com>
-Received: from mail-ed1-f68.google.com (mail-ed1-f68.google.com. [209.85.208.68])
-        by gmr-mx.google.com with ESMTPS id i18si830392wrn.0.2020.02.24.04.47.49
+Return-Path: <jirislaby@gmail.com>
+Received: from mail-wm1-x344.google.com (mail-wm1-x344.google.com. [2a00:1450:4864:20::344])
+        by gmr-mx.google.com with ESMTPS id i15si176826wro.2.2020.02.20.01.48.37
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 24 Feb 2020 04:47:49 -0800 (PST)
-Received: by mail-ed1-f68.google.com with SMTP id m13so11742674edb.6
-        for <linux-ntb@googlegroups.com>; Mon, 24 Feb 2020 04:47:49 -0800 (PST)
-Return-Path: <k.kozlowski.k@gmail.com>
-Date: Mon, 24 Feb 2020 13:47:44 +0100
-From: Krzysztof Kozlowski <krzk@kernel.org>
+        Thu, 20 Feb 2020 01:48:37 -0800 (PST)
+Received: by mail-wm1-x344.google.com with SMTP id n3so1263010wmk.4
+        for <linux-ntb@googlegroups.com>; Thu, 20 Feb 2020 01:48:37 -0800 (PST)
+Return-Path: <jirislaby@gmail.com>
 Subject: Re: [RESEND PATCH v2 9/9] ath5k: Constify ioreadX() iomem argument
  (as in generic implementation)
-Message-ID: <20200224124744.GA1949@pi3>
 References: <20200219175007.13627-1-krzk@kernel.org>
  <20200219175007.13627-10-krzk@kernel.org>
- <518a9023-f802-17b3-fca5-582400bc34ae@gmail.com>
+From: Jiri Slaby <jirislaby@gmail.com>
+Message-ID: <518a9023-f802-17b3-fca5-582400bc34ae@gmail.com>
+Date: Thu, 20 Feb 2020 10:48:33 +0100
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-In-Reply-To: <518a9023-f802-17b3-fca5-582400bc34ae@gmail.com>
-To: Jiri Slaby <jirislaby@gmail.com>
-Cc: Richard Henderson <rth@twiddle.net>, Ivan Kokshaysky <ink@jurassic.park.msu.ru>, Matt Turner <mattst88@gmail.com>, Alexey Brodkin <abrodkin@synopsys.com>, Vineet Gupta <vgupta@synopsys.com>, "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>, Helge Deller <deller@gmx.de>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, Yoshinori Sato <ysato@users.sourceforge.jp>, Rich Felker <dalias@libc.org>, Dave Airlie <airlied@redhat.com>, David Airlie <airlied@linux.ie>, Daniel Vetter <daniel@ffwll.ch>, Ben Skeggs <bskeggs@redhat.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, Nick Kossifidis <mickflemm@gmail.com>, Luis Chamberlain <mcgrof@kernel.org>, Kalle Valo <kvalo@codeaurora.org>, "David S. Miller" <davem@davemloft.net>, Dave Jiang <dave.jiang@intel.com>, Jon Mason <jdmason@kudzu.us>, Allen Hubbe <allenbh@gmail.com>, "Michael S. Tsirkin" <mst@redhat.com>, Jason Wang <jasowang@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Geert Uytterhoeven <geert+renesas@glider.be>, Andrew Morton <akpm@linux-foundation.org>, Thomas Gleixner <tglx@linutronix.de>, linux-alpha@vger.kernel.org, linux-kernel@vger.kernel.org, linux-snps-arc@lists.infradead.org, linux-parisc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-sh@vger.kernel.org, dri-devel@lists.freedesktop.org, nouveau@lists.freedesktop.org, linux-media@vger.kernel.org, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, linux-ntb@googlegroups.com, virtualization@lists.linux-foundation.org, linux-arch@vger.kernel.org
+In-Reply-To: <20200219175007.13627-10-krzk@kernel.org>
+Content-Type: text/plain; charset=iso-8859-2
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+To: Krzysztof Kozlowski <krzk@kernel.org>, Richard Henderson <rth@twiddle.net>, Ivan Kokshaysky <ink@jurassic.park.msu.ru>, Matt Turner <mattst88@gmail.com>, Alexey Brodkin <abrodkin@synopsys.com>, Vineet Gupta <vgupta@synopsys.com>, "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>, Helge Deller <deller@gmx.de>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, Yoshinori Sato <ysato@users.sourceforge.jp>, Rich Felker <dalias@libc.org>, Dave Airlie <airlied@redhat.com>, David Airlie <airlied@linux.ie>, Daniel Vetter <daniel@ffwll.ch>, Ben Skeggs <bskeggs@redhat.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, Nick Kossifidis <mickflemm@gmail.com>, Luis Chamberlain <mcgrof@kernel.org>, Kalle Valo <kvalo@codeaurora.org>, "David S. Miller" <davem@davemloft.net>, Dave Jiang <dave.jiang@intel.com>, Jon Mason <jdmason@kudzu.us>, Allen Hubbe <allenbh@gmail.com>, "Michael S. Tsirkin" <mst@redhat.com>, Jason Wang <jasowang@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Geert Uytterhoeven <geert+renesas@glider.be>, Andrew Morton <akpm@linux-foundation.org>, Thomas Gleixner <tglx@linutronix.de>, linux-alpha@vger.kernel.org, linux-kernel@vger.kernel.org, linux-snps-arc@lists.infradead.org, linux-parisc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-sh@vger.kernel.org, dri-devel@lists.freedesktop.org, nouveau@lists.freedesktop.org, linux-media@vger.kernel.org, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, linux-ntb@googlegroups.com, virtualization@lists.linux-foundation.org, linux-arch@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-On Thu, Feb 20, 2020 at 10:48:33AM +0100, Jiri Slaby wrote:
-> On 19. 02. 20, 18:50, Krzysztof Kozlowski wrote:
-> > The ioreadX() helpers have inconsistent interface.  On some architectur=
-es
-> > void *__iomem address argument is a pointer to const, on some not.
-> >=20
-> > Implementations of ioreadX() do not modify the memory under the address
-> > so they can be converted to a "const" version for const-safety and
-> > consistency among architectures.
-> >=20
-> > Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
-> > Acked-by: Kalle Valo <kvalo@codeaurora.org>
-> > ---
-> >  drivers/net/wireless/ath/ath5k/ahb.c | 10 +++++-----
-> >  1 file changed, 5 insertions(+), 5 deletions(-)
-> >=20
-> > diff --git a/drivers/net/wireless/ath/ath5k/ahb.c b/drivers/net/wireles=
-s/ath/ath5k/ahb.c
-> > index 2c9cec8b53d9..8bd01df369fb 100644
-> > --- a/drivers/net/wireless/ath/ath5k/ahb.c
-> > +++ b/drivers/net/wireless/ath/ath5k/ahb.c
-> > @@ -138,18 +138,18 @@ static int ath_ahb_probe(struct platform_device *=
-pdev)
-> > =20
-> >  	if (bcfg->devid >=3D AR5K_SREV_AR2315_R6) {
-> >  		/* Enable WMAC AHB arbitration */
-> > -		reg =3D ioread32((void __iomem *) AR5K_AR2315_AHB_ARB_CTL);
-> > +		reg =3D ioread32((const void __iomem *) AR5K_AR2315_AHB_ARB_CTL);
->=20
-> While I understand why the parameter of ioread32 should be const, I
-> don't see a reason for these casts on the users' side. What does it
-> bring except longer code to read?
+On 19. 02. 20, 18:50, Krzysztof Kozlowski wrote:
+> The ioreadX() helpers have inconsistent interface.  On some architectures
+> void *__iomem address argument is a pointer to const, on some not.
+> 
+> Implementations of ioreadX() do not modify the memory under the address
+> so they can be converted to a "const" version for const-safety and
+> consistency among architectures.
+> 
+> Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
+> Acked-by: Kalle Valo <kvalo@codeaurora.org>
+> ---
+>  drivers/net/wireless/ath/ath5k/ahb.c | 10 +++++-----
+>  1 file changed, 5 insertions(+), 5 deletions(-)
+> 
+> diff --git a/drivers/net/wireless/ath/ath5k/ahb.c b/drivers/net/wireless/ath/ath5k/ahb.c
+> index 2c9cec8b53d9..8bd01df369fb 100644
+> --- a/drivers/net/wireless/ath/ath5k/ahb.c
+> +++ b/drivers/net/wireless/ath/ath5k/ahb.c
+> @@ -138,18 +138,18 @@ static int ath_ahb_probe(struct platform_device *pdev)
+>  
+>  	if (bcfg->devid >= AR5K_SREV_AR2315_R6) {
+>  		/* Enable WMAC AHB arbitration */
+> -		reg = ioread32((void __iomem *) AR5K_AR2315_AHB_ARB_CTL);
+> +		reg = ioread32((const void __iomem *) AR5K_AR2315_AHB_ARB_CTL);
 
-Because the argument is an int:
+While I understand why the parameter of ioread32 should be const, I
+don't see a reason for these casts on the users' side. What does it
+bring except longer code to read?
 
-drivers/net/wireless/ath/ath5k/ahb.c: In function =E2=80=98ath_ahb_probe=E2=
-=80=99:
-drivers/net/wireless/ath/ath5k/ahb.c:141:18: warning: passing argument 1 of=
- =E2=80=98ioread32=E2=80=99 makes pointer from integer without a cast [-Win=
-t-conversion]
-   reg =3D ioread32(AR5K_AR2315_AHB_ARB_CTL);
-
-Best regards,
-Krzysztof
-
+thanks,
+-- 
+js
