@@ -1,150 +1,94 @@
-Return-Path: <Arindam.Nath@amd.com>
-Received: from NAM10-BN7-obe.outbound.protection.outlook.com (mail-bn7nam10on2080.outbound.protection.outlook.com. [40.107.92.80])
-        by gmr-mx.google.com with ESMTPS id x13si279284ybs.4.2020.03.11.10.44.38
+Return-Path: <logang@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
+        by gmr-mx.google.com with ESMTPS id q1si8390pff.4.2020.03.10.14.31.13
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 11 Mar 2020 10:44:38 -0700 (PDT)
-From: "Nath, Arindam" <Arindam.Nath@amd.com>
-Subject: RE: [PATCH v2 1/5] ntb_perf: refactor code for CPU and DMA transfers
-Date: Wed, 11 Mar 2020 17:44:37 +0000
-Message-ID: 
- <MN2PR12MB3232C36B88F3667D89FFEA929CFC0@MN2PR12MB3232.namprd12.prod.outlook.com>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 10 Mar 2020 14:31:13 -0700 (PDT)
 References: <1583873694-19151-1-git-send-email-sanju.mehta@amd.com>
- <1583873694-19151-2-git-send-email-sanju.mehta@amd.com>
- <e700a5f6-1929-0d65-b204-c5bfde58f5f7@deltatee.com>
-In-Reply-To: <e700a5f6-1929-0d65-b204-c5bfde58f5f7@deltatee.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+ <1583873694-19151-3-git-send-email-sanju.mehta@amd.com>
+From: Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <3c350277-8fe6-04b2-673e-7d4c8fb6ce24@deltatee.com>
+Date: Tue, 10 Mar 2020 15:31:10 -0600
 MIME-Version: 1.0
-To: Logan Gunthorpe <logang@deltatee.com>, "Mehta, Sanju" <Sanju.Mehta@amd.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "dave.jiang@intel.com" <dave.jiang@intel.com>, "allenbh@gmail.com" <allenbh@gmail.com>, "S-k, Shyam-sundar" <Shyam-sundar.S-k@amd.com>
-Cc: "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+In-Reply-To: <1583873694-19151-3-git-send-email-sanju.mehta@amd.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-CA
+Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH v2 2/5] ntb_perf: send command in response to EAGAIN
+To: Sanjay R Mehta <sanju.mehta@amd.com>, jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com, arindam.nath@amd.com, Shyam-sundar.S-k@amd.com
+Cc: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBMb2dhbiBHdW50aG9ycGUgPGxv
-Z2FuZ0BkZWx0YXRlZS5jb20+DQo+IFNlbnQ6IFdlZG5lc2RheSwgTWFyY2ggMTEsIDIwMjAgMDI6
-NTENCj4gVG86IE1laHRhLCBTYW5qdSA8U2FuanUuTWVodGFAYW1kLmNvbT47IGpkbWFzb25Aa3Vk
-enUudXM7DQo+IGRhdmUuamlhbmdAaW50ZWwuY29tOyBhbGxlbmJoQGdtYWlsLmNvbTsgTmF0aCwg
-QXJpbmRhbQ0KPiA8QXJpbmRhbS5OYXRoQGFtZC5jb20+OyBTLWssIFNoeWFtLXN1bmRhciA8U2h5
-YW0tc3VuZGFyLlMtDQo+IGtAYW1kLmNvbT4NCj4gQ2M6IGxpbnV4LW50YkBnb29nbGVncm91cHMu
-Y29tOyBsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0gg
-djIgMS81XSBudGJfcGVyZjogcmVmYWN0b3IgY29kZSBmb3IgQ1BVIGFuZCBETUENCj4gdHJhbnNm
-ZXJzDQo+IA0KPiANCj4gDQo+IE9uIDIwMjAtMDMtMTAgMjo1NCBwLm0uLCBTYW5qYXkgUiBNZWh0
-YSB3cm90ZToNCj4gPiBGcm9tOiBBcmluZGFtIE5hdGggPGFyaW5kYW0ubmF0aEBhbWQuY29tPg0K
-PiA+DQo+ID4gVGhpcyBwYXRjaCBjcmVhdGVzIHNlcGFyYXRlIGZ1bmN0aW9uIHRvIGhhbmRsZSBD
-UFUNCj4gPiBhbmQgRE1BIHRyYW5zZmVycy4gU2luY2UgQ1BVIHRyYW5zZmVycyB1c2UgbWVtY29w
-eQ0KPiA+IGFuZCBETUEgdHJhbnNmZXJzIHVzZSBkbWFlbmdpbmUgQVBJcywgdGhlc2UgY2hhbmdl
-cw0KPiA+IG5vdCBvbmx5IGFsbG93IGxvZ2ljYWwgc2VwYXJhdGlvbiBiZXR3ZWVuIHRoZSB0d28s
-DQo+ID4gYnV0IGFsc28gYWxsb3dzIHNvbWVvbmUgdG8gY2xlYXJseSBzZWUgdGhlIGRpZmZlcmVu
-Y2UNCj4gPiBpbiB0aGUgd2F5IHRoZSB0d28gYXJlIGhhbmRsZWQuDQo+ID4NCj4gPiBJbiB0aGUg
-Y2FzZSBvZiBETUEsIHdlIERNQSBmcm9tIHN5c3RlbSBtZW1vcnkgdG8gdGhlDQo+ID4gbWVtb3J5
-IHdpbmRvdyhNVykgb2YgTlRCLCB3aGljaCBpcyBhIE1NSU8gcmVnaW9uLCB3ZQ0KPiA+IHNob3Vs
-ZCBub3QgdXNlIGRtYV9tYXBfcGFnZSgpIGZvciBtYXBwaW5nIE1XLiBUaGUNCj4gPiBjb3JyZWN0
-IHdheSB0byBtYXAgYSBNTUlPIHJlZ2lvbiBpcyB0byB1c2UNCj4gPiBkbWFfbWFwX3Jlc291cmNl
-KCksIHNvIHRoZSBjb2RlIGlzIG1vZGlmaWVkDQo+ID4gYWNjb3JkaW5nbHkuDQo+ID4NCj4gPiBk
-bWFfbWFwX3Jlc291cmNlKCkgZXhwZWN0cyBwaHlzaWNhbCBhZGRyZXNzIG9mIHRoZQ0KPiA+IHJl
-Z2lvbiB0byBiZSBtYXBwZWQgZm9yIERNQSwgd2UgYWRkIGEgbmV3IGZpZWxkLA0KPiA+IG91dGJ1
-Zl9waHlzX2FkZHIsIHRvIHN0cnVjdCBwZXJmX3BlZXIsIGFuZCBhbHNvDQo+ID4gYW5vdGhlciBm
-aWVsZCwgb3V0YnVmX2RtYV9hZGRyLCB0byBzdG9yZSB0aGUNCj4gPiBjb3JyZXNwb25kaW5nIG1h
-cHBlZCBhZGRyZXNzIHJldHVybmVkIGJ5IHRoZSBBUEkuDQo+ID4NCj4gPiBTaW5jZSB0aGUgTVcg
-aXMgY29udGlndW91cywgcmF0aGVyIHRoYW4gbWFwcGluZw0KPiA+IGNodW5rLWJ5LWNodW5rLCB3
-ZSBtYXAgdGhlIGVudGlyZSBNVyBiZWZvcmUgdGhlDQo+ID4gYWN0dWFsIERNQSB0cmFuc2ZlciBo
-YXBwZW5zLiBUaGVuIGZvciBlYWNoIGNodW5rLA0KPiA+IHdlIHNpbXBseSBwYXNzIG9mZnNldCBp
-bnRvIHRoZSBtYXBwZWQgcmVnaW9uIGFuZA0KPiA+IERNQSB0byB0aGF0IHJlZ2lvbi4gVGhlbiBs
-YXRlciwgd2UgdW5tYXAgdGhlIE1XDQo+ID4gZHVyaW5nIHBlcmZfY2xlYXJfdGVzdCgpLg0KPiA+
-DQo+ID4gVGhlIGFib3ZlIG1lYW5zIHRoYXQgbm93IHdlIG5lZWQgdG8gaGF2ZSBkaWZmZXJlbnQN
-Cj4gPiBmdW5jdGlvbiBwYXJhbWV0ZXJzIHRvIGRlYWwgd2l0aCBpbiB0aGUgY2FzZSBvZg0KPiA+
-IENQVSBhbmQgRE1BIHRyYW5zZmVycy4gSW4gdGhlIGNhc2Ugb2YgQ1BVIHRyYW5zZmVycywNCj4g
-PiB3ZSBzaW1wbHkgbmVlZCB0aGUgQ1BVIHZpcnR1YWwgYWRkcmVzc2VzIGZvciBtZW1jb3B5LA0K
-PiA+IGJ1dCBpbiB0aGUgY2FzZSBvZiBETUEsIHdlIG5lZWQgZG1hX2FkZHJfdCwgd2hpY2gNCj4g
-PiB3aWxsIGJlIGRpZmZlcmVudCBmcm9tIENQVSBwaHlzaWNhbCBhZGRyZXNzIGRlcGVuZGluZw0K
-PiA+IG9uIHdoZXRoZXIgSU9NTVUgaXMgZW5hYmxlZCBvciBub3QuIFRodXMgd2Ugbm93DQo+ID4g
-aGF2ZSB0d28gc2VwYXJhdGUgZnVuY3Rpb25zLCBwZXJmX2NvcHlfY2h1bmtfY3B1KCksDQo+ID4g
-YW5kIHBlcmZfY29weV9jaHVua19kbWEoKSB0byB0YWtlIGNhcmUgb2YgYWJvdmUNCj4gPiBjb25z
-aWRlcmF0aW9uLg0KPiA+DQo+ID4gU2lnbmVkLW9mZi1ieTogQXJpbmRhbSBOYXRoIDxhcmluZGFt
-Lm5hdGhAYW1kLmNvbT4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBTYW5qYXkgUiBNZWh0YSA8c2FuanUu
-bWVodGFAYW1kLmNvbT4NCj4gPiAtLS0NCj4gPiAgZHJpdmVycy9udGIvdGVzdC9udGJfcGVyZi5j
-IHwgMTQxDQo+ICsrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKy0tLS0tLS0tLS0tDQo+
-ID4gIDEgZmlsZSBjaGFuZ2VkLCAxMDUgaW5zZXJ0aW9ucygrKSwgMzYgZGVsZXRpb25zKC0pDQo+
-ID4NCj4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9udGIvdGVzdC9udGJfcGVyZi5jIGIvZHJpdmVy
-cy9udGIvdGVzdC9udGJfcGVyZi5jDQo+ID4gaW5kZXggZTliN2MyZC4uNmQxNjYyOCAxMDA2NDQN
-Cj4gPiAtLS0gYS9kcml2ZXJzL250Yi90ZXN0L250Yl9wZXJmLmMNCj4gPiArKysgYi9kcml2ZXJz
-L250Yi90ZXN0L250Yl9wZXJmLmMNCj4gPiBAQCAtMTQ5LDYgKzE0OSw4IEBAIHN0cnVjdCBwZXJm
-X3BlZXIgew0KPiA+ICAJdTY0IG91dGJ1Zl94bGF0Ow0KPiA+ICAJcmVzb3VyY2Vfc2l6ZV90IG91
-dGJ1Zl9zaXplOw0KPiA+ICAJdm9pZCBfX2lvbWVtICpvdXRidWY7DQo+ID4gKwlwaHlzX2FkZHJf
-dCBvdXRidWZfcGh5c19hZGRyOw0KPiA+ICsJZG1hX2FkZHJfdCBvdXRidWZfZG1hX2FkZHI7DQo+
-ID4NCj4gPiAgCS8qIEluYm91bmQgTVcgcGFyYW1zICovDQo+ID4gIAlkbWFfYWRkcl90IGluYnVm
-X3hsYXQ7DQo+ID4gQEAgLTc3NSwyNiArNzc3LDI0IEBAIHN0YXRpYyB2b2lkIHBlcmZfZG1hX2Nv
-cHlfY2FsbGJhY2sodm9pZCAqZGF0YSkNCj4gPiAgCXdha2VfdXAoJnB0aHItPmRtYV93YWl0KTsN
-Cj4gPiAgfQ0KPiA+DQo+ID4gLXN0YXRpYyBpbnQgcGVyZl9jb3B5X2NodW5rKHN0cnVjdCBwZXJm
-X3RocmVhZCAqcHRociwNCj4gPiAtCQkJICAgdm9pZCBfX2lvbWVtICpkc3QsIHZvaWQgKnNyYywg
-c2l6ZV90IGxlbikNCj4gPiArc3RhdGljIGludCBwZXJmX2NvcHlfY2h1bmtfY3B1KHN0cnVjdCBw
-ZXJmX3RocmVhZCAqcHRociwNCj4gPiArCQkJICAgICAgIHZvaWQgX19pb21lbSAqZHN0LCB2b2lk
-ICpzcmMsIHNpemVfdCBsZW4pDQo+ID4gK3sNCj4gPiArCW1lbWNweV90b2lvKGRzdCwgc3JjLCBs
-ZW4pOw0KPiA+ICsNCj4gPiArCXJldHVybiBsaWtlbHkoYXRvbWljX3JlYWQoJnB0aHItPnBlcmYt
-PnRzeW5jKSA+IDApID8gMCA6IC1FSU5UUjsNCj4gPiArfQ0KPiA+ICsNCj4gPiArc3RhdGljIGlu
-dCBwZXJmX2NvcHlfY2h1bmtfZG1hKHN0cnVjdCBwZXJmX3RocmVhZCAqcHRociwNCj4gPiArCQkJ
-ICAgICAgIGRtYV9hZGRyX3QgZHN0LCB2b2lkICpzcmMsIHNpemVfdCBsZW4pDQo+ID4gIHsNCj4g
-PiAgCXN0cnVjdCBkbWFfYXN5bmNfdHhfZGVzY3JpcHRvciAqdHg7DQo+ID4gIAlzdHJ1Y3QgZG1h
-ZW5naW5lX3VubWFwX2RhdGEgKnVubWFwOw0KPiA+ICAJc3RydWN0IGRldmljZSAqZG1hX2RldjsN
-Cj4gPiAgCWludCB0cnkgPSAwLCByZXQgPSAwOw0KPiA+DQo+ID4gLQlpZiAoIXVzZV9kbWEpIHsN
-Cj4gPiAtCQltZW1jcHlfdG9pbyhkc3QsIHNyYywgbGVuKTsNCj4gPiAtCQlnb3RvIHJldF9jaGVj
-a190c3luYzsNCj4gPiAtCX0NCj4gPiAtDQo+ID4gIAlkbWFfZGV2ID0gcHRoci0+ZG1hX2NoYW4t
-PmRldmljZS0+ZGV2Ow0KPiA+IC0NCj4gPiAtCWlmICghaXNfZG1hX2NvcHlfYWxpZ25lZChwdGhy
-LT5kbWFfY2hhbi0+ZGV2aWNlLA0KPiBvZmZzZXRfaW5fcGFnZShzcmMpLA0KPiA+IC0JCQkJIG9m
-ZnNldF9pbl9wYWdlKGRzdCksIGxlbikpDQo+ID4gLQkJcmV0dXJuIC1FSU87DQo+IA0KPiBDYW4g
-eW91IHBsZWFzZSBzcGxpdCB0aGlzIHBhdGNoIGludG8gbXVsdGlwbGUgcGF0Y2hlcz8gSXQgaXMg
-aGFyZCB0bw0KPiByZXZpZXcgYW5kIHBhcnQgb2YgdGhlIHJlYXNvbiB0aGlzIGNvZGUgaXMgc3Vj
-aCBhIG1lc3MgaXMgYmVjYXVzZSB3ZQ0KPiBtZXJnZWQgbGFyZ2UgcGF0Y2hlcyB3aXRoIGEgYnVu
-Y2ggb2YgZGlmZmVyZW50IGNoYW5nZXMgcm9sbGVkIGludG8gb25lLA0KPiBtYW55IG9mIHdoaWNo
-IGRpZG4ndCBnZXQgc3VmZmljaWVudCByZXZpZXdlciBhdHRlbnRpb24uDQo+IA0KPiBQYXRjaGVz
-IHRoYXQgcmVmYWN0b3IgdGhpbmdzIHNob3VsZG4ndCBiZSBtYWtpbmcgZnVuY3Rpb25hbCBjaGFu
-Z2VzDQo+IChsaWtlIGFkZGluZyBkbWFfbWFwX3Jlc291cmNlcygpKS4NCg0KV2Ugd2lsbCBzcGxp
-dCB0aGUgcGF0Y2ggaW50byBtdWx0aXBsZSBwYXRjaGVzIGluIHYyLg0KDQo+IA0KPiANCj4gPiAt
-c3RhdGljIGludCBwZXJmX3J1bl90ZXN0KHN0cnVjdCBwZXJmX3RocmVhZCAqcHRocikNCj4gPiAr
-c3RhdGljIGludCBwZXJmX3J1bl90ZXN0X2NwdShzdHJ1Y3QgcGVyZl90aHJlYWQgKnB0aHIpDQo+
-ID4gIHsNCj4gPiAgCXN0cnVjdCBwZXJmX3BlZXIgKnBlZXIgPSBwdGhyLT5wZXJmLT50ZXN0X3Bl
-ZXI7DQo+ID4gIAlzdHJ1Y3QgcGVyZl9jdHggKnBlcmYgPSBwdGhyLT5wZXJmOw0KPiA+IEBAIC05
-MTQsNyArOTAzLDcgQEAgc3RhdGljIGludCBwZXJmX3J1bl90ZXN0KHN0cnVjdCBwZXJmX3RocmVh
-ZCAqcHRocikNCj4gPg0KPiA+ICAJLyogQ29waWVkIGZpZWxkIGlzIGNsZWFyZWQgb24gdGVzdCBs
-YXVuY2ggc3RhZ2UgKi8NCj4gPiAgCXdoaWxlIChwdGhyLT5jb3BpZWQgPCB0b3RhbF9zaXplKSB7
-DQo+ID4gLQkJcmV0ID0gcGVyZl9jb3B5X2NodW5rKHB0aHIsIGZsdF9kc3QsIGZsdF9zcmMsIGNo
-dW5rX3NpemUpOw0KPiA+ICsJCXJldCA9IHBlcmZfY29weV9jaHVua19jcHUocHRociwgZmx0X2Rz
-dCwgZmx0X3NyYywNCj4gY2h1bmtfc2l6ZSk7DQo+ID4gIAkJaWYgKHJldCkgew0KPiA+ICAJCQlk
-ZXZfZXJyKCZwZXJmLT5udGItPmRldiwgIiVkOiBHb3QgZXJyb3IgJWQgb24NCj4gdGVzdFxuIiwN
-Cj4gPiAgCQkJCXB0aHItPnRpZHgsIHJldCk7DQo+ID4gQEAgLTkzNyw2ICs5MjYsNzQgQEAgc3Rh
-dGljIGludCBwZXJmX3J1bl90ZXN0KHN0cnVjdCBwZXJmX3RocmVhZCAqcHRocikNCj4gPiAgCXJl
-dHVybiAwOw0KPiA+ICB9DQo+ID4NCj4gPiArc3RhdGljIGludCBwZXJmX3J1bl90ZXN0X2RtYShz
-dHJ1Y3QgcGVyZl90aHJlYWQgKnB0aHIpDQo+ID4gK3sNCj4gPiArCXN0cnVjdCBwZXJmX3BlZXIg
-KnBlZXIgPSBwdGhyLT5wZXJmLT50ZXN0X3BlZXI7DQo+ID4gKwlzdHJ1Y3QgcGVyZl9jdHggKnBl
-cmYgPSBwdGhyLT5wZXJmOw0KPiA+ICsJc3RydWN0IGRldmljZSAqZG1hX2RldjsNCj4gPiArCWRt
-YV9hZGRyX3QgZmx0X2RzdCwgYm5kX2RzdDsNCj4gPiArCXU2NCB0b3RhbF9zaXplLCBjaHVua19z
-aXplOw0KPiA+ICsJdm9pZCAqZmx0X3NyYzsNCj4gPiArCWludCByZXQgPSAwOw0KPiA+ICsNCj4g
-PiArCXRvdGFsX3NpemUgPSAxVUxMIDw8IHRvdGFsX29yZGVyOw0KPiA+ICsJY2h1bmtfc2l6ZSA9
-IDFVTEwgPDwgY2h1bmtfb3JkZXI7DQo+ID4gKwljaHVua19zaXplID0gbWluX3QodTY0LCBwZWVy
-LT5vdXRidWZfc2l6ZSwgY2h1bmtfc2l6ZSk7DQo+ID4gKw0KPiA+ICsJLyogTWFwIE1XIGZvciBE
-TUEgKi8NCj4gPiArCWRtYV9kZXYgPSBwdGhyLT5kbWFfY2hhbi0+ZGV2aWNlLT5kZXY7DQo+ID4g
-KwlwZWVyLT5vdXRidWZfZG1hX2FkZHIgPSBkbWFfbWFwX3Jlc291cmNlKGRtYV9kZXYsDQo+ID4g
-KwkJCQkJCSBwZWVyLT5vdXRidWZfcGh5c19hZGRyLA0KPiA+ICsJCQkJCQkgcGVlci0+b3V0YnVm
-X3NpemUsDQo+ID4gKwkJCQkJCSBETUFfRlJPTV9ERVZJQ0UsIDApOw0KPiA+ICsJaWYgKGRtYV9t
-YXBwaW5nX2Vycm9yKGRtYV9kZXYsIHBlZXItPm91dGJ1Zl9kbWFfYWRkcikpIHsNCj4gPiArCQlk
-bWFfdW5tYXBfcmVzb3VyY2UoZG1hX2RldiwgcGVlci0+b3V0YnVmX2RtYV9hZGRyLA0KPiA+ICsJ
-CQkJICAgcGVlci0+b3V0YnVmX3NpemUsIERNQV9GUk9NX0RFVklDRSwNCj4gMCk7DQo+ID4gKwkJ
-cmV0dXJuIC1FSU87DQo+ID4gKwl9DQo+ID4gKw0KPiA+ICsJZmx0X3NyYyA9IHB0aHItPnNyYzsN
-Cj4gPiArCWJuZF9kc3QgPSBwZWVyLT5vdXRidWZfZG1hX2FkZHIgKyBwZWVyLT5vdXRidWZfc2l6
-ZTsNCj4gPiArCWZsdF9kc3QgPSBwZWVyLT5vdXRidWZfZG1hX2FkZHI7DQo+ID4gKw0KPiA+ICsJ
-cHRoci0+ZHVyYXRpb24gPSBrdGltZV9nZXQoKTsNCj4gPiArCS8qIENvcGllZCBmaWVsZCBpcyBj
-bGVhcmVkIG9uIHRlc3QgbGF1bmNoIHN0YWdlICovDQo+ID4gKwl3aGlsZSAocHRoci0+Y29waWVk
-IDwgdG90YWxfc2l6ZSkgew0KPiA+ICsJCXJldCA9IHBlcmZfY29weV9jaHVua19kbWEocHRociwg
-Zmx0X2RzdCwgZmx0X3NyYywNCj4gY2h1bmtfc2l6ZSk7DQo+ID4gKwkJaWYgKHJldCkgew0KPiA+
-ICsJCQlkZXZfZXJyKCZwZXJmLT5udGItPmRldiwgIiVkOiBHb3QgZXJyb3IgJWQgb24NCj4gdGVz
-dFxuIiwNCj4gPiArCQkJCXB0aHItPnRpZHgsIHJldCk7DQo+ID4gKwkJCXJldHVybiByZXQ7DQo+
-ID4gKwkJfQ0KPiA+ICsNCj4gDQo+IEhvbmVzdGx5LCB0aGlzIGRvZXNuJ3Qgc2VlbSBsaWtlIGEg
-Z29vZCBhcHByb2FjaCB0byBtZS4gRHVwbGljYXRpbmcgdGhlDQo+IG1ham9yaXR5IG9mIHRoZSBw
-ZXJmX3J1bl90ZXN0KCkgZnVuY3Rpb24gaXMgbWFraW5nIHRoZSBjb2RlIG1vcmUNCj4gY29tcGxp
-Y2F0ZWQgYW5kIGhhcmRlciB0byBtYWludGFpbi4NCj4gDQo+IFlvdSBzaG91bGQgYmUgYWJsZSB0
-byBqdXN0IHNlbGVjdGl2ZWx5IGNhbGwgZG1hX21hcF9yZXNvdXJjZXMoKSBpbg0KPiBwZXJmX3J1
-bl90ZXN0KCksIG9yIGV2ZW4gaW4gcGVyZl9zZXR1cF9wZWVyX213KCkgd2l0aG91dCBuZWVkaW5n
-IHRvIGFkZA0KPiBzbyBtdWNoIGV4dHJhIGR1cGxpY2F0ZSBjb2RlLg0KDQpXaWxsIGJlIHRha2Vu
-IGNhcmUgb2YgaW4gdjIuIFRoYW5rcyBmb3IgdGhlIHN1Z2dlc3Rpb25zLg0KDQpBcmluZGFtDQoN
-Cj4gDQo+IExvZ2FuDQo=
+
+
+On 2020-03-10 2:54 p.m., Sanjay R Mehta wrote:
+> From: Arindam Nath <arindam.nath@amd.com>
+> 
+> perf_spad_cmd_send() and perf_msg_cmd_send() return
+> -EAGAIN after trying to send commands for a maximum
+> of MSG_TRIES re-tries. But currently there is no
+> handling for this error. These functions are invoked
+> from perf_service_work() through function pointers,
+> so rather than simply call these functions is not
+> enough. We need to make sure to invoke them again in
+> case of -EAGAIN. Since peer status bits were cleared
+> before calling these functions, we set the same status
+> bits before queueing the work again for later invocation.
+> This way we simply won't go ahead and initialize the
+> XLAT registers wrongfully in case sending the very first
+> command itself fails.
+
+So what happens if there's an actual non-recoverable error that causes
+perf_msg_cmd_send() to fail? Are you proposing it just requeues high
+priority work forever?
+
+I never really reviewed this stuff properly but it looks like it has a
+bunch of problems. Using the high priority work queue for some low
+priority setup work seems wrong, at the very least. The spad and msg
+send loops also look like they have a bunch of inter-host race condition
+problems as well. Yikes.
+
+Logan
+
+
+
+> Signed-off-by: Arindam Nath <arindam.nath@amd.com>
+> Signed-off-by: Sanjay R Mehta <sanju.mehta@amd.com>
+> ---
+>  drivers/ntb/test/ntb_perf.c | 18 ++++++++++++++----
+>  1 file changed, 14 insertions(+), 4 deletions(-)
+> 
+> diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
+> index 6d16628..9068e42 100644
+> --- a/drivers/ntb/test/ntb_perf.c
+> +++ b/drivers/ntb/test/ntb_perf.c
+> @@ -625,14 +625,24 @@ static void perf_service_work(struct work_struct *work)
+>  {
+>  	struct perf_peer *peer = to_peer_service(work);
+>  
+> -	if (test_and_clear_bit(PERF_CMD_SSIZE, &peer->sts))
+> -		perf_cmd_send(peer, PERF_CMD_SSIZE, peer->outbuf_size);
+> +	if (test_and_clear_bit(PERF_CMD_SSIZE, &peer->sts)) {
+> +		if (perf_cmd_send(peer, PERF_CMD_SSIZE, peer->outbuf_size)
+> +		    == -EAGAIN) {
+> +			set_bit(PERF_CMD_SSIZE, &peer->sts);
+> +			(void)queue_work(system_highpri_wq, &peer->service);
+> +		}
+> +	}
+>  
+>  	if (test_and_clear_bit(PERF_CMD_RSIZE, &peer->sts))
+>  		perf_setup_inbuf(peer);
+>  
+> -	if (test_and_clear_bit(PERF_CMD_SXLAT, &peer->sts))
+> -		perf_cmd_send(peer, PERF_CMD_SXLAT, peer->inbuf_xlat);
+> +	if (test_and_clear_bit(PERF_CMD_SXLAT, &peer->sts)) {
+> +		if (perf_cmd_send(peer, PERF_CMD_SXLAT, peer->inbuf_xlat)
+> +		    == -EAGAIN) {
+> +			set_bit(PERF_CMD_SXLAT, &peer->sts);
+> +			(void)queue_work(system_highpri_wq, &peer->service);
+> +		}
+> +	}
+>  
+>  	if (test_and_clear_bit(PERF_CMD_RXLAT, &peer->sts))
+>  		perf_setup_outbuf(peer);
+> 
