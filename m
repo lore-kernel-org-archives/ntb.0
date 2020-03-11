@@ -1,105 +1,107 @@
-Return-Path: <logang@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [207.54.116.67])
-        by gmr-mx.google.com with ESMTPS id m18si138114qtn.5.2020.03.11.11.47.30
+Return-Path: <Arindam.Nath@amd.com>
+Received: from NAM12-BN8-obe.outbound.protection.outlook.com (mail-bn8nam12on2088.outbound.protection.outlook.com. [40.107.237.88])
+        by gmr-mx.google.com with ESMTPS id e26si139904qka.2.2020.03.11.11.11.08
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 11 Mar 2020 11:47:30 -0700 (PDT)
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 11 Mar 2020 11:11:08 -0700 (PDT)
+From: "Nath, Arindam" <Arindam.Nath@amd.com>
+Subject: RE: [PATCH v2 2/5] ntb_perf: send command in response to EAGAIN
+Date: Wed, 11 Mar 2020 18:11:06 +0000
+Message-ID: 
+ <MN2PR12MB3232AD3D784F07645D7115609CFC0@MN2PR12MB3232.namprd12.prod.outlook.com>
 References: <1583873694-19151-1-git-send-email-sanju.mehta@amd.com>
  <1583873694-19151-3-git-send-email-sanju.mehta@amd.com>
  <3c350277-8fe6-04b2-673e-7d4c8fb6ce24@deltatee.com>
- <MN2PR12MB3232AD3D784F07645D7115609CFC0@MN2PR12MB3232.namprd12.prod.outlook.com>
-From: Logan Gunthorpe <logang@deltatee.com>
-Message-ID: <214f3ef3-853d-6b0d-0fed-5bb6c1f1de1f@deltatee.com>
-Date: Wed, 11 Mar 2020 12:47:23 -0600
-MIME-Version: 1.0
-In-Reply-To: <MN2PR12MB3232AD3D784F07645D7115609CFC0@MN2PR12MB3232.namprd12.prod.outlook.com>
-Content-Type: text/plain; charset=utf-8
+In-Reply-To: <3c350277-8fe6-04b2-673e-7d4c8fb6ce24@deltatee.com>
 Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-Subject: Re: [PATCH v2 2/5] ntb_perf: send command in response to EAGAIN
-To: "Nath, Arindam" <Arindam.Nath@amd.com>, "Mehta, Sanju" <Sanju.Mehta@amd.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "dave.jiang@intel.com" <dave.jiang@intel.com>, "allenbh@gmail.com" <allenbh@gmail.com>, "S-k, Shyam-sundar" <Shyam-sundar.S-k@amd.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
+To: Logan Gunthorpe <logang@deltatee.com>, "Mehta, Sanju" <Sanju.Mehta@amd.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "dave.jiang@intel.com" <dave.jiang@intel.com>, "allenbh@gmail.com" <allenbh@gmail.com>, "S-k, Shyam-sundar" <Shyam-sundar.S-k@amd.com>
 Cc: "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-ID: <linux-ntb.googlegroups.com>
 
-
-
-On 2020-03-11 12:11 p.m., Nath, Arindam wrote:
->> -----Original Message-----
->> From: Logan Gunthorpe <logang@deltatee.com>
->> Sent: Wednesday, March 11, 2020 03:01
->> To: Mehta, Sanju <Sanju.Mehta@amd.com>; jdmason@kudzu.us;
->> dave.jiang@intel.com; allenbh@gmail.com; Nath, Arindam
->> <Arindam.Nath@amd.com>; S-k, Shyam-sundar <Shyam-sundar.S-
->> k@amd.com>
->> Cc: linux-ntb@googlegroups.com; linux-kernel@vger.kernel.org
->> Subject: Re: [PATCH v2 2/5] ntb_perf: send command in response to EAGAIN
->>
->>
->>
->> On 2020-03-10 2:54 p.m., Sanjay R Mehta wrote:
->>> From: Arindam Nath <arindam.nath@amd.com>
->>>
->>> perf_spad_cmd_send() and perf_msg_cmd_send() return
->>> -EAGAIN after trying to send commands for a maximum
->>> of MSG_TRIES re-tries. But currently there is no
->>> handling for this error. These functions are invoked
->>> from perf_service_work() through function pointers,
->>> so rather than simply call these functions is not
->>> enough. We need to make sure to invoke them again in
->>> case of -EAGAIN. Since peer status bits were cleared
->>> before calling these functions, we set the same status
->>> bits before queueing the work again for later invocation.
->>> This way we simply won't go ahead and initialize the
->>> XLAT registers wrongfully in case sending the very first
->>> command itself fails.
->>
->> So what happens if there's an actual non-recoverable error that causes
->> perf_msg_cmd_send() to fail? Are you proposing it just requeues high
->> priority work forever?
-> 
-> The intent of the patch is to handle -EAGAIN, since the error code is
-> an indication that we need to try again later. Currently there is a very
-> small time frame during which ntb_perf should be loaded on both sides
-> (primary and secondary) to have XLAT registers configured correctly.
-> Failing that the code will still fall through without properly initializing the
-> XLAT registers and there is no indication of that either until we have
-> actually tried to perform 'echo 0 > /sys/kernel/debug/.../run'.
-> 
-> With the changes proposed in this patch, we do not have to depend
-> on whether the drivers at both ends are loaded within a fixed time
-> duration. So we can simply load the driver at one side, and at a later
-> time load the driver on the other, and still the XLAT registers would
-> be set up correctly.
-> 
-> Looking at perf_spad_cmd_send() and perf_msg_cmd_send(), if the
-> concern is that ntb_peer_spad_read()/ntb_msg_read_sts() fail because
-> of some non-recoverable error and we still schedule a high priority
-> work, that is a valid concern. But isn't it still better than simply falling
-> through and initializing XLAT register with incorrect values?
-
-I don't think it's ever acceptable to get into an infinite loop.
-Especially when you're running on the system's high priority work queue...
-
-At the very least schedule a delayed work item to try again in some
-number of seconds or something. Essentially just have more retires,
-perhaps with longer delays in between.
-
-Falling through and continuing with the wrong values is certainly wrong.
-I didn't notice that. If an error occurs, it shouldn't continue, it
-should print an error to dmesg and stop.
-
-> 
->>
->> I never really reviewed this stuff properly but it looks like it has a
->> bunch of problems. Using the high priority work queue for some low
->> priority setup work seems wrong, at the very least. The spad and msg
->> send loops also look like they have a bunch of inter-host race condition
->> problems as well. Yikes.
-> 
-> I am not very sure what the design considerations were when having
-> a high priority work queue, but perhaps we can all have a discussion
-> on this.
-
-I'd change it. Seems completely wrong to me.
-
-Logan
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBMb2dhbiBHdW50aG9ycGUgPGxv
+Z2FuZ0BkZWx0YXRlZS5jb20+DQo+IFNlbnQ6IFdlZG5lc2RheSwgTWFyY2ggMTEsIDIwMjAgMDM6
+MDENCj4gVG86IE1laHRhLCBTYW5qdSA8U2FuanUuTWVodGFAYW1kLmNvbT47IGpkbWFzb25Aa3Vk
+enUudXM7DQo+IGRhdmUuamlhbmdAaW50ZWwuY29tOyBhbGxlbmJoQGdtYWlsLmNvbTsgTmF0aCwg
+QXJpbmRhbQ0KPiA8QXJpbmRhbS5OYXRoQGFtZC5jb20+OyBTLWssIFNoeWFtLXN1bmRhciA8U2h5
+YW0tc3VuZGFyLlMtDQo+IGtAYW1kLmNvbT4NCj4gQ2M6IGxpbnV4LW50YkBnb29nbGVncm91cHMu
+Y29tOyBsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0gg
+djIgMi81XSBudGJfcGVyZjogc2VuZCBjb21tYW5kIGluIHJlc3BvbnNlIHRvIEVBR0FJTg0KPiAN
+Cj4gDQo+IA0KPiBPbiAyMDIwLTAzLTEwIDI6NTQgcC5tLiwgU2FuamF5IFIgTWVodGEgd3JvdGU6
+DQo+ID4gRnJvbTogQXJpbmRhbSBOYXRoIDxhcmluZGFtLm5hdGhAYW1kLmNvbT4NCj4gPg0KPiA+
+IHBlcmZfc3BhZF9jbWRfc2VuZCgpIGFuZCBwZXJmX21zZ19jbWRfc2VuZCgpIHJldHVybg0KPiA+
+IC1FQUdBSU4gYWZ0ZXIgdHJ5aW5nIHRvIHNlbmQgY29tbWFuZHMgZm9yIGEgbWF4aW11bQ0KPiA+
+IG9mIE1TR19UUklFUyByZS10cmllcy4gQnV0IGN1cnJlbnRseSB0aGVyZSBpcyBubw0KPiA+IGhh
+bmRsaW5nIGZvciB0aGlzIGVycm9yLiBUaGVzZSBmdW5jdGlvbnMgYXJlIGludm9rZWQNCj4gPiBm
+cm9tIHBlcmZfc2VydmljZV93b3JrKCkgdGhyb3VnaCBmdW5jdGlvbiBwb2ludGVycywNCj4gPiBz
+byByYXRoZXIgdGhhbiBzaW1wbHkgY2FsbCB0aGVzZSBmdW5jdGlvbnMgaXMgbm90DQo+ID4gZW5v
+dWdoLiBXZSBuZWVkIHRvIG1ha2Ugc3VyZSB0byBpbnZva2UgdGhlbSBhZ2FpbiBpbg0KPiA+IGNh
+c2Ugb2YgLUVBR0FJTi4gU2luY2UgcGVlciBzdGF0dXMgYml0cyB3ZXJlIGNsZWFyZWQNCj4gPiBi
+ZWZvcmUgY2FsbGluZyB0aGVzZSBmdW5jdGlvbnMsIHdlIHNldCB0aGUgc2FtZSBzdGF0dXMNCj4g
+PiBiaXRzIGJlZm9yZSBxdWV1ZWluZyB0aGUgd29yayBhZ2FpbiBmb3IgbGF0ZXIgaW52b2NhdGlv
+bi4NCj4gPiBUaGlzIHdheSB3ZSBzaW1wbHkgd29uJ3QgZ28gYWhlYWQgYW5kIGluaXRpYWxpemUg
+dGhlDQo+ID4gWExBVCByZWdpc3RlcnMgd3JvbmdmdWxseSBpbiBjYXNlIHNlbmRpbmcgdGhlIHZl
+cnkgZmlyc3QNCj4gPiBjb21tYW5kIGl0c2VsZiBmYWlscy4NCj4gDQo+IFNvIHdoYXQgaGFwcGVu
+cyBpZiB0aGVyZSdzIGFuIGFjdHVhbCBub24tcmVjb3ZlcmFibGUgZXJyb3IgdGhhdCBjYXVzZXMN
+Cj4gcGVyZl9tc2dfY21kX3NlbmQoKSB0byBmYWlsPyBBcmUgeW91IHByb3Bvc2luZyBpdCBqdXN0
+IHJlcXVldWVzIGhpZ2gNCj4gcHJpb3JpdHkgd29yayBmb3JldmVyPw0KDQpUaGUgaW50ZW50IG9m
+IHRoZSBwYXRjaCBpcyB0byBoYW5kbGUgLUVBR0FJTiwgc2luY2UgdGhlIGVycm9yIGNvZGUgaXMN
+CmFuIGluZGljYXRpb24gdGhhdCB3ZSBuZWVkIHRvIHRyeSBhZ2FpbiBsYXRlci4gQ3VycmVudGx5
+IHRoZXJlIGlzIGEgdmVyeQ0Kc21hbGwgdGltZSBmcmFtZSBkdXJpbmcgd2hpY2ggbnRiX3BlcmYg
+c2hvdWxkIGJlIGxvYWRlZCBvbiBib3RoIHNpZGVzDQoocHJpbWFyeSBhbmQgc2Vjb25kYXJ5KSB0
+byBoYXZlIFhMQVQgcmVnaXN0ZXJzIGNvbmZpZ3VyZWQgY29ycmVjdGx5Lg0KRmFpbGluZyB0aGF0
+IHRoZSBjb2RlIHdpbGwgc3RpbGwgZmFsbCB0aHJvdWdoIHdpdGhvdXQgcHJvcGVybHkgaW5pdGlh
+bGl6aW5nIHRoZQ0KWExBVCByZWdpc3RlcnMgYW5kIHRoZXJlIGlzIG5vIGluZGljYXRpb24gb2Yg
+dGhhdCBlaXRoZXIgdW50aWwgd2UgaGF2ZQ0KYWN0dWFsbHkgdHJpZWQgdG8gcGVyZm9ybSAnZWNo
+byAwID4gL3N5cy9rZXJuZWwvZGVidWcvLi4uL3J1bicuDQoNCldpdGggdGhlIGNoYW5nZXMgcHJv
+cG9zZWQgaW4gdGhpcyBwYXRjaCwgd2UgZG8gbm90IGhhdmUgdG8gZGVwZW5kDQpvbiB3aGV0aGVy
+IHRoZSBkcml2ZXJzIGF0IGJvdGggZW5kcyBhcmUgbG9hZGVkIHdpdGhpbiBhIGZpeGVkIHRpbWUN
+CmR1cmF0aW9uLiBTbyB3ZSBjYW4gc2ltcGx5IGxvYWQgdGhlIGRyaXZlciBhdCBvbmUgc2lkZSwg
+YW5kIGF0IGEgbGF0ZXINCnRpbWUgbG9hZCB0aGUgZHJpdmVyIG9uIHRoZSBvdGhlciwgYW5kIHN0
+aWxsIHRoZSBYTEFUIHJlZ2lzdGVycyB3b3VsZA0KYmUgc2V0IHVwIGNvcnJlY3RseS4NCg0KTG9v
+a2luZyBhdCBwZXJmX3NwYWRfY21kX3NlbmQoKSBhbmQgcGVyZl9tc2dfY21kX3NlbmQoKSwgaWYg
+dGhlDQpjb25jZXJuIGlzIHRoYXQgbnRiX3BlZXJfc3BhZF9yZWFkKCkvbnRiX21zZ19yZWFkX3N0
+cygpIGZhaWwgYmVjYXVzZQ0Kb2Ygc29tZSBub24tcmVjb3ZlcmFibGUgZXJyb3IgYW5kIHdlIHN0
+aWxsIHNjaGVkdWxlIGEgaGlnaCBwcmlvcml0eQ0Kd29yaywgdGhhdCBpcyBhIHZhbGlkIGNvbmNl
+cm4uIEJ1dCBpc24ndCBpdCBzdGlsbCBiZXR0ZXIgdGhhbiBzaW1wbHkgZmFsbGluZw0KdGhyb3Vn
+aCBhbmQgaW5pdGlhbGl6aW5nIFhMQVQgcmVnaXN0ZXIgd2l0aCBpbmNvcnJlY3QgdmFsdWVzPw0K
+DQo+IA0KPiBJIG5ldmVyIHJlYWxseSByZXZpZXdlZCB0aGlzIHN0dWZmIHByb3Blcmx5IGJ1dCBp
+dCBsb29rcyBsaWtlIGl0IGhhcyBhDQo+IGJ1bmNoIG9mIHByb2JsZW1zLiBVc2luZyB0aGUgaGln
+aCBwcmlvcml0eSB3b3JrIHF1ZXVlIGZvciBzb21lIGxvdw0KPiBwcmlvcml0eSBzZXR1cCB3b3Jr
+IHNlZW1zIHdyb25nLCBhdCB0aGUgdmVyeSBsZWFzdC4gVGhlIHNwYWQgYW5kIG1zZw0KPiBzZW5k
+IGxvb3BzIGFsc28gbG9vayBsaWtlIHRoZXkgaGF2ZSBhIGJ1bmNoIG9mIGludGVyLWhvc3QgcmFj
+ZSBjb25kaXRpb24NCj4gcHJvYmxlbXMgYXMgd2VsbC4gWWlrZXMuDQoNCkkgYW0gbm90IHZlcnkg
+c3VyZSB3aGF0IHRoZSBkZXNpZ24gY29uc2lkZXJhdGlvbnMgd2VyZSB3aGVuIGhhdmluZw0KYSBo
+aWdoIHByaW9yaXR5IHdvcmsgcXVldWUsIGJ1dCBwZXJoYXBzIHdlIGNhbiBhbGwgaGF2ZSBhIGRp
+c2N1c3Npb24NCm9uIHRoaXMuDQoNCkFyaW5kYW0NCg0KPiANCj4gTG9nYW4NCj4gDQo+IA0KPiAN
+Cj4gPiBTaWduZWQtb2ZmLWJ5OiBBcmluZGFtIE5hdGggPGFyaW5kYW0ubmF0aEBhbWQuY29tPg0K
+PiA+IFNpZ25lZC1vZmYtYnk6IFNhbmpheSBSIE1laHRhIDxzYW5qdS5tZWh0YUBhbWQuY29tPg0K
+PiA+IC0tLQ0KPiA+ICBkcml2ZXJzL250Yi90ZXN0L250Yl9wZXJmLmMgfCAxOCArKysrKysrKysr
+KysrKy0tLS0NCj4gPiAgMSBmaWxlIGNoYW5nZWQsIDE0IGluc2VydGlvbnMoKyksIDQgZGVsZXRp
+b25zKC0pDQo+ID4NCj4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9udGIvdGVzdC9udGJfcGVyZi5j
+IGIvZHJpdmVycy9udGIvdGVzdC9udGJfcGVyZi5jDQo+ID4gaW5kZXggNmQxNjYyOC4uOTA2OGU0
+MiAxMDA2NDQNCj4gPiAtLS0gYS9kcml2ZXJzL250Yi90ZXN0L250Yl9wZXJmLmMNCj4gPiArKysg
+Yi9kcml2ZXJzL250Yi90ZXN0L250Yl9wZXJmLmMNCj4gPiBAQCAtNjI1LDE0ICs2MjUsMjQgQEAg
+c3RhdGljIHZvaWQgcGVyZl9zZXJ2aWNlX3dvcmsoc3RydWN0IHdvcmtfc3RydWN0DQo+ICp3b3Jr
+KQ0KPiA+ICB7DQo+ID4gIAlzdHJ1Y3QgcGVyZl9wZWVyICpwZWVyID0gdG9fcGVlcl9zZXJ2aWNl
+KHdvcmspOw0KPiA+DQo+ID4gLQlpZiAodGVzdF9hbmRfY2xlYXJfYml0KFBFUkZfQ01EX1NTSVpF
+LCAmcGVlci0+c3RzKSkNCj4gPiAtCQlwZXJmX2NtZF9zZW5kKHBlZXIsIFBFUkZfQ01EX1NTSVpF
+LCBwZWVyLQ0KPiA+b3V0YnVmX3NpemUpOw0KPiA+ICsJaWYgKHRlc3RfYW5kX2NsZWFyX2JpdChQ
+RVJGX0NNRF9TU0laRSwgJnBlZXItPnN0cykpIHsNCj4gPiArCQlpZiAocGVyZl9jbWRfc2VuZChw
+ZWVyLCBQRVJGX0NNRF9TU0laRSwgcGVlci0NCj4gPm91dGJ1Zl9zaXplKQ0KPiA+ICsJCSAgICA9
+PSAtRUFHQUlOKSB7DQo+ID4gKwkJCXNldF9iaXQoUEVSRl9DTURfU1NJWkUsICZwZWVyLT5zdHMp
+Ow0KPiA+ICsJCQkodm9pZClxdWV1ZV93b3JrKHN5c3RlbV9oaWdocHJpX3dxLCAmcGVlci0NCj4g
+PnNlcnZpY2UpOw0KPiA+ICsJCX0NCj4gPiArCX0NCj4gPg0KPiA+ICAJaWYgKHRlc3RfYW5kX2Ns
+ZWFyX2JpdChQRVJGX0NNRF9SU0laRSwgJnBlZXItPnN0cykpDQo+ID4gIAkJcGVyZl9zZXR1cF9p
+bmJ1ZihwZWVyKTsNCj4gPg0KPiA+IC0JaWYgKHRlc3RfYW5kX2NsZWFyX2JpdChQRVJGX0NNRF9T
+WExBVCwgJnBlZXItPnN0cykpDQo+ID4gLQkJcGVyZl9jbWRfc2VuZChwZWVyLCBQRVJGX0NNRF9T
+WExBVCwgcGVlci0+aW5idWZfeGxhdCk7DQo+ID4gKwlpZiAodGVzdF9hbmRfY2xlYXJfYml0KFBF
+UkZfQ01EX1NYTEFULCAmcGVlci0+c3RzKSkgew0KPiA+ICsJCWlmIChwZXJmX2NtZF9zZW5kKHBl
+ZXIsIFBFUkZfQ01EX1NYTEFULCBwZWVyLQ0KPiA+aW5idWZfeGxhdCkNCj4gPiArCQkgICAgPT0g
+LUVBR0FJTikgew0KPiA+ICsJCQlzZXRfYml0KFBFUkZfQ01EX1NYTEFULCAmcGVlci0+c3RzKTsN
+Cj4gPiArCQkJKHZvaWQpcXVldWVfd29yayhzeXN0ZW1faGlnaHByaV93cSwgJnBlZXItDQo+ID5z
+ZXJ2aWNlKTsNCj4gPiArCQl9DQo+ID4gKwl9DQo+ID4NCj4gPiAgCWlmICh0ZXN0X2FuZF9jbGVh
+cl9iaXQoUEVSRl9DTURfUlhMQVQsICZwZWVyLT5zdHMpKQ0KPiA+ICAJCXBlcmZfc2V0dXBfb3V0
+YnVmKHBlZXIpOw0KPiA+DQo=
