@@ -1,130 +1,104 @@
-Return-Path: <tiwai@suse.de>
-Received: from mx2.suse.de (mx2.suse.de. [195.135.220.15])
-        by gmr-mx.google.com with ESMTPS id h10si82584edn.1.2020.03.11.01.49.20
+Return-Path: <Arindam.Nath@amd.com>
+Received: from NAM12-DM6-obe.outbound.protection.outlook.com (mail-dm6nam12on2041.outbound.protection.outlook.com. [40.107.243.41])
+        by gmr-mx.google.com with ESMTPS id o11si204722otk.0.2020.03.11.11.58.48
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 11 Mar 2020 01:49:20 -0700 (PDT)
-From: Takashi Iwai <tiwai@suse.de>
-Subject: [PATCH] NTB: ntb_transport: Use scnprintf() for avoiding potential buffer overflow
-Date: Wed, 11 Mar 2020 09:49:17 +0100
-Message-Id: <20200311084917.18592-1-tiwai@suse.de>
-To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>
-Cc: linux-ntb@googlegroups.com
+        Wed, 11 Mar 2020 11:58:48 -0700 (PDT)
+From: "Nath, Arindam" <Arindam.Nath@amd.com>
+Subject: RE: [PATCH v2 2/5] ntb_perf: send command in response to EAGAIN
+Date: Wed, 11 Mar 2020 18:58:46 +0000
+Message-ID: 
+ <MN2PR12MB323290836319B3E7032D91369CFC0@MN2PR12MB3232.namprd12.prod.outlook.com>
+References: <1583873694-19151-1-git-send-email-sanju.mehta@amd.com>
+ <1583873694-19151-3-git-send-email-sanju.mehta@amd.com>
+ <3c350277-8fe6-04b2-673e-7d4c8fb6ce24@deltatee.com>
+ <MN2PR12MB3232AD3D784F07645D7115609CFC0@MN2PR12MB3232.namprd12.prod.outlook.com>
+ <214f3ef3-853d-6b0d-0fed-5bb6c1f1de1f@deltatee.com>
+In-Reply-To: <214f3ef3-853d-6b0d-0fed-5bb6c1f1de1f@deltatee.com>
+Content-Language: en-US
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
+To: Logan Gunthorpe <logang@deltatee.com>, "Mehta, Sanju" <Sanju.Mehta@amd.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "dave.jiang@intel.com" <dave.jiang@intel.com>, "allenbh@gmail.com" <allenbh@gmail.com>, "S-k, Shyam-sundar" <Shyam-sundar.S-k@amd.com>
+Cc: "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-ID: <linux-ntb.googlegroups.com>
 
-Since snprintf() returns the would-be-output size instead of the
-actual output size, the succeeding calls may go beyond the given
-buffer limit.  Fix it by replacing with scnprintf().
-
-Signed-off-by: Takashi Iwai <tiwai@suse.de>
----
- drivers/ntb/ntb_transport.c | 58 ++++++++++++++++++++++-----------------------
- 1 file changed, 29 insertions(+), 29 deletions(-)
-
-diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 00a5d5764993..e6d1f5b298f3 100644
---- a/drivers/ntb/ntb_transport.c
-+++ b/drivers/ntb/ntb_transport.c
-@@ -481,70 +481,70 @@ static ssize_t debugfs_read(struct file *filp, char __user *ubuf, size_t count,
- 		return -ENOMEM;
- 
- 	out_offset = 0;
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "\nNTB QP stats:\n\n");
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "rx_bytes - \t%llu\n", qp->rx_bytes);
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "rx_pkts - \t%llu\n", qp->rx_pkts);
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "rx_memcpy - \t%llu\n", qp->rx_memcpy);
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "rx_async - \t%llu\n", qp->rx_async);
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "rx_ring_empty - %llu\n", qp->rx_ring_empty);
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "rx_err_no_buf - %llu\n", qp->rx_err_no_buf);
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "rx_err_oflow - \t%llu\n", qp->rx_err_oflow);
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "rx_err_ver - \t%llu\n", qp->rx_err_ver);
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "rx_buff - \t0x%p\n", qp->rx_buff);
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "rx_index - \t%u\n", qp->rx_index);
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "rx_max_entry - \t%u\n", qp->rx_max_entry);
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "rx_alloc_entry - \t%u\n\n", qp->rx_alloc_entry);
- 
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "tx_bytes - \t%llu\n", qp->tx_bytes);
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "tx_pkts - \t%llu\n", qp->tx_pkts);
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "tx_memcpy - \t%llu\n", qp->tx_memcpy);
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "tx_async - \t%llu\n", qp->tx_async);
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "tx_ring_full - \t%llu\n", qp->tx_ring_full);
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "tx_err_no_buf - %llu\n", qp->tx_err_no_buf);
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "tx_mw - \t0x%p\n", qp->tx_mw);
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "tx_index (H) - \t%u\n", qp->tx_index);
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "RRI (T) - \t%u\n",
- 			       qp->remote_rx_info->entry);
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "tx_max_entry - \t%u\n", qp->tx_max_entry);
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "free tx - \t%u\n",
- 			       ntb_transport_tx_free_entry(qp));
- 
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "\n");
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "Using TX DMA - \t%s\n",
- 			       qp->tx_dma_chan ? "Yes" : "No");
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "Using RX DMA - \t%s\n",
- 			       qp->rx_dma_chan ? "Yes" : "No");
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "QP Link - \t%s\n",
- 			       qp->link_is_up ? "Up" : "Down");
--	out_offset += snprintf(buf + out_offset, out_count - out_offset,
-+	out_offset += scnprintf(buf + out_offset, out_count - out_offset,
- 			       "\n");
- 
- 	if (out_offset > out_count)
--- 
-2.16.4
-
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBMb2dhbiBHdW50aG9ycGUgPGxv
+Z2FuZ0BkZWx0YXRlZS5jb20+DQo+IFNlbnQ6IFRodXJzZGF5LCBNYXJjaCAxMiwgMjAyMCAwMDox
+Nw0KPiBUbzogTmF0aCwgQXJpbmRhbSA8QXJpbmRhbS5OYXRoQGFtZC5jb20+OyBNZWh0YSwgU2Fu
+anUNCj4gPFNhbmp1Lk1laHRhQGFtZC5jb20+OyBqZG1hc29uQGt1ZHp1LnVzOyBkYXZlLmppYW5n
+QGludGVsLmNvbTsNCj4gYWxsZW5iaEBnbWFpbC5jb207IFMtaywgU2h5YW0tc3VuZGFyIDxTaHlh
+bS1zdW5kYXIuUy1rQGFtZC5jb20+DQo+IENjOiBsaW51eC1udGJAZ29vZ2xlZ3JvdXBzLmNvbTsg
+bGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZw0KPiBTdWJqZWN0OiBSZTogW1BBVENIIHYyIDIv
+NV0gbnRiX3BlcmY6IHNlbmQgY29tbWFuZCBpbiByZXNwb25zZSB0byBFQUdBSU4NCj4gDQo+IA0K
+PiANCj4gT24gMjAyMC0wMy0xMSAxMjoxMSBwLm0uLCBOYXRoLCBBcmluZGFtIHdyb3RlOg0KPiA+
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiA+PiBGcm9tOiBMb2dhbiBHdW50aG9ycGUg
+PGxvZ2FuZ0BkZWx0YXRlZS5jb20+DQo+ID4+IFNlbnQ6IFdlZG5lc2RheSwgTWFyY2ggMTEsIDIw
+MjAgMDM6MDENCj4gPj4gVG86IE1laHRhLCBTYW5qdSA8U2FuanUuTWVodGFAYW1kLmNvbT47IGpk
+bWFzb25Aa3VkenUudXM7DQo+ID4+IGRhdmUuamlhbmdAaW50ZWwuY29tOyBhbGxlbmJoQGdtYWls
+LmNvbTsgTmF0aCwgQXJpbmRhbQ0KPiA+PiA8QXJpbmRhbS5OYXRoQGFtZC5jb20+OyBTLWssIFNo
+eWFtLXN1bmRhciA8U2h5YW0tc3VuZGFyLlMtDQo+ID4+IGtAYW1kLmNvbT4NCj4gPj4gQ2M6IGxp
+bnV4LW50YkBnb29nbGVncm91cHMuY29tOyBsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3JnDQo+
+ID4+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggdjIgMi81XSBudGJfcGVyZjogc2VuZCBjb21tYW5kIGlu
+IHJlc3BvbnNlIHRvDQo+IEVBR0FJTg0KPiA+Pg0KPiA+Pg0KPiA+Pg0KPiA+PiBPbiAyMDIwLTAz
+LTEwIDI6NTQgcC5tLiwgU2FuamF5IFIgTWVodGEgd3JvdGU6DQo+ID4+PiBGcm9tOiBBcmluZGFt
+IE5hdGggPGFyaW5kYW0ubmF0aEBhbWQuY29tPg0KPiA+Pj4NCj4gPj4+IHBlcmZfc3BhZF9jbWRf
+c2VuZCgpIGFuZCBwZXJmX21zZ19jbWRfc2VuZCgpIHJldHVybg0KPiA+Pj4gLUVBR0FJTiBhZnRl
+ciB0cnlpbmcgdG8gc2VuZCBjb21tYW5kcyBmb3IgYSBtYXhpbXVtDQo+ID4+PiBvZiBNU0dfVFJJ
+RVMgcmUtdHJpZXMuIEJ1dCBjdXJyZW50bHkgdGhlcmUgaXMgbm8NCj4gPj4+IGhhbmRsaW5nIGZv
+ciB0aGlzIGVycm9yLiBUaGVzZSBmdW5jdGlvbnMgYXJlIGludm9rZWQNCj4gPj4+IGZyb20gcGVy
+Zl9zZXJ2aWNlX3dvcmsoKSB0aHJvdWdoIGZ1bmN0aW9uIHBvaW50ZXJzLA0KPiA+Pj4gc28gcmF0
+aGVyIHRoYW4gc2ltcGx5IGNhbGwgdGhlc2UgZnVuY3Rpb25zIGlzIG5vdA0KPiA+Pj4gZW5vdWdo
+LiBXZSBuZWVkIHRvIG1ha2Ugc3VyZSB0byBpbnZva2UgdGhlbSBhZ2FpbiBpbg0KPiA+Pj4gY2Fz
+ZSBvZiAtRUFHQUlOLiBTaW5jZSBwZWVyIHN0YXR1cyBiaXRzIHdlcmUgY2xlYXJlZA0KPiA+Pj4g
+YmVmb3JlIGNhbGxpbmcgdGhlc2UgZnVuY3Rpb25zLCB3ZSBzZXQgdGhlIHNhbWUgc3RhdHVzDQo+
+ID4+PiBiaXRzIGJlZm9yZSBxdWV1ZWluZyB0aGUgd29yayBhZ2FpbiBmb3IgbGF0ZXIgaW52b2Nh
+dGlvbi4NCj4gPj4+IFRoaXMgd2F5IHdlIHNpbXBseSB3b24ndCBnbyBhaGVhZCBhbmQgaW5pdGlh
+bGl6ZSB0aGUNCj4gPj4+IFhMQVQgcmVnaXN0ZXJzIHdyb25nZnVsbHkgaW4gY2FzZSBzZW5kaW5n
+IHRoZSB2ZXJ5IGZpcnN0DQo+ID4+PiBjb21tYW5kIGl0c2VsZiBmYWlscy4NCj4gPj4NCj4gPj4g
+U28gd2hhdCBoYXBwZW5zIGlmIHRoZXJlJ3MgYW4gYWN0dWFsIG5vbi1yZWNvdmVyYWJsZSBlcnJv
+ciB0aGF0IGNhdXNlcw0KPiA+PiBwZXJmX21zZ19jbWRfc2VuZCgpIHRvIGZhaWw/IEFyZSB5b3Ug
+cHJvcG9zaW5nIGl0IGp1c3QgcmVxdWV1ZXMgaGlnaA0KPiA+PiBwcmlvcml0eSB3b3JrIGZvcmV2
+ZXI/DQo+ID4NCj4gPiBUaGUgaW50ZW50IG9mIHRoZSBwYXRjaCBpcyB0byBoYW5kbGUgLUVBR0FJ
+Tiwgc2luY2UgdGhlIGVycm9yIGNvZGUgaXMNCj4gPiBhbiBpbmRpY2F0aW9uIHRoYXQgd2UgbmVl
+ZCB0byB0cnkgYWdhaW4gbGF0ZXIuIEN1cnJlbnRseSB0aGVyZSBpcyBhIHZlcnkNCj4gPiBzbWFs
+bCB0aW1lIGZyYW1lIGR1cmluZyB3aGljaCBudGJfcGVyZiBzaG91bGQgYmUgbG9hZGVkIG9uIGJv
+dGggc2lkZXMNCj4gPiAocHJpbWFyeSBhbmQgc2Vjb25kYXJ5KSB0byBoYXZlIFhMQVQgcmVnaXN0
+ZXJzIGNvbmZpZ3VyZWQgY29ycmVjdGx5Lg0KPiA+IEZhaWxpbmcgdGhhdCB0aGUgY29kZSB3aWxs
+IHN0aWxsIGZhbGwgdGhyb3VnaCB3aXRob3V0IHByb3Blcmx5IGluaXRpYWxpemluZyB0aGUNCj4g
+PiBYTEFUIHJlZ2lzdGVycyBhbmQgdGhlcmUgaXMgbm8gaW5kaWNhdGlvbiBvZiB0aGF0IGVpdGhl
+ciB1bnRpbCB3ZSBoYXZlDQo+ID4gYWN0dWFsbHkgdHJpZWQgdG8gcGVyZm9ybSAnZWNobyAwID4g
+L3N5cy9rZXJuZWwvZGVidWcvLi4uL3J1bicuDQo+ID4NCj4gPiBXaXRoIHRoZSBjaGFuZ2VzIHBy
+b3Bvc2VkIGluIHRoaXMgcGF0Y2gsIHdlIGRvIG5vdCBoYXZlIHRvIGRlcGVuZA0KPiA+IG9uIHdo
+ZXRoZXIgdGhlIGRyaXZlcnMgYXQgYm90aCBlbmRzIGFyZSBsb2FkZWQgd2l0aGluIGEgZml4ZWQg
+dGltZQ0KPiA+IGR1cmF0aW9uLiBTbyB3ZSBjYW4gc2ltcGx5IGxvYWQgdGhlIGRyaXZlciBhdCBv
+bmUgc2lkZSwgYW5kIGF0IGEgbGF0ZXINCj4gPiB0aW1lIGxvYWQgdGhlIGRyaXZlciBvbiB0aGUg
+b3RoZXIsIGFuZCBzdGlsbCB0aGUgWExBVCByZWdpc3RlcnMgd291bGQNCj4gPiBiZSBzZXQgdXAg
+Y29ycmVjdGx5Lg0KPiA+DQo+ID4gTG9va2luZyBhdCBwZXJmX3NwYWRfY21kX3NlbmQoKSBhbmQg
+cGVyZl9tc2dfY21kX3NlbmQoKSwgaWYgdGhlDQo+ID4gY29uY2VybiBpcyB0aGF0IG50Yl9wZWVy
+X3NwYWRfcmVhZCgpL250Yl9tc2dfcmVhZF9zdHMoKSBmYWlsIGJlY2F1c2UNCj4gPiBvZiBzb21l
+IG5vbi1yZWNvdmVyYWJsZSBlcnJvciBhbmQgd2Ugc3RpbGwgc2NoZWR1bGUgYSBoaWdoIHByaW9y
+aXR5DQo+ID4gd29yaywgdGhhdCBpcyBhIHZhbGlkIGNvbmNlcm4uIEJ1dCBpc24ndCBpdCBzdGls
+bCBiZXR0ZXIgdGhhbiBzaW1wbHkgZmFsbGluZw0KPiA+IHRocm91Z2ggYW5kIGluaXRpYWxpemlu
+ZyBYTEFUIHJlZ2lzdGVyIHdpdGggaW5jb3JyZWN0IHZhbHVlcz8NCj4gDQo+IEkgZG9uJ3QgdGhp
+bmsgaXQncyBldmVyIGFjY2VwdGFibGUgdG8gZ2V0IGludG8gYW4gaW5maW5pdGUgbG9vcC4NCj4g
+RXNwZWNpYWxseSB3aGVuIHlvdSdyZSBydW5uaW5nIG9uIHRoZSBzeXN0ZW0ncyBoaWdoIHByaW9y
+aXR5IHdvcmsgcXVldWUuLi4NCj4gDQo+IEF0IHRoZSB2ZXJ5IGxlYXN0IHNjaGVkdWxlIGEgZGVs
+YXllZCB3b3JrIGl0ZW0gdG8gdHJ5IGFnYWluIGluIHNvbWUNCj4gbnVtYmVyIG9mIHNlY29uZHMg
+b3Igc29tZXRoaW5nLiBFc3NlbnRpYWxseSBqdXN0IGhhdmUgbW9yZSByZXRpcmVzLA0KPiBwZXJo
+YXBzIHdpdGggbG9uZ2VyIGRlbGF5cyBpbiBiZXR3ZWVuLg0KDQpTb3VuZHMgbGlrZSBhIGdvb2Qg
+aWRlYS4gVGhhbmtzIGZvciB0aGUgc3VnZ2VzdGlvbi4NCg0KQXJpbmRhbQ0KDQo+IA0KPiBGYWxs
+aW5nIHRocm91Z2ggYW5kIGNvbnRpbnVpbmcgd2l0aCB0aGUgd3JvbmcgdmFsdWVzIGlzIGNlcnRh
+aW5seSB3cm9uZy4NCj4gSSBkaWRuJ3Qgbm90aWNlIHRoYXQuIElmIGFuIGVycm9yIG9jY3Vycywg
+aXQgc2hvdWxkbid0IGNvbnRpbnVlLCBpdA0KPiBzaG91bGQgcHJpbnQgYW4gZXJyb3IgdG8gZG1l
+c2cgYW5kIHN0b3AuDQo+IA0KPiA+DQo+ID4+DQo+ID4+IEkgbmV2ZXIgcmVhbGx5IHJldmlld2Vk
+IHRoaXMgc3R1ZmYgcHJvcGVybHkgYnV0IGl0IGxvb2tzIGxpa2UgaXQgaGFzIGENCj4gPj4gYnVu
+Y2ggb2YgcHJvYmxlbXMuIFVzaW5nIHRoZSBoaWdoIHByaW9yaXR5IHdvcmsgcXVldWUgZm9yIHNv
+bWUgbG93DQo+ID4+IHByaW9yaXR5IHNldHVwIHdvcmsgc2VlbXMgd3JvbmcsIGF0IHRoZSB2ZXJ5
+IGxlYXN0LiBUaGUgc3BhZCBhbmQgbXNnDQo+ID4+IHNlbmQgbG9vcHMgYWxzbyBsb29rIGxpa2Ug
+dGhleSBoYXZlIGEgYnVuY2ggb2YgaW50ZXItaG9zdCByYWNlIGNvbmRpdGlvbg0KPiA+PiBwcm9i
+bGVtcyBhcyB3ZWxsLiBZaWtlcy4NCj4gPg0KPiA+IEkgYW0gbm90IHZlcnkgc3VyZSB3aGF0IHRo
+ZSBkZXNpZ24gY29uc2lkZXJhdGlvbnMgd2VyZSB3aGVuIGhhdmluZw0KPiA+IGEgaGlnaCBwcmlv
+cml0eSB3b3JrIHF1ZXVlLCBidXQgcGVyaGFwcyB3ZSBjYW4gYWxsIGhhdmUgYSBkaXNjdXNzaW9u
+DQo+ID4gb24gdGhpcy4NCj4gDQo+IEknZCBjaGFuZ2UgaXQuIFNlZW1zIGNvbXBsZXRlbHkgd3Jv
+bmcgdG8gbWUuDQo+IA0KPiBMb2dhbg0K
