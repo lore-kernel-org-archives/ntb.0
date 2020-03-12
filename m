@@ -1,40 +1,113 @@
-Return-Path: <k.kozlowski.k@gmail.com>
-Received: from mail-ed1-f65.google.com (mail-ed1-f65.google.com. [209.85.208.65])
-        by gmr-mx.google.com with ESMTPS id w6si542109lfa.1.2020.03.14.03.59.50
+Return-Path: <mpe@ellerman.id.au>
+Received: from ozlabs.org (bilbo.ozlabs.org. [203.11.71.1])
+        by gmr-mx.google.com with ESMTPS id l1si156735ybt.2.2020.03.12.03.56.07
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 14 Mar 2020 03:59:50 -0700 (PDT)
-Received: by mail-ed1-f65.google.com with SMTP id v6so130265edw.8
-        for <linux-ntb@googlegroups.com>; Sat, 14 Mar 2020 03:59:50 -0700 (PDT)
-Return-Path: <k.kozlowski.k@gmail.com>
-Date: Sat, 14 Mar 2020 11:59:44 +0100
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Subject: Re: [RESEND PATCH v2 6/9] drm/mgag200: Constify ioreadX() iomem
- argument (as in generic implementation)
-Message-ID: <20200314105944.GA16044@kozik-lap>
-References: <20200219175007.13627-1-krzk@kernel.org>
- <20200219175007.13627-7-krzk@kernel.org>
- <90baef2d-25fe-fac4-6a7e-b103b4b6721e@suse.de>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 12 Mar 2020 03:56:07 -0700 (PDT)
+From: Michael Ellerman <mpe@ellerman.id.au>
+Subject: Re: [RESEND PATCH v2 1/9] iomap: Constify ioreadX() iomem argument (as in generic implementation)
+In-Reply-To: <20200219175007.13627-2-krzk@kernel.org>
+References: <20200219175007.13627-1-krzk@kernel.org> <20200219175007.13627-2-krzk@kernel.org>
+Date: Thu, 12 Mar 2020 21:55:44 +1100
+Message-ID: <87ftedj0zz.fsf@mpe.ellerman.id.au>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <90baef2d-25fe-fac4-6a7e-b103b4b6721e@suse.de>
-To: Thomas Zimmermann <tzimmermann@suse.de>
-Cc: Richard Henderson <rth@twiddle.net>, Ivan Kokshaysky <ink@jurassic.park.msu.ru>, Matt Turner <mattst88@gmail.com>, Alexey Brodkin <abrodkin@synopsys.com>, Vineet Gupta <vgupta@synopsys.com>, "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>, Helge Deller <deller@gmx.de>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, Yoshinori Sato <ysato@users.sourceforge.jp>, Rich Felker <dalias@libc.org>, Dave Airlie <airlied@redhat.com>, David Airlie <airlied@linux.ie>, Daniel Vetter <daniel@ffwll.ch>, Ben Skeggs <bskeggs@redhat.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, Jiri Slaby <jirislaby@gmail.com>, Nick Kossifidis <mickflemm@gmail.com>, Luis Chamberlain <mcgrof@kernel.org>, Kalle Valo <kvalo@codeaurora.org>, "David S. Miller" <davem@davemloft.net>, Dave Jiang <dave.jiang@intel.com>, Jon Mason <jdmason@kudzu.us>, Allen Hubbe <allenbh@gmail.com>, "Michael S. Tsirkin" <mst@redhat.com>, Jason Wang <jasowang@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Geert Uytterhoeven <geert+renesas@glider.be>, Andrew Morton <akpm@linux-foundation.org>, Thomas Gleixner <tglx@linutronix.de>, linux-alpha@vger.kernel.org, linux-kernel@vger.kernel.org, linux-snps-arc@lists.infradead.org, linux-parisc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-sh@vger.kernel.org, dri-devel@lists.freedesktop.org, nouveau@lists.freedesktop.org, linux-media@vger.kernel.org, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, linux-ntb@googlegroups.com, virtualization@lists.linux-foundation.org, linux-arch@vger.kernel.org
+Content-Type: text/plain
+To: Krzysztof Kozlowski <krzk@kernel.org>, Richard Henderson <rth@twiddle.net>, Ivan Kokshaysky <ink@jurassic.park.msu.ru>, Matt Turner <mattst88@gmail.com>, Alexey Brodkin <abrodkin@synopsys.com>, Vineet Gupta <vgupta@synopsys.com>, "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>, Helge Deller <deller@gmx.de>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Yoshinori Sato <ysato@users.sourceforge.jp>, Rich Felker <dalias@libc.org>, Dave Airlie <airlied@redhat.com>, David Airlie <airlied@linux.ie>, Daniel Vetter <daniel@ffwll.ch>, Ben Skeggs <bskeggs@redhat.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, Jiri Slaby <jirislaby@gmail.com>, Nick Kossifidis <mickflemm@gmail.com>, Luis Chamberlain <mcgrof@kernel.org>, Kalle Valo <kvalo@codeaurora.org>, "David
+ S. Miller" <davem@davemloft.net>, Dave Jiang <dave.jiang@intel.com>, Jon Mason <jdmason@kudzu.us>, Allen Hubbe <allenbh@gmail.com>, "Michael S.
+ Tsirkin" <mst@redhat.com>, Jason Wang <jasowang@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Geert Uytterhoeven <geert+renesas@glider.be>, Andrew Morton <akpm@linux-foundation.org>, Thomas Gleixner <tglx@linutronix.de>, linux-alpha@vger.kernel.org, linux-kernel@vger.kernel.org, linux-snps-arc@lists.infradead.org, linux-parisc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-sh@vger.kernel.org, dri-devel@lists.freedesktop.org, nouveau@lists.freedesktop.org, linux-media@vger.kernel.org, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, linux-ntb@googlegroups.com, virtualization@lists.linux-foundation.org, linux-arch@vger.kernel.org
+Cc: Krzysztof Kozlowski <krzk@kernel.org>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Thu, Mar 12, 2020 at 11:49:05AM +0100, Thomas Zimmermann wrote:
-> Hi Krzysztof,
-> 
-> I just received a resend email from 3 weeks ago :/
-> 
-> Do you want me to merge the mgag200 patch into drm-misc-next?
+Krzysztof Kozlowski <krzk@kernel.org> writes:
+> diff --git a/arch/powerpc/kernel/iomap.c b/arch/powerpc/kernel/iomap.c
+> index 5ac84efc6ede..9fe4fb3b08aa 100644
+> --- a/arch/powerpc/kernel/iomap.c
+> +++ b/arch/powerpc/kernel/iomap.c
+> @@ -15,23 +15,23 @@
+>   * Here comes the ppc64 implementation of the IOMAP 
+>   * interfaces.
+>   */
+> -unsigned int ioread8(void __iomem *addr)
+> +unsigned int ioread8(const void __iomem *addr)
+>  {
+>  	return readb(addr);
+>  }
+> -unsigned int ioread16(void __iomem *addr)
+> +unsigned int ioread16(const void __iomem *addr)
+>  {
+>  	return readw(addr);
+>  }
+> -unsigned int ioread16be(void __iomem *addr)
+> +unsigned int ioread16be(const void __iomem *addr)
+>  {
+>  	return readw_be(addr);
+>  }
+> -unsigned int ioread32(void __iomem *addr)
+> +unsigned int ioread32(const void __iomem *addr)
+>  {
+>  	return readl(addr);
+>  }
+> -unsigned int ioread32be(void __iomem *addr)
+> +unsigned int ioread32be(const void __iomem *addr)
+>  {
+>  	return readl_be(addr);
+>  }
+> @@ -41,27 +41,27 @@ EXPORT_SYMBOL(ioread16be);
+>  EXPORT_SYMBOL(ioread32);
+>  EXPORT_SYMBOL(ioread32be);
+>  #ifdef __powerpc64__
+> -u64 ioread64(void __iomem *addr)
+> +u64 ioread64(const void __iomem *addr)
+>  {
+>  	return readq(addr);
+>  }
+> -u64 ioread64_lo_hi(void __iomem *addr)
+> +u64 ioread64_lo_hi(const void __iomem *addr)
+>  {
+>  	return readq(addr);
+>  }
+> -u64 ioread64_hi_lo(void __iomem *addr)
+> +u64 ioread64_hi_lo(const void __iomem *addr)
+>  {
+>  	return readq(addr);
+>  }
+> -u64 ioread64be(void __iomem *addr)
+> +u64 ioread64be(const void __iomem *addr)
+>  {
+>  	return readq_be(addr);
+>  }
+> -u64 ioread64be_lo_hi(void __iomem *addr)
+> +u64 ioread64be_lo_hi(const void __iomem *addr)
+>  {
+>  	return readq_be(addr);
+>  }
+> -u64 ioread64be_hi_lo(void __iomem *addr)
+> +u64 ioread64be_hi_lo(const void __iomem *addr)
+>  {
+>  	return readq_be(addr);
+>  }
+> @@ -139,15 +139,15 @@ EXPORT_SYMBOL(iowrite64be_hi_lo);
+>   * FIXME! We could make these do EEH handling if we really
+>   * wanted. Not clear if we do.
+>   */
+> -void ioread8_rep(void __iomem *addr, void *dst, unsigned long count)
+> +void ioread8_rep(const void __iomem *addr, void *dst, unsigned long count)
+>  {
+>  	readsb(addr, dst, count);
+>  }
+> -void ioread16_rep(void __iomem *addr, void *dst, unsigned long count)
+> +void ioread16_rep(const void __iomem *addr, void *dst, unsigned long count)
+>  {
+>  	readsw(addr, dst, count);
+>  }
+> -void ioread32_rep(void __iomem *addr, void *dst, unsigned long count)
+> +void ioread32_rep(const void __iomem *addr, void *dst, unsigned long count)
+>  {
+>  	readsl(addr, dst, count);
+>  }
 
-Thanks but it depends on the first patch in the series so either it
-could go with your ack through other tree or I will send it later (once
-1st patch gets to mainline).
+This looks OK to me.
 
+Acked-by: Michael Ellerman <mpe@ellerman.id.au> (powerpc)
 
-Best regards,
-Krzysztof
-
+cheers
