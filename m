@@ -1,56 +1,28 @@
-Return-Path: <hverkuil@xs4all.nl>
-Received: from lb1-smtp-cloud9.xs4all.net (lb1-smtp-cloud9.xs4all.net. [194.109.24.22])
-        by gmr-mx.google.com with ESMTPS id d12si222768lfi.2.2020.03.12.01.01.38
+Return-Path: <pr-tracker-bot@kernel.org>
+Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
+        by gmr-mx.google.com with ESMTPS id a3si27023iog.2.2020.03.31.16.55.14
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 12 Mar 2020 01:01:38 -0700 (PDT)
-Subject: Re: [RESEND PATCH v2 8/9] media: fsl-viu: Constify ioreadX() iomem
- argument (as in generic implementation)
-References: <20200219175007.13627-1-krzk@kernel.org>
- <20200219175007.13627-9-krzk@kernel.org>
-From: Hans Verkuil <hverkuil@xs4all.nl>
-Message-ID: <1c4a11b5-5ca6-7555-de3c-ff30f707fac7@xs4all.nl>
-Date: Thu, 12 Mar 2020 09:01:22 +0100
-MIME-Version: 1.0
-In-Reply-To: <20200219175007.13627-9-krzk@kernel.org>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-To: Krzysztof Kozlowski <krzk@kernel.org>, Richard Henderson <rth@twiddle.net>, Ivan Kokshaysky <ink@jurassic.park.msu.ru>, Matt Turner <mattst88@gmail.com>, Alexey Brodkin <abrodkin@synopsys.com>, Vineet Gupta <vgupta@synopsys.com>, "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>, Helge Deller <deller@gmx.de>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, Yoshinori Sato <ysato@users.sourceforge.jp>, Rich Felker <dalias@libc.org>, Dave Airlie <airlied@redhat.com>, David Airlie <airlied@linux.ie>, Daniel Vetter <daniel@ffwll.ch>, Ben Skeggs <bskeggs@redhat.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, Jiri Slaby <jirislaby@gmail.com>, Nick Kossifidis <mickflemm@gmail.com>, Luis Chamberlain <mcgrof@kernel.org>, Kalle Valo <kvalo@codeaurora.org>, "David S. Miller" <davem@davemloft.net>, Dave Jiang <dave.jiang@intel.com>, Jon Mason <jdmason@kudzu.us>, Allen Hubbe <allenbh@gmail.com>, "Michael S. Tsirkin" <mst@redhat.com>, Jason Wang <jasowang@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Geert Uytterhoeven <geert+renesas@glider.be>, Andrew Morton <akpm@linux-foundation.org>, Thomas Gleixner <tglx@linutronix.de>, linux-alpha@vger.kernel.org, linux-kernel@vger.kernel.org, linux-snps-arc@lists.infradead.org, linux-parisc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-sh@vger.kernel.org, dri-devel@lists.freedesktop.org, nouveau@lists.freedesktop.org, linux-media@vger.kernel.org, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, linux-ntb@googlegroups.com, virtualization@lists.linux-foundation.org, linux-arch@vger.kernel.org
+        Tue, 31 Mar 2020 16:55:14 -0700 (PDT)
+Subject: Re: [GIT PULL] NTB bug fixes for v5.7
+From: pr-tracker-bot@kernel.org
+In-Reply-To: <20200331152721.GA1719@athena.kudzu.us>
+References: <20200331152721.GA1719@athena.kudzu.us>
+Message-Id: <158569891371.16027.14099209625031293428.pr-tracker-bot@kernel.org>
+Date: Tue, 31 Mar 2020 23:55:13 +0000
+To: Jon Mason <jdmason@kudzu.us>
+Cc: torvalds@linux-foundation.org, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-On 2/19/20 6:50 PM, Krzysztof Kozlowski wrote:
-> The ioreadX() helpers have inconsistent interface.  On some architectures
-> void *__iomem address argument is a pointer to const, on some not.
-> 
-> Implementations of ioreadX() do not modify the memory under the address
-> so they can be converted to a "const" version for const-safety and
-> consistency among architectures.
-> 
-> Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
+The pull request you sent on Tue, 31 Mar 2020 11:27:21 -0400:
 
-Acked-by: Hans Verkuil <hverkuil-cisco@xs4all.nl>
+> git://github.com/jonmason/ntb tags/ntb-5.7
 
-Regards,
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/56a451b780676bc1cdac011735fe2869fa2e9abf
 
-	Hans
+Thank you!
 
-> ---
->  drivers/media/platform/fsl-viu.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/media/platform/fsl-viu.c b/drivers/media/platform/fsl-viu.c
-> index 81a8faedbba6..991d9dc82749 100644
-> --- a/drivers/media/platform/fsl-viu.c
-> +++ b/drivers/media/platform/fsl-viu.c
-> @@ -34,7 +34,7 @@
->  /* Allow building this driver with COMPILE_TEST */
->  #if !defined(CONFIG_PPC) && !defined(CONFIG_MICROBLAZE)
->  #define out_be32(v, a)	iowrite32be(a, (void __iomem *)v)
-> -#define in_be32(a)	ioread32be((void __iomem *)a)
-> +#define in_be32(a)	ioread32be((const void __iomem *)a)
->  #endif
->  
->  #define BUFFER_TIMEOUT		msecs_to_jiffies(500)  /* 0.5 seconds */
-> 
-
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.wiki.kernel.org/userdoc/prtracker
