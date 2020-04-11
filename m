@@ -1,15 +1,15 @@
 Return-Path: <sashal@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id np5si191719pjb.2.2020.04.11.16.07.32
+        by gmr-mx.google.com with ESMTPS id f17si307073vka.5.2020.04.11.16.04.22
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Sat, 11 Apr 2020 16:07:32 -0700 (PDT)
+        Sat, 11 Apr 2020 16:04:22 -0700 (PDT)
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.5 022/121] ntb_tool: Fix printk format
-Date: Sat, 11 Apr 2020 19:05:27 -0400
-Message-Id: <20200411230706.23855-22-sashal@kernel.org>
-In-Reply-To: <20200411230706.23855-1-sashal@kernel.org>
-References: <20200411230706.23855-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.6 027/149] ntb_tool: Fix printk format
+Date: Sat, 11 Apr 2020 19:01:44 -0400
+Message-Id: <20200411230347.22371-27-sashal@kernel.org>
+In-Reply-To: <20200411230347.22371-1-sashal@kernel.org>
+References: <20200411230347.22371-1-sashal@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
