@@ -1,95 +1,79 @@
-Return-Path: <jdmason@kudzu.us>
-Received: from mail-qt1-x834.google.com (mail-qt1-x834.google.com. [2607:f8b0:4864:20::834])
-        by gmr-mx.google.com with ESMTPS id z126si140786qkd.2.2020.04.20.08.31.55
+Return-Path: <sashal@kernel.org>
+Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
+        by gmr-mx.google.com with ESMTPS id z1si261456plo.3.2020.04.11.16.13.37
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 20 Apr 2020 08:31:55 -0700 (PDT)
-Received: by mail-qt1-x834.google.com with SMTP id i68so3075102qtb.5
-        for <linux-ntb@googlegroups.com>; Mon, 20 Apr 2020 08:31:55 -0700 (PDT)
-Return-Path: <jdmason@kudzu.us>
-Received: from kudzu.us ([2605:a601:a664:2e00:8846:46a:2e78:2224])
-        by smtp.gmail.com with ESMTPSA id v188sm779031qkh.47.2020.04.20.08.31.53
-        for <linux-ntb@googlegroups.com>
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 20 Apr 2020 08:31:54 -0700 (PDT)
-Date: Mon, 20 Apr 2020 11:31:52 -0400
-From: Jon Mason <jdmason@kudzu.us>
-Subject: Smatch warnings
-Message-ID: <20200420153151.GA23017@kudzu.us>
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Sat, 11 Apr 2020 16:13:37 -0700 (PDT)
+From: Sasha Levin <sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.14 08/37] NTB: set peer_sta within event handler itself
+Date: Sat, 11 Apr 2020 19:12:57 -0400
+Message-Id: <20200411231327.26550-8-sashal@kernel.org>
+In-Reply-To: <20200411231327.26550-1-sashal@kernel.org>
+References: <20200411231327.26550-1-sashal@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-To: linux-ntb@googlegroups.com
+Content-Transfer-Encoding: 8bit
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: Arindam Nath <arindam.nath@amd.com>, Jon Mason <jdmason@kudzu.us>, Sasha Levin <sashal@kernel.org>, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-FYI, I was using smatch when building the NTB code and saw the following
-warnings.  If anyone is bored, feel free to address them.
+From: Arindam Nath <arindam.nath@amd.com>
 
-Thanks,
-Jon
+[ Upstream commit 2465b87ce36ea2dbd97e5fb58a0efd284c9f687e ]
 
+amd_ack_smu() should only set the corresponding
+bits into SMUACK register. Setting the bitmask
+of peer_sta should be done within the event handler.
+They are two different things, and so should be
+handled differently and at different places.
+
+Signed-off-by: Arindam Nath <arindam.nath@amd.com>
+Signed-off-by: Jon Mason <jdmason@kudzu.us>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
+ drivers/ntb/hw/amd/ntb_hw_amd.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
-  CALL    scripts/checksyscalls.sh
-  CALL    scripts/atomic/check-atomics.sh
-  DESCEND  objtool
-  CHK     include/generated/compile.h
-  CHK     kernel/kheaders_data.tar.xz
-  CHECK   drivers/gpu/drm/i915/display/intel_frontbuffer.c
-  CC [M]  drivers/gpu/drm/i915/display/intel_frontbuffer.o
-  LD [M]  drivers/gpu/drm/i915/i915.o
-  CHECK   drivers/net/ntb_netdev.c
-  CC [M]  drivers/net/ntb_netdev.o
-  LD [M]  drivers/ntb/ntb.o
-  CHECK   drivers/ntb/ntb_transport.c
-drivers/ntb/ntb_transport.c:1336 ntb_transport_probe() warn: should '1 << qp_count' be a 64 bit type?
-  CC [M]  drivers/ntb/ntb_transport.o
-  CHECK   drivers/ntb/hw/amd/ntb_hw_amd.c
-  CC [M]  drivers/ntb/hw/amd/ntb_hw_amd.o
-  CHECK   drivers/ntb/hw/idt/ntb_hw_idt.c
-drivers/ntb/hw/idt/ntb_hw_idt.c:2514 idt_init_dbgfs() warn: passing zero to 'PTR_ERR'
-drivers/ntb/hw/idt/ntb_hw_idt.c:2760 idt_pci_probe() warn: passing zero to 'PTR_ERR'
-  CC [M]  drivers/ntb/hw/idt/ntb_hw_idt.o
-  CHECK   drivers/ntb/hw/intel/ntb_hw_gen1.c
-  CC [M]  drivers/ntb/hw/intel/ntb_hw_gen1.o
-  CHECK   drivers/ntb/hw/intel/ntb_hw_gen3.c
-  CC [M]  drivers/ntb/hw/intel/ntb_hw_gen3.o
-  CHECK   drivers/ntb/hw/intel/ntb_hw_gen4.c
-  CC [M]  drivers/ntb/hw/intel/ntb_hw_gen4.o
-  LD [M]  drivers/ntb/hw/intel/ntb_hw_intel.o
-  CHECK   drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-  CC [M]  drivers/ntb/hw/mscc/ntb_hw_switchtec.o
-  CHECK   drivers/ntb/test/ntb_pingpong.c
-  CC [M]  drivers/ntb/test/ntb_pingpong.o
-  CHECK   drivers/ntb/test/ntb_tool.c
-drivers/ntb/test/ntb_tool.c:1288 tool_inmsg_read() error: uninitialized symbol 'pidx'.
-  CC [M]  drivers/ntb/test/ntb_tool.o
-  CHECK   drivers/ntb/test/ntb_perf.c
-  CC [M]  drivers/ntb/test/ntb_perf.o
-  CHECK   drivers/ntb/test/ntb_msi_test.c
-  CC [M]  drivers/ntb/test/ntb_msi_test.o
-Kernel: arch/x86/boot/bzImage is ready  (#6)
-  MODPOST 7760 modules
-  LD [M]  drivers/gpu/drm/i915/i915.ko
-  CC [M]  drivers/net/ntb_netdev.mod.o
-  LD [M]  drivers/net/ntb_netdev.ko
-  CC [M]  drivers/ntb/hw/amd/ntb_hw_amd.mod.o
-  LD [M]  drivers/ntb/hw/amd/ntb_hw_amd.ko
-  CC [M]  drivers/ntb/hw/idt/ntb_hw_idt.mod.o
-  LD [M]  drivers/ntb/hw/idt/ntb_hw_idt.ko
-  CC [M]  drivers/ntb/hw/intel/ntb_hw_intel.mod.o
-  LD [M]  drivers/ntb/hw/intel/ntb_hw_intel.ko
-  CC [M]  drivers/ntb/hw/mscc/ntb_hw_switchtec.mod.o
-  LD [M]  drivers/ntb/hw/mscc/ntb_hw_switchtec.ko
-  CC [M]  drivers/ntb/ntb.mod.o
-  LD [M]  drivers/ntb/ntb.ko
-  CC [M]  drivers/ntb/ntb_transport.mod.o
-  LD [M]  drivers/ntb/ntb_transport.ko
-  CC [M]  drivers/ntb/test/ntb_msi_test.mod.o
-  LD [M]  drivers/ntb/test/ntb_msi_test.ko
-  CC [M]  drivers/ntb/test/ntb_perf.mod.o
-  LD [M]  drivers/ntb/test/ntb_perf.ko
-  CC [M]  drivers/ntb/test/ntb_pingpong.mod.o
-  LD [M]  drivers/ntb/test/ntb_pingpong.ko
-  CC [M]  drivers/ntb/test/ntb_tool.mod.o
-  LD [M]  drivers/ntb/test/ntb_tool.ko
+diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.c b/drivers/ntb/hw/amd/ntb_hw_amd.c
+index f0788aae05c9c..4cdfcff21efd1 100644
+--- a/drivers/ntb/hw/amd/ntb_hw_amd.c
++++ b/drivers/ntb/hw/amd/ntb_hw_amd.c
+@@ -493,8 +493,6 @@ static void amd_ack_smu(struct amd_ntb_dev *ndev, u32 bit)
+ 	reg = readl(mmio + AMD_SMUACK_OFFSET);
+ 	reg |= bit;
+ 	writel(reg, mmio + AMD_SMUACK_OFFSET);
+-
+-	ndev->peer_sta |= bit;
+ }
+ 
+ static void amd_handle_event(struct amd_ntb_dev *ndev, int vec)
+@@ -512,9 +510,11 @@ static void amd_handle_event(struct amd_ntb_dev *ndev, int vec)
+ 	status &= AMD_EVENT_INTMASK;
+ 	switch (status) {
+ 	case AMD_PEER_FLUSH_EVENT:
++		ndev->peer_sta |= AMD_PEER_FLUSH_EVENT;
+ 		dev_info(dev, "Flush is done.\n");
+ 		break;
+ 	case AMD_PEER_RESET_EVENT:
++		ndev->peer_sta |= AMD_PEER_RESET_EVENT;
+ 		amd_ack_smu(ndev, AMD_PEER_RESET_EVENT);
+ 
+ 		/* link down first */
+@@ -527,6 +527,7 @@ static void amd_handle_event(struct amd_ntb_dev *ndev, int vec)
+ 	case AMD_PEER_PMETO_EVENT:
+ 	case AMD_LINK_UP_EVENT:
+ 	case AMD_LINK_DOWN_EVENT:
++		ndev->peer_sta |= status;
+ 		amd_ack_smu(ndev, status);
+ 
+ 		/* link down */
+@@ -540,6 +541,7 @@ static void amd_handle_event(struct amd_ntb_dev *ndev, int vec)
+ 		if (status & 0x1)
+ 			dev_info(dev, "Wakeup is done.\n");
+ 
++		ndev->peer_sta |= AMD_PEER_D0_EVENT;
+ 		amd_ack_smu(ndev, AMD_PEER_D0_EVENT);
+ 
+ 		/* start a timer to poll link status */
+-- 
+2.20.1
+
