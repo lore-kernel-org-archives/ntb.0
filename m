@@ -1,15 +1,15 @@
 Return-Path: <sashal@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id ng2si187376pjb.0.2020.04.11.16.12.14
+        by gmr-mx.google.com with ESMTPS id s10si414342ybk.0.2020.04.11.16.10.05
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Sat, 11 Apr 2020 16:12:14 -0700 (PDT)
+        Sat, 11 Apr 2020 16:10:05 -0700 (PDT)
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 09/66] NTB: set peer_sta within event handler itself
-Date: Sat, 11 Apr 2020 19:11:06 -0400
-Message-Id: <20200411231203.25933-9-sashal@kernel.org>
-In-Reply-To: <20200411231203.25933-1-sashal@kernel.org>
-References: <20200411231203.25933-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.4 017/108] NTB: set peer_sta within event handler itself
+Date: Sat, 11 Apr 2020 19:08:12 -0400
+Message-Id: <20200411230943.24951-17-sashal@kernel.org>
+In-Reply-To: <20200411230943.24951-1-sashal@kernel.org>
+References: <20200411230943.24951-1-sashal@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
@@ -34,7 +34,7 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.c b/drivers/ntb/hw/amd/ntb_hw_amd.c
-index efb214fc545a2..967724ccb03ac 100644
+index 156c2a18a2394..ecbc283f094b9 100644
 --- a/drivers/ntb/hw/amd/ntb_hw_amd.c
 +++ b/drivers/ntb/hw/amd/ntb_hw_amd.c
 @@ -493,8 +493,6 @@ static void amd_ack_smu(struct amd_ntb_dev *ndev, u32 bit)
