@@ -1,44 +1,83 @@
-Return-Path: <linjiasen@hygon.cn>
-Received: from spam2.hygon.cn ([110.188.70.11])
-        by gmr-mx.google.com with ESMTPS id v1si38117oia.0.2020.04.09.00.14.13
+Return-Path: <sashal@kernel.org>
+Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
+        by gmr-mx.google.com with ESMTPS id y140si355999ybe.1.2020.04.11.16.12.16
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 09 Apr 2020 00:14:13 -0700 (PDT)
-From: Jiasen Lin <linjiasen@hygon.cn>
-Subject: [PATCH] NTB: Fix static check warning in perf_clear_test
-Date: Thu, 9 Apr 2020 00:11:24 -0700
-Message-ID: <1586416284-3246-1-git-send-email-linjiasen@hygon.cn>
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Sat, 11 Apr 2020 16:12:16 -0700 (PDT)
+From: Sasha Levin <sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 10/66] ntb_tool: Fix printk format
+Date: Sat, 11 Apr 2020 19:11:07 -0400
+Message-Id: <20200411231203.25933-10-sashal@kernel.org>
+In-Reply-To: <20200411231203.25933-1-sashal@kernel.org>
+References: <20200411231203.25933-1-sashal@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain
-To: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, jdmason@kudzu.us, dan.carpenter@oracle.com
-Cc: allenbh@gmail.com, dave.jiang@intel.com, zhangpanyong@hygon.cn, linjiasen@hygon.cn
+Content-Transfer-Encoding: 8bit
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: Helge Deller <deller@gmx.de>, Jon Mason <jdmason@kudzu.us>, Sasha Levin <sashal@kernel.org>, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-As pthr->dma_chan can't be NULL in this context, so there is
-no need to check pthr->dma_chan.
+From: Helge Deller <deller@gmx.de>
 
-Fixes: 99a06056124d ("NTB: ntb_perf: Fix address err in perf_copy_chunk")
-Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
-Signed-off-by: Jiasen Lin <linjiasen@hygon.cn>
+[ Upstream commit 2ef97a6c181eba48f14c9ed98ce4398d21164683 ]
+
+The correct printk format is %pa or %pap, but not %pa[p].
+
+Fixes: 7f46c8b3a5523 ("NTB: ntb_tool: Add full multi-port NTB API support")
+Signed-off-by: Helge Deller <deller@gmx.de>
+Signed-off-by: Jon Mason <jdmason@kudzu.us>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/ntb/test/ntb_perf.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/ntb/test/ntb_tool.c | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index 972f6d9..f73b126 100644
---- a/drivers/ntb/test/ntb_perf.c
-+++ b/drivers/ntb/test/ntb_perf.c
-@@ -1010,8 +1010,8 @@ static void perf_clear_test(struct perf_thread *pthr)
- 				   pthr->perf->test_peer->dma_dst_addr,
- 				   pthr->perf->test_peer->outbuf_size,
- 				   DMA_FROM_DEVICE, 0);
--	if (pthr->dma_chan)
--		dma_release_channel(pthr->dma_chan);
-+
-+	dma_release_channel(pthr->dma_chan);
+diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c
+index d592c0ffbd198..69da758fe64c8 100644
+--- a/drivers/ntb/test/ntb_tool.c
++++ b/drivers/ntb/test/ntb_tool.c
+@@ -678,19 +678,19 @@ static ssize_t tool_mw_trans_read(struct file *filep, char __user *ubuf,
+ 			 &inmw->dma_base);
  
- no_dma_notify:
- 	atomic_dec(&perf->tsync);
+ 	off += scnprintf(buf + off, buf_size - off,
+-			 "Window Size    \t%pa[p]\n",
++			 "Window Size    \t%pap\n",
+ 			 &inmw->size);
+ 
+ 	off += scnprintf(buf + off, buf_size - off,
+-			 "Alignment      \t%pa[p]\n",
++			 "Alignment      \t%pap\n",
+ 			 &addr_align);
+ 
+ 	off += scnprintf(buf + off, buf_size - off,
+-			 "Size Alignment \t%pa[p]\n",
++			 "Size Alignment \t%pap\n",
+ 			 &size_align);
+ 
+ 	off += scnprintf(buf + off, buf_size - off,
+-			 "Size Max       \t%pa[p]\n",
++			 "Size Max       \t%pap\n",
+ 			 &size_max);
+ 
+ 	ret = simple_read_from_buffer(ubuf, size, offp, buf, off);
+@@ -907,16 +907,16 @@ static ssize_t tool_peer_mw_trans_read(struct file *filep, char __user *ubuf,
+ 			 "Virtual address     \t0x%pK\n", outmw->io_base);
+ 
+ 	off += scnprintf(buf + off, buf_size - off,
+-			 "Phys Address        \t%pa[p]\n", &map_base);
++			 "Phys Address        \t%pap\n", &map_base);
+ 
+ 	off += scnprintf(buf + off, buf_size - off,
+-			 "Mapping Size        \t%pa[p]\n", &map_size);
++			 "Mapping Size        \t%pap\n", &map_size);
+ 
+ 	off += scnprintf(buf + off, buf_size - off,
+ 			 "Translation Address \t0x%016llx\n", outmw->tr_base);
+ 
+ 	off += scnprintf(buf + off, buf_size - off,
+-			 "Window Size         \t%pa[p]\n", &outmw->size);
++			 "Window Size         \t%pap\n", &outmw->size);
+ 
+ 	ret = simple_read_from_buffer(ubuf, size, offp, buf, off);
+ 	kfree(buf);
 -- 
-2.7.4
+2.20.1
 
