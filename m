@@ -1,83 +1,95 @@
-Return-Path: <sashal@kernel.org>
-Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id f17si307073vka.5.2020.04.11.16.04.22
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-qt1-x834.google.com (mail-qt1-x834.google.com. [2607:f8b0:4864:20::834])
+        by gmr-mx.google.com with ESMTPS id z126si140786qkd.2.2020.04.20.08.31.55
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Sat, 11 Apr 2020 16:04:22 -0700 (PDT)
-From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.6 027/149] ntb_tool: Fix printk format
-Date: Sat, 11 Apr 2020 19:01:44 -0400
-Message-Id: <20200411230347.22371-27-sashal@kernel.org>
-In-Reply-To: <20200411230347.22371-1-sashal@kernel.org>
-References: <20200411230347.22371-1-sashal@kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 20 Apr 2020 08:31:55 -0700 (PDT)
+Received: by mail-qt1-x834.google.com with SMTP id i68so3075102qtb.5
+        for <linux-ntb@googlegroups.com>; Mon, 20 Apr 2020 08:31:55 -0700 (PDT)
+Return-Path: <jdmason@kudzu.us>
+Received: from kudzu.us ([2605:a601:a664:2e00:8846:46a:2e78:2224])
+        by smtp.gmail.com with ESMTPSA id v188sm779031qkh.47.2020.04.20.08.31.53
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 20 Apr 2020 08:31:54 -0700 (PDT)
+Date: Mon, 20 Apr 2020 11:31:52 -0400
+From: Jon Mason <jdmason@kudzu.us>
+Subject: Smatch warnings
+Message-ID: <20200420153151.GA23017@kudzu.us>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Helge Deller <deller@gmx.de>, Jon Mason <jdmason@kudzu.us>, Sasha Levin <sashal@kernel.org>, linux-ntb@googlegroups.com
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+To: linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Helge Deller <deller@gmx.de>
+FYI, I was using smatch when building the NTB code and saw the following
+warnings.  If anyone is bored, feel free to address them.
 
-[ Upstream commit 2ef97a6c181eba48f14c9ed98ce4398d21164683 ]
+Thanks,
+Jon
 
-The correct printk format is %pa or %pap, but not %pa[p].
-
-Fixes: 7f46c8b3a5523 ("NTB: ntb_tool: Add full multi-port NTB API support")
-Signed-off-by: Helge Deller <deller@gmx.de>
-Signed-off-by: Jon Mason <jdmason@kudzu.us>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/ntb/test/ntb_tool.c | 14 +++++++-------
- 1 file changed, 7 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c
-index d592c0ffbd198..69da758fe64c8 100644
---- a/drivers/ntb/test/ntb_tool.c
-+++ b/drivers/ntb/test/ntb_tool.c
-@@ -678,19 +678,19 @@ static ssize_t tool_mw_trans_read(struct file *filep, char __user *ubuf,
- 			 &inmw->dma_base);
- 
- 	off += scnprintf(buf + off, buf_size - off,
--			 "Window Size    \t%pa[p]\n",
-+			 "Window Size    \t%pap\n",
- 			 &inmw->size);
- 
- 	off += scnprintf(buf + off, buf_size - off,
--			 "Alignment      \t%pa[p]\n",
-+			 "Alignment      \t%pap\n",
- 			 &addr_align);
- 
- 	off += scnprintf(buf + off, buf_size - off,
--			 "Size Alignment \t%pa[p]\n",
-+			 "Size Alignment \t%pap\n",
- 			 &size_align);
- 
- 	off += scnprintf(buf + off, buf_size - off,
--			 "Size Max       \t%pa[p]\n",
-+			 "Size Max       \t%pap\n",
- 			 &size_max);
- 
- 	ret = simple_read_from_buffer(ubuf, size, offp, buf, off);
-@@ -907,16 +907,16 @@ static ssize_t tool_peer_mw_trans_read(struct file *filep, char __user *ubuf,
- 			 "Virtual address     \t0x%pK\n", outmw->io_base);
- 
- 	off += scnprintf(buf + off, buf_size - off,
--			 "Phys Address        \t%pa[p]\n", &map_base);
-+			 "Phys Address        \t%pap\n", &map_base);
- 
- 	off += scnprintf(buf + off, buf_size - off,
--			 "Mapping Size        \t%pa[p]\n", &map_size);
-+			 "Mapping Size        \t%pap\n", &map_size);
- 
- 	off += scnprintf(buf + off, buf_size - off,
- 			 "Translation Address \t0x%016llx\n", outmw->tr_base);
- 
- 	off += scnprintf(buf + off, buf_size - off,
--			 "Window Size         \t%pa[p]\n", &outmw->size);
-+			 "Window Size         \t%pap\n", &outmw->size);
- 
- 	ret = simple_read_from_buffer(ubuf, size, offp, buf, off);
- 	kfree(buf);
--- 
-2.20.1
-
+  CALL    scripts/checksyscalls.sh
+  CALL    scripts/atomic/check-atomics.sh
+  DESCEND  objtool
+  CHK     include/generated/compile.h
+  CHK     kernel/kheaders_data.tar.xz
+  CHECK   drivers/gpu/drm/i915/display/intel_frontbuffer.c
+  CC [M]  drivers/gpu/drm/i915/display/intel_frontbuffer.o
+  LD [M]  drivers/gpu/drm/i915/i915.o
+  CHECK   drivers/net/ntb_netdev.c
+  CC [M]  drivers/net/ntb_netdev.o
+  LD [M]  drivers/ntb/ntb.o
+  CHECK   drivers/ntb/ntb_transport.c
+drivers/ntb/ntb_transport.c:1336 ntb_transport_probe() warn: should '1 << qp_count' be a 64 bit type?
+  CC [M]  drivers/ntb/ntb_transport.o
+  CHECK   drivers/ntb/hw/amd/ntb_hw_amd.c
+  CC [M]  drivers/ntb/hw/amd/ntb_hw_amd.o
+  CHECK   drivers/ntb/hw/idt/ntb_hw_idt.c
+drivers/ntb/hw/idt/ntb_hw_idt.c:2514 idt_init_dbgfs() warn: passing zero to 'PTR_ERR'
+drivers/ntb/hw/idt/ntb_hw_idt.c:2760 idt_pci_probe() warn: passing zero to 'PTR_ERR'
+  CC [M]  drivers/ntb/hw/idt/ntb_hw_idt.o
+  CHECK   drivers/ntb/hw/intel/ntb_hw_gen1.c
+  CC [M]  drivers/ntb/hw/intel/ntb_hw_gen1.o
+  CHECK   drivers/ntb/hw/intel/ntb_hw_gen3.c
+  CC [M]  drivers/ntb/hw/intel/ntb_hw_gen3.o
+  CHECK   drivers/ntb/hw/intel/ntb_hw_gen4.c
+  CC [M]  drivers/ntb/hw/intel/ntb_hw_gen4.o
+  LD [M]  drivers/ntb/hw/intel/ntb_hw_intel.o
+  CHECK   drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+  CC [M]  drivers/ntb/hw/mscc/ntb_hw_switchtec.o
+  CHECK   drivers/ntb/test/ntb_pingpong.c
+  CC [M]  drivers/ntb/test/ntb_pingpong.o
+  CHECK   drivers/ntb/test/ntb_tool.c
+drivers/ntb/test/ntb_tool.c:1288 tool_inmsg_read() error: uninitialized symbol 'pidx'.
+  CC [M]  drivers/ntb/test/ntb_tool.o
+  CHECK   drivers/ntb/test/ntb_perf.c
+  CC [M]  drivers/ntb/test/ntb_perf.o
+  CHECK   drivers/ntb/test/ntb_msi_test.c
+  CC [M]  drivers/ntb/test/ntb_msi_test.o
+Kernel: arch/x86/boot/bzImage is ready  (#6)
+  MODPOST 7760 modules
+  LD [M]  drivers/gpu/drm/i915/i915.ko
+  CC [M]  drivers/net/ntb_netdev.mod.o
+  LD [M]  drivers/net/ntb_netdev.ko
+  CC [M]  drivers/ntb/hw/amd/ntb_hw_amd.mod.o
+  LD [M]  drivers/ntb/hw/amd/ntb_hw_amd.ko
+  CC [M]  drivers/ntb/hw/idt/ntb_hw_idt.mod.o
+  LD [M]  drivers/ntb/hw/idt/ntb_hw_idt.ko
+  CC [M]  drivers/ntb/hw/intel/ntb_hw_intel.mod.o
+  LD [M]  drivers/ntb/hw/intel/ntb_hw_intel.ko
+  CC [M]  drivers/ntb/hw/mscc/ntb_hw_switchtec.mod.o
+  LD [M]  drivers/ntb/hw/mscc/ntb_hw_switchtec.ko
+  CC [M]  drivers/ntb/ntb.mod.o
+  LD [M]  drivers/ntb/ntb.ko
+  CC [M]  drivers/ntb/ntb_transport.mod.o
+  LD [M]  drivers/ntb/ntb_transport.ko
+  CC [M]  drivers/ntb/test/ntb_msi_test.mod.o
+  LD [M]  drivers/ntb/test/ntb_msi_test.ko
+  CC [M]  drivers/ntb/test/ntb_perf.mod.o
+  LD [M]  drivers/ntb/test/ntb_perf.ko
+  CC [M]  drivers/ntb/test/ntb_pingpong.mod.o
+  LD [M]  drivers/ntb/test/ntb_pingpong.ko
+  CC [M]  drivers/ntb/test/ntb_tool.mod.o
+  LD [M]  drivers/ntb/test/ntb_tool.ko
