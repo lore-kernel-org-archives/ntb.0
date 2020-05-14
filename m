@@ -1,182 +1,55 @@
-Return-Path: <robherring2@gmail.com>
-Received: from mail-ot1-f67.google.com (mail-ot1-f67.google.com. [209.85.210.67])
-        by gmr-mx.google.com with ESMTPS id w8si57594pjr.0.2020.05.14.19.38.53
+Return-Path: <kishon@ti.com>
+Received: from lelv0142.ext.ti.com (lelv0142.ext.ti.com. [198.47.23.249])
+        by gmr-mx.google.com with ESMTPS id h17si322985otk.1.2020.05.14.08.02.22
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 14 May 2020 19:38:54 -0700 (PDT)
-Received: by mail-ot1-f67.google.com with SMTP id d26so765148otc.7
-        for <linux-ntb@googlegroups.com>; Thu, 14 May 2020 19:38:53 -0700 (PDT)
-Return-Path: <robherring2@gmail.com>
-Date: Thu, 14 May 2020 21:38:50 -0500
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH 01/19] dt-bindings: PCI: Endpoint: Add DT bindings for
- PCI EPF NTB Device
-Message-ID: <20200515023850.GA10278@bogus>
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 14 May 2020 08:02:22 -0700 (PDT)
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: [PATCH 16/19] PCI: Add TI J721E device to pci ids
+Date: Thu, 14 May 2020 20:29:24 +0530
+Message-ID: <20200514145927.17555-17-kishon@ti.com>
+In-Reply-To: <20200514145927.17555-1-kishon@ti.com>
 References: <20200514145927.17555-1-kishon@ti.com>
- <20200514145927.17555-2-kishon@ti.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200514145927.17555-2-kishon@ti.com>
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: linux-pci@vger.kernel.org, devicetree@vger.kernel.org, linux-ntb@googlegroups.com, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-doc@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, Jonathan Corbet <corbet@lwn.net>, linux-kernel@vger.kernel.org, Bjorn Helgaas <bhelgaas@google.com>, Allen Hubbe <allenbh@gmail.com>, Tom Joseph <tjoseph@cadence.com>, Dave Jiang <dave.jiang@intel.com>, Jon Mason <jdmason@kudzu.us>, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>
+Content-Type: text/plain
+To: Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Arnd Bergmann <arnd@arndb.de>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Tom Joseph <tjoseph@cadence.com>, Bjorn Helgaas <bhelgaas@google.com>, Rob Herring <robh+dt@kernel.org>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jonathan Corbet <corbet@lwn.net>, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-ntb@googlegroups.com, Kishon Vijay Abraham I <kishon@ti.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Thu, 14 May 2020 20:29:09 +0530, Kishon Vijay Abraham I wrote:
-> Add device tree schema for PCI endpoint function bus to which
-> endpoint function devices should be attached. Then add device tree
-> schema for PCI endpoint function device to include bindings thats
-> generic to all endpoint functions. Finally add device tree schema
-> for PCI endpoint NTB function device by including the generic
-> device tree schema for PCIe endpoint function.
-> 
-> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
-> ---
->  .../bindings/pci/endpoint/pci-epf-bus.yaml    | 42 +++++++++++
->  .../bindings/pci/endpoint/pci-epf-device.yaml | 69 +++++++++++++++++++
->  .../bindings/pci/endpoint/pci-epf-ntb.yaml    | 68 ++++++++++++++++++
->  3 files changed, 179 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/pci/endpoint/pci-epf-bus.yaml
->  create mode 100644 Documentation/devicetree/bindings/pci/endpoint/pci-epf-device.yaml
->  create mode 100644 Documentation/devicetree/bindings/pci/endpoint/pci-epf-ntb.yaml
-> 
+Add TI J721E device to the pci id database. Since this device has
+a configurable PCIe endpoint, it could be used with different
+drivers.
 
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+---
+ drivers/misc/pci_endpoint_test.c | 1 -
+ include/linux/pci_ids.h          | 1 +
+ 2 files changed, 1 insertion(+), 1 deletion(-)
 
-My bot found errors running 'make dt_binding_check' on your patch:
-
-Traceback (most recent call last):
-  File "/usr/local/bin/dt-doc-validate", line 64, in <module>
-    ret = check_doc(args.yamldt)
-  File "/usr/local/bin/dt-doc-validate", line 25, in check_doc
-    testtree = dtschema.load(filename, line_number=line_number, duplicate_keys=False)
-  File "/usr/local/lib/python3.6/dist-packages/dtschema/lib.py", line 592, in load
-    return yaml.load(f.read())
-  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/main.py", line 343, in load
-    return constructor.get_single_data()
-  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 113, in get_single_data
-    return self.construct_document(node)
-  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 123, in construct_document
-    for _dummy in generator:
-  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 723, in construct_yaml_map
-    value = self.construct_mapping(node)
-  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 440, in construct_mapping
-    return BaseConstructor.construct_mapping(self, node, deep=deep)
-  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 257, in construct_mapping
-    if self.check_mapping_key(node, key_node, mapping, key, value):
-  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 295, in check_mapping_key
-    raise DuplicateKeyError(*args)
-ruamel.yaml.constructor.DuplicateKeyError: while constructing a mapping
-  in "<unicode string>", line 5, column 1
-found duplicate key "properties" with value "{}" (original value: "{}")
-  in "<unicode string>", line 17, column 1
-
-To suppress this check see:
-    http://yaml.readthedocs.io/en/latest/api.html#duplicate-keys
-
-Duplicate keys will become an error in future releases, and are errors
-by default when using the new API.
-
-Documentation/devicetree/bindings/Makefile:12: recipe for target 'Documentation/devicetree/bindings/pci/endpoint/pci-epf-device.example.dts' failed
-make[1]: *** [Documentation/devicetree/bindings/pci/endpoint/pci-epf-device.example.dts] Error 1
-make[1]: *** Waiting for unfinished jobs....
-Documentation/devicetree/bindings/pci/endpoint/pci-epf-ntb.yaml: while constructing a mapping
-  in "<unicode string>", line 5, column 1
-found duplicate key "properties" with value "{}" (original value: "{}")
-  in "<unicode string>", line 17, column 1
-
-To suppress this check see:
-    http://yaml.readthedocs.io/en/latest/api.html#duplicate-keys
-
-Duplicate keys will become an error in future releases, and are errors
-by default when using the new API.
-
-Traceback (most recent call last):
-  File "/usr/local/bin/dt-mk-schema", line 34, in <module>
-    schemas = dtschema.process_schemas(args.schemas, core_schema=(not args.useronly))
-  File "/usr/local/lib/python3.6/dist-packages/dtschema/lib.py", line 554, in process_schemas
-    sch = process_schema(os.path.abspath(filename))
-  File "/usr/local/lib/python3.6/dist-packages/dtschema/lib.py", line 507, in process_schema
-    schema = load_schema(filename)
-  File "/usr/local/lib/python3.6/dist-packages/dtschema/lib.py", line 123, in load_schema
-    return do_load(os.path.join(schema_basedir, schema))
-  File "/usr/local/lib/python3.6/dist-packages/dtschema/lib.py", line 108, in do_load
-    return yaml.load(tmp)
-  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/main.py", line 343, in load
-    return constructor.get_single_data()
-  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 113, in get_single_data
-    return self.construct_document(node)
-  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 123, in construct_document
-    for _dummy in generator:
-  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 723, in construct_yaml_map
-    value = self.construct_mapping(node)
-  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 440, in construct_mapping
-    return BaseConstructor.construct_mapping(self, node, deep=deep)
-  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 257, in construct_mapping
-    if self.check_mapping_key(node, key_node, mapping, key, value):
-  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 295, in check_mapping_key
-    raise DuplicateKeyError(*args)
-ruamel.yaml.constructor.DuplicateKeyError: while constructing a mapping
-  in "<unicode string>", line 5, column 1
-found duplicate key "properties" with value "{}" (original value: "{}")
-  in "<unicode string>", line 17, column 1
-
-To suppress this check see:
-    http://yaml.readthedocs.io/en/latest/api.html#duplicate-keys
-
-Duplicate keys will become an error in future releases, and are errors
-by default when using the new API.
-
-Documentation/devicetree/bindings/Makefile:41: recipe for target 'Documentation/devicetree/bindings/processed-schema-examples.yaml' failed
-make[1]: *** [Documentation/devicetree/bindings/processed-schema-examples.yaml] Error 123
-make[1]: *** Deleting file 'Documentation/devicetree/bindings/processed-schema-examples.yaml'
-Traceback (most recent call last):
-  File "/usr/local/bin/dt-mk-schema", line 34, in <module>
-    schemas = dtschema.process_schemas(args.schemas, core_schema=(not args.useronly))
-  File "/usr/local/lib/python3.6/dist-packages/dtschema/lib.py", line 554, in process_schemas
-    sch = process_schema(os.path.abspath(filename))
-  File "/usr/local/lib/python3.6/dist-packages/dtschema/lib.py", line 507, in process_schema
-    schema = load_schema(filename)
-  File "/usr/local/lib/python3.6/dist-packages/dtschema/lib.py", line 123, in load_schema
-    return do_load(os.path.join(schema_basedir, schema))
-  File "/usr/local/lib/python3.6/dist-packages/dtschema/lib.py", line 108, in do_load
-    return yaml.load(tmp)
-  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/main.py", line 343, in load
-    return constructor.get_single_data()
-  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 113, in get_single_data
-    return self.construct_document(node)
-  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 123, in construct_document
-    for _dummy in generator:
-  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 723, in construct_yaml_map
-    value = self.construct_mapping(node)
-  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 440, in construct_mapping
-    return BaseConstructor.construct_mapping(self, node, deep=deep)
-  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 257, in construct_mapping
-    if self.check_mapping_key(node, key_node, mapping, key, value):
-  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 295, in check_mapping_key
-    raise DuplicateKeyError(*args)
-ruamel.yaml.constructor.DuplicateKeyError: while constructing a mapping
-  in "<unicode string>", line 5, column 1
-found duplicate key "properties" with value "{}" (original value: "{}")
-  in "<unicode string>", line 17, column 1
-
-To suppress this check see:
-    http://yaml.readthedocs.io/en/latest/api.html#duplicate-keys
-
-Duplicate keys will become an error in future releases, and are errors
-by default when using the new API.
-
-Documentation/devicetree/bindings/Makefile:45: recipe for target 'Documentation/devicetree/bindings/processed-schema.yaml' failed
-make[1]: *** [Documentation/devicetree/bindings/processed-schema.yaml] Error 123
-make[1]: *** Deleting file 'Documentation/devicetree/bindings/processed-schema.yaml'
-Makefile:1300: recipe for target 'dt_binding_check' failed
-make: *** [dt_binding_check] Error 2
-
-See https://patchwork.ozlabs.org/patch/1290443
-
-If you already ran 'make dt_binding_check' and didn't see the above
-error(s), then make sure dt-schema is up to date:
-
-pip3 install git+https://github.com/devicetree-org/dt-schema.git@master --upgrade
-
-Please check and re-submit.
+diff --git a/drivers/misc/pci_endpoint_test.c b/drivers/misc/pci_endpoint_test.c
+index a70b17e5dd9a..a322e60fcec4 100644
+--- a/drivers/misc/pci_endpoint_test.c
++++ b/drivers/misc/pci_endpoint_test.c
+@@ -68,7 +68,6 @@
+ #define PCI_ENDPOINT_TEST_FLAGS			0x2c
+ #define FLAG_USE_DMA				BIT(0)
+ 
+-#define PCI_DEVICE_ID_TI_J721E			0xb00d
+ #define PCI_DEVICE_ID_TI_AM654			0xb00c
+ 
+ #define is_am654_pci_dev(pdev)		\
+diff --git a/include/linux/pci_ids.h b/include/linux/pci_ids.h
+index 1dfc4e1dcb94..1707e67cd088 100644
+--- a/include/linux/pci_ids.h
++++ b/include/linux/pci_ids.h
+@@ -879,6 +879,7 @@
+ #define PCI_DEVICE_ID_TI_X620		0xac8d
+ #define PCI_DEVICE_ID_TI_X420		0xac8e
+ #define PCI_DEVICE_ID_TI_XX20_FM	0xac8f
++#define PCI_DEVICE_ID_TI_J721E		0xb00d
+ #define PCI_DEVICE_ID_TI_DRA74x		0xb500
+ #define PCI_DEVICE_ID_TI_DRA72x		0xb501
+ 
+-- 
+2.17.1
 
