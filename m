@@ -1,28 +1,28 @@
-Return-Path: <kishon@ti.com>
-Received: from lelv0143.ext.ti.com (lelv0143.ext.ti.com. [198.47.23.248])
-        by gmr-mx.google.com with ESMTPS id d84si310426vsc.0.2020.05.21.22.54.01
+Return-Path: <robherring2@gmail.com>
+Received: from mail-ot1-f67.google.com (mail-ot1-f67.google.com. [209.85.210.67])
+        by gmr-mx.google.com with ESMTPS id w8si57594pjr.0.2020.05.14.19.38.53
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 21 May 2020 22:54:01 -0700 (PDT)
-Subject: Re: [PATCH 01/19] dt-bindings: PCI: Endpoint: Add DT bindings for PCI
- EPF NTB Device
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 14 May 2020 19:38:54 -0700 (PDT)
+Received: by mail-ot1-f67.google.com with SMTP id d26so765148otc.7
+        for <linux-ntb@googlegroups.com>; Thu, 14 May 2020 19:38:53 -0700 (PDT)
+Return-Path: <robherring2@gmail.com>
+Date: Thu, 14 May 2020 21:38:50 -0500
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH 01/19] dt-bindings: PCI: Endpoint: Add DT bindings for
+ PCI EPF NTB Device
+Message-ID: <20200515023850.GA10278@bogus>
 References: <20200514145927.17555-1-kishon@ti.com>
  <20200514145927.17555-2-kishon@ti.com>
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Message-ID: <73193475-5244-554d-df71-df600f70c0d9@ti.com>
-Date: Fri, 22 May 2020 11:23:46 +0530
 MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 In-Reply-To: <20200514145927.17555-2-kishon@ti.com>
-Content-Type: text/plain; charset="utf-8"
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-To: Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Arnd Bergmann <arnd@arndb.de>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Tom Joseph <tjoseph@cadence.com>, Bjorn Helgaas <bhelgaas@google.com>, Rob Herring <robh+dt@kernel.org>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jonathan Corbet <corbet@lwn.net>, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-ntb@googlegroups.com
+To: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: linux-pci@vger.kernel.org, devicetree@vger.kernel.org, linux-ntb@googlegroups.com, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-doc@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, Jonathan Corbet <corbet@lwn.net>, linux-kernel@vger.kernel.org, Bjorn Helgaas <bhelgaas@google.com>, Allen Hubbe <allenbh@gmail.com>, Tom Joseph <tjoseph@cadence.com>, Dave Jiang <dave.jiang@intel.com>, Jon Mason <jdmason@kudzu.us>, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Hi RobH,
-
-On 5/14/2020 8:29 PM, Kishon Vijay Abraham I wrote:
+On Thu, 14 May 2020 20:29:09 +0530, Kishon Vijay Abraham I wrote:
 > Add device tree schema for PCI endpoint function bus to which
 > endpoint function devices should be attached. Then add device tree
 > schema for PCI endpoint function device to include bindings thats
@@ -40,214 +40,143 @@ On 5/14/2020 8:29 PM, Kishon Vijay Abraham I wrote:
 >  create mode 100644 Documentation/devicetree/bindings/pci/endpoint/pci-epf-device.yaml
 >  create mode 100644 Documentation/devicetree/bindings/pci/endpoint/pci-epf-ntb.yaml
 > 
-> diff --git a/Documentation/devicetree/bindings/pci/endpoint/pci-epf-bus.yaml b/Documentation/devicetree/bindings/pci/endpoint/pci-epf-bus.yaml
-> new file mode 100644
-> index 000000000000..1c504f2e85e4
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/pci/endpoint/pci-epf-bus.yaml
-> @@ -0,0 +1,42 @@
-> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-> +# Copyright (C) 2020 Texas Instruments Incorporated - http://www.ti.com/
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/pci/endpoint/pci-epf-bus.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: PCI Endpoint Function Bus
-> +
-> +maintainers:
-> +  - Kishon Vijay Abraham I <kishon@ti.com>
-> +
-> +properties:
-> +  compatible:
-> +    const: pci-epf-bus
-> +
-> +patternProperties:
-> +  "^func@[0-9a-f]+$":
-> +    type: object
-> +    description: |
-> +      PCI Endpoint Function Bus node should have subnodes for each of
-> +      the implemented endpoint function. It should follow the bindings
-> +      specified for endpoint function in
-> +      Documentation/devicetree/bindings/pci/endpoint/
-> +
-> +examples:
-> +  - |
-> +    epf_bus {
-> +      compatible = "pci-epf-bus";
-> +
-> +      func@0 {
-> +        compatible = "pci-epf-ntb";
-> +        epcs = <&pcie0_ep>, <&pcie1_ep>;
-> +        epc-names = "primary", "secondary";
-> +        reg = <0>;
 
-I'm not sure how to represent "reg" property properly for cases like this where
-it represents ID and not a memory resource. I seem to get warning for
-"reg_format" even after adding address-cells and size-cells property in
-epf_bus. Can you give some hints here please?
 
-> +        epf,vendor-id = /bits/ 16 <0x104c>;
+My bot found errors running 'make dt_binding_check' on your patch:
 
-I want to make vendor-id and device-id as 16 bits from the beginning at-least
-for PCIe endpoint. So I'm prefixing these properties with "epf,". However I get
-this "do not match any of the regexes:". Can we add "epf" as a standard prefix?
+Traceback (most recent call last):
+  File "/usr/local/bin/dt-doc-validate", line 64, in <module>
+    ret = check_doc(args.yamldt)
+  File "/usr/local/bin/dt-doc-validate", line 25, in check_doc
+    testtree = dtschema.load(filename, line_number=line_number, duplicate_keys=False)
+  File "/usr/local/lib/python3.6/dist-packages/dtschema/lib.py", line 592, in load
+    return yaml.load(f.read())
+  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/main.py", line 343, in load
+    return constructor.get_single_data()
+  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 113, in get_single_data
+    return self.construct_document(node)
+  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 123, in construct_document
+    for _dummy in generator:
+  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 723, in construct_yaml_map
+    value = self.construct_mapping(node)
+  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 440, in construct_mapping
+    return BaseConstructor.construct_mapping(self, node, deep=deep)
+  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 257, in construct_mapping
+    if self.check_mapping_key(node, key_node, mapping, key, value):
+  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 295, in check_mapping_key
+    raise DuplicateKeyError(*args)
+ruamel.yaml.constructor.DuplicateKeyError: while constructing a mapping
+  in "<unicode string>", line 5, column 1
+found duplicate key "properties" with value "{}" (original value: "{}")
+  in "<unicode string>", line 17, column 1
 
-Thanks
-Kishon
-> +        epf,device-id = /bits/ 16 <0xb00d>;
-> +        num-mws = <4>;
-> +        mws-size = <0x0 0x100000>, <0x0 0x100000>, <0x0 0x100000>, <0x0 0x100000>;
-> +      };
-> +    };
-> +...
-> diff --git a/Documentation/devicetree/bindings/pci/endpoint/pci-epf-device.yaml b/Documentation/devicetree/bindings/pci/endpoint/pci-epf-device.yaml
-> new file mode 100644
-> index 000000000000..cee72864c8ca
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/pci/endpoint/pci-epf-device.yaml
-> @@ -0,0 +1,69 @@
-> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-> +# Copyright (C) 2020 Texas Instruments Incorporated - http://www.ti.com/
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/pci/endpoint/pci-epf-device.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: PCI Endpoint Function Device
-> +
-> +maintainers:
-> +  - Kishon Vijay Abraham I <kishon@ti.com>
-> +
-> +properties:
-> +  compatible:
-> +    const: pci-epf-bus
-> +
-> +properties:
-> +  $nodename:
-> +    pattern: "^func@"
-> +
-> +  epcs:
-> +    description:
-> +      Phandle to the endpoint controller device. Should have "2" entries for
-> +      NTB endpoint function and "1" entry for others.
-> +    minItems: 1
-> +    maxItems: 2
-> +
-> +  epc-names:
-> +    description:
-> +      Must contain an entry for each entry in "epcs" when "epcs" have more than
-> +      one entry.
-> +
-> +  reg:
-> +    maxItems: 0
-> +    description: Must contain the index number of the function.
-> +
-> +  epf,vendor-id:
-> +    description:
-> +      The PCI vendor ID
-> +    allOf:
-> +      - $ref: /schemas/types.yaml#/definitions/uint16
-> +
-> +  epf,device-id:
-> +    description:
-> +      The PCI device ID
-> +    allOf:
-> +      - $ref: /schemas/types.yaml#/definitions/uint16
-> +
-> +  epf,baseclass-code:
-> +    description: Code to classify the type of operation the function performs
-> +    allOf:
-> +      - $ref: /schemas/types.yaml#/definitions/uint8
-> +
-> +  epf,subclass-code:
-> +    description:
-> +      Specifies a base class sub-class, which identifies more specifically the
-> +      operation of the Function
-> +    allOf:
-> +      - $ref: /schemas/types.yaml#/definitions/uint8
-> +
-> +  epf,subsys-vendor-id:
-> +    description: Code to identify vendor of the add-in card or subsystem
-> +    allOf:
-> +      - $ref: /schemas/types.yaml#/definitions/uint16
-> +
-> +  epf,subsys-id:
-> +    description: Code to specify an id that is specific to a vendor
-> +    allOf:
-> +      - $ref: /schemas/types.yaml#/definitions/uint16
-> diff --git a/Documentation/devicetree/bindings/pci/endpoint/pci-epf-ntb.yaml b/Documentation/devicetree/bindings/pci/endpoint/pci-epf-ntb.yaml
-> new file mode 100644
-> index 000000000000..92c2e522b9e5
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/pci/endpoint/pci-epf-ntb.yaml
-> @@ -0,0 +1,68 @@
-> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-> +# Copyright (C) 2020 Texas Instruments Incorporated - http://www.ti.com/
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/pci/endpoint/pci-epf-ntb.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: PCI Endpoint NTB Function Device
-> +
-> +maintainers:
-> +  - Kishon Vijay Abraham I <kishon@ti.com>
-> +
-> +allOf:
-> +  - $ref: "pci-epf-device.yaml#"
-> +
-> +properties:
-> +  compatible:
-> +    const: pci-epf-ntb
-> +
-> +  epcs:
-> +    minItems: 2
-> +    maxItems: 2
-> +
-> +  epc-names:
-> +    items:
-> +      - const: primary
-> +      - const: secondary
-> +
-> +  num-mws:
-> +    description:
-> +      Specify the number of memory windows
-> +    allOf:
-> +      - $ref: /schemas/types.yaml#/definitions/uint8
-> +    minimum: 1
-> +    maximum: 4
-> +
-> +  mws-size:
-> +    description:
-> +      List of 'num-mws' entries containing size of each memory window.
-> +    minItems: 1
-> +    maxItems: 4
-> +
-> +required:
-> +  - compatible
-> +  - epcs
-> +  - epc-names
-> +  - epf,vendor-id
-> +  - epf,device-id
-> +  - num-mws
-> +  - mws-size
-> +
-> +examples:
-> +  - |
-> +    epf_bus {
-> +      compatible = "pci-epf-bus";
-> +
-> +      func@0 {
-> +        compatible = "pci-epf-ntb";
-> +        reg = <0>;
-> +        epcs = <&pcie0_ep>, <&pcie1_ep>;
-> +        epc-names = "primary", "secondary";
-> +        epf,vendor-id = /bits/ 16 <0x104c>;
-> +        epf,device-id = /bits/ 16 <0xb00d>;
-> +        num-mws = <4>;
-> +        mws-size = <0x0 0x100000>, <0x0 0x100000>, <0x0 0x100000>, <0x0 0x100000>;
-> +      };
-> +    };
-> +...
-> 
+To suppress this check see:
+    http://yaml.readthedocs.io/en/latest/api.html#duplicate-keys
+
+Duplicate keys will become an error in future releases, and are errors
+by default when using the new API.
+
+Documentation/devicetree/bindings/Makefile:12: recipe for target 'Documentation/devicetree/bindings/pci/endpoint/pci-epf-device.example.dts' failed
+make[1]: *** [Documentation/devicetree/bindings/pci/endpoint/pci-epf-device.example.dts] Error 1
+make[1]: *** Waiting for unfinished jobs....
+Documentation/devicetree/bindings/pci/endpoint/pci-epf-ntb.yaml: while constructing a mapping
+  in "<unicode string>", line 5, column 1
+found duplicate key "properties" with value "{}" (original value: "{}")
+  in "<unicode string>", line 17, column 1
+
+To suppress this check see:
+    http://yaml.readthedocs.io/en/latest/api.html#duplicate-keys
+
+Duplicate keys will become an error in future releases, and are errors
+by default when using the new API.
+
+Traceback (most recent call last):
+  File "/usr/local/bin/dt-mk-schema", line 34, in <module>
+    schemas = dtschema.process_schemas(args.schemas, core_schema=(not args.useronly))
+  File "/usr/local/lib/python3.6/dist-packages/dtschema/lib.py", line 554, in process_schemas
+    sch = process_schema(os.path.abspath(filename))
+  File "/usr/local/lib/python3.6/dist-packages/dtschema/lib.py", line 507, in process_schema
+    schema = load_schema(filename)
+  File "/usr/local/lib/python3.6/dist-packages/dtschema/lib.py", line 123, in load_schema
+    return do_load(os.path.join(schema_basedir, schema))
+  File "/usr/local/lib/python3.6/dist-packages/dtschema/lib.py", line 108, in do_load
+    return yaml.load(tmp)
+  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/main.py", line 343, in load
+    return constructor.get_single_data()
+  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 113, in get_single_data
+    return self.construct_document(node)
+  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 123, in construct_document
+    for _dummy in generator:
+  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 723, in construct_yaml_map
+    value = self.construct_mapping(node)
+  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 440, in construct_mapping
+    return BaseConstructor.construct_mapping(self, node, deep=deep)
+  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 257, in construct_mapping
+    if self.check_mapping_key(node, key_node, mapping, key, value):
+  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 295, in check_mapping_key
+    raise DuplicateKeyError(*args)
+ruamel.yaml.constructor.DuplicateKeyError: while constructing a mapping
+  in "<unicode string>", line 5, column 1
+found duplicate key "properties" with value "{}" (original value: "{}")
+  in "<unicode string>", line 17, column 1
+
+To suppress this check see:
+    http://yaml.readthedocs.io/en/latest/api.html#duplicate-keys
+
+Duplicate keys will become an error in future releases, and are errors
+by default when using the new API.
+
+Documentation/devicetree/bindings/Makefile:41: recipe for target 'Documentation/devicetree/bindings/processed-schema-examples.yaml' failed
+make[1]: *** [Documentation/devicetree/bindings/processed-schema-examples.yaml] Error 123
+make[1]: *** Deleting file 'Documentation/devicetree/bindings/processed-schema-examples.yaml'
+Traceback (most recent call last):
+  File "/usr/local/bin/dt-mk-schema", line 34, in <module>
+    schemas = dtschema.process_schemas(args.schemas, core_schema=(not args.useronly))
+  File "/usr/local/lib/python3.6/dist-packages/dtschema/lib.py", line 554, in process_schemas
+    sch = process_schema(os.path.abspath(filename))
+  File "/usr/local/lib/python3.6/dist-packages/dtschema/lib.py", line 507, in process_schema
+    schema = load_schema(filename)
+  File "/usr/local/lib/python3.6/dist-packages/dtschema/lib.py", line 123, in load_schema
+    return do_load(os.path.join(schema_basedir, schema))
+  File "/usr/local/lib/python3.6/dist-packages/dtschema/lib.py", line 108, in do_load
+    return yaml.load(tmp)
+  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/main.py", line 343, in load
+    return constructor.get_single_data()
+  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 113, in get_single_data
+    return self.construct_document(node)
+  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 123, in construct_document
+    for _dummy in generator:
+  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 723, in construct_yaml_map
+    value = self.construct_mapping(node)
+  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 440, in construct_mapping
+    return BaseConstructor.construct_mapping(self, node, deep=deep)
+  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 257, in construct_mapping
+    if self.check_mapping_key(node, key_node, mapping, key, value):
+  File "/usr/local/lib/python3.6/dist-packages/ruamel/yaml/constructor.py", line 295, in check_mapping_key
+    raise DuplicateKeyError(*args)
+ruamel.yaml.constructor.DuplicateKeyError: while constructing a mapping
+  in "<unicode string>", line 5, column 1
+found duplicate key "properties" with value "{}" (original value: "{}")
+  in "<unicode string>", line 17, column 1
+
+To suppress this check see:
+    http://yaml.readthedocs.io/en/latest/api.html#duplicate-keys
+
+Duplicate keys will become an error in future releases, and are errors
+by default when using the new API.
+
+Documentation/devicetree/bindings/Makefile:45: recipe for target 'Documentation/devicetree/bindings/processed-schema.yaml' failed
+make[1]: *** [Documentation/devicetree/bindings/processed-schema.yaml] Error 123
+make[1]: *** Deleting file 'Documentation/devicetree/bindings/processed-schema.yaml'
+Makefile:1300: recipe for target 'dt_binding_check' failed
+make: *** [dt_binding_check] Error 2
+
+See https://patchwork.ozlabs.org/patch/1290443
+
+If you already ran 'make dt_binding_check' and didn't see the above
+error(s), then make sure dt-schema is up to date:
+
+pip3 install git+https://github.com/devicetree-org/dt-schema.git@master --upgrade
+
+Please check and re-submit.
+
