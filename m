@@ -1,43 +1,253 @@
-Return-Path: <robh+dt@kernel.org>
-Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id t132si82656pfc.6.2020.05.22.09.11.21
+Return-Path: <kishon@ti.com>
+Received: from lelv0143.ext.ti.com (lelv0143.ext.ti.com. [198.47.23.248])
+        by gmr-mx.google.com with ESMTPS id d84si310426vsc.0.2020.05.21.22.54.01
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 22 May 2020 09:11:21 -0700 (PDT)
-Received: from mail-ot1-f51.google.com (mail-ot1-f51.google.com [209.85.210.51])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-	(No client certificate requested)
-	by mail.kernel.org (Postfix) with ESMTPSA id 55A8E207F9
-	for <linux-ntb@googlegroups.com>; Fri, 22 May 2020 16:11:21 +0000 (UTC)
-Received: by mail-ot1-f51.google.com with SMTP id h7so8633973otr.3
-        for <linux-ntb@googlegroups.com>; Fri, 22 May 2020 09:11:21 -0700 (PDT)
-MIME-Version: 1.0
+        Thu, 21 May 2020 22:54:01 -0700 (PDT)
+Subject: Re: [PATCH 01/19] dt-bindings: PCI: Endpoint: Add DT bindings for PCI
+ EPF NTB Device
 References: <20200514145927.17555-1-kishon@ti.com>
-In-Reply-To: <20200514145927.17555-1-kishon@ti.com>
-From: Rob Herring <robh+dt@kernel.org>
-Date: Fri, 22 May 2020 10:11:09 -0600
-Message-ID: <CAL_JsqKxe5FtZfiQKcQFFLOM5F52kx-q8vZspPTXhcWg+3rJvQ@mail.gmail.com>
-Subject: Re: [PATCH 00/19] Implement NTB Controller using multiple PCI EP
-Content-Type: text/plain; charset="UTF-8"
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Arnd Bergmann <arnd@arndb.de>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Tom Joseph <tjoseph@cadence.com>, Bjorn Helgaas <bhelgaas@google.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jonathan Corbet <corbet@lwn.net>, PCI <linux-pci@vger.kernel.org>, Linux Doc Mailing List <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, devicetree@vger.kernel.org, linux-ntb@googlegroups.com
+ <20200514145927.17555-2-kishon@ti.com>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Message-ID: <73193475-5244-554d-df71-df600f70c0d9@ti.com>
+Date: Fri, 22 May 2020 11:23:46 +0530
+MIME-Version: 1.0
+In-Reply-To: <20200514145927.17555-2-kishon@ti.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+To: Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Arnd Bergmann <arnd@arndb.de>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Tom Joseph <tjoseph@cadence.com>, Bjorn Helgaas <bhelgaas@google.com>, Rob Herring <robh+dt@kernel.org>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jonathan Corbet <corbet@lwn.net>, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-On Thu, May 14, 2020 at 8:59 AM Kishon Vijay Abraham I <kishon@ti.com> wrote:
->
-> This series is about implementing SW defined NTB using
-> multiple endpoint instances. This series has been tested using
-> 2 endpoint instances in J7 connected to two DRA7 boards. However there
-> is nothing platform specific for the NTB functionality.
->
-> This was presented in Linux Plumbers Conference. The presentation
-> can be found @ [1]
+Hi RobH,
 
-I'd like to know why putting this into DT is better than configfs.
-Does it solve some problem? Doing things in userspace is so much
-easier and more flexible than modifying and updating a DT.
+On 5/14/2020 8:29 PM, Kishon Vijay Abraham I wrote:
+> Add device tree schema for PCI endpoint function bus to which
+> endpoint function devices should be attached. Then add device tree
+> schema for PCI endpoint function device to include bindings thats
+> generic to all endpoint functions. Finally add device tree schema
+> for PCI endpoint NTB function device by including the generic
+> device tree schema for PCIe endpoint function.
+> 
+> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+> ---
+>  .../bindings/pci/endpoint/pci-epf-bus.yaml    | 42 +++++++++++
+>  .../bindings/pci/endpoint/pci-epf-device.yaml | 69 +++++++++++++++++++
+>  .../bindings/pci/endpoint/pci-epf-ntb.yaml    | 68 ++++++++++++++++++
+>  3 files changed, 179 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/pci/endpoint/pci-epf-bus.yaml
+>  create mode 100644 Documentation/devicetree/bindings/pci/endpoint/pci-epf-device.yaml
+>  create mode 100644 Documentation/devicetree/bindings/pci/endpoint/pci-epf-ntb.yaml
+> 
+> diff --git a/Documentation/devicetree/bindings/pci/endpoint/pci-epf-bus.yaml b/Documentation/devicetree/bindings/pci/endpoint/pci-epf-bus.yaml
+> new file mode 100644
+> index 000000000000..1c504f2e85e4
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/pci/endpoint/pci-epf-bus.yaml
+> @@ -0,0 +1,42 @@
+> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+> +# Copyright (C) 2020 Texas Instruments Incorporated - http://www.ti.com/
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/pci/endpoint/pci-epf-bus.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: PCI Endpoint Function Bus
+> +
+> +maintainers:
+> +  - Kishon Vijay Abraham I <kishon@ti.com>
+> +
+> +properties:
+> +  compatible:
+> +    const: pci-epf-bus
+> +
+> +patternProperties:
+> +  "^func@[0-9a-f]+$":
+> +    type: object
+> +    description: |
+> +      PCI Endpoint Function Bus node should have subnodes for each of
+> +      the implemented endpoint function. It should follow the bindings
+> +      specified for endpoint function in
+> +      Documentation/devicetree/bindings/pci/endpoint/
+> +
+> +examples:
+> +  - |
+> +    epf_bus {
+> +      compatible = "pci-epf-bus";
+> +
+> +      func@0 {
+> +        compatible = "pci-epf-ntb";
+> +        epcs = <&pcie0_ep>, <&pcie1_ep>;
+> +        epc-names = "primary", "secondary";
+> +        reg = <0>;
 
-I don't really think the PCI endpoint stuff is mature enough to be
-putting into DT either.
+I'm not sure how to represent "reg" property properly for cases like this where
+it represents ID and not a memory resource. I seem to get warning for
+"reg_format" even after adding address-cells and size-cells property in
+epf_bus. Can you give some hints here please?
 
-Rob
+> +        epf,vendor-id = /bits/ 16 <0x104c>;
+
+I want to make vendor-id and device-id as 16 bits from the beginning at-least
+for PCIe endpoint. So I'm prefixing these properties with "epf,". However I get
+this "do not match any of the regexes:". Can we add "epf" as a standard prefix?
+
+Thanks
+Kishon
+> +        epf,device-id = /bits/ 16 <0xb00d>;
+> +        num-mws = <4>;
+> +        mws-size = <0x0 0x100000>, <0x0 0x100000>, <0x0 0x100000>, <0x0 0x100000>;
+> +      };
+> +    };
+> +...
+> diff --git a/Documentation/devicetree/bindings/pci/endpoint/pci-epf-device.yaml b/Documentation/devicetree/bindings/pci/endpoint/pci-epf-device.yaml
+> new file mode 100644
+> index 000000000000..cee72864c8ca
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/pci/endpoint/pci-epf-device.yaml
+> @@ -0,0 +1,69 @@
+> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+> +# Copyright (C) 2020 Texas Instruments Incorporated - http://www.ti.com/
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/pci/endpoint/pci-epf-device.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: PCI Endpoint Function Device
+> +
+> +maintainers:
+> +  - Kishon Vijay Abraham I <kishon@ti.com>
+> +
+> +properties:
+> +  compatible:
+> +    const: pci-epf-bus
+> +
+> +properties:
+> +  $nodename:
+> +    pattern: "^func@"
+> +
+> +  epcs:
+> +    description:
+> +      Phandle to the endpoint controller device. Should have "2" entries for
+> +      NTB endpoint function and "1" entry for others.
+> +    minItems: 1
+> +    maxItems: 2
+> +
+> +  epc-names:
+> +    description:
+> +      Must contain an entry for each entry in "epcs" when "epcs" have more than
+> +      one entry.
+> +
+> +  reg:
+> +    maxItems: 0
+> +    description: Must contain the index number of the function.
+> +
+> +  epf,vendor-id:
+> +    description:
+> +      The PCI vendor ID
+> +    allOf:
+> +      - $ref: /schemas/types.yaml#/definitions/uint16
+> +
+> +  epf,device-id:
+> +    description:
+> +      The PCI device ID
+> +    allOf:
+> +      - $ref: /schemas/types.yaml#/definitions/uint16
+> +
+> +  epf,baseclass-code:
+> +    description: Code to classify the type of operation the function performs
+> +    allOf:
+> +      - $ref: /schemas/types.yaml#/definitions/uint8
+> +
+> +  epf,subclass-code:
+> +    description:
+> +      Specifies a base class sub-class, which identifies more specifically the
+> +      operation of the Function
+> +    allOf:
+> +      - $ref: /schemas/types.yaml#/definitions/uint8
+> +
+> +  epf,subsys-vendor-id:
+> +    description: Code to identify vendor of the add-in card or subsystem
+> +    allOf:
+> +      - $ref: /schemas/types.yaml#/definitions/uint16
+> +
+> +  epf,subsys-id:
+> +    description: Code to specify an id that is specific to a vendor
+> +    allOf:
+> +      - $ref: /schemas/types.yaml#/definitions/uint16
+> diff --git a/Documentation/devicetree/bindings/pci/endpoint/pci-epf-ntb.yaml b/Documentation/devicetree/bindings/pci/endpoint/pci-epf-ntb.yaml
+> new file mode 100644
+> index 000000000000..92c2e522b9e5
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/pci/endpoint/pci-epf-ntb.yaml
+> @@ -0,0 +1,68 @@
+> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+> +# Copyright (C) 2020 Texas Instruments Incorporated - http://www.ti.com/
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/pci/endpoint/pci-epf-ntb.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: PCI Endpoint NTB Function Device
+> +
+> +maintainers:
+> +  - Kishon Vijay Abraham I <kishon@ti.com>
+> +
+> +allOf:
+> +  - $ref: "pci-epf-device.yaml#"
+> +
+> +properties:
+> +  compatible:
+> +    const: pci-epf-ntb
+> +
+> +  epcs:
+> +    minItems: 2
+> +    maxItems: 2
+> +
+> +  epc-names:
+> +    items:
+> +      - const: primary
+> +      - const: secondary
+> +
+> +  num-mws:
+> +    description:
+> +      Specify the number of memory windows
+> +    allOf:
+> +      - $ref: /schemas/types.yaml#/definitions/uint8
+> +    minimum: 1
+> +    maximum: 4
+> +
+> +  mws-size:
+> +    description:
+> +      List of 'num-mws' entries containing size of each memory window.
+> +    minItems: 1
+> +    maxItems: 4
+> +
+> +required:
+> +  - compatible
+> +  - epcs
+> +  - epc-names
+> +  - epf,vendor-id
+> +  - epf,device-id
+> +  - num-mws
+> +  - mws-size
+> +
+> +examples:
+> +  - |
+> +    epf_bus {
+> +      compatible = "pci-epf-bus";
+> +
+> +      func@0 {
+> +        compatible = "pci-epf-ntb";
+> +        reg = <0>;
+> +        epcs = <&pcie0_ep>, <&pcie1_ep>;
+> +        epc-names = "primary", "secondary";
+> +        epf,vendor-id = /bits/ 16 <0x104c>;
+> +        epf,device-id = /bits/ 16 <0xb00d>;
+> +        num-mws = <4>;
+> +        mws-size = <0x0 0x100000>, <0x0 0x100000>, <0x0 0x100000>, <0x0 0x100000>;
+> +      };
+> +    };
+> +...
+> 
