@@ -1,57 +1,199 @@
-Return-Path: <sashal@kernel.org>
-Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id v16si109497ybe.2.2020.06.17.18.15.39
+Return-Path: <dave.jiang@intel.com>
+Received: from mga18.intel.com (mga18.intel.com. [134.134.136.126])
+        by gmr-mx.google.com with ESMTPS id i13si319034ilj.2.2020.06.05.08.13.36
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 17 Jun 2020 18:15:39 -0700 (PDT)
-From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.7 350/388] NTB: Revert the change to use the NTB device dev for DMA allocations
-Date: Wed, 17 Jun 2020 21:07:27 -0400
-Message-Id: <20200618010805.600873-350-sashal@kernel.org>
-In-Reply-To: <20200618010805.600873-1-sashal@kernel.org>
-References: <20200618010805.600873-1-sashal@kernel.org>
+        Fri, 05 Jun 2020 08:13:36 -0700 (PDT)
+Subject: [PATCH] ntb: intel: add hw workaround for NTB BAR alignment
+From: Dave Jiang <dave.jiang@intel.com>
+Date: Fri, 05 Jun 2020 08:13:34 -0700
+Message-ID: <159136975973.3747.12027781316842006922.stgit@djiang5-desk3.ch.intel.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Logan Gunthorpe <logang@deltatee.com>, Alexander Fomichev <fomichev.ru@gmail.com>, Jon Mason <jdmason@kudzu.us>, Sasha Levin <sashal@kernel.org>, linux-ntb@googlegroups.com
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+To: jdmason@kudzu.us
+Cc: allenbh@gmail.com, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Logan Gunthorpe <logang@deltatee.com>
+Add NTB_HWERR_BAR_ALIGN hw errata flag to work around issue where the
+aligment for the XLAT base must be BAR size aligned rather than 4k page
+aligned. On ICX platform, the XLAT base can be 4k page size aligned
+rather than BAR size aligned unlike the previous gen Intel NTB. However,
+a silicon errata prevented this from working as expected and a workaround
+is introduced to resolve the issue.
 
-[ Upstream commit 40da7d9a93c8941737ef4a1208d32c13ce017fe1 ]
-
-Commit 417cf39cfea9 ("NTB: Set dma mask and dma coherent mask to NTB
-devices") started using the NTB device for DMA allocations which was
-turns out was wrong. If the IOMMU is enabled, such alloctanions will
-always fail with messages such as:
-
-  DMAR: Allocating domain for 0000:02:00.1 failed
-
-This is because the IOMMU has not setup the device for such use.
-
-Change the tools back to using the PCI device for allocations seeing
-it doesn't make sense to add an IOMMU group for the non-physical NTB
-device. Also remove the code that sets the DMA mask as it no longer
-makes sense to do this.
-
-Fixes: 7f46c8b3a552 ("NTB: ntb_tool: Add full multi-port NTB API support")
-Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Tested-by: Alexander Fomichev <fomichev.ru@gmail.com>
-Signed-off-by: Jon Mason <jdmason@kudzu.us>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
+Signed-off-by: Dave Jiang <dave.jiang@intel.com>
 ---
- drivers/ntb/core.c | 1 -
- 1 file changed, 1 deletion(-)
 
-diff --git a/drivers/ntb/core.c b/drivers/ntb/core.c
-index c9a0912b175f..f8f75a504a58 100644
---- a/drivers/ntb/core.c
-+++ b/drivers/ntb/core.c
-@@ -311,4 +311,3 @@ static void __exit ntb_driver_exit(void)
- 	bus_unregister(&ntb_bus);
+Jon,
+Please replace the submiitted patch ("ntb: intel: add revision lockdown for
+Icelake NTB driver") with this one. Thanks!
+
+ drivers/ntb/hw/intel/ntb_hw_gen1.h |    1 
+ drivers/ntb/hw/intel/ntb_hw_gen4.c |   78 ++++++++++++++++++++++++++++++------
+ drivers/ntb/hw/intel/ntb_hw_gen4.h |   13 ++++++
+ 3 files changed, 79 insertions(+), 13 deletions(-)
+
+diff --git a/drivers/ntb/hw/intel/ntb_hw_gen1.h b/drivers/ntb/hw/intel/ntb_hw_gen1.h
+index 544cf5c06f4d..1b759942d8af 100644
+--- a/drivers/ntb/hw/intel/ntb_hw_gen1.h
++++ b/drivers/ntb/hw/intel/ntb_hw_gen1.h
+@@ -140,6 +140,7 @@
+ #define NTB_HWERR_SB01BASE_LOCKUP	BIT_ULL(1)
+ #define NTB_HWERR_B2BDOORBELL_BIT14	BIT_ULL(2)
+ #define NTB_HWERR_MSIX_VECTOR32_BAD	BIT_ULL(3)
++#define NTB_HWERR_BAR_ALIGN		BIT_ULL(4)
+ 
+ extern struct intel_b2b_addr xeon_b2b_usd_addr;
+ extern struct intel_b2b_addr xeon_b2b_dsd_addr;
+diff --git a/drivers/ntb/hw/intel/ntb_hw_gen4.c b/drivers/ntb/hw/intel/ntb_hw_gen4.c
+index 77001ffe4efa..7e3cdccfec7e 100644
+--- a/drivers/ntb/hw/intel/ntb_hw_gen4.c
++++ b/drivers/ntb/hw/intel/ntb_hw_gen4.c
+@@ -223,6 +223,9 @@ int gen4_init_dev(struct intel_ntb_dev *ndev)
+ 
+ 	ndev->reg = &gen4_reg;
+ 
++	if (pdev_is_ICX(pdev))
++		ndev->hwerr_flags |= NTB_HWERR_BAR_ALIGN;
++
+ 	ppd1 = ioread32(ndev->self_mmio + GEN4_PPD1_OFFSET);
+ 	ndev->ntb.topo = gen4_ppd_topo(ndev, ppd1);
+ 	dev_dbg(&pdev->dev, "ppd %#x topo %s\n", ppd1,
+@@ -388,9 +391,14 @@ static int intel_ntb4_mw_set_trans(struct ntb_dev *ntb, int pidx, int idx,
+ 	else
+ 		mw_size = bar_size;
+ 
+-	/* hardware requires that addr is aligned to bar size */
+-	if (addr & (bar_size - 1))
+-		return -EINVAL;
++	if (ndev->hwerr_flags & NTB_HWERR_BAR_ALIGN) {
++		/* hardware requires that addr is aligned to bar size */
++		if (addr & (bar_size - 1))
++			return -EINVAL;
++	} else {
++		if (addr & (PAGE_SIZE - 1))
++			return -EINVAL;
++	}
+ 
+ 	/* make sure the range fits in the usable mw size */
+ 	if (size > mw_size)
+@@ -399,7 +407,6 @@ static int intel_ntb4_mw_set_trans(struct ntb_dev *ntb, int pidx, int idx,
+ 	mmio = ndev->self_mmio;
+ 	xlat_reg = ndev->xlat_reg->bar2_xlat + (idx * 0x10);
+ 	limit_reg = ndev->xlat_reg->bar2_limit + (idx * 0x10);
+-	idx_reg = ndev->xlat_reg->bar2_idx + (idx * 0x2);
+ 	base = pci_resource_start(ndev->ntb.pdev, bar);
+ 
+ 	/* Set the limit if supported, if size is not mw_size */
+@@ -433,16 +440,19 @@ static int intel_ntb4_mw_set_trans(struct ntb_dev *ntb, int pidx, int idx,
+ 
+ 	dev_dbg(&ntb->pdev->dev, "BAR %d IMXLMT: %#Lx\n", bar, reg_val);
+ 
+-	iowrite16(base_idx, mmio + idx_reg);
+-	reg_val16 = ioread16(mmio + idx_reg);
+-	if (reg_val16 != base_idx) {
+-		iowrite64(base, mmio + limit_reg);
+-		iowrite64(0, mmio + xlat_reg);
+-		iowrite16(0, mmio + idx_reg);
+-		return -EIO;
++	if (ndev->hwerr_flags & NTB_HWERR_BAR_ALIGN) {
++		idx_reg = ndev->xlat_reg->bar2_idx + (idx * 0x2);
++		iowrite16(base_idx, mmio + idx_reg);
++		reg_val16 = ioread16(mmio + idx_reg);
++		if (reg_val16 != base_idx) {
++			iowrite64(base, mmio + limit_reg);
++			iowrite64(0, mmio + xlat_reg);
++			iowrite16(0, mmio + idx_reg);
++			return -EIO;
++		}
++		dev_dbg(&ntb->pdev->dev, "BAR %d IMBASEIDX: %#x\n", bar, reg_val16);
+ 	}
+ 
+-	dev_dbg(&ntb->pdev->dev, "BAR %d IMBASEIDX: %#x\n", bar, reg_val16);
+ 
+ 	return 0;
  }
- module_exit(ntb_driver_exit);
--
--- 
-2.25.1
+@@ -517,9 +527,51 @@ static int intel_ntb4_link_disable(struct ntb_dev *ntb)
+ 	return 0;
+ }
+ 
++int intel_ntb4_mw_get_align(struct ntb_dev *ntb, int pidx, int idx,
++			    resource_size_t *addr_align,
++			    resource_size_t *size_align,
++			    resource_size_t *size_max)
++{
++	struct intel_ntb_dev *ndev = ntb_ndev(ntb);
++	resource_size_t bar_size, mw_size;
++	int bar;
++
++	if (pidx != NTB_DEF_PEER_IDX)
++		return -EINVAL;
++
++	if (idx >= ndev->b2b_idx && !ndev->b2b_off)
++		idx += 1;
++
++	bar = ndev_mw_to_bar(ndev, idx);
++	if (bar < 0)
++		return bar;
++
++	bar_size = pci_resource_len(ndev->ntb.pdev, bar);
++
++	if (idx == ndev->b2b_idx)
++		mw_size = bar_size - ndev->b2b_off;
++	else
++		mw_size = bar_size;
++
++	if (addr_align) {
++		if (ndev->hwerr_flags & NTB_HWERR_BAR_ALIGN)
++			*addr_align = pci_resource_len(ndev->ntb.pdev, bar);
++		else
++			*addr_align = PAGE_SIZE;
++	}
++
++	if (size_align)
++		*size_align = 1;
++
++	if (size_max)
++		*size_max = mw_size;
++
++	return 0;
++}
++
+ const struct ntb_dev_ops intel_ntb4_ops = {
+ 	.mw_count		= intel_ntb_mw_count,
+-	.mw_get_align		= intel_ntb_mw_get_align,
++	.mw_get_align		= intel_ntb4_mw_get_align,
+ 	.mw_set_trans		= intel_ntb4_mw_set_trans,
+ 	.peer_mw_count		= intel_ntb_peer_mw_count,
+ 	.peer_mw_get_addr	= intel_ntb_peer_mw_get_addr,
+diff --git a/drivers/ntb/hw/intel/ntb_hw_gen4.h b/drivers/ntb/hw/intel/ntb_hw_gen4.h
+index 10f3ddf2ad30..83cd9349cf83 100644
+--- a/drivers/ntb/hw/intel/ntb_hw_gen4.h
++++ b/drivers/ntb/hw/intel/ntb_hw_gen4.h
+@@ -46,6 +46,10 @@
+ 
+ #include "ntb_hw_intel.h"
+ 
++/* Supported PCI device revision range for ICX */
++#define PCI_DEVICE_REVISION_ICX_MIN	0x2
++#define PCI_DEVICE_REVISION_ICX_MAX	0xF
++
+ /* Intel Gen4 NTB hardware */
+ /* PCIe config space */
+ #define GEN4_IMBAR23SZ_OFFSET		0x00c4
+@@ -125,4 +129,13 @@ ssize_t ndev_ntb4_debugfs_read(struct file *filp, char __user *ubuf,
+ 
+ extern const struct ntb_dev_ops intel_ntb4_ops;
+ 
++static inline int pdev_is_ICX(struct pci_dev *pdev)
++{
++	if (pdev_is_gen4(pdev) &&
++	    pdev->revision >= PCI_DEVICE_REVISION_ICX_MIN &&
++	    pdev->revision <= PCI_DEVICE_REVISION_ICX_MAX)
++		return 1;
++	return 0;
++}
++
+ #endif
 
