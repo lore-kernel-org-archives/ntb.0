@@ -1,15 +1,15 @@
 Return-Path: <sashal@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id kb2si52053pjb.1.2020.06.17.18.25.37
+        by gmr-mx.google.com with ESMTPS id z202si48209qka.6.2020.06.17.18.21.40
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 17 Jun 2020 18:25:37 -0700 (PDT)
+        Wed, 17 Jun 2020 18:21:40 -0700 (PDT)
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 155/172] NTB: ntb_tool: reading the link file should not end in a NULL byte
-Date: Wed, 17 Jun 2020 21:22:01 -0400
-Message-Id: <20200618012218.607130-155-sashal@kernel.org>
-In-Reply-To: <20200618012218.607130-1-sashal@kernel.org>
-References: <20200618012218.607130-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.4 239/266] NTB: ntb_tool: reading the link file should not end in a NULL byte
+Date: Wed, 17 Jun 2020 21:16:04 -0400
+Message-Id: <20200618011631.604574-239-sashal@kernel.org>
+In-Reply-To: <20200618011631.604574-1-sashal@kernel.org>
+References: <20200618011631.604574-1-sashal@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
