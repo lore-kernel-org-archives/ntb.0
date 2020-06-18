@@ -1,61 +1,94 @@
-Date: Sun, 24 May 2020 14:37:45 -0700 (PDT)
-From: Anubhav Guleria <anubhav.nitsri.it@gmail.com>
-Message-Id: <ca1ae048-bb3d-4aec-8d89-17178734f097@googlegroups.com>
-Subject: Using NTRDMA with Intel Skylake in b2b configuration
+Return-Path: <sashal@kernel.org>
+Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
+        by gmr-mx.google.com with ESMTPS id b1si56302ilq.4.2020.06.17.18.25.42
+        for <linux-ntb@googlegroups.com>
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 17 Jun 2020 18:25:43 -0700 (PDT)
+From: Sasha Levin <sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 159/172] NTB: perf: Fix race condition when run with ntb_test
+Date: Wed, 17 Jun 2020 21:22:05 -0400
+Message-Id: <20200618012218.607130-159-sashal@kernel.org>
+In-Reply-To: <20200618012218.607130-1-sashal@kernel.org>
+References: <20200618012218.607130-1-sashal@kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/mixed; 
-	boundary="----=_Part_1290_300045457.1590356265525"
-To: linux-ntb <linux-ntb@googlegroups.com>
+Content-Transfer-Encoding: 8bit
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: Logan Gunthorpe <logang@deltatee.com>, Allen Hubbe <allenbh@gmail.com>, Alexander Fomichev <fomichev.ru@gmail.com>, Jon Mason <jdmason@kudzu.us>, Sasha Levin <sashal@kernel.org>, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-------=_Part_1290_300045457.1590356265525
-Content-Type: multipart/alternative; 
-	boundary="----=_Part_1291_770982628.1590356265525"
+From: Logan Gunthorpe <logang@deltatee.com>
 
-------=_Part_1291_770982628.1590356265525
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+[ Upstream commit 34d8673a01b053b6231a995a4eec9341163d63be ]
 
+When running ntb_test, the script tries to run the ntb_perf test
+immediately after probing the modules. Since adding multi-port support,
+this fails seeing the new initialization procedure in ntb_perf
+can not complete instantly.
 
-Hi, 
-I am trying to setup ntrdma(https://github.com/ntrdma/ntrdma-ext) with 
-Intel Skylake b2b configuration and Linux 4.14.178. 
-Following is how my memory windows are setup:
-1) MW[0] (BAR23): dma_alloc_coherent 
-2) MW[1] (BAR45): memremap
+To fix this we add a completion which is waited on when a test is
+started. In this way, run can be written any time after the module is
+loaded and it will wait for the initialization to complete instead of
+sending an error.
 
-Further, what I understand that in case of MR registering there are 2 
-steps[ntrdma_reg_user_mr()]:
+Fixes: 5648e56d03fa ("NTB: ntb_perf: Add full multi-port NTB API support")
+Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+Acked-by: Allen Hubbe <allenbh@gmail.com>
+Tested-by: Alexander Fomichev <fomichev.ru@gmail.com>
+Signed-off-by: Jon Mason <jdmason@kudzu.us>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ drivers/ntb/test/ntb_perf.c | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
 
-1) Call ib_umem_get() to Pin and DMA Map userspace Memory.
-2) Then, prepare a memory buffer in a NTB window, by ntc_mr_buf_map_dma(..).
+diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
+index 62a9a1d44f9f..ad5d3919435c 100644
+--- a/drivers/ntb/test/ntb_perf.c
++++ b/drivers/ntb/test/ntb_perf.c
+@@ -158,6 +158,8 @@ struct perf_peer {
+ 	/* NTB connection setup service */
+ 	struct work_struct	service;
+ 	unsigned long		sts;
++
++	struct completion init_comp;
+ };
+ #define to_peer_service(__work) \
+ 	container_of(__work, struct perf_peer, service)
+@@ -549,6 +551,7 @@ static int perf_setup_outbuf(struct perf_peer *peer)
+ 
+ 	/* Initialization is finally done */
+ 	set_bit(PERF_STS_DONE, &peer->sts);
++	complete_all(&peer->init_comp);
+ 
+ 	return 0;
+ }
+@@ -640,6 +643,7 @@ static void perf_service_work(struct work_struct *work)
+ 		perf_setup_outbuf(peer);
+ 
+ 	if (test_and_clear_bit(PERF_CMD_CLEAR, &peer->sts)) {
++		init_completion(&peer->init_comp);
+ 		clear_bit(PERF_STS_DONE, &peer->sts);
+ 		if (test_bit(0, &peer->perf->busy_flag) &&
+ 		    peer == peer->perf->test_peer) {
+@@ -1047,8 +1051,9 @@ static int perf_submit_test(struct perf_peer *peer)
+ 	struct perf_thread *pthr;
+ 	int tidx, ret;
+ 
+-	if (!test_bit(PERF_STS_DONE, &peer->sts))
+-		return -ENOLINK;
++	ret = wait_for_completion_interruptible(&peer->init_comp);
++	if (ret < 0)
++		return ret;
+ 
+ 	if (test_and_set_bit_lock(0, &perf->busy_flag))
+ 		return -EBUSY;
+@@ -1414,6 +1419,7 @@ static int perf_init_peers(struct perf_ctx *perf)
+ 			peer->gidx = pidx;
+ 		}
+ 		INIT_WORK(&peer->service, perf_service_work);
++		init_completion(&peer->init_comp);
+ 	}
+ 	if (perf->gidx == -1)
+ 		perf->gidx = pidx;
+-- 
+2.25.1
 
-The doubt that I have is that is it necessary to have the dma_addr from 
-step 1 to be within the limits of NTB window, in this case MW[0] ?
-And if so, is there some specific configuration that needs to be made?
-
-Also, is above configuration of MWs correct?
-
-Thanks in advance.
-
-------=_Part_1291_770982628.1590356265525
-Content-Type: text/html; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr"><br><div>Hi,=C2=A0</div><div>I am trying to setup ntrdma(h=
-ttps://github.com/ntrdma/ntrdma-ext) with Intel Skylake b2b configuration a=
-nd Linux 4.14.178.=C2=A0</div><div>Following is how my memory windows are s=
-etup:</div><div>1) MW[0] (BAR23): dma_alloc_coherent=C2=A0</div><div>2) MW[=
-1] (BAR45): memremap</div><div><br></div><div>Further, what I understand th=
-at in case of MR registering there are 2 steps[ntrdma_reg_user_mr()]:</div>=
-<div><br></div><div>1) Call ib_umem_get() to Pin and DMA Map userspace Memo=
-ry.</div><div>2) Then, prepare a memory buffer in a NTB window, by ntc_mr_b=
-uf_map_dma(..).</div><div><br></div><div>The doubt that I have is that is i=
-t necessary to have the dma_addr from step 1 to be within the limits of NTB=
- window, in this case MW[0] ?</div><div>And if so, is there some specific c=
-onfiguration that needs to be made?</div><div><br></div><div>Also, is above=
- configuration of MWs correct?</div><div><br></div><div>Thanks in advance.<=
-/div></div>
-------=_Part_1291_770982628.1590356265525--
-
-------=_Part_1290_300045457.1590356265525--
