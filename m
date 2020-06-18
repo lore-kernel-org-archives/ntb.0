@@ -1,15 +1,15 @@
 Return-Path: <sashal@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id i17si370159pjv.1.2020.06.17.18.21.42
+        by gmr-mx.google.com with ESMTPS id z17si83673iod.1.2020.06.17.18.15.40
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 17 Jun 2020 18:21:42 -0700 (PDT)
+        Wed, 17 Jun 2020 18:15:40 -0700 (PDT)
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.4 241/266] NTB: perf: Don't require one more memory window than number of peers
-Date: Wed, 17 Jun 2020 21:16:06 -0400
-Message-Id: <20200618011631.604574-241-sashal@kernel.org>
-In-Reply-To: <20200618011631.604574-1-sashal@kernel.org>
-References: <20200618011631.604574-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.7 351/388] NTB: perf: Don't require one more memory window than number of peers
+Date: Wed, 17 Jun 2020 21:07:28 -0400
+Message-Id: <20200618010805.600873-351-sashal@kernel.org>
+In-Reply-To: <20200618010805.600873-1-sashal@kernel.org>
+References: <20200618010805.600873-1-sashal@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
@@ -34,10 +34,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index 52c29791fc02..3817eadab2cf 100644
+index 1c93b9f5c73b..21c8a3bac1e0 100644
 --- a/drivers/ntb/test/ntb_perf.c
 +++ b/drivers/ntb/test/ntb_perf.c
-@@ -653,7 +653,7 @@ static int perf_init_service(struct perf_ctx *perf)
+@@ -654,7 +654,7 @@ static int perf_init_service(struct perf_ctx *perf)
  {
  	u64 mask;
  
