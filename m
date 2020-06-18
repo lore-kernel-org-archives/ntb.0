@@ -1,15 +1,15 @@
 Return-Path: <sashal@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id y21si105419qka.2.2020.06.17.18.21.41
+        by gmr-mx.google.com with ESMTPS id v16si109497ybe.2.2020.06.17.18.15.39
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 17 Jun 2020 18:21:41 -0700 (PDT)
+        Wed, 17 Jun 2020 18:15:39 -0700 (PDT)
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.4 240/266] NTB: Revert the change to use the NTB device dev for DMA allocations
-Date: Wed, 17 Jun 2020 21:16:05 -0400
-Message-Id: <20200618011631.604574-240-sashal@kernel.org>
-In-Reply-To: <20200618011631.604574-1-sashal@kernel.org>
-References: <20200618011631.604574-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.7 350/388] NTB: Revert the change to use the NTB device dev for DMA allocations
+Date: Wed, 17 Jun 2020 21:07:27 -0400
+Message-Id: <20200618010805.600873-350-sashal@kernel.org>
+In-Reply-To: <20200618010805.600873-1-sashal@kernel.org>
+References: <20200618010805.600873-1-sashal@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
