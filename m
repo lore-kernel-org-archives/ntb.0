@@ -1,15 +1,15 @@
 Return-Path: <sashal@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id i11si141682vkk.2.2020.06.17.18.25.41
+        by gmr-mx.google.com with ESMTPS id i11si141033vkk.2.2020.06.17.18.21.44
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 17 Jun 2020 18:25:42 -0700 (PDT)
+        Wed, 17 Jun 2020 18:21:44 -0700 (PDT)
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 158/172] NTB: perf: Fix support for hardware that doesn't have port numbers
-Date: Wed, 17 Jun 2020 21:22:04 -0400
-Message-Id: <20200618012218.607130-158-sashal@kernel.org>
-In-Reply-To: <20200618012218.607130-1-sashal@kernel.org>
-References: <20200618012218.607130-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.4 242/266] NTB: perf: Fix support for hardware that doesn't have port numbers
+Date: Wed, 17 Jun 2020 21:16:07 -0400
+Message-Id: <20200618011631.604574-242-sashal@kernel.org>
+In-Reply-To: <20200618011631.604574-1-sashal@kernel.org>
+References: <20200618011631.604574-1-sashal@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
@@ -40,10 +40,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 10 insertions(+)
 
 diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index 28d288ff3bae..62a9a1d44f9f 100644
+index 3817eadab2cf..281170887ad0 100644
 --- a/drivers/ntb/test/ntb_perf.c
 +++ b/drivers/ntb/test/ntb_perf.c
-@@ -1418,6 +1418,16 @@ static int perf_init_peers(struct perf_ctx *perf)
+@@ -1423,6 +1423,16 @@ static int perf_init_peers(struct perf_ctx *perf)
  	if (perf->gidx == -1)
  		perf->gidx = pidx;
  
