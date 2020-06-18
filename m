@@ -1,15 +1,15 @@
 Return-Path: <sashal@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id t24si95878uaq.0.2020.06.17.18.21.46
+        by gmr-mx.google.com with ESMTPS id q194si120105pfq.4.2020.06.17.18.15.44
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 17 Jun 2020 18:21:47 -0700 (PDT)
+        Wed, 17 Jun 2020 18:15:44 -0700 (PDT)
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.4 244/266] NTB: ntb_test: Fix bug when counting remote files
-Date: Wed, 17 Jun 2020 21:16:09 -0400
-Message-Id: <20200618011631.604574-244-sashal@kernel.org>
-In-Reply-To: <20200618011631.604574-1-sashal@kernel.org>
-References: <20200618011631.604574-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.7 354/388] NTB: ntb_test: Fix bug when counting remote files
+Date: Wed, 17 Jun 2020 21:07:31 -0400
+Message-Id: <20200618010805.600873-354-sashal@kernel.org>
+In-Reply-To: <20200618010805.600873-1-sashal@kernel.org>
+References: <20200618010805.600873-1-sashal@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
