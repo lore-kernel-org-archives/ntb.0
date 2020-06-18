@@ -1,15 +1,15 @@
 Return-Path: <sashal@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id a72si71266qkb.0.2020.06.17.18.23.16
+        by gmr-mx.google.com with ESMTPS id i11si140477vkk.2.2020.06.17.18.18.12
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 17 Jun 2020 18:23:16 -0700 (PDT)
+        Wed, 17 Jun 2020 18:18:12 -0700 (PDT)
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 042/172] NTB: ntb_pingpong: Choose doorbells based on port number
-Date: Wed, 17 Jun 2020 21:20:08 -0400
-Message-Id: <20200618012218.607130-42-sashal@kernel.org>
-In-Reply-To: <20200618012218.607130-1-sashal@kernel.org>
-References: <20200618012218.607130-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.4 072/266] NTB: ntb_pingpong: Choose doorbells based on port number
+Date: Wed, 17 Jun 2020 21:13:17 -0400
+Message-Id: <20200618011631.604574-72-sashal@kernel.org>
+In-Reply-To: <20200618011631.604574-1-sashal@kernel.org>
+References: <20200618011631.604574-1-sashal@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
