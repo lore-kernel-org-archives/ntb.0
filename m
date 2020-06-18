@@ -1,15 +1,15 @@
 Return-Path: <sashal@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id x132si122506pgx.4.2020.06.17.18.21.38
+        by gmr-mx.google.com with ESMTPS id q194si120086pfq.4.2020.06.17.18.15.36
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 17 Jun 2020 18:21:38 -0700 (PDT)
+        Wed, 17 Jun 2020 18:15:36 -0700 (PDT)
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.4 238/266] ntb_tool: pass correct struct device to dma_alloc_coherent
-Date: Wed, 17 Jun 2020 21:16:03 -0400
-Message-Id: <20200618011631.604574-238-sashal@kernel.org>
-In-Reply-To: <20200618011631.604574-1-sashal@kernel.org>
-References: <20200618011631.604574-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.7 348/388] ntb_tool: pass correct struct device to dma_alloc_coherent
+Date: Wed, 17 Jun 2020 21:07:25 -0400
+Message-Id: <20200618010805.600873-348-sashal@kernel.org>
+In-Reply-To: <20200618010805.600873-1-sashal@kernel.org>
+References: <20200618010805.600873-1-sashal@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
@@ -39,7 +39,7 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c
-index d592c0ffbd19..025747c1568e 100644
+index 69da758fe64c..9eaeb221d980 100644
 --- a/drivers/ntb/test/ntb_tool.c
 +++ b/drivers/ntb/test/ntb_tool.c
 @@ -590,7 +590,7 @@ static int tool_setup_mw(struct tool_ctx *tc, int pidx, int widx,
