@@ -1,15 +1,15 @@
 Return-Path: <sashal@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id z202si48281qka.6.2020.06.17.18.23.18
+        by gmr-mx.google.com with ESMTPS id t23si69202plr.4.2020.06.17.18.18.13
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 17 Jun 2020 18:23:18 -0700 (PDT)
+        Wed, 17 Jun 2020 18:18:13 -0700 (PDT)
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 043/172] NTB: Fix the default port and peer numbers for legacy drivers
-Date: Wed, 17 Jun 2020 21:20:09 -0400
-Message-Id: <20200618012218.607130-43-sashal@kernel.org>
-In-Reply-To: <20200618012218.607130-1-sashal@kernel.org>
-References: <20200618012218.607130-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.4 073/266] NTB: Fix the default port and peer numbers for legacy drivers
+Date: Wed, 17 Jun 2020 21:13:18 -0400
+Message-Id: <20200618011631.604574-73-sashal@kernel.org>
+In-Reply-To: <20200618011631.604574-1-sashal@kernel.org>
+References: <20200618011631.604574-1-sashal@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
@@ -46,13 +46,13 @@ Tested-by: Alexander Fomichev <fomichev.ru@gmail.com>
 Signed-off-by: Jon Mason <jdmason@kudzu.us>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/ntb/ntb.c | 8 ++------
+ drivers/ntb/core.c | 8 ++------
  1 file changed, 2 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/ntb/ntb.c b/drivers/ntb/ntb.c
+diff --git a/drivers/ntb/core.c b/drivers/ntb/core.c
 index 2581ab724c34..c9a0912b175f 100644
---- a/drivers/ntb/ntb.c
-+++ b/drivers/ntb/ntb.c
+--- a/drivers/ntb/core.c
++++ b/drivers/ntb/core.c
 @@ -214,10 +214,8 @@ int ntb_default_port_number(struct ntb_dev *ntb)
  	case NTB_TOPO_B2B_DSD:
  		return NTB_PORT_SEC_DSD;
