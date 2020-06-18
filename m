@@ -1,15 +1,15 @@
 Return-Path: <sashal@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id c26si36896otn.4.2020.06.17.18.21.37
+        by gmr-mx.google.com with ESMTPS id p45si99149qtk.2.2020.06.17.18.15.35
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 17 Jun 2020 18:21:37 -0700 (PDT)
+        Wed, 17 Jun 2020 18:15:35 -0700 (PDT)
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.4 237/266] ntb_perf: pass correct struct device to dma_alloc_coherent
-Date: Wed, 17 Jun 2020 21:16:02 -0400
-Message-Id: <20200618011631.604574-237-sashal@kernel.org>
-In-Reply-To: <20200618011631.604574-1-sashal@kernel.org>
-References: <20200618011631.604574-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.7 347/388] ntb_perf: pass correct struct device to dma_alloc_coherent
+Date: Wed, 17 Jun 2020 21:07:24 -0400
+Message-Id: <20200618010805.600873-347-sashal@kernel.org>
+In-Reply-To: <20200618010805.600873-1-sashal@kernel.org>
+References: <20200618010805.600873-1-sashal@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
@@ -40,10 +40,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index e9b7c2dfc730..52c29791fc02 100644
+index 972f6d984f6d..1c93b9f5c73b 100644
 --- a/drivers/ntb/test/ntb_perf.c
 +++ b/drivers/ntb/test/ntb_perf.c
-@@ -556,7 +556,7 @@ static void perf_free_inbuf(struct perf_peer *peer)
+@@ -557,7 +557,7 @@ static void perf_free_inbuf(struct perf_peer *peer)
  		return;
  
  	(void)ntb_mw_clear_trans(peer->perf->ntb, peer->pidx, peer->gidx);
@@ -52,7 +52,7 @@ index e9b7c2dfc730..52c29791fc02 100644
  			  peer->inbuf, peer->inbuf_xlat);
  	peer->inbuf = NULL;
  }
-@@ -585,8 +585,9 @@ static int perf_setup_inbuf(struct perf_peer *peer)
+@@ -586,8 +586,9 @@ static int perf_setup_inbuf(struct perf_peer *peer)
  
  	perf_free_inbuf(peer);
  
@@ -64,7 +64,7 @@ index e9b7c2dfc730..52c29791fc02 100644
  	if (!peer->inbuf) {
  		dev_err(&perf->ntb->dev, "Failed to alloc inbuf of %pa\n",
  			&peer->inbuf_size);
-@@ -1517,4 +1518,3 @@ static void __exit perf_exit(void)
+@@ -1554,4 +1555,3 @@ static void __exit perf_exit(void)
  	destroy_workqueue(perf_wq);
  }
  module_exit(perf_exit);
