@@ -1,15 +1,15 @@
 Return-Path: <sashal@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id z202si48213qka.6.2020.06.17.18.21.45
+        by gmr-mx.google.com with ESMTPS id c22si152180oto.3.2020.06.17.18.15.43
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 17 Jun 2020 18:21:45 -0700 (PDT)
+        Wed, 17 Jun 2020 18:15:43 -0700 (PDT)
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.4 243/266] NTB: perf: Fix race condition when run with ntb_test
-Date: Wed, 17 Jun 2020 21:16:08 -0400
-Message-Id: <20200618011631.604574-243-sashal@kernel.org>
-In-Reply-To: <20200618011631.604574-1-sashal@kernel.org>
-References: <20200618011631.604574-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.7 353/388] NTB: perf: Fix race condition when run with ntb_test
+Date: Wed, 17 Jun 2020 21:07:30 -0400
+Message-Id: <20200618010805.600873-353-sashal@kernel.org>
+In-Reply-To: <20200618010805.600873-1-sashal@kernel.org>
+References: <20200618010805.600873-1-sashal@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
@@ -41,10 +41,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 8 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index 281170887ad0..5ce4766a6c9e 100644
+index 0b1eae07b133..528751803419 100644
 --- a/drivers/ntb/test/ntb_perf.c
 +++ b/drivers/ntb/test/ntb_perf.c
-@@ -158,6 +158,8 @@ struct perf_peer {
+@@ -159,6 +159,8 @@ struct perf_peer {
  	/* NTB connection setup service */
  	struct work_struct	service;
  	unsigned long		sts;
@@ -53,7 +53,7 @@ index 281170887ad0..5ce4766a6c9e 100644
  };
  #define to_peer_service(__work) \
  	container_of(__work, struct perf_peer, service)
-@@ -546,6 +548,7 @@ static int perf_setup_outbuf(struct perf_peer *peer)
+@@ -547,6 +549,7 @@ static int perf_setup_outbuf(struct perf_peer *peer)
  
  	/* Initialization is finally done */
  	set_bit(PERF_STS_DONE, &peer->sts);
@@ -61,7 +61,7 @@ index 281170887ad0..5ce4766a6c9e 100644
  
  	return 0;
  }
-@@ -637,6 +640,7 @@ static void perf_service_work(struct work_struct *work)
+@@ -638,6 +641,7 @@ static void perf_service_work(struct work_struct *work)
  		perf_setup_outbuf(peer);
  
  	if (test_and_clear_bit(PERF_CMD_CLEAR, &peer->sts)) {
@@ -69,7 +69,7 @@ index 281170887ad0..5ce4766a6c9e 100644
  		clear_bit(PERF_STS_DONE, &peer->sts);
  		if (test_bit(0, &peer->perf->busy_flag) &&
  		    peer == peer->perf->test_peer) {
-@@ -1052,8 +1056,9 @@ static int perf_submit_test(struct perf_peer *peer)
+@@ -1084,8 +1088,9 @@ static int perf_submit_test(struct perf_peer *peer)
  	struct perf_thread *pthr;
  	int tidx, ret;
  
@@ -81,7 +81,7 @@ index 281170887ad0..5ce4766a6c9e 100644
  
  	if (test_and_set_bit_lock(0, &perf->busy_flag))
  		return -EBUSY;
-@@ -1419,6 +1424,7 @@ static int perf_init_peers(struct perf_ctx *perf)
+@@ -1456,6 +1461,7 @@ static int perf_init_peers(struct perf_ctx *perf)
  			peer->gidx = pidx;
  		}
  		INIT_WORK(&peer->service, perf_service_work);
