@@ -1,82 +1,57 @@
 Return-Path: <sashal@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id e69si119699oob.2.2020.06.17.18.10.16
+        by gmr-mx.google.com with ESMTPS id i17si370690pjv.1.2020.06.17.18.25.38
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 17 Jun 2020 18:10:16 -0700 (PDT)
+        Wed, 17 Jun 2020 18:25:38 -0700 (PDT)
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.7 096/388] NTB: Fix the default port and peer numbers for legacy drivers
-Date: Wed, 17 Jun 2020 21:03:13 -0400
-Message-Id: <20200618010805.600873-96-sashal@kernel.org>
-In-Reply-To: <20200618010805.600873-1-sashal@kernel.org>
-References: <20200618010805.600873-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 156/172] NTB: Revert the change to use the NTB device dev for DMA allocations
+Date: Wed, 17 Jun 2020 21:22:02 -0400
+Message-Id: <20200618012218.607130-156-sashal@kernel.org>
+In-Reply-To: <20200618012218.607130-1-sashal@kernel.org>
+References: <20200618012218.607130-1-sashal@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Logan Gunthorpe <logang@deltatee.com>, Allen Hubbe <allenbh@gmail.com>, Alexander Fomichev <fomichev.ru@gmail.com>, Jon Mason <jdmason@kudzu.us>, Sasha Levin <sashal@kernel.org>, linux-ntb@googlegroups.com
+Cc: Logan Gunthorpe <logang@deltatee.com>, Alexander Fomichev <fomichev.ru@gmail.com>, Jon Mason <jdmason@kudzu.us>, Sasha Levin <sashal@kernel.org>, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
 From: Logan Gunthorpe <logang@deltatee.com>
 
-[ Upstream commit fc8b086d9dbd57458d136c4fa70ee26f832c3a2e ]
+[ Upstream commit 40da7d9a93c8941737ef4a1208d32c13ce017fe1 ]
 
-When the commit adding ntb_default_port_number() and
-ntb_default_peer_port_number()  entered the kernel there was no
-users of it so it was impossible to tell what the API needed.
+Commit 417cf39cfea9 ("NTB: Set dma mask and dma coherent mask to NTB
+devices") started using the NTB device for DMA allocations which was
+turns out was wrong. If the IOMMU is enabled, such alloctanions will
+always fail with messages such as:
 
-When a user finally landed a year later (ntb_pingpong) there were
-more NTB topologies were created and no consideration was considered
-to how other drivers had changed.
+  DMAR: Allocating domain for 0000:02:00.1 failed
 
-Now that there is a user it can be fixed to provide a sensible default
-for the legacy drivers that do not implement ntb_{peer_}port_number().
-Seeing ntb_pingpong doesn't check error codes returning EINVAL was also
-not sensible.
+This is because the IOMMU has not setup the device for such use.
 
-Patches for ntb_pingpong and ntb_perf follow (which are broken
-otherwise) to support hardware that doesn't have port numbers. This is
-important not only to not break support with existing drivers but for
-the cross link topology which, due to its perfect symmetry, cannot
-assign unique port numbers to each side.
+Change the tools back to using the PCI device for allocations seeing
+it doesn't make sense to add an IOMMU group for the non-physical NTB
+device. Also remove the code that sets the DMA mask as it no longer
+makes sense to do this.
 
-Fixes: 1e5301196a88 ("NTB: Add indexed ports NTB API")
+Fixes: 7f46c8b3a552 ("NTB: ntb_tool: Add full multi-port NTB API support")
 Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-Acked-by: Allen Hubbe <allenbh@gmail.com>
 Tested-by: Alexander Fomichev <fomichev.ru@gmail.com>
 Signed-off-by: Jon Mason <jdmason@kudzu.us>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/ntb/core.c | 8 ++------
- 1 file changed, 2 insertions(+), 6 deletions(-)
+ drivers/ntb/ntb.c | 1 -
+ 1 file changed, 1 deletion(-)
 
-diff --git a/drivers/ntb/core.c b/drivers/ntb/core.c
-index 2581ab724c34..c9a0912b175f 100644
---- a/drivers/ntb/core.c
-+++ b/drivers/ntb/core.c
-@@ -214,10 +214,8 @@ int ntb_default_port_number(struct ntb_dev *ntb)
- 	case NTB_TOPO_B2B_DSD:
- 		return NTB_PORT_SEC_DSD;
- 	default:
--		break;
-+		return 0;
- 	}
--
--	return -EINVAL;
+diff --git a/drivers/ntb/ntb.c b/drivers/ntb/ntb.c
+index c9a0912b175f..f8f75a504a58 100644
+--- a/drivers/ntb/ntb.c
++++ b/drivers/ntb/ntb.c
+@@ -311,4 +311,3 @@ static void __exit ntb_driver_exit(void)
+ 	bus_unregister(&ntb_bus);
  }
- EXPORT_SYMBOL(ntb_default_port_number);
- 
-@@ -240,10 +238,8 @@ int ntb_default_peer_port_number(struct ntb_dev *ntb, int pidx)
- 	case NTB_TOPO_B2B_DSD:
- 		return NTB_PORT_PRI_USD;
- 	default:
--		break;
-+		return 0;
- 	}
+ module_exit(ntb_driver_exit);
 -
--	return -EINVAL;
- }
- EXPORT_SYMBOL(ntb_default_peer_port_number);
- 
 -- 
 2.25.1
 
