@@ -1,15 +1,15 @@
 Return-Path: <sashal@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id i17si370690pjv.1.2020.06.17.18.25.38
+        by gmr-mx.google.com with ESMTPS id y21si105419qka.2.2020.06.17.18.21.41
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 17 Jun 2020 18:25:38 -0700 (PDT)
+        Wed, 17 Jun 2020 18:21:41 -0700 (PDT)
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 156/172] NTB: Revert the change to use the NTB device dev for DMA allocations
-Date: Wed, 17 Jun 2020 21:22:02 -0400
-Message-Id: <20200618012218.607130-156-sashal@kernel.org>
-In-Reply-To: <20200618012218.607130-1-sashal@kernel.org>
-References: <20200618012218.607130-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.4 240/266] NTB: Revert the change to use the NTB device dev for DMA allocations
+Date: Wed, 17 Jun 2020 21:16:05 -0400
+Message-Id: <20200618011631.604574-240-sashal@kernel.org>
+In-Reply-To: <20200618011631.604574-1-sashal@kernel.org>
+References: <20200618011631.604574-1-sashal@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
@@ -40,13 +40,13 @@ Tested-by: Alexander Fomichev <fomichev.ru@gmail.com>
 Signed-off-by: Jon Mason <jdmason@kudzu.us>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/ntb/ntb.c | 1 -
+ drivers/ntb/core.c | 1 -
  1 file changed, 1 deletion(-)
 
-diff --git a/drivers/ntb/ntb.c b/drivers/ntb/ntb.c
+diff --git a/drivers/ntb/core.c b/drivers/ntb/core.c
 index c9a0912b175f..f8f75a504a58 100644
---- a/drivers/ntb/ntb.c
-+++ b/drivers/ntb/ntb.c
+--- a/drivers/ntb/core.c
++++ b/drivers/ntb/core.c
 @@ -311,4 +311,3 @@ static void __exit ntb_driver_exit(void)
  	bus_unregister(&ntb_bus);
  }
