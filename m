@@ -1,15 +1,15 @@
 Return-Path: <sashal@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id i11si140477vkk.2.2020.06.17.18.18.12
+        by gmr-mx.google.com with ESMTPS id u126si108281ybg.0.2020.06.17.18.10.16
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 17 Jun 2020 18:18:12 -0700 (PDT)
+        Wed, 17 Jun 2020 18:10:16 -0700 (PDT)
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.4 072/266] NTB: ntb_pingpong: Choose doorbells based on port number
-Date: Wed, 17 Jun 2020 21:13:17 -0400
-Message-Id: <20200618011631.604574-72-sashal@kernel.org>
-In-Reply-To: <20200618011631.604574-1-sashal@kernel.org>
-References: <20200618011631.604574-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.7 095/388] NTB: ntb_pingpong: Choose doorbells based on port number
+Date: Wed, 17 Jun 2020 21:03:12 -0400
+Message-Id: <20200618010805.600873-95-sashal@kernel.org>
+In-Reply-To: <20200618010805.600873-1-sashal@kernel.org>
+References: <20200618010805.600873-1-sashal@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
@@ -41,7 +41,7 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 6 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/ntb/test/ntb_pingpong.c b/drivers/ntb/test/ntb_pingpong.c
-index 65865e460ab8..18d00eec7b02 100644
+index 04dd46647db3..2164e8492772 100644
 --- a/drivers/ntb/test/ntb_pingpong.c
 +++ b/drivers/ntb/test/ntb_pingpong.c
 @@ -121,15 +121,14 @@ static int pp_find_next_peer(struct pp_ctx *pp)
@@ -74,7 +74,7 @@ index 65865e460ab8..18d00eec7b02 100644
  	pp->pmask = GENMASK_ULL(pidx, 0) >> 1;
  	pp->nmask = GENMASK_ULL(pcnt - 1, pidx);
  
-@@ -435,4 +434,3 @@ static void __exit pp_exit(void)
+@@ -432,4 +431,3 @@ static void __exit pp_exit(void)
  	debugfs_remove_recursive(pp_dbgfs_topdir);
  }
  module_exit(pp_exit);
