@@ -1,15 +1,15 @@
 Return-Path: <sashal@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id a13si96052otl.0.2020.06.17.18.25.44
+        by gmr-mx.google.com with ESMTPS id t24si95878uaq.0.2020.06.17.18.21.46
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 17 Jun 2020 18:25:44 -0700 (PDT)
+        Wed, 17 Jun 2020 18:21:47 -0700 (PDT)
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 160/172] NTB: ntb_test: Fix bug when counting remote files
-Date: Wed, 17 Jun 2020 21:22:06 -0400
-Message-Id: <20200618012218.607130-160-sashal@kernel.org>
-In-Reply-To: <20200618012218.607130-1-sashal@kernel.org>
-References: <20200618012218.607130-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.4 244/266] NTB: ntb_test: Fix bug when counting remote files
+Date: Wed, 17 Jun 2020 21:16:09 -0400
+Message-Id: <20200618011631.604574-244-sashal@kernel.org>
+In-Reply-To: <20200618011631.604574-1-sashal@kernel.org>
+References: <20200618011631.604574-1-sashal@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
@@ -35,10 +35,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/tools/testing/selftests/ntb/ntb_test.sh b/tools/testing/selftests/ntb/ntb_test.sh
-index 08cbfbbc7029..17ca36403d04 100755
+index 9c60337317c6..020137b61407 100755
 --- a/tools/testing/selftests/ntb/ntb_test.sh
 +++ b/tools/testing/selftests/ntb/ntb_test.sh
-@@ -250,7 +250,7 @@ function get_files_count()
+@@ -241,7 +241,7 @@ function get_files_count()
  	split_remote $LOC
  
  	if [[ "$REMOTE" == "" ]]; then
