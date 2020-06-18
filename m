@@ -1,15 +1,15 @@
 Return-Path: <sashal@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id t23si69202plr.4.2020.06.17.18.18.13
+        by gmr-mx.google.com with ESMTPS id e69si119699oob.2.2020.06.17.18.10.16
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 17 Jun 2020 18:18:13 -0700 (PDT)
+        Wed, 17 Jun 2020 18:10:16 -0700 (PDT)
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.4 073/266] NTB: Fix the default port and peer numbers for legacy drivers
-Date: Wed, 17 Jun 2020 21:13:18 -0400
-Message-Id: <20200618011631.604574-73-sashal@kernel.org>
-In-Reply-To: <20200618011631.604574-1-sashal@kernel.org>
-References: <20200618011631.604574-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.7 096/388] NTB: Fix the default port and peer numbers for legacy drivers
+Date: Wed, 17 Jun 2020 21:03:13 -0400
+Message-Id: <20200618010805.600873-96-sashal@kernel.org>
+In-Reply-To: <20200618010805.600873-1-sashal@kernel.org>
+References: <20200618010805.600873-1-sashal@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
