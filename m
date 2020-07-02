@@ -1,13 +1,13 @@
 Return-Path: <kishon@ti.com>
-Received: from lelv0143.ext.ti.com (lelv0143.ext.ti.com. [198.47.23.248])
-        by gmr-mx.google.com with ESMTPS id d16si432292pgk.2.2020.07.02.01.22.12
+Received: from lelv0142.ext.ti.com (lelv0142.ext.ti.com. [198.47.23.249])
+        by gmr-mx.google.com with ESMTPS id j9si247953qkg.6.2020.07.02.01.22.07
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 02 Jul 2020 01:22:12 -0700 (PDT)
+        Thu, 02 Jul 2020 01:22:07 -0700 (PDT)
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [RFC PATCH 03/22] vhost: Add ops for the VHOST driver to configure VHOST device
-Date: Thu, 2 Jul 2020 13:51:24 +0530
-Message-ID: <20200702082143.25259-4-kishon@ti.com>
+Subject: [RFC PATCH 02/22] vhost: Introduce standard Linux driver model in VHOST
+Date: Thu, 2 Jul 2020 13:51:23 +0530
+Message-ID: <20200702082143.25259-3-kishon@ti.com>
 In-Reply-To: <20200702082143.25259-1-kishon@ti.com>
 References: <20200702082143.25259-1-kishon@ti.com>
 MIME-Version: 1.0
@@ -17,308 +17,381 @@ To: Ohad Ben-Cohen <ohad@wizery.com>, Bjorn Andersson <bjorn.andersson@linaro.or
 Cc: linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-remoteproc@vger.kernel.org, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, kvm@vger.kernel.org, virtualization@lists.linux-foundation.org, netdev@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-Add "vhost_config_ops" in *struct vhost_driver* for the VHOST driver to
-configure VHOST device and add facility for VHOST device to notify
-VHOST driver (whenever VIRTIO sets a new status or finalize features).
-This is in preparation to use the same vhost_driver across different
-VHOST devices (like PCIe or NTB or platform device).
+Introduce standard driver model in VHOST. This will facilitate using
+multiple VHOST drivers (like net, scsi etc.,) over different VHOST
+devices using MMIO (like PCIe or NTB), using kernel pointers (like
+platform devices) or using userspace pointers.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- drivers/vhost/vhost.c | 185 ++++++++++++++++++++++++++++++++++++++++++
- include/linux/vhost.h |  57 +++++++++++++
- 2 files changed, 242 insertions(+)
+ drivers/vhost/net.c                      |   3 +-
+ drivers/vhost/scsi.c                     |   2 +-
+ drivers/vhost/test.c                     |   3 +-
+ drivers/vhost/vdpa.c                     |   2 +-
+ drivers/vhost/vhost.c                    | 157 ++++++++++++++++++++++-
+ drivers/vhost/vsock.c                    |   2 +-
+ include/linux/mod_devicetable.h          |   6 +
+ {drivers/vhost => include/linux}/vhost.h |  22 +++-
+ tools/virtio/virtio_test.c               |   2 +-
+ 9 files changed, 190 insertions(+), 9 deletions(-)
+ rename {drivers/vhost => include/linux}/vhost.h (93%)
 
+diff --git a/drivers/vhost/net.c b/drivers/vhost/net.c
+index 437126219116..3c57c345cbfd 100644
+--- a/drivers/vhost/net.c
++++ b/drivers/vhost/net.c
+@@ -18,6 +18,7 @@
+ #include <linux/slab.h>
+ #include <linux/sched/clock.h>
+ #include <linux/sched/signal.h>
++#include <linux/vhost.h>
+ #include <linux/vmalloc.h>
+ 
+ #include <linux/net.h>
+@@ -33,7 +34,7 @@
+ #include <net/sock.h>
+ #include <net/xdp.h>
+ 
+-#include "vhost.h"
++#include <uapi/linux/vhost.h>
+ 
+ static int experimental_zcopytx = 0;
+ module_param(experimental_zcopytx, int, 0444);
+diff --git a/drivers/vhost/scsi.c b/drivers/vhost/scsi.c
+index f5138379659e..06898b7ce7dd 100644
+--- a/drivers/vhost/scsi.c
++++ b/drivers/vhost/scsi.c
+@@ -47,7 +47,7 @@
+ #include <linux/llist.h>
+ #include <linux/bitmap.h>
+ 
+-#include "vhost.h"
++#include <uapi/linux/vhost.h>
+ 
+ #define VHOST_SCSI_VERSION  "v0.1"
+ #define VHOST_SCSI_NAMELEN 256
+diff --git a/drivers/vhost/test.c b/drivers/vhost/test.c
+index 6518b48c0633..07508526182f 100644
+--- a/drivers/vhost/test.c
++++ b/drivers/vhost/test.c
+@@ -14,9 +14,10 @@
+ #include <linux/workqueue.h>
+ #include <linux/file.h>
+ #include <linux/slab.h>
++#include <linux/vhost.h>
++#include <uapi/linux/vhost.h>
+ 
+ #include "test.h"
+-#include "vhost.h"
+ 
+ /* Max number of bytes transferred before requeueing the job.
+  * Using this limit prevents one virtqueue from starving others. */
+diff --git a/drivers/vhost/vdpa.c b/drivers/vhost/vdpa.c
+index 0968361e3b77..61d90100db89 100644
+--- a/drivers/vhost/vdpa.c
++++ b/drivers/vhost/vdpa.c
+@@ -22,7 +22,7 @@
+ #include <linux/vhost.h>
+ #include <linux/virtio_net.h>
+ 
+-#include "vhost.h"
++#include <uapi/linux/vhost.h>
+ 
+ enum {
+ 	VHOST_VDPA_FEATURES =
 diff --git a/drivers/vhost/vhost.c b/drivers/vhost/vhost.c
-index fa2bc6e68be2..f959abb0b1bb 100644
+index 3c2633fb519d..fa2bc6e68be2 100644
 --- a/drivers/vhost/vhost.c
 +++ b/drivers/vhost/vhost.c
-@@ -2558,6 +2558,190 @@ struct vhost_msg_node *vhost_dequeue_msg(struct vhost_dev *dev,
+@@ -32,8 +32,6 @@
+ #include <linux/nospec.h>
+ #include <linux/kcov.h>
+ 
+-#include "vhost.h"
+-
+ static ushort max_mem_regions = 64;
+ module_param(max_mem_regions, ushort, 0444);
+ MODULE_PARM_DESC(max_mem_regions,
+@@ -43,6 +41,9 @@ module_param(max_iotlb_entries, int, 0444);
+ MODULE_PARM_DESC(max_iotlb_entries,
+ 	"Maximum number of iotlb entries. (default: 2048)");
+ 
++static DEFINE_IDA(vhost_index_ida);
++static DEFINE_MUTEX(vhost_index_mutex);
++
+ enum {
+ 	VHOST_MEMORY_F_LOG = 0x1,
+ };
+@@ -2557,14 +2558,166 @@ struct vhost_msg_node *vhost_dequeue_msg(struct vhost_dev *dev,
  }
  EXPORT_SYMBOL_GPL(vhost_dequeue_msg);
  
++static inline int vhost_id_match(const struct vhost_dev *vdev,
++				 const struct vhost_device_id *id)
++{
++	if (id->device != vdev->id.device && id->device != VIRTIO_DEV_ANY_ID)
++		return 0;
++
++	return id->vendor == VIRTIO_DEV_ANY_ID || id->vendor == vdev->id.vendor;
++}
++
++static int vhost_dev_match(struct device *dev, struct device_driver *drv)
++{
++	struct vhost_driver *driver = to_vhost_driver(drv);
++	struct vhost_dev *vdev = to_vhost_dev(dev);
++	const struct vhost_device_id *ids;
++	int i;
++
++	ids = driver->id_table;
++	for (i = 0; ids[i].device; i++)
++		if (vhost_id_match(vdev, &ids[i]))
++			return 1;
++
++	return 0;
++}
++
++static int vhost_dev_probe(struct device *dev)
++{
++	struct vhost_driver *driver = to_vhost_driver(dev->driver);
++	struct vhost_dev *vdev = to_vhost_dev(dev);
++
++	if (!driver->probe)
++		return -ENODEV;
++
++	vdev->driver = driver;
++
++	return driver->probe(vdev);
++}
++
++static int vhost_dev_remove(struct device *dev)
++{
++	struct vhost_driver *driver = to_vhost_driver(dev->driver);
++	struct vhost_dev *vdev = to_vhost_dev(dev);
++	int ret = 0;
++
++	if (driver->remove)
++		ret = driver->remove(vdev);
++	vdev->driver = NULL;
++
++	return ret;
++}
++
++static struct bus_type vhost_bus_type = {
++	.name  = "vhost",
++	.match = vhost_dev_match,
++	.probe = vhost_dev_probe,
++	.remove = vhost_dev_remove,
++};
++
 +/**
-+ * vhost_create_vqs() - Invoke vhost_config_ops to create virtqueue
-+ * @vdev: Vhost device that provides create_vqs() callback to create virtqueue
-+ * @nvqs: Number of vhost virtqueues to be created
-+ * @num_bufs: The number of buffers that should be supported by the vhost
-+ *   virtqueue (number of descriptors in the vhost virtqueue)
-+ * @vqs: Pointers to all the created vhost virtqueues
-+ * @callback: Callback function associated with the virtqueue
-+ * @names: Names associated with each virtqueue
++ * vhost_register_driver() - Register a vhost driver
++ * @driver: Vhost driver that has to be registered
 + *
-+ * Wrapper that invokes vhost_config_ops to create virtqueue.
++ * Register a vhost driver.
 + */
-+int vhost_create_vqs(struct vhost_dev *vdev, unsigned int nvqs,
-+		     unsigned int num_bufs, struct vhost_virtqueue *vqs[],
-+		     vhost_vq_callback_t *callbacks[],
-+		     const char * const names[])
++int vhost_register_driver(struct vhost_driver *driver)
 +{
 +	int ret;
 +
-+	if (IS_ERR_OR_NULL(vdev))
-+		return -EINVAL;
++	driver->driver.bus = &vhost_bus_type;
 +
-+	if (!vdev->ops && !vdev->ops->create_vqs)
-+		return -EINVAL;
++	ret = driver_register(&driver->driver);
++	if (ret)
++		return ret;
 +
-+	mutex_lock(&vdev->mutex);
-+	ret = vdev->ops->create_vqs(vdev, nvqs, num_bufs, vqs, callbacks,
-+				    names);
-+	mutex_unlock(&vdev->mutex);
-+
-+	return ret;
++	return 0;
 +}
-+EXPORT_SYMBOL_GPL(vhost_create_vqs);
++EXPORT_SYMBOL_GPL(vhost_register_driver);
 +
-+/* vhost_del_vqs - Invoke vhost_config_ops to delete the created virtqueues
-+ * @vdev: Vhost device that provides del_vqs() callback to delete virtqueue
++/**
++ * vhost_unregister_driver() - Unregister a vhost driver
++ * @driver: Vhost driver that has to be un-registered
 + *
-+ * Wrapper that invokes vhost_config_ops to delete all the virtqueues
-+ * associated with the vhost device.
++ * Unregister a vhost driver.
 + */
-+void vhost_del_vqs(struct vhost_dev *vdev)
++void vhost_unregister_driver(struct vhost_driver *driver)
 +{
-+	if (IS_ERR_OR_NULL(vdev))
-+		return;
-+
-+	if (!vdev->ops && !vdev->ops->del_vqs)
-+		return;
-+
-+	mutex_lock(&vdev->mutex);
-+	vdev->ops->del_vqs(vdev);
-+	mutex_unlock(&vdev->mutex);
++	driver_unregister(&driver->driver);
 +}
-+EXPORT_SYMBOL_GPL(vhost_del_vqs);
++EXPORT_SYMBOL_GPL(vhost_unregister_driver);
 +
-+/* vhost_write - Invoke vhost_config_ops to write data to buffer provided
-+ *   by remote virtio driver
-+ * @vdev: Vhost device that provides write() callback to write data
-+ * @dst: Buffer address in the remote device provided by the remote virtio
-+ *   driver
-+ * @src: Buffer address in the local device provided by the vhost client driver
-+ * @len: Length of the data to be copied from @src to @dst
++/**
++ * vhost_register_device() - Register vhost device
++ * @vdev: Vhost device that has to be registered
 + *
-+ * Wrapper that invokes vhost_config_ops to write data to buffer provided by
-+ * remote virtio driver from buffer provided by vhost client driver.
++ * Allocate a ID and register vhost device.
 + */
-+int vhost_write(struct vhost_dev *vdev, u64 vhost_dst, void *src, int len)
++int vhost_register_device(struct vhost_dev *vdev)
 +{
-+	if (IS_ERR_OR_NULL(vdev))
-+		return -EINVAL;
-+
-+	if (!vdev->ops && !vdev->ops->write)
-+		return -EINVAL;
-+
-+	return vdev->ops->write(vdev, vhost_dst, src, len);
-+}
-+EXPORT_SYMBOL_GPL(vhost_write);
-+
-+/* vhost_read - Invoke vhost_config_ops to read data from buffers provided by
-+ *   remote virtio driver
-+ * @vdev: Vhost device that provides read() callback to read data
-+ * @dst: Buffer address in the local device provided by the vhost client driver
-+ * @src: Buffer address in the remote device provided by the remote virtio
-+ *   driver
-+ * @len: Length of the data to be copied from @src to @dst
-+ *
-+ * Wrapper that invokes vhost_config_ops to read data from buffers provided by
-+ * remote virtio driver to the address provided by vhost client driver.
-+ */
-+int vhost_read(struct vhost_dev *vdev, void *dst, u64 vhost_src, int len)
-+{
-+	if (IS_ERR_OR_NULL(vdev))
-+		return -EINVAL;
-+
-+	if (!vdev->ops && !vdev->ops->read)
-+		return -EINVAL;
-+
-+	return vdev->ops->read(vdev, dst, vhost_src, len);
-+}
-+EXPORT_SYMBOL_GPL(vhost_read);
-+
-+/* vhost_set_status - Invoke vhost_config_ops to set vhost device status
-+ * @vdev: Vhost device that provides set_status() callback to set device status
-+ * @status: Vhost device status configured by vhost client driver
-+ *
-+ * Wrapper that invokes vhost_config_ops to set vhost device status.
-+ */
-+int vhost_set_status(struct vhost_dev *vdev, u8 status)
-+{
++	struct device *dev = &vdev->dev;
 +	int ret;
 +
-+	if (IS_ERR_OR_NULL(vdev))
-+		return -EINVAL;
++	mutex_lock(&vhost_index_mutex);
++	ret = ida_simple_get(&vhost_index_ida, 0, 0, GFP_KERNEL);
++	mutex_unlock(&vhost_index_mutex);
++	if (ret < 0)
++		return ret;
 +
-+	if (!vdev->ops && !vdev->ops->set_status)
-+		return -EINVAL;
++	vdev->index = ret;
++	dev->bus = &vhost_bus_type;
++	device_initialize(dev);
 +
-+	mutex_lock(&vdev->mutex);
-+	ret = vdev->ops->set_status(vdev, status);
-+	mutex_unlock(&vdev->mutex);
++	dev_set_name(dev, "vhost%u", ret);
 +
-+	return ret;
-+}
-+EXPORT_SYMBOL_GPL(vhost_set_status);
++	ret = device_add(dev);
++	if (ret) {
++		put_device(dev);
++		goto err;
++	}
 +
-+/* vhost_get_status - Invoke vhost_config_ops to get vhost device status
-+ * @vdev: Vhost device that provides get_status() callback to get device status
-+ *
-+ * Wrapper that invokes vhost_config_ops to get vhost device status.
-+ */
-+u8 vhost_get_status(struct vhost_dev *vdev)
-+{
-+	u8 status;
++	return 0;
 +
-+	if (IS_ERR_OR_NULL(vdev))
-+		return -EINVAL;
-+
-+	if (!vdev->ops && !vdev->ops->get_status)
-+		return -EINVAL;
-+
-+	mutex_lock(&vdev->mutex);
-+	status = vdev->ops->get_status(vdev);
-+	mutex_unlock(&vdev->mutex);
-+
-+	return status;
-+}
-+EXPORT_SYMBOL_GPL(vhost_get_status);
-+
-+/* vhost_set_features - Invoke vhost_config_ops to set vhost device features
-+ * @vdev: Vhost device that provides set_features() callback to set device
-+ *   features
-+ *
-+ * Wrapper that invokes vhost_config_ops to set device features.
-+ */
-+int vhost_set_features(struct vhost_dev *vdev, u64 device_features)
-+{
-+	int ret;
-+
-+	if (IS_ERR_OR_NULL(vdev))
-+		return -EINVAL;
-+
-+	if (!vdev->ops && !vdev->ops->set_features)
-+		return -EINVAL;
-+
-+	mutex_lock(&vdev->mutex);
-+	ret = vdev->ops->set_features(vdev, device_features);
-+	mutex_unlock(&vdev->mutex);
++err:
++	mutex_lock(&vhost_index_mutex);
++	ida_simple_remove(&vhost_index_ida, vdev->index);
++	mutex_unlock(&vhost_index_mutex);
 +
 +	return ret;
 +}
-+EXPORT_SYMBOL_GPL(vhost_set_features);
++EXPORT_SYMBOL_GPL(vhost_register_device);
 +
-+/* vhost_register_notifier - Register notifier to receive notification from
-+ *   vhost device
-+ * @vdev: Vhost device from which notification has to be received.
-+ * @nb: Notifier block holding the callback function
++/**
++ * vhost_unregister_device() - Un-register vhost device
++ * @vdev: Vhost device that has to be un-registered
 + *
-+ * Invoked by vhost client to receive notification from vhost device.
++ * Un-register vhost device and free the allocated ID.
 + */
-+int vhost_register_notifier(struct vhost_dev *vdev, struct notifier_block *nb)
++void vhost_unregister_device(struct vhost_dev *vdev)
 +{
-+	return blocking_notifier_chain_register(&vdev->notifier, nb);
++	device_unregister(&vdev->dev);
++	mutex_lock(&vhost_index_mutex);
++	ida_simple_remove(&vhost_index_ida, vdev->index);
++	mutex_unlock(&vhost_index_mutex);
 +}
-+EXPORT_SYMBOL_GPL(vhost_register_notifier);
-+
- static inline int vhost_id_match(const struct vhost_dev *vdev,
- 				 const struct vhost_device_id *id)
++EXPORT_SYMBOL_GPL(vhost_unregister_device);
+ 
+ static int __init vhost_init(void)
  {
-@@ -2669,6 +2853,7 @@ int vhost_register_device(struct vhost_dev *vdev)
- 	device_initialize(dev);
++	int ret;
++
++	ret = bus_register(&vhost_bus_type);
++	if (ret) {
++		pr_err("failed to register vhost bus --> %d\n", ret);
++		return ret;
++	}
++
+ 	return 0;
+ }
  
- 	dev_set_name(dev, "vhost%u", ret);
-+	BLOCKING_INIT_NOTIFIER_HEAD(&vdev->notifier);
+ static void __exit vhost_exit(void)
+ {
++	bus_unregister(&vhost_bus_type);
+ }
  
- 	ret = device_add(dev);
- 	if (ret) {
-diff --git a/include/linux/vhost.h b/include/linux/vhost.h
-index 16c374a8fa12..b22a19c66109 100644
---- a/include/linux/vhost.h
+ module_init(vhost_init);
+diff --git a/drivers/vhost/vsock.c b/drivers/vhost/vsock.c
+index 8317ad026e3d..5753048b7405 100644
+--- a/drivers/vhost/vsock.c
++++ b/drivers/vhost/vsock.c
+@@ -17,7 +17,7 @@
+ #include <linux/hashtable.h>
+ 
+ #include <net/af_vsock.h>
+-#include "vhost.h"
++#include <uapi/linux/vhost.h>
+ 
+ #define VHOST_VSOCK_DEFAULT_HOST_CID	2
+ /* Max number of bytes transferred before requeueing the job.
+diff --git a/include/linux/mod_devicetable.h b/include/linux/mod_devicetable.h
+index 8d764aab29de..c7df018989e3 100644
+--- a/include/linux/mod_devicetable.h
++++ b/include/linux/mod_devicetable.h
+@@ -430,6 +430,12 @@ struct virtio_device_id {
+ };
+ #define VIRTIO_DEV_ANY_ID	0xffffffff
+ 
++/* VHOST */
++struct vhost_device_id {
++	__u32 device;
++	__u32 vendor;
++};
++
+ /*
+  * For Hyper-V devices we use the device guid as the id.
+  */
+diff --git a/drivers/vhost/vhost.h b/include/linux/vhost.h
+similarity index 93%
+rename from drivers/vhost/vhost.h
+rename to include/linux/vhost.h
+index 5d1d00363e79..16c374a8fa12 100644
+--- a/drivers/vhost/vhost.h
 +++ b/include/linux/vhost.h
-@@ -135,6 +135,37 @@ struct vhost_msg_node {
+@@ -3,7 +3,6 @@
+ #define _VHOST_H
+ 
+ #include <linux/eventfd.h>
+-#include <linux/vhost.h>
+ #include <linux/mm.h>
+ #include <linux/mutex.h>
+ #include <linux/poll.h>
+@@ -13,6 +12,7 @@
+ #include <linux/virtio_ring.h>
+ #include <linux/atomic.h>
+ #include <linux/vhost_iotlb.h>
++#include <uapi/linux/vhost.h>
+ 
+ struct vhost_work;
+ typedef void (*vhost_work_fn_t)(struct vhost_work *work);
+@@ -135,7 +135,20 @@ struct vhost_msg_node {
    struct list_head node;
  };
  
-+enum vhost_notify_event {
-+	NOTIFY_SET_STATUS,
-+	NOTIFY_FINALIZE_FEATURES,
-+	NOTIFY_RESET,
++struct vhost_driver {
++	struct device_driver driver;
++	struct vhost_device_id *id_table;
++	int (*probe)(struct vhost_dev *dev);
++	int (*remove)(struct vhost_dev *dev);
 +};
 +
-+typedef void vhost_vq_callback_t(struct vhost_virtqueue *);
-+/**
-+ * struct vhost_config_ops - set of function pointers for performing vhost
-+ *   device specific operation
-+ * @create_vqs: ops to create vhost virtqueue
-+ * @del_vqs: ops to delete vhost virtqueue
-+ * @write: ops to write data to buffer provided by remote virtio driver
-+ * @read: ops to read data from buffer provided by remote virtio driver
-+ * @set_features: ops to set vhost device features
-+ * @set_status: ops to set vhost device status
-+ * @get_status: ops to get vhost device status
-+ */
-+struct vhost_config_ops {
-+	int (*create_vqs)(struct vhost_dev *vdev, unsigned int nvqs,
-+			  unsigned int num_bufs, struct vhost_virtqueue *vqs[],
-+			  vhost_vq_callback_t *callbacks[],
-+			  const char * const names[]);
-+	void (*del_vqs)(struct vhost_dev *vdev);
-+	int (*write)(struct vhost_dev *vdev, u64 vhost_dst, void *src, int len);
-+	int (*read)(struct vhost_dev *vdev, void *dst, u64 vhost_src, int len);
-+	int (*set_features)(struct vhost_dev *vdev, u64 device_features);
-+	int (*set_status)(struct vhost_dev *vdev, u8 status);
-+	u8 (*get_status)(struct vhost_dev *vdev);
-+};
++#define to_vhost_driver(drv) (container_of((drv), struct vhost_driver, driver))
 +
- struct vhost_driver {
- 	struct device_driver driver;
- 	struct vhost_device_id *id_table;
-@@ -149,6 +180,8 @@ struct vhost_dev {
- 	struct vhost_driver *driver;
- 	struct vhost_device_id id;
- 	int index;
-+	const struct vhost_config_ops *ops;
-+	struct blocking_notifier_head notifier;
+ struct vhost_dev {
++	struct device dev;
++	struct vhost_driver *driver;
++	struct vhost_device_id id;
++	int index;
  	struct mm_struct *mm;
  	struct mutex mutex;
  	struct vhost_virtqueue **vqs;
-@@ -173,11 +206,35 @@ struct vhost_dev {
+@@ -158,6 +171,13 @@ struct vhost_dev {
+ 			   struct vhost_iotlb_msg *msg);
+ };
  
- #define to_vhost_dev(d) container_of((d), struct vhost_dev, dev)
- 
-+static inline void vhost_set_drvdata(struct vhost_dev *vdev, void *data)
-+{
-+	dev_set_drvdata(&vdev->dev, data);
-+}
++#define to_vhost_dev(d) container_of((d), struct vhost_dev, dev)
 +
-+static inline void *vhost_get_drvdata(struct vhost_dev *vdev)
-+{
-+	return dev_get_drvdata(&vdev->dev);
-+}
-+
- int vhost_register_driver(struct vhost_driver *driver);
- void vhost_unregister_driver(struct vhost_driver *driver);
- int vhost_register_device(struct vhost_dev *vdev);
- void vhost_unregister_device(struct vhost_dev *vdev);
- 
-+int vhost_create_vqs(struct vhost_dev *vdev, unsigned int nvqs,
-+		     unsigned int num_bufs, struct vhost_virtqueue *vqs[],
-+		     vhost_vq_callback_t *callbacks[],
-+		     const char * const names[]);
-+void vhost_del_vqs(struct vhost_dev *vdev);
-+int vhost_write(struct vhost_dev *vdev, u64 vhost_dst, void *src, int len);
-+int vhost_read(struct vhost_dev *vdev, void *dst, u64 vhost_src, int len);
-+int vhost_set_features(struct vhost_dev *vdev, u64 device_features);
-+u64 vhost_get_features(struct vhost_dev *vdev);
-+int vhost_set_status(struct vhost_dev *vdev, u8 status);
-+u8 vhost_get_status(struct vhost_dev *vdev);
-+
-+int vhost_register_notifier(struct vhost_dev *vdev, struct notifier_block *nb);
++int vhost_register_driver(struct vhost_driver *driver);
++void vhost_unregister_driver(struct vhost_driver *driver);
++int vhost_register_device(struct vhost_dev *vdev);
++void vhost_unregister_device(struct vhost_dev *vdev);
 +
  bool vhost_exceeds_weight(struct vhost_virtqueue *vq, int pkts, int total_len);
  void vhost_dev_init(struct vhost_dev *, struct vhost_virtqueue **vqs,
  		    int nvqs, int iov_limit, int weight, int byte_weight,
+diff --git a/tools/virtio/virtio_test.c b/tools/virtio/virtio_test.c
+index b427def67e7e..b13434d6c976 100644
+--- a/tools/virtio/virtio_test.c
++++ b/tools/virtio/virtio_test.c
+@@ -13,9 +13,9 @@
+ #include <fcntl.h>
+ #include <stdbool.h>
+ #include <linux/virtio_types.h>
+-#include <linux/vhost.h>
+ #include <linux/virtio.h>
+ #include <linux/virtio_ring.h>
++#include <uapi/linux/vhost.h>
+ #include "../../drivers/vhost/test.h"
+ 
+ /* Unused */
 -- 
 2.17.1
 
