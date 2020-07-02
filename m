@@ -1,13 +1,13 @@
 Return-Path: <kishon@ti.com>
-Received: from lelv0142.ext.ti.com (lelv0142.ext.ti.com. [198.47.23.249])
-        by gmr-mx.google.com with ESMTPS id s7si7357vsm.0.2020.07.02.01.23.22
+Received: from fllv0015.ext.ti.com (fllv0015.ext.ti.com. [198.47.19.141])
+        by gmr-mx.google.com with ESMTPS id d16si432385pgk.2.2020.07.02.01.23.09
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 02 Jul 2020 01:23:22 -0700 (PDT)
+        Thu, 02 Jul 2020 01:23:09 -0700 (PDT)
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [RFC PATCH 15/22] samples/rpmsg: Setup delayed work to send message
-Date: Thu, 2 Jul 2020 13:51:36 +0530
-Message-ID: <20200702082143.25259-16-kishon@ti.com>
+Subject: [RFC PATCH 13/22] rpmsg: virtio_rpmsg_bus: Use virtio_alloc_buffer() and virtio_free_buffer()
+Date: Thu, 2 Jul 2020 13:51:34 +0530
+Message-ID: <20200702082143.25259-14-kishon@ti.com>
 In-Reply-To: <20200702082143.25259-1-kishon@ti.com>
 References: <20200702082143.25259-1-kishon@ti.com>
 MIME-Version: 1.0
@@ -17,77 +17,74 @@ To: Ohad Ben-Cohen <ohad@wizery.com>, Bjorn Andersson <bjorn.andersson@linaro.or
 Cc: linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-remoteproc@vger.kernel.org, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, kvm@vger.kernel.org, virtualization@lists.linux-foundation.org, netdev@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-Let us not send any message to the remote processor before
-announce_create() callback has been invoked. Since announce_create() is
-only invoked after ->probe() is completed, setup delayed work to start
-sending message to the remote processor.
+Use virtio_alloc_buffer() and virtio_free_buffer() to allocate and free
+memory buffer respectively. Only if buffer allocation using
+virtio_alloc_buffer() try using dma_alloc_coherent(). This is required
+for devices like NTB to use rpmsg for communicating with other host.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- samples/rpmsg/rpmsg_client_sample.c | 28 +++++++++++++++++++++-------
- 1 file changed, 21 insertions(+), 7 deletions(-)
+ drivers/rpmsg/virtio_rpmsg_bus.c | 32 ++++++++++++++++++++++----------
+ 1 file changed, 22 insertions(+), 10 deletions(-)
 
-diff --git a/samples/rpmsg/rpmsg_client_sample.c b/samples/rpmsg/rpmsg_client_sample.c
-index ae5081662283..514a51945d69 100644
---- a/samples/rpmsg/rpmsg_client_sample.c
-+++ b/samples/rpmsg/rpmsg_client_sample.c
-@@ -20,6 +20,8 @@ module_param(count, int, 0644);
+diff --git a/drivers/rpmsg/virtio_rpmsg_bus.c b/drivers/rpmsg/virtio_rpmsg_bus.c
+index f91143b25af7..2b25a8ae1539 100644
+--- a/drivers/rpmsg/virtio_rpmsg_bus.c
++++ b/drivers/rpmsg/virtio_rpmsg_bus.c
+@@ -882,13 +882,16 @@ static int rpmsg_probe(struct virtio_device *vdev)
  
- struct instance_data {
- 	int rx_count;
-+	struct delayed_work send_msg_work;
-+	struct rpmsg_device *rpdev;
- };
+ 	total_buf_space = vrp->num_bufs * vrp->buf_size;
  
- static int rpmsg_sample_cb(struct rpmsg_device *rpdev, void *data, int len,
-@@ -48,9 +50,21 @@ static int rpmsg_sample_cb(struct rpmsg_device *rpdev, void *data, int len,
+-	/* allocate coherent memory for the buffers */
+-	bufs_va = dma_alloc_coherent(vdev->dev.parent,
+-				     total_buf_space, &vrp->bufs_dma,
+-				     GFP_KERNEL);
++	bufs_va = virtio_alloc_buffer(vdev, total_buf_space);
+ 	if (!bufs_va) {
+-		err = -ENOMEM;
+-		goto vqs_del;
++		/* allocate coherent memory for the buffers */
++		bufs_va = dma_alloc_coherent(vdev->dev.parent,
++					     total_buf_space, &vrp->bufs_dma,
++					     GFP_KERNEL);
++		if (!bufs_va) {
++			err = -ENOMEM;
++			goto vqs_del;
++		}
+ 	}
+ 
+ 	dev_dbg(&vdev->dev, "buffers: va %pK, dma %pad\n",
+@@ -951,8 +954,13 @@ static int rpmsg_probe(struct virtio_device *vdev)
  	return 0;
- }
  
--static int rpmsg_sample_probe(struct rpmsg_device *rpdev)
-+static void rpmsg_sample_send_msg_work(struct work_struct *work)
- {
-+	struct instance_data *idata = container_of(work, struct instance_data,
-+						   send_msg_work.work);
-+	struct rpmsg_device *rpdev = idata->rpdev;
- 	int ret;
+ free_coherent:
+-	dma_free_coherent(vdev->dev.parent, total_buf_space,
+-			  bufs_va, vrp->bufs_dma);
++	if (!vrp->bufs_dma) {
++		virtio_free_buffer(vdev, bufs_va, total_buf_space);
++	} else {
++		dma_free_coherent(vdev->dev.parent, total_buf_space,
++				  bufs_va, vrp->bufs_dma);
++	}
 +
-+	/* send a message to our remote processor */
-+	ret = rpmsg_send(rpdev->ept, MSG, strlen(MSG));
-+	if (ret)
-+		dev_err(&rpdev->dev, "rpmsg_send failed: %d\n", ret);
-+}
-+
-+static int rpmsg_sample_probe(struct rpmsg_device *rpdev)
-+{
- 	struct instance_data *idata;
+ vqs_del:
+ 	vdev->config->del_vqs(vrp->vdev);
+ free_vrp:
+@@ -986,8 +994,12 @@ static void rpmsg_remove(struct virtio_device *vdev)
  
- 	dev_info(&rpdev->dev, "new channel: 0x%x -> 0x%x!\n",
-@@ -62,18 +76,18 @@ static int rpmsg_sample_probe(struct rpmsg_device *rpdev)
+ 	vdev->config->del_vqs(vrp->vdev);
  
- 	dev_set_drvdata(&rpdev->dev, idata);
+-	dma_free_coherent(vdev->dev.parent, total_buf_space,
+-			  vrp->rbufs, vrp->bufs_dma);
++	if (!vrp->bufs_dma) {
++		virtio_free_buffer(vdev, vrp->rbufs, total_buf_space);
++	} else {
++		dma_free_coherent(vdev->dev.parent, total_buf_space,
++				  vrp->rbufs, vrp->bufs_dma);
++	}
  
--	/* send a message to our remote processor */
--	ret = rpmsg_send(rpdev->ept, MSG, strlen(MSG));
--	if (ret) {
--		dev_err(&rpdev->dev, "rpmsg_send failed: %d\n", ret);
--		return ret;
--	}
-+	idata->rpdev = rpdev;
-+	INIT_DELAYED_WORK(&idata->send_msg_work, rpmsg_sample_send_msg_work);
-+	schedule_delayed_work(&idata->send_msg_work, msecs_to_jiffies(500));
- 
- 	return 0;
+ 	kfree(vrp);
  }
- 
- static void rpmsg_sample_remove(struct rpmsg_device *rpdev)
- {
-+	struct instance_data *idata = dev_get_drvdata(&rpdev->dev);
-+
-+	cancel_delayed_work_sync(&idata->send_msg_work);
- 	dev_info(&rpdev->dev, "rpmsg sample client driver is removed\n");
- }
- 
 -- 
 2.17.1
 
