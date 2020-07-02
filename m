@@ -1,13 +1,13 @@
 Return-Path: <kishon@ti.com>
-Received: from fllv0015.ext.ti.com (fllv0015.ext.ti.com. [198.47.19.141])
-        by gmr-mx.google.com with ESMTPS id d16si432385pgk.2.2020.07.02.01.23.09
+Received: from lelv0143.ext.ti.com (lelv0143.ext.ti.com. [198.47.23.248])
+        by gmr-mx.google.com with ESMTPS id cp21si498760pjb.3.2020.07.02.01.23.03
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 02 Jul 2020 01:23:09 -0700 (PDT)
+        Thu, 02 Jul 2020 01:23:03 -0700 (PDT)
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [RFC PATCH 13/22] rpmsg: virtio_rpmsg_bus: Use virtio_alloc_buffer() and virtio_free_buffer()
-Date: Thu, 2 Jul 2020 13:51:34 +0530
-Message-ID: <20200702082143.25259-14-kishon@ti.com>
+Subject: [RFC PATCH 12/22] virtio: Add ops to allocate and free buffer
+Date: Thu, 2 Jul 2020 13:51:33 +0530
+Message-ID: <20200702082143.25259-13-kishon@ti.com>
 In-Reply-To: <20200702082143.25259-1-kishon@ti.com>
 References: <20200702082143.25259-1-kishon@ti.com>
 MIME-Version: 1.0
@@ -17,74 +17,91 @@ To: Ohad Ben-Cohen <ohad@wizery.com>, Bjorn Andersson <bjorn.andersson@linaro.or
 Cc: linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-remoteproc@vger.kernel.org, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, kvm@vger.kernel.org, virtualization@lists.linux-foundation.org, netdev@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-Use virtio_alloc_buffer() and virtio_free_buffer() to allocate and free
-memory buffer respectively. Only if buffer allocation using
-virtio_alloc_buffer() try using dma_alloc_coherent(). This is required
-for devices like NTB to use rpmsg for communicating with other host.
+Add ops to allocate and free buffer in struct virtio_config_ops.
+Certain vhost devices can have restriction on the range of memory
+it can access on the virtio. The virtio drivers attached to
+such vhost devices reserves memory that can be accessed by
+vhost. This function allocates buffer for such reserved region.
+
+For instance when virtio-vhost is used by two hosts connected to
+NTB, the vhost can access only memory exposed by memory windows
+and the size of the memory window can be limited. Here the NTB
+virtio driver can reserve a small region (few MBs) and provide
+buffer address from this pool whenever requested by virtio client
+driver.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- drivers/rpmsg/virtio_rpmsg_bus.c | 32 ++++++++++++++++++++++----------
- 1 file changed, 22 insertions(+), 10 deletions(-)
+ include/linux/virtio_config.h | 42 +++++++++++++++++++++++++++++++++++
+ 1 file changed, 42 insertions(+)
 
-diff --git a/drivers/rpmsg/virtio_rpmsg_bus.c b/drivers/rpmsg/virtio_rpmsg_bus.c
-index f91143b25af7..2b25a8ae1539 100644
---- a/drivers/rpmsg/virtio_rpmsg_bus.c
-+++ b/drivers/rpmsg/virtio_rpmsg_bus.c
-@@ -882,13 +882,16 @@ static int rpmsg_probe(struct virtio_device *vdev)
+diff --git a/include/linux/virtio_config.h b/include/linux/virtio_config.h
+index bb4cc4910750..419f733017c2 100644
+--- a/include/linux/virtio_config.h
++++ b/include/linux/virtio_config.h
+@@ -65,6 +65,9 @@ struct irq_affinity;
+  *      the caller can then copy.
+  * @set_vq_affinity: set the affinity for a virtqueue (optional).
+  * @get_vq_affinity: get the affinity for a virtqueue (optional).
++ * @alloc_buffer: Allocate and provide buffer addresses that can be
++ *      accessed by both virtio and vhost
++ * @free_buffer: Free the allocated buffer address
+  */
+ typedef void vq_callback_t(struct virtqueue *);
+ struct virtio_config_ops {
+@@ -88,6 +91,9 @@ struct virtio_config_ops {
+ 			       const struct cpumask *cpu_mask);
+ 	const struct cpumask *(*get_vq_affinity)(struct virtio_device *vdev,
+ 			int index);
++	void * (*alloc_buffer)(struct virtio_device *vdev, size_t size);
++	void (*free_buffer)(struct virtio_device *vdev, void *addr,
++			    size_t size);
+ };
  
- 	total_buf_space = vrp->num_bufs * vrp->buf_size;
- 
--	/* allocate coherent memory for the buffers */
--	bufs_va = dma_alloc_coherent(vdev->dev.parent,
--				     total_buf_space, &vrp->bufs_dma,
--				     GFP_KERNEL);
-+	bufs_va = virtio_alloc_buffer(vdev, total_buf_space);
- 	if (!bufs_va) {
--		err = -ENOMEM;
--		goto vqs_del;
-+		/* allocate coherent memory for the buffers */
-+		bufs_va = dma_alloc_coherent(vdev->dev.parent,
-+					     total_buf_space, &vrp->bufs_dma,
-+					     GFP_KERNEL);
-+		if (!bufs_va) {
-+			err = -ENOMEM;
-+			goto vqs_del;
-+		}
- 	}
- 
- 	dev_dbg(&vdev->dev, "buffers: va %pK, dma %pad\n",
-@@ -951,8 +954,13 @@ static int rpmsg_probe(struct virtio_device *vdev)
- 	return 0;
- 
- free_coherent:
--	dma_free_coherent(vdev->dev.parent, total_buf_space,
--			  bufs_va, vrp->bufs_dma);
-+	if (!vrp->bufs_dma) {
-+		virtio_free_buffer(vdev, bufs_va, total_buf_space);
-+	} else {
-+		dma_free_coherent(vdev->dev.parent, total_buf_space,
-+				  bufs_va, vrp->bufs_dma);
-+	}
-+
- vqs_del:
- 	vdev->config->del_vqs(vrp->vdev);
- free_vrp:
-@@ -986,8 +994,12 @@ static void rpmsg_remove(struct virtio_device *vdev)
- 
- 	vdev->config->del_vqs(vrp->vdev);
- 
--	dma_free_coherent(vdev->dev.parent, total_buf_space,
--			  vrp->rbufs, vrp->bufs_dma);
-+	if (!vrp->bufs_dma) {
-+		virtio_free_buffer(vdev, vrp->rbufs, total_buf_space);
-+	} else {
-+		dma_free_coherent(vdev->dev.parent, total_buf_space,
-+				  vrp->rbufs, vrp->bufs_dma);
-+	}
- 
- 	kfree(vrp);
+ /* If driver didn't advertise the feature, it will never appear. */
+@@ -232,6 +238,42 @@ const char *virtio_bus_name(struct virtio_device *vdev)
+ 	return vdev->config->bus_name(vdev);
  }
+ 
++/**
++ * virtio_alloc_buffer - Allocate buffer from the reserved memory
++ * @vdev: Virtio device which manages the reserved memory
++ * @size: Size of the buffer to be allocated
++ *
++ * Certain vhost devices can have restriction on the range of memory
++ * it can access on the virtio. The virtio drivers attached to
++ * such vhost devices reserves memory that can be accessed by
++ * vhost. This function allocates buffer for such reserved region.
++ */
++static inline void *
++virtio_alloc_buffer(struct virtio_device *vdev, size_t size)
++{
++	if (!vdev->config->alloc_buffer)
++		return NULL;
++
++	return vdev->config->alloc_buffer(vdev, size);
++}
++
++/**
++ * virtio_free_buffer - Free the allocated buffer
++ * @vdev: Virtio device which manages the reserved memory
++ * @addr: Address returned by virtio_alloc_buffer()
++ * @size: Size of the buffer that has to be freed
++ *
++ * Free the allocated buffer address given by virtio_alloc_buffer().
++ */
++static inline void
++virtio_free_buffer(struct virtio_device *vdev, void *addr, size_t size)
++{
++	if (!vdev->config->free_buffer)
++		return;
++
++	return vdev->config->free_buffer(vdev, addr, size);
++}
++
+ /**
+  * virtqueue_set_affinity - setting affinity for a virtqueue
+  * @vq: the virtqueue
 -- 
 2.17.1
 
