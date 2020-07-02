@@ -1,13 +1,13 @@
 Return-Path: <kishon@ti.com>
 Received: from lelv0142.ext.ti.com (lelv0142.ext.ti.com. [198.47.23.249])
-        by gmr-mx.google.com with ESMTPS id b26si458589qtq.3.2020.07.02.01.22.40
+        by gmr-mx.google.com with ESMTPS id z71si282001ilf.5.2020.07.02.01.22.38
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 02 Jul 2020 01:22:40 -0700 (PDT)
+        Thu, 02 Jul 2020 01:22:38 -0700 (PDT)
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [RFC PATCH 08/22] rpmsg: virtio_rpmsg_bus: Disable receive virtqueue callback when reading messages
-Date: Thu, 2 Jul 2020 13:51:29 +0530
-Message-ID: <20200702082143.25259-9-kishon@ti.com>
+Subject: [RFC PATCH 07/22] virtio_pci: Use request_threaded_irq() instead of request_irq()
+Date: Thu, 2 Jul 2020 13:51:28 +0530
+Message-ID: <20200702082143.25259-8-kishon@ti.com>
 In-Reply-To: <20200702082143.25259-1-kishon@ti.com>
 References: <20200702082143.25259-1-kishon@ti.com>
 MIME-Version: 1.0
@@ -17,46 +17,73 @@ To: Ohad Ben-Cohen <ohad@wizery.com>, Bjorn Andersson <bjorn.andersson@linaro.or
 Cc: linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-remoteproc@vger.kernel.org, linux-ntb@googlegroups.com, linux-pci@vger.kernel.org, kvm@vger.kernel.org, virtualization@lists.linux-foundation.org, netdev@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-Since rpmsg_recv_done() reads messages in a while loop, disable
-callbacks until the while loop exits. This helps to get rid of the
-annoying "uhm, incoming signal, but no used buffer ?" message.
+Some of the virtio drivers (like virtio_rpmsg_bus.c) use sleeping
+functions like mutex_*() in the virtqueue callback. Use
+request_threaded_irq() instead of request_irq() in order for
+the virtqueue callbacks to be executed in thread context instead
+of interrupt context.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- drivers/rpmsg/virtio_rpmsg_bus.c | 14 ++++++++++++++
- 1 file changed, 14 insertions(+)
+ drivers/virtio/virtio_pci_common.c | 25 +++++++++++++------------
+ 1 file changed, 13 insertions(+), 12 deletions(-)
 
-diff --git a/drivers/rpmsg/virtio_rpmsg_bus.c b/drivers/rpmsg/virtio_rpmsg_bus.c
-index 376ebbf880d6..2d0d42084ac0 100644
---- a/drivers/rpmsg/virtio_rpmsg_bus.c
-+++ b/drivers/rpmsg/virtio_rpmsg_bus.c
-@@ -777,6 +777,7 @@ static void rpmsg_recv_done(struct virtqueue *rvq)
- 		return;
- 	}
- 
-+	virtqueue_disable_cb(rvq);
- 	while (msg) {
- 		err = rpmsg_recv_single(vrp, dev, msg, len);
+diff --git a/drivers/virtio/virtio_pci_common.c b/drivers/virtio/virtio_pci_common.c
+index 222d630c41fc..60998b4f1f30 100644
+--- a/drivers/virtio/virtio_pci_common.c
++++ b/drivers/virtio/virtio_pci_common.c
+@@ -140,9 +140,9 @@ static int vp_request_msix_vectors(struct virtio_device *vdev, int nvectors,
+ 	v = vp_dev->msix_used_vectors;
+ 	snprintf(vp_dev->msix_names[v], sizeof *vp_dev->msix_names,
+ 		 "%s-config", name);
+-	err = request_irq(pci_irq_vector(vp_dev->pci_dev, v),
+-			  vp_config_changed, 0, vp_dev->msix_names[v],
+-			  vp_dev);
++	err = request_threaded_irq(pci_irq_vector(vp_dev->pci_dev, v), 0,
++				   vp_config_changed, 0, vp_dev->msix_names[v],
++				   vp_dev);
+ 	if (err)
+ 		goto error;
+ 	++vp_dev->msix_used_vectors;
+@@ -159,9 +159,9 @@ static int vp_request_msix_vectors(struct virtio_device *vdev, int nvectors,
+ 		v = vp_dev->msix_used_vectors;
+ 		snprintf(vp_dev->msix_names[v], sizeof *vp_dev->msix_names,
+ 			 "%s-virtqueues", name);
+-		err = request_irq(pci_irq_vector(vp_dev->pci_dev, v),
+-				  vp_vring_interrupt, 0, vp_dev->msix_names[v],
+-				  vp_dev);
++		err = request_threaded_irq(pci_irq_vector(vp_dev->pci_dev, v),
++					   0, vp_vring_interrupt, 0,
++					   vp_dev->msix_names[v], vp_dev);
  		if (err)
-@@ -786,6 +787,19 @@ static void rpmsg_recv_done(struct virtqueue *rvq)
- 
- 		msg = virtqueue_get_buf(rvq, &len);
+ 			goto error;
+ 		++vp_dev->msix_used_vectors;
+@@ -336,10 +336,11 @@ static int vp_find_vqs_msix(struct virtio_device *vdev, unsigned nvqs,
+ 			 sizeof *vp_dev->msix_names,
+ 			 "%s-%s",
+ 			 dev_name(&vp_dev->vdev.dev), names[i]);
+-		err = request_irq(pci_irq_vector(vp_dev->pci_dev, msix_vec),
+-				  vring_interrupt, 0,
+-				  vp_dev->msix_names[msix_vec],
+-				  vqs[i]);
++		err = request_threaded_irq(pci_irq_vector(vp_dev->pci_dev,
++							  msix_vec),
++					   0, vring_interrupt, 0,
++					   vp_dev->msix_names[msix_vec],
++					   vqs[i]);
+ 		if (err)
+ 			goto error_find;
  	}
-+	virtqueue_enable_cb(rvq);
-+
-+	/*
-+	 * Try to read message one more time in case a new message is submitted
-+	 * after virtqueue_get_buf() inside the while loop but before enabling
-+	 * callbacks
-+	 */
-+	msg = virtqueue_get_buf(rvq, &len);
-+	if (msg) {
-+		err = rpmsg_recv_single(vrp, dev, msg, len);
-+		if (!err)
-+			msgs_received++;
-+	}
+@@ -361,8 +362,8 @@ static int vp_find_vqs_intx(struct virtio_device *vdev, unsigned nvqs,
+ 	if (!vp_dev->vqs)
+ 		return -ENOMEM;
  
- 	dev_dbg(dev, "Received %u messages\n", msgs_received);
+-	err = request_irq(vp_dev->pci_dev->irq, vp_interrupt, IRQF_SHARED,
+-			dev_name(&vdev->dev), vp_dev);
++	err = request_threaded_irq(vp_dev->pci_dev->irq, 0, vp_interrupt,
++				   IRQF_SHARED, dev_name(&vdev->dev), vp_dev);
+ 	if (err)
+ 		goto out_del_vqs;
  
 -- 
 2.17.1
