@@ -1,16 +1,16 @@
 Return-Path: <allen.cryptic@gmail.com>
-Received: from mail-pl1-x642.google.com (mail-pl1-x642.google.com. [2607:f8b0:4864:20::642])
-        by gmr-mx.google.com with ESMTPS id c11si851510pjn.0.2020.08.17.02.20.15
+Received: from mail-pg1-x543.google.com (mail-pg1-x543.google.com. [2607:f8b0:4864:20::543])
+        by gmr-mx.google.com with ESMTPS id p67si832485ybg.2.2020.08.17.02.20.01
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 17 Aug 2020 02:20:15 -0700 (PDT)
-Received: by mail-pl1-x642.google.com with SMTP id t10so7189159plz.10
-        for <linux-ntb@googlegroups.com>; Mon, 17 Aug 2020 02:20:15 -0700 (PDT)
+        Mon, 17 Aug 2020 02:20:01 -0700 (PDT)
+Received: by mail-pg1-x543.google.com with SMTP id o13so7843199pgf.0
+        for <linux-ntb@googlegroups.com>; Mon, 17 Aug 2020 02:20:01 -0700 (PDT)
 Return-Path: <allen.cryptic@gmail.com>
 From: Allen Pais <allen.cryptic@gmail.com>
-Subject: [PATCH] net: atm: convert tasklets callbacks to use from_tasklet()
-Date: Mon, 17 Aug 2020 14:46:11 +0530
-Message-Id: <20200817091617.28119-17-allen.cryptic@gmail.com>
+Subject: [PATCH 1/2] misc: ibmvmc: convert tasklets to use new tasklet_setup() API
+Date: Mon, 17 Aug 2020 14:46:10 +0530
+Message-Id: <20200817091617.28119-16-allen.cryptic@gmail.com>
 In-Reply-To: <20200817091617.28119-1-allen.cryptic@gmail.com>
 References: <20200817091617.28119-1-allen.cryptic@gmail.com>
 To: jdike@addtoit.com, richard@nod.at, anton.ivanov@cambridgegreys.com, 3chas3@gmail.com, axboe@kernel.dk, stefanr@s5r6.in-berlin.de, airlied@linux.ie, daniel@ffwll.ch, sre@kernel.org, James.Bottomley@HansenPartnership.com, kys@microsoft.com, deller@gmx.de, dmitry.torokhov@gmail.com, jassisinghbrar@gmail.com, shawnguo@kernel.org, s.hauer@pengutronix.de, maximlevitsky@gmail.com, oakad@yahoo.com, ulf.hansson@linaro.org, mporter@kernel.crashing.org, alex.bou9@gmail.com, broonie@kernel.org, martyn@welchs.me.uk, manohar.vanga@gmail.com, mitch@sfgoth.com, davem@davemloft.net, kuba@kernel.org
@@ -19,27 +19,44 @@ List-ID: <linux-ntb.googlegroups.com>
 
 From: Allen Pais <allen.lkml@gmail.com>
 
-Update all the callbacks of all tasklets by using
-from_tasklet() and remove .data field.
+In preparation for unconditionally passing the
+struct tasklet_struct pointer to all tasklet
+callbacks, switch to using the new tasklet_setup()
+and from_tasklet() to pass the tasklet pointer explicitly.
 
 Signed-off-by: Romain Perier <romain.perier@gmail.com>
 Signed-off-by: Allen Pais <allen.lkml@gmail.com>
 ---
- net/atm/pppoatm.c | 1 -
- 1 file changed, 1 deletion(-)
+ drivers/misc/ibmvmc.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/net/atm/pppoatm.c b/net/atm/pppoatm.c
-index 579b66da1d95..3803be8470f7 100644
---- a/net/atm/pppoatm.c
-+++ b/net/atm/pppoatm.c
-@@ -416,7 +416,6 @@ static int pppoatm_assign_vcc(struct atm_vcc *atmvcc, void __user *arg)
- 	pvcc->chan.mtu = atmvcc->qos.txtp.max_sdu - PPP_HDRLEN -
- 	    (be.encaps == e_vc ? 0 : LLC_LEN);
- 	pvcc->wakeup_tasklet = tasklet_proto;
--	pvcc->wakeup_tasklet.data = (unsigned long) &pvcc->chan;
- 	err = ppp_register_channel(&pvcc->chan);
- 	if (err != 0) {
- 		kfree(pvcc);
+diff --git a/drivers/misc/ibmvmc.c b/drivers/misc/ibmvmc.c
+index 2d778d0f011e..347278c1a5e4 100644
+--- a/drivers/misc/ibmvmc.c
++++ b/drivers/misc/ibmvmc.c
+@@ -2064,10 +2064,10 @@ static void ibmvmc_handle_crq(struct ibmvmc_crq_msg *crq,
+ 	}
+ }
+ 
+-static void ibmvmc_task(unsigned long data)
++static void ibmvmc_task(struct tasklet_struct *t)
+ {
+-	struct crq_server_adapter *adapter =
+-		(struct crq_server_adapter *)data;
++	struct crq_server_adapter *adapter = from_tasklet(adapter, t,
++							  work_task);
+ 	struct vio_dev *vdev = to_vio_dev(adapter->dev);
+ 	struct ibmvmc_crq_msg *crq;
+ 	int done = 0;
+@@ -2150,7 +2150,7 @@ static int ibmvmc_init_crq_queue(struct crq_server_adapter *adapter)
+ 	queue->cur = 0;
+ 	spin_lock_init(&queue->lock);
+ 
+-	tasklet_init(&adapter->work_task, ibmvmc_task, (unsigned long)adapter);
++	tasklet_setup(&adapter->work_task, ibmvmc_task);
+ 
+ 	if (request_irq(vdev->irq,
+ 			ibmvmc_handle_event,
 -- 
 2.17.1
 
