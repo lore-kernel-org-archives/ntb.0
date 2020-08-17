@@ -1,16 +1,16 @@
 Return-Path: <allen.cryptic@gmail.com>
-Received: from mail-pl1-x644.google.com (mail-pl1-x644.google.com. [2607:f8b0:4864:20::644])
-        by gmr-mx.google.com with ESMTPS id s2si972441pgh.4.2020.08.17.02.19.30
+Received: from mail-pf1-x444.google.com (mail-pf1-x444.google.com. [2607:f8b0:4864:20::444])
+        by gmr-mx.google.com with ESMTPS id p19si1130123vsn.2.2020.08.17.02.19.17
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 17 Aug 2020 02:19:30 -0700 (PDT)
-Received: by mail-pl1-x644.google.com with SMTP id q19so7209883pll.0
-        for <linux-ntb@googlegroups.com>; Mon, 17 Aug 2020 02:19:30 -0700 (PDT)
+        Mon, 17 Aug 2020 02:19:17 -0700 (PDT)
+Received: by mail-pf1-x444.google.com with SMTP id k18so7919350pfp.7
+        for <linux-ntb@googlegroups.com>; Mon, 17 Aug 2020 02:19:17 -0700 (PDT)
 Return-Path: <allen.cryptic@gmail.com>
 From: Allen Pais <allen.cryptic@gmail.com>
-Subject: [PATCH 1/2] mailbox: bcm: convert tasklets to use new tasklet_setup() API
-Date: Mon, 17 Aug 2020 14:46:08 +0530
-Message-Id: <20200817091617.28119-14-allen.cryptic@gmail.com>
+Subject: [PATCH] input: serio: convert tasklets to use new tasklet_setup() API
+Date: Mon, 17 Aug 2020 14:46:07 +0530
+Message-Id: <20200817091617.28119-13-allen.cryptic@gmail.com>
 In-Reply-To: <20200817091617.28119-1-allen.cryptic@gmail.com>
 References: <20200817091617.28119-1-allen.cryptic@gmail.com>
 To: jdike@addtoit.com, richard@nod.at, anton.ivanov@cambridgegreys.com, 3chas3@gmail.com, axboe@kernel.dk, stefanr@s5r6.in-berlin.de, airlied@linux.ie, daniel@ffwll.ch, sre@kernel.org, James.Bottomley@HansenPartnership.com, kys@microsoft.com, deller@gmx.de, dmitry.torokhov@gmail.com, jassisinghbrar@gmail.com, shawnguo@kernel.org, s.hauer@pengutronix.de, maximlevitsky@gmail.com, oakad@yahoo.com, ulf.hansson@linaro.org, mporter@kernel.crashing.org, alex.bou9@gmail.com, broonie@kernel.org, martyn@welchs.me.uk, manohar.vanga@gmail.com, mitch@sfgoth.com, davem@davemloft.net, kuba@kernel.org
@@ -27,34 +27,31 @@ and from_tasklet() to pass the tasklet pointer explicitly.
 Signed-off-by: Romain Perier <romain.perier@gmail.com>
 Signed-off-by: Allen Pais <allen.lkml@gmail.com>
 ---
- drivers/mailbox/bcm-pdc-mailbox.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ drivers/input/serio/hp_sdc.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mailbox/bcm-pdc-mailbox.c b/drivers/mailbox/bcm-pdc-mailbox.c
-index 53945ca5d785..5b375985f7b8 100644
---- a/drivers/mailbox/bcm-pdc-mailbox.c
-+++ b/drivers/mailbox/bcm-pdc-mailbox.c
-@@ -962,9 +962,9 @@ static irqreturn_t pdc_irq_handler(int irq, void *data)
-  * a DMA receive interrupt. Reenables the receive interrupt.
-  * @data: PDC state structure
-  */
--static void pdc_tasklet_cb(unsigned long data)
-+static void pdc_tasklet_cb(struct tasklet_struct *t)
+diff --git a/drivers/input/serio/hp_sdc.c b/drivers/input/serio/hp_sdc.c
+index 13eacf6ab431..91f8253ac66a 100644
+--- a/drivers/input/serio/hp_sdc.c
++++ b/drivers/input/serio/hp_sdc.c
+@@ -301,7 +301,7 @@ static irqreturn_t hp_sdc_nmisr(int irq, void *dev_id)
+ 
+ unsigned long hp_sdc_put(void);
+ 
+-static void hp_sdc_tasklet(unsigned long foo)
++static void hp_sdc_tasklet(struct tasklet_struct *unused)
  {
--	struct pdc_state *pdcs = (struct pdc_state *)data;
-+	struct pdc_state *pdcs = from_tasklet(pdcs, t, rx_tasklet);
+ 	write_lock_irq(&hp_sdc.rtq_lock);
  
- 	pdc_receive(pdcs);
+@@ -890,7 +890,7 @@ static int __init hp_sdc_init(void)
+ 	hp_sdc_status_in8();
+ 	hp_sdc_data_in8();
  
-@@ -1589,7 +1589,7 @@ static int pdc_probe(struct platform_device *pdev)
- 	pdc_hw_init(pdcs);
+-	tasklet_init(&hp_sdc.task, hp_sdc_tasklet, 0);
++	tasklet_setup(&hp_sdc.task, hp_sdc_tasklet, 0);
  
- 	/* Init tasklet for deferred DMA rx processing */
--	tasklet_init(&pdcs->rx_tasklet, pdc_tasklet_cb, (unsigned long)pdcs);
-+	tasklet_setup(&pdcs->rx_tasklet, pdc_tasklet_cb);
- 
- 	err = pdc_interrupts_init(pdcs);
- 	if (err)
+ 	/* Sync the output buffer registers, thus scheduling hp_sdc_tasklet. */
+ 	t_sync.actidx	= 0;
 -- 
 2.17.1
 
