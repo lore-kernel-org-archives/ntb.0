@@ -1,16 +1,16 @@
 Return-Path: <allen.cryptic@gmail.com>
-Received: from mail-pg1-x543.google.com (mail-pg1-x543.google.com. [2607:f8b0:4864:20::543])
-        by gmr-mx.google.com with ESMTPS id t75si889724pfc.3.2020.08.17.02.20.28
+Received: from mail-pl1-x642.google.com (mail-pl1-x642.google.com. [2607:f8b0:4864:20::642])
+        by gmr-mx.google.com with ESMTPS id c11si851510pjn.0.2020.08.17.02.20.15
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 17 Aug 2020 02:20:28 -0700 (PDT)
-Received: by mail-pg1-x543.google.com with SMTP id p37so7829687pgl.3
-        for <linux-ntb@googlegroups.com>; Mon, 17 Aug 2020 02:20:28 -0700 (PDT)
+        Mon, 17 Aug 2020 02:20:15 -0700 (PDT)
+Received: by mail-pl1-x642.google.com with SMTP id t10so7189159plz.10
+        for <linux-ntb@googlegroups.com>; Mon, 17 Aug 2020 02:20:15 -0700 (PDT)
 Return-Path: <allen.cryptic@gmail.com>
 From: Allen Pais <allen.cryptic@gmail.com>
-Subject: [PATCH] platform: goldfish: convert tasklets to use new tasklet_setup() API
-Date: Mon, 17 Aug 2020 14:46:12 +0530
-Message-Id: <20200817091617.28119-18-allen.cryptic@gmail.com>
+Subject: [PATCH] net: atm: convert tasklets callbacks to use from_tasklet()
+Date: Mon, 17 Aug 2020 14:46:11 +0530
+Message-Id: <20200817091617.28119-17-allen.cryptic@gmail.com>
 In-Reply-To: <20200817091617.28119-1-allen.cryptic@gmail.com>
 References: <20200817091617.28119-1-allen.cryptic@gmail.com>
 To: jdike@addtoit.com, richard@nod.at, anton.ivanov@cambridgegreys.com, 3chas3@gmail.com, axboe@kernel.dk, stefanr@s5r6.in-berlin.de, airlied@linux.ie, daniel@ffwll.ch, sre@kernel.org, James.Bottomley@HansenPartnership.com, kys@microsoft.com, deller@gmx.de, dmitry.torokhov@gmail.com, jassisinghbrar@gmail.com, shawnguo@kernel.org, s.hauer@pengutronix.de, maximlevitsky@gmail.com, oakad@yahoo.com, ulf.hansson@linaro.org, mporter@kernel.crashing.org, alex.bou9@gmail.com, broonie@kernel.org, martyn@welchs.me.uk, manohar.vanga@gmail.com, mitch@sfgoth.com, davem@davemloft.net, kuba@kernel.org
@@ -19,44 +19,27 @@ List-ID: <linux-ntb.googlegroups.com>
 
 From: Allen Pais <allen.lkml@gmail.com>
 
-In preparation for unconditionally passing the
-struct tasklet_struct pointer to all tasklet
-callbacks, switch to using the new tasklet_setup()
-and from_tasklet() to pass the tasklet pointer explicitly.
+Update all the callbacks of all tasklets by using
+from_tasklet() and remove .data field.
 
 Signed-off-by: Romain Perier <romain.perier@gmail.com>
 Signed-off-by: Allen Pais <allen.lkml@gmail.com>
 ---
- drivers/platform/goldfish/goldfish_pipe.c | 7 +++----
- 1 file changed, 3 insertions(+), 4 deletions(-)
+ net/atm/pppoatm.c | 1 -
+ 1 file changed, 1 deletion(-)
 
-diff --git a/drivers/platform/goldfish/goldfish_pipe.c b/drivers/platform/goldfish/goldfish_pipe.c
-index 1ab207ec9c94..b9bead07760c 100644
---- a/drivers/platform/goldfish/goldfish_pipe.c
-+++ b/drivers/platform/goldfish/goldfish_pipe.c
-@@ -577,10 +577,10 @@ static struct goldfish_pipe *signalled_pipes_pop_front(
- 	return pipe;
- }
- 
--static void goldfish_interrupt_task(unsigned long dev_addr)
-+static void goldfish_interrupt_task(struct tasklet_struct *t)
- {
- 	/* Iterate over the signalled pipes and wake them one by one */
--	struct goldfish_pipe_dev *dev = (struct goldfish_pipe_dev *)dev_addr;
-+	struct goldfish_pipe_dev *dev = from_tasklet(dev, t, irq_tasklet);
- 	struct goldfish_pipe *pipe;
- 	int wakes;
- 
-@@ -811,8 +811,7 @@ static int goldfish_pipe_device_init(struct platform_device *pdev,
- {
- 	int err;
- 
--	tasklet_init(&dev->irq_tasklet, &goldfish_interrupt_task,
--		     (unsigned long)dev);
-+	tasklet_setup(&dev->irq_tasklet, &goldfish_interrupt_task);
- 
- 	err = devm_request_irq(&pdev->dev, dev->irq,
- 			       goldfish_pipe_interrupt,
+diff --git a/net/atm/pppoatm.c b/net/atm/pppoatm.c
+index 579b66da1d95..3803be8470f7 100644
+--- a/net/atm/pppoatm.c
++++ b/net/atm/pppoatm.c
+@@ -416,7 +416,6 @@ static int pppoatm_assign_vcc(struct atm_vcc *atmvcc, void __user *arg)
+ 	pvcc->chan.mtu = atmvcc->qos.txtp.max_sdu - PPP_HDRLEN -
+ 	    (be.encaps == e_vc ? 0 : LLC_LEN);
+ 	pvcc->wakeup_tasklet = tasklet_proto;
+-	pvcc->wakeup_tasklet.data = (unsigned long) &pvcc->chan;
+ 	err = ppp_register_channel(&pvcc->chan);
+ 	if (err != 0) {
+ 		kfree(pvcc);
 -- 
 2.17.1
 
