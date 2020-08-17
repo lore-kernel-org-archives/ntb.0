@@ -1,16 +1,16 @@
 Return-Path: <allen.cryptic@gmail.com>
-Received: from mail-pj1-x1042.google.com (mail-pj1-x1042.google.com. [2607:f8b0:4864:20::1042])
-        by gmr-mx.google.com with ESMTPS id c5si395461ots.0.2020.08.17.02.18.51
+Received: from mail-pj1-x1041.google.com (mail-pj1-x1041.google.com. [2607:f8b0:4864:20::1041])
+        by gmr-mx.google.com with ESMTPS id p197si906155vkp.0.2020.08.17.02.18.40
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 17 Aug 2020 02:18:51 -0700 (PDT)
-Received: by mail-pj1-x1042.google.com with SMTP id c10so7693154pjn.1
-        for <linux-ntb@googlegroups.com>; Mon, 17 Aug 2020 02:18:51 -0700 (PDT)
+        Mon, 17 Aug 2020 02:18:40 -0700 (PDT)
+Received: by mail-pj1-x1041.google.com with SMTP id ha11so7406377pjb.1
+        for <linux-ntb@googlegroups.com>; Mon, 17 Aug 2020 02:18:40 -0700 (PDT)
 Return-Path: <allen.cryptic@gmail.com>
 From: Allen Pais <allen.cryptic@gmail.com>
-Subject: [PATCH] firewire: ohci: convert tasklets to use new tasklet_setup() API
-Date: Mon, 17 Aug 2020 14:46:05 +0530
-Message-Id: <20200817091617.28119-11-allen.cryptic@gmail.com>
+Subject: [PATCH] drm: i915: convert tasklets to use new tasklet_setup() API
+Date: Mon, 17 Aug 2020 14:46:04 +0530
+Message-Id: <20200817091617.28119-10-allen.cryptic@gmail.com>
 In-Reply-To: <20200817091617.28119-1-allen.cryptic@gmail.com>
 References: <20200817091617.28119-1-allen.cryptic@gmail.com>
 To: jdike@addtoit.com, richard@nod.at, anton.ivanov@cambridgegreys.com, 3chas3@gmail.com, axboe@kernel.dk, stefanr@s5r6.in-berlin.de, airlied@linux.ie, daniel@ffwll.ch, sre@kernel.org, James.Bottomley@HansenPartnership.com, kys@microsoft.com, deller@gmx.de, dmitry.torokhov@gmail.com, jassisinghbrar@gmail.com, shawnguo@kernel.org, s.hauer@pengutronix.de, maximlevitsky@gmail.com, oakad@yahoo.com, ulf.hansson@linaro.org, mporter@kernel.crashing.org, alex.bou9@gmail.com, broonie@kernel.org, martyn@welchs.me.uk, manohar.vanga@gmail.com, mitch@sfgoth.com, davem@davemloft.net, kuba@kernel.org
@@ -22,78 +22,137 @@ From: Allen Pais <allen.lkml@gmail.com>
 In preparation for unconditionally passing the
 struct tasklet_struct pointer to all tasklet
 callbacks, switch to using the new tasklet_setup()
-and from_tasklet() to pass the tasklet pointer explicitly.
+and from_tasklet() to pass the tasklet pointer explicitly
+and remove the .data field.
 
 Signed-off-by: Romain Perier <romain.perier@gmail.com>
 Signed-off-by: Allen Pais <allen.lkml@gmail.com>
 ---
- drivers/firewire/ohci.c | 16 ++++++++--------
- 1 file changed, 8 insertions(+), 8 deletions(-)
+ drivers/gpu/drm/i915/gt/intel_lrc.c           | 31 ++++++++++---------
+ .../gpu/drm/i915/gt/uc/intel_guc_submission.c |  8 +++--
+ 2 files changed, 22 insertions(+), 17 deletions(-)
 
-diff --git a/drivers/firewire/ohci.c b/drivers/firewire/ohci.c
-index 7dde21b18b04..6298ff03796e 100644
---- a/drivers/firewire/ohci.c
-+++ b/drivers/firewire/ohci.c
-@@ -921,9 +921,9 @@ static void ar_recycle_buffers(struct ar_context *ctx, unsigned int end_buffer)
- 	}
+diff --git a/drivers/gpu/drm/i915/gt/intel_lrc.c b/drivers/gpu/drm/i915/gt/intel_lrc.c
+index 24322ef08aa4..c45e42b9f239 100644
+--- a/drivers/gpu/drm/i915/gt/intel_lrc.c
++++ b/drivers/gpu/drm/i915/gt/intel_lrc.c
+@@ -3130,9 +3130,10 @@ static bool preempt_timeout(const struct intel_engine_cs *const engine)
+  * Check the unread Context Status Buffers and manage the submission of new
+  * contexts to the ELSP accordingly.
+  */
+-static void execlists_submission_tasklet(unsigned long data)
++static void execlists_submission_tasklet(struct tasklet_struct *t)
+ {
+-	struct intel_engine_cs * const engine = (struct intel_engine_cs *)data;
++	struct intel_engine_cs * const engine = from_tasklet(engine, t,
++						     execlists.tasklet);
+ 	bool timeout = preempt_timeout(engine);
+ 
+ 	process_csb(engine);
+@@ -4306,9 +4307,10 @@ static void execlists_reset_rewind(struct intel_engine_cs *engine, bool stalled)
+ 	spin_unlock_irqrestore(&engine->active.lock, flags);
  }
  
--static void ar_context_tasklet(unsigned long data)
-+static void ar_context_tasklet(struct tasklet_struct *t)
+-static void nop_submission_tasklet(unsigned long data)
++static void nop_submission_tasklet(struct tasklet_struct *t)
  {
--	struct ar_context *ctx = (struct ar_context *)data;
-+	struct ar_context *ctx = from_tasklet(ctx, t, tasklet);
- 	unsigned int end_buffer_index, end_buffer_offset;
- 	void *p, *end;
+-	struct intel_engine_cs * const engine = (struct intel_engine_cs *)data;
++	struct intel_engine_cs * const engine = from_tasklet(engine, t,
++						     execlists.tasklet);
  
-@@ -977,7 +977,7 @@ static int ar_context_init(struct ar_context *ctx, struct fw_ohci *ohci,
+ 	/* The driver is wedged; don't process any more events. */
+ 	WRITE_ONCE(engine->execlists.queue_priority_hint, INT_MIN);
+@@ -4391,7 +4393,8 @@ static void execlists_reset_cancel(struct intel_engine_cs *engine)
+ 	execlists->queue = RB_ROOT_CACHED;
  
- 	ctx->regs        = regs;
- 	ctx->ohci        = ohci;
--	tasklet_init(&ctx->tasklet, ar_context_tasklet, (unsigned long)ctx);
-+	tasklet_setup(&ctx->tasklet, ar_context_tasklet);
+ 	GEM_BUG_ON(__tasklet_is_enabled(&execlists->tasklet));
+-	execlists->tasklet.func = nop_submission_tasklet;
++	execlists->tasklet.func = (void (*)(unsigned long))
++				  nop_submission_tasklet;
  
- 	for (i = 0; i < AR_BUFFERS; i++) {
- 		ctx->pages[i] = alloc_page(GFP_KERNEL | GFP_DMA32);
-@@ -1049,9 +1049,9 @@ static struct descriptor *find_branch_descriptor(struct descriptor *d, int z)
- 		return d + z - 1;
+ 	spin_unlock_irqrestore(&engine->active.lock, flags);
+ }
+@@ -4986,7 +4989,8 @@ void intel_execlists_set_default_submission(struct intel_engine_cs *engine)
+ {
+ 	engine->submit_request = execlists_submit_request;
+ 	engine->schedule = i915_schedule;
+-	engine->execlists.tasklet.func = execlists_submission_tasklet;
++	engine->execlists.tasklet.func = (void (*)(unsigned long))
++		execlists_submission_tasklet;
+ 
+ 	engine->reset.prepare = execlists_reset_prepare;
+ 	engine->reset.rewind = execlists_reset_rewind;
+@@ -5113,8 +5117,7 @@ int intel_execlists_submission_setup(struct intel_engine_cs *engine)
+ 	struct intel_uncore *uncore = engine->uncore;
+ 	u32 base = engine->mmio_base;
+ 
+-	tasklet_init(&engine->execlists.tasklet,
+-		     execlists_submission_tasklet, (unsigned long)engine);
++	tasklet_setup(&engine->execlists.tasklet, execlists_submission_tasklet);
+ 	timer_setup(&engine->execlists.timer, execlists_timeslice, 0);
+ 	timer_setup(&engine->execlists.preempt, execlists_preempt, 0);
+ 
+@@ -5509,9 +5512,10 @@ static intel_engine_mask_t virtual_submission_mask(struct virtual_engine *ve)
+ 	return mask;
  }
  
--static void context_tasklet(unsigned long data)
-+static void context_tasklet(struct tasklet_struct *t)
+-static void virtual_submission_tasklet(unsigned long data)
++static void virtual_submission_tasklet(struct tasklet_struct *t)
  {
--	struct context *ctx = (struct context *) data;
-+	struct context *ctx = from_tasklet(ctx, t, tasklet);
- 	struct descriptor *d, *last;
- 	u32 address;
- 	int z;
-@@ -1145,7 +1145,7 @@ static int context_init(struct context *ctx, struct fw_ohci *ohci,
- 	ctx->buffer_tail = list_entry(ctx->buffer_list.next,
- 			struct descriptor_buffer, list);
+-	struct virtual_engine * const ve = (struct virtual_engine *)data;
++	struct virtual_engine *  ve = from_tasklet(ve, t,
++						   base.execlists.tasklet);
+ 	const int prio = READ_ONCE(ve->base.execlists.queue_priority_hint);
+ 	intel_engine_mask_t mask;
+ 	unsigned int n;
+@@ -5724,9 +5728,8 @@ intel_execlists_create_virtual(struct intel_engine_cs **siblings,
  
--	tasklet_init(&ctx->tasklet, context_tasklet, (unsigned long)ctx);
-+	tasklet_setup(&ctx->tasklet, context_tasklet);
- 	ctx->callback = callback;
+ 	INIT_LIST_HEAD(virtual_queue(ve));
+ 	ve->base.execlists.queue_priority_hint = INT_MIN;
+-	tasklet_init(&ve->base.execlists.tasklet,
+-		     virtual_submission_tasklet,
+-		     (unsigned long)ve);
++	tasklet_setup(&ve->base.execlists.tasklet,
++		     virtual_submission_tasklet);
  
- 	/*
-@@ -1420,7 +1420,7 @@ static void at_context_flush(struct context *ctx)
- 	tasklet_disable(&ctx->tasklet);
+ 	intel_context_init(&ve->context, &ve->base);
  
- 	ctx->flushing = true;
--	context_tasklet((unsigned long)ctx);
-+	context_tasklet(&ctx->tasklet);
- 	ctx->flushing = false;
+@@ -5748,7 +5751,7 @@ intel_execlists_create_virtual(struct intel_engine_cs **siblings,
+ 		 * layering if we handle cloning of the requests and
+ 		 * submitting a copy into each backend.
+ 		 */
+-		if (sibling->execlists.tasklet.func !=
++		if (sibling->execlists.tasklet.func != (void (*)(unsigned long))
+ 		    execlists_submission_tasklet) {
+ 			err = -ENODEV;
+ 			goto err_put;
+diff --git a/drivers/gpu/drm/i915/gt/uc/intel_guc_submission.c b/drivers/gpu/drm/i915/gt/uc/intel_guc_submission.c
+index fdfeb4b9b0f5..3013ff54431c 100644
+--- a/drivers/gpu/drm/i915/gt/uc/intel_guc_submission.c
++++ b/drivers/gpu/drm/i915/gt/uc/intel_guc_submission.c
+@@ -344,9 +344,10 @@ static void __guc_dequeue(struct intel_engine_cs *engine)
+ 	execlists->active = execlists->inflight;
+ }
  
- 	tasklet_enable(&ctx->tasklet);
-@@ -3472,7 +3472,7 @@ static int ohci_flush_iso_completions(struct fw_iso_context *base)
- 	tasklet_disable(&ctx->context.tasklet);
+-static void guc_submission_tasklet(unsigned long data)
++static void guc_submission_tasklet(struct tasklet_struct *t)
+ {
+-	struct intel_engine_cs * const engine = (struct intel_engine_cs *)data;
++	struct intel_engine_cs * const engine = from_tasklet(engine, t,
++							     execlists.tasklet);
+ 	struct intel_engine_execlists * const execlists = &engine->execlists;
+ 	struct i915_request **port, *rq;
+ 	unsigned long flags;
+@@ -591,7 +592,8 @@ static void guc_set_default_submission(struct intel_engine_cs *engine)
+ 	 */
+ 	intel_execlists_set_default_submission(engine);
  
- 	if (!test_and_set_bit_lock(0, &ctx->flushing_completions)) {
--		context_tasklet((unsigned long)&ctx->context);
-+		context_tasklet(&ctx->context.tasklet);
+-	engine->execlists.tasklet.func = guc_submission_tasklet;
++	engine->execlists.tasklet.func =
++				(void (*)(unsigned long))guc_submission_tasklet;
  
- 		switch (base->type) {
- 		case FW_ISO_CONTEXT_TRANSMIT:
+ 	/* do not use execlists park/unpark */
+ 	engine->park = engine->unpark = NULL;
 -- 
 2.17.1
 
