@@ -1,16 +1,16 @@
 Return-Path: <allen.cryptic@gmail.com>
-Received: from mail-pg1-x543.google.com (mail-pg1-x543.google.com. [2607:f8b0:4864:20::543])
-        by gmr-mx.google.com with ESMTPS id p67si832485ybg.2.2020.08.17.02.20.01
+Received: from mail-pl1-x642.google.com (mail-pl1-x642.google.com. [2607:f8b0:4864:20::642])
+        by gmr-mx.google.com with ESMTPS id b21si895902qtq.1.2020.08.17.02.19.45
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 17 Aug 2020 02:20:01 -0700 (PDT)
-Received: by mail-pg1-x543.google.com with SMTP id o13so7843199pgf.0
-        for <linux-ntb@googlegroups.com>; Mon, 17 Aug 2020 02:20:01 -0700 (PDT)
+        Mon, 17 Aug 2020 02:19:45 -0700 (PDT)
+Received: by mail-pl1-x642.google.com with SMTP id f10so7191152plj.8
+        for <linux-ntb@googlegroups.com>; Mon, 17 Aug 2020 02:19:45 -0700 (PDT)
 Return-Path: <allen.cryptic@gmail.com>
 From: Allen Pais <allen.cryptic@gmail.com>
-Subject: [PATCH 1/2] misc: ibmvmc: convert tasklets to use new tasklet_setup() API
-Date: Mon, 17 Aug 2020 14:46:10 +0530
-Message-Id: <20200817091617.28119-16-allen.cryptic@gmail.com>
+Subject: [PATCH 1/2] memstick: jmb38x: convert tasklets to use new tasklet_setup() API
+Date: Mon, 17 Aug 2020 14:46:09 +0530
+Message-Id: <20200817091617.28119-15-allen.cryptic@gmail.com>
 In-Reply-To: <20200817091617.28119-1-allen.cryptic@gmail.com>
 References: <20200817091617.28119-1-allen.cryptic@gmail.com>
 To: jdike@addtoit.com, richard@nod.at, anton.ivanov@cambridgegreys.com, 3chas3@gmail.com, axboe@kernel.dk, stefanr@s5r6.in-berlin.de, airlied@linux.ie, daniel@ffwll.ch, sre@kernel.org, James.Bottomley@HansenPartnership.com, kys@microsoft.com, deller@gmx.de, dmitry.torokhov@gmail.com, jassisinghbrar@gmail.com, shawnguo@kernel.org, s.hauer@pengutronix.de, maximlevitsky@gmail.com, oakad@yahoo.com, ulf.hansson@linaro.org, mporter@kernel.crashing.org, alex.bou9@gmail.com, broonie@kernel.org, martyn@welchs.me.uk, manohar.vanga@gmail.com, mitch@sfgoth.com, davem@davemloft.net, kuba@kernel.org
@@ -27,36 +27,36 @@ and from_tasklet() to pass the tasklet pointer explicitly.
 Signed-off-by: Romain Perier <romain.perier@gmail.com>
 Signed-off-by: Allen Pais <allen.lkml@gmail.com>
 ---
- drivers/misc/ibmvmc.c | 8 ++++----
+ drivers/memstick/host/jmb38x_ms.c | 8 ++++----
  1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/misc/ibmvmc.c b/drivers/misc/ibmvmc.c
-index 2d778d0f011e..347278c1a5e4 100644
---- a/drivers/misc/ibmvmc.c
-+++ b/drivers/misc/ibmvmc.c
-@@ -2064,10 +2064,10 @@ static void ibmvmc_handle_crq(struct ibmvmc_crq_msg *crq,
- 	}
+diff --git a/drivers/memstick/host/jmb38x_ms.c b/drivers/memstick/host/jmb38x_ms.c
+index 4a6b866b0291..2bcf5ce113bd 100644
+--- a/drivers/memstick/host/jmb38x_ms.c
++++ b/drivers/memstick/host/jmb38x_ms.c
+@@ -603,10 +603,10 @@ static void jmb38x_ms_abort(struct timer_list *t)
+ 	spin_unlock_irqrestore(&host->lock, flags);
  }
  
--static void ibmvmc_task(unsigned long data)
-+static void ibmvmc_task(struct tasklet_struct *t)
+-static void jmb38x_ms_req_tasklet(unsigned long data)
++static void jmb38x_ms_req_tasklet(struct tasklet_struct *t)
  {
--	struct crq_server_adapter *adapter =
--		(struct crq_server_adapter *)data;
-+	struct crq_server_adapter *adapter = from_tasklet(adapter, t,
-+							  work_task);
- 	struct vio_dev *vdev = to_vio_dev(adapter->dev);
- 	struct ibmvmc_crq_msg *crq;
- 	int done = 0;
-@@ -2150,7 +2150,7 @@ static int ibmvmc_init_crq_queue(struct crq_server_adapter *adapter)
- 	queue->cur = 0;
- 	spin_lock_init(&queue->lock);
+-	struct memstick_host *msh = (struct memstick_host *)data;
+-	struct jmb38x_ms_host *host = memstick_priv(msh);
++	struct jmb38x_ms_host *host = from_tasklet(host, t, notify);
++	struct memstick_host *msh = host->msh;
+ 	unsigned long flags;
+ 	int rc;
  
--	tasklet_init(&adapter->work_task, ibmvmc_task, (unsigned long)adapter);
-+	tasklet_setup(&adapter->work_task, ibmvmc_task);
+@@ -868,7 +868,7 @@ static struct memstick_host *jmb38x_ms_alloc_host(struct jmb38x_ms *jm, int cnt)
+ 	host->irq = jm->pdev->irq;
+ 	host->timeout_jiffies = msecs_to_jiffies(1000);
  
- 	if (request_irq(vdev->irq,
- 			ibmvmc_handle_event,
+-	tasklet_init(&host->notify, jmb38x_ms_req_tasklet, (unsigned long)msh);
++	tasklet_setup(&host->notify, jmb38x_ms_req_tasklet);
+ 	msh->request = jmb38x_ms_submit_req;
+ 	msh->set_param = jmb38x_ms_set_param;
+ 
 -- 
 2.17.1
 
