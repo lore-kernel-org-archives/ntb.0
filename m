@@ -1,16 +1,16 @@
 Return-Path: <allen.cryptic@gmail.com>
-Received: from mail-pg1-x543.google.com (mail-pg1-x543.google.com. [2607:f8b0:4864:20::543])
-        by gmr-mx.google.com with ESMTPS id z7si812347ilm.3.2020.08.17.02.19.04
+Received: from mail-pj1-x1042.google.com (mail-pj1-x1042.google.com. [2607:f8b0:4864:20::1042])
+        by gmr-mx.google.com with ESMTPS id c5si395461ots.0.2020.08.17.02.18.51
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 17 Aug 2020 02:19:04 -0700 (PDT)
-Received: by mail-pg1-x543.google.com with SMTP id i10so2286729pgk.1
-        for <linux-ntb@googlegroups.com>; Mon, 17 Aug 2020 02:19:04 -0700 (PDT)
+        Mon, 17 Aug 2020 02:18:51 -0700 (PDT)
+Received: by mail-pj1-x1042.google.com with SMTP id c10so7693154pjn.1
+        for <linux-ntb@googlegroups.com>; Mon, 17 Aug 2020 02:18:51 -0700 (PDT)
 Return-Path: <allen.cryptic@gmail.com>
 From: Allen Pais <allen.cryptic@gmail.com>
-Subject: [PATCH 1/2] hsi: nokia-modem: convert tasklets to use new tasklet_setup() API
-Date: Mon, 17 Aug 2020 14:46:06 +0530
-Message-Id: <20200817091617.28119-12-allen.cryptic@gmail.com>
+Subject: [PATCH] firewire: ohci: convert tasklets to use new tasklet_setup() API
+Date: Mon, 17 Aug 2020 14:46:05 +0530
+Message-Id: <20200817091617.28119-11-allen.cryptic@gmail.com>
 In-Reply-To: <20200817091617.28119-1-allen.cryptic@gmail.com>
 References: <20200817091617.28119-1-allen.cryptic@gmail.com>
 To: jdike@addtoit.com, richard@nod.at, anton.ivanov@cambridgegreys.com, 3chas3@gmail.com, axboe@kernel.dk, stefanr@s5r6.in-berlin.de, airlied@linux.ie, daniel@ffwll.ch, sre@kernel.org, James.Bottomley@HansenPartnership.com, kys@microsoft.com, deller@gmx.de, dmitry.torokhov@gmail.com, jassisinghbrar@gmail.com, shawnguo@kernel.org, s.hauer@pengutronix.de, maximlevitsky@gmail.com, oakad@yahoo.com, ulf.hansson@linaro.org, mporter@kernel.crashing.org, alex.bou9@gmail.com, broonie@kernel.org, martyn@welchs.me.uk, manohar.vanga@gmail.com, mitch@sfgoth.com, davem@davemloft.net, kuba@kernel.org
@@ -27,37 +27,73 @@ and from_tasklet() to pass the tasklet pointer explicitly.
 Signed-off-by: Romain Perier <romain.perier@gmail.com>
 Signed-off-by: Allen Pais <allen.lkml@gmail.com>
 ---
- drivers/hsi/clients/nokia-modem.c | 9 +++++----
- 1 file changed, 5 insertions(+), 4 deletions(-)
+ drivers/firewire/ohci.c | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/hsi/clients/nokia-modem.c b/drivers/hsi/clients/nokia-modem.c
-index cd7ebf4c2e2f..36d373f089ce 100644
---- a/drivers/hsi/clients/nokia-modem.c
-+++ b/drivers/hsi/clients/nokia-modem.c
-@@ -36,9 +36,10 @@ struct nokia_modem_device {
- 	struct hsi_client	*cmt_speech;
- };
+diff --git a/drivers/firewire/ohci.c b/drivers/firewire/ohci.c
+index 7dde21b18b04..6298ff03796e 100644
+--- a/drivers/firewire/ohci.c
++++ b/drivers/firewire/ohci.c
+@@ -921,9 +921,9 @@ static void ar_recycle_buffers(struct ar_context *ctx, unsigned int end_buffer)
+ 	}
+ }
  
--static void do_nokia_modem_rst_ind_tasklet(unsigned long data)
-+static void do_nokia_modem_rst_ind_tasklet(struct tasklet_struct *t)
+-static void ar_context_tasklet(unsigned long data)
++static void ar_context_tasklet(struct tasklet_struct *t)
  {
--	struct nokia_modem_device *modem = (struct nokia_modem_device *)data;
-+	struct nokia_modem_device *modem = from_tasklet(modem, t,
-+						nokia_modem_rst_ind_tasklet);
+-	struct ar_context *ctx = (struct ar_context *)data;
++	struct ar_context *ctx = from_tasklet(ctx, t, tasklet);
+ 	unsigned int end_buffer_index, end_buffer_offset;
+ 	void *p, *end;
  
- 	if (!modem)
- 		return;
-@@ -155,8 +156,8 @@ static int nokia_modem_probe(struct device *dev)
- 	modem->nokia_modem_rst_ind_irq = irq;
- 	pflags = irq_get_trigger_type(irq);
+@@ -977,7 +977,7 @@ static int ar_context_init(struct ar_context *ctx, struct fw_ohci *ohci,
  
--	tasklet_init(&modem->nokia_modem_rst_ind_tasklet,
--			do_nokia_modem_rst_ind_tasklet, (unsigned long)modem);
-+	tasklet_setup(&modem->nokia_modem_rst_ind_tasklet,
-+			do_nokia_modem_rst_ind_tasklet);
- 	err = devm_request_irq(dev, irq, nokia_modem_rst_ind_isr,
- 				pflags, "modem_rst_ind", modem);
- 	if (err < 0) {
+ 	ctx->regs        = regs;
+ 	ctx->ohci        = ohci;
+-	tasklet_init(&ctx->tasklet, ar_context_tasklet, (unsigned long)ctx);
++	tasklet_setup(&ctx->tasklet, ar_context_tasklet);
+ 
+ 	for (i = 0; i < AR_BUFFERS; i++) {
+ 		ctx->pages[i] = alloc_page(GFP_KERNEL | GFP_DMA32);
+@@ -1049,9 +1049,9 @@ static struct descriptor *find_branch_descriptor(struct descriptor *d, int z)
+ 		return d + z - 1;
+ }
+ 
+-static void context_tasklet(unsigned long data)
++static void context_tasklet(struct tasklet_struct *t)
+ {
+-	struct context *ctx = (struct context *) data;
++	struct context *ctx = from_tasklet(ctx, t, tasklet);
+ 	struct descriptor *d, *last;
+ 	u32 address;
+ 	int z;
+@@ -1145,7 +1145,7 @@ static int context_init(struct context *ctx, struct fw_ohci *ohci,
+ 	ctx->buffer_tail = list_entry(ctx->buffer_list.next,
+ 			struct descriptor_buffer, list);
+ 
+-	tasklet_init(&ctx->tasklet, context_tasklet, (unsigned long)ctx);
++	tasklet_setup(&ctx->tasklet, context_tasklet);
+ 	ctx->callback = callback;
+ 
+ 	/*
+@@ -1420,7 +1420,7 @@ static void at_context_flush(struct context *ctx)
+ 	tasklet_disable(&ctx->tasklet);
+ 
+ 	ctx->flushing = true;
+-	context_tasklet((unsigned long)ctx);
++	context_tasklet(&ctx->tasklet);
+ 	ctx->flushing = false;
+ 
+ 	tasklet_enable(&ctx->tasklet);
+@@ -3472,7 +3472,7 @@ static int ohci_flush_iso_completions(struct fw_iso_context *base)
+ 	tasklet_disable(&ctx->context.tasklet);
+ 
+ 	if (!test_and_set_bit_lock(0, &ctx->flushing_completions)) {
+-		context_tasklet((unsigned long)&ctx->context);
++		context_tasklet(&ctx->context.tasklet);
+ 
+ 		switch (base->type) {
+ 		case FW_ISO_CONTEXT_TRANSMIT:
 -- 
 2.17.1
 
