@@ -1,16 +1,16 @@
 Return-Path: <allen.cryptic@gmail.com>
-Received: from mail-pf1-x444.google.com (mail-pf1-x444.google.com. [2607:f8b0:4864:20::444])
-        by gmr-mx.google.com with ESMTPS id p19si1130123vsn.2.2020.08.17.02.19.17
+Received: from mail-pg1-x543.google.com (mail-pg1-x543.google.com. [2607:f8b0:4864:20::543])
+        by gmr-mx.google.com with ESMTPS id z7si812347ilm.3.2020.08.17.02.19.04
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 17 Aug 2020 02:19:17 -0700 (PDT)
-Received: by mail-pf1-x444.google.com with SMTP id k18so7919350pfp.7
-        for <linux-ntb@googlegroups.com>; Mon, 17 Aug 2020 02:19:17 -0700 (PDT)
+        Mon, 17 Aug 2020 02:19:04 -0700 (PDT)
+Received: by mail-pg1-x543.google.com with SMTP id i10so2286729pgk.1
+        for <linux-ntb@googlegroups.com>; Mon, 17 Aug 2020 02:19:04 -0700 (PDT)
 Return-Path: <allen.cryptic@gmail.com>
 From: Allen Pais <allen.cryptic@gmail.com>
-Subject: [PATCH] input: serio: convert tasklets to use new tasklet_setup() API
-Date: Mon, 17 Aug 2020 14:46:07 +0530
-Message-Id: <20200817091617.28119-13-allen.cryptic@gmail.com>
+Subject: [PATCH 1/2] hsi: nokia-modem: convert tasklets to use new tasklet_setup() API
+Date: Mon, 17 Aug 2020 14:46:06 +0530
+Message-Id: <20200817091617.28119-12-allen.cryptic@gmail.com>
 In-Reply-To: <20200817091617.28119-1-allen.cryptic@gmail.com>
 References: <20200817091617.28119-1-allen.cryptic@gmail.com>
 To: jdike@addtoit.com, richard@nod.at, anton.ivanov@cambridgegreys.com, 3chas3@gmail.com, axboe@kernel.dk, stefanr@s5r6.in-berlin.de, airlied@linux.ie, daniel@ffwll.ch, sre@kernel.org, James.Bottomley@HansenPartnership.com, kys@microsoft.com, deller@gmx.de, dmitry.torokhov@gmail.com, jassisinghbrar@gmail.com, shawnguo@kernel.org, s.hauer@pengutronix.de, maximlevitsky@gmail.com, oakad@yahoo.com, ulf.hansson@linaro.org, mporter@kernel.crashing.org, alex.bou9@gmail.com, broonie@kernel.org, martyn@welchs.me.uk, manohar.vanga@gmail.com, mitch@sfgoth.com, davem@davemloft.net, kuba@kernel.org
@@ -27,31 +27,37 @@ and from_tasklet() to pass the tasklet pointer explicitly.
 Signed-off-by: Romain Perier <romain.perier@gmail.com>
 Signed-off-by: Allen Pais <allen.lkml@gmail.com>
 ---
- drivers/input/serio/hp_sdc.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/hsi/clients/nokia-modem.c | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/input/serio/hp_sdc.c b/drivers/input/serio/hp_sdc.c
-index 13eacf6ab431..91f8253ac66a 100644
---- a/drivers/input/serio/hp_sdc.c
-+++ b/drivers/input/serio/hp_sdc.c
-@@ -301,7 +301,7 @@ static irqreturn_t hp_sdc_nmisr(int irq, void *dev_id)
+diff --git a/drivers/hsi/clients/nokia-modem.c b/drivers/hsi/clients/nokia-modem.c
+index cd7ebf4c2e2f..36d373f089ce 100644
+--- a/drivers/hsi/clients/nokia-modem.c
++++ b/drivers/hsi/clients/nokia-modem.c
+@@ -36,9 +36,10 @@ struct nokia_modem_device {
+ 	struct hsi_client	*cmt_speech;
+ };
  
- unsigned long hp_sdc_put(void);
- 
--static void hp_sdc_tasklet(unsigned long foo)
-+static void hp_sdc_tasklet(struct tasklet_struct *unused)
+-static void do_nokia_modem_rst_ind_tasklet(unsigned long data)
++static void do_nokia_modem_rst_ind_tasklet(struct tasklet_struct *t)
  {
- 	write_lock_irq(&hp_sdc.rtq_lock);
+-	struct nokia_modem_device *modem = (struct nokia_modem_device *)data;
++	struct nokia_modem_device *modem = from_tasklet(modem, t,
++						nokia_modem_rst_ind_tasklet);
  
-@@ -890,7 +890,7 @@ static int __init hp_sdc_init(void)
- 	hp_sdc_status_in8();
- 	hp_sdc_data_in8();
+ 	if (!modem)
+ 		return;
+@@ -155,8 +156,8 @@ static int nokia_modem_probe(struct device *dev)
+ 	modem->nokia_modem_rst_ind_irq = irq;
+ 	pflags = irq_get_trigger_type(irq);
  
--	tasklet_init(&hp_sdc.task, hp_sdc_tasklet, 0);
-+	tasklet_setup(&hp_sdc.task, hp_sdc_tasklet, 0);
- 
- 	/* Sync the output buffer registers, thus scheduling hp_sdc_tasklet. */
- 	t_sync.actidx	= 0;
+-	tasklet_init(&modem->nokia_modem_rst_ind_tasklet,
+-			do_nokia_modem_rst_ind_tasklet, (unsigned long)modem);
++	tasklet_setup(&modem->nokia_modem_rst_ind_tasklet,
++			do_nokia_modem_rst_ind_tasklet);
+ 	err = devm_request_irq(dev, irq, nokia_modem_rst_ind_isr,
+ 				pflags, "modem_rst_ind", modem);
+ 	if (err < 0) {
 -- 
 2.17.1
 
