@@ -1,16 +1,16 @@
 Return-Path: <allen.cryptic@gmail.com>
-Received: from mail-pj1-x1044.google.com (mail-pj1-x1044.google.com. [2607:f8b0:4864:20::1044])
-        by gmr-mx.google.com with ESMTPS id q137si816761pfc.4.2020.08.17.02.17.59
+Received: from mail-pj1-x1041.google.com (mail-pj1-x1041.google.com. [2607:f8b0:4864:20::1041])
+        by gmr-mx.google.com with ESMTPS id s2si972188pgh.4.2020.08.17.02.17.45
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 17 Aug 2020 02:17:59 -0700 (PDT)
-Received: by mail-pj1-x1044.google.com with SMTP id ep8so7403576pjb.3
-        for <linux-ntb@googlegroups.com>; Mon, 17 Aug 2020 02:17:59 -0700 (PDT)
+        Mon, 17 Aug 2020 02:17:45 -0700 (PDT)
+Received: by mail-pj1-x1041.google.com with SMTP id f9so7394692pju.4
+        for <linux-ntb@googlegroups.com>; Mon, 17 Aug 2020 02:17:45 -0700 (PDT)
 Return-Path: <allen.cryptic@gmail.com>
 From: Allen Pais <allen.cryptic@gmail.com>
-Subject: [PATCH] drivers: rapidio: convert tasklets to use new tasklet_setup() API
-Date: Mon, 17 Aug 2020 14:46:01 +0530
-Message-Id: <20200817091617.28119-7-allen.cryptic@gmail.com>
+Subject: [PATCH] drivers: ntb: convert tasklets to use new tasklet_setup() API
+Date: Mon, 17 Aug 2020 14:46:00 +0530
+Message-Id: <20200817091617.28119-6-allen.cryptic@gmail.com>
 In-Reply-To: <20200817091617.28119-1-allen.cryptic@gmail.com>
 References: <20200817091617.28119-1-allen.cryptic@gmail.com>
 To: jdike@addtoit.com, richard@nod.at, anton.ivanov@cambridgegreys.com, 3chas3@gmail.com, axboe@kernel.dk, stefanr@s5r6.in-berlin.de, airlied@linux.ie, daniel@ffwll.ch, sre@kernel.org, James.Bottomley@HansenPartnership.com, kys@microsoft.com, deller@gmx.de, dmitry.torokhov@gmail.com, jassisinghbrar@gmail.com, shawnguo@kernel.org, s.hauer@pengutronix.de, maximlevitsky@gmail.com, oakad@yahoo.com, ulf.hansson@linaro.org, mporter@kernel.crashing.org, alex.bou9@gmail.com, broonie@kernel.org, martyn@welchs.me.uk, manohar.vanga@gmail.com, mitch@sfgoth.com, davem@davemloft.net, kuba@kernel.org
@@ -27,35 +27,44 @@ and from_tasklet() to pass the tasklet pointer explicitly.
 Signed-off-by: Romain Perier <romain.perier@gmail.com>
 Signed-off-by: Allen Pais <allen.lkml@gmail.com>
 ---
- drivers/rapidio/devices/tsi721_dma.c | 7 +++----
- 1 file changed, 3 insertions(+), 4 deletions(-)
+ drivers/ntb/ntb_transport.c | 9 ++++-----
+ 1 file changed, 4 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/rapidio/devices/tsi721_dma.c b/drivers/rapidio/devices/tsi721_dma.c
-index d375c02059f3..4a2bb6d7c692 100644
---- a/drivers/rapidio/devices/tsi721_dma.c
-+++ b/drivers/rapidio/devices/tsi721_dma.c
-@@ -566,9 +566,9 @@ static void tsi721_advance_work(struct tsi721_bdma_chan *bdma_chan,
- 		  bdma_chan->id);
+diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+index e6d1f5b298f3..ab3bee2fc803 100644
+--- a/drivers/ntb/ntb_transport.c
++++ b/drivers/ntb/ntb_transport.c
+@@ -273,7 +273,7 @@ enum {
+ #define NTB_QP_DEF_NUM_ENTRIES	100
+ #define NTB_LINK_DOWN_TIMEOUT	10
+ 
+-static void ntb_transport_rxc_db(unsigned long data);
++static void ntb_transport_rxc_db(struct tasklet_struct *t);
+ static const struct ntb_ctx_ops ntb_transport_ops;
+ static struct ntb_client ntb_transport_client;
+ static int ntb_async_tx_submit(struct ntb_transport_qp *qp,
+@@ -1234,8 +1234,7 @@ static int ntb_transport_init_queue(struct ntb_transport_ctx *nt,
+ 	INIT_LIST_HEAD(&qp->rx_free_q);
+ 	INIT_LIST_HEAD(&qp->tx_free_q);
+ 
+-	tasklet_init(&qp->rxc_db_work, ntb_transport_rxc_db,
+-		     (unsigned long)qp);
++	tasklet_setup(&qp->rxc_db_work, ntb_transport_rxc_db);
+ 
+ 	return 0;
+ }
+@@ -1685,9 +1684,9 @@ static int ntb_process_rxc(struct ntb_transport_qp *qp)
+ 	return 0;
  }
  
--static void tsi721_dma_tasklet(unsigned long data)
-+static void tsi721_dma_tasklet(struct tasklet_struct *t)
+-static void ntb_transport_rxc_db(unsigned long data)
++static void ntb_transport_rxc_db(struct tasklet_struct *t)
  {
--	struct tsi721_bdma_chan *bdma_chan = (struct tsi721_bdma_chan *)data;
-+	struct tsi721_bdma_chan *bdma_chan = from_tasklet(bdma_chan, t, tasklet);
- 	u32 dmac_int, dmac_sts;
+-	struct ntb_transport_qp *qp = (void *)data;
++	struct ntb_transport_qp *qp = from_tasklet(qp, t, rxc_db_work);
+ 	int rc, i;
  
- 	dmac_int = ioread32(bdma_chan->regs + TSI721_DMAC_INT);
-@@ -988,8 +988,7 @@ int tsi721_register_dma(struct tsi721_device *priv)
- 		INIT_LIST_HEAD(&bdma_chan->queue);
- 		INIT_LIST_HEAD(&bdma_chan->free_list);
- 
--		tasklet_init(&bdma_chan->tasklet, tsi721_dma_tasklet,
--			     (unsigned long)bdma_chan);
-+		tasklet_setup(&bdma_chan->tasklet, tsi721_dma_tasklet);
- 		list_add_tail(&bdma_chan->dchan.device_node,
- 			      &mport->dma.channels);
- 		nr_channels++;
+ 	dev_dbg(&qp->ndev->pdev->dev, "%s: doorbell %d received\n",
 -- 
 2.17.1
 
