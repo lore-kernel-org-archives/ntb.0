@@ -1,16 +1,16 @@
 Return-Path: <allen.cryptic@gmail.com>
-Received: from mail-pj1-x1041.google.com (mail-pj1-x1041.google.com. [2607:f8b0:4864:20::1041])
-        by gmr-mx.google.com with ESMTPS id bj6si145137plb.4.2020.08.17.02.17.32
+Received: from mail-pj1-x1043.google.com (mail-pj1-x1043.google.com. [2607:f8b0:4864:20::1043])
+        by gmr-mx.google.com with ESMTPS id t72si949623vkd.5.2020.08.17.02.17.21
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 17 Aug 2020 02:17:32 -0700 (PDT)
-Received: by mail-pj1-x1041.google.com with SMTP id i92so7691493pje.0
-        for <linux-ntb@googlegroups.com>; Mon, 17 Aug 2020 02:17:32 -0700 (PDT)
+        Mon, 17 Aug 2020 02:17:21 -0700 (PDT)
+Received: by mail-pj1-x1043.google.com with SMTP id e4so7525465pjd.0
+        for <linux-ntb@googlegroups.com>; Mon, 17 Aug 2020 02:17:21 -0700 (PDT)
 Return-Path: <allen.cryptic@gmail.com>
 From: Allen Pais <allen.cryptic@gmail.com>
-Subject: [PATCH] drivers: atm: convert tasklets to use new tasklet_setup() API
-Date: Mon, 17 Aug 2020 14:45:59 +0530
-Message-Id: <20200817091617.28119-5-allen.cryptic@gmail.com>
+Subject: [PATCH] driver: hv: convert tasklets to use new tasklet_setup() API
+Date: Mon, 17 Aug 2020 14:45:58 +0530
+Message-Id: <20200817091617.28119-4-allen.cryptic@gmail.com>
 In-Reply-To: <20200817091617.28119-1-allen.cryptic@gmail.com>
 References: <20200817091617.28119-1-allen.cryptic@gmail.com>
 To: jdike@addtoit.com, richard@nod.at, anton.ivanov@cambridgegreys.com, 3chas3@gmail.com, axboe@kernel.dk, stefanr@s5r6.in-berlin.de, airlied@linux.ie, daniel@ffwll.ch, sre@kernel.org, James.Bottomley@HansenPartnership.com, kys@microsoft.com, deller@gmx.de, dmitry.torokhov@gmail.com, jassisinghbrar@gmail.com, shawnguo@kernel.org, s.hauer@pengutronix.de, maximlevitsky@gmail.com, oakad@yahoo.com, ulf.hansson@linaro.org, mporter@kernel.crashing.org, alex.bou9@gmail.com, broonie@kernel.org, martyn@welchs.me.uk, manohar.vanga@gmail.com, mitch@sfgoth.com, davem@davemloft.net, kuba@kernel.org
@@ -27,155 +27,88 @@ and from_tasklet() to pass the tasklet pointer explicitly.
 Signed-off-by: Romain Perier <romain.perier@gmail.com>
 Signed-off-by: Allen Pais <allen.lkml@gmail.com>
 ---
- drivers/atm/eni.c       |  9 +++++----
- drivers/atm/fore200e.c  | 14 +++++++-------
- drivers/atm/he.c        |  8 ++++----
- drivers/atm/solos-pci.c |  8 ++++----
- 4 files changed, 20 insertions(+), 19 deletions(-)
+ drivers/hv/channel_mgmt.c | 3 +--
+ drivers/hv/connection.c   | 4 ++--
+ drivers/hv/hv.c           | 3 +--
+ drivers/hv/hyperv_vmbus.h | 4 ++--
+ drivers/hv/vmbus_drv.c    | 4 ++--
+ 5 files changed, 8 insertions(+), 10 deletions(-)
 
-diff --git a/drivers/atm/eni.c b/drivers/atm/eni.c
-index 39be444534d0..540edea0ad7a 100644
---- a/drivers/atm/eni.c
-+++ b/drivers/atm/eni.c
-@@ -1521,10 +1521,11 @@ static irqreturn_t eni_int(int irq,void *dev_id)
+diff --git a/drivers/hv/channel_mgmt.c b/drivers/hv/channel_mgmt.c
+index 591106cf58fc..640fc1688d49 100644
+--- a/drivers/hv/channel_mgmt.c
++++ b/drivers/hv/channel_mgmt.c
+@@ -321,8 +321,7 @@ static struct vmbus_channel *alloc_channel(void)
+ 
+ 	INIT_LIST_HEAD(&channel->sc_list);
+ 
+-	tasklet_init(&channel->callback_event,
+-		     vmbus_on_event, (unsigned long)channel);
++	tasklet_setup(&channel->callback_event, vmbus_on_event);
+ 
+ 	hv_ringbuffer_pre_init(channel);
+ 
+diff --git a/drivers/hv/connection.c b/drivers/hv/connection.c
+index 11170d9a2e1a..23e10ebecf5c 100644
+--- a/drivers/hv/connection.c
++++ b/drivers/hv/connection.c
+@@ -322,9 +322,9 @@ struct vmbus_channel *relid2channel(u32 relid)
+  *    If this tasklet has been running for a long time
+  *    then reschedule ourselves.
+  */
+-void vmbus_on_event(unsigned long data)
++void vmbus_on_event(struct tasklet_struct *t)
+ {
+-	struct vmbus_channel *channel = (void *) data;
++	struct vmbus_channel *channel = from_tasklet(channel, t, callback_event);
+ 	unsigned long time_limit = jiffies + 2;
+ 
+ 	trace_vmbus_on_event(channel);
+diff --git a/drivers/hv/hv.c b/drivers/hv/hv.c
+index da69338f92f5..91a0582387d6 100644
+--- a/drivers/hv/hv.c
++++ b/drivers/hv/hv.c
+@@ -96,8 +96,7 @@ int hv_synic_alloc(void)
+ 	for_each_present_cpu(cpu) {
+ 		hv_cpu = per_cpu_ptr(hv_context.cpu_context, cpu);
+ 
+-		tasklet_init(&hv_cpu->msg_dpc,
+-			     vmbus_on_msg_dpc, (unsigned long) hv_cpu);
++		tasklet_setup(&hv_cpu->msg_dpc, vmbus_on_msg_dpc);
+ 
+ 		hv_cpu->synic_message_page =
+ 			(void *)get_zeroed_page(GFP_ATOMIC);
+diff --git a/drivers/hv/hyperv_vmbus.h b/drivers/hv/hyperv_vmbus.h
+index 40e2b9f91163..36199d8ea8c3 100644
+--- a/drivers/hv/hyperv_vmbus.h
++++ b/drivers/hv/hyperv_vmbus.h
+@@ -351,8 +351,8 @@ void vmbus_disconnect(void);
+ 
+ int vmbus_post_msg(void *buffer, size_t buflen, bool can_sleep);
+ 
+-void vmbus_on_event(unsigned long data);
+-void vmbus_on_msg_dpc(unsigned long data);
++void vmbus_on_event(struct tasklet_struct *t);
++void vmbus_on_msg_dpc(struct tasklet_struct *t);
+ 
+ int hv_kvp_init(struct hv_util_service *srv);
+ void hv_kvp_deinit(void);
+diff --git a/drivers/hv/vmbus_drv.c b/drivers/hv/vmbus_drv.c
+index 910b6e90866c..6b7987dac97a 100644
+--- a/drivers/hv/vmbus_drv.c
++++ b/drivers/hv/vmbus_drv.c
+@@ -1043,9 +1043,9 @@ static void vmbus_onmessage_work(struct work_struct *work)
+ 	kfree(ctx);
  }
  
- 
--static void eni_tasklet(unsigned long data)
-+static void eni_tasklet(struct tasklet_struct *t)
+-void vmbus_on_msg_dpc(unsigned long data)
++void vmbus_on_msg_dpc(struct tasklet_struct *t)
  {
--	struct atm_dev *dev = (struct atm_dev *) data;
--	struct eni_dev *eni_dev = ENI_DEV(dev);
-+	struct eni_dev *eni_dev = from_tasklet(eni_dev, t, task);
-+	struct atm_dev *dev = container_of((void *)eni_dev, typeof(*dev),
-+					  dev_data);
- 	unsigned long flags;
- 	u32 events;
- 
-@@ -1838,7 +1839,7 @@ static int eni_start(struct atm_dev *dev)
- 	     eni_dev->vci,eni_dev->rx_dma,eni_dev->tx_dma,
- 	     eni_dev->service,buf);
- 	spin_lock_init(&eni_dev->lock);
--	tasklet_init(&eni_dev->task,eni_tasklet,(unsigned long) dev);
-+	tasklet_setup(&eni_dev->task,eni_tasklet);
- 	eni_dev->events = 0;
- 	/* initialize memory management */
- 	buffer_mem = eni_dev->mem - (buf - eni_dev->ram);
-diff --git a/drivers/atm/fore200e.c b/drivers/atm/fore200e.c
-index a81bc49c14ac..8c6226b50e4d 100644
---- a/drivers/atm/fore200e.c
-+++ b/drivers/atm/fore200e.c
-@@ -1180,9 +1180,9 @@ fore200e_interrupt(int irq, void* dev)
- 
- #ifdef FORE200E_USE_TASKLET
- static void
--fore200e_tx_tasklet(unsigned long data)
-+fore200e_tx_tasklet(struct tasklet_struct *t)
- {
--    struct fore200e* fore200e = (struct fore200e*) data;
-+    struct fore200e* fore200e = from_tasklet(fore200e, t, tx_tasklet);
-     unsigned long flags;
- 
-     DPRINTK(3, "tx tasklet scheduled for device %d\n", fore200e->atm_dev->number);
-@@ -1194,15 +1194,15 @@ fore200e_tx_tasklet(unsigned long data)
- 
- 
- static void
--fore200e_rx_tasklet(unsigned long data)
-+fore200e_rx_tasklet(struct tasklet_struct *t)
- {
--    struct fore200e* fore200e = (struct fore200e*) data;
-+    struct fore200e* fore200e = from_tasklet(fore200e, t, rx_tasklet);
-     unsigned long    flags;
- 
-     DPRINTK(3, "rx tasklet scheduled for device %d\n", fore200e->atm_dev->number);
- 
-     spin_lock_irqsave(&fore200e->q_lock, flags);
--    fore200e_rx_irq((struct fore200e*) data);
-+    fore200e_rx_irq(fore200e);
-     spin_unlock_irqrestore(&fore200e->q_lock, flags);
- }
- #endif
-@@ -1943,8 +1943,8 @@ static int fore200e_irq_request(struct fore200e *fore200e)
- 	   fore200e_irq_itoa(fore200e->irq), fore200e->name);
- 
- #ifdef FORE200E_USE_TASKLET
--    tasklet_init(&fore200e->tx_tasklet, fore200e_tx_tasklet, (unsigned long)fore200e);
--    tasklet_init(&fore200e->rx_tasklet, fore200e_rx_tasklet, (unsigned long)fore200e);
-+    tasklet_setup(&fore200e->tx_tasklet, fore200e_tx_tasklet);
-+    tasklet_setup(&fore200e->rx_tasklet, fore200e_rx_tasklet);
- #endif
- 
-     fore200e->state = FORE200E_STATE_IRQ;
-diff --git a/drivers/atm/he.c b/drivers/atm/he.c
-index 8af793f5e811..9c36fea4336f 100644
---- a/drivers/atm/he.c
-+++ b/drivers/atm/he.c
-@@ -100,7 +100,7 @@ static void he_close(struct atm_vcc *vcc);
- static int he_send(struct atm_vcc *vcc, struct sk_buff *skb);
- static int he_ioctl(struct atm_dev *dev, unsigned int cmd, void __user *arg);
- static irqreturn_t he_irq_handler(int irq, void *dev_id);
--static void he_tasklet(unsigned long data);
-+static void he_tasklet(struct tasklet_struct *t);
- static int he_proc_read(struct atm_dev *dev,loff_t *pos,char *page);
- static int he_start(struct atm_dev *dev);
- static void he_stop(struct he_dev *dev);
-@@ -383,7 +383,7 @@ static int he_init_one(struct pci_dev *pci_dev,
- 	he_dev->atm_dev->dev_data = he_dev;
- 	atm_dev->dev_data = he_dev;
- 	he_dev->number = atm_dev->number;
--	tasklet_init(&he_dev->tasklet, he_tasklet, (unsigned long) he_dev);
-+	tasklet_setup(&he_dev->tasklet, he_tasklet);
- 	spin_lock_init(&he_dev->global_lock);
- 
- 	if (he_start(atm_dev)) {
-@@ -1925,10 +1925,10 @@ he_service_rbpl(struct he_dev *he_dev, int group)
- }
- 
- static void
--he_tasklet(unsigned long data)
-+he_tasklet(struct tasklet_struct *t)
- {
- 	unsigned long flags;
--	struct he_dev *he_dev = (struct he_dev *) data;
-+	struct he_dev *he_dev = from_tasklet(he_dev, t, tasklet);
- 	int group, type;
- 	int updated = 0;
- 
-diff --git a/drivers/atm/solos-pci.c b/drivers/atm/solos-pci.c
-index 94fbc3abe60e..f44e1880cb74 100644
---- a/drivers/atm/solos-pci.c
-+++ b/drivers/atm/solos-pci.c
-@@ -167,7 +167,7 @@ static struct atm_vcc* find_vcc(struct atm_dev *dev, short vpi, int vci);
- static int atm_init(struct solos_card *, struct device *);
- static void atm_remove(struct solos_card *);
- static int send_command(struct solos_card *card, int dev, const char *buf, size_t size);
--static void solos_bh(unsigned long);
-+static void solos_bh(struct tasklet_struct *t);
- static int print_buffer(struct sk_buff *buf);
- 
- static inline void solos_pop(struct atm_vcc *vcc, struct sk_buff *skb)
-@@ -754,9 +754,9 @@ static irqreturn_t solos_irq(int irq, void *dev_id)
- 	return IRQ_RETVAL(handled);
- }
- 
--static void solos_bh(unsigned long card_arg)
-+static void solos_bh(struct tasklet_struct *t)
- {
--	struct solos_card *card = (void *)card_arg;
-+	struct solos_card *card = from_tasklet(card, t, tlet);
- 	uint32_t card_flags;
- 	uint32_t rx_done = 0;
- 	int port;
-@@ -1294,7 +1294,7 @@ static int fpga_probe(struct pci_dev *dev, const struct pci_device_id *id)
- 
- 	pci_set_drvdata(dev, card);
- 
--	tasklet_init(&card->tlet, solos_bh, (unsigned long)card);
-+	tasklet_setup(&card->tlet, solos_bh);
- 	spin_lock_init(&card->tx_lock);
- 	spin_lock_init(&card->tx_queue_lock);
- 	spin_lock_init(&card->cli_queue_lock);
+-	struct hv_per_cpu_context *hv_cpu = (void *)data;
++	struct hv_per_cpu_context *hv_cpu = from_tasklet(hv_cpu, t, msg_dpc);
+ 	void *page_addr = hv_cpu->synic_message_page;
+ 	struct hv_message *msg = (struct hv_message *)page_addr +
+ 				  VMBUS_MESSAGE_SINT;
 -- 
 2.17.1
 
