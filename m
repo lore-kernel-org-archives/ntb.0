@@ -1,41 +1,100 @@
-Return-Path: <axboe@kernel.dk>
-Received: from mail-pl1-x641.google.com (mail-pl1-x641.google.com. [2607:f8b0:4864:20::641])
-        by gmr-mx.google.com with ESMTPS id b21si923077qtq.1.2020.08.17.06.56.52
+Return-Path: <tcminyard@gmail.com>
+Received: from mail-ot1-x341.google.com (mail-ot1-x341.google.com. [2607:f8b0:4864:20::341])
+        by gmr-mx.google.com with ESMTPS id p67si847927ybg.2.2020.08.17.05.15.17
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 17 Aug 2020 06:56:52 -0700 (PDT)
-Received: by mail-pl1-x641.google.com with SMTP id g7so6428703plq.1
-        for <linux-ntb@googlegroups.com>; Mon, 17 Aug 2020 06:56:52 -0700 (PDT)
-Return-Path: <axboe@kernel.dk>
-Subject: Re: [PATCH] block: convert tasklets to use new tasklet_setup() API
+        Mon, 17 Aug 2020 05:15:17 -0700 (PDT)
+Received: by mail-ot1-x341.google.com with SMTP id h16so13200108oti.7
+        for <linux-ntb@googlegroups.com>; Mon, 17 Aug 2020 05:15:17 -0700 (PDT)
+Return-Path: <tcminyard@gmail.com>
+Sender: Corey Minyard <tcminyard@gmail.com>
+Date: Mon, 17 Aug 2020 07:15:14 -0500
+From: Corey Minyard <minyard@acm.org>
+Subject: Re: [PATCH] char: ipmi: convert tasklets to use new tasklet_setup()
+ API
+Message-ID: <20200817121514.GE2865@minyard.net>
+Reply-To: minyard@acm.org
 References: <20200817091617.28119-1-allen.cryptic@gmail.com>
- <20200817091617.28119-2-allen.cryptic@gmail.com>
-From: Jens Axboe <axboe@kernel.dk>
-Message-ID: <b5508ca4-0641-7265-2939-5f03cbfab2e2@kernel.dk>
-Date: Mon, 17 Aug 2020 06:56:47 -0700
+ <20200817091617.28119-3-allen.cryptic@gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20200817091617.28119-2-allen.cryptic@gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-To: Allen Pais <allen.cryptic@gmail.com>, jdike@addtoit.com, richard@nod.at, anton.ivanov@cambridgegreys.com, 3chas3@gmail.com, stefanr@s5r6.in-berlin.de, airlied@linux.ie, daniel@ffwll.ch, sre@kernel.org, James.Bottomley@HansenPartnership.com, kys@microsoft.com, deller@gmx.de, dmitry.torokhov@gmail.com, jassisinghbrar@gmail.com, shawnguo@kernel.org, s.hauer@pengutronix.de, maximlevitsky@gmail.com, oakad@yahoo.com, ulf.hansson@linaro.org, mporter@kernel.crashing.org, alex.bou9@gmail.com, broonie@kernel.org, martyn@welchs.me.uk, manohar.vanga@gmail.com, mitch@sfgoth.com, davem@davemloft.net, kuba@kernel.org
-Cc: keescook@chromium.org, linux-um@lists.infradead.org, linux-kernel@vger.kernel.org, linux-atm-general@lists.sourceforge.net, netdev@vger.kernel.org, linux-block@vger.kernel.org, linux-arm-kernel@lists.infradead.org, openipmi-developer@lists.sourceforge.net, linux1394-devel@lists.sourceforge.net, intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org, linux-hyperv@vger.kernel.org, linux-parisc@vger.kernel.org, linux-input@vger.kernel.org, linux-mmc@vger.kernel.org, linux-ntb@googlegroups.com, linux-s390@vger.kernel.org, linux-spi@vger.kernel.org, devel@driverdev.osuosl.org, Allen Pais <allen.lkml@gmail.com>, Romain Perier <romain.perier@gmail.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200817091617.28119-3-allen.cryptic@gmail.com>
+To: Allen Pais <allen.cryptic@gmail.com>
+Cc: jdike@addtoit.com, richard@nod.at, anton.ivanov@cambridgegreys.com, 3chas3@gmail.com, axboe@kernel.dk, stefanr@s5r6.in-berlin.de, airlied@linux.ie, daniel@ffwll.ch, sre@kernel.org, James.Bottomley@HansenPartnership.com, kys@microsoft.com, deller@gmx.de, dmitry.torokhov@gmail.com, jassisinghbrar@gmail.com, shawnguo@kernel.org, s.hauer@pengutronix.de, maximlevitsky@gmail.com, oakad@yahoo.com, ulf.hansson@linaro.org, mporter@kernel.crashing.org, alex.bou9@gmail.com, broonie@kernel.org, martyn@welchs.me.uk, manohar.vanga@gmail.com, mitch@sfgoth.com, davem@davemloft.net, kuba@kernel.org, keescook@chromium.org, linux-um@lists.infradead.org, linux-kernel@vger.kernel.org, linux-atm-general@lists.sourceforge.net, netdev@vger.kernel.org, linux-block@vger.kernel.org, linux-arm-kernel@lists.infradead.org, openipmi-developer@lists.sourceforge.net, linux1394-devel@lists.sourceforge.net, intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org, linux-hyperv@vger.kernel.org, linux-parisc@vger.kernel.org, linux-input@vger.kernel.org, linux-mmc@vger.kernel.org, linux-ntb@googlegroups.com, linux-s390@vger.kernel.org, linux-spi@vger.kernel.org, devel@driverdev.osuosl.org, Allen Pais <allen.lkml@gmail.com>, Romain Perier <romain.perier@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On 8/17/20 2:15 AM, Allen Pais wrote:
+On Mon, Aug 17, 2020 at 02:45:57PM +0530, Allen Pais wrote:
 > From: Allen Pais <allen.lkml@gmail.com>
 > 
 > In preparation for unconditionally passing the
 > struct tasklet_struct pointer to all tasklet
 > callbacks, switch to using the new tasklet_setup()
 > and from_tasklet() to pass the tasklet pointer explicitly.
+> 
+> Signed-off-by: Romain Perier <romain.perier@gmail.com>
+> Signed-off-by: Allen Pais <allen.lkml@gmail.com>
 
-Who came up with the idea to add a macro 'from_tasklet' that is just
-container_of? container_of in the code would be _much_ more readable,
-and not leave anyone guessing wtf from_tasklet is doing.
+This looks good to me.
 
-I'd fix that up now before everything else goes in...
+Reviewed-by: Corey Minyard <cminyard@mvista.com>
 
--- 
-Jens Axboe
+Are you planning to push this, or do you want me to take it?  If you
+want me to take it, what is the urgency?
 
+-corey
+
+> ---
+>  drivers/char/ipmi/ipmi_msghandler.c | 13 ++++++-------
+>  1 file changed, 6 insertions(+), 7 deletions(-)
+> 
+> diff --git a/drivers/char/ipmi/ipmi_msghandler.c b/drivers/char/ipmi/ipmi_msghandler.c
+> index 737c0b6b24ea..e1814b6a1225 100644
+> --- a/drivers/char/ipmi/ipmi_msghandler.c
+> +++ b/drivers/char/ipmi/ipmi_msghandler.c
+> @@ -39,7 +39,7 @@
+>  
+>  static struct ipmi_recv_msg *ipmi_alloc_recv_msg(void);
+>  static int ipmi_init_msghandler(void);
+> -static void smi_recv_tasklet(unsigned long);
+> +static void smi_recv_tasklet(struct tasklet_struct *t);
+>  static void handle_new_recv_msgs(struct ipmi_smi *intf);
+>  static void need_waiter(struct ipmi_smi *intf);
+>  static int handle_one_recv_msg(struct ipmi_smi *intf,
+> @@ -3430,9 +3430,8 @@ int ipmi_add_smi(struct module         *owner,
+>  	intf->curr_seq = 0;
+>  	spin_lock_init(&intf->waiting_rcv_msgs_lock);
+>  	INIT_LIST_HEAD(&intf->waiting_rcv_msgs);
+> -	tasklet_init(&intf->recv_tasklet,
+> -		     smi_recv_tasklet,
+> -		     (unsigned long) intf);
+> +	tasklet_setup(&intf->recv_tasklet,
+> +		     smi_recv_tasklet);
+>  	atomic_set(&intf->watchdog_pretimeouts_to_deliver, 0);
+>  	spin_lock_init(&intf->xmit_msgs_lock);
+>  	INIT_LIST_HEAD(&intf->xmit_msgs);
+> @@ -4467,10 +4466,10 @@ static void handle_new_recv_msgs(struct ipmi_smi *intf)
+>  	}
+>  }
+>  
+> -static void smi_recv_tasklet(unsigned long val)
+> +static void smi_recv_tasklet(struct tasklet_struct *t)
+>  {
+>  	unsigned long flags = 0; /* keep us warning-free. */
+> -	struct ipmi_smi *intf = (struct ipmi_smi *) val;
+> +	struct ipmi_smi *intf = from_tasklet(intf, t, recv_tasklet);
+>  	int run_to_completion = intf->run_to_completion;
+>  	struct ipmi_smi_msg *newmsg = NULL;
+>  
+> @@ -4542,7 +4541,7 @@ void ipmi_smi_msg_received(struct ipmi_smi *intf,
+>  		spin_unlock_irqrestore(&intf->xmit_msgs_lock, flags);
+>  
+>  	if (run_to_completion)
+> -		smi_recv_tasklet((unsigned long) intf);
+> +		smi_recv_tasklet(&intf->recv_tasklet);
+>  	else
+>  		tasklet_schedule(&intf->recv_tasklet);
+>  }
+> -- 
+> 2.17.1
+> 
