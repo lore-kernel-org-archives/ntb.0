@@ -1,58 +1,81 @@
-Return-Path: <allen.cryptic@gmail.com>
-Received: from mail-pj1-x1044.google.com (mail-pj1-x1044.google.com. [2607:f8b0:4864:20::1044])
-        by gmr-mx.google.com with ESMTPS id j4si1041080pjd.0.2020.08.17.02.16.41
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-qt1-x843.google.com (mail-qt1-x843.google.com. [2607:f8b0:4864:20::843])
+        by gmr-mx.google.com with ESMTPS id u9si557737ilg.0.2020.08.24.07.58.59
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 17 Aug 2020 02:16:41 -0700 (PDT)
-Received: by mail-pj1-x1044.google.com with SMTP id kr4so7516373pjb.2
-        for <linux-ntb@googlegroups.com>; Mon, 17 Aug 2020 02:16:41 -0700 (PDT)
-Return-Path: <allen.cryptic@gmail.com>
-From: Allen Pais <allen.cryptic@gmail.com>
-Subject: [PATCH] arch: um: convert tasklets to use new tasklet_setup() API
-Date: Mon, 17 Aug 2020 14:45:55 +0530
-Message-Id: <20200817091617.28119-1-allen.cryptic@gmail.com>
-To: jdike@addtoit.com, richard@nod.at, anton.ivanov@cambridgegreys.com, 3chas3@gmail.com, axboe@kernel.dk, stefanr@s5r6.in-berlin.de, airlied@linux.ie, daniel@ffwll.ch, sre@kernel.org, James.Bottomley@HansenPartnership.com, kys@microsoft.com, deller@gmx.de, dmitry.torokhov@gmail.com, jassisinghbrar@gmail.com, shawnguo@kernel.org, s.hauer@pengutronix.de, maximlevitsky@gmail.com, oakad@yahoo.com, ulf.hansson@linaro.org, mporter@kernel.crashing.org, alex.bou9@gmail.com, broonie@kernel.org, martyn@welchs.me.uk, manohar.vanga@gmail.com, mitch@sfgoth.com, davem@davemloft.net, kuba@kernel.org
-Cc: keescook@chromium.org, linux-um@lists.infradead.org, linux-kernel@vger.kernel.org, linux-atm-general@lists.sourceforge.net, netdev@vger.kernel.org, linux-block@vger.kernel.org, linux-arm-kernel@lists.infradead.org, openipmi-developer@lists.sourceforge.net, linux1394-devel@lists.sourceforge.net, intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org, linux-hyperv@vger.kernel.org, linux-parisc@vger.kernel.org, linux-input@vger.kernel.org, linux-mmc@vger.kernel.org, linux-ntb@googlegroups.com, linux-s390@vger.kernel.org, linux-spi@vger.kernel.org, devel@driverdev.osuosl.org, Allen Pais <allen.lkml@gmail.com>, Romain Perier <romain.perier@gmail.com>
+        Mon, 24 Aug 2020 07:58:59 -0700 (PDT)
+Received: by mail-qt1-x843.google.com with SMTP id v91so964832qte.2
+        for <linux-ntb@googlegroups.com>; Mon, 24 Aug 2020 07:58:59 -0700 (PDT)
+Return-Path: <jdmason@kudzu.us>
+Date: Mon, 24 Aug 2020 10:58:38 -0400
+From: Jon Mason <jdmason@kudzu.us>
+Subject: Re: [PATCH][next] NTB: Use struct_size() helper in devm_kzalloc()
+Message-ID: <20200824145837.GC27238@kudzu.us>
+References: <20200619172514.GA1074@embeddedor>
+ <268330b2-e42b-4d62-1ff0-8462d68e498e@deltatee.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <268330b2-e42b-4d62-1ff0-8462d68e498e@deltatee.com>
+To: Logan Gunthorpe <logang@deltatee.com>
+Cc: "Gustavo A. R. Silva" <gustavoars@kernel.org>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, "Gustavo A. R. Silva" <gustavo@embeddedor.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Allen Pais <allen.lkml@gmail.com>
+On Fri, Jun 19, 2020 at 01:10:55PM -0600, Logan Gunthorpe wrote:
+> 
+> 
+> On 2020-06-19 11:25 a.m., Gustavo A. R. Silva wrote:
+> > Make use of the struct_size() helper instead of an open-coded version
+> > in order to avoid any potential type mistakes. Also, remove unnecessary
+> > variable _struct_size_.
+> > 
+> > This code was detected with the help of Coccinelle and, audited and
+> > fixed manually.
+> > 
+> > Addresses-KSPP-ID: https://github.com/KSPP/linux/issues/83
+> > Signed-off-by: Gustavo A. R. Silva <gustavoars@kernel.org>
+> 
+> Cool, I didn't know that existed! Thanks!
+> 
+> Reviewed-by: Logan Gunthorpe <logang@deltatee.com>
 
-In preparation for unconditionally passing the
-struct tasklet_struct pointer to all tasklet
-callbacks, switch to using the new tasklet_setup()
-and from_tasklet() to pass the tasklet pointer explicitly.
+Added to the ntb-next branch.
 
-Signed-off-by: Romain Perier <romain.perier@gmail.com>
-Signed-off-by: Allen Pais <allen.lkml@gmail.com>
----
- arch/um/drivers/vector_kern.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+Thanks,
+Jon
 
-diff --git a/arch/um/drivers/vector_kern.c b/arch/um/drivers/vector_kern.c
-index 8735c468230a..06980870ae23 100644
---- a/arch/um/drivers/vector_kern.c
-+++ b/arch/um/drivers/vector_kern.c
-@@ -1196,9 +1196,9 @@ static int vector_net_close(struct net_device *dev)
- 
- /* TX tasklet */
- 
--static void vector_tx_poll(unsigned long data)
-+static void vector_tx_poll(struct tasklet_struct *t)
- {
--	struct vector_private *vp = (struct vector_private *)data;
-+	struct vector_private *vp = from_tasklet(vp, t, tx_poll);
- 
- 	vp->estats.tx_kicks++;
- 	vector_send(vp->tx_queue);
-@@ -1629,7 +1629,7 @@ static void vector_eth_configure(
- 	});
- 
- 	dev->features = dev->hw_features = (NETIF_F_SG | NETIF_F_FRAGLIST);
--	tasklet_init(&vp->tx_poll, vector_tx_poll, (unsigned long)vp);
-+	tasklet_setup(&vp->tx_poll, vector_tx_poll);
- 	INIT_WORK(&vp->reset_tx, vector_reset_tx);
- 
- 	timer_setup(&vp->tl, vector_timer_expire, 0);
--- 
-2.17.1
 
+> 
+> > ---
+> >  drivers/ntb/test/ntb_msi_test.c | 5 +----
+> >  1 file changed, 1 insertion(+), 4 deletions(-)
+> > 
+> > diff --git a/drivers/ntb/test/ntb_msi_test.c b/drivers/ntb/test/ntb_msi_test.c
+> > index 99d826ed9c34..7095ecd6223a 100644
+> > --- a/drivers/ntb/test/ntb_msi_test.c
+> > +++ b/drivers/ntb/test/ntb_msi_test.c
+> > @@ -319,7 +319,6 @@ static void ntb_msit_remove_dbgfs(struct ntb_msit_ctx *nm)
+> >  static int ntb_msit_probe(struct ntb_client *client, struct ntb_dev *ntb)
+> >  {
+> >  	struct ntb_msit_ctx *nm;
+> > -	size_t struct_size;
+> >  	int peers;
+> >  	int ret;
+> >  
+> > @@ -352,9 +351,7 @@ static int ntb_msit_probe(struct ntb_client *client, struct ntb_dev *ntb)
+> >  		return ret;
+> >  	}
+> >  
+> > -	struct_size = sizeof(*nm) + sizeof(*nm->peers) * peers;
+> > -
+> > -	nm = devm_kzalloc(&ntb->dev, struct_size, GFP_KERNEL);
+> > +	nm = devm_kzalloc(&ntb->dev, struct_size(nm, peers, peers), GFP_KERNEL);
+> >  	if (!nm)
+> >  		return -ENOMEM;
+> >  
+> > 
+> 
+> -- 
+> You received this message because you are subscribed to the Google Groups "linux-ntb" group.
+> To unsubscribe from this group and stop receiving emails from it, send an email to linux-ntb+unsubscribe@googlegroups.com.
+> To view this discussion on the web visit https://groups.google.com/d/msgid/linux-ntb/268330b2-e42b-4d62-1ff0-8462d68e498e%40deltatee.com.
