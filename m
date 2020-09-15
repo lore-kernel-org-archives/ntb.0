@@ -1,13 +1,13 @@
 Return-Path: <kishon@ti.com>
-Received: from lelv0142.ext.ti.com (lelv0142.ext.ti.com. [198.47.23.249])
-        by gmr-mx.google.com with ESMTPS id y65si890756vkf.1.2020.09.14.21.22.32
+Received: from fllv0015.ext.ti.com (fllv0015.ext.ti.com. [198.47.19.141])
+        by gmr-mx.google.com with ESMTPS id d60si1273238pjk.0.2020.09.14.21.22.29
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 14 Sep 2020 21:22:32 -0700 (PDT)
+        Mon, 14 Sep 2020 21:22:29 -0700 (PDT)
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v4 08/17] PCI: endpoint: Add pci_epc_ops to map MSI irq
-Date: Tue, 15 Sep 2020 09:51:01 +0530
-Message-ID: <20200915042110.3015-9-kishon@ti.com>
+Subject: [PATCH v4 07/17] PCI: endpoint: Add support in configfs to associate two EPCs with EPF
+Date: Tue, 15 Sep 2020 09:51:00 +0530
+Message-ID: <20200915042110.3015-8-kishon@ti.com>
 In-Reply-To: <20200915042110.3015-1-kishon@ti.com>
 References: <20200915042110.3015-1-kishon@ti.com>
 MIME-Version: 1.0
@@ -16,102 +16,222 @@ To: Bjorn Helgaas <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, Loren
 Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Tom Joseph <tjoseph@cadence.com>, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, Kishon Vijay Abraham I <kishon@ti.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Add pci_epc_ops to map physical address to MSI address and return MSI
-data. The physical address is an address in the outbound region. This is
-required to implement doorbell functionality of NTB (non transparent
-bridge) wherein EPC on either side of the interface (primary and
-secondary) can directly write to the physical address (in outbound
-region) of the other interface to ring doorbell using MSI.
+Now that PCI endpoint core supports to add secondary endpoint
+controller (EPC) with endpoint function (EPF), Add support in configfs
+to associate two EPCs with EPF. This creates "primary" and "secondary"
+directory inside the directory created by users for EPF device. Users
+have to add a symlink of endpoint controller (pci_ep/controllers/) to
+"primary" or "secondary" directory to bind EPF to primary and secondary
+EPF interfaces respectively. Existing method of linking directory
+representing EPF device to directory representing EPC device to
+associate a single EPC device with a EPF device will continue to work.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- drivers/pci/endpoint/pci-epc-core.c | 40 +++++++++++++++++++++++++++++
- include/linux/pci-epc.h             |  7 +++++
- 2 files changed, 47 insertions(+)
+ .../PCI/endpoint/pci-endpoint-cfs.rst         |  10 ++
+ drivers/pci/endpoint/pci-ep-cfs.c             | 147 ++++++++++++++++++
+ 2 files changed, 157 insertions(+)
 
-diff --git a/drivers/pci/endpoint/pci-epc-core.c b/drivers/pci/endpoint/pci-epc-core.c
-index 0f6e2364ae6f..73f9ff425824 100644
---- a/drivers/pci/endpoint/pci-epc-core.c
-+++ b/drivers/pci/endpoint/pci-epc-core.c
-@@ -230,6 +230,46 @@ int pci_epc_raise_irq(struct pci_epc *epc, u8 func_no,
- }
- EXPORT_SYMBOL_GPL(pci_epc_raise_irq);
+diff --git a/Documentation/PCI/endpoint/pci-endpoint-cfs.rst b/Documentation/PCI/endpoint/pci-endpoint-cfs.rst
+index 1bbd81ed06c8..696f8eeb4738 100644
+--- a/Documentation/PCI/endpoint/pci-endpoint-cfs.rst
++++ b/Documentation/PCI/endpoint/pci-endpoint-cfs.rst
+@@ -68,6 +68,16 @@ created)
+ 				... subsys_vendor_id
+ 				... subsys_id
+ 				... interrupt_pin
++                                ... primary/
++			                ... <Symlink EPC Device1>/
++                                ... secondary/
++			                ... <Symlink EPC Device2>/
++
++If an EPF device has to be associated with 2 EPCs (like in the case of
++Non-transparent bridge), symlink of endpoint controller connected to primary
++interface should be added in 'primary' directory and symlink of endpoint
++controller connected to secondary interface should be added in 'secondary'
++directory.
  
-+/**
-+ * pci_epc_map_msi_irq() - Map physical address to MSI address and return
-+ *                         MSI data
-+ * @epc: the EPC device which has the MSI capability
-+ * @func_no: the physical endpoint function number in the EPC device
-+ * @vfunc_no: the virtual endpoint function number in the physical function
-+ * @phys_addr: the physical address of the outbound region
-+ * @interrupt_num: the MSI interrupt number
-+ * @entry_size: Size of Outbound address region for each interrupt
-+ * @msi_data: the data that should be written in order to raise MSI interrupt
-+ *            with interrupt number as 'interrupt num'
-+ *
-+ * Invoke to map physical address to MSI address and return MSI data. The
-+ * physical address should be an address in the outbound region. This is
-+ * required to implement doorbell functionality of NTB wherein EPC on either
-+ * side of the interface (primary and secondary) can directly write to the
-+ * physical address (in outbound region) of the other interface to ring
-+ * doorbell.
-+ */
-+int pci_epc_map_msi_irq(struct pci_epc *epc, u8 func_no, u8 vfunc_no,
-+			phys_addr_t phys_addr, u8 interrupt_num, u32 entry_size,
-+			u32 *msi_data)
+ EPC Device
+ ==========
+diff --git a/drivers/pci/endpoint/pci-ep-cfs.c b/drivers/pci/endpoint/pci-ep-cfs.c
+index 6ca9e2f92460..8f750961d6ab 100644
+--- a/drivers/pci/endpoint/pci-ep-cfs.c
++++ b/drivers/pci/endpoint/pci-ep-cfs.c
+@@ -21,6 +21,9 @@ static struct config_group *controllers_group;
+ 
+ struct pci_epf_group {
+ 	struct config_group group;
++	struct config_group primary_epc_group;
++	struct config_group secondary_epc_group;
++	struct delayed_work cfs_work;
+ 	struct pci_epf *epf;
+ 	int index;
+ };
+@@ -41,6 +44,127 @@ static inline struct pci_epc_group *to_pci_epc_group(struct config_item *item)
+ 	return container_of(to_config_group(item), struct pci_epc_group, group);
+ }
+ 
++static int pci_secondary_epc_epf_link(struct config_item *epf_item,
++				      struct config_item *epc_item)
 +{
 +	int ret;
++	struct pci_epf_group *epf_group = to_pci_epf_group(epf_item->ci_parent);
++	struct pci_epc_group *epc_group = to_pci_epc_group(epc_item);
++	struct pci_epc *epc = epc_group->epc;
++	struct pci_epf *epf = epf_group->epf;
 +
-+	if (IS_ERR_OR_NULL(epc))
-+		return -EINVAL;
++	ret = pci_epc_add_epf(epc, epf, SECONDARY_INTERFACE);
++	if (ret)
++		return ret;
 +
-+	if (!epc->ops->map_msi_irq)
-+		return -EINVAL;
++	ret = pci_epf_bind(epf);
++	if (ret) {
++		pci_epc_remove_epf(epc, epf, SECONDARY_INTERFACE);
++		return ret;
++	}
 +
-+	mutex_lock(&epc->lock);
-+	ret = epc->ops->map_msi_irq(epc, func_no, vfunc_no, phys_addr,
-+				    interrupt_num, entry_size, msi_data);
-+	mutex_unlock(&epc->lock);
-+
-+	return ret;
++	return 0;
 +}
-+EXPORT_SYMBOL_GPL(pci_epc_map_msi_irq);
 +
- /**
-  * pci_epc_get_msi() - get the number of MSI interrupt numbers allocated
-  * @epc: the EPC device to which MSI interrupts was requested
-diff --git a/include/linux/pci-epc.h b/include/linux/pci-epc.h
-index d9cb3944fb87..88284f3a0698 100644
---- a/include/linux/pci-epc.h
-+++ b/include/linux/pci-epc.h
-@@ -55,6 +55,7 @@ pci_epc_interface_string(enum pci_epc_interface_type type)
-  * @get_msix: ops to get the number of MSI-X interrupts allocated by the RC
-  *	     from the MSI-X capability register
-  * @raise_irq: ops to raise a legacy, MSI or MSI-X interrupt
-+ * @map_msi_irq: ops to map physical address to MSI address and return MSI data
-  * @start: ops to start the PCI link
-  * @stop: ops to stop the PCI link
-  * @owner: the module owner containing the ops
-@@ -77,6 +78,9 @@ struct pci_epc_ops {
- 	int	(*get_msix)(struct pci_epc *epc, u8 func_no);
- 	int	(*raise_irq)(struct pci_epc *epc, u8 func_no,
- 			     enum pci_epc_irq_type type, u16 interrupt_num);
-+	int	(*map_msi_irq)(struct pci_epc *epc, u8 func_no, u8 vfunc_no,
-+			       phys_addr_t phys_addr, u8 interrupt_num,
-+			       u32 entry_size, u32 *msi_data);
- 	int	(*start)(struct pci_epc *epc);
- 	void	(*stop)(struct pci_epc *epc);
- 	const struct pci_epc_features* (*get_features)(struct pci_epc *epc,
-@@ -216,6 +220,9 @@ int pci_epc_get_msi(struct pci_epc *epc, u8 func_no);
- int pci_epc_set_msix(struct pci_epc *epc, u8 func_no, u16 interrupts,
- 		     enum pci_barno, u32 offset);
- int pci_epc_get_msix(struct pci_epc *epc, u8 func_no);
-+int pci_epc_map_msi_irq(struct pci_epc *epc, u8 func_no,
-+			phys_addr_t phys_addr, u8 interrupt_num,
-+			u32 entry_size, u32 *msi_data);
- int pci_epc_raise_irq(struct pci_epc *epc, u8 func_no,
- 		      enum pci_epc_irq_type type, u16 interrupt_num);
- int pci_epc_start(struct pci_epc *epc);
++static void pci_secondary_epc_epf_unlink(struct config_item *epc_item,
++					 struct config_item *epf_item)
++{
++	struct pci_epf_group *epf_group = to_pci_epf_group(epf_item->ci_parent);
++	struct pci_epc_group *epc_group = to_pci_epc_group(epc_item);
++	struct pci_epc *epc;
++	struct pci_epf *epf;
++
++	WARN_ON_ONCE(epc_group->start);
++
++	epc = epc_group->epc;
++	epf = epf_group->epf;
++	pci_epf_unbind(epf);
++	pci_epc_remove_epf(epc, epf, SECONDARY_INTERFACE);
++}
++
++static struct configfs_item_operations pci_secondary_epc_item_ops = {
++	.allow_link	= pci_secondary_epc_epf_link,
++	.drop_link	= pci_secondary_epc_epf_unlink,
++};
++
++static const struct config_item_type pci_secondary_epc_type = {
++	.ct_item_ops	= &pci_secondary_epc_item_ops,
++	.ct_owner	= THIS_MODULE,
++};
++
++static struct config_group
++*pci_ep_cfs_add_secondary_group(struct pci_epf_group *epf_group)
++{
++	struct config_group *secondary_epc_group;
++
++	secondary_epc_group = &epf_group->secondary_epc_group;
++	config_group_init_type_name(secondary_epc_group, "secondary",
++				    &pci_secondary_epc_type);
++	configfs_register_group(&epf_group->group, secondary_epc_group);
++
++	return secondary_epc_group;
++}
++
++static int pci_primary_epc_epf_link(struct config_item *epf_item,
++				    struct config_item *epc_item)
++{
++	int ret;
++	struct pci_epf_group *epf_group = to_pci_epf_group(epf_item->ci_parent);
++	struct pci_epc_group *epc_group = to_pci_epc_group(epc_item);
++	struct pci_epc *epc = epc_group->epc;
++	struct pci_epf *epf = epf_group->epf;
++
++	ret = pci_epc_add_epf(epc, epf, PRIMARY_INTERFACE);
++	if (ret)
++		return ret;
++
++	ret = pci_epf_bind(epf);
++	if (ret) {
++		pci_epc_remove_epf(epc, epf, PRIMARY_INTERFACE);
++		return ret;
++	}
++
++	return 0;
++}
++
++static void pci_primary_epc_epf_unlink(struct config_item *epc_item,
++				       struct config_item *epf_item)
++{
++	struct pci_epf_group *epf_group = to_pci_epf_group(epf_item->ci_parent);
++	struct pci_epc_group *epc_group = to_pci_epc_group(epc_item);
++	struct pci_epc *epc;
++	struct pci_epf *epf;
++
++	WARN_ON_ONCE(epc_group->start);
++
++	epc = epc_group->epc;
++	epf = epf_group->epf;
++	pci_epf_unbind(epf);
++	pci_epc_remove_epf(epc, epf, PRIMARY_INTERFACE);
++}
++
++static struct configfs_item_operations pci_primary_epc_item_ops = {
++	.allow_link	= pci_primary_epc_epf_link,
++	.drop_link	= pci_primary_epc_epf_unlink,
++};
++
++static const struct config_item_type pci_primary_epc_type = {
++	.ct_item_ops	= &pci_primary_epc_item_ops,
++	.ct_owner	= THIS_MODULE,
++};
++
++static struct config_group
++*pci_ep_cfs_add_primary_group(struct pci_epf_group *epf_group)
++{
++	struct config_group *primary_epc_group = &epf_group->primary_epc_group;
++
++	config_group_init_type_name(primary_epc_group, "primary",
++				    &pci_primary_epc_type);
++	configfs_register_group(&epf_group->group, primary_epc_group);
++
++	return primary_epc_group;
++}
++
+ static ssize_t pci_epc_start_store(struct config_item *item, const char *page,
+ 				   size_t len)
+ {
+@@ -372,6 +496,25 @@ static const struct config_item_type pci_epf_type = {
+ 	.ct_owner	= THIS_MODULE,
+ };
+ 
++static void pci_epf_cfs_work(struct work_struct *work)
++{
++	struct pci_epf_group *epf_group;
++	struct config_group *group;
++
++	epf_group = container_of(work, struct pci_epf_group, cfs_work.work);
++	group = pci_ep_cfs_add_primary_group(epf_group);
++	if (IS_ERR(group)) {
++		pr_err("failed to create 'primary' EPC interface\n");
++		return;
++	}
++
++	group = pci_ep_cfs_add_secondary_group(epf_group);
++	if (IS_ERR(group)) {
++		pr_err("failed to create 'secondary' EPC interface\n");
++		return;
++	}
++}
++
+ static struct config_group *pci_epf_make(struct config_group *group,
+ 					 const char *name)
+ {
+@@ -414,6 +557,10 @@ static struct config_group *pci_epf_make(struct config_group *group,
+ 
+ 	kfree(epf_name);
+ 
++	INIT_DELAYED_WORK(&epf_group->cfs_work, pci_epf_cfs_work);
++	queue_delayed_work(system_wq, &epf_group->cfs_work,
++			   msecs_to_jiffies(1));
++
+ 	return &epf_group->group;
+ 
+ free_name:
 -- 
 2.17.1
 
