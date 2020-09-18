@@ -1,44 +1,84 @@
-Return-Path: <rdunlap@infradead.org>
-Received: from casper.infradead.org (casper.infradead.org. [2001:8b0:10b:1236::1])
-        by gmr-mx.google.com with ESMTPS id b5si88915lfa.0.2020.09.18.09.15.17
+Return-Path: <kishon@ti.com>
+Received: from fllv0016.ext.ti.com (fllv0016.ext.ti.com. [198.47.19.142])
+        by gmr-mx.google.com with ESMTPS id q10si112872uas.1.2020.09.17.23.45.48
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 18 Sep 2020 09:15:17 -0700 (PDT)
-Subject: Re: [PATCH v5 14/17] NTB: Add support for EPF PCI-Express
- Non-Transparent Bridge
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 17 Sep 2020 23:45:48 -0700 (PDT)
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: [PATCH v5 16/17] Documentation: PCI: Add configfs binding documentation for pci-ntb endpoint function
+Date: Fri, 18 Sep 2020 12:12:26 +0530
+Message-ID: <20200918064227.1463-17-kishon@ti.com>
+In-Reply-To: <20200918064227.1463-1-kishon@ti.com>
 References: <20200918064227.1463-1-kishon@ti.com>
- <20200918064227.1463-15-kishon@ti.com>
-From: Randy Dunlap <rdunlap@infradead.org>
-Message-ID: <93b651aa-23e5-9249-6b22-fef65806b007@infradead.org>
-Date: Fri, 18 Sep 2020 09:15:03 -0700
 MIME-Version: 1.0
-In-Reply-To: <20200918064227.1463-15-kishon@ti.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-To: Kishon Vijay Abraham I <kishon@ti.com>, Bjorn Helgaas <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Arnd Bergmann <arnd@arndb.de>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Tom Joseph <tjoseph@cadence.com>, Rob Herring <robh@kernel.org>
+Content-Type: text/plain
+To: Bjorn Helgaas <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, Kishon Vijay Abraham I <kishon@ti.com>, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Arnd Bergmann <arnd@arndb.de>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Tom Joseph <tjoseph@cadence.com>, Rob Herring <robh@kernel.org>
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-On 9/17/20 11:42 PM, Kishon Vijay Abraham I wrote:
-> diff --git a/drivers/ntb/hw/epf/Kconfig b/drivers/ntb/hw/epf/Kconfig
-> new file mode 100644
-> index 000000000000..6197d1aab344
-> --- /dev/null
-> +++ b/drivers/ntb/hw/epf/Kconfig
-> @@ -0,0 +1,6 @@
-> +config NTB_EPF
-> +	tristate "Generic EPF Non-Transparent Bridge support"
-> +	depends on m
-> +	help
-> +	  This driver supports EPF NTB on configurable endpoint.
-> +	  If unsure, say N.
+Add binding documentation for pci-ntb endpoint function that helps in
+adding and configuring pci-ntb endpoint function.
 
-Hi,
-Why is this driver restricted to 'm' (loadable module)?
-I.e., it cannot be builtin.
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+---
+ .../PCI/endpoint/function/binding/pci-ntb.rst | 38 +++++++++++++++++++
+ Documentation/PCI/endpoint/index.rst          |  1 +
+ 2 files changed, 39 insertions(+)
+ create mode 100644 Documentation/PCI/endpoint/function/binding/pci-ntb.rst
 
-thanks.
+diff --git a/Documentation/PCI/endpoint/function/binding/pci-ntb.rst b/Documentation/PCI/endpoint/function/binding/pci-ntb.rst
+new file mode 100644
+index 000000000000..40253d3d5163
+--- /dev/null
++++ b/Documentation/PCI/endpoint/function/binding/pci-ntb.rst
+@@ -0,0 +1,38 @@
++.. SPDX-License-Identifier: GPL-2.0
++
++==========================
++PCI NTB Endpoint Function
++==========================
++
++1) Create a subdirectory to pci_epf_ntb directory in configfs.
++
++Standard EPF Configurable Fields:
++
++================   ===========================================================
++vendorid	   should be 0x104c
++deviceid	   should be 0xb00d for TI's J721E SoC
++revid		   don't care
++progif_code	   don't care
++subclass_code	   should be 0x00
++baseclass_code	   should be 0x5
++cache_line_size	   don't care
++subsys_vendor_id   don't care
++subsys_id	   don't care
++interrupt_pin	   don't care
++msi_interrupts	   don't care
++msix_interrupts	   don't care
++================   ===========================================================
++
++2) Create a subdirectory to directory created in 1
++
++NTB EPF specific configurable fields:
++
++================   ===========================================================
++db_count	   Number of doorbells; default = 4
++mw1     	   size of memory window1
++mw2     	   size of memory window2
++mw3     	   size of memory window3
++mw4     	   size of memory window4
++num_mws     	   Number of memory windows; max = 4
++spad_count     	   Number of scratchpad registers; default = 64
++================   ===========================================================
+diff --git a/Documentation/PCI/endpoint/index.rst b/Documentation/PCI/endpoint/index.rst
+index ef6861128506..9cb6e5f3c4d5 100644
+--- a/Documentation/PCI/endpoint/index.rst
++++ b/Documentation/PCI/endpoint/index.rst
+@@ -14,3 +14,4 @@ PCI Endpoint Framework
+    pci-ntb-function
+ 
+    function/binding/pci-test
++   function/binding/pci-ntb
 -- 
-~Randy
+2.17.1
 
