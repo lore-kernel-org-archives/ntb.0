@@ -1,13 +1,13 @@
 Return-Path: <kishon@ti.com>
-Received: from lelv0143.ext.ti.com (lelv0143.ext.ti.com. [198.47.23.248])
-        by gmr-mx.google.com with ESMTPS id n86si149717ild.4.2020.09.17.23.44.02
+Received: from fllv0015.ext.ti.com (fllv0015.ext.ti.com. [198.47.19.141])
+        by gmr-mx.google.com with ESMTPS id t15si125551pjq.1.2020.09.17.23.43.10
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 17 Sep 2020 23:44:02 -0700 (PDT)
+        Thu, 17 Sep 2020 23:43:10 -0700 (PDT)
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v5 05/17] PCI: endpoint: Remove unused pci_epf_match_device()
-Date: Fri, 18 Sep 2020 12:12:15 +0530
-Message-ID: <20200918064227.1463-6-kishon@ti.com>
+Subject: [PATCH v5 04/17] PCI: endpoint: Make *_free_bar() to return error codes on failure
+Date: Fri, 18 Sep 2020 12:12:14 +0530
+Message-ID: <20200918064227.1463-5-kishon@ti.com>
 In-Reply-To: <20200918064227.1463-1-kishon@ti.com>
 References: <20200918064227.1463-1-kishon@ti.com>
 MIME-Version: 1.0
@@ -16,54 +16,102 @@ To: Bjorn Helgaas <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, Kisho
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-Remove unused pci_epf_match_device() function added in pci-epf-core.c
+Modify pci_epc_get_next_free_bar() and pci_epc_get_first_free_bar() to
+return error values if there are no free BARs available.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- drivers/pci/endpoint/pci-epf-core.c | 16 ----------------
- include/linux/pci-epf.h             |  2 --
- 2 files changed, 18 deletions(-)
+ drivers/pci/endpoint/functions/pci-epf-test.c |  2 ++
+ drivers/pci/endpoint/pci-epc-core.c           | 12 ++++++------
+ include/linux/pci-epc.h                       |  8 ++++----
+ include/linux/pci-epf.h                       |  1 +
+ 4 files changed, 13 insertions(+), 10 deletions(-)
 
-diff --git a/drivers/pci/endpoint/pci-epf-core.c b/drivers/pci/endpoint/pci-epf-core.c
-index c977cf9dce56..e44a317a2a2a 100644
---- a/drivers/pci/endpoint/pci-epf-core.c
-+++ b/drivers/pci/endpoint/pci-epf-core.c
-@@ -282,22 +282,6 @@ struct pci_epf *pci_epf_create(const char *name)
- }
- EXPORT_SYMBOL_GPL(pci_epf_create);
+diff --git a/drivers/pci/endpoint/functions/pci-epf-test.c b/drivers/pci/endpoint/functions/pci-epf-test.c
+index e4e51d884553..7a1f3abfde48 100644
+--- a/drivers/pci/endpoint/functions/pci-epf-test.c
++++ b/drivers/pci/endpoint/functions/pci-epf-test.c
+@@ -834,6 +834,8 @@ static int pci_epf_test_bind(struct pci_epf *epf)
+ 		linkup_notifier = epc_features->linkup_notifier;
+ 		core_init_notifier = epc_features->core_init_notifier;
+ 		test_reg_bar = pci_epc_get_first_free_bar(epc_features);
++		if (test_reg_bar < 0)
++			return -EINVAL;
+ 		pci_epf_configure_bar(epf, epc_features);
+ 	}
  
--const struct pci_epf_device_id *
--pci_epf_match_device(const struct pci_epf_device_id *id, struct pci_epf *epf)
--{
--	if (!id || !epf)
--		return NULL;
--
--	while (*id->name) {
--		if (strcmp(epf->name, id->name) == 0)
--			return id;
--		id++;
--	}
--
--	return NULL;
--}
--EXPORT_SYMBOL_GPL(pci_epf_match_device);
--
- static void pci_epf_dev_release(struct device *dev)
+diff --git a/drivers/pci/endpoint/pci-epc-core.c b/drivers/pci/endpoint/pci-epc-core.c
+index 1afe5d9afb0d..ea7e7465ce7a 100644
+--- a/drivers/pci/endpoint/pci-epc-core.c
++++ b/drivers/pci/endpoint/pci-epc-core.c
+@@ -90,8 +90,8 @@ EXPORT_SYMBOL_GPL(pci_epc_get);
+  * Invoke to get the first unreserved BAR that can be used by the endpoint
+  * function. For any incorrect value in reserved_bar return '0'.
+  */
+-unsigned int pci_epc_get_first_free_bar(const struct pci_epc_features
+-					*epc_features)
++enum pci_barno
++pci_epc_get_first_free_bar(const struct pci_epc_features *epc_features)
  {
- 	struct pci_epf *epf = to_pci_epf(dev);
+ 	return pci_epc_get_next_free_bar(epc_features, BAR_0);
+ }
+@@ -105,13 +105,13 @@ EXPORT_SYMBOL_GPL(pci_epc_get_first_free_bar);
+  * Invoke to get the next unreserved BAR starting from @bar that can be used
+  * for endpoint function. For any incorrect value in reserved_bar return '0'.
+  */
+-unsigned int pci_epc_get_next_free_bar(const struct pci_epc_features
+-				       *epc_features, enum pci_barno bar)
++enum pci_barno pci_epc_get_next_free_bar(const struct pci_epc_features
++					 *epc_features, enum pci_barno bar)
+ {
+ 	unsigned long free_bar;
+ 
+ 	if (!epc_features)
+-		return 0;
++		return BAR_0;
+ 
+ 	/* If 'bar - 1' is a 64-bit BAR, move to the next BAR */
+ 	if ((epc_features->bar_fixed_64bit << 1) & 1 << bar)
+@@ -126,7 +126,7 @@ unsigned int pci_epc_get_next_free_bar(const struct pci_epc_features
+ 
+ 	free_bar = find_next_zero_bit(&free_bar, 6, bar);
+ 	if (free_bar > 5)
+-		return 0;
++		return NO_BAR;
+ 
+ 	return free_bar;
+ }
+diff --git a/include/linux/pci-epc.h b/include/linux/pci-epc.h
+index cfe9b427e6b7..88d311bad984 100644
+--- a/include/linux/pci-epc.h
++++ b/include/linux/pci-epc.h
+@@ -201,10 +201,10 @@ int pci_epc_start(struct pci_epc *epc);
+ void pci_epc_stop(struct pci_epc *epc);
+ const struct pci_epc_features *pci_epc_get_features(struct pci_epc *epc,
+ 						    u8 func_no);
+-unsigned int pci_epc_get_first_free_bar(const struct pci_epc_features
+-					*epc_features);
+-unsigned int pci_epc_get_next_free_bar(const struct pci_epc_features
+-				       *epc_features, enum pci_barno bar);
++enum pci_barno
++pci_epc_get_first_free_bar(const struct pci_epc_features *epc_features);
++enum pci_barno pci_epc_get_next_free_bar(const struct pci_epc_features
++					 *epc_features, enum pci_barno bar);
+ struct pci_epc *pci_epc_get(const char *epc_name);
+ void pci_epc_put(struct pci_epc *epc);
+ 
 diff --git a/include/linux/pci-epf.h b/include/linux/pci-epf.h
-index fa3aca43eb19..f373a134ac04 100644
+index 6644ff3b0702..fa3aca43eb19 100644
 --- a/include/linux/pci-epf.h
 +++ b/include/linux/pci-epf.h
-@@ -165,8 +165,6 @@ static inline void *epf_get_drvdata(struct pci_epf *epf)
- 	return dev_get_drvdata(&epf->dev);
- }
+@@ -21,6 +21,7 @@ enum pci_notify_event {
+ };
  
--const struct pci_epf_device_id *
--pci_epf_match_device(const struct pci_epf_device_id *id, struct pci_epf *epf);
- struct pci_epf *pci_epf_create(const char *name);
- void pci_epf_destroy(struct pci_epf *epf);
- int __pci_epf_register_driver(struct pci_epf_driver *driver,
+ enum pci_barno {
++	NO_BAR = -1,
+ 	BAR_0,
+ 	BAR_1,
+ 	BAR_2,
 -- 
 2.17.1
 
