@@ -1,18 +1,18 @@
 Return-Path: <rdunlap@infradead.org>
 Received: from casper.infradead.org (casper.infradead.org. [2001:8b0:10b:1236::1])
-        by gmr-mx.google.com with ESMTPS id b1si97437wmj.1.2020.09.18.09.18.00
+        by gmr-mx.google.com with ESMTPS id b5si88915lfa.0.2020.09.18.09.15.17
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 18 Sep 2020 09:18:00 -0700 (PDT)
-Subject: Re: [PATCH v5 12/17] PCI: endpoint: Add EP function driver to provide
- NTB functionality
+        Fri, 18 Sep 2020 09:15:17 -0700 (PDT)
+Subject: Re: [PATCH v5 14/17] NTB: Add support for EPF PCI-Express
+ Non-Transparent Bridge
 References: <20200918064227.1463-1-kishon@ti.com>
- <20200918064227.1463-13-kishon@ti.com>
+ <20200918064227.1463-15-kishon@ti.com>
 From: Randy Dunlap <rdunlap@infradead.org>
-Message-ID: <31985ad8-2e9b-99d8-55ef-4ae90103e499@infradead.org>
-Date: Fri, 18 Sep 2020 09:17:54 -0700
+Message-ID: <93b651aa-23e5-9249-6b22-fef65806b007@infradead.org>
+Date: Fri, 18 Sep 2020 09:15:03 -0700
 MIME-Version: 1.0
-In-Reply-To: <20200918064227.1463-13-kishon@ti.com>
+In-Reply-To: <20200918064227.1463-15-kishon@ti.com>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
@@ -21,32 +21,22 @@ Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-pci@vger.kernel.org, 
 List-ID: <linux-ntb.googlegroups.com>
 
 On 9/17/20 11:42 PM, Kishon Vijay Abraham I wrote:
-> diff --git a/drivers/pci/endpoint/functions/Kconfig b/drivers/pci/endpoint/functions/Kconfig
-> index 8820d0f7ec77..55ac7bb2d469 100644
-> --- a/drivers/pci/endpoint/functions/Kconfig
-> +++ b/drivers/pci/endpoint/functions/Kconfig
-> @@ -12,3 +12,15 @@ config PCI_EPF_TEST
->  	   for PCI Endpoint.
->  
->  	   If in doubt, say "N" to disable Endpoint test driver.
-> +
-> +config PCI_EPF_NTB
-> +	tristate "PCI Endpoint NTB driver"
-> +	depends on PCI_ENDPOINT
+> diff --git a/drivers/ntb/hw/epf/Kconfig b/drivers/ntb/hw/epf/Kconfig
+> new file mode 100644
+> index 000000000000..6197d1aab344
+> --- /dev/null
+> +++ b/drivers/ntb/hw/epf/Kconfig
+> @@ -0,0 +1,6 @@
+> +config NTB_EPF
+> +	tristate "Generic EPF Non-Transparent Bridge support"
+> +	depends on m
 > +	help
-> +	   Select this configuration option to enable the NTB driver
-> +	   for PCI Endpoint. NTB driver implements NTB controller
-> +	   functionality using multiple PCIe endpoint instances. It
-> +	   can support NTB endpoint function devices created using
-> +	   device tree.
+> +	  This driver supports EPF NTB on configurable endpoint.
+> +	  If unsure, say N.
 
-Indent help text with one tab + 2 spaces...
-according to coding-style.rst.
-
-
-> +
-> +	   If in doubt, say "N" to disable Endpoint NTB driver.
-
+Hi,
+Why is this driver restricted to 'm' (loadable module)?
+I.e., it cannot be builtin.
 
 thanks.
 -- 
