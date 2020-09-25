@@ -1,63 +1,59 @@
-Return-Path: <sherry.sun@nxp.com>
-Received: from EUR02-HE1-obe.outbound.protection.outlook.com (mail-eopbgr10062.outbound.protection.outlook.com. [40.107.1.62])
-        by gmr-mx.google.com with ESMTPS id h22si83499ljh.7.2020.09.26.22.07.54
+Return-Path: <arnd@arndb.de>
+Received: from mout.kundenserver.de (mout.kundenserver.de. [212.227.126.135])
+        by gmr-mx.google.com with ESMTPS id w10si74950wma.1.2020.09.25.04.25.55
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Sat, 26 Sep 2020 22:07:55 -0700 (PDT)
-From: Sherry Sun <sherry.sun@nxp.com>
-Subject: RE: [PATCH 0/5] Add noncoherent platform support for vop driver
-Date: Sun, 27 Sep 2020 05:07:52 +0000
-Message-ID: 
- <VI1PR04MB496047225BD131296FA8EE0F92340@VI1PR04MB4960.eurprd04.prod.outlook.com>
-References: <20200925072630.8157-1-sherry.sun@nxp.com>
- <CAK8P3a3fog3jE_cPUTELDkFKoO2FbCJufQiDZhfL2FsZ5s5q3Q@mail.gmail.com>
-In-Reply-To: 
- <CAK8P3a3fog3jE_cPUTELDkFKoO2FbCJufQiDZhfL2FsZ5s5q3Q@mail.gmail.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 25 Sep 2020 04:25:55 -0700 (PDT)
+Received: from mail-qk1-f169.google.com ([209.85.222.169]) by
+ mrelayeu.kundenserver.de (mreue010 [212.227.15.129]) with ESMTPSA (Nemesis)
+ id 1MuUza-1kdi7N1KAE-00rbB7 for <linux-ntb@googlegroups.com>; Fri, 25 Sep
+ 2020 13:25:55 +0200
+Received: by mail-qk1-f169.google.com with SMTP id f142so2317791qke.13
+        for <linux-ntb@googlegroups.com>; Fri, 25 Sep 2020 04:25:55 -0700 (PDT)
 MIME-Version: 1.0
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Sudeep Dutt <sudeep.dutt@intel.com>, Ashutosh Dixit <ashutosh.dixit@intel.com>, gregkh <gregkh@linuxfoundation.org>, "wang.yi59@zte.com.cn" <wang.yi59@zte.com.cn>, Rikard Falkeborn <rikard.falkeborn@gmail.com>, Lee Jones <lee.jones@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, dl-linux-imx <linux-imx@nxp.com>, linux-pci <linux-pci@vger.kernel.org>, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Kishon Vijay Abraham I <kishon@ti.com>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
+References: <20200925072630.8157-1-sherry.sun@nxp.com>
+In-Reply-To: <20200925072630.8157-1-sherry.sun@nxp.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Date: Fri, 25 Sep 2020 13:25:38 +0200
+Message-ID: <CAK8P3a3fog3jE_cPUTELDkFKoO2FbCJufQiDZhfL2FsZ5s5q3Q@mail.gmail.com>
+Subject: Re: [PATCH 0/5] Add noncoherent platform support for vop driver
+Content-Type: text/plain; charset="UTF-8"
+To: Sherry Sun <sherry.sun@nxp.com>
+Cc: Sudeep Dutt <sudeep.dutt@intel.com>, Ashutosh Dixit <ashutosh.dixit@intel.com>, gregkh <gregkh@linuxfoundation.org>, wang.yi59@zte.com.cn, huang.zijiang@zte.com.cn, Rikard Falkeborn <rikard.falkeborn@gmail.com>, Lee Jones <lee.jones@linaro.org>, "Michael S. Tsirkin" <mst@redhat.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, NXP Linux Team <linux-imx@nxp.com>, linux-pci <linux-pci@vger.kernel.org>, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Kishon Vijay Abraham I <kishon@ti.com>, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-SGkgQXJuZCwNCg0KPiBTdWJqZWN0OiBSZTogW1BBVENIIDAvNV0gQWRkIG5vbmNvaGVyZW50IHBs
-YXRmb3JtIHN1cHBvcnQgZm9yIHZvcCBkcml2ZXINCj4gDQo+IE9uIEZyaSwgU2VwIDI1LCAyMDIw
-IGF0IDk6MjcgQU0gU2hlcnJ5IFN1biA8c2hlcnJ5LnN1bkBueHAuY29tPiB3cm90ZToNCj4gPg0K
-PiA+IENoYW5nZSB0aGUgd2F5IG9mIGFsbG9jYXRpbmcgdnJpbmcgdG8gc3VwcG9ydCBub25jb2hl
-cmVudCBwbGF0Zm9ybSBmb3INCj4gPiB2b3AgZHJpdmVyLCBhbmQgYWRkIHNvbWUgcmVsYXRlZCBk
-bWEgY2hhbmdlcyB0byBtYWtlIHN1cmUgbm9uY29oZXJlbnQNCj4gPiBwbGF0Zm9ybSB3b3JrcyB3
-ZWxsLg0KPiANCj4gQ291bGQgeW91IGRlc2NyaWJlIHdoeSB5b3UgYXJlIGRvaW5nIHRoaXM/IEFy
-ZSB5b3UgdXNpbmcgSW50ZWwgTUlDIGRldmljZXMNCj4gb24gQXJtIGhvc3RzLCBvciB0cnlpbmcg
-dG8gcmV1c2UgdGhlIGNvZGUgZm9yIG90aGVyIGFkZC1vbiBjYXJkcz8NCj4gDQoNCldlIHdhbnQg
-dG8gcmV1c2UgdGhlIHZvcCBkcml2ZXIgYmV0d2VlbiB0d28gaS5NWCBib2FyZHMgd2hpY2ggYXJl
-IGFybTY0IGFyY2hpdGVjdHVyZS4gQW5kIGluIGZhY3Qgd2UgaGF2ZSBzdWNjZXNzZnVsbHkgdmVy
-aWZpZWQgaXQuIA0KDQpCdXQgdGhlIGJpZ2dlc3QgcHJvYmxlbSB3ZSBjdXJyZW50bHkgZW5jb3Vu
-dGVyIGlzIGFib3V0IHRoZSBub25jb2hlcmVudCBtZW1vcnkuDQpTaW5jZSB0aGUgaGFyZHdhcmUg
-ZGV2aWNlIG9mIG91ciBwbGF0Zm9ybSBpcyBub3QgZG1hIGNvaGVyZW50LCANCndoZW4gdXNlIHRo
-ZSBvcmlnaW5hbCB3YXkoX19nZXRfZnJlZV9wYWdlcyBhbmQgZG1hX21hcF9zaW5nbGUsIGJ1dCB3
-aXRob3V0IGRtYV9zeW5jX3NpbmdsZV9mb3JfY3B1L2RldmljZSkgd2lsbCBtZWV0IGVycm9ycy4N
-Cg0KRGV2aWNlIHBhZ2VzL3ZyaW5nIHdoaWNoIGFyZSBpbnRlcmFjdCBiZXR3ZWVuIGVwIGFuZCBy
-YyBzaG91bGQgdXNlIGNvbnNpc3RlbnQgbWVtb3J5IHdpdGhvdXQgY2FjaGluZyBlZmZlY3RzLCAN
-CnNvIGFsbG9jYXRlIHRoZW0gYnkgZG1hX2FsbG9jX2NvaGVyZW50IGlzIGEgYmV0dGVyIHdheS4N
-Cg0KPiBOb3RlIHRoYXQgd2UgaGF2ZSBhIGNvdXBsZSBvZiBmcmFtZXdvcmtzIGluIHRoZSBrZXJu
-ZWwgdGhhdCB0cnkgdG8gZG8gc29tZQ0KPiBvZiB0aGUgc2FtZSB0aGluZ3MgaGVyZSwgbm90YWJs
-eSB0aGUgTlRCIGRyaXZlcnMgYW5kIHRoZSBQQ0kgZW5kcG9pbnQNCj4gc3VwcG9ydCwgYm90aCBv
-ZiB3aGljaCBhcmUgZGVzaWduZWQgdG8gYmUgc29tZXdoYXQgbW9yZSBnZW5lcmljIHRoYW4gdGhl
-DQo+IE1JQyBkcml2ZXIuDQo+IA0KPiBIYXZlIHlvdSBjb25zaWRlcmVkIHVzaW5nIHRoYXQgaW5z
-dGVhZD8NCj4gDQo+ICAgICAgICAgIEFybmQNCj4gDQoNClNvcnJ5IEkgZG9uJ3QgbXVjaCBhYm91
-dCBOVEIsIGJ1dCBmb3IgUENJIGVuZHBvaW50IGRyaXZlciwgd2Ugd2lsbCB1c2UgaXQgZm9yIHBj
-aSBkYXRhIGludGVyYWN0aW9uIGJlbG93IHRoZSB2b3AgbGF5ZXIuDQoNCkJlc3QgcmVnYXJkcw0K
-U2hlcnJ5DQoNCj4gPiBTaGVycnkgU3VuICg1KToNCj4gPiAgIG1pc2M6IHZvcDogY2hhbmdlIHRo
-ZSB3YXkgb2YgYWxsb2NhdGluZyB2cmluZyBmb3Igbm9uY29oZXJlbnQgcGxhdGZvcm0NCj4gPiAg
-IG1pc2M6IHZvcDogY2hhbmdlIHRoZSB3YXkgb2YgYWxsb2NhdGluZyB1c2VkIHJpbmcNCj4gPiAg
-IG1pc2M6IHZvcDogc2ltcGx5IHJldHVybiB0aGUgc2F2ZWQgZG1hIGFkZHJlc3MgaW5zdGVhZCBv
-ZiB2aXJ0X3RvX3BoeXMNCj4gPiAgIG1pc2M6IHZvcDogc2V0IFZJUlRJT19GX0FDQ0VTU19QTEFU
-Rk9STSBmb3Igbm9jb2hlcmVudCBwbGF0Zm9ybQ0KPiA+ICAgbWlzYzogdm9wOiBtYXBwaW5nIGtl
-cm5lbCBtZW1vcnkgdG8gdXNlciBzcGFjZSBhcyBub25jYWNoZWQNCj4gPg0KPiA+ICBkcml2ZXJz
-L21pc2MvbWljL2J1cy92b3BfYnVzLmggICAgfCAgIDIgKw0KPiA+ICBkcml2ZXJzL21pc2MvbWlj
-L2hvc3QvbWljX2Jvb3QuYyAgfCAgIDggKysNCj4gPiAgZHJpdmVycy9taXNjL21pYy92b3Avdm9w
-X21haW4uYyAgIHwgIDUxICsrKysrKysrKy0tLS0NCj4gPiAgZHJpdmVycy9taXNjL21pYy92b3Av
-dm9wX3ZyaW5naC5jIHwgMTE3DQo+ID4gKysrKysrKysrKysrKysrKysrKystLS0tLS0tLS0tDQo+
-ID4gIDQgZmlsZXMgY2hhbmdlZCwgMTI1IGluc2VydGlvbnMoKyksIDUzIGRlbGV0aW9ucygtKQ0K
-PiA+DQo+ID4gLS0NCj4gPiAyLjE3LjENCj4gPg0K
+On Fri, Sep 25, 2020 at 9:27 AM Sherry Sun <sherry.sun@nxp.com> wrote:
+>
+> Change the way of allocating vring to support noncoherent platform for vop
+> driver, and add some related dma changes to make sure noncoherent platform works
+> well.
+
+Could you describe why you are doing this? Are you using Intel MIC
+devices on Arm hosts, or trying to reuse the code for other add-on
+cards?
+
+Note that we have a couple of frameworks in the kernel that try to
+do some of the same things here, notably the NTB drivers and the
+PCI endpoint support, both of which are designed to be somewhat
+more generic than the MIC driver.
+
+Have you considered using that instead?
+
+         Arnd
+
+> Sherry Sun (5):
+>   misc: vop: change the way of allocating vring for noncoherent platform
+>   misc: vop: change the way of allocating used ring
+>   misc: vop: simply return the saved dma address instead of virt_to_phys
+>   misc: vop: set VIRTIO_F_ACCESS_PLATFORM for nocoherent platform
+>   misc: vop: mapping kernel memory to user space as noncached
+>
+>  drivers/misc/mic/bus/vop_bus.h    |   2 +
+>  drivers/misc/mic/host/mic_boot.c  |   8 ++
+>  drivers/misc/mic/vop/vop_main.c   |  51 +++++++++----
+>  drivers/misc/mic/vop/vop_vringh.c | 117 ++++++++++++++++++++----------
+>  4 files changed, 125 insertions(+), 53 deletions(-)
+>
+> --
+> 2.17.1
+>
