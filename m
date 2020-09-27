@@ -1,124 +1,63 @@
-Return-Path: <kishon@ti.com>
-Received: from fllv0015.ext.ti.com (fllv0015.ext.ti.com. [198.47.19.141])
-        by gmr-mx.google.com with ESMTPS id mm16si973695pjb.2.2020.09.14.21.21.31
+Return-Path: <sherry.sun@nxp.com>
+Received: from EUR02-HE1-obe.outbound.protection.outlook.com (mail-eopbgr10062.outbound.protection.outlook.com. [40.107.1.62])
+        by gmr-mx.google.com with ESMTPS id h22si83499ljh.7.2020.09.26.22.07.54
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 14 Sep 2020 21:21:31 -0700 (PDT)
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v4 00/17] Implement NTB Controller using multiple PCI EP
-Date: Tue, 15 Sep 2020 09:50:53 +0530
-Message-ID: <20200915042110.3015-1-kishon@ti.com>
+        Sat, 26 Sep 2020 22:07:55 -0700 (PDT)
+From: Sherry Sun <sherry.sun@nxp.com>
+Subject: RE: [PATCH 0/5] Add noncoherent platform support for vop driver
+Date: Sun, 27 Sep 2020 05:07:52 +0000
+Message-ID: 
+ <VI1PR04MB496047225BD131296FA8EE0F92340@VI1PR04MB4960.eurprd04.prod.outlook.com>
+References: <20200925072630.8157-1-sherry.sun@nxp.com>
+ <CAK8P3a3fog3jE_cPUTELDkFKoO2FbCJufQiDZhfL2FsZ5s5q3Q@mail.gmail.com>
+In-Reply-To: 
+ <CAK8P3a3fog3jE_cPUTELDkFKoO2FbCJufQiDZhfL2FsZ5s5q3Q@mail.gmail.com>
+Content-Language: en-US
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Content-Type: text/plain
-To: Bjorn Helgaas <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Rob Herring <robh@kernel.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Tom Joseph <tjoseph@cadence.com>, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, Kishon Vijay Abraham I <kishon@ti.com>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Sudeep Dutt <sudeep.dutt@intel.com>, Ashutosh Dixit <ashutosh.dixit@intel.com>, gregkh <gregkh@linuxfoundation.org>, "wang.yi59@zte.com.cn" <wang.yi59@zte.com.cn>, Rikard Falkeborn <rikard.falkeborn@gmail.com>, Lee Jones <lee.jones@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, dl-linux-imx <linux-imx@nxp.com>, linux-pci <linux-pci@vger.kernel.org>, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Kishon Vijay Abraham I <kishon@ti.com>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-This series is about implementing SW defined NTB using
-multiple endpoint instances. This series has been tested using
-2 endpoint instances in J7 connected to J7 board on one end and DRA7 board
-on the other end. However there is nothing platform specific for the NTB
-functionality.
-
-This was presented in Linux Plumbers Conference. The presentation
-can be found @ [1]
-
-RFC patch series can be found @ [2]
-v1 patch series can be found @ [3]
-v2 patch series can be found @ [4]
-v3 patch series can be found @ [5]
-
-Changes from v3:
-1) Fixed Documentation edits suggested by Randy Dunlap <rdunlap@infradead.org>
-
-Changes from v2:
-1) Add support for the user to create sub-directory of 'EPF Device'
-   directory (for endpoint function specific configuration using
-   configfs).
-2) Add documentation for NTB specific attributes in configfs
-3) Check for PCI_CLASS_MEMORY_RAM (PCIe class) before binding ntb_hw_epf
-   driver
-4) Other documentation fixes
-
-Changes from v1:
-1) As per Rob's comment, removed support for creating NTB function
-   device from DT
-2) Add support to create NTB EPF device using configfs (added support in
-   configfs to associate primary and secondary EPC with EPF.
-
-Changes from RFC:
-1) Converted the DT binding patches to YAML schema and merged the
-   DT binding patches together
-2) NTB documentation is converted to .rst
-3) One HOST can now interrupt the other HOST using MSI-X interrupts
-4) Added support for teardown of memory window and doorbell
-   configuration
-5) Add support to provide support 64-bit memory window size from
-   DT
-
-[1] -> https://www.linuxplumbersconf.org/event/4/contributions/395/attachments/284/481/Implementing_NTB_Controller_Using_PCIe_Endpoint_-_final.pdf
-[2] -> http://lore.kernel.org/r/20190926112933.8922-1-kishon@ti.com
-[3] -> http://lore.kernel.org/r/20200514145927.17555-1-kishon@ti.com
-[4] -> http://lore.kernel.org/r/20200611130525.22746-1-kishon@ti.com
-[5] -> http://lore.kernel.org/r/20200904075052.8911-1-kishon@ti.com
-
-Kishon Vijay Abraham I (17):
-  Documentation: PCI: Add specification for the *PCI NTB* function
-    device
-  PCI: endpoint: Make *_get_first_free_bar() take into account 64 bit
-    BAR
-  PCI: endpoint: Add helper API to get the 'next' unreserved BAR
-  PCI: endpoint: Make *_free_bar() to return error codes on failure
-  PCI: endpoint: Remove unused pci_epf_match_device()
-  PCI: endpoint: Add support to associate secondary EPC with EPF
-  PCI: endpoint: Add support in configfs to associate two EPCs with EPF
-  PCI: endpoint: Add pci_epc_ops to map MSI irq
-  PCI: endpoint: Add pci_epf_ops for epf drivers to expose function
-    specific attrs
-  PCI: endpoint: Allow user to create sub-directory of 'EPF Device'
-    directory
-  PCI: cadence: Implement ->msi_map_irq() ops
-  PCI: endpoint: Add EP function driver to provide NTB functionality
-  PCI: Add TI J721E device to pci ids
-  NTB: Add support for EPF PCI-Express Non-Transparent Bridge
-  NTB: tool: Enable the NTB/PCIe link on the local or remote side of
-    bridge
-  Documentation: PCI: Add binding documentation for pci-ntb endpoint
-    function
-  Documentation: PCI: Add userguide for PCI endpoint NTB function
-
- .../PCI/endpoint/function/binding/pci-ntb.rst |   38 +
- Documentation/PCI/endpoint/index.rst          |    3 +
- .../PCI/endpoint/pci-endpoint-cfs.rst         |   10 +
- .../PCI/endpoint/pci-ntb-function.rst         |  351 +++
- Documentation/PCI/endpoint/pci-ntb-howto.rst  |  160 ++
- drivers/misc/pci_endpoint_test.c              |    1 -
- drivers/ntb/hw/Kconfig                        |    1 +
- drivers/ntb/hw/Makefile                       |    1 +
- drivers/ntb/hw/epf/Kconfig                    |    6 +
- drivers/ntb/hw/epf/Makefile                   |    1 +
- drivers/ntb/hw/epf/ntb_hw_epf.c               |  751 ++++++
- drivers/ntb/test/ntb_tool.c                   |    1 +
- .../pci/controller/cadence/pcie-cadence-ep.c  |   50 +
- drivers/pci/endpoint/functions/Kconfig        |   12 +
- drivers/pci/endpoint/functions/Makefile       |    1 +
- drivers/pci/endpoint/functions/pci-epf-ntb.c  | 2106 +++++++++++++++++
- drivers/pci/endpoint/functions/pci-epf-test.c |   13 +-
- drivers/pci/endpoint/pci-ep-cfs.c             |  176 +-
- drivers/pci/endpoint/pci-epc-core.c           |  131 +-
- drivers/pci/endpoint/pci-epf-core.c           |  105 +-
- include/linux/pci-epc.h                       |   38 +-
- include/linux/pci-epf.h                       |   28 +-
- include/linux/pci_ids.h                       |    1 +
- 23 files changed, 3918 insertions(+), 67 deletions(-)
- create mode 100644 Documentation/PCI/endpoint/function/binding/pci-ntb.rst
- create mode 100644 Documentation/PCI/endpoint/pci-ntb-function.rst
- create mode 100644 Documentation/PCI/endpoint/pci-ntb-howto.rst
- create mode 100644 drivers/ntb/hw/epf/Kconfig
- create mode 100644 drivers/ntb/hw/epf/Makefile
- create mode 100644 drivers/ntb/hw/epf/ntb_hw_epf.c
- create mode 100644 drivers/pci/endpoint/functions/pci-epf-ntb.c
-
--- 
-2.17.1
-
+SGkgQXJuZCwNCg0KPiBTdWJqZWN0OiBSZTogW1BBVENIIDAvNV0gQWRkIG5vbmNvaGVyZW50IHBs
+YXRmb3JtIHN1cHBvcnQgZm9yIHZvcCBkcml2ZXINCj4gDQo+IE9uIEZyaSwgU2VwIDI1LCAyMDIw
+IGF0IDk6MjcgQU0gU2hlcnJ5IFN1biA8c2hlcnJ5LnN1bkBueHAuY29tPiB3cm90ZToNCj4gPg0K
+PiA+IENoYW5nZSB0aGUgd2F5IG9mIGFsbG9jYXRpbmcgdnJpbmcgdG8gc3VwcG9ydCBub25jb2hl
+cmVudCBwbGF0Zm9ybSBmb3INCj4gPiB2b3AgZHJpdmVyLCBhbmQgYWRkIHNvbWUgcmVsYXRlZCBk
+bWEgY2hhbmdlcyB0byBtYWtlIHN1cmUgbm9uY29oZXJlbnQNCj4gPiBwbGF0Zm9ybSB3b3JrcyB3
+ZWxsLg0KPiANCj4gQ291bGQgeW91IGRlc2NyaWJlIHdoeSB5b3UgYXJlIGRvaW5nIHRoaXM/IEFy
+ZSB5b3UgdXNpbmcgSW50ZWwgTUlDIGRldmljZXMNCj4gb24gQXJtIGhvc3RzLCBvciB0cnlpbmcg
+dG8gcmV1c2UgdGhlIGNvZGUgZm9yIG90aGVyIGFkZC1vbiBjYXJkcz8NCj4gDQoNCldlIHdhbnQg
+dG8gcmV1c2UgdGhlIHZvcCBkcml2ZXIgYmV0d2VlbiB0d28gaS5NWCBib2FyZHMgd2hpY2ggYXJl
+IGFybTY0IGFyY2hpdGVjdHVyZS4gQW5kIGluIGZhY3Qgd2UgaGF2ZSBzdWNjZXNzZnVsbHkgdmVy
+aWZpZWQgaXQuIA0KDQpCdXQgdGhlIGJpZ2dlc3QgcHJvYmxlbSB3ZSBjdXJyZW50bHkgZW5jb3Vu
+dGVyIGlzIGFib3V0IHRoZSBub25jb2hlcmVudCBtZW1vcnkuDQpTaW5jZSB0aGUgaGFyZHdhcmUg
+ZGV2aWNlIG9mIG91ciBwbGF0Zm9ybSBpcyBub3QgZG1hIGNvaGVyZW50LCANCndoZW4gdXNlIHRo
+ZSBvcmlnaW5hbCB3YXkoX19nZXRfZnJlZV9wYWdlcyBhbmQgZG1hX21hcF9zaW5nbGUsIGJ1dCB3
+aXRob3V0IGRtYV9zeW5jX3NpbmdsZV9mb3JfY3B1L2RldmljZSkgd2lsbCBtZWV0IGVycm9ycy4N
+Cg0KRGV2aWNlIHBhZ2VzL3ZyaW5nIHdoaWNoIGFyZSBpbnRlcmFjdCBiZXR3ZWVuIGVwIGFuZCBy
+YyBzaG91bGQgdXNlIGNvbnNpc3RlbnQgbWVtb3J5IHdpdGhvdXQgY2FjaGluZyBlZmZlY3RzLCAN
+CnNvIGFsbG9jYXRlIHRoZW0gYnkgZG1hX2FsbG9jX2NvaGVyZW50IGlzIGEgYmV0dGVyIHdheS4N
+Cg0KPiBOb3RlIHRoYXQgd2UgaGF2ZSBhIGNvdXBsZSBvZiBmcmFtZXdvcmtzIGluIHRoZSBrZXJu
+ZWwgdGhhdCB0cnkgdG8gZG8gc29tZQ0KPiBvZiB0aGUgc2FtZSB0aGluZ3MgaGVyZSwgbm90YWJs
+eSB0aGUgTlRCIGRyaXZlcnMgYW5kIHRoZSBQQ0kgZW5kcG9pbnQNCj4gc3VwcG9ydCwgYm90aCBv
+ZiB3aGljaCBhcmUgZGVzaWduZWQgdG8gYmUgc29tZXdoYXQgbW9yZSBnZW5lcmljIHRoYW4gdGhl
+DQo+IE1JQyBkcml2ZXIuDQo+IA0KPiBIYXZlIHlvdSBjb25zaWRlcmVkIHVzaW5nIHRoYXQgaW5z
+dGVhZD8NCj4gDQo+ICAgICAgICAgIEFybmQNCj4gDQoNClNvcnJ5IEkgZG9uJ3QgbXVjaCBhYm91
+dCBOVEIsIGJ1dCBmb3IgUENJIGVuZHBvaW50IGRyaXZlciwgd2Ugd2lsbCB1c2UgaXQgZm9yIHBj
+aSBkYXRhIGludGVyYWN0aW9uIGJlbG93IHRoZSB2b3AgbGF5ZXIuDQoNCkJlc3QgcmVnYXJkcw0K
+U2hlcnJ5DQoNCj4gPiBTaGVycnkgU3VuICg1KToNCj4gPiAgIG1pc2M6IHZvcDogY2hhbmdlIHRo
+ZSB3YXkgb2YgYWxsb2NhdGluZyB2cmluZyBmb3Igbm9uY29oZXJlbnQgcGxhdGZvcm0NCj4gPiAg
+IG1pc2M6IHZvcDogY2hhbmdlIHRoZSB3YXkgb2YgYWxsb2NhdGluZyB1c2VkIHJpbmcNCj4gPiAg
+IG1pc2M6IHZvcDogc2ltcGx5IHJldHVybiB0aGUgc2F2ZWQgZG1hIGFkZHJlc3MgaW5zdGVhZCBv
+ZiB2aXJ0X3RvX3BoeXMNCj4gPiAgIG1pc2M6IHZvcDogc2V0IFZJUlRJT19GX0FDQ0VTU19QTEFU
+Rk9STSBmb3Igbm9jb2hlcmVudCBwbGF0Zm9ybQ0KPiA+ICAgbWlzYzogdm9wOiBtYXBwaW5nIGtl
+cm5lbCBtZW1vcnkgdG8gdXNlciBzcGFjZSBhcyBub25jYWNoZWQNCj4gPg0KPiA+ICBkcml2ZXJz
+L21pc2MvbWljL2J1cy92b3BfYnVzLmggICAgfCAgIDIgKw0KPiA+ICBkcml2ZXJzL21pc2MvbWlj
+L2hvc3QvbWljX2Jvb3QuYyAgfCAgIDggKysNCj4gPiAgZHJpdmVycy9taXNjL21pYy92b3Avdm9w
+X21haW4uYyAgIHwgIDUxICsrKysrKysrKy0tLS0NCj4gPiAgZHJpdmVycy9taXNjL21pYy92b3Av
+dm9wX3ZyaW5naC5jIHwgMTE3DQo+ID4gKysrKysrKysrKysrKysrKysrKystLS0tLS0tLS0tDQo+
+ID4gIDQgZmlsZXMgY2hhbmdlZCwgMTI1IGluc2VydGlvbnMoKyksIDUzIGRlbGV0aW9ucygtKQ0K
+PiA+DQo+ID4gLS0NCj4gPiAyLjE3LjENCj4gPg0K
