@@ -1,13 +1,13 @@
 Return-Path: <kishon@ti.com>
 Received: from fllv0016.ext.ti.com (fllv0016.ext.ti.com. [198.47.19.142])
-        by gmr-mx.google.com with ESMTPS id 134si132012vkx.0.2020.09.30.08.36.41
+        by gmr-mx.google.com with ESMTPS id j16si123442pgj.1.2020.09.30.08.36.35
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 30 Sep 2020 08:36:41 -0700 (PDT)
+        Wed, 30 Sep 2020 08:36:35 -0700 (PDT)
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v7 10/18] PCI: endpoint: Allow user to create sub-directory of 'EPF Device' directory
-Date: Wed, 30 Sep 2020 21:05:11 +0530
-Message-ID: <20200930153519.7282-11-kishon@ti.com>
+Subject: [PATCH v7 09/18] PCI: endpoint: Add pci_epf_ops for epf drivers to expose function specific attrs
+Date: Wed, 30 Sep 2020 21:05:10 +0530
+Message-ID: <20200930153519.7282-10-kishon@ti.com>
 In-Reply-To: <20200930153519.7282-1-kishon@ti.com>
 References: <20200930153519.7282-1-kishon@ti.com>
 MIME-Version: 1.0
@@ -16,89 +16,89 @@ To: Bjorn Helgaas <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, Kisho
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-Documentation/PCI/endpoint/pci-endpoint-cfs.rst explains how a user
-has to create a directory in-order to create a 'EPF Device' that
-can be configured/probed by 'EPF Driver'.
-
-Allow user to create a sub-directory of 'EPF Device' directory for
-any function specific attributes that has to be exposed to the user.
+In addition to the attributes that are generic across function drivers
+documented in Documentation/PCI/endpoint/pci-endpoint-cfs.rst, there
+could be function specific attributes that has to be exposed by the
+function driver to be configured by the user. Add ->add_cfs()
+in pci_epf_ops to be populated by the function driver if it has to
+expose any function specific attributes and pci_epf_type_add_cfs() to
+be invoked by pci-ep-cfs.c when sub-directory to main function directory
+is created.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- drivers/pci/endpoint/pci-ep-cfs.c | 23 +++++++++++++++++++++++
- include/linux/pci-epf.h           |  3 +++
- 2 files changed, 26 insertions(+)
+ drivers/pci/endpoint/pci-epf-core.c | 32 +++++++++++++++++++++++++++++
+ include/linux/pci-epf.h             |  5 +++++
+ 2 files changed, 37 insertions(+)
 
-diff --git a/drivers/pci/endpoint/pci-ep-cfs.c b/drivers/pci/endpoint/pci-ep-cfs.c
-index 8f750961d6ab..f3a8b833b479 100644
---- a/drivers/pci/endpoint/pci-ep-cfs.c
-+++ b/drivers/pci/endpoint/pci-ep-cfs.c
-@@ -490,7 +490,29 @@ static struct configfs_item_operations pci_epf_ops = {
- 	.release		= pci_epf_release,
- };
+diff --git a/drivers/pci/endpoint/pci-epf-core.c b/drivers/pci/endpoint/pci-epf-core.c
+index 79329ec6373c..7646c8660d42 100644
+--- a/drivers/pci/endpoint/pci-epf-core.c
++++ b/drivers/pci/endpoint/pci-epf-core.c
+@@ -20,6 +20,38 @@ static DEFINE_MUTEX(pci_epf_mutex);
+ static struct bus_type pci_epf_bus_type;
+ static const struct device_type pci_epf_type;
  
-+static struct config_group *pci_epf_type_make(struct config_group *group,
-+					      const char *name)
++/**
++ * pci_epf_type_add_cfs() - Help function drivers to expose function specific
++ *                          attributes in configfs
++ * @epf: the EPF device that has to be configured using configfs
++ * @group: the parent configfs group (corresponding to entries in
++ *         pci_epf_device_id)
++ *
++ * Invoke to expose function specific attributes in configfs. If the function
++ * driver does not have anything to expose (attributes configured by user),
++ * return NULL.
++ */
++struct config_group *pci_epf_type_add_cfs(struct pci_epf *epf,
++					  struct config_group *group)
 +{
-+	struct pci_epf_group *epf_group = to_pci_epf_group(&group->cg_item);
 +	struct config_group *epf_type_group;
 +
-+	epf_type_group = pci_epf_type_add_cfs(epf_group->epf, group);
++	if (!epf->driver) {
++		dev_err(&epf->dev, "epf device not bound to driver\n");
++		return NULL;
++	}
++
++	if (!epf->driver->ops->add_cfs)
++		return NULL;
++
++	mutex_lock(&epf->lock);
++	epf_type_group = epf->driver->ops->add_cfs(epf, group);
++	mutex_unlock(&epf->lock);
++
 +	return epf_type_group;
 +}
++EXPORT_SYMBOL_GPL(pci_epf_type_add_cfs);
 +
-+static void pci_epf_type_drop(struct config_group *group,
-+			      struct config_item *item)
-+{
-+	config_item_put(item);
-+}
-+
-+static struct configfs_group_operations pci_epf_type_group_ops = {
-+	.make_group     = &pci_epf_type_make,
-+	.drop_item      = &pci_epf_type_drop,
-+};
-+
- static const struct config_item_type pci_epf_type = {
-+	.ct_group_ops	= &pci_epf_type_group_ops,
- 	.ct_item_ops	= &pci_epf_ops,
- 	.ct_attrs	= pci_epf_attrs,
- 	.ct_owner	= THIS_MODULE,
-@@ -553,6 +575,7 @@ static struct config_group *pci_epf_make(struct config_group *group,
- 		goto free_name;
- 	}
- 
-+	epf->group = &epf_group->group;
- 	epf_group->epf = epf;
- 
- 	kfree(epf_name);
+ /**
+  * pci_epf_unbind() - Notify the function driver that the binding between the
+  *		      EPF device and EPC device has been lost
 diff --git a/include/linux/pci-epf.h b/include/linux/pci-epf.h
-index b241e7dd171f..6833e2160ef1 100644
+index 1dc66824f5a8..b241e7dd171f 100644
 --- a/include/linux/pci-epf.h
 +++ b/include/linux/pci-epf.h
-@@ -9,6 +9,7 @@
- #ifndef __LINUX_PCI_EPF_H
- #define __LINUX_PCI_EPF_H
- 
-+#include <linux/configfs.h>
- #include <linux/device.h>
- #include <linux/mod_devicetable.h>
- #include <linux/pci.h>
-@@ -128,6 +129,7 @@ struct pci_epf_bar {
-  *   EPC device
-  * @sec_epc_bar: represents the BAR of EPF device associated with secondary EPC
-  * @sec_epc_func_no: unique (physical) function number within the secondary EPC
-+ * @group: configfs group associated with the EPF device
+@@ -62,10 +62,13 @@ struct pci_epf_header {
+  * @bind: ops to perform when a EPC device has been bound to EPF device
+  * @unbind: ops to perform when a binding has been lost between a EPC device
+  *	    and EPF device
++ * @add_cfs: ops to initialize function specific configfs attributes
   */
- struct pci_epf {
- 	struct device		dev;
-@@ -150,6 +152,7 @@ struct pci_epf {
- 	struct list_head	sec_epc_list;
- 	struct pci_epf_bar	sec_epc_bar[6];
- 	u8			sec_epc_func_no;
-+	struct config_group	*group;
+ struct pci_epf_ops {
+ 	int	(*bind)(struct pci_epf *epf);
+ 	void	(*unbind)(struct pci_epf *epf);
++	struct config_group *(*add_cfs)(struct pci_epf *epf,
++					struct config_group *group);
  };
  
  /**
+@@ -188,4 +191,6 @@ void pci_epf_free_space(struct pci_epf *epf, void *addr, enum pci_barno bar,
+ 			enum pci_epc_interface_type type);
+ int pci_epf_bind(struct pci_epf *epf);
+ void pci_epf_unbind(struct pci_epf *epf);
++struct config_group *pci_epf_type_add_cfs(struct pci_epf *epf,
++					  struct config_group *group);
+ #endif /* __LINUX_PCI_EPF_H */
 -- 
 2.17.1
 
