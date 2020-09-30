@@ -1,119 +1,210 @@
 Return-Path: <kishon@ti.com>
-Received: from fllv0016.ext.ti.com (fllv0016.ext.ti.com. [198.47.19.142])
-        by gmr-mx.google.com with ESMTPS id m19si434496otn.1.2020.09.04.00.51.09
+Received: from fllv0015.ext.ti.com (fllv0015.ext.ti.com. [198.47.19.141])
+        by gmr-mx.google.com with ESMTPS id d22si204205ooj.1.2020.09.30.08.38.37
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 04 Sep 2020 00:51:09 -0700 (PDT)
+        Wed, 30 Sep 2020 08:38:37 -0700 (PDT)
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v3 00/17] Implement NTB Controller using multiple PCI EP
-Date: Fri, 4 Sep 2020 13:20:35 +0530
-Message-ID: <20200904075052.8911-1-kishon@ti.com>
+Subject: [PATCH v7 18/18] Documentation: PCI: Add userguide for PCI endpoint NTB function
+Date: Wed, 30 Sep 2020 21:05:19 +0530
+Message-ID: <20200930153519.7282-19-kishon@ti.com>
+In-Reply-To: <20200930153519.7282-1-kishon@ti.com>
+References: <20200930153519.7282-1-kishon@ti.com>
 MIME-Version: 1.0
 Content-Type: text/plain
-To: Bjorn Helgaas <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Rob Herring <robh@kernel.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Tom Joseph <tjoseph@cadence.com>, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, Kishon Vijay Abraham I <kishon@ti.com>
+To: Bjorn Helgaas <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, Kishon Vijay Abraham I <kishon@ti.com>, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Arnd Bergmann <arnd@arndb.de>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Tom Joseph <tjoseph@cadence.com>, Rob Herring <robh@kernel.org>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-This series is about implementing SW defined NTB using
-multiple endpoint instances. This series has been tested using
-2 endpoint instances in J7 connected to J7 board on one end and DRA7 board
-on the other end. However there is nothing platform specific for the NTB
-functionality.
+Add documentation to help users use pci-epf-ntb function driver and
+existing host side NTB infrastructure for NTB functionality.
 
-This was presented in Linux Plumbers Conference. The presentation
-can be found @ [1]
-
-RFC patch series can be found @ [2]
-v1 patch series can be found @ [3]
-v2 patch series can be found @ [4]
-
-Changes from v2:
-1) Add support for the user to create sub-directory of 'EPF Device'
-   directory (for endpoint function specific configuration using
-   configfs).
-2) Add documentation for NTB specific attributes in configfs
-3) Check for PCI_CLASS_MEMORY_RAM (PCIe class) before binding ntb_hw_epf
-   driver
-4) Other documentation fixes
-
-Changes from v1:
-1) As per Rob's comment, removed support for creating NTB function
-   device from DT
-2) Add support to create NTB EPF device using configfs (added support in
-   configfs to associate primary and secondary EPC with EPF.
-
-Changes from RFC:
-1) Converted the DT binding patches to YAML schema and merged the
-   DT binding patches together
-2) NTB documentation is converted to .rst
-3) One HOST can now interrupt the other HOST using MSI-X interrupts
-4) Added support for teardown of memory window and doorbell
-   configuration
-5) Add support to provide support 64-bit memory window size from
-   DT
-
-[1] -> https://www.linuxplumbersconf.org/event/4/contributions/395/attachments/284/481/Implementing_NTB_Controller_Using_PCIe_Endpoint_-_final.pdf
-[2] -> http://lore.kernel.org/r/20190926112933.8922-1-kishon@ti.com
-[3] -> http://lore.kernel.org/r/20200514145927.17555-1-kishon@ti.com
-[4] -> http://lore.kernel.org/r/20200611130525.22746-1-kishon@ti.com
-
-Kishon Vijay Abraham I (17):
-  Documentation: PCI: Add specification for the *PCI NTB* function
-    device
-  PCI: endpoint: Make *_get_first_free_bar() take into account 64 bit
-    BAR
-  PCI: endpoint: Add helper API to get the 'next' unreserved BAR
-  PCI: endpoint: Make *_free_bar() to return error codes on failure
-  PCI: endpoint: Remove unused pci_epf_match_device()
-  PCI: endpoint: Add support to associate secondary EPC with EPF
-  PCI: endpoint: Add support in configfs to associate two EPCs with EPF
-  PCI: endpoint: Add pci_epc_ops to map MSI irq
-  PCI: endpoint: Add pci_epf_ops for epf drivers to expose function
-    specific attrs
-  PCI: endpoint: Allow user to create sub-directory of 'EPF Device'
-    directory
-  PCI: cadence: Implement ->msi_map_irq() ops
-  PCI: endpoint: Add EP function driver to provide NTB functionality
-  PCI: Add TI J721E device to pci ids
-  NTB: Add support for EPF PCI-Express Non-Transparent Bridge
-  NTB: tool: Enable the NTB/PCIe link on the local or remote side of
-    bridge
-  Documentation: PCI: Add binding documentation for pci-ntb endpoint
-    function
-  Documentation: PCI: Add userguide for PCI endpoint NTB function
-
- .../PCI/endpoint/function/binding/pci-ntb.rst |   38 +
- Documentation/PCI/endpoint/index.rst          |    3 +
- .../PCI/endpoint/pci-endpoint-cfs.rst         |   10 +
- .../PCI/endpoint/pci-ntb-function.rst         |  351 +++
- Documentation/PCI/endpoint/pci-ntb-howto.rst  |  160 ++
- drivers/misc/pci_endpoint_test.c              |    1 -
- drivers/ntb/hw/Kconfig                        |    1 +
- drivers/ntb/hw/Makefile                       |    1 +
- drivers/ntb/hw/epf/Kconfig                    |    6 +
- drivers/ntb/hw/epf/Makefile                   |    1 +
- drivers/ntb/hw/epf/ntb_hw_epf.c               |  751 ++++++
- drivers/ntb/test/ntb_tool.c                   |    1 +
- .../pci/controller/cadence/pcie-cadence-ep.c  |   50 +
- drivers/pci/endpoint/functions/Kconfig        |   12 +
- drivers/pci/endpoint/functions/Makefile       |    1 +
- drivers/pci/endpoint/functions/pci-epf-ntb.c  | 2106 +++++++++++++++++
- drivers/pci/endpoint/functions/pci-epf-test.c |   13 +-
- drivers/pci/endpoint/pci-ep-cfs.c             |  176 +-
- drivers/pci/endpoint/pci-epc-core.c           |  131 +-
- drivers/pci/endpoint/pci-epf-core.c           |  105 +-
- include/linux/pci-epc.h                       |   38 +-
- include/linux/pci-epf.h                       |   28 +-
- include/linux/pci_ids.h                       |    1 +
- 23 files changed, 3918 insertions(+), 67 deletions(-)
- create mode 100644 Documentation/PCI/endpoint/function/binding/pci-ntb.rst
- create mode 100644 Documentation/PCI/endpoint/pci-ntb-function.rst
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+Reviewed-by: Randy Dunlap <rdunlap@infradead.org>
+---
+ Documentation/PCI/endpoint/index.rst         |   1 +
+ Documentation/PCI/endpoint/pci-ntb-howto.rst | 160 +++++++++++++++++++
+ 2 files changed, 161 insertions(+)
  create mode 100644 Documentation/PCI/endpoint/pci-ntb-howto.rst
- create mode 100644 drivers/ntb/hw/epf/Kconfig
- create mode 100644 drivers/ntb/hw/epf/Makefile
- create mode 100644 drivers/ntb/hw/epf/ntb_hw_epf.c
- create mode 100644 drivers/pci/endpoint/functions/pci-epf-ntb.c
 
+diff --git a/Documentation/PCI/endpoint/index.rst b/Documentation/PCI/endpoint/index.rst
+index 9cb6e5f3c4d5..38ea1f604b6d 100644
+--- a/Documentation/PCI/endpoint/index.rst
++++ b/Documentation/PCI/endpoint/index.rst
+@@ -12,6 +12,7 @@ PCI Endpoint Framework
+    pci-test-function
+    pci-test-howto
+    pci-ntb-function
++   pci-ntb-howto
+ 
+    function/binding/pci-test
+    function/binding/pci-ntb
+diff --git a/Documentation/PCI/endpoint/pci-ntb-howto.rst b/Documentation/PCI/endpoint/pci-ntb-howto.rst
+new file mode 100644
+index 000000000000..b6e1073c9a39
+--- /dev/null
++++ b/Documentation/PCI/endpoint/pci-ntb-howto.rst
+@@ -0,0 +1,160 @@
++.. SPDX-License-Identifier: GPL-2.0
++
++===================================================================
++PCI Non-Transparent Bridge (NTB) Endpoint Function (EPF) User Guide
++===================================================================
++
++:Author: Kishon Vijay Abraham I <kishon@ti.com>
++
++This document is a guide to help users use pci-epf-ntb function driver
++and ntb_hw_epf host driver for NTB functionality. The list of steps to
++be followed in the host side and EP side is given below. For the hardware
++configuration and internals of NTB using configurable endpoints see
++Documentation/PCI/endpoint/pci-ntb-function.rst
++
++Endpoint Device
++===============
++
++Endpoint Controller Devices
++---------------------------
++
++For implementing NTB functionality at least two endpoint controller devices
++are required.
++To find the list of endpoint controller devices in the system::
++
++        # ls /sys/class/pci_epc/
++          2900000.pcie-ep  2910000.pcie-ep
++
++If PCI_ENDPOINT_CONFIGFS is enabled::
++
++	# ls /sys/kernel/config/pci_ep/controllers
++	  2900000.pcie-ep  2910000.pcie-ep
++
++
++Endpoint Function Drivers
++-------------------------
++
++To find the list of endpoint function drivers in the system::
++
++	# ls /sys/bus/pci-epf/drivers
++	  pci_epf_ntb   pci_epf_ntb
++
++If PCI_ENDPOINT_CONFIGFS is enabled::
++
++	# ls /sys/kernel/config/pci_ep/functions
++	  pci_epf_ntb   pci_epf_ntb
++
++
++Creating pci-epf-ntb Device
++----------------------------
++
++PCI endpoint function device can be created using the configfs. To create
++pci-epf-ntb device, the following commands can be used::
++
++	# mount -t configfs none /sys/kernel/config
++	# cd /sys/kernel/config/pci_ep/
++	# mkdir functions/pci_epf_ntb/func1
++
++The "mkdir func1" above creates the pci-epf-ntb function device that will
++be probed by pci_epf_ntb driver.
++
++The PCI endpoint framework populates the directory with the following
++configurable fields::
++
++	# ls functions/pci_epf_ntb/func1
++          baseclass_code    deviceid          msi_interrupts    pci-epf-ntb.0
++          progif_code       secondary         subsys_id         vendorid
++          cache_line_size   interrupt_pin     msix_interrupts   primary
++          revid             subclass_code     subsys_vendor_id
++
++The PCI endpoint function driver populates these entries with default values
++when the device is bound to the driver. The pci-epf-ntb driver populates
++vendorid with 0xffff and interrupt_pin with 0x0001::
++
++	# cat functions/pci_epf_ntb/func1/vendorid
++	  0xffff
++	# cat functions/pci_epf_ntb/func1/interrupt_pin
++	  0x0001
++
++
++Configuring pci-epf-ntb Device
++-------------------------------
++
++The user can configure the pci-epf-ntb device using its configfs entry. In order
++to change the vendorid and the deviceid, the following
++commands can be used::
++
++	# echo 0x104c > functions/pci_epf_ntb/func1/vendorid
++	# echo 0xb00d > functions/pci_epf_ntb/func1/deviceid
++
++In order to configure NTB specific attributes, a new sub-directory to func1
++should be created::
++
++	# mkdir functions/pci_epf_ntb/func1/pci_epf_ntb.0/
++
++The NTB function driver will populate this directory with various attributes
++that can be configured by the user::
++
++	# ls functions/pci_epf_ntb/func1/pci_epf_ntb.0/
++          db_count    mw1         mw2         mw3         mw4         num_mws
++          spad_count
++
++A sample configuration for NTB function is given below::
++
++	# echo 4 > functions/pci_epf_ntb/func1/pci_epf_ntb.0/db_count
++	# echo 128 > functions/pci_epf_ntb/func1/pci_epf_ntb.0/spad_count
++	# echo 2 > functions/pci_epf_ntb/func1/pci_epf_ntb.0/num_mws
++	# echo 0x100000 > functions/pci_epf_ntb/func1/pci_epf_ntb.0/mw1
++	# echo 0x100000 > functions/pci_epf_ntb/func1/pci_epf_ntb.0/mw2
++
++Binding pci-epf-ntb Device to EP Controller
++--------------------------------------------
++
++NTB function device should be attached to two PCIe endpoint controllers
++connected to the two hosts. Use the 'primary' and 'secondary' entries
++inside NTB function device to attach one PCIe endpoint controller to
++primary interface and the other PCIe endpoint controller to the secondary
++interface. ::
++
++        # ln -s controllers/2900000.pcie-ep/ functions/pci-epf-ntb/func1/primary
++        # ln -s controllers/2910000.pcie-ep/ functions/pci-epf-ntb/func1/secondary
++
++Once the above step is completed, both the PCI endpoint controllers are ready to
++establish a link with the host.
++
++
++Start the Link
++--------------
++
++In order for the endpoint device to establish a link with the host, the _start_
++field should be populated with '1'. For NTB, both the PCIe endpoint controllers
++should establish link with the host::
++
++        #echo 1 > controllers/2900000.pcie-ep/start
++        #echo 1 > controllers/2910000.pcie-ep/start
++
++
++RootComplex Device
++==================
++
++lspci Output
++------------
++
++Note that the devices listed here correspond to the values populated in
++"Creating pci-epf-ntb Device" section above::
++
++        # lspci
++        0000:00:00.0 PCI bridge: Texas Instruments Device b00d
++        0000:01:00.0 RAM memory: Texas Instruments Device b00d
++
++
++Using ntb_hw_epf Device
++-----------------------
++
++The host side software follows the standard NTB software architecture in Linux.
++All the existing client side NTB utilities like NTB Transport Client and NTB
++Netdev, NTB Ping Pong Test Client and NTB Tool Test Client can be used with NTB
++function device.
++
++For more information on NTB see
++:doc:`Non-Transparent Bridge <../../driver-api/ntb>`
 -- 
 2.17.1
 
