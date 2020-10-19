@@ -1,59 +1,69 @@
-Return-Path: <arnd@arndb.de>
-Received: from mout.kundenserver.de (mout.kundenserver.de. [212.227.126.135])
-        by gmr-mx.google.com with ESMTPS id w10si74950wma.1.2020.09.25.04.25.55
+Return-Path: <anton.ivanov@cambridgegreys.com>
+Received: from www.kot-begemot.co.uk (ivanoab7.miniserver.com. [37.128.132.42])
+        by gmr-mx.google.com with ESMTPS id v35si645912qtv.1.2020.10.19.00.39.40
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 25 Sep 2020 04:25:55 -0700 (PDT)
-Received: from mail-qk1-f169.google.com ([209.85.222.169]) by
- mrelayeu.kundenserver.de (mreue010 [212.227.15.129]) with ESMTPSA (Nemesis)
- id 1MuUza-1kdi7N1KAE-00rbB7 for <linux-ntb@googlegroups.com>; Fri, 25 Sep
- 2020 13:25:55 +0200
-Received: by mail-qk1-f169.google.com with SMTP id f142so2317791qke.13
-        for <linux-ntb@googlegroups.com>; Fri, 25 Sep 2020 04:25:55 -0700 (PDT)
+        Mon, 19 Oct 2020 00:39:40 -0700 (PDT)
+Subject: Re: [PATCH] arch: um: convert tasklets to use new tasklet_setup() API
+References: <20200817091617.28119-1-allen.cryptic@gmail.com>
+From: Anton Ivanov <anton.ivanov@cambridgegreys.com>
+Message-ID: <3359192b-8f02-feb4-a9a7-a13b5d876998@cambridgegreys.com>
+Date: Mon, 19 Oct 2020 08:39:05 +0100
 MIME-Version: 1.0
-References: <20200925072630.8157-1-sherry.sun@nxp.com>
-In-Reply-To: <20200925072630.8157-1-sherry.sun@nxp.com>
-From: Arnd Bergmann <arnd@arndb.de>
-Date: Fri, 25 Sep 2020 13:25:38 +0200
-Message-ID: <CAK8P3a3fog3jE_cPUTELDkFKoO2FbCJufQiDZhfL2FsZ5s5q3Q@mail.gmail.com>
-Subject: Re: [PATCH 0/5] Add noncoherent platform support for vop driver
-Content-Type: text/plain; charset="UTF-8"
-To: Sherry Sun <sherry.sun@nxp.com>
-Cc: Sudeep Dutt <sudeep.dutt@intel.com>, Ashutosh Dixit <ashutosh.dixit@intel.com>, gregkh <gregkh@linuxfoundation.org>, wang.yi59@zte.com.cn, huang.zijiang@zte.com.cn, Rikard Falkeborn <rikard.falkeborn@gmail.com>, Lee Jones <lee.jones@linaro.org>, "Michael S. Tsirkin" <mst@redhat.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, NXP Linux Team <linux-imx@nxp.com>, linux-pci <linux-pci@vger.kernel.org>, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Kishon Vijay Abraham I <kishon@ti.com>, linux-ntb@googlegroups.com
+In-Reply-To: <20200817091617.28119-1-allen.cryptic@gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+To: Allen Pais <allen.cryptic@gmail.com>, jdike@addtoit.com, richard@nod.at, 3chas3@gmail.com, axboe@kernel.dk, stefanr@s5r6.in-berlin.de, airlied@linux.ie, daniel@ffwll.ch, sre@kernel.org, James.Bottomley@HansenPartnership.com, kys@microsoft.com, deller@gmx.de, dmitry.torokhov@gmail.com, jassisinghbrar@gmail.com, shawnguo@kernel.org, s.hauer@pengutronix.de, maximlevitsky@gmail.com, oakad@yahoo.com, ulf.hansson@linaro.org, mporter@kernel.crashing.org, alex.bou9@gmail.com, broonie@kernel.org, martyn@welchs.me.uk, manohar.vanga@gmail.com, mitch@sfgoth.com, davem@davemloft.net, kuba@kernel.org
+Cc: devel@driverdev.osuosl.org, linux-s390@vger.kernel.org, linux-hyperv@vger.kernel.org, Romain Perier <romain.perier@gmail.com>, keescook@chromium.org, linux-parisc@vger.kernel.org, linux-ntb@googlegroups.com, netdev@vger.kernel.org, intel-gfx@lists.freedesktop.org, linux-atm-general@lists.sourceforge.net, linux-um@lists.infradead.org, linux-kernel@vger.kernel.org, dri-devel@lists.freedesktop.org, linux-spi@vger.kernel.org, linux-block@vger.kernel.org, Allen Pais <allen.lkml@gmail.com>, linux-input@vger.kernel.org, linux-mmc@vger.kernel.org, openipmi-developer@lists.sourceforge.net, linux1394-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org
 List-ID: <linux-ntb.googlegroups.com>
 
-On Fri, Sep 25, 2020 at 9:27 AM Sherry Sun <sherry.sun@nxp.com> wrote:
->
-> Change the way of allocating vring to support noncoherent platform for vop
-> driver, and add some related dma changes to make sure noncoherent platform works
-> well.
 
-Could you describe why you are doing this? Are you using Intel MIC
-devices on Arm hosts, or trying to reuse the code for other add-on
-cards?
 
-Note that we have a couple of frameworks in the kernel that try to
-do some of the same things here, notably the NTB drivers and the
-PCI endpoint support, both of which are designed to be somewhat
-more generic than the MIC driver.
+On 17/08/2020 10:15, Allen Pais wrote:
+> From: Allen Pais <allen.lkml@gmail.com>
+> 
+> In preparation for unconditionally passing the
+> struct tasklet_struct pointer to all tasklet
+> callbacks, switch to using the new tasklet_setup()
+> and from_tasklet() to pass the tasklet pointer explicitly.
+> 
+> Signed-off-by: Romain Perier <romain.perier@gmail.com>
+> Signed-off-by: Allen Pais <allen.lkml@gmail.com>
+> ---
+>   arch/um/drivers/vector_kern.c | 6 +++---
+>   1 file changed, 3 insertions(+), 3 deletions(-)
+> 
+> diff --git a/arch/um/drivers/vector_kern.c b/arch/um/drivers/vector_kern.c
+> index 8735c468230a..06980870ae23 100644
+> --- a/arch/um/drivers/vector_kern.c
+> +++ b/arch/um/drivers/vector_kern.c
+> @@ -1196,9 +1196,9 @@ static int vector_net_close(struct net_device *dev)
+>   
+>   /* TX tasklet */
+>   
+> -static void vector_tx_poll(unsigned long data)
+> +static void vector_tx_poll(struct tasklet_struct *t)
+>   {
+> -	struct vector_private *vp = (struct vector_private *)data;
+> +	struct vector_private *vp = from_tasklet(vp, t, tx_poll);
+>   
+>   	vp->estats.tx_kicks++;
+>   	vector_send(vp->tx_queue);
+> @@ -1629,7 +1629,7 @@ static void vector_eth_configure(
+>   	});
+>   
+>   	dev->features = dev->hw_features = (NETIF_F_SG | NETIF_F_FRAGLIST);
+> -	tasklet_init(&vp->tx_poll, vector_tx_poll, (unsigned long)vp);
+> +	tasklet_setup(&vp->tx_poll, vector_tx_poll);
+>   	INIT_WORK(&vp->reset_tx, vector_reset_tx);
+>   
+>   	timer_setup(&vp->tl, vector_timer_expire, 0);
+> 
 
-Have you considered using that instead?
+Acked-By: Anton Ivanov <anton.ivanov@cambridgegreys.com>
 
-         Arnd
-
-> Sherry Sun (5):
->   misc: vop: change the way of allocating vring for noncoherent platform
->   misc: vop: change the way of allocating used ring
->   misc: vop: simply return the saved dma address instead of virt_to_phys
->   misc: vop: set VIRTIO_F_ACCESS_PLATFORM for nocoherent platform
->   misc: vop: mapping kernel memory to user space as noncached
->
->  drivers/misc/mic/bus/vop_bus.h    |   2 +
->  drivers/misc/mic/host/mic_boot.c  |   8 ++
->  drivers/misc/mic/vop/vop_main.c   |  51 +++++++++----
->  drivers/misc/mic/vop/vop_vringh.c | 117 ++++++++++++++++++++----------
->  4 files changed, 125 insertions(+), 53 deletions(-)
->
-> --
-> 2.17.1
->
+-- 
+Anton R. Ivanov
+Cambridgegreys Limited. Registered in England. Company Number 10273661
+https://www.cambridgegreys.com/
