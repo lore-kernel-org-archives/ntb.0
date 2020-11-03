@@ -1,156 +1,514 @@
-Return-Path: <sherry.sun@nxp.com>
-Received: from EUR04-DB3-obe.outbound.protection.outlook.com (mail-eopbgr60076.outbound.protection.outlook.com. [40.107.6.76])
-        by gmr-mx.google.com with ESMTPS id o4si245606wrx.4.2020.11.09.01.37.02
+Return-Path: <alanmikhak@gmail.com>
+Received: from mail-vs1-xe43.google.com (mail-vs1-xe43.google.com. [2607:f8b0:4864:20::e43])
+        by gmr-mx.google.com with ESMTPS id x13si778910qka.3.2020.11.03.00.25.58
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 09 Nov 2020 01:37:02 -0800 (PST)
-From: Sherry Sun <sherry.sun@nxp.com>
-Subject: RE: [PATCH v7 15/18] NTB: Add support for EPF PCI-Express
- Non-Transparent Bridge
-Date: Mon, 9 Nov 2020 09:37:00 +0000
-Message-ID: 
- <VI1PR04MB496061EAB6F249F1C394F01092EA0@VI1PR04MB4960.eurprd04.prod.outlook.com>
-References: <20200930153519.7282-16-kishon@ti.com>
-In-Reply-To: <20200930153519.7282-16-kishon@ti.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 03 Nov 2020 00:25:58 -0800 (PST)
+Received: by mail-vs1-xe43.google.com with SMTP id t8so6191665vsr.2
+        for <linux-ntb@googlegroups.com>; Tue, 03 Nov 2020 00:25:58 -0800 (PST)
 MIME-Version: 1.0
-To: "kishon@ti.com" <kishon@ti.com>
-Cc: "bhelgaas@google.com" <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, "lorenzo.pieralisi@arm.com" <lorenzo.pieralisi@arm.com>, "arnd@arndb.de" <arnd@arndb.de>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "dave.jiang@intel.com" <dave.jiang@intel.com>, "allenbh@gmail.com" <allenbh@gmail.com>, "tjoseph@cadence.com" <tjoseph@cadence.com>, Rob Herring <robh@kernel.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
+References: <20200930153519.7282-1-kishon@ti.com> <fe2db298-2116-7f52-80bd-a3d01a9a1521@ti.com>
+ <72ebe7db-86cd-6827-03ff-bde32c10dc7e@ti.com> <20201020131843.GA25784@e121166-lin.cambridge.arm.com>
+ <27b4ae15-03ce-e2f1-a0b5-65db7c7dd71e@ti.com>
+In-Reply-To: <27b4ae15-03ce-e2f1-a0b5-65db7c7dd71e@ti.com>
+From: Alan Mikhak <alanmikhak@gmail.com>
+Date: Tue, 3 Nov 2020 00:25:46 -0800
+Message-ID: <CAOY98NcccMN=QPNv1Nt2HXMeDo1R+f8oQK6V663a30sdKpPy9Q@mail.gmail.com>
+Subject: Re: [PATCH v7 00/18] Implement NTB Controller using multiple PCI EP
+Content-Type: multipart/alternative; boundary="000000000000c0a88805b32f9c05"
+To: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Rob Herring <robh@kernel.org>, Bjorn Helgaas <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, Arnd Bergmann <arnd@arndb.de>, Tom Joseph <tjoseph@cadence.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, alan.mikhak@sifive.com
 List-ID: <linux-ntb.googlegroups.com>
 
-Hi Kishon,
+--000000000000c0a88805b32f9c05
+Content-Type: text/plain; charset="UTF-8"
 
-> Subject: [PATCH v7 15/18] NTB: Add support for EPF PCI-Express Non-
-> Transparent Bridge
->=20
-> From: Kishon Vijay Abraham I <kishon@ti.com>
->=20
-> Add support for EPF PCI-Express Non-Transparent Bridge (NTB) device.
-> This driver is platform independent and could be used by any platform whi=
-ch
-> have multiple PCIe endpoint instances configured using the pci-epf-ntb dr=
-iver.
-> The driver connnects to the standard NTB sub-system interface. The EPF NT=
-B
-> device has configurable number of memory windows (Max 4), configurable
-> number of doorbell (Max 32), and configurable number of scratch-pad
-> registers.
->=20
-> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
-> ---
->  drivers/ntb/hw/Kconfig          |   1 +
->  drivers/ntb/hw/Makefile         |   1 +
->  drivers/ntb/hw/epf/Kconfig      |   6 +
->  drivers/ntb/hw/epf/Makefile     |   1 +
->  drivers/ntb/hw/epf/ntb_hw_epf.c | 755
-> ++++++++++++++++++++++++++++++++
->  5 files changed, 764 insertions(+)
->  create mode 100644 drivers/ntb/hw/epf/Kconfig  create mode 100644
-> drivers/ntb/hw/epf/Makefile  create mode 100644
-> drivers/ntb/hw/epf/ntb_hw_epf.c
->=20
-> diff --git a/drivers/ntb/hw/Kconfig b/drivers/ntb/hw/Kconfig index
-> e77c587060ff..c325be526b80 100644
-> --- a/drivers/ntb/hw/Kconfig
-> +++ b/drivers/ntb/hw/Kconfig
-> @@ -2,4 +2,5 @@
->  source "drivers/ntb/hw/amd/Kconfig"
->  source "drivers/ntb/hw/idt/Kconfig"
->  source "drivers/ntb/hw/intel/Kconfig"
-> +source "drivers/ntb/hw/epf/Kconfig"
->  source "drivers/ntb/hw/mscc/Kconfig"
-> diff --git a/drivers/ntb/hw/Makefile b/drivers/ntb/hw/Makefile index
-> 4714d6238845..223ca592b5f9 100644
-> --- a/drivers/ntb/hw/Makefile
-> +++ b/drivers/ntb/hw/Makefile
-> @@ -2,4 +2,5 @@
->  obj-$(CONFIG_NTB_AMD)	+=3D amd/
->  obj-$(CONFIG_NTB_IDT)	+=3D idt/
->  obj-$(CONFIG_NTB_INTEL)	+=3D intel/
-> +obj-$(CONFIG_NTB_EPF)	+=3D epf/
->  obj-$(CONFIG_NTB_SWITCHTEC) +=3D mscc/
-> diff --git a/drivers/ntb/hw/epf/Kconfig b/drivers/ntb/hw/epf/Kconfig new
-> file mode 100644 index 000000000000..6197d1aab344
-> --- /dev/null
-> +++ b/drivers/ntb/hw/epf/Kconfig
-> @@ -0,0 +1,6 @@
-> +config NTB_EPF
-> +	tristate "Generic EPF Non-Transparent Bridge support"
-> +	depends on m
-> +	help
-> +	  This driver supports EPF NTB on configurable endpoint.
-> +	  If unsure, say N.
-> diff --git a/drivers/ntb/hw/epf/Makefile b/drivers/ntb/hw/epf/Makefile ne=
-w
-> file mode 100644 index 000000000000..2f560a422bc6
-> --- /dev/null
-> +++ b/drivers/ntb/hw/epf/Makefile
-> @@ -0,0 +1 @@
-> +obj-$(CONFIG_NTB_EPF) +=3D ntb_hw_epf.o
-> diff --git a/drivers/ntb/hw/epf/ntb_hw_epf.c
-> b/drivers/ntb/hw/epf/ntb_hw_epf.c new file mode 100644 index
-> 000000000000..0a144987851a
-> --- /dev/null
-> +++ b/drivers/ntb/hw/epf/ntb_hw_epf.c
-> @@ -0,0 +1,755 @@
-......
-> +static int ntb_epf_init_pci(struct ntb_epf_dev *ndev,
-> +			    struct pci_dev *pdev)
-> +{
-> +	struct device *dev =3D ndev->dev;
-> +	int ret;
-> +
-> +	pci_set_drvdata(pdev, ndev);
-> +
-> +	ret =3D pci_enable_device(pdev);
-> +	if (ret) {
-> +		dev_err(dev, "Cannot enable PCI device\n");
-> +		goto err_pci_enable;
-> +	}
-> +
-> +	ret =3D pci_request_regions(pdev, "ntb");
-> +	if (ret) {
-> +		dev_err(dev, "Cannot obtain PCI resources\n");
-> +		goto err_pci_regions;
-> +	}
-> +
-> +	pci_set_master(pdev);
-> +
-> +	ret =3D dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64));
-> +	if (ret) {
-> +		ret =3D dma_set_mask_and_coherent(dev,
-> DMA_BIT_MASK(32));
-> +		if (ret) {
-> +			dev_err(dev, "Cannot set DMA mask\n");
-> +			goto err_dma_mask;
-> +		}
-> +		dev_warn(&pdev->dev, "Cannot DMA highmem\n");
-> +	}
-> +
-> +	ndev->ctrl_reg =3D pci_iomap(pdev, 0, 0);
+On Mon, Nov 2, 2020, 11:58 PM Kishon Vijay Abraham I <kishon@ti.com> wrote:
 
-The second parameter of pci_iomap should be ndev->ctrl_reg_bar instead of t=
-he hardcode value 0, right?
+> +Alan
+>
+> Hi Jon Mason, Allen Hubbe, Dave Jiang,
+>
+> On 20/10/20 6:48 pm, Lorenzo Pieralisi wrote:
+> > On Tue, Oct 20, 2020 at 01:45:45PM +0530, Kishon Vijay Abraham I wrote:
+> >> Hi,
+> >>
+> >> On 05/10/20 11:27 am, Kishon Vijay Abraham I wrote:
+> >>> Hi Jon Mason, Allen Hubbe, Dave Jiang,
+> >>>
+> >>> On 30/09/20 9:05 pm, Kishon Vijay Abraham I wrote:
+> >>>> This series is about implementing SW defined Non-Transparent Bridge
+> (NTB)
+> >>>> using multiple endpoint (EP) instances. This series has been tested
+> using
+> >>>> 2 endpoint instances in J7 connected to J7 board on one end and DRA7
+> board
+> >>>> on the other end. However there is nothing platform specific for the
+> NTB
+> >>>> functionality.
+> >>>
+> >>> This series has two patches that adds to drivers/ntb/ directory.
+> >>> [PATCH v7 15/18] NTB: Add support for EPF PCI-Express Non-Transparent
+> >>> Bridge and [PATCH v7 16/18] NTB: tool: Enable the NTB/PCIe link on the
+> >>> local or remote side of bridge.
+> >>>
+> >>> If you can review and Ack the above patches, Lorenzo can queue it along
+> >>> with the rest of the series.
+>
+> Would you be able to review and Ack the NTB parts of this series?
+> >>>
+> >>> Thanks for your help in advance.
+> >>
+> >> Gentle ping on this series.
+> >
+> > I am not queueing any more patches for this merge window - we postpone
+> > this series to v5.11 and in the interim it would be good to define some
+> > possible users.
+>
+> Alan, Do you have a system where you can test this series? It only needs
+> two endpoint instances on a single system.
+>
+> Thanks
+> Kishon
+>
 
-> +	if (!ndev->ctrl_reg) {
-> +		ret =3D -EIO;
-> +		goto err_dma_mask;
-> +	}
-> +
-> +	ndev->peer_spad_reg =3D pci_iomap(pdev, 1, 0);
+Kishon, I have no suitable systems. I wonder if two Nvidia Jetson Xavier NX
+boards can be connected back to back by ethernet and plugged into x86
+system pcie slots for this. I believe they have the dwc pcie controller
+with driver support for endpoint mode but I personally don't have any. The
+FriendlyElec NanoPi M4 boards also supports endpoint mode with the Rockchip
+RK3399 pcie controller but I have not found the endpoint driver suppor for
+that.
 
-pci_iomap(pdev, ndev->peer_spad_reg_bar, 0);
+Regards, Alan
 
-> +	if (!ndev->peer_spad_reg) {
-> +		ret =3D -EIO;
-> +		goto err_dma_mask;
-> +	}
-> +
-> +	ndev->db_reg =3D pci_iomap(pdev, 2, 0);
+>
+> > Thanks,
+> > Lorenzo
+> >
+> >> Thanks
+> >> Kishon
+> >>>
+> >>> Best Regards,
+> >>> Kishon
+> >>>
+> >>>>
+> >>>> This was presented in Linux Plumbers Conference. Link to presentation
+> >>>> and video can be found @ [1]
+> >>>>
+> >>>> RFC patch series can be found @ [2]
+> >>>> v1 patch series can be found @ [3]
+> >>>> v2 patch series can be found @ [4]
+> >>>> v3 patch series can be found @ [5]
+> >>>> v4 patch series can be found @ [6]
+> >>>> v5 patch series can be found @ [7]
+> >>>> v6 patch series can be found @ [8]
+> >>>>
+> >>>> Changes from v6:
+> >>>> 1) Fixed issues when multiple NTB devices are creating using multiple
+> >>>>    functions
+> >>>> 2) Fixed issue with writing scratchpad register
+> >>>> 3) Created a video demo @ [9]
+> >>>>
+> >>>> Changes from v5:
+> >>>> 1) Fixed a formatting issue in Kconfig pointed out by Randy
+> >>>> 2) Checked for Error or Null in pci_epc_add_epf()
+> >>>>
+> >>>> Changes from v4:
+> >>>> 1) Fixed error condition checks in pci_epc_add_epf()
+> >>>>
+> >>>> Changes from v3:
+> >>>> 1) Fixed Documentation edits suggested by Randy Dunlap <
+> rdunlap@infradead.org>
+> >>>>
+> >>>> Changes from v2:
+> >>>> 1) Add support for the user to create sub-directory of 'EPF Device'
+> >>>>    directory (for endpoint function specific configuration using
+> >>>>    configfs).
+> >>>> 2) Add documentation for NTB specific attributes in configfs
+> >>>> 3) Check for PCI_CLASS_MEMORY_RAM (PCIe class) before binding
+> ntb_hw_epf
+> >>>>    driver
+> >>>> 4) Other documentation fixes
+> >>>>
+> >>>> Changes from v1:
+> >>>> 1) As per Rob's comment, removed support for creating NTB function
+> >>>>    device from DT
+> >>>> 2) Add support to create NTB EPF device using configfs (added support
+> in
+> >>>>    configfs to associate primary and secondary EPC with EPF.
+> >>>>
+> >>>> Changes from RFC:
+> >>>> 1) Converted the DT binding patches to YAML schema and merged the
+> >>>>    DT binding patches together
+> >>>> 2) NTB documentation is converted to .rst
+> >>>> 3) One HOST can now interrupt the other HOST using MSI-X interrupts
+> >>>> 4) Added support for teardown of memory window and doorbell
+> >>>>    configuration
+> >>>> 5) Add support to provide support 64-bit memory window size from
+> >>>>    DT
+> >>>>
+> >>>> [1] -> https://linuxplumbersconf.org/event/4/contributions/395/
+> >>>> [2] -> http://lore.kernel.org/r/20190926112933.8922-1-kishon@ti.com
+> >>>> [3] -> http://lore.kernel.org/r/20200514145927.17555-1-kishon@ti.com
+> >>>> [4] -> http://lore.kernel.org/r/20200611130525.22746-1-kishon@ti.com
+> >>>> [5] -> http://lore.kernel.org/r/20200904075052.8911-1-kishon@ti.com
+> >>>> [6] -> http://lore.kernel.org/r/20200915042110.3015-1-kishon@ti.com
+> >>>> [7] -> http://lore.kernel.org/r/20200918064227.1463-1-kishon@ti.com
+> >>>> [8] -> http://lore.kernel.org/r/20200924092519.17082-1-kishon@ti.com
+> >>>> [9] -> https://youtu.be/dLKKxrg5-rY
+> >>>>
+> >>>> Kishon Vijay Abraham I (18):
+> >>>>   Documentation: PCI: Add specification for the *PCI NTB* function
+> >>>>     device
+> >>>>   PCI: endpoint: Make *_get_first_free_bar() take into account 64 bit
+> >>>>     BAR
+> >>>>   PCI: endpoint: Add helper API to get the 'next' unreserved BAR
+> >>>>   PCI: endpoint: Make *_free_bar() to return error codes on failure
+> >>>>   PCI: endpoint: Remove unused pci_epf_match_device()
+> >>>>   PCI: endpoint: Add support to associate secondary EPC with EPF
+> >>>>   PCI: endpoint: Add support in configfs to associate two EPCs with
+> EPF
+> >>>>   PCI: endpoint: Add pci_epc_ops to map MSI irq
+> >>>>   PCI: endpoint: Add pci_epf_ops for epf drivers to expose function
+> >>>>     specific attrs
+> >>>>   PCI: endpoint: Allow user to create sub-directory of 'EPF Device'
+> >>>>     directory
+> >>>>   PCI: cadence: Implement ->msi_map_irq() ops
+> >>>>   PCI: cadence: Configure LM_EP_FUNC_CFG based on
+> epc->function_num_map
+> >>>>   PCI: endpoint: Add EP function driver to provide NTB functionality
+> >>>>   PCI: Add TI J721E device to pci ids
+> >>>>   NTB: Add support for EPF PCI-Express Non-Transparent Bridge
+> >>>>   NTB: tool: Enable the NTB/PCIe link on the local or remote side of
+> >>>>     bridge
+> >>>>   Documentation: PCI: Add configfs binding documentation for pci-ntb
+> >>>>     endpoint function
+> >>>>   Documentation: PCI: Add userguide for PCI endpoint NTB function
+> >>>>
+> >>>>  .../PCI/endpoint/function/binding/pci-ntb.rst |   38 +
+> >>>>  Documentation/PCI/endpoint/index.rst          |    3 +
+> >>>>  .../PCI/endpoint/pci-endpoint-cfs.rst         |   10 +
+> >>>>  .../PCI/endpoint/pci-ntb-function.rst         |  351 +++
+> >>>>  Documentation/PCI/endpoint/pci-ntb-howto.rst  |  160 ++
+> >>>>  drivers/misc/pci_endpoint_test.c              |    1 -
+> >>>>  drivers/ntb/hw/Kconfig                        |    1 +
+> >>>>  drivers/ntb/hw/Makefile                       |    1 +
+> >>>>  drivers/ntb/hw/epf/Kconfig                    |    6 +
+> >>>>  drivers/ntb/hw/epf/Makefile                   |    1 +
+> >>>>  drivers/ntb/hw/epf/ntb_hw_epf.c               |  755 ++++++
+> >>>>  drivers/ntb/test/ntb_tool.c                   |    1 +
+> >>>>  .../pci/controller/cadence/pcie-cadence-ep.c  |   60 +-
+> >>>>  drivers/pci/endpoint/functions/Kconfig        |   12 +
+> >>>>  drivers/pci/endpoint/functions/Makefile       |    1 +
+> >>>>  drivers/pci/endpoint/functions/pci-epf-ntb.c  | 2114
+> +++++++++++++++++
+> >>>>  drivers/pci/endpoint/functions/pci-epf-test.c |   13 +-
+> >>>>  drivers/pci/endpoint/pci-ep-cfs.c             |  176 +-
+> >>>>  drivers/pci/endpoint/pci-epc-core.c           |  130 +-
+> >>>>  drivers/pci/endpoint/pci-epf-core.c           |  105 +-
+> >>>>  include/linux/pci-epc.h                       |   39 +-
+> >>>>  include/linux/pci-epf.h                       |   28 +-
+> >>>>  include/linux/pci_ids.h                       |    1 +
+> >>>>  23 files changed, 3934 insertions(+), 73 deletions(-)
+> >>>>  create mode 100644
+> Documentation/PCI/endpoint/function/binding/pci-ntb.rst
+> >>>>  create mode 100644 Documentation/PCI/endpoint/pci-ntb-function.rst
+> >>>>  create mode 100644 Documentation/PCI/endpoint/pci-ntb-howto.rst
+> >>>>  create mode 100644 drivers/ntb/hw/epf/Kconfig
+> >>>>  create mode 100644 drivers/ntb/hw/epf/Makefile
+> >>>>  create mode 100644 drivers/ntb/hw/epf/ntb_hw_epf.c
+> >>>>  create mode 100644 drivers/pci/endpoint/functions/pci-epf-ntb.c
+> >>>>
+>
 
-pci_iomap(pdev, ndev->db_reg_bar, 0);
+--000000000000c0a88805b32f9c05
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Best Regards
-Sherry
+<div dir=3D"auto"><div><div class=3D"gmail_quote"><div dir=3D"ltr" class=3D=
+"gmail_attr">On Mon, Nov 2, 2020, 11:58 PM Kishon Vijay Abraham I &lt;<a hr=
+ef=3D"mailto:kishon@ti.com">kishon@ti.com</a>&gt; wrote:<br></div><blockquo=
+te class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc so=
+lid;padding-left:1ex">+Alan<br>
+<br>
+Hi Jon Mason, Allen Hubbe, Dave Jiang,<br>
+<br>
+On 20/10/20 6:48 pm, Lorenzo Pieralisi wrote:<br>
+&gt; On Tue, Oct 20, 2020 at 01:45:45PM +0530, Kishon Vijay Abraham I wrote=
+:<br>
+&gt;&gt; Hi,<br>
+&gt;&gt;<br>
+&gt;&gt; On 05/10/20 11:27 am, Kishon Vijay Abraham I wrote:<br>
+&gt;&gt;&gt; Hi Jon Mason, Allen Hubbe, Dave Jiang,<br>
+&gt;&gt;&gt;<br>
+&gt;&gt;&gt; On 30/09/20 9:05 pm, Kishon Vijay Abraham I wrote:<br>
+&gt;&gt;&gt;&gt; This series is about implementing SW defined Non-Transpare=
+nt Bridge (NTB)<br>
+&gt;&gt;&gt;&gt; using multiple endpoint (EP) instances. This series has be=
+en tested using<br>
+&gt;&gt;&gt;&gt; 2 endpoint instances in J7 connected to J7 board on one en=
+d and DRA7 board<br>
+&gt;&gt;&gt;&gt; on the other end. However there is nothing platform specif=
+ic for the NTB<br>
+&gt;&gt;&gt;&gt; functionality.<br>
+&gt;&gt;&gt;<br>
+&gt;&gt;&gt; This series has two patches that adds to drivers/ntb/ director=
+y.<br>
+&gt;&gt;&gt; [PATCH v7 15/18] NTB: Add support for EPF PCI-Express Non-Tran=
+sparent<br>
+&gt;&gt;&gt; Bridge and [PATCH v7 16/18] NTB: tool: Enable the NTB/PCIe lin=
+k on the<br>
+&gt;&gt;&gt; local or remote side of bridge.<br>
+&gt;&gt;&gt;<br>
+&gt;&gt;&gt; If you can review and Ack the above patches, Lorenzo can queue=
+ it along<br>
+&gt;&gt;&gt; with the rest of the series.<br>
+<br>
+Would you be able to review and Ack the NTB parts of this series?<br>
+&gt;&gt;&gt;<br>
+&gt;&gt;&gt; Thanks for your help in advance.<br>
+&gt;&gt;<br>
+&gt;&gt; Gentle ping on this series.<br>
+&gt; <br>
+&gt; I am not queueing any more patches for this merge window - we postpone=
+<br>
+&gt; this series to v5.11 and in the interim it would be good to define som=
+e<br>
+&gt; possible users.<br>
+<br>
+Alan, Do you have a system where you can test this series? It only needs<br=
+>
+two endpoint instances on a single system.<br>
+<br>
+Thanks<br>
+Kishon<br></blockquote></div></div><div dir=3D"auto"><br></div><div dir=3D"=
+auto">Kishon, I have no suitable systems. I wonder if two Nvidia Jetson Xav=
+ier NX boards can be connected back to back by ethernet and plugged into x8=
+6 system pcie slots for this. I believe they have the dwc pcie controller w=
+ith driver support for endpoint mode but I personally don&#39;t have any. T=
+he FriendlyElec NanoPi M4 boards also supports endpoint mode with the Rockc=
+hip RK3399 pcie controller but I have not found the endpoint driver suppor =
+for that.</div><div dir=3D"auto"><br></div><div dir=3D"auto">Regards, Alan<=
+/div><div dir=3D"auto"><br></div><div dir=3D"auto"><div class=3D"gmail_quot=
+e"><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left=
+:1px #ccc solid;padding-left:1ex">
+&gt; <br>
+&gt; Thanks,<br>
+&gt; Lorenzo<br>
+&gt; <br>
+&gt;&gt; Thanks<br>
+&gt;&gt; Kishon<br>
+&gt;&gt;&gt;<br>
+&gt;&gt;&gt; Best Regards,<br>
+&gt;&gt;&gt; Kishon<br>
+&gt;&gt;&gt;<br>
+&gt;&gt;&gt;&gt;<br>
+&gt;&gt;&gt;&gt; This was presented in Linux Plumbers Conference. Link to p=
+resentation<br>
+&gt;&gt;&gt;&gt; and video can be found @ [1]<br>
+&gt;&gt;&gt;&gt;<br>
+&gt;&gt;&gt;&gt; RFC patch series can be found @ [2]<br>
+&gt;&gt;&gt;&gt; v1 patch series can be found @ [3]<br>
+&gt;&gt;&gt;&gt; v2 patch series can be found @ [4]<br>
+&gt;&gt;&gt;&gt; v3 patch series can be found @ [5]<br>
+&gt;&gt;&gt;&gt; v4 patch series can be found @ [6]<br>
+&gt;&gt;&gt;&gt; v5 patch series can be found @ [7]<br>
+&gt;&gt;&gt;&gt; v6 patch series can be found @ [8]<br>
+&gt;&gt;&gt;&gt;<br>
+&gt;&gt;&gt;&gt; Changes from v6:<br>
+&gt;&gt;&gt;&gt; 1) Fixed issues when multiple NTB devices are creating usi=
+ng multiple<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0 functions<br>
+&gt;&gt;&gt;&gt; 2) Fixed issue with writing scratchpad register<br>
+&gt;&gt;&gt;&gt; 3) Created a video demo @ [9]<br>
+&gt;&gt;&gt;&gt;<br>
+&gt;&gt;&gt;&gt; Changes from v5:<br>
+&gt;&gt;&gt;&gt; 1) Fixed a formatting issue in Kconfig pointed out by Rand=
+y<br>
+&gt;&gt;&gt;&gt; 2) Checked for Error or Null in pci_epc_add_epf()<br>
+&gt;&gt;&gt;&gt;<br>
+&gt;&gt;&gt;&gt; Changes from v4:<br>
+&gt;&gt;&gt;&gt; 1) Fixed error condition checks in pci_epc_add_epf()<br>
+&gt;&gt;&gt;&gt;<br>
+&gt;&gt;&gt;&gt; Changes from v3:<br>
+&gt;&gt;&gt;&gt; 1) Fixed Documentation edits suggested by Randy Dunlap &lt=
+;<a href=3D"mailto:rdunlap@infradead.org" target=3D"_blank" rel=3D"noreferr=
+er">rdunlap@infradead.org</a>&gt;<br>
+&gt;&gt;&gt;&gt;<br>
+&gt;&gt;&gt;&gt; Changes from v2:<br>
+&gt;&gt;&gt;&gt; 1) Add support for the user to create sub-directory of &#3=
+9;EPF Device&#39;<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0 directory (for endpoint function specific con=
+figuration using<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0 configfs).<br>
+&gt;&gt;&gt;&gt; 2) Add documentation for NTB specific attributes in config=
+fs<br>
+&gt;&gt;&gt;&gt; 3) Check for PCI_CLASS_MEMORY_RAM (PCIe class) before bind=
+ing ntb_hw_epf<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0 driver<br>
+&gt;&gt;&gt;&gt; 4) Other documentation fixes<br>
+&gt;&gt;&gt;&gt;<br>
+&gt;&gt;&gt;&gt; Changes from v1:<br>
+&gt;&gt;&gt;&gt; 1) As per Rob&#39;s comment, removed support for creating =
+NTB function<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0 device from DT<br>
+&gt;&gt;&gt;&gt; 2) Add support to create NTB EPF device using configfs (ad=
+ded support in<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0 configfs to associate primary and secondary E=
+PC with EPF.<br>
+&gt;&gt;&gt;&gt;<br>
+&gt;&gt;&gt;&gt; Changes from RFC:<br>
+&gt;&gt;&gt;&gt; 1) Converted the DT binding patches to YAML schema and mer=
+ged the<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0 DT binding patches together<br>
+&gt;&gt;&gt;&gt; 2) NTB documentation is converted to .rst<br>
+&gt;&gt;&gt;&gt; 3) One HOST can now interrupt the other HOST using MSI-X i=
+nterrupts<br>
+&gt;&gt;&gt;&gt; 4) Added support for teardown of memory window and doorbel=
+l<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0 configuration<br>
+&gt;&gt;&gt;&gt; 5) Add support to provide support 64-bit memory window siz=
+e from<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0 DT<br>
+&gt;&gt;&gt;&gt;<br>
+&gt;&gt;&gt;&gt; [1] -&gt; <a href=3D"https://linuxplumbersconf.org/event/4=
+/contributions/395/" rel=3D"noreferrer noreferrer" target=3D"_blank">https:=
+//linuxplumbersconf.org/event/4/contributions/395/</a><br>
+&gt;&gt;&gt;&gt; [2] -&gt; <a href=3D"http://lore.kernel.org/r/201909261129=
+33.8922-1-kishon@ti.com" rel=3D"noreferrer noreferrer" target=3D"_blank">ht=
+tp://lore.kernel.org/r/20190926112933.8922-1-kishon@ti.com</a><br>
+&gt;&gt;&gt;&gt; [3] -&gt; <a href=3D"http://lore.kernel.org/r/202005141459=
+27.17555-1-kishon@ti.com" rel=3D"noreferrer noreferrer" target=3D"_blank">h=
+ttp://lore.kernel.org/r/20200514145927.17555-1-kishon@ti.com</a><br>
+&gt;&gt;&gt;&gt; [4] -&gt; <a href=3D"http://lore.kernel.org/r/202006111305=
+25.22746-1-kishon@ti.com" rel=3D"noreferrer noreferrer" target=3D"_blank">h=
+ttp://lore.kernel.org/r/20200611130525.22746-1-kishon@ti.com</a><br>
+&gt;&gt;&gt;&gt; [5] -&gt; <a href=3D"http://lore.kernel.org/r/202009040750=
+52.8911-1-kishon@ti.com" rel=3D"noreferrer noreferrer" target=3D"_blank">ht=
+tp://lore.kernel.org/r/20200904075052.8911-1-kishon@ti.com</a><br>
+&gt;&gt;&gt;&gt; [6] -&gt; <a href=3D"http://lore.kernel.org/r/202009150421=
+10.3015-1-kishon@ti.com" rel=3D"noreferrer noreferrer" target=3D"_blank">ht=
+tp://lore.kernel.org/r/20200915042110.3015-1-kishon@ti.com</a><br>
+&gt;&gt;&gt;&gt; [7] -&gt; <a href=3D"http://lore.kernel.org/r/202009180642=
+27.1463-1-kishon@ti.com" rel=3D"noreferrer noreferrer" target=3D"_blank">ht=
+tp://lore.kernel.org/r/20200918064227.1463-1-kishon@ti.com</a><br>
+&gt;&gt;&gt;&gt; [8] -&gt; <a href=3D"http://lore.kernel.org/r/202009240925=
+19.17082-1-kishon@ti.com" rel=3D"noreferrer noreferrer" target=3D"_blank">h=
+ttp://lore.kernel.org/r/20200924092519.17082-1-kishon@ti.com</a><br>
+&gt;&gt;&gt;&gt; [9] -&gt; <a href=3D"https://youtu.be/dLKKxrg5-rY" rel=3D"=
+noreferrer noreferrer" target=3D"_blank">https://youtu.be/dLKKxrg5-rY</a><b=
+r>
+&gt;&gt;&gt;&gt;<br>
+&gt;&gt;&gt;&gt; Kishon Vijay Abraham I (18):<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0Documentation: PCI: Add specification for the =
+*PCI NTB* function<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0 =C2=A0device<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0PCI: endpoint: Make *_get_first_free_bar() tak=
+e into account 64 bit<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0 =C2=A0BAR<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0PCI: endpoint: Add helper API to get the &#39;=
+next&#39; unreserved BAR<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0PCI: endpoint: Make *_free_bar() to return err=
+or codes on failure<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0PCI: endpoint: Remove unused pci_epf_match_dev=
+ice()<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0PCI: endpoint: Add support to associate second=
+ary EPC with EPF<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0PCI: endpoint: Add support in configfs to asso=
+ciate two EPCs with EPF<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0PCI: endpoint: Add pci_epc_ops to map MSI irq<=
+br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0PCI: endpoint: Add pci_epf_ops for epf drivers=
+ to expose function<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0 =C2=A0specific attrs<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0PCI: endpoint: Allow user to create sub-direct=
+ory of &#39;EPF Device&#39;<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0 =C2=A0directory<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0PCI: cadence: Implement -&gt;msi_map_irq() ops=
+<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0PCI: cadence: Configure LM_EP_FUNC_CFG based o=
+n epc-&gt;function_num_map<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0PCI: endpoint: Add EP function driver to provi=
+de NTB functionality<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0PCI: Add TI J721E device to pci ids<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0NTB: Add support for EPF PCI-Express Non-Trans=
+parent Bridge<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0NTB: tool: Enable the NTB/PCIe link on the loc=
+al or remote side of<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0 =C2=A0bridge<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0Documentation: PCI: Add configfs binding docum=
+entation for pci-ntb<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0 =C2=A0endpoint function<br>
+&gt;&gt;&gt;&gt;=C2=A0 =C2=A0Documentation: PCI: Add userguide for PCI endp=
+oint NTB function<br>
+&gt;&gt;&gt;&gt;<br>
+&gt;&gt;&gt;&gt;=C2=A0 .../PCI/endpoint/function/binding/pci-ntb.rst |=C2=
+=A0 =C2=A038 +<br>
+&gt;&gt;&gt;&gt;=C2=A0 Documentation/PCI/endpoint/index.rst=C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0 |=C2=A0 =C2=A0 3 +<br>
+&gt;&gt;&gt;&gt;=C2=A0 .../PCI/endpoint/pci-endpoint-cfs.rst=C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0|=C2=A0 =C2=A010 +<br>
+&gt;&gt;&gt;&gt;=C2=A0 .../PCI/endpoint/pci-ntb-function.rst=C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0|=C2=A0 351 +++<br>
+&gt;&gt;&gt;&gt;=C2=A0 Documentation/PCI/endpoint/pci-ntb-howto.rst=C2=A0 |=
+=C2=A0 160 ++<br>
+&gt;&gt;&gt;&gt;=C2=A0 drivers/misc/pci_endpoint_test.c=C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 |=C2=A0 =C2=A0 1 -<br>
+&gt;&gt;&gt;&gt;=C2=A0 drivers/ntb/hw/Kconfig=C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 |=C2=A0 =C2=A0 1 +<=
+br>
+&gt;&gt;&gt;&gt;=C2=A0 drivers/ntb/hw/Makefile=C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0|=C2=A0 =C2=A0 1 +<b=
+r>
+&gt;&gt;&gt;&gt;=C2=A0 drivers/ntb/hw/epf/Kconfig=C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 |=C2=A0 =C2=A0 6 +<br>
+&gt;&gt;&gt;&gt;=C2=A0 drivers/ntb/hw/epf/Makefile=C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0|=C2=A0 =C2=A0 1 +<br>
+&gt;&gt;&gt;&gt;=C2=A0 drivers/ntb/hw/epf/ntb_hw_epf.c=C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0|=C2=A0 755 ++++++<br>
+&gt;&gt;&gt;&gt;=C2=A0 drivers/ntb/test/ntb_tool.c=C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0|=C2=A0 =C2=A0 1 +<br>
+&gt;&gt;&gt;&gt;=C2=A0 .../pci/controller/cadence/pcie-cadence-ep.c=C2=A0 |=
+=C2=A0 =C2=A060 +-<br>
+&gt;&gt;&gt;&gt;=C2=A0 drivers/pci/endpoint/functions/Kconfig=C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 |=C2=A0 =C2=A012 +<br>
+&gt;&gt;&gt;&gt;=C2=A0 drivers/pci/endpoint/functions/Makefile=C2=A0 =C2=A0=
+ =C2=A0 =C2=A0|=C2=A0 =C2=A0 1 +<br>
+&gt;&gt;&gt;&gt;=C2=A0 drivers/pci/endpoint/functions/pci-epf-ntb.c=C2=A0 |=
+ 2114 +++++++++++++++++<br>
+&gt;&gt;&gt;&gt;=C2=A0 drivers/pci/endpoint/functions/pci-epf-test.c |=C2=
+=A0 =C2=A013 +-<br>
+&gt;&gt;&gt;&gt;=C2=A0 drivers/pci/endpoint/pci-ep-cfs.c=C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0|=C2=A0 176 +-<br>
+&gt;&gt;&gt;&gt;=C2=A0 drivers/pci/endpoint/pci-epc-core.c=C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0|=C2=A0 130 +-<br>
+&gt;&gt;&gt;&gt;=C2=A0 drivers/pci/endpoint/pci-epf-core.c=C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0|=C2=A0 105 +-<br>
+&gt;&gt;&gt;&gt;=C2=A0 include/linux/pci-epc.h=C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0|=C2=A0 =C2=A039 +-<=
+br>
+&gt;&gt;&gt;&gt;=C2=A0 include/linux/pci-epf.h=C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0|=C2=A0 =C2=A028 +-<=
+br>
+&gt;&gt;&gt;&gt;=C2=A0 include/linux/pci_ids.h=C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0|=C2=A0 =C2=A0 1 +<b=
+r>
+&gt;&gt;&gt;&gt;=C2=A0 23 files changed, 3934 insertions(+), 73 deletions(-=
+)<br>
+&gt;&gt;&gt;&gt;=C2=A0 create mode 100644 Documentation/PCI/endpoint/functi=
+on/binding/pci-ntb.rst<br>
+&gt;&gt;&gt;&gt;=C2=A0 create mode 100644 Documentation/PCI/endpoint/pci-nt=
+b-function.rst<br>
+&gt;&gt;&gt;&gt;=C2=A0 create mode 100644 Documentation/PCI/endpoint/pci-nt=
+b-howto.rst<br>
+&gt;&gt;&gt;&gt;=C2=A0 create mode 100644 drivers/ntb/hw/epf/Kconfig<br>
+&gt;&gt;&gt;&gt;=C2=A0 create mode 100644 drivers/ntb/hw/epf/Makefile<br>
+&gt;&gt;&gt;&gt;=C2=A0 create mode 100644 drivers/ntb/hw/epf/ntb_hw_epf.c<b=
+r>
+&gt;&gt;&gt;&gt;=C2=A0 create mode 100644 drivers/pci/endpoint/functions/pc=
+i-epf-ntb.c<br>
+&gt;&gt;&gt;&gt;<br>
+</blockquote></div></div></div>
+
+--000000000000c0a88805b32f9c05--
