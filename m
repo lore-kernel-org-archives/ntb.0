@@ -1,80 +1,68 @@
-Return-Path: <sherry.sun@nxp.com>
-Received: from EUR04-DB3-obe.outbound.protection.outlook.com (mail-eopbgr60049.outbound.protection.outlook.com. [40.107.6.49])
-        by gmr-mx.google.com with ESMTPS id a1si24533lff.2.2020.11.10.18.49.53
+Return-Path: <kishon@ti.com>
+Received: from fllv0016.ext.ti.com (fllv0016.ext.ti.com. [198.47.19.142])
+        by gmr-mx.google.com with ESMTPS id y17si594166vko.2.2020.11.10.07.42.56
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 10 Nov 2020 18:49:53 -0800 (PST)
-From: Sherry Sun <sherry.sun@nxp.com>
-Subject: RE: [PATCH v7 15/18] NTB: Add support for EPF PCI-Express
+        Tue, 10 Nov 2020 07:42:56 -0800 (PST)
+Subject: Re: [PATCH v7 15/18] NTB: Add support for EPF PCI-Express
  Non-Transparent Bridge
-Date: Wed, 11 Nov 2020 02:49:51 +0000
-Message-ID: 
- <VI1PR04MB496067EB79873EEC9329B9B992E80@VI1PR04MB4960.eurprd04.prod.outlook.com>
 References: <20200930153519.7282-16-kishon@ti.com>
  <VI1PR04MB496061EAB6F249F1C394F01092EA0@VI1PR04MB4960.eurprd04.prod.outlook.com>
  <d6d27475-3464-6772-2122-cc194b8ae022@ti.com>
  <VI1PR04MB49602D24F65E11FF1F14294F92E90@VI1PR04MB4960.eurprd04.prod.outlook.com>
  <30c8f7a1-baa5-1eb4-d2c2-9a13be896f0f@ti.com>
  <CAK8P3a38vBXbAWE09H+TSoZUTkFdYDcQmXX97foT4qXQc8t5ZQ@mail.gmail.com>
- <5a9115c8-322e-ffd4-6274-ae98c375b21d@ti.com>
-In-Reply-To: <5a9115c8-322e-ffd4-6274-ae98c375b21d@ti.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Message-ID: <5a9115c8-322e-ffd4-6274-ae98c375b21d@ti.com>
+Date: Tue, 10 Nov 2020 21:12:33 +0530
 MIME-Version: 1.0
-To: Kishon Vijay Abraham I <kishon@ti.com>, Arnd Bergmann <arnd@kernel.org>
-Cc: "bhelgaas@google.com" <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, "lorenzo.pieralisi@arm.com" <lorenzo.pieralisi@arm.com>, "arnd@arndb.de" <arnd@arndb.de>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "dave.jiang@intel.com" <dave.jiang@intel.com>, "allenbh@gmail.com" <allenbh@gmail.com>, "tjoseph@cadence.com" <tjoseph@cadence.com>, Rob Herring <robh@kernel.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
+In-Reply-To: <CAK8P3a38vBXbAWE09H+TSoZUTkFdYDcQmXX97foT4qXQc8t5ZQ@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+To: Arnd Bergmann <arnd@kernel.org>
+Cc: Sherry Sun <sherry.sun@nxp.com>, "bhelgaas@google.com" <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, "lorenzo.pieralisi@arm.com" <lorenzo.pieralisi@arm.com>, "arnd@arndb.de" <arnd@arndb.de>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "dave.jiang@intel.com" <dave.jiang@intel.com>, "allenbh@gmail.com" <allenbh@gmail.com>, "tjoseph@cadence.com" <tjoseph@cadence.com>, Rob Herring <robh@kernel.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-SGkgS2lzaG9uLA0KDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggdjcgMTUvMThdIE5UQjogQWRkIHN1
-cHBvcnQgZm9yIEVQRiBQQ0ktRXhwcmVzcyBOb24tDQo+IFRyYW5zcGFyZW50IEJyaWRnZQ0KPiAN
-Cj4gSGkgU2hlcnJ5LCBBcm5kLA0KPiANCj4gT24gMTAvMTEvMjAgODoyOSBwbSwgQXJuZCBCZXJn
-bWFubiB3cm90ZToNCj4gPiBPbiBUdWUsIE5vdiAxMCwgMjAyMCBhdCAzOjIwIFBNIEtpc2hvbiBW
-aWpheSBBYnJhaGFtIEkgPGtpc2hvbkB0aS5jb20+DQo+IHdyb3RlOg0KPiA+PiBPbiAxMC8xMS8y
-MCA3OjU1IGFtLCBTaGVycnkgU3VuIHdyb3RlOg0KPiA+DQo+ID4+PiBCdXQgZm9yIFZPUCwgb25s
-eSB0d28gYm9hcmRzIGFyZSBuZWVkZWQob25lIGJvYXJkIGFzIGhvc3QgYW5kIG9uZQ0KPiA+Pj4g
-Ym9hcmQgYXMgY2FyZCkgdG8gcmVhbGl6ZSB0aGUgY29tbXVuaWNhdGlvbiBiZXR3ZWVuIHRoZSB0
-d28gc3lzdGVtcywNCj4gc28gbXkgcXVlc3Rpb24gaXMgd2hhdCBhcmUgdGhlIGFkdmFudGFnZXMg
-b2YgdXNpbmcgTlRCPw0KPiA+Pg0KPiA+PiBOVEIgaXMgYSBicmlkZ2UgdGhhdCBmYWNpbGl0YXRl
-cyBjb21tdW5pY2F0aW9uIGJldHdlZW4gdHdvIGRpZmZlcmVudA0KPiA+PiBzeXN0ZW1zLiBTbyBp
-dCBieSBpdHNlbGYgd2lsbCBub3QgYmUgc291cmNlIG9yIHNpbmsgb2YgYW55IGRhdGENCj4gPj4g
-dW5saWtlIGEgbm9ybWFsIEVQIHRvIFJQIHN5c3RlbSAob3IgdGhlIFZPUCkgd2hpY2ggd2lsbCBi
-ZSBzb3VyY2Ugb3Igc2luaw0KPiBvZiBkYXRhLg0KPiA+Pg0KPiA+Pj4gQmVjYXVzZSBJIHRoaW5r
-IHRoZSBhcmNoaXRlY3R1cmUgb2YgTlRCIHNlZW1zIG1vcmUgY29tcGxpY2F0ZWQuIE1hbnkNCj4g
-dGhhbmtzIQ0KPiA+Pg0KPiA+PiB5ZWFoLCBJIHRoaW5rIGl0IGVuYWJsZXMgYSBkaWZmZXJlbnQg
-dXNlIGNhc2UgYWxsIHRvZ2V0aGVyLiBDb25zaWRlcg0KPiA+PiB5b3UgaGF2ZSB0d28geDg2IEhP
-U1QgUENzIChoYXZpbmcgUlApIGFuZCB0aGV5IGhhdmUgdG8gYmUgY29tbXVuaWNhdGUNCj4gPj4g
-dXNpbmcgUENJZS4gTlRCIGNhbiBiZSB1c2VkIGluIHN1Y2ggY2FzZXMgZm9yIHRoZSB0d28geDg2
-IFBDcyB0bw0KPiA+PiBjb21tdW5pY2F0ZSB3aXRoIGVhY2ggb3RoZXIgb3ZlciBQQ0llLCB3aGlj
-aCB3b3VsZG4ndCBiZSBwb3NzaWJsZQ0KPiB3aXRob3V0IE5UQi4NCj4gPg0KPiA+IEkgdGhpbmsg
-Zm9yIFZPUCwgd2Ugc2hvdWxkIGhhdmUgYW4gYWJzdHJhY3Rpb24gdGhhdCBjYW4gd29yayBvbiBl
-aXRoZXINCj4gPiBOVEIgb3IgZGlyZWN0bHkgb24gdGhlIGVuZHBvaW50IGZyYW1ld29yayBidXQg
-cHJvdmlkZSBhbiBpbnRlcmZhY2UNCj4gPiB0aGF0IHRoZW4gbGV0cyB5b3UgY3JlYXRlIGxvZ2lj
-YWwgZGV2aWNlcyB0aGUgc2FtZSB3YXkuDQo+ID4NCj4gPiBEb2luZyBWT1AgYmFzZWQgb24gTlRC
-IHBsdXMgdGhlIG5ldyBOVEJfRVBGIGRyaXZlciB3b3VsZCBhbHNvIHdvcmsgYW5kDQo+ID4ganVz
-dCBtb3ZlIHRoZSBhYnN0cmFjdGlvbiBzb21ld2hlcmUgZWxzZSwgYnV0IEkgZ3Vlc3MgaXQgd291
-bGQNCj4gPiBjb21wbGljYXRlIHNldHRpbmcgaXQgdXAgZm9yIHRob3NlIHVzZXJzIHRoYXQgb25s
-eSBjYXJlIGFib3V0IHRoZQ0KPiA+IHNpbXBsZXIgZW5kcG9pbnQgY2FzZS4NCj4gDQo+IEknbSBu
-b3Qgc3VyZSBpZiB5b3UndmUgZ290IGEgY2hhbmNlIHRvIGxvb2sgYXQgWzFdLCB3aGVyZSBJIGFk
-ZGVkIHN1cHBvcnQgZm9yDQo+IFJQPC0+RVAgc3lzdGVtIGJvdGggcnVubmluZyBMaW51eCwgd2l0
-aCBFUCBjb25maWd1cmVkIHVzaW5nIExpbnV4IEVQDQo+IGZyYW1ld29yayAoYXMgd2VsbCBhcyBI
-T1NUIHBvcnRzIGNvbm5lY3RlZCB0byBOVEIgc3dpdGNoLCBwYXRjaGVzIDIwIGFuZA0KPiAyMSwg
-dGhhdCB1c2VzIHRoZSBMaW51eCBOVEIgZnJhbWV3b3JrKSB0byBjb21tdW5pY2F0ZSB1c2luZyB2
-aXJ0aW8gb3Zlcg0KPiBQQ0llLg0KPiANCg0KSSBzYXcgeW91ciBwYXRjaGVzIGF0IFsxXSwgaGVy
-ZSB5b3UgdGFrZSBhIHJwbXNnIGFzIGFuIGV4YW1wbGUgdG8gY29tbXVuaWNhdGUgYmV0d2Vlbg0K
-dHdvIFNvQ3MgdXNpbmcgUENJZSBSQzwtPkVQIGFuZCBIT1NUMS1OVEItSE9TVDIgZm9yIGRpZmZl
-cmVudCB1c2VyY2FzZXMuDQpUaGUgVk9QIGNvZGUgd29ya3MgdW5kZXIgdGhlIFBDSWUgUkM8LT5F
-UCBmcmFtZXdvcmssIHdoaWNoIG1lYW5zIHRoYXQgd2UgY2FuIGFsc28NCm1ha2UgVk9QIHdvcmtz
-IHVuZGVyIHRoZSBMaW51eCBOVEIgZnJhbWV3b3JrLCBqdXN0IGxpa2UgdGhlIHJwbXNnIHdheSB5
-b3UgZGlkIGhlcmUsIHJpZ2h0Pw0KDQpCZXN0IHJlZ2FyZHMNClNoZXJyeQ0KDQo+IFRoZSBjb3Zl
-ci1sZXR0ZXIgWzFdIHNob3dzIGEgcGljdHVyZSBvZiB0aGUgdHdvIHVzZSBjYXNlcyBzdXBwb3J0
-ZWQgaW4gdGhhdA0KPiBzZXJpZXMuDQo+IA0KPiBbMV0gLT4NCj4gaHR0cHM6Ly9ldXIwMS5zYWZl
-bGlua3MucHJvdGVjdGlvbi5vdXRsb29rLmNvbS8/dXJsPWh0dHAlM0ElMkYlMkZsb3JlLmtlDQo+
-IHJuZWwub3JnJTJGciUyRjIwMjAwNzAyMDgyMTQzLjI1MjU5LTEtDQo+IGtpc2hvbiU0MHRpLmNv
-bSZhbXA7ZGF0YT0wNCU3QzAxJTdDc2hlcnJ5LnN1biU0MG54cC5jb20lN0M1ZDhiNw0KPiAzYTRi
-NzI5NDdiZWE2NWQwOGQ4ODU4ZjUwOTElN0M2ODZlYTFkM2JjMmI0YzZmYTkyY2Q5OWM1YzMwMTYz
-NSU3DQo+IEMwJTdDMCU3QzYzNzQwNjE5Nzg2NTExOTk5MiU3Q1Vua25vd24lN0NUV0ZwYkdac2Iz
-ZDhleUpXSWpvaQ0KPiBNQzR3TGpBd01EQWlMQ0pRSWpvaVYybHVNeklpTENKQlRpSTZJazFoYVd3
-aUxDSlhWQ0k2TW4wJTNEJTdDMTAwDQo+IDAmYW1wO3NkYXRhPWlSckJ2UTl4am9PVVlVJTJGRGlk
-TUxaWnBXNlh1VTRJVFZYRkRBJTJCJTJGNHJKRlUNCj4gJTNEJmFtcDtyZXNlcnZlZD0wDQo+IA0K
-PiBUaGFuayBZb3UsDQo+IEtpc2hvbg0K
+Hi Sherry, Arnd,
+
+On 10/11/20 8:29 pm, Arnd Bergmann wrote:
+> On Tue, Nov 10, 2020 at 3:20 PM Kishon Vijay Abraham I <kishon@ti.com> wrote:
+>> On 10/11/20 7:55 am, Sherry Sun wrote:
+> 
+>>> But for VOP, only two boards are needed(one board as host and one board as card) to realize the
+>>> communication between the two systems, so my question is what are the advantages of using NTB?
+>>
+>> NTB is a bridge that facilitates communication between two different
+>> systems. So it by itself will not be source or sink of any data unlike a
+>> normal EP to RP system (or the VOP) which will be source or sink of data.
+>>
+>>> Because I think the architecture of NTB seems more complicated. Many thanks!
+>>
+>> yeah, I think it enables a different use case all together. Consider you
+>> have two x86 HOST PCs (having RP) and they have to be communicate using
+>> PCIe. NTB can be used in such cases for the two x86 PCs to communicate
+>> with each other over PCIe, which wouldn't be possible without NTB.
+> 
+> I think for VOP, we should have an abstraction that can work on either NTB
+> or directly on the endpoint framework but provide an interface that then
+> lets you create logical devices the same way.
+> 
+> Doing VOP based on NTB plus the new NTB_EPF driver would also
+> work and just move the abstraction somewhere else, but I guess it
+> would complicate setting it up for those users that only care about the
+> simpler endpoint case.
+
+I'm not sure if you've got a chance to look at [1], where I added
+support for RP<->EP system both running Linux, with EP configured using
+Linux EP framework (as well as HOST ports connected to NTB switch,
+patches 20 and 21, that uses the Linux NTB framework) to communicate
+using virtio over PCIe.
+
+The cover-letter [1] shows a picture of the two use cases supported in
+that series.
+
+[1] -> http://lore.kernel.org/r/20200702082143.25259-1-kishon@ti.com
+
+Thank You,
+Kishon
