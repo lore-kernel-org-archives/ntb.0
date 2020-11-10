@@ -1,129 +1,68 @@
-Return-Path: <dave.jiang@intel.com>
-Received: from mga17.intel.com (mga17.intel.com. [192.55.52.151])
-        by gmr-mx.google.com with ESMTPS id o26si1278515otk.2.2020.11.23.07.36.15
+Return-Path: <fancer.lancer@gmail.com>
+Received: from mail-lf1-x144.google.com (mail-lf1-x144.google.com. [2a00:1450:4864:20::144])
+        by gmr-mx.google.com with ESMTPS id m18si393609lfr.11.2020.11.10.10.33.43
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 23 Nov 2020 07:36:15 -0800 (PST)
-Subject: [PATCH] ntb: intel: add Intel NTB LTR vendor support for gen4 NTB
-From: Dave Jiang <dave.jiang@intel.com>
-Date: Mon, 23 Nov 2020 08:36:12 -0700
-Message-ID: 
- <160614577287.521825.7762300396286632790.stgit@djiang5-desk3.ch.intel.com>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 10 Nov 2020 10:33:43 -0800 (PST)
+Received: by mail-lf1-x144.google.com with SMTP id a25so10130965lfb.2
+        for <linux-ntb@googlegroups.com>; Tue, 10 Nov 2020 10:33:43 -0800 (PST)
+Return-Path: <fancer.lancer@gmail.com>
+Date: Tue, 10 Nov 2020 21:33:40 +0300
+From: Serge Semin <fancer.lancer@gmail.com>
+Subject: Re: [PATCH] ntb: idt: fix error check in ntb_hw_idt.c
+Message-ID: <20201110183340.77xcobfsnz43vsa2@mobilestation>
+References: <1604655811-31933-1-git-send-email-wangqing@vivo.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-To: jdmason@kudzu.us
-Cc: allenbh@gmail.com, linux-ntb@googlegroups.com
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1604655811-31933-1-git-send-email-wangqing@vivo.com>
+To: Wang Qing <wangqing@vivo.com>
+Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-Intel NTB device has custom LTR management that is not compliant with the
-PCIe standard. Add support to set LTR status triggered by link status
-change.
+Hello Wang
 
-Signed-off-by: Dave Jiang <dave.jiang@intel.com>
----
- drivers/ntb/hw/intel/ntb_hw_gen1.h |    1 +
- drivers/ntb/hw/intel/ntb_hw_gen4.c |   27 ++++++++++++++++++++++++++-
- drivers/ntb/hw/intel/ntb_hw_gen4.h |   15 +++++++++++++++
- 3 files changed, 42 insertions(+), 1 deletion(-)
+On Fri, Nov 06, 2020 at 05:43:31PM +0800, Wang Qing wrote:
+> idt_create_dev never return NULL and fix smatch warning.
 
-diff --git a/drivers/ntb/hw/intel/ntb_hw_gen1.h b/drivers/ntb/hw/intel/ntb_hw_gen1.h
-index 1b759942d8af..344249fc18d1 100644
---- a/drivers/ntb/hw/intel/ntb_hw_gen1.h
-+++ b/drivers/ntb/hw/intel/ntb_hw_gen1.h
-@@ -141,6 +141,7 @@
- #define NTB_HWERR_B2BDOORBELL_BIT14	BIT_ULL(2)
- #define NTB_HWERR_MSIX_VECTOR32_BAD	BIT_ULL(3)
- #define NTB_HWERR_BAR_ALIGN		BIT_ULL(4)
-+#define NTB_HWERR_LTR_BAD		BIT_ULL(5)
- 
- extern struct intel_b2b_addr xeon_b2b_usd_addr;
- extern struct intel_b2b_addr xeon_b2b_dsd_addr;
-diff --git a/drivers/ntb/hw/intel/ntb_hw_gen4.c b/drivers/ntb/hw/intel/ntb_hw_gen4.c
-index bc4541cbf8c6..fede05151f69 100644
---- a/drivers/ntb/hw/intel/ntb_hw_gen4.c
-+++ b/drivers/ntb/hw/intel/ntb_hw_gen4.c
-@@ -177,8 +177,10 @@ int gen4_init_dev(struct intel_ntb_dev *ndev)
- 
- 	ndev->reg = &gen4_reg;
- 
--	if (pdev_is_ICX(pdev))
-+	if (pdev_is_ICX(pdev)) {
- 		ndev->hwerr_flags |= NTB_HWERR_BAR_ALIGN;
-+		ndev->hwerr_flags |= NTB_HWERR_LTR_BAD;
-+	}
- 
- 	ppd1 = ioread32(ndev->self_mmio + GEN4_PPD1_OFFSET);
- 	ndev->ntb.topo = gen4_ppd_topo(ndev, ppd1);
-@@ -431,6 +433,25 @@ static int intel_ntb4_link_enable(struct ntb_dev *ntb,
- 		dev_dbg(&ntb->pdev->dev,
- 				"ignoring max_width %d\n", max_width);
- 
-+	if (!(ndev->hwerr_flags & NTB_HWERR_LTR_BAD)) {
-+		u32 ltr;
-+
-+		/* Setup active snoop LTR values */
-+		ltr = NTB_LTR_ACTIVE_REQMNT | NTB_LTR_ACTIVE_VAL | NTB_LTR_ACTIVE_LATSCALE;
-+		/* Setup active non-snoop values */
-+		ltr = (ltr << NTB_LTR_NS_SHIFT) | ltr;
-+		iowrite32(ltr, ndev->self_mmio + GEN4_LTR_ACTIVE_OFFSET);
-+
-+		/* Setup idle snoop LTR values */
-+		ltr = NTB_LTR_IDLE_VAL | NTB_LTR_IDLE_LATSCALE | NTB_LTR_IDLE_REQMNT;
-+		/* Setup idle non-snoop values */
-+		ltr = (ltr << NTB_LTR_NS_SHIFT) | ltr;
-+		iowrite32(ltr, ndev->self_mmio + GEN4_LTR_IDLE_OFFSET);
-+
-+		/* setup PCIe LTR to active */
-+		iowrite8(NTB_LTR_SWSEL_ACTIVE, ndev->self_mmio + GEN4_LTR_SWSEL_OFFSET);
-+	}
-+
- 	ntb_ctl = NTB_CTL_E2I_BAR23_SNOOP | NTB_CTL_I2E_BAR23_SNOOP;
- 	ntb_ctl |= NTB_CTL_E2I_BAR45_SNOOP | NTB_CTL_I2E_BAR45_SNOOP;
- 	iowrite32(ntb_ctl, ndev->self_mmio + ndev->reg->ntb_ctl);
-@@ -476,6 +497,10 @@ static int intel_ntb4_link_disable(struct ntb_dev *ntb)
- 	lnkctl |= GEN4_LINK_CTRL_LINK_DISABLE;
- 	iowrite16(lnkctl, ndev->self_mmio + GEN4_LINK_CTRL_OFFSET);
- 
-+	/* set LTR to idle */
-+	if (!(ndev->hwerr_flags & NTB_HWERR_LTR_BAD))
-+		iowrite8(NTB_LTR_SWSEL_IDLE, ndev->self_mmio + GEN4_LTR_SWSEL_OFFSET);
-+
- 	ndev->dev_up = 0;
- 
- 	return 0;
-diff --git a/drivers/ntb/hw/intel/ntb_hw_gen4.h b/drivers/ntb/hw/intel/ntb_hw_gen4.h
-index a868c788de02..3fcd3fdce9ed 100644
---- a/drivers/ntb/hw/intel/ntb_hw_gen4.h
-+++ b/drivers/ntb/hw/intel/ntb_hw_gen4.h
-@@ -35,6 +35,9 @@
- #define GEN4_IM_SPAD_SEM_OFFSET		0x00c0	/* SPAD hw semaphore */
- #define GEN4_IM_SPAD_STICKY_OFFSET	0x00c4  /* sticky SPAD */
- #define GEN4_IM_DOORBELL_OFFSET		0x0100  /* 0-31 doorbells */
-+#define GEN4_LTR_SWSEL_OFFSET		0x30ec
-+#define GEN4_LTR_ACTIVE_OFFSET		0x30f0
-+#define GEN4_LTR_IDLE_OFFSET		0x30f4
- #define GEN4_EM_SPAD_OFFSET		0x8080
- /* note, link status is now in MMIO and not config space for NTB */
- #define GEN4_LINK_CTRL_OFFSET		0xb050
-@@ -80,6 +83,18 @@
- 
- #define NTB_SJC_FORCEDETECT		0x000004
- 
-+#define NTB_LTR_SWSEL_ACTIVE		0x0
-+#define NTB_LTR_SWSEL_IDLE		0x1
-+
-+#define NTB_LTR_NS_SHIFT		16
-+#define NTB_LTR_ACTIVE_VAL		0x0000  /* 0 us */
-+#define NTB_LTR_ACTIVE_LATSCALE		0x0800  /* 1us scale */
-+#define NTB_LTR_ACTIVE_REQMNT		0x8000  /* snoop req enable */
-+
-+#define NTB_LTR_IDLE_VAL		0x0258  /* 600 us */
-+#define NTB_LTR_IDLE_LATSCALE		0x0800  /* 1us scale */
-+#define NTB_LTR_IDLE_REQMNT		0x8000  /* snoop req enable */
-+
- ssize_t ndev_ntb4_debugfs_read(struct file *filp, char __user *ubuf,
- 				      size_t count, loff_t *offp);
- int gen4_init_dev(struct intel_ntb_dev *ndev);
+Thanks for submitting this. For the both changes
+Acked-by: Serge Semin <fancer.lancer@gmail.com>
 
+They are mostly unrelated though. If they weren't trivial I'd have
+suggested to split them up into the dedicated patches. Since they
+aren't I suppose leaving the patch 'as is' is ok, unless the subsystem
+maintainer thinks differently.
 
+-Sergey
+
+> 
+> Signed-off-by: Wang Qing <wangqing@vivo.com>
+> ---
+>  drivers/ntb/hw/idt/ntb_hw_idt.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/ntb/hw/idt/ntb_hw_idt.c b/drivers/ntb/hw/idt/ntb_hw_idt.c
+> index d54261f..e7a4c2a
+> --- a/drivers/ntb/hw/idt/ntb_hw_idt.c
+> +++ b/drivers/ntb/hw/idt/ntb_hw_idt.c
+> @@ -2511,7 +2511,7 @@ static int idt_init_dbgfs(struct idt_ntb_dev *ndev)
+>  	/* If the top directory is not created then do nothing */
+>  	if (IS_ERR_OR_NULL(dbgfs_topdir)) {
+>  		dev_info(&ndev->ntb.pdev->dev, "Top DebugFS directory absent");
+> -		return PTR_ERR(dbgfs_topdir);
+> +		return PTR_ERR_OR_ZERO(dbgfs_topdir);
+>  	}
+>  
+>  	/* Create the info file node */
+> @@ -2756,7 +2756,7 @@ static int idt_pci_probe(struct pci_dev *pdev,
+>  
+>  	/* Allocate the memory for IDT NTB device data */
+>  	ndev = idt_create_dev(pdev, id);
+> -	if (IS_ERR_OR_NULL(ndev))
+> +	if (IS_ERR(ndev))
+>  		return PTR_ERR(ndev);
+>  
+>  	/* Initialize the basic PCI subsystem of the device */
+> -- 
+> 2.7.4
+> 
