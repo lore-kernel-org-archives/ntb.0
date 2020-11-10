@@ -1,194 +1,120 @@
-Return-Path: <kishon@ti.com>
-Received: from fllv0015.ext.ti.com (fllv0015.ext.ti.com. [198.47.19.141])
-        by gmr-mx.google.com with ESMTPS id f16si1249991otc.0.2020.11.10.06.21.06
+Return-Path: <sherry.sun@nxp.com>
+Received: from EUR05-AM6-obe.outbound.protection.outlook.com (mail-am6eur05on2083.outbound.protection.outlook.com. [40.107.22.83])
+        by gmr-mx.google.com with ESMTPS id t9si37444wmt.4.2020.11.09.18.25.42
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 10 Nov 2020 06:21:06 -0800 (PST)
-Subject: Re: [PATCH v7 15/18] NTB: Add support for EPF PCI-Express
+        Mon, 09 Nov 2020 18:25:42 -0800 (PST)
+From: Sherry Sun <sherry.sun@nxp.com>
+Subject: RE: [PATCH v7 15/18] NTB: Add support for EPF PCI-Express
  Non-Transparent Bridge
+Date: Tue, 10 Nov 2020 02:25:41 +0000
+Message-ID: 
+ <VI1PR04MB49602D24F65E11FF1F14294F92E90@VI1PR04MB4960.eurprd04.prod.outlook.com>
 References: <20200930153519.7282-16-kishon@ti.com>
  <VI1PR04MB496061EAB6F249F1C394F01092EA0@VI1PR04MB4960.eurprd04.prod.outlook.com>
  <d6d27475-3464-6772-2122-cc194b8ae022@ti.com>
- <VI1PR04MB49602D24F65E11FF1F14294F92E90@VI1PR04MB4960.eurprd04.prod.outlook.com>
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Message-ID: <30c8f7a1-baa5-1eb4-d2c2-9a13be896f0f@ti.com>
-Date: Tue, 10 Nov 2020 19:50:43 +0530
-MIME-Version: 1.0
-In-Reply-To: <VI1PR04MB49602D24F65E11FF1F14294F92E90@VI1PR04MB4960.eurprd04.prod.outlook.com>
-Content-Type: text/plain; charset="utf-8"
+In-Reply-To: <d6d27475-3464-6772-2122-cc194b8ae022@ti.com>
 Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-To: Sherry Sun <sherry.sun@nxp.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
+To: Kishon Vijay Abraham I <kishon@ti.com>
 Cc: "bhelgaas@google.com" <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, "lorenzo.pieralisi@arm.com" <lorenzo.pieralisi@arm.com>, "arnd@arndb.de" <arnd@arndb.de>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "dave.jiang@intel.com" <dave.jiang@intel.com>, "allenbh@gmail.com" <allenbh@gmail.com>, "tjoseph@cadence.com" <tjoseph@cadence.com>, Rob Herring <robh@kernel.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Hi Sherry,
-
-On 10/11/20 7:55 am, Sherry Sun wrote:
-> Hi Kishon,
-> 
->> Subject: Re: [PATCH v7 15/18] NTB: Add support for EPF PCI-Express Non-
->> Transparent Bridge
->>
->> Hi Sherry,
->>
->> On 09/11/20 3:07 pm, Sherry Sun wrote:
->>> Hi Kishon,
->>>
->>>> Subject: [PATCH v7 15/18] NTB: Add support for EPF PCI-Express Non-
->>>> Transparent Bridge
->>>>
->>>> From: Kishon Vijay Abraham I <kishon@ti.com>
->>>>
->>>> Add support for EPF PCI-Express Non-Transparent Bridge (NTB) device.
->>>> This driver is platform independent and could be used by any platform
->>>> which have multiple PCIe endpoint instances configured using the pci-epf-
->> ntb driver.
->>>> The driver connnects to the standard NTB sub-system interface. The
->>>> EPF NTB device has configurable number of memory windows (Max 4),
->>>> configurable number of doorbell (Max 32), and configurable number of
->>>> scratch-pad registers.
->>>>
->>>> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
->>>> ---
->>>>  drivers/ntb/hw/Kconfig          |   1 +
->>>>  drivers/ntb/hw/Makefile         |   1 +
->>>>  drivers/ntb/hw/epf/Kconfig      |   6 +
->>>>  drivers/ntb/hw/epf/Makefile     |   1 +
->>>>  drivers/ntb/hw/epf/ntb_hw_epf.c | 755
->>>> ++++++++++++++++++++++++++++++++
->>>>  5 files changed, 764 insertions(+)
->>>>  create mode 100644 drivers/ntb/hw/epf/Kconfig  create mode 100644
->>>> drivers/ntb/hw/epf/Makefile  create mode 100644
->>>> drivers/ntb/hw/epf/ntb_hw_epf.c
->>>>
->>>> diff --git a/drivers/ntb/hw/Kconfig b/drivers/ntb/hw/Kconfig index
->>>> e77c587060ff..c325be526b80 100644
->>>> --- a/drivers/ntb/hw/Kconfig
->>>> +++ b/drivers/ntb/hw/Kconfig
->>>> @@ -2,4 +2,5 @@
->>>>  source "drivers/ntb/hw/amd/Kconfig"
->>>>  source "drivers/ntb/hw/idt/Kconfig"
->>>>  source "drivers/ntb/hw/intel/Kconfig"
->>>> +source "drivers/ntb/hw/epf/Kconfig"
->>>>  source "drivers/ntb/hw/mscc/Kconfig"
->>>> diff --git a/drivers/ntb/hw/Makefile b/drivers/ntb/hw/Makefile index
->>>> 4714d6238845..223ca592b5f9 100644
->>>> --- a/drivers/ntb/hw/Makefile
->>>> +++ b/drivers/ntb/hw/Makefile
->>>> @@ -2,4 +2,5 @@
->>>>  obj-$(CONFIG_NTB_AMD)	+= amd/
->>>>  obj-$(CONFIG_NTB_IDT)	+= idt/
->>>>  obj-$(CONFIG_NTB_INTEL)	+= intel/
->>>> +obj-$(CONFIG_NTB_EPF)	+= epf/
->>>>  obj-$(CONFIG_NTB_SWITCHTEC) += mscc/ diff --git
->>>> a/drivers/ntb/hw/epf/Kconfig b/drivers/ntb/hw/epf/Kconfig new file
->>>> mode 100644 index 000000000000..6197d1aab344
->>>> --- /dev/null
->>>> +++ b/drivers/ntb/hw/epf/Kconfig
->>>> @@ -0,0 +1,6 @@
->>>> +config NTB_EPF
->>>> +	tristate "Generic EPF Non-Transparent Bridge support"
->>>> +	depends on m
->>>> +	help
->>>> +	  This driver supports EPF NTB on configurable endpoint.
->>>> +	  If unsure, say N.
->>>> diff --git a/drivers/ntb/hw/epf/Makefile
->>>> b/drivers/ntb/hw/epf/Makefile new file mode 100644 index
->>>> 000000000000..2f560a422bc6
->>>> --- /dev/null
->>>> +++ b/drivers/ntb/hw/epf/Makefile
->>>> @@ -0,0 +1 @@
->>>> +obj-$(CONFIG_NTB_EPF) += ntb_hw_epf.o
->>>> diff --git a/drivers/ntb/hw/epf/ntb_hw_epf.c
->>>> b/drivers/ntb/hw/epf/ntb_hw_epf.c new file mode 100644 index
->>>> 000000000000..0a144987851a
->>>> --- /dev/null
->>>> +++ b/drivers/ntb/hw/epf/ntb_hw_epf.c
->>>> @@ -0,0 +1,755 @@
->>> ......
->>>> +static int ntb_epf_init_pci(struct ntb_epf_dev *ndev,
->>>> +			    struct pci_dev *pdev)
->>>> +{
->>>> +	struct device *dev = ndev->dev;
->>>> +	int ret;
->>>> +
->>>> +	pci_set_drvdata(pdev, ndev);
->>>> +
->>>> +	ret = pci_enable_device(pdev);
->>>> +	if (ret) {
->>>> +		dev_err(dev, "Cannot enable PCI device\n");
->>>> +		goto err_pci_enable;
->>>> +	}
->>>> +
->>>> +	ret = pci_request_regions(pdev, "ntb");
->>>> +	if (ret) {
->>>> +		dev_err(dev, "Cannot obtain PCI resources\n");
->>>> +		goto err_pci_regions;
->>>> +	}
->>>> +
->>>> +	pci_set_master(pdev);
->>>> +
->>>> +	ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64));
->>>> +	if (ret) {
->>>> +		ret = dma_set_mask_and_coherent(dev,
->>>> DMA_BIT_MASK(32));
->>>> +		if (ret) {
->>>> +			dev_err(dev, "Cannot set DMA mask\n");
->>>> +			goto err_dma_mask;
->>>> +		}
->>>> +		dev_warn(&pdev->dev, "Cannot DMA highmem\n");
->>>> +	}
->>>> +
->>>> +	ndev->ctrl_reg = pci_iomap(pdev, 0, 0);
->>>
->>> The second parameter of pci_iomap should be ndev->ctrl_reg_bar instead
->> of the hardcode value 0, right?
->>>
->>>> +	if (!ndev->ctrl_reg) {
->>>> +		ret = -EIO;
->>>> +		goto err_dma_mask;
->>>> +	}
->>>> +
->>>> +	ndev->peer_spad_reg = pci_iomap(pdev, 1, 0);
->>>
->>> pci_iomap(pdev, ndev->peer_spad_reg_bar, 0);
->>>
->>>> +	if (!ndev->peer_spad_reg) {
->>>> +		ret = -EIO;
->>>> +		goto err_dma_mask;
->>>> +	}
->>>> +
->>>> +	ndev->db_reg = pci_iomap(pdev, 2, 0);
->>>
->>> pci_iomap(pdev, ndev->db_reg_bar, 0);
->>
->> Good catch. Will fix it and send. Thank you for reviewing.
-> 
-> You're welcome.
-> By the way, since I've studied VOP(virtio over pcie) before, and only recently learned
-> about NTB related code. I have some questions about NTB.
-> 
-> For NTB, in order to make two(or more) different systems to communicate with each other, 
-> seems at least three boards are required(two host boards and one board with multiple EP
-> instances as bridge), right?
-
-right, this series is about creating NTB bridge by configuring multiple
-EP instances in an SoC, however there are also dedicated HW NTB switches
-(internally they might as well use multiple EP instances).
-
-> But for VOP, only two boards are needed(one board as host and one board as card) to realize the
-> communication between the two systems, so my question is what are the advantages of using NTB? 
-
-NTB is a bridge that facilitates communication between two different
-systems. So it by itself will not be source or sink of any data unlike a
-normal EP to RP system (or the VOP) which will be source or sink of data.
-> Because I think the architecture of NTB seems more complicated. Many thanks!
-
-yeah, I think it enables a different use case all together. Consider you
-have two x86 HOST PCs (having RP) and they have to be communicate using
-PCIe. NTB can be used in such cases for the two x86 PCs to communicate
-with each other over PCIe, which wouldn't be possible without NTB.
-
-Regards,
-Kishon
+SGkgS2lzaG9uLA0KDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggdjcgMTUvMThdIE5UQjogQWRkIHN1
+cHBvcnQgZm9yIEVQRiBQQ0ktRXhwcmVzcyBOb24tDQo+IFRyYW5zcGFyZW50IEJyaWRnZQ0KPiAN
+Cj4gSGkgU2hlcnJ5LA0KPiANCj4gT24gMDkvMTEvMjAgMzowNyBwbSwgU2hlcnJ5IFN1biB3cm90
+ZToNCj4gPiBIaSBLaXNob24sDQo+ID4NCj4gPj4gU3ViamVjdDogW1BBVENIIHY3IDE1LzE4XSBO
+VEI6IEFkZCBzdXBwb3J0IGZvciBFUEYgUENJLUV4cHJlc3MgTm9uLQ0KPiA+PiBUcmFuc3BhcmVu
+dCBCcmlkZ2UNCj4gPj4NCj4gPj4gRnJvbTogS2lzaG9uIFZpamF5IEFicmFoYW0gSSA8a2lzaG9u
+QHRpLmNvbT4NCj4gPj4NCj4gPj4gQWRkIHN1cHBvcnQgZm9yIEVQRiBQQ0ktRXhwcmVzcyBOb24t
+VHJhbnNwYXJlbnQgQnJpZGdlIChOVEIpIGRldmljZS4NCj4gPj4gVGhpcyBkcml2ZXIgaXMgcGxh
+dGZvcm0gaW5kZXBlbmRlbnQgYW5kIGNvdWxkIGJlIHVzZWQgYnkgYW55IHBsYXRmb3JtDQo+ID4+
+IHdoaWNoIGhhdmUgbXVsdGlwbGUgUENJZSBlbmRwb2ludCBpbnN0YW5jZXMgY29uZmlndXJlZCB1
+c2luZyB0aGUgcGNpLWVwZi0NCj4gbnRiIGRyaXZlci4NCj4gPj4gVGhlIGRyaXZlciBjb25ubmVj
+dHMgdG8gdGhlIHN0YW5kYXJkIE5UQiBzdWItc3lzdGVtIGludGVyZmFjZS4gVGhlDQo+ID4+IEVQ
+RiBOVEIgZGV2aWNlIGhhcyBjb25maWd1cmFibGUgbnVtYmVyIG9mIG1lbW9yeSB3aW5kb3dzIChN
+YXggNCksDQo+ID4+IGNvbmZpZ3VyYWJsZSBudW1iZXIgb2YgZG9vcmJlbGwgKE1heCAzMiksIGFu
+ZCBjb25maWd1cmFibGUgbnVtYmVyIG9mDQo+ID4+IHNjcmF0Y2gtcGFkIHJlZ2lzdGVycy4NCj4g
+Pj4NCj4gPj4gU2lnbmVkLW9mZi1ieTogS2lzaG9uIFZpamF5IEFicmFoYW0gSSA8a2lzaG9uQHRp
+LmNvbT4NCj4gPj4gLS0tDQo+ID4+ICBkcml2ZXJzL250Yi9ody9LY29uZmlnICAgICAgICAgIHwg
+ICAxICsNCj4gPj4gIGRyaXZlcnMvbnRiL2h3L01ha2VmaWxlICAgICAgICAgfCAgIDEgKw0KPiA+
+PiAgZHJpdmVycy9udGIvaHcvZXBmL0tjb25maWcgICAgICB8ICAgNiArDQo+ID4+ICBkcml2ZXJz
+L250Yi9ody9lcGYvTWFrZWZpbGUgICAgIHwgICAxICsNCj4gPj4gIGRyaXZlcnMvbnRiL2h3L2Vw
+Zi9udGJfaHdfZXBmLmMgfCA3NTUNCj4gPj4gKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
+KysNCj4gPj4gIDUgZmlsZXMgY2hhbmdlZCwgNzY0IGluc2VydGlvbnMoKykNCj4gPj4gIGNyZWF0
+ZSBtb2RlIDEwMDY0NCBkcml2ZXJzL250Yi9ody9lcGYvS2NvbmZpZyAgY3JlYXRlIG1vZGUgMTAw
+NjQ0DQo+ID4+IGRyaXZlcnMvbnRiL2h3L2VwZi9NYWtlZmlsZSAgY3JlYXRlIG1vZGUgMTAwNjQ0
+DQo+ID4+IGRyaXZlcnMvbnRiL2h3L2VwZi9udGJfaHdfZXBmLmMNCj4gPj4NCj4gPj4gZGlmZiAt
+LWdpdCBhL2RyaXZlcnMvbnRiL2h3L0tjb25maWcgYi9kcml2ZXJzL250Yi9ody9LY29uZmlnIGlu
+ZGV4DQo+ID4+IGU3N2M1ODcwNjBmZi4uYzMyNWJlNTI2YjgwIDEwMDY0NA0KPiA+PiAtLS0gYS9k
+cml2ZXJzL250Yi9ody9LY29uZmlnDQo+ID4+ICsrKyBiL2RyaXZlcnMvbnRiL2h3L0tjb25maWcN
+Cj4gPj4gQEAgLTIsNCArMiw1IEBADQo+ID4+ICBzb3VyY2UgImRyaXZlcnMvbnRiL2h3L2FtZC9L
+Y29uZmlnIg0KPiA+PiAgc291cmNlICJkcml2ZXJzL250Yi9ody9pZHQvS2NvbmZpZyINCj4gPj4g
+IHNvdXJjZSAiZHJpdmVycy9udGIvaHcvaW50ZWwvS2NvbmZpZyINCj4gPj4gK3NvdXJjZSAiZHJp
+dmVycy9udGIvaHcvZXBmL0tjb25maWciDQo+ID4+ICBzb3VyY2UgImRyaXZlcnMvbnRiL2h3L21z
+Y2MvS2NvbmZpZyINCj4gPj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbnRiL2h3L01ha2VmaWxlIGIv
+ZHJpdmVycy9udGIvaHcvTWFrZWZpbGUgaW5kZXgNCj4gPj4gNDcxNGQ2MjM4ODQ1Li4yMjNjYTU5
+MmI1ZjkgMTAwNjQ0DQo+ID4+IC0tLSBhL2RyaXZlcnMvbnRiL2h3L01ha2VmaWxlDQo+ID4+ICsr
+KyBiL2RyaXZlcnMvbnRiL2h3L01ha2VmaWxlDQo+ID4+IEBAIC0yLDQgKzIsNSBAQA0KPiA+PiAg
+b2JqLSQoQ09ORklHX05UQl9BTUQpCSs9IGFtZC8NCj4gPj4gIG9iai0kKENPTkZJR19OVEJfSURU
+KQkrPSBpZHQvDQo+ID4+ICBvYmotJChDT05GSUdfTlRCX0lOVEVMKQkrPSBpbnRlbC8NCj4gPj4g
+K29iai0kKENPTkZJR19OVEJfRVBGKQkrPSBlcGYvDQo+ID4+ICBvYmotJChDT05GSUdfTlRCX1NX
+SVRDSFRFQykgKz0gbXNjYy8gZGlmZiAtLWdpdA0KPiA+PiBhL2RyaXZlcnMvbnRiL2h3L2VwZi9L
+Y29uZmlnIGIvZHJpdmVycy9udGIvaHcvZXBmL0tjb25maWcgbmV3IGZpbGUNCj4gPj4gbW9kZSAx
+MDA2NDQgaW5kZXggMDAwMDAwMDAwMDAwLi42MTk3ZDFhYWIzNDQNCj4gPj4gLS0tIC9kZXYvbnVs
+bA0KPiA+PiArKysgYi9kcml2ZXJzL250Yi9ody9lcGYvS2NvbmZpZw0KPiA+PiBAQCAtMCwwICsx
+LDYgQEANCj4gPj4gK2NvbmZpZyBOVEJfRVBGDQo+ID4+ICsJdHJpc3RhdGUgIkdlbmVyaWMgRVBG
+IE5vbi1UcmFuc3BhcmVudCBCcmlkZ2Ugc3VwcG9ydCINCj4gPj4gKwlkZXBlbmRzIG9uIG0NCj4g
+Pj4gKwloZWxwDQo+ID4+ICsJICBUaGlzIGRyaXZlciBzdXBwb3J0cyBFUEYgTlRCIG9uIGNvbmZp
+Z3VyYWJsZSBlbmRwb2ludC4NCj4gPj4gKwkgIElmIHVuc3VyZSwgc2F5IE4uDQo+ID4+IGRpZmYg
+LS1naXQgYS9kcml2ZXJzL250Yi9ody9lcGYvTWFrZWZpbGUNCj4gPj4gYi9kcml2ZXJzL250Yi9o
+dy9lcGYvTWFrZWZpbGUgbmV3IGZpbGUgbW9kZSAxMDA2NDQgaW5kZXgNCj4gPj4gMDAwMDAwMDAw
+MDAwLi4yZjU2MGE0MjJiYzYNCj4gPj4gLS0tIC9kZXYvbnVsbA0KPiA+PiArKysgYi9kcml2ZXJz
+L250Yi9ody9lcGYvTWFrZWZpbGUNCj4gPj4gQEAgLTAsMCArMSBAQA0KPiA+PiArb2JqLSQoQ09O
+RklHX05UQl9FUEYpICs9IG50Yl9od19lcGYubw0KPiA+PiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9u
+dGIvaHcvZXBmL250Yl9od19lcGYuYw0KPiA+PiBiL2RyaXZlcnMvbnRiL2h3L2VwZi9udGJfaHdf
+ZXBmLmMgbmV3IGZpbGUgbW9kZSAxMDA2NDQgaW5kZXgNCj4gPj4gMDAwMDAwMDAwMDAwLi4wYTE0
+NDk4Nzg1MWENCj4gPj4gLS0tIC9kZXYvbnVsbA0KPiA+PiArKysgYi9kcml2ZXJzL250Yi9ody9l
+cGYvbnRiX2h3X2VwZi5jDQo+ID4+IEBAIC0wLDAgKzEsNzU1IEBADQo+ID4gLi4uLi4uDQo+ID4+
+ICtzdGF0aWMgaW50IG50Yl9lcGZfaW5pdF9wY2koc3RydWN0IG50Yl9lcGZfZGV2ICpuZGV2LA0K
+PiA+PiArCQkJICAgIHN0cnVjdCBwY2lfZGV2ICpwZGV2KQ0KPiA+PiArew0KPiA+PiArCXN0cnVj
+dCBkZXZpY2UgKmRldiA9IG5kZXYtPmRldjsNCj4gPj4gKwlpbnQgcmV0Ow0KPiA+PiArDQo+ID4+
+ICsJcGNpX3NldF9kcnZkYXRhKHBkZXYsIG5kZXYpOw0KPiA+PiArDQo+ID4+ICsJcmV0ID0gcGNp
+X2VuYWJsZV9kZXZpY2UocGRldik7DQo+ID4+ICsJaWYgKHJldCkgew0KPiA+PiArCQlkZXZfZXJy
+KGRldiwgIkNhbm5vdCBlbmFibGUgUENJIGRldmljZVxuIik7DQo+ID4+ICsJCWdvdG8gZXJyX3Bj
+aV9lbmFibGU7DQo+ID4+ICsJfQ0KPiA+PiArDQo+ID4+ICsJcmV0ID0gcGNpX3JlcXVlc3RfcmVn
+aW9ucyhwZGV2LCAibnRiIik7DQo+ID4+ICsJaWYgKHJldCkgew0KPiA+PiArCQlkZXZfZXJyKGRl
+diwgIkNhbm5vdCBvYnRhaW4gUENJIHJlc291cmNlc1xuIik7DQo+ID4+ICsJCWdvdG8gZXJyX3Bj
+aV9yZWdpb25zOw0KPiA+PiArCX0NCj4gPj4gKw0KPiA+PiArCXBjaV9zZXRfbWFzdGVyKHBkZXYp
+Ow0KPiA+PiArDQo+ID4+ICsJcmV0ID0gZG1hX3NldF9tYXNrX2FuZF9jb2hlcmVudChkZXYsIERN
+QV9CSVRfTUFTSyg2NCkpOw0KPiA+PiArCWlmIChyZXQpIHsNCj4gPj4gKwkJcmV0ID0gZG1hX3Nl
+dF9tYXNrX2FuZF9jb2hlcmVudChkZXYsDQo+ID4+IERNQV9CSVRfTUFTSygzMikpOw0KPiA+PiAr
+CQlpZiAocmV0KSB7DQo+ID4+ICsJCQlkZXZfZXJyKGRldiwgIkNhbm5vdCBzZXQgRE1BIG1hc2tc
+biIpOw0KPiA+PiArCQkJZ290byBlcnJfZG1hX21hc2s7DQo+ID4+ICsJCX0NCj4gPj4gKwkJZGV2
+X3dhcm4oJnBkZXYtPmRldiwgIkNhbm5vdCBETUEgaGlnaG1lbVxuIik7DQo+ID4+ICsJfQ0KPiA+
+PiArDQo+ID4+ICsJbmRldi0+Y3RybF9yZWcgPSBwY2lfaW9tYXAocGRldiwgMCwgMCk7DQo+ID4N
+Cj4gPiBUaGUgc2Vjb25kIHBhcmFtZXRlciBvZiBwY2lfaW9tYXAgc2hvdWxkIGJlIG5kZXYtPmN0
+cmxfcmVnX2JhciBpbnN0ZWFkDQo+IG9mIHRoZSBoYXJkY29kZSB2YWx1ZSAwLCByaWdodD8NCj4g
+Pg0KPiA+PiArCWlmICghbmRldi0+Y3RybF9yZWcpIHsNCj4gPj4gKwkJcmV0ID0gLUVJTzsNCj4g
+Pj4gKwkJZ290byBlcnJfZG1hX21hc2s7DQo+ID4+ICsJfQ0KPiA+PiArDQo+ID4+ICsJbmRldi0+
+cGVlcl9zcGFkX3JlZyA9IHBjaV9pb21hcChwZGV2LCAxLCAwKTsNCj4gPg0KPiA+IHBjaV9pb21h
+cChwZGV2LCBuZGV2LT5wZWVyX3NwYWRfcmVnX2JhciwgMCk7DQo+ID4NCj4gPj4gKwlpZiAoIW5k
+ZXYtPnBlZXJfc3BhZF9yZWcpIHsNCj4gPj4gKwkJcmV0ID0gLUVJTzsNCj4gPj4gKwkJZ290byBl
+cnJfZG1hX21hc2s7DQo+ID4+ICsJfQ0KPiA+PiArDQo+ID4+ICsJbmRldi0+ZGJfcmVnID0gcGNp
+X2lvbWFwKHBkZXYsIDIsIDApOw0KPiA+DQo+ID4gcGNpX2lvbWFwKHBkZXYsIG5kZXYtPmRiX3Jl
+Z19iYXIsIDApOw0KPiANCj4gR29vZCBjYXRjaC4gV2lsbCBmaXggaXQgYW5kIHNlbmQuIFRoYW5r
+IHlvdSBmb3IgcmV2aWV3aW5nLg0KDQpZb3UncmUgd2VsY29tZS4NCkJ5IHRoZSB3YXksIHNpbmNl
+IEkndmUgc3R1ZGllZCBWT1AodmlydGlvIG92ZXIgcGNpZSkgYmVmb3JlLCBhbmQgb25seSByZWNl
+bnRseSBsZWFybmVkDQphYm91dCBOVEIgcmVsYXRlZCBjb2RlLiBJIGhhdmUgc29tZSBxdWVzdGlv
+bnMgYWJvdXQgTlRCLg0KDQpGb3IgTlRCLCBpbiBvcmRlciB0byBtYWtlIHR3byhvciBtb3JlKSBk
+aWZmZXJlbnQgc3lzdGVtcyB0byBjb21tdW5pY2F0ZSB3aXRoIGVhY2ggb3RoZXIsIA0Kc2VlbXMg
+YXQgbGVhc3QgdGhyZWUgYm9hcmRzIGFyZSByZXF1aXJlZCh0d28gaG9zdCBib2FyZHMgYW5kIG9u
+ZSBib2FyZCB3aXRoIG11bHRpcGxlIEVQDQppbnN0YW5jZXMgYXMgYnJpZGdlKSwgcmlnaHQ/DQpC
+dXQgZm9yIFZPUCwgb25seSB0d28gYm9hcmRzIGFyZSBuZWVkZWQob25lIGJvYXJkIGFzIGhvc3Qg
+YW5kIG9uZSBib2FyZCBhcyBjYXJkKSB0byByZWFsaXplIHRoZQ0KY29tbXVuaWNhdGlvbiBiZXR3
+ZWVuIHRoZSB0d28gc3lzdGVtcywgc28gbXkgcXVlc3Rpb24gaXMgd2hhdCBhcmUgdGhlIGFkdmFu
+dGFnZXMgb2YgdXNpbmcgTlRCPyANCkJlY2F1c2UgSSB0aGluayB0aGUgYXJjaGl0ZWN0dXJlIG9m
+IE5UQiBzZWVtcyBtb3JlIGNvbXBsaWNhdGVkLiBNYW55IHRoYW5rcyENCg0KQmVzdCByZWdhcmRz
+DQpTaGVycnkNCg0KPiANCj4gUmVnYXJkcywNCj4gS2lzaG9uDQo=
