@@ -1,55 +1,194 @@
-Return-Path: <arnd@kernel.org>
-Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id y4si1020511ybr.2.2020.11.10.06.59.28
+Return-Path: <kishon@ti.com>
+Received: from fllv0015.ext.ti.com (fllv0015.ext.ti.com. [198.47.19.141])
+        by gmr-mx.google.com with ESMTPS id f16si1249991otc.0.2020.11.10.06.21.06
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 10 Nov 2020 06:59:28 -0800 (PST)
-Received: from mail-ot1-f43.google.com (mail-ot1-f43.google.com [209.85.210.43])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-	(No client certificate requested)
-	by mail.kernel.org (Postfix) with ESMTPSA id 7521D2151B
-	for <linux-ntb@googlegroups.com>; Tue, 10 Nov 2020 14:59:27 +0000 (UTC)
-Received: by mail-ot1-f43.google.com with SMTP id i18so12785413ots.0
-        for <linux-ntb@googlegroups.com>; Tue, 10 Nov 2020 06:59:27 -0800 (PST)
-MIME-Version: 1.0
-References: <20200930153519.7282-16-kishon@ti.com> <VI1PR04MB496061EAB6F249F1C394F01092EA0@VI1PR04MB4960.eurprd04.prod.outlook.com>
- <d6d27475-3464-6772-2122-cc194b8ae022@ti.com> <VI1PR04MB49602D24F65E11FF1F14294F92E90@VI1PR04MB4960.eurprd04.prod.outlook.com>
- <30c8f7a1-baa5-1eb4-d2c2-9a13be896f0f@ti.com>
-In-Reply-To: <30c8f7a1-baa5-1eb4-d2c2-9a13be896f0f@ti.com>
-From: Arnd Bergmann <arnd@kernel.org>
-Date: Tue, 10 Nov 2020 15:59:08 +0100
-Message-ID: <CAK8P3a38vBXbAWE09H+TSoZUTkFdYDcQmXX97foT4qXQc8t5ZQ@mail.gmail.com>
+        Tue, 10 Nov 2020 06:21:06 -0800 (PST)
 Subject: Re: [PATCH v7 15/18] NTB: Add support for EPF PCI-Express
  Non-Transparent Bridge
-Content-Type: text/plain; charset="UTF-8"
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: Sherry Sun <sherry.sun@nxp.com>, "bhelgaas@google.com" <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, "lorenzo.pieralisi@arm.com" <lorenzo.pieralisi@arm.com>, "arnd@arndb.de" <arnd@arndb.de>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "dave.jiang@intel.com" <dave.jiang@intel.com>, "allenbh@gmail.com" <allenbh@gmail.com>, "tjoseph@cadence.com" <tjoseph@cadence.com>, Rob Herring <robh@kernel.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
+References: <20200930153519.7282-16-kishon@ti.com>
+ <VI1PR04MB496061EAB6F249F1C394F01092EA0@VI1PR04MB4960.eurprd04.prod.outlook.com>
+ <d6d27475-3464-6772-2122-cc194b8ae022@ti.com>
+ <VI1PR04MB49602D24F65E11FF1F14294F92E90@VI1PR04MB4960.eurprd04.prod.outlook.com>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Message-ID: <30c8f7a1-baa5-1eb4-d2c2-9a13be896f0f@ti.com>
+Date: Tue, 10 Nov 2020 19:50:43 +0530
+MIME-Version: 1.0
+In-Reply-To: <VI1PR04MB49602D24F65E11FF1F14294F92E90@VI1PR04MB4960.eurprd04.prod.outlook.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+To: Sherry Sun <sherry.sun@nxp.com>
+Cc: "bhelgaas@google.com" <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, "lorenzo.pieralisi@arm.com" <lorenzo.pieralisi@arm.com>, "arnd@arndb.de" <arnd@arndb.de>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "dave.jiang@intel.com" <dave.jiang@intel.com>, "allenbh@gmail.com" <allenbh@gmail.com>, "tjoseph@cadence.com" <tjoseph@cadence.com>, Rob Herring <robh@kernel.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Tue, Nov 10, 2020 at 3:20 PM Kishon Vijay Abraham I <kishon@ti.com> wrote:
-> On 10/11/20 7:55 am, Sherry Sun wrote:
+Hi Sherry,
 
-> > But for VOP, only two boards are needed(one board as host and one board as card) to realize the
-> > communication between the two systems, so my question is what are the advantages of using NTB?
->
-> NTB is a bridge that facilitates communication between two different
-> systems. So it by itself will not be source or sink of any data unlike a
-> normal EP to RP system (or the VOP) which will be source or sink of data.
->
-> > Because I think the architecture of NTB seems more complicated. Many thanks!
->
-> yeah, I think it enables a different use case all together. Consider you
-> have two x86 HOST PCs (having RP) and they have to be communicate using
-> PCIe. NTB can be used in such cases for the two x86 PCs to communicate
-> with each other over PCIe, which wouldn't be possible without NTB.
+On 10/11/20 7:55 am, Sherry Sun wrote:
+> Hi Kishon,
+> 
+>> Subject: Re: [PATCH v7 15/18] NTB: Add support for EPF PCI-Express Non-
+>> Transparent Bridge
+>>
+>> Hi Sherry,
+>>
+>> On 09/11/20 3:07 pm, Sherry Sun wrote:
+>>> Hi Kishon,
+>>>
+>>>> Subject: [PATCH v7 15/18] NTB: Add support for EPF PCI-Express Non-
+>>>> Transparent Bridge
+>>>>
+>>>> From: Kishon Vijay Abraham I <kishon@ti.com>
+>>>>
+>>>> Add support for EPF PCI-Express Non-Transparent Bridge (NTB) device.
+>>>> This driver is platform independent and could be used by any platform
+>>>> which have multiple PCIe endpoint instances configured using the pci-epf-
+>> ntb driver.
+>>>> The driver connnects to the standard NTB sub-system interface. The
+>>>> EPF NTB device has configurable number of memory windows (Max 4),
+>>>> configurable number of doorbell (Max 32), and configurable number of
+>>>> scratch-pad registers.
+>>>>
+>>>> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+>>>> ---
+>>>>  drivers/ntb/hw/Kconfig          |   1 +
+>>>>  drivers/ntb/hw/Makefile         |   1 +
+>>>>  drivers/ntb/hw/epf/Kconfig      |   6 +
+>>>>  drivers/ntb/hw/epf/Makefile     |   1 +
+>>>>  drivers/ntb/hw/epf/ntb_hw_epf.c | 755
+>>>> ++++++++++++++++++++++++++++++++
+>>>>  5 files changed, 764 insertions(+)
+>>>>  create mode 100644 drivers/ntb/hw/epf/Kconfig  create mode 100644
+>>>> drivers/ntb/hw/epf/Makefile  create mode 100644
+>>>> drivers/ntb/hw/epf/ntb_hw_epf.c
+>>>>
+>>>> diff --git a/drivers/ntb/hw/Kconfig b/drivers/ntb/hw/Kconfig index
+>>>> e77c587060ff..c325be526b80 100644
+>>>> --- a/drivers/ntb/hw/Kconfig
+>>>> +++ b/drivers/ntb/hw/Kconfig
+>>>> @@ -2,4 +2,5 @@
+>>>>  source "drivers/ntb/hw/amd/Kconfig"
+>>>>  source "drivers/ntb/hw/idt/Kconfig"
+>>>>  source "drivers/ntb/hw/intel/Kconfig"
+>>>> +source "drivers/ntb/hw/epf/Kconfig"
+>>>>  source "drivers/ntb/hw/mscc/Kconfig"
+>>>> diff --git a/drivers/ntb/hw/Makefile b/drivers/ntb/hw/Makefile index
+>>>> 4714d6238845..223ca592b5f9 100644
+>>>> --- a/drivers/ntb/hw/Makefile
+>>>> +++ b/drivers/ntb/hw/Makefile
+>>>> @@ -2,4 +2,5 @@
+>>>>  obj-$(CONFIG_NTB_AMD)	+= amd/
+>>>>  obj-$(CONFIG_NTB_IDT)	+= idt/
+>>>>  obj-$(CONFIG_NTB_INTEL)	+= intel/
+>>>> +obj-$(CONFIG_NTB_EPF)	+= epf/
+>>>>  obj-$(CONFIG_NTB_SWITCHTEC) += mscc/ diff --git
+>>>> a/drivers/ntb/hw/epf/Kconfig b/drivers/ntb/hw/epf/Kconfig new file
+>>>> mode 100644 index 000000000000..6197d1aab344
+>>>> --- /dev/null
+>>>> +++ b/drivers/ntb/hw/epf/Kconfig
+>>>> @@ -0,0 +1,6 @@
+>>>> +config NTB_EPF
+>>>> +	tristate "Generic EPF Non-Transparent Bridge support"
+>>>> +	depends on m
+>>>> +	help
+>>>> +	  This driver supports EPF NTB on configurable endpoint.
+>>>> +	  If unsure, say N.
+>>>> diff --git a/drivers/ntb/hw/epf/Makefile
+>>>> b/drivers/ntb/hw/epf/Makefile new file mode 100644 index
+>>>> 000000000000..2f560a422bc6
+>>>> --- /dev/null
+>>>> +++ b/drivers/ntb/hw/epf/Makefile
+>>>> @@ -0,0 +1 @@
+>>>> +obj-$(CONFIG_NTB_EPF) += ntb_hw_epf.o
+>>>> diff --git a/drivers/ntb/hw/epf/ntb_hw_epf.c
+>>>> b/drivers/ntb/hw/epf/ntb_hw_epf.c new file mode 100644 index
+>>>> 000000000000..0a144987851a
+>>>> --- /dev/null
+>>>> +++ b/drivers/ntb/hw/epf/ntb_hw_epf.c
+>>>> @@ -0,0 +1,755 @@
+>>> ......
+>>>> +static int ntb_epf_init_pci(struct ntb_epf_dev *ndev,
+>>>> +			    struct pci_dev *pdev)
+>>>> +{
+>>>> +	struct device *dev = ndev->dev;
+>>>> +	int ret;
+>>>> +
+>>>> +	pci_set_drvdata(pdev, ndev);
+>>>> +
+>>>> +	ret = pci_enable_device(pdev);
+>>>> +	if (ret) {
+>>>> +		dev_err(dev, "Cannot enable PCI device\n");
+>>>> +		goto err_pci_enable;
+>>>> +	}
+>>>> +
+>>>> +	ret = pci_request_regions(pdev, "ntb");
+>>>> +	if (ret) {
+>>>> +		dev_err(dev, "Cannot obtain PCI resources\n");
+>>>> +		goto err_pci_regions;
+>>>> +	}
+>>>> +
+>>>> +	pci_set_master(pdev);
+>>>> +
+>>>> +	ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64));
+>>>> +	if (ret) {
+>>>> +		ret = dma_set_mask_and_coherent(dev,
+>>>> DMA_BIT_MASK(32));
+>>>> +		if (ret) {
+>>>> +			dev_err(dev, "Cannot set DMA mask\n");
+>>>> +			goto err_dma_mask;
+>>>> +		}
+>>>> +		dev_warn(&pdev->dev, "Cannot DMA highmem\n");
+>>>> +	}
+>>>> +
+>>>> +	ndev->ctrl_reg = pci_iomap(pdev, 0, 0);
+>>>
+>>> The second parameter of pci_iomap should be ndev->ctrl_reg_bar instead
+>> of the hardcode value 0, right?
+>>>
+>>>> +	if (!ndev->ctrl_reg) {
+>>>> +		ret = -EIO;
+>>>> +		goto err_dma_mask;
+>>>> +	}
+>>>> +
+>>>> +	ndev->peer_spad_reg = pci_iomap(pdev, 1, 0);
+>>>
+>>> pci_iomap(pdev, ndev->peer_spad_reg_bar, 0);
+>>>
+>>>> +	if (!ndev->peer_spad_reg) {
+>>>> +		ret = -EIO;
+>>>> +		goto err_dma_mask;
+>>>> +	}
+>>>> +
+>>>> +	ndev->db_reg = pci_iomap(pdev, 2, 0);
+>>>
+>>> pci_iomap(pdev, ndev->db_reg_bar, 0);
+>>
+>> Good catch. Will fix it and send. Thank you for reviewing.
+> 
+> You're welcome.
+> By the way, since I've studied VOP(virtio over pcie) before, and only recently learned
+> about NTB related code. I have some questions about NTB.
+> 
+> For NTB, in order to make two(or more) different systems to communicate with each other, 
+> seems at least three boards are required(two host boards and one board with multiple EP
+> instances as bridge), right?
 
-I think for VOP, we should have an abstraction that can work on either NTB
-or directly on the endpoint framework but provide an interface that then
-lets you create logical devices the same way.
+right, this series is about creating NTB bridge by configuring multiple
+EP instances in an SoC, however there are also dedicated HW NTB switches
+(internally they might as well use multiple EP instances).
 
-Doing VOP based on NTB plus the new NTB_EPF driver would also
-work and just move the abstraction somewhere else, but I guess it
-would complicate setting it up for those users that only care about the
-simpler endpoint case.
+> But for VOP, only two boards are needed(one board as host and one board as card) to realize the
+> communication between the two systems, so my question is what are the advantages of using NTB? 
 
-      Arnd
+NTB is a bridge that facilitates communication between two different
+systems. So it by itself will not be source or sink of any data unlike a
+normal EP to RP system (or the VOP) which will be source or sink of data.
+> Because I think the architecture of NTB seems more complicated. Many thanks!
+
+yeah, I think it enables a different use case all together. Consider you
+have two x86 HOST PCs (having RP) and they have to be communicate using
+PCIe. NTB can be used in such cases for the two x86 PCs to communicate
+with each other over PCIe, which wouldn't be possible without NTB.
+
+Regards,
+Kishon
