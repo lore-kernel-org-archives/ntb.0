@@ -1,55 +1,71 @@
-Return-Path: <jdmason@kudzu.us>
-Received: from mail-qt1-x842.google.com (mail-qt1-x842.google.com. [2607:f8b0:4864:20::842])
-        by gmr-mx.google.com with ESMTPS id v8si436233pgj.1.2020.10.25.06.36.41
+Return-Path: <kishon@ti.com>
+Received: from fllv0016.ext.ti.com (fllv0016.ext.ti.com. [198.47.19.142])
+        by gmr-mx.google.com with ESMTPS id bg19si842763pjb.2.2020.11.16.07.46.35
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 25 Oct 2020 06:36:41 -0700 (PDT)
-Received: by mail-qt1-x842.google.com with SMTP id q26so4847335qtb.5
-        for <linux-ntb@googlegroups.com>; Sun, 25 Oct 2020 06:36:41 -0700 (PDT)
-Return-Path: <jdmason@kudzu.us>
-From: Jon Mason <jdmason@kudzu.us>
-Date: Sun, 25 Oct 2020 09:36:37 -0400
-Subject: [GIT PULL] NTB bug fixes for v5.10
-Message-ID: <20201025133637.GA7862@athena.kudzu.us>
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 16 Nov 2020 07:46:35 -0800 (PST)
+Subject: Re: [PATCH v7 15/18] NTB: Add support for EPF PCI-Express
+ Non-Transparent Bridge
+References: <20200930153519.7282-16-kishon@ti.com>
+ <VI1PR04MB496061EAB6F249F1C394F01092EA0@VI1PR04MB4960.eurprd04.prod.outlook.com>
+ <d6d27475-3464-6772-2122-cc194b8ae022@ti.com>
+ <VI1PR04MB49602D24F65E11FF1F14294F92E90@VI1PR04MB4960.eurprd04.prod.outlook.com>
+ <30c8f7a1-baa5-1eb4-d2c2-9a13be896f0f@ti.com>
+ <CAK8P3a38vBXbAWE09H+TSoZUTkFdYDcQmXX97foT4qXQc8t5ZQ@mail.gmail.com>
+ <5a9115c8-322e-ffd4-6274-ae98c375b21d@ti.com>
+ <CAK8P3a33XSvenqBhuQpGmtLbYydyzY2OQh73150TJtpzW24DTw@mail.gmail.com>
+ <c720de5b-bf76-162f-24cb-07f6fe670bd2@ti.com>
+ <CAK8P3a0nTdtADPa_5jduDm5MpBiwBNgs7cYokK5qBZ=RkL1Ktg@mail.gmail.com>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Message-ID: <a590bff0-ba9e-8e19-4f09-4838d8afdbb6@ti.com>
+Date: Mon, 16 Nov 2020 21:15:53 +0530
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
+In-Reply-To: <CAK8P3a0nTdtADPa_5jduDm5MpBiwBNgs7cYokK5qBZ=RkL1Ktg@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+To: Arnd Bergmann <arnd@kernel.org>
+Cc: Sherry Sun <sherry.sun@nxp.com>, "bhelgaas@google.com" <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, "lorenzo.pieralisi@arm.com" <lorenzo.pieralisi@arm.com>, "arnd@arndb.de" <arnd@arndb.de>, "jdmason@kudzu.us" <jdmason@kudzu.us>, "dave.jiang@intel.com" <dave.jiang@intel.com>, "allenbh@gmail.com" <allenbh@gmail.com>, "tjoseph@cadence.com" <tjoseph@cadence.com>, Rob Herring <robh@kernel.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Hello Linus,
-Here are a few NTB bug fixes for v5.10.  Please consider pulling them.
+Hi Arnd,
 
-Thanks,
-Jon
+On 16/11/20 9:07 pm, Arnd Bergmann wrote:
+> On Mon, Nov 16, 2020 at 6:19 AM Kishon Vijay Abraham I <kishon@ti.com> wrote:
+>> On 12/11/20 6:54 pm, Arnd Bergmann wrote:
+>>>
+>>> This looks very  promising indeed, I need to read up on the whole
+>>> discussion there. I also see your slides at [1]  that help do explain some
+>>> of it. I have one fundamental question that I can't figure out from
+>>> the description, maybe you can help me here:
+>>>
+>>> How is the configuration managed, taking the EP case as an
+>>> example? Your UseCase1 example sounds like the system that owns
+>>> the EP hardware is the one that turns the EP into a vhost device,
+>>> and creates a vhost-rpmsg device on top, while the RC side would
+>>> probe the pci-vhost and then detect a virtio-rpmsg device to talk to.
+>>
+>> That's correct. Slide no 9 in [1] should give the layering details.
+>>
+>>> Can it also do the opposite, so you end up with e.g. a virtio-net
+>>> device on the EP side and vhost-net on the RC?
+>>
+>> Unfortunately no. Again referring slide 9 in [1], we only have
+>> vhost-pci-epf on the EP side which only creates a "vhost_dev" to deal
+>> with vhost side of things. For doing the opposite, we'd need to create
+>> virtio-pci-epf for EP side that interacts with core virtio (and also the
+>> corresponding vhost back end on PCI host).
+> 
+> Ok, I see. So I think this is the opposite of drivers/misc/mic and
+> the bluefield driver were using, so we would probably end up
+> needing both.
+> 
+> Then again, I guess the NTB driver would give us the functionality
+> for free, if it shows a symmetric link?
 
-The following changes since commit d012a7190fc1fd72ed48911e77ca97ba4521bccd:
+Right, NTB driver would need "pci_dev" on both sides of the link. But
+that would also mean we cannot use pci EP framework which actually uses
+"pci_epf".
 
-  Linux 5.9-rc2 (2020-08-23 14:08:43 -0700)
-
-are available in the Git repository at:
-
-  git://github.com/jonmason/ntb tags/ntb-5.10
-
-for you to fetch changes up to b8e2c8bbdf7778c6e3c65db21ababb1dfa794282:
-
-  NTB: Use struct_size() helper in devm_kzalloc() (2020-08-24 10:58:06 -0400)
-
-----------------------------------------------------------------
-Bug fixes for v5.10
-
-----------------------------------------------------------------
-Dinghao Liu (1):
-      ntb: intel: Fix memleak in intel_ntb_pci_probe
-
-Gustavo A. R. Silva (1):
-      NTB: Use struct_size() helper in devm_kzalloc()
-
-Kaige Li (1):
-      NTB: hw: amd: fix an issue about leak system resources
-
- drivers/ntb/hw/amd/ntb_hw_amd.c    | 1 +
- drivers/ntb/hw/intel/ntb_hw_gen1.c | 2 +-
- drivers/ntb/test/ntb_msi_test.c    | 5 +----
- 3 files changed, 3 insertions(+), 5 deletions(-)
+Thanks
+Kishon
