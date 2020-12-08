@@ -1,45 +1,68 @@
-Return-Path: <tjoseph@cadence.com>
-Received: from mx0a-0014ca01.pphosted.com (mx0a-0014ca01.pphosted.com. [208.84.65.235])
-        by gmr-mx.google.com with ESMTPS id j124si1361064pfb.2.2020.12.14.09.56.59
+Return-Path: <kishon@ti.com>
+Received: from fllv0016.ext.ti.com (fllv0016.ext.ti.com. [198.47.19.142])
+        by gmr-mx.google.com with ESMTPS id a16si1034430uas.1.2020.12.07.20.47.04
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 14 Dec 2020 09:56:59 -0800 (PST)
-From: Tom Joseph <tjoseph@cadence.com>
-Subject: RE: [PATCH v8 12/18] PCI: cadence: Configure LM_EP_FUNC_CFG based on
- epc->function_num_map
-Date: Mon, 14 Dec 2020 17:56:42 +0000
-Message-ID: 
- <MN2PR07MB6208137D0A15339D083FA187A1C70@MN2PR07MB6208.namprd07.prod.outlook.com>
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 07 Dec 2020 20:47:04 -0800 (PST)
+Subject: Re: [PATCH v8 16/18] NTB: tool: Enable the NTB/PCIe link on the local
+ or remote side of bridge
 References: <20201111153559.19050-1-kishon@ti.com>
- <20201111153559.19050-13-kishon@ti.com>
-In-Reply-To: <20201111153559.19050-13-kishon@ti.com>
-Content-Language: en-US
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+ <20201111153559.19050-17-kishon@ti.com>
+ <f39cf769993541e2a46bfe4d777ccf46@intel.com>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Message-ID: <6a493055-eef0-5722-e24b-449a11cf8a36@ti.com>
+Date: Tue, 8 Dec 2020 10:16:46 +0530
 MIME-Version: 1.0
-To: Kishon Vijay Abraham I <kishon@ti.com>, Bjorn Helgaas <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Arnd Bergmann <arnd@arndb.de>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Rob Herring <robh@kernel.org>
-Cc: "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
+In-Reply-To: <f39cf769993541e2a46bfe4d777ccf46@intel.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+To: "Jiang, Dave" <dave.jiang@intel.com>, Bjorn Helgaas <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Arnd Bergmann <arnd@arndb.de>, Jon Mason <jdmason@kudzu.us>, Allen Hubbe <allenbh@gmail.com>, Tom Joseph <tjoseph@cadence.com>, Rob Herring <robh@kernel.org>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-> -----Original Message-----
-> From: Kishon Vijay Abraham I <kishon@ti.com>
-> Sent: 11 November 2020 15:36
->=20
-> The number of functions supported by the endpoint controller is
-> configured in LM_EP_FUNC_CFG based on func_no member of struct
-> pci_epf.
-> Now that an endpoint function can be associated with two endpoint
-> controllers (primary and secondary), just using func_no will
-> not suffice as that will take into account only if the endpoint
-> controller is associated with the primary interface of endpoint
-> function. Instead use epc->function_num_map which will already have the
-> configured functions information (irrespective of whether the endpoint
-> controller is associated with primary or secondary interface).
->=20
-> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
-> ---
->  drivers/pci/controller/cadence/pcie-cadence-ep.c | 7 +------
->  1 file changed, 1 insertion(+), 6 deletions(-)
->=20
+Hi Dave,
 
-Reviewed-by: Tom Joseph <tjoseph@cadence.com>
+On 07/12/20 9:25 pm, Jiang, Dave wrote:
+> 
+> 
+>> -----Original Message-----
+>> From: Kishon Vijay Abraham I <kishon@ti.com>
+>> Sent: Wednesday, November 11, 2020 8:36 AM
+>> To: Bjorn Helgaas <bhelgaas@google.com>; Jonathan Corbet
+>> <corbet@lwn.net>; Kishon Vijay Abraham I <kishon@ti.com>; Lorenzo
+>> Pieralisi <lorenzo.pieralisi@arm.com>; Arnd Bergmann <arnd@arndb.de>;
+>> Jon Mason <jdmason@kudzu.us>; Jiang, Dave <dave.jiang@intel.com>;
+>> Allen Hubbe <allenbh@gmail.com>; Tom Joseph <tjoseph@cadence.com>;
+>> Rob Herring <robh@kernel.org>
+>> Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>; linux-
+>> pci@vger.kernel.org; linux-doc@vger.kernel.org; linux-
+>> kernel@vger.kernel.org; linux-ntb@googlegroups.com
+>> Subject: [PATCH v8 16/18] NTB: tool: Enable the NTB/PCIe link on the local or
+>> remote side of bridge
+>>
+>> Invoke ntb_link_enable() to enable the NTB/PCIe link on the local or remote
+>> side of the bridge.
+>>
+>> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+>> ---
+>>  drivers/ntb/test/ntb_tool.c | 1 +
+>>  1 file changed, 1 insertion(+)
+>>
+>> diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c index
+>> b7bf3f863d79..8230ced503e3 100644
+>> --- a/drivers/ntb/test/ntb_tool.c
+>> +++ b/drivers/ntb/test/ntb_tool.c
+>> @@ -1638,6 +1638,7 @@ static int tool_probe(struct ntb_client *self, struct
+>> ntb_dev *ntb)
+>>
+>>  	tool_setup_dbgfs(tc);
+>>
+>> +	ntb_link_enable(ntb, NTB_SPEED_AUTO, NTB_WIDTH_AUTO);
+> 
+> The tool expects the user to enable the link via debugfs according to documentation. Is this necessary?
+
+right, it can be enabled using debugfs. Will drop this patch.
+
+Thank You,
+Kishon
