@@ -1,18 +1,18 @@
 Return-Path: <boris.ostrovsky@oracle.com>
-Received: from aserp2120.oracle.com (aserp2120.oracle.com. [141.146.126.78])
-        by gmr-mx.google.com with ESMTPS id r207si402015vkf.2.2020.12.10.15.21.28
+Received: from aserp2130.oracle.com (aserp2130.oracle.com. [141.146.126.79])
+        by gmr-mx.google.com with ESMTPS id e6si557921pgf.3.2020.12.10.15.21.17
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 10 Dec 2020 15:21:28 -0800 (PST)
-Subject: Re: [patch 27/30] xen/events: Only force affinity mask for percpu
- interrupts
+        Thu, 10 Dec 2020 15:21:18 -0800 (PST)
+Subject: Re: [patch 24/30] xen/events: Remove unused
+ bind_evtchn_to_irq_lateeoi()
 References: <20201210192536.118432146@linutronix.de>
- <20201210194045.250321315@linutronix.de>
+ <20201210194044.972064156@linutronix.de>
 From: boris.ostrovsky@oracle.com
-Message-ID: <7f7af60f-567f-cdef-f8db-8062a44758ce@oracle.com>
-Date: Thu, 10 Dec 2020 18:20:46 -0500
+Message-ID: <748d8d81-ac0f-aee2-1a56-ba9c40fee52f@oracle.com>
+Date: Thu, 10 Dec 2020 18:19:19 -0500
 MIME-Version: 1.0
-In-Reply-To: <20201210194045.250321315@linutronix.de>
+In-Reply-To: <20201210194044.972064156@linutronix.de>
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Content-Language: en-US
@@ -22,25 +22,31 @@ List-ID: <linux-ntb.googlegroups.com>
 
 
 On 12/10/20 2:26 PM, Thomas Gleixner wrote:
-> All event channel setups bind the interrupt on CPU0 or the target CPU for
-> percpu interrupts and overwrite the affinity mask with the corresponding
-> cpumask. That does not make sense.
+> Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+> Cc: Boris Ostrovsky <boris.ostrovsky@oracle.com>
+> Cc: Juergen Gross <jgross@suse.com>
+> Cc: Stefano Stabellini <sstabellini@kernel.org>
+> Cc: xen-devel@lists.xenproject.org
+> ---
+>  drivers/xen/events/events_base.c |    6 ------
+>  1 file changed, 6 deletions(-)
 >
-> The XEN implementation of irqchip::irq_set_affinity() already picks a
-> single target CPU out of the affinity mask and the actual target is stored
-> in the effective CPU mask, so destroying the user chosen affinity mask
-> which might contain more than one CPU is wrong.
->
-> Change the implementation so that the channel is bound to CPU0 at the XEN
-> level and leave the affinity mask alone. At startup of the interrupt
-> affinity will be assigned out of the affinity mask and the XEN binding will
-> be updated. 
+> --- a/drivers/xen/events/events_base.c
+> +++ b/drivers/xen/events/events_base.c
+> @@ -1132,12 +1132,6 @@ int bind_evtchn_to_irq(evtchn_port_t evt
+>  }
+>  EXPORT_SYMBOL_GPL(bind_evtchn_to_irq);
+>  
+> -int bind_evtchn_to_irq_lateeoi(evtchn_port_t evtchn)
+> -{
+> -	return bind_evtchn_to_irq_chip(evtchn, &xen_lateeoi_chip);
+> -}
+> -EXPORT_SYMBOL_GPL(bind_evtchn_to_irq_lateeoi);
 
 
-If that's the case then I wonder whether we need this call at all and instead bind at startup time.
+
+include/xen/events.h also needs to be updated (and in the next patch for xen_set_affinity_evtchn() as well).
 
 
 -boris
 
-
-> Only keep the enforcement for real percpu interrupts.
