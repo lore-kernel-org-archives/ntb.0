@@ -1,71 +1,49 @@
 Return-Path: <tglx@linutronix.de>
-Received: from galois.linutronix.de (Galois.linutronix.de. [193.142.43.55])
-        by gmr-mx.google.com with ESMTPS id v191si247287lfa.9.2020.12.10.11.42.38
+Received: from galois.linutronix.de (Galois.linutronix.de. [2a0a:51c0:0:12e:550::1])
+        by gmr-mx.google.com with ESMTPS id i3si188859edy.3.2020.12.10.11.42.36
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 10 Dec 2020 11:42:38 -0800 (PST)
-Message-Id: <20201210194044.364211860@linutronix.de>
-Date: Thu, 10 Dec 2020 20:25:54 +0100
+        Thu, 10 Dec 2020 11:42:36 -0800 (PST)
+Message-Id: <20201210194044.255887860@linutronix.de>
+Date: Thu, 10 Dec 2020 20:25:53 +0100
 From: Thomas Gleixner <tglx@linutronix.de>
-Subject: [patch 18/30] PCI: xilinx-nwl: Use irq_data_get_irq_chip_data()
+Subject: [patch 17/30] NTB/msi: Use irq_has_action()
 References: <20201210192536.118432146@linutronix.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-transfer-encoding: 8-bit
 To: LKML <linux-kernel@vger.kernel.org>
-Cc: Peter Zijlstra <peterz@infradead.org>, Marc Zyngier <maz@kernel.org>, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Rob Herring <robh@kernel.org>, Bjorn Helgaas <bhelgaas@google.com>, Michal Simek <michal.simek@xilinx.com>, linux-pci@vger.kernel.org, linux-arm-kernel@lists.infradead.org, "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>, Helge Deller <deller@gmx.de>, afzal mohammed <afzal.mohd.ma@gmail.com>, linux-parisc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, Christian Borntraeger <borntraeger@de.ibm.com>, Heiko Carstens <hca@linux.ibm.com>, linux-s390@vger.kernel.org, Jani Nikula <jani.nikula@linux.intel.com>, Joonas Lahtinen <joonas.lahtinen@linux.intel.com>, Rodrigo Vivi <rodrigo.vivi@intel.com>, David Airlie <airlied@linux.ie>, Daniel Vetter <daniel@ffwll.ch>, Pankaj Bharadiya <pankaj.laxminarayan.bharadiya@intel.com>, Chris Wilson <chris@chris-wilson.co.uk>, Wambui Karuga <wambui.karugax@gmail.com>, intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org, Tvrtko Ursulin <tvrtko.ursulin@linux.intel.com>, Linus Walleij <linus.walleij@linaro.org>, linux-gpio@vger.kernel.org, Lee Jones <lee.jones@linaro.org>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com, Karthikeyan Mitran <m.karthikeyan@mobiveil.co.in>, Hou Zhiqiang <Zhiqiang.Hou@nxp.com>, Tariq Toukan <tariqt@nvidia.com>, "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>, netdev@vger.kernel.org, linux-rdma@vger.kernel.org, Saeed Mahameed <saeedm@nvidia.com>, Leon Romanovsky <leon@kernel.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Stefano Stabellini <sstabellini@kernel.org>, xen-devel@lists.xenproject.org
+Cc: Peter Zijlstra <peterz@infradead.org>, Marc Zyngier <maz@kernel.org>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com, "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>, Helge Deller <deller@gmx.de>, afzal mohammed <afzal.mohd.ma@gmail.com>, linux-parisc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, linux-arm-kernel@lists.infradead.org, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, Christian Borntraeger <borntraeger@de.ibm.com>, Heiko Carstens <hca@linux.ibm.com>, linux-s390@vger.kernel.org, Jani Nikula <jani.nikula@linux.intel.com>, Joonas Lahtinen <joonas.lahtinen@linux.intel.com>, Rodrigo Vivi <rodrigo.vivi@intel.com>, David Airlie <airlied@linux.ie>, Daniel Vetter <daniel@ffwll.ch>, Pankaj Bharadiya <pankaj.laxminarayan.bharadiya@intel.com>, Chris Wilson <chris@chris-wilson.co.uk>, Wambui Karuga <wambui.karugax@gmail.com>, intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org, Tvrtko Ursulin <tvrtko.ursulin@linux.intel.com>, Linus Walleij <linus.walleij@linaro.org>, linux-gpio@vger.kernel.org, Lee Jones <lee.jones@linaro.org>, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Rob Herring <robh@kernel.org>, Bjorn Helgaas <bhelgaas@google.com>, Michal Simek <michal.simek@xilinx.com>, linux-pci@vger.kernel.org, Karthikeyan Mitran <m.karthikeyan@mobiveil.co.in>, Hou Zhiqiang <Zhiqiang.Hou@nxp.com>, Tariq Toukan <tariqt@nvidia.com>, "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>, netdev@vger.kernel.org, linux-rdma@vger.kernel.org, Saeed Mahameed <saeedm@nvidia.com>, Leon Romanovsky <leon@kernel.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Stefano Stabellini <sstabellini@kernel.org>, xen-devel@lists.xenproject.org
 List-ID: <linux-ntb.googlegroups.com>
 
-Going through a full irq descriptor lookup instead of just using the proper
-helper function which provides direct access is suboptimal.
-
-In fact it _is_ wrong because the chip callback needs to get the chip data
-which is relevant for the chip while using the irq descriptor variant
-returns the irq chip data of the top level chip of a hierarchy. It does not
-matter in this case because the chip is the top level chip, but that
-doesn't make it more correct.
+Use the proper core function.
 
 Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
-Cc: Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>
-Cc: Rob Herring <robh@kernel.org>
-Cc: Bjorn Helgaas <bhelgaas@google.com>
-Cc: Michal Simek <michal.simek@xilinx.com>
-Cc: linux-pci@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org
+Cc: Jon Mason <jdmason@kudzu.us>
+Cc: Dave Jiang <dave.jiang@intel.com>
+Cc: Allen Hubbe <allenbh@gmail.com>
+Cc: linux-ntb@googlegroups.com
 ---
- drivers/pci/controller/pcie-xilinx-nwl.c |    8 ++------
- 1 file changed, 2 insertions(+), 6 deletions(-)
+ drivers/ntb/msi.c |    4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
 
---- a/drivers/pci/controller/pcie-xilinx-nwl.c
-+++ b/drivers/pci/controller/pcie-xilinx-nwl.c
-@@ -379,13 +379,11 @@ static void nwl_pcie_msi_handler_low(str
- 
- static void nwl_mask_leg_irq(struct irq_data *data)
+--- a/drivers/ntb/msi.c
++++ b/drivers/ntb/msi.c
+@@ -282,15 +282,13 @@ int ntbm_msi_request_threaded_irq(struct
+ 				  struct ntb_msi_desc *msi_desc)
  {
--	struct irq_desc *desc = irq_to_desc(data->irq);
--	struct nwl_pcie *pcie;
-+	struct nwl_pcie *pcie = irq_data_get_irq_chip_data(data);
- 	unsigned long flags;
- 	u32 mask;
- 	u32 val;
+ 	struct msi_desc *entry;
+-	struct irq_desc *desc;
+ 	int ret;
  
--	pcie = irq_desc_get_chip_data(desc);
- 	mask = 1 << (data->hwirq - 1);
- 	raw_spin_lock_irqsave(&pcie->leg_mask_lock, flags);
- 	val = nwl_bridge_readl(pcie, MSGF_LEG_MASK);
-@@ -395,13 +393,11 @@ static void nwl_mask_leg_irq(struct irq_
+ 	if (!ntb->msi)
+ 		return -EINVAL;
  
- static void nwl_unmask_leg_irq(struct irq_data *data)
- {
--	struct irq_desc *desc = irq_to_desc(data->irq);
--	struct nwl_pcie *pcie;
-+	struct nwl_pcie *pcie = irq_data_get_irq_chip_data(data);
- 	unsigned long flags;
- 	u32 mask;
- 	u32 val;
+ 	for_each_pci_msi_entry(entry, ntb->pdev) {
+-		desc = irq_to_desc(entry->irq);
+-		if (desc->action)
++		if (irq_has_action(entry->irq))
+ 			continue;
  
--	pcie = irq_desc_get_chip_data(desc);
- 	mask = 1 << (data->hwirq - 1);
- 	raw_spin_lock_irqsave(&pcie->leg_mask_lock, flags);
- 	val = nwl_bridge_readl(pcie, MSGF_LEG_MASK);
+ 		ret = devm_request_threaded_irq(&ntb->dev, entry->irq, handler,
 
