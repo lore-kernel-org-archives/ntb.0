@@ -1,13 +1,13 @@
 Return-Path: <tglx@linutronix.de>
 Received: from galois.linutronix.de (Galois.linutronix.de. [2a0a:51c0:0:12e:550::1])
-        by gmr-mx.google.com with ESMTPS id o135si203039wme.3.2020.12.10.11.42.18
+        by gmr-mx.google.com with ESMTPS id u25si116780lfd.11.2020.12.10.11.42.16
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 10 Dec 2020 11:42:18 -0800 (PST)
-Message-Id: <20201210194042.860029489@linutronix.de>
-Date: Thu, 10 Dec 2020 20:25:39 +0100
+        Thu, 10 Dec 2020 11:42:16 -0800 (PST)
+Message-Id: <20201210194042.548936472@linutronix.de>
+Date: Thu, 10 Dec 2020 20:25:37 +0100
 From: Thomas Gleixner <tglx@linutronix.de>
-Subject: [patch 03/30] genirq: Move irq_set_lockdep_class() to core
+Subject: [patch 01/30] genirq: Move irq_has_action() into core code
 References: <20201210192536.118432146@linutronix.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -16,57 +16,90 @@ To: LKML <linux-kernel@vger.kernel.org>
 Cc: Peter Zijlstra <peterz@infradead.org>, Marc Zyngier <maz@kernel.org>, "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>, Helge Deller <deller@gmx.de>, afzal mohammed <afzal.mohd.ma@gmail.com>, linux-parisc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, linux-arm-kernel@lists.infradead.org, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, Christian Borntraeger <borntraeger@de.ibm.com>, Heiko Carstens <hca@linux.ibm.com>, linux-s390@vger.kernel.org, Jani Nikula <jani.nikula@linux.intel.com>, Joonas Lahtinen <joonas.lahtinen@linux.intel.com>, Rodrigo Vivi <rodrigo.vivi@intel.com>, David Airlie <airlied@linux.ie>, Daniel Vetter <daniel@ffwll.ch>, Pankaj Bharadiya <pankaj.laxminarayan.bharadiya@intel.com>, Chris Wilson <chris@chris-wilson.co.uk>, Wambui Karuga <wambui.karugax@gmail.com>, intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org, Tvrtko Ursulin <tvrtko.ursulin@linux.intel.com>, Linus Walleij <linus.walleij@linaro.org>, linux-gpio@vger.kernel.org, Lee Jones <lee.jones@linaro.org>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Rob Herring <robh@kernel.org>, Bjorn Helgaas <bhelgaas@google.com>, Michal Simek <michal.simek@xilinx.com>, linux-pci@vger.kernel.org, Karthikeyan Mitran <m.karthikeyan@mobiveil.co.in>, Hou Zhiqiang <Zhiqiang.Hou@nxp.com>, Tariq Toukan <tariqt@nvidia.com>, "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>, netdev@vger.kernel.org, linux-rdma@vger.kernel.org, Saeed Mahameed <saeedm@nvidia.com>, Leon Romanovsky <leon@kernel.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Stefano Stabellini <sstabellini@kernel.org>, xen-devel@lists.xenproject.org
 List-ID: <linux-ntb.googlegroups.com>
 
-irq_set_lockdep_class() is used from modules and requires irq_to_desc() to
-be exported. Move it into the core code which lifts another requirement for
-the export.
+This function uses irq_to_desc() and is going to be used by modules to
+replace the open coded irq_to_desc() (ab)usage. The final goal is to remove
+the export of irq_to_desc() so driver cannot fiddle with it anymore.
+
+Move it into the core code and fixup the usage sites to include the proper
+header.
 
 Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
 ---
- include/linux/irqdesc.h |   10 ++++------
- kernel/irq/irqdesc.c    |   14 ++++++++++++++
- 2 files changed, 18 insertions(+), 6 deletions(-)
+ arch/alpha/kernel/sys_jensen.c |    2 +-
+ arch/x86/kernel/topology.c     |    1 +
+ include/linux/interrupt.h      |    1 +
+ include/linux/irqdesc.h        |    7 +------
+ kernel/irq/manage.c            |   17 +++++++++++++++++
+ 5 files changed, 21 insertions(+), 7 deletions(-)
 
+--- a/arch/alpha/kernel/sys_jensen.c
++++ b/arch/alpha/kernel/sys_jensen.c
+@@ -7,7 +7,7 @@
+  *
+  * Code supporting the Jensen.
+  */
+-
++#include <linux/interrupt.h>
+ #include <linux/kernel.h>
+ #include <linux/types.h>
+ #include <linux/mm.h>
+--- a/arch/x86/kernel/topology.c
++++ b/arch/x86/kernel/topology.c
+@@ -25,6 +25,7 @@
+  *
+  * Send feedback to <colpatch@us.ibm.com>
+  */
++#include <linux/interrupt.h>
+ #include <linux/nodemask.h>
+ #include <linux/export.h>
+ #include <linux/mmzone.h>
+--- a/include/linux/interrupt.h
++++ b/include/linux/interrupt.h
+@@ -232,6 +232,7 @@ extern void devm_free_irq(struct device
+ # define local_irq_enable_in_hardirq()	local_irq_enable()
+ #endif
+ 
++bool irq_has_action(unsigned int irq);
+ extern void disable_irq_nosync(unsigned int irq);
+ extern bool disable_hardirq(unsigned int irq);
+ extern void disable_irq(unsigned int irq);
 --- a/include/linux/irqdesc.h
 +++ b/include/linux/irqdesc.h
-@@ -240,16 +240,14 @@ static inline bool irq_is_percpu_devid(u
- 	return irq_check_status_bit(irq, IRQ_PER_CPU_DEVID);
- }
- 
-+void __irq_set_lockdep_class(unsigned int irq, struct lock_class_key *lock_class,
-+			     struct lock_class_key *request_class);
- static inline void
- irq_set_lockdep_class(unsigned int irq, struct lock_class_key *lock_class,
- 		      struct lock_class_key *request_class)
+@@ -179,12 +179,7 @@ int handle_domain_nmi(struct irq_domain
+ /* Test to see if a driver has successfully requested an irq */
+ static inline int irq_desc_has_action(struct irq_desc *desc)
  {
--	struct irq_desc *desc = irq_to_desc(irq);
+-	return desc->action != NULL;
+-}
 -
--	if (desc) {
--		lockdep_set_class(&desc->lock, lock_class);
--		lockdep_set_class(&desc->request_mutex, request_class);
--	}
-+	if (IS_ENABLED(CONFIG_LOCKDEP))
-+		__irq_set_lockdep_class(irq, lock_class, request_class);
+-static inline int irq_has_action(unsigned int irq)
+-{
+-	return irq_desc_has_action(irq_to_desc(irq));
++	return desc && desc->action != NULL;
  }
  
- #endif
---- a/kernel/irq/irqdesc.c
-+++ b/kernel/irq/irqdesc.c
-@@ -968,3 +968,17 @@ unsigned int kstat_irqs_usr(unsigned int
- 	rcu_read_unlock();
- 	return sum;
+ /**
+--- a/kernel/irq/manage.c
++++ b/kernel/irq/manage.c
+@@ -2752,3 +2752,20 @@ int irq_set_irqchip_state(unsigned int i
+ 	return err;
  }
+ EXPORT_SYMBOL_GPL(irq_set_irqchip_state);
 +
-+#ifdef CONFIG_LOCKDEP
-+void __irq_set_lockdep_class(unsigned int irq, struct lock_class_key *lock_class,
-+			     struct lock_class_key *request_class)
++/**
++ * irq_has_action - Check whether an interrupt is requested
++ * @irq:	The linux irq number
++ *
++ * Returns: A snapshot of the current state
++ */
++bool irq_has_action(unsigned int irq)
 +{
-+	struct irq_desc *desc = irq_to_desc(irq);
++	bool res;
 +
-+	if (desc) {
-+		lockdep_set_class(&desc->lock, lock_class);
-+		lockdep_set_class(&desc->request_mutex, request_class);
-+	}
++	rcu_read_lock();
++	res = irq_desc_has_action(irq_to_desc(irq));
++	rcu_read_unlock();
++	return res;
 +}
-+EXPORT_SYMBOL_GPL(irq_set_lockdep_class);
-+#endif
++EXPORT_SYMBOL_GPL(irq_has_action);
 
