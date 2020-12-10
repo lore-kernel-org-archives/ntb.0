@@ -1,70 +1,48 @@
 Return-Path: <tglx@linutronix.de>
 Received: from galois.linutronix.de (Galois.linutronix.de. [193.142.43.55])
-        by gmr-mx.google.com with ESMTPS id cc25si209296edb.2.2020.12.10.11.42.35
+        by gmr-mx.google.com with ESMTPS id cc25si209295edb.2.2020.12.10.11.42.34
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 10 Dec 2020 11:42:35 -0800 (PST)
-Message-Id: <20201210194044.157283633@linutronix.de>
-Date: Thu, 10 Dec 2020 20:25:52 +0100
+        Thu, 10 Dec 2020 11:42:34 -0800 (PST)
+Message-Id: <20201210194044.065003856@linutronix.de>
+Date: Thu, 10 Dec 2020 20:25:51 +0100
 From: Thomas Gleixner <tglx@linutronix.de>
-Subject: 
- [patch 16/30] mfd: ab8500-debugfs: Remove the racy fiddling with irq_desc
+Subject: [patch 15/30] pinctrl: nomadik: Use irq_has_action()
 References: <20201210192536.118432146@linutronix.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-transfer-encoding: 8-bit
 To: LKML <linux-kernel@vger.kernel.org>
-Cc: Peter Zijlstra <peterz@infradead.org>, Marc Zyngier <maz@kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Lee Jones <lee.jones@linaro.org>, linux-arm-kernel@lists.infradead.org, "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>, Helge Deller <deller@gmx.de>, afzal mohammed <afzal.mohd.ma@gmail.com>, linux-parisc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, Christian Borntraeger <borntraeger@de.ibm.com>, Heiko Carstens <hca@linux.ibm.com>, linux-s390@vger.kernel.org, Jani Nikula <jani.nikula@linux.intel.com>, Joonas Lahtinen <joonas.lahtinen@linux.intel.com>, Rodrigo Vivi <rodrigo.vivi@intel.com>, David Airlie <airlied@linux.ie>, Daniel Vetter <daniel@ffwll.ch>, Pankaj Bharadiya <pankaj.laxminarayan.bharadiya@intel.com>, Chris Wilson <chris@chris-wilson.co.uk>, Wambui Karuga <wambui.karugax@gmail.com>, intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org, Tvrtko Ursulin <tvrtko.ursulin@linux.intel.com>, linux-gpio@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Rob Herring <robh@kernel.org>, Bjorn Helgaas <bhelgaas@google.com>, Michal Simek <michal.simek@xilinx.com>, linux-pci@vger.kernel.org, Karthikeyan Mitran <m.karthikeyan@mobiveil.co.in>, Hou Zhiqiang <Zhiqiang.Hou@nxp.com>, Tariq Toukan <tariqt@nvidia.com>, "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>, netdev@vger.kernel.org, linux-rdma@vger.kernel.org, Saeed Mahameed <saeedm@nvidia.com>, Leon Romanovsky <leon@kernel.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Stefano Stabellini <sstabellini@kernel.org>, xen-devel@lists.xenproject.org
+Cc: Peter Zijlstra <peterz@infradead.org>, Marc Zyngier <maz@kernel.org>, Linus Walleij <linus.walleij@linaro.org>, linux-arm-kernel@lists.infradead.org, linux-gpio@vger.kernel.org, "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>, Helge Deller <deller@gmx.de>, afzal mohammed <afzal.mohd.ma@gmail.com>, linux-parisc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, Christian Borntraeger <borntraeger@de.ibm.com>, Heiko Carstens <hca@linux.ibm.com>, linux-s390@vger.kernel.org, Jani Nikula <jani.nikula@linux.intel.com>, Joonas Lahtinen <joonas.lahtinen@linux.intel.com>, Rodrigo Vivi <rodrigo.vivi@intel.com>, David Airlie <airlied@linux.ie>, Daniel Vetter <daniel@ffwll.ch>, Pankaj Bharadiya <pankaj.laxminarayan.bharadiya@intel.com>, Chris Wilson <chris@chris-wilson.co.uk>, Wambui Karuga <wambui.karugax@gmail.com>, intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org, Tvrtko Ursulin <tvrtko.ursulin@linux.intel.com>, Lee Jones <lee.jones@linaro.org>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Rob Herring <robh@kernel.org>, Bjorn Helgaas <bhelgaas@google.com>, Michal Simek <michal.simek@xilinx.com>, linux-pci@vger.kernel.org, Karthikeyan Mitran <m.karthikeyan@mobiveil.co.in>, Hou Zhiqiang <Zhiqiang.Hou@nxp.com>, Tariq Toukan <tariqt@nvidia.com>, "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>, netdev@vger.kernel.org, linux-rdma@vger.kernel.org, Saeed Mahameed <saeedm@nvidia.com>, Leon Romanovsky <leon@kernel.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Stefano Stabellini <sstabellini@kernel.org>, xen-devel@lists.xenproject.org
 List-ID: <linux-ntb.googlegroups.com>
 
-First of all drivers have absolutely no business to dig into the internals
-of an irq descriptor. That's core code and subject to change. All of this
-information is readily available to /proc/interrupts in a safe and race
-free way.
-
-Remove the inspection code which is a blatant violation of subsystem
-boundaries and racy against concurrent modifications of the interrupt
-descriptor.
-
-Print the irq line instead so the information can be looked up in a sane
-way in /proc/interrupts.
+Let the core code do the fiddling with irq_desc.
 
 Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
 Cc: Linus Walleij <linus.walleij@linaro.org>
-Cc: Lee Jones <lee.jones@linaro.org>
 Cc: linux-arm-kernel@lists.infradead.org
+Cc: linux-gpio@vger.kernel.org
 ---
- drivers/mfd/ab8500-debugfs.c |   16 +++-------------
- 1 file changed, 3 insertions(+), 13 deletions(-)
+ drivers/pinctrl/nomadik/pinctrl-nomadik.c |    3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
---- a/drivers/mfd/ab8500-debugfs.c
-+++ b/drivers/mfd/ab8500-debugfs.c
-@@ -1513,24 +1513,14 @@ static int ab8500_interrupts_show(struct
- {
- 	int line;
+--- a/drivers/pinctrl/nomadik/pinctrl-nomadik.c
++++ b/drivers/pinctrl/nomadik/pinctrl-nomadik.c
+@@ -948,7 +948,6 @@ static void nmk_gpio_dbg_show_one(struct
+ 			   (mode < 0) ? "unknown" : modes[mode]);
+ 	} else {
+ 		int irq = chip->to_irq(chip, offset);
+-		struct irq_desc	*desc = irq_to_desc(irq);
+ 		const int pullidx = pull ? 1 : 0;
+ 		int val;
+ 		static const char * const pulls[] = {
+@@ -969,7 +968,7 @@ static void nmk_gpio_dbg_show_one(struct
+ 		 * This races with request_irq(), set_irq_type(),
+ 		 * and set_irq_wake() ... but those are "rare".
+ 		 */
+-		if (irq > 0 && desc && desc->action) {
++		if (irq > 0 && irq_has_action(irq)) {
+ 			char *trigger;
  
--	seq_puts(s, "name: number:  number of: wake:\n");
-+	seq_puts(s, "name: number: irq: number of: wake:\n");
- 
- 	for (line = 0; line < num_interrupt_lines; line++) {
--		struct irq_desc *desc = irq_to_desc(line + irq_first);
--
--		seq_printf(s, "%3i:  %6i %4i",
-+		seq_printf(s, "%3i:  %6i %4i %4i\n",
- 			   line,
-+			   line + irq_first,
- 			   num_interrupts[line],
- 			   num_wake_interrupts[line]);
--
--		if (desc && desc->name)
--			seq_printf(s, "-%-8s", desc->name);
--		if (desc && desc->action) {
--			struct irqaction *action = desc->action;
--
--			seq_printf(s, "  %s", action->name);
--			while ((action = action->next) != NULL)
--				seq_printf(s, ", %s", action->name);
- 		}
- 		seq_putc(s, '\n');
- 	}
+ 			if (nmk_chip->edge_rising & BIT(offset))
 
