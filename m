@@ -1,105 +1,74 @@
 Return-Path: <tglx@linutronix.de>
 Received: from galois.linutronix.de (Galois.linutronix.de. [2a0a:51c0:0:12e:550::1])
-        by gmr-mx.google.com with ESMTPS id u25si116780lfd.11.2020.12.10.11.42.16
+        by gmr-mx.google.com with ESMTPS id y21si196543lfl.7.2020.12.10.11.42.15
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 10 Dec 2020 11:42:16 -0800 (PST)
-Message-Id: <20201210194042.548936472@linutronix.de>
-Date: Thu, 10 Dec 2020 20:25:37 +0100
+        Thu, 10 Dec 2020 11:42:15 -0800 (PST)
+Message-Id: <20201210192536.118432146@linutronix.de>
+Date: Thu, 10 Dec 2020 20:25:36 +0100
 From: Thomas Gleixner <tglx@linutronix.de>
-Subject: [patch 01/30] genirq: Move irq_has_action() into core code
-References: <20201210192536.118432146@linutronix.de>
+Subject: [patch 00/30] genirq: Treewide hunt for irq descriptor abuse and
+ assorted fixes
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-transfer-encoding: 8-bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 To: LKML <linux-kernel@vger.kernel.org>
 Cc: Peter Zijlstra <peterz@infradead.org>, Marc Zyngier <maz@kernel.org>, "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>, Helge Deller <deller@gmx.de>, afzal mohammed <afzal.mohd.ma@gmail.com>, linux-parisc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, linux-arm-kernel@lists.infradead.org, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, Christian Borntraeger <borntraeger@de.ibm.com>, Heiko Carstens <hca@linux.ibm.com>, linux-s390@vger.kernel.org, Jani Nikula <jani.nikula@linux.intel.com>, Joonas Lahtinen <joonas.lahtinen@linux.intel.com>, Rodrigo Vivi <rodrigo.vivi@intel.com>, David Airlie <airlied@linux.ie>, Daniel Vetter <daniel@ffwll.ch>, Pankaj Bharadiya <pankaj.laxminarayan.bharadiya@intel.com>, Chris Wilson <chris@chris-wilson.co.uk>, Wambui Karuga <wambui.karugax@gmail.com>, intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org, Tvrtko Ursulin <tvrtko.ursulin@linux.intel.com>, Linus Walleij <linus.walleij@linaro.org>, linux-gpio@vger.kernel.org, Lee Jones <lee.jones@linaro.org>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Rob Herring <robh@kernel.org>, Bjorn Helgaas <bhelgaas@google.com>, Michal Simek <michal.simek@xilinx.com>, linux-pci@vger.kernel.org, Karthikeyan Mitran <m.karthikeyan@mobiveil.co.in>, Hou Zhiqiang <Zhiqiang.Hou@nxp.com>, Tariq Toukan <tariqt@nvidia.com>, "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>, netdev@vger.kernel.org, linux-rdma@vger.kernel.org, Saeed Mahameed <saeedm@nvidia.com>, Leon Romanovsky <leon@kernel.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Stefano Stabellini <sstabellini@kernel.org>, xen-devel@lists.xenproject.org
 List-ID: <linux-ntb.googlegroups.com>
 
-This function uses irq_to_desc() and is going to be used by modules to
-replace the open coded irq_to_desc() (ab)usage. The final goal is to remove
-the export of irq_to_desc() so driver cannot fiddle with it anymore.
-
-Move it into the core code and fixup the usage sites to include the proper
-header.
-
-Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
----
- arch/alpha/kernel/sys_jensen.c |    2 +-
- arch/x86/kernel/topology.c     |    1 +
- include/linux/interrupt.h      |    1 +
- include/linux/irqdesc.h        |    7 +------
- kernel/irq/manage.c            |   17 +++++++++++++++++
- 5 files changed, 21 insertions(+), 7 deletions(-)
-
---- a/arch/alpha/kernel/sys_jensen.c
-+++ b/arch/alpha/kernel/sys_jensen.c
-@@ -7,7 +7,7 @@
-  *
-  * Code supporting the Jensen.
-  */
--
-+#include <linux/interrupt.h>
- #include <linux/kernel.h>
- #include <linux/types.h>
- #include <linux/mm.h>
---- a/arch/x86/kernel/topology.c
-+++ b/arch/x86/kernel/topology.c
-@@ -25,6 +25,7 @@
-  *
-  * Send feedback to <colpatch@us.ibm.com>
-  */
-+#include <linux/interrupt.h>
- #include <linux/nodemask.h>
- #include <linux/export.h>
- #include <linux/mmzone.h>
---- a/include/linux/interrupt.h
-+++ b/include/linux/interrupt.h
-@@ -232,6 +232,7 @@ extern void devm_free_irq(struct device
- # define local_irq_enable_in_hardirq()	local_irq_enable()
- #endif
- 
-+bool irq_has_action(unsigned int irq);
- extern void disable_irq_nosync(unsigned int irq);
- extern bool disable_hardirq(unsigned int irq);
- extern void disable_irq(unsigned int irq);
---- a/include/linux/irqdesc.h
-+++ b/include/linux/irqdesc.h
-@@ -179,12 +179,7 @@ int handle_domain_nmi(struct irq_domain
- /* Test to see if a driver has successfully requested an irq */
- static inline int irq_desc_has_action(struct irq_desc *desc)
- {
--	return desc->action != NULL;
--}
--
--static inline int irq_has_action(unsigned int irq)
--{
--	return irq_desc_has_action(irq_to_desc(irq));
-+	return desc && desc->action != NULL;
- }
- 
- /**
---- a/kernel/irq/manage.c
-+++ b/kernel/irq/manage.c
-@@ -2752,3 +2752,20 @@ int irq_set_irqchip_state(unsigned int i
- 	return err;
- }
- EXPORT_SYMBOL_GPL(irq_set_irqchip_state);
-+
-+/**
-+ * irq_has_action - Check whether an interrupt is requested
-+ * @irq:	The linux irq number
-+ *
-+ * Returns: A snapshot of the current state
-+ */
-+bool irq_has_action(unsigned int irq)
-+{
-+	bool res;
-+
-+	rcu_read_lock();
-+	res = irq_desc_has_action(irq_to_desc(irq));
-+	rcu_read_unlock();
-+	return res;
-+}
-+EXPORT_SYMBOL_GPL(irq_has_action);
-
+QSByZWNlbnQgcmVxdWVzdCB0byBleHBvcnQga3N0YXRfaXJxcygpIHBvaW50ZWQgdG8gYSBjb3B5
+IG9mIHRoZSBzYW1lIGluCnRoZSBpOTE1IGNvZGUsIHdoaWNoIG1hZGUgbWUgbG9vayBmb3IgZnVy
+dGhlciB1c2FnZSBvZiBpcnEgZGVzY3JpcHRvcnMgaW4KZHJpdmVycy4KClRoZSB1c2FnZSBpbiBk
+cml2ZXJzIHJhbmdlcyBmcm9tIGNyZWF0aXZlIHRvIGJyb2tlbiBpbiBhbGwgY29sb3Vycy4KCmly
+cWRlc2MuaCBjbGVhcmx5IHNheXMgdGhhdCB0aGlzIGlzIGNvcmUgZnVuY3Rpb25hbGl0eSBhbmQg
+dGhlIGZhY3QgQyBkb2VzCm5vdCBhbGxvdyBmdWxsIGVuY2Fwc3VsYXRpb24gaXMgbm90IGEganVz
+dGlmaWNhdGlvbiB0byBmaWRkbGUgd2l0aCBpdCBqdXN0CmJlY2F1c2UuIEl0IHRvb2sgdXMgYSBs
+b3Qgb2YgZWZmb3J0IHRvIG1ha2UgdGhlIGNvcmUgZnVuY3Rpb25hbGl0eSBwcm92aWRlCndoYXQg
+ZHJpdmVycyBuZWVkLgoKSWYgdGhlcmUgaXMgYSBzaG9ydGNvbWluZywgaXQncyBub3QgYXNrZWQg
+dG9vIG11Y2ggdG8gdGFsayB0byB0aGUgcmVsZXZhbnQKbWFpbnRhaW5lcnMgaW5zdGVhZCBvZiBn
+b2luZyBvZmYgYW5kIGZpZGRsaW5nIHdpdGggdGhlIGd1dHMgb2YgaW50ZXJydXB0CmRlc2NyaXB0
+b3JzIGFuZCBvZnRlbiBlbm91Z2ggd2l0aG91dCB1bmRlcnN0YW5kaW5nIGxpZmV0aW1lIGFuZCBs
+b2NraW5nCnJ1bGVzLgoKQXMgcGVvcGxlIGluc2lzdCBvbiBub3QgcmVzcGVjdGluZyBib3VuZGFy
+aWVzLCB0aGlzIHNlcmllcyBjbGVhbnMgdXAgdGhlCihhYil1c2UgYW5kIGF0IHRoZSBlbmQgcmVt
+b3ZlcyB0aGUgZXhwb3J0IG9mIGlycV90b19kZXNjKCkgdG8gbWFrZSBpdCBhdApsZWFzdCBoYXJk
+ZXIuIEFsbCBsZWdpdGltYXRlIHVzZXJzIG9mIHRoaXMgYXJlIGJ1aWx0IGluLgoKV2hpbGUgYXQg
+aXQgSSBzdHVtYmxlZCBvdmVyIHNvbWUgb3RoZXIgb2RkaXRpZXMgcmVsYXRlZCB0byBpbnRlcnJ1
+cHQKY291bnRpbmcgYW5kIGNsZWFuZWQgdGhlbSB1cCBhcyB3ZWxsLgoKVGhlIHNlcmllcyBhcHBs
+aWVzIG9uIHRvcCBvZgoKICAgZ2l0Oi8vZ2l0Lmtlcm5lbC5vcmcvcHViL3NjbS9saW51eC9rZXJu
+ZWwvZ2l0L3RpcC90aXAuZ2l0IGlycS9jb3JlCgphbmQgaXMgYWxzbyBhdmFpbGFibGUgZnJvbSBn
+aXQ6CgogIGdpdDovL2dpdC5rZXJuZWwub3JnL3B1Yi9zY20vbGludXgva2VybmVsL2dpdC90Z2x4
+L2RldmVsLmdpdCBnZW5pcnEKClRoYW5rcywKCgl0Z2x4Ci0tLQogYXJjaC9hbHBoYS9rZXJuZWwv
+c3lzX2plbnNlbi5jICAgICAgICAgICAgICAgICAgICAgICB8ICAgIDIgCiBhcmNoL2FybS9rZXJu
+ZWwvc21wLmMgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgICAgMiAKIGFyY2gvcGFy
+aXNjL2tlcm5lbC9pcnEuYyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAgICA3IAogYXJj
+aC9zMzkwL2tlcm5lbC9pcnEuYyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB8ICAgIDIg
+CiBhcmNoL3g4Ni9rZXJuZWwvdG9wb2xvZ3kuYyAgICAgICAgICAgICAgICAgICAgICAgICAgIHwg
+ICAgMSAKIGFyY2gvYXJtNjQva2VybmVsL3NtcC5jICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgfCAgICAyIAogZHJpdmVycy9ncHUvZHJtL2k5MTUvZGlzcGxheS9pbnRlbF9scGVfYXVkaW8u
+YyAgICAgICB8ICAgIDQgCiBkcml2ZXJzL2dwdS9kcm0vaTkxNS9pOTE1X2lycS5jICAgICAgICAg
+ICAgICAgICAgICAgIHwgICAzNCArKysKIGRyaXZlcnMvZ3B1L2RybS9pOTE1L2k5MTVfcG11LmMg
+ICAgICAgICAgICAgICAgICAgICAgfCAgIDE4IC0KIGRyaXZlcnMvZ3B1L2RybS9pOTE1L2k5MTVf
+cG11LmggICAgICAgICAgICAgICAgICAgICAgfCAgICA4IAogZHJpdmVycy9tZmQvYWI4NTAwLWRl
+YnVnZnMuYyAgICAgICAgICAgICAgICAgICAgICAgICB8ICAgMTYgLQogZHJpdmVycy9uZXQvZXRo
+ZXJuZXQvbWVsbGFub3gvbWx4NC9lbl9jcS5jICAgICAgICAgICB8ICAgIDggCiBkcml2ZXJzL25l
+dC9ldGhlcm5ldC9tZWxsYW5veC9tbHg0L2VuX3J4LmMgICAgICAgICAgIHwgICAgNiAKIGRyaXZl
+cnMvbmV0L2V0aGVybmV0L21lbGxhbm94L21seDQvbWx4NF9lbi5oICAgICAgICAgfCAgICAzIAog
+ZHJpdmVycy9uZXQvZXRoZXJuZXQvbWVsbGFub3gvbWx4NS9jb3JlL2VuLmggICAgICAgICB8ICAg
+IDIgCiBkcml2ZXJzL25ldC9ldGhlcm5ldC9tZWxsYW5veC9tbHg1L2NvcmUvZW5fbWFpbi5jICAg
+IHwgICAgMiAKIGRyaXZlcnMvbmV0L2V0aGVybmV0L21lbGxhbm94L21seDUvY29yZS9lbl90eHJ4
+LmMgICAgfCAgICA2IAogZHJpdmVycy9udGIvbXNpLmMgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICB8ICAgIDQgCiBkcml2ZXJzL3BjaS9jb250cm9sbGVyL21vYml2ZWlsL3BjaWUt
+bW9iaXZlaWwtaG9zdC5jIHwgICAgOCAKIGRyaXZlcnMvcGNpL2NvbnRyb2xsZXIvcGNpZS14aWxp
+bngtbndsLmMgICAgICAgICAgICAgfCAgICA4IAogZHJpdmVycy9waW5jdHJsL25vbWFkaWsvcGlu
+Y3RybC1ub21hZGlrLmMgICAgICAgICAgICB8ICAgIDMgCiBkcml2ZXJzL3hlbi9ldmVudHMvZXZl
+bnRzX2Jhc2UuYyAgICAgICAgICAgICAgICAgICAgIHwgIDE3MiArKysrKysrKysrKy0tLS0tLS0t
+CiBkcml2ZXJzL3hlbi9ldnRjaG4uYyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwg
+ICAzNCAtLS0KIGluY2x1ZGUvbGludXgvaW50ZXJydXB0LmggICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgfCAgICAxIAogaW5jbHVkZS9saW51eC9pcnEuaCAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICB8ICAgIDcgCiBpbmNsdWRlL2xpbnV4L2lycWRlc2MuaCAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgIHwgICA0MCArLS0tCiBpbmNsdWRlL2xpbnV4L2tlcm5lbF9zdGF0Lmgg
+ICAgICAgICAgICAgICAgICAgICAgICAgIHwgICAgMSAKIGtlcm5lbC9pcnEvaXJxZGVzYy5jICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAgIDQyICsrLS0KIGtlcm5lbC9pcnEvbWFu
+YWdlLmMgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAgIDM3ICsrKysKIGtlcm5l
+bC9pcnEvcHJvYy5jICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAgICA1IAog
+MzAgZmlsZXMgY2hhbmdlZCwgMjYzIGluc2VydGlvbnMoKyksIDIyMiBkZWxldGlvbnMoLSkKCgo=
