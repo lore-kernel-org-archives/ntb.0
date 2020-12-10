@@ -1,107 +1,71 @@
 Return-Path: <tglx@linutronix.de>
 Received: from galois.linutronix.de (Galois.linutronix.de. [2a0a:51c0:0:12e:550::1])
-        by gmr-mx.google.com with ESMTPS id r16si184111edx.1.2020.12.10.11.42.40
+        by gmr-mx.google.com with ESMTPS id h19si215673ljh.7.2020.12.10.11.42.39
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 10 Dec 2020 11:42:40 -0800 (PST)
-Message-Id: <20201210194044.580936243@linutronix.de>
-Date: Thu, 10 Dec 2020 20:25:56 +0100
+        Thu, 10 Dec 2020 11:42:39 -0800 (PST)
+Message-Id: <20201210194044.473308721@linutronix.de>
+Date: Thu, 10 Dec 2020 20:25:55 +0100
 From: Thomas Gleixner <tglx@linutronix.de>
-Subject: [patch 20/30] net/mlx4: Replace irq_to_desc() abuse
+Subject: [patch 19/30] PCI: mobiveil: Use irq_data_get_irq_chip_data()
 References: <20201210192536.118432146@linutronix.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-transfer-encoding: 8-bit
 To: LKML <linux-kernel@vger.kernel.org>
-Cc: Peter Zijlstra <peterz@infradead.org>, Marc Zyngier <maz@kernel.org>, Tariq Toukan <tariqt@nvidia.com>, "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>, netdev@vger.kernel.org, linux-rdma@vger.kernel.org, "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>, Helge Deller <deller@gmx.de>, afzal mohammed <afzal.mohd.ma@gmail.com>, linux-parisc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, linux-arm-kernel@lists.infradead.org, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, Christian Borntraeger <borntraeger@de.ibm.com>, Heiko Carstens <hca@linux.ibm.com>, linux-s390@vger.kernel.org, Jani Nikula <jani.nikula@linux.intel.com>, Joonas Lahtinen <joonas.lahtinen@linux.intel.com>, Rodrigo Vivi <rodrigo.vivi@intel.com>, David Airlie <airlied@linux.ie>, Daniel Vetter <daniel@ffwll.ch>, Pankaj Bharadiya <pankaj.laxminarayan.bharadiya@intel.com>, Chris Wilson <chris@chris-wilson.co.uk>, Wambui Karuga <wambui.karugax@gmail.com>, intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org, Tvrtko Ursulin <tvrtko.ursulin@linux.intel.com>, Linus Walleij <linus.walleij@linaro.org>, linux-gpio@vger.kernel.org, Lee Jones <lee.jones@linaro.org>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Rob Herring <robh@kernel.org>, Bjorn Helgaas <bhelgaas@google.com>, Michal Simek <michal.simek@xilinx.com>, linux-pci@vger.kernel.org, Karthikeyan Mitran <m.karthikeyan@mobiveil.co.in>, Hou Zhiqiang <Zhiqiang.Hou@nxp.com>, Saeed Mahameed <saeedm@nvidia.com>, Leon Romanovsky <leon@kernel.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Stefano Stabellini <sstabellini@kernel.org>, xen-devel@lists.xenproject.org
+Cc: Peter Zijlstra <peterz@infradead.org>, Marc Zyngier <maz@kernel.org>, Karthikeyan Mitran <m.karthikeyan@mobiveil.co.in>, Hou Zhiqiang <Zhiqiang.Hou@nxp.com>, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Rob Herring <robh@kernel.org>, Bjorn Helgaas <bhelgaas@google.com>, linux-pci@vger.kernel.org, "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>, Helge Deller <deller@gmx.de>, afzal mohammed <afzal.mohd.ma@gmail.com>, linux-parisc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, linux-arm-kernel@lists.infradead.org, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, Christian Borntraeger <borntraeger@de.ibm.com>, Heiko Carstens <hca@linux.ibm.com>, linux-s390@vger.kernel.org, Jani Nikula <jani.nikula@linux.intel.com>, Joonas Lahtinen <joonas.lahtinen@linux.intel.com>, Rodrigo Vivi <rodrigo.vivi@intel.com>, David Airlie <airlied@linux.ie>, Daniel Vetter <daniel@ffwll.ch>, Pankaj Bharadiya <pankaj.laxminarayan.bharadiya@intel.com>, Chris Wilson <chris@chris-wilson.co.uk>, Wambui Karuga <wambui.karugax@gmail.com>, intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org, Tvrtko Ursulin <tvrtko.ursulin@linux.intel.com>, Linus Walleij <linus.walleij@linaro.org>, linux-gpio@vger.kernel.org, Lee Jones <lee.jones@linaro.org>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com, Michal Simek <michal.simek@xilinx.com>, Tariq Toukan <tariqt@nvidia.com>, "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>, netdev@vger.kernel.org, linux-rdma@vger.kernel.org, Saeed Mahameed <saeedm@nvidia.com>, Leon Romanovsky <leon@kernel.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Stefano Stabellini <sstabellini@kernel.org>, xen-devel@lists.xenproject.org
 List-ID: <linux-ntb.googlegroups.com>
 
-No driver has any business with the internals of an interrupt
-descriptor. Storing a pointer to it just to use yet another helper at the
-actual usage site to retrieve the affinity mask is creative at best. Just
-because C does not allow encapsulation does not mean that the kernel has no
-limits.
+Going through a full irq descriptor lookup instead of just using the proper
+helper function which provides direct access is suboptimal.
 
-Retrieve a pointer to the affinity mask itself and use that. It's still
-using an interface which is usually not for random drivers, but definitely
-less hideous than the previous hack.
+In fact it _is_ wrong because the chip callback needs to get the chip data
+which is relevant for the chip while using the irq descriptor variant
+returns the irq chip data of the top level chip of a hierarchy. It does not
+matter in this case because the chip is the top level chip, but that
+doesn't make it more correct.
 
 Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
-Cc: Tariq Toukan <tariqt@nvidia.com>
-Cc: "David S. Miller" <davem@davemloft.net>
-Cc: Jakub Kicinski <kuba@kernel.org>
-Cc: netdev@vger.kernel.org
-Cc: linux-rdma@vger.kernel.org
+Cc: Karthikeyan Mitran <m.karthikeyan@mobiveil.co.in>
+Cc: Hou Zhiqiang <Zhiqiang.Hou@nxp.com>
+Cc: Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>
+Cc: Rob Herring <robh@kernel.org>
+Cc: Bjorn Helgaas <bhelgaas@google.com>
+Cc: linux-pci@vger.kernel.org
 ---
- drivers/net/ethernet/mellanox/mlx4/en_cq.c   |    8 +++-----
- drivers/net/ethernet/mellanox/mlx4/en_rx.c   |    6 +-----
- drivers/net/ethernet/mellanox/mlx4/mlx4_en.h |    3 ++-
- 3 files changed, 6 insertions(+), 11 deletions(-)
+ drivers/pci/controller/mobiveil/pcie-mobiveil-host.c |    8 ++------
+ 1 file changed, 2 insertions(+), 6 deletions(-)
 
---- a/drivers/net/ethernet/mellanox/mlx4/en_cq.c
-+++ b/drivers/net/ethernet/mellanox/mlx4/en_cq.c
-@@ -90,7 +90,7 @@ int mlx4_en_activate_cq(struct mlx4_en_p
- 			int cq_idx)
+--- a/drivers/pci/controller/mobiveil/pcie-mobiveil-host.c
++++ b/drivers/pci/controller/mobiveil/pcie-mobiveil-host.c
+@@ -306,13 +306,11 @@ int mobiveil_host_init(struct mobiveil_p
+ 
+ static void mobiveil_mask_intx_irq(struct irq_data *data)
  {
- 	struct mlx4_en_dev *mdev = priv->mdev;
--	int err = 0;
-+	int irq, err = 0;
- 	int timestamp_en = 0;
- 	bool assigned_eq = false;
+-	struct irq_desc *desc = irq_to_desc(data->irq);
+-	struct mobiveil_pcie *pcie;
++	struct mobiveil_pcie *pcie = irq_data_get_irq_chip_data(data);
+ 	struct mobiveil_root_port *rp;
+ 	unsigned long flags;
+ 	u32 mask, shifted_val;
  
-@@ -116,10 +116,8 @@ int mlx4_en_activate_cq(struct mlx4_en_p
+-	pcie = irq_desc_get_chip_data(desc);
+ 	rp = &pcie->rp;
+ 	mask = 1 << ((data->hwirq + PAB_INTX_START) - 1);
+ 	raw_spin_lock_irqsave(&rp->intx_mask_lock, flags);
+@@ -324,13 +322,11 @@ static void mobiveil_mask_intx_irq(struc
  
- 			assigned_eq = true;
- 		}
--
--		cq->irq_desc =
--			irq_to_desc(mlx4_eq_get_irq(mdev->dev,
--						    cq->vector));
-+		irq = mlx4_eq_get_irq(mdev->dev, cq->vector);
-+		cq->aff_mask = irq_get_affinity_mask(irq);
- 	} else {
- 		/* For TX we use the same irq per
- 		ring we assigned for the RX    */
---- a/drivers/net/ethernet/mellanox/mlx4/en_rx.c
-+++ b/drivers/net/ethernet/mellanox/mlx4/en_rx.c
-@@ -959,8 +959,6 @@ int mlx4_en_poll_rx_cq(struct napi_struc
+ static void mobiveil_unmask_intx_irq(struct irq_data *data)
+ {
+-	struct irq_desc *desc = irq_to_desc(data->irq);
+-	struct mobiveil_pcie *pcie;
++	struct mobiveil_pcie *pcie = irq_data_get_irq_chip_data(data);
+ 	struct mobiveil_root_port *rp;
+ 	unsigned long flags;
+ 	u32 shifted_val, mask;
  
- 	/* If we used up all the quota - we're probably not done yet... */
- 	if (done == budget || !clean_complete) {
--		const struct cpumask *aff;
--		struct irq_data *idata;
- 		int cpu_curr;
- 
- 		/* in case we got here because of !clean_complete */
-@@ -969,10 +967,8 @@ int mlx4_en_poll_rx_cq(struct napi_struc
- 		INC_PERF_COUNTER(priv->pstats.napi_quota);
- 
- 		cpu_curr = smp_processor_id();
--		idata = irq_desc_get_irq_data(cq->irq_desc);
--		aff = irq_data_get_affinity_mask(idata);
- 
--		if (likely(cpumask_test_cpu(cpu_curr, aff)))
-+		if (likely(cpumask_test_cpu(cpu_curr, cq->aff_mask)))
- 			return budget;
- 
- 		/* Current cpu is not according to smp_irq_affinity -
---- a/drivers/net/ethernet/mellanox/mlx4/mlx4_en.h
-+++ b/drivers/net/ethernet/mellanox/mlx4/mlx4_en.h
-@@ -46,6 +46,7 @@
- #endif
- #include <linux/cpu_rmap.h>
- #include <linux/ptp_clock_kernel.h>
-+#include <linux/irq.h>
- #include <net/xdp.h>
- 
- #include <linux/mlx4/device.h>
-@@ -380,7 +381,7 @@ struct mlx4_en_cq {
- 	struct mlx4_cqe *buf;
- #define MLX4_EN_OPCODE_ERROR	0x1e
- 
--	struct irq_desc *irq_desc;
-+	const struct cpumask *aff_mask;
- };
- 
- struct mlx4_en_port_profile {
+-	pcie = irq_desc_get_chip_data(desc);
+ 	rp = &pcie->rp;
+ 	mask = 1 << ((data->hwirq + PAB_INTX_START) - 1);
+ 	raw_spin_lock_irqsave(&rp->intx_mask_lock, flags);
 
