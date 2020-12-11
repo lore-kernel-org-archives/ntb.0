@@ -1,126 +1,77 @@
-Return-Path: <Andrew.Cooper3@citrix.com>
-Received: from esa3.hc3370-68.iphmx.com (esa3.hc3370-68.iphmx.com. [216.71.145.155])
-        by gmr-mx.google.com with ESMTPS id z94si454742qtc.0.2020.12.11.14.21.40
+Return-Path: <tglx@linutronix.de>
+Received: from galois.linutronix.de (Galois.linutronix.de. [2a0a:51c0:0:12e:550::1])
+        by gmr-mx.google.com with ESMTPS id v7si569363edj.5.2020.12.11.14.07.24
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 11 Dec 2020 14:21:40 -0800 (PST)
-Subject: Re: [patch 27/30] xen/events: Only force affinity mask for percpu
- interrupts
-References: <20201210192536.118432146@linutronix.de>
- <20201210194045.250321315@linutronix.de>
- <7f7af60f-567f-cdef-f8db-8062a44758ce@oracle.com>
- <2164a0ce-0e0d-c7dc-ac97-87c8f384ad82@suse.com>
- <871rfwiknd.fsf@nanos.tec.linutronix.de>
- <9806692f-24a3-4b6f-ae55-86bd66481271@oracle.com>
- <877dpoghio.fsf@nanos.tec.linutronix.de>
-From: Andrew Cooper <andrew.cooper3@citrix.com>
-Message-ID: <edbedd7a-4463-d934-73c9-fa046c19cf6d@citrix.com>
-Date: Fri, 11 Dec 2020 22:21:19 +0000
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 11 Dec 2020 14:07:24 -0800 (PST)
+From: Thomas Gleixner <tglx@linutronix.de>
+Subject: Re: [patch 03/30] genirq: Move irq_set_lockdep_class() to core
+In-Reply-To: <87h7osgifc.fsf@nanos.tec.linutronix.de>
+References: <20201210192536.118432146@linutronix.de> <20201210194042.860029489@linutronix.de> <CAHp75Vc-2OjE2uwvNRiyLMQ8GSN3P7SehKD-yf229_7ocaktiw@mail.gmail.com> <87h7osgifc.fsf@nanos.tec.linutronix.de>
+Date: Fri, 11 Dec 2020 23:07:22 +0100
+Message-ID: <87360cgfol.fsf@nanos.tec.linutronix.de>
 MIME-Version: 1.0
-In-Reply-To: <877dpoghio.fsf@nanos.tec.linutronix.de>
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
-Content-Language: en-GB
-Return-Path: andrew.cooper3@citrix.com
-To: Thomas Gleixner <tglx@linutronix.de>, boris.ostrovsky@oracle.com, =?UTF-8?B?SsO8cmdlbiBHcm/Dnw==?= <jgross@suse.com>, LKML <linux-kernel@vger.kernel.org>
-Cc: Peter Zijlstra <peterz@infradead.org>, Marc Zyngier <maz@kernel.org>, Stefano Stabellini <sstabellini@kernel.org>, xen-devel@lists.xenproject.org, "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>, Helge Deller <deller@gmx.de>, afzal
- mohammed <afzal.mohd.ma@gmail.com>, linux-parisc@vger.kernel.org, Russell
- King <linux@armlinux.org.uk>, linux-arm-kernel@lists.infradead.org, Mark
- Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, Christian Borntraeger <borntraeger@de.ibm.com>, Heiko Carstens <hca@linux.ibm.com>, linux-s390@vger.kernel.org, Jani Nikula <jani.nikula@linux.intel.com>, Joonas Lahtinen <joonas.lahtinen@linux.intel.com>, Rodrigo Vivi <rodrigo.vivi@intel.com>, David Airlie <airlied@linux.ie>, Daniel Vetter <daniel@ffwll.ch>, Pankaj Bharadiya <pankaj.laxminarayan.bharadiya@intel.com>, Chris Wilson <chris@chris-wilson.co.uk>, Wambui Karuga <wambui.karugax@gmail.com>, intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org, Tvrtko
- Ursulin <tvrtko.ursulin@linux.intel.com>, Linus Walleij <linus.walleij@linaro.org>, linux-gpio@vger.kernel.org, Lee Jones <lee.jones@linaro.org>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Rob Herring <robh@kernel.org>, Bjorn Helgaas <bhelgaas@google.com>, Michal
- Simek <michal.simek@xilinx.com>, linux-pci@vger.kernel.org, Karthikeyan
- Mitran <m.karthikeyan@mobiveil.co.in>, Hou Zhiqiang <Zhiqiang.Hou@nxp.com>, Tariq Toukan <tariqt@nvidia.com>, "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>, netdev@vger.kernel.org, linux-rdma@vger.kernel.org, Saeed Mahameed <saeedm@nvidia.com>, Leon
- Romanovsky <leon@kernel.org>
+Content-Type: text/plain
+To: Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc: LKML <linux-kernel@vger.kernel.org>, Peter Zijlstra <peterz@infradead.org>, Marc Zyngier <maz@kernel.org>, "James E.J.
+ Bottomley" <James.Bottomley@hansenpartnership.com>, Helge Deller <deller@gmx.de>, afzal mohammed <afzal.mohd.ma@gmail.com>, linux-parisc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, Christian Borntraeger <borntraeger@de.ibm.com>, Heiko Carstens <hca@linux.ibm.com>, linux-s390@vger.kernel.org, Jani Nikula <jani.nikula@linux.intel.com>, Joonas Lahtinen <joonas.lahtinen@linux.intel.com>, Rodrigo Vivi <rodrigo.vivi@intel.com>, David Airlie <airlied@linux.ie>, Daniel Vetter <daniel@ffwll.ch>, Pankaj Bharadiya <pankaj.laxminarayan.bharadiya@intel.com>, Chris Wilson <chris@chris-wilson.co.uk>, Wambui Karuga <wambui.karugax@gmail.com>, intel-gfx <intel-gfx@lists.freedesktop.org>, dri-devel <dri-devel@lists.freedesktop.org>, Tvrtko Ursulin <tvrtko.ursulin@linux.intel.com>, Linus Walleij <linus.walleij@linaro.org>, "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>, Lee Jones <lee.jones@linaro.org>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Rob Herring <robh@kernel.org>, Bjorn Helgaas <bhelgaas@google.com>, Michal Simek <michal.simek@xilinx.com>, linux-pci <linux-pci@vger.kernel.org>, Karthikeyan Mitran <m.karthikeyan@mobiveil.co.in>, Hou Zhiqiang <Zhiqiang.Hou@nxp.com>, Tariq Toukan <tariqt@nvidia.com>, "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>, netdev <netdev@vger.kernel.org>, "open
+ list:HFI1 DRIVER" <linux-rdma@vger.kernel.org>, Saeed Mahameed <saeedm@nvidia.com>, Leon Romanovsky <leon@kernel.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Stefano Stabellini <sstabellini@kernel.org>, xen-devel@lists.xenproject.org
 List-ID: <linux-ntb.googlegroups.com>
 
-On 11/12/2020 21:27, Thomas Gleixner wrote:
-> On Fri, Dec 11 2020 at 09:29, boris ostrovsky wrote:
->
->> On 12/11/20 7:37 AM, Thomas Gleixner wrote:
->>> On Fri, Dec 11 2020 at 13:10, Jürgen Groß wrote:
->>>> On 11.12.20 00:20, boris.ostrovsky@oracle.com wrote:
->>>>> On 12/10/20 2:26 PM, Thomas Gleixner wrote:
->>>>>> Change the implementation so that the channel is bound to CPU0 at the XEN
->>>>>> level and leave the affinity mask alone. At startup of the interrupt
->>>>>> affinity will be assigned out of the affinity mask and the XEN binding will
->>>>>> be updated.
->>>>> If that's the case then I wonder whether we need this call at all and instead bind at startup time.
->>>> After some discussion with Thomas on IRC and xen-devel archaeology the
->>>> result is: this will be needed especially for systems running on a
->>>> single vcpu (e.g. small guests), as the .irq_set_affinity() callback
->>>> won't be called in this case when starting the irq.
->> On UP are we not then going to end up with an empty affinity mask? Or
->> are we guaranteed to have it set to 1 by interrupt generic code?
-> An UP kernel does not ever look on the affinity mask. The
-> chip::irq_set_affinity() callback is not invoked so the mask is
-> irrelevant.
->
-> A SMP kernel on a UP machine sets CPU0 in the mask so all is good.
->
->> This is actually why I brought this up in the first place --- a
->> potential mismatch between the affinity mask and Xen-specific data
->> (e.g. info->cpu and then protocol-specific data in event channel
->> code). Even if they are re-synchronized later, at startup time (for
->> SMP).
-> Which is not a problem either. The affinity mask is only relevant for
-> setting the affinity, but it's not relevant for delivery and never can
-> be.
->
->> I don't see anything that would cause a problem right now but I worry
->> that this inconsistency may come up at some point.
-> As long as the affinity mask becomes not part of the event channel magic
-> this should never matter.
->
-> Look at it from hardware:
->
-> interrupt is affine to CPU0
->
->      CPU0 runs:
->      
->      set_affinity(CPU0 -> CPU1)
->         local_irq_disable()
->         
->  --> interrupt is raised in hardware and pending on CPU0
->
->         irq hardware is reconfigured to be affine to CPU1
->
->         local_irq_enable()
->
->  --> interrupt is handled on CPU0
->
-> the next interrupt will be raised on CPU1
->
-> So info->cpu which is registered via the hypercall binds the 'hardware
-> delivery' and whenever the new affinity is written it is rebound to some
-> other CPU and the next interrupt is then raised on this other CPU.
->
-> It's not any different from the hardware example at least not as far as
-> I understood the code.
+On Fri, Dec 11 2020 at 22:08, Thomas Gleixner wrote:
 
-Xen's event channels do have a couple of quirks.
+> On Fri, Dec 11 2020 at 19:53, Andy Shevchenko wrote:
+>
+>> On Thu, Dec 10, 2020 at 10:14 PM Thomas Gleixner <tglx@linutronix.de> wrote:
+>>>
+>>> irq_set_lockdep_class() is used from modules and requires irq_to_desc() to
+>>> be exported. Move it into the core code which lifts another requirement for
+>>> the export.
+>>
+>> ...
+>>
+>>> +       if (IS_ENABLED(CONFIG_LOCKDEP))
+>>> +               __irq_set_lockdep_class(irq, lock_class, request_class);
+>
+> You are right. Let me fix that.
 
-Binding an event channel always results in one spurious event being
-delivered.  This is to cover notifications which can get lost during the
-bidirectional setup, or re-setups in certain configurations.
+No. I have to correct myself. You're wrong.
 
-Binding an interdomain or pirq event channel always defaults to vCPU0. 
-There is no way to atomically set the affinity while binding.  I believe
-the API predates SMP guest support in Xen, and noone has fixed it up since.
+The inline is evaluated in the compilation units which include that
+header and because the function declaration is unconditional it is
+happy.
 
-As a consequence, the guest will observe the event raised on vCPU0 as
-part of setting up the event, even if it attempts to set a different
-affinity immediately afterwards.  A little bit of care needs to be taken
-when binding an event channel on vCPUs other than 0, to ensure that the
-callback is safe with respect to any remaining state needing initialisation.
+Now the optimizer stage makes the whole thing a NOOP if CONFIG_LOCKDEP=n
+and thereby drops the reference to the function which makes it not
+required for linking.
 
-Beyond this, there is nothing magic I'm aware of.
+So in the file where the function is implemented:
 
-We have seen soft lockups before in certain scenarios, simply due to the
-quantity of events hitting vCPU0 before irqbalance gets around to
-spreading the load.  This is why there is an attempt to round-robin the
-userspace event channel affinities by default, but I still don't see why
-this would need custom affinity logic itself.
+#ifdef CONFIG_LOCKDEP
+void __irq_set_lockdep_class(....)
+{
+}
+#endif
+
+The whole block is either discarded because CONFIG_LOCKDEP is not
+defined or compile if it is defined which makes it available for the
+linker.
+
+And in the latter case the optimizer keeps the call in the inline (it
+optimizes the condition away because it's always true).
+
+So in both cases the compiler and the linker are happy and everything
+works as expected.
+
+It would fail if the header file had the following:
+
+#ifdef CONFIG_LOCKDEP
+void __irq_set_lockdep_class(....);
+#endif
+
+Because then it would complain about the missing function prototype when
+it evaluates the inline.
 
 Thanks,
 
-~Andrew
+        tglx
