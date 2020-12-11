@@ -1,54 +1,211 @@
-Return-Path: <lee.jones@linaro.org>
-Received: from mail-wr1-x442.google.com (mail-wr1-x442.google.com. [2a00:1450:4864:20::442])
-        by gmr-mx.google.com with ESMTPS id x12si358275wmk.1.2020.12.11.02.04.40
+Return-Path: <jani.nikula@intel.com>
+Received: from mga12.intel.com (mga12.intel.com. [192.55.52.136])
+        by gmr-mx.google.com with ESMTPS id r2si532727pls.2.2020.12.11.01.54.23
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 11 Dec 2020 02:04:40 -0800 (PST)
-Received: by mail-wr1-x442.google.com with SMTP id a12so8393765wrv.8
-        for <linux-ntb@googlegroups.com>; Fri, 11 Dec 2020 02:04:40 -0800 (PST)
-Return-Path: <lee.jones@linaro.org>
-Date: Fri, 11 Dec 2020 10:04:36 +0000
-From: Lee Jones <lee.jones@linaro.org>
-Subject: Re: [patch 16/30] mfd: ab8500-debugfs: Remove the racy fiddling with
- irq_desc
-Message-ID: <20201211100436.GC5029@dell>
-References: <20201210192536.118432146@linutronix.de>
- <20201210194044.157283633@linutronix.de>
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 11 Dec 2020 01:54:23 -0800 (PST)
+From: Jani Nikula <jani.nikula@linux.intel.com>
+Subject: Re: [patch 14/30] drm/i915/pmu: Replace open coded kstat_irqs() copy
+In-Reply-To: <20201210194043.957046529@linutronix.de>
+References: <20201210192536.118432146@linutronix.de> <20201210194043.957046529@linutronix.de>
+Date: Fri, 11 Dec 2020 11:54:03 +0200
+Message-ID: <87wnxo7jno.fsf@intel.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20201210194044.157283633@linutronix.de>
-To: Thomas Gleixner <tglx@linutronix.de>
-Cc: LKML <linux-kernel@vger.kernel.org>, Peter Zijlstra <peterz@infradead.org>, Marc Zyngier <maz@kernel.org>, Linus Walleij <linus.walleij@linaro.org>, linux-arm-kernel@lists.infradead.org, "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>, Helge Deller <deller@gmx.de>, afzal mohammed <afzal.mohd.ma@gmail.com>, linux-parisc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, Christian Borntraeger <borntraeger@de.ibm.com>, Heiko Carstens <hca@linux.ibm.com>, linux-s390@vger.kernel.org, Jani Nikula <jani.nikula@linux.intel.com>, Joonas Lahtinen <joonas.lahtinen@linux.intel.com>, Rodrigo Vivi <rodrigo.vivi@intel.com>, David Airlie <airlied@linux.ie>, Daniel Vetter <daniel@ffwll.ch>, Pankaj Bharadiya <pankaj.laxminarayan.bharadiya@intel.com>, Chris Wilson <chris@chris-wilson.co.uk>, Wambui Karuga <wambui.karugax@gmail.com>, intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org, Tvrtko Ursulin <tvrtko.ursulin@linux.intel.com>, linux-gpio@vger.kernel.org, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Rob Herring <robh@kernel.org>, Bjorn Helgaas <bhelgaas@google.com>, Michal Simek <michal.simek@xilinx.com>, linux-pci@vger.kernel.org, Karthikeyan Mitran <m.karthikeyan@mobiveil.co.in>, Hou Zhiqiang <Zhiqiang.Hou@nxp.com>, Tariq Toukan <tariqt@nvidia.com>, "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>, netdev@vger.kernel.org, linux-rdma@vger.kernel.org, Saeed Mahameed <saeedm@nvidia.com>, Leon Romanovsky <leon@kernel.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Stefano Stabellini <sstabellini@kernel.org>, xen-devel@lists.xenproject.org
+Content-Type: text/plain
+To: Thomas Gleixner <tglx@linutronix.de>, LKML <linux-kernel@vger.kernel.org>
+Cc: Peter Zijlstra <peterz@infradead.org>, Marc Zyngier <maz@kernel.org>, Tvrtko Ursulin <tvrtko.ursulin@linux.intel.com>, Joonas Lahtinen <joonas.lahtinen@linux.intel.com>, Rodrigo Vivi <rodrigo.vivi@intel.com>, David Airlie <airlied@linux.ie>, Daniel Vetter <daniel@ffwll.ch>, intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org, "James
+ E.J. Bottomley" <James.Bottomley@HansenPartnership.com>, Helge Deller <deller@gmx.de>, afzal mohammed <afzal.mohd.ma@gmail.com>, linux-parisc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, linux-arm-kernel@lists.infradead.org, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, Christian Borntraeger <borntraeger@de.ibm.com>, Heiko Carstens <hca@linux.ibm.com>, linux-s390@vger.kernel.org, Pankaj Bharadiya <pankaj.laxminarayan.bharadiya@intel.com>, Chris Wilson <chris@chris-wilson.co.uk>, Wambui Karuga <wambui.karugax@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, linux-gpio@vger.kernel.org, Lee Jones <lee.jones@linaro.org>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Rob Herring <robh@kernel.org>, Bjorn Helgaas <bhelgaas@google.com>, Michal Simek <michal.simek@xilinx.com>, linux-pci@vger.kernel.org, Karthikeyan Mitran <m.karthikeyan@mobiveil.co.in>, Hou Zhiqiang <Zhiqiang.Hou@nxp.com>, Tariq Toukan <tariqt@nvidia.com>, "David S.
+ Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>, netdev@vger.kernel.org, linux-rdma@vger.kernel.org, Saeed Mahameed <saeedm@nvidia.com>, Leon Romanovsky <leon@kernel.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Stefano Stabellini <sstabellini@kernel.org>, xen-devel@lists.xenproject.org
 List-ID: <linux-ntb.googlegroups.com>
 
-On Thu, 10 Dec 2020, Thomas Gleixner wrote:
+On Thu, 10 Dec 2020, Thomas Gleixner <tglx@linutronix.de> wrote:
+> Driver code has no business with the internals of the irq descriptor.
+>
+> Aside of that the count is per interrupt line and therefore takes
+> interrupts from other devices into account which share the interrupt line
+> and are not handled by the graphics driver.
+>
+> Replace it with a pmu private count which only counts interrupts which
+> originate from the graphics card.
+>
+> To avoid atomics or heuristics of some sort make the counter field
+> 'unsigned long'. That limits the count to 4e9 on 32bit which is a lot and
+> postprocessing can easily deal with the occasional wraparound.
 
-> First of all drivers have absolutely no business to dig into the internals
-> of an irq descriptor. That's core code and subject to change. All of this
-> information is readily available to /proc/interrupts in a safe and race
-> free way.
-> 
-> Remove the inspection code which is a blatant violation of subsystem
-> boundaries and racy against concurrent modifications of the interrupt
-> descriptor.
-> 
-> Print the irq line instead so the information can be looked up in a sane
-> way in /proc/interrupts.
-> 
+I'll let Tvrtko and Chris review the substance here, but assuming they
+don't object,
+
+Acked-by: Jani Nikula <jani.nikula@intel.com>
+
+for merging via whichever tree makes most sense.
+
+>
 > Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
-> Cc: Linus Walleij <linus.walleij@linaro.org>
-> Cc: Lee Jones <lee.jones@linaro.org>
-> Cc: linux-arm-kernel@lists.infradead.org
+> Cc: Tvrtko Ursulin <tvrtko.ursulin@linux.intel.com>
+> Cc: Jani Nikula <jani.nikula@linux.intel.com>
+> Cc: Joonas Lahtinen <joonas.lahtinen@linux.intel.com>
+> Cc: Rodrigo Vivi <rodrigo.vivi@intel.com>
+> Cc: David Airlie <airlied@linux.ie>
+> Cc: Daniel Vetter <daniel@ffwll.ch>
+> Cc: intel-gfx@lists.freedesktop.org
+> Cc: dri-devel@lists.freedesktop.org
 > ---
->  drivers/mfd/ab8500-debugfs.c |   16 +++-------------
->  1 file changed, 3 insertions(+), 13 deletions(-)
-
-Acked-by: Lee Jones <lee.jones@linaro.org>
+>  drivers/gpu/drm/i915/i915_irq.c |   34 ++++++++++++++++++++++++++++++++++
+>  drivers/gpu/drm/i915/i915_pmu.c |   18 +-----------------
+>  drivers/gpu/drm/i915/i915_pmu.h |    8 ++++++++
+>  3 files changed, 43 insertions(+), 17 deletions(-)
+>
+> --- a/drivers/gpu/drm/i915/i915_irq.c
+> +++ b/drivers/gpu/drm/i915/i915_irq.c
+> @@ -60,6 +60,24 @@
+>   * and related files, but that will be described in separate chapters.
+>   */
+>  
+> +/*
+> + * Interrupt statistic for PMU. Increments the counter only if the
+> + * interrupt originated from the the GPU so interrupts from a device which
+> + * shares the interrupt line are not accounted.
+> + */
+> +static inline void pmu_irq_stats(struct drm_i915_private *priv,
+> +				 irqreturn_t res)
+> +{
+> +	if (unlikely(res != IRQ_HANDLED))
+> +		return;
+> +
+> +	/*
+> +	 * A clever compiler translates that into INC. A not so clever one
+> +	 * should at least prevent store tearing.
+> +	 */
+> +	WRITE_ONCE(priv->pmu.irq_count, priv->pmu.irq_count + 1);
+> +}
+> +
+>  typedef bool (*long_pulse_detect_func)(enum hpd_pin pin, u32 val);
+>  
+>  static const u32 hpd_ilk[HPD_NUM_PINS] = {
+> @@ -1599,6 +1617,8 @@ static irqreturn_t valleyview_irq_handle
+>  		valleyview_pipestat_irq_handler(dev_priv, pipe_stats);
+>  	} while (0);
+>  
+> +	pmu_irq_stats(dev_priv, ret);
+> +
+>  	enable_rpm_wakeref_asserts(&dev_priv->runtime_pm);
+>  
+>  	return ret;
+> @@ -1676,6 +1696,8 @@ static irqreturn_t cherryview_irq_handle
+>  		valleyview_pipestat_irq_handler(dev_priv, pipe_stats);
+>  	} while (0);
+>  
+> +	pmu_irq_stats(dev_priv, ret);
+> +
+>  	enable_rpm_wakeref_asserts(&dev_priv->runtime_pm);
+>  
+>  	return ret;
+> @@ -2103,6 +2125,8 @@ static irqreturn_t ilk_irq_handler(int i
+>  	if (sde_ier)
+>  		raw_reg_write(regs, SDEIER, sde_ier);
+>  
+> +	pmu_irq_stats(i915, ret);
+> +
+>  	/* IRQs are synced during runtime_suspend, we don't require a wakeref */
+>  	enable_rpm_wakeref_asserts(&i915->runtime_pm);
+>  
+> @@ -2419,6 +2443,8 @@ static irqreturn_t gen8_irq_handler(int
+>  
+>  	gen8_master_intr_enable(regs);
+>  
+> +	pmu_irq_stats(dev_priv, IRQ_HANDLED);
+> +
+>  	return IRQ_HANDLED;
+>  }
+>  
+> @@ -2514,6 +2540,8 @@ static __always_inline irqreturn_t
+>  
+>  	gen11_gu_misc_irq_handler(gt, gu_misc_iir);
+>  
+> +	pmu_irq_stats(i915, IRQ_HANDLED);
+> +
+>  	return IRQ_HANDLED;
+>  }
+>  
+> @@ -3688,6 +3716,8 @@ static irqreturn_t i8xx_irq_handler(int
+>  		i8xx_pipestat_irq_handler(dev_priv, iir, pipe_stats);
+>  	} while (0);
+>  
+> +	pmu_irq_stats(dev_priv, ret);
+> +
+>  	enable_rpm_wakeref_asserts(&dev_priv->runtime_pm);
+>  
+>  	return ret;
+> @@ -3796,6 +3826,8 @@ static irqreturn_t i915_irq_handler(int
+>  		i915_pipestat_irq_handler(dev_priv, iir, pipe_stats);
+>  	} while (0);
+>  
+> +	pmu_irq_stats(dev_priv, ret);
+> +
+>  	enable_rpm_wakeref_asserts(&dev_priv->runtime_pm);
+>  
+>  	return ret;
+> @@ -3941,6 +3973,8 @@ static irqreturn_t i965_irq_handler(int
+>  		i965_pipestat_irq_handler(dev_priv, iir, pipe_stats);
+>  	} while (0);
+>  
+> +	pmu_irq_stats(dev_priv, IRQ_HANDLED);
+> +
+>  	enable_rpm_wakeref_asserts(&dev_priv->runtime_pm);
+>  
+>  	return ret;
+> --- a/drivers/gpu/drm/i915/i915_pmu.c
+> +++ b/drivers/gpu/drm/i915/i915_pmu.c
+> @@ -423,22 +423,6 @@ static enum hrtimer_restart i915_sample(
+>  	return HRTIMER_RESTART;
+>  }
+>  
+> -static u64 count_interrupts(struct drm_i915_private *i915)
+> -{
+> -	/* open-coded kstat_irqs() */
+> -	struct irq_desc *desc = irq_to_desc(i915->drm.pdev->irq);
+> -	u64 sum = 0;
+> -	int cpu;
+> -
+> -	if (!desc || !desc->kstat_irqs)
+> -		return 0;
+> -
+> -	for_each_possible_cpu(cpu)
+> -		sum += *per_cpu_ptr(desc->kstat_irqs, cpu);
+> -
+> -	return sum;
+> -}
+> -
+>  static void i915_pmu_event_destroy(struct perf_event *event)
+>  {
+>  	struct drm_i915_private *i915 =
+> @@ -581,7 +565,7 @@ static u64 __i915_pmu_event_read(struct
+>  				   USEC_PER_SEC /* to MHz */);
+>  			break;
+>  		case I915_PMU_INTERRUPTS:
+> -			val = count_interrupts(i915);
+> +			val = READ_ONCE(pmu->irq_count);
+>  			break;
+>  		case I915_PMU_RC6_RESIDENCY:
+>  			val = get_rc6(&i915->gt);
+> --- a/drivers/gpu/drm/i915/i915_pmu.h
+> +++ b/drivers/gpu/drm/i915/i915_pmu.h
+> @@ -108,6 +108,14 @@ struct i915_pmu {
+>  	 */
+>  	ktime_t sleep_last;
+>  	/**
+> +	 * @irq_count: Number of interrupts
+> +	 *
+> +	 * Intentionally unsigned long to avoid atomics or heuristics on 32bit.
+> +	 * 4e9 interrupts are a lot and postprocessing can really deal with an
+> +	 * occasional wraparound easily. It's 32bit after all.
+> +	 */
+> +	unsigned long irq_count;
+> +	/**
+>  	 * @events_attr_group: Device events attribute group.
+>  	 */
+>  	struct attribute_group events_attr_group;
+>
 
 -- 
-Lee Jones [李琼斯]
-Senior Technical Lead - Developer Services
-Linaro.org │ Open source software for Arm SoCs
-Follow Linaro: Facebook | Twitter | Blog
+Jani Nikula, Intel Open Source Graphics Center
