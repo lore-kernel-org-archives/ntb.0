@@ -1,20 +1,20 @@
 Return-Path: <ttoukan.linux@gmail.com>
 Received: from mail-ej1-x641.google.com (mail-ej1-x641.google.com. [2a00:1450:4864:20::641])
-        by gmr-mx.google.com with ESMTPS id q28si523998lfb.10.2020.12.13.03.31.32
+        by gmr-mx.google.com with ESMTPS id r12si504635ljm.1.2020.12.13.03.24.09
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 13 Dec 2020 03:31:32 -0800 (PST)
-Received: by mail-ej1-x641.google.com with SMTP id ga15so18611284ejb.4
-        for <linux-ntb@googlegroups.com>; Sun, 13 Dec 2020 03:31:32 -0800 (PST)
+        Sun, 13 Dec 2020 03:24:09 -0800 (PST)
+Received: by mail-ej1-x641.google.com with SMTP id q22so864190eja.2
+        for <linux-ntb@googlegroups.com>; Sun, 13 Dec 2020 03:24:09 -0800 (PST)
 Return-Path: <ttoukan.linux@gmail.com>
-Subject: Re: [patch 21/30] net/mlx4: Use effective interrupt affinity
+Subject: Re: [patch 20/30] net/mlx4: Replace irq_to_desc() abuse
 References: <20201210192536.118432146@linutronix.de>
- <20201210194044.672935978@linutronix.de>
+ <20201210194044.580936243@linutronix.de>
 From: Tariq Toukan <ttoukan.linux@gmail.com>
-Message-ID: <57c3f9d3-7262-9916-626b-c2234de763f0@gmail.com>
-Date: Sun, 13 Dec 2020 13:31:24 +0200
+Message-ID: <01e427f9-7238-d6a8-25ec-8585914d32df@gmail.com>
+Date: Sun, 13 Dec 2020 13:24:00 +0200
 MIME-Version: 1.0
-In-Reply-To: <20201210194044.672935978@linutronix.de>
+In-Reply-To: <20201210194044.580936243@linutronix.de>
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
@@ -25,13 +25,15 @@ List-ID: <linux-ntb.googlegroups.com>
 
 
 On 12/10/2020 9:25 PM, Thomas Gleixner wrote:
-> Using the interrupt affinity mask for checking locality is not really
-> working well on architectures which support effective affinity masks.
+> No driver has any business with the internals of an interrupt
+> descriptor. Storing a pointer to it just to use yet another helper at the
+> actual usage site to retrieve the affinity mask is creative at best. Just
+> because C does not allow encapsulation does not mean that the kernel has no
+> limits.
 > 
-> The affinity mask is either the system wide default or set by user space,
-> but the architecture can or even must reduce the mask to the effective set,
-> which means that checking the affinity mask itself does not really tell
-> about the actual target CPUs.
+> Retrieve a pointer to the affinity mask itself and use that. It's still
+> using an interface which is usually not for random drivers, but definitely
+> less hideous than the previous hack.
 > 
 > Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
 > Cc: Tariq Toukan <tariqt@nvidia.com>
@@ -40,22 +42,12 @@ On 12/10/2020 9:25 PM, Thomas Gleixner wrote:
 > Cc: netdev@vger.kernel.org
 > Cc: linux-rdma@vger.kernel.org
 > ---
->   drivers/net/ethernet/mellanox/mlx4/en_cq.c |    2 +-
->   1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> --- a/drivers/net/ethernet/mellanox/mlx4/en_cq.c
-> +++ b/drivers/net/ethernet/mellanox/mlx4/en_cq.c
-> @@ -117,7 +117,7 @@ int mlx4_en_activate_cq(struct mlx4_en_p
->   			assigned_eq = true;
->   		}
->   		irq = mlx4_eq_get_irq(mdev->dev, cq->vector);
-> -		cq->aff_mask = irq_get_affinity_mask(irq);
-> +		cq->aff_mask = irq_get_effective_affinity_mask(irq);
->   	} else {
->   		/* For TX we use the same irq per
->   		ring we assigned for the RX    */
+>   drivers/net/ethernet/mellanox/mlx4/en_cq.c   |    8 +++-----
+>   drivers/net/ethernet/mellanox/mlx4/en_rx.c   |    6 +-----
+>   drivers/net/ethernet/mellanox/mlx4/mlx4_en.h |    3 ++-
+>   3 files changed, 6 insertions(+), 11 deletions(-)
 > 
 
 Reviewed-by: Tariq Toukan <tariqt@nvidia.com>
 
-Thanks.
+Thanks for your patch.
