@@ -1,74 +1,117 @@
-Return-Path: <tglx@linutronix.de>
-Received: from galois.linutronix.de (Galois.linutronix.de. [2a0a:51c0:0:12e:550::1])
-        by gmr-mx.google.com with ESMTPS id y21si196543lfl.7.2020.12.10.11.42.15
+Return-Path: <robh@kernel.org>
+Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
+        by gmr-mx.google.com with ESMTPS id n20si1044439qta.1.2020.12.15.08.01.39
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 10 Dec 2020 11:42:15 -0800 (PST)
-Message-Id: <20201210192536.118432146@linutronix.de>
-Date: Thu, 10 Dec 2020 20:25:36 +0100
-From: Thomas Gleixner <tglx@linutronix.de>
-Subject: [patch 00/30] genirq: Treewide hunt for irq descriptor abuse and
- assorted fixes
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 15 Dec 2020 08:01:39 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-To: LKML <linux-kernel@vger.kernel.org>
-Cc: Peter Zijlstra <peterz@infradead.org>, Marc Zyngier <maz@kernel.org>, "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>, Helge Deller <deller@gmx.de>, afzal mohammed <afzal.mohd.ma@gmail.com>, linux-parisc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, linux-arm-kernel@lists.infradead.org, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>, Christian Borntraeger <borntraeger@de.ibm.com>, Heiko Carstens <hca@linux.ibm.com>, linux-s390@vger.kernel.org, Jani Nikula <jani.nikula@linux.intel.com>, Joonas Lahtinen <joonas.lahtinen@linux.intel.com>, Rodrigo Vivi <rodrigo.vivi@intel.com>, David Airlie <airlied@linux.ie>, Daniel Vetter <daniel@ffwll.ch>, Pankaj Bharadiya <pankaj.laxminarayan.bharadiya@intel.com>, Chris Wilson <chris@chris-wilson.co.uk>, Wambui Karuga <wambui.karugax@gmail.com>, intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org, Tvrtko Ursulin <tvrtko.ursulin@linux.intel.com>, Linus Walleij <linus.walleij@linaro.org>, linux-gpio@vger.kernel.org, Lee Jones <lee.jones@linaro.org>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Rob Herring <robh@kernel.org>, Bjorn Helgaas <bhelgaas@google.com>, Michal Simek <michal.simek@xilinx.com>, linux-pci@vger.kernel.org, Karthikeyan Mitran <m.karthikeyan@mobiveil.co.in>, Hou Zhiqiang <Zhiqiang.Hou@nxp.com>, Tariq Toukan <tariqt@nvidia.com>, "David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>, netdev@vger.kernel.org, linux-rdma@vger.kernel.org, Saeed Mahameed <saeedm@nvidia.com>, Leon Romanovsky <leon@kernel.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Stefano Stabellini <sstabellini@kernel.org>, xen-devel@lists.xenproject.org
+References: <20201111153559.19050-1-kishon@ti.com> <20201111153559.19050-12-kishon@ti.com>
+In-Reply-To: <20201111153559.19050-12-kishon@ti.com>
+From: Rob Herring <robh@kernel.org>
+Date: Tue, 15 Dec 2020 10:01:25 -0600
+Message-ID: <CAL_Jsq+iUU0aR950fvQ7+uenBT5MVbCEU9cDg+vfyO=VugpTZA@mail.gmail.com>
+Subject: Re: [PATCH v8 11/18] PCI: cadence: Implement ->msi_map_irq() ops
+Content-Type: text/plain; charset="UTF-8"
+To: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: Bjorn Helgaas <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Arnd Bergmann <arnd@arndb.de>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Tom Joseph <tjoseph@cadence.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, PCI <linux-pci@vger.kernel.org>, Linux Doc Mailing List <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-QSByZWNlbnQgcmVxdWVzdCB0byBleHBvcnQga3N0YXRfaXJxcygpIHBvaW50ZWQgdG8gYSBjb3B5
-IG9mIHRoZSBzYW1lIGluCnRoZSBpOTE1IGNvZGUsIHdoaWNoIG1hZGUgbWUgbG9vayBmb3IgZnVy
-dGhlciB1c2FnZSBvZiBpcnEgZGVzY3JpcHRvcnMgaW4KZHJpdmVycy4KClRoZSB1c2FnZSBpbiBk
-cml2ZXJzIHJhbmdlcyBmcm9tIGNyZWF0aXZlIHRvIGJyb2tlbiBpbiBhbGwgY29sb3Vycy4KCmly
-cWRlc2MuaCBjbGVhcmx5IHNheXMgdGhhdCB0aGlzIGlzIGNvcmUgZnVuY3Rpb25hbGl0eSBhbmQg
-dGhlIGZhY3QgQyBkb2VzCm5vdCBhbGxvdyBmdWxsIGVuY2Fwc3VsYXRpb24gaXMgbm90IGEganVz
-dGlmaWNhdGlvbiB0byBmaWRkbGUgd2l0aCBpdCBqdXN0CmJlY2F1c2UuIEl0IHRvb2sgdXMgYSBs
-b3Qgb2YgZWZmb3J0IHRvIG1ha2UgdGhlIGNvcmUgZnVuY3Rpb25hbGl0eSBwcm92aWRlCndoYXQg
-ZHJpdmVycyBuZWVkLgoKSWYgdGhlcmUgaXMgYSBzaG9ydGNvbWluZywgaXQncyBub3QgYXNrZWQg
-dG9vIG11Y2ggdG8gdGFsayB0byB0aGUgcmVsZXZhbnQKbWFpbnRhaW5lcnMgaW5zdGVhZCBvZiBn
-b2luZyBvZmYgYW5kIGZpZGRsaW5nIHdpdGggdGhlIGd1dHMgb2YgaW50ZXJydXB0CmRlc2NyaXB0
-b3JzIGFuZCBvZnRlbiBlbm91Z2ggd2l0aG91dCB1bmRlcnN0YW5kaW5nIGxpZmV0aW1lIGFuZCBs
-b2NraW5nCnJ1bGVzLgoKQXMgcGVvcGxlIGluc2lzdCBvbiBub3QgcmVzcGVjdGluZyBib3VuZGFy
-aWVzLCB0aGlzIHNlcmllcyBjbGVhbnMgdXAgdGhlCihhYil1c2UgYW5kIGF0IHRoZSBlbmQgcmVt
-b3ZlcyB0aGUgZXhwb3J0IG9mIGlycV90b19kZXNjKCkgdG8gbWFrZSBpdCBhdApsZWFzdCBoYXJk
-ZXIuIEFsbCBsZWdpdGltYXRlIHVzZXJzIG9mIHRoaXMgYXJlIGJ1aWx0IGluLgoKV2hpbGUgYXQg
-aXQgSSBzdHVtYmxlZCBvdmVyIHNvbWUgb3RoZXIgb2RkaXRpZXMgcmVsYXRlZCB0byBpbnRlcnJ1
-cHQKY291bnRpbmcgYW5kIGNsZWFuZWQgdGhlbSB1cCBhcyB3ZWxsLgoKVGhlIHNlcmllcyBhcHBs
-aWVzIG9uIHRvcCBvZgoKICAgZ2l0Oi8vZ2l0Lmtlcm5lbC5vcmcvcHViL3NjbS9saW51eC9rZXJu
-ZWwvZ2l0L3RpcC90aXAuZ2l0IGlycS9jb3JlCgphbmQgaXMgYWxzbyBhdmFpbGFibGUgZnJvbSBn
-aXQ6CgogIGdpdDovL2dpdC5rZXJuZWwub3JnL3B1Yi9zY20vbGludXgva2VybmVsL2dpdC90Z2x4
-L2RldmVsLmdpdCBnZW5pcnEKClRoYW5rcywKCgl0Z2x4Ci0tLQogYXJjaC9hbHBoYS9rZXJuZWwv
-c3lzX2plbnNlbi5jICAgICAgICAgICAgICAgICAgICAgICB8ICAgIDIgCiBhcmNoL2FybS9rZXJu
-ZWwvc21wLmMgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgICAgMiAKIGFyY2gvcGFy
-aXNjL2tlcm5lbC9pcnEuYyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAgICA3IAogYXJj
-aC9zMzkwL2tlcm5lbC9pcnEuYyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB8ICAgIDIg
-CiBhcmNoL3g4Ni9rZXJuZWwvdG9wb2xvZ3kuYyAgICAgICAgICAgICAgICAgICAgICAgICAgIHwg
-ICAgMSAKIGFyY2gvYXJtNjQva2VybmVsL3NtcC5jICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgfCAgICAyIAogZHJpdmVycy9ncHUvZHJtL2k5MTUvZGlzcGxheS9pbnRlbF9scGVfYXVkaW8u
-YyAgICAgICB8ICAgIDQgCiBkcml2ZXJzL2dwdS9kcm0vaTkxNS9pOTE1X2lycS5jICAgICAgICAg
-ICAgICAgICAgICAgIHwgICAzNCArKysKIGRyaXZlcnMvZ3B1L2RybS9pOTE1L2k5MTVfcG11LmMg
-ICAgICAgICAgICAgICAgICAgICAgfCAgIDE4IC0KIGRyaXZlcnMvZ3B1L2RybS9pOTE1L2k5MTVf
-cG11LmggICAgICAgICAgICAgICAgICAgICAgfCAgICA4IAogZHJpdmVycy9tZmQvYWI4NTAwLWRl
-YnVnZnMuYyAgICAgICAgICAgICAgICAgICAgICAgICB8ICAgMTYgLQogZHJpdmVycy9uZXQvZXRo
-ZXJuZXQvbWVsbGFub3gvbWx4NC9lbl9jcS5jICAgICAgICAgICB8ICAgIDggCiBkcml2ZXJzL25l
-dC9ldGhlcm5ldC9tZWxsYW5veC9tbHg0L2VuX3J4LmMgICAgICAgICAgIHwgICAgNiAKIGRyaXZl
-cnMvbmV0L2V0aGVybmV0L21lbGxhbm94L21seDQvbWx4NF9lbi5oICAgICAgICAgfCAgICAzIAog
-ZHJpdmVycy9uZXQvZXRoZXJuZXQvbWVsbGFub3gvbWx4NS9jb3JlL2VuLmggICAgICAgICB8ICAg
-IDIgCiBkcml2ZXJzL25ldC9ldGhlcm5ldC9tZWxsYW5veC9tbHg1L2NvcmUvZW5fbWFpbi5jICAg
-IHwgICAgMiAKIGRyaXZlcnMvbmV0L2V0aGVybmV0L21lbGxhbm94L21seDUvY29yZS9lbl90eHJ4
-LmMgICAgfCAgICA2IAogZHJpdmVycy9udGIvbXNpLmMgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICB8ICAgIDQgCiBkcml2ZXJzL3BjaS9jb250cm9sbGVyL21vYml2ZWlsL3BjaWUt
-bW9iaXZlaWwtaG9zdC5jIHwgICAgOCAKIGRyaXZlcnMvcGNpL2NvbnRyb2xsZXIvcGNpZS14aWxp
-bngtbndsLmMgICAgICAgICAgICAgfCAgICA4IAogZHJpdmVycy9waW5jdHJsL25vbWFkaWsvcGlu
-Y3RybC1ub21hZGlrLmMgICAgICAgICAgICB8ICAgIDMgCiBkcml2ZXJzL3hlbi9ldmVudHMvZXZl
-bnRzX2Jhc2UuYyAgICAgICAgICAgICAgICAgICAgIHwgIDE3MiArKysrKysrKysrKy0tLS0tLS0t
-CiBkcml2ZXJzL3hlbi9ldnRjaG4uYyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwg
-ICAzNCAtLS0KIGluY2x1ZGUvbGludXgvaW50ZXJydXB0LmggICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgfCAgICAxIAogaW5jbHVkZS9saW51eC9pcnEuaCAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICB8ICAgIDcgCiBpbmNsdWRlL2xpbnV4L2lycWRlc2MuaCAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgIHwgICA0MCArLS0tCiBpbmNsdWRlL2xpbnV4L2tlcm5lbF9zdGF0Lmgg
-ICAgICAgICAgICAgICAgICAgICAgICAgIHwgICAgMSAKIGtlcm5lbC9pcnEvaXJxZGVzYy5jICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAgIDQyICsrLS0KIGtlcm5lbC9pcnEvbWFu
-YWdlLmMgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAgIDM3ICsrKysKIGtlcm5l
-bC9pcnEvcHJvYy5jICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAgICA1IAog
-MzAgZmlsZXMgY2hhbmdlZCwgMjYzIGluc2VydGlvbnMoKyksIDIyMiBkZWxldGlvbnMoLSkKCgo=
+On Wed, Nov 11, 2020 at 9:37 AM Kishon Vijay Abraham I <kishon@ti.com> wrote:
+>
+> Implement ->msi_map_irq() ops in order to map physical address to
+> MSI address and return MSI data.
+>
+> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+> ---
+>  .../pci/controller/cadence/pcie-cadence-ep.c  | 53 +++++++++++++++++++
+>  1 file changed, 53 insertions(+)
+>
+> diff --git a/drivers/pci/controller/cadence/pcie-cadence-ep.c b/drivers/pci/controller/cadence/pcie-cadence-ep.c
+> index 84cc58dc8512..1fe6b8baca97 100644
+> --- a/drivers/pci/controller/cadence/pcie-cadence-ep.c
+> +++ b/drivers/pci/controller/cadence/pcie-cadence-ep.c
+> @@ -382,6 +382,57 @@ static int cdns_pcie_ep_send_msi_irq(struct cdns_pcie_ep *ep, u8 fn,
+>         return 0;
+>  }
+>
+> +static int cdns_pcie_ep_map_msi_irq(struct pci_epc *epc, u8 fn,
+> +                                   phys_addr_t addr, u8 interrupt_num,
+> +                                   u32 entry_size, u32 *msi_data,
+> +                                   u32 *msi_addr_offset)
+> +{
+> +       struct cdns_pcie_ep *ep = epc_get_drvdata(epc);
+> +       u32 cap = CDNS_PCIE_EP_FUNC_MSI_CAP_OFFSET;
+> +       struct cdns_pcie *pcie = &ep->pcie;
+> +       u64 pci_addr, pci_addr_mask = 0xff;
+> +       u16 flags, mme, data, data_mask;
+> +       u8 msi_count;
+> +       int ret;
+> +       int i;
+> +
+
+
+> +       /* Check whether the MSI feature has been enabled by the PCI host. */
+> +       flags = cdns_pcie_ep_fn_readw(pcie, fn, cap + PCI_MSI_FLAGS);
+> +       if (!(flags & PCI_MSI_FLAGS_ENABLE))
+> +               return -EINVAL;
+> +
+> +       /* Get the number of enabled MSIs */
+> +       mme = (flags & PCI_MSI_FLAGS_QSIZE) >> 4;
+> +       msi_count = 1 << mme;
+> +       if (!interrupt_num || interrupt_num > msi_count)
+> +               return -EINVAL;
+> +
+> +       /* Compute the data value to be written. */
+> +       data_mask = msi_count - 1;
+> +       data = cdns_pcie_ep_fn_readw(pcie, fn, cap + PCI_MSI_DATA_64);
+> +       data = data & ~data_mask;
+> +
+> +       /* Get the PCI address where to write the data into. */
+> +       pci_addr = cdns_pcie_ep_fn_readl(pcie, fn, cap + PCI_MSI_ADDRESS_HI);
+> +       pci_addr <<= 32;
+> +       pci_addr |= cdns_pcie_ep_fn_readl(pcie, fn, cap + PCI_MSI_ADDRESS_LO);
+> +       pci_addr &= GENMASK_ULL(63, 2);
+
+Wouldn't all of the above be the same code for any endpoint driver? We
+just need endpoint config space accessors for the same 32-bit only
+access issues. Not asking for that in this series, but if that's the
+direction we should go.
+
+> +
+> +       for (i = 0; i < interrupt_num; i++) {
+> +               ret = cdns_pcie_ep_map_addr(epc, fn, addr,
+> +                                           pci_addr & ~pci_addr_mask,
+> +                                           entry_size);
+> +               if (ret)
+> +                       return ret;
+> +               addr = addr + entry_size;
+> +       }
+> +
+> +       *msi_data = data;
+> +       *msi_addr_offset = pci_addr & pci_addr_mask;
+> +
+> +       return 0;
+> +}
+> +
+>  static int cdns_pcie_ep_send_msix_irq(struct cdns_pcie_ep *ep, u8 fn,
+>                                       u16 interrupt_num)
+>  {
+> @@ -481,6 +532,7 @@ static const struct pci_epc_features cdns_pcie_epc_features = {
+>         .linkup_notifier = false,
+>         .msi_capable = true,
+>         .msix_capable = true,
+> +       .align = 256,
+>  };
+>
+>  static const struct pci_epc_features*
+> @@ -500,6 +552,7 @@ static const struct pci_epc_ops cdns_pcie_epc_ops = {
+>         .set_msix       = cdns_pcie_ep_set_msix,
+>         .get_msix       = cdns_pcie_ep_get_msix,
+>         .raise_irq      = cdns_pcie_ep_raise_irq,
+> +       .map_msi_irq    = cdns_pcie_ep_map_msi_irq,
+>         .start          = cdns_pcie_ep_start,
+>         .get_features   = cdns_pcie_ep_get_features,
+>  };
+> --
+> 2.17.1
+>
