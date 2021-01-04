@@ -1,13 +1,13 @@
 Return-Path: <kishon@ti.com>
-Received: from fllv0015.ext.ti.com (fllv0015.ext.ti.com. [198.47.19.141])
-        by gmr-mx.google.com with ESMTPS id z9si3865323pgv.2.2021.01.04.07.31.54
+Received: from fllv0016.ext.ti.com (fllv0016.ext.ti.com. [198.47.19.142])
+        by gmr-mx.google.com with ESMTPS id b76si5383506ill.3.2021.01.04.07.31.40
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 04 Jan 2021 07:31:54 -0800 (PST)
+        Mon, 04 Jan 2021 07:31:40 -0800 (PST)
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v9 16/17] Documentation: PCI: Add configfs binding documentation for pci-ntb endpoint function
-Date: Mon, 4 Jan 2021 20:59:08 +0530
-Message-ID: <20210104152909.22038-17-kishon@ti.com>
+Subject: [PATCH v9 12/17] PCI: cadence: Configure LM_EP_FUNC_CFG based on epc->function_num_map
+Date: Mon, 4 Jan 2021 20:59:04 +0530
+Message-ID: <20210104152909.22038-13-kishon@ti.com>
 In-Reply-To: <20210104152909.22038-1-kishon@ti.com>
 References: <20210104152909.22038-1-kishon@ti.com>
 MIME-Version: 1.0
@@ -16,69 +16,45 @@ To: Bjorn Helgaas <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, Kisho
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-Add binding documentation for pci-ntb endpoint function that helps in
-adding and configuring pci-ntb endpoint function.
+The number of functions supported by the endpoint controller is
+configured in LM_EP_FUNC_CFG based on func_no member of struct pci_epf.
+Now that an endpoint function can be associated with two endpoint
+controllers (primary and secondary), just using func_no will
+not suffice as that will take into account only if the endpoint
+controller is associated with the primary interface of endpoint
+function. Instead use epc->function_num_map which will already have the
+configured functions information (irrespective of whether the endpoint
+controller is associated with primary or secondary interface).
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- .../PCI/endpoint/function/binding/pci-ntb.rst | 38 +++++++++++++++++++
- Documentation/PCI/endpoint/index.rst          |  1 +
- 2 files changed, 39 insertions(+)
- create mode 100644 Documentation/PCI/endpoint/function/binding/pci-ntb.rst
+ drivers/pci/controller/cadence/pcie-cadence-ep.c | 7 +------
+ 1 file changed, 1 insertion(+), 6 deletions(-)
 
-diff --git a/Documentation/PCI/endpoint/function/binding/pci-ntb.rst b/Documentation/PCI/endpoint/function/binding/pci-ntb.rst
-new file mode 100644
-index 000000000000..40253d3d5163
---- /dev/null
-+++ b/Documentation/PCI/endpoint/function/binding/pci-ntb.rst
-@@ -0,0 +1,38 @@
-+.. SPDX-License-Identifier: GPL-2.0
-+
-+==========================
-+PCI NTB Endpoint Function
-+==========================
-+
-+1) Create a subdirectory to pci_epf_ntb directory in configfs.
-+
-+Standard EPF Configurable Fields:
-+
-+================   ===========================================================
-+vendorid	   should be 0x104c
-+deviceid	   should be 0xb00d for TI's J721E SoC
-+revid		   don't care
-+progif_code	   don't care
-+subclass_code	   should be 0x00
-+baseclass_code	   should be 0x5
-+cache_line_size	   don't care
-+subsys_vendor_id   don't care
-+subsys_id	   don't care
-+interrupt_pin	   don't care
-+msi_interrupts	   don't care
-+msix_interrupts	   don't care
-+================   ===========================================================
-+
-+2) Create a subdirectory to directory created in 1
-+
-+NTB EPF specific configurable fields:
-+
-+================   ===========================================================
-+db_count	   Number of doorbells; default = 4
-+mw1     	   size of memory window1
-+mw2     	   size of memory window2
-+mw3     	   size of memory window3
-+mw4     	   size of memory window4
-+num_mws     	   Number of memory windows; max = 4
-+spad_count     	   Number of scratchpad registers; default = 64
-+================   ===========================================================
-diff --git a/Documentation/PCI/endpoint/index.rst b/Documentation/PCI/endpoint/index.rst
-index ef6861128506..9cb6e5f3c4d5 100644
---- a/Documentation/PCI/endpoint/index.rst
-+++ b/Documentation/PCI/endpoint/index.rst
-@@ -14,3 +14,4 @@ PCI Endpoint Framework
-    pci-ntb-function
+diff --git a/drivers/pci/controller/cadence/pcie-cadence-ep.c b/drivers/pci/controller/cadence/pcie-cadence-ep.c
+index dc88078194cb..897cdde02bd8 100644
+--- a/drivers/pci/controller/cadence/pcie-cadence-ep.c
++++ b/drivers/pci/controller/cadence/pcie-cadence-ep.c
+@@ -506,18 +506,13 @@ static int cdns_pcie_ep_start(struct pci_epc *epc)
+ 	struct cdns_pcie_ep *ep = epc_get_drvdata(epc);
+ 	struct cdns_pcie *pcie = &ep->pcie;
+ 	struct device *dev = pcie->dev;
+-	struct pci_epf *epf;
+-	u32 cfg;
+ 	int ret;
  
-    function/binding/pci-test
-+   function/binding/pci-ntb
+ 	/*
+ 	 * BIT(0) is hardwired to 1, hence function 0 is always enabled
+ 	 * and can't be disabled anyway.
+ 	 */
+-	cfg = BIT(0);
+-	list_for_each_entry(epf, &epc->pci_epf, list)
+-		cfg |= BIT(epf->func_no);
+-	cdns_pcie_writel(pcie, CDNS_PCIE_LM_EP_FUNC_CFG, cfg);
++	cdns_pcie_writel(pcie, CDNS_PCIE_LM_EP_FUNC_CFG, epc->function_num_map);
+ 
+ 	ret = cdns_pcie_start_link(pcie);
+ 	if (ret) {
 -- 
 2.17.1
 
