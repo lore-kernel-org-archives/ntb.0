@@ -1,98 +1,150 @@
-Return-Path: <kishon@ti.com>
-Received: from fllv0016.ext.ti.com (fllv0016.ext.ti.com. [198.47.19.142])
-        by gmr-mx.google.com with ESMTPS id u2si5940216otg.1.2021.01.04.05.13.10
+Return-Path: <jdmason@kudzu.us>
+Received: from mail-il1-x12d.google.com (mail-il1-x12d.google.com. [2607:f8b0:4864:20::12d])
+        by gmr-mx.google.com with ESMTPS id s126si3236704ooa.0.2021.01.04.07.41.43
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 04 Jan 2021 05:13:10 -0800 (PST)
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: Re: [PATCH v8 11/18] PCI: cadence: Implement ->msi_map_irq() ops
-References: <20201111153559.19050-1-kishon@ti.com>
- <20201111153559.19050-12-kishon@ti.com>
- <CAL_Jsq+iUU0aR950fvQ7+uenBT5MVbCEU9cDg+vfyO=VugpTZA@mail.gmail.com>
-Message-ID: <992b5423-89a2-a03b-539d-a9b2822f598a@ti.com>
-Date: Mon, 4 Jan 2021 18:42:55 +0530
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 04 Jan 2021 07:41:43 -0800 (PST)
+Received: by mail-il1-x12d.google.com with SMTP id 2so25661828ilg.9
+        for <linux-ntb@googlegroups.com>; Mon, 04 Jan 2021 07:41:43 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <CAL_Jsq+iUU0aR950fvQ7+uenBT5MVbCEU9cDg+vfyO=VugpTZA@mail.gmail.com>
-Content-Type: text/plain; charset="utf-8"
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-To: Rob Herring <robh@kernel.org>
-Cc: Bjorn Helgaas <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Arnd Bergmann <arnd@arndb.de>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Tom Joseph <tjoseph@cadence.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, PCI <linux-pci@vger.kernel.org>, Linux Doc Mailing List <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-ntb@googlegroups.com
+References: <20201227141638.GA11393@athena.kudzu.us> <CAHk-=wjxQzF3eWank1r7F6+EqSRsO+kvibPqDbzxjHv3wzZt0A@mail.gmail.com>
+ <20210104082948.GR2831@kadam>
+In-Reply-To: <20210104082948.GR2831@kadam>
+From: Jon Mason <jdmason@kudzu.us>
+Date: Mon, 4 Jan 2021 10:41:32 -0500
+Message-ID: <CAPoiz9zqKsOD8ywxgEjy5t9FB0Mv5uWgfJJCaqCyKxdb5E4wLw@mail.gmail.com>
+Subject: Re: [GIT PULL] NTB bug fixes for v5.11
+Content-Type: text/plain; charset="UTF-8"
+To: Dan Carpenter <dan.carpenter@oracle.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-ntb <linux-ntb@googlegroups.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Hi Rob,
+On Mon, Jan 4, 2021 at 3:31 AM Dan Carpenter <dan.carpenter@oracle.com> wrote:
+>
+> On Sun, Dec 27, 2020 at 09:38:23AM -0800, Linus Torvalds wrote:
+> > On Sun, Dec 27, 2020 at 6:16 AM Jon Mason <jdmason@kudzu.us> wrote:
+> > >
+> > > Wang Qing (1):
+> > >       ntb: idt: fix error check in ntb_hw_idt.c
+> >
+> > So this patch seems to be at least partially triggered by a smatch
+> > warning that is a bit questionable.
+> >
+> > This part:
+> >
+> >      if (IS_ERR_OR_NULL(dbgfs_topdir)) {
+> >          dev_info(&ndev->ntb.pdev->dev, "Top DebugFS directory absent");
+> > -        return PTR_ERR(dbgfs_topdir);
+> > +        return PTR_ERR_OR_ZERO(dbgfs_topdir);
+> >      }
+> >
+> > works, but is very non-optimal and unnecessary.
+> >
+> > The thing is, "PTR_ERR()" works just fine on a IS_ERR_OR_NULL pointer.
+> > It doesn't work on a _regular_ non-NULL and non-ERR pointer, and will
+> > return random garbage for those. But if you've tested for
+> > IS_ERR_OR_NULL(), then a regular PTR_ERR() is already fine.
+> >
+> > And PTR_ERR_OR_ZERO() potentially generates an extraneous pointless
+> > tests against zero (to check for the ERR case).
+> >
+> > A compiler may be able to notice that the PTR_ERR_OR_ZERO() is
+> > unnecessary and remove it (because of the IS_ERR_OR_NULL() checks),
+> > but in general we should assume compilers are "not stupid" rather than
+> > "really smart".
+> >
+> > So while this patch isn't _wrong_, and I've already pulled it, the
+> > fact that apparently some smatch test triggers these pointless and
+> > potentially expensive patches is not a good idea.
+> >
+> > I'm not sure what the smatch tests should be (NULL turns to 0, which
+> > may be confusing), but I'm cc'ing Dan in case he has ideas.
+> >
+>
+> The most common bug that this check finds is the other part of that same
+> commit 91b8246de859 ("ntb: idt: fix error check in ntb_hw_idt.c"):
+>
+>         /* Allocate the memory for IDT NTB device data */
+>         ndev = idt_create_dev(pdev, id);
+> -       if (IS_ERR_OR_NULL(ndev))
+> +       if (IS_ERR(ndev))
+>                 return PTR_ERR(ndev);
+>
+> idt_create_dev() never returns NULL, but if it did then we don't want
+> to return success.
+>
+> For the debugfs stuff, the caller doesn't check the return value anyway.
+> Just make it a void function.  A lot of this debugfs code could be
+> simplified.  It's not a bug to pass an error pointer or a NULL dbgfs_topdir
+> pointer to debugfs_create_file().  There isn't any benefit in checking
+> debugfs_initialized().
+>
+> diff --git a/drivers/ntb/hw/idt/ntb_hw_idt.c b/drivers/ntb/hw/idt/ntb_hw_idt.c
+> index e7a4c2aa8baa..710c17b2a923 100644
+> --- a/drivers/ntb/hw/idt/ntb_hw_idt.c
+> +++ b/drivers/ntb/hw/idt/ntb_hw_idt.c
+> @@ -2504,28 +2504,14 @@ static ssize_t idt_dbgfs_info_read(struct file *filp, char __user *ubuf,
+>   *
+>   * Return: zero on success, otherwise a negative error number.
+>   */
+> -static int idt_init_dbgfs(struct idt_ntb_dev *ndev)
+> +static void idt_init_dbgfs(struct idt_ntb_dev *ndev)
+>  {
+>         char devname[64];
+>
+> -       /* If the top directory is not created then do nothing */
+> -       if (IS_ERR_OR_NULL(dbgfs_topdir)) {
+> -               dev_info(&ndev->ntb.pdev->dev, "Top DebugFS directory absent");
+> -               return PTR_ERR_OR_ZERO(dbgfs_topdir);
+> -       }
+> -
+>         /* Create the info file node */
+>         snprintf(devname, 64, "info:%s", pci_name(ndev->ntb.pdev));
+>         ndev->dbgfs_info = debugfs_create_file(devname, 0400, dbgfs_topdir,
+> -               ndev, &idt_dbgfs_info_ops);
+> -       if (IS_ERR(ndev->dbgfs_info)) {
+> -               dev_dbg(&ndev->ntb.pdev->dev, "Failed to create DebugFS node");
+> -               return PTR_ERR(ndev->dbgfs_info);
+> -       }
+> -
+> -       dev_dbg(&ndev->ntb.pdev->dev, "NTB device DebugFS node created");
+> -
+> -       return 0;
+> +                                              ndev, &idt_dbgfs_info_ops);
+>  }
+>
+>  /*
+> @@ -2792,7 +2778,7 @@ static int idt_pci_probe(struct pci_dev *pdev,
+>                 goto err_deinit_isr;
+>
+>         /* Initialize DebugFS info node */
+> -       (void)idt_init_dbgfs(ndev);
+> +       idt_init_dbgfs(ndev);
+>
+>         /* IDT PCIe-switch NTB driver is finally initialized */
+>         dev_info(&pdev->dev, "IDT NTB device is ready");
+> @@ -2904,9 +2890,7 @@ static int __init idt_pci_driver_init(void)
+>  {
+>         pr_info("%s %s\n", NTB_DESC, NTB_VER);
+>
+> -       /* Create the top DebugFS directory if the FS is initialized */
+> -       if (debugfs_initialized())
+> -               dbgfs_topdir = debugfs_create_dir(KBUILD_MODNAME, NULL);
+> +       dbgfs_topdir = debugfs_create_dir(KBUILD_MODNAME, NULL);
+>
+>         /* Register the NTB hardware driver to handle the PCI device */
+>         return pci_register_driver(&idt_pci_driver);
+> --
+> 2.29.2
 
-On 15/12/20 9:31 pm, Rob Herring wrote:
-> On Wed, Nov 11, 2020 at 9:37 AM Kishon Vijay Abraham I <kishon@ti.com> wrote:
->>
->> Implement ->msi_map_irq() ops in order to map physical address to
->> MSI address and return MSI data.
->>
->> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
->> ---
->>  .../pci/controller/cadence/pcie-cadence-ep.c  | 53 +++++++++++++++++++
->>  1 file changed, 53 insertions(+)
->>
->> diff --git a/drivers/pci/controller/cadence/pcie-cadence-ep.c b/drivers/pci/controller/cadence/pcie-cadence-ep.c
->> index 84cc58dc8512..1fe6b8baca97 100644
->> --- a/drivers/pci/controller/cadence/pcie-cadence-ep.c
->> +++ b/drivers/pci/controller/cadence/pcie-cadence-ep.c
->> @@ -382,6 +382,57 @@ static int cdns_pcie_ep_send_msi_irq(struct cdns_pcie_ep *ep, u8 fn,
->>         return 0;
->>  }
->>
->> +static int cdns_pcie_ep_map_msi_irq(struct pci_epc *epc, u8 fn,
->> +                                   phys_addr_t addr, u8 interrupt_num,
->> +                                   u32 entry_size, u32 *msi_data,
->> +                                   u32 *msi_addr_offset)
->> +{
->> +       struct cdns_pcie_ep *ep = epc_get_drvdata(epc);
->> +       u32 cap = CDNS_PCIE_EP_FUNC_MSI_CAP_OFFSET;
->> +       struct cdns_pcie *pcie = &ep->pcie;
->> +       u64 pci_addr, pci_addr_mask = 0xff;
->> +       u16 flags, mme, data, data_mask;
->> +       u8 msi_count;
->> +       int ret;
->> +       int i;
->> +
-> 
-> 
->> +       /* Check whether the MSI feature has been enabled by the PCI host. */
->> +       flags = cdns_pcie_ep_fn_readw(pcie, fn, cap + PCI_MSI_FLAGS);
->> +       if (!(flags & PCI_MSI_FLAGS_ENABLE))
->> +               return -EINVAL;
->> +
->> +       /* Get the number of enabled MSIs */
->> +       mme = (flags & PCI_MSI_FLAGS_QSIZE) >> 4;
->> +       msi_count = 1 << mme;
->> +       if (!interrupt_num || interrupt_num > msi_count)
->> +               return -EINVAL;
->> +
->> +       /* Compute the data value to be written. */
->> +       data_mask = msi_count - 1;
->> +       data = cdns_pcie_ep_fn_readw(pcie, fn, cap + PCI_MSI_DATA_64);
->> +       data = data & ~data_mask;
->> +
->> +       /* Get the PCI address where to write the data into. */
->> +       pci_addr = cdns_pcie_ep_fn_readl(pcie, fn, cap + PCI_MSI_ADDRESS_HI);
->> +       pci_addr <<= 32;
->> +       pci_addr |= cdns_pcie_ep_fn_readl(pcie, fn, cap + PCI_MSI_ADDRESS_LO);
->> +       pci_addr &= GENMASK_ULL(63, 2);
-> 
-> Wouldn't all of the above be the same code for any endpoint driver? We
-> just need endpoint config space accessors for the same 32-bit only
-> access issues. Not asking for that in this series, but if that's the
-> direction we should go.
+This seems logical and the patch looks fine to me.  If you send it as
+a patch, I'll happily pull it in.
 
-Do you mean "endpoint" variant of pci_generic_config_read() which takes
-function number and capability offset? That could be done but we have to
-add support to traverse the linked list of capabilities though the
-capabilities are going to be at a fixed location for a given IP.
+Thanks,
+Jon
 
-Also in some cases, the writes are to a different register than the
-configuration space registers like vendor_id in Cadence EP should be
-written to Local Management register instead of the configuration space
-register.
-
-Thank You,
-Kishon
+>
+> --
+> You received this message because you are subscribed to the Google Groups "linux-ntb" group.
+> To unsubscribe from this group and stop receiving emails from it, send an email to linux-ntb+unsubscribe@googlegroups.com.
+> To view this discussion on the web visit https://groups.google.com/d/msgid/linux-ntb/20210104082948.GR2831%40kadam.
