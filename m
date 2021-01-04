@@ -1,13 +1,13 @@
 Return-Path: <kishon@ti.com>
 Received: from fllv0015.ext.ti.com (fllv0015.ext.ti.com. [198.47.19.141])
-        by gmr-mx.google.com with ESMTPS id l19si4600058oib.3.2021.01.04.07.31.59
+        by gmr-mx.google.com with ESMTPS id z9si3865323pgv.2.2021.01.04.07.31.54
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 04 Jan 2021 07:31:59 -0800 (PST)
+        Mon, 04 Jan 2021 07:31:54 -0800 (PST)
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v9 10/17] PCI: endpoint: Allow user to create sub-directory of 'EPF Device' directory
-Date: Mon, 4 Jan 2021 20:59:02 +0530
-Message-ID: <20210104152909.22038-11-kishon@ti.com>
+Subject: [PATCH v9 16/17] Documentation: PCI: Add configfs binding documentation for pci-ntb endpoint function
+Date: Mon, 4 Jan 2021 20:59:08 +0530
+Message-ID: <20210104152909.22038-17-kishon@ti.com>
 In-Reply-To: <20210104152909.22038-1-kishon@ti.com>
 References: <20210104152909.22038-1-kishon@ti.com>
 MIME-Version: 1.0
@@ -16,89 +16,69 @@ To: Bjorn Helgaas <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, Kisho
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-Documentation/PCI/endpoint/pci-endpoint-cfs.rst explains how a user
-has to create a directory in-order to create a 'EPF Device' that
-can be configured/probed by 'EPF Driver'.
-
-Allow user to create a sub-directory of 'EPF Device' directory for
-any function specific attributes that has to be exposed to the user.
+Add binding documentation for pci-ntb endpoint function that helps in
+adding and configuring pci-ntb endpoint function.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- drivers/pci/endpoint/pci-ep-cfs.c | 23 +++++++++++++++++++++++
- include/linux/pci-epf.h           |  3 +++
- 2 files changed, 26 insertions(+)
+ .../PCI/endpoint/function/binding/pci-ntb.rst | 38 +++++++++++++++++++
+ Documentation/PCI/endpoint/index.rst          |  1 +
+ 2 files changed, 39 insertions(+)
+ create mode 100644 Documentation/PCI/endpoint/function/binding/pci-ntb.rst
 
-diff --git a/drivers/pci/endpoint/pci-ep-cfs.c b/drivers/pci/endpoint/pci-ep-cfs.c
-index 8f750961d6ab..f3a8b833b479 100644
---- a/drivers/pci/endpoint/pci-ep-cfs.c
-+++ b/drivers/pci/endpoint/pci-ep-cfs.c
-@@ -490,7 +490,29 @@ static struct configfs_item_operations pci_epf_ops = {
- 	.release		= pci_epf_release,
- };
- 
-+static struct config_group *pci_epf_type_make(struct config_group *group,
-+					      const char *name)
-+{
-+	struct pci_epf_group *epf_group = to_pci_epf_group(&group->cg_item);
-+	struct config_group *epf_type_group;
+diff --git a/Documentation/PCI/endpoint/function/binding/pci-ntb.rst b/Documentation/PCI/endpoint/function/binding/pci-ntb.rst
+new file mode 100644
+index 000000000000..40253d3d5163
+--- /dev/null
++++ b/Documentation/PCI/endpoint/function/binding/pci-ntb.rst
+@@ -0,0 +1,38 @@
++.. SPDX-License-Identifier: GPL-2.0
 +
-+	epf_type_group = pci_epf_type_add_cfs(epf_group->epf, group);
-+	return epf_type_group;
-+}
++==========================
++PCI NTB Endpoint Function
++==========================
 +
-+static void pci_epf_type_drop(struct config_group *group,
-+			      struct config_item *item)
-+{
-+	config_item_put(item);
-+}
++1) Create a subdirectory to pci_epf_ntb directory in configfs.
 +
-+static struct configfs_group_operations pci_epf_type_group_ops = {
-+	.make_group     = &pci_epf_type_make,
-+	.drop_item      = &pci_epf_type_drop,
-+};
++Standard EPF Configurable Fields:
 +
- static const struct config_item_type pci_epf_type = {
-+	.ct_group_ops	= &pci_epf_type_group_ops,
- 	.ct_item_ops	= &pci_epf_ops,
- 	.ct_attrs	= pci_epf_attrs,
- 	.ct_owner	= THIS_MODULE,
-@@ -553,6 +575,7 @@ static struct config_group *pci_epf_make(struct config_group *group,
- 		goto free_name;
- 	}
++================   ===========================================================
++vendorid	   should be 0x104c
++deviceid	   should be 0xb00d for TI's J721E SoC
++revid		   don't care
++progif_code	   don't care
++subclass_code	   should be 0x00
++baseclass_code	   should be 0x5
++cache_line_size	   don't care
++subsys_vendor_id   don't care
++subsys_id	   don't care
++interrupt_pin	   don't care
++msi_interrupts	   don't care
++msix_interrupts	   don't care
++================   ===========================================================
++
++2) Create a subdirectory to directory created in 1
++
++NTB EPF specific configurable fields:
++
++================   ===========================================================
++db_count	   Number of doorbells; default = 4
++mw1     	   size of memory window1
++mw2     	   size of memory window2
++mw3     	   size of memory window3
++mw4     	   size of memory window4
++num_mws     	   Number of memory windows; max = 4
++spad_count     	   Number of scratchpad registers; default = 64
++================   ===========================================================
+diff --git a/Documentation/PCI/endpoint/index.rst b/Documentation/PCI/endpoint/index.rst
+index ef6861128506..9cb6e5f3c4d5 100644
+--- a/Documentation/PCI/endpoint/index.rst
++++ b/Documentation/PCI/endpoint/index.rst
+@@ -14,3 +14,4 @@ PCI Endpoint Framework
+    pci-ntb-function
  
-+	epf->group = &epf_group->group;
- 	epf_group->epf = epf;
- 
- 	kfree(epf_name);
-diff --git a/include/linux/pci-epf.h b/include/linux/pci-epf.h
-index b241e7dd171f..6833e2160ef1 100644
---- a/include/linux/pci-epf.h
-+++ b/include/linux/pci-epf.h
-@@ -9,6 +9,7 @@
- #ifndef __LINUX_PCI_EPF_H
- #define __LINUX_PCI_EPF_H
- 
-+#include <linux/configfs.h>
- #include <linux/device.h>
- #include <linux/mod_devicetable.h>
- #include <linux/pci.h>
-@@ -128,6 +129,7 @@ struct pci_epf_bar {
-  *   EPC device
-  * @sec_epc_bar: represents the BAR of EPF device associated with secondary EPC
-  * @sec_epc_func_no: unique (physical) function number within the secondary EPC
-+ * @group: configfs group associated with the EPF device
-  */
- struct pci_epf {
- 	struct device		dev;
-@@ -150,6 +152,7 @@ struct pci_epf {
- 	struct list_head	sec_epc_list;
- 	struct pci_epf_bar	sec_epc_bar[6];
- 	u8			sec_epc_func_no;
-+	struct config_group	*group;
- };
- 
- /**
+    function/binding/pci-test
++   function/binding/pci-ntb
 -- 
 2.17.1
 
