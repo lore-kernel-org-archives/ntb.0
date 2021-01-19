@@ -1,114 +1,70 @@
-Return-Path: <helgaas@kernel.org>
-Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id d2si1749100pfr.4.2021.01.19.10.34.07
-        for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 19 Jan 2021 10:34:07 -0800 (PST)
-Date: Tue, 19 Jan 2021 12:34:05 -0600
-From: Bjorn Helgaas <helgaas@kernel.org>
-Subject: Re: [PATCH v9 10/17] PCI: endpoint: Allow user to create
- sub-directory of 'EPF Device' directory
-Message-ID: <20210119183405.GA2496684@bjorn-Precision-5520>
+Return-Path: <lorenzo.pieralisi@arm.com>
+Received: from foss.arm.com (foss.arm.com. [217.140.110.172])
+        by gmr-mx.google.com with ESMTP id 13si1428230pgf.0.2021.01.19.03.30.06
+        for <linux-ntb@googlegroups.com>;
+        Tue, 19 Jan 2021 03:30:07 -0800 (PST)
+From: Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>
+Subject: Re: [PATCH v9 00/17] Implement NTB Controller using multiple PCI EP
+Date: Tue, 19 Jan 2021 11:29:55 +0000
+Message-Id: <161105563975.29969.4677344444174224884.b4-ty@arm.com>
+In-Reply-To: <20210104152909.22038-1-kishon@ti.com>
+References: <20210104152909.22038-1-kishon@ti.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210104152909.22038-11-kishon@ti.com>
-To: Kishon Vijay Abraham I <kishon@ti.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Bjorn Helgaas <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Arnd Bergmann <arnd@arndb.de>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Tom Joseph <tjoseph@cadence.com>, Rob Herring <robh@kernel.org>, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
+Content-Transfer-Encoding: 8bit
+To: Kishon Vijay Abraham I <kishon@ti.com>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Rob Herring <robh@kernel.org>, Jon Mason <jdmason@kudzu.us>, Jonathan Corbet <corbet@lwn.net>, Arnd Bergmann <arnd@arndb.de>, Bjorn Helgaas <bhelgaas@google.com>, Tom Joseph <tjoseph@cadence.com>
+Cc: Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, linux-ntb@googlegroups.com, linux-doc@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-[cc->to Greg]
-
-On Mon, Jan 04, 2021 at 08:59:02PM +0530, Kishon Vijay Abraham I wrote:
-> Documentation/PCI/endpoint/pci-endpoint-cfs.rst explains how a user
-> has to create a directory in-order to create a 'EPF Device' that
-> can be configured/probed by 'EPF Driver'.
+On Mon, 4 Jan 2021 20:58:52 +0530, Kishon Vijay Abraham I wrote:
+> This series is about implementing SW defined Non-Transparent Bridge (NTB)
+> using multiple endpoint (EP) instances. This series has been tested using
+> 2 endpoint instances in J7 connected to J7 board on one end and DRA7 board
+> on the other end. However there is nothing platform specific for the NTB
+> functionality.
 > 
-> Allow user to create a sub-directory of 'EPF Device' directory for
-> any function specific attributes that has to be exposed to the user.
-
-Maybe add an example sysfs path in the commit log?
-
-Seems like there's restriction on hierarchy depth in sysfs, but I
-don't remember the details.  Moved Greg to "to" in case he wants to
-comment.
-
-> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
-> ---
->  drivers/pci/endpoint/pci-ep-cfs.c | 23 +++++++++++++++++++++++
->  include/linux/pci-epf.h           |  3 +++
->  2 files changed, 26 insertions(+)
+> This was presented in Linux Plumbers Conference. Link to presentation
+> and video can be found @ [1]
+> Created a video demo @ [9]
 > 
-> diff --git a/drivers/pci/endpoint/pci-ep-cfs.c b/drivers/pci/endpoint/pci-ep-cfs.c
-> index 8f750961d6ab..f3a8b833b479 100644
-> --- a/drivers/pci/endpoint/pci-ep-cfs.c
-> +++ b/drivers/pci/endpoint/pci-ep-cfs.c
-> @@ -490,7 +490,29 @@ static struct configfs_item_operations pci_epf_ops = {
->  	.release		= pci_epf_release,
->  };
->  
-> +static struct config_group *pci_epf_type_make(struct config_group *group,
-> +					      const char *name)
-> +{
-> +	struct pci_epf_group *epf_group = to_pci_epf_group(&group->cg_item);
-> +	struct config_group *epf_type_group;
-> +
-> +	epf_type_group = pci_epf_type_add_cfs(epf_group->epf, group);
-> +	return epf_type_group;
-> +}
-> +
-> +static void pci_epf_type_drop(struct config_group *group,
-> +			      struct config_item *item)
-> +{
-> +	config_item_put(item);
-> +}
-> +
-> +static struct configfs_group_operations pci_epf_type_group_ops = {
-> +	.make_group     = &pci_epf_type_make,
-> +	.drop_item      = &pci_epf_type_drop,
-> +};
-> +
->  static const struct config_item_type pci_epf_type = {
-> +	.ct_group_ops	= &pci_epf_type_group_ops,
->  	.ct_item_ops	= &pci_epf_ops,
->  	.ct_attrs	= pci_epf_attrs,
->  	.ct_owner	= THIS_MODULE,
-> @@ -553,6 +575,7 @@ static struct config_group *pci_epf_make(struct config_group *group,
->  		goto free_name;
->  	}
->  
-> +	epf->group = &epf_group->group;
->  	epf_group->epf = epf;
->  
->  	kfree(epf_name);
-> diff --git a/include/linux/pci-epf.h b/include/linux/pci-epf.h
-> index b241e7dd171f..6833e2160ef1 100644
-> --- a/include/linux/pci-epf.h
-> +++ b/include/linux/pci-epf.h
-> @@ -9,6 +9,7 @@
->  #ifndef __LINUX_PCI_EPF_H
->  #define __LINUX_PCI_EPF_H
->  
-> +#include <linux/configfs.h>
->  #include <linux/device.h>
->  #include <linux/mod_devicetable.h>
->  #include <linux/pci.h>
-> @@ -128,6 +129,7 @@ struct pci_epf_bar {
->   *   EPC device
->   * @sec_epc_bar: represents the BAR of EPF device associated with secondary EPC
->   * @sec_epc_func_no: unique (physical) function number within the secondary EPC
-> + * @group: configfs group associated with the EPF device
->   */
->  struct pci_epf {
->  	struct device		dev;
-> @@ -150,6 +152,7 @@ struct pci_epf {
->  	struct list_head	sec_epc_list;
->  	struct pci_epf_bar	sec_epc_bar[6];
->  	u8			sec_epc_func_no;
-> +	struct config_group	*group;
->  };
->  
->  /**
-> -- 
-> 2.17.1
-> 
+> [...]
+
+Applied to pci/ntb to give it more visibility and testing, aiming
+for v5.12.
+
+[01/17] Documentation: PCI: Add specification for the *PCI NTB* function device
+        https://git.kernel.org/lpieralisi/pci/c/75e6ac86ca
+[02/17] PCI: endpoint: Make *_get_first_free_bar() take into account 64 bit BAR
+        https://git.kernel.org/lpieralisi/pci/c/b6c7a2a2b5
+[03/17] PCI: endpoint: Add helper API to get the 'next' unreserved BAR
+        https://git.kernel.org/lpieralisi/pci/c/43e293914d
+[04/17] PCI: endpoint: Make *_free_bar() to return error codes on failure
+        https://git.kernel.org/lpieralisi/pci/c/293e2c258c
+[05/17] PCI: endpoint: Remove unused pci_epf_match_device()
+        https://git.kernel.org/lpieralisi/pci/c/9a25bdab98
+[06/17] PCI: endpoint: Add support to associate secondary EPC with EPF
+        https://git.kernel.org/lpieralisi/pci/c/868fe90ea4
+[07/17] PCI: endpoint: Add support in configfs to associate two EPCs with EPF
+        https://git.kernel.org/lpieralisi/pci/c/632c92ec12
+[08/17] PCI: endpoint: Add pci_epc_ops to map MSI irq
+        https://git.kernel.org/lpieralisi/pci/c/310511a301
+[09/17] PCI: endpoint: Add pci_epf_ops for epf drivers to expose function specific attrs
+        https://git.kernel.org/lpieralisi/pci/c/34fb8ab2e3
+[10/17] PCI: endpoint: Allow user to create sub-directory of 'EPF Device' directory
+        https://git.kernel.org/lpieralisi/pci/c/3a5c112c7a
+[11/17] PCI: cadence: Implement ->msi_map_irq() ops
+        https://git.kernel.org/lpieralisi/pci/c/d5c3d2ae7c
+[12/17] PCI: cadence: Configure LM_EP_FUNC_CFG based on epc->function_num_map
+        https://git.kernel.org/lpieralisi/pci/c/d3f4973104
+[13/17] PCI: endpoint: Add EP function driver to provide NTB functionality
+        https://git.kernel.org/lpieralisi/pci/c/7dc64244f9
+[14/17] PCI: Add TI J721E device to pci ids
+        https://git.kernel.org/lpieralisi/pci/c/17d49876c3
+[15/17] NTB: Add support for EPF PCI-Express Non-Transparent Bridge
+        https://git.kernel.org/lpieralisi/pci/c/5d0db3f429
+[16/17] Documentation: PCI: Add configfs binding documentation for pci-ntb endpoint function
+        https://git.kernel.org/lpieralisi/pci/c/099f07051e
+[17/17] Documentation: PCI: Add userguide for PCI endpoint NTB function
+        https://git.kernel.org/lpieralisi/pci/c/27f22f76c3
+
+Thanks,
+Lorenzo
