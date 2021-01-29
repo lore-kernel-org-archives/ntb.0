@@ -1,137 +1,211 @@
-Return-Path: <dan.carpenter@oracle.com>
-Received: from aserp2130.oracle.com (aserp2130.oracle.com. [141.146.126.79])
-        by gmr-mx.google.com with ESMTPS id mt17si1515572pjb.0.2021.01.04.00.31.00
+Return-Path: <kishon@ti.com>
+Received: from fllv0015.ext.ti.com (fllv0015.ext.ti.com. [198.47.19.141])
+        by gmr-mx.google.com with ESMTPS id c10si568484ybf.1.2021.01.29.04.45.05
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 04 Jan 2021 00:31:01 -0800 (PST)
-Date: Mon, 4 Jan 2021 11:29:48 +0300
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: Re: [GIT PULL] NTB bug fixes for v5.11
-Message-ID: <20210104082948.GR2831@kadam>
-References: <20201227141638.GA11393@athena.kudzu.us>
- <CAHk-=wjxQzF3eWank1r7F6+EqSRsO+kvibPqDbzxjHv3wzZt0A@mail.gmail.com>
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 29 Jan 2021 04:45:06 -0800 (PST)
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: [PATCH v10 17/17] Documentation: PCI: Add userguide for PCI endpoint NTB function
+Date: Fri, 29 Jan 2021 18:13:13 +0530
+Message-ID: <20210129124313.28549-18-kishon@ti.com>
+In-Reply-To: <20210129124313.28549-1-kishon@ti.com>
+References: <20210129124313.28549-1-kishon@ti.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAHk-=wjxQzF3eWank1r7F6+EqSRsO+kvibPqDbzxjHv3wzZt0A@mail.gmail.com>
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Jon Mason <jdmason@kudzu.us>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-ntb@googlegroups.com
+Content-Type: text/plain
+To: Bjorn Helgaas <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, Kishon Vijay Abraham I <kishon@ti.com>, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Arnd Bergmann <arnd@arndb.de>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Tom Joseph <tjoseph@cadence.com>, Rob Herring <robh@kernel.org>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-On Sun, Dec 27, 2020 at 09:38:23AM -0800, Linus Torvalds wrote:
-> On Sun, Dec 27, 2020 at 6:16 AM Jon Mason <jdmason@kudzu.us> wrote:
-> >
-> > Wang Qing (1):
-> >       ntb: idt: fix error check in ntb_hw_idt.c
-> 
-> So this patch seems to be at least partially triggered by a smatch
-> warning that is a bit questionable.
-> 
-> This part:
-> 
->      if (IS_ERR_OR_NULL(dbgfs_topdir)) {
->          dev_info(&ndev->ntb.pdev->dev, "Top DebugFS directory absent");
-> -        return PTR_ERR(dbgfs_topdir);
-> +        return PTR_ERR_OR_ZERO(dbgfs_topdir);
->      }
-> 
-> works, but is very non-optimal and unnecessary.
-> 
-> The thing is, "PTR_ERR()" works just fine on a IS_ERR_OR_NULL pointer.
-> It doesn't work on a _regular_ non-NULL and non-ERR pointer, and will
-> return random garbage for those. But if you've tested for
-> IS_ERR_OR_NULL(), then a regular PTR_ERR() is already fine.
-> 
-> And PTR_ERR_OR_ZERO() potentially generates an extraneous pointless
-> tests against zero (to check for the ERR case).
-> 
-> A compiler may be able to notice that the PTR_ERR_OR_ZERO() is
-> unnecessary and remove it (because of the IS_ERR_OR_NULL() checks),
-> but in general we should assume compilers are "not stupid" rather than
-> "really smart".
-> 
-> So while this patch isn't _wrong_, and I've already pulled it, the
-> fact that apparently some smatch test triggers these pointless and
-> potentially expensive patches is not a good idea.
-> 
-> I'm not sure what the smatch tests should be (NULL turns to 0, which
-> may be confusing), but I'm cc'ing Dan in case he has ideas.
->
+Add documentation to help users use pci-epf-ntb function driver and
+existing host side NTB infrastructure for NTB functionality.
 
-The most common bug that this check finds is the other part of that same
-commit 91b8246de859 ("ntb: idt: fix error check in ntb_hw_idt.c"):
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+Reviewed-by: Randy Dunlap <rdunlap@infradead.org>
+---
+ Documentation/PCI/endpoint/index.rst         |   1 +
+ Documentation/PCI/endpoint/pci-ntb-howto.rst | 161 +++++++++++++++++++
+ 2 files changed, 162 insertions(+)
+ create mode 100644 Documentation/PCI/endpoint/pci-ntb-howto.rst
 
- 	/* Allocate the memory for IDT NTB device data */
- 	ndev = idt_create_dev(pdev, id);
--	if (IS_ERR_OR_NULL(ndev))
-+	if (IS_ERR(ndev))
- 		return PTR_ERR(ndev);
-
-idt_create_dev() never returns NULL, but if it did then we don't want
-to return success.
-
-For the debugfs stuff, the caller doesn't check the return value anyway.
-Just make it a void function.  A lot of this debugfs code could be
-simplified.  It's not a bug to pass an error pointer or a NULL dbgfs_topdir
-pointer to debugfs_create_file().  There isn't any benefit in checking
-debugfs_initialized().
-
-diff --git a/drivers/ntb/hw/idt/ntb_hw_idt.c b/drivers/ntb/hw/idt/ntb_hw_idt.c
-index e7a4c2aa8baa..710c17b2a923 100644
---- a/drivers/ntb/hw/idt/ntb_hw_idt.c
-+++ b/drivers/ntb/hw/idt/ntb_hw_idt.c
-@@ -2504,28 +2504,14 @@ static ssize_t idt_dbgfs_info_read(struct file *filp, char __user *ubuf,
-  *
-  * Return: zero on success, otherwise a negative error number.
-  */
--static int idt_init_dbgfs(struct idt_ntb_dev *ndev)
-+static void idt_init_dbgfs(struct idt_ntb_dev *ndev)
- {
- 	char devname[64];
+diff --git a/Documentation/PCI/endpoint/index.rst b/Documentation/PCI/endpoint/index.rst
+index 9cb6e5f3c4d5..38ea1f604b6d 100644
+--- a/Documentation/PCI/endpoint/index.rst
++++ b/Documentation/PCI/endpoint/index.rst
+@@ -12,6 +12,7 @@ PCI Endpoint Framework
+    pci-test-function
+    pci-test-howto
+    pci-ntb-function
++   pci-ntb-howto
  
--	/* If the top directory is not created then do nothing */
--	if (IS_ERR_OR_NULL(dbgfs_topdir)) {
--		dev_info(&ndev->ntb.pdev->dev, "Top DebugFS directory absent");
--		return PTR_ERR_OR_ZERO(dbgfs_topdir);
--	}
--
- 	/* Create the info file node */
- 	snprintf(devname, 64, "info:%s", pci_name(ndev->ntb.pdev));
- 	ndev->dbgfs_info = debugfs_create_file(devname, 0400, dbgfs_topdir,
--		ndev, &idt_dbgfs_info_ops);
--	if (IS_ERR(ndev->dbgfs_info)) {
--		dev_dbg(&ndev->ntb.pdev->dev, "Failed to create DebugFS node");
--		return PTR_ERR(ndev->dbgfs_info);
--	}
--
--	dev_dbg(&ndev->ntb.pdev->dev, "NTB device DebugFS node created");
--
--	return 0;
-+					       ndev, &idt_dbgfs_info_ops);
- }
- 
- /*
-@@ -2792,7 +2778,7 @@ static int idt_pci_probe(struct pci_dev *pdev,
- 		goto err_deinit_isr;
- 
- 	/* Initialize DebugFS info node */
--	(void)idt_init_dbgfs(ndev);
-+	idt_init_dbgfs(ndev);
- 
- 	/* IDT PCIe-switch NTB driver is finally initialized */
- 	dev_info(&pdev->dev, "IDT NTB device is ready");
-@@ -2904,9 +2890,7 @@ static int __init idt_pci_driver_init(void)
- {
- 	pr_info("%s %s\n", NTB_DESC, NTB_VER);
- 
--	/* Create the top DebugFS directory if the FS is initialized */
--	if (debugfs_initialized())
--		dbgfs_topdir = debugfs_create_dir(KBUILD_MODNAME, NULL);
-+	dbgfs_topdir = debugfs_create_dir(KBUILD_MODNAME, NULL);
- 
- 	/* Register the NTB hardware driver to handle the PCI device */
- 	return pci_register_driver(&idt_pci_driver);
+    function/binding/pci-test
+    function/binding/pci-ntb
+diff --git a/Documentation/PCI/endpoint/pci-ntb-howto.rst b/Documentation/PCI/endpoint/pci-ntb-howto.rst
+new file mode 100644
+index 000000000000..9f905ea724d1
+--- /dev/null
++++ b/Documentation/PCI/endpoint/pci-ntb-howto.rst
+@@ -0,0 +1,161 @@
++.. SPDX-License-Identifier: GPL-2.0
++
++===================================================================
++PCI Non-Transparent Bridge (NTB) Endpoint Function (EPF) User Guide
++===================================================================
++
++:Author: Kishon Vijay Abraham I <kishon@ti.com>
++
++This document is a guide to help users use pci-epf-ntb function driver
++and ntb_hw_epf host driver for NTB functionality. The list of steps to
++be followed in the host side and EP side is given below. For the hardware
++configuration and internals of NTB using configurable endpoints see
++Documentation/PCI/endpoint/pci-ntb-function.rst
++
++Endpoint Device
++===============
++
++Endpoint Controller Devices
++---------------------------
++
++For implementing NTB functionality at least two endpoint controller devices
++are required.
++
++To find the list of endpoint controller devices in the system::
++
++        # ls /sys/class/pci_epc/
++          2900000.pcie-ep  2910000.pcie-ep
++
++If PCI_ENDPOINT_CONFIGFS is enabled::
++
++	# ls /sys/kernel/config/pci_ep/controllers
++	  2900000.pcie-ep  2910000.pcie-ep
++
++
++Endpoint Function Drivers
++-------------------------
++
++To find the list of endpoint function drivers in the system::
++
++	# ls /sys/bus/pci-epf/drivers
++	  pci_epf_ntb   pci_epf_ntb
++
++If PCI_ENDPOINT_CONFIGFS is enabled::
++
++	# ls /sys/kernel/config/pci_ep/functions
++	  pci_epf_ntb   pci_epf_ntb
++
++
++Creating pci-epf-ntb Device
++----------------------------
++
++PCI endpoint function device can be created using the configfs. To create
++pci-epf-ntb device, the following commands can be used::
++
++	# mount -t configfs none /sys/kernel/config
++	# cd /sys/kernel/config/pci_ep/
++	# mkdir functions/pci_epf_ntb/func1
++
++The "mkdir func1" above creates the pci-epf-ntb function device that will
++be probed by pci_epf_ntb driver.
++
++The PCI endpoint framework populates the directory with the following
++configurable fields::
++
++	# ls functions/pci_epf_ntb/func1
++          baseclass_code    deviceid          msi_interrupts    pci-epf-ntb.0
++          progif_code       secondary         subsys_id         vendorid
++          cache_line_size   interrupt_pin     msix_interrupts   primary
++          revid             subclass_code     subsys_vendor_id
++
++The PCI endpoint function driver populates these entries with default values
++when the device is bound to the driver. The pci-epf-ntb driver populates
++vendorid with 0xffff and interrupt_pin with 0x0001::
++
++	# cat functions/pci_epf_ntb/func1/vendorid
++	  0xffff
++	# cat functions/pci_epf_ntb/func1/interrupt_pin
++	  0x0001
++
++
++Configuring pci-epf-ntb Device
++-------------------------------
++
++The user can configure the pci-epf-ntb device using its configfs entry. In order
++to change the vendorid and the deviceid, the following
++commands can be used::
++
++	# echo 0x104c > functions/pci_epf_ntb/func1/vendorid
++	# echo 0xb00d > functions/pci_epf_ntb/func1/deviceid
++
++In order to configure NTB specific attributes, a new sub-directory to func1
++should be created::
++
++	# mkdir functions/pci_epf_ntb/func1/pci_epf_ntb.0/
++
++The NTB function driver will populate this directory with various attributes
++that can be configured by the user::
++
++	# ls functions/pci_epf_ntb/func1/pci_epf_ntb.0/
++          db_count    mw1         mw2         mw3         mw4         num_mws
++          spad_count
++
++A sample configuration for NTB function is given below::
++
++	# echo 4 > functions/pci_epf_ntb/func1/pci_epf_ntb.0/db_count
++	# echo 128 > functions/pci_epf_ntb/func1/pci_epf_ntb.0/spad_count
++	# echo 2 > functions/pci_epf_ntb/func1/pci_epf_ntb.0/num_mws
++	# echo 0x100000 > functions/pci_epf_ntb/func1/pci_epf_ntb.0/mw1
++	# echo 0x100000 > functions/pci_epf_ntb/func1/pci_epf_ntb.0/mw2
++
++Binding pci-epf-ntb Device to EP Controller
++--------------------------------------------
++
++NTB function device should be attached to two PCIe endpoint controllers
++connected to the two hosts. Use the 'primary' and 'secondary' entries
++inside NTB function device to attach one PCIe endpoint controller to
++primary interface and the other PCIe endpoint controller to the secondary
++interface. ::
++
++        # ln -s controllers/2900000.pcie-ep/ functions/pci-epf-ntb/func1/primary
++        # ln -s controllers/2910000.pcie-ep/ functions/pci-epf-ntb/func1/secondary
++
++Once the above step is completed, both the PCI endpoint controllers are ready to
++establish a link with the host.
++
++
++Start the Link
++--------------
++
++In order for the endpoint device to establish a link with the host, the _start_
++field should be populated with '1'. For NTB, both the PCIe endpoint controllers
++should establish link with the host::
++
++        #echo 1 > controllers/2900000.pcie-ep/start
++        #echo 1 > controllers/2910000.pcie-ep/start
++
++
++RootComplex Device
++==================
++
++lspci Output
++------------
++
++Note that the devices listed here correspond to the values populated in
++"Creating pci-epf-ntb Device" section above::
++
++        # lspci
++        0000:00:00.0 PCI bridge: Texas Instruments Device b00d
++        0000:01:00.0 RAM memory: Texas Instruments Device b00d
++
++
++Using ntb_hw_epf Device
++-----------------------
++
++The host side software follows the standard NTB software architecture in Linux.
++All the existing client side NTB utilities like NTB Transport Client and NTB
++Netdev, NTB Ping Pong Test Client and NTB Tool Test Client can be used with NTB
++function device.
++
++For more information on NTB see
++:doc:`Non-Transparent Bridge <../../driver-api/ntb>`
 -- 
-2.29.2
-
+2.17.1
 
