@@ -1,13 +1,13 @@
 Return-Path: <kishon@ti.com>
-Received: from fllv0015.ext.ti.com (fllv0015.ext.ti.com. [198.47.19.141])
-        by gmr-mx.google.com with ESMTPS id d2si526681pfr.4.2021.01.29.04.44.31
+Received: from fllv0016.ext.ti.com (fllv0016.ext.ti.com. [198.47.19.142])
+        by gmr-mx.google.com with ESMTPS id v81si344166iod.4.2021.01.29.04.44.24
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 29 Jan 2021 04:44:31 -0800 (PST)
+        Fri, 29 Jan 2021 04:44:24 -0800 (PST)
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v10 11/17] PCI: cadence: Implement ->msi_map_irq() ops
-Date: Fri, 29 Jan 2021 18:13:07 +0530
-Message-ID: <20210129124313.28549-12-kishon@ti.com>
+Subject: [PATCH v10 10/17] PCI: endpoint: Allow user to create sub-directory of 'EPF Device' directory
+Date: Fri, 29 Jan 2021 18:13:06 +0530
+Message-ID: <20210129124313.28549-11-kishon@ti.com>
 In-Reply-To: <20210129124313.28549-1-kishon@ti.com>
 References: <20210129124313.28549-1-kishon@ti.com>
 MIME-Version: 1.0
@@ -16,93 +16,89 @@ To: Bjorn Helgaas <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, Kisho
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-pci@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-Implement ->msi_map_irq() ops in order to map physical address to
-MSI address and return MSI data.
+Documentation/PCI/endpoint/pci-endpoint-cfs.rst explains how a user
+has to create a directory in-order to create a 'EPF Device' that
+can be configured/probed by 'EPF Driver'.
+
+Allow user to create a sub-directory of 'EPF Device' directory for
+any function specific attributes that has to be exposed to the user.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
-Reviewed-by: Tom Joseph <tjoseph@cadence.com>
 ---
- .../pci/controller/cadence/pcie-cadence-ep.c  | 53 +++++++++++++++++++
- 1 file changed, 53 insertions(+)
+ drivers/pci/endpoint/pci-ep-cfs.c | 23 +++++++++++++++++++++++
+ include/linux/pci-epf.h           |  3 +++
+ 2 files changed, 26 insertions(+)
 
-diff --git a/drivers/pci/controller/cadence/pcie-cadence-ep.c b/drivers/pci/controller/cadence/pcie-cadence-ep.c
-index 9e2b024d32f2..dc88078194cb 100644
---- a/drivers/pci/controller/cadence/pcie-cadence-ep.c
-+++ b/drivers/pci/controller/cadence/pcie-cadence-ep.c
-@@ -382,6 +382,57 @@ static int cdns_pcie_ep_send_msi_irq(struct cdns_pcie_ep *ep, u8 fn,
- 	return 0;
- }
+diff --git a/drivers/pci/endpoint/pci-ep-cfs.c b/drivers/pci/endpoint/pci-ep-cfs.c
+index 8f750961d6ab..f3a8b833b479 100644
+--- a/drivers/pci/endpoint/pci-ep-cfs.c
++++ b/drivers/pci/endpoint/pci-ep-cfs.c
+@@ -490,7 +490,29 @@ static struct configfs_item_operations pci_epf_ops = {
+ 	.release		= pci_epf_release,
+ };
  
-+static int cdns_pcie_ep_map_msi_irq(struct pci_epc *epc, u8 fn,
-+				    phys_addr_t addr, u8 interrupt_num,
-+				    u32 entry_size, u32 *msi_data,
-+				    u32 *msi_addr_offset)
++static struct config_group *pci_epf_type_make(struct config_group *group,
++					      const char *name)
 +{
-+	struct cdns_pcie_ep *ep = epc_get_drvdata(epc);
-+	u32 cap = CDNS_PCIE_EP_FUNC_MSI_CAP_OFFSET;
-+	struct cdns_pcie *pcie = &ep->pcie;
-+	u64 pci_addr, pci_addr_mask = 0xff;
-+	u16 flags, mme, data, data_mask;
-+	u8 msi_count;
-+	int ret;
-+	int i;
++	struct pci_epf_group *epf_group = to_pci_epf_group(&group->cg_item);
++	struct config_group *epf_type_group;
 +
-+	/* Check whether the MSI feature has been enabled by the PCI host. */
-+	flags = cdns_pcie_ep_fn_readw(pcie, fn, cap + PCI_MSI_FLAGS);
-+	if (!(flags & PCI_MSI_FLAGS_ENABLE))
-+		return -EINVAL;
-+
-+	/* Get the number of enabled MSIs */
-+	mme = (flags & PCI_MSI_FLAGS_QSIZE) >> 4;
-+	msi_count = 1 << mme;
-+	if (!interrupt_num || interrupt_num > msi_count)
-+		return -EINVAL;
-+
-+	/* Compute the data value to be written. */
-+	data_mask = msi_count - 1;
-+	data = cdns_pcie_ep_fn_readw(pcie, fn, cap + PCI_MSI_DATA_64);
-+	data = data & ~data_mask;
-+
-+	/* Get the PCI address where to write the data into. */
-+	pci_addr = cdns_pcie_ep_fn_readl(pcie, fn, cap + PCI_MSI_ADDRESS_HI);
-+	pci_addr <<= 32;
-+	pci_addr |= cdns_pcie_ep_fn_readl(pcie, fn, cap + PCI_MSI_ADDRESS_LO);
-+	pci_addr &= GENMASK_ULL(63, 2);
-+
-+	for (i = 0; i < interrupt_num; i++) {
-+		ret = cdns_pcie_ep_map_addr(epc, fn, addr,
-+					    pci_addr & ~pci_addr_mask,
-+					    entry_size);
-+		if (ret)
-+			return ret;
-+		addr = addr + entry_size;
-+	}
-+
-+	*msi_data = data;
-+	*msi_addr_offset = pci_addr & pci_addr_mask;
-+
-+	return 0;
++	epf_type_group = pci_epf_type_add_cfs(epf_group->epf, group);
++	return epf_type_group;
 +}
 +
- static int cdns_pcie_ep_send_msix_irq(struct cdns_pcie_ep *ep, u8 fn,
- 				      u16 interrupt_num)
- {
-@@ -481,6 +532,7 @@ static const struct pci_epc_features cdns_pcie_epc_features = {
- 	.linkup_notifier = false,
- 	.msi_capable = true,
- 	.msix_capable = true,
-+	.align = 256,
++static void pci_epf_type_drop(struct config_group *group,
++			      struct config_item *item)
++{
++	config_item_put(item);
++}
++
++static struct configfs_group_operations pci_epf_type_group_ops = {
++	.make_group     = &pci_epf_type_make,
++	.drop_item      = &pci_epf_type_drop,
++};
++
+ static const struct config_item_type pci_epf_type = {
++	.ct_group_ops	= &pci_epf_type_group_ops,
+ 	.ct_item_ops	= &pci_epf_ops,
+ 	.ct_attrs	= pci_epf_attrs,
+ 	.ct_owner	= THIS_MODULE,
+@@ -553,6 +575,7 @@ static struct config_group *pci_epf_make(struct config_group *group,
+ 		goto free_name;
+ 	}
+ 
++	epf->group = &epf_group->group;
+ 	epf_group->epf = epf;
+ 
+ 	kfree(epf_name);
+diff --git a/include/linux/pci-epf.h b/include/linux/pci-epf.h
+index b241e7dd171f..6833e2160ef1 100644
+--- a/include/linux/pci-epf.h
++++ b/include/linux/pci-epf.h
+@@ -9,6 +9,7 @@
+ #ifndef __LINUX_PCI_EPF_H
+ #define __LINUX_PCI_EPF_H
+ 
++#include <linux/configfs.h>
+ #include <linux/device.h>
+ #include <linux/mod_devicetable.h>
+ #include <linux/pci.h>
+@@ -128,6 +129,7 @@ struct pci_epf_bar {
+  *   EPC device
+  * @sec_epc_bar: represents the BAR of EPF device associated with secondary EPC
+  * @sec_epc_func_no: unique (physical) function number within the secondary EPC
++ * @group: configfs group associated with the EPF device
+  */
+ struct pci_epf {
+ 	struct device		dev;
+@@ -150,6 +152,7 @@ struct pci_epf {
+ 	struct list_head	sec_epc_list;
+ 	struct pci_epf_bar	sec_epc_bar[6];
+ 	u8			sec_epc_func_no;
++	struct config_group	*group;
  };
  
- static const struct pci_epc_features*
-@@ -500,6 +552,7 @@ static const struct pci_epc_ops cdns_pcie_epc_ops = {
- 	.set_msix	= cdns_pcie_ep_set_msix,
- 	.get_msix	= cdns_pcie_ep_get_msix,
- 	.raise_irq	= cdns_pcie_ep_raise_irq,
-+	.map_msi_irq	= cdns_pcie_ep_map_msi_irq,
- 	.start		= cdns_pcie_ep_start,
- 	.get_features	= cdns_pcie_ep_get_features,
- };
+ /**
 -- 
 2.17.1
 
