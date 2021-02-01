@@ -1,40 +1,69 @@
-Return-Path: <weiyongjun1@huawei.com>
-Received: from szxga04-in.huawei.com (szxga04-in.huawei.com. [45.249.212.190])
-        by gmr-mx.google.com with ESMTPS id f24si321770pju.1.2021.02.09.23.45.53
-        for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 09 Feb 2021 23:45:54 -0800 (PST)
-From: Wei Yongjun <weiyongjun1@huawei.com>
-Subject: [PATCH -next] NTB: Drop kfree for memory allocated with devm_kzalloc
-Date: Wed, 10 Feb 2021 07:53:45 +0000
-Message-ID: <20210210075345.1096001-1-weiyongjun1@huawei.com>
+Return-Path: <lorenzo.pieralisi@arm.com>
+Received: from foss.arm.com (foss.arm.com. [217.140.110.172])
+        by gmr-mx.google.com with ESMTP id e11si1164877vkp.4.2021.02.01.14.03.20
+        for <linux-ntb@googlegroups.com>;
+        Mon, 01 Feb 2021 14:03:20 -0800 (PST)
+From: Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>
+Subject: Re: [PATCH v11 00/17] Implement NTB Controller using multiple PCI EP
+Date: Mon,  1 Feb 2021 22:03:09 +0000
+Message-Id: <161221695543.9151.8142592721154575298.b4-ty@arm.com>
+In-Reply-To: <20210201195809.7342-1-kishon@ti.com>
+References: <20210201195809.7342-1-kishon@ti.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
 Content-Transfer-Encoding: 8bit
-To: Hulk Robot <hulkci@huawei.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Kishon Vijay Abraham I <kishon@ti.com>
-Cc: Wei Yongjun <weiyongjun1@huawei.com>, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>, Jon Mason <jdmason@kudzu.us>, Rob Herring <robh@kernel.org>, Dave Jiang <dave.jiang@intel.com>, Tom Joseph <tjoseph@cadence.com>, Bjorn Helgaas <bhelgaas@google.com>, Allen Hubbe <allenbh@gmail.com>, Kishon Vijay Abraham I <kishon@ti.com>, Jonathan Corbet <corbet@lwn.net>
+Cc: Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ntb@googlegroups.com, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-pci@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-It's not necessary to free memory allocated with devm_kzalloc
-and using kfree leads to a double free.
+On Tue, 2 Feb 2021 01:27:52 +0530, Kishon Vijay Abraham I wrote:
+> This series is about implementing SW defined Non-Transparent Bridge (NTB)
+> using multiple endpoint (EP) instances. This series has been tested using
+> 2 endpoint instances in J7 connected to J7 board on one end and DRA7 board
+> on the other end. However there is nothing platform specific for the NTB
+> functionality.
+> 
+> This was presented in Linux Plumbers Conference. Link to presentation
+> and video can be found @ [1]
+> Created a video demo @ [9]
+> 
+> [...]
 
-Fixes: 363baf7d6051 ("NTB: Add support for EPF PCI-Express Non-Transparent Bridge")
-Reported-by: Hulk Robot <hulkci@huawei.com>
-Signed-off-by: Wei Yongjun <weiyongjun1@huawei.com>
----
- drivers/ntb/hw/epf/ntb_hw_epf.c | 1 -
- 1 file changed, 1 deletion(-)
+Applied to pci/ntb, thanks!
 
-diff --git a/drivers/ntb/hw/epf/ntb_hw_epf.c b/drivers/ntb/hw/epf/ntb_hw_epf.c
-index 2cccb7dff5dd..b019755e4e21 100644
---- a/drivers/ntb/hw/epf/ntb_hw_epf.c
-+++ b/drivers/ntb/hw/epf/ntb_hw_epf.c
-@@ -723,7 +723,6 @@ static void ntb_epf_pci_remove(struct pci_dev *pdev)
- 	ntb_unregister_device(&ndev->ntb);
- 	ntb_epf_cleanup_isr(ndev);
- 	ntb_epf_deinit_pci(ndev);
--	kfree(ndev);
- }
- 
- static const struct ntb_epf_data j721e_data = {
+[01/17] Documentation: PCI: Add specification for the *PCI NTB* function device
+        https://git.kernel.org/lpieralisi/pci/c/051a6adf6e
+[02/17] PCI: endpoint: Make *_get_first_free_bar() take into account 64 bit BAR
+        https://git.kernel.org/lpieralisi/pci/c/c0527dabcc
+[03/17] PCI: endpoint: Add helper API to get the 'next' unreserved BAR
+        https://git.kernel.org/lpieralisi/pci/c/d91d6ddfd2
+[04/17] PCI: endpoint: Make *_free_bar() to return error codes on failure
+        https://git.kernel.org/lpieralisi/pci/c/b9bdfa3da3
+[05/17] PCI: endpoint: Remove unused pci_epf_match_device()
+        https://git.kernel.org/lpieralisi/pci/c/2872f07cb0
+[06/17] PCI: endpoint: Add support to associate secondary EPC with EPF
+        https://git.kernel.org/lpieralisi/pci/c/6d0b4a7f2c
+[07/17] PCI: endpoint: Add support in configfs to associate two EPCs with EPF
+        https://git.kernel.org/lpieralisi/pci/c/c8e7d97270
+[08/17] PCI: endpoint: Add pci_epc_ops to map MSI irq
+        https://git.kernel.org/lpieralisi/pci/c/2bbb192338
+[09/17] PCI: endpoint: Add pci_epf_ops for epf drivers to expose function specific attrs
+        https://git.kernel.org/lpieralisi/pci/c/cea2edf604
+[10/17] PCI: endpoint: Allow user to create sub-directory of 'EPF Device' directory
+        https://git.kernel.org/lpieralisi/pci/c/1b0ef1c913
+[11/17] PCI: cadence: Implement ->msi_map_irq() ops
+        https://git.kernel.org/lpieralisi/pci/c/743a5d6309
+[12/17] PCI: cadence: Configure LM_EP_FUNC_CFG based on epc->function_num_map
+        https://git.kernel.org/lpieralisi/pci/c/54e9e441b0
+[13/17] PCI: endpoint: Add EP function driver to provide NTB functionality
+        https://git.kernel.org/lpieralisi/pci/c/e9d7f4603e
+[14/17] PCI: Add TI J721E device to pci ids
+        https://git.kernel.org/lpieralisi/pci/c/7aac69682e
+[15/17] NTB: Add support for EPF PCI-Express Non-Transparent Bridge
+        https://git.kernel.org/lpieralisi/pci/c/363baf7d60
+[16/17] Documentation: PCI: Add configfs binding documentation for pci-ntb endpoint function
+        https://git.kernel.org/lpieralisi/pci/c/0456a9cd0a
+[17/17] Documentation: PCI: Add userguide for PCI endpoint NTB function
+        https://git.kernel.org/lpieralisi/pci/c/096ce75bf6
 
+Thanks,
+Lorenzo
