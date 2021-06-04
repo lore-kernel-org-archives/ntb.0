@@ -1,71 +1,56 @@
-Return-Path: <fancer.lancer@gmail.com>
-Received: from mail-lj1-x22a.google.com (mail-lj1-x22a.google.com. [2a00:1450:4864:20::22a])
-        by gmr-mx.google.com with ESMTPS id p17si357114lfe.0.2021.06.05.11.05.57
+Return-Path: <logang@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [204.191.154.188])
+        by gmr-mx.google.com with ESMTPS id w16si268090oov.0.2021.06.04.08.18.23
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 05 Jun 2021 11:05:57 -0700 (PDT)
-Received: by mail-lj1-x22a.google.com with SMTP id z22so24800ljh.8
-        for <linux-ntb@googlegroups.com>; Sat, 05 Jun 2021 11:05:57 -0700 (PDT)
-Return-Path: <fancer.lancer@gmail.com>
-Date: Sat, 5 Jun 2021 21:05:54 +0300
-From: Serge Semin <fancer.lancer@gmail.com>
-Subject: Re: [PATCH 1/2] NTB: perf: Fix an error code in perf_setup_inbuf()
-Message-ID: <20210605180554.ql4rhpukj57ujkxw@mobilestation>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 04 Jun 2021 08:18:23 -0700 (PDT)
 References: <1622802051-43464-1-git-send-email-yang.lee@linux.alibaba.com>
+ <1622802051-43464-2-git-send-email-yang.lee@linux.alibaba.com>
+From: Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <490f9031-7a12-6031-7262-f38cd96cb502@deltatee.com>
+Date: Fri, 4 Jun 2021 09:18:17 -0600
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1622802051-43464-1-git-send-email-yang.lee@linux.alibaba.com>
-To: Yang Li <yang.lee@linux.alibaba.com>
-Cc: jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
+In-Reply-To: <1622802051-43464-2-git-send-email-yang.lee@linux.alibaba.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-CA
+Content-Transfer-Encoding: 7bit
+Subject: Re: [PATCH 2/2] NTB: Fix an error code in ntb_msit_probe()
+To: Yang Li <yang.lee@linux.alibaba.com>, jdmason@kudzu.us
+Cc: dave.jiang@intel.com, allenbh@gmail.com, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-Hello Yang.
 
-On Fri, Jun 04, 2021 at 06:20:50PM +0800, Yang Li wrote:
-> When the function IS_ALIGNED() returns false, the value of ret is 0.
+
+
+On 2021-06-04 4:20 a.m., Yang Li wrote:
+> When the value of nm->isr_ctx is false, the value of ret is 0.
 > So, we set ret to -ENOMEM to indicate this error.
 > 
 > Clean up smatch warning:
-> drivers/ntb/test/ntb_perf.c:602 perf_setup_inbuf() warn: missing error
+> drivers/ntb/test/ntb_msi_test.c:373 ntb_msit_probe() warn: missing error
 > code 'ret'.
-
-Great catch! Thanks for posing the fix. Indeed ret would zero in case of
-unaligned buffer allocation. Though such situation is very improbable.
-A tiny nitpick below.
-
 > 
 > Reported-by: Abaci Robot <abaci@linux.alibaba.com>
 > Signed-off-by: Yang Li <yang.lee@linux.alibaba.com>
 > ---
->  drivers/ntb/test/ntb_perf.c | 1 +
->  1 file changed, 1 insertion(+)
+>  drivers/ntb/test/ntb_msi_test.c | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
 > 
-> diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-> index 89df135..c20b375 100644
-> --- a/drivers/ntb/test/ntb_perf.c
-> +++ b/drivers/ntb/test/ntb_perf.c
-> @@ -598,6 +598,7 @@ static int perf_setup_inbuf(struct perf_peer *peer)
->  		return -ENOMEM;
->  	}
->  	if (!IS_ALIGNED(peer->inbuf_xlat, xlat_align)) {
+> diff --git a/drivers/ntb/test/ntb_msi_test.c b/drivers/ntb/test/ntb_msi_test.c
+> index 7095ecd..5f9e0be 100644
+> --- a/drivers/ntb/test/ntb_msi_test.c
+> +++ b/drivers/ntb/test/ntb_msi_test.c
+> @@ -369,8 +369,10 @@ static int ntb_msit_probe(struct ntb_client *client, struct ntb_dev *ntb)
+>  	if (ret)
+>  		goto remove_dbgfs;
+>  
+> -	if (!nm->isr_ctx)
+> +	if (!nm->isr_ctx) {
+> +		return -ENOMEM;
+>  		goto remove_dbgfs;
 
-> +		ret = -ENOMEM;
+I think you made a typo here. You probably meant ret = -ENOMEM.
 
-I'd set -EINVAL here. In this case we do have enough memory, but the
-base address is unaligned in a way the NTB hw requires. After fixing
-that feel free to add:
-Reviewed-by: Serge Semin <fancer.lancer@gmail.com>
+Thanks,
 
--Sergey
-
->  		dev_err(&perf->ntb->dev, "Unaligned inbuf allocated\n");
->  		goto err_free_inbuf;
->  	}
-> -- 
-> 1.8.3.1
-> 
-> -- 
-> You received this message because you are subscribed to the Google Groups "linux-ntb" group.
-> To unsubscribe from this group and stop receiving emails from it, send an email to linux-ntb+unsubscribe@googlegroups.com.
-> To view this discussion on the web visit https://groups.google.com/d/msgid/linux-ntb/1622802051-43464-1-git-send-email-yang.lee%40linux.alibaba.com.
+Logan
