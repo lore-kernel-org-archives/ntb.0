@@ -1,48 +1,131 @@
 Return-Path: <yang.lee@linux.alibaba.com>
-Received: from out30-130.freemail.mail.aliyun.com (out30-130.freemail.mail.aliyun.com. [115.124.30.130])
-        by gmr-mx.google.com with ESMTPS id x24si1321644qkx.3.2021.06.07.01.40.45
+Received: from out30-133.freemail.mail.aliyun.com (out30-133.freemail.mail.aliyun.com. [115.124.30.133])
+        by gmr-mx.google.com with ESMTPS id e4si265087qtg.1.2021.06.06.22.58.14
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 07 Jun 2021 01:40:46 -0700 (PDT)
-From: Yang Li <yang.lee@linux.alibaba.com>
-Subject: [PATCH v2] NTB: perf: Fix an error code in perf_setup_inbuf()
-Date: Mon,  7 Jun 2021 16:40:36 +0800
-Message-Id: <1623055236-97905-1-git-send-email-yang.lee@linux.alibaba.com>
-To: jdmason@kudzu.us
-Cc: dave.jiang@intel.com, allenbh@gmail.com, fancer.lancer@gmail.com, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Yang Li <yang.lee@linux.alibaba.com>
+        Sun, 06 Jun 2021 22:58:15 -0700 (PDT)
+Date: Mon, 07 Jun 2021 13:58:11 +0800
+From: "Yang.Lee" <yang.lee@linux.alibaba.com>
+Return-Path: "Yang.Lee" <yang.lee@linux.alibaba.com>
+Reply-To: "Yang.Lee" <yang.lee@linux.alibaba.com>
+Message-ID: <f39ea413-ac8a-430a-ba3d-9c197b3584ba.yang.lee@linux.alibaba.com>
+Subject: =?UTF-8?B?5Zue5aSN77yaW1BBVENIIDIvMl0gTlRCOiBGaXggYW4gZXJyb3IgY29kZSBpbiBudGJfbXNp?=
+  =?UTF-8?B?dF9wcm9iZSgp?=
+MIME-Version: 1.0
+Return-Path: <yang.lee@linux.alibaba.com>
+References: <1622802051-43464-1-git-send-email-yang.lee@linux.alibaba.com> <1622802051-43464-2-git-send-email-yang.lee@linux.alibaba.com>,<490f9031-7a12-6031-7262-f38cd96cb502@deltatee.com>
+In-Reply-To: <490f9031-7a12-6031-7262-f38cd96cb502@deltatee.com>
+Content-Type: multipart/alternative;
+  boundary="----=ALIBOUNDARY_78408_7f4bf1157940_60bdb573_d3cfe"
+To: jdmason <jdmason@kudzu.us>, Logan Gunthorpe <logang@deltatee.com>
+Cc: "dave.jiang" <dave.jiang@intel.com>, allenbh <allenbh@gmail.com>, linux-ntb <linux-ntb@googlegroups.com>, linux-kernel <linux-kernel@vger.kernel.org>
 List-ID: <linux-ntb.googlegroups.com>
 
-When the function IS_ALIGNED() returns false, the value of ret is 0.
-So, we set ret to -EINVAL to indicate this error.
+------=ALIBOUNDARY_78408_7f4bf1157940_60bdb573_d3cfe
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: base64
 
-Clean up smatch warning:
-drivers/ntb/test/ntb_perf.c:602 perf_setup_inbuf() warn: missing error
-code 'ret'.
+SGksCkkgaGF2ZSBzZW50IGEgVjIgcGF0Y2guIAoKVGhhbmtzIGZvciB5b3VyIHJldmlldy4KLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tCuWPkeS7tuS6uu+8mkxvZ2FuIEd1bnRob3JwZSA8bG9nYW5nQGRlbHRhdGVlLmNvbT4K
+5Y+R6YCB5pe26Ze077yaMjAyMeW5tDbmnIg15pelKOaYn+acn+WFrSkgMDA6MjEK5pS25Lu25Lq6
+77yaWWFuZyBMaSA8eWFuZy5sZWVAbGludXguYWxpYmFiYS5jb20+OyBqZG1hc29uIDxqZG1hc29u
+QGt1ZHp1LnVzPgrmioTjgIDpgIHvvJpkYXZlLmppYW5nIDxkYXZlLmppYW5nQGludGVsLmNvbT47
+IGFsbGVuYmggPGFsbGVuYmhAZ21haWwuY29tPjsgbGludXgtbnRiIDxsaW51eC1udGJAZ29vZ2xl
+Z3JvdXBzLmNvbT47IGxpbnV4LWtlcm5lbCA8bGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZz4K
+5Li744CA6aKY77yaUmU6IFtQQVRDSCAyLzJdIE5UQjogRml4IGFuIGVycm9yIGNvZGUgaW4gbnRi
+X21zaXRfcHJvYmUoKQoKCgoKT24gMjAyMS0wNi0wNCA0OjIwIGEubS4sIFlhbmcgTGkgd3JvdGU6
+Cj4gV2hlbiB0aGUgdmFsdWUgb2Ygbm0tPmlzcl9jdHggaXMgZmFsc2UsIHRoZSB2YWx1ZSBvZiBy
+ZXQgaXMgMC4KPiBTbywgd2Ugc2V0IHJldCB0byAtRU5PTUVNIHRvIGluZGljYXRlIHRoaXMgZXJy
+b3IuCj4gCj4gQ2xlYW4gdXAgc21hdGNoIHdhcm5pbmc6Cj4gZHJpdmVycy9udGIvdGVzdC9udGJf
+bXNpX3Rlc3QuYzozNzMgbnRiX21zaXRfcHJvYmUoKSB3YXJuOiBtaXNzaW5nIGVycm9yCj4gY29k
+ZSAncmV0Jy4KPiAKPiBSZXBvcnRlZC1ieTogQWJhY2kgUm9ib3QgPGFiYWNpQGxpbnV4LmFsaWJh
+YmEuY29tPgo+IFNpZ25lZC1vZmYtYnk6IFlhbmcgTGkgPHlhbmcubGVlQGxpbnV4LmFsaWJhYmEu
+Y29tPgo+IC0tLQo+ICBkcml2ZXJzL250Yi90ZXN0L250Yl9tc2lfdGVzdC5jIHwgNCArKystCj4g
+IDEgZmlsZSBjaGFuZ2VkLCAzIGluc2VydGlvbnMoKyksIDEgZGVsZXRpb24oLSkKPiAKPiBkaWZm
+IC0tZ2l0IGEvZHJpdmVycy9udGIvdGVzdC9udGJfbXNpX3Rlc3QuYyBiL2RyaXZlcnMvbnRiL3Rl
+c3QvbnRiX21zaV90ZXN0LmMKPiBpbmRleCA3MDk1ZWNkLi41ZjllMGJlIDEwMDY0NAo+IC0tLSBh
+L2RyaXZlcnMvbnRiL3Rlc3QvbnRiX21zaV90ZXN0LmMKPiArKysgYi9kcml2ZXJzL250Yi90ZXN0
+L250Yl9tc2lfdGVzdC5jCj4gQEAgLTM2OSw4ICszNjksMTAgQEAgc3RhdGljIGludCBudGJfbXNp
+dF9wcm9iZShzdHJ1Y3QgbnRiX2NsaWVudCAqY2xpZW50LCBzdHJ1Y3QgbnRiX2RldiAqbnRiKQo+
+ICAgaWYgKHJldCkKPiAgICBnb3RvIHJlbW92ZV9kYmdmczsKPiAgCj4gLSBpZiAoIW5tLT5pc3Jf
+Y3R4KQo+ICsgaWYgKCFubS0+aXNyX2N0eCkgewo+ICsgIHJldHVybiAtRU5PTUVNOwo+ICAgIGdv
+dG8gcmVtb3ZlX2RiZ2ZzOwoKSSB0aGluayB5b3UgbWFkZSBhIHR5cG8gaGVyZS4gWW91IHByb2Jh
+Ymx5IG1lYW50IHJldCA9IC1FTk9NRU0uCgpUaGFua3MsCgpMb2dhbgoK
+------=ALIBOUNDARY_78408_7f4bf1157940_60bdb573_d3cfe
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: base64
 
-Reported-by: Abaci Robot <abaci@linux.alibaba.com>
-Signed-off-by: Yang Li <yang.lee@linux.alibaba.com>
-Reviewed-by: Serge Semin <fancer.lancer@gmail.com>
----
-
-Change in v2:
---According to Serge's suggestion, set ret to -EINVAL.
-https://lore.kernel.org/lkml/20210605180554.ql4rhpukj57ujkxw@mobilestation/
-
- drivers/ntb/test/ntb_perf.c | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index 89df135..65e1e5c 100644
---- a/drivers/ntb/test/ntb_perf.c
-+++ b/drivers/ntb/test/ntb_perf.c
-@@ -598,6 +598,7 @@ static int perf_setup_inbuf(struct perf_peer *peer)
- 		return -ENOMEM;
- 	}
- 	if (!IS_ALIGNED(peer->inbuf_xlat, xlat_align)) {
-+		ret = -EINVAL;
- 		dev_err(&perf->ntb->dev, "Unaligned inbuf allocated\n");
- 		goto err_free_inbuf;
- 	}
--- 
-1.8.3.1
+PGRpdiBjbGFzcz0iX19hbGl5dW5fZW1haWxfYm9keV9ibG9jayI+PGRpdiAgc3R5bGU9ImNsZWFy
+OmJvdGg7Ij48c3BhbiAgc3R5bGU9ImZvbnQtZmFtaWx5OlRhaG9tYSxBcmlhbCxTVEhlaXRpLFNp
+bVN1bjtmb250LXNpemU6MTQuMHB4O2NvbG9yOiMwMDAwMDA7Ij5IaSw8L3NwYW4+PC9kaXY+PGRp
+diAgc3R5bGU9ImNsZWFyOmJvdGg7Ij48c3BhbiAgc3R5bGU9ImZvbnQtZmFtaWx5OlRhaG9tYSxB
+cmlhbCxTVEhlaXRpLFNpbVN1bjtmb250LXNpemU6MTQuMHB4O2NvbG9yOiMwMDAwMDA7Ij5JJm5i
+c3A7aGF2ZSZuYnNwO3NlbnQmbmJzcDthJm5ic3A7VjImbmJzcDtwYXRjaC4mbmJzcDs8L3NwYW4+
+PC9kaXY+PGRpdiAgc3R5bGU9ImNsZWFyOmJvdGg7Ij48c3BhbiAgc3R5bGU9ImZvbnQtZmFtaWx5
+OlRhaG9tYSxBcmlhbCxTVEhlaXRpLFNpbVN1bjtmb250LXNpemU6MTQuMHB4O2NvbG9yOiMwMDAw
+MDA7Ij48YnIgPjwvc3Bhbj48L2Rpdj48ZGl2ICBzdHlsZT0iY2xlYXI6Ym90aDsiPjxzcGFuICBz
+dHlsZT0iZm9udC1mYW1pbHk6VGFob21hLEFyaWFsLFNUSGVpdGksU2ltU3VuO2ZvbnQtc2l6ZTox
+NC4wcHg7Y29sb3I6IzAwMDAwMDsiPlRoYW5rcyBmb3ImbmJzcDt5b3VyJm5ic3A7cmV2aWV3Ljwv
+c3Bhbj48L2Rpdj48YmxvY2txdW90ZSAgc3R5bGU9Im1hcmdpbi1yaWdodDouMHB4O21hcmdpbi10
+b3A6LjBweDttYXJnaW4tYm90dG9tOi4wcHg7Ij48ZGl2ICBzdHlsZT0iY2xlYXI6Ym90aDsiPjxz
+cGFuICBzdHlsZT0iZm9udC1mYW1pbHk6VGFob21hLEFyaWFsLFNUSGVpdGksU2ltU3VuO2ZvbnQt
+c2l6ZToxNC4wcHg7Y29sb3I6IzAwMDAwMDsiPi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLTwvc3Bhbj48L2Rpdj48ZGl2ICBz
+dHlsZT0iY2xlYXI6Ym90aDsiPjxzcGFuICBzdHlsZT0iZm9udC1mYW1pbHk6VGFob21hLEFyaWFs
+LFNUSGVpdGksU2ltU3VuO2ZvbnQtc2l6ZToxNC4wcHg7Y29sb3I6IzAwMDAwMDsiPuWPkeS7tuS6
+uu+8mkxvZ2FuIEd1bnRob3JwZSAmbHQ7bG9nYW5nQGRlbHRhdGVlLmNvbSZndDs8L3NwYW4+PC9k
+aXY+PGRpdiAgc3R5bGU9ImNsZWFyOmJvdGg7Ij48c3BhbiAgc3R5bGU9ImZvbnQtZmFtaWx5OlRh
+aG9tYSxBcmlhbCxTVEhlaXRpLFNpbVN1bjtmb250LXNpemU6MTQuMHB4O2NvbG9yOiMwMDAwMDA7
+Ij7lj5HpgIHml7bpl7TvvJoyMDIx5bm0NuaciDXml6Uo5pif5pyf5YWtKSAwMDoyMTwvc3Bhbj48
+L2Rpdj48ZGl2ICBzdHlsZT0iY2xlYXI6Ym90aDsiPjxzcGFuICBzdHlsZT0iZm9udC1mYW1pbHk6
+VGFob21hLEFyaWFsLFNUSGVpdGksU2ltU3VuO2ZvbnQtc2l6ZToxNC4wcHg7Y29sb3I6IzAwMDAw
+MDsiPuaUtuS7tuS6uu+8mllhbmcgTGkgJmx0O3lhbmcubGVlQGxpbnV4LmFsaWJhYmEuY29tJmd0
+OzsgamRtYXNvbiAmbHQ7amRtYXNvbkBrdWR6dS51cyZndDs8L3NwYW4+PC9kaXY+PGRpdiAgc3R5
+bGU9ImNsZWFyOmJvdGg7Ij48c3BhbiAgc3R5bGU9ImZvbnQtZmFtaWx5OlRhaG9tYSxBcmlhbCxT
+VEhlaXRpLFNpbVN1bjtmb250LXNpemU6MTQuMHB4O2NvbG9yOiMwMDAwMDA7Ij7mioTjgIDpgIHv
+vJpkYXZlLmppYW5nICZsdDtkYXZlLmppYW5nQGludGVsLmNvbSZndDs7IGFsbGVuYmggJmx0O2Fs
+bGVuYmhAZ21haWwuY29tJmd0OzsgbGludXgtbnRiICZsdDtsaW51eC1udGJAZ29vZ2xlZ3JvdXBz
+LmNvbSZndDs7IGxpbnV4LWtlcm5lbCAmbHQ7bGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZyZn
+dDs8L3NwYW4+PC9kaXY+PGRpdiAgc3R5bGU9ImNsZWFyOmJvdGg7Ij48c3BhbiAgc3R5bGU9ImZv
+bnQtZmFtaWx5OlRhaG9tYSxBcmlhbCxTVEhlaXRpLFNpbVN1bjtmb250LXNpemU6MTQuMHB4O2Nv
+bG9yOiMwMDAwMDA7Ij7kuLvjgIDpopjvvJpSZTogW1BBVENIIDIvMl0gTlRCOiBGaXggYW4gZXJy
+b3IgY29kZSBpbiBudGJfbXNpdF9wcm9iZSgpPC9zcGFuPjwvZGl2PjxkaXYgIHN0eWxlPSJjbGVh
+cjpib3RoOyI+PHNwYW4gIHN0eWxlPSJmb250LWZhbWlseTpUYWhvbWEsQXJpYWwsU1RIZWl0aSxT
+aW1TdW47Zm9udC1zaXplOjE0LjBweDtjb2xvcjojMDAwMDAwOyI+PGJyID48L3NwYW4+PC9kaXY+
+PGJyID48YnIgPjxiciA+T24mbmJzcDsyMDIxLTA2LTA0Jm5ic3A7NDoyMCZuYnNwO2EubS4sJm5i
+c3A7WWFuZyZuYnNwO0xpJm5ic3A7d3JvdGU6PGJyID4mZ3Q7Jm5ic3A7V2hlbiZuYnNwO3RoZSZu
+YnNwO3ZhbHVlJm5ic3A7b2YmbmJzcDtubS0mZ3Q7aXNyX2N0eCZuYnNwO2lzJm5ic3A7ZmFsc2Us
+Jm5ic3A7dGhlJm5ic3A7dmFsdWUmbmJzcDtvZiZuYnNwO3JldCZuYnNwO2lzJm5ic3A7MC48YnIg
+PiZndDsmbmJzcDtTbywmbmJzcDt3ZSZuYnNwO3NldCZuYnNwO3JldCZuYnNwO3RvJm5ic3A7LUVO
+T01FTSZuYnNwO3RvJm5ic3A7aW5kaWNhdGUmbmJzcDt0aGlzJm5ic3A7ZXJyb3IuPGJyID4mZ3Q7
+Jm5ic3A7PGJyID4mZ3Q7Jm5ic3A7Q2xlYW4mbmJzcDt1cCZuYnNwO3NtYXRjaCZuYnNwO3dhcm5p
+bmc6PGJyID4mZ3Q7Jm5ic3A7ZHJpdmVycy9udGIvdGVzdC9udGJfbXNpX3Rlc3QuYzozNzMmbmJz
+cDtudGJfbXNpdF9wcm9iZSgpJm5ic3A7d2FybjombmJzcDttaXNzaW5nJm5ic3A7ZXJyb3I8YnIg
+PiZndDsmbmJzcDtjb2RlJm5ic3A7J3JldCcuPGJyID4mZ3Q7Jm5ic3A7PGJyID4mZ3Q7Jm5ic3A7
+UmVwb3J0ZWQtYnk6Jm5ic3A7QWJhY2kmbmJzcDtSb2JvdCZuYnNwOyZsdDthYmFjaUBsaW51eC5h
+bGliYWJhLmNvbSZndDs8YnIgPiZndDsmbmJzcDtTaWduZWQtb2ZmLWJ5OiZuYnNwO1lhbmcmbmJz
+cDtMaSZuYnNwOyZsdDt5YW5nLmxlZUBsaW51eC5hbGliYWJhLmNvbSZndDs8YnIgPiZndDsmbmJz
+cDstLS08YnIgPiZndDsmbmJzcDsmbmJzcDtkcml2ZXJzL250Yi90ZXN0L250Yl9tc2lfdGVzdC5j
+Jm5ic3A7fCZuYnNwOzQmbmJzcDsrKystPGJyID4mZ3Q7Jm5ic3A7Jm5ic3A7MSZuYnNwO2ZpbGUm
+bmJzcDtjaGFuZ2VkLCZuYnNwOzMmbmJzcDtpbnNlcnRpb25zKCspLCZuYnNwOzEmbmJzcDtkZWxl
+dGlvbigtKTxiciA+Jmd0OyZuYnNwOzxiciA+Jmd0OyZuYnNwO2RpZmYmbmJzcDstLWdpdCZuYnNw
+O2EvZHJpdmVycy9udGIvdGVzdC9udGJfbXNpX3Rlc3QuYyZuYnNwO2IvZHJpdmVycy9udGIvdGVz
+dC9udGJfbXNpX3Rlc3QuYzxiciA+Jmd0OyZuYnNwO2luZGV4Jm5ic3A7NzA5NWVjZC4uNWY5ZTBi
+ZSZuYnNwOzEwMDY0NDxiciA+Jmd0OyZuYnNwOy0tLSZuYnNwO2EvZHJpdmVycy9udGIvdGVzdC9u
+dGJfbXNpX3Rlc3QuYzxiciA+Jmd0OyZuYnNwOysrKyZuYnNwO2IvZHJpdmVycy9udGIvdGVzdC9u
+dGJfbXNpX3Rlc3QuYzxiciA+Jmd0OyZuYnNwO0BAJm5ic3A7LTM2OSw4Jm5ic3A7KzM2OSwxMCZu
+YnNwO0BAJm5ic3A7c3RhdGljJm5ic3A7aW50Jm5ic3A7bnRiX21zaXRfcHJvYmUoc3RydWN0Jm5i
+c3A7bnRiX2NsaWVudCZuYnNwOypjbGllbnQsJm5ic3A7c3RydWN0Jm5ic3A7bnRiX2RldiZuYnNw
+OypudGIpPGJyID4mZ3Q7Jm5ic3A7Jm5ic3A7Jm5ic3A7aWYmbmJzcDsocmV0KTxiciA+Jmd0OyZu
+YnNwOyZuYnNwOyZuYnNwOyZuYnNwO2dvdG8mbmJzcDtyZW1vdmVfZGJnZnM7PGJyID4mZ3Q7Jm5i
+c3A7Jm5ic3A7PGJyID4mZ3Q7Jm5ic3A7LSZuYnNwO2lmJm5ic3A7KCFubS0mZ3Q7aXNyX2N0eCk8
+YnIgPiZndDsmbmJzcDsrJm5ic3A7aWYmbmJzcDsoIW5tLSZndDtpc3JfY3R4KSZuYnNwO3s8YnIg
+PiZndDsmbmJzcDsrJm5ic3A7Jm5ic3A7cmV0dXJuJm5ic3A7LUVOT01FTTs8YnIgPiZndDsmbmJz
+cDsmbmJzcDsmbmJzcDsmbmJzcDtnb3RvJm5ic3A7cmVtb3ZlX2RiZ2ZzOzxiciA+PGJyID5JJm5i
+c3A7dGhpbmsmbmJzcDt5b3UmbmJzcDttYWRlJm5ic3A7YSZuYnNwO3R5cG8mbmJzcDtoZXJlLiZu
+YnNwO1lvdSZuYnNwO3Byb2JhYmx5Jm5ic3A7bWVhbnQmbmJzcDtyZXQmbmJzcDs9Jm5ic3A7LUVO
+T01FTS48YnIgPjxiciA+VGhhbmtzLDxiciA+PGJyID5Mb2dhbjwvYmxvY2txdW90ZT48ZGl2ID48
+YnIgPjwvZGl2PjwvZGl2Pg==
+------=ALIBOUNDARY_78408_7f4bf1157940_60bdb573_d3cfe--
 
