@@ -1,42 +1,45 @@
-Return-Path: <yang.lee@linux.alibaba.com>
-Received: from out30-56.freemail.mail.aliyun.com (out30-56.freemail.mail.aliyun.com. [115.124.30.56])
-        by gmr-mx.google.com with ESMTPS id f3si436080pjs.3.2021.06.04.03.21.20
+Return-Path: <colin.king@canonical.com>
+Received: from youngberry.canonical.com (youngberry.canonical.com. [91.189.89.112])
+        by gmr-mx.google.com with ESMTPS id x10si176961ejy.0.2021.06.09.04.21.29
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 04 Jun 2021 03:21:20 -0700 (PDT)
-From: Yang Li <yang.lee@linux.alibaba.com>
-Subject: [PATCH 1/2] NTB: perf: Fix an error code in perf_setup_inbuf()
-Date: Fri,  4 Jun 2021 18:20:50 +0800
-Message-Id: <1622802051-43464-1-git-send-email-yang.lee@linux.alibaba.com>
-To: jdmason@kudzu.us
-Cc: dave.jiang@intel.com, allenbh@gmail.com, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Yang Li <yang.lee@linux.alibaba.com>
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 09 Jun 2021 04:21:29 -0700 (PDT)
+From: Colin King <colin.king@canonical.com>
+Subject: [PATCH] ntb: ntb_pingpong: remove redundant initialization of variables msg_data and spad_data
+Date: Wed,  9 Jun 2021 12:21:28 +0100
+Message-Id: <20210609112128.184667-1-colin.king@canonical.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, linux-ntb@googlegroups.com
+Cc: kernel-janitors@vger.kernel.org, linux-kernel@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-When the function IS_ALIGNED() returns false, the value of ret is 0.
-So, we set ret to -ENOMEM to indicate this error.
+From: Colin Ian King <colin.king@canonical.com>
 
-Clean up smatch warning:
-drivers/ntb/test/ntb_perf.c:602 perf_setup_inbuf() warn: missing error
-code 'ret'.
+The variables msg_data and spad_data are being initialized with values
+that are never read, they are being updated later on. The initializations
+are redundant and can be removed.
 
-Reported-by: Abaci Robot <abaci@linux.alibaba.com>
-Signed-off-by: Yang Li <yang.lee@linux.alibaba.com>
+Addresses-Coverity: ("Unused value")
+Signed-off-by: Colin Ian King <colin.king@canonical.com>
 ---
- drivers/ntb/test/ntb_perf.c | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/ntb/test/ntb_pingpong.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index 89df135..c20b375 100644
---- a/drivers/ntb/test/ntb_perf.c
-+++ b/drivers/ntb/test/ntb_perf.c
-@@ -598,6 +598,7 @@ static int perf_setup_inbuf(struct perf_peer *peer)
- 		return -ENOMEM;
- 	}
- 	if (!IS_ALIGNED(peer->inbuf_xlat, xlat_align)) {
-+		ret = -ENOMEM;
- 		dev_err(&perf->ntb->dev, "Unaligned inbuf allocated\n");
- 		goto err_free_inbuf;
- 	}
+diff --git a/drivers/ntb/test/ntb_pingpong.c b/drivers/ntb/test/ntb_pingpong.c
+index 2164e8492772..8aeca7914050 100644
+--- a/drivers/ntb/test/ntb_pingpong.c
++++ b/drivers/ntb/test/ntb_pingpong.c
+@@ -187,7 +187,7 @@ static void pp_ping(struct pp_ctx *pp)
+ 
+ static void pp_pong(struct pp_ctx *pp)
+ {
+-	u32 msg_data = -1, spad_data = -1;
++	u32 msg_data, spad_data;
+ 	int pidx = 0;
+ 
+ 	/* Read pong data */
 -- 
-1.8.3.1
+2.31.1
 
