@@ -1,23 +1,23 @@
 Return-Path: <ukl@pengutronix.de>
 Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de. [2001:67c:670:201:290:27ff:fe1d:cc33])
-        by gmr-mx.google.com with ESMTPS id be24si835356edb.1.2021.07.13.12.36.18
+        by gmr-mx.google.com with ESMTPS id x13si114873wmk.4.2021.07.13.00.41.05
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 13 Jul 2021 12:36:18 -0700 (PDT)
+        Tue, 13 Jul 2021 00:41:05 -0700 (PDT)
 From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
-Subject: [PATCH v4 0/5] bus: Make remove callback return void
-Date: Tue, 13 Jul 2021 21:35:17 +0200
-Message-Id: <20210713193522.1770306-1-u.kleine-koenig@pengutronix.de>
+Subject: [PATCH v3 0/5] bus: Make remove callback return void
+Date: Tue, 13 Jul 2021 09:40:09 +0200
+Message-Id: <20210713074014.684791-1-u.kleine-koenig@pengutronix.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
 To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: kernel@pengutronix.de, Alexander Shishkin <alexander.shishkin@linux.intel.com>, Alexandre Belloni <alexandre.belloni@bootlin.com>, Alexandre Bounine <alex.bou9@gmail.com>, Alex Dubov <oakad@yahoo.com>, Alex Elder <elder@kernel.org>, Alex Williamson <alex.williamson@redhat.com>, Alison Schofield <alison.schofield@intel.com>, Allen Hubbe <allenbh@gmail.com>, Andreas Noever <andreas.noever@gmail.com>, Andy Gross <agross@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Benjamin Tissoires <benjamin.tissoires@redhat.com>, Ben Widawsky <ben.widawsky@intel.com>, Bjorn Andersson <bjorn.andersson@linaro.org>, Bjorn Helgaas <bhelgaas@google.com>, Bodo Stroesser <bostroesser@gmail.com>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Chen-Yu Tsai <wens@csie.org>, Christian Borntraeger <borntraeger@de.ibm.com>, Cornelia Huck <cohuck@redhat.com>, Cristian Marussi <cristian.marussi@arm.com>, Dan Williams <dan.j.williams@intel.com>, Dave Jiang <dave.jiang@intel.com>, "David S. Miller" <davem@davemloft.net>, David Woodhouse <dwmw@amazon.co.uk>, Dexuan Cui <decui@microsoft.com>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, Dominik Brodowski <linux@dominikbrodowski.net>, Eric Farman <farman@linux.ibm.com>, Finn Thain <fthain@linux-m68k.org>, Florian Fainelli <f.fainelli@gmail.com>, Frank Li <lznuaa@gmail.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Geoff Levand <geoff@infradead.org>, Haiyang Zhang <haiyangz@microsoft.com>, Halil Pasic <pasic@linux.ibm.com>, Hannes Reinecke <hare@suse.de>, Hans de Goede <hdegoede@redhat.com>, Harald Freudenberger <freude@linux.ibm.com>, Heikki Krogerus <heikki.krogerus@linux.intel.com>, Heiko Carstens <hca@linux.ibm.com>, Helge Deller <deller@gmx.de>, Ira Weiny <ira.weiny@intel.com>, Jakub Kicinski <kuba@kernel.org>, "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>, Jaroslav Kysela <perex@perex.cz>, Jason Wang <jasowang@redhat.com>, Jens Taprogge <jens.taprogge@taprogge.org>, Jernej Skrabec <jernej.skrabec@gmail.com>, Jiri Kosina <jikos@kernel.org>, Jiri Slaby <jirislaby@kernel.org>, Joey Pabalan <jpabalanb@gmail.com>, Johan Hovold <johan@kernel.org>, Johannes Berg <johannes@sipsolutions.net>, Johannes Thumshirn <morbidrsa@gmail.com>, Jon Mason <jdmason@kudzu.us>, Juergen Gross <jgross@suse.com>, Julien Grall <jgrall@amazon.com>, Kai-Heng Feng <kai.heng.feng@canonical.com>, Kirti Wankhede <kwankhede@nvidia.com>, Kishon Vijay Abraham I <kishon@ti.com>, =?UTF-8?q?Krzysztof=20Wilczy=C5=84ski?= <kw@linux.com>, "K. Y. Srinivasan" <kys@microsoft.com>, Lee Jones <lee.jones@linaro.org>, Len Brown <lenb@kernel.org>, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Manohar Vanga <manohar.vanga@gmail.com>, Marc Zyngier <maz@kernel.org>, Mark Brown <broonie@kernel.org>, Mark Gross <mgross@linux.intel.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, Martyn Welch <martyn@welchs.me.uk>, Mathieu Poirier <mathieu.poirier@linaro.org>, Matthew Rosato <mjrosato@linux.ibm.com>, Matt Porter <mporter@kernel.crashing.org>, Mauro Carvalho Chehab <mchehab@kernel.org>, Maxime Ripard <mripard@kernel.org>, Maximilian Luz <luzmaximilian@gmail.com>, Maxim Levitsky <maximlevitsky@gmail.com>, Michael Buesch <m@bues.ch>, Michael Ellerman <mpe@ellerman.id.au>, Michael Jamet <michael.jamet@intel.com>, "Michael S. Tsirkin" <mst@redhat.com>, Mika Westerberg <mika.westerberg@linux.intel.com>, Mike Christie <michael.christie@oracle.com>, Moritz Fischer <mdf@kernel.org>, Ohad Ben-Cohen <ohad@wizery.com>, =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>, Paul Mackerras <paulus@samba.org>, Peter Oberparleiter <oberpar@linux.ibm.com>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, =?UTF-8?q?Rafa=C5=82=20Mi=C5=82ecki?= <zajec5@gmail.com>, Rich Felker <dalias@libc.org>, Rikard Falkeborn <rikard.falkeborn@gmail.com>, Rob Herring <robh@kernel.org>, Russell King <linux@armlinux.org.uk>, "Russell King (Oracle)" <rmk+kernel@armlinux.org.uk>, Samuel Holland <samuel@sholland.org>, Samuel Iglesias Gonsalvez <siglesias@igalia.com>, SeongJae Park <sjpark@amazon.de>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>, Stefano Stabellini <sstabellini@kernel.org>, Stefan Richter <stefanr@s5r6.in-berlin.de>, Stephen Boyd <sboyd@kernel.org>, Stephen Hemminger <sthemmin@microsoft.com>, Sudeep Holla <sudeep.holla@arm.com>, Sven Van Asbroeck <TheSven73@gmail.com>, Takashi Iwai <tiwai@suse.com>, Thomas Bogendoerfer <tsbogend@alpha.franken.de>, Thorsten Scherer <t.scherer@eckelmann.de>, Tomas Winkler <tomas.winkler@intel.com>, Tom Rix <trix@redhat.com>, Tyrel Datwyler <tyreld@linux.ibm.com>, Ulf Hansson <ulf.hansson@linaro.org>, Vasily Gorbik <gor@linux.ibm.com>, Vineeth Vijayan <vneethv@linux.ibm.com>, Vinod Koul <vkoul@kernel.org>, Vishal Verma <vishal.l.verma@intel.com>, Wei Liu <wei.liu@kernel.org>, William Breathitt Gray <vilhelm.gray@gmail.com>, Wolfram Sang <wsa@kernel.org>, Wu Hao <hao.wu@intel.com>, Yehezkel Bernat <YehezkelShB@gmail.com>, Yoshinori Sato <ysato@users.sourceforge.jp>, YueHaibing <yuehaibing@huawei.com>, Yufen Yu <yuyufen@huawei.com>, alsa-devel@alsa-project.org, dmaengine@vger.kernel.org, greybus-dev@lists.linaro.org, industrypack-devel@lists.sourceforge.net, kvm@vger.kernel.org, linux1394-devel@lists.sourceforge.net, linux-acpi@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-arm-msm@vger.kernel.org, linux-cxl@vger.kernel.org, linux-fpga@vger.kernel.org, linux-hyperv@vger.kernel.org, linux-i2c@vger.kernel.org, linux-i3c@lists.infradead.org, linux-input@vger.kernel.org, linux-kernel@vger.kernel.org, linux-m68k@lists.linux-m68k.org, linux-media@vger.kernel.org, linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org, linux-ntb@googlegroups.com, linux-parisc@vger.kernel.org, linux-pci@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-remoteproc@vger.kernel.org, linux-s390@vger.kernel.org, linux-scsi@vger.kernel.org, linux-serial@vger.kernel.org, linux-sh@vger.kernel.org, linux-spi@vger.kernel.org, linux-staging@lists.linux.dev, linux-sunxi@lists.linux.dev, linux-usb@vger.kernel.org, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, nvdimm@lists.linux.dev, platform-driver-x86@vger.kernel.org, sparclinux@vger.kernel.org, target-devel@vger.kernel.org, virtualization@lists.linux-foundation.org, xen-devel@lists.xenproject.org
+Cc: kernel@pengutronix.de, Alexander Shishkin <alexander.shishkin@linux.intel.com>, Alexandre Belloni <alexandre.belloni@bootlin.com>, Alexandre Bounine <alex.bou9@gmail.com>, Alex Dubov <oakad@yahoo.com>, Alex Elder <elder@kernel.org>, Alex Williamson <alex.williamson@redhat.com>, Alison Schofield <alison.schofield@intel.com>, Allen Hubbe <allenbh@gmail.com>, Andreas Noever <andreas.noever@gmail.com>, Andy Gross <agross@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Benjamin Tissoires <benjamin.tissoires@redhat.com>, Ben Widawsky <ben.widawsky@intel.com>, Bjorn Andersson <bjorn.andersson@linaro.org>, Bjorn Helgaas <bhelgaas@google.com>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Chen-Yu Tsai <wens@csie.org>, Christian Borntraeger <borntraeger@de.ibm.com>, Cornelia Huck <cohuck@redhat.com>, Cristian Marussi <cristian.marussi@arm.com>, Dan Williams <dan.j.williams@intel.com>, Dave Jiang <dave.jiang@intel.com>, "David S. Miller" <davem@davemloft.net>, David Woodhouse <dwmw@amazon.co.uk>, Dexuan Cui <decui@microsoft.com>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, Dominik Brodowski <linux@dominikbrodowski.net>, Eric Farman <farman@linux.ibm.com>, Frank Li <lznuaa@gmail.com>, Geoff Levand <geoff@infradead.org>, Haiyang Zhang <haiyangz@microsoft.com>, Halil Pasic <pasic@linux.ibm.com>, Hannes Reinecke <hare@suse.de>, Hans de Goede <hdegoede@redhat.com>, Harald Freudenberger <freude@linux.ibm.com>, Heikki Krogerus <heikki.krogerus@linux.intel.com>, Heiko Carstens <hca@linux.ibm.com>, Helge Deller <deller@gmx.de>, Ira Weiny <ira.weiny@intel.com>, Jakub Kicinski <kuba@kernel.org>, "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>, Jaroslav Kysela <perex@perex.cz>, Jason Wang <jasowang@redhat.com>, Jens Taprogge <jens.taprogge@taprogge.org>, Jernej Skrabec <jernej.skrabec@gmail.com>, Jiri Kosina <jikos@kernel.org>, Jiri Slaby <jirislaby@kernel.org>, Joey Pabalan <jpabalanb@gmail.com>, Johan Hovold <johan@kernel.org>, Johannes Berg <johannes@sipsolutions.net>, Johannes Thumshirn <morbidrsa@gmail.com>, Jon Mason <jdmason@kudzu.us>, Juergen Gross <jgross@suse.com>, Julien Grall <jgrall@amazon.com>, Kai-Heng Feng <kai.heng.feng@canonical.com>, Kirti Wankhede <kwankhede@nvidia.com>, Kishon Vijay Abraham I <kishon@ti.com>, =?UTF-8?q?Krzysztof=20Wilczy=C5=84ski?= <kw@linux.com>, "K. Y. Srinivasan" <kys@microsoft.com>, Lee Jones <lee.jones@linaro.org>, Len Brown <lenb@kernel.org>, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Manohar Vanga <manohar.vanga@gmail.com>, Marc Zyngier <maz@kernel.org>, Mark Brown <broonie@kernel.org>, Mark Gross <mgross@linux.intel.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, Martyn Welch <martyn@welchs.me.uk>, Mathieu Poirier <mathieu.poirier@linaro.org>, Matthew Rosato <mjrosato@linux.ibm.com>, Matt Porter <mporter@kernel.crashing.org>, Mauro Carvalho Chehab <mchehab@kernel.org>, Maxime Ripard <mripard@kernel.org>, Maximilian Luz <luzmaximilian@gmail.com>, Maxim Levitsky <maximlevitsky@gmail.com>, Michael Buesch <m@bues.ch>, Michael Ellerman <mpe@ellerman.id.au>, Michael Jamet <michael.jamet@intel.com>, "Michael S. Tsirkin" <mst@redhat.com>, Mika Westerberg <mika.westerberg@linux.intel.com>, Mike Christie <michael.christie@oracle.com>, Moritz Fischer <mdf@kernel.org>, Ohad Ben-Cohen <ohad@wizery.com>, =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>, Paul Mackerras <paulus@samba.org>, Peter Oberparleiter <oberpar@linux.ibm.com>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, =?UTF-8?q?Rafa=C5=82=20Mi=C5=82ecki?= <zajec5@gmail.com>, Rob Herring <robh@kernel.org>, Russell King <linux@armlinux.org.uk>, "Russell King (Oracle)" <rmk+kernel@armlinux.org.uk>, Samuel Holland <samuel@sholland.org>, Samuel Iglesias Gonsalvez <siglesias@igalia.com>, SeongJae Park <sjpark@amazon.de>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>, Stefano Stabellini <sstabellini@kernel.org>, Stefan Richter <stefanr@s5r6.in-berlin.de>, Stephen Boyd <sboyd@kernel.org>, Stephen Hemminger <sthemmin@microsoft.com>, Sudeep Holla <sudeep.holla@arm.com>, Sven Van Asbroeck <TheSven73@gmail.com>, Takashi Iwai <tiwai@suse.com>, Thomas Bogendoerfer <tsbogend@alpha.franken.de>, Thorsten Scherer <t.scherer@eckelmann.de>, Tomas Winkler <tomas.winkler@intel.com>, Tom Rix <trix@redhat.com>, Tyrel Datwyler <tyreld@linux.ibm.com>, Ulf Hansson <ulf.hansson@linaro.org>, Vasily Gorbik <gor@linux.ibm.com>, Vineeth Vijayan <vneethv@linux.ibm.com>, Vinod Koul <vkoul@kernel.org>, Vishal Verma <vishal.l.verma@intel.com>, Wei Liu <wei.liu@kernel.org>, William Breathitt Gray <vilhelm.gray@gmail.com>, Wolfram Sang <wsa@kernel.org>, Wu Hao <hao.wu@intel.com>, Yehezkel Bernat <YehezkelShB@gmail.com>, YueHaibing <yuehaibing@huawei.com>, alsa-devel@alsa-project.org, dmaengine@vger.kernel.org, greybus-dev@lists.linaro.org, industrypack-devel@lists.sourceforge.net, kvm@vger.kernel.org, linux1394-devel@lists.sourceforge.net, linux-acpi@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-arm-msm@vger.kernel.org, linux-cxl@vger.kernel.org, linux-fpga@vger.kernel.org, linux-hyperv@vger.kernel.org, linux-i2c@vger.kernel.org, linux-i3c@lists.infradead.org, linux-input@vger.kernel.org, linux-kernel@vger.kernel.org, linux-media@vger.kernel.org, linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org, linux-ntb@googlegroups.com, linux-parisc@vger.kernel.org, linux-pci@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-remoteproc@vger.kernel.org, linux-s390@vger.kernel.org, linux-scsi@vger.kernel.org, linux-serial@vger.kernel.org, linux-spi@vger.kernel.org, linux-staging@lists.linux.dev, linux-sunxi@lists.linux.dev, linux-usb@vger.kernel.org, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, nvdimm@lists.linux.dev, platform-driver-x86@vger.kernel.org, target-devel@vger.kernel.org, virtualization@lists.linux-foundation.org, xen-devel@lists.xenproject.org
 List-ID: <linux-ntb.googlegroups.com>
 
 Hello,
 
-this is v4 of the final patch set for my effort to make struct
+this is the final patch set for my effort to make struct
 bus_type::remove return void.
 
 The first four patches contain cleanups that make some of these
@@ -33,20 +33,17 @@ consider it beneficial to put these patches into next soon. I expect
 that it will be Greg who takes the complete series, he already confirmed
 via irc (for v2) to look into this series.
 
-The only change compared to v3 is in the fourth patch where I modified a
-few more drivers to fix build failures. Some of them were found by build
-bots (thanks!), some of them I found myself using a regular expression
-search. The newly modified files are:
-
- arch/sparc/kernel/vio.c
- drivers/nubus/bus.c
- drivers/sh/superhyway/superhyway.c
- drivers/vlynq/vlynq.c
- drivers/zorro/zorro-driver.c
- sound/ac97/bus.c
+In the last round I failed to send the cover letter to all affected
+people, sorry for that, this should be fixed now.
 
 Best regards
 Uwe
+
+Changes since v2:
+ - Add several acks/review tags
+ - Include patch #1 explicitly
+ - rebase to v5.14-rc1, build test on amd64, arm64 and s390 using
+   allmodconfig
 
 Uwe Kleine-König (5):
   PCI: endpoint: Make struct pci_epf_driver::remove return void
@@ -64,7 +61,6 @@ Uwe Kleine-König (5):
  arch/powerpc/platforms/pseries/ibmebus.c  | 3 +--
  arch/powerpc/platforms/pseries/vio.c      | 3 +--
  arch/s390/include/asm/eadm.h              | 2 +-
- arch/sparc/kernel/vio.c                   | 4 +---
  drivers/acpi/bus.c                        | 3 +--
  drivers/amba/bus.c                        | 4 +---
  drivers/base/auxiliary.c                  | 4 +---
@@ -100,7 +96,6 @@ Uwe Kleine-König (5):
  drivers/net/netdevsim/bus.c               | 3 +--
  drivers/ntb/core.c                        | 4 +---
  drivers/ntb/ntb_transport.c               | 4 +---
- drivers/nubus/bus.c                       | 6 ++----
  drivers/nvdimm/bus.c                      | 3 +--
  drivers/pci/endpoint/pci-epf-core.c       | 7 ++-----
  drivers/pci/pci-driver.c                  | 3 +--
@@ -121,7 +116,6 @@ Uwe Kleine-König (5):
  drivers/s390/cio/vfio_ccw_drv.c           | 3 +--
  drivers/s390/crypto/ap_bus.c              | 4 +---
  drivers/scsi/scsi_debug.c                 | 3 +--
- drivers/sh/superhyway/superhyway.c        | 8 ++------
  drivers/siox/siox-core.c                  | 4 +---
  drivers/slimbus/core.c                    | 4 +---
  drivers/soc/qcom/apr.c                    | 4 +---
@@ -139,17 +133,13 @@ Uwe Kleine-König (5):
  drivers/vdpa/vdpa.c                       | 4 +---
  drivers/vfio/mdev/mdev_driver.c           | 4 +---
  drivers/virtio/virtio.c                   | 3 +--
- drivers/vlynq/vlynq.c                     | 4 +---
  drivers/vme/vme.c                         | 4 +---
  drivers/xen/xenbus/xenbus.h               | 2 +-
  drivers/xen/xenbus/xenbus_probe.c         | 4 +---
- drivers/zorro/zorro-driver.c              | 3 +--
  include/linux/device/bus.h                | 2 +-
  include/linux/pci-epf.h                   | 2 +-
- sound/ac97/bus.c                          | 6 ++----
  sound/aoa/soundbus/core.c                 | 4 +---
- 93 files changed, 107 insertions(+), 263 deletions(-)
-
+ 87 files changed, 98 insertions(+), 241 deletions(-)
 
 base-commit: e73f0f0ee7541171d89f2e2491130c7771ba58d3
 -- 
