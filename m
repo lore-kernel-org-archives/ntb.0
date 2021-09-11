@@ -1,15 +1,15 @@
 Return-Path: <sashal@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id h24si169394otk.1.2021.09.11.06.13.10
+        by gmr-mx.google.com with ESMTPS id l68si224199iof.1.2021.09.11.06.12.30
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Sat, 11 Sep 2021 06:13:10 -0700 (PDT)
+        Sat, 11 Sep 2021 06:12:30 -0700 (PDT)
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.13 28/29] NTB: perf: Fix an error code in perf_setup_inbuf()
-Date: Sat, 11 Sep 2021 09:12:32 -0400
-Message-Id: <20210911131233.284800-28-sashal@kernel.org>
-In-Reply-To: <20210911131233.284800-1-sashal@kernel.org>
-References: <20210911131233.284800-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.14 30/32] NTB: perf: Fix an error code in perf_setup_inbuf()
+Date: Sat, 11 Sep 2021 09:11:47 -0400
+Message-Id: <20210911131149.284397-30-sashal@kernel.org>
+In-Reply-To: <20210911131149.284397-1-sashal@kernel.org>
+References: <20210911131149.284397-1-sashal@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
