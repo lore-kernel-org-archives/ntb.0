@@ -1,15 +1,15 @@
 Return-Path: <sashal@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id o5si140795pgv.1.2021.09.11.06.13.42
+        by gmr-mx.google.com with ESMTPS id t8si81931ybu.4.2021.09.11.06.13.09
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Sat, 11 Sep 2021 06:13:42 -0700 (PDT)
+        Sat, 11 Sep 2021 06:13:09 -0700 (PDT)
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.10 23/25] NTB: Fix an error code in ntb_msit_probe()
-Date: Sat, 11 Sep 2021 09:13:10 -0400
-Message-Id: <20210911131312.285225-23-sashal@kernel.org>
-In-Reply-To: <20210911131312.285225-1-sashal@kernel.org>
-References: <20210911131312.285225-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.13 27/29] NTB: Fix an error code in ntb_msit_probe()
+Date: Sat, 11 Sep 2021 09:12:31 -0400
+Message-Id: <20210911131233.284800-27-sashal@kernel.org>
+In-Reply-To: <20210911131233.284800-1-sashal@kernel.org>
+References: <20210911131233.284800-1-sashal@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
