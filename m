@@ -1,15 +1,15 @@
 Return-Path: <sashal@kernel.org>
 Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id h4si60928vkf.1.2021.09.11.06.14.15
+        by gmr-mx.google.com with ESMTPS id l68si224498iof.1.2021.09.11.06.14.04
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Sat, 11 Sep 2021 06:14:15 -0700 (PDT)
+        Sat, 11 Sep 2021 06:14:04 -0700 (PDT)
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 7/7] NTB: perf: Fix an error code in perf_setup_inbuf()
-Date: Sat, 11 Sep 2021 09:14:04 -0400
-Message-Id: <20210911131404.286005-7-sashal@kernel.org>
-In-Reply-To: <20210911131404.286005-1-sashal@kernel.org>
-References: <20210911131404.286005-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.4 14/14] NTB: perf: Fix an error code in perf_setup_inbuf()
+Date: Sat, 11 Sep 2021 09:13:45 -0400
+Message-Id: <20210911131345.285564-14-sashal@kernel.org>
+In-Reply-To: <20210911131345.285564-1-sashal@kernel.org>
+References: <20210911131345.285564-1-sashal@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
@@ -37,10 +37,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 1 insertion(+)
 
 diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index ad5d3919435c..87a41d0ededc 100644
+index 5ce4766a6c9e..251fe75798c1 100644
 --- a/drivers/ntb/test/ntb_perf.c
 +++ b/drivers/ntb/test/ntb_perf.c
-@@ -600,6 +600,7 @@ static int perf_setup_inbuf(struct perf_peer *peer)
+@@ -597,6 +597,7 @@ static int perf_setup_inbuf(struct perf_peer *peer)
  		return -ENOMEM;
  	}
  	if (!IS_ALIGNED(peer->inbuf_xlat, xlat_align)) {
