@@ -1,57 +1,38 @@
-Return-Path: <sashal@kernel.org>
-Received: from mail.kernel.org (mail.kernel.org. [198.145.29.99])
-        by gmr-mx.google.com with ESMTPS id f13si144369qko.2.2021.09.11.06.12.29
+Return-Path: <jiangliuer01@gmail.com>
+Received: from mail-pg1-x532.google.com (mail-pg1-x532.google.com. [2607:f8b0:4864:20::532])
+        by gmr-mx.google.com with ESMTPS id b125si731128qkf.0.2021.10.29.05.05.42
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Sat, 11 Sep 2021 06:12:29 -0700 (PDT)
-From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.14 29/32] NTB: Fix an error code in ntb_msit_probe()
-Date: Sat, 11 Sep 2021 09:11:46 -0400
-Message-Id: <20210911131149.284397-29-sashal@kernel.org>
-In-Reply-To: <20210911131149.284397-1-sashal@kernel.org>
-References: <20210911131149.284397-1-sashal@kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 29 Oct 2021 05:05:42 -0700 (PDT)
+Received: by mail-pg1-x532.google.com with SMTP id t7so9685923pgl.9
+        for <linux-ntb@googlegroups.com>; Fri, 29 Oct 2021 05:05:42 -0700 (PDT)
+Return-Path: <jiangliuer01@gmail.com>
+From: Wang Haojun <jiangliuer01@gmail.com>
+Subject: [PATCH] IDT: Fix Build warnings on some 32bit architectures.
+Date: Fri, 29 Oct 2021 20:05:12 +0800
+Message-Id: <20211029120512.3456871-1-wanghaojun@loongson.cn>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Yang Li <yang.lee@linux.alibaba.com>, Abaci Robot <abaci@linux.alibaba.com>, Logan Gunthorpe <logang@deltatee.com>, Jon Mason <jdmason@kudzu.us>, Sasha Levin <sashal@kernel.org>, linux-ntb@googlegroups.com
+To: Serge Semin <fancer.lancer@gmail.com>
+Cc: linux-ntb@googlegroups.com, Huacai Chen <chenhuacai@kernel.org>, Wang Haojun <wanghaojun@loongson.cn>, Li Xuefeng <lixuefeng@loongson.cn>
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Yang Li <yang.lee@linux.alibaba.com>
+The frame size of 1032 bytes is larger than 1024 bytes on 32bit with
+unaligned memory accesses architectures.
 
-[ Upstream commit 319f83ac98d7afaabab84ce5281a819a358b9895 ]
-
-When the value of nm->isr_ctx is false, the value of ret is 0.
-So, we set ret to -ENOMEM to indicate this error.
-
-Clean up smatch warning:
-drivers/ntb/test/ntb_msi_test.c:373 ntb_msit_probe() warn: missing
-error code 'ret'.
-
-Reported-by: Abaci Robot <abaci@linux.alibaba.com>
-Signed-off-by: Yang Li <yang.lee@linux.alibaba.com>
-Reviewed-by: Logan Gunthorpe <logang@deltatee.com>
-Signed-off-by: Jon Mason <jdmason@kudzu.us>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
+Signed-off-by: Wang Haojun <wanghaojun@loongson.cn>
 ---
- drivers/ntb/test/ntb_msi_test.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ drivers/ntb/hw/idt/Makefile | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/ntb/test/ntb_msi_test.c b/drivers/ntb/test/ntb_msi_test.c
-index 7095ecd6223a..4e18e08776c9 100644
---- a/drivers/ntb/test/ntb_msi_test.c
-+++ b/drivers/ntb/test/ntb_msi_test.c
-@@ -369,8 +369,10 @@ static int ntb_msit_probe(struct ntb_client *client, struct ntb_dev *ntb)
- 	if (ret)
- 		goto remove_dbgfs;
- 
--	if (!nm->isr_ctx)
-+	if (!nm->isr_ctx) {
-+		ret = -ENOMEM;
- 		goto remove_dbgfs;
-+	}
- 
- 	ntb_link_enable(ntb, NTB_SPEED_AUTO, NTB_WIDTH_AUTO);
- 
+diff --git a/drivers/ntb/hw/idt/Makefile b/drivers/ntb/hw/idt/Makefile
+index f75e9d65c8a2..4e52d83ae75c 100644
+--- a/drivers/ntb/hw/idt/Makefile
++++ b/drivers/ntb/hw/idt/Makefile
+@@ -1,2 +1,3 @@
+ # SPDX-License-Identifier: GPL-2.0-only
+ obj-$(CONFIG_NTB_IDT) += ntb_hw_idt.o
++CFLAGS_ntb_hw_idt.o += -Wframe-larger-than=1280
 -- 
-2.30.2
+2.27.0
 
