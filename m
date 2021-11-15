@@ -1,38 +1,290 @@
-Return-Path: <jiangliuer01@gmail.com>
-Received: from mail-pg1-x532.google.com (mail-pg1-x532.google.com. [2607:f8b0:4864:20::532])
-        by gmr-mx.google.com with ESMTPS id b125si731128qkf.0.2021.10.29.05.05.42
-        for <linux-ntb@googlegroups.com>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 29 Oct 2021 05:05:42 -0700 (PDT)
-Received: by mail-pg1-x532.google.com with SMTP id t7so9685923pgl.9
-        for <linux-ntb@googlegroups.com>; Fri, 29 Oct 2021 05:05:42 -0700 (PDT)
-Return-Path: <jiangliuer01@gmail.com>
-From: Wang Haojun <jiangliuer01@gmail.com>
-Subject: [PATCH] IDT: Fix Build warnings on some 32bit architectures.
-Date: Fri, 29 Oct 2021 20:05:12 +0800
-Message-Id: <20211029120512.3456871-1-wanghaojun@loongson.cn>
+Date: Mon, 15 Nov 2021 08:51:46 -0800 (PST)
+From: Eyal ben ner <eyalbenn@gmail.com>
+Message-Id: <24826bb2-da96-4ea8-9b75-6f40425e0368n@googlegroups.com>
+Subject: ntb_tool: asymmetric windows
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-To: Serge Semin <fancer.lancer@gmail.com>
-Cc: linux-ntb@googlegroups.com, Huacai Chen <chenhuacai@kernel.org>, Wang Haojun <wanghaojun@loongson.cn>, Li Xuefeng <lixuefeng@loongson.cn>
+Content-Type: multipart/mixed; 
+	boundary="----=_Part_4986_966976853.1636995106189"
+To: linux-ntb <linux-ntb@googlegroups.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-The frame size of 1032 bytes is larger than 1024 bytes on 32bit with
-unaligned memory accesses architectures.
+------=_Part_4986_966976853.1636995106189
+Content-Type: multipart/alternative; 
+	boundary="----=_Part_4987_455102966.1636995106189"
 
-Signed-off-by: Wang Haojun <wanghaojun@loongson.cn>
----
- drivers/ntb/hw/idt/Makefile | 1 +
- 1 file changed, 1 insertion(+)
+------=_Part_4987_455102966.1636995106189
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-diff --git a/drivers/ntb/hw/idt/Makefile b/drivers/ntb/hw/idt/Makefile
-index f75e9d65c8a2..4e52d83ae75c 100644
---- a/drivers/ntb/hw/idt/Makefile
-+++ b/drivers/ntb/hw/idt/Makefile
-@@ -1,2 +1,3 @@
- # SPDX-License-Identifier: GPL-2.0-only
- obj-$(CONFIG_NTB_IDT) += ntb_hw_idt.o
-+CFLAGS_ntb_hw_idt.o += -Wframe-larger-than=1280
--- 
-2.27.0
 
+
+
+Hi,
+
+Newbie question: I'm using 2 Xeon(R) Silver 4214 nodes (ntb3 hw) with 
+4.19.177 kernel.
+
+I loaded the ntb_tool modules and connected both nodes.
+
+I created 8KB buffer on node A, I mapped a (8KB) window on node B, I wrote 
+8KB file to the window and succeed to read the file completely from the 
+debugfs on node A (so far, we are good).
+
+I restarted node A buffer content.
+
+Next, I created additional 4KB buffer on node B, then I wrote the same 8KB 
+file to the same old 8KB window on node B, but now I read only 4KB on node 
+A, the rest 4KB is the initialized data of the buffer.
+
+Below I'll put the exact commands I used.
+
+Is this a knows issue?
+
+Any idea how to solve this issue?
+
+ 
+
+Thanks,
+
+Eyal
+
+ 
+
+1st stage:
+
+Node A:
+
+1.      insmod ntb/test/ntb_tool.ko
+
+Node B:
+
+1.      insmod ntb/test/ntb_tool.ko 
+
+Node A:
+
+1.      export DBG_DIR=/sys/kernel/debug/ntb_tool/0000:0a:00.0
+
+2.      cat $DBG_DIR/peer0/link
+
+3.      echo Y > $DBG_DIR/link
+
+4.      cat $DBG_DIR/peer0/link
+
+Node B:
+
+1.      export DBG_DIR=/sys/kernel/debug/ntb_tool/0000:0a:00.0
+
+2.      cat $DBG_DIR/peer0/link
+
+3.      echo Y > $DBG_DIR/link
+
+4.      cat $DBG_DIR/peer0/link
+
+Node A:
+
+1.      echo 8192 > $DBG_DIR/peer0/mw_trans0
+
+2.      cat 2.txt > $DBG_DIR/peer0/mw
+
+3.      head -c 8192 $DBG_DIR/peer0/mw0 > 1s_1st_r.txt
+
+Node B:
+
+1.      echo 0x1000000000:8192  > $DBG_DIR/peer0/peer_mw_trans0
+
+2.      cat 5.txt  > $DBG_DIR/peer0/peer_mw0
+
+Node A:
+
+1.      head -c 8192 $DBG_DIR/peer0/mw0 > 1s_2nd_r.txt
+
+ 
+
+2nd stage:
+
+Node B:
+
+1.      echo 4096 > $DBG_DIR/peer0/mw_trans0
+
+Node A:
+
+1.      cat 2.txt > $DBG_DIR/peer0/mw0
+
+2.      head -c 8192 $DBG_DIR/peer0/mw0 > 2s_1st_r.txt
+
+Node B:
+
+1.      cat 5.txt  > $DBG_DIR/peer0/peer_mw0
+
+Node A:
+
+1.      head -c 8192 $DBG_DIR/peer0/mw0 > 2s_2nd_r.txt
+
+ 
+
+ 
+
+ 
+
+------=_Part_4987_455102966.1636995106189
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 7bit
+
+<p><br>
+Hi,</p>
+
+<p>Newbie question: I'm using 2 Xeon(R) Silver 4214 nodes (ntb3 hw)&nbsp;with 4.19.177 kernel.</p>
+
+<p>I loaded the ntb_tool modules and connected both
+nodes.</p>
+
+<p>I created 8KB buffer on node A, I mapped a (8KB)
+window on node B, I wrote 8KB file to the window and succeed to read
+the file completely from the debugfs on node A (so far, we are good).</p>
+
+<p>I restarted node A buffer content.</p>
+
+<p>Next, I created additional 4KB buffer on node B, then I wrote
+the same 8KB file to the same old 8KB window on node B, but now I read only 4KB
+on node A, the rest 4KB is the initialized data of the buffer.</p>
+
+<p>Below I'll put the exact commands I used.</p>
+
+<p>Is this a knows issue?</p>
+
+<p>Any
+idea how to solve this issue?</p>
+
+<p>&nbsp;</p>
+
+<p>Thanks,</p>
+
+<p>Eyal</p>
+
+<p>&nbsp;</p>
+
+<p>1st
+stage:</p>
+
+<p>Node
+A:</p>
+
+<p>1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span dir="LTR"></span>insmod ntb/test/ntb_tool.ko</p>
+
+<p>Node
+B:</p>
+
+<p>1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span dir="LTR"></span>insmod ntb/test/ntb_tool.ko </p>
+
+<p>Node
+A:</p>
+
+<p>1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span dir="LTR"></span>export
+DBG_DIR=/sys/kernel/debug/ntb_tool/0000:0a:00.0</p>
+
+<p>2.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span dir="LTR"></span>cat $DBG_DIR/peer0/link</p>
+
+<p>3.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span dir="LTR"></span>echo Y &gt; $DBG_DIR/link</p>
+
+<p>4.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span dir="LTR"></span>cat $DBG_DIR/peer0/link</p>
+
+<p>Node
+B:</p>
+
+<p>1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span dir="LTR"></span>export
+DBG_DIR=/sys/kernel/debug/ntb_tool/0000:0a:00.0</p>
+
+<p>2.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span dir="LTR"></span>cat $DBG_DIR/peer0/link</p>
+
+<p>3.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span dir="LTR"></span>echo Y &gt; $DBG_DIR/link</p>
+
+<p>4.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span dir="LTR"></span>cat $DBG_DIR/peer0/link</p>
+
+<p>Node
+A:</p>
+
+<p>1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span dir="LTR"></span>echo
+8192 &gt; $DBG_DIR/peer0/mw_trans0</p>
+
+<p>2.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span dir="LTR"></span>cat
+2.txt &gt; $DBG_DIR/peer0/mw</p>
+
+<p>3.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span dir="LTR"></span>head
+-c 8192 $DBG_DIR/peer0/mw0 &gt; 1s_1st_r.txt</p>
+
+<p>Node
+B:</p>
+
+<p>1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span dir="LTR"></span>echo
+0x1000000000:8192&nbsp; &gt; $DBG_DIR/peer0/peer_mw_trans0</p>
+
+<p>2.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span dir="LTR"></span>cat
+5.txt&nbsp; &gt; $DBG_DIR/peer0/peer_mw0</p>
+
+<p>Node
+A:</p>
+
+<p>1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span dir="LTR"></span>head
+-c 8192 $DBG_DIR/peer0/mw0 &gt; 1s_2nd_r.txt</p>
+
+<p>&nbsp;</p>
+
+<p>2nd
+stage:</p>
+
+<p>Node
+B:</p>
+
+<p>1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span dir="LTR"></span>echo
+4096 &gt; $DBG_DIR/peer0/mw_trans0</p>
+
+<p>Node
+A:</p>
+
+<p>1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span dir="LTR"></span>cat
+2.txt &gt; $DBG_DIR/peer0/mw0</p>
+
+<p>2.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span dir="LTR"></span>head
+-c 8192 $DBG_DIR/peer0/mw0 &gt; 2s_1st_r.txt</p>
+
+<p>Node
+B:</p>
+
+<p>1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span dir="LTR"></span>cat
+5.txt&nbsp; &gt; $DBG_DIR/peer0/peer_mw0</p>
+
+<p>Node
+A:</p>
+
+<p>1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span dir="LTR"></span>head
+-c 8192 $DBG_DIR/peer0/mw0 &gt; 2s_2nd_r.txt</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+------=_Part_4987_455102966.1636995106189--
+
+------=_Part_4986_966976853.1636995106189--
