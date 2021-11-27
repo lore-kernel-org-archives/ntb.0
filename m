@@ -1,16 +1,16 @@
 Return-Path: <tglx@linutronix.de>
 Received: from galois.linutronix.de (Galois.linutronix.de. [2a0a:51c0:0:12e:550::1])
-        by gmr-mx.google.com with ESMTPS id w22si1225809qkp.2.2021.11.26.17.23.50
+        by gmr-mx.google.com with ESMTPS id d23si534649pfr.1.2021.11.26.17.23.49
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 26 Nov 2021 17:23:50 -0800 (PST)
-Message-ID: <20211126232735.069709622@linutronix.de>
+        Fri, 26 Nov 2021 17:23:49 -0800 (PST)
+Message-ID: <20211126232735.010399268@linutronix.de>
 From: Thomas Gleixner <tglx@linutronix.de>
-Subject: [patch 13/32] xen/pcifront: Rework MSI handling
+Subject: [patch 12/32] x86/pci/xen: Use msi_for_each_desc()
 References: <20211126230957.239391799@linutronix.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Date: Sat, 27 Nov 2021 02:23:49 +0100 (CET)
+Date: Sat, 27 Nov 2021 02:23:47 +0100 (CET)
 To: LKML <linux-kernel@vger.kernel.org>
 Cc: Bjorn Helgaas <helgaas@kernel.org>, Marc Zygnier <maz@kernel.org>, Alex Williamson <alex.williamson@redhat.com>, Kevin Tian <kevin.tian@intel.com>, Jason Gunthorpe <jgg@nvidia.com>, Megha Dey <megha.dey@intel.com>, Ashok Raj <ashok.raj@intel.com>, linux-pci@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-s390@vger.kernel.org, Heiko Carstens <hca@linux.ibm.com>, Christian Borntraeger <borntraeger@de.ibm.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
@@ -19,18 +19,51 @@ Replace the about to vanish iterators.
 
 Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
 ---
- drivers/pci/xen-pcifront.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ arch/x86/pci/xen.c |   14 ++++++--------
+ 1 file changed, 6 insertions(+), 8 deletions(-)
 
---- a/drivers/pci/xen-pcifront.c
-+++ b/drivers/pci/xen-pcifront.c
-@@ -262,7 +262,7 @@ static int pci_frontend_enable_msix(stru
- 	}
- 
+--- a/arch/x86/pci/xen.c
++++ b/arch/x86/pci/xen.c
+@@ -184,7 +184,7 @@ static int xen_setup_msi_irqs(struct pci
+ 	if (ret)
+ 		goto error;
  	i = 0;
--	for_each_pci_msi_entry(entry, dev) {
-+	msi_for_each_desc(entry, &dev->dev, MSI_DESC_NOTASSOCIATED) {
- 		op.msix_entries[i].entry = entry->msi_index;
- 		/* Vector is useless at this point. */
- 		op.msix_entries[i].vector = -1;
+-	for_each_pci_msi_entry(msidesc, dev) {
++	msi_for_each_desc(msidesc, &dev->dev, MSI_DESC_NOTASSOCIATED) {
+ 		irq = xen_bind_pirq_msi_to_irq(dev, msidesc, v[i],
+ 					       (type == PCI_CAP_ID_MSI) ? nvec : 1,
+ 					       (type == PCI_CAP_ID_MSIX) ?
+@@ -235,7 +235,7 @@ static int xen_hvm_setup_msi_irqs(struct
+ 	if (type == PCI_CAP_ID_MSI && nvec > 1)
+ 		return 1;
+ 
+-	for_each_pci_msi_entry(msidesc, dev) {
++	msi_for_each_desc(msidesc, &dev->dev, MSI_DESC_NOTASSOCIATED) {
+ 		pirq = xen_allocate_pirq_msi(dev, msidesc);
+ 		if (pirq < 0) {
+ 			irq = -ENODEV;
+@@ -270,7 +270,7 @@ static int xen_initdom_setup_msi_irqs(st
+ 	int ret = 0;
+ 	struct msi_desc *msidesc;
+ 
+-	for_each_pci_msi_entry(msidesc, dev) {
++	msi_for_each_desc(msidesc, &dev->dev, MSI_DESC_NOTASSOCIATED) {
+ 		struct physdev_map_pirq map_irq;
+ 		domid_t domid;
+ 
+@@ -389,11 +389,9 @@ static void xen_teardown_msi_irqs(struct
+ 	struct msi_desc *msidesc;
+ 	int i;
+ 
+-	for_each_pci_msi_entry(msidesc, dev) {
+-		if (msidesc->irq) {
+-			for (i = 0; i < msidesc->nvec_used; i++)
+-				xen_destroy_irq(msidesc->irq + i);
+-		}
++	msi_for_each_desc(msidesc, &dev->dev, MSI_DESC_ASSOCIATED) {
++		for (i = 0; i < msidesc->nvec_used; i++)
++			xen_destroy_irq(msidesc->irq + i);
+ 	}
+ }
+ 
 
