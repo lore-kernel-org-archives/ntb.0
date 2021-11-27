@@ -1,167 +1,95 @@
 Return-Path: <tglx@linutronix.de>
-Received: from galois.linutronix.de (Galois.linutronix.de. [2a0a:51c0:0:12e:550::1])
-        by gmr-mx.google.com with ESMTPS id i6si1270663qko.3.2021.11.26.17.24.16
+Received: from galois.linutronix.de (Galois.linutronix.de. [193.142.43.55])
+        by gmr-mx.google.com with ESMTPS id bg19si1168877oib.5.2021.11.26.17.24.13
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 26 Nov 2021 17:24:16 -0800 (PST)
-Message-ID: <20211126232736.024070925@linutronix.de>
+        Fri, 26 Nov 2021 17:24:14 -0800 (PST)
+Message-ID: <20211126232735.966439698@linutronix.de>
 From: Thomas Gleixner <tglx@linutronix.de>
-Subject: [patch 29/32] genirq/msi: Mop up old interfaces
+Subject: [patch 28/32] genirq/msi: Convert to new functions
 References: <20211126230957.239391799@linutronix.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Date: Sat, 27 Nov 2021 02:24:13 +0100 (CET)
+Date: Sat, 27 Nov 2021 02:24:12 +0100 (CET)
 To: LKML <linux-kernel@vger.kernel.org>
 Cc: Bjorn Helgaas <helgaas@kernel.org>, Marc Zygnier <maz@kernel.org>, Alex Williamson <alex.williamson@redhat.com>, Kevin Tian <kevin.tian@intel.com>, Jason Gunthorpe <jgg@nvidia.com>, Megha Dey <megha.dey@intel.com>, Ashok Raj <ashok.raj@intel.com>, linux-pci@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-s390@vger.kernel.org, Heiko Carstens <hca@linux.ibm.com>, Christian Borntraeger <borntraeger@de.ibm.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-Get rid of the old iterators, alloc/free functions and adjust the core code
-accordingly.
+Use the new iterator functions and add locking where required.
 
 Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
 ---
- include/linux/msi.h |   15 ---------------
- kernel/irq/msi.c    |   31 +++++++++++++++----------------
- 2 files changed, 15 insertions(+), 31 deletions(-)
+ kernel/irq/msi.c |   23 ++++++++++++++---------
+ 1 file changed, 14 insertions(+), 9 deletions(-)
 
---- a/include/linux/msi.h
-+++ b/include/linux/msi.h
-@@ -254,15 +254,7 @@ static inline struct msi_desc *msi_first
- #define msi_for_each_desc(desc, dev, filter)				\
- 	msi_for_each_desc_from(desc, dev, filter, 0)
- 
--/* Helpers to hide struct msi_desc implementation details */
- #define msi_desc_to_dev(desc)		((desc)->dev)
--#define dev_to_msi_list(dev)		(&(dev)->msi.data->list)
--#define first_msi_entry(dev)		\
--	list_first_entry(dev_to_msi_list((dev)), struct msi_desc, list)
--#define for_each_msi_entry(desc, dev)	\
--	list_for_each_entry((desc), dev_to_msi_list((dev)), list)
--#define for_each_msi_entry_safe(desc, tmp, dev)	\
--	list_for_each_entry_safe((desc), (tmp), dev_to_msi_list((dev)), list)
- 
- #ifdef CONFIG_IRQ_MSI_IOMMU
- static inline const void *msi_desc_get_iommu_cookie(struct msi_desc *desc)
-@@ -288,10 +280,6 @@ static inline void msi_desc_set_iommu_co
- #endif
- 
- #ifdef CONFIG_PCI_MSI
--#define first_pci_msi_entry(pdev)	first_msi_entry(&(pdev)->dev)
--#define for_each_pci_msi_entry(desc, pdev)	\
--	for_each_msi_entry((desc), &(pdev)->dev)
--
- struct pci_dev *msi_desc_to_pci_dev(struct msi_desc *desc);
- void pci_write_msi_msg(unsigned int irq, struct msi_msg *msg);
- #else /* CONFIG_PCI_MSI */
-@@ -314,9 +302,6 @@ static inline void msi_free_msi_descs(st
- 	msi_free_msi_descs_range(dev, MSI_DESC_ALL, 0, UINT_MAX);
- }
- 
--struct msi_desc *alloc_msi_entry(struct device *dev, int nvec,
--				 const struct irq_affinity_desc *affinity);
--void free_msi_entry(struct msi_desc *entry);
- void __pci_read_msi_msg(struct msi_desc *entry, struct msi_msg *msg);
- void __pci_write_msi_msg(struct msi_desc *entry, struct msi_msg *msg);
- 
 --- a/kernel/irq/msi.c
 +++ b/kernel/irq/msi.c
-@@ -19,8 +19,10 @@
- 
- #include "internals.h"
- 
-+#define dev_to_msi_list(dev)	(&(dev)->msi.data->list)
-+
- /**
-- * alloc_msi_entry - Allocate an initialized msi_desc
-+ * msi_alloc_desc - Allocate an initialized msi_desc
-  * @dev:	Pointer to the device for which this is allocated
-  * @nvec:	The number of vectors used in this entry
-  * @affinity:	Optional pointer to an affinity mask array size of @nvec
-@@ -30,12 +32,11 @@
-  *
-  * Return: pointer to allocated &msi_desc on success or %NULL on failure
-  */
--struct msi_desc *alloc_msi_entry(struct device *dev, int nvec,
--				 const struct irq_affinity_desc *affinity)
-+static struct msi_desc *msi_alloc_desc(struct device *dev, int nvec,
-+					const struct irq_affinity_desc *affinity)
+@@ -354,6 +354,7 @@ struct msi_desc *msi_next_desc(struct de
+ int __msi_get_virq(struct device *dev, unsigned int index)
  {
--	struct msi_desc *desc;
-+	struct msi_desc *desc = kzalloc(sizeof(*desc), GFP_KERNEL);
+ 	struct msi_desc *desc;
++	int ret = -ENOENT;
+ 	bool pcimsi;
  
--	desc = kzalloc(sizeof(*desc), GFP_KERNEL);
- 	if (!desc)
- 		return NULL;
+ 	if (!dev->msi.data)
+@@ -361,11 +362,12 @@ int __msi_get_virq(struct device *dev, u
  
-@@ -43,21 +44,19 @@ struct msi_desc *alloc_msi_entry(struct
- 	desc->dev = dev;
- 	desc->nvec_used = nvec;
- 	if (affinity) {
--		desc->affinity = kmemdup(affinity,
--			nvec * sizeof(*desc->affinity), GFP_KERNEL);
-+		desc->affinity = kmemdup(affinity, nvec * sizeof(*desc->affinity), GFP_KERNEL);
- 		if (!desc->affinity) {
- 			kfree(desc);
- 			return NULL;
+ 	pcimsi = msi_device_has_property(dev, MSI_PROP_PCI_MSI);
+ 
+-	for_each_msi_entry(desc, dev) {
++	msi_lock_descs(dev);
++	msi_for_each_desc_from(desc, dev, MSI_DESC_ASSOCIATED, index) {
+ 		/* PCI-MSI has only one descriptor for multiple interrupts. */
+ 		if (pcimsi) {
+-			if (desc->irq && index < desc->nvec_used)
+-				return desc->irq + index;
++			if (index < desc->nvec_used)
++				ret = desc->irq + index;
+ 			break;
  		}
+ 
+@@ -373,10 +375,13 @@ int __msi_get_virq(struct device *dev, u
+ 		 * PCI-MSIX and platform MSI use a descriptor per
+ 		 * interrupt.
+ 		 */
+-		if (desc->msi_index == index)
+-			return desc->irq;
++		if (desc->msi_index == index) {
++			ret = desc->irq;
++			break;
++		}
  	}
--
- 	return desc;
+-	return -ENOENT;
++	msi_unlock_descs(dev);
++	return ret;
+ }
+ EXPORT_SYMBOL_GPL(__msi_get_virq);
+ 
+@@ -407,7 +412,7 @@ static const struct attribute_group **ms
+ 	int i;
+ 
+ 	/* Determine how many msi entries we have */
+-	for_each_msi_entry(entry, dev)
++	msi_for_each_desc(entry, dev, MSI_DESC_ALL)
+ 		num_msi += entry->nvec_used;
+ 	if (!num_msi)
+ 		return NULL;
+@@ -417,7 +422,7 @@ static const struct attribute_group **ms
+ 	if (!msi_attrs)
+ 		return ERR_PTR(-ENOMEM);
+ 
+-	for_each_msi_entry(entry, dev) {
++	msi_for_each_desc(entry, dev, MSI_DESC_ALL) {
+ 		for (i = 0; i < entry->nvec_used; i++) {
+ 			msi_dev_attr = kzalloc(sizeof(*msi_dev_attr), GFP_KERNEL);
+ 			if (!msi_dev_attr)
+@@ -838,7 +843,7 @@ static bool msi_check_reservation_mode(s
+ 	 * Checking the first MSI descriptor is sufficient. MSIX supports
+ 	 * masking and MSI does so when the can_mask attribute is set.
+ 	 */
+-	desc = first_msi_entry(dev);
++	desc = msi_first_desc(dev);
+ 	return desc->pci.msi_attrib.is_msix || desc->pci.msi_attrib.can_mask;
  }
  
--void free_msi_entry(struct msi_desc *entry)
-+static void msi_free_desc(struct msi_desc *desc)
- {
--	kfree(entry->affinity);
--	kfree(entry);
-+	kfree(desc->affinity);
-+	kfree(desc);
- }
- 
- /**
-@@ -73,7 +72,7 @@ int msi_add_msi_desc(struct device *dev,
- 
- 	lockdep_assert_held(&dev->msi.data->mutex);
- 
--	desc = alloc_msi_entry(dev, init_desc->nvec_used, init_desc->affinity);
-+	desc = msi_alloc_desc(dev, init_desc->nvec_used, init_desc->affinity);
- 	if (!desc)
- 		return -ENOMEM;
- 
-@@ -103,7 +102,7 @@ int msi_add_simple_msi_descs(struct devi
- 	lockdep_assert_held(&dev->msi.data->mutex);
- 
- 	for (i = 0; i < ndesc; i++) {
--		desc = alloc_msi_entry(dev, 1, NULL);
-+		desc = msi_alloc_desc(dev, 1, NULL);
- 		if (!desc)
- 			goto fail;
- 		desc->msi_index = index + i;
-@@ -116,7 +115,7 @@ int msi_add_simple_msi_descs(struct devi
- fail:
- 	list_for_each_entry_safe(desc, tmp, &list, list) {
- 		list_del(&desc->list);
--		free_msi_entry(desc);
-+		msi_free_desc(desc);
- 	}
- 	return -ENOMEM;
- }
-@@ -143,7 +142,7 @@ void msi_free_msi_descs_range(struct dev
- 		if (desc->msi_index < base_index || desc->msi_index >= base_index + ndesc)
- 			continue;
- 		list_del(&desc->list);
--		free_msi_entry(desc);
-+		msi_free_desc(desc);
- 		dev->msi.data->num_descs--;
- 	}
- }
-@@ -779,7 +778,7 @@ int msi_domain_populate_irqs(struct irq_
- 
- 	msi_lock_descs(dev);
- 	for (virq = virq_base; virq < virq_base + nvec; virq++) {
--		desc = alloc_msi_entry(dev, 1, NULL);
-+		desc = msi_alloc_desc(dev, 1, NULL);
- 		if (!desc) {
- 			ret = -ENOMEM;
- 			goto fail;
 
