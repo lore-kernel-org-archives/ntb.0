@@ -1,108 +1,80 @@
 Return-Path: <tglx@linutronix.de>
 Received: from galois.linutronix.de (Galois.linutronix.de. [2a0a:51c0:0:12e:550::1])
-        by gmr-mx.google.com with ESMTPS id f21si740643pfc.3.2021.11.26.17.23.32
+        by gmr-mx.google.com with ESMTPS id w4si1899873pjr.3.2021.11.26.17.23.30
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 26 Nov 2021 17:23:32 -0800 (PST)
-Message-ID: <20211126232734.349989857@linutronix.de>
+        Fri, 26 Nov 2021 17:23:30 -0800 (PST)
+Message-ID: <20211126230957.239391799@linutronix.de>
 From: Thomas Gleixner <tglx@linutronix.de>
-Subject: 
- [patch 01/32] genirq/msi: Move descriptor list to struct msi_device_data
-References: <20211126230957.239391799@linutronix.de>
+Subject: [patch 00/32] genirq/msi, PCI/MSI: Spring cleaning - Part 2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Date: Sat, 27 Nov 2021 02:23:30 +0100 (CET)
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Date: Sat, 27 Nov 2021 02:23:28 +0100 (CET)
 To: LKML <linux-kernel@vger.kernel.org>
 Cc: Bjorn Helgaas <helgaas@kernel.org>, Marc Zygnier <maz@kernel.org>, Alex Williamson <alex.williamson@redhat.com>, Kevin Tian <kevin.tian@intel.com>, Jason Gunthorpe <jgg@nvidia.com>, Megha Dey <megha.dey@intel.com>, Ashok Raj <ashok.raj@intel.com>, linux-pci@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-s390@vger.kernel.org, Heiko Carstens <hca@linux.ibm.com>, Christian Borntraeger <borntraeger@de.ibm.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-It's only required when MSI is in use.
-
-Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
----
- drivers/base/core.c    |    3 ---
- include/linux/device.h |    4 ----
- include/linux/msi.h    |    4 +++-
- kernel/irq/msi.c       |    5 ++++-
- 4 files changed, 7 insertions(+), 9 deletions(-)
-
---- a/drivers/base/core.c
-+++ b/drivers/base/core.c
-@@ -2874,9 +2874,6 @@ void device_initialize(struct device *de
- 	INIT_LIST_HEAD(&dev->devres_head);
- 	device_pm_init(dev);
- 	set_dev_node(dev, NUMA_NO_NODE);
--#ifdef CONFIG_GENERIC_MSI_IRQ
--	INIT_LIST_HEAD(&dev->msi_list);
--#endif
- 	INIT_LIST_HEAD(&dev->links.consumers);
- 	INIT_LIST_HEAD(&dev->links.suppliers);
- 	INIT_LIST_HEAD(&dev->links.defer_sync);
---- a/include/linux/device.h
-+++ b/include/linux/device.h
-@@ -422,7 +422,6 @@ struct dev_msi_info {
-  * @em_pd:	device's energy model performance domain
-  * @pins:	For device pin management.
-  *		See Documentation/driver-api/pin-control.rst for details.
-- * @msi_list:	Hosts MSI descriptors
-  * @numa_node:	NUMA node this device is close to.
-  * @dma_ops:    DMA mapping operations for this device.
-  * @dma_mask:	Dma mask (if dma'ble device).
-@@ -518,9 +517,6 @@ struct device {
- 	struct dev_pin_info	*pins;
- #endif
- 	struct dev_msi_info	msi;
--#ifdef CONFIG_GENERIC_MSI_IRQ
--	struct list_head	msi_list;
--#endif
- #ifdef CONFIG_DMA_OPS
- 	const struct dma_map_ops *dma_ops;
- #endif
---- a/include/linux/msi.h
-+++ b/include/linux/msi.h
-@@ -145,12 +145,14 @@ struct msi_desc {
-  * @properties:		MSI properties which are interesting to drivers
-  * @attrs:		Pointer to the sysfs attribute group
-  * @platform_data:	Platform-MSI specific data
-+ * @list:		List of MSI descriptors associated to the device
-  */
- struct msi_device_data {
- 	raw_spinlock_t			lock;
- 	unsigned long			properties;
- 	const struct attribute_group    **attrs;
- 	struct platform_msi_priv_data	*platform_data;
-+	struct list_head		list;
- };
- 
- int msi_setup_device_data(struct device *dev);
-@@ -187,7 +189,7 @@ static inline unsigned int msi_get_virq(
- 
- /* Helpers to hide struct msi_desc implementation details */
- #define msi_desc_to_dev(desc)		((desc)->dev)
--#define dev_to_msi_list(dev)		(&(dev)->msi_list)
-+#define dev_to_msi_list(dev)		(&(dev)->msi.data->list)
- #define first_msi_entry(dev)		\
- 	list_first_entry(dev_to_msi_list((dev)), struct msi_desc, list)
- #define for_each_msi_entry(desc, dev)	\
---- a/kernel/irq/msi.c
-+++ b/kernel/irq/msi.c
-@@ -87,7 +87,9 @@ EXPORT_SYMBOL_GPL(get_cached_msi_msg);
- 
- static void msi_device_data_release(struct device *dev, void *res)
- {
--	WARN_ON_ONCE(!list_empty(&dev->msi_list));
-+	struct msi_device_data *md = res;
-+
-+	WARN_ON_ONCE(!list_empty(&md->list));
- 	dev->msi.data = NULL;
- }
- 
-@@ -113,6 +115,7 @@ int msi_setup_device_data(struct device
- 		return -ENOMEM;
- 
- 	raw_spin_lock_init(&md->lock);
-+	INIT_LIST_HEAD(&md->list);
- 	dev->msi.data = md;
- 	devres_add(dev, md);
- 	return 0;
-
+VGhpcyBpcyB0aGUgdGhpcmQgcGFydCBvZiBbUENJXU1TSSByZWZhY3RvcmluZyB3aGljaCBhaW1z
+IHRvIHByb3ZpZGUgdGhlCmFiaWxpdHkgb2YgZXhwYW5kaW5nIE1TSS1YIHZlY3RvcnMgYWZ0ZXIg
+ZW5hYmxpbmcgTVNJLVguCgpUaGUgZmlyc3QgdHdvIHBhcnRzIG9mIHRoaXMgd29yayBjYW4gYmUg
+Zm91bmQgaGVyZToKCiAgICBodHRwczovL2xvcmUua2VybmVsLm9yZy9yLzIwMjExMTI2MjIyNzAw
+Ljg2MjQwNzk3N0BsaW51dHJvbml4LmRlCiAgICBodHRwczovL2xvcmUua2VybmVsLm9yZy9yLzIw
+MjExMTI2MjI0MTAwLjMwMzA0Njc0OUBsaW51dHJvbml4LmRlCgpUaGlzIHRoaXJkIHBhcnQgaGFz
+IHRoZSBmb2xsb3dpbmcgaW1wb3J0YW50IGNoYW5nZXM6CgogICAxKSBBZGQgbG9ja2luZyB0byBw
+cm90ZWN0IHRoZSBNU0kgZGVzY3JpcHRvciBzdG9yYWdlCgogICAgICBSaWdodCBub3cgdGhlIE1T
+SSBkZXNjcmlwdG9yIHN0b3JhZ2UgKGxpbmtlZCBsaXN0KSBpcyBub3QgcHJvdGVjdGVkCiAgICAg
+IGJ5IGFueXRoaW5nIHVuZGVyIHRoZSBhc3N1bXB0aW9uIHRoYXQgdGhlIGxpc3QgaXMgaW5zdGFs
+bGVkIGJlZm9yZQogICAgICB1c2UgYW5kIGRlc3Ryb3llZCBhZnRlciB1c2UuIEFzIHRoaXMgaXMg
+YWJvdXQgdG8gY2hhbmdlIHRoZXJlIGhhcyB0bwogICAgICBiZSBwcm90ZWN0aW9uCgogICAyKSBB
+IG5ldyBzZXQgb2YgaXRlcmF0b3JzIHdoaWNoIGFsbG93IGZpbHRlcmluZyBvbiB0aGUgc3RhdGUg
+b2YgdGhlCiAgICAgIGRlc2NyaXB0b3JzIG5hbWVseSB3aGV0aGVyIGEgZGVzY3JpcHRvciBpcyBh
+c3NvY2lhdGVkIHRvIGEgTGludXgKICAgICAgaW50ZXJydXB0IG9yIG5vdC4KCiAgICAgIFRoaXMg
+Y2xlYW5zIHVwIGEgbG90IG9mIHVzZSBjYXNlcyB3aGljaCBoYXZlIHRvIGRvIHRoaXMgZmlsdGVy
+aW5nCiAgICAgIG1hbnVhbGx5LgoKICAgMykgQSBuZXcgc2V0IG9mIE1TSSBkZXNjcmlwdG9yIGFs
+bG9jYXRpb24gZnVuY3Rpb25zIHdoaWNoIG1ha2UgdGhlIHVzYWdlCiAgICAgIHNpdGVzIHNpbXBs
+ZXIgYW5kIGNvbmZpbmUgdGhlIHN0b3JhZ2UgaGFuZGxpbmcgdG8gdGhlIGNvcmUgY29kZS4KCiAg
+ICAgIFRyaXZpYWwgTVNJIGRlc2NyaXB0b3JzIChub24gUENJKSBhcmUgbm93IGFsbG9jYXRlZCBi
+eSB0aGUgY29yZSBjb2RlCiAgICAgIGF1dG9tYXRpY2FsbHkgd2hlbiB0aGUgdW5kZXJseWluZyBp
+cnEgZG9tYWluIHJlcXVlc3RzIHRoYXQuCgogICA0KSBSZXdvcmsgb2Ygc3lzZnMgaGFuZGxpbmcg
+dG8gcHJlcGFyZSBmb3IgZHluYW1pYyBleHRlbnNpb24gb2YgTVNJLVgKCiAgICAgIFRoZSBjdXJy
+ZW50IG1lY2hhbmlzbSB3aGljaCBjcmVhdGVzIHRoZSBkaXJlY3RvcnkgYW5kIHRoZSBhdHRyaWJ1
+dGVzCiAgICAgIGZvciBhbGwgTVNJIGRlc2NyaXB0b3JzIGluIG9uZSBnbyBpcyBvYnZpb3VzbHkg
+bm90IHN1aXRhYmxlIGZvcgogICAgICBkeW5hbWljIGV4dGVuc2lvbi4gVGhlIHJld29yayBzcGxp
+dHMgdGhlIGRpcmVjdG9yeSBjcmVhdGlvbiBvdXQgYW5kCiAgICAgIGxldHMgdGhlIE1TSSBpbnRl
+cnJ1cHQgYWxsb2NhdGlvbiBjcmVhdGUgdGhlIHBlciBkZXNjcmlwdG9yCiAgICAgIGF0dHJpYnV0
+ZXMuCgogICA1KSBDb252ZXJzaW9uIG9mIHRoZSBNU0kgZGVzY3JpcHRvciBzdG9yYWdlIHRvIHhh
+cnJheQoKICAgICAgVGhlIGxpbmtlZCBsaXN0IGJhc2VkIHN0b3JhZ2UgaXMgc3Vib3B0aW1hbCBl
+dmVuIHdpdGhvdXQgZHluYW1pYwogICAgICBleHBhbnNpb24gYXMgaXQgcmVxdWlyZXMgZnVsbCBs
+aXN0IHdhbGtzIHRvIGdldCB0byBhIHNwZWNpZmljCiAgICAgIGRlc2NyaXB0b3IuIFdpdGggZHlu
+YW1pYyBleHBhbnNpb24gdGhpcyBnZXRzIGV2ZW4gbW9yZQogICAgICBjb252b2x1dGVkLiBYYXJy
+YXkgaXMgd2F5IG1vcmUgc3VpdGFibGUgYW5kIHNpbXBsaWZpZXMgdGhlCiAgICAgIGZpbmFsIGdv
+YWwgb2YgZHluYW1pYyBleHBhbnNpb24gb2YgdGhlIE1TSS1YIHNwYWNlLgoKVGhlIHNlcmllcyBp
+cyBiYXNlZCBvbjoKCiAgICAgZ2l0Oi8vZ2l0Lmtlcm5lbC5vcmcvcHViL3NjbS9saW51eC9rZXJu
+ZWwvZ2l0L3RnbHgvZGV2ZWwuZ2l0IG1zaS12MS1wYXJ0LTIKCmFuZCBhbHNvIGF2YWlsYWJsZSBm
+cm9tIGdpdDoKCiAgICAgZ2l0Oi8vZ2l0Lmtlcm5lbC5vcmcvcHViL3NjbS9saW51eC9rZXJuZWwv
+Z2l0L3RnbHgvZGV2ZWwuZ2l0IG1zaS12MS1wYXJ0LTMKCkZvciB0aGUgY3VyaW91cyB3aG8gY2Fu
+J3Qgd2FpdCBmb3IgdGhlIG5leHQgcGFydCB0byBhcnJpdmUgdGhlIGZ1bGwgc2VyaWVzCmlzIGF2
+YWlsYWJsZSB2aWE6CgogICAgIGdpdDovL2dpdC5rZXJuZWwub3JnL3B1Yi9zY20vbGludXgva2Vy
+bmVsL2dpdC90Z2x4L2RldmVsLmdpdCBtc2ktdjEtcGFydC00CgpUaGFua3MsCgoJdGdseAotLS0K
+IC5jbGFuZy1mb3JtYXQgICAgICAgICAgICAgICAgICAgICAgICAgIHwgICAgMSAKIGFyY2gvcG93
+ZXJwYy9wbGF0Zm9ybXMvNHh4L2hzdGFfbXNpLmMgIHwgICAgNyAKIGFyY2gvcG93ZXJwYy9wbGF0
+Zm9ybXMvY2VsbC9heG9uX21zaS5jIHwgICAgNyAKIGFyY2gvcG93ZXJwYy9wbGF0Zm9ybXMvcGFz
+ZW1pL21zaS5jICAgIHwgICAgOSAKIGFyY2gvcG93ZXJwYy9zeXNkZXYvZnNsX21zaS5jICAgICAg
+ICAgIHwgICAgOCAKIGFyY2gvcG93ZXJwYy9zeXNkZXYvbXBpY191M21zaS5jICAgICAgIHwgICAg
+OSAKIGFyY2gvczM5MC9wY2kvcGNpX2lycS5jICAgICAgICAgICAgICAgIHwgICAgNiAKIGFyY2gv
+eDg2L3BjaS94ZW4uYyAgICAgICAgICAgICAgICAgICAgIHwgICAxNCAKIGRyaXZlcnMvYmFzZS9j
+b3JlLmMgICAgICAgICAgICAgICAgICAgIHwgICAgMyAKIGRyaXZlcnMvYmFzZS9wbGF0Zm9ybS1t
+c2kuYyAgICAgICAgICAgIHwgIDExMCAtLS0tLQogZHJpdmVycy9idXMvZnNsLW1jL2ZzbC1tYy1t
+c2kuYyAgICAgICAgfCAgIDYxIC0tCiBkcml2ZXJzL250Yi9tc2kuYyAgICAgICAgICAgICAgICAg
+ICAgICB8ICAgMTkgCiBkcml2ZXJzL3BjaS9jb250cm9sbGVyL3BjaS1oeXBlcnYuYyAgICB8ICAg
+MTUgCiBkcml2ZXJzL3BjaS9tc2kvaXJxZG9tYWluLmMgICAgICAgICAgICB8ICAgMTEgCiBkcml2
+ZXJzL3BjaS9tc2kvbGVnYWN5LmMgICAgICAgICAgICAgICB8ICAgMjAgCiBkcml2ZXJzL3BjaS9t
+c2kvbXNpLmMgICAgICAgICAgICAgICAgICB8ICAyNTUgKysrKystLS0tLS0KIGRyaXZlcnMvcGNp
+L3hlbi1wY2lmcm9udC5jICAgICAgICAgICAgIHwgICAgMiAKIGRyaXZlcnMvc29jL3RpL3RpX3Nj
+aV9pbnRhX21zaS5jICAgICAgIHwgICA3NyArLS0KIGluY2x1ZGUvbGludXgvZGV2aWNlLmggICAg
+ICAgICAgICAgICAgIHwgICAgNCAKIGluY2x1ZGUvbGludXgvbXNpLmggICAgICAgICAgICAgICAg
+ICAgIHwgIDEzNSArKysrKy0KIGluY2x1ZGUvbGludXgvc29jL3RpL3RpX3NjaV9pbnRhX21zaS5o
+IHwgICAgMSAKIGtlcm5lbC9pcnEvbXNpLmMgICAgICAgICAgICAgICAgICAgICAgIHwgIDcxOSAr
+KysrKysrKysrKysrKysrKysrKysrLS0tLS0tLS0tLS0KIDIyIGZpbGVzIGNoYW5nZWQsIDg0MSBp
+bnNlcnRpb25zKCspLCA2NTIgZGVsZXRpb25zKC0pCgoK
