@@ -1,95 +1,227 @@
 Return-Path: <tglx@linutronix.de>
 Received: from galois.linutronix.de (Galois.linutronix.de. [193.142.43.55])
-        by gmr-mx.google.com with ESMTPS id bg19si1168877oib.5.2021.11.26.17.24.13
+        by gmr-mx.google.com with ESMTPS id a38si556609ybi.4.2021.11.26.17.24.12
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 26 Nov 2021 17:24:14 -0800 (PST)
-Message-ID: <20211126232735.966439698@linutronix.de>
+        Fri, 26 Nov 2021 17:24:12 -0800 (PST)
+Message-ID: <20211126232735.907470678@linutronix.de>
 From: Thomas Gleixner <tglx@linutronix.de>
-Subject: [patch 28/32] genirq/msi: Convert to new functions
+Subject: [patch 27/32] genirq/msi: Make interrupt allocation less convoluted
 References: <20211126230957.239391799@linutronix.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Date: Sat, 27 Nov 2021 02:24:12 +0100 (CET)
+Date: Sat, 27 Nov 2021 02:24:10 +0100 (CET)
 To: LKML <linux-kernel@vger.kernel.org>
 Cc: Bjorn Helgaas <helgaas@kernel.org>, Marc Zygnier <maz@kernel.org>, Alex Williamson <alex.williamson@redhat.com>, Kevin Tian <kevin.tian@intel.com>, Jason Gunthorpe <jgg@nvidia.com>, Megha Dey <megha.dey@intel.com>, Ashok Raj <ashok.raj@intel.com>, linux-pci@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-s390@vger.kernel.org, Heiko Carstens <hca@linux.ibm.com>, Christian Borntraeger <borntraeger@de.ibm.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-Use the new iterator functions and add locking where required.
+There is no real reason to do several loops over the MSI descriptors
+instead of just doing one loop. In case of an error everything is undone
+anyway so it does not matter whether it's a partial or a full rollback.
 
 Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
 ---
- kernel/irq/msi.c |   23 ++++++++++++++---------
- 1 file changed, 14 insertions(+), 9 deletions(-)
+ .clang-format       |    1 
+ include/linux/msi.h |    7 --
+ kernel/irq/msi.c    |  129 +++++++++++++++++++++++++++-------------------------
+ 3 files changed, 70 insertions(+), 67 deletions(-)
 
+--- a/.clang-format
++++ b/.clang-format
+@@ -216,7 +216,6 @@ ExperimentalAutoDetectBinPacking: false
+   - 'for_each_migratetype_order'
+   - 'for_each_msi_entry'
+   - 'for_each_msi_entry_safe'
+-  - 'for_each_msi_vector'
+   - 'for_each_net'
+   - 'for_each_net_continue_reverse'
+   - 'for_each_netdev'
+--- a/include/linux/msi.h
++++ b/include/linux/msi.h
+@@ -263,12 +263,7 @@ static inline struct msi_desc *msi_first
+ 	list_for_each_entry((desc), dev_to_msi_list((dev)), list)
+ #define for_each_msi_entry_safe(desc, tmp, dev)	\
+ 	list_for_each_entry_safe((desc), (tmp), dev_to_msi_list((dev)), list)
+-#define for_each_msi_vector(desc, __irq, dev)				\
+-	for_each_msi_entry((desc), (dev))				\
+-		if ((desc)->irq)					\
+-			for (__irq = (desc)->irq;			\
+-			     __irq < ((desc)->irq + (desc)->nvec_used);	\
+-			     __irq++)
++
+ #ifdef CONFIG_IRQ_MSI_IOMMU
+ static inline const void *msi_desc_get_iommu_cookie(struct msi_desc *desc)
+ {
 --- a/kernel/irq/msi.c
 +++ b/kernel/irq/msi.c
-@@ -354,6 +354,7 @@ struct msi_desc *msi_next_desc(struct de
- int __msi_get_virq(struct device *dev, unsigned int index)
+@@ -873,23 +873,74 @@ static int msi_handle_pci_fail(struct ir
+ 	return allocated ? allocated : -ENOSPC;
+ }
+ 
++#define VIRQ_CAN_RESERVE	0x01
++#define VIRQ_ACTIVATE		0x02
++#define VIRQ_NOMASK_QUIRK	0x04
++
++static int msi_init_virq(struct irq_domain *domain, int virq, unsigned int vflags)
++{
++	struct irq_data *irqd = irq_domain_get_irq_data(domain, virq);
++	int ret;
++
++	if (!vflags & VIRQ_CAN_RESERVE) {
++		irqd_clr_can_reserve(irqd);
++		if (vflags & VIRQ_NOMASK_QUIRK)
++			irqd_set_msi_nomask_quirk(irqd);
++	}
++
++	if (!(vflags & VIRQ_ACTIVATE))
++		return 0;
++
++	ret = irq_domain_activate_irq(irqd, vflags & VIRQ_CAN_RESERVE);
++	if (ret)
++		return ret;
++	/*
++	 * If the interrupt uses reservation mode, clear the activated bit
++	 * so request_irq() will assign the final vector.
++	 */
++	if (vflags & VIRQ_CAN_RESERVE)
++		irqd_clr_activated(irqd);
++	return 0;
++}
++
+ int __msi_domain_alloc_irqs(struct irq_domain *domain, struct device *dev,
+ 			    int nvec)
  {
- 	struct msi_desc *desc;
-+	int ret = -ENOENT;
- 	bool pcimsi;
+ 	struct msi_domain_info *info = domain->host_data;
+ 	struct msi_domain_ops *ops = info->ops;
+-	struct irq_data *irq_data;
+-	struct msi_desc *desc;
+ 	msi_alloc_info_t arg = { };
++	unsigned int vflags = 0;
++	struct msi_desc *desc;
+ 	int allocated = 0;
+ 	int i, ret, virq;
+-	bool can_reserve;
  
- 	if (!dev->msi.data)
-@@ -361,11 +362,12 @@ int __msi_get_virq(struct device *dev, u
- 
- 	pcimsi = msi_device_has_property(dev, MSI_PROP_PCI_MSI);
+ 	ret = msi_domain_prepare_irqs(domain, dev, nvec, &arg);
+ 	if (ret)
+ 		return ret;
  
 -	for_each_msi_entry(desc, dev) {
-+	msi_lock_descs(dev);
-+	msi_for_each_desc_from(desc, dev, MSI_DESC_ASSOCIATED, index) {
- 		/* PCI-MSI has only one descriptor for multiple interrupts. */
- 		if (pcimsi) {
--			if (desc->irq && index < desc->nvec_used)
--				return desc->irq + index;
-+			if (index < desc->nvec_used)
-+				ret = desc->irq + index;
- 			break;
++	/*
++	 * This flag is set by the PCI layer as we need to activate
++	 * the MSI entries before the PCI layer enables MSI in the
++	 * card. Otherwise the card latches a random msi message.
++	 */
++	if (info->flags & MSI_FLAG_ACTIVATE_EARLY)
++		vflags |= VIRQ_ACTIVATE;
++
++	/*
++	 * Interrupt can use a reserved vector and will not occupy
++	 * a real device vector until the interrupt is requested.
++	 */
++	if (msi_check_reservation_mode(domain, info, dev)) {
++		vflags |= VIRQ_CAN_RESERVE;
++		/*
++		 * MSI affinity setting requires a special quirk (X86) when
++		 * reservation mode is active.
++		 */
++		if (domain->flags & IRQ_DOMAIN_MSI_NOMASK_QUIRK)
++			vflags |= VIRQ_NOMASK_QUIRK;
++	}
++
++	msi_for_each_desc(desc, dev, MSI_DESC_NOTASSOCIATED) {
+ 		ops->set_desc(&arg, desc);
+ 
+ 		virq = __irq_domain_alloc_irqs(domain, -1, desc->nvec_used,
+@@ -901,49 +952,12 @@ int __msi_domain_alloc_irqs(struct irq_d
+ 		for (i = 0; i < desc->nvec_used; i++) {
+ 			irq_set_msi_desc_off(virq, i, desc);
+ 			irq_debugfs_copy_devname(virq + i, dev);
++			ret = msi_init_virq(domain, virq + i, vflags);
++			if (ret)
++				return ret;
  		}
- 
-@@ -373,10 +375,13 @@ int __msi_get_virq(struct device *dev, u
- 		 * PCI-MSIX and platform MSI use a descriptor per
- 		 * interrupt.
- 		 */
--		if (desc->msi_index == index)
--			return desc->irq;
-+		if (desc->msi_index == index) {
-+			ret = desc->irq;
-+			break;
-+		}
+ 		allocated++;
  	}
--	return -ENOENT;
-+	msi_unlock_descs(dev);
-+	return ret;
+-
+-	can_reserve = msi_check_reservation_mode(domain, info, dev);
+-
+-	/*
+-	 * This flag is set by the PCI layer as we need to activate
+-	 * the MSI entries before the PCI layer enables MSI in the
+-	 * card. Otherwise the card latches a random msi message.
+-	 */
+-	if (!(info->flags & MSI_FLAG_ACTIVATE_EARLY))
+-		goto skip_activate;
+-
+-	for_each_msi_vector(desc, i, dev) {
+-		if (desc->irq == i) {
+-			virq = desc->irq;
+-			dev_dbg(dev, "irq [%d-%d] for MSI\n",
+-				virq, virq + desc->nvec_used - 1);
+-		}
+-
+-		irq_data = irq_domain_get_irq_data(domain, i);
+-		if (!can_reserve) {
+-			irqd_clr_can_reserve(irq_data);
+-			if (domain->flags & IRQ_DOMAIN_MSI_NOMASK_QUIRK)
+-				irqd_set_msi_nomask_quirk(irq_data);
+-		}
+-		ret = irq_domain_activate_irq(irq_data, can_reserve);
+-		if (ret)
+-			return ret;
+-	}
+-
+-skip_activate:
+-	/*
+-	 * If these interrupts use reservation mode, clear the activated bit
+-	 * so request_irq() will assign the final vector.
+-	 */
+-	if (can_reserve) {
+-		for_each_msi_vector(desc, i, dev) {
+-			irq_data = irq_domain_get_irq_data(domain, i);
+-			irqd_clr_activated(irq_data);
+-		}
+-	}
+ 	return 0;
  }
- EXPORT_SYMBOL_GPL(__msi_get_virq);
  
-@@ -407,7 +412,7 @@ static const struct attribute_group **ms
+@@ -1021,26 +1035,21 @@ int msi_domain_alloc_irqs(struct irq_dom
+ 
+ void __msi_domain_free_irqs(struct irq_domain *domain, struct device *dev)
+ {
+-	struct irq_data *irq_data;
++	struct irq_data *irqd;
+ 	struct msi_desc *desc;
  	int i;
  
- 	/* Determine how many msi entries we have */
--	for_each_msi_entry(entry, dev)
-+	msi_for_each_desc(entry, dev, MSI_DESC_ALL)
- 		num_msi += entry->nvec_used;
- 	if (!num_msi)
- 		return NULL;
-@@ -417,7 +422,7 @@ static const struct attribute_group **ms
- 	if (!msi_attrs)
- 		return ERR_PTR(-ENOMEM);
- 
--	for_each_msi_entry(entry, dev) {
-+	msi_for_each_desc(entry, dev, MSI_DESC_ALL) {
- 		for (i = 0; i < entry->nvec_used; i++) {
- 			msi_dev_attr = kzalloc(sizeof(*msi_dev_attr), GFP_KERNEL);
- 			if (!msi_dev_attr)
-@@ -838,7 +843,7 @@ static bool msi_check_reservation_mode(s
- 	 * Checking the first MSI descriptor is sufficient. MSIX supports
- 	 * masking and MSI does so when the can_mask attribute is set.
- 	 */
--	desc = first_msi_entry(dev);
-+	desc = msi_first_desc(dev);
- 	return desc->pci.msi_attrib.is_msix || desc->pci.msi_attrib.can_mask;
+-	for_each_msi_vector(desc, i, dev) {
+-		irq_data = irq_domain_get_irq_data(domain, i);
+-		if (irqd_is_activated(irq_data))
+-			irq_domain_deactivate_irq(irq_data);
+-	}
+-
+-	for_each_msi_entry(desc, dev) {
+-		/*
+-		 * We might have failed to allocate an MSI early
+-		 * enough that there is no IRQ associated to this
+-		 * entry. If that's the case, don't do anything.
+-		 */
+-		if (desc->irq) {
+-			irq_domain_free_irqs(desc->irq, desc->nvec_used);
+-			desc->irq = 0;
++	/* Only handle MSI entries which have an interrupt associated */
++	msi_for_each_desc(desc, dev, MSI_DESC_ASSOCIATED) {
++		/* Make sure all interrupts are deactivated */
++		for (i = 0; i < desc->nvec_used; i++) {
++			irqd = irq_domain_get_irq_data(domain, desc->irq + i);
++			if (irqd && irqd_is_activated(irqd))
++				irq_domain_deactivate_irq(irqd);
+ 		}
++
++		irq_domain_free_irqs(desc->irq, desc->nvec_used);
++		desc->irq = 0;
+ 	}
  }
  
 
