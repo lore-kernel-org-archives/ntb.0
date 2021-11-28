@@ -1,61 +1,112 @@
 Return-Path: <tglx@linutronix.de>
-Received: from galois.linutronix.de (Galois.linutronix.de. [193.142.43.55])
-        by gmr-mx.google.com with ESMTPS id p10si355763plr.4.2021.11.29.01.26.13
+Received: from galois.linutronix.de (Galois.linutronix.de. [2a0a:51c0:0:12e:550::1])
+        by gmr-mx.google.com with ESMTPS id g64si1891079oia.1.2021.11.28.11.33.15
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 29 Nov 2021 01:26:14 -0800 (PST)
+        Sun, 28 Nov 2021 11:33:15 -0800 (PST)
 From: Thomas Gleixner <tglx@linutronix.de>
-Subject: Re: [patch 04/32] genirq/msi: Provide a set of advanced MSI
- accessors and iterators
-In-Reply-To: <877dcsf5l5.ffs@tglx>
-Date: Mon, 29 Nov 2021 10:26:11 +0100
-Message-ID: <87o863e2j0.ffs@tglx>
+Subject: Re: [patch 31/32] genirq/msi: Simplify sysfs handling
+In-Reply-To: <YaNi2RkiYdnoEDau@kroah.com>
+References: <20211126230957.239391799@linutronix.de>
+ <20211126232736.135247787@linutronix.de> <YaIlX8bef2jPLkUE@kroah.com>
+ <87lf19fl9i.ffs@tglx> <YaNi2RkiYdnoEDau@kroah.com>
+Date: Sun, 28 Nov 2021 20:33:13 +0100
+Message-ID: <871r30f53a.ffs@tglx>
 MIME-Version: 1.0
 Content-Type: text/plain
-To: Jason Gunthorpe <jgg@nvidia.com>
-Cc: LKML <linux-kernel@vger.kernel.org>, Bjorn Helgaas <helgaas@kernel.org>, Marc Zygnier <maz@kernel.org>, Alex Williamson <alex.williamson@redhat.com>, Kevin Tian <kevin.tian@intel.com>, Megha Dey <megha.dey@intel.com>, Ashok Raj <ashok.raj@intel.com>, linux-pci@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-s390@vger.kernel.org, Heiko Carstens <hca@linux.ibm.com>, Christian Borntraeger <borntraeger@de.ibm.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: LKML <linux-kernel@vger.kernel.org>, Bjorn Helgaas <helgaas@kernel.org>, Marc Zygnier <maz@kernel.org>, Alex Williamson <alex.williamson@redhat.com>, Kevin Tian <kevin.tian@intel.com>, Jason Gunthorpe <jgg@nvidia.com>, Megha Dey <megha.dey@intel.com>, Ashok Raj <ashok.raj@intel.com>, linux-pci@vger.kernel.org, linux-s390@vger.kernel.org, Heiko Carstens <hca@linux.ibm.com>, Christian Borntraeger <borntraeger@de.ibm.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com, Neil Horman <nhorman@tuxdriver.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Jason,
-
-On Sun, Nov 28 2021 at 20:22, Thomas Gleixner wrote:
-> On Sat, Nov 27 2021 at 21:00, Jason Gunthorpe wrote:
->> On Sat, Nov 27, 2021 at 02:22:33AM +0100, Thomas Gleixner wrote:
->> I understand why that isn't desirable at this patch where the storage
->> would have to be a list_head pointer, but still, seems like an odd
->> place to end up at the end of the series.
->>
->> eg add index here unused and then the last patch uses it instead of
->> __iter_idx.
+On Sun, Nov 28 2021 at 12:07, Greg Kroah-Hartman wrote:
+> On Sat, Nov 27, 2021 at 08:31:37PM +0100, Thomas Gleixner wrote:
+>> On Sat, Nov 27 2021 at 13:32, Greg Kroah-Hartman wrote:
+>> > On Sat, Nov 27, 2021 at 02:23:15AM +0100, Thomas Gleixner wrote:
+>> >> The sysfs handling for MSI is a convoluted maze and it is in the way of
+>> >> supporting dynamic expansion of the MSI-X vectors because it only supports
+>> >> a one off bulk population/free of the sysfs entries.
+>> >> 
+>> >> Change it to do:
+>> >> 
+>> >>    1) Creating an empty sysfs attribute group when msi_device_data is
+>> >>       allocated
+>> >> 
+>> >>    2) Populate the entries when the MSI descriptor is initialized
+>> >
+>> > How much later does this happen?  Can it happen while the device has a
+>> > driver bound to it?
+>> 
+>> That's not later than before. It's when the driver initializes the
+>> MSI[X] interrupts, which usually happens in the probe() function.
+>> 
+>> The difference is that the group, (i.e.) directory is created slightly
+>> earlier.
 >
-> TBH, didn't think about doing just that. OTH, given the experience of
-> looking at the creative mess people create, this was probably also a
-> vain attempt to make it harder in the future.
+> Ok, but that still happens when probe() is called for the driver,
+> right?
+
+Yes.
+
+>> >> +static inline int msi_sysfs_create_group(struct device *dev)
+>> >> +{
+>> >> +	return devm_device_add_group(dev, &msi_irqs_group);
+>> >
+>> > Much nicer, but you changed the lifetime rules of when these attributes
+>> > will be removed, is that ok?
+>> 
+>> The msi entries are removed at the same place as they are removed in the
+>> current mainline code, i.e. when the device driver shuts the device
+>> down and disables MSI[X], which happens usually during remove()
+>> 
+>> What's different now is that the empty group stays around a bit
+>> longer. I don't see how that matters.
 >
->> Also, I don't understand why filter was stored in the dev and not
->> passed into msi_next_desc() in the macro here?
+> How much longer does it stick around?
 >
-> No real reason. I probably just stored it along with the rest. Lemme try
-> that index approach.
+> What happens if this sequence happens:
+> 	- probe()
+> 	- disconnect()
+> 	- probe()
+> with the same device (i.e. the device is not removed from the system)?
+>
+> Which can happen as userspace can trigger disconnect() or even worse, if
+> the driver is unloaded and then loaded again?  Will the second call to
+> create this directory fail as it is not cleaned up yet?
+>
+> I can never remember if devm_*() stuff sticks around for the device
+> lifecycle, or for the driver/device lifecycle, which is one big reason
+> why I don't like that api...
 
-After looking at all the call sites again, there is no real usage for
-this local index variable.
+Driver lifecycle AFAICT.
 
-If anything needs the index of a descriptor then it's available in the
-descriptor itself. That won't change because the low level message write
-code needs the index too and the only accessible storage there is
-msi_desc.
+>> > I still worry that these attributes show up "after" the device is
+>> > registered with the driver core, but hey, it's no worse than it
+>> > currently is, so that's not caused by this patch series...
+>> 
+>> Happens that register before or after driver->probe()?
+>
+> During probe is a bit too late, but we can handle that as we are used to
+> it.  If it happens after probe() succeeds, based on something else being
+> asked for in the driver (like the device being opened), then userspace
+> has no chance of ever noticing these attributes being added.
+>
+> But again, this isn't new to your code series, so I wouldn't worry about
+> it.  Obviously userspace tools do not care or really notice these
+> attributes at all otherwise the authors of them would have complained
+> a long time ago :)
 
-So the "gain" would be to have a pointless 'unsigned long index;'
-variable at all usage sites.
+I have no idea how these attributes are used at all. Neil should knows
+as he added it in the first place.
 
-What for? The usage sites should not have to care about the storage
-details of a facility they are using.
+> So again, no real objection from me here, just meta-comments, except for
+> the above thing with the devm_* call to ensure that the
+> probe/disconnect/probe sequence will still work just as well as it does
+> today.  Should be easy enough to test out by just unloading a module and
+> then loading it again with this patch series applied.
 
-So it might look odd in the first place, but at the end it's conveniant
-and does not put any restrictions on changing the underlying mechanics.
+That works just fine. Tested that already before posting. After module
+removal the directory is gone.
 
 Thanks,
 
         tglx
-
