@@ -1,103 +1,120 @@
-Return-Path: <gregkh@linuxfoundation.org>
-Received: from dfw.source.kernel.org (dfw.source.kernel.org. [139.178.84.217])
-        by gmr-mx.google.com with ESMTPS id o19si2078692wme.2.2021.11.28.03.07.11
+Return-Path: <jgg@nvidia.com>
+Received: from NAM10-BN7-obe.outbound.protection.outlook.com (mail-bn7nam10on2085.outbound.protection.outlook.com. [40.107.92.85])
+        by gmr-mx.google.com with ESMTPS id f19si674402iox.3.2021.11.27.17.00.41
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Sun, 28 Nov 2021 03:07:11 -0800 (PST)
-Date: Sun, 28 Nov 2021 12:07:05 +0100
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: Re: [patch 31/32] genirq/msi: Simplify sysfs handling
-Message-ID: <YaNi2RkiYdnoEDau@kroah.com>
+        Sat, 27 Nov 2021 17:00:41 -0800 (PST)
+Date: Sat, 27 Nov 2021 21:00:37 -0400
+From: Jason Gunthorpe <jgg@nvidia.com>
+Subject: Re: [patch 04/32] genirq/msi: Provide a set of advanced MSI
+ accessors and iterators
+Message-ID: <20211128010037.GV4670@nvidia.com>
 References: <20211126230957.239391799@linutronix.de>
- <20211126232736.135247787@linutronix.de>
- <YaIlX8bef2jPLkUE@kroah.com>
- <87lf19fl9i.ffs@tglx>
-MIME-Version: 1.0
+ <20211126232734.531194050@linutronix.de>
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <87lf19fl9i.ffs@tglx>
+In-Reply-To: <20211126232734.531194050@linutronix.de>
+Return-Path: jgg@nvidia.com
+MIME-Version: 1.0
 To: Thomas Gleixner <tglx@linutronix.de>
-Cc: LKML <linux-kernel@vger.kernel.org>, Bjorn Helgaas <helgaas@kernel.org>, Marc Zygnier <maz@kernel.org>, Alex Williamson <alex.williamson@redhat.com>, Kevin Tian <kevin.tian@intel.com>, Jason Gunthorpe <jgg@nvidia.com>, Megha Dey <megha.dey@intel.com>, Ashok Raj <ashok.raj@intel.com>, linux-pci@vger.kernel.org, linux-s390@vger.kernel.org, Heiko Carstens <hca@linux.ibm.com>, Christian Borntraeger <borntraeger@de.ibm.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com
+Cc: LKML <linux-kernel@vger.kernel.org>, Bjorn Helgaas <helgaas@kernel.org>, Marc Zygnier <maz@kernel.org>, Alex Williamson <alex.williamson@redhat.com>, Kevin Tian <kevin.tian@intel.com>, Megha Dey <megha.dey@intel.com>, Ashok Raj <ashok.raj@intel.com>, linux-pci@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-s390@vger.kernel.org, Heiko Carstens <hca@linux.ibm.com>, Christian Borntraeger <borntraeger@de.ibm.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-On Sat, Nov 27, 2021 at 08:31:37PM +0100, Thomas Gleixner wrote:
-> On Sat, Nov 27 2021 at 13:32, Greg Kroah-Hartman wrote:
-> > On Sat, Nov 27, 2021 at 02:23:15AM +0100, Thomas Gleixner wrote:
-> >> The sysfs handling for MSI is a convoluted maze and it is in the way of
-> >> supporting dynamic expansion of the MSI-X vectors because it only supports
-> >> a one off bulk population/free of the sysfs entries.
-> >> 
-> >> Change it to do:
-> >> 
-> >>    1) Creating an empty sysfs attribute group when msi_device_data is
-> >>       allocated
-> >> 
-> >>    2) Populate the entries when the MSI descriptor is initialized
-> >
-> > How much later does this happen?  Can it happen while the device has a
-> > driver bound to it?
+On Sat, Nov 27, 2021 at 02:22:33AM +0100, Thomas Gleixner wrote:
+> In preparation for dynamic handling of MSI-X interrupts provide a new set
+> of MSI descriptor accessor functions and iterators. They are benefitial per
+> se as they allow to cleanup quite some code in various MSI domain
+> implementations.
 > 
-> That's not later than before. It's when the driver initializes the
-> MSI[X] interrupts, which usually happens in the probe() function.
+> Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+>  include/linux/msi.h |   58 ++++++++++++++++++++++++++++
+>  kernel/irq/msi.c    |  107 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  2 files changed, 165 insertions(+)
 > 
-> The difference is that the group, (i.e.) directory is created slightly
-> earlier.
+> +++ b/include/linux/msi.h
+> @@ -140,6 +140,18 @@ struct msi_desc {
+>  	struct pci_msi_desc		pci;
+>  };
+>  
+> +/*
+> + * Filter values for the MSI descriptor iterators and accessor functions.
+> + */
+> +enum msi_desc_filter {
+> +	/* All descriptors */
+> +	MSI_DESC_ALL,
+> +	/* Descriptors which have no interrupt associated */
+> +	MSI_DESC_NOTASSOCIATED,
+> +	/* Descriptors which have an interrupt associated */
+> +	MSI_DESC_ASSOCIATED,
+> +};
+> +
+>  /**
+>   * msi_device_data - MSI per device data
+>   * @lock:		Spinlock to protect register access
+> @@ -148,6 +160,8 @@ struct msi_desc {
+>   * @platform_data:	Platform-MSI specific data
+>   * @list:		List of MSI descriptors associated to the device
+>   * @mutex:		Mutex protecting the MSI list
+> + * @__next:		Cached pointer to the next entry for iterators
+> + * @__filter:		Cached descriptor filter
+>   */
+>  struct msi_device_data {
+>  	raw_spinlock_t			lock;
+> @@ -156,6 +170,8 @@ struct msi_device_data {
+>  	struct platform_msi_priv_data	*platform_data;
+>  	struct list_head		list;
+>  	struct mutex			mutex;
+> +	struct msi_desc			*__next;
+> +	enum msi_desc_filter		__filter;
+>  };
+>  
+>  int msi_setup_device_data(struct device *dev);
+> @@ -193,6 +209,48 @@ static inline unsigned int msi_get_virq(
+>  void msi_lock_descs(struct device *dev);
+>  void msi_unlock_descs(struct device *dev);
+>  
+> +struct msi_desc *__msi_first_desc(struct device *dev, enum msi_desc_filter filter, unsigned int base_index);
+> +struct msi_desc *msi_next_desc(struct device *dev);
+> +
+> +/**
+> + * msi_first_desc - Get the first MSI descriptor associated to the device
+> + * @dev:	Device to search
+> + */
+> +static inline struct msi_desc *msi_first_desc(struct device *dev)
+> +{
+> +	return __msi_first_desc(dev, MSI_DESC_ALL, 0);
+> +}
+> +
+> +
+> +/**
+> + * msi_for_each_desc_from - Iterate the MSI descriptors from a given index
+> + *
+> + * @desc:	struct msi_desc pointer used as iterator
+> + * @dev:	struct device pointer - device to iterate
+> + * @filter:	Filter for descriptor selection
+> + * @base_index:	MSI index to iterate from
+> + *
+> + * Notes:
+> + *  - The loop must be protected with a msi_lock_descs()/msi_unlock_descs()
+> + *    pair.
+> + *  - It is safe to remove a retrieved MSI descriptor in the loop.
+> + */
+> +#define msi_for_each_desc_from(desc, dev, filter, base_index)			\
+> +	for ((desc) = __msi_first_desc((dev), (filter), (base_index)); (desc);	\
+> +	     (desc) = msi_next_desc((dev)))
 
-Ok, but that still happens when probe() is called for the driver, right?
+Given this ends up as an xarray it feels really weird that there is a
+hidden shared __next/__iter_idx instead of having the caller provide
+the index storage as is normal for xa operations.
 
-> >> +
-> >> +static inline int msi_sysfs_create_group(struct device *dev)
-> >> +{
-> >> +	return devm_device_add_group(dev, &msi_irqs_group);
-> >
-> > Much nicer, but you changed the lifetime rules of when these attributes
-> > will be removed, is that ok?
-> 
-> The msi entries are removed at the same place as they are removed in the
-> current mainline code, i.e. when the device driver shuts the device
-> down and disables MSI[X], which happens usually during remove()
-> 
-> What's different now is that the empty group stays around a bit
-> longer. I don't see how that matters.
+I understand why that isn't desirable at this patch where the storage
+would have to be a list_head pointer, but still, seems like an odd
+place to end up at the end of the series.
 
-How much longer does it stick around?
+eg add index here unused and then the last patch uses it instead of
+__iter_idx.
 
-What happens if this sequence happens:
-	- probe()
-	- disconnect()
-	- probe()
-with the same device (i.e. the device is not removed from the system)?
+Also, I don't understand why filter was stored in the dev and not
+passed into msi_next_desc() in the macro here?
 
-Which can happen as userspace can trigger disconnect() or even worse, if
-the driver is unloaded and then loaded again?  Will the second call to
-create this directory fail as it is not cleaned up yet?
-
-I can never remember if devm_*() stuff sticks around for the device
-lifecycle, or for the driver/device lifecycle, which is one big reason
-why I don't like that api...
-
-> > I still worry that these attributes show up "after" the device is
-> > registered with the driver core, but hey, it's no worse than it
-> > currently is, so that's not caused by this patch series...
-> 
-> Happens that register before or after driver->probe()?
-
-During probe is a bit too late, but we can handle that as we are used to
-it.  If it happens after probe() succeeds, based on something else being
-asked for in the driver (like the device being opened), then userspace
-has no chance of ever noticing these attributes being added.
-
-But again, this isn't new to your code series, so I wouldn't worry about
-it.  Obviously userspace tools do not care or really notice these
-attributes at all otherwise the authors of them would have complained
-a long time ago :)
-
-So again, no real objection from me here, just meta-comments, except for
-the above thing with the devm_* call to ensure that the
-probe/disconnect/probe sequence will still work just as well as it does
-today.  Should be easy enough to test out by just unloading a module and
-then loading it again with this patch series applied.
-
-thanks,
-
-greg k-h
+Jason
