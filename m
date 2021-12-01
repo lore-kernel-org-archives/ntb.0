@@ -1,168 +1,108 @@
-Return-Path: <tglx@linutronix.de>
-Received: from galois.linutronix.de (Galois.linutronix.de. [193.142.43.55])
-        by gmr-mx.google.com with ESMTPS id l7si102875ilh.5.2021.12.01.09.35.37
+Return-Path: <dave.jiang@intel.com>
+Received: from mga18.intel.com (mga18.intel.com. [134.134.136.126])
+        by gmr-mx.google.com with ESMTPS id b9si21706lji.2.2021.12.01.08.30.31
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 01 Dec 2021 09:35:37 -0800 (PST)
-From: Thomas Gleixner <tglx@linutronix.de>
-Subject: Re: [patch 21/32] NTB/msi: Convert to msi_on_each_desc()
-In-Reply-To: <20211201130023.GH4670@nvidia.com>
-References: <7daba0e2-73a3-4980-c3a5-a71f6b597b22@deltatee.com>
- <874k7ueldt.ffs@tglx> <6ba084d6-2b26-7c86-4526-8fcd3d921dfd@deltatee.com>
- <87ilwacwp8.ffs@tglx> <d6f13729-1b83-fa7d-3f0d-98d4e3f7a2aa@deltatee.com>
- <87v909bf2k.ffs@tglx> <20211130202800.GE4670@nvidia.com>
- <87o861banv.ffs@tglx> <20211201001748.GF4670@nvidia.com>
- <87mtlkaauo.ffs@tglx> <20211201130023.GH4670@nvidia.com>
-Date: Wed, 01 Dec 2021 18:35:35 +0100
-Message-ID: <87y2548byw.ffs@tglx>
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 01 Dec 2021 08:30:32 -0800 (PST)
+Message-ID: <8c2262ba-173e-0007-bc4c-94ec54b2847d@intel.com>
+Date: Wed, 1 Dec 2021 09:28:52 -0700
 MIME-Version: 1.0
-Content-Type: text/plain
-To: Jason Gunthorpe <jgg@nvidia.com>
-Cc: Logan Gunthorpe <logang@deltatee.com>, LKML <linux-kernel@vger.kernel.org>, Bjorn Helgaas <helgaas@kernel.org>, Marc Zygnier <maz@kernel.org>, Alex Williamson <alex.williamson@redhat.com>, Kevin Tian <kevin.tian@intel.com>, Megha Dey <megha.dey@intel.com>, Ashok Raj <ashok.raj@intel.com>, linux-pci@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com, linux-s390@vger.kernel.org, Heiko Carstens <hca@linux.ibm.com>, Christian Borntraeger <borntraeger@de.ibm.com>, x86@kernel.org, Joerg Roedel <jroedel@suse.de>, iommu@lists.linux-foundation.org
+Subject: Re: [patch 21/32] NTB/msi: Convert to msi_on_each_desc()
+Content-Language: en-US
+References: <20211126230957.239391799@linutronix.de>
+ <20211126232735.547996838@linutronix.de>
+ <7daba0e2-73a3-4980-c3a5-a71f6b597b22@deltatee.com> <874k7ueldt.ffs@tglx>
+ <6ba084d6-2b26-7c86-4526-8fcd3d921dfd@deltatee.com> <87ilwacwp8.ffs@tglx>
+ <d6f13729-1b83-fa7d-3f0d-98d4e3f7a2aa@deltatee.com> <87v909bf2k.ffs@tglx>
+ <20211130202800.GE4670@nvidia.com> <87o861banv.ffs@tglx>
+ <20211201001748.GF4670@nvidia.com> <87mtlkaauo.ffs@tglx>
+From: Dave Jiang <dave.jiang@intel.com>
+In-Reply-To: <87mtlkaauo.ffs@tglx>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+To: Thomas Gleixner <tglx@linutronix.de>, Jason Gunthorpe <jgg@nvidia.com>
+Cc: Logan Gunthorpe <logang@deltatee.com>, LKML <linux-kernel@vger.kernel.org>, Bjorn Helgaas <helgaas@kernel.org>, Marc Zygnier <maz@kernel.org>, Alex Williamson <alex.williamson@redhat.com>, Kevin Tian <kevin.tian@intel.com>, Megha Dey <megha.dey@intel.com>, Ashok Raj <ashok.raj@intel.com>, linux-pci@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jon Mason <jdmason@kudzu.us>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com, linux-s390@vger.kernel.org, Heiko Carstens <hca@linux.ibm.com>, Christian Borntraeger <borntraeger@de.ibm.com>, x86@kernel.org, Joerg Roedel <jroedel@suse.de>, iommu@lists.linux-foundation.org
 List-ID: <linux-ntb.googlegroups.com>
 
-On Wed, Dec 01 2021 at 09:00, Jason Gunthorpe wrote:
-> On Wed, Dec 01, 2021 at 11:16:47AM +0100, Thomas Gleixner wrote:
->> Looking at the device slices as subdevices with their own struct device
->> makes a lot of sense from the conceptual level.
+
+On 12/1/2021 3:16 AM, Thomas Gleixner wrote:
+> Jason,
 >
-> Except IMS is not just for subdevices, it should be usable for any
-> driver in any case as a general interrupt mechiansm, as you alluded to
-> below about ethernet queues. ntb seems to be the current example of
-> this need..
-
-But NTB is operating through an abstraction layer and is not a direct
-PCIe device driver.
-
-> IDXD is not so much making device "slices", but virtualizing and
-> sharing a PCI device. The IDXD hardware is multi-queue like the NIC I
-> described and the VFIO driver is simply allocating queues from a PCI
-> device for specific usages and assigning them interrupts.
-
-Right.
-
-But what is the representation for that resulting device? Some VFIO
-specific homebrewn muck or something which is based on struct device?
-
-Right now with VF passthrough, I can see the interrupts which are
-associated to the device.
-
-How is that going to be with something which is just made up? Does that
-expose it's own msi properties then somewhere hidden in the VFIO layer?
-
-See below.
-
-> There is already a char dev interface that equally allocates queues
-> from the same IDXD device, why shouldn't it be able to access IMS
-> interrupt pools too?
-
-Why wouldn't it be able to do so?
-
-> IMHO a well designed IDXD driver should put all the PCI MMIO, queue
-> mangement, interrupts, etc in the PCI driver layer, and the VFIO
-> driver layer should only deal with the MMIO trapping and VFIO
-> interfacing.
+> CC+ IOMMU folks
 >
-> From this view it is conceptually wrong to have the VFIO driver
-> directly talking to MMIO registers in the PCI device or owning the
-> irq_chip.
-
-The VFIO driver does not own the irq chip ever. The irq chip is of
-course part of the underlying infrastructure. I never asked for that.
-
-PCIe driver
-     Owns the PCI/MSI[x] interrupts for the control block
-
-     Has a control mechanism which handles queues or whatever the
-     device is partitioned into, that's what I called slice.
-
-     The irqdomain is part of that control mechanism and the irqchip
-     implementation belongs to that as well. It has to because the
-     message store is device specific.
-
-     Whether the doamin and chip implementation is in a separate
-     drivers/irqchip/foo.c file for sharing or directly built into the
-     PCIe driver itself does not matter.
-
-     When it allocates a slice for whatever usage then it also
-     allocates the IMS interrupts (though the VFIO people want to
-     have only one and do the allocations later on demand).
-
-     That allocation cannot be part of the PCI/MSIx interrupt
-     domain as we already agreed on.
-
-We have several problems to solve. Let me look at it from both point of
-views:
-
-    1) Storage
-
-       A) Having "subdevices" solves the storage problem nicely and
-          makes everything just fall in place. Even for a purely
-          physical multiqueue device one can argue that each queue is a
-          "subdevice" of the physical device. The fact that we lump them
-          all together today is not an argument against that.
-
-       B) Requires extra storage in the PCIe device and extra storage
-          per subdevice, queue to keep track of the interrupts which
-          are associated to it.
-
-    2) Exposure of VFIO interrupts via sysfs
-
-       A) Just works
-
-       B) Requires extra mechanisms to expose it
-
-    3) On demand expansion of the vectors for VFIO
-
-       A) Just works because the device has an irqdomain assigned.
-
-       B) Requires extra indirections to do that
-
-    4) IOMMU msi_desc::dev
-
-       A) I think that's reasonably simple to address by having the
-          relationship to the underlying PCIe device stored in struct
-          device, which is not really adding any complexity to the IOMMU
-          code.
-
-          Quite the contrary it could be used to make the DMA aliasing a
-          problem of device setup time and not a lookup per interrupt
-          allocation in the IOMMU code.
-
-       B) No change required.
-
-    4) PASID
-
-       While an Intel IDXD specific issue, it want's to be solved
-       without any nasty hacks.
-
-       A) Having a "subdevice" allows to associate the PASID with the
-          underlying struct device which makes IOMMU integration trivial
-
-       B) Needs some other custom hackery to get that solved
-
-So both variants come with their ups and downs.
-
-IMO A) is the right thing to do when looking at all the involved moving
-pieces.
-
-> It would be very odd for the PCI driver to allocate interrupts from
-> some random external struct device when it is creating queues on the
-> PCI device.
-
-No. That's not what I want.
-
->> and then have a store index for each allocation domain. With the
->> proposed encapsulation of the xarray handling that's definitely
->> feasible. Whether that buys much is a different question. Let me think
->> about it some more.
+> On Tue, Nov 30 2021 at 20:17, Jason Gunthorpe wrote:
+>> On Tue, Nov 30, 2021 at 10:23:16PM +0100, Thomas Gleixner wrote:
+>>> The real problem is where to store the MSI descriptors because the PCI
+>>> device has its own real PCI/MSI-X interrupts which means it still shares
+>>> the storage space.
+>> Er.. I never realized that just looking at the patches :|
+>>
+>> That is relevant to all real "IMS" users. IDXD escaped this because
+>> it, IMHO, wrongly used the mdev with the IRQ layer. The mdev is purely
+>> a messy artifact of VFIO, it should not be required to make the IRQ
+>> layers work.
+>> I don't think it makes sense that the msi_desc would point to a mdev,
+>> the iommu layer consumes the msi_desc_to_dev(), it really should point
+>> to the physical device that originates the message with a proper
+>> iommu ops/data/etc.
+> Looking at the device slices as subdevices with their own struct device
+> makes a lot of sense from the conceptual level. That makes is pretty
+> much obvious to manage the MSIs of those devices at this level like we
+> do for any other device.
 >
-> Any possibility that the 'IMS' xarray could be outside the struct
-> device?
+> Whether mdev is the right encapsulation for these subdevices is an
+> orthogonal problem.
+>
+> I surely agree that msi_desc::dev is an interesting question, but we
+> already have this disconnect of msi_desc::dev and DMA today due to DMA
+> aliasing. I haven't looked at that in detail yet, but of course the
+> alias handling is substantially different accross the various IOMMU
+> implementations.
+>
+> Though I fear there is also a use case for MSI-X and IMS tied to the
+> same device. That network card you are talking about might end up using
+> MSI-X for a control block and then IMS for the actual network queues
+> when it is used as physical function device as a whole, but that's
+> conceptually a different case.
 
-We could, but we really want to keep things tied to devices which is the
-right thing to do.
+Hi Thomas. This is actually the IDXD usage for a mediated device passed 
+to a guest kernel when we plumb the pass through of IMS to the guest 
+rather than doing previous implementation of having a MSIX vector on 
+guest backed by IMS. The control block for the mediated device is 
+emulated and therefore an emulated MSIX vector will be surfaced as 
+vector 0. However the queues will backed by IMS vectors. So we end up 
+needing MSIX and IMS coexist running on the guest kernel for the same 
+device.
 
-Thanks,
+DJ
 
-        tglx
+>
+>>> I'm currently tending to partition the index space in the xarray:
+>>>
+>>>   0x00000000 - 0x0000ffff          PCI/MSI-X
+>>>   0x00010000 - 0x0001ffff          NTB
+>> It is OK, with some xarray work it can be range allocating & reserving
+>> so that the msi_domain_alloc_irqs() flows can carve out chunks of the
+>> number space..
+>>
+>> Another view is the msi_domain_alloc_irqs() flows should have their
+>> own xarrays..
+> Yes, I was thinking about that as well. The trivial way would be:
+>
+>      struct xarray     store[MSI_MAX_STORES];
+>
+> and then have a store index for each allocation domain. With the
+> proposed encapsulation of the xarray handling that's definitely
+> feasible. Whether that buys much is a different question. Let me think
+> about it some more.
+>
+>>> which is feasible now with the range modifications and way simpler to do
+>>> with xarray than with the linked list.
+>> Indeed!
+> I'm glad you like the approach.
+>
+> Thanks,
+>
+>          tglx
+>
+>
