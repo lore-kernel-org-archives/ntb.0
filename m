@@ -1,252 +1,147 @@
-Return-Path: <tglx@linutronix.de>
-Received: from galois.linutronix.de (Galois.linutronix.de. [193.142.43.55])
-        by gmr-mx.google.com with ESMTPS id l7si199840ilh.5.2021.12.02.14.31.13
+Return-Path: <jgg@nvidia.com>
+Received: from NAM11-BN8-obe.outbound.protection.outlook.com ([40.107.236.58])
+        by gmr-mx.google.com with ESMTPS id i17si125331ila.3.2021.12.02.12.00.21
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 02 Dec 2021 14:31:13 -0800 (PST)
-From: Thomas Gleixner <tglx@linutronix.de>
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 02 Dec 2021 12:00:21 -0800 (PST)
+Date: Thu, 2 Dec 2021 16:00:17 -0400
+From: Jason Gunthorpe <jgg@nvidia.com>
 Subject: Re: [patch 21/32] NTB/msi: Convert to msi_on_each_desc()
-In-Reply-To: <20211202200017.GS4670@nvidia.com>
-References: <87o861banv.ffs@tglx> <20211201001748.GF4670@nvidia.com>
- <87mtlkaauo.ffs@tglx> <20211201130023.GH4670@nvidia.com>
- <87y2548byw.ffs@tglx> <20211201181406.GM4670@nvidia.com>
- <87mtlk84ae.ffs@tglx> <87r1av7u3d.ffs@tglx>
- <20211202135502.GP4670@nvidia.com> <87wnkm6c77.ffs@tglx>
- <20211202200017.GS4670@nvidia.com>
-Date: Thu, 02 Dec 2021 23:31:11 +0100
-Message-ID: <87o85y63m8.ffs@tglx>
+Message-ID: <20211202200017.GS4670@nvidia.com>
+References: <87o861banv.ffs@tglx>
+ <20211201001748.GF4670@nvidia.com>
+ <87mtlkaauo.ffs@tglx>
+ <20211201130023.GH4670@nvidia.com>
+ <87y2548byw.ffs@tglx>
+ <20211201181406.GM4670@nvidia.com>
+ <87mtlk84ae.ffs@tglx>
+ <87r1av7u3d.ffs@tglx>
+ <20211202135502.GP4670@nvidia.com>
+ <87wnkm6c77.ffs@tglx>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <87wnkm6c77.ffs@tglx>
+Return-Path: jgg@nvidia.com
 MIME-Version: 1.0
-Content-Type: text/plain
-To: Jason Gunthorpe <jgg@nvidia.com>
+To: Thomas Gleixner <tglx@linutronix.de>
 Cc: Logan Gunthorpe <logang@deltatee.com>, LKML <linux-kernel@vger.kernel.org>, Bjorn Helgaas <helgaas@kernel.org>, Marc Zygnier <maz@kernel.org>, Alex Williamson <alex.williamson@redhat.com>, Kevin Tian <kevin.tian@intel.com>, Megha Dey <megha.dey@intel.com>, Ashok Raj <ashok.raj@intel.com>, linux-pci@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com, linux-s390@vger.kernel.org, Heiko Carstens <hca@linux.ibm.com>, Christian Borntraeger <borntraeger@de.ibm.com>, x86@kernel.org, Joerg Roedel <jroedel@suse.de>, iommu@lists.linux-foundation.org
 List-ID: <linux-ntb.googlegroups.com>
 
-Jason,
+On Thu, Dec 02, 2021 at 08:25:48PM +0100, Thomas Gleixner wrote:
+> Jason,
+> 
+> On Thu, Dec 02 2021 at 09:55, Jason Gunthorpe wrote:
+> > On Thu, Dec 02, 2021 at 01:01:42AM +0100, Thomas Gleixner wrote:
+> >> On Wed, Dec 01 2021 at 21:21, Thomas Gleixner wrote:
+> >> > On Wed, Dec 01 2021 at 14:14, Jason Gunthorpe wrote:
+> >> > Which in turn is consistent all over the place and does not require any
+> >> > special case for anything. Neither for interrupts nor for anything else.
+> >> 
+> >> that said, feel free to tell me that I'm getting it all wrong.
+> >> 
+> >> The reason I'm harping on this is that we are creating ABIs on several
+> >> ends and we all know that getting that wrong is a major pain.
+> >
+> > I don't really like coupling the method to fetch IRQs with needing
+> > special struct devices. Struct devices have a sysfs presence and it is
+> > not always appropriate to create sysfs stuff just to allocate some
+> > IRQs.
+> >
+> > A queue is simply not a device, it doesn't make any sense. A queue is
+> > more like a socket().
+> 
+> Let's put the term 'device' for a bit please. 
+> 
+> > That said, we often have enough struct devices floating about to make
+> > this work. Between netdev/ib_device/aux device/mdev we can use them to
+> > do this.
+> >
+> > I think it is conceptual nonsense to attach an IMS IRQ domain to a
+> > netdev or a cdev, but it will solve this problem.
+> 
+> The IMS irqdomain is _NOT_ part of the netdev or cdev or whatever. I
+> explained that several times now.
+> 
+> We seem to have a serious problem of terminology and the understanding
+> of topology which is why we continue to talk past each other forever.
 
-On Thu, Dec 02 2021 at 16:00, Jason Gunthorpe wrote:
-> On Thu, Dec 02, 2021 at 08:25:48PM +0100, Thomas Gleixner wrote:
->> We seem to have a serious problem of terminology and the understanding
->> of topology which is why we continue to talk past each other forever.
->
-> I think I understand and agree with everything you said below.
+I think I understand and agree with everything you said below.
 
-Good!
+The point we diverge is where to put the vector storage:
+ 
+> Of course we can store them in pci_dev.dev.msi.data.store. Either with a
+> dedicated xarray or by partitioning the xarray space. Both have their
+> pro and cons.
 
-> The point we diverge is where to put the vector storage:
+This decision seems to drive the question of how many 'struct devices'
+do we need, and where do we get them..
 
-Kinda. The vector, i.e. message storage is either:
+> But what I really struggle with is how this is further represented when
+> the queues are allocated for VFIO, cdev, whatever usage.
 
-  - MSI entry in the PCI config space
-  - MSI-X table in the PCI config space
-  - Device specific IMS storage
+Yes, this seems to be the primary question
 
-The software representation aka struct msi_desc is a different
-story. That's what we are debating.
+> The fact that the irqdomain is instantiated by the device driver does
+> not make it any different. As explained above it's just an
+> implementation detail which makes it possible to handle the device
+> specific message storage requirement in a sane way. The actual interrupt
+> resources come still from the underlying irqdomains as for PCI/MSI.
 
->> Of course we can store them in pci_dev.dev.msi.data.store. Either with a
->> dedicated xarray or by partitioning the xarray space. Both have their
->> pro and cons.
->
-> This decision seems to drive the question of how many 'struct devices'
-> do we need, and where do we get them..
+Yes! This is not under debate
 
-Not really. There is nothing what enforces to make the MSI irqdomain
-storage strictly hang off struct device. There has to be a connection to
-a struct device in some way obviously to make IOMMU happy.
+> Now I was looking for a generic representation of such a container and
+> my initial reaction was to bind it to a struct device, which also makes
+> it trivial to store these MSI descriptors in that struct device.
 
->> Such a logical function would be the entity to hand out for VFIO or
->> cdev.
->
-> What is a logical function, concretely?
+Right, I've been trying to argue around just this choice.
+ 
+> I can understand your resistance against that to some extent, but I
+> think we really have to come up with a proper abstract representation
+> for these.
 
-That's a name I came up with for a abstract representation of such a
-queue container. I came up with that as a obvious consequence of my
-previous reasoning about PF -> VF -> XF.
+Ok
 
-> Does it have struct device?
+> Such a logical function would be the entity to hand out for VFIO or
+> cdev.
 
-It does not necessarily have to .
+What is a logical function, concretely? 
 
-> Can I instead suggest a name like 'message interrupt table' ?
+Does it have struct device?
 
-Well yes, but that's not what I meant. See below.
+Can I instead suggest a name like 'message interrupt table' ?
 
-> Ie a device has two linearly indexed message interrupt tables - the
-> PCI SIG defined MSI/MSI-X one created by the PCI core and the IMS one
-> created by the driver.
->
-> Both start at 0 index and they have different irq_domains.
->
-> Instead of asking the driver to create a domain we ask the driver to
-> create a new 'message interrupt table'. The driver provides the
-> irq_chip to program the messages and the pci_device. The core code
-> manages the irq domain setup.
->
-> Using what you say below:
->
->> If this is not split out, then every driver and wrapper has to come up
->> with it's own representation of this instead of being able to do:
->> 
->>      request_irq(msi_get_virq(lfunc, idx=0), handler0, ...);
->>      request_irq(msi_get_virq(lfunc, idx=1), handler1, ...);
->
-> We could say:
->   msi_get_virq(device.pci_msi_table, index=0)
->
-> Is the 0th PCI SIG MSI vector
->
-> Something like:
->
->  ims_table = pci_create_msi_table(pci_dev, my_irq_chip,..)
->  msi_get_virq(ims_table, index=0)
+Ie a device has two linearly indexed message interrupt tables - the
+PCI SIG defined MSI/MSI-X one created by the PCI core and the IMS one
+created by the driver.
 
-Which is pretty much a wrapper around two different irqdomains for the
-device and either partitioned index space in the xarray or two xarrays.
+Both start at 0 index and they have different irq_domains.
 
-Just badly named because the table itself is where the resulting message
-is stored, which is composed with the help of the relevant MSI
-descriptor. See above.
+Instead of asking the driver to create a domain we ask the driver to
+create a new 'message interrupt table'. The driver provides the
+irq_chip to program the messages and the pci_device. The core code
+manages the irq domain setup.
 
-We really should not try to make up an artifical table representation
-for something which does not necessarily have a table at all, i.e. the
-devices you talk about which store the message in queue specific system
-memory. Pretending that this is a table is just silly.
+Using what you say below:
 
-Also I disagree that this has to be tied to a PCI specific interface,
-except for creating a PCI specific wrapper for it to not make a driver
-developer have to write '&pdev->dev', which is the very least of our
-problems.
+> If this is not split out, then every driver and wrapper has to come up
+> with it's own representation of this instead of being able to do:
+> 
+>      request_irq(msi_get_virq(lfunc, idx=0), handler0, ...);
+>      request_irq(msi_get_virq(lfunc, idx=1), handler1, ...);
 
-IMS as a technical concept is absolutely not PCI specific at all and not
-invented by PCI/SIG. It's a marketing brandname for something which
-existed way before they thought about it: Message signaled interrupts.
+We could say:
+  msi_get_virq(device.pci_msi_table, index=0)
 
-Aside of that 'my_irq_chip' does not cut it at all because of the way
-how the resulting messages are stored. IDXD has IOMEM storage and a
-storage space limitation while your device uses system memory storage
-and has other limitations, i.e. system memory and the number of queues
-the device can provide.
+Is the 0th PCI SIG MSI vector
 
-An irqchip is a just set of functions to talk to hardware either
-directly or via some indirect transport (I2C, SPI, MLX queue management
-magic...). These functions require irqdomain and/or device specific
-information to function.
+Something like:
 
-Trying to create a universal pci_create_foo() wrapper around this is
-going to be like the 13th Herkulean task.
+ ims_table = pci_create_msi_table(pci_dev, my_irq_chip,..)
+ msi_get_virq(ims_table, index=0)
 
-Seriously, you cannot make something uniform which is by definition
-non-uniform.
+Is the 0th IMS vector
 
-Let's not even try to pretend that it is possible.
+Is it close to what you are thinking with lfunc?
 
-> Is the 0th IMS vector
->
-> Is it close to what you are thinking with lfunc?
-
-Not really. I was really reasoning about an abstract representation for
-a functional queue, which is more than just a queue allocated from the
-PF or VF device.
-
-I really meant a container like this:
-
-struct logical_function {
-        /* Pointer to the physical device */
-        struct device		*phys_device;
-        /* MSI descriptor storage */
-	struct msi_data		msi;
-        /* The queue number */
-        unsigned int		queue_nr;
-        /* Add more information which is common to these things */
-};
-
-Now the real queue, which is obviously not generic:
-
-struct myqueue_function {
-	struct logical_function lfunc;
-        struct myqueue		queue;
-};        
-
-The idea is to have a common representation for these type of things
-which allows:
-
- 1) Have common code for exposing queues to VFIO, cdev, sysfs...
-
-    You still need myqueue specific code, but the common stuff which is
-    in struct logical_function can be generic and device independent.
-
- 2) Having the MSI storage per logical function (queue) allows to have
-    a queue relative 0 based MSI index space.
-
-    The actual index in the physical table (think IMS) would be held in
-    the msi descriptor itself.
-
-`   Which then allows queue relative addressing without extra device/queue
-    specific meta storage.
-
-    i.e.
-
-        msi_get_virq(&myqueue->lfunc.msi, idx = 0)
-
-    v.s.
-
-        idx = myqueue->msidx[0];
-        msi_get_virq(pcidev->dev, idx);
-
-        where the queue management code has to set up myqueue->msidx[]
-        and stick the index of the underlying device storage into it.
-
- 3) Setup and teardown would be simply per logical function for
-    all of the related resources which are required.
-
-    Interrrupt teardown would look like this:
-
-      msi_domain_free_all_irqs(irqdomain, &lfunc->msi);
-
-    vs.
-
-      for (i = 0; i < myqueue->nrirqs; i++)
-           msi_domain_free_irq(irqdomain, &pcidev->dev, myqueue->msidx[0]);
-
-
-Now change struct logical_function to:
-
-struct logical_function {
--       /* Pointer to the physical device */
--       struct device		*phys_device;
-
-+       /* Pseudo device to allow using devres */
-+       struct pseudo_device	pseudo_device;
-
-	/* MSI descriptor storage */
-	struct msi_data		msi;
-        /* The queue number */
-        unsigned int		queue_nr;
-        /* Add more information which is common to these things */
-};
-
-where struct pseudo_device holds the phys_device pointer and then you
-can utilize the devres infrastructure like you do for any other device
-and do:
-
-      pseudo_device_add(&myqueue->lfunc.pseudo_device);
-
-at setup time and
-
-      pseudo_device_remove(&myqueue->lfunc.pseudo_device);
-
-on teardown and let all the resources including MSI interrupts be
-released automatically.
-
-Needs some infrastructure obviously, but to me that makes a lot of
-sense.
-
-And I named it pseudo_device on purpose as it is just a vehicle to make
-existing infrastructure which is device specific usable for this kind of
-thing.
-
-I might be completely off track. Feel free to tell me so :)
-
-Thanks,
-
-        tglx
+Regards,
+Jason
