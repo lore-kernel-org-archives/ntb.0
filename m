@@ -1,407 +1,387 @@
 Return-Path: <tglx@linutronix.de>
 Received: from galois.linutronix.de (Galois.linutronix.de. [193.142.43.55])
-        by gmr-mx.google.com with ESMTPS id c15si867178lfv.8.2021.12.06.14.51.53
+        by gmr-mx.google.com with ESMTPS id x20si564385wrg.3.2021.12.06.14.51.51
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 06 Dec 2021 14:51:53 -0800 (PST)
-Message-ID: <20211206210749.280627070@linutronix.de>
+        Mon, 06 Dec 2021 14:51:51 -0800 (PST)
+Message-ID: <20211206210749.224917330@linutronix.de>
 From: Thomas Gleixner <tglx@linutronix.de>
-Subject: [patch V2 31/31] genirq/msi: Convert storage to xarray
+Subject: [patch V2 30/31] genirq/msi: Simplify sysfs handling
 References: <20211206210600.123171746@linutronix.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Date: Mon,  6 Dec 2021 23:51:52 +0100 (CET)
+Date: Mon,  6 Dec 2021 23:51:50 +0100 (CET)
 To: LKML <linux-kernel@vger.kernel.org>
 Cc: Bjorn Helgaas <helgaas@kernel.org>, Marc Zygnier <maz@kernel.org>, Alex Williamson <alex.williamson@redhat.com>, Kevin Tian <kevin.tian@intel.com>, Jason Gunthorpe <jgg@nvidia.com>, Megha Dey <megha.dey@intel.com>, Ashok Raj <ashok.raj@intel.com>, linux-pci@vger.kernel.org, Cedric Le Goater <clg@kaod.org>, xen-devel@lists.xenproject.org, Juergen Gross <jgross@suse.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Niklas Schnelle <schnelle@linux.ibm.com>, linux-s390@vger.kernel.org, Heiko Carstens <hca@linux.ibm.com>, Christian Borntraeger <borntraeger@de.ibm.com>, Logan Gunthorpe <logang@deltatee.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com
 List-ID: <linux-ntb.googlegroups.com>
 
-The current linked list storage for MSI descriptors is suboptimal in
-several ways:
+The sysfs handling for MSI is a convoluted maze and it is in the way of
+supporting dynamic expansion of the MSI-X vectors because it only supports
+a one off bulk population/free of the sysfs entries.
 
-  1) Looking up a MSI desciptor requires a O(n) list walk in the worst case
+Change it to do:
 
-  2) The upcoming support of runtime expansion of MSI-X vectors would need
-     to do a full list walk to figure out whether a particular index is
-     already associated.
+   1) Creating an empty sysfs attribute group when msi_device_data is
+      allocated
 
-  3) Runtime expansion of sparse allocations is even more complex as the
-     current implementation assumes an ordered list (increasing MSI index).
+   2) Populate the entries when the MSI descriptor is initialized
 
-Use an xarray which solves all of the above problems nicely.
+   3) Free the entries when a MSI descriptor is detached from a Linux
+      interrupt.
+
+   4) Provide functions for the legacy non-irqdomain fallback code to
+      do a bulk population/free. This code won't support dynamic
+      expansion.
+
+This makes the code simpler and reduces the number of allocations as the
+empty attribute group can be shared.
 
 Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
 Reviewed-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 ---
- include/linux/msi.h |   13 +---
- kernel/irq/msi.c    |  169 +++++++++++++++++++++++-----------------------------
- 2 files changed, 83 insertions(+), 99 deletions(-)
+ include/linux/msi.h |    8 +-
+ kernel/irq/msi.c    |  196 +++++++++++++++++++++++-----------------------------
+ 2 files changed, 95 insertions(+), 109 deletions(-)
 
 --- a/include/linux/msi.h
 +++ b/include/linux/msi.h
-@@ -17,6 +17,7 @@
-  */
+@@ -72,7 +72,7 @@ struct irq_data;
+ struct msi_desc;
+ struct pci_dev;
+ struct platform_msi_priv_data;
+-struct attribute_group;
++struct device_attribute;
  
- #include <linux/cpumask.h>
-+#include <linux/xarray.h>
- #include <linux/mutex.h>
- #include <linux/list.h>
- #include <linux/bits.h>
-@@ -124,7 +125,6 @@ struct pci_msi_desc {
- 
- /**
-  * struct msi_desc - Descriptor structure for MSI based interrupts
-- * @list:	List head for management
-  * @irq:	The base interrupt number
-  * @nvec_used:	The number of vectors used
+ void __get_cached_msi_msg(struct msi_desc *entry, struct msi_msg *msg);
+ #ifdef CONFIG_GENERIC_MSI_IRQ
+@@ -130,6 +130,7 @@ struct pci_msi_desc {
   * @dev:	Pointer to the device which uses this descriptor
-@@ -141,7 +141,6 @@ struct pci_msi_desc {
-  */
- struct msi_desc {
- 	/* Shared device/bus type independent data */
--	struct list_head		list;
- 	unsigned int			irq;
- 	unsigned int			nvec_used;
- 	struct device			*dev;
-@@ -177,16 +176,16 @@ enum msi_desc_filter {
+  * @msg:	The last set MSI message cached for reuse
+  * @affinity:	Optional pointer to a cpu affinity mask for this descriptor
++ * @sysfs_attr:	Pointer to sysfs device attribute
+  *
+  * @write_msi_msg:	Callback that may be called when the MSI message
+  *			address or data changes
+@@ -149,6 +150,9 @@ struct msi_desc {
+ #ifdef CONFIG_IRQ_MSI_IOMMU
+ 	const void			*iommu_cookie;
+ #endif
++#ifdef CONFIG_SYSFS
++	struct device_attribute		*sysfs_attrs;
++#endif
+ 
+ 	void (*write_msi_msg)(struct msi_desc *entry, void *data);
+ 	void *write_msi_msg_data;
+@@ -172,7 +176,6 @@ enum msi_desc_filter {
+ /**
   * msi_device_data - MSI per device data
   * @properties:		MSI properties which are interesting to drivers
+- * @attrs:		Pointer to the sysfs attribute group
   * @platform_data:	Platform-MSI specific data
-- * @list:		List of MSI descriptors associated to the device
-- * @mutex:		Mutex protecting the MSI list
-- * @__next:		Cached pointer to the next entry for iterators
-+ * @mutex:		Mutex protecting the MSI descriptor store
-+ * @__store:		Xarray for storing MSI descriptor pointers
-+ * @__iter_idx:		Index to search the next entry for iterators
+  * @list:		List of MSI descriptors associated to the device
+  * @mutex:		Mutex protecting the MSI list
+@@ -180,7 +183,6 @@ enum msi_desc_filter {
   */
  struct msi_device_data {
  	unsigned long			properties;
+-	const struct attribute_group    **attrs;
  	struct platform_msi_priv_data	*platform_data;
--	struct list_head		list;
+ 	struct list_head		list;
  	struct mutex			mutex;
--	struct msi_desc			*__next;
-+	struct xarray			__store;
-+	unsigned long			__iter_idx;
- };
- 
- int msi_setup_device_data(struct device *dev);
 --- a/kernel/irq/msi.c
 +++ b/kernel/irq/msi.c
-@@ -20,7 +20,6 @@
+@@ -19,6 +19,7 @@
+ 
  #include "internals.h"
  
- static inline int msi_sysfs_create_group(struct device *dev);
--#define dev_to_msi_list(dev)	(&(dev)->msi.data->list)
++static inline int msi_sysfs_create_group(struct device *dev);
+ #define dev_to_msi_list(dev)	(&(dev)->msi.data->list)
  
  /**
-  * msi_alloc_desc - Allocate an initialized msi_desc
-@@ -41,7 +40,6 @@ static struct msi_desc *msi_alloc_desc(s
- 	if (!desc)
- 		return NULL;
- 
--	INIT_LIST_HEAD(&desc->list);
- 	desc->dev = dev;
- 	desc->nvec_used = nvec;
- 	if (affinity) {
-@@ -60,6 +58,17 @@ static void msi_free_desc(struct msi_des
- 	kfree(desc);
- }
- 
-+static int msi_insert_desc(struct msi_device_data *md, struct msi_desc *desc, unsigned int index)
-+{
+@@ -202,6 +203,7 @@ static void msi_device_data_release(stru
+ int msi_setup_device_data(struct device *dev)
+ {
+ 	struct msi_device_data *md;
 +	int ret;
-+
-+	desc->msi_index = index;
-+	ret = xa_insert(&md->__store, index, desc, GFP_KERNEL);
-+	if (ret)
-+		msi_free_desc(desc);
-+	return ret;
-+}
-+
- /**
-  * msi_add_msi_desc - Allocate and initialize a MSI descriptor
-  * @dev:	Pointer to the device for which the descriptor is allocated
-@@ -77,12 +86,9 @@ int msi_add_msi_desc(struct device *dev,
- 	if (!desc)
+ 
+ 	if (dev->msi.data)
+ 		return 0;
+@@ -210,6 +212,12 @@ int msi_setup_device_data(struct device
+ 	if (!md)
  		return -ENOMEM;
  
--	/* Copy the MSI index and type specific data to the new descriptor. */
--	desc->msi_index = init_desc->msi_index;
-+	/* Copy type specific data to the new descriptor. */
- 	desc->pci = init_desc->pci;
--
--	list_add_tail(&desc->list, &dev->msi.data->list);
--	return 0;
-+	return msi_insert_desc(dev->msi.data, desc, init_desc->msi_index);
++	ret = msi_sysfs_create_group(dev);
++	if (ret) {
++		devres_free(md);
++		return ret;
++	}
++
+ 	INIT_LIST_HEAD(&md->list);
+ 	mutex_init(&md->mutex);
+ 	dev->msi.data = md;
+@@ -379,6 +387,20 @@ unsigned int msi_get_virq(struct device
+ EXPORT_SYMBOL_GPL(msi_get_virq);
+ 
+ #ifdef CONFIG_SYSFS
++static struct attribute *msi_dev_attrs[] = {
++	NULL
++};
++
++static const struct attribute_group msi_irqs_group = {
++	.name	= "msi_irqs",
++	.attrs	= msi_dev_attrs,
++};
++
++static inline int msi_sysfs_create_group(struct device *dev)
++{
++	return devm_device_add_group(dev, &msi_irqs_group);
++}
++
+ static ssize_t msi_mode_show(struct device *dev, struct device_attribute *attr,
+ 			     char *buf)
+ {
+@@ -388,97 +410,74 @@ static ssize_t msi_mode_show(struct devi
+ 	return sysfs_emit(buf, "%s\n", is_msix ? "msix" : "msi");
  }
  
- /**
-@@ -95,28 +101,41 @@ int msi_add_msi_desc(struct device *dev,
-  */
- static int msi_add_simple_msi_descs(struct device *dev, unsigned int index, unsigned int ndesc)
+-/**
+- * msi_populate_sysfs - Populate msi_irqs sysfs entries for devices
+- * @dev:	The device(PCI, platform etc) who will get sysfs entries
+- */
+-static const struct attribute_group **msi_populate_sysfs(struct device *dev)
++static void msi_sysfs_remove_desc(struct device *dev, struct msi_desc *desc)
  {
--	struct msi_desc *desc, *tmp;
--	LIST_HEAD(list);
--	unsigned int i;
-+	unsigned int idx, last = index + ndesc - 1;
+-	const struct attribute_group **msi_irq_groups;
+-	struct attribute **msi_attrs, *msi_attr;
+-	struct device_attribute *msi_dev_attr;
+-	struct attribute_group *msi_irq_group;
+-	struct msi_desc *entry;
+-	int ret = -ENOMEM;
+-	int num_msi = 0;
+-	int count = 0;
++	struct device_attribute *attrs = desc->sysfs_attrs;
+ 	int i;
+ 
+-	/* Determine how many msi entries we have */
+-	msi_for_each_desc(entry, dev, MSI_DESC_ALL)
+-		num_msi += entry->nvec_used;
+-	if (!num_msi)
+-		return NULL;
++	if (!attrs)
++		return;
+ 
+-	/* Dynamically create the MSI attributes for the device */
+-	msi_attrs = kcalloc(num_msi + 1, sizeof(void *), GFP_KERNEL);
+-	if (!msi_attrs)
+-		return ERR_PTR(-ENOMEM);
+-
+-	msi_for_each_desc(entry, dev, MSI_DESC_ALL) {
+-		for (i = 0; i < entry->nvec_used; i++) {
+-			msi_dev_attr = kzalloc(sizeof(*msi_dev_attr), GFP_KERNEL);
+-			if (!msi_dev_attr)
+-				goto error_attrs;
+-			msi_attrs[count] = &msi_dev_attr->attr;
+-
+-			sysfs_attr_init(&msi_dev_attr->attr);
+-			msi_dev_attr->attr.name = kasprintf(GFP_KERNEL, "%d",
+-							    entry->irq + i);
+-			if (!msi_dev_attr->attr.name)
+-				goto error_attrs;
+-			msi_dev_attr->attr.mode = 0444;
+-			msi_dev_attr->show = msi_mode_show;
+-			++count;
+-		}
++	desc->sysfs_attrs = NULL;
++	for (i = 0; i < desc->nvec_used; i++) {
++		if (attrs[i].show)
++			sysfs_remove_file_from_group(&dev->kobj, &attrs[i].attr, msi_irqs_group.name);
++		kfree(attrs[i].attr.name);
+ 	}
++	kfree(attrs);
++}
+ 
+-	msi_irq_group = kzalloc(sizeof(*msi_irq_group), GFP_KERNEL);
+-	if (!msi_irq_group)
+-		goto error_attrs;
+-	msi_irq_group->name = "msi_irqs";
+-	msi_irq_group->attrs = msi_attrs;
+-
+-	msi_irq_groups = kcalloc(2, sizeof(void *), GFP_KERNEL);
+-	if (!msi_irq_groups)
+-		goto error_irq_group;
+-	msi_irq_groups[0] = msi_irq_group;
++static int msi_sysfs_populate_desc(struct device *dev, struct msi_desc *desc)
++{
++	struct device_attribute *attrs;
++	int ret, i;
+ 
+-	ret = sysfs_create_groups(&dev->kobj, msi_irq_groups);
+-	if (ret)
+-		goto error_irq_groups;
++	attrs = kcalloc(desc->nvec_used, sizeof(*attrs), GFP_KERNEL);
++	if (!attrs)
++		return -ENOMEM;
++
++	desc->sysfs_attrs = attrs;
++	for (i = 0; i < desc->nvec_used; i++) {
++		sysfs_attr_init(&attrs[i].attr);
++		attrs[i].attr.name = kasprintf(GFP_KERNEL, "%d", desc->irq + i);
++		if (!attrs[i].attr.name) {
++			ret = -ENOMEM;
++			goto fail;
++		}
+ 
+-	return msi_irq_groups;
++		attrs[i].attr.mode = 0444;
++		attrs[i].show = msi_mode_show;
+ 
+-error_irq_groups:
+-	kfree(msi_irq_groups);
+-error_irq_group:
+-	kfree(msi_irq_group);
+-error_attrs:
+-	count = 0;
+-	msi_attr = msi_attrs[count];
+-	while (msi_attr) {
+-		msi_dev_attr = container_of(msi_attr, struct device_attribute, attr);
+-		kfree(msi_attr->name);
+-		kfree(msi_dev_attr);
+-		++count;
+-		msi_attr = msi_attrs[count];
++		ret = sysfs_add_file_to_group(&dev->kobj, &attrs[i].attr, msi_irqs_group.name);
++		if (ret) {
++			attrs[i].show = NULL;
++			goto fail;
++		}
+ 	}
+-	kfree(msi_attrs);
+-	return ERR_PTR(ret);
++	return 0;
++
++fail:
++	msi_sysfs_remove_desc(dev, desc);
++	return ret;
+ }
+ 
++#ifdef CONFIG_PCI_MSI_ARCH_FALLBACKS
+ /**
+  * msi_device_populate_sysfs - Populate msi_irqs sysfs entries for a device
+  * @dev:	The device (PCI, platform etc) which will get sysfs entries
+  */
+ int msi_device_populate_sysfs(struct device *dev)
+ {
+-	const struct attribute_group **group = msi_populate_sysfs(dev);
 +	struct msi_desc *desc;
 +	int ret;
  
- 	lockdep_assert_held(&dev->msi.data->mutex);
- 
--	for (i = 0; i < ndesc; i++) {
-+	for (idx = index; idx <= last; idx++) {
- 		desc = msi_alloc_desc(dev, 1, NULL);
- 		if (!desc)
-+			goto fail_mem;
-+		ret = msi_insert_desc(dev->msi.data, desc, idx);
+-	if (IS_ERR(group))
+-		return PTR_ERR(group);
+-	dev->msi.data->attrs = group;
++	msi_for_each_desc(desc, dev, MSI_DESC_ASSOCIATED) {
++		if (desc->sysfs_attrs)
++			continue;
++		ret = msi_sysfs_populate_desc(dev, desc);
 +		if (ret)
- 			goto fail;
--		desc->msi_index = index + i;
--		list_add_tail(&desc->list, &list);
- 	}
--	list_splice_tail(&list, &dev->msi.data->list);
++			return ret;
++	}
  	return 0;
- 
-+fail_mem:
-+	ret = -ENOMEM;
- fail:
--	list_for_each_entry_safe(desc, tmp, &list, list) {
--		list_del(&desc->list);
--		msi_free_desc(desc);
-+	msi_free_msi_descs_range(dev, MSI_DESC_NOTASSOCIATED, index, last);
-+	return ret;
-+}
-+
-+static bool msi_desc_match(struct msi_desc *desc, enum msi_desc_filter filter)
-+{
-+	switch (filter) {
-+	case MSI_DESC_ALL:
-+		return true;
-+	case MSI_DESC_NOTASSOCIATED:
-+		return !desc->irq;
-+	case MSI_DESC_ASSOCIATED:
-+		return !!desc->irq;
- 	}
--	return -ENOMEM;
-+	WARN_ON_ONCE(1);
-+	return false;
  }
  
- /**
-@@ -141,19 +160,17 @@ void msi_device_set_properties(struct de
- void msi_free_msi_descs_range(struct device *dev, enum msi_desc_filter filter,
- 			      unsigned int first_index, unsigned int last_index)
+@@ -489,28 +488,17 @@ int msi_device_populate_sysfs(struct dev
+  */
+ void msi_device_destroy_sysfs(struct device *dev)
  {
-+	struct xarray *xa = &dev->msi.data->__store;
+-	const struct attribute_group **msi_irq_groups = dev->msi.data->attrs;
+-	struct device_attribute *dev_attr;
+-	struct attribute **msi_attrs;
+-	int count = 0;
+-
+-	dev->msi.data->attrs = NULL;
+-	if (!msi_irq_groups)
+-		return;
++	struct msi_desc *desc;
+ 
+-	sysfs_remove_groups(&dev->kobj, msi_irq_groups);
+-	msi_attrs = msi_irq_groups[0]->attrs;
+-	while (msi_attrs[count]) {
+-		dev_attr = container_of(msi_attrs[count], struct device_attribute, attr);
+-		kfree(dev_attr->attr.name);
+-		kfree(dev_attr);
+-		++count;
+-	}
+-	kfree(msi_attrs);
+-	kfree(msi_irq_groups[0]);
+-	kfree(msi_irq_groups);
++	msi_for_each_desc(desc, dev, MSI_DESC_ALL)
++		msi_sysfs_remove_desc(dev, desc);
+ }
+-#endif
++#endif /* CONFIG_PCI_MSI_ARCH_FALLBACK */
++#else /* CONFIG_SYSFS */
++static inline int msi_sysfs_create_group(struct device *dev) { return 0; }
++static inline int msi_sysfs_populate_desc(struct device *dev, struct msi_desc *desc) { return 0; }
++static inline void msi_sysfs_remove_desc(struct device *dev, struct msi_desc *desc) { }
++#endif /* !CONFIG_SYSFS */
+ 
+ #ifdef CONFIG_GENERIC_MSI_IRQ_DOMAIN
+ static inline void irq_chip_write_msi_msg(struct irq_data *data,
+@@ -942,6 +930,12 @@ int __msi_domain_alloc_irqs(struct irq_d
+ 			ret = msi_init_virq(domain, virq + i, vflags);
+ 			if (ret)
+ 				return ret;
++
++			if (info->flags & MSI_FLAG_DEV_SYSFS) {
++				ret = msi_sysfs_populate_desc(dev, desc);
++				if (ret)
++					return ret;
++			}
+ 		}
+ 		allocated++;
+ 	}
+@@ -986,18 +980,7 @@ int msi_domain_alloc_irqs_descs_locked(s
+ 
+ 	ret = ops->domain_alloc_irqs(domain, dev, nvec);
+ 	if (ret)
+-		goto cleanup;
+-
+-	if (!(info->flags & MSI_FLAG_DEV_SYSFS))
+-		return 0;
+-
+-	ret = msi_device_populate_sysfs(dev);
+-	if (ret)
+-		goto cleanup;
+-	return 0;
+-
+-cleanup:
+-	msi_domain_free_irqs_descs_locked(domain, dev);
++		msi_domain_free_irqs_descs_locked(domain, dev);
+ 	return ret;
+ }
+ 
+@@ -1022,6 +1005,7 @@ int msi_domain_alloc_irqs(struct irq_dom
+ 
+ void __msi_domain_free_irqs(struct irq_domain *domain, struct device *dev)
+ {
++	struct msi_domain_info *info = domain->host_data;
+ 	struct irq_data *irqd;
  	struct msi_desc *desc;
-+	unsigned long idx;
+ 	int i;
+@@ -1036,6 +1020,8 @@ void __msi_domain_free_irqs(struct irq_d
+ 		}
+ 
+ 		irq_domain_free_irqs(desc->irq, desc->nvec_used);
++		if (info->flags & MSI_FLAG_DEV_SYSFS)
++			msi_sysfs_remove_desc(dev, desc);
+ 		desc->irq = 0;
+ 	}
+ }
+@@ -1064,8 +1050,6 @@ void msi_domain_free_irqs_descs_locked(s
  
  	lockdep_assert_held(&dev->msi.data->mutex);
  
--	msi_for_each_desc(desc, dev, filter) {
--		/*
--		 * Stupid for now to handle MSI device domain until the
--		 * storage is switched over to an xarray.
--		 */
--		if (desc->msi_index < first_index || desc->msi_index > last_index)
--			continue;
--		list_del(&desc->list);
--		msi_free_desc(desc);
-+	xa_for_each_range(xa, idx, desc, first_index, last_index) {
-+		if (msi_desc_match(desc, filter)) {
-+			xa_erase(xa, idx);
-+			msi_free_desc(desc);
-+		}
- 	}
- }
- 
-@@ -186,7 +203,8 @@ static void msi_device_data_release(stru
- {
- 	struct msi_device_data *md = res;
- 
--	WARN_ON_ONCE(!list_empty(&md->list));
-+	WARN_ON_ONCE(!xa_empty(&md->__store));
-+	xa_destroy(&md->__store);
- 	dev->msi.data = NULL;
- }
- 
-@@ -218,7 +236,7 @@ int msi_setup_device_data(struct device
- 		return ret;
- 	}
- 
--	INIT_LIST_HEAD(&md->list);
-+	xa_init(&md->__store);
- 	mutex_init(&md->mutex);
- 	dev->msi.data = md;
- 	devres_add(dev, md);
-@@ -245,34 +263,21 @@ void msi_unlock_descs(struct device *dev
- {
- 	if (WARN_ON_ONCE(!dev->msi.data))
- 		return;
--	/* Clear the next pointer which was cached by the iterator */
--	dev->msi.data->__next = NULL;
-+	/* Invalidate the index wich was cached by the iterator */
-+	dev->msi.data->__iter_idx = MSI_MAX_INDEX;
- 	mutex_unlock(&dev->msi.data->mutex);
- }
- EXPORT_SYMBOL_GPL(msi_unlock_descs);
- 
--static bool msi_desc_match(struct msi_desc *desc, enum msi_desc_filter filter)
--{
--	switch (filter) {
--	case MSI_DESC_ALL:
--		return true;
--	case MSI_DESC_NOTASSOCIATED:
--		return !desc->irq;
--	case MSI_DESC_ASSOCIATED:
--		return !!desc->irq;
--	}
--	WARN_ON_ONCE(1);
--	return false;
--}
--
--static struct msi_desc *msi_find_first_desc(struct device *dev, enum msi_desc_filter filter)
-+static struct msi_desc *msi_find_desc(struct msi_device_data *md, enum msi_desc_filter filter)
- {
- 	struct msi_desc *desc;
- 
--	list_for_each_entry(desc, dev_to_msi_list(dev), list) {
-+	xa_for_each_start(&md->__store, md->__iter_idx, desc, md->__iter_idx) {
- 		if (msi_desc_match(desc, filter))
- 			return desc;
- 	}
-+	md->__iter_idx = MSI_MAX_INDEX;
- 	return NULL;
- }
- 
-@@ -289,37 +294,24 @@ static struct msi_desc *msi_find_first_d
-  */
- struct msi_desc *msi_first_desc(struct device *dev, enum msi_desc_filter filter)
- {
--	struct msi_desc *desc;
-+	struct msi_device_data *md = dev->msi.data;
- 
--	if (WARN_ON_ONCE(!dev->msi.data))
-+	if (WARN_ON_ONCE(!md))
- 		return NULL;
- 
--	lockdep_assert_held(&dev->msi.data->mutex);
-+	lockdep_assert_held(&md->mutex);
- 
--	desc = msi_find_first_desc(dev, filter);
--	dev->msi.data->__next = desc ? list_next_entry(desc, list) : NULL;
--	return desc;
-+	md->__iter_idx = 0;
-+	return msi_find_desc(md, filter);
- }
- EXPORT_SYMBOL_GPL(msi_first_desc);
- 
--static struct msi_desc *__msi_next_desc(struct device *dev, enum msi_desc_filter filter,
--					struct msi_desc *from)
--{
--	struct msi_desc *desc = from;
--
--	list_for_each_entry_from(desc, dev_to_msi_list(dev), list) {
--		if (msi_desc_match(desc, filter))
--			return desc;
--	}
--	return NULL;
--}
--
- /**
-  * msi_next_desc - Get the next MSI descriptor of a device
-  * @dev:	Device to operate on
-  *
-  * The first invocation of msi_next_desc() has to be preceeded by a
-- * successful incovation of __msi_first_desc(). Consecutive invocations are
-+ * successful invocation of __msi_first_desc(). Consecutive invocations are
-  * only valid if the previous one was successful. All these operations have
-  * to be done within the same MSI mutex held region.
-  *
-@@ -328,20 +320,18 @@ static struct msi_desc *__msi_next_desc(
-  */
- struct msi_desc *msi_next_desc(struct device *dev, enum msi_desc_filter filter)
- {
--	struct msi_device_data *data = dev->msi.data;
--	struct msi_desc *desc;
-+	struct msi_device_data *md = dev->msi.data;
- 
--	if (WARN_ON_ONCE(!data))
-+	if (WARN_ON_ONCE(!md))
- 		return NULL;
- 
--	lockdep_assert_held(&data->mutex);
-+	lockdep_assert_held(&md->mutex);
- 
--	if (!data->__next)
-+	if (md->__iter_idx >= (unsigned long)MSI_MAX_INDEX)
- 		return NULL;
- 
--	desc = __msi_next_desc(dev, filter, data->__next);
--	dev->msi.data->__next = desc ? list_next_entry(desc, list) : NULL;
--	return desc;
-+	md->__iter_idx++;
-+	return msi_find_desc(md, filter);
- }
- EXPORT_SYMBOL_GPL(msi_next_desc);
- 
-@@ -364,21 +354,18 @@ unsigned int msi_get_virq(struct device
- 	pcimsi = msi_device_has_property(dev, MSI_PROP_PCI_MSI);
- 
- 	msi_lock_descs(dev);
--	msi_for_each_desc(desc, dev, MSI_DESC_ASSOCIATED) {
--		/* PCI-MSI has only one descriptor for multiple interrupts. */
--		if (pcimsi) {
--			if (index < desc->nvec_used)
--				ret = desc->irq + index;
--			break;
--		}
--
-+	desc = xa_load(&dev->msi.data->__store, pcimsi ? 0 : index);
-+	if (desc && desc->irq) {
- 		/*
-+		 * PCI-MSI has only one descriptor for multiple interrupts.
- 		 * PCI-MSIX and platform MSI use a descriptor per
- 		 * interrupt.
- 		 */
--		if (desc->msi_index == index) {
-+		if (pcimsi) {
-+			if (index < desc->nvec_used)
-+				ret = desc->irq + index;
-+		} else {
- 			ret = desc->irq;
--			break;
- 		}
- 	}
- 	msi_unlock_descs(dev);
-@@ -759,16 +746,13 @@ int msi_domain_populate_irqs(struct irq_
- 	int ret, virq;
- 
- 	msi_lock_descs(dev);
--	for (virq = virq_base; virq < virq_base + nvec; virq++) {
--		desc = msi_alloc_desc(dev, 1, NULL);
--		if (!desc) {
--			ret = -ENOMEM;
--			goto fail;
--		}
-+	ret = msi_add_simple_msi_descs(dev, virq_base, nvec);
-+	if (ret)
-+		goto unlock;
- 
--		desc->msi_index = virq;
-+	for (virq = virq_base; virq < virq_base + nvec; virq++) {
-+		desc = xa_load(&dev->msi.data->__store, virq);
- 		desc->irq = virq;
--		list_add_tail(&desc->list, &dev->msi.data->list);
- 
- 		ops->set_desc(arg, desc);
- 		ret = irq_domain_alloc_irqs_hierarchy(domain, virq, 1, arg);
-@@ -784,6 +768,7 @@ int msi_domain_populate_irqs(struct irq_
- 	for (--virq; virq >= virq_base; virq--)
- 		irq_domain_free_irqs_common(domain, virq, 1);
- 	msi_free_msi_descs_range(dev, MSI_DESC_ALL, virq_base, virq_base + nvec - 1);
-+unlock:
- 	msi_unlock_descs(dev);
- 	return ret;
+-	if (info->flags & MSI_FLAG_DEV_SYSFS)
+-		msi_device_destroy_sysfs(dev);
+ 	ops->domain_free_irqs(domain, dev);
+ 	msi_domain_free_msi_descs(info, dev);
  }
 
