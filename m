@@ -1,14 +1,15 @@
 Return-Path: <jgg@nvidia.com>
-Received: from NAM11-CO1-obe.outbound.protection.outlook.com (mail-co1nam11on2053.outbound.protection.outlook.com. [40.107.220.53])
-        by gmr-mx.google.com with ESMTPS id f38si2049005qtb.3.2021.12.06.06.43.47
+Received: from NAM11-CO1-obe.outbound.protection.outlook.com (mail-co1nam11on2061.outbound.protection.outlook.com. [40.107.220.61])
+        by gmr-mx.google.com with ESMTPS id be25si1348191oib.3.2021.12.06.06.19.25
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 06 Dec 2021 06:43:48 -0800 (PST)
-Date: Mon, 6 Dec 2021 10:43:44 -0400
+        Mon, 06 Dec 2021 06:19:25 -0800 (PST)
+Date: Mon, 6 Dec 2021 10:19:22 -0400
 From: Jason Gunthorpe <jgg@nvidia.com>
 Subject: Re: [patch 21/32] NTB/msi: Convert to msi_on_each_desc()
-Message-ID: <20211206144344.GA4670@nvidia.com>
-References: <87r1av7u3d.ffs@tglx>
+Message-ID: <20211206141922.GZ4670@nvidia.com>
+References: <87mtlk84ae.ffs@tglx>
+ <87r1av7u3d.ffs@tglx>
  <20211202135502.GP4670@nvidia.com>
  <87wnkm6c77.ffs@tglx>
  <20211202200017.GS4670@nvidia.com>
@@ -17,198 +18,213 @@ References: <87r1av7u3d.ffs@tglx>
  <877dcl681d.ffs@tglx>
  <20211203164104.GX4670@nvidia.com>
  <87v9044fkb.ffs@tglx>
- <87o85v3znb.ffs@tglx>
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <87o85v3znb.ffs@tglx>
+In-Reply-To: <87v9044fkb.ffs@tglx>
 Return-Path: jgg@nvidia.com
 MIME-Version: 1.0
 To: Thomas Gleixner <tglx@linutronix.de>
-Cc: Logan Gunthorpe <logang@deltatee.com>, LKML <linux-kernel@vger.kernel.org>, Bjorn Helgaas <helgaas@kernel.org>, Marc Zygnier <maz@kernel.org>, Alex Williamson <alex.williamson@redhat.com>, Kevin Tian <kevin.tian@intel.com>, Megha Dey <megha.dey@intel.com>, Ashok Raj <ashok.raj@intel.com>, linux-pci@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com, linux-s390@vger.kernel.org, Heiko Carstens <hca@linux.ibm.com>, Christian Borntraeger <borntraeger@de.ibm.com>, x86@kernel.org, Joerg Roedel <jroedel@suse.de>, iommu@lists.linux-foundation.org, Kalle Valo <kvalo@codeaurora.org>
+Cc: Logan Gunthorpe <logang@deltatee.com>, LKML <linux-kernel@vger.kernel.org>, Bjorn Helgaas <helgaas@kernel.org>, Marc Zygnier <maz@kernel.org>, Alex Williamson <alex.williamson@redhat.com>, Kevin Tian <kevin.tian@intel.com>, Megha Dey <megha.dey@intel.com>, Ashok Raj <ashok.raj@intel.com>, linux-pci@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com, linux-s390@vger.kernel.org, Heiko Carstens <hca@linux.ibm.com>, Christian Borntraeger <borntraeger@de.ibm.com>, x86@kernel.org, Joerg Roedel <jroedel@suse.de>, iommu@lists.linux-foundation.org
 List-ID: <linux-ntb.googlegroups.com>
 
-On Sun, Dec 05, 2021 at 03:16:40PM +0100, Thomas Gleixner wrote:
-> On Sat, Dec 04 2021 at 15:20, Thomas Gleixner wrote:
-> > On Fri, Dec 03 2021 at 12:41, Jason Gunthorpe wrote:
-> > So I need to break that up in a way which caters for both cases, but
-> > does neither create a special case for PCI nor for the rest of the
-> > universe, i.e. the 1:1 case has to be a subset of the 1:2 case which
-> > means all of it is common case. With that solved the storage question
-> > becomes a nobrainer.
+On Sat, Dec 04, 2021 at 03:20:36PM +0100, Thomas Gleixner wrote:
+> Jason,
+> 
+> On Fri, Dec 03 2021 at 12:41, Jason Gunthorpe wrote:
+> > On Fri, Dec 03, 2021 at 04:07:58PM +0100, Thomas Gleixner wrote:
+> > Lets do a thought experiment, lets say we forget about the current PCI
+> > MSI API.
+
+I've read both your emails, and I'll make a few small remarks on this
+one, mainly to try to clearly communicate what I was thinking
+
+Just want to call out the above paragraph, not suggesting we do it,
+but the thought exercise of what should we do if not weighed down by
+endless engineering cruft is usually informative.
+
+> > What if it worked more like this:
 > >
-> > When I looked at it again yesterday while writing mail, I went back to
-> > my notes and found the loose ends where I left off. Let me go back and
-> > start over from there.
+> > probe()
+> >  // Access the real PCI SIG MSI/MSI-X table
+> >  mystruct->msi_table = pci_allocate_msi_table(pci_dev);
+> >
+> >  // Special interrupt 0
+> >  mstruct->desc0 = msi_table_alloc_vector(mystruct->msi_table, hw_label=0);
+> >  request_irq(mystruct->desc0, ..)
 > 
-> I found out why I stopped looking at it. I came from a similar point of
-> view what you were suggesting:
+> A device driver should not even know about msi_desc. Period.
+
+Here, this wasn't really about the msi_desc, it was just about some
+pointer-based handle. Call it what you will, and force it to be opaque
+to the drivers.
+
+eg this 'msi table' layer can just have a 
+
+struct msi_handle;
+
+In headers
+
+and in a C it can be:
+
+struct msi_handle {
+   struct msi_desc desc;
+};
+
+And achieve what you've asked for
+
+> >  - msi_table is a general API for accessing MSIs. Each bus type
+> >    would provide some kind of logical creation function for their
+> >    bus standardized MSI table type. eg MSI/MSI-X/etc
 > 
-> >> If IMS == MSI, then couldn't we conceptually have the dev->irqdomain
-> >> completely unable to handle IMS/MSI/MSI-X at all, and instead, when
-> >> the driver asks for PCI MSI access we create a new hierarchical
-> >> irqdomain and link it to a MSI chip_ops or a MSI-X chip_ops - just as
-> >> you outlined for IMS?  (again, not saying to do this, but let's ask if
-> >> that makes more sense than the current configuration)
+> You can't give up on that table thing, right? We just established that
+> for devices like yours IMS is not necessary a table and does not even
+> need the index. The fact that MSI-X uses a table does not make
+> everything a nail^Wtable. :)
+
+It is just a name for the idea of a handle to a device's MSI
+mechanism.
+
+Call it 'msi_hw' or something.
+
+My concept is that each device, integral to the device, has some ways
+to operate the device's MSI storage (MSI/MSI-X/IMS/Platform), so lets
+give that a name and give it a struct and an API. It is all still core
+code.
+
+Think of it as a clean separation between 'determining the addr/data
+pair' and 'writing the addr/data pair to HW'.
+
+Today you are thinking about this object as an irqdomain, irqchip, and
+msi xarray - I think?
+
+> >    It is a logical handle for the physical resource the holds the MSI
+> >    addr/data paris.
+> >
+> >  - Use a pointer instead of idx as the API for referring to a MSI
+> >    irq. Most drivers probably only use msi_desc->irq?
 > 
-> Which I shot down with:
-> 
-> > That's not really a good idea because dev->irqdomain is a generic
-> > mechanism and not restricted to the PCI use case. Special casing it for
-> > PCI is just wrong. Special casing it for all use cases just to please
-> > PCI is equally wrong. There is a world outside of PCI and x86. 
-> 
-> That argument is actually only partially correct.
+> No. pci_irq_vector() translates the hw index to linux irq number.  The
+> hardware index is known by the driver when it is doing a batched
+> allocation, right?
 
-I'm not sure I understood your reply? I think we are both agreeing
-that dev->irqdomain wants to be a generic mechanism?
+Yes
 
-I'd say that today we've special cased it to handle PCI. IMHO that is
-exactly what pci_msi_create_irq_domain() is doing - it replaces the
-chip ops with ops that can *ONLY* do PCI MSI and so dev->irqdomain
-becomes PCI only and non-generic.
+> I'm fine with using the info struct I described above as the reference
+> cookie.
 
-> After studying my notes and some more code (sigh), it looks feasible
-> under certain assumptions, constraints and consequences.
-> 
-> Assumptions:
-> 
->   1) The irqdomain pointer of PCI devices which is set up during device
->      discovery is not used by anything else than infrastructure which
->      knows how to handle it.
-> 
->      Of course there is no guarantee, but I'm not that horrified about
->      it anymore after chasing the exposure with yet more coccinelle
->      scripts.
-
-OK
-
-
-> Constraints:
-> 
->   1) This is strictly opt-in and depends on hierarchical irqdomains.
-
-OK
-
->      That means that devices which depend on IMS won't work on anything
->      which is not up to date.
-
-OK - I think any pressure to get platforms to update their code is
-only positive.
+IMHO an opaque pointer to refer to the MSI is cleaner
  
->   2) Guest support is strictly opt-in
+> >  - We do not have device->msi, it is held in the driver instead.
 > 
->      The underlying architecture/subarchitecture specific irqdomain has
->      to detect at setup time (eventually early boot), whether the
->      underlying hypervisor supports it.
+> No. First of all drivers have no business with that, really.
+
+I'm reading your second email and still not entirely clear what your
+thinking is for devices->msi?
+
+> >    dev->irqdomain is always the bus/platform originated irqdomain of
+> >    the physical device.
 > 
->      The only reasonable way to support that is the availability of
->      interrupt remapping via vIOMMU, as we discussed before.
+> This is a guarantee for subtle bugs and I'm not even remotely interested
+> going there. See also below.
 
-This is talking about IMS specifically because of the legacy issue
-where the MSI addr/data pair inside a guest is often completely fake?
+Not sure I follow this? My suggestion is that it is either as-is today
+or NULL and we don't try to use eg mdev->irqdomain for anything.
 
->   4) The resulting irqdomain hierarchy would ideally look like this:
+> >    Thus we break the 1:1 of the device and irqdomain. A device can
+> >    spawn many msi_tables, but only one would be on the dev->irqdomain
 > 
->      VECTOR -> [IOMMU, ROUTING, ...] -> PCI/[MSI/MSI-X/IMS] domains
+> Why are you trying brute force to push things into device drivers?
+> That's really the wrong direction. We want common infrastructure to be
+> managed by generic code. And all of this is about common infrastructure.
 
-OK, this matches where I have come from as well
+The driver needs some kind of handle to tell the core code what MSI
+'namespace' it is talking about in every API - eg MSI or IMS.
+
+Pointers are the usual way to make such a handle.
+
+Going along the IMS == MSI principle that says there should be a
+driver facing API with a pointer handle for the MSI and a pointer
+handle for the IMS.
+
+Yes, this means the existing API is some compat wrapper around a
+pointer API and would have to store the pointer handle in the device,
+but the idea would be to make that pci->dev ONLY for the compat API,
+not used in the IRQ infrastructure.
+
+> > Is it sane? What really needs device->msi anyhow?
+> 
+> device->msi is a container for interrupt management and that's done by
+> the interrupt code and not by random device drivers. Again, struct
+> msi_desc is a software construct which the interrupt core code and the
+> irqdomains and irq chip implementation use for various purposes. Nothing
+> outside of this realm has to even know about the fact that this data
+> structure exists in the first place. See below.
+
+I imagined that msi_desc remains as part of the interrupt core code
+and the 'msi_table' object is another interrupt core code object for
+dealing with device's MSI
+
+> > IMS is a logical progression of this concept:
+> >
+> > probe()
+> >    mystruct->msi_table = pci_allocate_msi_table(pci_dev);
+> >    mystruct->ims_irqdomain = <....>
+> >    mystruct->ims_table = msi_allocate_table(pci_dev->dev,  mystruct->ims_irqdomain ..)
+> >
+> >    // Use MSI
+> >    mystruct->desc0 = msi_table_alloc_vector(mystruct->msi_table, hw_label=0);
+> >    // Use IMS
+> >    mystruct->desc1 = msi_table_alloc_vector(mystruct->ims_table, hw_label=0);
+> >
+> > Not saying we can/should go out and just do something so radical, but
+> > as a thought experiment, can it guide toward a direction like this?
+> 
+> What I agree on is that the interface should be in a way that the driver
+> can:
+> 
+>  1) Allocate vectors at a given hardware index
+> 
+>  2) Allocate vectors within a given hardware index range
+> 
+>  3) The core returns the hardware index and the Linux irq number in
+>     a separate info structure which is independent of the interrupt
+>     stack internal data representations.
+
+Still slightly like an opaque pointer better than a two entry struct -
+but compat is compat..
+
+> Sure the driver can get a cookie of some sort to do allocation/free from
+> different resource pools, e.g. PCI-MSI[X] and IMS. But the internal data
+> representation management has to be done at the core level.
+
+And here I still see it in the core level - this 'msi table' is a core
+level data-structure and the opaque 'msi handle' is a core level
+data-structure
  
->      That does not work in all cases due to architecture and host
->      controller constraints, so we might end up with:
-> 
->            VECTOR -> IOMMU -> SHIM -> PCI/[MSI/MSI-X/IMS] domains
+We are just exposing a handle that the drive can use to. You are
+calling it a cooking, but IMHO using a cookie instead of a pointer
+seems obfuscating a bit?
 
-OK - I dont' know enough about the architecture/controller details to
-imagine what SHIM is, but if it allows keeping the PCI code as purely
-PCI code, then great
+> even try to make the irqchip/domain code mangled into the other device
+> code. It should create the irqdomain with the associated chip and that
+> creation process returns a cookie which is passed to the actual device
+> specific code. Allocation then can use that cookie and not the irqdomain
+> pointer itself.
 
->   5) The design rules for the device specific IMS irqdomains have to be
->      documented and enforced to the extent possible.
-> 
->      Rules which I have in my notes as of today:
-> 
->        - The device specific IMS irq chip / irqdomain has to be strictly
->          separated from the rest of the driver code and can only
->          interact via the irq chip data which is either per interrupt or
->          per device.
+Sounds like your cookie == my msi_table? Maybe we are all agreeing at
+this point then?
 
-It seems OK with the observaion that IDXD and mlx5 will both need to
-set 'per-interrupt' data before provisioning the IRQ
+> So thanks for being patient in educating me here.
 
->          I have some ideas how to enforce these things to go into
->          drivers/irqchip/ so they are exposed to scrutiny and not
->          burried in some "my device is special" driver code and applied
->          by subsystem maintainers before anyone can even look at it. 
-
-Means more modules, but OK
+I'm happy you got something out of all these words!
  
->        - The irqchip callbacks which can be implemented by these top
->          level domains are going to be restricted.
+> The fact that we will be able to support this at all is based on years
+> of cleanups, consolidation and restructuring of the infrastructure. The
+> result of doing this is that my trust in driver developers in that
+> regard is very close to zero. The cleanup patches I had to do for this
+> series just to solve the single irqdomain case did not help to elevate
+> the trust level either.
 
-OK - I think it is great that the driver will see a special ops struct
-that is 'ops for device's MSI addr/data pair storage'. It makes it
-really clear what it is
+Yes, it is amazing how many patches this is at already.
 
->        - For the irqchip callbacks which are allowed/required the rules
->          vs. following down the hierarchy need to be defined and
->          enforced.
-
-The driver should be the ultimate origin of the interrupt so it is
-always end-point in the hierarchy, opposite the CPU?
-
-I would hope the driver doesn't have an exposure to hierarchy?
- 
->        - To achieve that the registration interface will not be based on
->          struct irq_chip. This will be a new representation and the core
->          will convert that into a proper irq chip which fits into the
->          hierarchy. This provides one central place where the hierarchy
->          requirements can be handled as they depend on the underlying
->          MSI domain (IOMMU, SHIM, etc.). Otherwise any change on that
->          would require to chase the IMS irqchips all over the place.
-
-OK, I like this too.
-
-So we have a new concept: 'device MSI storage ops'
-
-Put them along with the xarray holding the msi_descs and you've got my
-msi_table :)
-
- 
->   2) The device centric storage concept will stay as it does not make
->      any sense to push it towards drivers and what's worse it would be a
->      major pain vs. the not yet up to the task irqdomains and the legacy
->      architecture backends to change that. I really have no interrest to
->      make the legacy code
-> 
->      It also makes sense because the interrupts are strictly tied to the
->      device. They cannot originate from some disconnected layer of thin
->      air.
-> 
->      Sorry Jason, no tables for you. :)
-
-How does the driver select with 'device MSI storage ops' it is
-requesting a MSI for ?
-
->   1) I'm going to post part 1-3 of the series once more with the fallout
->      and review comments addressed.
-
-OK, I didn't see anything in there that was making anything harder in
-this direction
- 
->   5) Implement an IMS user.
-> 
->      The obvious candidate which should be halfways accessible is the
->      ath11 PCI driver which falls into that category.
-
-Aiiee:
-
-drivers/net/wireless/ath/ath11k/pci.c:  ab_pci->msi_ep_base_data = msi_desc->msg.data;
-
-So, we already have two in-tree PCI IMS devices!!
-
-Agree this makes a lot of sense to focus on some first steps
-
-Along with NTB which is in the same general camp
-
-Thanksm
 Jason
