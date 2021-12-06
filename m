@@ -1,218 +1,143 @@
-Return-Path: <jgg@nvidia.com>
-Received: from NAM10-BN7-obe.outbound.protection.outlook.com (mail-bn7nam10on2079.outbound.protection.outlook.com. [40.107.92.79])
-        by gmr-mx.google.com with ESMTPS id y7si302329oon.2.2021.12.06.09.00.38
+Return-Path: <tglx@linutronix.de>
+Received: from galois.linutronix.de (Galois.linutronix.de. [2a0a:51c0:0:12e:550::1])
+        by gmr-mx.google.com with ESMTPS id 138si847125wme.0.2021.12.06.07.48.00
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 06 Dec 2021 09:00:38 -0800 (PST)
-Date: Mon, 6 Dec 2021 13:00:35 -0400
-From: Jason Gunthorpe <jgg@nvidia.com>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 06 Dec 2021 07:48:00 -0800 (PST)
+From: Thomas Gleixner <tglx@linutronix.de>
 Subject: Re: [patch 21/32] NTB/msi: Convert to msi_on_each_desc()
-Message-ID: <20211206170035.GJ4670@nvidia.com>
-References: <87wnkm6c77.ffs@tglx>
- <20211202200017.GS4670@nvidia.com>
- <87o85y63m8.ffs@tglx>
- <20211203003749.GT4670@nvidia.com>
- <877dcl681d.ffs@tglx>
- <20211203164104.GX4670@nvidia.com>
- <87v9044fkb.ffs@tglx>
- <87o85v3znb.ffs@tglx>
+In-Reply-To: <20211206144344.GA4670@nvidia.com>
+References: <87r1av7u3d.ffs@tglx> <20211202135502.GP4670@nvidia.com>
+ <87wnkm6c77.ffs@tglx> <20211202200017.GS4670@nvidia.com>
+ <87o85y63m8.ffs@tglx> <20211203003749.GT4670@nvidia.com>
+ <877dcl681d.ffs@tglx> <20211203164104.GX4670@nvidia.com>
+ <87v9044fkb.ffs@tglx> <87o85v3znb.ffs@tglx>
  <20211206144344.GA4670@nvidia.com>
- <87fsr54tw1.ffs@tglx>
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <87fsr54tw1.ffs@tglx>
-Return-Path: jgg@nvidia.com
+Date: Mon, 06 Dec 2021 16:47:58 +0100
+Message-ID: <87fsr54tw1.ffs@tglx>
 MIME-Version: 1.0
-To: Thomas Gleixner <tglx@linutronix.de>
+Content-Type: text/plain
+To: Jason Gunthorpe <jgg@nvidia.com>
 Cc: Logan Gunthorpe <logang@deltatee.com>, LKML <linux-kernel@vger.kernel.org>, Bjorn Helgaas <helgaas@kernel.org>, Marc Zygnier <maz@kernel.org>, Alex Williamson <alex.williamson@redhat.com>, Kevin Tian <kevin.tian@intel.com>, Megha Dey <megha.dey@intel.com>, Ashok Raj <ashok.raj@intel.com>, linux-pci@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com, linux-s390@vger.kernel.org, Heiko Carstens <hca@linux.ibm.com>, Christian Borntraeger <borntraeger@de.ibm.com>, x86@kernel.org, Joerg Roedel <jroedel@suse.de>, iommu@lists.linux-foundation.org, Kalle Valo <kvalo@codeaurora.org>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Mon, Dec 06, 2021 at 04:47:58PM +0100, Thomas Gleixner wrote:
+Jason,
 
-> >>        - The irqchip callbacks which can be implemented by these top
-> >>          level domains are going to be restricted.
-> >
-> > OK - I think it is great that the driver will see a special ops struct
-> > that is 'ops for device's MSI addr/data pair storage'. It makes it
-> > really clear what it is
-> 
-> It will need some more than that, e.g. mask/unmask and as we discussed
-> quite some time ago something like the irq_buslock/unlock pair, so you
-> can handle updates to the state from thread context via a command queue
-> (IIRC).
+On Mon, Dec 06 2021 at 10:43, Jason Gunthorpe wrote:
+> On Sun, Dec 05, 2021 at 03:16:40PM +0100, Thomas Gleixner wrote:
+>> > That's not really a good idea because dev->irqdomain is a generic
+>> > mechanism and not restricted to the PCI use case. Special casing it for
+>> > PCI is just wrong. Special casing it for all use cases just to please
+>> > PCI is equally wrong. There is a world outside of PCI and x86. 
+>> 
+>> That argument is actually only partially correct.
+>
+> I'm not sure I understood your reply? I think we are both agreeing
+> that dev->irqdomain wants to be a generic mechanism?
 
-Yes, I was thinking about all of that in here.
+Yes. I managed to confuse myself there by being too paranoid about how
+to distinguish things on platforms which need to support both ways, i.e.
+x86 when XEN is enabled.
 
-Let me ask a slightly different question
+> I'd say that today we've special cased it to handle PCI. IMHO that is
+> exactly what pci_msi_create_irq_domain() is doing - it replaces the
+> chip ops with ops that can *ONLY* do PCI MSI and so dev->irqdomain
+> becomes PCI only and non-generic.
 
-pci_msi_create_irq_domain() hooks into the platforms irq_chip as an
-alternative to hierarchical irq domains (?)
+Right. See above. That's why I went back to my notes, did some more
+research ...
 
-eg:
+>>   2) Guest support is strictly opt-in
+>> 
+>>      The underlying architecture/subarchitecture specific irqdomain has
+>>      to detect at setup time (eventually early boot), whether the
+>>      underlying hypervisor supports it.
+>> 
+>>      The only reasonable way to support that is the availability of
+>>      interrupt remapping via vIOMMU, as we discussed before.
+>
+> This is talking about IMS specifically because of the legacy issue
+> where the MSI addr/data pair inside a guest is often completely fake?
 
-		chip->irq_write_msi_msg = pci_msi_domain_write_msg;
+This is about IMS, right. PCI/MSI[x] is handled today because the writes
+to the MSI/MSI-X message store can be trapped.
 
-And we see:
+>>      That does not work in all cases due to architecture and host
+>>      controller constraints, so we might end up with:
+>> 
+>>            VECTOR -> IOMMU -> SHIM -> PCI/[MSI/MSI-X/IMS] domains
+>
+> OK - I dont' know enough about the architecture/controller details to
+> imagine what SHIM is, but if it allows keeping the PCI code as purely
+> PCI code, then great
 
-void pci_msi_domain_write_msg(struct irq_data *irq_data, struct msi_msg *msg)
-{
-	struct msi_desc *desc = irq_data_get_msi_desc(irq_data);
+It's today part of the arch/subarch specific PCI/MSI domain to deal with
+quirks above the IOMMU level. As we can't proliferate that into the new
+endpoint domain, that needs to be done as a shim layer in between which
+has no real other functionality than applying the quirks. Yes, it's all
+pretty. Welcome to my wonderful world.
 
-Now, if we have your idea to have some:
+>>        - The irqchip callbacks which can be implemented by these top
+>>          level domains are going to be restricted.
+>
+> OK - I think it is great that the driver will see a special ops struct
+> that is 'ops for device's MSI addr/data pair storage'. It makes it
+> really clear what it is
 
-struct msi_storage_ops {
-   write_msg
-   mask;
-   unmask;
-   lock;
-   unlock;
-};
+It will need some more than that, e.g. mask/unmask and as we discussed
+quite some time ago something like the irq_buslock/unlock pair, so you
+can handle updates to the state from thread context via a command queue
+(IIRC).
 
-Which is how a driver plugs in its storage operations.
+>>        - For the irqchip callbacks which are allowed/required the rules
+>>          vs. following down the hierarchy need to be defined and
+>>          enforced.
+>
+> The driver should be the ultimate origin of the interrupt so it is
+> always end-point in the hierarchy, opposite the CPU?
+>
+> I would hope the driver doesn't have an exposure to hierarchy?
 
-In almost all cases 'ops' will come along with a 'state', so lets
-create one:
+No.
+  
+> So we have a new concept: 'device MSI storage ops'
+>
+> Put them along with the xarray holding the msi_descs and you've got my
+> msi_table :)
 
-struct msi_storage {  // Look, I avoided the word table!
-   const struct msi_storage_ops *ops
-};
+Hehe.
+  
+>>      Sorry Jason, no tables for you. :)
+>
+> How does the driver select with 'device MSI storage ops' it is
+> requesting a MSI for ?
 
-ie:
+Via some cookie, reference whatever as discussed in the other
+mail. We'll bikeshed the naming once I get there :)
 
-struct msi_storage_ops {
-   void (*write_msg)(struct msi_storage *msi, struct msi_desc *desc, struct msi_msg *msg);
+>>   1) I'm going to post part 1-3 of the series once more with the fallout
+>>      and review comments addressed.
+>
+> OK, I didn't see anything in there that was making anything harder in
+> this direction
 
+It's helping to keep the existing stuff including the !irqdomain parts
+sufficiently self contained so I can actually change the inner workings
+of msi domains without going back to any of these places (hopefully).
+  
+>>   5) Implement an IMS user.
+>> 
+>>      The obvious candidate which should be halfways accessible is the
+>>      ath11 PCI driver which falls into that category.
+>
+> Aiiee:
 
-Now, what if we made a 'generic_msi_create_irq_domain()' that hooks
-the irq_chip with something like this:
+Yes.
 
-void generic_msi_domain_write_msg(struct irq_data *irq_data, struct msi_msg *msg)
-{
-	struct msi_desc *desc = irq_data_get_msi_desc(irq_data);
-	struct msi_storage *msi = desc->msi;
+> drivers/net/wireless/ath/ath11k/pci.c:  ab_pci->msi_ep_base_data = msi_desc->msg.data;
 
-	msi->ops->write_msg(msi, desc, msg);
-}
+That's only one part of it. Look how the address is retrieved.
 
-And then have what pci_msi_domain_write_msg() did now accomplished by
-having it set desc->storage to a pci_msi_storage or pci_msix_storage
-with those msi_storage_ops pointing at pci_msi_domain_write_msg/etc
+Thanks,
 
-Then we can transform:
-
-void __pci_write_msi_msg(struct msi_desc *entry, struct msi_msg *msg)
-{
-	struct pci_dev *dev = msi_desc_to_pci_dev(entry);
-
-into
-
-struct pci_msi_storage {
-        struct msi_storage storage;
-        struct pci_dev *dev;
-	unsigned int msi_cap_off;
-};
-
-void pci_write_msi64_msg(struct msi_storage *storage,  struct msi_desc *desc, struct msi_msg *msg)
-{
-	struct pci_msi_storage *msi = container_of(storage, struct pci_msi_storage, storage);
-	unsigned int pos = storage->msi_cap_off;
-	struct pci_dev *dev = msi->dev;
-
-	pci_read_config_word(dev, pos + PCI_MSI_FLAGS, &msgctl);
-	msgctl &= ~PCI_MSI_FLAGS_QSIZE;
-	msgctl |= desc->msi_attrib.multiple << 4;
-	pci_write_config_word(dev, pos + PCI_MSI_FLAGS, msgctl);
-
-	pci_write_config_dword(dev, pos + PCI_MSI_ADDRESS_LO, msg->address_lo);
-	pci_write_config_dword(dev, pos + PCI_MSI_ADDRESS_HI, msg->address_hi);
-	pci_write_config_word(dev, pos + PCI_MSI_DATA_64, msg->data);
-	/* Ensure that the writes are visible in the device */
-	pci_read_config_word(dev, pos + PCI_MSI_FLAGS, &msgctl);
-	desc->msg = *msg; // in core code instead ?
-}
-
-And others for the different cases. Look no ifs!
-
-OK?
-
-Now, we have some duplication between the struct msi_storage_ops and
-the struct irq_chip. Let's see what that is about:
-
-arch/x86/kernel/apic/msi.c:     .irq_write_msi_msg      = dmar_msi_write_msg,
-arch/x86/kernel/hpet.c: .irq_write_msi_msg = hpet_msi_write_msg,
-
-Surprised! These are actually IMS. The HPET and DMAR devices both have
-device-specific message storage! So these could use
-msi_storage_ops. And WTF is IOMMU DMAR driver code doing in
-apic/msi.c ???
-
-arch/powerpc/platforms/pseries/msi.c:   .irq_write_msi_msg      = pseries_msi_write_msg,
-
-AFAICT this is really like virtualization? The hypervisor is
-controlling the real MSI table and what the OS sees is faked out
-somewhat.
-
-This is more of quirk in the PCI MSI implementation (do not touch the
-storage) and a block on non-PCI uses of MSI similar to what x86 needs?
-
-drivers/irqchip/irq-gic-v2m.c:  .irq_write_msi_msg      = pci_msi_domain_write_msg,
-drivers/irqchip/irq-gic-v3-its-pci-msi.c:       .irq_write_msi_msg      = pci_msi_domain_write_msg,
-drivers/irqchip/irq-gic-v3-mbi.c:       .irq_write_msi_msg      = pci_msi_domain_write_msg,
-
-ARM seems to be replacing the 'mask at source' with 'mask at
-destination' - I wonder why?
-
-Should this really be hierarchical where we mask *both* the MSI
-originating device (storage_ops->mask) and at the CPU IRQ controller?
-(gicv2m_mask_msi_irq ?) if it can?
-
-drivers/base/platform-msi.c:            chip->irq_write_msi_msg = platform_msi_write_msg;
-
-Oh! this is doing what I kind of just suggested, just non-generically
-and hacked into platform bus drivers the same as PCI does:
-
-static void platform_msi_write_msg(struct irq_data *data, struct msi_msg *msg)
-{
-	struct msi_desc *desc = irq_data_get_msi_desc(data);
-	struct platform_msi_priv_data *priv_data;
-
-	priv_data = desc->platform.msi_priv_data;
-
-	priv_data->write_msg(desc, msg);
-}
-
-platform_msi entirely gets deleted. Instead all platform drivers using
-it will use IMS - set up a msi_storage_ops with
-storage_ops->write_msg == platform_msi_priv_data::write_msg and
-allocate a msi_storage someplace.
-
-So, at least at this first order, we could have world where the
-irq_chip does not overlap struct msi_storage_ops - ie we move the MSI
-related things from irq_chip to msi_storage_ops.
-
-Then, all the core code places calling into chip->[msi] would instead 
-find the msi_storage_op from the irq_data. ie like (or better)
-
-  irq_data->desc->storage->ops
-
-Now we have a real clear split of responsibility.
-
-The irq_domain hierarchy and irq_chip is all about classic wired
-interrupts and interrupt controller path after the device launches the
-message. For MSI it's job is to determine the addr/data.
-
-msi_storage_ops is all about interrupt origin points that can hold an
-addr/data pair. It's job is to store the addr/data into the device
-specific registers, do mask-at-source, locking etc.
-
-PCI, HPET, DMAR move to msi_storage_ops instead of using irq_chip
-
-Then you get what you asked at the start, the platform's irq_domain is
-now fully generic and can be 1:N to different MSI storage providers.
-
-For API compat every pci struct device will have to instantiate a
-msi_storage someplace, but that seems easy enough.
-
-Seems like a nice uniform solution?
-
-Jason
+        tglx
