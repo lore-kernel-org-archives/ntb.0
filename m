@@ -1,83 +1,59 @@
-Return-Path: <tglx@linutronix.de>
-Received: from galois.linutronix.de (Galois.linutronix.de. [2a0a:51c0:0:12e:550::1])
-        by gmr-mx.google.com with ESMTPS id e15si512809ljg.0.2021.12.09.00.37.07
+Return-Path: <kevin.tian@intel.com>
+Received: from mga07.intel.com (mga07.intel.com. [134.134.136.100])
+        by gmr-mx.google.com with ESMTPS id y8si264470lfj.0.2021.12.08.22.26.45
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 09 Dec 2021 00:37:08 -0800 (PST)
-From: Thomas Gleixner <tglx@linutronix.de>
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 08 Dec 2021 22:26:46 -0800 (PST)
+From: "Tian, Kevin" <kevin.tian@intel.com>
 Subject: RE: [patch 21/32] NTB/msi: Convert to msi_on_each_desc()
-In-Reply-To: <BN9PR11MB52765F2EF8420C60FD5945D18C709@BN9PR11MB5276.namprd11.prod.outlook.com>
-References: <20211126230957.239391799@linutronix.de>
- <20211126232735.547996838@linutronix.de>
- <7daba0e2-73a3-4980-c3a5-a71f6b597b22@deltatee.com> <874k7ueldt.ffs@tglx>
- <6ba084d6-2b26-7c86-4526-8fcd3d921dfd@deltatee.com> <87ilwacwp8.ffs@tglx>
- <d6f13729-1b83-fa7d-3f0d-98d4e3f7a2aa@deltatee.com> <87v909bf2k.ffs@tglx>
- <20211130202800.GE4670@nvidia.com> <87o861banv.ffs@tglx>
- <20211201001748.GF4670@nvidia.com> <87mtlkaauo.ffs@tglx>
- <8c2262ba-173e-0007-bc4c-94ec54b2847d@intel.com> <87pmqg88xq.ffs@tglx>
- <df00b87e-00dc-d998-8b64-46b16dba46eb@intel.com> <87k0go8432.ffs@tglx>
- <f4cc305b-a329-6d27-9fca-b74ebc9fa0c1@intel.com> <878rx480fk.ffs@tglx>
- <BN9PR11MB52765F2EF8420C60FD5945D18C709@BN9PR11MB5276.namprd11.prod.outlook.com>
-Date: Thu, 09 Dec 2021 09:37:06 +0100
-Message-ID: <87sfv2yy19.ffs@tglx>
+Date: Thu, 9 Dec 2021 06:26:38 +0000
+Message-ID: <BN9PR11MB52766CC46D3D4865308F61D98C709@BN9PR11MB5276.namprd11.prod.outlook.com>
+References: <87y2548byw.ffs@tglx> <20211201181406.GM4670@nvidia.com>
+ <87mtlk84ae.ffs@tglx> <87r1av7u3d.ffs@tglx>
+ <20211202135502.GP4670@nvidia.com> <87wnkm6c77.ffs@tglx>
+ <20211202200017.GS4670@nvidia.com> <87o85y63m8.ffs@tglx>
+ <20211203003749.GT4670@nvidia.com> <877dcl681d.ffs@tglx>
+ <20211203164104.GX4670@nvidia.com>
+In-Reply-To: <20211203164104.GX4670@nvidia.com>
+Content-Language: en-US
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Content-Type: text/plain
-To: "Tian, Kevin" <kevin.tian@intel.com>, "Jiang, Dave" <dave.jiang@intel.com>, Jason Gunthorpe <jgg@nvidia.com>
-Cc: Logan Gunthorpe <logang@deltatee.com>, LKML <linux-kernel@vger.kernel.org>, Bjorn Helgaas <helgaas@kernel.org>, Marc Zygnier <maz@kernel.org>, Alex Williamson <alex.williamson@redhat.com>, "Dey, Megha" <megha.dey@intel.com>, "Raj, Ashok" <ashok.raj@intel.com>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jon Mason <jdmason@kudzu.us>, Allen Hubbe <allenbh@gmail.com>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "linux-s390@vger.kernel.org" <linux-s390@vger.kernel.org>, Heiko Carstens <hca@linux.ibm.com>, Christian Borntraeger <borntraeger@de.ibm.com>, "x86@kernel.org" <x86@kernel.org>, Joerg Roedel <jroedel@suse.de>, "iommu@lists.linux-foundation.org" <iommu@lists.linux-foundation.org>
+Return-Path: kevin.tian@intel.com
+To: Jason Gunthorpe <jgg@nvidia.com>, Thomas Gleixner <tglx@linutronix.de>
+Cc: Logan Gunthorpe <logang@deltatee.com>, LKML <linux-kernel@vger.kernel.org>, Bjorn Helgaas <helgaas@kernel.org>, Marc
+ Zygnier <maz@kernel.org>, Alex Williamson <alex.williamson@redhat.com>, "Dey, Megha" <megha.dey@intel.com>, "Raj, Ashok" <ashok.raj@intel.com>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jon Mason <jdmason@kudzu.us>, "Jiang, Dave" <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "linux-s390@vger.kernel.org" <linux-s390@vger.kernel.org>, Heiko Carstens <hca@linux.ibm.com>, Christian Borntraeger <borntraeger@de.ibm.com>, "x86@kernel.org" <x86@kernel.org>, Joerg Roedel <jroedel@suse.de>, "iommu@lists.linux-foundation.org" <iommu@lists.linux-foundation.org>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Thu, Dec 09 2021 at 05:23, Kevin Tian wrote:
->> From: Thomas Gleixner <tglx@linutronix.de>
->> I don't see anything wrong with that. A subdevice is it's own entity and
->> VFIO can chose the most conveniant representation of it to the guest
->> obviously.
->> 
->> How that is backed on the host does not really matter. You can expose
->> MSI-X to the guest with a INTx backing as well.
->> 
->
-> Agree with this point. How the interrupts are represented to the guest
-> is orthogonal to how the backend resource is allocated. Physically MSI-X 
-> and IMS can be enabled simultaneously on an IDXD device. Once 
-> dynamic allocation is allowed for both, either one can be allocated for
-> a subdevice (with only difference on supported #subdevices). 
->
-> When an interrupt resource is exposed to the guest with the same type 
-> (e.g. MSI-on-MSI or IMS-on-IMS), it can be also passed through to the 
-> guest as long as a hypercall machinery is in place to get addr/data pair 
-> from the host (as you suggested earlier).
-
-As I pointed out in the conclusion of this thread, IMS is only going to
-be supported with interrupt remapping in place on both host and guest.
-
-As these devices are requiring a vIOMMU on the guest anyway (PASID, User
-IO page tables), the required hypercalls are part of the vIOMMU/IR
-implementation. If you look at it from the irqdomain hierarchy view:
-
-                         |- PCI-MSI
-  VECTOR -- [v]IOMMU/IR -|- PCI-MSI-X
-                         |- PCI-IMS
-
-So host and guest use just the same representation which makes a ton of
-sense.
-
-There are two places where this matters:
-
-  1) The activate() callback of the IR domain
-
-  2) The irq_set_affinity() callback of the irqchip associated with the
-     IR domain
-
-Both callbacks are allowed to fail and the error code is handed back to
-the originating call site.
-
-If you look at the above hierarchy view then MSI/MSI-X/IMS are all
-treated in exactly the same way. It all becomes the common case.
-
-No?
-
-Thanks,
-
-        tglx
-
-
+PiBGcm9tOiBKYXNvbiBHdW50aG9ycGUgPGpnZ0BudmlkaWEuY29tPg0KPiBTZW50OiBTYXR1cmRh
+eSwgRGVjZW1iZXIgNCwgMjAyMSAxMjo0MSBBTQ0KPiANCj4gPiBPciBoYXMgZWFjaCBxdWV1ZSBh
+bmQgY29udHJvbGJsb2NrIGFuZCB3aGF0ZXZlciBhY2Nlc3MgdG8gYSBzaGFyZWQgbGFyZ2UNCj4g
+PiBhcnJheSB3aGVyZSB0aGUgbWVzc2FnZXMgYXJlIHN0b3JlZCBhbmQgdGhlIGluZGljZXMgYXJl
+IGhhbmRlZCBvdXQgdG8NCj4gPiB0aGUgcXVldWVzIGFuZCBjb250cm9sYmxvY2tzPw0KPiANCj4g
+PiBJZiBlYWNoIG9mIHRoZW0gaGF2ZSB0aGVpciBvd24gc21hbGwgYXJyYXksIHRoZW4gcXVldWUg
+cmVsYXRpdmUgaW5kZXhpbmcNCj4gPiBtYWtlcyBhIHRvbiBvZiBzZW5zZSwgbm8/DQo+IA0KPiBP
+a2F5LCBJIHNlZS4NCj4gDQo+IEkgZG9uJ3Qga25vdyBvZiBhbnkgdXNlIGNhc2UgZm9yIG1vcmUg
+dGhhbiBvbmUgaW50ZXJydXB0IG9uIGEgcXVldWUsDQo+IGFuZCBpZiBpdCBkaWQgY29tZSB1cCBJ
+J2QgcHJvYmFibHkgYXBwcm9hY2ggaXQgYnkgbWFraW5nIHRoZSBxdWV1ZQ0KPiBoYW5kbGUgYWJv
+dmUgYWxzbyBzcGVjaWZ5IHRoZSAncXVldWUgcmVsYXRpdmUgSFcgaW5kZXgnDQo+IA0KDQpXZSBo
+YXZlIHN1Y2ggdXNlIGNhc2Ugd2l0aCBJRFhELg0KDQpCYXNpY2FsbHkgdGhlIElEWEQgcXVldWUg
+YWxsb3dzIHNvZnR3YXJlIHRvIHB1dCBhbiBpbnRlcnJ1cHQgaGFuZGxlDQoodGhlIGluZGV4IG9m
+IE1TSS1YIG9yIElNUyBlbnRyeSkgaW4gdGhlIHN1Ym1pdHRlZCBkZXNjcmlwdG9yLiBVcG9uDQpj
+b21wbGV0aW9uIG9mIHRoZSBkZXNjcmlwdG9yIHRoZSBoYXJkd2FyZSBmaW5kcyB0aGUgc3BlY2lm
+aWVkIGVudHJ5IA0KYW5kIHRoZW4gZ2VuZXJhdGUgaW50ZXJydXB0IHRvIG5vdGlmeSBzb2Z0d2Fy
+ZS4NCg0KQ29uY2VwdHVhbGx5IGRlc2NyaXB0b3JzIHN1Ym1pdHRlZCB0byBhIHNhbWUgcXVldWUg
+Y2FuIHVzZSBkaWZmZXJlbnQNCmhhbmRsZXMsIGltcGx5aW5nIG9uZSBxdWV1ZSBjYW4gYmUgYXNz
+b2NpYXRlZCB0byBtdWx0aXBsZSBpbnRlcnJ1cHRzLg0KDQpPbmUgZXhhbXBsZSBpcyB0aGUgc2hh
+cmVkIHdvcmsgcXVldWUgdXNhZ2Ugd2hpY2ggYWxsb3dzIG11bHRpcGxlIA0KY2xpZW50cyBkaXJl
+Y3RseSBhbmQgc2ltdWx0YW5lb3VzbHkgc3VibWl0dGluZyBkZXNjcmlwdG9ycyB0byB0aGUgDQpz
+YW1lIHF1ZXVlLCBieSB1c2luZyBFTlFDTUQocGFzaWQsIGRlc2NyaXB0b3IpIGluc3RydWN0aW9u
+LiBJbiB0aGlzIA0KY2FzZSBlYWNoIGNsaWVudCBjYW4gYmUgYWxsb2NhdGVkIHdpdGggYW4gaW50
+ZXJydXB0IGVudHJ5IChpbmNsdWRpbmcgdGhlDQppbmZvcm1hdGlvbiBhYm91dCB0aGUgY2xpZW50
+J3MgcGFzaWQgZm9yIHBlcm1pc3Npb24gY2hlY2sgd2hlbiB0aGUNCkhXIGdlbmVyYXRlcyBjb21w
+bGV0aW9uIGludGVycnVwdCkgYW5kIHRoZW4gdXNlIHRoaXMgZW50cnkgZm9yIA0KYWxsIGRlc2Ny
+aXB0b3JzIHN1Ym1pdHRlZCBieSB0aGF0IGNsaWVudC4NCg0KSGF2ZW4ndCBjb21wbGV0ZWQgcmVh
+ZGluZyBvZiB0aGlzIHRocmVhZCwgYnV0IHdvdWxkIGxpa2UgdG8gcG9pbnQgDQpvdXQgdGhpcyB1
+c2FnZSBzbyBpdCBpcyBub3QgaWdub3JlZCBpbiB0aGUgZmluYWwgcmV3b3JrLiBJdCBiYXNpY2Fs
+bHkNCm1lYW5zIG9uZSBxdWV1ZSBtaWdodCBiZSBhc3NvY2lhdGVkIHRvIG11bHRpcGxlIGludGVy
+cnVwdCBlbnRyaWVzDQphbmQgbXVsdGlwbGUgcGFzaWRzLiDwn5iKDQoNClRoYW5rcw0KS2V2aW4N
+Cg==
