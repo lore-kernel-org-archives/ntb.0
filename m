@@ -1,95 +1,75 @@
-Return-Path: <jgg@nvidia.com>
-Received: from NAM11-BN8-obe.outbound.protection.outlook.com (mail-bn8nam11on2081.outbound.protection.outlook.com. [40.107.236.81])
-        by gmr-mx.google.com with ESMTPS id pi11si995038pjb.2.2021.12.09.08.21.31
+Return-Path: <tglx@linutronix.de>
+Received: from galois.linutronix.de (Galois.linutronix.de. [2a0a:51c0:0:12e:550::1])
+        by gmr-mx.google.com with ESMTPS id y8si14926lfj.0.2021.12.09.07.57.43
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 09 Dec 2021 08:21:31 -0800 (PST)
-Date: Thu, 9 Dec 2021 12:21:29 -0400
-From: Jason Gunthorpe <jgg@nvidia.com>
-Subject: Re: [patch 21/32] NTB/msi: Convert to msi_on_each_desc()
-Message-ID: <20211209162129.GS6385@nvidia.com>
-References: <20211201001748.GF4670@nvidia.com>
- <87mtlkaauo.ffs@tglx>
- <8c2262ba-173e-0007-bc4c-94ec54b2847d@intel.com>
- <87pmqg88xq.ffs@tglx>
- <df00b87e-00dc-d998-8b64-46b16dba46eb@intel.com>
- <87k0go8432.ffs@tglx>
- <f4cc305b-a329-6d27-9fca-b74ebc9fa0c1@intel.com>
- <878rx480fk.ffs@tglx>
- <BN9PR11MB52765F2EF8420C60FD5945D18C709@BN9PR11MB5276.namprd11.prod.outlook.com>
- <87sfv2yy19.ffs@tglx>
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <87sfv2yy19.ffs@tglx>
-Return-Path: jgg@nvidia.com
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 09 Dec 2021 07:57:43 -0800 (PST)
+From: Thomas Gleixner <tglx@linutronix.de>
+Subject: RE: [patch 21/32] NTB/msi: Convert to msi_on_each_desc()
+In-Reply-To: <BN9PR11MB5276BDE2AC58ADA7A66CAFBA8C709@BN9PR11MB5276.namprd11.prod.outlook.com>
+References: <87y2548byw.ffs@tglx> <20211201181406.GM4670@nvidia.com>
+ <87mtlk84ae.ffs@tglx> <87r1av7u3d.ffs@tglx>
+ <20211202135502.GP4670@nvidia.com> <87wnkm6c77.ffs@tglx>
+ <20211202200017.GS4670@nvidia.com> <87o85y63m8.ffs@tglx>
+ <20211203003749.GT4670@nvidia.com> <877dcl681d.ffs@tglx>
+ <20211203164104.GX4670@nvidia.com>
+ <BN9PR11MB52766CC46D3D4865308F61D98C709@BN9PR11MB5276.namprd11.prod.outlook.com>
+ <87pmq6ywu3.ffs@tglx>
+ <BN9PR11MB5276BDE2AC58ADA7A66CAFBA8C709@BN9PR11MB5276.namprd11.prod.outlook.com>
+Date: Thu, 09 Dec 2021 16:57:41 +0100
+Message-ID: <87mtl9zs7e.ffs@tglx>
 MIME-Version: 1.0
-To: Thomas Gleixner <tglx@linutronix.de>
-Cc: "Tian, Kevin" <kevin.tian@intel.com>, "Jiang, Dave" <dave.jiang@intel.com>, Logan Gunthorpe <logang@deltatee.com>, LKML <linux-kernel@vger.kernel.org>, Bjorn Helgaas <helgaas@kernel.org>, Marc Zygnier <maz@kernel.org>, Alex Williamson <alex.williamson@redhat.com>, "Dey, Megha" <megha.dey@intel.com>, "Raj, Ashok" <ashok.raj@intel.com>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jon Mason <jdmason@kudzu.us>, Allen Hubbe <allenbh@gmail.com>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "linux-s390@vger.kernel.org" <linux-s390@vger.kernel.org>, Heiko Carstens <hca@linux.ibm.com>, Christian Borntraeger <borntraeger@de.ibm.com>, "x86@kernel.org" <x86@kernel.org>, Joerg Roedel <jroedel@suse.de>, "iommu@lists.linux-foundation.org" <iommu@lists.linux-foundation.org>
+Content-Type: text/plain
+To: "Tian, Kevin" <kevin.tian@intel.com>, Jason Gunthorpe <jgg@nvidia.com>
+Cc: Logan Gunthorpe <logang@deltatee.com>, LKML <linux-kernel@vger.kernel.org>, Bjorn Helgaas <helgaas@kernel.org>, Marc Zygnier <maz@kernel.org>, Alex Williamson <alex.williamson@redhat.com>, "Dey, Megha" <megha.dey@intel.com>, "Raj, Ashok" <ashok.raj@intel.com>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jon Mason <jdmason@kudzu.us>, "Jiang, Dave" <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, "linux-ntb@googlegroups.com" <linux-ntb@googlegroups.com>, "linux-s390@vger.kernel.org" <linux-s390@vger.kernel.org>, Heiko Carstens <hca@linux.ibm.com>, Christian Borntraeger <borntraeger@de.ibm.com>, "x86@kernel.org" <x86@kernel.org>, Joerg Roedel <jroedel@suse.de>, "iommu@lists.linux-foundation.org" <iommu@lists.linux-foundation.org>
 List-ID: <linux-ntb.googlegroups.com>
 
-On Thu, Dec 09, 2021 at 09:37:06AM +0100, Thomas Gleixner wrote:
-> On Thu, Dec 09 2021 at 05:23, Kevin Tian wrote:
-> >> From: Thomas Gleixner <tglx@linutronix.de>
-> >> I don't see anything wrong with that. A subdevice is it's own entity and
-> >> VFIO can chose the most conveniant representation of it to the guest
-> >> obviously.
-> >> 
-> >> How that is backed on the host does not really matter. You can expose
-> >> MSI-X to the guest with a INTx backing as well.
-> >> 
-> >
-> > Agree with this point. How the interrupts are represented to the guest
-> > is orthogonal to how the backend resource is allocated. Physically MSI-X 
-> > and IMS can be enabled simultaneously on an IDXD device. Once 
-> > dynamic allocation is allowed for both, either one can be allocated for
-> > a subdevice (with only difference on supported #subdevices). 
-> >
-> > When an interrupt resource is exposed to the guest with the same type 
-> > (e.g. MSI-on-MSI or IMS-on-IMS), it can be also passed through to the 
-> > guest as long as a hypercall machinery is in place to get addr/data pair 
-> > from the host (as you suggested earlier).
-> 
-> As I pointed out in the conclusion of this thread, IMS is only going to
-> be supported with interrupt remapping in place on both host and guest.
-> 
-> As these devices are requiring a vIOMMU on the guest anyway (PASID, User
-> IO page tables), the required hypercalls are part of the vIOMMU/IR
-> implementation. If you look at it from the irqdomain hierarchy view:
+On Thu, Dec 09 2021 at 12:17, Kevin Tian wrote:
+>> From: Thomas Gleixner <tglx@linutronix.de>
+>> I think you are looking at that from the internal implementation details
+>> of IDXD. But you can just model it in an IDXD implementation agnostic
+>> way:
+>> 
+>>      ENQCMD(PASID, IMS-ENTRY,.....)
+>
+> Not exactly IMS-ENTRY. MSI-ENTRY also works.
 
-It is true for IDXD, but mlx5 will work without a PASID or vIOMMU in a
-guest today, and there is no reason to imagine some future IMS would
-have any different device requirements from MSI-X.
+Sure.
 
-Though, vIOMMU operating in bypass mode seems like it is fine if it
-helps the solution.
+>> 
+>> implies an on demand allocation of a virtual queue, which is deallocated
+>> when the command completes. The PASID and IMS-ENTRY act as the 'queue'
+>> identifier.
+>> 
+>> The implementation detail of IDXD that it executes these computations on
+>> an internal shared workqueue does not change that.
+>> 
+>> Such a workqueue can only execute one enqueued command at a time,
+>> which
+>> means that during the execution of a particular command that IDXD
+>> internal workqueue represents the 'virtual queue' which is identified by
+>> the unique PASID/IMS-ENTRY pair.
+>
+> While it's one way of looking at this model do we want to actually
+> create some objects to represent this 'virtual queue' concept? that
+> implies each ENQCMD must be moderated to create such short-lifespan
+> objects and I'm not sure the benefit of doing so.
 
-> If you look at the above hierarchy view then MSI/MSI-X/IMS are all
-> treated in exactly the same way. It all becomes the common case.
+You don't have to create anything. The PASID/ENTRY pair represents that
+'virtual queue', right?
 
-Unfortunately in a guest they are not all the same - it is like the
-PPC code I saw messing with MSI today - MSI setup is a hypercall,
-either explicitly or implicitly by trapping device registers.
+> If not then from driver p.o.v it's still one queue resource and driver 
+> needs to manage its association with multiple interrupt entries and 
+> PASIDs when it's connected to multiple clients.
 
-So MSI is special compared to everything else because MSI has that
-hypervisor intrusion.
+That's correct, but there is nothing problematic with it. It's like
+allocating multiple interrupts for any other hardware device or
+subdevice, right?
 
-My ideal outcome would be to have the guest negotiate some new
-capability with the hypervisor where the guest promises to use new
-hypecalls to get addr/data pairs and the hypervisor removes all the
-emulation around the PCI MSI. Then MSI == IMS again and we can have
-everything treated in exactly the same way. Hypervisor doesn't care
-how the guest tells the origin device what the addr/data pair is.
+What's probably more interresting is how the PASID/interrupt/RID
+relations are managed.
 
-This moves the hypervisor trap to setup the interrupt remapping from
-the MSI emulation to the new hypercall.
+Thanks,
 
-If we keep the MSI emulation in the hypervisor then MSI != IMS.  The
-MSI code needs to write a addr/data pair compatible with the emulation
-and the IMS code needs to write an addr/data pair from the
-hypercall. Seems like this scenario is best avoided!
+        tglx
 
-From this perspective I haven't connected how virtual interrupt
-remapping helps in the guest? Is this a way to provide the hypercall
-I'm imagining above?
-
-Jason
