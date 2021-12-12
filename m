@@ -1,12 +1,12 @@
 Return-Path: <tglx@linutronix.de>
-Received: from galois.linutronix.de (Galois.linutronix.de. [2a0a:51c0:0:12e:550::1])
-        by gmr-mx.google.com with ESMTPS id e2si491057wre.5.2021.12.12.12.55.33
+Received: from galois.linutronix.de (Galois.linutronix.de. [193.142.43.55])
+        by gmr-mx.google.com with ESMTPS id a1si426458wrv.4.2021.12.12.12.50.42
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 12 Dec 2021 12:55:33 -0800 (PST)
+        Sun, 12 Dec 2021 12:50:42 -0800 (PST)
 From: Thomas Gleixner <tglx@linutronix.de>
 Subject: RE: [patch 21/32] NTB/msi: Convert to msi_on_each_desc()
-In-Reply-To: <BL1PR11MB5271326D39DAB692F07587768C739@BL1PR11MB5271.namprd11.prod.outlook.com>
+In-Reply-To: <BL1PR11MB5271BFC6B2218CF7E9151EE88C739@BL1PR11MB5271.namprd11.prod.outlook.com>
 References: <f4cc305b-a329-6d27-9fca-b74ebc9fa0c1@intel.com>
  <878rx480fk.ffs@tglx>
  <BN9PR11MB52765F2EF8420C60FD5945D18C709@BN9PR11MB5276.namprd11.prod.outlook.com>
@@ -14,12 +14,12 @@ References: <f4cc305b-a329-6d27-9fca-b74ebc9fa0c1@intel.com>
  <878rwtzfh1.ffs@tglx> <20211209205835.GZ6385@nvidia.com>
  <8735n1zaz3.ffs@tglx> <87sfv1xq3b.ffs@tglx>
  <BN9PR11MB527619B099061B3814EB40408C719@BN9PR11MB5276.namprd11.prod.outlook.com>
- <20211210123938.GF6385@nvidia.com> <87fsr0xp31.ffs@tglx>
- <BN9PR11MB527625E8A9BB854F3C0D19AE8C729@BN9PR11MB5276.namprd11.prod.outlook.com>
- <875yrvwavf.ffs@tglx>
- <BL1PR11MB5271326D39DAB692F07587768C739@BL1PR11MB5271.namprd11.prod.outlook.com>
-Date: Sun, 12 Dec 2021 21:55:32 +0100
-Message-ID: <87fsqxv8zf.ffs@tglx>
+ <20211210123938.GF6385@nvidia.com>
+ <BN9PR11MB5276B2584F928B4BFD4573428C729@BN9PR11MB5276.namprd11.prod.outlook.com>
+ <87lf0qvfze.ffs@tglx>
+ <BL1PR11MB5271BFC6B2218CF7E9151EE88C739@BL1PR11MB5271.namprd11.prod.outlook.com>
+Date: Sun, 12 Dec 2021 21:50:41 +0100
+Message-ID: <87ilvtv97i.ffs@tglx>
 MIME-Version: 1.0
 Content-Type: text/plain
 To: "Tian, Kevin" <kevin.tian@intel.com>, Jason Gunthorpe <jgg@nvidia.com>
@@ -29,22 +29,20 @@ List-ID: <linux-ntb.googlegroups.com>
 
 Kevin,
 
-On Sun, Dec 12 2021 at 01:56, Kevin Tian wrote:
+On Sun, Dec 12 2021 at 02:14, Kevin Tian wrote:
 >> From: Thomas Gleixner <tglx@linutronix.de>
->> All I can find is drivers/iommu/virtio-iommu.c but I can't find anything
->> vIR related there.
+> I just continue the thought practice along that direction to see what
+> the host flow will be like (step by step). Looking at the current 
+> implementation is just one necessary step in my thought practice to 
+> help refine the picture. When I found something which may be 
+> worth being aligned then I shared to avoid follow a wrong direction 
+> too far.
 >
-> Well, virtio-iommu is a para-virtualized vIOMMU implementations.
->
-> In reality there are also fully emulated vIOMMU implementations (e.g.
-> Qemu fully emulates Intel/AMD/ARM IOMMUs). In those configurations
-> the IR logic in existing iommu drivers just apply:
->
-> 	drivers/iommu/intel/irq_remapping.c
-> 	drivers/iommu/amd/iommu.c
+> If both of your think it simply adds noise to this discussion, I can
+> surely hold back and focus on 'concept' only.
 
-thanks for the explanation. So that's a full IOMMU emulation. I was more
-expecting a paravirtualized lightweight one.
+All good. We _want_ your participartion for sure. Comparing and
+contrasting it to the existing flow is fine.
 
 Thanks,
 
