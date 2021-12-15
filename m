@@ -1,41 +1,52 @@
-Return-Path: <logang@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [204.191.154.188])
-        by gmr-mx.google.com with ESMTPS id l22si246616ooe.0.2021.12.22.16.50.49
+Return-Path: <tglx@linutronix.de>
+Received: from galois.linutronix.de (Galois.linutronix.de. [2a0a:51c0:0:12e:550::1])
+        by gmr-mx.google.com with ESMTPS id o29si200919wms.1.2021.12.15.12.50.59
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 22 Dec 2021 16:50:49 -0800 (PST)
-References: <20211223004802.18184-1-rdunlap@infradead.org>
-From: Logan Gunthorpe <logang@deltatee.com>
-Message-ID: <db287ffb-0599-6d5a-bf03-fbaad19377ba@deltatee.com>
-Date: Wed, 22 Dec 2021 17:50:45 -0700
+        Wed, 15 Dec 2021 12:50:59 -0800 (PST)
+From: Thomas Gleixner <tglx@linutronix.de>
+Subject: Re: [patch V2 21/31] soc: ti: ti_sci_inta_msi: Rework MSI
+ descriptor allocation
+In-Reply-To: <20211206210748.737904583@linutronix.de>
+References: <20211206210600.123171746@linutronix.de>
+ <20211206210748.737904583@linutronix.de>
+Date: Wed, 15 Dec 2021 21:50:58 +0100
+Message-ID: <87a6h1r3rh.ffs@tglx>
 MIME-Version: 1.0
-In-Reply-To: <20211223004802.18184-1-rdunlap@infradead.org>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-CA
-Content-Transfer-Encoding: 7bit
-Subject: Re: [PATCH] ntb_hw_switchtec: fix the spelling of "its"
-To: Randy Dunlap <rdunlap@infradead.org>, linux-pci@vger.kernel.org
-Cc: Kurt Schwemmer <kurt.schwemmer@microsemi.com>, linux-ntb <linux-ntb@googlegroups.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>
+Content-Type: text/plain
+To: LKML <linux-kernel@vger.kernel.org>
+Cc: Bjorn Helgaas <helgaas@kernel.org>, Marc Zygnier <maz@kernel.org>, Alex Williamson <alex.williamson@redhat.com>, Kevin Tian <kevin.tian@intel.com>, Jason Gunthorpe <jgg@nvidia.com>, Megha Dey <megha.dey@intel.com>, Ashok Raj <ashok.raj@intel.com>, linux-pci@vger.kernel.org, Cedric Le Goater <clg@kaod.org>, xen-devel@lists.xenproject.org, Juergen Gross <jgross@suse.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Niklas Schnelle <schnelle@linux.ibm.com>, linux-s390@vger.kernel.org, Heiko Carstens <hca@linux.ibm.com>, Christian Borntraeger <borntraeger@de.ibm.com>, Logan Gunthorpe <logang@deltatee.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com, Nishanth Menon <nm@ti.com>
 List-ID: <linux-ntb.googlegroups.com>
 
+On Mon, Dec 06 2021 at 23:51, Thomas Gleixner wrote:
+>
+> No functional change intended.
 
+Famous last words.
 
-On 2021-12-22 5:48 p.m., Randy Dunlap wrote:
-> Use the possessive "its" instead of the contraction "it's" (it is)
-> in user messages.
-> 
-> Signed-off-by: Randy Dunlap <rdunlap@infradead.org>
-> Cc: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
-> Cc: Logan Gunthorpe <logang@deltatee.com>
-> 
+>  static int ti_sci_inta_msi_alloc_descs(struct device *dev,
+>  				       struct ti_sci_resource *res)
+>  {
+> -	struct msi_desc *msi_desc;
+> +	struct msi_desc msi_desc;
+>  	int set, i, count = 0;
+>  
+> +	memset(&msi_desc, 0, sizeof(msi_desc));
 
-Oh, yup, thanks!
+This fails to initialize msi_desc.nvec_used which makes the subsequent
+interrupt allocation fail. Delta fix below.
 
-Reviewed-by: Logan Gunthorpe <logang@deltatee.com>
+Thanks,
 
-Though this patch should have been sent to the NTB list as changes to
-that file go through there. (I've cced that list and the maintainer Jon,
-but the original patch might need a resend).
-
-Logan
-
+        tglx
+---
+--- a/drivers/soc/ti/ti_sci_inta_msi.c
++++ b/drivers/soc/ti/ti_sci_inta_msi.c
+@@ -68,6 +68,7 @@ static int ti_sci_inta_msi_alloc_descs(s
+ 	int set, i, count = 0;
+ 
+ 	memset(&msi_desc, 0, sizeof(msi_desc));
++	msi_desc.nvec_used = 1;
+ 
+ 	for (set = 0; set < res->sets; set++) {
+ 		for (i = 0; i < res->desc[set].num; i++, count++) {
