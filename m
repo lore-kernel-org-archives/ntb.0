@@ -1,52 +1,42 @@
-Return-Path: <Kelvin.Cao@microchip.com>
-Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com. [68.232.154.123])
-        by gmr-mx.google.com with ESMTPS id q2si170721ljc.0.2021.12.23.17.25.07
+Return-Path: <Sanju.Mehta@amd.com>
+Received: from NAM02-DM3-obe.outbound.protection.outlook.com (mail-dm3nam07on2082.outbound.protection.outlook.com. [40.107.95.82])
+        by gmr-mx.google.com with ESMTPS id 8926c6da1cb9f-2faa6b53fbfsi1061383173.1.2021.12.17.01.56.41
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 23 Dec 2021 17:25:08 -0800 (PST)
-From: Kelvin Cao <kelvin.cao@microchip.com>
-Subject: [PATCH 1/6] ntb_hw_switchtec: Fix pff ioread to read into mmio_part_cfg_all
-Date: Thu, 23 Dec 2021 17:23:29 -0800
-Message-ID: <20211224012334.89173-2-kelvin.cao@microchip.com>
-In-Reply-To: <20211224012334.89173-1-kelvin.cao@microchip.com>
-References: <20211224012334.89173-1-kelvin.cao@microchip.com>
+        Fri, 17 Dec 2021 01:56:41 -0800 (PST)
+From: Sanjay R Mehta <sanju.mehta@amd.com>
+Subject: [PATCH] ntb_hw_amd: Add NTB PCI ID for new gen CPU
+Date: Fri, 17 Dec 2021 03:56:20 -0600
+Message-ID: <1639734980-9748-1-git-send-email-sanju.mehta@amd.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-Path: kelvin.cao@microchip.com
-Content-Type: text/plain
-To: Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Logan Gunthorpe <logang@deltatee.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-pci@vger.kernel.org, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org
-Cc: Kelvin Cao <kelvin.cao@microchip.com>, kelvincao@outlook.com, Jeremy
- Pallotta <jmpallotta@gmail.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-Path: Sanju.Mehta@amd.com
+To: jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com, logang@deltatee.com
+Cc: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Sanjay R
+ Mehta <sanju.mehta@amd.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-From: Jeremy Pallotta <jmpallotta@gmail.com>
+Add NTB support for new generation of processor
 
-Array mmio_part_cfg_all holds the partition configuration of all
-partitions, with partition number as index. Fix this by reading into
-mmio_part_cfg_all for pff.
-
-Fixes: 0ee28f26f378 ("NTB: switchtec_ntb: Add link management")
-Signed-off-by: Jeremy Pallotta <jmpallotta@gmail.com>
-Signed-off-by: Kelvin Cao <kelvin.cao@microchip.com>
+Signed-off-by: Sanjay R Mehta <sanju.mehta@amd.com>
 ---
- drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/ntb/hw/amd/ntb_hw_amd.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-index 4c6eb61a6ac6..6603c77c0a84 100644
---- a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-+++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-@@ -419,8 +419,8 @@ static void switchtec_ntb_part_link_speed(struct switchtec_ntb *sndev,
- 					  enum ntb_width *width)
- {
- 	struct switchtec_dev *stdev = sndev->stdev;
--
--	u32 pff = ioread32(&stdev->mmio_part_cfg[partition].vep_pff_inst_id);
-+	u32 pff =
-+		ioread32(&stdev->mmio_part_cfg_all[partition].vep_pff_inst_id);
- 	u32 linksta = ioread32(&stdev->mmio_pff_csr[pff].pci_cap_region[13]);
- 
- 	if (speed)
+diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.c b/drivers/ntb/hw/amd/ntb_hw_amd.c
+index 87847c3..04550b1 100644
+--- a/drivers/ntb/hw/amd/ntb_hw_amd.c
++++ b/drivers/ntb/hw/amd/ntb_hw_amd.c
+@@ -1321,6 +1321,8 @@ static const struct ntb_dev_data dev_data[] = {
+ static const struct pci_device_id amd_ntb_pci_tbl[] = {
+ 	{ PCI_VDEVICE(AMD, 0x145b), (kernel_ulong_t)&dev_data[0] },
+ 	{ PCI_VDEVICE(AMD, 0x148b), (kernel_ulong_t)&dev_data[1] },
++	{ PCI_VDEVICE(AMD, 0x14c0), (kernel_ulong_t)&dev_data[1] },
++	{ PCI_VDEVICE(AMD, 0x14c3), (kernel_ulong_t)&dev_data[1] },
+ 	{ PCI_VDEVICE(HYGON, 0x145b), (kernel_ulong_t)&dev_data[0] },
+ 	{ 0, }
+ };
 -- 
-2.25.1
+2.7.4
 
