@@ -1,80 +1,51 @@
-Return-Path: <tglx@linutronix.de>
-Received: from galois.linutronix.de (Galois.linutronix.de. [2a0a:51c0:0:12e:550::1])
-        by gmr-mx.google.com with ESMTPS id w4si1899873pjr.3.2021.11.26.17.23.30
+Return-Path: <yang.lee@linux.alibaba.com>
+Received: from out30-56.freemail.mail.aliyun.com (out30-56.freemail.mail.aliyun.com. [115.124.30.56])
+        by gmr-mx.google.com with ESMTPS id k10si143046qko.0.2021.12.21.17.55.24
         for <linux-ntb@googlegroups.com>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 26 Nov 2021 17:23:30 -0800 (PST)
-Message-ID: <20211126230957.239391799@linutronix.de>
-From: Thomas Gleixner <tglx@linutronix.de>
-Subject: [patch 00/32] genirq/msi, PCI/MSI: Spring cleaning - Part 2
+        Tue, 21 Dec 2021 17:55:27 -0800 (PST)
+From: Yang Li <yang.lee@linux.alibaba.com>
+Subject: [PATCH next] NTB/msi: Fix ntbm_msi_request_threaded_irq() kernel-doc comment
+Date: Wed, 22 Dec 2021 09:55:13 +0800
+Message-Id: <20211222015513.23106-1-yang.lee@linux.alibaba.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Date: Sat, 27 Nov 2021 02:23:28 +0100 (CET)
-To: LKML <linux-kernel@vger.kernel.org>
-Cc: Bjorn Helgaas <helgaas@kernel.org>, Marc Zygnier <maz@kernel.org>, Alex Williamson <alex.williamson@redhat.com>, Kevin Tian <kevin.tian@intel.com>, Jason Gunthorpe <jgg@nvidia.com>, Megha Dey <megha.dey@intel.com>, Ashok Raj <ashok.raj@intel.com>, linux-pci@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-s390@vger.kernel.org, Heiko Carstens <hca@linux.ibm.com>, Christian Borntraeger <borntraeger@de.ibm.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com
+Content-Transfer-Encoding: 8bit
+To: jdmason@kudzu.us
+Cc: dave.jiang@intel.com, allenbh@gmail.com, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Yang Li <yang.lee@linux.alibaba.com>, Abaci Robot <abaci@linux.alibaba.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-VGhpcyBpcyB0aGUgdGhpcmQgcGFydCBvZiBbUENJXU1TSSByZWZhY3RvcmluZyB3aGljaCBhaW1z
-IHRvIHByb3ZpZGUgdGhlCmFiaWxpdHkgb2YgZXhwYW5kaW5nIE1TSS1YIHZlY3RvcnMgYWZ0ZXIg
-ZW5hYmxpbmcgTVNJLVguCgpUaGUgZmlyc3QgdHdvIHBhcnRzIG9mIHRoaXMgd29yayBjYW4gYmUg
-Zm91bmQgaGVyZToKCiAgICBodHRwczovL2xvcmUua2VybmVsLm9yZy9yLzIwMjExMTI2MjIyNzAw
-Ljg2MjQwNzk3N0BsaW51dHJvbml4LmRlCiAgICBodHRwczovL2xvcmUua2VybmVsLm9yZy9yLzIw
-MjExMTI2MjI0MTAwLjMwMzA0Njc0OUBsaW51dHJvbml4LmRlCgpUaGlzIHRoaXJkIHBhcnQgaGFz
-IHRoZSBmb2xsb3dpbmcgaW1wb3J0YW50IGNoYW5nZXM6CgogICAxKSBBZGQgbG9ja2luZyB0byBw
-cm90ZWN0IHRoZSBNU0kgZGVzY3JpcHRvciBzdG9yYWdlCgogICAgICBSaWdodCBub3cgdGhlIE1T
-SSBkZXNjcmlwdG9yIHN0b3JhZ2UgKGxpbmtlZCBsaXN0KSBpcyBub3QgcHJvdGVjdGVkCiAgICAg
-IGJ5IGFueXRoaW5nIHVuZGVyIHRoZSBhc3N1bXB0aW9uIHRoYXQgdGhlIGxpc3QgaXMgaW5zdGFs
-bGVkIGJlZm9yZQogICAgICB1c2UgYW5kIGRlc3Ryb3llZCBhZnRlciB1c2UuIEFzIHRoaXMgaXMg
-YWJvdXQgdG8gY2hhbmdlIHRoZXJlIGhhcyB0bwogICAgICBiZSBwcm90ZWN0aW9uCgogICAyKSBB
-IG5ldyBzZXQgb2YgaXRlcmF0b3JzIHdoaWNoIGFsbG93IGZpbHRlcmluZyBvbiB0aGUgc3RhdGUg
-b2YgdGhlCiAgICAgIGRlc2NyaXB0b3JzIG5hbWVseSB3aGV0aGVyIGEgZGVzY3JpcHRvciBpcyBh
-c3NvY2lhdGVkIHRvIGEgTGludXgKICAgICAgaW50ZXJydXB0IG9yIG5vdC4KCiAgICAgIFRoaXMg
-Y2xlYW5zIHVwIGEgbG90IG9mIHVzZSBjYXNlcyB3aGljaCBoYXZlIHRvIGRvIHRoaXMgZmlsdGVy
-aW5nCiAgICAgIG1hbnVhbGx5LgoKICAgMykgQSBuZXcgc2V0IG9mIE1TSSBkZXNjcmlwdG9yIGFs
-bG9jYXRpb24gZnVuY3Rpb25zIHdoaWNoIG1ha2UgdGhlIHVzYWdlCiAgICAgIHNpdGVzIHNpbXBs
-ZXIgYW5kIGNvbmZpbmUgdGhlIHN0b3JhZ2UgaGFuZGxpbmcgdG8gdGhlIGNvcmUgY29kZS4KCiAg
-ICAgIFRyaXZpYWwgTVNJIGRlc2NyaXB0b3JzIChub24gUENJKSBhcmUgbm93IGFsbG9jYXRlZCBi
-eSB0aGUgY29yZSBjb2RlCiAgICAgIGF1dG9tYXRpY2FsbHkgd2hlbiB0aGUgdW5kZXJseWluZyBp
-cnEgZG9tYWluIHJlcXVlc3RzIHRoYXQuCgogICA0KSBSZXdvcmsgb2Ygc3lzZnMgaGFuZGxpbmcg
-dG8gcHJlcGFyZSBmb3IgZHluYW1pYyBleHRlbnNpb24gb2YgTVNJLVgKCiAgICAgIFRoZSBjdXJy
-ZW50IG1lY2hhbmlzbSB3aGljaCBjcmVhdGVzIHRoZSBkaXJlY3RvcnkgYW5kIHRoZSBhdHRyaWJ1
-dGVzCiAgICAgIGZvciBhbGwgTVNJIGRlc2NyaXB0b3JzIGluIG9uZSBnbyBpcyBvYnZpb3VzbHkg
-bm90IHN1aXRhYmxlIGZvcgogICAgICBkeW5hbWljIGV4dGVuc2lvbi4gVGhlIHJld29yayBzcGxp
-dHMgdGhlIGRpcmVjdG9yeSBjcmVhdGlvbiBvdXQgYW5kCiAgICAgIGxldHMgdGhlIE1TSSBpbnRl
-cnJ1cHQgYWxsb2NhdGlvbiBjcmVhdGUgdGhlIHBlciBkZXNjcmlwdG9yCiAgICAgIGF0dHJpYnV0
-ZXMuCgogICA1KSBDb252ZXJzaW9uIG9mIHRoZSBNU0kgZGVzY3JpcHRvciBzdG9yYWdlIHRvIHhh
-cnJheQoKICAgICAgVGhlIGxpbmtlZCBsaXN0IGJhc2VkIHN0b3JhZ2UgaXMgc3Vib3B0aW1hbCBl
-dmVuIHdpdGhvdXQgZHluYW1pYwogICAgICBleHBhbnNpb24gYXMgaXQgcmVxdWlyZXMgZnVsbCBs
-aXN0IHdhbGtzIHRvIGdldCB0byBhIHNwZWNpZmljCiAgICAgIGRlc2NyaXB0b3IuIFdpdGggZHlu
-YW1pYyBleHBhbnNpb24gdGhpcyBnZXRzIGV2ZW4gbW9yZQogICAgICBjb252b2x1dGVkLiBYYXJy
-YXkgaXMgd2F5IG1vcmUgc3VpdGFibGUgYW5kIHNpbXBsaWZpZXMgdGhlCiAgICAgIGZpbmFsIGdv
-YWwgb2YgZHluYW1pYyBleHBhbnNpb24gb2YgdGhlIE1TSS1YIHNwYWNlLgoKVGhlIHNlcmllcyBp
-cyBiYXNlZCBvbjoKCiAgICAgZ2l0Oi8vZ2l0Lmtlcm5lbC5vcmcvcHViL3NjbS9saW51eC9rZXJu
-ZWwvZ2l0L3RnbHgvZGV2ZWwuZ2l0IG1zaS12MS1wYXJ0LTIKCmFuZCBhbHNvIGF2YWlsYWJsZSBm
-cm9tIGdpdDoKCiAgICAgZ2l0Oi8vZ2l0Lmtlcm5lbC5vcmcvcHViL3NjbS9saW51eC9rZXJuZWwv
-Z2l0L3RnbHgvZGV2ZWwuZ2l0IG1zaS12MS1wYXJ0LTMKCkZvciB0aGUgY3VyaW91cyB3aG8gY2Fu
-J3Qgd2FpdCBmb3IgdGhlIG5leHQgcGFydCB0byBhcnJpdmUgdGhlIGZ1bGwgc2VyaWVzCmlzIGF2
-YWlsYWJsZSB2aWE6CgogICAgIGdpdDovL2dpdC5rZXJuZWwub3JnL3B1Yi9zY20vbGludXgva2Vy
-bmVsL2dpdC90Z2x4L2RldmVsLmdpdCBtc2ktdjEtcGFydC00CgpUaGFua3MsCgoJdGdseAotLS0K
-IC5jbGFuZy1mb3JtYXQgICAgICAgICAgICAgICAgICAgICAgICAgIHwgICAgMSAKIGFyY2gvcG93
-ZXJwYy9wbGF0Zm9ybXMvNHh4L2hzdGFfbXNpLmMgIHwgICAgNyAKIGFyY2gvcG93ZXJwYy9wbGF0
-Zm9ybXMvY2VsbC9heG9uX21zaS5jIHwgICAgNyAKIGFyY2gvcG93ZXJwYy9wbGF0Zm9ybXMvcGFz
-ZW1pL21zaS5jICAgIHwgICAgOSAKIGFyY2gvcG93ZXJwYy9zeXNkZXYvZnNsX21zaS5jICAgICAg
-ICAgIHwgICAgOCAKIGFyY2gvcG93ZXJwYy9zeXNkZXYvbXBpY191M21zaS5jICAgICAgIHwgICAg
-OSAKIGFyY2gvczM5MC9wY2kvcGNpX2lycS5jICAgICAgICAgICAgICAgIHwgICAgNiAKIGFyY2gv
-eDg2L3BjaS94ZW4uYyAgICAgICAgICAgICAgICAgICAgIHwgICAxNCAKIGRyaXZlcnMvYmFzZS9j
-b3JlLmMgICAgICAgICAgICAgICAgICAgIHwgICAgMyAKIGRyaXZlcnMvYmFzZS9wbGF0Zm9ybS1t
-c2kuYyAgICAgICAgICAgIHwgIDExMCAtLS0tLQogZHJpdmVycy9idXMvZnNsLW1jL2ZzbC1tYy1t
-c2kuYyAgICAgICAgfCAgIDYxIC0tCiBkcml2ZXJzL250Yi9tc2kuYyAgICAgICAgICAgICAgICAg
-ICAgICB8ICAgMTkgCiBkcml2ZXJzL3BjaS9jb250cm9sbGVyL3BjaS1oeXBlcnYuYyAgICB8ICAg
-MTUgCiBkcml2ZXJzL3BjaS9tc2kvaXJxZG9tYWluLmMgICAgICAgICAgICB8ICAgMTEgCiBkcml2
-ZXJzL3BjaS9tc2kvbGVnYWN5LmMgICAgICAgICAgICAgICB8ICAgMjAgCiBkcml2ZXJzL3BjaS9t
-c2kvbXNpLmMgICAgICAgICAgICAgICAgICB8ICAyNTUgKysrKystLS0tLS0KIGRyaXZlcnMvcGNp
-L3hlbi1wY2lmcm9udC5jICAgICAgICAgICAgIHwgICAgMiAKIGRyaXZlcnMvc29jL3RpL3RpX3Nj
-aV9pbnRhX21zaS5jICAgICAgIHwgICA3NyArLS0KIGluY2x1ZGUvbGludXgvZGV2aWNlLmggICAg
-ICAgICAgICAgICAgIHwgICAgNCAKIGluY2x1ZGUvbGludXgvbXNpLmggICAgICAgICAgICAgICAg
-ICAgIHwgIDEzNSArKysrKy0KIGluY2x1ZGUvbGludXgvc29jL3RpL3RpX3NjaV9pbnRhX21zaS5o
-IHwgICAgMSAKIGtlcm5lbC9pcnEvbXNpLmMgICAgICAgICAgICAgICAgICAgICAgIHwgIDcxOSAr
-KysrKysrKysrKysrKysrKysrKysrLS0tLS0tLS0tLS0KIDIyIGZpbGVzIGNoYW5nZWQsIDg0MSBp
-bnNlcnRpb25zKCspLCA2NTIgZGVsZXRpb25zKC0pCgoK
+Add the description of @msi_desc and change the @devname to @name
+in ntbm_msi_request_threaded_irq() kernel-doc comment to remove
+some warnings found by running scripts/kernel-doc, which is caused
+by using 'make W=1'.
+drivers/ntb/msi.c:285: warning: Function parameter or member 'name' not
+described in 'ntbm_msi_request_threaded_irq'
+drivers/ntb/msi.c:285: warning: Function parameter or member 'msi_desc'
+not described in 'ntbm_msi_request_threaded_irq'
+drivers/ntb/msi.c:285: warning: Excess function parameter 'devname'
+description in 'ntbm_msi_request_threaded_irq'
+
+Reported-by: Abaci Robot <abaci@linux.alibaba.com>
+Signed-off-by: Yang Li <yang.lee@linux.alibaba.com>
+---
+ drivers/ntb/msi.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/ntb/msi.c b/drivers/ntb/msi.c
+index 2818bfcf4031..dd683cb58d09 100644
+--- a/drivers/ntb/msi.c
++++ b/drivers/ntb/msi.c
+@@ -262,8 +262,9 @@ static int ntbm_msi_setup_callback(struct ntb_dev *ntb, struct msi_desc *entry,
+  * @handler:	Function to be called when the IRQ occurs
+  * @thread_fn:  Function to be called in a threaded interrupt context. NULL
+  *              for clients which handle everything in @handler
+- * @devname:    An ascii name for the claiming device, dev_name(dev) if NULL
++ * @name:    An ascii name for the claiming device, dev_name(dev) if NULL
+  * @dev_id:     A cookie passed back to the handler function
++ * @msi_desc:	MSI descriptor data which triggers the interrupt
+  *
+  * This function assigns an interrupt handler to an unused
+  * MSI interrupt and returns the descriptor used to trigger
+-- 
+2.20.1.7.g153144c
+
