@@ -1,42 +1,41 @@
-Return-Path: <Sanju.Mehta@amd.com>
-Received: from NAM02-DM3-obe.outbound.protection.outlook.com (mail-dm3nam07on2082.outbound.protection.outlook.com. [40.107.95.82])
-        by gmr-mx.google.com with ESMTPS id 8926c6da1cb9f-2faa6b53fbfsi1061383173.1.2021.12.17.01.56.41
+Return-Path: <logang@deltatee.com>
+Received: from ale.deltatee.com (ale.deltatee.com. [204.191.154.188])
+        by gmr-mx.google.com with ESMTPS id l22si246616ooe.0.2021.12.22.16.50.49
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 17 Dec 2021 01:56:41 -0800 (PST)
-From: Sanjay R Mehta <sanju.mehta@amd.com>
-Subject: [PATCH] ntb_hw_amd: Add NTB PCI ID for new gen CPU
-Date: Fri, 17 Dec 2021 03:56:20 -0600
-Message-ID: <1639734980-9748-1-git-send-email-sanju.mehta@amd.com>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 22 Dec 2021 16:50:49 -0800 (PST)
+References: <20211223004802.18184-1-rdunlap@infradead.org>
+From: Logan Gunthorpe <logang@deltatee.com>
+Message-ID: <db287ffb-0599-6d5a-bf03-fbaad19377ba@deltatee.com>
+Date: Wed, 22 Dec 2021 17:50:45 -0700
 MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+In-Reply-To: <20211223004802.18184-1-rdunlap@infradead.org>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-CA
 Content-Transfer-Encoding: 7bit
-Return-Path: Sanju.Mehta@amd.com
-To: jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com, logang@deltatee.com
-Cc: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, Sanjay R
- Mehta <sanju.mehta@amd.com>
+Subject: Re: [PATCH] ntb_hw_switchtec: fix the spelling of "its"
+To: Randy Dunlap <rdunlap@infradead.org>, linux-pci@vger.kernel.org
+Cc: Kurt Schwemmer <kurt.schwemmer@microsemi.com>, linux-ntb <linux-ntb@googlegroups.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>
 List-ID: <linux-ntb.googlegroups.com>
 
-Add NTB support for new generation of processor
 
-Signed-off-by: Sanjay R Mehta <sanju.mehta@amd.com>
----
- drivers/ntb/hw/amd/ntb_hw_amd.c | 2 ++
- 1 file changed, 2 insertions(+)
 
-diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.c b/drivers/ntb/hw/amd/ntb_hw_amd.c
-index 87847c3..04550b1 100644
---- a/drivers/ntb/hw/amd/ntb_hw_amd.c
-+++ b/drivers/ntb/hw/amd/ntb_hw_amd.c
-@@ -1321,6 +1321,8 @@ static const struct ntb_dev_data dev_data[] = {
- static const struct pci_device_id amd_ntb_pci_tbl[] = {
- 	{ PCI_VDEVICE(AMD, 0x145b), (kernel_ulong_t)&dev_data[0] },
- 	{ PCI_VDEVICE(AMD, 0x148b), (kernel_ulong_t)&dev_data[1] },
-+	{ PCI_VDEVICE(AMD, 0x14c0), (kernel_ulong_t)&dev_data[1] },
-+	{ PCI_VDEVICE(AMD, 0x14c3), (kernel_ulong_t)&dev_data[1] },
- 	{ PCI_VDEVICE(HYGON, 0x145b), (kernel_ulong_t)&dev_data[0] },
- 	{ 0, }
- };
--- 
-2.7.4
+On 2021-12-22 5:48 p.m., Randy Dunlap wrote:
+> Use the possessive "its" instead of the contraction "it's" (it is)
+> in user messages.
+> 
+> Signed-off-by: Randy Dunlap <rdunlap@infradead.org>
+> Cc: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
+> Cc: Logan Gunthorpe <logang@deltatee.com>
+> 
+
+Oh, yup, thanks!
+
+Reviewed-by: Logan Gunthorpe <logang@deltatee.com>
+
+Though this patch should have been sent to the NTB list as changes to
+that file go through there. (I've cced that list and the maintainer Jon,
+but the original patch might need a resend).
+
+Logan
 
