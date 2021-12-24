@@ -1,13 +1,13 @@
 Return-Path: <Kelvin.Cao@microchip.com>
 Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com. [68.232.154.123])
-        by gmr-mx.google.com with ESMTPS id q2si170723ljc.0.2021.12.23.17.25.09
+        by gmr-mx.google.com with ESMTPS id q2si170721ljc.0.2021.12.23.17.25.08
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
         Thu, 23 Dec 2021 17:25:09 -0800 (PST)
 From: Kelvin Cao <kelvin.cao@microchip.com>
-Subject: [PATCH 4/6] ntb_hw_switchtec: Update the way of getting VEP instance ID
-Date: Thu, 23 Dec 2021 17:23:32 -0800
-Message-ID: <20211224012334.89173-5-kelvin.cao@microchip.com>
+Subject: [PATCH 3/6] ntb_hw_switchtec: AND with the part_map for a valid tpart_vec
+Date: Thu, 23 Dec 2021 17:23:31 -0800
+Message-ID: <20211224012334.89173-4-kelvin.cao@microchip.com>
 In-Reply-To: <20211224012334.89173-1-kelvin.cao@microchip.com>
 References: <20211224012334.89173-1-kelvin.cao@microchip.com>
 MIME-Version: 1.0
@@ -19,41 +19,29 @@ Cc: Kelvin Cao <kelvin.cao@microchip.com>, kelvincao@outlook.com, Jeremy
  Pallotta <jmpallotta@gmail.com>
 List-ID: <linux-ntb.googlegroups.com>
 
-Gen4 firmware adds DMA VEP and NVMe VEP support in VEP (virtual EP)
-instance ID register in addtion to management EP. Update the way of
-getting management VEP instance ID.
+From: Jeremy Pallotta <jmpallotta@gmail.com>
 
+Some firmware versions return 1 in the target partition vector for
+undefined partitions. AND with the part_map to give a valid tpart_vec.
+
+Signed-off-by: Jeremy Pallotta <jmpallotta@gmail.com>
 Signed-off-by: Kelvin Cao <kelvin.cao@microchip.com>
 ---
- drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 8 +++++---
- 1 file changed, 5 insertions(+), 3 deletions(-)
+ drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 1 +
+ 1 file changed, 1 insertion(+)
 
 diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-index 25302a384a7d..03839346233d 100644
+index ec9cb6c81eda..25302a384a7d 100644
 --- a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
 +++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-@@ -419,8 +419,10 @@ static void switchtec_ntb_part_link_speed(struct switchtec_ntb *sndev,
- 					  enum ntb_width *width)
- {
- 	struct switchtec_dev *stdev = sndev->stdev;
--	u32 pff =
--		ioread32(&stdev->mmio_part_cfg_all[partition].vep_pff_inst_id);
-+	struct part_cfg_regs __iomem *part_cfg =
-+		&stdev->mmio_part_cfg_all[partition];
-+
-+	u32 pff = ioread32(&part_cfg->vep_pff_inst_id) & 0xFF;
- 	u32 linksta = ioread32(&stdev->mmio_pff_csr[pff].pci_cap_region[13]);
+@@ -858,6 +858,7 @@ static int switchtec_ntb_init_sndev(struct switchtec_ntb *sndev)
+ 	tpart_vec |= ioread32(&sndev->mmio_ntb->ntp_info[self].target_part_low);
  
- 	if (speed)
-@@ -1089,7 +1091,7 @@ static int crosslink_enum_partition(struct switchtec_ntb *sndev,
- {
- 	struct part_cfg_regs __iomem *part_cfg =
- 		&sndev->stdev->mmio_part_cfg_all[sndev->peer_partition];
--	u32 pff = ioread32(&part_cfg->vep_pff_inst_id);
-+	u32 pff = ioread32(&part_cfg->vep_pff_inst_id) & 0xFF;
- 	struct pff_csr_regs __iomem *mmio_pff =
- 		&sndev->stdev->mmio_pff_csr[pff];
- 	const u64 bar_space = 0x1000000000LL;
+ 	part_map = ioread64(&sndev->mmio_ntb->ep_map);
++	tpart_vec &= part_map;
+ 	part_map &= ~(1 << sndev->self_partition);
+ 
+ 	if (!tpart_vec) {
 -- 
 2.25.1
 
