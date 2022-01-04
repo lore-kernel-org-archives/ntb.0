@@ -1,111 +1,48 @@
-Return-Path: <dave.jiang@intel.com>
-Received: from mga11.intel.com (mga11.intel.com. [192.55.52.93])
-        by gmr-mx.google.com with ESMTPS id i16si131809edc.4.2022.01.27.12.31.15
+Return-Path: <Kelvin.Cao@microchip.com>
+Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com. [68.232.153.233])
+        by gmr-mx.google.com with ESMTPS id q2si2136206pfu.5.2022.01.04.13.28.41
         for <linux-ntb@googlegroups.com>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 27 Jan 2022 12:31:16 -0800 (PST)
-Subject: [PATCH] ntb: intel: fix port config status offset for SPR
-From: Dave Jiang <dave.jiang@intel.com>
-Date: Thu, 27 Jan 2022 13:31:12 -0700
-Message-ID: 
- <164331547261.135051.8301478137022089685.stgit@djiang5-desk3.ch.intel.com>
-MIME-Version: 1.0
+        Tue, 04 Jan 2022 13:28:41 -0800 (PST)
+From: <Kelvin.Cao@microchip.com>
+Subject: Re: [PATCH 0/6] Switchtec NTB Fixes and Improvements
+Date: Tue, 4 Jan 2022 21:28:30 +0000
+Message-ID: <41ea955218bb9fa42e59e106b7ee4e2c9c69cb3d.camel@microchip.com>
+References: <20211224012334.89173-1-kelvin.cao@microchip.com>
+	 <91ece4bb-5ab3-4ec9-acb0-0b054d4ec435@deltatee.com>
+In-Reply-To: <91ece4bb-5ab3-4ec9-acb0-0b054d4ec435@deltatee.com>
+Content-Language: en-US
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-To: jdmason@kudzu.us
-Cc: Jerry Dai <jerry.dai@intel.com>, allenbh@gmail.com, linux-ntb@googlegroups.com
+Content-ID: <4DBE65673B8B79429C11FB6484DD176A@namprd11.prod.outlook.com>
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
+Return-Path: Kelvin.Cao@microchip.com
+To: linux-ntb@googlegroups.com, kurt.schwemmer@microsemi.com, dave.jiang@intel.com, allenbh@gmail.com, linux-kernel@vger.kernel.org, logang@deltatee.com, linux-pci@vger.kernel.org, jdmason@kudzu.us
+Cc: kelvincao@outlook.com, jmpallotta@gmail.com
 List-ID: <linux-ntb.googlegroups.com>
 
-The field offset for port configuration status on SPR has been changed to
-bit 14 from ICX where it resides at bit 12. By chance link status detection
-continued to work on SPR. This is due to bit 12 being a configuration bit
-which is in sync with the status bit. Fix this by checking for a SPR device
-and checking correct status bit.
-
-Tested-by: Jerry Dai <jerry.dai@intel.com>
-Signed-off-by: Dave Jiang <dave.jiang@intel.com>
----
- drivers/ntb/hw/intel/ntb_hw_gen4.c |   17 ++++++++++++++++-
- drivers/ntb/hw/intel/ntb_hw_gen4.h |   16 ++++++++++++++++
- 2 files changed, 32 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/ntb/hw/intel/ntb_hw_gen4.c b/drivers/ntb/hw/intel/ntb_hw_gen4.c
-index fede05151f69..4081fc538ff4 100644
---- a/drivers/ntb/hw/intel/ntb_hw_gen4.c
-+++ b/drivers/ntb/hw/intel/ntb_hw_gen4.c
-@@ -168,6 +168,18 @@ static enum ntb_topo gen4_ppd_topo(struct intel_ntb_dev *ndev, u32 ppd)
- 	return NTB_TOPO_NONE;
- }
- 
-+static enum ntb_topo spr_ppd_topo(struct intel_ntb_dev *ndev, u32 ppd)
-+{
-+	switch (ppd & SPR_PPD_TOPO_MASK) {
-+	case SPR_PPD_TOPO_B2B_USD:
-+		return NTB_TOPO_B2B_USD;
-+	case SPR_PPD_TOPO_B2B_DSD:
-+		return NTB_TOPO_B2B_DSD;
-+	}
-+
-+	return NTB_TOPO_NONE;
-+}
-+
- int gen4_init_dev(struct intel_ntb_dev *ndev)
- {
- 	struct pci_dev *pdev = ndev->ntb.pdev;
-@@ -183,7 +195,10 @@ int gen4_init_dev(struct intel_ntb_dev *ndev)
- 	}
- 
- 	ppd1 = ioread32(ndev->self_mmio + GEN4_PPD1_OFFSET);
--	ndev->ntb.topo = gen4_ppd_topo(ndev, ppd1);
-+	if (pdev_is_ICX(pdev))
-+		ndev->ntb.topo = gen4_ppd_topo(ndev, ppd1);
-+	else if (pdev_is_SPR(pdev))
-+		ndev->ntb.topo = spr_ppd_topo(ndev, ppd1);
- 	dev_dbg(&pdev->dev, "ppd %#x topo %s\n", ppd1,
- 		ntb_topo_string(ndev->ntb.topo));
- 	if (ndev->ntb.topo == NTB_TOPO_NONE)
-diff --git a/drivers/ntb/hw/intel/ntb_hw_gen4.h b/drivers/ntb/hw/intel/ntb_hw_gen4.h
-index 3fcd3fdce9ed..f91323eaf5ce 100644
---- a/drivers/ntb/hw/intel/ntb_hw_gen4.h
-+++ b/drivers/ntb/hw/intel/ntb_hw_gen4.h
-@@ -49,10 +49,14 @@
- #define GEN4_PPD_CLEAR_TRN		0x0001
- #define GEN4_PPD_LINKTRN		0x0008
- #define GEN4_PPD_CONN_MASK		0x0300
-+#define SPR_PPD_CONN_MASK		0x0700
- #define GEN4_PPD_CONN_B2B		0x0200
- #define GEN4_PPD_DEV_MASK		0x1000
- #define GEN4_PPD_DEV_DSD		0x1000
- #define GEN4_PPD_DEV_USD		0x0000
-+#define SPR_PPD_DEV_MASK		0x4000
-+#define SPR_PPD_DEV_DSD 		0x4000
-+#define SPR_PPD_DEV_USD 		0x0000
- #define GEN4_LINK_CTRL_LINK_DISABLE	0x0010
- 
- #define GEN4_SLOTSTS			0xb05a
-@@ -62,6 +66,10 @@
- #define GEN4_PPD_TOPO_B2B_USD	(GEN4_PPD_CONN_B2B | GEN4_PPD_DEV_USD)
- #define GEN4_PPD_TOPO_B2B_DSD	(GEN4_PPD_CONN_B2B | GEN4_PPD_DEV_DSD)
- 
-+#define SPR_PPD_TOPO_MASK	(SPR_PPD_CONN_MASK | SPR_PPD_DEV_MASK)
-+#define SPR_PPD_TOPO_B2B_USD	(GEN4_PPD_CONN_B2B | SPR_PPD_DEV_USD)
-+#define SPR_PPD_TOPO_B2B_DSD	(GEN4_PPD_CONN_B2B | SPR_PPD_DEV_DSD)
-+
- #define GEN4_DB_COUNT			32
- #define GEN4_DB_LINK			32
- #define GEN4_DB_LINK_BIT		BIT_ULL(GEN4_DB_LINK)
-@@ -112,4 +120,12 @@ static inline int pdev_is_ICX(struct pci_dev *pdev)
- 	return 0;
- }
- 
-+static inline int pdev_is_SPR(struct pci_dev *pdev)
-+{
-+	if (pdev_is_gen4(pdev) &&
-+	    pdev->revision > PCI_DEVICE_REVISION_ICX_MAX)
-+		return 1;
-+	return 0;
-+}
-+
- #endif
-
-
+T24gVHVlLCAyMDIyLTAxLTA0IGF0IDA5OjU1IC0wNzAwLCBMb2dhbiBHdW50aG9ycGUgd3JvdGU6
+DQo+IEVYVEVSTkFMIEVNQUlMOiBEbyBub3QgY2xpY2sgbGlua3Mgb3Igb3BlbiBhdHRhY2htZW50
+cyB1bmxlc3MgeW91DQo+IGtub3cgdGhlIGNvbnRlbnQgaXMgc2FmZQ0KPiANCj4gT24gMjAyMS0x
+Mi0yMyA2OjIzIHAubS4sIEtlbHZpbiBDYW8gd3JvdGU6DQo+ID4gSGksDQo+ID4gDQo+ID4gUGxl
+YXNlIGZpbmQgYSBidW5jaCBvZiBwYXRjaGVzIGZvciB0aGUgU3dpdGNodGVjIE5UQiBkcml2ZXIu
+DQo+ID4gDQo+ID4gUGF0Y2hlIDEsIDIgYW5kIDYgZml4IHRocmVlIG1pbm9yIGJ1Z3MuIFBhdGNo
+IDMgd29ya3MgYXJvdW5kIGENCj4gPiBtaW5vcg0KPiA+IGZpcm13YXJlIGlzc3VlLiBQYXRjaCA0
+IHVwZGF0ZXMgdGhlIG1ldGhvZCBvZiBnZXR0aW5nIG1hbmFnZW1lbnQNCj4gPiBWRVANCj4gPiBp
+bnN0YW5jZSBJRCBiYXNlZCBvbiBhIG5ldyBmaXJtd2FyZSBjaGFuZ2UuIFBhdGNoIDUgcmVtb3Zl
+cyBjb2RlDQo+ID4gdGhhdA0KPiA+IGRpc2FibGVzIElEIHByb3RlY3Rpb24gdG8gYXZvaWQgY29u
+ZmxpY3Qgd2l0aCBzdGF0aWMgU3dpdGNodGVjDQo+ID4gY29uZmlnDQo+ID4gc2V0dGluZ3MuDQo+
+ID4gDQo+ID4gVGhpcyBwYXRjaHNldCBpcyBiYXNlZCBvbiA1LjE2LjAtcmM1Lg0KPiA+IA0KPiA+
+IFRoYW5rcywNCj4gPiBLZWx2aW4NCj4gPiANCj4gPiBKZXJlbXkgUGFsbG90dGEgKDIpOg0KPiA+
+ICAgbnRiX2h3X3N3aXRjaHRlYzogRml4IHBmZiBpb3JlYWQgdG8gcmVhZCBpbnRvIG1taW9fcGFy
+dF9jZmdfYWxsDQo+ID4gICBudGJfaHdfc3dpdGNodGVjOiBBTkQgd2l0aCB0aGUgcGFydF9tYXAg
+Zm9yIGEgdmFsaWQgdHBhcnRfdmVjDQo+ID4gDQo+ID4gS2VsdmluIENhbyAoMyk6DQo+ID4gICBu
+dGJfaHdfc3dpdGNodGVjOiBVcGRhdGUgdGhlIHdheSBvZiBnZXR0aW5nIFZFUCBpbnN0YW5jZSBJ
+RA0KPiA+ICAgbnRiX2h3X3N3aXRjaHRlYzogUmVtb3ZlIGNvZGUgZm9yIGRpc2FibGluZyBJRCBw
+cm90ZWN0aW9uDQo+ID4gICBudGJfaHdfc3dpdGNodGVjOiBGaXggYSBtaW5vciBpc3N1ZSBpbiBj
+b25maWdfcmVxX2lkX3RhYmxlKCkNCj4gPiANCj4gPiBXZXNsZXkgU2hlbmcgKDEpOg0KPiA+ICAg
+bnRiX2h3X3N3aXRjaHRlYzogRml4IGJ1ZyB3aXRoIG1vcmUgdGhhbiAzMiBwYXJ0aXRpb25zDQo+
+IA0KPiBJJ3ZlIHJldmlld2VkIGFsbCB0aGVzZSBwYXRjaGVzIGFuZCB0aGV5IGxvb2sgZ29vZCB0
+byBtZS4NCj4gDQo+IFJldmlld2VkLWJ5OiBMb2dhbiBHdW50aG9ycGUgPGxvZ2FuZ0BkZWx0YXRl
+ZS5jb20+DQo+IA0KVGhhbmtzIExvZ2FuIQ0KDQpLZWx2aW4NCg0KPiBUaGFua3MsDQo+IA0KPiBM
+b2dhbg0K
