@@ -1,27 +1,26 @@
-Return-Path: <logang@deltatee.com>
-Received: from ale.deltatee.com (ale.deltatee.com. [204.191.154.188])
-        by gmr-mx.google.com with ESMTPS id j19si199223jat.1.2022.01.21.08.25.03
+Return-Path: <keescook@chromium.org>
+Received: from mail-pj1-x102f.google.com (mail-pj1-x102f.google.com. [2607:f8b0:4864:20::102f])
+        by gmr-mx.google.com with ESMTPS id k8si489253ybt.2.2022.01.20.15.34.04
         for <linux-ntb@googlegroups.com>
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 21 Jan 2022 08:25:03 -0800 (PST)
-References: <20220120230247.GA40182@embeddedor>
-From: Logan Gunthorpe <logang@deltatee.com>
-Message-ID: <b2d9c1ad-9a6d-4e0c-e877-44029f4c1a7e@deltatee.com>
-Date: Fri, 21 Jan 2022 09:24:59 -0700
-MIME-Version: 1.0
-In-Reply-To: <20220120230247.GA40182@embeddedor>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-CA
-Content-Transfer-Encoding: 7bit
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 20 Jan 2022 15:34:04 -0800 (PST)
+Received: by mail-pj1-x102f.google.com with SMTP id d12-20020a17090a628c00b001b4f47e2f51so8908309pjj.3
+        for <linux-ntb@googlegroups.com>; Thu, 20 Jan 2022 15:34:04 -0800 (PST)
+Return-Path: <keescook@chromium.org>
+Date: Thu, 20 Jan 2022 15:34:02 -0800
+From: Kees Cook <keescook@chromium.org>
 Subject: Re: [PATCH][next] NTB/msi: Use struct_size() helper in devm_kzalloc()
-To: "Gustavo A. R. Silva" <gustavoars@kernel.org>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>
-Cc: linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org
+Message-ID: <202201201533.975AD386E@keescook>
+References: <20220120230247.GA40182@embeddedor>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220120230247.GA40182@embeddedor>
+To: "Gustavo A. R. Silva" <gustavoars@kernel.org>
+Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, linux-ntb@googlegroups.com, linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org
 List-ID: <linux-ntb.googlegroups.com>
 
-
-
-
-On 2022-01-20 4:02 p.m., Gustavo A. R. Silva wrote:
+On Thu, Jan 20, 2022 at 05:02:47PM -0600, Gustavo A. R. Silva wrote:
 > Make use of the struct_size() helper instead of an open-coded version,
 > in order to avoid any potential type mistakes or integer overflows that,
 > in the worst scenario, could lead to heap overflows.
@@ -32,6 +31,9 @@ On 2022-01-20 4:02 p.m., Gustavo A. R. Silva wrote:
 > Link: https://github.com/KSPP/linux/issues/174
 > Signed-off-by: Gustavo A. R. Silva <gustavoars@kernel.org>
 
-Thanks, looks good to me.
+Heh, the variable was even named struct_size. ;)
 
-Reviewed-by: Logan Gunthorpe <logang@deltatee.com>
+Reviewed-by: Kees Cook <keescook@chromium.org>
+
+-- 
+Kees Cook
