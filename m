@@ -1,46 +1,58 @@
-Received: from mga05.intel.com (mga05.intel.com [192.55.52.43])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qk1-f178.google.com (mail-qk1-f178.google.com [209.85.222.178])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 76D592F23
-	for <ntb@lists.linux.dev>; Wed,  2 Feb 2022 20:13:59 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1643832839; x=1675368839;
-  h=message-id:date:mime-version:to:from:subject:
-   content-transfer-encoding;
-  bh=YkLsVOb1RUGIXQzJMKGfzQDxVPSJbJxaLL1azJItlMo=;
-  b=dIqgow0bn3fjCciq469iGqULIYF7MSDUzogQ9emLTFWEv7jUStxzDz8I
-   h4tKhDBYxfmGB6fwVK/UKM/18/39pT2yS27aiIgQi0AOtmzvvWj11oiK9
-   HziJVpL1gcL7zrNOeqIRie1eFWo1VaJ45KlaRwUoVhWkDh6beZDvd+gai
-   8PUlXoFm/VQ4S7xBfowi1AJBCQZ3vT3jxlXjUrbNvlt8ANBekdE2sxdoD
-   2/d7Pc8ibblYqHlSJENR6CCQJdu5eb7jjyOWkXW7d85IB4P25rCVl2c7x
-   l1g5mvImZ5reZKS2OOM20mHRfa7qFjGzoBk4wlrGQoj2Jqn3MfVt7W5VN
-   A==;
-X-IronPort-AV: E=McAfee;i="6200,9189,10246"; a="334370844"
-X-IronPort-AV: E=Sophos;i="5.88,337,1635231600"; 
-   d="scan'208";a="334370844"
-Received: from orsmga008.jf.intel.com ([10.7.209.65])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Feb 2022 12:13:58 -0800
-X-IronPort-AV: E=Sophos;i="5.88,337,1635231600"; 
-   d="scan'208";a="538448978"
-Received: from djiang5-mobl1.amr.corp.intel.com (HELO [10.209.184.227]) ([10.209.184.227])
-  by orsmga008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Feb 2022 12:13:58 -0800
-Message-ID: <e49bfda5-6f90-38c7-628e-365c61502487@intel.com>
-Date: Wed, 2 Feb 2022 13:13:57 -0700
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BED722F28
+	for <ntb@lists.linux.dev>; Wed,  2 Feb 2022 21:10:40 +0000 (UTC)
+Received: by mail-qk1-f178.google.com with SMTP id 71so838120qkf.4
+        for <ntb@lists.linux.dev>; Wed, 02 Feb 2022 13:10:40 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linuxfoundation.org; s=google;
+        h=date:from:to:subject:message-id:mime-version:content-disposition;
+        bh=TJiHaenZuFuQ0gBBRp6+G0aYMDsUoYTGvU6NDOHtmM4=;
+        b=Vv0fn27iIp6+aFkj/XQ51oPAVdmPYfop6QHJuEqK0SxN4kY9Bce++6RkGzjvlcfLFM
+         z9XNFltdEr/oOd0DtpTZwk0i9kTIhmPEBzM1S9d8Rs3pYlj5iBbrV7Ir5lQnteZOISOv
+         iMifghv/UUEDr14dMmYVDl2CTFljFgFD3MCLQ=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:subject:message-id:mime-version
+         :content-disposition;
+        bh=TJiHaenZuFuQ0gBBRp6+G0aYMDsUoYTGvU6NDOHtmM4=;
+        b=EayckgT54yuFQ4Z62jRMcnxIK2597+nYRmrJLrD7x2Iph2P2z+bHd6oeaDBTen4try
+         2p+j5PJpUh7gcc20clB95vx0ypShs88TIbulI3Ol90f9FgGMCm0BuWDy+Ga1BhTSi3qd
+         Z3M/v/v8zhT/4o9PprVUGs3CLWHcxG3uRadqWTMN+XD/Rx+pLtkD326SXkl2guvTju1E
+         DTq3EzpyLzC1/NSS5OtrQDbKasiXGQd87mndIMfYFHkFmHBjkc48pwcjivSkbtQr0Rwu
+         pw/30oU9bYd5uU5oFpxEDJrls0QCobkikpXV4OUHjpPa58m6nT4gQUNo24zJfqK//z4z
+         scig==
+X-Gm-Message-State: AOAM530YI6cnptcufLOZp65v84NPM/IE3O/MJBKbQWCjXFdwGYz5jI95
+	D35mgsyqhRadZpoxSMl71b2Wz4x9Bul7gw==
+X-Google-Smtp-Source: ABdhPJyZwBk6moBL7hm05yEoSoWoDbdrsAENLybPrgc7wFTC8dxZuSmIVVZ9xMLo2kvOaWJXlwbdxQ==
+X-Received: by 2002:a37:64d5:: with SMTP id y204mr22304448qkb.385.1643836239385;
+        Wed, 02 Feb 2022 13:10:39 -0800 (PST)
+Received: from meerkat.local (bras-base-mtrlpq5031w-grc-32-216-209-220-127.dsl.bell.ca. [216.209.220.127])
+        by smtp.gmail.com with ESMTPSA id y15sm13231472qko.133.2022.02.02.13.10.38
+        for <ntb@lists.linux.dev>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 02 Feb 2022 13:10:39 -0800 (PST)
+Date: Wed, 2 Feb 2022 16:10:37 -0500
+From: Konstantin Ryabitsev <konstantin@linuxfoundation.org>
+To: ntb@lists.linux.dev
+Subject: Welcome to ntb@lists.linux.dev
+Message-ID: <20220202211037.c76tpezi4ffmzuqr@meerkat.local>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.5.0
-Content-Language: en-US
-To: ntb@lists.linux.dev
-From: Dave Jiang <dave.jiang@intel.com>
-Subject: testing list posting
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 
-test 1 2 3
+Hello, all:
 
+You are receiving this message because you've been automatically subscribed to
+the new NTB list, hosted at ntb@lists.linux.dev. This is a test message to
+ensure that the archive is properly working. You should receive further
+messages about the list migration from project administrators.
+
+Best regards,
+Konstantin
