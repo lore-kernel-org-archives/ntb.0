@@ -1,41 +1,41 @@
-Received: from mail-lj1-f174.google.com (mail-lj1-f174.google.com [209.85.208.174])
+Received: from mail-lj1-f179.google.com (mail-lj1-f179.google.com [209.85.208.179])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CFD5E7A
-	for <ntb@lists.linux.dev>; Fri, 13 May 2022 19:38:14 +0000 (UTC)
-Received: by mail-lj1-f174.google.com with SMTP id 16so11395739lju.13
-        for <ntb@lists.linux.dev>; Fri, 13 May 2022 12:38:14 -0700 (PDT)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E8AC67A
+	for <ntb@lists.linux.dev>; Fri, 13 May 2022 19:38:56 +0000 (UTC)
+Received: by mail-lj1-f179.google.com with SMTP id t25so11442050ljd.6
+        for <ntb@lists.linux.dev>; Fri, 13 May 2022 12:38:56 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=ljObTqx/PdCyP+gPDOj5B116uUi0/GPi/NssLjDst1U=;
-        b=FL9XQdbCUMSJhcwYJXfa4KT6Bh2UBxNob7dKJVaZlyLUdl2Gtvfaez137lbGplq08A
-         QDUyoSj6HhRZOdF2oFqf7TE5f5LjOyk8GtNti7EeFSfNhYXoNzP071bw2zvAcylMcjnJ
-         BX+RwVY9IkJ7R85MJRLJfAWB93MFfVoDXJLU1tf6Bb2d4ApzKmIXZvJ/QIiZL0tm+0Qt
-         thT16H9BX4U0BvOMpAM0dOdly4Zq0nhdvyIDS5NFY9Kuc2dwrRVp9cy2EdvaR4jOK72Z
-         DL+xJB+h9dwRd7zkoensHj4bkdn7D9+9ymI7foZ95t3zC/SZRxuJSATDSHBHQSjxSuH4
-         9MTA==
+        bh=m9h/z26HBhmwnDz/Npeyv+ju+fanBQS5zr0rBPWxpIA=;
+        b=cXEVHl4QJUoEfeM4GS1hr3IEG+qT/sb3Ew8wEgDx+jmpG0crJi98sejY54Ni2BO0XN
+         E+L7x2q3GZ4HXJQROKWZBbOfFlCqGrxshTgiyPpKUtVCxaubXEgTRV8eaWJ0FKSQUpwz
+         /5s091kHjMCTJOkdzJdKiNAQFYP43lDgDRm6vW8fIkYPvPcBa/vS8eLNs4hWoH5Lf0A5
+         KRRxBvNqRG9cBdlMT8akdND5lL6SpKqojfM1MRZ1bAznGoMHABpOWWYTuQLjRc9dvNnm
+         c3wiHhqeUltWv7byyM+8uf93j+tlMHvCAb45iBohHoLw5G0hD9W7XzAwuRE7t0evp3Gy
+         7SNA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=ljObTqx/PdCyP+gPDOj5B116uUi0/GPi/NssLjDst1U=;
-        b=742xVskopqt7N9tVleBN0GFkZxCDthsWj2j9h4YeArS8qtQZF8jwByH6AqPcsmNATG
-         AcLa7JWNJLLH57M2m/8dDNLtwjIOa5URbuiSjESDkdL3xzMDhnIx4G3pUaPY0Q1Qx7d2
-         10PTiOL3EZrWRf67V47fMGKnyknO11JeZ1Nk8tgCw7BleiNaEGd9tl0NaQyd8Xj0ck0x
-         krO1jkup8uiKkSvKXQMrNqTnRd1XuJn12urQGEwAHKQc9HzOemPQXIAd+3jwRnrpFZUy
-         /W0cEGU4HJUNkEDJKYI/bXiqZ7osyqc5zFX4mMLudjIC/Vwy4fyqE5Yx1uwnIJI9Bu58
-         iBcg==
-X-Gm-Message-State: AOAM530l3AE6zved5C09tjtDBbxjDgOgle0MA6/lJxbgMw2lQoc3HfsS
-	TFt2O7MI4KHl/unUkPlZ/7OBdD2NA39fbedk1Wo=
-X-Google-Smtp-Source: ABdhPJxpep6p5fRt2xKENgiKUKIROqJIq5gdHG0uWVHTxKGstu+h94kOljlT8xamreYUPZIIq2OoRA==
-X-Received: by 2002:a2e:9188:0:b0:24f:1a0d:6bbd with SMTP id f8-20020a2e9188000000b0024f1a0d6bbdmr3875936ljg.226.1652470692540;
-        Fri, 13 May 2022 12:38:12 -0700 (PDT)
+        bh=m9h/z26HBhmwnDz/Npeyv+ju+fanBQS5zr0rBPWxpIA=;
+        b=UpltL83ivabzJCAG0bweYpzvIG1FNoFDOYsqzkH5Af3IZ9SuoW6Drb+VSCa4oEELaK
+         3AkHi0xTWBU6XlP9tWwXAHD7c/kbxoaCOojELmS7a7MnCjc4NcDlGvUHYmX3pAk/FqiX
+         4zdQadD6vhKh4EtEBaNWhWVW1hQE5P72+E6oTjdzbBmnmJz3nIVKLC+aM49iNBMbxYcZ
+         BSlfyHXZFOTIFbkESAhww+jjLNOLXg8PzJRH4wDIphb7XjyGlKtqWJfFRw5lgVnbQmXq
+         ILdQAeK9XRvGRno13fO/+jKC4EO4VAhuGXeVBpK/5S9iGr9NN7o8O9eXZrg/jNZO9Pqy
+         WiNQ==
+X-Gm-Message-State: AOAM531+tgMIL0k/0MrxWh4QXe8NJ9pxGC3F4OWN2ZGk6YKJ2X0W/6b3
+	K+f+F/jGB8KunMQSsg++kfSfRKtNY8xeEgciJTc=
+X-Google-Smtp-Source: ABdhPJyxdlrmk2YN4HPpoGzrGZAxd7QlAe+MZz3trEhketGGMUQHH8YEk+TJPA5+FDya881VoQqIKg==
+X-Received: by 2002:a2e:bd89:0:b0:24e:e54b:ca9c with SMTP id o9-20020a2ebd89000000b0024ee54bca9cmr3893752ljq.433.1652470734523;
+        Fri, 13 May 2022 12:38:54 -0700 (PDT)
 Received: from localhost.localdomain ([62.217.189.101])
-        by smtp.googlemail.com with ESMTPSA id q12-20020ac2528c000000b0047255d211bbsm472962lfm.234.2022.05.13.12.38.11
+        by smtp.googlemail.com with ESMTPSA id q12-20020ac2528c000000b0047255d211bbsm472962lfm.234.2022.05.13.12.38.53
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 13 May 2022 12:38:12 -0700 (PDT)
+        Fri, 13 May 2022 12:38:54 -0700 (PDT)
 From: Alexander Fomichev <fomichev.ru@gmail.com>
 To: ntb@lists.linux.dev
 Cc: linux@yadro.com,
@@ -45,9 +45,9 @@ Cc: linux@yadro.com,
 	Guo Zhengkui <guozhengkui@vivo.com>,
 	fancer.lancer@gmail.com,
 	Alexander Fomichev <a.fomichev@yadro.com>
-Subject: [PATCH v3 1/3] ntb_perf: extend with burst latency measurement
-Date: Fri, 13 May 2022 22:37:02 +0300
-Message-Id: <20220513193704.36868-2-fomichev.ru@gmail.com>
+Subject: [PATCH v3 2/3] ntb_perf: extend with poll latency measurement
+Date: Fri, 13 May 2022 22:37:03 +0300
+Message-Id: <20220513193704.36868-3-fomichev.ru@gmail.com>
 X-Mailer: git-send-email 2.36.1
 In-Reply-To: <20220513193704.36868-1-fomichev.ru@gmail.com>
 References: <20220513193704.36868-1-fomichev.ru@gmail.com>
@@ -61,262 +61,511 @@ Content-Transfer-Encoding: 8bit
 
 From: Alexander Fomichev <a.fomichev@yadro.com>
 
-Burst latency is a delay between start to send 1 byte to the
-remote system and hardware readiness to send another byte. The
-measurement performed within bandwidth test procedure. The DMA Engine is
-off. Data integrity is not checked. This mode can be disabled by
-'perf_latency=N' module parameter.
+Poll latency is a delay between start to send 1 byte to the
+remote system and receiving the confirmation. The remote system needs to
+be run in server mode beforehand. Then the server polls the input buffer
+and on receiving data immediately sends the confirmation back.
 
 Signed-off-by: Alexander Fomichev <a.fomichev@yadro.com>
 ---
- drivers/ntb/test/ntb_perf.c | 140 ++++++++++++++++++++++++++++++++++--
- 1 file changed, 136 insertions(+), 4 deletions(-)
+ drivers/ntb/test/ntb_perf.c | 374 +++++++++++++++++++++++++++++++++++-
+ 1 file changed, 373 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index 65e1e5cf1b29..23bde12eaf3d 100644
+index 23bde12eaf3d..f0f3beba70a5 100644
 --- a/drivers/ntb/test/ntb_perf.c
 +++ b/drivers/ntb/test/ntb_perf.c
-@@ -6,6 +6,7 @@
+@@ -67,6 +67,14 @@
   *
-  *   Copyright(c) 2015 Intel Corporation. All rights reserved.
-  *   Copyright(c) 2017 T-Platforms. All Rights Reserved.
-+ *   Copyright(c) 2022 YADRO. All Rights Reserved.
-  *
-  *   This program is free software; you can redistribute it and/or modify
-  *   it under the terms of version 2 of the GNU General Public License as
-@@ -15,6 +16,7 @@
-  *
-  *   Copyright(c) 2015 Intel Corporation. All rights reserved.
-  *   Copyright(c) 2017 T-Platforms. All Rights Reserved.
-+ *   Copyright(c) 2022 YADRO. All Rights Reserved.
-  *
-  *   Redistribution and use in source and binary forms, with or without
-  *   modification, are permitted provided that the following conditions
-@@ -85,7 +87,7 @@
+  * root@self# echo 0 > $DBG_DIR/run
+  * root@self# cat $DBG_DIR/run
++ *-----------------------------------------------------------------------------
++ * Eg: start latency test with peer (index 0) poll-waiting and get the metrics
++ *
++ * Server side:
++ * root@self# echo 0 > $DBG_DIR/poll_latency/run_server
++ * Client side:
++ * root@self# echo 0 > $DBG_DIR/poll_latency/run_client
++ * root@self# cat $DBG_DIR/poll_latency/run_client
+  */
+ 
+ #include <linux/init.h>
+@@ -87,7 +95,7 @@
  #include <linux/ntb.h>
  
  #define DRIVER_NAME		"ntb_perf"
--#define DRIVER_VERSION		"2.0"
-+#define DRIVER_VERSION		"2.1"
+-#define DRIVER_VERSION		"2.1"
++#define DRIVER_VERSION		"2.2"
  
  MODULE_LICENSE("Dual BSD/GPL");
  MODULE_VERSION(DRIVER_VERSION);
-@@ -106,6 +108,9 @@ MODULE_DESCRIPTION("PCIe NTB Performance Measurement Tool");
+@@ -135,6 +143,10 @@ static unsigned long lat_time_ms = 1000; /* default 1s */
+ module_param(lat_time_ms, ulong, 0644);
+ MODULE_PARM_DESC(lat_time_ms, "Time (in ms) to test latency");
  
- #define PERF_BUF_LEN 1024
- 
-+#define LAT_MIN_TRIES	20
-+#define RESCHEDULE_RATIO	10000
-+
- static unsigned long max_mw_size;
- module_param(max_mw_size, ulong, 0644);
- MODULE_PARM_DESC(max_mw_size, "Upper limit of memory window size");
-@@ -122,6 +127,14 @@ static bool use_dma; /* default to 0 */
- module_param(use_dma, bool, 0644);
- MODULE_PARM_DESC(use_dma, "Use DMA engine to measure performance");
- 
-+static bool perf_latency = true;
-+module_param(perf_latency, bool, 0644);
-+MODULE_PARM_DESC(perf_latency, "Measure burst latency");
-+
-+static unsigned long lat_time_ms = 1000; /* default 1s */
-+module_param(lat_time_ms, ulong, 0644);
-+MODULE_PARM_DESC(lat_time_ms, "Time (in ms) to test latency");
++static unsigned long lat_timeout_us = 500;
++module_param(lat_timeout_us, ulong, 0644);
++MODULE_PARM_DESC(lat_timeout_us, "Timeout (in us) to wait for server reply");
 +
  /*==============================================================================
   *                         Perf driver data definition
   *==============================================================================
-@@ -178,6 +191,8 @@ struct perf_thread {
- 	void *src;
- 	u64 copied;
- 	ktime_t duration;
+@@ -151,6 +163,11 @@ enum perf_cmd {
+ 	PERF_STS_LNKUP = 6, /* link up state flag */
+ };
+ 
++enum run_mode {
++	RUN_PL_CLIENT,
++	RUN_PL_SERVER,
++};
++
+ struct perf_ctx;
+ 
+ struct perf_peer {
+@@ -199,6 +216,21 @@ struct perf_thread {
+ #define to_thread_work(__work) \
+ 	container_of(__work, struct perf_thread, work)
+ 
++struct perf_poll_lat_data {
++	struct perf_ctx *perf;
++	void *src;
 +	ktime_t latency;
 +	u64 tries;
- 	int status;
- 	struct work_struct work;
- };
-@@ -783,7 +798,7 @@ static void perf_dma_copy_callback(void *data)
++	int status;
++	atomic_t running;
++	struct work_struct clt_work;
++	struct work_struct srv_work;
++};
++#define to_pldata_clt_work(__work) \
++	container_of(__work, struct perf_poll_lat_data, clt_work)
++#define to_pldata_srv_work(__work) \
++	container_of(__work, struct perf_poll_lat_data, srv_work)
++
+ struct perf_ctx {
+ 	struct ntb_dev *ntb;
+ 
+@@ -206,6 +238,7 @@ struct perf_ctx {
+ 	int gidx;
+ 	int pcnt;
+ 	struct perf_peer *peers;
++	struct perf_poll_lat_data pldata;
+ 
+ 	/* Performance measuring work-threads interface */
+ 	unsigned long busy_flag;
+@@ -254,6 +287,8 @@ static struct dentry *perf_dbgfs_topdir;
+ 
+ static struct workqueue_struct *perf_wq __read_mostly;
+ 
++static const u8 stop_word = 0xFF;
++
+ /*==============================================================================
+  *                  NTB cross-link commands execution service
+  *==============================================================================
+@@ -1129,6 +1164,185 @@ static void perf_thread_work(struct work_struct *work)
+ 	perf_clear_test(pthr);
  }
  
- static int perf_copy_chunk(struct perf_thread *pthr,
--			   void __iomem *dst, void *src, size_t len)
-+			   void __iomem *dst, void *src, size_t len, bool _use_dma)
- {
- 	struct dma_async_tx_descriptor *tx;
- 	struct dmaengine_unmap_data *unmap;
-@@ -794,7 +809,7 @@ static int perf_copy_chunk(struct perf_thread *pthr,
- 	void __iomem *dst_vaddr;
- 	dma_addr_t dst_dma_addr;
- 
--	if (!use_dma) {
-+	if (!_use_dma) {
- 		memcpy_toio(dst, src, len);
- 		goto ret_check_tsync;
- 	}
-@@ -940,7 +955,7 @@ static int perf_run_test(struct perf_thread *pthr)
- 
- 	/* Copied field is cleared on test launch stage */
- 	while (pthr->copied < total_size) {
--		ret = perf_copy_chunk(pthr, flt_dst, flt_src, chunk_size);
-+		ret = perf_copy_chunk(pthr, flt_dst, flt_src, chunk_size, use_dma);
- 		if (ret) {
- 			dev_err(&perf->ntb->dev, "%d: Got error %d on test\n",
- 				pthr->tidx, ret);
-@@ -1018,6 +1033,67 @@ static void perf_clear_test(struct perf_thread *pthr)
- 	kfree(pthr->src);
- }
- 
-+static int perf_run_latency(struct perf_thread *pthr)
++static int perf_init_pl(struct perf_poll_lat_data *pldata)
 +{
-+	struct perf_peer *peer = pthr->perf->test_peer;
-+	struct ntb_dev *ntb = pthr->perf->ntb;
-+	void __iomem *flt_dst, *bnd_dst;
-+	void *flt_src;
-+	u64 stop_at;
-+	int ret;
++	struct perf_ctx *perf = pldata->perf;
++	struct perf_peer *peer = perf->test_peer;
++	u8 *bp;
 +
-+	pthr->tries = 0;
-+	pthr->latency = ktime_get();
-+	flt_src = pthr->src;
-+	flt_dst = peer->outbuf;
-+	bnd_dst = peer->outbuf + peer->outbuf_size;
++	pldata->src = kmalloc_node(peer->outbuf_size, GFP_KERNEL,
++				 dev_to_node(&perf->ntb->dev));
++	if (!pldata->src)
++		return -ENOMEM;
 +
-+	stop_at = ktime_get_real_fast_ns() + lat_time_ms * NSEC_PER_MSEC;
-+	while (ktime_get_real_fast_ns() < stop_at) {
-+		ret = perf_copy_chunk(pthr, flt_dst, flt_src, 1, false);
-+		if (ret) {
-+			dev_err(&ntb->dev, "%d: Latency testing error %d\n",
-+				pthr->tidx, ret);
-+			pthr->latency = ktime_set(0, 0);
-+			return ret;
-+		}
++	/*
++	 * Prepare random data to send, guaranteed exclusion of 0x00 (unreceived)
++	 * and 0xFF (stop_word)
++	 */
++	get_random_bytes(pldata->src, peer->outbuf_size);
++	for (bp = pldata->src; bp < (u8 *) pldata->src + peer->outbuf_size; bp++)
++		while (*bp == 0 || *bp == stop_word)
++			*bp = (u8)get_random_int();
 +
-+		pthr->tries++;
-+		flt_dst++;
-+		flt_src++;
-+
-+		if (flt_dst >= bnd_dst || flt_dst < peer->outbuf) {
-+			flt_dst = peer->outbuf;
-+			flt_src = pthr->src;
-+		}
-+
-+		/* Avoid processor soft lock-ups */
-+		if (!(pthr->tries % RESCHEDULE_RATIO))
-+			schedule();
-+	}
-+
-+	/* Stop timer */
-+	pthr->latency = ktime_sub(ktime_get(), pthr->latency);
-+
-+	if (pthr->tries < LAT_MIN_TRIES) {
-+		dev_err(&ntb->dev,
-+			"%d: Too few steps (%llu) to measure Latency, recommended > %d. Increase value of 'lat_time_ms' parameter\n",
-+			pthr->tidx, pthr->tries, LAT_MIN_TRIES);
-+		pthr->latency = ktime_set(0, 0);
-+		return -EINVAL;
-+	}
-+
-+	dev_dbg(&ntb->dev, "%d: made %llu tries, lasted %llu usecs\n",
-+		pthr->tidx, pthr->tries, ktime_to_us(pthr->latency));
-+
-+	pthr->latency = ns_to_ktime(ktime_divns(pthr->latency, pthr->tries));
-+
-+	dev_dbg(&ntb->dev, "%d: latency %llu us (%llu ns)\n", pthr->tidx,
-+		ktime_to_us(pthr->latency), ktime_to_ns(pthr->latency));
++	memset(peer->inbuf, 0, peer->inbuf_size);
 +
 +	return 0;
 +}
 +
- static void perf_thread_work(struct work_struct *work)
- {
- 	struct perf_thread *pthr = to_thread_work(work);
-@@ -1043,6 +1119,11 @@ static void perf_thread_work(struct work_struct *work)
- 	}
- 
- 	pthr->status = perf_sync_test(pthr);
-+	if (pthr->status)
-+		goto err_clear_test;
-+
-+	if (perf_latency)
-+		pthr->status = perf_run_latency(pthr);
- 
- err_clear_test:
- 	perf_clear_test(pthr);
-@@ -1142,6 +1223,18 @@ static int perf_read_stats(struct perf_ctx *perf, char *buf,
- 			"%d: copied %llu bytes in %llu usecs, %llu MBytes/s\n",
- 			tidx, pthr->copied, ktime_to_us(pthr->duration),
- 			div64_u64(pthr->copied, ktime_to_us(pthr->duration)));
-+
-+		if (perf_latency && ktime_compare(pthr->latency, ktime_set(0, 0))) {
-+			if (ktime_to_us(pthr->latency) < 10) {
-+				(*pos) += scnprintf(buf + *pos, size - *pos,
-+						"%d: latency %llu ns\n",
-+						tidx, ktime_to_ns(pthr->latency));
-+			} else {
-+				(*pos) += scnprintf(buf + *pos, size - *pos,
-+						"%d: latency %llu us\n",
-+						tidx, ktime_to_us(pthr->latency));
-+			}
-+		}
- 	}
- 
- 	clear_bit_unlock(0, &perf->busy_flag);
-@@ -1344,12 +1437,48 @@ static ssize_t perf_dbgfs_write_tcnt(struct file *filep,
- 	return size;
- }
- 
-+static ssize_t perf_dbgfs_read_lattrs(struct file *filep, char __user *ubuf,
-+				    size_t size, loff_t *offp)
++static int perf_poll_peer_reply(volatile u8 *cur)
 +{
-+	size_t buf_size = min_t(size_t, size, PERF_BUF_LEN);
-+	struct perf_ctx *perf = filep->private_data;
-+	ssize_t pos, ret;
-+	char *buf;
-+	int tidx;
++	u64 wait_till = ktime_get_real_fast_ns() + lat_timeout_us * NSEC_PER_USEC;
 +
-+	buf = kmalloc(buf_size, GFP_KERNEL);
-+	if (!buf)
-+		return -ENOMEM;
++	while (ktime_get_real_fast_ns() < wait_till) {
++		if (*cur == stop_word) {
++			*cur = 0;
++			return 1;
++		}
++		if (*cur != 0) {
++			*cur = 0;
++			return 0;
++		}
++	}
++	return -EINTR;
++}
 +
-+	pos = scnprintf(buf, buf_size, "    Peer %d latency try count:\n",
-+			perf->test_peer->pidx);
++static int perf_run_pl_client(struct perf_poll_lat_data *pldata)
++{
++	struct perf_peer *peer = pldata->perf->test_peer;
++	struct ntb_dev *ntb = pldata->perf->ntb;
++	void *src = pldata->src;
++	u64 stop_at;
++	int ret;
 +
-+	for (tidx = 0; tidx < perf->tcnt; tidx++) {
-+		struct perf_thread *pthr = &perf->threads[tidx];
++	dev_dbg(&ntb->dev, "poll_lat: client started.\n");
 +
-+		pos += scnprintf(buf + pos, buf_size - pos,
-+			"%d: made %llu tries\n",
-+			tidx, pthr->tries);
++	pldata->tries = 0;
++	pldata->latency = ktime_get();
++
++	stop_at = ktime_get_real_fast_ns() + lat_time_ms * NSEC_PER_MSEC;
++	while (ktime_get_real_fast_ns() < stop_at) {
++		memcpy_toio(peer->outbuf, src, 1);
++
++		/* Avoid processor soft lock-ups */
++		schedule();
++
++		ret = perf_poll_peer_reply(peer->inbuf);
++		if (ret < 0) {
++			dev_err(&ntb->dev, "Timeout waiting for peer reply on poll latency\n");
++			pldata->latency = ktime_set(0, 0);
++			return -EINTR;
++		} else if (ret == 1) {
++			dev_warn(&ntb->dev, "Server terminated on poll latency, stopping\n");
++			break;
++		} else if (!atomic_read(&pldata->running)) {
++			dev_err(&ntb->dev, "Poll latency client terminated\n");
++			return -EINTR;
++		}
++
++		pldata->tries++;
++		src++;
++
++		if (src >= pldata->src + peer->outbuf_size)
++			src = pldata->src;
 +	}
 +
-+	ret = simple_read_from_buffer(ubuf, size, offp, buf, pos);
++	/* Stop timer */
++	pldata->latency = ktime_sub(ktime_get(), pldata->latency);
++	/* Send stop to peer */
++	memcpy_toio(peer->outbuf, &stop_word, 1);
 +
-+	kfree(buf);
++	if (pldata->tries < LAT_MIN_TRIES) {
++		dev_err(&ntb->dev,
++			"Too few steps (%llu) to measure Latency, recommended > %d. Increase value of 'lat_time_ms' parameter\n",
++			pldata->tries, LAT_MIN_TRIES);
++		pldata->latency = ktime_set(0, 0);
++		return -EINVAL;
++	}
++
++	dev_dbg(&ntb->dev, "poll_lat: made %llu tries, lasted %llu usecs\n",
++		pldata->tries, ktime_to_us(pldata->latency));
++
++	pldata->latency = ns_to_ktime(ktime_divns(pldata->latency, pldata->tries));
++
++	dev_dbg(&ntb->dev, "poll_lat: latency %llu us (%llu ns)\n",
++		ktime_to_us(pldata->latency), ktime_to_ns(pldata->latency));
++
++	return 0;
++}
++
++static int perf_run_pl_server(struct perf_poll_lat_data *pldata)
++{
++	struct perf_peer *peer = pldata->perf->test_peer;
++	struct ntb_dev *ntb = pldata->perf->ntb;
++	void *src = pldata->src;
++	int ret = 0;
++
++	dev_dbg(&ntb->dev, "poll_lat: server started.\n");
++
++	pldata->tries = 0;
++
++	while (ret != 1 && atomic_read(&pldata->running)) {
++		ret = perf_poll_peer_reply(peer->inbuf);
++		if (!ret) {
++			/* Pong to client */
++			memcpy_toio(peer->outbuf, src++, 1);
++			if (src >= pldata->src + peer->outbuf_size)
++				src = pldata->src;
++
++			pldata->tries++;
++		}
++
++		/* Avoid processor soft lock-ups */
++		schedule();
++	}
++
++	if (pldata->tries < LAT_MIN_TRIES)
++		dev_warn(&ntb->dev,
++			"Poll latency test terminated too early. Increase client's test time\n");
++
++	dev_dbg(&ntb->dev, "poll_lat: server stopped, had responded %llu times\n",
++		pldata->tries);
++
++	return atomic_read(&pldata->running) ? -ENODATA : -EINTR;
++}
++
++static void perf_clear_pl(struct perf_poll_lat_data *pldata)
++{
++	struct perf_ctx *perf = pldata->perf;
++	struct perf_peer *peer = perf->test_peer;
++
++	memset(peer->inbuf, stop_word, 1);
++	atomic_set(&pldata->running, 0);
++	wake_up(&perf->twait);
++	kfree(pldata->src);
++}
++
++static void perf_poll_lat_client_work(struct work_struct *work)
++{
++	struct perf_poll_lat_data *pldata = to_pldata_clt_work(work);
++
++	pldata->status = perf_init_pl(pldata);
++	if (pldata->status)
++		return;
++
++	pldata->status = perf_run_pl_client(pldata);
++
++	perf_clear_pl(pldata);
++}
++
++static void perf_poll_lat_server_work(struct work_struct *work)
++{
++	struct perf_poll_lat_data *pldata = to_pldata_srv_work(work);
++
++	pldata->status = perf_init_pl(pldata);
++	if (pldata->status)
++		return;
++
++	pldata->status = perf_run_pl_server(pldata);
++
++	perf_clear_pl(pldata);
++}
++
+ static int perf_set_tcnt(struct perf_ctx *perf, u8 tcnt)
+ {
+ 	if (tcnt == 0 || tcnt > MAX_THREADS_CNT)
+@@ -1149,7 +1363,10 @@ static void perf_terminate_test(struct perf_ctx *perf)
+ 	int tidx;
+ 
+ 	atomic_set(&perf->tsync, -1);
++	atomic_set(&perf->pldata.running, 0);
+ 	wake_up(&perf->twait);
++	cancel_work_sync(&perf->pldata.srv_work);
++	cancel_work_sync(&perf->pldata.clt_work);
+ 
+ 	for (tidx = 0; tidx < MAX_THREADS_CNT; tidx++) {
+ 		wake_up(&perf->threads[tidx].dma_wait);
+@@ -1195,6 +1412,46 @@ static int perf_submit_test(struct perf_peer *peer)
+ 	return ret;
+ }
+ 
++static int perf_submit_poll_lat(struct perf_peer *peer, enum run_mode mode)
++{
++	struct perf_ctx *perf = peer->perf;
++	int ret;
++
++	ret = wait_for_completion_interruptible(&peer->init_comp);
++	if (ret < 0)
++		return ret;
++
++	if (test_and_set_bit_lock(0, &perf->busy_flag))
++		return -EBUSY;
++
++	perf->test_peer = peer;
++	atomic_set(&perf->pldata.running, 1);
++	perf->pldata.status = -ENODATA;
++	perf->pldata.tries = 0;
++	perf->pldata.latency = ktime_set(0, 0);
++
++	switch (mode) {
++	case RUN_PL_SERVER:
++		(void)queue_work(perf_wq, &perf->pldata.srv_work);
++		break;
++	case RUN_PL_CLIENT:
++	default:
++		(void)queue_work(perf_wq, &perf->pldata.clt_work);
++		break;
++	}
++
++	ret = wait_event_interruptible(perf->twait,
++				       !atomic_read(&perf->pldata.running));
++	if (ret == -ERESTARTSYS) {
++		perf_terminate_test(perf);
++		ret = -EINTR;
++	}
++
++	clear_bit_unlock(0, &perf->busy_flag);
 +
 +	return ret;
++}
++
+ static int perf_read_stats(struct perf_ctx *perf, char *buf,
+ 			   size_t size, ssize_t *pos)
+ {
+@@ -1237,6 +1494,24 @@ static int perf_read_stats(struct perf_ctx *perf, char *buf,
+ 		}
+ 	}
+ 
++	if (perf->pldata.status != -ENODATA) {
++		(*pos) += scnprintf(buf + *pos, size - *pos, "\n");
++		if (perf->pldata.status) {
++			(*pos) += scnprintf(buf + *pos, size - *pos,
++				"poll latency: error status %d\n", perf->pldata.status);
++		} else {
++			if (ktime_to_us(perf->pldata.latency) < 10) {
++				(*pos) += scnprintf(buf + *pos, size - *pos,
++						"poll latency %llu ns\n",
++						ktime_to_ns(perf->pldata.latency));
++			} else {
++				(*pos) += scnprintf(buf + *pos, size - *pos,
++						"poll latency %llu us\n",
++						ktime_to_us(perf->pldata.latency));
++			}
++		}
++	}
++
+ 	clear_bit_unlock(0, &perf->busy_flag);
+ 
+ 	return 0;
+@@ -1250,6 +1525,10 @@ static void perf_init_threads(struct perf_ctx *perf)
+ 	perf->tcnt = DEF_THREADS_CNT;
+ 	perf->test_peer = &perf->peers[0];
+ 	init_waitqueue_head(&perf->twait);
++	perf->pldata.perf = perf;
++	INIT_WORK(&perf->pldata.srv_work, perf_poll_lat_server_work);
++	INIT_WORK(&perf->pldata.clt_work, perf_poll_lat_client_work);
++	perf->pldata.status = -ENODATA;
+ 
+ 	for (tidx = 0; tidx < MAX_THREADS_CNT; tidx++) {
+ 		pthr = &perf->threads[tidx];
+@@ -1406,6 +1685,64 @@ static const struct file_operations perf_dbgfs_run = {
+ 	.write = perf_dbgfs_write_run
+ };
+ 
++static ssize_t perf_dbgfs_write_run_pl(struct file *filep, const char __user *ubuf,
++				    size_t size, loff_t *offp, enum run_mode mode)
++{
++	struct perf_ctx *perf = filep->private_data;
++	struct ntb_dev *ntb = perf->ntb;
++	struct perf_peer *peer;
++	int pidx, ret;
++
++	ret = kstrtoint_from_user(ubuf, size, 0, &pidx);
++	if (ret)
++		return ret;
++
++	if (pidx < 0 && mode == RUN_PL_SERVER) {
++		dev_dbg(&ntb->dev, "poll_lat: kill server\n");
++		if (test_bit(0, &perf->busy_flag)) {
++			peer = perf->test_peer;
++			/* Send stop to client */
++			memcpy_toio(peer->outbuf, &stop_word, 1);
++		}
++		perf_terminate_test(perf);
++		clear_bit_unlock(0, &perf->busy_flag);
++		return size;
++	}
++
++	if (pidx < 0 || pidx >= perf->pcnt)
++		return -EINVAL;
++
++	peer = &perf->peers[pidx];
++
++	ret = perf_submit_poll_lat(peer, mode);
++
++	return ret ? ret : size;
++}
++
++static ssize_t perf_dbgfs_write_run_client(struct file *filep, const char __user *ubuf,
++				    size_t size, loff_t *offp)
++{
++	return perf_dbgfs_write_run_pl(filep, ubuf, size, offp, RUN_PL_CLIENT);
++}
++
++static const struct file_operations perf_dbgfs_run_client = {
++	.open = simple_open,
++	.read = perf_dbgfs_read_run,
++	.write = perf_dbgfs_write_run_client
++};
++
++static ssize_t perf_dbgfs_write_run_server(struct file *filep, const char __user *ubuf,
++				    size_t size, loff_t *offp)
++{
++	return perf_dbgfs_write_run_pl(filep, ubuf, size, offp, RUN_PL_SERVER);
++}
++
++static const struct file_operations perf_dbgfs_run_server = {
++	.open = simple_open,
++	.read = perf_dbgfs_read_run,
++	.write = perf_dbgfs_write_run_server
++};
++
+ static ssize_t perf_dbgfs_read_tcnt(struct file *filep, char __user *ubuf,
+ 				    size_t size, loff_t *offp)
+ {
+@@ -1468,6 +1805,24 @@ static ssize_t perf_dbgfs_read_lattrs(struct file *filep, char __user *ubuf,
+ 	return ret;
+ }
+ 
++static ssize_t perf_dbgfs_read_inbuf(struct file *filep, char __user *ubuf,
++				    size_t size, loff_t *offp)
++{
++	struct perf_ctx *perf = filep->private_data;
++	char buf[32];
++	ssize_t pos;
++	u64 *value;
++
++	if (!perf->test_peer || !perf->test_peer->inbuf) {
++		pos = scnprintf(buf, sizeof(buf), "NULL\n");
++	} else {
++		value = perf->test_peer->inbuf;
++		pos = scnprintf(buf, sizeof(buf), "0x%llx\n", *value);
++	}
++
++	return simple_read_from_buffer(ubuf, size, offp, buf, pos);
 +}
 +
  static const struct file_operations perf_dbgfs_tcnt = {
  	.open = simple_open,
  	.read = perf_dbgfs_read_tcnt,
- 	.write = perf_dbgfs_write_tcnt
+@@ -1479,6 +1834,11 @@ static const struct file_operations perf_dbgfs_lattrs = {
+ 	.read = perf_dbgfs_read_lattrs
  };
  
-+static const struct file_operations perf_dbgfs_lattrs = {
++static const struct file_operations perf_dbgfs_inbuf = {
 +	.open = simple_open,
-+	.read = perf_dbgfs_read_lattrs
++	.read = perf_dbgfs_read_inbuf,
 +};
 +
  static void perf_setup_dbgfs(struct perf_ctx *perf)
  {
  	struct pci_dev *pdev = perf->ntb->pdev;
-@@ -1375,6 +1504,9 @@ static void perf_setup_dbgfs(struct perf_ctx *perf)
- 	debugfs_create_u8("total_order", 0500, perf->dbgfs_dir, &total_order);
+@@ -1495,6 +1855,12 @@ static void perf_setup_dbgfs(struct perf_ctx *perf)
+ 	debugfs_create_file("run", 0600, perf->dbgfs_dir, perf,
+ 			    &perf_dbgfs_run);
  
- 	debugfs_create_bool("use_dma", 0500, perf->dbgfs_dir, &use_dma);
++	debugfs_create_file("run_client", 0600, perf->dbgfs_dir, perf,
++			    &perf_dbgfs_run_client);
 +
-+	debugfs_create_file("latency_tries", 0400, perf->dbgfs_dir, perf,
-+			    &perf_dbgfs_lattrs);
++	debugfs_create_file("run_server", 0600, perf->dbgfs_dir, perf,
++			    &perf_dbgfs_run_server);
++
+ 	debugfs_create_file("threads_count", 0600, perf->dbgfs_dir, perf,
+ 			    &perf_dbgfs_tcnt);
+ 
+@@ -1507,6 +1873,12 @@ static void perf_setup_dbgfs(struct perf_ctx *perf)
+ 
+ 	debugfs_create_file("latency_tries", 0400, perf->dbgfs_dir, perf,
+ 			    &perf_dbgfs_lattrs);
++
++	debugfs_create_u64("poll_latency_tries", 0400, perf->dbgfs_dir,
++				&perf->pldata.tries);
++
++	debugfs_create_file("inbuf", 0400, perf->dbgfs_dir, perf,
++			    &perf_dbgfs_inbuf);
  }
  
  static void perf_clear_dbgfs(struct perf_ctx *perf)
