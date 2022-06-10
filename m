@@ -1,99 +1,172 @@
-Received: from mail-lj1-f181.google.com (mail-lj1-f181.google.com [209.85.208.181])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B35BEEA8
-	for <ntb@lists.linux.dev>; Wed, 25 May 2022 08:58:06 +0000 (UTC)
-Received: by mail-lj1-f181.google.com with SMTP id q1so14059767ljb.5
-        for <ntb@lists.linux.dev>; Wed, 25 May 2022 01:58:06 -0700 (PDT)
+Received: from mail.baikalelectronics.com (mail.baikalelectronics.com [87.245.175.230])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 590007A
+	for <ntb@lists.linux.dev>; Fri, 10 Jun 2022 08:14:50 +0000 (UTC)
+Received: from mail (mail.baikal.int [192.168.51.25])
+	by mail.baikalelectronics.com (Postfix) with ESMTP id 9473516A0;
+	Fri, 10 Jun 2022 11:08:57 +0300 (MSK)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.baikalelectronics.com 9473516A0
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=KQj7AtJgNaYpUrKmSfOG/MaLkEoVxOErcSY4pQJ5csk=;
-        b=RALk5RoedwkXDj5j8+/dSa6QQKPGAL5GTu/XM7HDK0hf3nv0wdWsw5ABQwufiqiajb
-         w9Haou2Wsf/DX5RaVuD8uqxswLL9vHXLpnlvwc7+nfBIwRfow4YohiC5mkiZgnj1UWXz
-         2AvPhhvhvKuWqMb39CS/wLS49vF1POnA60Uo6RvrohTNtYCpZpw09U4/Bc5HQsvCU8IW
-         OmjnO9jiMRN2GDkw0QHUF9Ao+WSfBWSnBfq8LIUX6dWp5X/Zs0YpuR/IymQGHqz1/Ki8
-         zpG3KIiGBymvly4Ne4cVyy02gN9EwyMfEl5jgFmgFEu6pf1b0IeJCJkCy7omHixagTyQ
-         zb9w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=KQj7AtJgNaYpUrKmSfOG/MaLkEoVxOErcSY4pQJ5csk=;
-        b=FkgwN+rqUBcmPFJCYvU09kAFpty40QsgePOa4R139bA68KpcXuIO9L3M1DqgfA1a6x
-         +de7DJz89oD+0axbil2EwzCjloZy+N1ntiyjRNpL9aTh2k2300B9s3nIKQyVwwxtbovE
-         ZCDq/407JBqw+9VUbG48nQtHaUA8v5QCZkkrVrtBhGTU0drjnoUdg1dDTnZUF7PHYYvm
-         4gerSadtjBrtDFscUjhem0UOUt3MgvXh46ix+o+JDvnImLS7CGrlxWHrkr83Qpb5kSA2
-         spKvibOeuiRNNZGdpWWOx3hHrmMZ81l2WJASN6WFz5a/LvHb9dfOno2Wv8CdkGRPEQrm
-         SpVg==
-X-Gm-Message-State: AOAM531aKf7/xcJL+Wh48NRjAHbW8mXoVA/1tNtkaTXWze6Zwf6f5yav
-	t3M0unKISEWZozYr8boLSP0=
-X-Google-Smtp-Source: ABdhPJx6Xepue3dRzqeo54eepjGOTH0miyHt9CK5Mvmj+X/cBmZjN4kMbzn7anbyevgV4iYAK4vuYA==
-X-Received: by 2002:a2e:bf01:0:b0:247:dfe7:62dc with SMTP id c1-20020a2ebf01000000b00247dfe762dcmr18781584ljr.365.1653469084586;
-        Wed, 25 May 2022 01:58:04 -0700 (PDT)
-Received: from mobilestation ([95.79.189.214])
-        by smtp.gmail.com with ESMTPSA id x19-20020a056512131300b00478628920e1sm2030430lfu.103.2022.05.25.01.58.03
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 25 May 2022 01:58:03 -0700 (PDT)
-Date: Wed, 25 May 2022 11:58:01 +0300
-From: Serge Semin <fancer.lancer@gmail.com>
-To: Dave Jiang <dave.jiang@intel.com>
-Cc: Alexander Fomichev <fomichev.ru@gmail.com>, ntb@lists.linux.dev,
-	linux@yadro.com, Jon Mason <jdmason@kudzu.us>,
-	Allen Hubbe <allenbh@gmail.com>,
-	Guo Zhengkui <guozhengkui@vivo.com>,
-	Alexander Fomichev <a.fomichev@yadro.com>
-Subject: Re: [PATCH v3 0/3] ntb_perf: add new 'latency' test set
-Message-ID: <20220525085801.4r2l44vqiaqrbjk4@mobilestation>
-References: <20220513193704.36868-1-fomichev.ru@gmail.com>
- <60dd9f2e-57b1-7c9d-ca99-568c37fe286a@intel.com>
+	d=baikalelectronics.ru; s=mail; t=1654848540;
+	bh=P0epdiQ2UfkKeER5KtOFqFsZ8/0xaqJ7ab4vUUQPTCw=;
+	h=From:To:CC:Subject:Date:From;
+	b=FES/RpZBcFEtKNYzfj2ZM1TKH3v4j1D1srCu1QFX0yo+vxrndl74dC/lOEO0AROoD
+	 E9WiAns/InODAMwuQ3yGDm0SYSUjNGDlAku4e4gJHtto+ZKLwtUZuRhTH6qiwi2G8o
+	 Wx1WzoKWULlo6KhIEebDed0WI8cU+7OfayCvYSmE=
+Received: from localhost (192.168.53.207) by mail (192.168.51.25) with
+ Microsoft SMTP Server (TLS) id 15.0.1395.4; Fri, 10 Jun 2022 11:08:05 +0300
+From: Serge Semin <Sergey.Semin@baikalelectronics.ru>
+To: Christoph Hellwig <hch@lst.de>, Marek Szyprowski
+	<m.szyprowski@samsung.com>, Robin Murphy <robin.murphy@arm.com>, Vladimir
+ Murzin <vladimir.murzin@arm.com>
+CC: Serge Semin <Sergey.Semin@baikalelectronics.ru>, Serge Semin
+	<fancer.lancer@gmail.com>, Alexey Malahov
+	<Alexey.Malahov@baikalelectronics.ru>, Pavel Parkhomenko
+	<Pavel.Parkhomenko@baikalelectronics.ru>, Manivannan Sadhasivam
+	<manivannan.sadhasivam@linaro.org>, Andrew Lunn <andrew@lunn.ch>, Sebastian
+ Hesselbarth <sebastian.hesselbarth@gmail.com>, Gregory Clement
+	<gregory.clement@bootlin.com>, <linux-arm-kernel@lists.infradead.org>,
+	Srujana Challa <schalla@marvell.com>, Arnaud Ebalard <arno@natisbad.org>,
+	Boris Brezillon <bbrezillon@kernel.org>, <linux-crypto@vger.kernel.org>,
+	Vinod Koul <vkoul@kernel.org>, <dmaengine@vger.kernel.org>, Shawn Guo
+	<shawnguo@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, Li Yang
+	<leoyang.li@nxp.com>, Geert Uytterhoeven <geert+renesas@glider.be>, Magnus
+ Damm <magnus.damm@gmail.com>, <linux-renesas-soc@vger.kernel.org>, Alex
+ Deucher <alexander.deucher@amd.com>, =?UTF-8?q?Christian=20K=C3=B6nig?=
+	<christian.koenig@amd.com>, "Pan, Xinhui" <Xinhui.Pan@amd.com>, David Airlie
+	<airlied@linux.ie>, Gerd Hoffmann <kraxel@redhat.com>, Tomasz Figa
+	<tfiga@chromium.org>, Oded Gabbay <ogabbay@kernel.org>, Arnd Bergmann
+	<arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Manivannan
+ Sadhasivam <mani@kernel.org>, Andy Gross <agross@kernel.org>, Bjorn Andersson
+	<bjorn.andersson@linaro.org>, <linux-arm-msm@vger.kernel.org>, Sunil Goutham
+	<sgoutham@marvell.com>, Linu Cherian <lcherian@marvell.com>, Geetha sowjanya
+	<gakula@marvell.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang
+	<dave.jiang@intel.com>, <ntb@lists.linux.dev>,
+	<iommu@lists.linux-foundation.org>, <linux-kernel@vger.kernel.org>
+Subject: [PATCH] dma-direct: take dma-ranges/offsets into account in resource mapping
+Date: Fri, 10 Jun 2022 11:08:02 +0300
+Message-ID: <20220610080802.11147-1-Sergey.Semin@baikalelectronics.ru>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <60dd9f2e-57b1-7c9d-ca99-568c37fe286a@intel.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+X-ClientProxiedBy: MAIL.baikal.int (192.168.51.25) To mail (192.168.51.25)
 
-Hi Dave
+A basic device-specific linear memory mapping was introduced back in
+commit ("dma: Take into account dma_pfn_offset") as a single-valued offset
+preserved in the device.dma_pfn_offset field, which was initialized for
+instance by means of the "dma-ranges" DT property. Afterwards the
+functionality was extended to support more than one device-specific region
+defined in the device.dma_range_map list of maps. But all of these
+improvements concerned a single pointer, page or sg DMA-mapping methods,
+while the system resource mapping function turned to miss the
+corresponding modification. Thus the dma_direct_map_resource() method now
+just casts the CPU physical address to the device DMA address with no
+dma-ranges-based mapping taking into account, which is obviously wrong.
+Let's fix it by using the phys_to_dma_direct() method to get the
+device-specific bus address from the passed memory resource for the case
+of the directly mapped DMA.
 
-On Mon, May 23, 2022 at 11:38:35AM -0700, Dave Jiang wrote:
-> 
-> On 5/13/2022 12:37 PM, Alexander Fomichev wrote:
-> > From: Alexander Fomichev <a.fomichev@yadro.com>
-> > 
-> > The ntb_perf test provides a tool for NTB hardware performance
-> > evaluation. For software impact elimination the test uses a simple method
-> > (let's call it 'burst' mode), when the local system sends to the remote
-> > system a data set and counts time interval until hardware completion
-> > report, without the remote side confirming, nor data integrity check.
-> > The measured metric is a 'burst' throughput bandwidth of NTB connection.
-> > 
-> > The patches extend ntb_perf with 3 new metrics:
-> > 1) Burst latency
-> > 2) Poll latency
-> > 3) Doorbell latency
-> > 
-> > The resulting test set is fully backward compatible.
-> > 
-> > Alexander Fomichev (3):
-> >    ntb_perf: extend with burst latency measurement
-> >    ntb_perf: extend with poll latency measurement
-> >    ntb_perf: extend with doorbell latency measurement
-> > 
-> >   drivers/ntb/test/ntb_perf.c | 826 +++++++++++++++++++++++++++++++++++-
-> >   1 file changed, 810 insertions(+), 16 deletions(-)
-> 
+Fixes: 25f1e1887088 ("dma: Take into account dma_pfn_offset")
+Signed-off-by: Serge Semin <Sergey.Semin@baikalelectronics.ru>
 
-> Looks ok to me. Probably should get Serge's ack.
+---
 
-Ok. I'll have a look at the series on this week.
+After a long discussion with Christoph and Robin regarding this patch
+here:
+https://lore.kernel.org/lkml/20220324014836.19149-4-Sergey.Semin@baikalelectronics.ru
+and here
+https://lore.kernel.org/linux-pci/20220503225104.12108-2-Sergey.Semin@baikalelectronics.ru/
+It was decided to consult with wider maintainers audience whether it's ok
+to accept the change as is or a more sophisticated solution needs to be
+found for the non-linear direct MMIO mapping.
 
--Sergey
+Cc: Christoph Hellwig <hch@lst.de>
+Cc: Robin Murphy <robin.murphy@arm.com>
+Cc: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
 
-> 
-> Reviewed-by: Dave Jiang <dave.jiang@intel.com>
-> 
+file: arch/arm/mach-orion5x/board-dt.c
+Cc: Andrew Lunn <andrew@lunn.ch>
+Cc: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+Cc: Gregory Clement <gregory.clement@bootlin.com>
+Cc: linux-arm-kernel@lists.infradead.org
+
+file: drivers/crypto/marvell/cesa/cesa.c
+Cc: Srujana Challa <schalla@marvell.com>
+Cc: Arnaud Ebalard <arno@natisbad.org>
+Cc: Boris Brezillon <bbrezillon@kernel.org>
+Cc: linux-crypto@vger.kernel.org
+
+file: drivers/dma/{fsl-edma-common.c,pl330.c,sh/rcar-dmac.c}
+Cc: Vinod Koul <vkoul@kernel.org>
+Cc: dmaengine@vger.kernel.org
+
+file: arch/arm/boot/dts/{vfxxx.dtsi,ls1021a.dtsi,imx7ulp.dtsi,fsl-ls1043a.dtsi}
+Cc: Shawn Guo <shawnguo@kernel.org>
+Cc: Sascha Hauer <s.hauer@pengutronix.de>
+Cc: Li Yang <leoyang.li@nxp.com>
+Cc: linux-arm-kernel@lists.infradead.org
+
+file: arch/arm/boot/dts/r8a77*.dtsi, arch/arm64/boot/dts/renesas/r8a77*.dtsi
+Cc: Geert Uytterhoeven <geert+renesas@glider.be>
+Cc: Magnus Damm <magnus.damm@gmail.com>
+Cc: linux-renesas-soc@vger.kernel.org
+
+file: drivers/gpu/drm/amd/amdgpu/amdgpu_vram_mgr.c
+Cc: Alex Deucher <alexander.deucher@amd.com>
+Cc: "Christian König" <christian.koenig@amd.com>
+Cc: "Pan, Xinhui" <Xinhui.Pan@amd.com>
+
+file: drivers/gpu/drm/virtio/virtgpu_vram.c
+Cc: David Airlie <airlied@linux.ie>
+Cc: Gerd Hoffmann <kraxel@redhat.com>
+
+file: drivers/media/common/videobuf2/videobuf2-dma-contig.c
+Cc: Tomasz Figa <tfiga@chromium.org>
+Cc: Marek Szyprowski <m.szyprowski@samsung.com>
+
+file: drivers/misc/habanalabs/common/memory.c
+Cc: Oded Gabbay <ogabbay@kernel.org>
+Cc: Arnd Bergmann <arnd@arndb.de>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+file: drivers/mtd/nand/raw/qcom_nandc.c
+Cc: Manivannan Sadhasivam <mani@kernel.org>
+
+file: arch/arm64/boot/dts/qcom/{ipq8074.dtsi,ipq6018.dtsi,qcom-sdx55.dtsi,qcom-ipq4019.dtsi,qcom-ipq8064.dtsi}
+Cc: Andy Gross <agross@kernel.org>
+Cc: Bjorn Andersson <bjorn.andersson@linaro.org>
+Cc: linux-arm-msm@vger.kernel.org
+
+file: drivers/net/ethernet/marvell/octeontx2/af/rvu.c
+Cc: Sunil Goutham <sgoutham@marvell.com>
+Cc: Linu Cherian <lcherian@marvell.com>
+Cc: Geetha sowjanya <gakula@marvell.com>
+
+file: drivers/ntb/ntb_transport.c
+Cc: Jon Mason <jdmason@kudzu.us>
+Cc: Dave Jiang <dave.jiang@intel.com>
+Cc: ntb@lists.linux.dev
+---
+ kernel/dma/direct.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/kernel/dma/direct.c b/kernel/dma/direct.c
+index 9743c6ccce1a..bc06db74dfdb 100644
+--- a/kernel/dma/direct.c
++++ b/kernel/dma/direct.c
+@@ -497,7 +497,7 @@ int dma_direct_map_sg(struct device *dev, struct scatterlist *sgl, int nents,
+ dma_addr_t dma_direct_map_resource(struct device *dev, phys_addr_t paddr,
+ 		size_t size, enum dma_data_direction dir, unsigned long attrs)
+ {
+-	dma_addr_t dma_addr = paddr;
++	dma_addr_t dma_addr = phys_to_dma_direct(dev, paddr);
+ 
+ 	if (unlikely(!dma_capable(dev, dma_addr, size, false))) {
+ 		dev_err_once(dev,
+-- 
+2.35.1
+
