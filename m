@@ -1,67 +1,81 @@
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D7D23137A
-	for <ntb@lists.linux.dev>; Wed, 22 Jun 2022 11:24:29 +0000 (UTC)
-Received: by verein.lst.de (Postfix, from userid 2407)
-	id DB13D68AA6; Wed, 22 Jun 2022 13:16:41 +0200 (CEST)
-Date: Wed, 22 Jun 2022 13:16:41 +0200
-From: Christoph Hellwig <hch@lst.de>
-To: Serge Semin <fancer.lancer@gmail.com>
-Cc: Serge Semin <Sergey.Semin@baikalelectronics.ru>,
-	Christoph Hellwig <hch@lst.de>,
-	Marek Szyprowski <m.szyprowski@samsung.com>,
-	Robin Murphy <robin.murphy@arm.com>,
-	Vladimir Murzin <vladimir.murzin@arm.com>,
-	Alexey Malahov <Alexey.Malahov@baikalelectronics.ru>,
-	Pavel Parkhomenko <Pavel.Parkhomenko@baikalelectronics.ru>,
-	Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
-	Andrew Lunn <andrew@lunn.ch>,
-	Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>,
-	Gregory Clement <gregory.clement@bootlin.com>,
-	linux-arm-kernel@lists.infradead.org,
-	Srujana Challa <schalla@marvell.com>,
-	Arnaud Ebalard <arno@natisbad.org>,
-	Boris Brezillon <bbrezillon@kernel.org>,
-	linux-crypto@vger.kernel.org, Vinod Koul <vkoul@kernel.org>,
-	dmaengine@vger.kernel.org, Shawn Guo <shawnguo@kernel.org>,
-	Sascha Hauer <s.hauer@pengutronix.de>, Li Yang <leoyang.li@nxp.com>,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
-	Magnus Damm <magnus.damm@gmail.com>,
-	linux-renesas-soc@vger.kernel.org,
-	Alex Deucher <alexander.deucher@amd.com>,
-	Christian =?iso-8859-1?Q?K=F6nig?= <christian.koenig@amd.com>,
-	"Pan, Xinhui" <Xinhui.Pan@amd.com>, David Airlie <airlied@linux.ie>,
-	Gerd Hoffmann <kraxel@redhat.com>, Tomasz Figa <tfiga@chromium.org>,
-	Oded Gabbay <ogabbay@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Manivannan Sadhasivam <mani@kernel.org>,
-	Andy Gross <agross@kernel.org>,
-	Bjorn Andersson <bjorn.andersson@linaro.org>,
-	linux-arm-msm@vger.kernel.org, Sunil Goutham <sgoutham@marvell.com>,
-	Linu Cherian <lcherian@marvell.com>,
-	Geetha sowjanya <gakula@marvell.com>, Jon Mason <jdmason@kudzu.us>,
-	Dave Jiang <dave.jiang@intel.com>, ntb@lists.linux.dev,
-	iommu@lists.linux-foundation.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] dma-direct: take dma-ranges/offsets into account in
- resource mapping
-Message-ID: <20220622111641.GA27618@lst.de>
-References: <20220610080802.11147-1-Sergey.Semin@baikalelectronics.ru> <20220620213755.kczuriyildoublzi@mobilestation>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 40A811869;
+	Wed, 22 Jun 2022 17:44:35 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 67C53C36AE2;
+	Wed, 22 Jun 2022 17:44:34 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1655919874;
+	bh=+kC/zzrxsO6n8cq3xnxIXvNTnaexwmD8lJHtOZ0k0OE=;
+	h=From:To:Cc:Subject:Date:From;
+	b=JIm6M8SVTqwLJWdokvyB9ukWoNBDYjrRlZT9aPXc+g21G99AePhExJcranIXDjeXK
+	 9U9ezEqLlY3NU+WV45rtOxw+oWcuD00xjai7EQlA/5xy/45EhUxXTCFkvxCUMOWCUp
+	 k2GUzDIzhbrDS1+C8Kfs8RNwmsmpEV13eVBc/Wb0XUyskOI9miNik90LagB4khtBTH
+	 JqhqwHMxwUPJsllHAk6QKhxOGlhxEXRha/PdsBRkvxHhWh/4KCS7eenIN2JoVx+yr8
+	 ALWaT53kjxDVkg7AkER7y3g9irS6ljMV88zGURx+GbLjxPFOiLFJh1Q3vpn4wUExkD
+	 Ycyh7ZeNsCFAw==
+From: Nathan Chancellor <nathan@kernel.org>
+To: Jon Mason <jdmason@kudzu.us>,
+	Dave Jiang <dave.jiang@intel.com>,
+	Allen Hubbe <allenbh@gmail.com>
+Cc: Alexander Fomichev <a.fomichev@yadro.com>,
+	ntb@lists.linux.dev,
+	patches@lists.linux.dev,
+	Nathan Chancellor <nathan@kernel.org>,
+	kernel test robot <lkp@intel.com>
+Subject: [PATCH] ntb_perf: Fix 64-bit division on 32-bit architectures
+Date: Wed, 22 Jun 2022 10:43:26 -0700
+Message-Id: <20220622174326.1832697-1-nathan@kernel.org>
+X-Mailer: git-send-email 2.37.0.rc1
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220620213755.kczuriyildoublzi@mobilestation>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+Content-Transfer-Encoding: 8bit
 
-I'd really like to hear something from the driver maintainers.  The
-cod change itself looks fine, we just need to make sure it does not
-break any driver assumptions.
+When compiling for a 32-bit architecture, such as arm, an error occurs
+during modpost:
 
-And I think at least for the PCIe P2P and NTB cases I fear it might
-break them.  The proper logic for those is in the p2p helpers, but
-it seems like not everyone is using them.
+  ERROR: modpost: "__aeabi_uldivmod" [drivers/ntb/test/ntb_perf.ko] undefined!
+
+The tries member of struct perf_thread is u64 so a 64-bit division
+helper is needed. Use div_u64_rem() to get the remainder of the division
+so that it can be checked against zero.
+
+Fixes: dc150dfb081f ("ntb_perf: extend with burst latency measurement")
+Reported-by: kernel test robot <lkp@intel.com>
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ drivers/ntb/test/ntb_perf.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
+index 23e154bd41b9..4e05c7aa070d 100644
+--- a/drivers/ntb/test/ntb_perf.c
++++ b/drivers/ntb/test/ntb_perf.c
+@@ -1118,6 +1118,7 @@ static int perf_run_latency(struct perf_thread *pthr)
+ 	void __iomem *flt_dst, *bnd_dst;
+ 	void *flt_src;
+ 	u64 stop_at;
++	u32 rem;
+ 	int ret;
+ 
+ 	pthr->tries = 0;
+@@ -1146,7 +1147,8 @@ static int perf_run_latency(struct perf_thread *pthr)
+ 		}
+ 
+ 		/* Avoid processor soft lock-ups */
+-		if (!(pthr->tries % RESCHEDULE_RATIO))
++		div_u64_rem(pthr->tries, RESCHEDULE_RATIO, &rem);
++		if (!rem)
+ 			schedule();
+ 	}
+ 
+
+base-commit: 0c4b285d9636cc850f55151fa6a250dd131e5192
+-- 
+2.37.0.rc1
+
