@@ -1,58 +1,47 @@
-Received: from mail-lf1-f49.google.com (mail-lf1-f49.google.com [209.85.167.49])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mga07.intel.com (mga07.intel.com [134.134.136.100])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 24764111B
-	for <ntb@lists.linux.dev>; Wed, 22 Jun 2022 20:36:53 +0000 (UTC)
-Received: by mail-lf1-f49.google.com with SMTP id f39so14126181lfv.3
-        for <ntb@lists.linux.dev>; Wed, 22 Jun 2022 13:36:53 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=ZfHupK9hRhtnd5t6GGGgTf2v5tyR2N/tHz46UJtTY0A=;
-        b=OuiG3CCVdqEM63HFEiLL8964KoI5KAKM6xgrl7ojtMezmruEIloYuymfby9h1v50vE
-         kLFrS0sdkJ6mNNX15nwpynU1HXTY2+xJVBnGdsCGsJgDgnD/ewQV0D/ZjZEojFA4KTqJ
-         SqdXIwkBsr+mCyZpG84cvdsWdySUfCj4MbDkalP2v7y3Iwp2Xl0QXwQVktl882VhWdsj
-         nuapD4hL4ljXX15g4oWOeHRZd4liBbAEtjPpuWW4ifSedH/yEIB3HG06eZHNJwvLxyjv
-         8O9JLr8VCafSBBNotGHmortzByr1MqyPsgjWFAoAoIxx46XQuDaQCnAy53yNMPFhmQj2
-         PFPg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=ZfHupK9hRhtnd5t6GGGgTf2v5tyR2N/tHz46UJtTY0A=;
-        b=h+sJsmEQ2XofQ7eP10h4xgUefkrxrx5kZlgMLMhv6JOZAHxdYWsUFm3pvHKj1SXMb3
-         k2swI65QnJYNT8Ftom5igzhnHrIsr1ZK16ps+vhJ9dvmgDnQq606xPz1Ebgk8SA1BgXs
-         gLADPYrvEJAELNz9IuPU76Ta19eFR5Jw1kKlMRwxoRww2gH6Ix5zZRv36ElEJFj+KlmR
-         in9NBqfKapFzJCPUBVPn4y7Z05axdRWf4ubA8E3W+CLeBnqdZS7rvpsIAd0LZ6IDYJsQ
-         csISPE2VhBBeYW/x8Q9gql6l90qPAWzOXQWIa+HJZLsNP9Xxptxcvcx0XvsDz9XYuk9i
-         G9mw==
-X-Gm-Message-State: AJIora8O5Tt2dJOakv4sgqLTBymcX046w/hQbqWwilLJNlrFU4PccMQZ
-	hzp0hYVp86VpXx8heWycOWw=
-X-Google-Smtp-Source: AGRyM1tK84tEYHeiaSQjAeEcwgFuUSS88uDwlN6D2TUDQV/MG4/mQtYKKDXt48brGOZp1NbgqLcXBw==
-X-Received: by 2002:a05:6512:202d:b0:47f:7d1b:bb7e with SMTP id s13-20020a056512202d00b0047f7d1bbb7emr3243029lfs.615.1655930211080;
-        Wed, 22 Jun 2022 13:36:51 -0700 (PDT)
-Received: from mobilestation ([95.79.189.214])
-        by smtp.gmail.com with ESMTPSA id x4-20020a056512078400b0047f6c48a603sm1484195lfr.202.2022.06.22.13.36.49
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 22 Jun 2022 13:36:50 -0700 (PDT)
-Date: Wed, 22 Jun 2022 23:36:48 +0300
-From: Serge Semin <fancer.lancer@gmail.com>
-To: Alexander Fomichev <fomichev.ru@gmail.com>
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>,
-	ntb@lists.linux.dev, linux@yadro.com,
-	Allen Hubbe <allenbh@gmail.com>,
-	Guo Zhengkui <guozhengkui@vivo.com>,
-	Alexander Fomichev <a.fomichev@yadro.com>
-Subject: Re: [PATCH v3 0/3] ntb_perf: add new 'latency' test set
-Message-ID: <20220622203648.jo6raa4h57g24el2@mobilestation>
-References: <20220513193704.36868-1-fomichev.ru@gmail.com>
- <60dd9f2e-57b1-7c9d-ca99-568c37fe286a@intel.com>
- <20220525085801.4r2l44vqiaqrbjk4@mobilestation>
- <20220620102014.7oiq3yh7jfvzacpm@yadro.com>
- <YrCHbmrNy9obZe2t@kudzu.us>
- <20220621140537.tfhsqez4wh7ehftv@mobilestation>
- <20220622094457.52x4gfve3g3r3kvj@yadro.com>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EC74746A2;
+	Fri, 24 Jun 2022 20:20:26 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1656102027; x=1687638027;
+  h=date:from:to:cc:subject:message-id:mime-version:
+   content-transfer-encoding;
+  bh=5yir5qsDWmJvpcLu8qopoQ2H2wrhCorETTzmzNRdNeU=;
+  b=DfBSv5hImO05Cr0wbpMO6B2WHyt3SgHDsjYSl8D2J0crrNgFcCrw8NKr
+   Ztfe//KKx8DB15UnvzjoXgXN31q8dJP1y2ZnWotprzZ7qkZYAwk2nAbKA
+   92BSbGZKyjoLQ/s9pEm9v5rWxvFo2EEgXzMDJJf9i2EAag1ne+FbztCQ4
+   1Z4Fw1sFfoZWog/mKLY3uwiJQuSnoE97d50+6H7D6db8yeN/4iTS3oIQA
+   UXOtEo48VTfZC8Fh7BX0LRILO1NubvO0lE4z/P/et3fkEENtU2u8WD3kK
+   A2b7Gf2fPgChPi4yIZI+NqlmagiRSglUilQ8m6vfkSsWKYBoTFTDC7gUO
+   w==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10388"; a="345082782"
+X-IronPort-AV: E=Sophos;i="5.92,220,1650956400"; 
+   d="scan'208";a="345082782"
+Received: from orsmga002.jf.intel.com ([10.7.209.21])
+  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Jun 2022 13:20:26 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.92,220,1650956400"; 
+   d="scan'208";a="589124453"
+Received: from lkp-server01.sh.intel.com (HELO 68b931ab7ac1) ([10.239.97.150])
+  by orsmga002.jf.intel.com with ESMTP; 24 Jun 2022 13:20:23 -0700
+Received: from kbuild by 68b931ab7ac1 with local (Exim 4.95)
+	(envelope-from <lkp@intel.com>)
+	id 1o4pmw-0004ff-Tx;
+	Fri, 24 Jun 2022 20:20:22 +0000
+Date: Sat, 25 Jun 2022 04:20:04 +0800
+From: kernel test robot <lkp@intel.com>
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: ntb@lists.linux.dev, netdev@vger.kernel.org,
+ linuxppc-dev@lists.ozlabs.org, linux-staging@lists.linux.dev,
+ linux-perf-users@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+ dri-devel@lists.freedesktop.org, amd-gfx@lists.freedesktop.org,
+ Linux Memory Management List <linux-mm@kvack.org>
+Subject: [linux-next:master] BUILD REGRESSION
+ 2f9cb3d3bd73fc2225d66aa8fcffb632ed3eb235
+Message-ID: <62b61c74.3Kp+9QDweGyj9KVR%lkp@intel.com>
+User-Agent: Heirloom mailx 12.5 6/20/10
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -60,125 +49,213 @@ List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220622094457.52x4gfve3g3r3kvj@yadro.com>
+Content-Transfer-Encoding: 7bit
 
-On Wed, Jun 22, 2022 at 12:44:57PM +0300, Alexander Fomichev wrote:
-> Hi Serge,
-> 
-> Thank you for the very detailed comments.
-> 
-> On Tue, Jun 21, 2022 at 05:05:37PM +0300, Serge Semin wrote:
-> > 
-> > Please also note, there is a special test-script, which rely on the
-> > certain test drivers semantic:
-> > tools/testing/selftests/ntb/ntb_test.sh
-> > It looks like the suggested patches don't change the already defined
-> > ntb_perf DebugFS interface, but still may cause the script to fail if the
-> > latency on the particular system will get measured too high. So should
-> > we have the latency-part in a separate driver, the script won't get
-> > affected by it. If it is required the script could be updated accordingly
-> > taking the new driver specifics into account.
-> >
+tree/branch: https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git master
+branch HEAD: 2f9cb3d3bd73fc2225d66aa8fcffb632ed3eb235  Add linux-next specific files for 20220624
 
-> As described in the cover commit message, the resulting test is fully
-> backward compatible. I mean that if we don't fiddle with the new sysfs
-> entries, then no latency measures are performed, and the test works as
-> it did before the patch set.
+Error/Warning reports:
 
-sysfs? Did you mean debugfs?
-Anyway the DebugFS interface will be indeed backward compatible, but
-functionally the performance test won't be the same. AFAICS at the
-very least the burst-latency test is executed by default together with
-the standard performance test. It may cause ntb_test.sh regressions on
-the systems (the test will fail if the latency is too high), which
-haven't had any problem before.
+https://lore.kernel.org/llvm/202206221813.Dn1s6uuh-lkp@intel.com
 
-> Also, I plan to make changes to "ntb_test.sh" script accordingly, after
-> this patch set is merged.
+Error/Warning: (recently discovered and may have been fixed)
 
-Good. It will be much easier to do should you have the latency test
-implemented as a separate driver.
+arch/powerpc/kernel/interrupt.c:542:55: error: suggest braces around empty body in an 'if' statement [-Werror=empty-body]
+arch/powerpc/kernel/interrupt.c:542:55: warning: suggest braces around empty body in an 'if' statement [-Wempty-body]
+drivers/gpu/drm/amd/amdgpu/../display/dc/core/dc_link.c:1025:33: warning: variable 'pre_connection_type' set but not used [-Wunused-but-set-variable]
+drivers/ntb/test/ntb_perf.c:1145: undefined reference to `__umoddi3'
+drivers/pci/endpoint/functions/pci-epf-vntb.c:975:5: warning: no previous prototype for function 'pci_read' [-Wmissing-prototypes]
+drivers/pci/endpoint/functions/pci-epf-vntb.c:984:5: warning: no previous prototype for function 'pci_write' [-Wmissing-prototypes]
+include/linux/fs.h:1656: warning: expecting prototype for i_gid_into_mnt(). Prototype was for i_gid_into_vfsgid() instead
 
-> 
-> > Regarding the tests implementation. As I see it failing the latency
-> > measurements if they're performed with the too few retries isn't a good
-> > idea. Alexander, you said that normally performing 1000 retries is
-> > enough to get the latency with a good precision, but the test driver
-> > returns an error if the number of retries is less than 20. So what
-> > happens between 20 and 1000? The tests get passed, but the results
-> > aren't accurate or what? If so then why don't the test fail in the
-> > case of 30 iterations too? IMO as long as you don't define the strong
-> > accuracy criteria, the failure condition shouldn't be determined by
-> > the number of iterations. So if I were you I would execute the latency
-> > tests with the specified "lat_time_ms" duration and printed a warning
-> > if the number of iterations turned to be too low (100, 200?) most
-> > likely causing to have inaccurate results, but still would calculate
-> > the latency from the determined numbers (even if there were only one
-> > iteration performed).
-> > 
-> Reasonable. I can easily change this part.
-> 
-> > The main issue is that after applying all the changes the ntb_perf
-> > driver will get extended greatly with three additional sub-tests
-> > and thus will loose its coherency. It gets to be obvious after
-> > the patch 2 and 3 applied, which introduce additional client-server
-> > semantic and imply allocating their-own private data. All of that
-> > makes the code much harder to read and breaks the driver specialization.
-> > 
-> > The latency tests as them-self are very useful though. But it would be
-> > much better to have them implemented in a separate driver
-> > "ntb_latency" or something.
-> >
+Unverified Error/Warning (likely false positive, please contact us if interested):
 
-> The whole 'latency' part relies on 'ntb_perf' infrastructure.
+drivers/net/pcs/pcs-xpcs.c:1031: undefined reference to `phylink_mii_c22_pcs_decode_state'
+drivers/net/pcs/pcs-xpcs.c:832: undefined reference to `phylink_mii_c22_pcs_encode_advertisement'
 
-Yeah, it's very handy, isn't it? =)
-Originally it has been created in a way so the perf-test would be
-portable across all the supported NTB HW types: local- and peer-based
-MW xlate address setup (Intel/AMD/Switchtec NTB HW vs IDT NTB HW),
-Scratchpad and Messages capable devices (Intel/AMD/Switchtec NTB HW vs
-IDT NTB HW). My idea was to provide a reference of how a portable NTB
-application could be designed. (It took some hard time to debug that
-part on the Intel/AMD hardware since nobody of the current maintainers
-had an access to one at that moment.) On the next step I was going to
-move the communication part of the ntb_perf driver to a separate
-kernel module as a communication library (which could be used for the
-inter-domains basic communications on top of the DB+Spad/MSG
-interface), but alas didn't find a time to get to work on it.
+Error/Warning ids grouped by kconfigs:
 
-> Moreover,
-> the first patch adds only one meaningful function.  Thus separatin theg
-> 'latency' part will make me copy a lot of code. As a compromise, I can
-> offer to put latency-related code into a separate .c file but leave the
-> whole test in a single module. That should increase readability and
-> eliminate code duplication.
+gcc_recent_errors
+|-- alpha-allyesconfig
+|   |-- drivers-gpu-drm-amd-amdgpu-..-display-dc-core-dc_link.c:warning:variable-pre_connection_type-set-but-not-used
+|   `-- drivers-staging-rtl8723bs-hal-hal_btcoex.c:warning:variable-pHalData-set-but-not-used
+|-- arc-allyesconfig
+|   |-- drivers-gpu-drm-amd-amdgpu-..-display-dc-core-dc_link.c:warning:variable-pre_connection_type-set-but-not-used
+|   `-- drivers-staging-rtl8723bs-hal-hal_btcoex.c:warning:variable-pHalData-set-but-not-used
+|-- arc-randconfig-m031-20220624
+|   |-- drivers-gpu-drm-vc4-vc4_perfmon.c-vc4_perfmon_get()-warn:variable-dereferenced-before-check-perfmon-(see-line-)
+|   `-- drivers-gpu-drm-vc4-vc4_perfmon.c-vc4_perfmon_get_values_ioctl()-warn:variable-dereferenced-before-check-perfmon-(see-line-)
+|-- arm-allyesconfig
+|   |-- drivers-gpu-drm-amd-amdgpu-..-display-dc-core-dc_link.c:warning:variable-pre_connection_type-set-but-not-used
+|   `-- drivers-staging-rtl8723bs-hal-hal_btcoex.c:warning:variable-pHalData-set-but-not-used
+|-- arm64-allyesconfig
+|   |-- drivers-gpu-drm-amd-amdgpu-..-display-dc-core-dc_link.c:warning:variable-pre_connection_type-set-but-not-used
+|   `-- drivers-staging-rtl8723bs-hal-hal_btcoex.c:warning:variable-pHalData-set-but-not-used
+|-- arm64-buildonly-randconfig-r004-20220624
+|   `-- drivers-gpu-drm-amd-amdgpu-..-display-dc-core-dc_link.c:warning:variable-pre_connection_type-set-but-not-used
+|-- i386-allnoconfig
+|   `-- include-linux-fs.h:warning:expecting-prototype-for-i_gid_into_mnt().-Prototype-was-for-i_gid_into_vfsgid()-instead
+|-- i386-allyesconfig
+|   |-- drivers-gpu-drm-amd-amdgpu-..-display-dc-core-dc_link.c:warning:variable-pre_connection_type-set-but-not-used
+|   |-- drivers-staging-rtl8723bs-hal-hal_btcoex.c:warning:variable-pHalData-set-but-not-used
+|   `-- ntb_perf.c:(.text):undefined-reference-to-__umoddi3
+|-- i386-randconfig-a001
+|   `-- ntb_perf.c:(.text):undefined-reference-to-__umoddi3
+|-- i386-randconfig-a005
+|   `-- drivers-staging-rtl8723bs-hal-hal_btcoex.c:warning:variable-pHalData-set-but-not-used
+|-- i386-randconfig-m021
+|   `-- arch-x86-events-core.c-init_hw_perf_events()-warn:missing-error-code-err
+|-- ia64-allmodconfig
+|   |-- drivers-gpu-drm-amd-amdgpu-..-display-dc-core-dc_link.c:warning:variable-pre_connection_type-set-but-not-used
+|   `-- drivers-staging-rtl8723bs-hal-hal_btcoex.c:warning:variable-pHalData-set-but-not-used
+|-- m68k-allmodconfig
+|   `-- drivers-staging-rtl8723bs-hal-hal_btcoex.c:warning:variable-pHalData-set-but-not-used
+|-- m68k-allyesconfig
+|   `-- drivers-staging-rtl8723bs-hal-hal_btcoex.c:warning:variable-pHalData-set-but-not-used
+|-- microblaze-randconfig-r006-20220624
+|   |-- drivers-gpu-drm-amd-amdgpu-..-display-dc-core-dc_link.c:warning:variable-pre_connection_type-set-but-not-used
+|   `-- drivers-ntb-test-ntb_perf.c:undefined-reference-to-__umoddi3
+|-- mips-allyesconfig
+|   |-- drivers-gpu-drm-amd-amdgpu-..-display-dc-core-dc_link.c:warning:variable-pre_connection_type-set-but-not-used
+|   `-- drivers-staging-rtl8723bs-hal-hal_btcoex.c:warning:variable-pHalData-set-but-not-used
+|-- nios2-randconfig-r016-20220624
+|   |-- drivers-net-pcs-pcs-xpcs.c:undefined-reference-to-phylink_mii_c22_pcs_decode_state
+|   `-- drivers-net-pcs-pcs-xpcs.c:undefined-reference-to-phylink_mii_c22_pcs_encode_advertisement
+|-- powerpc-allmodconfig
+|   |-- ERROR:__umoddi3-drivers-ntb-test-ntb_perf.ko-undefined
+|   |-- arch-powerpc-kernel-interrupt.c:warning:suggest-braces-around-empty-body-in-an-if-statement
+|   |-- drivers-gpu-drm-amd-amdgpu-..-display-dc-core-dc_link.c:warning:variable-pre_connection_type-set-but-not-used
+|   `-- drivers-staging-rtl8723bs-hal-hal_btcoex.c:warning:variable-pHalData-set-but-not-used
+|-- powerpc-allnoconfig
+|   `-- arch-powerpc-kernel-interrupt.c:error:suggest-braces-around-empty-body-in-an-if-statement
+|-- powerpc-asp8347_defconfig
+|   `-- arch-powerpc-kernel-interrupt.c:error:suggest-braces-around-empty-body-in-an-if-statement
+|-- powerpc-mpc834x_mds_defconfig
+|   `-- arch-powerpc-kernel-interrupt.c:error:suggest-braces-around-empty-body-in-an-if-statement
+|-- powerpc-randconfig-r002-20220624
+|   `-- arch-powerpc-kernel-interrupt.c:warning:suggest-braces-around-empty-body-in-an-if-statement
+|-- powerpc-randconfig-r032-20220624
+|   `-- arch-powerpc-kernel-interrupt.c:warning:suggest-braces-around-empty-body-in-an-if-statement
+|-- sh-allmodconfig
+|   `-- drivers-staging-rtl8723bs-hal-hal_btcoex.c:warning:variable-pHalData-set-but-not-used
+|-- sparc-allyesconfig
+|   |-- drivers-gpu-drm-amd-amdgpu-..-display-dc-core-dc_link.c:warning:variable-pre_connection_type-set-but-not-used
+|   `-- drivers-staging-rtl8723bs-hal-hal_btcoex.c:warning:variable-pHalData-set-but-not-used
+|-- sparc-randconfig-r011-20220624
+|   `-- drivers-gpu-drm-amd-amdgpu-..-display-dc-core-dc_link.c:warning:variable-pre_connection_type-set-but-not-used
+|-- x86_64-allyesconfig
+|   |-- drivers-gpu-drm-amd-amdgpu-..-display-dc-core-dc_link.c:warning:variable-pre_connection_type-set-but-not-used
+|   `-- drivers-staging-rtl8723bs-hal-hal_btcoex.c:warning:variable-pHalData-set-but-not-used
+|-- x86_64-randconfig-a002
+|   |-- pcs-xpcs.c:(.text):undefined-reference-to-phylink_mii_c22_pcs_decode_state
+|   `-- pcs-xpcs.c:(.text):undefined-reference-to-phylink_mii_c22_pcs_encode_advertisement
+`-- xtensa-allyesconfig
+    |-- drivers-gpu-drm-amd-amdgpu-..-display-dc-core-dc_link.c:warning:variable-pre_connection_type-set-but-not-used
+    |-- drivers-staging-rtl8723bs-hal-hal_btcoex.c:warning:variable-pHalData-set-but-not-used
+    `-- ntb_perf.c:(.text):undefined-reference-to-__umoddi3
 
-What would be much better if you detached the infrastructure part into
-a separate module, which could be afterwards used by the ntb_perf and
-your ntb_latency drivers.
+clang_recent_errors
+|-- hexagon-randconfig-r001-20220624
+|   `-- drivers-ufs-host-tc-dwc-g210-pltfrm.c:warning:unused-variable-tc_dwc_g210_pltfm_match
+`-- x86_64-allyesconfig
+    |-- drivers-pci-endpoint-functions-pci-epf-vntb.c:warning:no-previous-prototype-for-function-pci_read
+    `-- drivers-pci-endpoint-functions-pci-epf-vntb.c:warning:no-previous-prototype-for-function-pci_write
 
-What would be the best if you created it as a kernel library with a
-well-defined interface, which could be used not only by the test
-drivers, but by any kernel application (most importantly by the NTB
-transport driver) for the basic communications (like MW xlate address
-exchange, portable MW xlate address setup, etc).
+elapsed time: 728m
 
-> 
-> > I am very sorry to spilling it out at this stage. I should have done
-> > it on v1 or v2. Anyway it's up to the driver/subsystem maintainers
-> > (Dave, Jon) to decide whether the suggested update is suitable despite
-> > of all my thoughts.
-> > 
+configs tested: 84
+configs skipped: 3
 
-> Let's call for the third opinion.
+gcc tested configs:
+arm                                 defconfig
+arm                              allyesconfig
+arm64                            allyesconfig
+powerpc                     asp8347_defconfig
+mips                           ip32_defconfig
+s390                          debug_defconfig
+sparc                            allyesconfig
+openrisc                  or1klitex_defconfig
+sh                                  defconfig
+m68k                          multi_defconfig
+sh                      rts7751r2d1_defconfig
+xtensa                       common_defconfig
+microblaze                          defconfig
+arm                          iop32x_defconfig
+arm                        realview_defconfig
+arm                        keystone_defconfig
+m68k                         apollo_defconfig
+parisc64                            defconfig
+arm                       aspeed_g5_defconfig
+powerpc                 mpc834x_mds_defconfig
+riscv                             allnoconfig
+riscv                    nommu_k210_defconfig
+i386                   debian-10.3-kselftests
+riscv                          rv32_defconfig
+riscv                    nommu_virt_defconfig
+i386                              debian-10.3
+ia64                             allmodconfig
+mips                             allyesconfig
+powerpc                          allmodconfig
+sh                               allmodconfig
+powerpc                           allnoconfig
+m68k                             allyesconfig
+arc                              allyesconfig
+alpha                            allyesconfig
+m68k                             allmodconfig
+i386                                defconfig
+i386                             allyesconfig
+i386                          randconfig-a001
+i386                          randconfig-a003
+i386                          randconfig-a005
+x86_64                        randconfig-a013
+x86_64                        randconfig-a011
+x86_64                        randconfig-a015
+i386                          randconfig-a014
+i386                          randconfig-a012
+i386                          randconfig-a016
+x86_64                        randconfig-a004
+x86_64                        randconfig-a002
+x86_64                        randconfig-a006
+arc                  randconfig-r043-20220624
+um                           x86_64_defconfig
+um                             i386_defconfig
+x86_64                          rhel-8.3-func
+x86_64                         rhel-8.3-kunit
+x86_64                    rhel-8.3-kselftests
+x86_64                           rhel-8.3-syz
+x86_64                              defconfig
+x86_64                               rhel-8.3
+x86_64                           allyesconfig
 
-Ok.
+clang tested configs:
+arm                                 defconfig
+powerpc                     ksi8560_defconfig
+powerpc                       ebony_defconfig
+powerpc                     kilauea_defconfig
+powerpc                     kmeter1_defconfig
+x86_64                           allyesconfig
+arm                           omap1_defconfig
+arm                         s3c2410_defconfig
+powerpc                      walnut_defconfig
+mips                   sb1250_swarm_defconfig
+powerpc                      pmac32_defconfig
+i386                          randconfig-a002
+i386                          randconfig-a006
+i386                          randconfig-a004
+x86_64                        randconfig-a014
+x86_64                        randconfig-a012
+x86_64                        randconfig-a016
+i386                          randconfig-a013
+i386                          randconfig-a011
+i386                          randconfig-a015
+x86_64                        randconfig-a001
+x86_64                        randconfig-a003
+x86_64                        randconfig-a005
+hexagon              randconfig-r045-20220624
+riscv                randconfig-r042-20220624
+hexagon              randconfig-r041-20220624
+s390                 randconfig-r044-20220624
 
--Sergey
-
-> 
-> 
-> -- 
-> Regards,
->   Alexander
+-- 
+0-DAY CI Kernel Test Service
+https://01.org/lkp
