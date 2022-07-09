@@ -1,82 +1,264 @@
-Received: from mail-il1-f173.google.com (mail-il1-f173.google.com [209.85.166.173])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 67A733D89
-	for <ntb@lists.linux.dev>; Fri,  8 Jul 2022 21:32:05 +0000 (UTC)
-Received: by mail-il1-f173.google.com with SMTP id h16so5603150ila.2
-        for <ntb@lists.linux.dev>; Fri, 08 Jul 2022 14:32:05 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:in-reply-to:references:subject:date
-         :message-id;
-        bh=mPK7JqtCJf89laULVPANQB+hprBgnI5b+pSKYiY3/w8=;
-        b=2mX9kAKTcQfxv3qD6Ig/meZaAu1NWXeuh2Vbk9d+G2AlVDX3JH7qDIMVCk6KuyQB7T
-         y6tPe5SRzE+iYZHZ5uul6J6wDkphf0zId08VpxkX4cDeeHoxK79lXXIF559DwIUPHQYO
-         Ehnubi3nGJKsStDoEIK6Nq3ScttApwNA7/oi6ERNarp1X70b7T173QCfLEvDeNCmV8ha
-         SMg61bmDDXRsMS/2igsnXuP5uxRQ55w8OSxVoD7xOkNOVJ7mDPMlrEQFOARJ4ypmcG+U
-         Ky36ZTE9Hz6n/vNDewJgmu9H6N7iwnSYQ009FZfw4Dikk/9QXrkt0AH38EAuPTl0qJoP
-         lKQQ==
-X-Gm-Message-State: AJIora/fHAWo1O05yUCpyXzQ7eKqPWdNqfKFGdmZ+RN5xzKkvH6zdvJ2
-	NFvMcAqrwUZ6CDVBOJwuxw==
-X-Google-Smtp-Source: AGRyM1tCjV1LWB4OVa94Ub7ppM+PyrcTgBMr3Gdo0En5H45DKfvVy4UHV6k2oZR63GxcoKo/GZSd4A==
-X-Received: by 2002:a92:c811:0:b0:2dc:14bf:e15d with SMTP id v17-20020a92c811000000b002dc14bfe15dmr3121986iln.305.1657315924369;
-        Fri, 08 Jul 2022 14:32:04 -0700 (PDT)
-Received: from robh.at.kernel.org ([98.38.210.73])
-        by smtp.gmail.com with ESMTPSA id a11-20020a02734b000000b0033ebd47834fsm1530397jae.128.2022.07.08.14.32.03
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 08 Jul 2022 14:32:03 -0700 (PDT)
-Received: (nullmailer pid 1508198 invoked by uid 1000);
-	Fri, 08 Jul 2022 21:32:02 -0000
-From: Rob Herring <robh@kernel.org>
-To: Frank Li <Frank.Li@nxp.com>
-Cc: shawnguo@kernel.org, aisheng.dong@nxp.com, kw@linux.com, tglx@linutronix.de, peng.fan@nxp.com, linux-kernel@vger.kernel.org, kishon@ti.com, linux-imx@nxp.com, krzysztof.kozlowski+dt@linaro.org, s.hauer@pengutronix.de, kernel@pengutronix.de, linux-arm-kernel@lists.infradead.org, robh+dt@kernel.org, jdmason@kudzu.us, lorenzo.pieralisi@arm.com, devicetree@vger.kernel.org, festevam@gmail.com, ntb@lists.linux.dev, maz@kernel.org, bhelgaas@google.com, linux-pci@vger.kernel.org
-In-Reply-To: <20220707210238.917477-2-Frank.Li@nxp.com>
-References: <20220707210238.917477-1-Frank.Li@nxp.com> <20220707210238.917477-2-Frank.Li@nxp.com>
-Subject: Re: [PATCH 2/3] dt-bindings: irqchip: imx mu work as msi controller
-Date: Fri, 08 Jul 2022 15:32:02 -0600
-Message-Id: <1657315922.435976.1508197.nullmailer@robh.at.kernel.org>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E05B0A4F
+	for <ntb@lists.linux.dev>; Sat,  9 Jul 2022 08:16:21 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 58FCDC3411C;
+	Sat,  9 Jul 2022 08:16:21 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1657354581;
+	bh=Kl4LrwMcV0jEgVeyaN0UKSr1LebWTO1m6bXIl4hmN3U=;
+	h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
+	b=lV+MuBE5WlQTVkJkX6idN54XiOIhhYN0KigZFnazxeQixH2FmsVaS1EA5nRIoWMPb
+	 6UBhOLp73j4iFbJ/sGcSp2F01CRHAODTtzCpGemi9B8HDbIAz5vWF2+bMl3PLWBhGC
+	 shKKs/yzeWqwl1pjVkLTLjQMfcwcHDEv+sOOMFZAYHOyu34eWti/0jRRuBMnqxbXUF
+	 9A0y/QkwzeF5Zy/1yZaPZmNiE+GvyI+GlevUI5toqBRWCHeD9mNcoTG4y1WJObxxTX
+	 vEKKF/r5IrCm7Kajyfj2+tfEzLhlhFSkdwUA6zO2SVoPFbgcNj0niDdX4hxjMHc9xY
+	 Qx2bOxYqcgnww==
+Received: from sofa.misterjones.org ([185.219.108.64] helo=why.misterjones.org)
+	by disco-boy.misterjones.org with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+	(Exim 4.95)
+	(envelope-from <maz@kernel.org>)
+	id 1oA5dT-006K8H-0k;
+	Sat, 09 Jul 2022 09:16:19 +0100
+Date: Sat, 09 Jul 2022 09:16:18 +0100
+Message-ID: <87fsja1z1p.wl-maz@kernel.org>
+From: Marc Zyngier <maz@kernel.org>
+To: Frank Li <frank.li@nxp.com>
+Cc: "tglx@linutronix.de" <tglx@linutronix.de>,
+	"robh+dt@kernel.org"
+	<robh+dt@kernel.org>,
+	"krzysztof.kozlowski+dt@linaro.org"
+	<krzysztof.kozlowski+dt@linaro.org>,
+	"shawnguo@kernel.org"
+	<shawnguo@kernel.org>,
+	"s.hauer@pengutronix.de" <s.hauer@pengutronix.de>,
+	"kw@linux.com" <kw@linux.com>,
+	"bhelgaas@google.com" <bhelgaas@google.com>,
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+	"devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+	"linux-arm-kernel@lists.infradead.org"
+	<linux-arm-kernel@lists.infradead.org>,
+	"linux-pci@vger.kernel.org"
+	<linux-pci@vger.kernel.org>,
+	Peng Fan <peng.fan@nxp.com>,
+	Aisheng Dong
+	<aisheng.dong@nxp.com>,
+	"jdmason@kudzu.us" <jdmason@kudzu.us>,
+	"kernel@pengutronix.de" <kernel@pengutronix.de>,
+	"festevam@gmail.com"
+	<festevam@gmail.com>,
+	dl-linux-imx <linux-imx@nxp.com>,
+	"kishon@ti.com"
+	<kishon@ti.com>,
+	"lorenzo.pieralisi@arm.com" <lorenzo.pieralisi@arm.com>,
+	"ntb@lists.linux.dev" <ntb@lists.linux.dev>
+Subject: Re: [EXT] Re: [PATCH 1/3] irqchip: imx mu worked as msi controller
+In-Reply-To: <PAXPR04MB9186714350C749DB6AADB35188829@PAXPR04MB9186.eurprd04.prod.outlook.com>
+References: <20220707210238.917477-1-Frank.Li@nxp.com>
+	<87r12wkmkm.wl-maz@kernel.org>
+	<PAXPR04MB9186714350C749DB6AADB35188829@PAXPR04MB9186.eurprd04.prod.outlook.com>
+User-Agent: Wanderlust/2.15.9 (Almost Unreal) SEMI-EPG/1.14.7 (Harue)
+ FLIM-LB/1.14.9 (=?UTF-8?B?R29qxY0=?=) APEL-LB/10.8 EasyPG/1.0.0 Emacs/27.1
+ (x86_64-pc-linux-gnu) MULE/6.0 (HANACHIRUSATO)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0 (generated by SEMI-EPG 1.14.7 - "Harue")
+Content-Type: text/plain; charset=US-ASCII
+X-SA-Exim-Connect-IP: 185.219.108.64
+X-SA-Exim-Rcpt-To: frank.li@nxp.com, tglx@linutronix.de, robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org, shawnguo@kernel.org, s.hauer@pengutronix.de, kw@linux.com, bhelgaas@google.com, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-pci@vger.kernel.org, peng.fan@nxp.com, aisheng.dong@nxp.com, jdmason@kudzu.us, kernel@pengutronix.de, festevam@gmail.com, linux-imx@nxp.com, kishon@ti.com, lorenzo.pieralisi@arm.com, ntb@lists.linux.dev
+X-SA-Exim-Mail-From: maz@kernel.org
+X-SA-Exim-Scanned: No (on disco-boy.misterjones.org); SAEximRunCond expanded to false
 
-On Thu, 07 Jul 2022 16:02:37 -0500, Frank Li wrote:
-> imx mu support generate irq by write a register.
-> provide msi controller support so other driver
-> can use it by standard msi interface.
+On Fri, 08 Jul 2022 17:26:33 +0100,
+Frank Li <frank.li@nxp.com> wrote:
 > 
-> Signed-off-by: Frank Li <Frank.Li@nxp.com>
-> ---
->  .../interrupt-controller/fsl,mu-msi.yaml      | 94 +++++++++++++++++++
->  1 file changed, 94 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/interrupt-controller/fsl,mu-msi.yaml
 > 
+> 
+> > -----Original Message-----
+> > From: Marc Zyngier <maz@kernel.org>
+> > Sent: Friday, July 8, 2022 3:59 AM
+> > To: Frank Li <frank.li@nxp.com>
+> > Cc: tglx@linutronix.de; robh+dt@kernel.org;
+> > krzysztof.kozlowski+dt@linaro.org; shawnguo@kernel.org;
+> > s.hauer@pengutronix.de; kw@linux.com; bhelgaas@google.com; linux-
+> > kernel@vger.kernel.org; devicetree@vger.kernel.org; linux-arm-
+> > kernel@lists.infradead.org; linux-pci@vger.kernel.org; Peng Fan
+> > <peng.fan@nxp.com>; Aisheng Dong <aisheng.dong@nxp.com>;
+> > jdmason@kudzu.us; kernel@pengutronix.de; festevam@gmail.com; dl-linux-
+> > imx <linux-imx@nxp.com>; kishon@ti.com; lorenzo.pieralisi@arm.com;
+> > ntb@lists.linux.dev
+> > Subject: [EXT] Re: [PATCH 1/3] irqchip: imx mu worked as msi controller
+> > 
+> > Caution: EXT Email
+> > 
+> > On Thu, 07 Jul 2022 22:02:36 +0100,
+> > Frank Li <Frank.Li@nxp.com> wrote:
+> > >
+> > > MU support generate irq by write data to a register.
+> > > This patch make mu worked as msi controller.
+> > > So MU can do doorbell by using standard msi api.
+> > >
+> > > Signed-off-by: Frank Li <Frank.Li@nxp.com>
+> > > ---
+> > >  drivers/irqchip/Kconfig          |   7 +
+> > >  drivers/irqchip/Makefile         |   1 +
+> > >  drivers/irqchip/irq-imx-mu-msi.c | 490
+> > +++++++++++++++++++++++++++++++
+> > >  3 files changed, 498 insertions(+)
+> > >  create mode 100644 drivers/irqchip/irq-imx-mu-msi.c
+> > >
 
-My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
-on your patch (DT_CHECKER_FLAGS is new in v5.13):
+[...]
 
-yamllint warnings/errors:
+> > > +static void imx_mu_msi_mask_irq(struct irq_data *data)
+> > > +{
+> > > +     struct imx_mu_msi *msi_data = irq_data_get_irq_chip_data(data-
+> > >parent_data);
+> > > +
+> > > +     pci_msi_mask_irq(data);
+> > 
+> > What is this? Below, you create a platform MSI domain. Either you
+> > support PCI, and you create a PCI/MSI domain (and the above may make
+> > sense), or you are doing platform MSI, and the above is non-sense.
+> 
+> [Frank Li] You are right. This work as platform msi. Needn't call pci_msi_irq()  
 
-dtschema/dtc warnings/errors:
-Error: Documentation/devicetree/bindings/interrupt-controller/fsl,mu-msi.example.dts:31.41-42 syntax error
-FATAL ERROR: Unable to parse input tree
-make[1]: *** [scripts/Makefile.lib:383: Documentation/devicetree/bindings/interrupt-controller/fsl,mu-msi.example.dtb] Error 1
-make[1]: *** Waiting for unfinished jobs....
-make: *** [Makefile:1404: dt_binding_check] Error 2
+OK, hold that thought and see below.
 
-doc reference errors (make refcheckdocs):
+> > > +static int imx_mu_msi_domain_irq_alloc(struct irq_domain *domain,
+> > > +                                     unsigned int virq,
+> > > +                                     unsigned int nr_irqs,
+> > > +                                     void *args)
+> > > +{
+> > > +     struct imx_mu_msi *msi_data = domain->host_data;
+> > > +     msi_alloc_info_t *info = args;
+> > > +     int pos, err = 0;
+> > > +
+> > > +     pm_runtime_get_sync(&msi_data->pdev->dev);
+> > 
+> > The core code already deals with runtime PM. What prevents it from
+> > working, other than the fact you don't populate the device in the
+> > top-level domain?
+> 
+> [Frank Li]  Do you means power domain or irq domain?
 
-See https://patchwork.ozlabs.org/patch/
+IRQ domain. See irq_domain_set_pm_device() and how PM is used on
+interrupt request.
 
-This check can fail if there are any dependencies. The base for a patch
-series is generally the most recent rc1.
+[...]
 
-If you already ran 'make dt_binding_check' and didn't see the above
-error(s), then make sure 'yamllint' is installed and dt-schema is up to
-date:
+> > > +static void imx_mu_msi_domain_irq_free(struct irq_domain *domain,
+> > > +                                    unsigned int virq, unsigned int nr_irqs)
+> > > +{
+> > > +     struct irq_data *d = irq_domain_get_irq_data(domain, virq);
+> > > +     struct imx_mu_msi *msi_data = irq_data_get_irq_chip_data(d);
+> > > +     int pos;
+> > > +
+> > > +     pos = d->hwirq;
+> > > +     if (pos < 0 || pos >= msi_data->irqs_num) {
+> > > +             pr_err("failed to teardown msi. Invalid hwirq %d\n", pos);
+> > > +             return;
+> > > +     }
+> > 
+> > How can this happen?
+> 
+> I just copy from irq-ls-scfg-msi.c
 
-pip3 install dtschema --upgrade
+I wish you didn't do that.
 
-Please check and re-submit.
+> It should be impossible happen if everything work as expected. 
 
+Then it should go.
+
+[...]
+
+> > > +static const struct imx_mu_dcfg imx_mu_cfg_imx6sx = {
+> > > +     .xTR    = 0x0,
+> > > +     .xRR    = 0x10,
+> > > +     .xSR    = {0x20, 0x20, 0x20, 0x20},
+> > > +     .xCR    = {0x24, 0x24, 0x24, 0x24},
+> > > +};
+> > > +
+> > > +static const struct imx_mu_dcfg imx_mu_cfg_imx7ulp = {
+> > > +     .xTR    = 0x20,
+> > > +     .xRR    = 0x40,
+> > > +     .xSR    = {0x60, 0x60, 0x60, 0x60},
+> > > +     .xCR    = {0x64, 0x64, 0x64, 0x64},
+> > > +};
+> > > +
+> > > +static const struct imx_mu_dcfg imx_mu_cfg_imx8ulp = {
+> > > +     .type   = IMX_MU_V2,
+> > > +     .xTR    = 0x200,
+> > > +     .xRR    = 0x280,
+> > > +     .xSR    = {0xC, 0x118, 0x124, 0x12C},
+> > > +     .xCR    = {0x110, 0x114, 0x120, 0x128},
+> > > +};
+> > > +
+> > > +static const struct imx_mu_dcfg imx_mu_cfg_imx8ulp_s4 = {
+> > > +     .type   = IMX_MU_V2 | IMX_MU_V2_S4,
+> > > +     .xTR    = 0x200,
+> > > +     .xRR    = 0x280,
+> > > +     .xSR    = {0xC, 0x118, 0x124, 0x12C},
+> > > +     .xCR    = {0x110, 0x114, 0x120, 0x128},
+> > > +};
+> > 
+> > What are these? We really don't need more magic numbers.
+> 
+> It is register offset.  The difference version MU hardware's
+> register map is difference.
+
+Then please document what this is, what the various registers are, and
+correctly set type everywhere.
+
+[...]
+
+> > If that's hardcoded, why do we need an extra variable? I also question
+> > the usefulness of this driver if the HW can only deal with *4* MSIs...
+> > This looks a bit like a joke.
+> 
+> MU don't really MSI controller.  Each MU have 4 channel.  
+> I.MX have several MU units.
+
+Then is it really useful to model that as a MSI controller? This
+smells of a mailbox controller to me instead. And I really worry that
+this device doesn't correctly preserve the ordering between a device
+doing DMA and generating an interrupt to indicate completion of the
+DMA transaction... Does this block offers such a guarantee?
+
+> PCI EP driver need an address as doorbell,  so PCI RC side can write
+> This address to trigger irq.  Ideally,  it use GIC-ITS. But our i.MX chip
+> Have not ITS support yet now.  So we can use MU as simple MSI controller.
+
+Is that an integrated EP on the same SoC? Or are you talking of two
+SoCs connected over PCIe? Also, you explicitly said that this was
+*not* a PCI/MSI controller. So what is this all about?
+
+[...]
+
+> > > +static int imx_mu_msi_remove(struct platform_device *pdev)
+> > > +{
+> > > +     struct imx_mu_msi *msi_data = platform_get_drvdata(pdev);
+> > > +
+> > > +     imx_mu_msi_teardown_hwirq(msi_data);
+> > > +
+> > > +     irq_domain_remove(msi_data->msi_domain);
+> > > +     irq_domain_remove(msi_data->parent);
+> > 
+> > How do you ensure that no device is still holding interrupts? Let me
+> > give you a hint: you can't. So removing an interrupt controller module
+> > should not be possible.
+> 
+> [Frank Li] I agree. But there are many *_remove under irqchip.
+
+That doesn't make it right.
+
+Thanks,
+
+	M.
+
+-- 
+Without deviation from the norm, progress is not possible.
