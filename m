@@ -1,89 +1,93 @@
-Received: from mail-qt1-f174.google.com (mail-qt1-f174.google.com [209.85.160.174])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mga03.intel.com (mga03.intel.com [134.134.136.65])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E69297F
-	for <ntb@lists.linux.dev>; Tue,  2 Aug 2022 19:52:49 +0000 (UTC)
-Received: by mail-qt1-f174.google.com with SMTP id b21so11121856qte.12
-        for <ntb@lists.linux.dev>; Tue, 02 Aug 2022 12:52:49 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc;
-        bh=aG2QNcVXuB2r2q5voKvzNrwPDnLoG3eQsLfbpqqQ1v4=;
-        b=oQGXboiGD3g2UmaJT7bo3wItgqn6SFt8o4ZCh26IrXBo/QCf4+Lof7yoi2H+hteqPU
-         wtsRVV2C7KWMiPRXk30gm04lvW44dbirF3XMqAB2kavwdHe3I8LooaUyLygjOFSYNrdR
-         7tl6pFjIBgwx7lHSF5VZ5yBuGKnosK2CU6MBuIUzJds1f5rM6lHxOjM82gto6E3EiMX3
-         vCAb7kZ3d4Iy6aW8T7v2bNu0FaKfzlB4qlwDORWZqT0xyv+nhll8/KPfuXSwainBTQes
-         a1tEOikuNHxn84aAMY+/jHrc675VBATlNd0b9SVYgh9c0MGR57U/XwdzHtvopjyJ+h6t
-         ZDkg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc;
-        bh=aG2QNcVXuB2r2q5voKvzNrwPDnLoG3eQsLfbpqqQ1v4=;
-        b=Kek1HPG//b4FJSY3GbG1Feqvqg6/MeujcNDM+GAtM4X9BJjSS5avzExkS8uoAUSjDq
-         /Q5beK9pLZIXL3kvOiKLvR+o2J1cUkZQK3ard3tGRGMUiF/BbNM8HpDdMUCW/Y44C3R2
-         uMA0lfL5IqbzwhSn/iJG3iFQAEbPcok9yJIJm+Xa89jt+W4fDBh5b4l0E2ju2DwGSuAt
-         tH8Zp5koUFTaESDFSBAf0Xqk03wR0S52UOTgjtobBK8TwN3dVVl/4r9oHgze06nCNdnL
-         mVVPQgZQBTqfKXG+92Vlfe4DJJjEw7Yxohqs7m+NFj0Xvzf0ntTfU/qybXtp4HkVOqIt
-         LFyg==
-X-Gm-Message-State: AJIora8lAvI/8ARrqhiIOLa0vxGsIp4lpMjvnytrrEzjVGKJOm14S4n1
-	viViVHVrZiwyzhM5UcPUtYaur9dAd9LeT/MUMZKXJWjgLGE=
-X-Google-Smtp-Source: AGRyM1sKtRhZrqwDCbb2GkXrXYcC86Zp0I10RcN9HLZjO71hDzEkpJ08m3pTVxIQvoXiMTshom/+6Ed2XUrUEgPK7do=
-X-Received: by 2002:ac8:5848:0:b0:31e:f4d3:fe59 with SMTP id
- h8-20020ac85848000000b0031ef4d3fe59mr20128253qth.662.1659469968794; Tue, 02
- Aug 2022 12:52:48 -0700 (PDT)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BFDD57F
+	for <ntb@lists.linux.dev>; Tue,  2 Aug 2022 21:01:56 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1659474116; x=1691010116;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=D4kvEWMRMvyP6HvFfJKxNdfexfG2+NLXCpspNAaUioM=;
+  b=X8J4EAtfur+8wjLNz/698ZN5gGMxUzZZZL7VxHx1eFLVJc/bi2uZUttI
+   ToOaxJQVClepwXoaZQrWRRVuUqgPKZrBRu7VtIccSAtqIIeg1VGXs5yGr
+   qxWSQo+B0aPFlp1XdNaNReH/T320noiOLRxi6z9W577hWnWWs0Y+8/coY
+   4w5YDTb+OIEKGc9gOEoNxiCGwFy7puLLG0hbElAPufUyivYyehao4Enc6
+   lrtIttRh5ShXGBMkT+SksFa9/KWBXspvOEoStpwGFhtkxvdoMV1Lzbngv
+   lwnVu1/Sb4NotEu01x3NCQA/Rt/hNTiwHApW6r58QcJXIxGBUQzARtvhO
+   w==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10427"; a="290734136"
+X-IronPort-AV: E=Sophos;i="5.93,212,1654585200"; 
+   d="scan'208";a="290734136"
+Received: from orsmga004.jf.intel.com ([10.7.209.38])
+  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Aug 2022 14:01:56 -0700
+X-IronPort-AV: E=Sophos;i="5.93,212,1654585200"; 
+   d="scan'208";a="728970603"
+Received: from djiang5-mobl1.amr.corp.intel.com (HELO [10.212.30.74]) ([10.212.30.74])
+  by orsmga004-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Aug 2022 14:01:56 -0700
+Message-ID: <781b9161-a6cc-a8cc-af20-a4eebcdbca6e@intel.com>
+Date: Tue, 2 Aug 2022 14:01:55 -0700
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-References: <165938663353.3660206.14823522095818743981.stgit@djiang5-desk3.ch.intel.com>
-In-Reply-To: <165938663353.3660206.14823522095818743981.stgit@djiang5-desk3.ch.intel.com>
-From: Allen Hubbe <allenbh@gmail.com>
-Date: Tue, 2 Aug 2022 15:52:37 -0400
-Message-ID: <CAJ80savTwSK49YPdLDTgXsUqOF3+P5vcU6_sjc4Kaz_3_dF0ng@mail.gmail.com>
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
+ Firefox/91.0 Thunderbird/91.11.0
 Subject: Re: [PATCH v2] ntb: intel: add GNR support for Intel PCIe gen5 NTB
-To: Dave Jiang <dave.jiang@intel.com>
+Content-Language: en-US
+To: Allen Hubbe <allenbh@gmail.com>
 Cc: Jon Mason <jdmason@kudzu.us>, ntb@lists.linux.dev
-Content-Type: text/plain; charset="UTF-8"
+References: <165938663353.3660206.14823522095818743981.stgit@djiang5-desk3.ch.intel.com>
+ <CAJ80savTwSK49YPdLDTgXsUqOF3+P5vcU6_sjc4Kaz_3_dF0ng@mail.gmail.com>
+From: Dave Jiang <dave.jiang@intel.com>
+In-Reply-To: <CAJ80savTwSK49YPdLDTgXsUqOF3+P5vcU6_sjc4Kaz_3_dF0ng@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On Mon, Aug 1, 2022 at 4:53 PM Dave Jiang <dave.jiang@intel.com> wrote:
-> @@ -2047,6 +2047,8 @@ static const struct pci_device_id intel_ntb_pci_tbl[] = {
+
+On 8/2/2022 12:52 PM, Allen Hubbe wrote:
+> On Mon, Aug 1, 2022 at 4:53 PM Dave Jiang <dave.jiang@intel.com> wrote:
+>> @@ -2047,6 +2047,8 @@ static const struct pci_device_id intel_ntb_pci_tbl[] = {
+>>
+>>          /* GEN4 */
+>>          {PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_B2B_ICX)},
+>> +       /* SPR has same dev id has ICX but different revision id */
+>> +       {PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_B2B_GNR)},
+> comment says SPR but the id is GNR ?
+The comment is in place of the SPR ID because it's the same as ICX. It's 
+not the comment for the following GNR id line. The only difference 
+between ICX and SPR is dev revision ID.
 >
->         /* GEN4 */
->         {PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_B2B_ICX)},
-> +       /* SPR has same dev id has ICX but different revision id */
-> +       {PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_NTB_B2B_GNR)},
-
-comment says SPR but the id is GNR ?
-
-> @@ -70,6 +70,8 @@
->  #define PCI_DEVICE_ID_INTEL_NTB_SS_BDX 0x6F0F
->  #define PCI_DEVICE_ID_INTEL_NTB_B2B_SKX        0x201C
->  #define PCI_DEVICE_ID_INTEL_NTB_B2B_ICX        0x347e
-> +#define PCI_DEVICE_ID_INTEL_NTB_B2B_SPR        0x347e
-
-PCI_DEVICE_ID_INTEL_NTB_B2B_SPR is added here, but not used?
-
-pdev_is_SPR(pdev) already exists.
-Should that use PCI_DEVICE_ID_INTEL_NTB_B2B_SPR?
-
-> @@ -225,7 +227,14 @@ static inline int pdev_is_gen4(struct pci_dev *pdev)
->  {
->         if (pdev->device == PCI_DEVICE_ID_INTEL_NTB_B2B_ICX)
->                 return 1;
-> +       return 0;
-
-return pdev->device == PCI_DEVICE_ID_INTEL_NTB_B2B_ICX;
-
-> +}
+>> @@ -70,6 +70,8 @@
+>>   #define PCI_DEVICE_ID_INTEL_NTB_SS_BDX 0x6F0F
+>>   #define PCI_DEVICE_ID_INTEL_NTB_B2B_SKX        0x201C
+>>   #define PCI_DEVICE_ID_INTEL_NTB_B2B_ICX        0x347e
+>> +#define PCI_DEVICE_ID_INTEL_NTB_B2B_SPR        0x347e
+> PCI_DEVICE_ID_INTEL_NTB_B2B_SPR is added here, but not used?
 >
-> +static inline int pdev_is_gen5(struct pci_dev *pdev)
-> +{
-> +       if (pdev->device == PCI_DEVICE_ID_INTEL_NTB_B2B_GNR)
-> +               return 1;
->         return 0;
+> pdev_is_SPR(pdev) already exists.
+> Should that use PCI_DEVICE_ID_INTEL_NTB_B2B_SPR?
 
-return pdev->device == PCI_DEVICE_ID_INTEL_NTB_B2B_GNR;
+Probably, but not for this patch.
+
+
+>
+>> @@ -225,7 +227,14 @@ static inline int pdev_is_gen4(struct pci_dev *pdev)
+>>   {
+>>          if (pdev->device == PCI_DEVICE_ID_INTEL_NTB_B2B_ICX)
+>>                  return 1;
+>> +       return 0;
+> return pdev->device == PCI_DEVICE_ID_INTEL_NTB_B2B_ICX;
+Not a change for this patch. but I'll fix the gen5 function.
+>
+>> +}
+>>
+>> +static inline int pdev_is_gen5(struct pci_dev *pdev)
+>> +{
+>> +       if (pdev->device == PCI_DEVICE_ID_INTEL_NTB_B2B_GNR)
+>> +               return 1;
+>>          return 0;
+> return pdev->device == PCI_DEVICE_ID_INTEL_NTB_B2B_GNR;
+>
