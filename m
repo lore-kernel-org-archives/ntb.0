@@ -1,53 +1,164 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from EUR03-AM7-obe.outbound.protection.outlook.com (mail-am7eur03on2087.outbound.protection.outlook.com [40.107.105.87])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CE35A2595
-	for <ntb@lists.linux.dev>; Sat, 13 Aug 2022 21:48:06 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 8F1ECC4347C;
-	Sat, 13 Aug 2022 21:48:06 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1660427286;
-	bh=loKMlfzRt4o3HnwPVSZ5in4GmUivDV+CrE9quqJTiQw=;
-	h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-	b=AhvFk/tq9kQob//WQ8C0K1tScaXir9Nb0G5Q3zltZk7ieAYSR/ISU17fJAu0qAQxk
-	 Q5nM8/5nfNnXHgM3frzqbgFr0Zjy8l/iPNcp60lBefNwHw4ahmFTp80SXApwGraBZv
-	 w/iligKL+5WGS1DHE6zsIEyF8jBVVWL6pPeSwZHwwuwhjDaC+CUzBfb60iSBjSVkf5
-	 76o137Y6gebcfV3+1gw5vvc1TrZczH2+D+xCYW4kkV4r6anGJGcNX0HoGFHMg0IemI
-	 8qwOBxX9IFEFeFSP8eMySair3io3dblt+rF9treL6K/HtnRTpl3SeB/UlCxoIDrNWE
-	 21U6nBrpp34SA==
-Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id 7D258C43141;
-	Sat, 13 Aug 2022 21:48:06 +0000 (UTC)
-Subject: Re: [GIT PULL] NTB patches for v5.20
-From: pr-tracker-bot@kernel.org
-In-Reply-To: <YvcedivdOTR1dsik@athena.kudzu.us>
-References: <YvcedivdOTR1dsik@athena.kudzu.us>
-X-PR-Tracked-List-Id: <ntb.lists.linux.dev>
-X-PR-Tracked-Message-Id: <YvcedivdOTR1dsik@athena.kudzu.us>
-X-PR-Tracked-Remote: https://github.com/jonmason/ntb tags/ntb-5.20
-X-PR-Tracked-Commit-Id: e4fe2a2fc423cb51bfd36c14f95f3ca1d279ca92
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: a976835fdb312590ee5c085567a4e2b06da7ac33
-Message-Id: <166042728650.29926.15227519255426738757.pr-tracker-bot@kernel.org>
-Date: Sat, 13 Aug 2022 21:48:06 +0000
-To: Jon Mason <jdmason@kudzu.us>
-Cc: torvalds@linux-foundation.org, linux-kernel@vger.kernel.org, ntb@lists.linux.dev
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AB99AA29
+	for <ntb@lists.linux.dev>; Sun, 14 Aug 2022 02:53:58 +0000 (UTC)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=AqI/8BgglujBzN7rxBkLyAWDaEq1V//LDCabSGJe6Ak/eI5koSGSQZTUseqw4a+OggfHMswcoYrfnr0rX1T490myfSq0DAZlRLZDDs0G/ELGbfpevmajPRwtIZVPSebXDSiocZxU/8TxTeJ+1tPNNIG8TD14hLNasNwrfA1S6t84xFIjBEUfrqzd5cQxZbPrWZIBj1QQrq7ruvBtUKbgl0q5z+l/SSkQp6Vxs+09rgMKnoaFXUJJ0xW37BWAkfoq4bmp/BxRAtvdpT1LwcZMVBEyp0JX2gOQkf4M8t0RJxzDlQ37hrfutpWVhbHo+FPdDBYFbILkAgm9ommcOLzlPA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=24wTQm4PcMeaY9EnWVjI1YJhNtY0mxqd3I3ZVb6jbfQ=;
+ b=Yj3oipsuROZGNzRd6Tk0PkYAISJihRN/DVF3mKp07cGqeRJV5kOsINcS7evbjerFZ3Xz5ZgNKhwTjDJvDnCkd1oibzVl0Y56z9RTjZbiUUDSxYfL+QZZHwsMXKY3U0jAG/JB+xxa56JQoDGa3Z5ho+7ISDsrMgSMwtxsu6F97c7cJlcufGoTsn92DO5QUssRKnMdSunccUBTat/vIg23Z5PgG5lY8krYCMtZczrBv1gcRV+169+xf4hzdoqDIlVpaizDj6zAik9RiepiRs2i/iQTUTV7CAErAjwRy8ISAXpBkPJYCs6O30eTpZna0Pr9+5vxr67CHsn+dRnw72JQ7A==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
+ header.d=nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=24wTQm4PcMeaY9EnWVjI1YJhNtY0mxqd3I3ZVb6jbfQ=;
+ b=suUIQEUPL8oi/appsn4PumBaTnWK+jh6smQAQLRiFMLyGUEH/628jbSOiAlM6ySh9OqLDnVTd7n2EtvkW2bWF2/qkSdrcPlHtIPK8dxhOE4SiBDQDc7C0W/E5bnm6eeBSyolHWQkIlz8Dlj1/P7ySadSat+Y77EQ3QtH4rJ8wZ0=
+Received: from PAXPR04MB9186.eurprd04.prod.outlook.com (2603:10a6:102:232::18)
+ by PA4PR04MB7936.eurprd04.prod.outlook.com (2603:10a6:102:c6::21) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5525.11; Sun, 14 Aug
+ 2022 02:53:55 +0000
+Received: from PAXPR04MB9186.eurprd04.prod.outlook.com
+ ([fe80::c5f1:b708:61db:a004]) by PAXPR04MB9186.eurprd04.prod.outlook.com
+ ([fe80::c5f1:b708:61db:a004%5]) with mapi id 15.20.5504.027; Sun, 14 Aug 2022
+ 02:53:55 +0000
+From: Frank Li <frank.li@nxp.com>
+To: Marc Zyngier <maz@kernel.org>
+CC: "tglx@linutronix.de" <tglx@linutronix.de>, "robh+dt@kernel.org"
+	<robh+dt@kernel.org>, "krzysztof.kozlowski+dt@linaro.org"
+	<krzysztof.kozlowski+dt@linaro.org>, "shawnguo@kernel.org"
+	<shawnguo@kernel.org>, "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>,
+	"kw@linux.com" <kw@linux.com>, "bhelgaas@google.com" <bhelgaas@google.com>,
+	"devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+	"linux-arm-kernel@lists.infradead.org"
+	<linux-arm-kernel@lists.infradead.org>, "linux-pci@vger.kernel.org"
+	<linux-pci@vger.kernel.org>, Peng Fan <peng.fan@nxp.com>, Aisheng Dong
+	<aisheng.dong@nxp.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>,
+	"kernel@pengutronix.de" <kernel@pengutronix.de>, "festevam@gmail.com"
+	<festevam@gmail.com>, dl-linux-imx <linux-imx@nxp.com>, "kishon@ti.com"
+	<kishon@ti.com>, "lorenzo.pieralisi@arm.com" <lorenzo.pieralisi@arm.com>,
+	"ntb@lists.linux.dev" <ntb@lists.linux.dev>, "lznuaa@gmail.com"
+	<lznuaa@gmail.com>
+Subject: RE: [EXT] Re: [PATCH v4 2/4] irqchip: imx mu worked as msi controller
+Thread-Topic: [EXT] Re: [PATCH v4 2/4] irqchip: imx mu worked as msi
+ controller
+Thread-Index: AQHYrpXqVoTaplRNPkC0NMrsvBWgTa2suoiAgAD6LxA=
+Date: Sun, 14 Aug 2022 02:53:54 +0000
+Message-ID:
+ <PAXPR04MB91869E2B67FAFA84CE229B2288699@PAXPR04MB9186.eurprd04.prod.outlook.com>
+References: <20220812215242.2255824-1-Frank.Li@nxp.com>
+	<20220812215242.2255824-3-Frank.Li@nxp.com> <874jygs6e2.wl-maz@kernel.org>
+In-Reply-To: <874jygs6e2.wl-maz@kernel.org>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nxp.com;
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: 0d1f06d2-9869-4584-c4e7-08da7da03a19
+x-ms-traffictypediagnostic: PA4PR04MB7936:EE_
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info:
+ hc1QOqyRAPL9N41U2nrI+3EDWfqn9y7AUfhyGUbOXr6rArLIPRUFuWYe2MdHXiBsJUyIgtk7pCf4g/cbP6Du21mxGCr5ZPE/JxrHZ16n25Oa6dLTtcrpw729cACMHEznHavngZaSeilzcHnlyXMWyk06v2UZRW69WZPf5eZ8jfLb55jPQctBihl9vn6radrqn33GOgHBSx9eT2Z21nWvhtng41XxUuGW6pa8vRW3yFaaY+bsq8h4AdWFjCQzk30v/J+NY3G4doj444ymoJ5vMifgDAToEaIpZlYJYN+zfb9+3dtcTlskKx4LI93+IZwJ8Y5iRvz9Jn+eXPupPHSbHkoztwvtQjpIsCKfeef1KMuZUl+eXCSe7HtRo0mvxmdFKaDXoAsqBdgUGaVYfU/DYksrM5yVd88uG8BnPWnPBNAcJo+TM+w19KQb/AtZOc1BaLIp8ZG6Hvav5+g6sqBurXmyMYANL3w13mVmJcTakKVYefR6AV3BFS7tdw7vMA40cHcBA/v7uv7a1Zo57CdeIl9H2KcmJAmmZxzn/zoEoX2QPrKMlNv/RzLQSaTJj4Rgz35tf0xGHNWSR2lUCnQdqsvyJdDUGf8c/zwWfl4XEgyvOletEPW/h67MietK4zsuL6U9hSGFqvhwMguzSXqlXsCkEvnofatPHNHBexl8UlfdNSqQP+tZoGx4o1Ddtk6HkAw/gW03gFVo3ZUIDRak1cYliIDmLhf6npCKd4/EEcfBqqm/+0lo+sws8yaP8lGZEc2O3wIeRdNz+a+F+tJjzdkUZuJWNue8tWAbnmQPxVY=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PAXPR04MB9186.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230016)(4636009)(376002)(136003)(346002)(366004)(39860400002)(396003)(41300700001)(71200400001)(54906003)(478600001)(26005)(316002)(38100700002)(2906002)(4326008)(6916009)(66446008)(66556008)(64756008)(8676002)(66946007)(7416002)(44832011)(76116006)(66476007)(5660300002)(52536014)(8936002)(53546011)(38070700005)(122000001)(33656002)(186003)(86362001)(6506007)(55236004)(83380400001)(9686003)(7696005)(55016003);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?us-ascii?Q?nYArN6Xojropr0aZ6Gxm6bI938djRBxd6zF494ae3rjopPJXc7wpcC5YwagI?=
+ =?us-ascii?Q?YCxzb6ms80OOPizrw1Yha9Zi2BJYz8xwgQVjU7YQsghLkz6Jruj7lckPsgKn?=
+ =?us-ascii?Q?K8qwR1HwrYEDGgikNYXJ5d7vir8ZobuOuMZK64AoyuPJnPa/VKACBC8vFDRi?=
+ =?us-ascii?Q?3dPFJcw7qrBP6R9Gu6KX9Zk9KphZxp1OFKPA/ZIh/ie+ULFCRVC3y75ZPXKq?=
+ =?us-ascii?Q?OLzR84UHEzUIMW02PAKtaMZHeP/kFG55KjRWaRY9FugPxQ0wM7wJGSVhDOS6?=
+ =?us-ascii?Q?wkaJOb5SR0CPaoeCeM864XTvG4lUpV7YCj50G18wgOD1ZZ5vWwAlZ8+5XDEH?=
+ =?us-ascii?Q?kF9vi0EXOLbP+TprRWfBNo8S6SpOw3Gg4U/CjfE8hMqs8E7lQ3m7V6OA2Hfm?=
+ =?us-ascii?Q?ztJKJCm5RKM0AWVaDwHJZRzFZM/t+bNnFB5pYp0MKR2lhI78C9Qmq9+u0WYz?=
+ =?us-ascii?Q?d/SiQw/vrdaGOYYtWcOLQ4K/K+u1wdU5lde7SwVl6w1BXJ6aWTl45rj3n1ut?=
+ =?us-ascii?Q?tRPYvVClbX+TLEEO/RYNff5cq5xyQeme2iZPJMC3CO5hUiuwVjdI3R10KrUo?=
+ =?us-ascii?Q?5mbK4hk/daM5T9QxMLX40oyY9XkkjC1lUu+lzxP1rBarQbzg/0aBDVHWPJ7Z?=
+ =?us-ascii?Q?CQmotoNGSwncSFXPGosmv92xfeXMzmfnxxBl3lK+104894vo8RMGX1OIrNX1?=
+ =?us-ascii?Q?yxHPdB5Nhs/ge/v57GbS3ZJTAZGHjEa6+r8Rw0chxQZAP1o6bDAPuG1+y4nB?=
+ =?us-ascii?Q?VBf5EcDWDETISXJ7D3YgS/eO6oTjuIyDYt4GctYGs4Ke8EKricKHu8vCvA5y?=
+ =?us-ascii?Q?c62kstlYkUkHAg/63Lj6bQSpxBZZOnd7gLVF15oqs8OXRnwFATM2e7vKIKJk?=
+ =?us-ascii?Q?FwmwT0oF9xErrVDQsbU6xwxF+RswEjbhMj782w7RIogIbAPpFOLV4kzyQu0Z?=
+ =?us-ascii?Q?DloIaqCjVmDlQOotXgBbLHvP4NklAiLW1yuin8uEbKaRjVV2sIWzP5K20FzJ?=
+ =?us-ascii?Q?HyIA8OVijsBArG/mK1TiPiy9bciY9guMpvaxSI6pSA74mrwJiMuv9w8rxzQ0?=
+ =?us-ascii?Q?zO/rLiJXfPA63jekivw8r5jvD5KDf9WXmaBD38E1xiYFl/NJRtP9csiRZOWz?=
+ =?us-ascii?Q?pK+JknPM6obgrZQyacOo/OrjrNG587rm+MV44j1yXZM8MHIBaY6pOr9hZewN?=
+ =?us-ascii?Q?qj/LipI8p4/Mt1kKLIxSxkbLIU6qaJYH45LDuYcSv5v303UXlQBhwsxQhejL?=
+ =?us-ascii?Q?vP0hEmCxMQxdj8gm0h3ZWNFauQ3tG8etgL84knW1RdatrDuDBXTXbXdN3iAs?=
+ =?us-ascii?Q?l9RDITG/m4Em2QBLtX/Uk/A2Zc4eiu2OyRSqleEiMB1O93wY9teD+wZtO0jV?=
+ =?us-ascii?Q?5NluHf0I0mdHHtG9yIa0Ld30y9hJ+kmZCmXZ0sbk8CXM5gL5+L49xbOlOrwx?=
+ =?us-ascii?Q?+HJ4OPvrULrReQJSgevzgQSzOm+Se8pkutOy35Rs5iJAGmM8kFwl9iirPuis?=
+ =?us-ascii?Q?g4COU0lPUnrUiXms1Xkv+ympudTVqrJ/W3lPqAOsJ34voszcdDJIFlA/RFva?=
+ =?us-ascii?Q?/62Y26fD+2pmPYs0/2Q=3D?=
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+X-OriginatorOrg: nxp.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: PAXPR04MB9186.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 0d1f06d2-9869-4584-c4e7-08da7da03a19
+X-MS-Exchange-CrossTenant-originalarrivaltime: 14 Aug 2022 02:53:54.8728
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: OxOepHNY4uXDQ/VK+H9HdPCVrPeE1LfISimIvKk9ReVw9y9dRY17L7/wL4HfGs2Iw5JD7OUTiwMg14iYntqG7w==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PA4PR04MB7936
 
-The pull request you sent on Fri, 12 Aug 2022 23:45:58 -0400:
 
-> https://github.com/jonmason/ntb tags/ntb-5.20
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/a976835fdb312590ee5c085567a4e2b06da7ac33
+> -----Original Message-----
+> From: Marc Zyngier <maz@kernel.org>
+> Sent: Saturday, August 13, 2022 6:57 AM
+> To: Frank Li <frank.li@nxp.com>
+> Cc: tglx@linutronix.de; robh+dt@kernel.org;
+> krzysztof.kozlowski+dt@linaro.org; shawnguo@kernel.org;
+> s.hauer@pengutronix.de; kw@linux.com; bhelgaas@google.com;
+> devicetree@vger.kernel.org; linux-arm-kernel@lists.infradead.org; linux-
+> pci@vger.kernel.org; Peng Fan <peng.fan@nxp.com>; Aisheng Dong
+> <aisheng.dong@nxp.com>; jdmason@kudzu.us; kernel@pengutronix.de;
+> festevam@gmail.com; dl-linux-imx <linux-imx@nxp.com>; kishon@ti.com;
+> lorenzo.pieralisi@arm.com; ntb@lists.linux.dev; lznuaa@gmail.com
+> Subject: [EXT] Re: [PATCH v4 2/4] irqchip: imx mu worked as msi controlle=
+r
+>=20
+> Caution: EXT Email
+>=20
+> On Fri, 12 Aug 2022 22:52:40 +0100,
+> Frank Li <Frank.Li@nxp.com> wrote:
+> >
+> > MU support generate irq by write data to a register.
+> > This patch make mu worked as msi controller.
+> > So MU can do doorbell by using standard msi api.
+> >
+> > Signed-off-by: Frank Li <Frank.Li@nxp.com>
+>=20
+> May I add that it wouldn't hurt if you checked what addresses you send
+> your patches to? For example, 'kernel@vger.kernel.org' doesn't exist
+> (maybe you meant linux-kernel@...).
 
-Thank you!
+[Frank Li] Thanks. Strang, My email system have not report error. =20
 
--- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+>=20
+> I will not take patches that haven't been posted to LKML (and I
+> shouldn't have reviewed it the first place).
+>=20
+> Thanks,
+>=20
+>         M.
+>=20
+> --
+> Without deviation from the norm, progress is not possible.
