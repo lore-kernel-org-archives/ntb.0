@@ -1,173 +1,148 @@
-Received: from mail-oi1-f174.google.com (mail-oi1-f174.google.com [209.85.167.174])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D1F4AEA2
-	for <ntb@lists.linux.dev>; Sun, 14 Aug 2022 20:41:43 +0000 (UTC)
-Received: by mail-oi1-f174.google.com with SMTP id u9so6851993oiv.12
-        for <ntb@lists.linux.dev>; Sun, 14 Aug 2022 13:41:43 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc;
-        bh=9Mv3SYsV787hG2zwBPi7bzT81bYQL5Y4bZ2g9jjPhSI=;
-        b=jfuXwfdNfPR1xYv8TiNysfZWdly+wF3nUDIDmcfbQWIkQqMVrkGfjI7NhVQNeaglNl
-         dbClwocz86Nhf7OtpAJU4FJMuSEOdgpCSuqQPfCGUM71922Ow6xH+PgS+Q7Wn7jHW9ou
-         YccCNebGv9Pv1DLebb7wKzB+CMOc9X+8bRAjhAEOlqgdN3DHQNs6+sjVeRuXYJoRrNWZ
-         FDQL+cOhA5SQK2e/rV2o067ssuAksN0Xps67kH0Bo9dzeplLBMu05HjGvUBCp52gLx1c
-         /YVwXzifc9q7+0rL8Q7OzAFvoDJMVz++fbt2L3iQRN5j6wW2k48Mtdupt3pi2wYgFj42
-         onXg==
-X-Gm-Message-State: ACgBeo38GdxIBbue/iYDBR2k6yyVOag2Hu9Oi3RZAzcWQ9iRtp7M6E+d
-	07UZpnWyW9YD9uaklRURnw==
-X-Google-Smtp-Source: AA6agR4uHGL9LB7gP7Q+Ajfe9FgPloWZ0Sz4kuzRLczXQqy+Qp+hbqAqrIq7K9g49rj7+MI+CQqFBQ==
-X-Received: by 2002:a05:6808:10ce:b0:342:a33c:fcc with SMTP id s14-20020a05680810ce00b00342a33c0fccmr5836922ois.250.1660509702872;
-        Sun, 14 Aug 2022 13:41:42 -0700 (PDT)
-Received: from robh.at.kernel.org ([172.58.176.57])
-        by smtp.gmail.com with ESMTPSA id r14-20020a05687032ce00b0011b98fa9ab5sm396327oac.50.2022.08.14.13.41.39
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 14 Aug 2022 13:41:42 -0700 (PDT)
-Received: (nullmailer pid 672588 invoked by uid 1000);
-	Sun, 14 Aug 2022 20:41:38 -0000
-Date: Sun, 14 Aug 2022 14:41:38 -0600
-From: Rob Herring <robh@kernel.org>
-To: Frank Li <Frank.Li@nxp.com>
-Cc: maz@kernel.org, tglx@linutronix.de, krzysztof.kozlowski+dt@linaro.org, shawnguo@kernel.org, s.hauer@pengutronix.de, kw@linux.com, bhelgaas@google.com, kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-pci@vger.kernel.org, peng.fan@nxp.com, aisheng.dong@nxp.com, jdmason@kudzu.us, kernel@pengutronix.de, festevam@gmail.com, linux-imx@nxp.com, kishon@ti.com, lorenzo.pieralisi@arm.com, ntb@lists.linux.dev, lznuaa@gmail.com
-Subject: Re: [PATCH v4 3/4] dt-bindings: irqchip: imx mu work as msi
- controller
-Message-ID: <20220814204138.GA664328-robh@kernel.org>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 30BC17E
+	for <ntb@lists.linux.dev>; Mon, 15 Aug 2022 08:58:49 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B403BC433D7;
+	Mon, 15 Aug 2022 08:58:49 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1660553929;
+	bh=BqH/4KtYjxbCwUUl+LU32sSE5MD8q5kMSnS0XBF9Bt4=;
+	h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
+	b=gEn5jVDeyFy0f1Io+cvIpMoR/lZuNLQOEtYhEh/MsTFrdSQLsgfxtZLyxTXlmjiNf
+	 JPs985fMu1hoSw0YKEj6UAySKrouzovKRCjqeAS693zmQ42rM1jwm/Rznh6NZH/9a5
+	 sZ2U3Di0ZbWeTZwegrxUqtaytvG9QiLfFe/Wci/0R/YlZkTwOj0YsrOu8FHwdqS3NX
+	 7gKm6Q0hnAWni1rZvl4mtCa3Lrqqy01yTc3kKNCMTJvQBHehiWrTSQfZ19OdSmu4XU
+	 TUFLpUwEta0ZV5WPxkXicDE+gJgLu23iDU7g18gx5brJT7IByoRz+BdqDiJuH91PuR
+	 OD2Mc8Us324Xw==
+Received: from sofa.misterjones.org ([185.219.108.64] helo=why.misterjones.org)
+	by disco-boy.misterjones.org with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+	(Exim 4.95)
+	(envelope-from <maz@kernel.org>)
+	id 1oNVvr-0032af-A2;
+	Mon, 15 Aug 2022 09:58:47 +0100
+Date: Mon, 15 Aug 2022 09:58:46 +0100
+Message-ID: <87czd1vq61.wl-maz@kernel.org>
+From: Marc Zyngier <maz@kernel.org>
+To: Frank Li <frank.li@nxp.com>
+Cc: "tglx@linutronix.de" <tglx@linutronix.de>,
+	"robh+dt@kernel.org"
+	<robh+dt@kernel.org>,
+	"krzysztof.kozlowski+dt@linaro.org"
+	<krzysztof.kozlowski+dt@linaro.org>,
+	"shawnguo@kernel.org"
+	<shawnguo@kernel.org>,
+	"s.hauer@pengutronix.de" <s.hauer@pengutronix.de>,
+	"kw@linux.com" <kw@linux.com>,
+	"bhelgaas@google.com" <bhelgaas@google.com>,
+	"devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+	"linux-arm-kernel@lists.infradead.org"
+	<linux-arm-kernel@lists.infradead.org>,
+	"linux-pci@vger.kernel.org"
+	<linux-pci@vger.kernel.org>,
+	Peng Fan <peng.fan@nxp.com>,
+	Aisheng Dong
+	<aisheng.dong@nxp.com>,
+	"jdmason@kudzu.us" <jdmason@kudzu.us>,
+	"kernel@pengutronix.de" <kernel@pengutronix.de>,
+	"festevam@gmail.com"
+	<festevam@gmail.com>,
+	dl-linux-imx <linux-imx@nxp.com>,
+	"kishon@ti.com"
+	<kishon@ti.com>,
+	"lorenzo.pieralisi@arm.com" <lorenzo.pieralisi@arm.com>,
+	"ntb@lists.linux.dev" <ntb@lists.linux.dev>,
+	"lznuaa@gmail.com"
+	<lznuaa@gmail.com>
+Subject: Re: [EXT] Re: [PATCH v4 2/4] irqchip: imx mu worked as msi controller
+In-Reply-To: <PAXPR04MB918614DF535DA7FBADC956F988699@PAXPR04MB9186.eurprd04.prod.outlook.com>
 References: <20220812215242.2255824-1-Frank.Li@nxp.com>
- <20220812215242.2255824-4-Frank.Li@nxp.com>
+	<20220812215242.2255824-3-Frank.Li@nxp.com>
+	<875yiwsdq2.wl-maz@kernel.org>
+	<PAXPR04MB918614DF535DA7FBADC956F988699@PAXPR04MB9186.eurprd04.prod.outlook.com>
+User-Agent: Wanderlust/2.15.9 (Almost Unreal) SEMI-EPG/1.14.7 (Harue)
+ FLIM-LB/1.14.9 (=?UTF-8?B?R29qxY0=?=) APEL-LB/10.8 EasyPG/1.0.0 Emacs/27.1
+ (x86_64-pc-linux-gnu) MULE/6.0 (HANACHIRUSATO)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220812215242.2255824-4-Frank.Li@nxp.com>
+MIME-Version: 1.0 (generated by SEMI-EPG 1.14.7 - "Harue")
+Content-Type: text/plain; charset=US-ASCII
+X-SA-Exim-Connect-IP: 185.219.108.64
+X-SA-Exim-Rcpt-To: frank.li@nxp.com, tglx@linutronix.de, robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org, shawnguo@kernel.org, s.hauer@pengutronix.de, kw@linux.com, bhelgaas@google.com, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-pci@vger.kernel.org, peng.fan@nxp.com, aisheng.dong@nxp.com, jdmason@kudzu.us, kernel@pengutronix.de, festevam@gmail.com, linux-imx@nxp.com, kishon@ti.com, lorenzo.pieralisi@arm.com, ntb@lists.linux.dev, lznuaa@gmail.com
+X-SA-Exim-Mail-From: maz@kernel.org
+X-SA-Exim-Scanned: No (on disco-boy.misterjones.org); SAEximRunCond expanded to false
 
-On Fri, Aug 12, 2022 at 04:52:41PM -0500, Frank Li wrote:
-> I.MX mu support generate irq by write a register. Provide msi controller
-> support so other driver such as PCI EP can use it by standard msi
-> interface as doorbell.
-> 
-> Signed-off-by: Frank Li <Frank.Li@nxp.com>
-> ---
->  .../interrupt-controller/fsl,mu-msi.yaml      | 93 +++++++++++++++++++
->  1 file changed, 93 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/interrupt-controller/fsl,mu-msi.yaml
-> 
-> diff --git a/Documentation/devicetree/bindings/interrupt-controller/fsl,mu-msi.yaml b/Documentation/devicetree/bindings/interrupt-controller/fsl,mu-msi.yaml
-> new file mode 100644
-> index 0000000000000..f60fa8b686879
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/interrupt-controller/fsl,mu-msi.yaml
-> @@ -0,0 +1,93 @@
-> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/interrupt-controller/fsl,mu-msi.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: NXP i.MX Messaging Unit (MU) work as msi controller
-> +
-> +maintainers:
-> +  - Frank Li <Frank.Li@nxp.com>
-> +
-> +description: |
-> +  The Messaging Unit module enables two processors within the SoC to
-> +  communicate and coordinate by passing messages (e.g. data, status
-> +  and control) through the MU interface. The MU also provides the ability
-> +  for one processor (A side) to signal the other processor (B side) using
-> +  interrupts.
-> +
-> +  Because the MU manages the messaging between processors, the MU uses
-> +  different clocks (from each side of the different peripheral buses).
-> +  Therefore, the MU must synchronize the accesses from one side to the
-> +  other. The MU accomplishes synchronization using two sets of matching
-> +  registers (Processor A-facing, Processor B-facing).
-> +
-> +  MU can work as msi interrupt controller to do doorbell
-> +
-> +allOf:
-> +  - $ref: /schemas/interrupt-controller/msi-controller.yaml#
-> +
-> +properties:
-> +  compatible:
-> +    enum:
-> +      - fsl,imx6sx-mu-msi
-> +      - fsl,imx7ulp-mu-msi
-> +      - fsl,imx8ulp-mu-msi
-> +      - fsl,imx8ulp-mu-msi-s4
-> +
-> +  reg:
-> +    items:
-> +      - description: a side register base address
-> +      - description: b side register base address
-> +
-> +  reg-names:
-> +    items:
-> +      - const: a
-> +      - const: b
-> +
-> +  interrupts:
-> +    description: a side interrupt number.
+On Sun, 14 Aug 2022 04:12:01 +0100,
+Frank Li <frank.li@nxp.com> wrote:
 
-How many?
-
-> +
-> +  clocks:
-> +    maxItems: 1
-> +
-> +  power-domains:
-> +    items:
-> +      - description: a side power domain
-> +      - description: b side power domain
-> +
-> +  power-domain-names:
-> +    items:
-> +      - const: a
-> +      - const: b
-> +
-> +  interrupt-controller: true
-> +
-> +  msi-controller: true
-
-#msi-cells?
-
-(Missing is treated as 0, but new bindings should be explicit)
-
-> +
-> +required:
-> +  - compatible
-> +  - reg
-> +  - interrupts
-> +  - interrupt-controller
-> +  - msi-controller
-> +
-> +additionalProperties: false
-> +
-> +examples:
-> +  - |
-> +    #include <dt-bindings/interrupt-controller/arm-gic.h>
-> +    #include <dt-bindings/firmware/imx/rsrc.h>
-> +
-> +    lsio_mu12: msi-controller@5d270000 {
-
-Drop unused labels.
-
-> +        compatible = "fsl,imx6sx-mu-msi";
-> +        msi-controller;
-> +        interrupt-controller;
-> +        reg = <0x5d270000 0x10000>,     /* A side */
-> +              <0x5d300000 0x10000>;     /* B side */
-> +        reg-names = "a", "b";
-> +        interrupts = <GIC_SPI 191 IRQ_TYPE_LEVEL_HIGH>;
-> +        power-domains = <&pd IMX_SC_R_MU_12A>,
-> +                        <&pd IMX_SC_R_MU_12B>;
-> +        power-domain-names = "a", "b";
-> +    };
-> -- 
-> 2.35.1
+> > > new file mode 100644
+> > > index 0000000000000..bb111412d598f
+> > > --- /dev/null
+> > > +++ b/drivers/irqchip/irq-imx-mu-msi.c
+> > > @@ -0,0 +1,443 @@
+> > > +// SPDX-License-Identifier: GPL-2.0-only
+> > > +/*
+> > > + * NXP MU worked as MSI controller
+> > 
+> > Freescale? Or NXP? Please make up your mind.
 > 
 > 
+> [Frank Li] NXP and freescale is the same thing. 
+> It is mux used at many place.
+
+Pick one, and stick to it. Having two names for the same thing is
+pointlessly confusing.
+
+> > > +static struct irq_chip imx_mu_msi_irq_chip = {
+> > > +     .name = "MU-MSI",
+> > > +     .irq_ack = irq_chip_ack_parent,
+> > 
+> > Crucially, no irq_write_msi_msg callback. So we happily inherit
+> > platform_msi_write_msg() and use the per descriptor write_msg()
+> > callback. Who sets this? Nobody.
+> 
+> [Frank Li] when set flag MSI_FLAG_USE_DEF_CHIP_OPS, 
+>  irq_write_msi_msg callback will be set at function platform_msi_update_chip_ops();
+
+That wasn't my question. But never mind, I found the call to
+platform_msi_domain_alloc_irqs() in patch #4.
+
+> > > +
+> > > +     /* Initialize MSI domain parent */
+> > > +     msi_data->parent = irq_domain_create_linear(fwnodes,
+> > > +                                                 IMX_MU_CHANS,
+> > > +                                                 &imx_mu_msi_domain_ops,
+> > > +                                                 msi_data);
+> > 
+> > Consider setting the bus_token attribute for this domain to something
+> > that isn't the default, as it otherwise clashes with the following
+> > creation.
+> 
+> [Frank Li] Any suggestion? Which bus_token is good?
+
+DOMAIN_BUS_NEXUS is what other drivers use.
+
+> > > +     priv->pd_a = dev_pm_domain_attach_by_name(dev, "a");
+> > 
+> > I'm sorry, but you'll have to come up with something slightly more
+> > descriptive than "a" or "b". At least add a qualifier to it. Same
+> > thing for the DT by the way.
+> 
+> [Frank Li] MU spec using  term "A side" and "B side".  So I think "a" and "b"
+> is enough.
+
+No, it really isn't.
+
+> 
+> Or do you think "a-side" is better?
+
+No, I would like something fully descriptive. The DT actually has
+"Processor A-facing", which seems like a reasonable description.
+
+	M.
+
+-- 
+Without deviation from the norm, progress is not possible.
