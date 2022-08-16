@@ -1,52 +1,51 @@
-Received: from mail-wr1-f48.google.com (mail-wr1-f48.google.com [209.85.221.48])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mga02.intel.com (mga02.intel.com [134.134.136.20])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 60E8253BE
-	for <ntb@lists.linux.dev>; Tue, 16 Aug 2022 17:56:19 +0000 (UTC)
-Received: by mail-wr1-f48.google.com with SMTP id a4so1794648wrq.1
-        for <ntb@lists.linux.dev>; Tue, 16 Aug 2022 10:56:19 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc;
-        bh=k5DkGkTOKyCfGJSB3JVSoc8oJOjT+G0s0ql7SDBxRkA=;
-        b=a7uuP9Lj0ZWS1UlXzGzuRS1wQ12lW7eFvBZ1x3feeUA4IpgadpznseHR/cAM2hFN+h
-         QiVj4oucnkZOLC4AU9Is0nPEgXM6aRTJDVMvOVhE3FtfUzaR271n+bu7NDC16D8y/73j
-         p8JcRA0ELEooGfoDIAwQtEIhjkcxvXfZoISoj+JtWTvolIZMYeEo81xPNQOOBg/Ab6Ra
-         j+7TxSIzvSOBhTBjO7h28sq2HqgLzE+WS58GSkpHIpNRh4XXvMPeEyx1AtBtkP0Zs7sE
-         v/dvCMn7A1fs5L5juo7CiIJFTrpsDMlFyRydLN07DO98vnMR3BhGXiEybdkuRJnxt7UM
-         Q5BA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc;
-        bh=k5DkGkTOKyCfGJSB3JVSoc8oJOjT+G0s0ql7SDBxRkA=;
-        b=uUgrOedFnRq+lX13O5Oy3OGKFWz4mQg/chHuJmdgdLwZ/qXSajjUWMau9XH59ocRSV
-         H23iq0ztzUKV+dznuTdm7mWWe50GkEysGdsOGrg1+FVuwbuS00j433DBNKP3N0uzwNnV
-         F5BoPVDC0DhVCC4gGPuPBWhUVTLReYzvH6U90OfPkFe8Xj29cMR+btTgo6FEzKNYQcjm
-         z2rkuFtx+bjCA1wvypCU0Ta5fvOXzB49vgusijHp7B8SxG1mxrH179qusqnuv6joryBw
-         EZ7CyF1tJSho8+xyHLAnOy1FyRjNUknivkhMpco9ndHEUuLM3aNEOZ8azUMua9rsnJS8
-         qgBg==
-X-Gm-Message-State: ACgBeo39/lM/tQEQCPuJOIagyxyY3S8P0swmKvYHgvuAHfOPstShDORa
-	lXPRTiDqPv6tDPJ2KMiuCCk=
-X-Google-Smtp-Source: AA6agR7ve1RThPpT1dJnCIpHTak7OCIHWHZMczFKRXLDCvhfIm8hlUV1WSdmvH9ip2yd1GCysKrWVQ==
-X-Received: by 2002:a5d:5e82:0:b0:223:71e4:9128 with SMTP id ck2-20020a5d5e82000000b0022371e49128mr12226670wrb.227.1660672577603;
-        Tue, 16 Aug 2022 10:56:17 -0700 (PDT)
-Received: from localhost ([185.36.143.175])
-        by smtp.gmail.com with ESMTPSA id t16-20020adfdc10000000b0021e5f32ade7sm10747704wri.68.2022.08.16.10.56.16
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 16 Aug 2022 10:56:17 -0700 (PDT)
-Date: Tue, 16 Aug 2022 20:56:15 +0300
-From: Alexander Fomichev <fomichev.ru@gmail.com>
-To: Dave Jiang <dave.jiang@intel.com>
-Cc: ntb@lists.linux.dev, linux@yadro.com, Jon Mason <jdmason@kudzu.us>,
-	Allen Hubbe <allenbh@gmail.com>,
-	Guo Zhengkui <guozhengkui@vivo.com>, fancer.lancer@gmail.com,
-	Alexander Fomichev <a.fomichev@yadro.com>
-Subject: Re: [PATCH v4 0/3] ntb_perf: add new 'latency' test set
-Message-ID: <20220816175615.noyouup5dputyacu@yadro.com>
-References: <20220812165544.26307-1-fomichev.ru@gmail.com>
- <68e750b4-001f-d0d7-1449-c8eda13d4b5e@intel.com>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 16BC16AAE;
+	Tue, 16 Aug 2022 19:05:05 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1660676706; x=1692212706;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=fw20SIT8UosrRyl9DK6OBZL1qLEKx8DhIicuKy/Nujk=;
+  b=SnNSVFEk85LBDnsXbOkaF8x8PpODHWIDJy4HMvCyGD3KUQuW8ubWWXjA
+   LIntEJ5fTonYNRom/cc+Oft1hEiEhVRQF3VlGscnTYKJuai0JdC8/u5un
+   E/9BL6BsZyI+FVWgYxNBusc2ER2uL/32wqE4dN9NZ0B+p9k/FsRtAQEhf
+   Gd++bdbMCa6IUdXOJba3EQAHTqOqLhQqt0dU+tjhYnHpyrl6pYjOY8DxF
+   CYlZHPpJiImiQc4Sk9H0dfQzS8lS4U29MiMAWnEvcIBbG+efhhiyETcMB
+   l0Xms4HvceCog37hBLLvAFpkGPdwwJCH5q0KPjh9VvFMP+j7crfVPPhqQ
+   w==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10441"; a="279267050"
+X-IronPort-AV: E=Sophos;i="5.93,242,1654585200"; 
+   d="scan'208";a="279267050"
+Received: from orsmga004.jf.intel.com ([10.7.209.38])
+  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Aug 2022 12:05:05 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.93,242,1654585200"; 
+   d="scan'208";a="733409002"
+Received: from lkp-server02.sh.intel.com (HELO 81d7e1ade3ba) ([10.239.97.151])
+  by orsmga004.jf.intel.com with ESMTP; 16 Aug 2022 12:04:59 -0700
+Received: from kbuild by 81d7e1ade3ba with local (Exim 4.96)
+	(envelope-from <lkp@intel.com>)
+	id 1oO1s3-00009Y-0i;
+	Tue, 16 Aug 2022 19:04:59 +0000
+Date: Wed, 17 Aug 2022 03:04:11 +0800
+From: kernel test robot <lkp@intel.com>
+To: Frank Li <Frank.Li@nxp.com>, maz@kernel.org, tglx@linutronix.de,
+	robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
+	shawnguo@kernel.org, s.hauer@pengutronix.de, kw@linux.com,
+	bhelgaas@google.com
+Cc: llvm@lists.linux.dev, kbuild-all@lists.01.org,
+	linux-kernel@vger.kernel.org, devicetree@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org, linux-pci@vger.kernel.org,
+	peng.fan@nxp.com, aisheng.dong@nxp.com, jdmason@kudzu.us,
+	kernel@pengutronix.de, festevam@gmail.com, linux-imx@nxp.com,
+	kishon@ti.com, lorenzo.pieralisi@arm.com, ntb@lists.linux.dev,
+	lznuaa@gmail.com
+Subject: Re: [PATCH v5 2/4] irqchip: Add IMX MU MSI controller driver
+Message-ID: <202208170210.zGxvHnIZ-lkp@intel.com>
+References: <20220815213936.2380439-3-Frank.Li@nxp.com>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -55,29 +54,86 @@ List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <68e750b4-001f-d0d7-1449-c8eda13d4b5e@intel.com>
+In-Reply-To: <20220815213936.2380439-3-Frank.Li@nxp.com>
 
-Hi Dave,
+Hi Frank,
 
-On Mon, Aug 15, 2022 at 09:45:13AM -0700, Dave Jiang wrote:
-> 
-> Hi Alexander, can you add the change log between revisions in the cover
-> letter please? That helps folks that have formerly reviewed to know what has
-> changed since your last revision. Thanks!
-> 
+I love your patch! Yet something to improve:
+
+[auto build test ERROR on jonmason-ntb/ntb-next]
+[also build test ERROR on robh/for-next linus/master v6.0-rc1 next-20220816]
+[cannot apply to tip/irq/core]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
+
+url:    https://github.com/intel-lab-lkp/linux/commits/Frank-Li/PCI-EP-driver-support-MSI-doorbell-from-host/20220816-131930
+base:   https://github.com/jonmason/ntb ntb-next
+config: arm-multi_v5_defconfig (https://download.01.org/0day-ci/archive/20220817/202208170210.zGxvHnIZ-lkp@intel.com/config)
+compiler: clang version 16.0.0 (https://github.com/llvm/llvm-project aed5e3bea138ce581d682158eb61c27b3cfdd6ec)
+reproduce (this is a W=1 build):
+        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
+        chmod +x ~/bin/make.cross
+        # install arm cross compiling tool for clang build
+        # apt-get install binutils-arm-linux-gnueabi
+        # https://github.com/intel-lab-lkp/linux/commit/71296e2ad757d90e870b2ab81f2b06b9c76e7c41
+        git remote add linux-review https://github.com/intel-lab-lkp/linux
+        git fetch --no-tags linux-review Frank-Li/PCI-EP-driver-support-MSI-doorbell-from-host/20220816-131930
+        git checkout 71296e2ad757d90e870b2ab81f2b06b9c76e7c41
+        # save the config file
+        mkdir build_dir && cp config build_dir/.config
+        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=clang make.cross W=1 O=build_dir ARCH=arm SHELL=/bin/bash
+
+If you fix the issue, kindly add following tag where applicable
+Reported-by: kernel test robot <lkp@intel.com>
+
+All errors (new ones prefixed by >>):
+
+>> drivers/irqchip/irq-imx-mu-msi.c:124:13: error: use of undeclared identifier 'irq_chip_ack_parent'
+           .irq_ack = irq_chip_ack_parent,
+                      ^
+   drivers/irqchip/irq-imx-mu-msi.c:127:30: error: variable has incomplete type 'struct msi_domain_ops'
+   static struct msi_domain_ops imx_mu_msi_irq_ops = {
+                                ^
+   drivers/irqchip/irq-imx-mu-msi.c:127:15: note: forward declaration of 'struct msi_domain_ops'
+   static struct msi_domain_ops imx_mu_msi_irq_ops = {
+                 ^
+   drivers/irqchip/irq-imx-mu-msi.c:131:12: error: use of undeclared identifier 'MSI_FLAG_USE_DEF_DOM_OPS'
+           .flags  = (MSI_FLAG_USE_DEF_DOM_OPS | MSI_FLAG_USE_DEF_CHIP_OPS),
+                      ^
+   drivers/irqchip/irq-imx-mu-msi.c:131:39: error: use of undeclared identifier 'MSI_FLAG_USE_DEF_CHIP_OPS'
+           .flags  = (MSI_FLAG_USE_DEF_DOM_OPS | MSI_FLAG_USE_DEF_CHIP_OPS),
+                                                 ^
+   drivers/irqchip/irq-imx-mu-msi.c:130:31: error: variable has incomplete type 'struct msi_domain_info'
+   static struct msi_domain_info imx_mu_msi_domain_info = {
+                                 ^
+   drivers/irqchip/irq-imx-mu-msi.c:130:15: note: forward declaration of 'struct msi_domain_info'
+   static struct msi_domain_info imx_mu_msi_domain_info = {
+                 ^
+   drivers/irqchip/irq-imx-mu-msi.c:203:3: error: field designator 'alloc' does not refer to any field in type 'const struct irq_domain_ops'
+           .alloc  = imx_mu_msi_domain_irq_alloc,
+            ^
+   drivers/irqchip/irq-imx-mu-msi.c:204:3: error: field designator 'free' does not refer to any field in type 'const struct irq_domain_ops'
+           .free   = imx_mu_msi_domain_irq_free,
+            ^
+   drivers/irqchip/irq-imx-mu-msi.c:241:25: error: call to undeclared function 'platform_msi_create_irq_domain'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
+           msi_data->msi_domain = platform_msi_create_irq_domain(
+                                  ^
+   drivers/irqchip/irq-imx-mu-msi.c:295:32: warning: variable 'priv' set but not used [-Wunused-but-set-variable]
+           struct imx_mu_msi *msi_data, *priv;
+                                         ^
+   1 warning and 8 errors generated.
 
 
-Changelog V4:
+vim +/irq_chip_ack_parent +124 drivers/irqchip/irq-imx-mu-msi.c
 
-- Disable latency measurement by default ('perf_latency' module parameter),
-  suggested by Serge Semin.
-- Produce warning and continue instead of termination with error in case
-  of few steps and thus inaccurate measurement. Suggested by Serge Semin.
-- Integrate Max Filippov's patch "drivers/ntb/test: avoid 64-bit modulus
-  operation" to eliminate compile errors on 32 bit architectures.
-  https://lore.kernel.org/ntb/20220627155710.2067032-1-jcmvbkbc@gmail.com/
-
+   121	
+   122	static struct irq_chip imx_mu_msi_irq_chip = {
+   123		.name = "MU-MSI",
+ > 124		.irq_ack = irq_chip_ack_parent,
+   125	};
+   126	
 
 -- 
-Regards,
-  Alexander
+0-DAY CI Kernel Test Service
+https://01.org/lkp
