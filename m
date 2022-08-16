@@ -1,49 +1,50 @@
-Received: from mga14.intel.com (mga14.intel.com [192.55.52.115])
+Received: from mga06.intel.com (mga06b.intel.com [134.134.136.31])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E57996AA9
-	for <ntb@lists.linux.dev>; Tue, 16 Aug 2022 22:08:08 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F1C073C00;
+	Tue, 16 Aug 2022 23:20:09 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1660687688; x=1692223688;
+  t=1660692009; x=1692228009;
   h=date:from:to:cc:subject:message-id:references:
    mime-version:in-reply-to;
-  bh=CIVvTEuUy1sRWasLTycmVZNGrzKlq4n4vwoqF5i72BU=;
-  b=ROPpMWfJW2CZwu58HLHhgRQyZZB1A7BruuA6s9g0vMiUT8jjzoTJeIqv
-   KVS8NDfpMXAWTs7m+cppnWlFDmGaUroQkHAdVTQK25F8AH4nsU6k8pguq
-   x6CQXOqFOyDK4Tdsw+mIUFbvaLbKjJgexDUpMSM3dHE1mJIbdI70tGIsh
-   NpmYfqf6ml/quG9ZQp1bx3O3VwzaOt2uPPGtOFvZpFvT7HwP7/R25/RLA
-   VJH3bpBIUutR2LSw8NNkKF+OXZe0jfyCa7VVXjdG9X7u7zHkBBBwtjnzv
-   s8n9pYJpk/yxbwC7Lo0tmQb9T6qGbcLzB8UPP0bGdiiQayIXucRLf/Eir
-   Q==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10441"; a="292336295"
+  bh=aJeN90HVF/ei3jDxKECmS++0CA+/54+qZwuC6Tfbrcs=;
+  b=ZeJxfjPXQjRBWdU3iQtUFXfpHW5lU8FVxrlixf6GQ7D3zabQlwKChLZa
+   AOUz7+btav4jwCfAOh/PJweH459kk3Nuns8Ai5Z2bhaE9Th9ka+ekVV23
+   KJmSHzLzEgOy8muZyxzQSMdByxD14CPaZ/mXbp1K9sRhzJLOk8tmc16yx
+   2igZ0YhhopxfOpjJaXVuaLLr+GPeO5CXfjWTrsEiDzrjoYlwtAfcEoP1P
+   u1erECc2LSZheetfStMk3pQ/roO5U2X2VrWnfiDnqXdJNFSNL5IDeYm6o
+   cyVFBFa+KASLkQ8baACh5rpQ8p42i66qsZsDpNqNfbv4LsJaQ4Ff4im4d
+   g==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10441"; a="354096876"
 X-IronPort-AV: E=Sophos;i="5.93,242,1654585200"; 
-   d="scan'208";a="292336295"
-Received: from fmsmga004.fm.intel.com ([10.253.24.48])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Aug 2022 15:08:08 -0700
+   d="scan'208";a="354096876"
+Received: from orsmga001.jf.intel.com ([10.7.209.18])
+  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Aug 2022 16:20:09 -0700
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.93,242,1654585200"; 
-   d="scan'208";a="675393543"
+   d="scan'208";a="640224507"
 Received: from lkp-server02.sh.intel.com (HELO 81d7e1ade3ba) ([10.239.97.151])
-  by fmsmga004.fm.intel.com with ESMTP; 16 Aug 2022 15:08:02 -0700
+  by orsmga001.jf.intel.com with ESMTP; 16 Aug 2022 16:20:04 -0700
 Received: from kbuild by 81d7e1ade3ba with local (Exim 4.96)
 	(envelope-from <lkp@intel.com>)
-	id 1oO4jC-0000Gr-0r;
-	Tue, 16 Aug 2022 22:08:02 +0000
-Date: Wed, 17 Aug 2022 06:07:29 +0800
+	id 1oO5qt-0000KG-1Y;
+	Tue, 16 Aug 2022 23:20:03 +0000
+Date: Wed, 17 Aug 2022 07:19:06 +0800
 From: kernel test robot <lkp@intel.com>
 To: Frank Li <Frank.Li@nxp.com>, maz@kernel.org, tglx@linutronix.de,
 	robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
 	shawnguo@kernel.org, s.hauer@pengutronix.de, kw@linux.com,
 	bhelgaas@google.com
-Cc: kbuild-all@lists.01.org, linux-kernel@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-	linux-pci@vger.kernel.org, peng.fan@nxp.com, aisheng.dong@nxp.com,
-	jdmason@kudzu.us, kernel@pengutronix.de, festevam@gmail.com,
-	linux-imx@nxp.com, kishon@ti.com, lorenzo.pieralisi@arm.com,
-	ntb@lists.linux.dev, lznuaa@gmail.com
+Cc: llvm@lists.linux.dev, kbuild-all@lists.01.org,
+	linux-kernel@vger.kernel.org, devicetree@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org, linux-pci@vger.kernel.org,
+	peng.fan@nxp.com, aisheng.dong@nxp.com, jdmason@kudzu.us,
+	kernel@pengutronix.de, festevam@gmail.com, linux-imx@nxp.com,
+	kishon@ti.com, lorenzo.pieralisi@arm.com, ntb@lists.linux.dev,
+	lznuaa@gmail.com
 Subject: Re: [PATCH v5 2/4] irqchip: Add IMX MU MSI controller driver
-Message-ID: <202208170522.PGyjHgNg-lkp@intel.com>
+Message-ID: <202208170756.pO5LueSf-lkp@intel.com>
 References: <20220815213936.2380439-3-Frank.Li@nxp.com>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
@@ -68,86 +69,75 @@ https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
 url:    https://github.com/intel-lab-lkp/linux/commits/Frank-Li/PCI-EP-driver-support-MSI-doorbell-from-host/20220816-131930
 base:   https://github.com/jonmason/ntb ntb-next
-config: arm-vf610m4_defconfig (https://download.01.org/0day-ci/archive/20220817/202208170522.PGyjHgNg-lkp@intel.com/config)
-compiler: arm-linux-gnueabi-gcc (GCC) 12.1.0
+config: arm-imx_v4_v5_defconfig (https://download.01.org/0day-ci/archive/20220817/202208170756.pO5LueSf-lkp@intel.com/config)
+compiler: clang version 16.0.0 (https://github.com/llvm/llvm-project aed5e3bea138ce581d682158eb61c27b3cfdd6ec)
 reproduce (this is a W=1 build):
         wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
         chmod +x ~/bin/make.cross
+        # install arm cross compiling tool for clang build
+        # apt-get install binutils-arm-linux-gnueabi
         # https://github.com/intel-lab-lkp/linux/commit/71296e2ad757d90e870b2ab81f2b06b9c76e7c41
         git remote add linux-review https://github.com/intel-lab-lkp/linux
         git fetch --no-tags linux-review Frank-Li/PCI-EP-driver-support-MSI-doorbell-from-host/20220816-131930
         git checkout 71296e2ad757d90e870b2ab81f2b06b9c76e7c41
         # save the config file
         mkdir build_dir && cp config build_dir/.config
-        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-12.1.0 make.cross W=1 O=build_dir ARCH=arm SHELL=/bin/bash drivers/irqchip/
+        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=clang make.cross W=1 O=build_dir ARCH=arm SHELL=/bin/bash
 
 If you fix the issue, kindly add following tag where applicable
 Reported-by: kernel test robot <lkp@intel.com>
 
-All error/warnings (new ones prefixed by >>):
+All errors (new ones prefixed by >>):
 
->> drivers/irqchip/irq-imx-mu-msi.c:127:15: error: variable 'imx_mu_msi_irq_ops' has initializer but incomplete type
-     127 | static struct msi_domain_ops imx_mu_msi_irq_ops = {
-         |               ^~~~~~~~~~~~~~
-   drivers/irqchip/irq-imx-mu-msi.c:130:15: error: variable 'imx_mu_msi_domain_info' has initializer but incomplete type
-     130 | static struct msi_domain_info imx_mu_msi_domain_info = {
-         |               ^~~~~~~~~~~~~~~
-   drivers/irqchip/irq-imx-mu-msi.c:131:10: error: 'struct msi_domain_info' has no member named 'flags'
-     131 |         .flags  = (MSI_FLAG_USE_DEF_DOM_OPS | MSI_FLAG_USE_DEF_CHIP_OPS),
-         |          ^~~~~
-   drivers/irqchip/irq-imx-mu-msi.c:131:20: error: 'MSI_FLAG_USE_DEF_DOM_OPS' undeclared here (not in a function)
-     131 |         .flags  = (MSI_FLAG_USE_DEF_DOM_OPS | MSI_FLAG_USE_DEF_CHIP_OPS),
-         |                    ^~~~~~~~~~~~~~~~~~~~~~~~
-   drivers/irqchip/irq-imx-mu-msi.c:131:47: error: 'MSI_FLAG_USE_DEF_CHIP_OPS' undeclared here (not in a function)
-     131 |         .flags  = (MSI_FLAG_USE_DEF_DOM_OPS | MSI_FLAG_USE_DEF_CHIP_OPS),
-         |                                               ^~~~~~~~~~~~~~~~~~~~~~~~~
-   drivers/irqchip/irq-imx-mu-msi.c:131:19: warning: excess elements in struct initializer
-     131 |         .flags  = (MSI_FLAG_USE_DEF_DOM_OPS | MSI_FLAG_USE_DEF_CHIP_OPS),
-         |                   ^
-   drivers/irqchip/irq-imx-mu-msi.c:131:19: note: (near initialization for 'imx_mu_msi_domain_info')
-   drivers/irqchip/irq-imx-mu-msi.c:132:10: error: 'struct msi_domain_info' has no member named 'ops'
-     132 |         .ops    = &imx_mu_msi_irq_ops,
-         |          ^~~
-   drivers/irqchip/irq-imx-mu-msi.c:132:19: warning: excess elements in struct initializer
-     132 |         .ops    = &imx_mu_msi_irq_ops,
-         |                   ^
-   drivers/irqchip/irq-imx-mu-msi.c:132:19: note: (near initialization for 'imx_mu_msi_domain_info')
-   drivers/irqchip/irq-imx-mu-msi.c:133:10: error: 'struct msi_domain_info' has no member named 'chip'
-     133 |         .chip   = &imx_mu_msi_irq_chip,
-         |          ^~~~
-   drivers/irqchip/irq-imx-mu-msi.c:133:19: warning: excess elements in struct initializer
-     133 |         .chip   = &imx_mu_msi_irq_chip,
-         |                   ^
-   drivers/irqchip/irq-imx-mu-msi.c:133:19: note: (near initialization for 'imx_mu_msi_domain_info')
-   drivers/irqchip/irq-imx-mu-msi.c: In function 'imx_mu_msi_domains_init':
-   drivers/irqchip/irq-imx-mu-msi.c:241:32: error: implicit declaration of function 'platform_msi_create_irq_domain' [-Werror=implicit-function-declaration]
-     241 |         msi_data->msi_domain = platform_msi_create_irq_domain(
-         |                                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   drivers/irqchip/irq-imx-mu-msi.c:241:30: warning: assignment to 'struct irq_domain *' from 'int' makes pointer from integer without a cast [-Wint-conversion]
-     241 |         msi_data->msi_domain = platform_msi_create_irq_domain(
-         |                              ^
-   drivers/irqchip/irq-imx-mu-msi.c: In function 'imx_mu_of_init':
->> drivers/irqchip/irq-imx-mu-msi.c:295:39: warning: variable 'priv' set but not used [-Wunused-but-set-variable]
-     295 |         struct imx_mu_msi *msi_data, *priv;
-         |                                       ^~~~
-   drivers/irqchip/irq-imx-mu-msi.c: At top level:
->> drivers/irqchip/irq-imx-mu-msi.c:127:30: error: storage size of 'imx_mu_msi_irq_ops' isn't known
-     127 | static struct msi_domain_ops imx_mu_msi_irq_ops = {
-         |                              ^~~~~~~~~~~~~~~~~~
-   drivers/irqchip/irq-imx-mu-msi.c:130:31: error: storage size of 'imx_mu_msi_domain_info' isn't known
-     130 | static struct msi_domain_info imx_mu_msi_domain_info = {
-         |                               ^~~~~~~~~~~~~~~~~~~~~~
-   cc1: some warnings being treated as errors
+>> drivers/irqchip/irq-imx-mu-msi.c:124:13: error: use of undeclared identifier 'irq_chip_ack_parent'
+           .irq_ack = irq_chip_ack_parent,
+                      ^
+>> drivers/irqchip/irq-imx-mu-msi.c:127:30: error: variable has incomplete type 'struct msi_domain_ops'
+   static struct msi_domain_ops imx_mu_msi_irq_ops = {
+                                ^
+   drivers/irqchip/irq-imx-mu-msi.c:127:15: note: forward declaration of 'struct msi_domain_ops'
+   static struct msi_domain_ops imx_mu_msi_irq_ops = {
+                 ^
+>> drivers/irqchip/irq-imx-mu-msi.c:131:12: error: use of undeclared identifier 'MSI_FLAG_USE_DEF_DOM_OPS'
+           .flags  = (MSI_FLAG_USE_DEF_DOM_OPS | MSI_FLAG_USE_DEF_CHIP_OPS),
+                      ^
+>> drivers/irqchip/irq-imx-mu-msi.c:131:39: error: use of undeclared identifier 'MSI_FLAG_USE_DEF_CHIP_OPS'
+           .flags  = (MSI_FLAG_USE_DEF_DOM_OPS | MSI_FLAG_USE_DEF_CHIP_OPS),
+                                                 ^
+>> drivers/irqchip/irq-imx-mu-msi.c:130:31: error: variable has incomplete type 'struct msi_domain_info'
+   static struct msi_domain_info imx_mu_msi_domain_info = {
+                                 ^
+   drivers/irqchip/irq-imx-mu-msi.c:130:15: note: forward declaration of 'struct msi_domain_info'
+   static struct msi_domain_info imx_mu_msi_domain_info = {
+                 ^
+>> drivers/irqchip/irq-imx-mu-msi.c:203:3: error: field designator 'alloc' does not refer to any field in type 'const struct irq_domain_ops'
+           .alloc  = imx_mu_msi_domain_irq_alloc,
+            ^
+>> drivers/irqchip/irq-imx-mu-msi.c:204:3: error: field designator 'free' does not refer to any field in type 'const struct irq_domain_ops'
+           .free   = imx_mu_msi_domain_irq_free,
+            ^
+>> drivers/irqchip/irq-imx-mu-msi.c:241:25: error: call to undeclared function 'platform_msi_create_irq_domain'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
+           msi_data->msi_domain = platform_msi_create_irq_domain(
+                                  ^
+   drivers/irqchip/irq-imx-mu-msi.c:295:32: warning: variable 'priv' set but not used [-Wunused-but-set-variable]
+           struct imx_mu_msi *msi_data, *priv;
+                                         ^
+   1 warning and 8 errors generated.
 
 
-vim +/imx_mu_msi_irq_ops +127 drivers/irqchip/irq-imx-mu-msi.c
+vim +/irq_chip_ack_parent +124 drivers/irqchip/irq-imx-mu-msi.c
 
+   121	
+   122	static struct irq_chip imx_mu_msi_irq_chip = {
+   123		.name = "MU-MSI",
+ > 124		.irq_ack = irq_chip_ack_parent,
+   125	};
    126	
  > 127	static struct msi_domain_ops imx_mu_msi_irq_ops = {
    128	};
    129	
-   130	static struct msi_domain_info imx_mu_msi_domain_info = {
-   131		.flags	= (MSI_FLAG_USE_DEF_DOM_OPS | MSI_FLAG_USE_DEF_CHIP_OPS),
+ > 130	static struct msi_domain_info imx_mu_msi_domain_info = {
+ > 131		.flags	= (MSI_FLAG_USE_DEF_DOM_OPS | MSI_FLAG_USE_DEF_CHIP_OPS),
    132		.ops	= &imx_mu_msi_irq_ops,
    133		.chip	= &imx_mu_msi_irq_chip,
    134	};
@@ -219,8 +209,8 @@ vim +/imx_mu_msi_irq_ops +127 drivers/irqchip/irq-imx-mu-msi.c
    200	}
    201	
    202	static const struct irq_domain_ops imx_mu_msi_domain_ops = {
-   203		.alloc	= imx_mu_msi_domain_irq_alloc,
-   204		.free	= imx_mu_msi_domain_irq_free,
+ > 203		.alloc	= imx_mu_msi_domain_irq_alloc,
+ > 204		.free	= imx_mu_msi_domain_irq_free,
    205	};
    206	
    207	static void imx_mu_msi_irq_handler(struct irq_desc *desc)
@@ -257,7 +247,7 @@ vim +/imx_mu_msi_irq_ops +127 drivers/irqchip/irq-imx-mu-msi.c
    238	
    239		irq_domain_update_bus_token(parent, DOMAIN_BUS_NEXUS);
    240	
-   241		msi_data->msi_domain = platform_msi_create_irq_domain(
+ > 241		msi_data->msi_domain = platform_msi_create_irq_domain(
    242					fwnodes,
    243					&imx_mu_msi_domain_info,
    244					parent);
@@ -273,140 +263,6 @@ vim +/imx_mu_msi_irq_ops +127 drivers/irqchip/irq-imx-mu-msi.c
    254		return 0;
    255	}
    256	
-   257	/* Register offset of different version MU IP */
-   258	static const struct imx_mu_dcfg imx_mu_cfg_imx6sx = {
-   259		.xTR    = 0x0,
-   260		.xRR    = 0x10,
-   261		.xSR    = {0x20, 0x20, 0x20, 0x20},
-   262		.xCR    = {0x24, 0x24, 0x24, 0x24},
-   263	};
-   264	
-   265	static const struct imx_mu_dcfg imx_mu_cfg_imx7ulp = {
-   266		.xTR    = 0x20,
-   267		.xRR    = 0x40,
-   268		.xSR    = {0x60, 0x60, 0x60, 0x60},
-   269		.xCR    = {0x64, 0x64, 0x64, 0x64},
-   270	};
-   271	
-   272	static const struct imx_mu_dcfg imx_mu_cfg_imx8ulp = {
-   273		.type   = IMX_MU_V2,
-   274		.xTR    = 0x200,
-   275		.xRR    = 0x280,
-   276		.xSR    = {0xC, 0x118, 0x124, 0x12C},
-   277		.xCR    = {0x110, 0x114, 0x120, 0x128},
-   278	};
-   279	
-   280	static const struct imx_mu_dcfg imx_mu_cfg_imx8ulp_s4 = {
-   281	
-   282		.type   = IMX_MU_V2 | IMX_MU_V2_S4,
-   283		.xTR    = 0x200,
-   284		.xRR    = 0x280,
-   285		.xSR    = {0xC, 0x118, 0x124, 0x12C},
-   286		.xCR    = {0x110, 0x114, 0x120, 0x128},
-   287	};
-   288	
-   289	static int __init imx_mu_of_init(struct device_node *dn,
-   290					 struct device_node *parent,
-   291					 const struct imx_mu_dcfg *cfg
-   292					)
-   293	{
-   294		struct platform_device *pdev = of_find_device_by_node(dn);
- > 295		struct imx_mu_msi *msi_data, *priv;
-   296		struct device_link *pd_link_a;
-   297		struct device_link *pd_link_b;
-   298		struct resource *res;
-   299		struct device *pd_a;
-   300		struct device *pd_b;
-   301		struct device *dev;
-   302		int ret;
-   303		int irq;
-   304	
-   305		if (!pdev)
-   306			return -ENODEV;
-   307	
-   308		dev = &pdev->dev;
-   309	
-   310		priv = msi_data = devm_kzalloc(&pdev->dev, sizeof(*msi_data), GFP_KERNEL);
-   311		if (!msi_data)
-   312			return -ENOMEM;
-   313	
-   314		msi_data->cfg = cfg;
-   315	
-   316		msi_data->regs = devm_platform_ioremap_resource_byname(pdev, "processor a-facing");
-   317		if (IS_ERR(msi_data->regs)) {
-   318			dev_err(&pdev->dev, "failed to initialize 'regs'\n");
-   319			return PTR_ERR(msi_data->regs);
-   320		}
-   321	
-   322		res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "processor b-facing");
-   323		if (!res)
-   324			return -EIO;
-   325	
-   326		msi_data->msiir_addr = res->start + msi_data->cfg->xTR;
-   327	
-   328		irq = platform_get_irq(pdev, 0);
-   329		if (irq <= 0)
-   330			return -ENODEV;
-   331	
-   332		platform_set_drvdata(pdev, msi_data);
-   333	
-   334		msi_data->clk = devm_clk_get(dev, NULL);
-   335		if (IS_ERR(msi_data->clk)) {
-   336			if (PTR_ERR(msi_data->clk) != -ENOENT)
-   337				return PTR_ERR(msi_data->clk);
-   338	
-   339			msi_data->clk = NULL;
-   340		}
-   341	
-   342		pd_a = dev_pm_domain_attach_by_name(dev, "processor a-facing");
-   343		if (IS_ERR(pd_a))
-   344			return PTR_ERR(pd_a);
-   345	
-   346		pd_b = dev_pm_domain_attach_by_name(dev, "processor b-facing");
-   347		if (IS_ERR(pd_b))
-   348			return PTR_ERR(pd_b);
-   349	
-   350		pd_link_a = device_link_add(dev, pd_a,
-   351				DL_FLAG_STATELESS |
-   352				DL_FLAG_PM_RUNTIME |
-   353				DL_FLAG_RPM_ACTIVE);
-   354	
-   355		if (!pd_link_a) {
-   356			dev_err(dev, "Failed to add device_link to mu a.\n");
-   357			goto err_pd_a;
-   358		}
-   359	
-   360		pd_link_b = device_link_add(dev, pd_b,
-   361				DL_FLAG_STATELESS |
-   362				DL_FLAG_PM_RUNTIME |
-   363				DL_FLAG_RPM_ACTIVE);
-   364	
-   365	
-   366		if (!pd_link_b) {
-   367			dev_err(dev, "Failed to add device_link to mu a.\n");
-   368			goto err_pd_b;
-   369		}
-   370	
-   371		ret = imx_mu_msi_domains_init(msi_data, dev);
-   372		if (ret)
-   373			goto err_dm_init;
-   374	
-   375		irq_set_chained_handler_and_data(irq,
-   376						 imx_mu_msi_irq_handler,
-   377						 msi_data);
-   378	
-   379		pm_runtime_enable(dev);
-   380	
-   381		return 0;
-   382	
-   383	err_dm_init:
-   384		device_link_remove(dev,	pd_b);
-   385	err_pd_b:
-   386		device_link_remove(dev, pd_a);
-   387	err_pd_a:
-   388		return -EINVAL;
-   389	}
-   390	
 
 -- 
 0-DAY CI Kernel Test Service
