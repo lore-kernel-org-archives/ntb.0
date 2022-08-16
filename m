@@ -1,51 +1,52 @@
-Received: from mga14.intel.com (mga14.intel.com [192.55.52.115])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wr1-f48.google.com (mail-wr1-f48.google.com [209.85.221.48])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 310812F26;
-	Tue, 16 Aug 2022 08:39:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1660639198; x=1692175198;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=RSEQvzyLuQNM7I4Q/O8zTlnKSg2x78+IvGBFvjba1ps=;
-  b=nKCb98AGiWW42ZKDYnFkCLA/2gP4wyEraEHk5KaXljEeRhZc0bvHXttJ
-   BK//0HJ0ncBN8hU+rnlfI8eEuC7zlrf4TL6WxjMmnNlvJsC00/oGg96WH
-   7RYkMLvl1duUBDNZ/YKUx6j0cFOonsyGH8ydY5luirAfCtQleW3hiCKsB
-   0ukCw5yiirvdVQIoQEVnCh6AL5iL6zoy2PI7Ofc/Hp3d7/JWyr2QtIpha
-   OI387o3jH14ywXycPl3WbxS7wtnw1yumeGPNdSONfYWmbezTfOR2G+UuT
-   wX5DDFC5hYoRaNOtLJXkVjt7UlMHiGjJ/L1EFuJAbiyYvjqmMtxoBT8eV
-   g==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10440"; a="292160467"
-X-IronPort-AV: E=Sophos;i="5.93,240,1654585200"; 
-   d="scan'208";a="292160467"
-Received: from fmsmga002.fm.intel.com ([10.253.24.26])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Aug 2022 01:39:57 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.93,240,1654585200"; 
-   d="scan'208";a="710058969"
-Received: from lkp-server02.sh.intel.com (HELO 3d2a4d02a2a9) ([10.239.97.151])
-  by fmsmga002.fm.intel.com with ESMTP; 16 Aug 2022 01:39:52 -0700
-Received: from kbuild by 3d2a4d02a2a9 with local (Exim 4.96)
-	(envelope-from <lkp@intel.com>)
-	id 1oNs74-0001dx-2Y;
-	Tue, 16 Aug 2022 08:39:50 +0000
-Date: Tue, 16 Aug 2022 16:39:05 +0800
-From: kernel test robot <lkp@intel.com>
-To: Frank Li <Frank.Li@nxp.com>, maz@kernel.org, tglx@linutronix.de,
-	robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-	shawnguo@kernel.org, s.hauer@pengutronix.de, kw@linux.com,
-	bhelgaas@google.com
-Cc: llvm@lists.linux.dev, kbuild-all@lists.01.org,
-	linux-kernel@vger.kernel.org, devicetree@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org, linux-pci@vger.kernel.org,
-	peng.fan@nxp.com, aisheng.dong@nxp.com, jdmason@kudzu.us,
-	kernel@pengutronix.de, festevam@gmail.com, linux-imx@nxp.com,
-	kishon@ti.com, lorenzo.pieralisi@arm.com, ntb@lists.linux.dev,
-	lznuaa@gmail.com
-Subject: Re: [PATCH v5 2/4] irqchip: Add IMX MU MSI controller driver
-Message-ID: <202208161638.7Rn1SHT2-lkp@intel.com>
-References: <20220815213936.2380439-3-Frank.Li@nxp.com>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 60E8253BE
+	for <ntb@lists.linux.dev>; Tue, 16 Aug 2022 17:56:19 +0000 (UTC)
+Received: by mail-wr1-f48.google.com with SMTP id a4so1794648wrq.1
+        for <ntb@lists.linux.dev>; Tue, 16 Aug 2022 10:56:19 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc;
+        bh=k5DkGkTOKyCfGJSB3JVSoc8oJOjT+G0s0ql7SDBxRkA=;
+        b=a7uuP9Lj0ZWS1UlXzGzuRS1wQ12lW7eFvBZ1x3feeUA4IpgadpznseHR/cAM2hFN+h
+         QiVj4oucnkZOLC4AU9Is0nPEgXM6aRTJDVMvOVhE3FtfUzaR271n+bu7NDC16D8y/73j
+         p8JcRA0ELEooGfoDIAwQtEIhjkcxvXfZoISoj+JtWTvolIZMYeEo81xPNQOOBg/Ab6Ra
+         j+7TxSIzvSOBhTBjO7h28sq2HqgLzE+WS58GSkpHIpNRh4XXvMPeEyx1AtBtkP0Zs7sE
+         v/dvCMn7A1fs5L5juo7CiIJFTrpsDMlFyRydLN07DO98vnMR3BhGXiEybdkuRJnxt7UM
+         Q5BA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc;
+        bh=k5DkGkTOKyCfGJSB3JVSoc8oJOjT+G0s0ql7SDBxRkA=;
+        b=uUgrOedFnRq+lX13O5Oy3OGKFWz4mQg/chHuJmdgdLwZ/qXSajjUWMau9XH59ocRSV
+         H23iq0ztzUKV+dznuTdm7mWWe50GkEysGdsOGrg1+FVuwbuS00j433DBNKP3N0uzwNnV
+         F5BoPVDC0DhVCC4gGPuPBWhUVTLReYzvH6U90OfPkFe8Xj29cMR+btTgo6FEzKNYQcjm
+         z2rkuFtx+bjCA1wvypCU0Ta5fvOXzB49vgusijHp7B8SxG1mxrH179qusqnuv6joryBw
+         EZ7CyF1tJSho8+xyHLAnOy1FyRjNUknivkhMpco9ndHEUuLM3aNEOZ8azUMua9rsnJS8
+         qgBg==
+X-Gm-Message-State: ACgBeo39/lM/tQEQCPuJOIagyxyY3S8P0swmKvYHgvuAHfOPstShDORa
+	lXPRTiDqPv6tDPJ2KMiuCCk=
+X-Google-Smtp-Source: AA6agR7ve1RThPpT1dJnCIpHTak7OCIHWHZMczFKRXLDCvhfIm8hlUV1WSdmvH9ip2yd1GCysKrWVQ==
+X-Received: by 2002:a5d:5e82:0:b0:223:71e4:9128 with SMTP id ck2-20020a5d5e82000000b0022371e49128mr12226670wrb.227.1660672577603;
+        Tue, 16 Aug 2022 10:56:17 -0700 (PDT)
+Received: from localhost ([185.36.143.175])
+        by smtp.gmail.com with ESMTPSA id t16-20020adfdc10000000b0021e5f32ade7sm10747704wri.68.2022.08.16.10.56.16
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 16 Aug 2022 10:56:17 -0700 (PDT)
+Date: Tue, 16 Aug 2022 20:56:15 +0300
+From: Alexander Fomichev <fomichev.ru@gmail.com>
+To: Dave Jiang <dave.jiang@intel.com>
+Cc: ntb@lists.linux.dev, linux@yadro.com, Jon Mason <jdmason@kudzu.us>,
+	Allen Hubbe <allenbh@gmail.com>,
+	Guo Zhengkui <guozhengkui@vivo.com>, fancer.lancer@gmail.com,
+	Alexander Fomichev <a.fomichev@yadro.com>
+Subject: Re: [PATCH v4 0/3] ntb_perf: add new 'latency' test set
+Message-ID: <20220816175615.noyouup5dputyacu@yadro.com>
+References: <20220812165544.26307-1-fomichev.ru@gmail.com>
+ <68e750b4-001f-d0d7-1449-c8eda13d4b5e@intel.com>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -54,153 +55,29 @@ List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220815213936.2380439-3-Frank.Li@nxp.com>
+In-Reply-To: <68e750b4-001f-d0d7-1449-c8eda13d4b5e@intel.com>
 
-Hi Frank,
+Hi Dave,
 
-I love your patch! Perhaps something to improve:
-
-[auto build test WARNING on jonmason-ntb/ntb-next]
-[also build test WARNING on robh/for-next linus/master v6.0-rc1 next-20220816]
-[cannot apply to tip/irq/core]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
-
-url:    https://github.com/intel-lab-lkp/linux/commits/Frank-Li/PCI-EP-driver-support-MSI-doorbell-from-host/20220816-131930
-base:   https://github.com/jonmason/ntb ntb-next
-config: arm64-randconfig-r025-20220815 (https://download.01.org/0day-ci/archive/20220816/202208161638.7Rn1SHT2-lkp@intel.com/config)
-compiler: clang version 16.0.0 (https://github.com/llvm/llvm-project aed5e3bea138ce581d682158eb61c27b3cfdd6ec)
-reproduce (this is a W=1 build):
-        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
-        chmod +x ~/bin/make.cross
-        # install arm64 cross compiling tool for clang build
-        # apt-get install binutils-aarch64-linux-gnu
-        # https://github.com/intel-lab-lkp/linux/commit/71296e2ad757d90e870b2ab81f2b06b9c76e7c41
-        git remote add linux-review https://github.com/intel-lab-lkp/linux
-        git fetch --no-tags linux-review Frank-Li/PCI-EP-driver-support-MSI-doorbell-from-host/20220816-131930
-        git checkout 71296e2ad757d90e870b2ab81f2b06b9c76e7c41
-        # save the config file
-        mkdir build_dir && cp config build_dir/.config
-        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=clang make.cross W=1 O=build_dir ARCH=arm64 SHELL=/bin/bash drivers/irqchip/
-
-If you fix the issue, kindly add following tag where applicable
-Reported-by: kernel test robot <lkp@intel.com>
-
-All warnings (new ones prefixed by >>):
-
->> drivers/irqchip/irq-imx-mu-msi.c:295:32: warning: variable 'priv' set but not used [-Wunused-but-set-variable]
-           struct imx_mu_msi *msi_data, *priv;
-                                         ^
-   1 warning generated.
+On Mon, Aug 15, 2022 at 09:45:13AM -0700, Dave Jiang wrote:
+> 
+> Hi Alexander, can you add the change log between revisions in the cover
+> letter please? That helps folks that have formerly reviewed to know what has
+> changed since your last revision. Thanks!
+> 
 
 
-vim +/priv +295 drivers/irqchip/irq-imx-mu-msi.c
+Changelog V4:
 
-   288	
-   289	static int __init imx_mu_of_init(struct device_node *dn,
-   290					 struct device_node *parent,
-   291					 const struct imx_mu_dcfg *cfg
-   292					)
-   293	{
-   294		struct platform_device *pdev = of_find_device_by_node(dn);
- > 295		struct imx_mu_msi *msi_data, *priv;
-   296		struct device_link *pd_link_a;
-   297		struct device_link *pd_link_b;
-   298		struct resource *res;
-   299		struct device *pd_a;
-   300		struct device *pd_b;
-   301		struct device *dev;
-   302		int ret;
-   303		int irq;
-   304	
-   305		if (!pdev)
-   306			return -ENODEV;
-   307	
-   308		dev = &pdev->dev;
-   309	
-   310		priv = msi_data = devm_kzalloc(&pdev->dev, sizeof(*msi_data), GFP_KERNEL);
-   311		if (!msi_data)
-   312			return -ENOMEM;
-   313	
-   314		msi_data->cfg = cfg;
-   315	
-   316		msi_data->regs = devm_platform_ioremap_resource_byname(pdev, "processor a-facing");
-   317		if (IS_ERR(msi_data->regs)) {
-   318			dev_err(&pdev->dev, "failed to initialize 'regs'\n");
-   319			return PTR_ERR(msi_data->regs);
-   320		}
-   321	
-   322		res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "processor b-facing");
-   323		if (!res)
-   324			return -EIO;
-   325	
-   326		msi_data->msiir_addr = res->start + msi_data->cfg->xTR;
-   327	
-   328		irq = platform_get_irq(pdev, 0);
-   329		if (irq <= 0)
-   330			return -ENODEV;
-   331	
-   332		platform_set_drvdata(pdev, msi_data);
-   333	
-   334		msi_data->clk = devm_clk_get(dev, NULL);
-   335		if (IS_ERR(msi_data->clk)) {
-   336			if (PTR_ERR(msi_data->clk) != -ENOENT)
-   337				return PTR_ERR(msi_data->clk);
-   338	
-   339			msi_data->clk = NULL;
-   340		}
-   341	
-   342		pd_a = dev_pm_domain_attach_by_name(dev, "processor a-facing");
-   343		if (IS_ERR(pd_a))
-   344			return PTR_ERR(pd_a);
-   345	
-   346		pd_b = dev_pm_domain_attach_by_name(dev, "processor b-facing");
-   347		if (IS_ERR(pd_b))
-   348			return PTR_ERR(pd_b);
-   349	
-   350		pd_link_a = device_link_add(dev, pd_a,
-   351				DL_FLAG_STATELESS |
-   352				DL_FLAG_PM_RUNTIME |
-   353				DL_FLAG_RPM_ACTIVE);
-   354	
-   355		if (!pd_link_a) {
-   356			dev_err(dev, "Failed to add device_link to mu a.\n");
-   357			goto err_pd_a;
-   358		}
-   359	
-   360		pd_link_b = device_link_add(dev, pd_b,
-   361				DL_FLAG_STATELESS |
-   362				DL_FLAG_PM_RUNTIME |
-   363				DL_FLAG_RPM_ACTIVE);
-   364	
-   365	
-   366		if (!pd_link_b) {
-   367			dev_err(dev, "Failed to add device_link to mu a.\n");
-   368			goto err_pd_b;
-   369		}
-   370	
-   371		ret = imx_mu_msi_domains_init(msi_data, dev);
-   372		if (ret)
-   373			goto err_dm_init;
-   374	
-   375		irq_set_chained_handler_and_data(irq,
-   376						 imx_mu_msi_irq_handler,
-   377						 msi_data);
-   378	
-   379		pm_runtime_enable(dev);
-   380	
-   381		return 0;
-   382	
-   383	err_dm_init:
-   384		device_link_remove(dev,	pd_b);
-   385	err_pd_b:
-   386		device_link_remove(dev, pd_a);
-   387	err_pd_a:
-   388		return -EINVAL;
-   389	}
-   390	
+- Disable latency measurement by default ('perf_latency' module parameter),
+  suggested by Serge Semin.
+- Produce warning and continue instead of termination with error in case
+  of few steps and thus inaccurate measurement. Suggested by Serge Semin.
+- Integrate Max Filippov's patch "drivers/ntb/test: avoid 64-bit modulus
+  operation" to eliminate compile errors on 32 bit architectures.
+  https://lore.kernel.org/ntb/20220627155710.2067032-1-jcmvbkbc@gmail.com/
+
 
 -- 
-0-DAY CI Kernel Test Service
-https://01.org/lkp
+Regards,
+  Alexander
