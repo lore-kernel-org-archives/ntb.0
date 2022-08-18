@@ -1,269 +1,111 @@
-Received: from mga06.intel.com (mga06b.intel.com [134.134.136.31])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pg1-f172.google.com (mail-pg1-f172.google.com [209.85.215.172])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F1C073C00;
-	Tue, 16 Aug 2022 23:20:09 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1660692009; x=1692228009;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=aJeN90HVF/ei3jDxKECmS++0CA+/54+qZwuC6Tfbrcs=;
-  b=ZeJxfjPXQjRBWdU3iQtUFXfpHW5lU8FVxrlixf6GQ7D3zabQlwKChLZa
-   AOUz7+btav4jwCfAOh/PJweH459kk3Nuns8Ai5Z2bhaE9Th9ka+ekVV23
-   KJmSHzLzEgOy8muZyxzQSMdByxD14CPaZ/mXbp1K9sRhzJLOk8tmc16yx
-   2igZ0YhhopxfOpjJaXVuaLLr+GPeO5CXfjWTrsEiDzrjoYlwtAfcEoP1P
-   u1erECc2LSZheetfStMk3pQ/roO5U2X2VrWnfiDnqXdJNFSNL5IDeYm6o
-   cyVFBFa+KASLkQ8baACh5rpQ8p42i66qsZsDpNqNfbv4LsJaQ4Ff4im4d
-   g==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10441"; a="354096876"
-X-IronPort-AV: E=Sophos;i="5.93,242,1654585200"; 
-   d="scan'208";a="354096876"
-Received: from orsmga001.jf.intel.com ([10.7.209.18])
-  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Aug 2022 16:20:09 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.93,242,1654585200"; 
-   d="scan'208";a="640224507"
-Received: from lkp-server02.sh.intel.com (HELO 81d7e1ade3ba) ([10.239.97.151])
-  by orsmga001.jf.intel.com with ESMTP; 16 Aug 2022 16:20:04 -0700
-Received: from kbuild by 81d7e1ade3ba with local (Exim 4.96)
-	(envelope-from <lkp@intel.com>)
-	id 1oO5qt-0000KG-1Y;
-	Tue, 16 Aug 2022 23:20:03 +0000
-Date: Wed, 17 Aug 2022 07:19:06 +0800
-From: kernel test robot <lkp@intel.com>
-To: Frank Li <Frank.Li@nxp.com>, maz@kernel.org, tglx@linutronix.de,
-	robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-	shawnguo@kernel.org, s.hauer@pengutronix.de, kw@linux.com,
-	bhelgaas@google.com
-Cc: llvm@lists.linux.dev, kbuild-all@lists.01.org,
-	linux-kernel@vger.kernel.org, devicetree@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org, linux-pci@vger.kernel.org,
-	peng.fan@nxp.com, aisheng.dong@nxp.com, jdmason@kudzu.us,
-	kernel@pengutronix.de, festevam@gmail.com, linux-imx@nxp.com,
-	kishon@ti.com, lorenzo.pieralisi@arm.com, ntb@lists.linux.dev,
-	lznuaa@gmail.com
-Subject: Re: [PATCH v5 2/4] irqchip: Add IMX MU MSI controller driver
-Message-ID: <202208170756.pO5LueSf-lkp@intel.com>
-References: <20220815213936.2380439-3-Frank.Li@nxp.com>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 75EEB7B
+	for <ntb@lists.linux.dev>; Thu, 18 Aug 2022 06:02:36 +0000 (UTC)
+Received: by mail-pg1-f172.google.com with SMTP id 24so518138pgr.7
+        for <ntb@lists.linux.dev>; Wed, 17 Aug 2022 23:02:36 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:from:to
+         :cc;
+        bh=zK72A8q5XD2E3NomsnJJ4xt124GNl/LXJjyyFVpPi3Q=;
+        b=vDSQyxgLF0rPsGm3whfGWvdwuXaaggJm3hBiEY2XXtCdUbBAxBskXAwmyUgst2JRgh
+         0+RpDuL0rmCPrMNVzxiAFW+s4D4T6kN/boLgbrVPavMoHdMdjN1qjyA7UBlRv4NrB0tb
+         UElnczihsgdB6AyXrjodapbcspF13GOULens5dy15Q9P/Pu5fSXPeGA/MtKUJlA4qOKK
+         v4Anr60vZYM+arsPw9kr8FN6TRaKylEE/YYCjthoJvysvh9bjoxiX8OisPgsih0ZhD2U
+         oUy91KJDxhT6SWgkhXQgljljmB6vMtYNr/bY6i7F7nDTEdgaIuEVIPJQAo/aL2M223or
+         Pf1w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc;
+        bh=zK72A8q5XD2E3NomsnJJ4xt124GNl/LXJjyyFVpPi3Q=;
+        b=krHn5Osdpw3QtGDe2dV15BuzOkdsNrFy71cjdCCtsS8leEg0eFRhGJZlTRSTl+qzrZ
+         NdGeGcF5E1H8nQg6rZPN1EcItXpEolQrgk1NsWu+euwjzkrUwn3Nz01DEQPh9F07C7dU
+         7W/NooIXhKwHaIRVQrZfHdjjgB5WYmS6xhVQep0u/RmWiI5I2IsFkw8g14psrVREgEX3
+         rr0gA+0UoHfFR2gRh3xLsxGj9cYy9eC7RmSmfyjOG9TwAEj54i+MA/p+qn35cQ8Vsq4L
+         nXv/6sxrSM2G/ZP+DJjUSOcwDx3A8B8AOl2sADc3TOMTUbxEPeFqC0hvkjH/fVVrhNXg
+         7qDg==
+X-Gm-Message-State: ACgBeo2v9HIMWMAtRhERC06C5dHw8bRYkefT8jSJyIrT8PP/YGIKCoU3
+	3qsRDXh2cGcSSbDApQmI2mFe
+X-Google-Smtp-Source: AA6agR5S8mPl/SarYfDESuLsWayOu8NNUQMOoFIcC5tZbb45kGSDfEw9qTui2H5mFYBnpeNL3hk41Q==
+X-Received: by 2002:a05:6a00:4509:b0:52d:4943:90b4 with SMTP id cw9-20020a056a00450900b0052d494390b4mr1569547pfb.22.1660802555747;
+        Wed, 17 Aug 2022 23:02:35 -0700 (PDT)
+Received: from thinkpad ([117.202.186.191])
+        by smtp.gmail.com with ESMTPSA id 13-20020a170902c10d00b0016d737bff00sm454658pli.220.2022.08.17.23.02.32
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 17 Aug 2022 23:02:35 -0700 (PDT)
+Date: Thu, 18 Aug 2022 11:32:30 +0530
+From: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+To: Jon Mason <jdmason@kudzu.us>
+Cc: ntb@lists.linux.dev, Bjorn Helgaas <helgaas@kernel.org>,
+	Frank.Li@nxp.com, linux-pci@vger.kernel.org,
+	linux-kernel@vger.kernel.org, kishon@ti.com
+Subject: Re: [PATCH] MAINTAINERS: add PCI Endpoint NTB drivers to NTB files
+Message-ID: <20220818060230.GA12008@thinkpad>
+References: <20220812194205.388967-1-jdmason@kudzu.us>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20220815213936.2380439-3-Frank.Li@nxp.com>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20220812194205.388967-1-jdmason@kudzu.us>
 
-Hi Frank,
++ Kishon (PCI EP Maintainer)
 
-I love your patch! Yet something to improve:
+On Fri, Aug 12, 2022 at 03:42:05PM -0400, Jon Mason wrote:
+> The PCI Endpoint NTB drivers are under the NTB umbrella.  Add an entry
+> there to allow for notification of changes for it.
+> 
+> Signed-off-by: Jon Mason <jdmason@kudzu.us>
 
-[auto build test ERROR on jonmason-ntb/ntb-next]
-[also build test ERROR on robh/for-next linus/master v6.0-rc1 next-20220816]
-[cannot apply to tip/irq/core]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
+Hi Jason,
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Frank-Li/PCI-EP-driver-support-MSI-doorbell-from-host/20220816-131930
-base:   https://github.com/jonmason/ntb ntb-next
-config: arm-imx_v4_v5_defconfig (https://download.01.org/0day-ci/archive/20220817/202208170756.pO5LueSf-lkp@intel.com/config)
-compiler: clang version 16.0.0 (https://github.com/llvm/llvm-project aed5e3bea138ce581d682158eb61c27b3cfdd6ec)
-reproduce (this is a W=1 build):
-        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
-        chmod +x ~/bin/make.cross
-        # install arm cross compiling tool for clang build
-        # apt-get install binutils-arm-linux-gnueabi
-        # https://github.com/intel-lab-lkp/linux/commit/71296e2ad757d90e870b2ab81f2b06b9c76e7c41
-        git remote add linux-review https://github.com/intel-lab-lkp/linux
-        git fetch --no-tags linux-review Frank-Li/PCI-EP-driver-support-MSI-doorbell-from-host/20220816-131930
-        git checkout 71296e2ad757d90e870b2ab81f2b06b9c76e7c41
-        # save the config file
-        mkdir build_dir && cp config build_dir/.config
-        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=clang make.cross W=1 O=build_dir ARCH=arm SHELL=/bin/bash
+I know that this patch is already in Linus's tree but I think this PCI Endpoint
+VNTB driver is not going in a correct path. First, Kishon is not convinced with
+the way the PCI Endpoint VNTB function driver is written currently. He prefers
+the VirtIO approach over the current one [1].
 
-If you fix the issue, kindly add following tag where applicable
-Reported-by: kernel test robot <lkp@intel.com>
+But while the conversation was still going on, the series got merged via NTB
+tree without any ACKs from the PCI/PCI_EP maintainers. Also, note that there
+was a patch touching the PCI Controller driver as well and that was also not
+ACKed [2].
 
-All errors (new ones prefixed by >>):
+If this trend is going to continue in the coming days, then I'm afraid that NTB
+might end up being a backdoor for PCI/PCI_EP patches :(
 
->> drivers/irqchip/irq-imx-mu-msi.c:124:13: error: use of undeclared identifier 'irq_chip_ack_parent'
-           .irq_ack = irq_chip_ack_parent,
-                      ^
->> drivers/irqchip/irq-imx-mu-msi.c:127:30: error: variable has incomplete type 'struct msi_domain_ops'
-   static struct msi_domain_ops imx_mu_msi_irq_ops = {
-                                ^
-   drivers/irqchip/irq-imx-mu-msi.c:127:15: note: forward declaration of 'struct msi_domain_ops'
-   static struct msi_domain_ops imx_mu_msi_irq_ops = {
-                 ^
->> drivers/irqchip/irq-imx-mu-msi.c:131:12: error: use of undeclared identifier 'MSI_FLAG_USE_DEF_DOM_OPS'
-           .flags  = (MSI_FLAG_USE_DEF_DOM_OPS | MSI_FLAG_USE_DEF_CHIP_OPS),
-                      ^
->> drivers/irqchip/irq-imx-mu-msi.c:131:39: error: use of undeclared identifier 'MSI_FLAG_USE_DEF_CHIP_OPS'
-           .flags  = (MSI_FLAG_USE_DEF_DOM_OPS | MSI_FLAG_USE_DEF_CHIP_OPS),
-                                                 ^
->> drivers/irqchip/irq-imx-mu-msi.c:130:31: error: variable has incomplete type 'struct msi_domain_info'
-   static struct msi_domain_info imx_mu_msi_domain_info = {
-                                 ^
-   drivers/irqchip/irq-imx-mu-msi.c:130:15: note: forward declaration of 'struct msi_domain_info'
-   static struct msi_domain_info imx_mu_msi_domain_info = {
-                 ^
->> drivers/irqchip/irq-imx-mu-msi.c:203:3: error: field designator 'alloc' does not refer to any field in type 'const struct irq_domain_ops'
-           .alloc  = imx_mu_msi_domain_irq_alloc,
-            ^
->> drivers/irqchip/irq-imx-mu-msi.c:204:3: error: field designator 'free' does not refer to any field in type 'const struct irq_domain_ops'
-           .free   = imx_mu_msi_domain_irq_free,
-            ^
->> drivers/irqchip/irq-imx-mu-msi.c:241:25: error: call to undeclared function 'platform_msi_create_irq_domain'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
-           msi_data->msi_domain = platform_msi_create_irq_domain(
-                                  ^
-   drivers/irqchip/irq-imx-mu-msi.c:295:32: warning: variable 'priv' set but not used [-Wunused-but-set-variable]
-           struct imx_mu_msi *msi_data, *priv;
-                                         ^
-   1 warning and 8 errors generated.
+Thanks,
+Mani
 
+[1] https://lore.kernel.org/all/20220222162355.32369-4-Frank.Li@nxp.com
+[2] https://lore.kernel.org/all/20220222162355.32369-2-Frank.Li@nxp.com
 
-vim +/irq_chip_ack_parent +124 drivers/irqchip/irq-imx-mu-msi.c
-
-   121	
-   122	static struct irq_chip imx_mu_msi_irq_chip = {
-   123		.name = "MU-MSI",
- > 124		.irq_ack = irq_chip_ack_parent,
-   125	};
-   126	
- > 127	static struct msi_domain_ops imx_mu_msi_irq_ops = {
-   128	};
-   129	
- > 130	static struct msi_domain_info imx_mu_msi_domain_info = {
- > 131		.flags	= (MSI_FLAG_USE_DEF_DOM_OPS | MSI_FLAG_USE_DEF_CHIP_OPS),
-   132		.ops	= &imx_mu_msi_irq_ops,
-   133		.chip	= &imx_mu_msi_irq_chip,
-   134	};
-   135	
-   136	static void imx_mu_msi_parent_compose_msg(struct irq_data *data,
-   137						  struct msi_msg *msg)
-   138	{
-   139		struct imx_mu_msi *msi_data = irq_data_get_irq_chip_data(data);
-   140		u64 addr = msi_data->msiir_addr + 4 * data->hwirq;
-   141	
-   142		msg->address_hi = upper_32_bits(addr);
-   143		msg->address_lo = lower_32_bits(addr);
-   144		msg->data = data->hwirq;
-   145	}
-   146	
-   147	static int imx_mu_msi_parent_set_affinity(struct irq_data *irq_data,
-   148					   const struct cpumask *mask, bool force)
-   149	{
-   150		return -EINVAL;
-   151	}
-   152	
-   153	static struct irq_chip imx_mu_msi_parent_chip = {
-   154		.name		= "MU",
-   155		.irq_mask	= imx_mu_msi_parent_mask_irq,
-   156		.irq_unmask	= imx_mu_msi_parent_unmask_irq,
-   157		.irq_ack	= imx_mu_msi_parent_ack_irq,
-   158		.irq_compose_msi_msg	= imx_mu_msi_parent_compose_msg,
-   159		.irq_set_affinity = imx_mu_msi_parent_set_affinity,
-   160	};
-   161	
-   162	static int imx_mu_msi_domain_irq_alloc(struct irq_domain *domain,
-   163						unsigned int virq,
-   164						unsigned int nr_irqs,
-   165						void *args)
-   166	{
-   167		struct imx_mu_msi *msi_data = domain->host_data;
-   168		unsigned long flags;
-   169		int pos, err = 0;
-   170	
-   171		WARN_ON(nr_irqs != 1);
-   172	
-   173		spin_lock_irqsave(&msi_data->lock, flags);
-   174		pos = find_first_zero_bit(&msi_data->used, IMX_MU_CHANS);
-   175		if (pos < IMX_MU_CHANS)
-   176			__set_bit(pos, &msi_data->used);
-   177		else
-   178			err = -ENOSPC;
-   179		spin_unlock_irqrestore(&msi_data->lock, flags);
-   180	
-   181		if (err)
-   182			return err;
-   183	
-   184		irq_domain_set_info(domain, virq, pos,
-   185				    &imx_mu_msi_parent_chip, msi_data,
-   186				    handle_edge_irq, NULL, NULL);
-   187		return 0;
-   188	}
-   189	
-   190	static void imx_mu_msi_domain_irq_free(struct irq_domain *domain,
-   191					       unsigned int virq, unsigned int nr_irqs)
-   192	{
-   193		struct irq_data *d = irq_domain_get_irq_data(domain, virq);
-   194		struct imx_mu_msi *msi_data = irq_data_get_irq_chip_data(d);
-   195		unsigned long flags;
-   196	
-   197		spin_lock_irqsave(&msi_data->lock, flags);
-   198		__clear_bit(d->hwirq, &msi_data->used);
-   199		spin_unlock_irqrestore(&msi_data->lock, flags);
-   200	}
-   201	
-   202	static const struct irq_domain_ops imx_mu_msi_domain_ops = {
- > 203		.alloc	= imx_mu_msi_domain_irq_alloc,
- > 204		.free	= imx_mu_msi_domain_irq_free,
-   205	};
-   206	
-   207	static void imx_mu_msi_irq_handler(struct irq_desc *desc)
-   208	{
-   209		struct imx_mu_msi *msi_data = irq_desc_get_handler_data(desc);
-   210		struct irq_chip *chip = irq_desc_get_chip(desc);
-   211		u32 status;
-   212		int i;
-   213	
-   214		status = imx_mu_read(msi_data, msi_data->cfg->xSR[IMX_MU_RSR]);
-   215	
-   216		chained_irq_enter(chip, desc);
-   217		for (i = 0; i < IMX_MU_CHANS; i++) {
-   218			if (status & IMX_MU_xSR_RFn(msi_data, i))
-   219				generic_handle_domain_irq(msi_data->msi_domain, i);
-   220		}
-   221		chained_irq_exit(chip, desc);
-   222	}
-   223	
-   224	static int imx_mu_msi_domains_init(struct imx_mu_msi *msi_data, struct device *dev)
-   225	{
-   226		struct fwnode_handle *fwnodes = dev_fwnode(dev);
-   227		struct irq_domain *parent;
-   228	
-   229		/* Initialize MSI domain parent */
-   230		parent = irq_domain_create_linear(fwnodes,
-   231						    IMX_MU_CHANS,
-   232						    &imx_mu_msi_domain_ops,
-   233						    msi_data);
-   234		if (!parent) {
-   235			dev_err(dev, "failed to create IRQ domain\n");
-   236			return -ENOMEM;
-   237		}
-   238	
-   239		irq_domain_update_bus_token(parent, DOMAIN_BUS_NEXUS);
-   240	
- > 241		msi_data->msi_domain = platform_msi_create_irq_domain(
-   242					fwnodes,
-   243					&imx_mu_msi_domain_info,
-   244					parent);
-   245	
-   246		if (!msi_data->msi_domain) {
-   247			dev_err(dev, "failed to create MSI domain\n");
-   248			irq_domain_remove(parent);
-   249			return -ENOMEM;
-   250		}
-   251	
-   252		irq_domain_set_pm_device(msi_data->msi_domain, dev);
-   253	
-   254		return 0;
-   255	}
-   256	
+> ---
+>  MAINTAINERS | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index 64379c699903..47e9f86bd712 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -14254,6 +14254,7 @@ W:	https://github.com/jonmason/ntb/wiki
+>  T:	git git://github.com/jonmason/ntb.git
+>  F:	drivers/net/ntb_netdev.c
+>  F:	drivers/ntb/
+> +F:	drivers/pci/endpoint/functions/pci-epf-*ntb.c
+>  F:	include/linux/ntb.h
+>  F:	include/linux/ntb_transport.h
+>  F:	tools/testing/selftests/ntb/
+> -- 
+> 2.30.2
+> 
 
 -- 
-0-DAY CI Kernel Test Service
-https://01.org/lkp
+மணிவண்ணன் சதாசிவம்
