@@ -1,35 +1,23 @@
-Received: from lelv0142.ext.ti.com (lelv0142.ext.ti.com [198.47.23.249])
+Received: from casper.infradead.org (casper.infradead.org [90.155.50.34])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E378717EE
-	for <ntb@lists.linux.dev>; Fri, 19 Aug 2022 08:39:56 +0000 (UTC)
-Received: from lelv0266.itg.ti.com ([10.180.67.225])
-	by lelv0142.ext.ti.com (8.15.2/8.15.2) with ESMTP id 27J6w1ve037308;
-	Fri, 19 Aug 2022 01:58:01 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-	s=ti-com-17Q1; t=1660892281;
-	bh=4hILr9mwysClVQmLXuoXs+Yh9Qr4uEAq3TEQk0aZ9TY=;
-	h=Date:Subject:To:CC:References:From:In-Reply-To;
-	b=xlJCz4L8ww8LLhJWZ29DVMHoVSA6+BGTGnckj3xI7LTm+lCnC7ADHlDrK+DoMeFXb
-	 wuHJkEvu0bdQiUSLMqi9QN3KMxLgjFM3kSH4WNkx8sq/9IiRRClc28BGp1yWPRRLYS
-	 lxxlKcmjzNETKUjQQGHsqoarcrcBlJGI2EbHQ7E4=
-Received: from DLEE112.ent.ti.com (dlee112.ent.ti.com [157.170.170.23])
-	by lelv0266.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 27J6w1Hj001477
-	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-	Fri, 19 Aug 2022 01:58:01 -0500
-Received: from DLEE106.ent.ti.com (157.170.170.36) by DLEE112.ent.ti.com
- (157.170.170.23) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.6; Fri, 19
- Aug 2022 01:58:00 -0500
-Received: from fllv0040.itg.ti.com (10.64.41.20) by DLEE106.ent.ti.com
- (157.170.170.36) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.6 via
- Frontend Transport; Fri, 19 Aug 2022 01:58:00 -0500
-Received: from [172.24.147.145] (ileax41-snat.itg.ti.com [10.172.224.153])
-	by fllv0040.itg.ti.com (8.15.2/8.15.2) with ESMTP id 27J6vwIw025185;
-	Fri, 19 Aug 2022 01:57:58 -0500
-Message-ID: <06015c8a-2dbe-bc5f-4b8e-2ee87ee5910c@ti.com>
-Date: Fri, 19 Aug 2022 12:27:57 +0530
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CAC7B3C13;
+	Fri, 19 Aug 2022 15:31:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=casper.20170209; h=Content-Transfer-Encoding:Content-Type:
+	In-Reply-To:From:References:Cc:To:Subject:MIME-Version:Date:Message-ID:Sender
+	:Reply-To:Content-ID:Content-Description;
+	bh=24MYTNmWKwuz612F53s8OGxxNoOr440y1r636RmtOyM=; b=p/vghahIi+rGsJOOBcIrm0yvFt
+	0YajqQ0rLEYEnvp2xZHIGxLITHzgOXXEv4M41MX318pD2xLf6gcLiQNI09vS6bl60rwA2GWTjaCQv
+	mxLM0ELFbzpxaMzJrb/xq0jOEuym4AOaZVkU3/CJnmE5ZwD8OhMDokLssZhE6l8fD8W61/qAvfDfS
+	M6u4mrQh7+6QBfnjdHEB1sbLlPEGx9kkwjr0UDMvfCYbuc2drfea8G4keCpflasM8TCCm6QZTYQYv
+	AlZxuTfljpn7GdTINGFYyc+NLCc0rFeua3I+6v+zIHZYya8ZcmJxLSXVRvpYUM4Js1B21+nTRCTGD
+	cnR0C4pg==;
+Received: from [2600:1702:3c30:6ca0:77cd:43b1:3d69:dd7b]
+	by casper.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
+	id 1oP3uE-00BHzl-Dd; Fri, 19 Aug 2022 15:27:30 +0000
+Message-ID: <245d4220-a88a-5665-c756-a5b32e5bfeae@infradead.org>
+Date: Fri, 19 Aug 2022 08:26:57 -0700
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -38,151 +26,188 @@ List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
  Thunderbird/91.11.0
-Subject: Re: [PATCH] MAINTAINERS: add PCI Endpoint NTB drivers to NTB files
+Subject: Re: [PATCH] net: move from strlcpy with unused retval to strscpy
 Content-Language: en-US
-To: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
-        Jon Mason
-	<jdmason@kudzu.us>
-CC: <ntb@lists.linux.dev>, Bjorn Helgaas <helgaas@kernel.org>,
-        <Frank.Li@nxp.com>, <linux-pci@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>
-References: <20220812194205.388967-1-jdmason@kudzu.us>
- <20220818060230.GA12008@thinkpad> <Yv5EA8uuhwn049jx@kudzu.us>
- <20220818145115.GA111116@thinkpad>
-From: Kishon Vijay Abraham I <kishon@ti.com>
-In-Reply-To: <20220818145115.GA111116@thinkpad>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
-X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+ linux-kernel@vger.kernel.org
+Cc: "David S. Miller" <davem@davemloft.net>,
+ Eric Dumazet <edumazet@google.com>, Jakub Kicinski <kuba@kernel.org>,
+ Paolo Abeni <pabeni@redhat.com>, Jay Vosburgh <j.vosburgh@gmail.com>,
+ Veaceslav Falico <vfalico@gmail.com>, Andy Gospodarek <andy@greyhouse.net>,
+ Wolfgang Grandegger <wg@grandegger.com>,
+ Marc Kleine-Budde <mkl@pengutronix.de>,
+ Florian Fainelli <f.fainelli@gmail.com>, Andrew Lunn <andrew@lunn.ch>,
+ Vivien Didelot <vivien.didelot@gmail.com>,
+ Vladimir Oltean <olteanv@gmail.com>, Kurt Kanzenbach <kurt@linutronix.de>,
+ Steffen Klassert <klassert@kernel.org>, David Dillow <dave@thedillows.org>,
+ Russell King <linux@armlinux.org.uk>, Ion Badulescu <ionut@badula.org>,
+ Andreas Larsson <andreas@gaisler.com>, Mark Einon <mark.einon@gmail.com>,
+ Lino Sanfilippo <LinoSanfilippo@gmx.de>, Chen-Yu Tsai <wens@csie.org>,
+ Jernej Skrabec <jernej.skrabec@gmail.com>,
+ Samuel Holland <samuel@sholland.org>, Jes Sorensen <jes@trained-monkey.org>,
+ Shay Agroskin <shayagr@amazon.com>, Arthur Kiyanovski <akiyano@amazon.com>,
+ David Arinzon <darinzon@amazon.com>, Noam Dagan <ndagan@amazon.com>,
+ Saeed Bishara <saeedb@amazon.com>, Don Fry <pcnet32@frontier.com>,
+ Tom Lendacky <thomas.lendacky@amd.com>,
+ Shyam Sundar S K <Shyam-sundar.S-k@amd.com>,
+ Igor Russkikh <irusskikh@marvell.com>, Chris Snook <chris.snook@gmail.com>,
+ Michael Chan <michael.chan@broadcom.com>,
+ Broadcom internal kernel review list
+ <bcm-kernel-feedback-list@broadcom.com>, =?UTF-8?B?UmFmYcWCIE1pxYJlY2tp?=
+ <rafal@milecki.pl>, Rasesh Mody <rmody@marvell.com>,
+ GR-Linux-NIC-Dev@marvell.com, Ariel Elior <aelior@marvell.com>,
+ Sudarsana Kalluru <skalluru@marvell.com>, Manish Chopra
+ <manishc@marvell.com>, Doug Berger <opendmb@gmail.com>,
+ Siva Reddy Kallam <siva.kallam@broadcom.com>,
+ Prashant Sreedharan <prashant@broadcom.com>,
+ Sunil Goutham <sgoutham@marvell.com>, Raju Rangoju <rajur@chelsio.com>,
+ Ayush Sawal <ayush.sawal@chelsio.com>,
+ Vinay Kumar Yadav <vinay.yadav@chelsio.com>,
+ Rohit Maheshwari <rohitm@chelsio.com>,
+ Hartley Sweeten <hsweeten@visionengravers.com>,
+ Christian Benvenuti <benve@cisco.com>,
+ Govindarajulu Varadarajan <_govind@gmx.com>,
+ Denis Kirjanov <kda@linux-powerpc.org>,
+ Ajit Khaparde <ajit.khaparde@broadcom.com>,
+ Sriharsha Basavapatna <sriharsha.basavapatna@broadcom.com>,
+ Somnath Kotur <somnath.kotur@broadcom.com>,
+ Madalin Bucur <madalin.bucur@nxp.com>, Ioana Ciornei
+ <ioana.ciornei@nxp.com>, Claudiu Manoil <claudiu.manoil@nxp.com>,
+ Joakim Zhang <qiangqing.zhang@nxp.com>,
+ Pantelis Antoniou <pantelis.antoniou@gmail.com>, Li Yang
+ <leoyang.li@nxp.com>, Yisen Zhuang <yisen.zhuang@huawei.com>,
+ Salil Mehta <salil.mehta@huawei.com>, Douglas Miller
+ <dougmill@linux.ibm.com>, Michael Ellerman <mpe@ellerman.id.au>,
+ Nicholas Piggin <npiggin@gmail.com>,
+ Christophe Leroy <christophe.leroy@csgroup.eu>,
+ Nick Child <nnac123@linux.ibm.com>,
+ Jesse Brandeburg <jesse.brandeburg@intel.com>,
+ Tony Nguyen <anthony.l.nguyen@intel.com>,
+ Guo-Fu Tseng <cooldavid@cooldavid.org>,
+ Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>,
+ Thomas Petazzoni <thomas.petazzoni@bootlin.com>,
+ Marcin Wojtas <mw@semihalf.com>, Geetha sowjanya <gakula@marvell.com>,
+ Subbaraya Sundeep <sbhatta@marvell.com>, hariprasad <hkelam@marvell.com>,
+ Taras Chornyi <tchornyi@marvell.com>, Mirko Lindner <mlindner@marvell.com>,
+ Stephen Hemminger <stephen@networkplumber.org>, Felix Fietkau
+ <nbd@nbd.name>, John Crispin <john@phrozen.org>,
+ Sean Wang <sean.wang@mediatek.com>, Mark Lee <Mark-MC.Lee@mediatek.com>,
+ Matthias Brugger <matthias.bgg@gmail.com>, Tariq Toukan <tariqt@nvidia.com>,
+ Saeed Mahameed <saeedm@nvidia.com>, Leon Romanovsky <leon@kernel.org>,
+ Ido Schimmel <idosch@nvidia.com>, Petr Machata <petrm@nvidia.com>,
+ Bryan Whitehead <bryan.whitehead@microchip.com>,
+ UNGLinuxDriver@microchip.com, Chris Lee <christopher.lee@cspi.com>,
+ Jon Mason <jdmason@kudzu.us>, Simon Horman <simon.horman@corigine.com>,
+ Rain River <rain.1986.08.12@gmail.com>, Zhu Yanjun <zyjzyj2000@gmail.com>,
+ Vladimir Zapolskiy <vz@mleia.com>, Rahul Verma <rahulv@marvell.com>,
+ Shahed Shaikh <shshaikh@marvell.com>, Heiner Kallweit
+ <hkallweit1@gmail.com>, nic_swsd@realtek.com, Jiri Pirko <jiri@resnulli.us>,
+ Byungho An <bh74.an@samsung.com>, Edward Cree <ecree.xilinx@gmail.com>,
+ Martin Habets <habetsm.xilinx@gmail.com>, Ralf Baechle
+ <ralf@linux-mips.org>, Francois Romieu <romieu@fr.zoreil.com>,
+ Daniele Venzano <venza@brownhat.org>, Nicolas Pitre <nico@fluxnic.net>,
+ Steve Glendinning <steve.glendinning@shawell.net>,
+ Jassi Brar <jaswinder.singh@linaro.org>,
+ Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+ Kunihiko Hayashi <hayashi.kunihiko@socionext.com>,
+ Giuseppe Cavallaro <peppe.cavallaro@st.com>,
+ Alexandre Torgue <alexandre.torgue@foss.st.com>,
+ Jose Abreu <joabreu@synopsys.com>,
+ Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+ Grygorii Strashko <grygorii.strashko@ti.com>,
+ Samuel Chessman <chessman@tux.org>, Ishizaki Kou
+ <kou.ishizaki@toshiba.co.jp>, Kevin Brace <kevinbrace@bracecomputerlab.com>,
+ Radhey Shyam Pandey <radhey.shyam.pandey@xilinx.com>,
+ Michal Simek <michal.simek@xilinx.com>, Krzysztof Halasa <khalasa@piap.pl>,
+ "K. Y. Srinivasan" <kys@microsoft.com>,
+ Haiyang Zhang <haiyangz@microsoft.com>, Wei Liu <wei.liu@kernel.org>,
+ Dexuan Cui <decui@microsoft.com>,
+ Sridhar Samudrala <sridhar.samudrala@intel.com>,
+ Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>,
+ Michael Hennerich <michael.hennerich@analog.com>,
+ Petko Manolov <petkan@nucleusys.com>, Oliver Neukum <oneukum@suse.com>,
+ "Michael S. Tsirkin" <mst@redhat.com>, Jason Wang <jasowang@redhat.com>,
+ Ronak Doshi <doshir@vmware.com>,
+ VMware PV-Drivers Reviewers <pv-drivers@vmware.com>,
+ David Ahern <dsahern@kernel.org>, Kalle Valo <kvalo@kernel.org>,
+ Christian Lamparter <chunkeey@googlemail.com>,
+ Simon Kelley <simon@thekelleys.org.uk>,
+ Larry Finger <Larry.Finger@lwfinger.net>,
+ Arend van Spriel <aspriel@gmail.com>, Franky Lin <franky.lin@broadcom.com>,
+ Hante Meuleman <hante.meuleman@broadcom.com>,
+ Stanislav Yakovlev <stas.yakovlev@gmail.com>,
+ Stanislaw Gruszka <stf_xl@wp.pl>, Jouni Malinen <j@w1.fi>,
+ Ajay Singh <ajay.kathat@microchip.com>,
+ Claudiu Beznea <claudiu.beznea@microchip.com>,
+ Igor Mitsyanko <imitsyanko@quantenna.com>,
+ Sergey Matyukevich <geomatsi@gmail.com>,
+ Herton Ronaldo Krzesinski <herton@canonical.com>,
+ Hin-Tak Leung <htl10@users.sourceforge.net>, netdev@vger.kernel.org,
+ linux-can@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+ linux-sunxi@lists.linux.dev, linux-acenic@sunsite.dk,
+ linux-parisc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
+ intel-wired-lan@lists.osuosl.org, linux-mediatek@lists.infradead.org,
+ linux-rdma@vger.kernel.org, oss-drivers@corigine.com,
+ linux-mips@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com,
+ linux-omap@vger.kernel.org, linux-hyperv@vger.kernel.org,
+ ntb@lists.linux.dev, linux-usb@vger.kernel.org,
+ virtualization@lists.linux-foundation.org, linux-wireless@vger.kernel.org,
+ b43-dev@lists.infradead.org, brcm80211-dev-list.pdl@broadcom.com,
+ SHA-cyfmac-dev-list@infineon.com, libertas-dev@lists.infradead.org
+References: <20220818210050.7108-1-wsa+renesas@sang-engineering.com>
+From: Geoff Levand <geoff@infradead.org>
+In-Reply-To: <20220818210050.7108-1-wsa+renesas@sang-engineering.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
+Hi Wolfram,
 
+On 8/18/22 14:00, Wolfram Sang wrote:
+> Follow the advice of the below link and prefer 'strscpy' in this
+> subsystem. Conversion is 1:1 because the return value is not used.
+> Generated by a coccinelle script.
+> 
+> Link: https://lore.kernel.org/r/CAHk-=wgfRnXz0W3D37d01q3JFkr_i_uTL=V6A6G1oUZcprmknw@mail.gmail.com/
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-On 18/08/22 20:21, Manivannan Sadhasivam wrote:
-> On Thu, Aug 18, 2022 at 09:52:03AM -0400, Jon Mason wrote:
->> On Thu, Aug 18, 2022 at 11:32:30AM +0530, Manivannan Sadhasivam wrote:
->>> + Kishon (PCI EP Maintainer)
->>>
->>> On Fri, Aug 12, 2022 at 03:42:05PM -0400, Jon Mason wrote:
->>>> The PCI Endpoint NTB drivers are under the NTB umbrella.  Add an entry
->>>> there to allow for notification of changes for it.
->>>>
->>>> Signed-off-by: Jon Mason <jdmason@kudzu.us>
->>>
->>> Hi Jason,
->>
->> I assume you mean me.  Odd that you got my name wrong 2 lines below it
->> being properly written out.
->>
-> 
-> Terribly sorry about that! I was reading another thread just before this
-> and misspelled your name.
-> 
->>> I know that this patch is already in Linus's tree but I think this PCI Endpoint
->>> VNTB driver is not going in a correct path. First, Kishon is not convinced with
->>> the way the PCI Endpoint VNTB function driver is written currently. He prefers
->>> the VirtIO approach over the current one [1].
->>
->> To your point, this is already in Linus' tree.  If it is not the way
->> people want it, patches accepted.
->>
->> Kishon (in the thread) recommended doing it one way, and Frank
->> responded he liked doing it another.  Kishon didn't respond to that
->> last email.  To me, this is an acceptable technical disagreement that
->> can be addressed in the future and no need to prevent working patches
->> from being accepted.
->>
-> 
-> Kishon being the maintainer proposed an entirely different way of representing
-> the driver. I agree that the patch is working but maintainer's view matters and
-> if you don't hear from the maintainer for some time, you'll ping them (Frank
-> did ping but there is something called RESEND).
-> 
-> I'm not sure that merging the patches without an ACK from the relevant subsystem
-> maintainer is the right thing to do.
-> 
->>> But while the conversation was still going on, the series got merged via NTB
->>> tree without any ACKs from the PCI/PCI_EP maintainers. Also, note that there
->>> was a patch touching the PCI Controller driver as well and that was also not
->>> ACKed [2].
->>
->> I put the series in my ntb-next branch, which was pulled into linux-next
->> for roughly 3 months, and he did not object then (though likely he did
->> not notice).  Multiple patches were submitted to the relevant mailing
->> lists to address minor issues in the series (from being in linux-next)
->> and most/all of those hit the PCI mailing list.  Bjorn responded to
->> all of them saying they needed to go through the ntb tree (because of
->> the dependency on Frank Li's original series).  So while not an
->> explicit ack, it was implicit to me in that he was aware of the
->> series.
-Definitely take the blame for not registering my objection though I felt
-I might be the odd one out for proposing a different way and rest are in
-alignment to get it merged.
+...
 
->>
->> Given the length of time and the public work on the series, how much
->> longer should I have waited for a nack?
->>
-> 
-> I'd argue that you should've waited for the ACK first. I've seen and
-> experienced patch series hanging there for multiple releases. I'm not in favour
-> of not responding to the patches, maintainers do have their own work to do but
-> merging the patches touching the different subsystem without an ACK doesn't
-> sound good to me.
-> 
-> I don't know why he didn't object when the series got merged in this manner :/
-> 
->>> If this trend is going to continue in the coming days, then I'm afraid that NTB
->>> might end up being a backdoor for PCI/PCI_EP patches :(
->>
->> Completely unfounded, per Bjorn's comment on
->> https://lore.kernel.org/all/20220815183920.GA1960006@bhelgaas/
->>
-> 
+> diff --git a/drivers/net/ethernet/toshiba/ps3_gelic_net.c b/drivers/net/ethernet/toshiba/ps3_gelic_net.c
+> index 3dbfb1b20649..6e838e8f79d0 100644
+> --- a/drivers/net/ethernet/toshiba/ps3_gelic_net.c
+> +++ b/drivers/net/ethernet/toshiba/ps3_gelic_net.c
+> @@ -1187,8 +1187,8 @@ int gelic_net_open(struct net_device *netdev)
+>  void gelic_net_get_drvinfo(struct net_device *netdev,
+>  			   struct ethtool_drvinfo *info)
+>  {
+> -	strlcpy(info->driver, DRV_NAME, sizeof(info->driver));
+> -	strlcpy(info->version, DRV_VERSION, sizeof(info->version));
+> +	strscpy(info->driver, DRV_NAME, sizeof(info->driver));
+> +	strscpy(info->version, DRV_VERSION, sizeof(info->version));
+>  }
+>  ps3_gelic_net
+>  static int gelic_ether_get_link_ksettings(struct net_device *netdev,
+> diff --git a/drivers/net/ethernet/toshiba/spider_net_ethtool.c b/drivers/net/ethernet/toshiba/spider_net_ethtool.c
+> index 93110dba0bfa..fef9fd127b5e 100644
+> --- a/drivers/net/ethernet/toshiba/spider_net_ethtool.c
+> +++ b/drivers/net/ethernet/toshiba/spider_net_ethtool.c
+> @@ -63,12 +63,12 @@ spider_net_ethtool_get_drvinfo(struct net_device *netdev,
+>  	card = netdev_priv(netdev);
+>  
+>  	/* clear and fill out info */
+> -	strlcpy(drvinfo->driver, spider_net_driver_name,
+> +	strscpy(drvinfo->driver, spider_net_driver_name,
+>  		sizeof(drvinfo->driver));
+> -	strlcpy(drvinfo->version, VERSION, sizeof(drvinfo->version));
+> -	strlcpy(drvinfo->fw_version, "no information",
+> +	strscpy(drvinfo->version, VERSION, sizeof(drvinfo->version));
+> +	strscpy(drvinfo->fw_version, "no information",
+>  		sizeof(drvinfo->fw_version));
+> -	strlcpy(drvinfo->bus_info, pci_name(card->pdev),
+> +	strscpy(drvinfo->bus_info, pci_name(card->pdev),
+>  		sizeof(drvinfo->bus_info));
+>  }
 
-> It's now fine that NTB related PCI patches can be merged through NTB tree but
-> please wait for an ACK for patches touching the non-NTB drivers. If you ask me
-> how long you should wait, then I don't have an answer, but atleast give a
-> notice before doing so that it can catch the proper eyes.
+Seems OK for both ps3_gelic_net and spider_net_ethtool.
 
-+1
-
-Thanks,
-Kishon
-
-> 
-> Thanks,
-> Mani
-> 
->> Thanks,
->> Jon
->>
->>>
->>> Thanks,
->>> Mani
->>>
->>> [1] https://lore.kernel.org/all/20220222162355.32369-4-Frank.Li@nxp.com
->>> [2] https://lore.kernel.org/all/20220222162355.32369-2-Frank.Li@nxp.com
->>>
->>>> ---
->>>>  MAINTAINERS | 1 +
->>>>  1 file changed, 1 insertion(+)
->>>>
->>>> diff --git a/MAINTAINERS b/MAINTAINERS
->>>> index 64379c699903..47e9f86bd712 100644
->>>> --- a/MAINTAINERS
->>>> +++ b/MAINTAINERS
->>>> @@ -14254,6 +14254,7 @@ W:	https://github.com/jonmason/ntb/wiki
->>>>  T:	git git://github.com/jonmason/ntb.git
->>>>  F:	drivers/net/ntb_netdev.c
->>>>  F:	drivers/ntb/
->>>> +F:	drivers/pci/endpoint/functions/pci-epf-*ntb.c
->>>>  F:	include/linux/ntb.h
->>>>  F:	include/linux/ntb_transport.h
->>>>  F:	tools/testing/selftests/ntb/
->>>> -- 
->>>> 2.30.2
->>>>
->>>
->>> -- 
->>> மணிவண்ணன் சதாசிவம்
-> 
+Acked-by: Geoff Levand <geoff@infradead.org>
