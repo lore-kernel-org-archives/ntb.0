@@ -1,171 +1,269 @@
-Received: from smtp-fw-33001.amazon.com (smtp-fw-33001.amazon.com [207.171.190.10])
+Received: from EUR05-AM6-obe.outbound.protection.outlook.com (mail-am6eur05on2076.outbound.protection.outlook.com [40.107.22.76])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8A5477F;
-	Mon, 22 Aug 2022 07:03:14 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=amazon.com; i=@amazon.com; q=dns/txt; s=amazon201209;
-  t=1661151794; x=1692687794;
-  h=references:from:to:cc:date:in-reply-to:message-id:
-   mime-version:subject;
-  bh=nzd0TYYufJ0cvZMq/1825VGB80pelN1uNxD/ulxN3IE=;
-  b=XTOPrOUoX+k2IvUPclwFv0IXtXnF6LwGp3Imo7qSe/5fpnKTFWCMqCRy
-   o58QjlchBJwED4b0r0yzwwUC7H+k6SrCV8Ehva+e2O6BQvI7keSxELuKt
-   ISVvTL2+HNjU1Q61mBkakyHsrA/EFJqwUmvGYZKzNICnY0RK6FilaQLFZ
-   g=;
-X-IronPort-AV: E=Sophos;i="5.93,254,1654560000"; 
-   d="scan'208";a="219871863"
-Subject: Re: [PATCH] net: move from strlcpy with unused retval to strscpy
-Received: from iad12-co-svc-p1-lb1-vlan3.amazon.com (HELO email-inbound-relay-iad-1e-26daedd8.us-east-1.amazon.com) ([10.43.8.6])
-  by smtp-border-fw-33001.sea14.amazon.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Aug 2022 07:02:58 +0000
-Received: from EX13D28EUC001.ant.amazon.com (iad12-ws-svc-p26-lb9-vlan2.iad.amazon.com [10.40.163.34])
-	by email-inbound-relay-iad-1e-26daedd8.us-east-1.amazon.com (Postfix) with ESMTPS id 4C09AE2EC5;
-	Mon, 22 Aug 2022 07:02:54 +0000 (UTC)
-Received: from u570694869fb251.ant.amazon.com.amazon.com (10.43.161.172) by
- EX13D28EUC001.ant.amazon.com (10.43.164.4) with Microsoft SMTP Server (TLS)
- id 15.0.1497.38; Mon, 22 Aug 2022 07:01:48 +0000
-References: <20220818210050.7108-1-wsa+renesas@sang-engineering.com>
-User-agent: mu4e 1.6.10; emacs 28.0.91
-From: Shay Agroskin <shayagr@amazon.com>
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-CC: <linux-kernel@vger.kernel.org>, "David S. Miller" <davem@davemloft.net>,
-	Eric Dumazet <edumazet@google.com>, Jakub Kicinski <kuba@kernel.org>, Paolo
- Abeni <pabeni@redhat.com>, Jay Vosburgh <j.vosburgh@gmail.com>, Veaceslav
- Falico <vfalico@gmail.com>, Andy Gospodarek <andy@greyhouse.net>, Wolfgang
- Grandegger <wg@grandegger.com>, "Marc Kleine-Budde" <mkl@pengutronix.de>,
-	Florian Fainelli <f.fainelli@gmail.com>, Andrew Lunn <andrew@lunn.ch>, Vivien
- Didelot <vivien.didelot@gmail.com>, Vladimir Oltean <olteanv@gmail.com>,
-	"Kurt Kanzenbach" <kurt@linutronix.de>, Steffen Klassert
-	<klassert@kernel.org>, David Dillow <dave@thedillows.org>, Russell King
-	<linux@armlinux.org.uk>, Ion Badulescu <ionut@badula.org>, Andreas Larsson
-	<andreas@gaisler.com>, Mark Einon <mark.einon@gmail.com>, Lino Sanfilippo
-	<LinoSanfilippo@gmx.de>, Chen-Yu Tsai <wens@csie.org>, Jernej Skrabec
-	<jernej.skrabec@gmail.com>, Samuel Holland <samuel@sholland.org>, "Jes
- Sorensen" <jes@trained-monkey.org>, Arthur Kiyanovski <akiyano@amazon.com>,
-	David Arinzon <darinzon@amazon.com>, Noam Dagan <ndagan@amazon.com>, "Saeed
- Bishara" <saeedb@amazon.com>, Don Fry <pcnet32@frontier.com>, Tom Lendacky
-	<thomas.lendacky@amd.com>, Shyam Sundar S K <Shyam-sundar.S-k@amd.com>, Igor
- Russkikh <irusskikh@marvell.com>, Chris Snook <chris.snook@gmail.com>,
-	Michael Chan <michael.chan@broadcom.com>, Broadcom internal kernel review
- list <bcm-kernel-feedback-list@broadcom.com>,
-	=?utf-8?Q?Rafa=C5=82_Mi=C5=82eck?= =?utf-8?Q?i?= <rafal@milecki.pl>, Rasesh
- Mody <rmody@marvell.com>, <GR-Linux-NIC-Dev@marvell.com>, Ariel Elior
-	<aelior@marvell.com>, Sudarsana Kalluru <skalluru@marvell.com>, "Manish
- Chopra" <manishc@marvell.com>, Doug Berger <opendmb@gmail.com>, "Siva Reddy
- Kallam" <siva.kallam@broadcom.com>, Prashant Sreedharan
-	<prashant@broadcom.com>, Sunil Goutham <sgoutham@marvell.com>, "Raju Rangoju"
-	<rajur@chelsio.com>, Ayush Sawal <ayush.sawal@chelsio.com>, "Vinay Kumar
- Yadav" <vinay.yadav@chelsio.com>, Rohit Maheshwari <rohitm@chelsio.com>,
-	Hartley Sweeten <hsweeten@visionengravers.com>, Christian Benvenuti
-	<benve@cisco.com>, Govindarajulu Varadarajan <_govind@gmx.com>, Denis
- Kirjanov <kda@linux-powerpc.org>, Ajit Khaparde <ajit.khaparde@broadcom.com>,
-	Sriharsha Basavapatna <sriharsha.basavapatna@broadcom.com>, Somnath Kotur
-	<somnath.kotur@broadcom.com>, Madalin Bucur <madalin.bucur@nxp.com>, "Ioana
- Ciornei" <ioana.ciornei@nxp.com>, Claudiu Manoil <claudiu.manoil@nxp.com>,
-	Joakim Zhang <qiangqing.zhang@nxp.com>, Pantelis Antoniou
-	<pantelis.antoniou@gmail.com>, Li Yang <leoyang.li@nxp.com>, Yisen Zhuang
-	<yisen.zhuang@huawei.com>, Salil Mehta <salil.mehta@huawei.com>, "Douglas
- Miller" <dougmill@linux.ibm.com>, Michael Ellerman <mpe@ellerman.id.au>,
-	Nicholas Piggin <npiggin@gmail.com>, Christophe Leroy
-	<christophe.leroy@csgroup.eu>, Nick Child <nnac123@linux.ibm.com>, "Jesse
- Brandeburg" <jesse.brandeburg@intel.com>, Tony Nguyen
-	<anthony.l.nguyen@intel.com>, Guo-Fu Tseng <cooldavid@cooldavid.org>,
-	Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni
-	<thomas.petazzoni@bootlin.com>, Marcin Wojtas <mw@semihalf.com>, "Geetha
- sowjanya" <gakula@marvell.com>, Subbaraya Sundeep <sbhatta@marvell.com>,
-	hariprasad <hkelam@marvell.com>, Taras Chornyi <tchornyi@marvell.com>, Mirko
- Lindner <mlindner@marvell.com>, Stephen Hemminger
-	<stephen@networkplumber.org>, Felix Fietkau <nbd@nbd.name>, John Crispin
-	<john@phrozen.org>, Sean Wang <sean.wang@mediatek.com>, Mark Lee
-	<Mark-MC.Lee@mediatek.com>, Matthias Brugger <matthias.bgg@gmail.com>, Tariq
- Toukan <tariqt@nvidia.com>, Saeed Mahameed <saeedm@nvidia.com>, "Leon
- Romanovsky" <leon@kernel.org>, Ido Schimmel <idosch@nvidia.com>, "Petr
- Machata" <petrm@nvidia.com>, Bryan Whitehead <bryan.whitehead@microchip.com>,
-	<UNGLinuxDriver@microchip.com>, Chris Lee <christopher.lee@cspi.com>, Jon
- Mason <jdmason@kudzu.us>, Simon Horman <simon.horman@corigine.com>, Rain
- River <rain.1986.08.12@gmail.com>, "Zhu Yanjun" <zyjzyj2000@gmail.com>,
-	Vladimir Zapolskiy <vz@mleia.com>, "Rahul Verma" <rahulv@marvell.com>, Shahed
- Shaikh <shshaikh@marvell.com>, "Heiner Kallweit" <hkallweit1@gmail.com>,
-	<nic_swsd@realtek.com>, Jiri Pirko <jiri@resnulli.us>, Byungho An
-	<bh74.an@samsung.com>, Edward Cree <ecree.xilinx@gmail.com>, Martin Habets
-	<habetsm.xilinx@gmail.com>, "Ralf Baechle" <ralf@linux-mips.org>, Francois
- Romieu <romieu@fr.zoreil.com>, Daniele Venzano <venza@brownhat.org>, Nicolas
- Pitre <nico@fluxnic.net>, Steve Glendinning <steve.glendinning@shawell.net>,
-	Jassi Brar <jaswinder.singh@linaro.org>, Ilias Apalodimas
-	<ilias.apalodimas@linaro.org>, Kunihiko Hayashi
-	<hayashi.kunihiko@socionext.com>, Giuseppe Cavallaro
-	<peppe.cavallaro@st.com>, Alexandre Torgue <alexandre.torgue@foss.st.com>,
-	Jose Abreu <joabreu@synopsys.com>, Maxime Coquelin
-	<mcoquelin.stm32@gmail.com>, Grygorii Strashko <grygorii.strashko@ti.com>,
-	Samuel Chessman <chessman@tux.org>, Geoff Levand <geoff@infradead.org>,
-	Ishizaki Kou <kou.ishizaki@toshiba.co.jp>, Kevin Brace
-	<kevinbrace@bracecomputerlab.com>, Radhey Shyam Pandey
-	<radhey.shyam.pandey@xilinx.com>, Michal Simek <michal.simek@xilinx.com>,
-	Krzysztof Halasa <khalasa@piap.pl>, "K. Y. Srinivasan" <kys@microsoft.com>,
-	Haiyang Zhang <haiyangz@microsoft.com>, Wei Liu <wei.liu@kernel.org>, Dexuan
- Cui <decui@microsoft.com>, Sridhar Samudrala <sridhar.samudrala@intel.com>,
-	Dave Jiang <dave.jiang@intel.com>, "Allen Hubbe" <allenbh@gmail.com>, Michael
- Hennerich <michael.hennerich@analog.com>, Petko Manolov
-	<petkan@nucleusys.com>, Oliver Neukum <oneukum@suse.com>, "Michael S.
- Tsirkin" <mst@redhat.com>, Jason Wang <jasowang@redhat.com>, Ronak Doshi
-	<doshir@vmware.com>, "VMware PV-Drivers Reviewers" <pv-drivers@vmware.com>,
-	David Ahern <dsahern@kernel.org>, Kalle Valo <kvalo@kernel.org>, Christian
- Lamparter <chunkeey@googlemail.com>, Simon Kelley <simon@thekelleys.org.uk>,
-	"Larry Finger" <Larry.Finger@lwfinger.net>, Arend van Spriel
-	<aspriel@gmail.com>, Franky Lin <franky.lin@broadcom.com>, Hante Meuleman
-	<hante.meuleman@broadcom.com>, Stanislav Yakovlev <stas.yakovlev@gmail.com>,
-	Stanislaw Gruszka <stf_xl@wp.pl>, Jouni Malinen <j@w1.fi>, Ajay Singh
-	<ajay.kathat@microchip.com>, Claudiu Beznea <claudiu.beznea@microchip.com>,
-	Igor Mitsyanko <imitsyanko@quantenna.com>, Sergey Matyukevich
-	<geomatsi@gmail.com>, Herton Ronaldo Krzesinski <herton@canonical.com>,
-	Hin-Tak Leung <htl10@users.sourceforge.net>, <netdev@vger.kernel.org>,
-	<linux-can@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
-	<linux-sunxi@lists.linux.dev>, <linux-acenic@sunsite.dk>,
-	<linux-parisc@vger.kernel.org>, <linuxppc-dev@lists.ozlabs.org>,
-	<intel-wired-lan@lists.osuosl.org>, <linux-mediatek@lists.infradead.org>,
-	<linux-rdma@vger.kernel.org>, <oss-drivers@corigine.com>,
-	<linux-mips@vger.kernel.org>, <linux-stm32@st-md-mailman.stormreply.com>,
-	<linux-omap@vger.kernel.org>, <linux-hyperv@vger.kernel.org>,
-	<ntb@lists.linux.dev>, <linux-usb@vger.kernel.org>,
-	<virtualization@lists.linux-foundation.org>,
-	<linux-wireless@vger.kernel.org>, <b43-dev@lists.infradead.org>,
-	<brcm80211-dev-list.pdl@broadcom.com>, <SHA-cyfmac-dev-list@infineon.com>,
-	<libertas-dev@lists.infradead.org>
-Date: Mon, 22 Aug 2022 10:00:23 +0300
-In-Reply-To: <20220818210050.7108-1-wsa+renesas@sang-engineering.com>
-Message-ID: <pj41zlczcsep7s.fsf@u570694869fb251.ant.amazon.com>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EEF98256C
+	for <ntb@lists.linux.dev>; Mon, 22 Aug 2022 15:51:53 +0000 (UTC)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=Qz0rmHKs5p2Q1gh+S9fh4i4MG8hnRoDPrAIyNBXUKBYyFJHyyQZ3ZjEx0efihqHEXVFJU+LWwqkoyrr57RTZ1dI++7ejc69iqSCjV7KuV0HQXY36iE0OKLGtHPszSdui4Vs1rs0xifGXLFLY5bjG0odh8aZ1EDnu4ih4m6x/ua3RJBESYJgIeicIDn163fZjtvKQzfjmwZ473tHNtm+ODkUu1dHADevVQbd0aJVeE0knELDcmT07oKDTIIyiXCJzu6S0dSFaZEnVumWR7wtvnOz0x1anKQ6CnTLj1IxOjEHhxIqudPU9lc9vLSYmy2brEATBkkuEmx5ClR/pw9/4Pw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=CJlixqmQQxoLKu6qGTAVvd95979GeiOaY4aPCwvlxjs=;
+ b=KTo7wPJYQxGCNTS+dKJNXx3R5J9CE6DheE+7ViCNt6h/CEvcIwHytXYQr9vDxQIbbGHGzIPK/NIJLqg477K0mUvek8awTvG1czMVOgAipuURy9BkyZoi1rcjwij1blDoked40OnxZskSsdE5LYA7RYNvpbZX5XA759olbMxMsDq5fFVsilUM5KdBL2SMm1p0NQMF7QdiqQ6hHcZyTf8qTZ0rcBxD53v9+ppVgz+wtoIsErGrsxVXImcQEUjqFLF1Qj3SdOW0UuLukYGpK4IwBMETy5AJigJfB+Qxz5bZT/uKIjWaGffM6vhwpT+K2X9urx1JBceqDt9b3P5k4fP1Mw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
+ header.d=nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=CJlixqmQQxoLKu6qGTAVvd95979GeiOaY4aPCwvlxjs=;
+ b=JSKlLCTAsGysH97ISYHeTycODCOBiwIgMGFHppV5iMW4jh9ZVkUMWxxXA8SQNyKYhEtp6B2F0RHfqy/JQk0V18woUe9DySE5XyctLZw1ehFvRkYiP/FZWY9if6y7SvcZlxNrTbD+dA1TElDgEcxaPfWfBu8JMyiAx5rUzozJXfQ=
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nxp.com;
+Received: from PAXPR04MB9186.eurprd04.prod.outlook.com (2603:10a6:102:232::18)
+ by AM5PR04MB3169.eurprd04.prod.outlook.com (2603:10a6:206:4::19) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5546.22; Mon, 22 Aug
+ 2022 15:51:50 +0000
+Received: from PAXPR04MB9186.eurprd04.prod.outlook.com
+ ([fe80::85cb:614b:9f52:2dba]) by PAXPR04MB9186.eurprd04.prod.outlook.com
+ ([fe80::85cb:614b:9f52:2dba%4]) with mapi id 15.20.5546.022; Mon, 22 Aug 2022
+ 15:51:50 +0000
+From: Frank Li <Frank.Li@nxp.com>
+To: maz@kernel.org,
+	tglx@linutronix.de,
+	robh+dt@kernel.org,
+	krzysztof.kozlowski+dt@linaro.org,
+	shawnguo@kernel.org,
+	s.hauer@pengutronix.de,
+	kw@linux.com,
+	bhelgaas@google.com
+Cc: linux-kernel@vger.kernel.org,
+	devicetree@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-pci@vger.kernel.org,
+	peng.fan@nxp.com,
+	aisheng.dong@nxp.com,
+	jdmason@kudzu.us,
+	kernel@pengutronix.de,
+	festevam@gmail.com,
+	linux-imx@nxp.com,
+	kishon@ti.com,
+	lorenzo.pieralisi@arm.com,
+	ntb@lists.linux.dev,
+	lznuaa@gmail.com
+Subject: [PATCH v7 0/4] PCI EP driver support MSI doorbell from host
+Date: Mon, 22 Aug 2022 10:51:26 -0500
+Message-Id: <20220822155130.2491006-1-Frank.Li@nxp.com>
+X-Mailer: git-send-email 2.35.1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+X-ClientProxiedBy: SJ0PR13CA0038.namprd13.prod.outlook.com
+ (2603:10b6:a03:2c2::13) To PAXPR04MB9186.eurprd04.prod.outlook.com
+ (2603:10a6:102:232::18)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain; format=flowed
-X-Originating-IP: [10.43.161.172]
-X-ClientProxiedBy: EX13D13UWA002.ant.amazon.com (10.43.160.172) To
- EX13D28EUC001.ant.amazon.com (10.43.164.4)
-Precedence: Bulk
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 1a09cbf7-3f7a-48cc-8ba0-08da84563a07
+X-MS-TrafficTypeDiagnostic: AM5PR04MB3169:EE_
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info:
+	BXcWSMLSSfVFcifcbSte0pRpFWw36ZqqiprdHSJj/s75Ok5uaJ5mFd8Vkh+/Q+4hb9aaQn4b1SQWbuj5IxWMtsfC3ZUqEDBL3AVCp0ygbRIXIijSMzp9YRi1lrnXVOzgqnC2sCUgBZmNyMEV5FIBlIqnu6Rj81pvlfFeuRKqpZVocPO/wzYBaLZzAhEM8EndaoG2NfeliW3COEwS6Lx8EFUET6MgAXUAjy+0qGfaDGA5m1+eOlE5rQakq23PMevcoLyYrPFf1fPWC43uLaFPG1zFDIafgFYbk52XbKa2jgER8ZZH8XZaNv6a4BHk3AYc9HBh97R0YCXAa2ULt4gGhQhPIa9a3NoNY/9M4ROOuA8j0YtUi7r4CuW63VXoDR7VX0H8oaqE5Yx/xBbR1CqerRFADb1wMplz2UvDuym0H1h2jIfEP0uGC1vl/2LUh/stoW4eh8mzJo0LUrBTFngiizJktqJHtREOedoDPraeGe8FkDsmfIzs41bHhsbdUpOCuzi4g5Ev1cjToc8EjKe3cCaG5TSJE+gxfpP0RPL1NsU+OtYrvH43FBeRaNq3T9qLa7j5xOnN1jJHFOWoaFZb6dDpaPidwwYAv28lMr/qcs/FtcNWvINP0YqgKxGrDxrzwwxSU1G5cgZNMsskTe6uHZH4EsuJI3VK8WXAaDiHIhmWI6SqU5NIj7EjEqWlkWRK1YBwO/zNaDZ/r3AT9+kp1g18QYzBDcQCSkBv8LXbiVMPcTs30yj3gfFL58Rwut+EkbDoT7tS6KJtspEx6bBFZG2jzVL9V9qMYM322q4LNUc=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PAXPR04MB9186.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230016)(4636009)(346002)(39860400002)(366004)(136003)(396003)(376002)(316002)(86362001)(38100700002)(38350700002)(36756003)(41300700001)(83380400001)(26005)(6506007)(52116002)(6666004)(6486002)(966005)(6512007)(478600001)(2906002)(66946007)(66556008)(66476007)(1076003)(8936002)(5660300002)(8676002)(7416002)(2616005)(4326008)(186003);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?utf-8?B?VmUwS0tZdTRrekJHbVlCbW5LcXB2MlEwcVppR2R1YzhHdkVTTWNJWTBUVVpk?=
+ =?utf-8?B?VTFFaHZRc2ErREd1ZXllWmtpV2dPYzNPRXlOTmVvR1U2RlhxZjN0Y1Q4eHNY?=
+ =?utf-8?B?R0ZkQXJ6aUNQelloalF6R3BMUjJNRVYxMWN5NU8vNWxCcVNLeUE3bENiOGtN?=
+ =?utf-8?B?K3VnRzZGNk1nNXJ2Vnd1elBtclJZUXo0M0x3VzlLSU12RzNoQ0hwV0grYjh2?=
+ =?utf-8?B?YVhScmF2bGV1KytTQ2ZoaGJGeWlaamlZTDc5YTExOVA1cmdJNkpFTDNjWDhW?=
+ =?utf-8?B?QTRkelFlQUhwbWRtMjFZcU5McjNxQklUYjdwM2JPZ1UyYUIzbWdROE1TYzNy?=
+ =?utf-8?B?eGRGQkJkOXMxZlY0dldVeCtqeFJ0RjZpNDZvNSs0MDlOczdzM3F1YVFKaEg5?=
+ =?utf-8?B?NFZBcG9zWjQ3R0hTbTNZckZ3WlVtTEI1VnovYkR1SGlOYlZFTDRmNnA3cGpp?=
+ =?utf-8?B?VVBLcVd6VE5zQ3RqYTJSWTB6WnFCZDdZT09FOGtTNGxMRlJTZk5sTDdwdGx3?=
+ =?utf-8?B?YW5hdVp0bEhvUWtmTldiRG9ZcTNHYi9aelYwcUFDdE9ZMk1qajhkN3poRXdC?=
+ =?utf-8?B?TjBxdElPWHFNYkxyTGFLS1BQb1REUDFQeGpaMTRKRW9RRStDNTIzY2IvYk5Y?=
+ =?utf-8?B?eDZPUTJEVVVSaFRpU28rcmJFVC8xU29kWFZqYTdCb09iQ2lmQzlienJsTWE2?=
+ =?utf-8?B?TGQ4Sk5VVHBFcDNPOWs3Mm9lTGt1aDB4ZU9wTi9jZ1M2Y2RBQ3h6VmVOWU16?=
+ =?utf-8?B?VzJENjZQT09zYzRsVzM0UnRqRFQzblE3c0ZmL3ZPaGFrZUhnTVdieXZ2di85?=
+ =?utf-8?B?bmc5TTRTRDZZSGZiQ2lzVDlqdDBUbzZPWlUvVUxYNktTUE52RStucGpuYkt0?=
+ =?utf-8?B?MDIrcUo3K0k2TElFRTNrNHhnUkY4dXFOWk83dUh1ZC9WemkxUnpEZnJ2dk9D?=
+ =?utf-8?B?RG95UVNqaUhXM2lOZFZoZnVmODFHQ1h5YXZJb1lFazJmVVViSlM2SWhtWG5j?=
+ =?utf-8?B?NGczTkpGTjJEVUJFamtPR1JZOWJYaGh1MTV5dml5SXoxTVdhcFlJZEd6cnpK?=
+ =?utf-8?B?dnpwY0dHMDl3M3h6R3U5NkZkdzFRTHdHQy9lMmxlYmUrM2VrcDV1QmtxVFpB?=
+ =?utf-8?B?U0lYUHRnT3pQSkFMSkx0dHVxU09ySEhLQVJ0M0JKVytLdDROUTljcmR5czkz?=
+ =?utf-8?B?eHNwaUhDb1R4S25Jai9oNDNCL2FjOUJTRGNPa3Z1MVIxbUZ4ZjlGQnZFbjZ4?=
+ =?utf-8?B?YzNvb2t6dGhtNHZIT1RIbUIzazliRmRRV3JhVGlGRDZ6K204dnVsdnYxSVUy?=
+ =?utf-8?B?Mys4K2lUQTFVUlF4SkxuRmlFM1VpZkh4S3dpc1M1NWVPSlFCMEVJc2hFK1p3?=
+ =?utf-8?B?ZVh0UjRBZUFnUzVIcHpycjhOb3JQY2RnNExEb09CVndTQ3dPekxYR0xBenhu?=
+ =?utf-8?B?RllGT3E3QzJpMXBLaCtCVEw0OEJobGhyUGg2NWRqMGkxOHNtT2p5Y3NOM2Zm?=
+ =?utf-8?B?YXY2UzRhb2J6bnBDMVhkZzFPU0hoa3hsL2E5SC96d3BIOEhiZVRqOU9URndG?=
+ =?utf-8?B?TG02cnlndzFJY0k3RG9YMnZnbXVwaUZ3WGJ1cmNTRGtOVUtNbjhIb1RIdkMw?=
+ =?utf-8?B?cXV4cnR1UlNlaXdVZ0ZPZjlSYXR1dTRxMVdaMWtjT3BjQkp3NzFmdDBsVnZi?=
+ =?utf-8?B?UTNPWDRoL2U0aUYrbG16MGZRRUVYZXpBQVZoajZ1VTJzRE9uVFZiTjdsNUNt?=
+ =?utf-8?B?UXV1c3dpL1Z6WDVWQ2J5dkRTTGQ3bFVaU1lEUks2SVQxTC9UMG9TLzRVSEZG?=
+ =?utf-8?B?UnBJbEhBcE9VZlQxdWN2aU5QQVlHdWdyTnExUTg4SjNzOG5pUDlrWDNBdXEr?=
+ =?utf-8?B?M2hsbS9lQmZsaktIcFBOYmlYLzJNNjYvNzF5bEhVbzVSWDJWSGUvUm5JQlU5?=
+ =?utf-8?B?L0NwUXRaRFpndTBzNFY3LzBTTjlYaDVrSG1oRndNaWRPSGgvMFZPaFI4VHVr?=
+ =?utf-8?B?aTg5TFZ4cG55ZEZIU05aTzFtdDZOTWxOdmxEZDZaKzBZQjJ3YUVyOUR0RDIy?=
+ =?utf-8?B?UUZMUjgrSHI2UlBPSUZqYjF5MmlTVnNJRkYrTUxjeVVBbTBBMGRjOGFlVXZi?=
+ =?utf-8?Q?vxgA=3D?=
+X-OriginatorOrg: nxp.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 1a09cbf7-3f7a-48cc-8ba0-08da84563a07
+X-MS-Exchange-CrossTenant-AuthSource: PAXPR04MB9186.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 22 Aug 2022 15:51:50.4316
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: MgXmT04uH6mytudEOD7s3LutrjSQ1T33ZVV9WYLCBKD1xpB2JPGnVZIXmEjfNSps9lgimPATFo7WztAce1UIrA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: AM5PR04MB3169
 
 
-Wolfram Sang <wsa+renesas@sang-engineering.com> writes:
+                  ┌───────┐          ┌──────────┐
+                  │       │          │          │
+┌─────────────┐   │       │          │ PCI Host │
+│ MSI         │◄┐ │       │          │          │
+│ Controller  │ │ │       │          │          │
+└─────────────┘ └─┼───────┼──────────┼─Bar0     │
+                  │ PCI   │          │ Bar1     │
+                  │ Func  │          │ Bar2     │
+                  │       │          │ Bar3     │
+                  │       │          │ Bar4     │
+                  │       ├─────────►│          │
+                  └───────┘          └──────────┘
 
-> CAUTION: This email originated from outside of the 
-> organization. Do not click links or open attachments unless you 
-> can confirm the sender and know the content is safe.
->
->
->
-> Follow the advice of the below link and prefer 'strscpy' in this
-> subsystem. Conversion is 1:1 because the return value is not 
-> used.
-> Generated by a coccinelle script.
->
-> Link: 
-> https://lore.kernel.org/r/CAHk-=wgfRnXz0W3D37d01q3JFkr_i_uTL=V6A6G1oUZcprmknw@mail.gmail.com/
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> ---
-...
->  drivers/net/ethernet/amazon/ena/ena_ethtool.c    |  4 ++--
->  drivers/net/ethernet/amazon/ena/ena_netdev.c     |  2 +-
+Many PCI controllers provided Endpoint functions.
+Generally PCI endpoint is hardware, which is not running a rich OS,
+like linux.
 
-Reviewed-by: Shay Agroskin <shayagr@amazon.com>
+But Linux also supports endpoint functions.  PCI Host write BAR<n> space
+like write to memory. The EP side can't know memory changed by the Host
+driver. 
+
+PCI Spec has not defined a standard method to do that.  Only define
+MSI(x) to let EP notified RC status change. 
+
+The basic idea is to trigger an IRQ when PCI RC writes to a memory
+address. That's what MSI controller provided.  EP drivers just need to
+request a platform MSI interrupt, struct MSI_msg *msg will pass down a
+memory address and data.  EP driver will map such memory address to
+one of PCI BAR<n>.  Host just writes such an address to trigger EP side
+IRQ.
+
+If system have gic-its, only need update PCI EP side driver. But i.MX
+have not chip support gic-its yet. So we have to use MU to simulate a
+MSI controller. Although only 4 MSI IRQs are simulated, it matched
+vntb(pci-epf-vntb) network requirement.
+
+After enable MSI, ping delay reduce < 1ms from ~8ms
+
+IRQchip: imx mu worked as MSI controller: 
+     let imx mu worked as MSI controllers. Although IP is not design
+as MSI controller, we still can use it if limited IRQ number to 4.
+
+pcie: endpoint: pci-epf-vntb: add endpoint MSI support
+	 Based on ntb-next branch. https://github.com/jonmason/ntb/commits/ntb-next
+	 Using MSI as door bell registers
+	 This patch is totally independent on previous on. It can be
+applied to ntb-next seperately.
+
+i.MX EP function driver is upstreaming by Richard Zhu.
+Some dts change missed at this patches. below is reference dts change
+
+--- a/arch/arm64/boot/dts/freescale/imx8-ss-hsio.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8-ss-hsio.dtsi
+@@ -160,5 +160,6 @@ pcieb_ep: pcie_ep@5f010000 {
+                num-ib-windows = <6>;
+                num-ob-windows = <6>;
+                status = "disabled";
++               MSI-parent = <&lsio_mu12>;
+        };
+
+--- a/arch/arm64/boot/dts/freescale/imx8-ss-lsio.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8-ss-lsio.dtsi
+@@ -172,6 +172,19 @@ lsio_mu6: mailbox@5d210000 {
+                status = "disabled";
+        };
+
++       lsio_mu12: mailbox@5d270000 {
++               compatible = "fsl,imx6sx-mu-MSI";
++               msi-controller;
++               interrupt-controller;
++               reg = <0x5d270000 0x10000>,     /* A side */
++                     <0x5d300000 0x10000>;     /* B side */
++               reg-names = "a", "b";
++               interrupts = <GIC_SPI 191 IRQ_TYPE_LEVEL_HIGH>;
++               power-domains = <&pd IMX_SC_R_MU_12A>,
++                               <&pd IMX_SC_R_MU_12B>;
++               power-domain-names = "a", "b";
++       };
++
+
+Change Log
+- Change from v6 to v7
+  pcie: endpoint: add endpoint MSI support
+  Fine tuning commit message
+  Fixed issues, reviewed by Bjorn Helgaas
+
+- Change from v5 to v6
+  Fixed build error found by kernel test robot
+
+- Change from v4 to v5
+  Fixed dt-binding document
+        add msi-cell
+        add interrupt max number
+	update naming reg-names and power-domain-names.
+  Fixed irqchip-Add-IMX-MU-MSI-controller-driver.patch
+        rework commit message
+        remove some field in struct imx_mu_dcfg
+	error handle when link power domain failure.
+	add irq_domain_update_bus_token
+
+- Change from v3 to v4
+  Fixed dt-binding document according to Krzysztof Kozlowski's feedback
+  Fixed irqchip-imx-mu-worked-as-msi-controller according to Marc Zyngier's
+        comments.
+
+	There are still two important points, which I am not sure.
+	1. clean irq_set_affinity after platform_msi_create_irq_domain.
+	   Some function, like platform_msi_write_msg() is static.
+	   so I have to set MSI_FLAG_USE_DEF_CHIP_OPS flags, which will
+	   set irq_set_affinity to default one.
+	2. about comments
+
+	> +	msi_data->msi_domain = platform_msi_create_irq_domain(
+	> +				of_node_to_fwnode(msi_data->pdev->dev.of_node),
+	> +				&imx_mu_msi_domain_info,
+	> +				msi_data->parent);
+
+	"And you don't get an error due to the fact that you use the same
+	fwnode for both domains without overriding the domain bus token?"
+
+ 	I did not understand yet. 
+
+  Fixed static check warning, reported by Dan Carpenter
+	pcie: endpoint: pci-epf-vntb: add endpoint MSI support
+
+- Change from v2 to v3
+  Fixed dt-binding docment check failure
+  Fixed typo a cover letter.
+  Change according Bjorn's comments at patch 
+	pcie: endpoint: pci-epf-vntb: add endpoint MSI support
+	 
+
+- from V1 to V2
+  Fixed fsl,mu-msi.yaml's problem
+  Fixed irq-imx-mu-msi.c problem according Marc Zyngier's feeback 
+  Added a new patch to allow pass down .pm by IRQCHIP_PLATFORM_DRIVER_END
+
+-- 
+2.35.1
+
