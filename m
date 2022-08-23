@@ -1,36 +1,36 @@
-Received: from mga05.intel.com (mga05.intel.com [192.55.52.43])
+Received: from mga12.intel.com (mga12.intel.com [192.55.52.136])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1A4924A3B
-	for <ntb@lists.linux.dev>; Mon, 22 Aug 2022 21:33:14 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 89A6C7F
+	for <ntb@lists.linux.dev>; Tue, 23 Aug 2022 00:46:23 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1661203995; x=1692739995;
+  t=1661215583; x=1692751583;
   h=date:from:to:cc:subject:message-id:references:
    mime-version:in-reply-to;
-  bh=KAwOGc5/RlMiec7gexR6wehKS1gvBgI3uejZUSQuJmc=;
-  b=n2ZrkOv+IbtOJRCBASy2ucqN+pYxo4S07sQr0hOS9ylMzjU5Xpwoc4VY
-   ygZMf8+/ztmev/XoFBgujat1L4fO2gltKWXdf9UKs+IlE9n9Q/HlifKFZ
-   Paqjh/XRhbD8/+62xEsRWdkZuOx7trd4LUahwCIpL7DHWGca2Kuqi8O4O
-   TpslBXRxaBmOHf7RyLV69rbGLkcM7xi0CsGEecK779MKP0an8lHKR/2gG
-   Z2njnsdMq7NRuF1c9WIlbH4J/hS3Iv5vOJyu0PS5RjMkoQxkPyzhHAuFe
-   qNNYjKvdig6HkN3KSOo/R9NO9UiX0w9nbT/583QGX01aMOAiLaVEB41RV
-   Q==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10447"; a="379814770"
-X-IronPort-AV: E=Sophos;i="5.93,255,1654585200"; 
-   d="scan'208";a="379814770"
-Received: from fmsmga003.fm.intel.com ([10.253.24.29])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Aug 2022 14:33:14 -0700
+  bh=k4k4gsNd5k3zq1HDQ+xAymdp/CfQzCncB8UUoV7WRQw=;
+  b=FFNOzbxUQ58HC+wTgqDroaFV2yMgfI+3jMwV8bSlsMDzTpr1xsquy4CX
+   kqr0uBQ6v1jTPY3H97AgYnMYWDrWd1n03HCf4oDwm2vk4pkDxki/M5PAr
+   sQNE5AHRMiB/KBLulBhWtMZdpNJ6oU1Ig4TRnIIncFGP9beRjHrkO2FAf
+   LYLiKvHKFd63bsHqPMtHCWhOgZswDrW1KtpalQ0vCV1dQrYjfVMhe/TG5
+   Qeemuxrz9eSViWxHxyDbhK8k0uEfdd/LesRZX+BdohCiDGA5mT9JqFQ4c
+   w0Z/8E3toxtI/7Z6KWnit34pNSDVW/d+7CFedYfGBOXpaz4RMF4x2tf92
+   g==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10447"; a="273310935"
+X-IronPort-AV: E=Sophos;i="5.93,256,1654585200"; 
+   d="scan'208";a="273310935"
+Received: from fmsmga001.fm.intel.com ([10.253.24.23])
+  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Aug 2022 17:46:22 -0700
 X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.93,255,1654585200"; 
-   d="scan'208";a="698435678"
+X-IronPort-AV: E=Sophos;i="5.93,256,1654585200"; 
+   d="scan'208";a="751491576"
 Received: from lkp-server01.sh.intel.com (HELO dd9b29378baa) ([10.239.97.150])
-  by FMSMGA003.fm.intel.com with ESMTP; 22 Aug 2022 14:33:09 -0700
+  by fmsmga001.fm.intel.com with ESMTP; 22 Aug 2022 17:46:18 -0700
 Received: from kbuild by dd9b29378baa with local (Exim 4.96)
 	(envelope-from <lkp@intel.com>)
-	id 1oQF2i-0000jv-2J;
-	Mon, 22 Aug 2022 21:33:08 +0000
-Date: Tue, 23 Aug 2022 05:32:54 +0800
+	id 1oQI3d-0000vD-12;
+	Tue, 23 Aug 2022 00:46:17 +0000
+Date: Tue, 23 Aug 2022 08:45:38 +0800
 From: kernel test robot <lkp@intel.com>
 To: Frank Li <Frank.Li@nxp.com>, maz@kernel.org, tglx@linutronix.de,
 	robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
@@ -43,7 +43,7 @@ Cc: kbuild-all@lists.01.org, linux-kernel@vger.kernel.org,
 	linux-imx@nxp.com, kishon@ti.com, lorenzo.pieralisi@arm.com,
 	ntb@lists.linux.dev, lznuaa@gmail.com
 Subject: Re: [PATCH v7 4/4] PCI: endpoint: Add NTB MSI support
-Message-ID: <202208230543.fAaLXJy7-lkp@intel.com>
+Message-ID: <202208230844.D25Fw8sg-lkp@intel.com>
 References: <20220822155130.2491006-5-Frank.Li@nxp.com>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
@@ -57,10 +57,10 @@ In-Reply-To: <20220822155130.2491006-5-Frank.Li@nxp.com>
 
 Hi Frank,
 
-I love your patch! Yet something to improve:
+I love your patch! Perhaps something to improve:
 
-[auto build test ERROR on jonmason-ntb/ntb-next]
-[also build test ERROR on robh/for-next linus/master v6.0-rc2 next-20220822]
+[auto build test WARNING on jonmason-ntb/ntb-next]
+[also build test WARNING on robh/for-next linus/master v6.0-rc2 next-20220822]
 [cannot apply to tip/irq/core]
 [If your patch is applied to the wrong git tree, kindly drop us a note.
 And when submitting patch, we suggest to use '--base' as documented in
@@ -68,74 +68,98 @@ https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
 url:    https://github.com/intel-lab-lkp/linux/commits/Frank-Li/PCI-EP-driver-support-MSI-doorbell-from-host/20220822-235323
 base:   https://github.com/jonmason/ntb ntb-next
-config: microblaze-randconfig-r005-20220821 (https://download.01.org/0day-ci/archive/20220823/202208230543.fAaLXJy7-lkp@intel.com/config)
-compiler: microblaze-linux-gcc (GCC) 12.1.0
-reproduce (this is a W=1 build):
+config: s390-randconfig-s053-20220821 (https://download.01.org/0day-ci/archive/20220823/202208230844.D25Fw8sg-lkp@intel.com/config)
+compiler: s390-linux-gcc (GCC) 12.1.0
+reproduce:
         wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
         chmod +x ~/bin/make.cross
+        # apt-get install sparse
+        # sparse version: v0.6.4-39-gce1a6720-dirty
         # https://github.com/intel-lab-lkp/linux/commit/d98704aefa5b57814d7b9b1b40160df34977b2b6
         git remote add linux-review https://github.com/intel-lab-lkp/linux
         git fetch --no-tags linux-review Frank-Li/PCI-EP-driver-support-MSI-doorbell-from-host/20220822-235323
         git checkout d98704aefa5b57814d7b9b1b40160df34977b2b6
         # save the config file
         mkdir build_dir && cp config build_dir/.config
-        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-12.1.0 make.cross W=1 O=build_dir ARCH=microblaze SHELL=/bin/bash drivers/pci/endpoint/functions/
+        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-12.1.0 make.cross C=1 CF='-fdiagnostic-prefix -D__CHECK_ENDIAN__' O=build_dir ARCH=s390 SHELL=/bin/bash drivers/pci/endpoint/functions/
 
 If you fix the issue, kindly add following tag where applicable
 Reported-by: kernel test robot <lkp@intel.com>
 
-All errors (new ones prefixed by >>):
+sparse warnings: (new ones prefixed by >>)
+>> drivers/pci/endpoint/functions/pci-epf-vntb.c:567:25: sparse: sparse: incorrect type in assignment (different address spaces) @@     expected void [noderef] __iomem *[assigned] mw_addr @@     got void * @@
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:567:25: sparse:     expected void [noderef] __iomem *[assigned] mw_addr
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:567:25: sparse:     got void *
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:600:41: sparse: sparse: incorrect type in argument 2 (different address spaces) @@     expected void *addr @@     got void [noderef] __iomem *epf_db @@
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:600:41: sparse:     expected void *addr
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:600:41: sparse:     got void [noderef] __iomem *epf_db
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:1201:33: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void [noderef] __iomem *base @@     got struct epf_ntb_ctrl *reg @@
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:1201:33: sparse:     expected void [noderef] __iomem *base
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:1201:33: sparse:     got struct epf_ntb_ctrl *reg
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:1212:33: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void [noderef] __iomem *base @@     got struct epf_ntb_ctrl *reg @@
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:1212:33: sparse:     expected void [noderef] __iomem *base
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:1212:33: sparse:     got struct epf_ntb_ctrl *reg
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:1223:33: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void [noderef] __iomem *base @@     got struct epf_ntb_ctrl *reg @@
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:1223:33: sparse:     expected void [noderef] __iomem *base
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:1223:33: sparse:     got struct epf_ntb_ctrl *reg
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:1235:33: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void [noderef] __iomem *base @@     got struct epf_ntb_ctrl *reg @@
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:1235:33: sparse:     expected void [noderef] __iomem *base
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:1235:33: sparse:     got struct epf_ntb_ctrl *reg
 
-   drivers/pci/endpoint/functions/pci-epf-vntb.c: In function 'epf_ntb_epc_msi_init':
->> drivers/pci/endpoint/functions/pci-epf-vntb.c:786:13: error: implicit declaration of function 'platform_msi_domain_alloc_irqs' [-Werror=implicit-function-declaration]
-     786 |         if (platform_msi_domain_alloc_irqs(&ntb->epf->dev,
-         |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   cc1: some warnings being treated as errors
+vim +567 drivers/pci/endpoint/functions/pci-epf-vntb.c
 
-
-vim +/platform_msi_domain_alloc_irqs +786 drivers/pci/endpoint/functions/pci-epf-vntb.c
-
-   771	
-   772	static void epf_ntb_epc_msi_init(struct epf_ntb *ntb)
-   773	{
-   774		struct device *dev = &ntb->epf->dev;
-   775		struct irq_domain *domain;
-   776		int virq;
-   777		int ret;
-   778		int i;
-   779	
-   780		domain = dev_get_msi_domain(ntb->epf->epc->dev.parent);
-   781		if (!domain)
-   782			return;
-   783	
-   784		dev_set_msi_domain(dev, domain);
-   785	
- > 786		if (platform_msi_domain_alloc_irqs(&ntb->epf->dev,
-   787			ntb->db_count,
-   788			epf_ntb_write_msi_msg)) {
-   789			dev_info(dev, "Can't allocate MSI, fall back to poll mode\n");
-   790			return;
-   791		}
-   792	
-   793		dev_info(dev, "vntb use MSI as doorbell\n");
-   794	
-   795		for (i = 0; i < ntb->db_count; i++) {
-   796			virq = msi_get_virq(dev, i);
-   797			ret = devm_request_irq(dev, virq,
-   798				       epf_ntb_interrupt_handler, 0,
-   799				       "ntb", ntb);
-   800	
-   801			if (ret) {
-   802				dev_err(dev, "devm_request_irq() failure, fall back to poll mode\n");
-   803				ntb->epf_db_phy = 0;
-   804				break;
-   805			}
-   806	
-   807			if (!i)
-   808				ntb->msi_virqbase = virq;
-   809		}
-   810	}
-   811	
+d98704aefa5b578 Frank Li 2022-08-22  536  
+e35f56bb03304ab Frank Li 2022-02-22  537  /**
+e35f56bb03304ab Frank Li 2022-02-22  538   * epf_ntb_db_bar_init() - Configure Doorbell window BARs
+e35f56bb03304ab Frank Li 2022-02-22  539   * @ntb: NTB device that facilitates communication between HOST and vHOST
+e35f56bb03304ab Frank Li 2022-02-22  540   */
+e35f56bb03304ab Frank Li 2022-02-22  541  static int epf_ntb_db_bar_init(struct epf_ntb *ntb)
+e35f56bb03304ab Frank Li 2022-02-22  542  {
+e35f56bb03304ab Frank Li 2022-02-22  543  	const struct pci_epc_features *epc_features;
+e35f56bb03304ab Frank Li 2022-02-22  544  	u32 align;
+e35f56bb03304ab Frank Li 2022-02-22  545  	struct device *dev = &ntb->epf->dev;
+e35f56bb03304ab Frank Li 2022-02-22  546  	int ret;
+e35f56bb03304ab Frank Li 2022-02-22  547  	struct pci_epf_bar *epf_bar;
+e35f56bb03304ab Frank Li 2022-02-22  548  	void __iomem *mw_addr;
+e35f56bb03304ab Frank Li 2022-02-22  549  	enum pci_barno barno;
+d98704aefa5b578 Frank Li 2022-08-22  550  	size_t size;
+e35f56bb03304ab Frank Li 2022-02-22  551  
+e35f56bb03304ab Frank Li 2022-02-22  552  	epc_features = pci_epc_get_features(ntb->epf->epc,
+e35f56bb03304ab Frank Li 2022-02-22  553  					    ntb->epf->func_no,
+e35f56bb03304ab Frank Li 2022-02-22  554  					    ntb->epf->vfunc_no);
+e35f56bb03304ab Frank Li 2022-02-22  555  	align = epc_features->align;
+d98704aefa5b578 Frank Li 2022-08-22  556  	size = epf_ntb_db_size(ntb);
+e35f56bb03304ab Frank Li 2022-02-22  557  
+e35f56bb03304ab Frank Li 2022-02-22  558  	barno = ntb->epf_ntb_bar[BAR_DB];
+d98704aefa5b578 Frank Li 2022-08-22  559  	epf_bar = &ntb->epf->bar[barno];
+e35f56bb03304ab Frank Li 2022-02-22  560  
+d98704aefa5b578 Frank Li 2022-08-22  561  	if (ntb->epf_db_phy) {
+d98704aefa5b578 Frank Li 2022-08-22  562  		mw_addr = NULL;
+d98704aefa5b578 Frank Li 2022-08-22  563  		epf_bar->phys_addr = ntb->epf_db_phy;
+d98704aefa5b578 Frank Li 2022-08-22  564  		epf_bar->barno = barno;
+d98704aefa5b578 Frank Li 2022-08-22  565  		epf_bar->size = size;
+d98704aefa5b578 Frank Li 2022-08-22  566  	} else {
+e35f56bb03304ab Frank Li 2022-02-22 @567  		mw_addr = pci_epf_alloc_space(ntb->epf, size, barno, align, 0);
+e35f56bb03304ab Frank Li 2022-02-22  568  		if (!mw_addr) {
+e35f56bb03304ab Frank Li 2022-02-22  569  			dev_err(dev, "Failed to allocate OB address\n");
+e35f56bb03304ab Frank Li 2022-02-22  570  			return -ENOMEM;
+e35f56bb03304ab Frank Li 2022-02-22  571  		}
+d98704aefa5b578 Frank Li 2022-08-22  572  	}
+e35f56bb03304ab Frank Li 2022-02-22  573  
+e35f56bb03304ab Frank Li 2022-02-22  574  	ntb->epf_db = mw_addr;
+e35f56bb03304ab Frank Li 2022-02-22  575  
+e35f56bb03304ab Frank Li 2022-02-22  576  	ret = pci_epc_set_bar(ntb->epf->epc, ntb->epf->func_no, ntb->epf->vfunc_no, epf_bar);
+e35f56bb03304ab Frank Li 2022-02-22  577  	if (ret) {
+e35f56bb03304ab Frank Li 2022-02-22  578  		dev_err(dev, "Doorbell BAR set failed\n");
+e35f56bb03304ab Frank Li 2022-02-22  579  			goto err_alloc_peer_mem;
+e35f56bb03304ab Frank Li 2022-02-22  580  	}
+e35f56bb03304ab Frank Li 2022-02-22  581  	return ret;
+e35f56bb03304ab Frank Li 2022-02-22  582  
+e35f56bb03304ab Frank Li 2022-02-22  583  err_alloc_peer_mem:
+e35f56bb03304ab Frank Li 2022-02-22  584  	pci_epc_mem_free_addr(ntb->epf->epc, epf_bar->phys_addr, mw_addr, epf_bar->size);
+e35f56bb03304ab Frank Li 2022-02-22  585  	return -1;
+e35f56bb03304ab Frank Li 2022-02-22  586  }
+e35f56bb03304ab Frank Li 2022-02-22  587  
 
 -- 
 0-DAY CI Kernel Test Service
