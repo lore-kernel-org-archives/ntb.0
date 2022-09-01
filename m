@@ -1,42 +1,42 @@
-Received: from mail-pf1-f174.google.com (mail-pf1-f174.google.com [209.85.210.174])
+Received: from mail-pj1-f51.google.com (mail-pj1-f51.google.com [209.85.216.51])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9E7CF6D3F
-	for <ntb@lists.linux.dev>; Thu,  1 Sep 2022 18:17:54 +0000 (UTC)
-Received: by mail-pf1-f174.google.com with SMTP id l65so7864432pfl.8
-        for <ntb@lists.linux.dev>; Thu, 01 Sep 2022 11:17:54 -0700 (PDT)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8DEEF7460
+	for <ntb@lists.linux.dev>; Thu,  1 Sep 2022 18:18:01 +0000 (UTC)
+Received: by mail-pj1-f51.google.com with SMTP id i7-20020a17090adc0700b001fd7ccbec3cso6256271pjv.0
+        for <ntb@lists.linux.dev>; Thu, 01 Sep 2022 11:18:01 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=bytedance-com.20210112.gappssmtp.com; s=20210112;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date;
-        bh=zI/BTKFXJXbsFO1kxQzveFTmwvhlHGn8PgFA+S1jres=;
-        b=lbGN4Kp3lRbdgZAgZthVUQrgacQyY9T1ORf4+IRNyEdsR08hfaasoXVs5DtXtNjkTt
-         wTxeqEsp7RBY+UWH7L93OCDfVRg9a1qSh9cBwhtS4I6Er4mCMCBHZU5JSui19cnXXiig
-         44oPiVPAXmom3N3thvuWvMaOvOfbAWjPKiQSDzINje0Iw3JqQRthMh0s8MIbff5OnpvO
-         N9tS9ZKZ0SL5YyBB3QM4IjwgO1zAcad5VDu0Kunmmzc158kOPOqoqYiZnKQaU3pCner0
-         QYRlE7l5InBZMbljno6S49tduW45wREpYyIuNPHbDZ1EkbLBhOg8Xve56z8sFCfzHqVq
-         iV5w==
+        bh=3DXCPe1BdEtYuRHvCYZXZkquoUJcR5dxO1Uv98IS8Fo=;
+        b=Aehod6L+M3ml0QOxN7x+0w3h0/6goHcKiCZebMRRRooSJP64c5JGUMmT0Xs0eXcJQX
+         KAebQ+kqsEsjzxwwCuCi+sTSZ9ePGDRJ4Ke8LtzrvIc85ZUFTKXl6caEY+cTLN//OYSf
+         0QqAgptsvqA+mNuSroupv9lAYWD/oiajx3bhNgTGjKE+5FJqGpp5hl75V/YPuX9vsEwJ
+         H9pYqtwIfWdmAJsRJBDrKwHc/OkPFAj95m1JVMfBleKx9eJGlDea3htyn18Jqhle3msk
+         1aFF1ndcoISes5UYjaPU1OELeWO86cea/I3zJ3XNGnx8Nc3DA33tRGi9jv4uXcMiqB7J
+         p+zw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date;
-        bh=zI/BTKFXJXbsFO1kxQzveFTmwvhlHGn8PgFA+S1jres=;
-        b=6jaQcEO6KbnMGXk8bXtezXaGdZ1qa3wiFdeLadixHQh9oq5BDlWFEo2Mn4bsKxouc4
-         LpL7ZvafBlx56zBiZfJZniZKGk1bJjJM+2SAmAqgaNlxU+p+yYaWDzc0KiNONBrbqUS8
-         4j6YryuVGMNyp2hgjsw4Hp5ls0HM5iyUxpZ/jdSAjoU+IG7xCprC/TXBbun1oZw+4kg7
-         l9tn923YsHUyEh1rc6fQUqHRpwJoqIL5bGMvw9Y9DTRs/xq/vI6xvzzz+1n0c+xkXCCu
-         Ic1gznsgvOjxlkRj1vuwPKNVSEgxyOPvb1HJrWCWCC+fJqCJRFxyYEBFtx9MRFZX5XPP
-         x1mg==
-X-Gm-Message-State: ACgBeo3sXh6piVAUuXm/F7ooMumburAz29SX8b2WmQZchZszwqbHeER2
-	7WuBPpYmWxS8uGiMp58gGz88bg==
-X-Google-Smtp-Source: AA6agR7kM8iGzccwGQ6iMySe4S2grbdHOsy/itfUuKWXsnekyj0x05dNeHnyQVuTcw2HeZHUxsgADQ==
-X-Received: by 2002:a05:6a00:88a:b0:53a:b7a0:ea3a with SMTP id q10-20020a056a00088a00b0053ab7a0ea3amr9698501pfj.21.1662056274006;
-        Thu, 01 Sep 2022 11:17:54 -0700 (PDT)
+        bh=3DXCPe1BdEtYuRHvCYZXZkquoUJcR5dxO1Uv98IS8Fo=;
+        b=RIFIdUVj/XeimgqLmODisHW2jlP1POcBt9N5S7yiDTCS/NgewvSa/JJQ1/b6SOkTmT
+         3A7lB33WzeSGNTejUOnQh7tk5q2eR97u2mJXdvjfEaHqGQ9IJk9zGAqYh6YPzUSpA02E
+         AgI6HoR7lh5RH4OTluJk0DR8qK5WiETJuaOYGXrDF+39yx05+SkYFiGHFub/K4QVYjoK
+         R/4TUbBg4I8ZUbLIInpS0v6BLpFBsRg2hlfTWqJo2W9EZoh7MnxRihiTAfn2zhW4q5su
+         mhQNgMqf2baYPpOemxO8tgr8zjnprP23kLWZA0KfBSb2iTFFcJQKCA2dWiBDiDgCmpi9
+         rPUA==
+X-Gm-Message-State: ACgBeo2fIR7M1C+s45cWv6fERD3KXPgwmJM7JJLLSvfTQtu9a2BHrD2u
+	WU9CwRsChLYkO7ytbQLNhGCOiA==
+X-Google-Smtp-Source: AA6agR5k3r5xfxPxjuPBt32QIykPTxBunw1TVl9SKzFPTIijRtI9vvEivAH4/47P1EXXXpyDgDMWRQ==
+X-Received: by 2002:a17:903:32d2:b0:172:f62a:2f33 with SMTP id i18-20020a17090332d200b00172f62a2f33mr31495269plr.16.1662056281071;
+        Thu, 01 Sep 2022 11:18:01 -0700 (PDT)
 Received: from C02F63J9MD6R.bytedance.net ([61.120.150.77])
-        by smtp.gmail.com with ESMTPSA id b13-20020a170903228d00b0017519b86996sm6320538plh.218.2022.09.01.11.17.48
+        by smtp.gmail.com with ESMTPSA id b13-20020a170903228d00b0017519b86996sm6320538plh.218.2022.09.01.11.17.55
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 01 Sep 2022 11:17:53 -0700 (PDT)
+        Thu, 01 Sep 2022 11:18:00 -0700 (PDT)
 From: Zhuo Chen <chenzhuo.1@bytedance.com>
 To: fancer.lancer@gmail.com,
 	jdmason@kudzu.us,
@@ -55,9 +55,9 @@ Cc: chenzhuo.1@bytedance.com,
 	linux-pci@vger.kernel.org,
 	linuxppc-dev@lists.ozlabs.org,
 	linux-scsi@vger.kernel.org
-Subject: [PATCH 2/3] PCI/ERR: Clear fatal status in pcie_do_recovery()
-Date: Fri,  2 Sep 2022 02:16:33 +0800
-Message-Id: <20220901181634.99591-3-chenzhuo.1@bytedance.com>
+Subject: [PATCH 3/3] PCI/AER: Use pci_aer_raw_clear_status() to clear root port's AER error status
+Date: Fri,  2 Sep 2022 02:16:34 +0800
+Message-Id: <20220901181634.99591-4-chenzhuo.1@bytedance.com>
 X-Mailer: git-send-email 2.30.1 (Apple Git-130)
 In-Reply-To: <20220901181634.99591-1-chenzhuo.1@bytedance.com>
 References: <20220901181634.99591-1-chenzhuo.1@bytedance.com>
@@ -69,41 +69,33 @@ List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-When state is pci_channel_io_frozen in pcie_do_recovery(),
-the severity is fatal and fatal status should be cleared.
-So we add pci_aer_clear_fatal_status().
-
-Since pcie_aer_is_native() in pci_aer_clear_fatal_status()
-and pci_aer_clear_nonfatal_status() contains the function of
-'if (host->native_aer || pcie_ports_native)', so we move them
-out of it.
+Statements clearing AER error status in aer_enable_rootport() has the
+same function as pci_aer_raw_clear_status(). So we replace them, which
+has no functional changes.
 
 Signed-off-by: Zhuo Chen <chenzhuo.1@bytedance.com>
 ---
- drivers/pci/pcie/err.c | 8 ++++++--
- 1 file changed, 6 insertions(+), 2 deletions(-)
+ drivers/pci/pcie/aer.c | 7 +------
+ 1 file changed, 1 insertion(+), 6 deletions(-)
 
-diff --git a/drivers/pci/pcie/err.c b/drivers/pci/pcie/err.c
-index 0c5a143025af..e0a8ade4c3fe 100644
---- a/drivers/pci/pcie/err.c
-+++ b/drivers/pci/pcie/err.c
-@@ -243,10 +243,14 @@ pci_ers_result_t pcie_do_recovery(struct pci_dev *dev,
- 	 * it is responsible for clearing this status.  In that case, the
- 	 * signaling device may not even be visible to the OS.
- 	 */
--	if (host->native_aer || pcie_ports_native) {
-+	if (host->native_aer || pcie_ports_native)
- 		pcie_clear_device_status(dev);
-+
-+	if (state == pci_channel_io_frozen)
-+		pci_aer_clear_fatal_status(dev);
-+	else
- 		pci_aer_clear_nonfatal_status(dev);
--	}
-+
- 	pci_info(bridge, "device recovery successful\n");
- 	return status;
+diff --git a/drivers/pci/pcie/aer.c b/drivers/pci/pcie/aer.c
+index d2996afa80f6..eb0193f279f2 100644
+--- a/drivers/pci/pcie/aer.c
++++ b/drivers/pci/pcie/aer.c
+@@ -1287,12 +1287,7 @@ static void aer_enable_rootport(struct aer_rpc *rpc)
+ 				   SYSTEM_ERROR_INTR_ON_MESG_MASK);
  
+ 	/* Clear error status */
+-	pci_read_config_dword(pdev, aer + PCI_ERR_ROOT_STATUS, &reg32);
+-	pci_write_config_dword(pdev, aer + PCI_ERR_ROOT_STATUS, reg32);
+-	pci_read_config_dword(pdev, aer + PCI_ERR_COR_STATUS, &reg32);
+-	pci_write_config_dword(pdev, aer + PCI_ERR_COR_STATUS, reg32);
+-	pci_read_config_dword(pdev, aer + PCI_ERR_UNCOR_STATUS, &reg32);
+-	pci_write_config_dword(pdev, aer + PCI_ERR_UNCOR_STATUS, reg32);
++	pci_aer_raw_clear_status(pdev);
+ 
+ 	/*
+ 	 * Enable error reporting for the root port device and downstream port
 -- 
 2.30.1 (Apple Git-130)
 
