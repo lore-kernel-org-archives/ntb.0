@@ -1,101 +1,244 @@
-Received: from mail-pj1-f51.google.com (mail-pj1-f51.google.com [209.85.216.51])
+Received: from mail-pg1-f176.google.com (mail-pg1-f176.google.com [209.85.215.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8DEEF7460
-	for <ntb@lists.linux.dev>; Thu,  1 Sep 2022 18:18:01 +0000 (UTC)
-Received: by mail-pj1-f51.google.com with SMTP id i7-20020a17090adc0700b001fd7ccbec3cso6256271pjv.0
-        for <ntb@lists.linux.dev>; Thu, 01 Sep 2022 11:18:01 -0700 (PDT)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7B839EA0
+	for <ntb@lists.linux.dev>; Fri,  2 Sep 2022 01:39:00 +0000 (UTC)
+Received: by mail-pg1-f176.google.com with SMTP id 73so707789pga.1
+        for <ntb@lists.linux.dev>; Thu, 01 Sep 2022 18:39:00 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=bytedance-com.20210112.gappssmtp.com; s=20210112;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date;
-        bh=3DXCPe1BdEtYuRHvCYZXZkquoUJcR5dxO1Uv98IS8Fo=;
-        b=Aehod6L+M3ml0QOxN7x+0w3h0/6goHcKiCZebMRRRooSJP64c5JGUMmT0Xs0eXcJQX
-         KAebQ+kqsEsjzxwwCuCi+sTSZ9ePGDRJ4Ke8LtzrvIc85ZUFTKXl6caEY+cTLN//OYSf
-         0QqAgptsvqA+mNuSroupv9lAYWD/oiajx3bhNgTGjKE+5FJqGpp5hl75V/YPuX9vsEwJ
-         H9pYqtwIfWdmAJsRJBDrKwHc/OkPFAj95m1JVMfBleKx9eJGlDea3htyn18Jqhle3msk
-         1aFF1ndcoISes5UYjaPU1OELeWO86cea/I3zJ3XNGnx8Nc3DA33tRGi9jv4uXcMiqB7J
-         p+zw==
+        d=linaro.org; s=google;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:from:to
+         :cc:subject:date;
+        bh=xtrTkJ4Uu3ohhJxNrzty1GMo4mCUZ5As2LZg/P4tK50=;
+        b=YYQS3U2an0NHsaT3kRyB/CjX2F6iSDaaaXdAkWZvO6gonxfA9qhHlPPJIy66EZe3ZR
+         wxIjWeCJzO7jdFWWO88kKC3qSXJ1mLTTNBSOcVvGsmLmcdYAQSBwKNehifBdxOZDugqV
+         isbdfKU8zmXU8m/Rm4CMHQofJVobu0qt2c+DjTYFJ5nX6ZsHTBHOxLlM51mZyvNLpmVQ
+         Q+YgCC0+Y8zFHJRTaKTF2NKyWdE/a8DEmMRHAUZ8A1vOp/Kq1MqYaKQzBTyto1CV5NQP
+         3+lPV55ABJaNHPEdbwbeUfQ4cHlupDfFN0jhMHJfQ5143PjQWyb5UgPyMSfsKXs/t6TM
+         bxOg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date;
-        bh=3DXCPe1BdEtYuRHvCYZXZkquoUJcR5dxO1Uv98IS8Fo=;
-        b=RIFIdUVj/XeimgqLmODisHW2jlP1POcBt9N5S7yiDTCS/NgewvSa/JJQ1/b6SOkTmT
-         3A7lB33WzeSGNTejUOnQh7tk5q2eR97u2mJXdvjfEaHqGQ9IJk9zGAqYh6YPzUSpA02E
-         AgI6HoR7lh5RH4OTluJk0DR8qK5WiETJuaOYGXrDF+39yx05+SkYFiGHFub/K4QVYjoK
-         R/4TUbBg4I8ZUbLIInpS0v6BLpFBsRg2hlfTWqJo2W9EZoh7MnxRihiTAfn2zhW4q5su
-         mhQNgMqf2baYPpOemxO8tgr8zjnprP23kLWZA0KfBSb2iTFFcJQKCA2dWiBDiDgCmpi9
-         rPUA==
-X-Gm-Message-State: ACgBeo2fIR7M1C+s45cWv6fERD3KXPgwmJM7JJLLSvfTQtu9a2BHrD2u
-	WU9CwRsChLYkO7ytbQLNhGCOiA==
-X-Google-Smtp-Source: AA6agR5k3r5xfxPxjuPBt32QIykPTxBunw1TVl9SKzFPTIijRtI9vvEivAH4/47P1EXXXpyDgDMWRQ==
-X-Received: by 2002:a17:903:32d2:b0:172:f62a:2f33 with SMTP id i18-20020a17090332d200b00172f62a2f33mr31495269plr.16.1662056281071;
-        Thu, 01 Sep 2022 11:18:01 -0700 (PDT)
-Received: from C02F63J9MD6R.bytedance.net ([61.120.150.77])
-        by smtp.gmail.com with ESMTPSA id b13-20020a170903228d00b0017519b86996sm6320538plh.218.2022.09.01.11.17.55
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 01 Sep 2022 11:18:00 -0700 (PDT)
-From: Zhuo Chen <chenzhuo.1@bytedance.com>
-To: fancer.lancer@gmail.com,
-	jdmason@kudzu.us,
-	dave.jiang@intel.com,
-	allenbh@gmail.com,
-	bhelgaas@google.com,
-	ruscur@russell.cc,
-	oohall@gmail.com,
-	james.smart@broadcom.com,
-	dick.kennedy@broadcom.com,
-	jejb@linux.ibm.com,
-	martin.petersen@oracle.com
-Cc: chenzhuo.1@bytedance.com,
-	ntb@lists.linux.dev,
-	linux-kernel@vger.kernel.org,
-	linux-pci@vger.kernel.org,
-	linuxppc-dev@lists.ozlabs.org,
-	linux-scsi@vger.kernel.org
-Subject: [PATCH 3/3] PCI/AER: Use pci_aer_raw_clear_status() to clear root port's AER error status
-Date: Fri,  2 Sep 2022 02:16:34 +0800
-Message-Id: <20220901181634.99591-4-chenzhuo.1@bytedance.com>
-X-Mailer: git-send-email 2.30.1 (Apple Git-130)
-In-Reply-To: <20220901181634.99591-1-chenzhuo.1@bytedance.com>
-References: <20220901181634.99591-1-chenzhuo.1@bytedance.com>
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date;
+        bh=xtrTkJ4Uu3ohhJxNrzty1GMo4mCUZ5As2LZg/P4tK50=;
+        b=E9iJVvNowUBwW5HdcLwbpLEo+fKok7YRDDgInPRLsFl0B0tUzJLPcQ+7n9BC2jzk8e
+         M01IR0nEOVM78m5ZP9j6QGaqaCLiqeBZqWqwsWodxaliExdo38OkBF23Feku6dv24c0n
+         vIDQw/SL/uqeWdQ5Wh3s8OjFE3VohKmotVUITlSLofyFnV6ewTVL2SDdMotNX0tZ0vaP
+         g+dybIZDgp0j3MSRCd7/cAHwie1C4bC1IEnpwwld3P9KMgJBv70ROTAldAllxx2Avu6i
+         crxgcfP64fAVi7IYKJw62LoRK5abf+xffAdbsVhO+vv+aYtZ6wKXcfWtVOo+Q7y8dMZS
+         2BOg==
+X-Gm-Message-State: ACgBeo0l7k4N+v0IQ1mRQEy4FqRy88L5fGRxP76fOc1OHpfeoJi4B0Ak
+	w+w0pwfSrOJTN344cyuWWU7Z
+X-Google-Smtp-Source: AA6agR7DjBAE56OPQD2pNaMD6zNmrRU9jU2sr6gi8usaSIIxK9Wdjn2+Sdz7pqPgMja4jY2efNlR5A==
+X-Received: by 2002:a63:4b5e:0:b0:41d:e04b:4515 with SMTP id k30-20020a634b5e000000b0041de04b4515mr28031011pgl.100.1662082739808;
+        Thu, 01 Sep 2022 18:38:59 -0700 (PDT)
+Received: from thinkpad ([117.217.177.124])
+        by smtp.gmail.com with ESMTPSA id y1-20020a17090a474100b001fdbb2e38acsm4058764pjg.5.2022.09.01.18.38.52
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 01 Sep 2022 18:38:58 -0700 (PDT)
+Date: Fri, 2 Sep 2022 07:08:48 +0530
+From: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+To: Frank Li <frank.li@nxp.com>
+Cc: "maz@kernel.org" <maz@kernel.org>,
+	"tglx@linutronix.de" <tglx@linutronix.de>,
+	"robh+dt@kernel.org" <robh+dt@kernel.org>,
+	"krzysztof.kozlowski+dt@linaro.org" <krzysztof.kozlowski+dt@linaro.org>,
+	"shawnguo@kernel.org" <shawnguo@kernel.org>,
+	"s.hauer@pengutronix.de" <s.hauer@pengutronix.de>,
+	"kw@linux.com" <kw@linux.com>,
+	"bhelgaas@google.com" <bhelgaas@google.com>,
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+	"devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+	"linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>,
+	"linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>,
+	Peng Fan <peng.fan@nxp.com>, Aisheng Dong <aisheng.dong@nxp.com>,
+	"jdmason@kudzu.us" <jdmason@kudzu.us>,
+	"kernel@pengutronix.de" <kernel@pengutronix.de>,
+	"festevam@gmail.com" <festevam@gmail.com>,
+	dl-linux-imx <linux-imx@nxp.com>, "kishon@ti.com" <kishon@ti.com>,
+	"lorenzo.pieralisi@arm.com" <lorenzo.pieralisi@arm.com>,
+	"ntb@lists.linux.dev" <ntb@lists.linux.dev>,
+	"lznuaa@gmail.com" <lznuaa@gmail.com>
+Subject: Re: [EXT] Re: [PATCH v6 4/4] pcie: endpoint: pci-epf-vntb: add
+ endpoint MSI support
+Message-ID: <20220902013848.GA4935@thinkpad>
+References: <20220818151127.2449064-1-Frank.Li@nxp.com>
+ <20220818151127.2449064-5-Frank.Li@nxp.com>
+ <20220831104203.GD5076@thinkpad>
+ <AM9PR04MB8793BEEC8B2F1713C252B4CA88789@AM9PR04MB8793.eurprd04.prod.outlook.com>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
+In-Reply-To: <AM9PR04MB8793BEEC8B2F1713C252B4CA88789@AM9PR04MB8793.eurprd04.prod.outlook.com>
 
-Statements clearing AER error status in aer_enable_rootport() has the
-same function as pci_aer_raw_clear_status(). So we replace them, which
-has no functional changes.
+On Wed, Aug 31, 2022 at 04:19:17PM +0000, Frank Li wrote:
+> 
+> 
+> > -----Original Message-----
+> > From: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+> > Sent: Wednesday, August 31, 2022 5:42 AM
+> > To: Frank Li <frank.li@nxp.com>
+> > Cc: maz@kernel.org; tglx@linutronix.de; robh+dt@kernel.org;
+> > krzysztof.kozlowski+dt@linaro.org; shawnguo@kernel.org;
+> > s.hauer@pengutronix.de; kw@linux.com; bhelgaas@google.com; linux-
+> > kernel@vger.kernel.org; devicetree@vger.kernel.org; linux-arm-
+> > kernel@lists.infradead.org; linux-pci@vger.kernel.org; Peng Fan
+> > <peng.fan@nxp.com>; Aisheng Dong <aisheng.dong@nxp.com>;
+> > jdmason@kudzu.us; kernel@pengutronix.de; festevam@gmail.com; dl-linux-
+> > imx <linux-imx@nxp.com>; kishon@ti.com; lorenzo.pieralisi@arm.com;
+> > ntb@lists.linux.dev; lznuaa@gmail.com
+> > Subject: [EXT] Re: [PATCH v6 4/4] pcie: endpoint: pci-epf-vntb: add endpoint
+> > MSI support
+> > 
+> > Caution: EXT Email
+> > 
+> > On Thu, Aug 18, 2022 at 10:11:27AM -0500, Frank Li wrote:
+> > >                         ┌───────┐          ┌──────────┐
+> > >                         │       │          │          │
+> > >       ┌─────────────┐   │       │          │ PCI Host │
+> > >       │ MSI         │◄┐ │       │          │          │
+> > >       │ Controller  │ │ │       │          │          │
+> > >       └─────────────┘ └─┼───────┼───
+> > ───────┼─BAR0     │
+> > >                         │ PCI   │          │ BAR1     │
+> > >                         │ Func  │          │ BAR2     │
+> > >                         │       │          │ BAR3     │
+> > >                         │       │          │ BAR4     │
+> > >                         │       ├─────────►│          │
+> > >                         └───────┘          └──────────┘
+> > >
+> > 
+> > This diagram doesn't say which side is host and which one is endpoint.
+> > And not conveying any useful information.
+> 
+> [Frank Li] At V2 version, this diagram is in cover letter.  Bjorn suggest move to here.
+> I think you have good background knowledge.  But it should be helpful for new
+> People,  who just touch this area. 
+> 
 
-Signed-off-by: Zhuo Chen <chenzhuo.1@bytedance.com>
----
- drivers/pci/pcie/aer.c | 7 +------
- 1 file changed, 1 insertion(+), 6 deletions(-)
+Having the block diagram always helps but my point is that this diagram doesn't
+convey the immediate knowledge that it is supposed to do so. Like there is no
+partition between host and endpoint and you did not add any explanation about
+it in the below text. So in v2, please incorporate those.
 
-diff --git a/drivers/pci/pcie/aer.c b/drivers/pci/pcie/aer.c
-index d2996afa80f6..eb0193f279f2 100644
---- a/drivers/pci/pcie/aer.c
-+++ b/drivers/pci/pcie/aer.c
-@@ -1287,12 +1287,7 @@ static void aer_enable_rootport(struct aer_rpc *rpc)
- 				   SYSTEM_ERROR_INTR_ON_MESG_MASK);
- 
- 	/* Clear error status */
--	pci_read_config_dword(pdev, aer + PCI_ERR_ROOT_STATUS, &reg32);
--	pci_write_config_dword(pdev, aer + PCI_ERR_ROOT_STATUS, reg32);
--	pci_read_config_dword(pdev, aer + PCI_ERR_COR_STATUS, &reg32);
--	pci_write_config_dword(pdev, aer + PCI_ERR_COR_STATUS, reg32);
--	pci_read_config_dword(pdev, aer + PCI_ERR_UNCOR_STATUS, &reg32);
--	pci_write_config_dword(pdev, aer + PCI_ERR_UNCOR_STATUS, reg32);
-+	pci_aer_raw_clear_status(pdev);
- 
- 	/*
- 	 * Enable error reporting for the root port device and downstream port
+> I already mark "PCI Func" and "PCI Host".  
+> 
+
+Sorry, that's not helpful and you need to improve it.
+
+> > 
+> > > Linux supports endpoint functions. PCI Host write BAR<n> space like write
+> > > to memory. The EP side can't know memory changed by the host driver.
+> > >
+> > 
+> > I think you just say, that there is no defined way of raising IRQs by host
+> > to the endpoint.
+> > 
+> > > PCI Spec has not defined a standard method to do that. Only define MSI(x)
+> > > to let EP notified RC status change.
+> > >
+> > 
+> > MSI is from EP, right? Throughout the driver you should call it as "doorbell"
+> > and not MSI.
+> 
+> [Frank Li] What's I want said is that PCI standard define MSI(x) to let EP notify RC. 
+> But there are not standard way for reverse direction.  MSI should be correct here.
+> 
+
+Right. But also use "MSI/MSI-X" instead of "MSI(x)"
+
+> > 
+> > > The basic idea is to trigger an IRQ when PCI RC writes to a memory
+> > > address. That's what MSI controller provided. EP drivers just need to
+> > > request a platform MSI interrupt, struct msi_msg *msg will pass down a
+> > > memory address and data. EP driver will map such memory address to one
+> > of
+> > > PCI BAR<n>.  Host just writes such an address to trigger EP side irq.
+> > >
+> > 
+> > IIUC (by looking at other patches in the series), the memory assigned for BAR
+> > region by the PCI host is mapped to the platform interrupt controller in
+> > PCI Endpoint. Such that, whenever the PCI host writes to the BAR region, it
+> > will trigger an IRQ in the Endpoint.
+> > 
+> > This kind of setup is available in other platforms like Qualcomm where the
+> > mapping of a register region available in BAR0 and interrupt controller is
+> > done in the hardware itself. So whenever the PCI host writes to that register
+> > in BAR0, an IRQ will be delivered to the endpoint.
+> 
+> [Frank Li] Yes,  not all platform have it. And EP driver have not provide a API
+> to get register region.  I think platform msi API is pretty good API. 
+> Many system have GIC ITS,  so EP function driver can use it.  Our test platform
+> have not ITS yet,  so we added a simple MU-MSI driver to do it. I think qualcomm
+> platform can use similar method.  So all EP function driver can use common method
+> to get notification from PCI host.
+> 
+
+What is the common method here? If you want to make this doorbell feature
+common across all EPF drivers, then you need to provide EPF APIs.
+
+> > 
+> > > Add MSI support for pci-epf-vntb. pci-epf-vntb driver query if system
+> > > have MSI controller. Setup doorbell address according to struct msi_msg.
+> > >
+> > > So PCIe host can write this doorbell address to triger EP side's irq.
+> > >
+> > > If no MSI controller exist, fall back to software polling.
+> > >
+> > > Signed-off-by: Frank Li <Frank.Li@nxp.com>
+> > > ---
+> > >  drivers/pci/endpoint/functions/pci-epf-vntb.c | 134 +++++++++++++++---
+> > >  1 file changed, 112 insertions(+), 22 deletions(-)
+> > >
+> > > diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> > b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+
+[...]
+
+> > > +static void epf_ntb_epc_msi_init(struct epf_ntb *ntb)
+> > > +{
+> > > +     struct device *dev = &ntb->epf->dev;
+> > > +     struct irq_domain *domain;
+> > > +     int virq;
+> > > +     int ret;
+> > > +     int i;
+> > > +
+> > > +     domain = dev_get_msi_domain(ntb->epf->epc->dev.parent);
+> > > +     if (!domain)
+> > > +             return;
+> > > +
+> > > +     dev_set_msi_domain(dev, domain);
+> > > +
+> > > +     if (platform_msi_domain_alloc_irqs(&ntb->epf->dev,
+> > > +             ntb->db_count,
+> > > +             epf_ntb_write_msi_msg)) {
+> > > +             dev_info(dev, "Can't allocate MSI, fall back to poll mode\n");
+> > > +             return;
+> > > +     }
+> > > +
+> > > +     dev_info(dev, "vntb use MSI as doorbell\n");
+> > > +
+> > 
+> > Why are you using the interrupt controller as the MSI controller? Why not
+> > just
+> > a plain interrupt controller?
+> 
+> [Frank Li] what's your means?   I think only MSI controller support write memory to trigger irq.
+> 
+
+From EPF driver perspective, only the IRQs need to be requested, right? So why
+cannot you expose MU as a generic irqchip driver, instead of a MSI controller? 
+
+Thanks,
+Mani
+
 -- 
-2.30.1 (Apple Git-130)
-
+மணிவண்ணன் சதாசிவம்
