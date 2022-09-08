@@ -1,36 +1,36 @@
 Received: from mga01.intel.com (mga01.intel.com [192.55.52.88])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6B7F328E3;
-	Wed,  7 Sep 2022 20:44:35 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0F4E518D;
+	Thu,  8 Sep 2022 00:03:44 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1662583475; x=1694119475;
+  t=1662595425; x=1694131425;
   h=date:from:to:cc:subject:message-id:references:
    mime-version:in-reply-to;
-  bh=AxE5PxZfcCUCqW1k3Km5XnS3tRDAQpDyRdVe5GhqX40=;
-  b=Eis8AgHo7RN56XDKXupNsNfp7tgV1bNqJXrnl/D8w21+xXBA3kynGJIB
-   SmvxiELu3VxSnsU94nZ1Kt/ez8j6boMPmrFbFmq0qEndzuWYyJcGiWY2M
-   xk933tMxeWj9y95DI4UX0LZNf6+WVfmS2GR45eb/P+O3HfU5KCuqCqQDo
-   Yrzepgpozr6pQaSdu//vVDSt/JaXeDKuyXn4F07gIBZaGuq6S2Ht4KETY
-   l5yKU2BPxDrx6tQlvgANGo/zFhzSCGqfc3njLrqGnNCxPfEKJJj+qrT4/
-   XcFEdzxy1y8Xz10m9x0KBa3+Wn3uB4qnuXIw70SRYtkGI9e0Qunbndr8y
+  bh=URLWQZsCNym3oVouZaO+x+X4zDWx8UYslRszx3tig5E=;
+  b=AQZ9WeNo7iGAwKFzDclsJzM1wRitRaOcinOfzp3tEPqs9cTNROxuIocw
+   mb/ySjELKMrmmxc5DVC4zWtDc09TvBJwwiAGgUJqAFDRzg5wiB3e5J1PG
+   o/J3pNUVpsbu7AU1Ru2L0rX/1kVY4xoya2N59p/Rxpiz7Z2yZ0kHLrFWR
+   M87faw8kSJ4ODDKH/8ha6fxbjxmx92yO8VYrxAiwmuIygL0XP1rA+IW0J
+   Le54cNertLlwcD/ID/jEANdn/a9t0exF5ritSUVtBh0oiKYsqliLGft5T
+   ZwXB77/ZOb3o286a3p3lHEsbu2xa2WXTrZVymHNKF+TLs48/Mv1Thgher
    Q==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10463"; a="323180606"
-X-IronPort-AV: E=Sophos;i="5.93,297,1654585200"; 
-   d="scan'208";a="323180606"
-Received: from fmsmga007.fm.intel.com ([10.253.24.52])
-  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Sep 2022 13:44:34 -0700
+X-IronPort-AV: E=McAfee;i="6500,9779,10463"; a="323214975"
+X-IronPort-AV: E=Sophos;i="5.93,298,1654585200"; 
+   d="scan'208";a="323214975"
+Received: from fmsmga004.fm.intel.com ([10.253.24.48])
+  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Sep 2022 17:03:44 -0700
 X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.93,297,1654585200"; 
-   d="scan'208";a="617228280"
+X-IronPort-AV: E=Sophos;i="5.93,298,1654585200"; 
+   d="scan'208";a="683019230"
 Received: from lkp-server02.sh.intel.com (HELO 95dfd251caa2) ([10.239.97.151])
-  by fmsmga007.fm.intel.com with ESMTP; 07 Sep 2022 13:44:29 -0700
+  by fmsmga004.fm.intel.com with ESMTP; 07 Sep 2022 17:03:39 -0700
 Received: from kbuild by 95dfd251caa2 with local (Exim 4.96)
 	(envelope-from <lkp@intel.com>)
-	id 1oW1uO-0006w5-1r;
-	Wed, 07 Sep 2022 20:44:28 +0000
-Date: Thu, 8 Sep 2022 04:43:48 +0800
+	id 1oW518-00077D-1Z;
+	Thu, 08 Sep 2022 00:03:38 +0000
+Date: Thu, 8 Sep 2022 08:03:27 +0800
 From: kernel test robot <lkp@intel.com>
 To: Frank Li <Frank.Li@nxp.com>, maz@kernel.org, tglx@linutronix.de,
 	robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
@@ -43,9 +43,9 @@ Cc: kbuild-all@lists.01.org, linux-kernel@vger.kernel.org,
 	linux-imx@nxp.com, kishon@ti.com, lorenzo.pieralisi@arm.com,
 	ntb@lists.linux.dev, lznuaa@gmail.com, imx@lists.linux.dev,
 	manivannan.sadhasivam@linaro.org
-Subject: Re: [PATCH v9 4/4] PCI: endpoint: Add vNTB MSI support
-Message-ID: <202209080437.cNpaoZXx-lkp@intel.com>
-References: <20220907034856.3101570-5-Frank.Li@nxp.com>
+Subject: Re: [PATCH v9 2/4] irqchip: Add IMX MU MSI controller driver
+Message-ID: <202209080757.hQMfrrfm-lkp@intel.com>
+References: <20220907034856.3101570-3-Frank.Li@nxp.com>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -54,14 +54,14 @@ List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220907034856.3101570-5-Frank.Li@nxp.com>
+In-Reply-To: <20220907034856.3101570-3-Frank.Li@nxp.com>
 
 Hi Frank,
 
-I love your patch! Perhaps something to improve:
+I love your patch! Yet something to improve:
 
-[auto build test WARNING on jonmason-ntb/ntb-next]
-[also build test WARNING on robh/for-next linus/master v6.0-rc4 next-20220907]
+[auto build test ERROR on jonmason-ntb/ntb-next]
+[also build test ERROR on robh/for-next linus/master v6.0-rc4 next-20220907]
 [cannot apply to tip/irq/core]
 [If your patch is applied to the wrong git tree, kindly drop us a note.
 And when submitting patch, we suggest to use '--base' as documented in
@@ -69,98 +69,135 @@ https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
 url:    https://github.com/intel-lab-lkp/linux/commits/Frank-Li/PCI-EP-driver-support-MSI-doorbell-from-host/20220907-115114
 base:   https://github.com/jonmason/ntb ntb-next
-config: loongarch-randconfig-s052-20220906 (https://download.01.org/0day-ci/archive/20220908/202209080437.cNpaoZXx-lkp@intel.com/config)
-compiler: loongarch64-linux-gcc (GCC) 12.1.0
+config: s390-randconfig-s033-20220907 (https://download.01.org/0day-ci/archive/20220908/202209080757.hQMfrrfm-lkp@intel.com/config)
+compiler: s390-linux-gcc (GCC) 12.1.0
 reproduce:
         wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
         chmod +x ~/bin/make.cross
         # apt-get install sparse
         # sparse version: v0.6.4-39-gce1a6720-dirty
-        # https://github.com/intel-lab-lkp/linux/commit/0fe017b7ce1e4748acce80d9ddb81b3cd456adbb
+        # https://github.com/intel-lab-lkp/linux/commit/c1f079e633c10b4f2f1f3c8f52e447d13fda8ddb
         git remote add linux-review https://github.com/intel-lab-lkp/linux
         git fetch --no-tags linux-review Frank-Li/PCI-EP-driver-support-MSI-doorbell-from-host/20220907-115114
-        git checkout 0fe017b7ce1e4748acce80d9ddb81b3cd456adbb
+        git checkout c1f079e633c10b4f2f1f3c8f52e447d13fda8ddb
         # save the config file
         mkdir build_dir && cp config build_dir/.config
-        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-12.1.0 make.cross C=1 CF='-fdiagnostic-prefix -D__CHECK_ENDIAN__' O=build_dir ARCH=loongarch SHELL=/bin/bash
+        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-12.1.0 make.cross C=1 CF='-fdiagnostic-prefix -D__CHECK_ENDIAN__' O=build_dir ARCH=s390 SHELL=/bin/bash
 
 If you fix the issue, kindly add following tag where applicable
 Reported-by: kernel test robot <lkp@intel.com>
 
-sparse warnings: (new ones prefixed by >>)
->> drivers/pci/endpoint/functions/pci-epf-vntb.c:567:25: sparse: sparse: incorrect type in assignment (different address spaces) @@     expected void [noderef] __iomem *[assigned] mw_addr @@     got void * @@
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:567:25: sparse:     expected void [noderef] __iomem *[assigned] mw_addr
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:567:25: sparse:     got void *
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:600:41: sparse: sparse: incorrect type in argument 2 (different address spaces) @@     expected void *addr @@     got void [noderef] __iomem *epf_db @@
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:600:41: sparse:     expected void *addr
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:600:41: sparse:     got void [noderef] __iomem *epf_db
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1206:33: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void [noderef] __iomem *base @@     got struct epf_ntb_ctrl *reg @@
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1206:33: sparse:     expected void [noderef] __iomem *base
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1206:33: sparse:     got struct epf_ntb_ctrl *reg
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1217:33: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void [noderef] __iomem *base @@     got struct epf_ntb_ctrl *reg @@
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1217:33: sparse:     expected void [noderef] __iomem *base
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1217:33: sparse:     got struct epf_ntb_ctrl *reg
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1228:33: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void [noderef] __iomem *base @@     got struct epf_ntb_ctrl *reg @@
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1228:33: sparse:     expected void [noderef] __iomem *base
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1228:33: sparse:     got struct epf_ntb_ctrl *reg
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1240:33: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void [noderef] __iomem *base @@     got struct epf_ntb_ctrl *reg @@
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1240:33: sparse:     expected void [noderef] __iomem *base
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1240:33: sparse:     got struct epf_ntb_ctrl *reg
+All errors (new ones prefixed by >>):
 
-vim +567 drivers/pci/endpoint/functions/pci-epf-vntb.c
+   s390-linux-ld: drivers/irqchip/irq-imx-mu-msi.o: in function `imx_mu_of_init':
+>> drivers/irqchip/irq-imx-mu-msi.c:316: undefined reference to `devm_platform_ioremap_resource_byname'
 
-0fe017b7ce1e47 Frank Li 2022-09-06  536  
-e35f56bb03304a Frank Li 2022-02-22  537  /**
-e35f56bb03304a Frank Li 2022-02-22  538   * epf_ntb_db_bar_init() - Configure Doorbell window BARs
-e35f56bb03304a Frank Li 2022-02-22  539   * @ntb: NTB device that facilitates communication between HOST and vHOST
-e35f56bb03304a Frank Li 2022-02-22  540   */
-e35f56bb03304a Frank Li 2022-02-22  541  static int epf_ntb_db_bar_init(struct epf_ntb *ntb)
-e35f56bb03304a Frank Li 2022-02-22  542  {
-e35f56bb03304a Frank Li 2022-02-22  543  	const struct pci_epc_features *epc_features;
-e35f56bb03304a Frank Li 2022-02-22  544  	u32 align;
-e35f56bb03304a Frank Li 2022-02-22  545  	struct device *dev = &ntb->epf->dev;
-e35f56bb03304a Frank Li 2022-02-22  546  	int ret;
-e35f56bb03304a Frank Li 2022-02-22  547  	struct pci_epf_bar *epf_bar;
-e35f56bb03304a Frank Li 2022-02-22  548  	void __iomem *mw_addr;
-e35f56bb03304a Frank Li 2022-02-22  549  	enum pci_barno barno;
-0fe017b7ce1e47 Frank Li 2022-09-06  550  	size_t size;
-e35f56bb03304a Frank Li 2022-02-22  551  
-e35f56bb03304a Frank Li 2022-02-22  552  	epc_features = pci_epc_get_features(ntb->epf->epc,
-e35f56bb03304a Frank Li 2022-02-22  553  					    ntb->epf->func_no,
-e35f56bb03304a Frank Li 2022-02-22  554  					    ntb->epf->vfunc_no);
-e35f56bb03304a Frank Li 2022-02-22  555  	align = epc_features->align;
-0fe017b7ce1e47 Frank Li 2022-09-06  556  	size = epf_ntb_db_size(ntb);
-e35f56bb03304a Frank Li 2022-02-22  557  
-e35f56bb03304a Frank Li 2022-02-22  558  	barno = ntb->epf_ntb_bar[BAR_DB];
-0fe017b7ce1e47 Frank Li 2022-09-06  559  	epf_bar = &ntb->epf->bar[barno];
-e35f56bb03304a Frank Li 2022-02-22  560  
-0fe017b7ce1e47 Frank Li 2022-09-06  561  	if (ntb->epf_db_phys) {
-0fe017b7ce1e47 Frank Li 2022-09-06  562  		mw_addr = NULL;
-0fe017b7ce1e47 Frank Li 2022-09-06  563  		epf_bar->phys_addr = ntb->epf_db_phys;
-0fe017b7ce1e47 Frank Li 2022-09-06  564  		epf_bar->barno = barno;
-0fe017b7ce1e47 Frank Li 2022-09-06  565  		epf_bar->size = size;
-0fe017b7ce1e47 Frank Li 2022-09-06  566  	} else {
-e35f56bb03304a Frank Li 2022-02-22 @567  		mw_addr = pci_epf_alloc_space(ntb->epf, size, barno, align, 0);
-e35f56bb03304a Frank Li 2022-02-22  568  		if (!mw_addr) {
-0fe017b7ce1e47 Frank Li 2022-09-06  569  			dev_err(dev, "Failed to allocate door bell address\n");
-e35f56bb03304a Frank Li 2022-02-22  570  			return -ENOMEM;
-e35f56bb03304a Frank Li 2022-02-22  571  		}
-0fe017b7ce1e47 Frank Li 2022-09-06  572  	}
-e35f56bb03304a Frank Li 2022-02-22  573  
-e35f56bb03304a Frank Li 2022-02-22  574  	ntb->epf_db = mw_addr;
-e35f56bb03304a Frank Li 2022-02-22  575  
-e35f56bb03304a Frank Li 2022-02-22  576  	ret = pci_epc_set_bar(ntb->epf->epc, ntb->epf->func_no, ntb->epf->vfunc_no, epf_bar);
-e35f56bb03304a Frank Li 2022-02-22  577  	if (ret) {
-e35f56bb03304a Frank Li 2022-02-22  578  		dev_err(dev, "Doorbell BAR set failed\n");
-e35f56bb03304a Frank Li 2022-02-22  579  			goto err_alloc_peer_mem;
-e35f56bb03304a Frank Li 2022-02-22  580  	}
-e35f56bb03304a Frank Li 2022-02-22  581  	return ret;
-e35f56bb03304a Frank Li 2022-02-22  582  
-e35f56bb03304a Frank Li 2022-02-22  583  err_alloc_peer_mem:
-e35f56bb03304a Frank Li 2022-02-22  584  	pci_epc_mem_free_addr(ntb->epf->epc, epf_bar->phys_addr, mw_addr, epf_bar->size);
-e35f56bb03304a Frank Li 2022-02-22  585  	return -1;
-e35f56bb03304a Frank Li 2022-02-22  586  }
-e35f56bb03304a Frank Li 2022-02-22  587  
+
+vim +316 drivers/irqchip/irq-imx-mu-msi.c
+
+   288	
+   289	static int __init imx_mu_of_init(struct device_node *dn,
+   290					 struct device_node *parent,
+   291					 const struct imx_mu_dcfg *cfg
+   292					)
+   293	{
+   294		struct platform_device *pdev = of_find_device_by_node(dn);
+   295		struct device_link *pd_link_a;
+   296		struct device_link *pd_link_b;
+   297		struct imx_mu_msi *msi_data;
+   298		struct resource *res;
+   299		struct device *pd_a;
+   300		struct device *pd_b;
+   301		struct device *dev;
+   302		int ret;
+   303		int irq;
+   304	
+   305		if (!pdev)
+   306			return -ENODEV;
+   307	
+   308		dev = &pdev->dev;
+   309	
+   310		msi_data = devm_kzalloc(&pdev->dev, sizeof(*msi_data), GFP_KERNEL);
+   311		if (!msi_data)
+   312			return -ENOMEM;
+   313	
+   314		msi_data->cfg = cfg;
+   315	
+ > 316		msi_data->regs = devm_platform_ioremap_resource_byname(pdev, "processor-a-side");
+   317		if (IS_ERR(msi_data->regs)) {
+   318			dev_err(&pdev->dev, "failed to initialize 'regs'\n");
+   319			return PTR_ERR(msi_data->regs);
+   320		}
+   321	
+   322		res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "processor-b-side");
+   323		if (!res)
+   324			return -EIO;
+   325	
+   326		msi_data->msiir_addr = res->start + msi_data->cfg->xTR;
+   327	
+   328		irq = platform_get_irq(pdev, 0);
+   329		if (irq <= 0)
+   330			return -ENODEV;
+   331	
+   332		platform_set_drvdata(pdev, msi_data);
+   333	
+   334		msi_data->clk = devm_clk_get(dev, NULL);
+   335		if (IS_ERR(msi_data->clk)) {
+   336			if (PTR_ERR(msi_data->clk) != -ENOENT)
+   337				return PTR_ERR(msi_data->clk);
+   338	
+   339			msi_data->clk = NULL;
+   340		}
+   341	
+   342		pd_a = dev_pm_domain_attach_by_name(dev, "processor-a-side");
+   343		if (IS_ERR(pd_a))
+   344			return PTR_ERR(pd_a);
+   345	
+   346		pd_b = dev_pm_domain_attach_by_name(dev, "processor-b-side");
+   347		if (IS_ERR(pd_b))
+   348			return PTR_ERR(pd_b);
+   349	
+   350		pd_link_a = device_link_add(dev, pd_a,
+   351				DL_FLAG_STATELESS |
+   352				DL_FLAG_PM_RUNTIME |
+   353				DL_FLAG_RPM_ACTIVE);
+   354	
+   355		if (!pd_link_a) {
+   356			dev_err(dev, "Failed to add device_link to mu a.\n");
+   357			goto err_pd_a;
+   358		}
+   359	
+   360		pd_link_b = device_link_add(dev, pd_b,
+   361				DL_FLAG_STATELESS |
+   362				DL_FLAG_PM_RUNTIME |
+   363				DL_FLAG_RPM_ACTIVE);
+   364	
+   365	
+   366		if (!pd_link_b) {
+   367			dev_err(dev, "Failed to add device_link to mu a.\n");
+   368			goto err_pd_b;
+   369		}
+   370	
+   371		ret = imx_mu_msi_domains_init(msi_data, dev);
+   372		if (ret)
+   373			goto err_dm_init;
+   374	
+   375		irq_set_chained_handler_and_data(irq,
+   376						 imx_mu_msi_irq_handler,
+   377						 msi_data);
+   378	
+   379		pm_runtime_enable(dev);
+   380	
+   381		return 0;
+   382	
+   383	err_dm_init:
+   384		device_link_remove(dev,	pd_b);
+   385	err_pd_b:
+   386		device_link_remove(dev, pd_a);
+   387	err_pd_a:
+   388		return -EINVAL;
+   389	}
+   390	
 
 -- 
 0-DAY CI Kernel Test Service
