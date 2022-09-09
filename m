@@ -1,61 +1,124 @@
-Received: from mail-ot1-f43.google.com (mail-ot1-f43.google.com [209.85.210.43])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3A456622;
-	Fri,  9 Sep 2022 01:43:49 +0000 (UTC)
-Received: by mail-ot1-f43.google.com with SMTP id h9-20020a9d5549000000b0063727299bb4so210904oti.9;
-        Thu, 08 Sep 2022 18:43:49 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date;
-        bh=kgAGirvJfdV3oB1r2QFilMXE0qgu9JtE1NsMjf6XFLY=;
-        b=OP8X26apmUDOOf1orSteUWORoM+yTIuCB5vRd/484q0vaNqOWDkIUwkk210fu0IeSO
-         XQ5upJCfCchuQ9YRmREQgERZGxV/sY57aKeIdP3E9UXX09SKjsyqUGuXO4sa7/WvKQP+
-         IHpdcv1WqBlhmeChx0k6uDJwQuKy1Fzk5CR3ccMfwxRwdz+roFYvHDuptsHF8V4fNf+/
-         izkuGUiC+IYYfJjeXiSiamHh/7nRxOOD1QBcGCN62XfnsDSDLFBTmgvi/Ax1YtG/cPV5
-         VrezUKq23lPXOzdBo7xI2RUjGvYbonPh2atoHIBJOV444GF8Khk7dvU2V9zafdzmBIod
-         bSOA==
-X-Gm-Message-State: ACgBeo1ziCfqPkyouvvAbAiT/34GQi3VOVhpac4m32SwhYP4Tg64DQT0
-	3X5wTd6SZ26v7KVxUIDd0Q==
-X-Google-Smtp-Source: AA6agR5i2t4iZ8enK9UJxaM3KxuW+PQOhJgW4tqlPDGLyRN8vJfn+FxaRNRJx75tuZ0LmnK4pAh3Gw==
-X-Received: by 2002:a05:6830:1bfa:b0:637:1491:2ac7 with SMTP id k26-20020a0568301bfa00b0063714912ac7mr4569354otb.9.1662687828152;
-        Thu, 08 Sep 2022 18:43:48 -0700 (PDT)
-Received: from robh.at.kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id e7-20020a056870c34700b0012696ac05d5sm483842oak.19.2022.09.08.18.43.46
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 08 Sep 2022 18:43:47 -0700 (PDT)
-Received: (nullmailer pid 3745755 invoked by uid 1000);
-	Fri, 09 Sep 2022 01:43:46 -0000
-Date: Thu, 8 Sep 2022 20:43:46 -0500
-From: Rob Herring <robh@kernel.org>
-To: Frank Li <Frank.Li@nxp.com>
-Cc: lorenzo.pieralisi@arm.com, linux-pci@vger.kernel.org, maz@kernel.org, ntb@lists.linux.dev, robh+dt@kernel.org, kishon@ti.com, imx@lists.linux.dev, bhelgaas@google.com, festevam@gmail.com, peng.fan@nxp.com, jdmason@kudzu.us, manivannan.sadhasivam@linaro.org, kw@linux.com, aisheng.dong@nxp.com, kernel@pengutronix.de, shawnguo@kernel.org, linux-imx@nxp.com, krzysztof.kozlowski+dt@linaro.org, s.hauer@pengutronix.de, devicetree@vger.kernel.org, tglx@linutronix.de, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, lznuaa@gmail.com
-Subject: Re: [PATCH v9 3/4] dt-bindings: irqchip: imx mu work as msi
- controller
-Message-ID: <20220909014346.GA3745691-robh@kernel.org>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A6704808;
+	Fri,  9 Sep 2022 12:07:58 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 49ED9C433D6;
+	Fri,  9 Sep 2022 12:07:58 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1662725278;
+	bh=Lz2P15vcZ1ZdRM5cHrVBvarPsmfwgCGjAbApIl9rp5A=;
+	h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
+	b=CCeG8HorK/8vU9xByifGY+FGtLVW8gwjYZY3c3WO1c03uSgOJ5c7qF0/eB61w5nmq
+	 OQkvU8vMK8tXpNVzi3imL0xTfNainAlCIgs/vEXusT1HDA6sXZDZJaeY9mhydG+ro9
+	 6kOeARHRaowQglhyOQe8YPwmj5d/mybpRX6r1IvJwL6x8AHtF5LSVvAL/XAMK5q/+G
+	 rq4Wld9gqMsi2I8MMgRgjQUQp1icUqKHWoprjqmVCcgjULEKoRS+mf2ViN/NXd+PWJ
+	 iYOn1skbdcD+tVuKYoMleE2RDOaCPqjoFRVaqhs6HGwc+iuHbd2PPdllOGffG+t9mx
+	 cg8mW+kfIi3cg==
+Received: from sofa.misterjones.org ([185.219.108.64] helo=wait-a-minute.misterjones.org)
+	by disco-boy.misterjones.org with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+	(Exim 4.95)
+	(envelope-from <maz@kernel.org>)
+	id 1oWcnc-009AnD-1t;
+	Fri, 09 Sep 2022 13:07:56 +0100
+Date: Fri, 09 Sep 2022 13:07:55 +0100
+Message-ID: <87edwkrbs4.wl-maz@kernel.org>
+From: Marc Zyngier <maz@kernel.org>
+To: Frank Li <frank.li@nxp.com>
+Cc: "tglx@linutronix.de" <tglx@linutronix.de>,
+	"robh+dt@kernel.org"
+	<robh+dt@kernel.org>,
+	"krzysztof.kozlowski+dt@linaro.org"
+	<krzysztof.kozlowski+dt@linaro.org>,
+	"shawnguo@kernel.org"
+	<shawnguo@kernel.org>,
+	"s.hauer@pengutronix.de" <s.hauer@pengutronix.de>,
+	"kw@linux.com" <kw@linux.com>,
+	"bhelgaas@google.com" <bhelgaas@google.com>,
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+	"devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+	"linux-arm-kernel@lists.infradead.org"
+	<linux-arm-kernel@lists.infradead.org>,
+	"linux-pci@vger.kernel.org"
+	<linux-pci@vger.kernel.org>,
+	Peng Fan <peng.fan@nxp.com>,
+	Aisheng Dong
+	<aisheng.dong@nxp.com>,
+	"jdmason@kudzu.us" <jdmason@kudzu.us>,
+	"kernel@pengutronix.de" <kernel@pengutronix.de>,
+	"festevam@gmail.com"
+	<festevam@gmail.com>,
+	dl-linux-imx <linux-imx@nxp.com>,
+	"kishon@ti.com"
+	<kishon@ti.com>,
+	"lorenzo.pieralisi@arm.com" <lorenzo.pieralisi@arm.com>,
+	"ntb@lists.linux.dev" <ntb@lists.linux.dev>,
+	"lznuaa@gmail.com"
+	<lznuaa@gmail.com>,
+	"imx@lists.linux.dev" <imx@lists.linux.dev>,
+	"manivannan.sadhasivam@linaro.org" <manivannan.sadhasivam@linaro.org>
+Subject: Re: [EXT] Re: [PATCH v9 2/4] irqchip: Add IMX MU MSI controller driver
+In-Reply-To: <AM9PR04MB8793CE5AAAB281CE628845AC88409@AM9PR04MB8793.eurprd04.prod.outlook.com>
 References: <20220907034856.3101570-1-Frank.Li@nxp.com>
- <20220907034856.3101570-4-Frank.Li@nxp.com>
+	<20220907034856.3101570-3-Frank.Li@nxp.com>
+	<87fsh2qpq4.wl-maz@kernel.org>
+	<AM9PR04MB879338D6D4B55A74CD002E6D88409@AM9PR04MB8793.eurprd04.prod.outlook.com>
+	<877d2dvs0d.wl-maz@kernel.org>
+	<AM9PR04MB8793CE5AAAB281CE628845AC88409@AM9PR04MB8793.eurprd04.prod.outlook.com>
+User-Agent: Wanderlust/2.15.9 (Almost Unreal) SEMI-EPG/1.14.7 (Harue)
+ FLIM-LB/1.14.9 (=?UTF-8?B?R29qxY0=?=) APEL-LB/10.8 EasyPG/1.0.0 Emacs/27.1
+ (x86_64-pc-linux-gnu) MULE/6.0 (HANACHIRUSATO)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220907034856.3101570-4-Frank.Li@nxp.com>
+MIME-Version: 1.0 (generated by SEMI-EPG 1.14.7 - "Harue")
+Content-Type: text/plain; charset=US-ASCII
+X-SA-Exim-Connect-IP: 185.219.108.64
+X-SA-Exim-Rcpt-To: frank.li@nxp.com, tglx@linutronix.de, robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org, shawnguo@kernel.org, s.hauer@pengutronix.de, kw@linux.com, bhelgaas@google.com, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-pci@vger.kernel.org, peng.fan@nxp.com, aisheng.dong@nxp.com, jdmason@kudzu.us, kernel@pengutronix.de, festevam@gmail.com, linux-imx@nxp.com, kishon@ti.com, lorenzo.pieralisi@arm.com, ntb@lists.linux.dev, lznuaa@gmail.com, imx@lists.linux.dev, manivannan.sadhasivam@linaro.org
+X-SA-Exim-Mail-From: maz@kernel.org
+X-SA-Exim-Scanned: No (on disco-boy.misterjones.org); SAEximRunCond expanded to false
 
-On Tue, 06 Sep 2022 22:48:55 -0500, Frank Li wrote:
-> I.MX mu support generate irq by write a register. Provide msi controller
-> support so other driver such as PCI EP can use it by standard msi
-> interface as doorbell.
-> 
-> Signed-off-by: Frank Li <Frank.Li@nxp.com>
-> ---
->  .../interrupt-controller/fsl,mu-msi.yaml      | 99 +++++++++++++++++++
->  1 file changed, 99 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/interrupt-controller/fsl,mu-msi.yaml
-> 
+On Thu, 08 Sep 2022 16:35:20 +0100,
+Frank Li <frank.li@nxp.com> wrote:
 
-Reviewed-by: Rob Herring <robh@kernel.org>
+> > > > > +struct imx_mu_msi {
+> > > > > +     spinlock_t                      lock;
+> > > > > +     raw_spinlock_t                  reglock;
+> > > >
+> > > > Why two locks? Isn't one enough to protect both MSI allocation (which
+> > > > happens once in a blue moon) and register access?
+> > >
+> > > [Frank Li] Previously your comment, ask me to use raw_spinlock for
+> > > read\write register access.  I don't think raw_spinlock is good for
+> > > MSI allocation.
+> > 
+> > Why wouldn't it be good enough? I'd really like to know.[Frank Li] '
+> 
+> [Frank Li] According to my understand, raw_spinlock skip some lockdep
+> /debug feature to get better performance, which should be used when
+> Frequently call, such as irq handle\polling thread.
+
+I'm afraid you are terribly misguided. They both have the same debug
+features because they are both using the same core implementation, and
+the only difference is whether this is preemptible for RT purposes or
+not.
+
+> Spinlock have DEBUG feature to check wrong use lock.  Allocate MSI generally
+> only is call once when driver probe.
+
+Again, you should really read the code and the documentation and stop
+making things up.
+
+> 
+> The basic principle,  lock should be used only when necessary.  Access reg and
+> Allocate msi is totally independence events.
+
+Independent events that do not occur simultaneously. So no harm in
+sharing the same lock.
+
+	M.
+
+-- 
+Without deviation from the norm, progress is not possible.
