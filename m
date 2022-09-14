@@ -1,35 +1,51 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mga09.intel.com (mga09.intel.com [134.134.136.24])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF6C23C3F;
-	Tue, 13 Sep 2022 22:19:18 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 51E8FC433C1;
-	Tue, 13 Sep 2022 22:19:18 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1663107558;
-	bh=vOM7sqZItl/trS+7jw/NfA7mCPUKtLKs8p8juFEz1LQ=;
-	h=Date:From:To:Cc:Subject:In-Reply-To:From;
-	b=PqY2sMOHIFT9Hb81j94J0rf9pS4s4sfT4NMscI+2mfmuako+a2b4cqOx8dG/wawnr
-	 Jh5hfF3unFix49Lcr+LmcEVF6JQ+zzbUJj/toSoRvoTw/5VVUpbrR+xLpAu3fZauyk
-	 Rx8/zEI88uPJ/xbsGWJTH2tyyZ7PzfNw0miGbHeXfoVKCy50rqL7VeYow23AQUEnq4
-	 n/hKChC9+JbfnKuz5cl04SNOvomK8erZlvC948pmx9bnHood+2BbE8a07mJ5/Ue7fe
-	 LCJW18jHOZcHWunYifNqxyn1pYn/oFCUMLwPNzLJF4XSCJR4oIHlec/buR4H9G26Lo
-	 cO2ze6p4tuRDw==
-Date: Tue, 13 Sep 2022 17:19:16 -0500
-From: Bjorn Helgaas <helgaas@kernel.org>
-To: Frank Li <Frank.Li@nxp.com>
-Cc: maz@kernel.org, tglx@linutronix.de, robh+dt@kernel.org,
-	krzysztof.kozlowski+dt@linaro.org, shawnguo@kernel.org,
-	s.hauer@pengutronix.de, kw@linux.com, bhelgaas@google.com,
-	linux-kernel@vger.kernel.org, devicetree@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org, linux-pci@vger.kernel.org,
-	peng.fan@nxp.com, aisheng.dong@nxp.com, jdmason@kudzu.us,
-	kernel@pengutronix.de, festevam@gmail.com, linux-imx@nxp.com,
-	kishon@ti.com, lorenzo.pieralisi@arm.com, ntb@lists.linux.dev,
-	lznuaa@gmail.com, imx@lists.linux.dev,
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 978983D62;
+	Wed, 14 Sep 2022 15:26:18 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1663169178; x=1694705178;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=w2AVshTSG88TxCtziOS+qzrWEimtM+9ls56BMEl28zk=;
+  b=kFD6pmFQapaAUZPYq1My+KTn2bhSpGFL/4E3X3rml+1//+/S/Rrw6XYX
+   G9hJNg94Rg5G1tdoLv4AkhNlfIAhy0MQ3db6jwvONl2u6pCltG+L3cPj9
+   0Wc3xhFfiWiZqt1tJwBZjg0goXI3QAwgnNhrfF8tWLCdybx/YP4yJFYk1
+   1cw7xkxW1AvQNXgdbNRM2IX5nvhUOb4WvdlE0yfnSRVr7cPFAo0oyv2eY
+   YLMSbGe1GvgILSb4iEaGKmPZVTko+GVs6ivTuxQ0W50p2AEPujR8VJeZc
+   iJ3VfxHGtzUv9H2rs6iPp5ZqG4XA/Vb2N+kp9xSreQkjvf78MD1sOAT9s
+   Q==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10470"; a="299269959"
+X-IronPort-AV: E=Sophos;i="5.93,315,1654585200"; 
+   d="scan'208";a="299269959"
+Received: from orsmga004.jf.intel.com ([10.7.209.38])
+  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Sep 2022 08:26:18 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.93,315,1654585200"; 
+   d="scan'208";a="742592762"
+Received: from lkp-server01.sh.intel.com (HELO d6e6b7c4e5a2) ([10.239.97.150])
+  by orsmga004.jf.intel.com with ESMTP; 14 Sep 2022 08:26:11 -0700
+Received: from kbuild by d6e6b7c4e5a2 with local (Exim 4.96)
+	(envelope-from <lkp@intel.com>)
+	id 1oYUHD-0000Km-02;
+	Wed, 14 Sep 2022 15:26:11 +0000
+Date: Wed, 14 Sep 2022 23:25:27 +0800
+From: kernel test robot <lkp@intel.com>
+To: Frank Li <Frank.Li@nxp.com>, maz@kernel.org, tglx@linutronix.de,
+	robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
+	shawnguo@kernel.org, s.hauer@pengutronix.de, kw@linux.com,
+	bhelgaas@google.com
+Cc: kbuild-all@lists.01.org, linux-kernel@vger.kernel.org,
+	devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+	linux-pci@vger.kernel.org, peng.fan@nxp.com, aisheng.dong@nxp.com,
+	jdmason@kudzu.us, kernel@pengutronix.de, festevam@gmail.com,
+	linux-imx@nxp.com, kishon@ti.com, lorenzo.pieralisi@arm.com,
+	ntb@lists.linux.dev, lznuaa@gmail.com, imx@lists.linux.dev,
 	manivannan.sadhasivam@linaro.org
 Subject: Re: [PATCH v10 5/6] PCI: endpoint: makeup pci-epf-vntb.c
-Message-ID: <20220913221916.GA627631@bhelgaas>
+Message-ID: <202209142334.YTRtjuFD-lkp@intel.com>
+References: <20220913210957.3493826-6-Frank.Li@nxp.com>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -40,57 +56,149 @@ Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 In-Reply-To: <20220913210957.3493826-6-Frank.Li@nxp.com>
 
-In subject, capitalize and change "makeup" to "Clean up":
+Hi Frank,
 
-  PCI: endpoint: pci-epf-vntb: Clean up
+I love your patch! Perhaps something to improve:
 
-On Tue, Sep 13, 2022 at 04:09:56PM -0500, Frank Li wrote:
-> Remove unused field: epf_db_phy.
-> Remove __iomem before epf_db.
-> Remove dupicate check if (readl(ntb->epf_db + i * 4)).
-> Using readl_relaxed instead of readl.
-> Using marco ENTRY_SIZE instead of number 4 at all place.
+[auto build test WARNING on jonmason-ntb/ntb-next]
+[also build test WARNING on driver-core/driver-core-testing linus/master v6.0-rc5 next-20220914]
+[cannot apply to tip/irq/core]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
-Add "()" after function names.
+url:    https://github.com/intel-lab-lkp/linux/commits/Frank-Li/platform-msi-export-symbol-platform_msi_create_irq_domain/20220914-060955
+base:   https://github.com/jonmason/ntb ntb-next
+config: ia64-randconfig-s051-20220914 (https://download.01.org/0day-ci/archive/20220914/202209142334.YTRtjuFD-lkp@intel.com/config)
+compiler: ia64-linux-gcc (GCC) 12.1.0
+reproduce:
+        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
+        chmod +x ~/bin/make.cross
+        # apt-get install sparse
+        # sparse version: v0.6.4-39-gce1a6720-dirty
+        # https://github.com/intel-lab-lkp/linux/commit/c0b811e4bf3a50a612ed143d284880e09790eff5
+        git remote add linux-review https://github.com/intel-lab-lkp/linux
+        git fetch --no-tags linux-review Frank-Li/platform-msi-export-symbol-platform_msi_create_irq_domain/20220914-060955
+        git checkout c0b811e4bf3a50a612ed143d284880e09790eff5
+        # save the config file
+        mkdir build_dir && cp config build_dir/.config
+        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-12.1.0 make.cross C=1 CF='-fdiagnostic-prefix -D__CHECK_ENDIAN__' O=build_dir ARCH=ia64 SHELL=/bin/bash drivers/pci/endpoint/functions/
 
-s/marco/macro/
+If you fix the issue, kindly add following tag where applicable
+Reported-by: kernel test robot <lkp@intel.com>
 
-It would be nice if "ENTRY_SIZE" had a hint about what kind of entry
-we're talking about.
+sparse warnings: (new ones prefixed by >>)
+>> drivers/pci/endpoint/functions/pci-epf-vntb.c:258:47: sparse: sparse: incorrect type in argument 1 (different address spaces) @@     expected void const volatile [noderef] __iomem *addr @@     got void * @@
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:258:47: sparse:     expected void const volatile [noderef] __iomem *addr
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:258:47: sparse:     got void *
+>> drivers/pci/endpoint/functions/pci-epf-vntb.c:260:47: sparse: sparse: incorrect type in argument 2 (different address spaces) @@     expected void volatile [noderef] __iomem *addr @@     got void * @@
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:260:47: sparse:     expected void volatile [noderef] __iomem *addr
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:260:47: sparse:     got void *
+>> drivers/pci/endpoint/functions/pci-epf-vntb.c:560:66: sparse: sparse: incorrect type in argument 3 (different address spaces) @@     expected void [noderef] __iomem *virt_addr @@     got void *[assigned] mw_addr @@
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:560:66: sparse:     expected void [noderef] __iomem *virt_addr
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:560:66: sparse:     got void *[assigned] mw_addr
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:1106:33: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void [noderef] __iomem *base @@     got struct epf_ntb_ctrl *reg @@
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:1106:33: sparse:     expected void [noderef] __iomem *base
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:1106:33: sparse:     got struct epf_ntb_ctrl *reg
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:1117:33: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void [noderef] __iomem *base @@     got struct epf_ntb_ctrl *reg @@
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:1117:33: sparse:     expected void [noderef] __iomem *base
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:1117:33: sparse:     got struct epf_ntb_ctrl *reg
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:1128:33: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void [noderef] __iomem *base @@     got struct epf_ntb_ctrl *reg @@
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:1128:33: sparse:     expected void [noderef] __iomem *base
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:1128:33: sparse:     got struct epf_ntb_ctrl *reg
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:1140:33: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void [noderef] __iomem *base @@     got struct epf_ntb_ctrl *reg @@
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:1140:33: sparse:     expected void [noderef] __iomem *base
+   drivers/pci/endpoint/functions/pci-epf-vntb.c:1140:33: sparse:     got struct epf_ntb_ctrl *reg
+   drivers/pci/endpoint/functions/pci-epf-vntb.c: note: in included file (through arch/ia64/include/asm/io.h, include/linux/io.h):
+   include/asm-generic/io.h:335:15: sparse: sparse: cast to restricted __le32
 
-Since this is a collection of random cleanups, I noticed a typo in
-epf_ntb_configure_interrupt() kernel-doc: s/capaiblity/capability/
+vim +258 drivers/pci/endpoint/functions/pci-epf-vntb.c
 
-The struct epf_ntb_ctrl definition is also whitespace-damaged.  The
-members of struct epf_ntb_ctrl and struct epf_ntb should follow the
-same indentation style.  Some members of struct epf_ntb_ctrl are
-indented with a tab, others with space.  Either make them all tabs and
-indent struct epf_ntb similarly, or indent the struct epf_ntb_ctrl
-members with a single space.
+   236	
+   237	/**
+   238	 * epf_ntb_cmd_handler() - Handle commands provided by the NTB Host
+   239	 * @work: work_struct for the epf_ntb_epc
+   240	 *
+   241	 * Workqueue function that gets invoked for the two epf_ntb_epc
+   242	 * periodically (once every 5ms) to see if it has received any commands
+   243	 * from NTB host. The host can send commands to configure doorbell or
+   244	 * configure memory window or to update link status.
+   245	 */
+   246	static void epf_ntb_cmd_handler(struct work_struct *work)
+   247	{
+   248		struct epf_ntb_ctrl *ctrl;
+   249		u32 command, argument;
+   250		struct epf_ntb *ntb;
+   251		struct device *dev;
+   252		int ret;
+   253		int i;
+   254	
+   255		ntb = container_of(work, struct epf_ntb, cmd_handler.work);
+   256	
+   257		for (i = 1; i < ntb->db_count; i++) {
+ > 258			if (readl_relaxed(ntb->epf_db + i * ENTRY_SIZE)) {
+   259				ntb_db_event(&ntb->ntb, i);
+ > 260				writel(0, ntb->epf_db + i * ENTRY_SIZE);
+   261			}
+   262		}
+   263	
+   264		ctrl = ntb->reg;
+   265		command = ctrl->command;
+   266		if (!command)
+   267			goto reset_handler;
+   268		argument = ctrl->argument;
+   269	
+   270		ctrl->command = 0;
+   271		ctrl->argument = 0;
+   272	
+   273		ctrl = ntb->reg;
+   274		dev = &ntb->epf->dev;
+   275	
+   276		switch (command) {
+   277		case COMMAND_CONFIGURE_DOORBELL:
+   278			ctrl->command_status = COMMAND_STATUS_OK;
+   279			break;
+   280		case COMMAND_TEARDOWN_DOORBELL:
+   281			ctrl->command_status = COMMAND_STATUS_OK;
+   282			break;
+   283		case COMMAND_CONFIGURE_MW:
+   284			ret = epf_ntb_configure_mw(ntb, argument);
+   285			if (ret < 0)
+   286				ctrl->command_status = COMMAND_STATUS_ERROR;
+   287			else
+   288				ctrl->command_status = COMMAND_STATUS_OK;
+   289			break;
+   290		case COMMAND_TEARDOWN_MW:
+   291			epf_ntb_teardown_mw(ntb, argument);
+   292			ctrl->command_status = COMMAND_STATUS_OK;
+   293			break;
+   294		case COMMAND_LINK_UP:
+   295			ntb->linkup = true;
+   296			ret = epf_ntb_link_up(ntb, true);
+   297			if (ret < 0)
+   298				ctrl->command_status = COMMAND_STATUS_ERROR;
+   299			else
+   300				ctrl->command_status = COMMAND_STATUS_OK;
+   301			goto reset_handler;
+   302		case COMMAND_LINK_DOWN:
+   303			ntb->linkup = false;
+   304			ret = epf_ntb_link_up(ntb, false);
+   305			if (ret < 0)
+   306				ctrl->command_status = COMMAND_STATUS_ERROR;
+   307			else
+   308				ctrl->command_status = COMMAND_STATUS_OK;
+   309			break;
+   310		default:
+   311			dev_err(dev, "UNKNOWN command: %d\n", command);
+   312			break;
+   313		}
+   314	
+   315	reset_handler:
+   316		queue_delayed_work(kpcintb_workqueue, &ntb->cmd_handler,
+   317				   msecs_to_jiffies(5));
+   318	}
+   319	
 
-The comments in the file have a whole collection of ways to spell
-vhost: Virtual Host, VHOST, VHost, vHOST, vhost.  Make them all the
-same, please.  You can use "Virtual Host (VHOST)" or whatever the
-first time if you want to use the short version later.
-
-Same for host/HOST/etc.  I don't want to read things like this:
-
-  @ntb: NTB device that facilitates communication between HOST and vHOST2
-
-  Wrapper to initialize a particular EPC interface and start the
-  workqueue to check for commands from host.
-
-and wonder whether "host" is supposed to be the same as "HOST".  Also,
-why does that say "vHOST*2*"?
-
-There are several instances of "HOST1" and "HOST2" (and "vHOST2").
-Should those appear somewhere in the diagram at the top of the file?
-
-The diagram starts with "/**" which means it's kernel-doc, but the
-diagram is not kernel-doc.  Please run this:
-
-  scripts/kernel-doc -v -none drivers/pci/endpoint/functions/pci-epf-vntb.c
-
-and fix all the warnings.
-
-Bjorn
+-- 
+0-DAY CI Kernel Test Service
+https://01.org/lkp
