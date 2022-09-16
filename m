@@ -1,204 +1,99 @@
-Received: from mga09.intel.com (mga09.intel.com [134.134.136.24])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pj1-f54.google.com (mail-pj1-f54.google.com [209.85.216.54])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 978983D62;
-	Wed, 14 Sep 2022 15:26:18 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1663169178; x=1694705178;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=w2AVshTSG88TxCtziOS+qzrWEimtM+9ls56BMEl28zk=;
-  b=kFD6pmFQapaAUZPYq1My+KTn2bhSpGFL/4E3X3rml+1//+/S/Rrw6XYX
-   G9hJNg94Rg5G1tdoLv4AkhNlfIAhy0MQ3db6jwvONl2u6pCltG+L3cPj9
-   0Wc3xhFfiWiZqt1tJwBZjg0goXI3QAwgnNhrfF8tWLCdybx/YP4yJFYk1
-   1cw7xkxW1AvQNXgdbNRM2IX5nvhUOb4WvdlE0yfnSRVr7cPFAo0oyv2eY
-   YLMSbGe1GvgILSb4iEaGKmPZVTko+GVs6ivTuxQ0W50p2AEPujR8VJeZc
-   iJ3VfxHGtzUv9H2rs6iPp5ZqG4XA/Vb2N+kp9xSreQkjvf78MD1sOAT9s
-   Q==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10470"; a="299269959"
-X-IronPort-AV: E=Sophos;i="5.93,315,1654585200"; 
-   d="scan'208";a="299269959"
-Received: from orsmga004.jf.intel.com ([10.7.209.38])
-  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Sep 2022 08:26:18 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.93,315,1654585200"; 
-   d="scan'208";a="742592762"
-Received: from lkp-server01.sh.intel.com (HELO d6e6b7c4e5a2) ([10.239.97.150])
-  by orsmga004.jf.intel.com with ESMTP; 14 Sep 2022 08:26:11 -0700
-Received: from kbuild by d6e6b7c4e5a2 with local (Exim 4.96)
-	(envelope-from <lkp@intel.com>)
-	id 1oYUHD-0000Km-02;
-	Wed, 14 Sep 2022 15:26:11 +0000
-Date: Wed, 14 Sep 2022 23:25:27 +0800
-From: kernel test robot <lkp@intel.com>
-To: Frank Li <Frank.Li@nxp.com>, maz@kernel.org, tglx@linutronix.de,
-	robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-	shawnguo@kernel.org, s.hauer@pengutronix.de, kw@linux.com,
-	bhelgaas@google.com
-Cc: kbuild-all@lists.01.org, linux-kernel@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-	linux-pci@vger.kernel.org, peng.fan@nxp.com, aisheng.dong@nxp.com,
-	jdmason@kudzu.us, kernel@pengutronix.de, festevam@gmail.com,
-	linux-imx@nxp.com, kishon@ti.com, lorenzo.pieralisi@arm.com,
-	ntb@lists.linux.dev, lznuaa@gmail.com, imx@lists.linux.dev,
-	manivannan.sadhasivam@linaro.org
-Subject: Re: [PATCH v10 5/6] PCI: endpoint: makeup pci-epf-vntb.c
-Message-ID: <202209142334.YTRtjuFD-lkp@intel.com>
-References: <20220913210957.3493826-6-Frank.Li@nxp.com>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 328302C80
+	for <ntb@lists.linux.dev>; Fri, 16 Sep 2022 07:57:24 +0000 (UTC)
+Received: by mail-pj1-f54.google.com with SMTP id q3so20271877pjg.3
+        for <ntb@lists.linux.dev>; Fri, 16 Sep 2022 00:57:24 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=igel-co-jp.20210112.gappssmtp.com; s=20210112;
+        h=message-id:date:subject:cc:to:from:from:to:cc:subject:date;
+        bh=YuvBuqEBRJCl7zorVVAVVlmcoiWTc8c8OVPLn4Ys5UE=;
+        b=P6dmFhRycQyiwrMOwJkNsZ/BBg8kqPR9AYtgGpqG0fCqzoY37IK1RLuYdcNjzUZ1mS
+         maZaszqH8MsEkW3jg90SoSs73SkpUEg+y3d4NSnzq7lQCueWN2urDuMwAVA7bGzWLhYT
+         PqzvuNNlUFQ+SDGFk1PcrLvcMeaBug8oOl71yI4aU/VWrW1dQ3CvRFWYz4E759KusM4H
+         WMwJO2pJg7ZvEnclA/1addscjrgWNb1Vllmh5/yzQ8XnhG99etnim1ZPgJEHNSgu5dQt
+         rzke/AU2JFdSkBOLUm2YBUtky6Ipj44Iv/QhlikY0SDtDwUosMBbhndm0lJl2T26sx4s
+         54Cg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date;
+        bh=YuvBuqEBRJCl7zorVVAVVlmcoiWTc8c8OVPLn4Ys5UE=;
+        b=5Z5ZBqT+q6AU7fmstQ61sflqJmCpLUOFMO8nPcTlgtS3bXpeTU6DWklJRU5bZHBDg1
+         g79mRixqZsoqZtHMFlINmaJoeAHJBrNg7BGi4q20kVFsZw4+5SK32hlU4djRqg9CnDb2
+         CC/QxtWn+N3WZyv5DQs7wPv9Yc/awV4WJdWeTME+dPD/1mIprQE2iHymbGKqlqbMAFG1
+         gNL3Juu6CmrSzNGN1U0n8P5i0QWQ/wXt5JHcbFiwx7NFyOkEanywNKkNBqj0ehH0qHIK
+         HAJP7hE/+CBN6vjYHHbSbv2c1EHSrXVaBKLUBCqrPUqIExnFKs3VakYiadaoLa2eagIl
+         GN1A==
+X-Gm-Message-State: ACrzQf2vfXebaUmuRe8iaMJ2M6tH8AlOKN5XBzApNICM+XZlYywmcsb1
+	eezQCudPR/IWfra7gpAClzujLQ==
+X-Google-Smtp-Source: AMsMyM6luTj24P0sD683SpaOotadfC+IV3ZQEMuBb4fBCtTB5Ow6HhSJK2rfhpdTg/TKXxasRvWXFA==
+X-Received: by 2002:a17:902:f612:b0:172:cbb0:9b4f with SMTP id n18-20020a170902f61200b00172cbb09b4fmr3449108plg.142.1663315043503;
+        Fri, 16 Sep 2022 00:57:23 -0700 (PDT)
+Received: from tyrell.hq.igel.co.jp (napt.igel.co.jp. [219.106.231.132])
+        by smtp.gmail.com with ESMTPSA id y28-20020aa79e1c000000b00543236e83e6sm11319867pfq.22.2022.09.16.00.57.20
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 16 Sep 2022 00:57:22 -0700 (PDT)
+From: Shunsuke Mie <mie@igel.co.jp>
+To: Jon Mason <jdmason@kudzu.us>
+Cc: Dave Jiang <dave.jiang@intel.com>,
+	Allen Hubbe <allenbh@gmail.com>,
+	Kishon Vijay Abraham I <kishon@ti.com>,
+	Lorenzo Pieralisi <lpieralisi@kernel.org>,
+	=?UTF-8?q?Krzysztof=20Wilczy=C5=84ski?= <kw@linux.com>,
+	Bjorn Helgaas <bhelgaas@google.com>,
+	ntb@lists.linux.dev,
+	linux-pci@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Shunsuke Mie <mie@igel.co.jp>
+Subject: [PATCH] PCI: endpoint: pci-epf-{,v}ntb: fix a check for no epc alignment constraint
+Date: Fri, 16 Sep 2022 16:56:51 +0900
+Message-Id: <20220916075651.64957-1-mie@igel.co.jp>
+X-Mailer: git-send-email 2.17.1
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220913210957.3493826-6-Frank.Li@nxp.com>
 
-Hi Frank,
+Some pci endpoint controllers has not alignment constraint, and the
+epc_features->align becomes 0. In this case, IS_ALIGNED() in
+epf_ntb_config_spad_bar_alloc() doesn't work well. So this patch adds the 0
+checking before the IS_ALIGNED().
 
-I love your patch! Perhaps something to improve:
+Signed-off-by: Shunsuke Mie <mie@igel.co.jp>
+---
+ drivers/pci/endpoint/functions/pci-epf-ntb.c  | 2 +-
+ drivers/pci/endpoint/functions/pci-epf-vntb.c | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
-[auto build test WARNING on jonmason-ntb/ntb-next]
-[also build test WARNING on driver-core/driver-core-testing linus/master v6.0-rc5 next-20220914]
-[cannot apply to tip/irq/core]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
-
-url:    https://github.com/intel-lab-lkp/linux/commits/Frank-Li/platform-msi-export-symbol-platform_msi_create_irq_domain/20220914-060955
-base:   https://github.com/jonmason/ntb ntb-next
-config: ia64-randconfig-s051-20220914 (https://download.01.org/0day-ci/archive/20220914/202209142334.YTRtjuFD-lkp@intel.com/config)
-compiler: ia64-linux-gcc (GCC) 12.1.0
-reproduce:
-        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
-        chmod +x ~/bin/make.cross
-        # apt-get install sparse
-        # sparse version: v0.6.4-39-gce1a6720-dirty
-        # https://github.com/intel-lab-lkp/linux/commit/c0b811e4bf3a50a612ed143d284880e09790eff5
-        git remote add linux-review https://github.com/intel-lab-lkp/linux
-        git fetch --no-tags linux-review Frank-Li/platform-msi-export-symbol-platform_msi_create_irq_domain/20220914-060955
-        git checkout c0b811e4bf3a50a612ed143d284880e09790eff5
-        # save the config file
-        mkdir build_dir && cp config build_dir/.config
-        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-12.1.0 make.cross C=1 CF='-fdiagnostic-prefix -D__CHECK_ENDIAN__' O=build_dir ARCH=ia64 SHELL=/bin/bash drivers/pci/endpoint/functions/
-
-If you fix the issue, kindly add following tag where applicable
-Reported-by: kernel test robot <lkp@intel.com>
-
-sparse warnings: (new ones prefixed by >>)
->> drivers/pci/endpoint/functions/pci-epf-vntb.c:258:47: sparse: sparse: incorrect type in argument 1 (different address spaces) @@     expected void const volatile [noderef] __iomem *addr @@     got void * @@
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:258:47: sparse:     expected void const volatile [noderef] __iomem *addr
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:258:47: sparse:     got void *
->> drivers/pci/endpoint/functions/pci-epf-vntb.c:260:47: sparse: sparse: incorrect type in argument 2 (different address spaces) @@     expected void volatile [noderef] __iomem *addr @@     got void * @@
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:260:47: sparse:     expected void volatile [noderef] __iomem *addr
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:260:47: sparse:     got void *
->> drivers/pci/endpoint/functions/pci-epf-vntb.c:560:66: sparse: sparse: incorrect type in argument 3 (different address spaces) @@     expected void [noderef] __iomem *virt_addr @@     got void *[assigned] mw_addr @@
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:560:66: sparse:     expected void [noderef] __iomem *virt_addr
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:560:66: sparse:     got void *[assigned] mw_addr
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1106:33: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void [noderef] __iomem *base @@     got struct epf_ntb_ctrl *reg @@
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1106:33: sparse:     expected void [noderef] __iomem *base
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1106:33: sparse:     got struct epf_ntb_ctrl *reg
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1117:33: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void [noderef] __iomem *base @@     got struct epf_ntb_ctrl *reg @@
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1117:33: sparse:     expected void [noderef] __iomem *base
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1117:33: sparse:     got struct epf_ntb_ctrl *reg
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1128:33: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void [noderef] __iomem *base @@     got struct epf_ntb_ctrl *reg @@
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1128:33: sparse:     expected void [noderef] __iomem *base
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1128:33: sparse:     got struct epf_ntb_ctrl *reg
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1140:33: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void [noderef] __iomem *base @@     got struct epf_ntb_ctrl *reg @@
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1140:33: sparse:     expected void [noderef] __iomem *base
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1140:33: sparse:     got struct epf_ntb_ctrl *reg
-   drivers/pci/endpoint/functions/pci-epf-vntb.c: note: in included file (through arch/ia64/include/asm/io.h, include/linux/io.h):
-   include/asm-generic/io.h:335:15: sparse: sparse: cast to restricted __le32
-
-vim +258 drivers/pci/endpoint/functions/pci-epf-vntb.c
-
-   236	
-   237	/**
-   238	 * epf_ntb_cmd_handler() - Handle commands provided by the NTB Host
-   239	 * @work: work_struct for the epf_ntb_epc
-   240	 *
-   241	 * Workqueue function that gets invoked for the two epf_ntb_epc
-   242	 * periodically (once every 5ms) to see if it has received any commands
-   243	 * from NTB host. The host can send commands to configure doorbell or
-   244	 * configure memory window or to update link status.
-   245	 */
-   246	static void epf_ntb_cmd_handler(struct work_struct *work)
-   247	{
-   248		struct epf_ntb_ctrl *ctrl;
-   249		u32 command, argument;
-   250		struct epf_ntb *ntb;
-   251		struct device *dev;
-   252		int ret;
-   253		int i;
-   254	
-   255		ntb = container_of(work, struct epf_ntb, cmd_handler.work);
-   256	
-   257		for (i = 1; i < ntb->db_count; i++) {
- > 258			if (readl_relaxed(ntb->epf_db + i * ENTRY_SIZE)) {
-   259				ntb_db_event(&ntb->ntb, i);
- > 260				writel(0, ntb->epf_db + i * ENTRY_SIZE);
-   261			}
-   262		}
-   263	
-   264		ctrl = ntb->reg;
-   265		command = ctrl->command;
-   266		if (!command)
-   267			goto reset_handler;
-   268		argument = ctrl->argument;
-   269	
-   270		ctrl->command = 0;
-   271		ctrl->argument = 0;
-   272	
-   273		ctrl = ntb->reg;
-   274		dev = &ntb->epf->dev;
-   275	
-   276		switch (command) {
-   277		case COMMAND_CONFIGURE_DOORBELL:
-   278			ctrl->command_status = COMMAND_STATUS_OK;
-   279			break;
-   280		case COMMAND_TEARDOWN_DOORBELL:
-   281			ctrl->command_status = COMMAND_STATUS_OK;
-   282			break;
-   283		case COMMAND_CONFIGURE_MW:
-   284			ret = epf_ntb_configure_mw(ntb, argument);
-   285			if (ret < 0)
-   286				ctrl->command_status = COMMAND_STATUS_ERROR;
-   287			else
-   288				ctrl->command_status = COMMAND_STATUS_OK;
-   289			break;
-   290		case COMMAND_TEARDOWN_MW:
-   291			epf_ntb_teardown_mw(ntb, argument);
-   292			ctrl->command_status = COMMAND_STATUS_OK;
-   293			break;
-   294		case COMMAND_LINK_UP:
-   295			ntb->linkup = true;
-   296			ret = epf_ntb_link_up(ntb, true);
-   297			if (ret < 0)
-   298				ctrl->command_status = COMMAND_STATUS_ERROR;
-   299			else
-   300				ctrl->command_status = COMMAND_STATUS_OK;
-   301			goto reset_handler;
-   302		case COMMAND_LINK_DOWN:
-   303			ntb->linkup = false;
-   304			ret = epf_ntb_link_up(ntb, false);
-   305			if (ret < 0)
-   306				ctrl->command_status = COMMAND_STATUS_ERROR;
-   307			else
-   308				ctrl->command_status = COMMAND_STATUS_OK;
-   309			break;
-   310		default:
-   311			dev_err(dev, "UNKNOWN command: %d\n", command);
-   312			break;
-   313		}
-   314	
-   315	reset_handler:
-   316		queue_delayed_work(kpcintb_workqueue, &ntb->cmd_handler,
-   317				   msecs_to_jiffies(5));
-   318	}
-   319	
-
+diff --git a/drivers/pci/endpoint/functions/pci-epf-ntb.c b/drivers/pci/endpoint/functions/pci-epf-ntb.c
+index 9a00448c7e61..f74155ee8d72 100644
+--- a/drivers/pci/endpoint/functions/pci-epf-ntb.c
++++ b/drivers/pci/endpoint/functions/pci-epf-ntb.c
+@@ -1021,7 +1021,7 @@ static int epf_ntb_config_spad_bar_alloc(struct epf_ntb *ntb,
+ 	peer_size = peer_epc_features->bar_fixed_size[peer_barno];
+ 
+ 	/* Check if epc_features is populated incorrectly */
+-	if ((!IS_ALIGNED(size, align)))
++	if (align && (!IS_ALIGNED(size, align)))
+ 		return -EINVAL;
+ 
+ 	spad_count = ntb->spad_count;
+diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+index 0ea85e1d292e..5e346c0a0f05 100644
+--- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
++++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+@@ -418,7 +418,7 @@ static int epf_ntb_config_spad_bar_alloc(struct epf_ntb *ntb)
+ 	size = epc_features->bar_fixed_size[barno];
+ 	align = epc_features->align;
+ 
+-	if ((!IS_ALIGNED(size, align)))
++	if (align && !IS_ALIGNED(size, align))
+ 		return -EINVAL;
+ 
+ 	spad_count = ntb->spad_count;
 -- 
-0-DAY CI Kernel Test Service
-https://01.org/lkp
+2.17.1
+
