@@ -1,202 +1,325 @@
-Received: from mga06.intel.com (mga06b.intel.com [134.134.136.31])
+Received: from EUR02-HE1-obe.outbound.protection.outlook.com (mail-eopbgr10053.outbound.protection.outlook.com [40.107.1.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CD51D80C;
-	Sun, 18 Sep 2022 12:53:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1663505617; x=1695041617;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=gIdiSWaX7Uitc1QR0Z7rthV8TdGu0odC19sBfo6JySg=;
-  b=GRwVakgUi9PrvSNY2dEmUg4cYDdv56qiuheDmri+0d3zbLT8egwcV6kA
-   LPqbxs69rOi1nXD4bSI9VQrI/iY19Klm8U1cdGYepxepwnSc8EzYm8JzS
-   quFtLgJ0+5lBoHaD/ZtoLc8MHQRMFxOyTMGXbmqeAv5rlr0g7Ir0xtp6h
-   9ty1mYMPrEoKDyEm3SfzcTBITb6H6KV0tHJS2gvZziahUqMpWOQt9Czer
-   kXfKrW+REmv8MbSPfDKYfaEiV7mONAwk4cMkWIBpZSx/VGQpylgl141w4
-   gqiJRSj2VMFwm2CchPQ2b124YXay9YWCTgelVo48QJYeuccVJyTQw6snu
-   A==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10474"; a="360970056"
-X-IronPort-AV: E=Sophos;i="5.93,325,1654585200"; 
-   d="scan'208";a="360970056"
-Received: from orsmga004.jf.intel.com ([10.7.209.38])
-  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Sep 2022 05:53:37 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.93,325,1654585200"; 
-   d="scan'208";a="743821151"
-Received: from lkp-server01.sh.intel.com (HELO c0a60f19fe7e) ([10.239.97.150])
-  by orsmga004.jf.intel.com with ESMTP; 18 Sep 2022 05:53:31 -0700
-Received: from kbuild by c0a60f19fe7e with local (Exim 4.96)
-	(envelope-from <lkp@intel.com>)
-	id 1oZtne-0001C3-2M;
-	Sun, 18 Sep 2022 12:53:30 +0000
-Date: Sun, 18 Sep 2022 20:53:06 +0800
-From: kernel test robot <lkp@intel.com>
-To: Frank Li <Frank.Li@nxp.com>, maz@kernel.org, tglx@linutronix.de,
-	robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-	shawnguo@kernel.org, s.hauer@pengutronix.de, kw@linux.com,
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C6D847C;
+	Mon, 19 Sep 2022 15:41:03 +0000 (UTC)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=MDYUnBbfDAiiBRNU9qgr6ujhxKOtG76fIN2AFRdoPVaHYu1H1+QuS5nbveltodCnlgUuwv+C6c8x25fV+3UrTqoZAUT/mWfnueTtMTJJVnHiN5Xx05lMiWWGlO07oFJ2qke0Ue3HYiAOSgcCey2XM33VBeZ0D52j+CU7373iL7n0gvRiwk3429BgF4H9fkTN+940IUsdtt+DKIyojrVx4ntJbPlz+HfSJ20Fnc14SlqX/51jU7yvHndS/qgmHeyauZ3QKtVxkGvzqK/awQh7FGZzIwbkbAlZqqzFR+f6VGDpmL/oR9YiW575jl3mPwgk3N27bNynNBt+GTh61eAdEg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=DDD2m4WaQLJ5X3cdlq5/ReU71Ft6dOt4Wh+UdBg4azQ=;
+ b=kNxmYVRYdic3VD8SC+jfyu9VYwyasVlVMstd26OFOOGpC3T+o0oihFulhqHEXpwjOo6a19ky0piZ4w1KZKfxLKHawGOLzLugIZQkK5LUVyvBwOh0XqsyElUc5dAc1sRUYASR3BdtJTRpqtXcrZuloGW2LhI92OcjBqF0z7WCPXeZdzvNgEfFqJOr1PyFZfVDalp3uSVscPjPauIIK3ySZve6+Nvm9P+EwRS865Lnn47MhKlfQ/tFWr9m1+LgSn8+YrGJevysFa3JcazKSnVmbakfVHwPgnUlc5w1jDwqy8+NKTf3T6+fcu/RusFZAa0nsank7pEQ81FSJW51U60ABQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
+ header.d=nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=DDD2m4WaQLJ5X3cdlq5/ReU71Ft6dOt4Wh+UdBg4azQ=;
+ b=Ez6SkKaeVphOaYsB2Uwr7cyTdJUWGHdnjvc31soIE8SHP3VcZt6wbUxFVECEZ/HyviLA9Dxk6kR9cVw8uP6XGXsxeU/Fh+3e2OGn3ep5lEuxznCpwT4HqZxHr3/xqLKJciiCnTMsVJqKcYfWLNyU9aApFclP9TG0C6YyJiBGzXE=
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nxp.com;
+Received: from AM9PR04MB8793.eurprd04.prod.outlook.com (2603:10a6:20b:408::22)
+ by AM0PR04MB6945.eurprd04.prod.outlook.com (2603:10a6:208:17f::13) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5632.21; Mon, 19 Sep
+ 2022 15:41:00 +0000
+Received: from AM9PR04MB8793.eurprd04.prod.outlook.com
+ ([fe80::5a3:ff70:317d:a99e]) by AM9PR04MB8793.eurprd04.prod.outlook.com
+ ([fe80::5a3:ff70:317d:a99e%7]) with mapi id 15.20.5632.021; Mon, 19 Sep 2022
+ 15:41:00 +0000
+From: Frank Li <Frank.Li@nxp.com>
+To: maz@kernel.org,
+	tglx@linutronix.de,
+	robh+dt@kernel.org,
+	krzysztof.kozlowski+dt@linaro.org,
+	shawnguo@kernel.org,
+	s.hauer@pengutronix.de,
+	kw@linux.com,
 	bhelgaas@google.com
-Cc: kbuild-all@lists.01.org, linux-kernel@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-	linux-pci@vger.kernel.org, peng.fan@nxp.com, aisheng.dong@nxp.com,
-	jdmason@kudzu.us, kernel@pengutronix.de, festevam@gmail.com,
-	linux-imx@nxp.com, kishon@ti.com, lorenzo.pieralisi@arm.com,
-	ntb@lists.linux.dev, lznuaa@gmail.com, imx@lists.linux.dev,
+Cc: linux-kernel@vger.kernel.org,
+	devicetree@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-pci@vger.kernel.org,
+	peng.fan@nxp.com,
+	aisheng.dong@nxp.com,
+	jdmason@kudzu.us,
+	kernel@pengutronix.de,
+	festevam@gmail.com,
+	linux-imx@nxp.com,
+	kishon@ti.com,
+	lorenzo.pieralisi@arm.com,
+	ntb@lists.linux.dev,
+	lznuaa@gmail.com,
+	imx@lists.linux.dev,
 	manivannan.sadhasivam@linaro.org
-Subject: Re: [PATCH v10 5/6] PCI: endpoint: makeup pci-epf-vntb.c
-Message-ID: <202209182035.SS1p5KkG-lkp@intel.com>
-References: <20220913210957.3493826-6-Frank.Li@nxp.com>
+Subject: [PATCH v11 0/6] PCI EP driver support MSI doorbell from host
+Date: Mon, 19 Sep 2022 10:40:32 -0500
+Message-Id: <20220919154038.187168-1-Frank.Li@nxp.com>
+X-Mailer: git-send-email 2.35.1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+X-ClientProxiedBy: BY3PR05CA0059.namprd05.prod.outlook.com
+ (2603:10b6:a03:39b::34) To AM9PR04MB8793.eurprd04.prod.outlook.com
+ (2603:10a6:20b:408::22)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220913210957.3493826-6-Frank.Li@nxp.com>
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: AM9PR04MB8793:EE_|AM0PR04MB6945:EE_
+X-MS-Office365-Filtering-Correlation-Id: 8a7f91b6-d0d7-47d7-1e34-08da9a555a2d
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info:
+	V7q1oodgSvxVWe0W1TUJ0I/ROwWLrrdL3Zl6W5uwZSEeoXt+bAWGleBKdZN+LMLYZ8iKv8bLHOabWU4RzaZjlOtXdf8V18vtwOpkSI0/Tojtb0zMJS6BZ6muQEhwVCG3Jmf3Clf+0uO9Z6h4coCvYNefK4w4M14b5Jkpegv1sfrsdetfnsDfuzutByGUegJ6N3e5fU/idzO1uLmHblvpwup2pEtkNjJRWIuiMjXe7IFgMw5mlgZ2oy1vQLk6ZDca3B6KYEi+xtqQV8pWj09S9z3mkk0DkH52bjmAutZIPFDazd5wOq1efKgPzDfNGOErxnZ0hCvq7Amju87Ux51s/84n5xfTrh3H6PhvPtC4Bkmiqy6Y2xX/MHt8BRAKnrEud+Y1Kkl76nI3/hKhBmLa+m+5rCghHb/XU8mLkNto3TY1sfmcM2vEMv0EaDsdTXwdfjS1rCUFxBhR23opijiI9lLLL5Cyy2aW2KsRYnwr1Do8nfLWKabyoAU7PXxPKC644VY3sVzadsvDrl1zCFZ0KxgyYheWv4QNfnzCnYxagof/F/ayQ+CMON+POT5RGRMlM3ThlwYsIntrJMVd8op32A+BdGeq7vi3gkAWB0ItJb0xhdzKjyYDue34RSxcdbCX2I7ULAvW1kupS7mVDySDUXPzQezzST7+SJDRXm0T2Y5fa2xXVaS0nIW96zB7OgCNH6bUL++2w14E82zt5K0b6TM/3C64oVh1Kc6B6+n4ThE+AujRwi6TZAcQip2LkMIpdzzIVTCKjOTxMrZtJpzg4QwQTYXzzTgBpQ8JAY5vOfw=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:AM9PR04MB8793.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230022)(4636009)(366004)(396003)(346002)(376002)(136003)(39860400002)(451199015)(66476007)(36756003)(66556008)(1076003)(2616005)(2906002)(66946007)(38350700002)(38100700002)(4326008)(83380400001)(8936002)(186003)(41300700001)(6666004)(966005)(478600001)(8676002)(6512007)(86362001)(26005)(316002)(6506007)(52116002)(5660300002)(6486002)(7416002);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?utf-8?B?SUNzUGV6bytjS1FVWEd2MGhrSjh4cDBQSmZwaFNCSUp2MkwvREgzZnhDV2pz?=
+ =?utf-8?B?RDVBZ2UvbDJZTkdlQVhycGNWQTZJRzd6U3ZHTndvSFVnL0pxWDNYM3hLbU16?=
+ =?utf-8?B?RzBOZWNMbyt4OVh3YVVNVStsRWNzbmF1UUQ0QjZhMStMUFVaTzkzSjFqK0Yw?=
+ =?utf-8?B?aldyVGs4Z1N2aURoblg3WTlYL25kSVdOekpWR0N2QklPaDRpaXlrSzhGVU9Y?=
+ =?utf-8?B?bkNPLzNUWHlsdjR1a0lYZEFOWWE5cFRvUmkvb3lVczZTa3ErcVpZdEE3Q3hN?=
+ =?utf-8?B?K0VkNFRIY1JrMXBMeUhMZXZZY0JIazRiOHNCOTdwUlhhTHhmV3dtTVFNanJv?=
+ =?utf-8?B?MVQxcDRYQmZHVTZXZ3FCWHBvQXlwRVBaUTk3Wkk3c2pmUE4xeHVXbXBwMXRy?=
+ =?utf-8?B?UzhEMUp0bW5CMXpiQXdEZzRqTk5VV2lCSHRpaW9lWmk5aWNmUWRDMmdZalRT?=
+ =?utf-8?B?N1pabzBaMmZWWTE4STR5eUJQMDNEQ1Fqc2tkdGorMmo5VmlQbU5nSzNjQzlI?=
+ =?utf-8?B?UnlBWW5xWE93MUR4NnFrUzJkUEU4VS9WN04vWTdoSnRsbEl3QVJlUHYwU1ds?=
+ =?utf-8?B?cGpSc01HYW90Lzc5ODRUZEZ6cGlHRXNlYXBKcXJ4VHBZYmJ5SDBQdXJGNzh2?=
+ =?utf-8?B?cURiRFBLVDVXbW5xRU92SUZhTzhacFlOMTdJUWpvN1J2NEk4azk5dGRwOC96?=
+ =?utf-8?B?Q1BFTXZsUEZySlExcFExR21UZUN6WGx6SlVyank3b1V1SnNVeHdFWGFURWM5?=
+ =?utf-8?B?d3dXRUl0cUlBcy9QczV3cWtJa0syNENySjdMU3c1d3JjUHQ2YzF6S0V1bTNi?=
+ =?utf-8?B?TG1xbWFpY09MdFFRWE04L29vcFFtNWhadVl2dWpudFMyS3R3d1ljRGtsUzlE?=
+ =?utf-8?B?L3Jydit4djB0MUtLM2ZwdDcvcGRybFFTc2pXZTBydEpITHlPT3ZmWS9LWEpV?=
+ =?utf-8?B?MzVZcS85d2xkaVdqZ2VFR1M5ZXYrSHVydkNMMlcrdmZEQmJWRjNGOUpzaHI3?=
+ =?utf-8?B?TnhhM1BncVM3V2VCMTk1Z0ZvRVVvMW0zVlBJYXJNdkluSEk4Z2VqektiekFN?=
+ =?utf-8?B?K0tHTmZTWFA2MC91VjYwdEE0WW1TNjlCL05OVE4xTmtzVDB0ODdIMFN6NEZU?=
+ =?utf-8?B?bzVGTlNjYmc3Ni85S1VicE5JZ0pVRFFpbkNOTVlMZjJBWDF3TlJYMHoxTTNz?=
+ =?utf-8?B?WFR2YzJmekl3RTg1QW1rWU5JQ1ZjTU1IdjRXY0J6dnNWTkVxSE1mZWV1MC9X?=
+ =?utf-8?B?YVhnNDlFWGdEL3BoRlBHT1I1T3RtbWJINThacm9NYktaVnAxVUhnQ3BwYkxi?=
+ =?utf-8?B?aDFPWW9Dbjdld0I5UFViRG9aaXBlWmNvQjRHR3Zhb0U4aFFjWExyejdpMUNB?=
+ =?utf-8?B?U2FVYW1YRi93bE1PVGRwRVdQdkRpS3kzL0F5cnFNbVhDZFI3blpvOGJDR0dB?=
+ =?utf-8?B?eVlNYktkY3cyaWw1TnlmT1J3TEJ2VVRKcm9nbDRMN3oxdUgvamtGSmtuVlpM?=
+ =?utf-8?B?YXVZZm5zSUdqUHAzQ0xEbXZGdlZER0lOYUZNcnMxUXVZTHlMV1k4KysyZkh5?=
+ =?utf-8?B?cS9IK0hrREdDM3N4Smpya3RTK0pmSVdFdUVvUmJTR3NCbVU2ak4yYUlreHJW?=
+ =?utf-8?B?WWJrSlZDZVlsbjZJbFpBREFhMHlIL3NtOWZpSWY5bUR4ZzNFWkR5ZnRQeVl6?=
+ =?utf-8?B?RnY0eUZYZWpXdVdsTms5S2YxUEQ5RDRZMWtOR2tlOFNmaGVNSEhIL3lzc01o?=
+ =?utf-8?B?TG5BaktieTJVbXYxK1NGbStHaUtOVDBmMlpRWXlHbDhNUFhwYnk5cE9zY0s4?=
+ =?utf-8?B?bkRsM2JnNG5ha0ZGbzB4TXd4dk5oL043MkZyVnZOMWg0MGkxOVVvWWVGQjU1?=
+ =?utf-8?B?M2tGSHVkRkpOalprWWhCMG1aKzJtaDlEdWNQKy9zb2tMZDZoeHQ3M3p2V2Zy?=
+ =?utf-8?B?eHd5eHZxSWMwdHhONlhsem1NU2E4VVNvT2YweUJMYnI3QlFVN3ExaWtqd3c1?=
+ =?utf-8?B?Sk41MlQ3TThKbENiNUVQSVdUR1VYY1FkTkg5b3VzVEFwYitsWkZBMmtJYVZB?=
+ =?utf-8?B?QlY5V3prSjJqeTYrMEV6aGRua2tjcWFwZlQySDZqdTZicHRBK3dvNHBoYjJU?=
+ =?utf-8?Q?xspO86x0f3DGrVVAhWNGj05zH?=
+X-OriginatorOrg: nxp.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 8a7f91b6-d0d7-47d7-1e34-08da9a555a2d
+X-MS-Exchange-CrossTenant-AuthSource: AM9PR04MB8793.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 19 Sep 2022 15:41:00.4806
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: mbWkBNh0B4YqUjlVzUUi2bGKYCjT+ePdx1phWAM19UdTpR6ZFa69980T9Md/MpILk5nWETYBF7w61JoN5OtrHg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: AM0PR04MB6945
 
-Hi Frank,
 
-I love your patch! Perhaps something to improve:
 
-[auto build test WARNING on jonmason-ntb/ntb-next]
-[also build test WARNING on driver-core/driver-core-testing linus/master v6.0-rc5 next-20220916]
-[cannot apply to tip/irq/core]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
+                  ┌───────┐          ┌──────────┐
+                  │       │          │          │
+┌─────────────┐   │       │          │ PCI Host │
+│ MSI         │◄┐ │       │          │          │
+│ Controller  │ │ │       │          │          │
+└─────────────┘ └─┼───────┼──────────┼─Bar0     │
+                  │ PCI   │          │ Bar1     │
+                  │ Func  │          │ Bar2     │
+                  │       │          │ Bar3     │
+                  │       │          │ Bar4     │
+                  │       ├─────────►│          │
+                  └───────┘          └──────────┘
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Frank-Li/platform-msi-export-symbol-platform_msi_create_irq_domain/20220914-060955
-base:   https://github.com/jonmason/ntb ntb-next
-config: mips-randconfig-s042-20220918 (https://download.01.org/0day-ci/archive/20220918/202209182035.SS1p5KkG-lkp@intel.com/config)
-compiler: mips-linux-gcc (GCC) 12.1.0
-reproduce:
-        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
-        chmod +x ~/bin/make.cross
-        # apt-get install sparse
-        # sparse version: v0.6.4-39-gce1a6720-dirty
-        # https://github.com/intel-lab-lkp/linux/commit/c0b811e4bf3a50a612ed143d284880e09790eff5
-        git remote add linux-review https://github.com/intel-lab-lkp/linux
-        git fetch --no-tags linux-review Frank-Li/platform-msi-export-symbol-platform_msi_create_irq_domain/20220914-060955
-        git checkout c0b811e4bf3a50a612ed143d284880e09790eff5
-        # save the config file
-        mkdir build_dir && cp config build_dir/.config
-        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-12.1.0 make.cross C=1 CF='-fdiagnostic-prefix -D__CHECK_ENDIAN__' O=build_dir ARCH=mips SHELL=/bin/bash
+Many PCI controllers provided Endpoint functions.
+Generally PCI endpoint is hardware, which is not running a rich OS,
+like linux.
 
-If you fix the issue, kindly add following tag where applicable
-Reported-by: kernel test robot <lkp@intel.com>
+But Linux also supports endpoint functions.  PCI Host write BAR<n> space
+like write to memory. The EP side can't know memory changed by the Host
+driver. 
 
-sparse warnings: (new ones prefixed by >>)
->> drivers/pci/endpoint/functions/pci-epf-vntb.c:258:47: sparse: sparse: incorrect type in argument 1 (different address spaces) @@     expected void const volatile [noderef] __iomem *mem @@     got void * @@
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:258:47: sparse:     expected void const volatile [noderef] __iomem *mem
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:258:47: sparse:     got void *
->> drivers/pci/endpoint/functions/pci-epf-vntb.c:260:47: sparse: sparse: incorrect type in argument 2 (different address spaces) @@     expected void volatile [noderef] __iomem *mem @@     got void * @@
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:260:47: sparse:     expected void volatile [noderef] __iomem *mem
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:260:47: sparse:     got void *
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:560:66: sparse: sparse: incorrect type in argument 3 (different address spaces) @@     expected void [noderef] __iomem *virt_addr @@     got void *[assigned] mw_addr @@
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:560:66: sparse:     expected void [noderef] __iomem *virt_addr
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:560:66: sparse:     got void *[assigned] mw_addr
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1106:33: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void [noderef] __iomem *base @@     got struct epf_ntb_ctrl *reg @@
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1106:33: sparse:     expected void [noderef] __iomem *base
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1106:33: sparse:     got struct epf_ntb_ctrl *reg
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1117:33: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void [noderef] __iomem *base @@     got struct epf_ntb_ctrl *reg @@
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1117:33: sparse:     expected void [noderef] __iomem *base
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1117:33: sparse:     got struct epf_ntb_ctrl *reg
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1128:33: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void [noderef] __iomem *base @@     got struct epf_ntb_ctrl *reg @@
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1128:33: sparse:     expected void [noderef] __iomem *base
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1128:33: sparse:     got struct epf_ntb_ctrl *reg
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1140:33: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void [noderef] __iomem *base @@     got struct epf_ntb_ctrl *reg @@
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1140:33: sparse:     expected void [noderef] __iomem *base
-   drivers/pci/endpoint/functions/pci-epf-vntb.c:1140:33: sparse:     got struct epf_ntb_ctrl *reg
+PCI Spec has not defined a standard method to do that.  Only define
+MSI(x) to let EP notified RC status change. 
 
-vim +258 drivers/pci/endpoint/functions/pci-epf-vntb.c
+The basic idea is to trigger an IRQ when PCI RC writes to a memory
+address. That's what MSI controller provided.  EP drivers just need to
+request a platform MSI interrupt, struct MSI_msg *msg will pass down a
+memory address and data.  EP driver will map such memory address to
+one of PCI BAR<n>.  Host just writes such an address to trigger EP side
+IRQ.
 
-   236	
-   237	/**
-   238	 * epf_ntb_cmd_handler() - Handle commands provided by the NTB Host
-   239	 * @work: work_struct for the epf_ntb_epc
-   240	 *
-   241	 * Workqueue function that gets invoked for the two epf_ntb_epc
-   242	 * periodically (once every 5ms) to see if it has received any commands
-   243	 * from NTB host. The host can send commands to configure doorbell or
-   244	 * configure memory window or to update link status.
-   245	 */
-   246	static void epf_ntb_cmd_handler(struct work_struct *work)
-   247	{
-   248		struct epf_ntb_ctrl *ctrl;
-   249		u32 command, argument;
-   250		struct epf_ntb *ntb;
-   251		struct device *dev;
-   252		int ret;
-   253		int i;
-   254	
-   255		ntb = container_of(work, struct epf_ntb, cmd_handler.work);
-   256	
-   257		for (i = 1; i < ntb->db_count; i++) {
- > 258			if (readl_relaxed(ntb->epf_db + i * ENTRY_SIZE)) {
-   259				ntb_db_event(&ntb->ntb, i);
- > 260				writel(0, ntb->epf_db + i * ENTRY_SIZE);
-   261			}
-   262		}
-   263	
-   264		ctrl = ntb->reg;
-   265		command = ctrl->command;
-   266		if (!command)
-   267			goto reset_handler;
-   268		argument = ctrl->argument;
-   269	
-   270		ctrl->command = 0;
-   271		ctrl->argument = 0;
-   272	
-   273		ctrl = ntb->reg;
-   274		dev = &ntb->epf->dev;
-   275	
-   276		switch (command) {
-   277		case COMMAND_CONFIGURE_DOORBELL:
-   278			ctrl->command_status = COMMAND_STATUS_OK;
-   279			break;
-   280		case COMMAND_TEARDOWN_DOORBELL:
-   281			ctrl->command_status = COMMAND_STATUS_OK;
-   282			break;
-   283		case COMMAND_CONFIGURE_MW:
-   284			ret = epf_ntb_configure_mw(ntb, argument);
-   285			if (ret < 0)
-   286				ctrl->command_status = COMMAND_STATUS_ERROR;
-   287			else
-   288				ctrl->command_status = COMMAND_STATUS_OK;
-   289			break;
-   290		case COMMAND_TEARDOWN_MW:
-   291			epf_ntb_teardown_mw(ntb, argument);
-   292			ctrl->command_status = COMMAND_STATUS_OK;
-   293			break;
-   294		case COMMAND_LINK_UP:
-   295			ntb->linkup = true;
-   296			ret = epf_ntb_link_up(ntb, true);
-   297			if (ret < 0)
-   298				ctrl->command_status = COMMAND_STATUS_ERROR;
-   299			else
-   300				ctrl->command_status = COMMAND_STATUS_OK;
-   301			goto reset_handler;
-   302		case COMMAND_LINK_DOWN:
-   303			ntb->linkup = false;
-   304			ret = epf_ntb_link_up(ntb, false);
-   305			if (ret < 0)
-   306				ctrl->command_status = COMMAND_STATUS_ERROR;
-   307			else
-   308				ctrl->command_status = COMMAND_STATUS_OK;
-   309			break;
-   310		default:
-   311			dev_err(dev, "UNKNOWN command: %d\n", command);
-   312			break;
-   313		}
-   314	
-   315	reset_handler:
-   316		queue_delayed_work(kpcintb_workqueue, &ntb->cmd_handler,
-   317				   msecs_to_jiffies(5));
-   318	}
-   319	
+If system have gic-its, only need update PCI EP side driver. But i.MX
+have not chip support gic-its yet. So we have to use MU to simulate a
+MSI controller. Although only 4 MSI IRQs are simulated, it matched
+vntb(pci-epf-vntb) network requirement.
+
+After enable MSI, ping delay reduce < 1ms from ~8ms
+
+IRQchip: imx mu worked as MSI controller: 
+     let imx mu worked as MSI controllers. Although IP is not design
+as MSI controller, we still can use it if limited IRQ number to 4.
+
+pcie: endpoint: pci-epf-vntb: add endpoint MSI support
+	 Based on ntb-next branch. https://github.com/jonmason/ntb/commits/ntb-next
+	 Using MSI as door bell registers
+	 
+mu-msi patches (1-4) and vntb patch(5-6) is totally independently.
+These can be applied by irqchip and pci's maintainer seperatedly.
+
+i.MX EP function driver is upstreaming by Richard Zhu.
+Some dts change missed at this patches. below is reference dts change
+
+--- a/arch/arm64/boot/dts/freescale/imx8-ss-hsio.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8-ss-hsio.dtsi
+@@ -160,5 +160,6 @@ pcieb_ep: pcie_ep@5f010000 {
+                num-ib-windows = <6>;
+                num-ob-windows = <6>;
+                status = "disabled";
++               MSI-parent = <&lsio_mu12>;
+        };
+
+--- a/arch/arm64/boot/dts/freescale/imx8-ss-lsio.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8-ss-lsio.dtsi
+@@ -172,6 +172,19 @@ lsio_mu6: mailbox@5d210000 {
+                status = "disabled";
+        };
+
++       lsio_mu12: mailbox@5d270000 {
++               compatible = "fsl,imx6sx-mu-MSI";
++               msi-controller;
++               interrupt-controller;
++               reg = <0x5d270000 0x10000>,     /* A side */
++                     <0x5d300000 0x10000>;     /* B side */
++               reg-names = "a", "b";
++               interrupts = <GIC_SPI 191 IRQ_TYPE_LEVEL_HIGH>;
++               power-domains = <&pd IMX_SC_R_MU_12A>,
++                               <&pd IMX_SC_R_MU_12B>;
++               power-domain-names = "a", "b";
++       };
++
+
+Change Log
+- Change from v10 to v11
+  irqchips: no change
+  pcie:
+	clean up build warning foundby kernel test robot
+	clean up kernel-doc warning.
+	clean up vhost VHost.
+- Change from v9 to v10
+  fixed build error reported by kernel test robot <lkp@intel.com>
+  irqchips:
+	fixed accoring to Marc Zyngier's comments
+	Added new patch platform-msi: export symbol
+ platform_msi_create_irq_domain()
+	Using one lock for both reg and alloc msi irq
+	Using predefined macro to init cfg data
+   pcie: endpoint:
+	fixed according to Manivannan Sadhasivam's feedback
+	Added makeup patch before enable msi irq
+		PCI: endpoint: makeup pci-epf-vntb.c
+
+- Change from v8 to v9
+  fix dt_bind_check error
+
+- Change from v7 to v8
+  irqchip: using name process-a-side as resource bind name
+  pcie: endpoint:
+     - fix build error reported by kernel test robot <lkp@intel.com>
+     - rename epf_db_phy to epf_db_phys
+     - rework error message
+     - rework commit message
+     - change ntb to vtb at apply irq.
+     - kept name msi_virqbase because it is msi irq base number,
+	not base address. 
+		
+- Change from v6 to v7
+  pcie: endpoint: add endpoint MSI support
+  Fine tuning commit message
+  Fixed issues, reviewed by Bjorn Helgaas
+
+- Change from v5 to v6
+  Fixed build error found by kernel test robot
+
+- Change from v4 to v5
+  Fixed dt-binding document
+        add msi-cell
+        add interrupt max number
+	update naming reg-names and power-domain-names.
+  Fixed irqchip-Add-IMX-MU-MSI-controller-driver.patch
+        rework commit message
+        remove some field in struct imx_mu_dcfg
+	error handle when link power domain failure.
+	add irq_domain_update_bus_token
+
+- Change from v3 to v4
+  Fixed dt-binding document according to Krzysztof Kozlowski's feedback
+  Fixed irqchip-imx-mu-worked-as-msi-controller according to Marc Zyngier's
+        comments.
+
+	There are still two important points, which I am not sure.
+	1. clean irq_set_affinity after platform_msi_create_irq_domain.
+	   Some function, like platform_msi_write_msg() is static.
+	   so I have to set MSI_FLAG_USE_DEF_CHIP_OPS flags, which will
+	   set irq_set_affinity to default one.
+	2. about comments
+
+	> +	msi_data->msi_domain = platform_msi_create_irq_domain(
+	> +				of_node_to_fwnode(msi_data->pdev->dev.of_node),
+	> +				&imx_mu_msi_domain_info,
+	> +				msi_data->parent);
+
+	"And you don't get an error due to the fact that you use the same
+	fwnode for both domains without overriding the domain bus token?"
+
+ 	I did not understand yet. 
+
+  Fixed static check warning, reported by Dan Carpenter
+	pcie: endpoint: pci-epf-vntb: add endpoint MSI support
+
+- Change from v2 to v3
+  Fixed dt-binding docment check failure
+  Fixed typo a cover letter.
+  Change according Bjorn's comments at patch 
+	pcie: endpoint: pci-epf-vntb: add endpoint MSI support
+	 
+
+- from V1 to V2
+  Fixed fsl,mu-msi.yaml's problem
+  Fixed irq-imx-mu-msi.c problem according Marc Zyngier's feeback 
+  Added a new patch to allow pass down .pm by IRQCHIP_PLATFORM_DRIVER_END
+
+Frank Li (6):
+  platform-msi: export symbol platform_msi_create_irq_domain()
+  irqchip: allow pass down .pm field at IRQCHIP_PLATFORM_DRIVER_END
+  irqchip: Add IMX MU MSI controller driver
+  dt-bindings: irqchip: imx mu work as msi controller
+  PCI: endpoint: cleanup pci-epf-vntb.c
+  PCI: endpoint: Add vNTB MSI support
+
+ .../interrupt-controller/fsl,mu-msi.yaml      |  99 ++++
+ drivers/base/platform-msi.c                   |   1 +
+ drivers/irqchip/Kconfig                       |  14 +
+ drivers/irqchip/Makefile                      |   1 +
+ drivers/irqchip/irq-imx-mu-msi.c              | 455 ++++++++++++++++++
+ drivers/pci/endpoint/functions/pci-epf-vntb.c | 296 ++++++++----
+ include/linux/irqchip.h                       |   4 +-
+ 7 files changed, 786 insertions(+), 84 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/interrupt-controller/fsl,mu-msi.yaml
+ create mode 100644 drivers/irqchip/irq-imx-mu-msi.c
 
 -- 
-0-DAY CI Kernel Test Service
-https://01.org/lkp
+2.35.1
+
