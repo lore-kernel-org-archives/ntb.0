@@ -1,45 +1,45 @@
-Received: from mail-pg1-f173.google.com (mail-pg1-f173.google.com [209.85.215.173])
+Received: from mail-pl1-f171.google.com (mail-pl1-f171.google.com [209.85.214.171])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E9C5F33CF
-	for <ntb@lists.linux.dev>; Mon, 26 Sep 2022 14:02:04 +0000 (UTC)
-Received: by mail-pg1-f173.google.com with SMTP id e129so561529pgc.9
-        for <ntb@lists.linux.dev>; Mon, 26 Sep 2022 07:02:04 -0700 (PDT)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A57DD33CF
+	for <ntb@lists.linux.dev>; Mon, 26 Sep 2022 14:16:32 +0000 (UTC)
+Received: by mail-pl1-f171.google.com with SMTP id v1so6351122plo.9
+        for <ntb@lists.linux.dev>; Mon, 26 Sep 2022 07:16:32 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=bytedance-com.20210112.gappssmtp.com; s=20210112;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date;
-        bh=1yGPnS7+tabIF9f3YGZrIJUzZlCgUowefj3Ak6tgbc8=;
-        b=Cml+idqKmgZLlpiIB8rfPG/ng2lFM3Uc9sHJGoyFG7EKF7hZNke7PI/XfWak9pHRFi
-         efod9Ah4zEqgORi+dMraA2Sbgo/pbkOsElfL2aD04OOna/C7XRrRxw0DfgIIfFkuQBtl
-         cmmg93A0HBEzFfB1+OSXJZfXPeyzl0IgyhatrNNxgm2ohJf5RdnnNFXZNdgo7YaW0/yv
-         LuuQM2kgG/3u1LhXdaEb1jXfGr5iRHnQ+eWfqiHMVUElxVxahOJVNf9IRTzA3BIZLfv3
-         zqpVrMthiVdLVBUkfIC5c7/0nUDogIn6jR/lCahdK1UXLrg6UQyGo+qF4+waB/51xAs+
-         2x6w==
+        bh=f9x4Js9aJ8GGYBn29EvIVTQooQM7+4F6Gd+zw2Mc6M8=;
+        b=zbi+yH6owkuseZsPd8cID/9/WJR+WXOO72huZu1wJYjkboy+f0MsZabCpreRAfu0Sf
+         3BZmYRBcwpD7wi8A/IOpfuJVOl1A8rCJFaIcGSG0jKTrF8oCvuPQ+RBCTLvziQZNwC1g
+         Jd9oklGK6EvDETceCFaUoZePQcW8L05Zcov7bvOd0XZhHHpbvz9QNXl7DZPgxMgKI0QQ
+         vLCHPHYSGblBh6eb+LQZr1TrgBNIz+T+/FWuQZnJCYJQz7wXYaPUaM7LuExyVVf5TwXJ
+         ct7K8VAqw2t9I2n0tte3U2h0Rk0Ver57AT66B18Yzk80ZWyfj9mzyHlAE/JXkq2hSxLS
+         3r+g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date;
-        bh=1yGPnS7+tabIF9f3YGZrIJUzZlCgUowefj3Ak6tgbc8=;
-        b=z25b4oVBZb6r8WXNrnIc75HgQTN0boStExgo8Wm/apetdmNv+xrB7559AO4TudxPSP
-         D55cZtqMJf1DvD9FAJcWgsPaB5IVekN+NN1GCzkZhlRVvD2Tm4PpSKSUXjZhd00GdZJt
-         bsXn2ZyUV4BBIi2lm0bu0ABejV22Y2w2eFnFuxi7Rt+APCeX0N1WQlyzsbLFIwDYkO7m
-         WKRPSuVbYJWQzmgxSZd8aIpgZkSxMM42fYTHopIFy8coOWpMyFWCTn22nb2zWGv9Mq6g
-         MeMWgEtSfzSb4jeS7mlhNbOD6wEVbPs2qkhrQe8/iGVWUDH1/l1+HJMEhNw+y7NiA/ja
-         DU+w==
-X-Gm-Message-State: ACrzQf2dJcyR5F9jhi8hfHSK7520uKYrfqu0gKPHBiDrOaImfHKoEfxC
-	qCsVfbyJCUJwWdlM/cPkvxyP9Q==
-X-Google-Smtp-Source: AMsMyM56mNVNCK934eTJEzhPKz0Kgne9owdo04+/JMJy5BNbxI/i4itBQ3mjMLHU+WUWOj1bBuUPqA==
-X-Received: by 2002:aa7:9f0c:0:b0:546:c556:ac86 with SMTP id g12-20020aa79f0c000000b00546c556ac86mr23732346pfr.55.1664200924322;
-        Mon, 26 Sep 2022 07:02:04 -0700 (PDT)
+        bh=f9x4Js9aJ8GGYBn29EvIVTQooQM7+4F6Gd+zw2Mc6M8=;
+        b=VnBu7PR8j/7nV+1CtVUzioiYQ+3xjameQU8TcMiALtUxVlvBz3UQj55OpE7vB2kxum
+         pN8CCxvbtIoeQ0krnYXPM7xcRLPlgbmyRs74SIzbGniFtmzFbEPehD3zkubbFUM1mPFv
+         ZjFH/h9gJTtn7JHUnMkP9arrGVzwTDZahRaXh4cirCDM7u5Q6h4kgBQsFjwqUFPKeNWI
+         m1dXRTxtBxEgL1/2foXXUGtVovdtpgr7aEo50TqF48uLav8up8AAMw52Gn+AvPDWa5t0
+         0bjeaBJw+PTM2rgeydU3DefrPw3HybCZivXsW1P906KFhRBr7OK1IkD5+lOyMnPTRrrn
+         58Yw==
+X-Gm-Message-State: ACrzQf0YFefrBPX4/VHwdZX/fWOm2irzrNeOJLjYp6dgSnwBufg0wnUX
+	nXk4tWdAbEu8TRz7RizY9yDXUg==
+X-Google-Smtp-Source: AMsMyM5TPoPvq12bpXj85IzcoD1FO5FB0fyyNhOKXktO0s3dtYc0w3EMmyW5x+a7mrmCCw2DD9kjgw==
+X-Received: by 2002:a17:902:6b0a:b0:178:9a17:5b89 with SMTP id o10-20020a1709026b0a00b001789a175b89mr21933535plk.113.1664201791912;
+        Mon, 26 Sep 2022 07:16:31 -0700 (PDT)
 Received: from [10.2.223.68] ([61.120.150.77])
-        by smtp.gmail.com with ESMTPSA id b15-20020a63d30f000000b004393cb720afsm10769098pgg.38.2022.09.26.07.01.58
+        by smtp.gmail.com with ESMTPSA id b11-20020a170903228b00b001781cad59e3sm11362897plh.108.2022.09.26.07.16.25
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 26 Sep 2022 07:02:03 -0700 (PDT)
-Message-ID: <1de80c28-33ec-b1bd-a557-91e4166d2da7@bytedance.com>
-Date: Mon, 26 Sep 2022 22:01:55 +0800
+        Mon, 26 Sep 2022 07:16:31 -0700 (PDT)
+Message-ID: <3e025745-06af-c5c6-aa70-6ff1f9ad0962@bytedance.com>
+Date: Mon, 26 Sep 2022 22:16:23 +0800
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -48,7 +48,8 @@ List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:102.0)
  Gecko/20100101 Thunderbird/102.3.0
-Subject: Re: [PATCH 2/3] PCI/ERR: Clear fatal status in pcie_do_recovery()
+Subject: Re: [PATCH 3/3] PCI/AER: Use pci_aer_raw_clear_status() to clear root
+ port's AER error status
 Content-Language: en-US
 To: Bjorn Helgaas <helgaas@kernel.org>
 Cc: fancer.lancer@gmail.com, jdmason@kudzu.us, dave.jiang@intel.com,
@@ -57,87 +58,61 @@ Cc: fancer.lancer@gmail.com, jdmason@kudzu.us, dave.jiang@intel.com,
  martin.petersen@oracle.com, linux-scsi@vger.kernel.org,
  linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org,
  ntb@lists.linux.dev, linuxppc-dev@lists.ozlabs.org
-References: <20220922210853.GA1335665@bhelgaas>
+References: <20220922215030.GA1341314@bhelgaas>
 From: Zhuo Chen <chenzhuo.1@bytedance.com>
-In-Reply-To: <20220922210853.GA1335665@bhelgaas>
+In-Reply-To: <20220922215030.GA1341314@bhelgaas>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 
 
 
-On 9/23/22 5:08 AM, Bjorn Helgaas wrote:
-> On Fri, Sep 02, 2022 at 02:16:33AM +0800, Zhuo Chen wrote:
->> When state is pci_channel_io_frozen in pcie_do_recovery(),
->> the severity is fatal and fatal status should be cleared.
->> So we add pci_aer_clear_fatal_status().
-> 
-> Seems sensible to me.  Did you find this by code inspection or by
-> debugging a problem?  If the latter, it would be nice to mention the
-> symptoms of the problem in the commit log.
-
-I found this by code inspection so I may not enumerate what kind of 
-problems this code will cause.
-> 
->> Since pcie_aer_is_native() in pci_aer_clear_fatal_status()
->> and pci_aer_clear_nonfatal_status() contains the function of
->> 'if (host->native_aer || pcie_ports_native)', so we move them
->> out of it.
-> 
-> Wrap commit log to fill 75 columns.
-> 
+On 9/23/22 5:50 AM, Bjorn Helgaas wrote:
+> On Fri, Sep 02, 2022 at 02:16:34AM +0800, Zhuo Chen wrote:
+>> Statements clearing AER error status in aer_enable_rootport() has the
+>> same function as pci_aer_raw_clear_status(). So we replace them, which
+>> has no functional changes.
+>>
 >> Signed-off-by: Zhuo Chen <chenzhuo.1@bytedance.com>
 >> ---
->>   drivers/pci/pcie/err.c | 8 ++++++--
->>   1 file changed, 6 insertions(+), 2 deletions(-)
+>>   drivers/pci/pcie/aer.c | 7 +------
+>>   1 file changed, 1 insertion(+), 6 deletions(-)
 >>
->> diff --git a/drivers/pci/pcie/err.c b/drivers/pci/pcie/err.c
->> index 0c5a143025af..e0a8ade4c3fe 100644
->> --- a/drivers/pci/pcie/err.c
->> +++ b/drivers/pci/pcie/err.c
->> @@ -243,10 +243,14 @@ pci_ers_result_t pcie_do_recovery(struct pci_dev *dev,
->>   	 * it is responsible for clearing this status.  In that case, the
->>   	 * signaling device may not even be visible to the OS.
->>   	 */
->> -	if (host->native_aer || pcie_ports_native) {
->> +	if (host->native_aer || pcie_ports_native)
->>   		pcie_clear_device_status(dev);
-> 
-> pcie_clear_device_status() doesn't check for pcie_aer_is_native()
-> internally, but after 068c29a248b6 ("PCI/ERR: Clear PCIe Device Status
-> errors only if OS owns AER") and aa344bc8b727 ("PCI/ERR: Clear AER
-> status only when we control AER"), both callers check before calling
-> it.
-> 
-> I think we should move the check inside pcie_clear_device_status().
-> That could be a separate preliminary patch.
-> 
-> There are a couple other places (aer_root_reset() and
-> get_port_device_capability()) that do the same check and could be
-> changed to use pcie_aer_is_native() instead.  That could be another
-> preliminary patch.
-> 
-Good suggestion. But I have only one doubt. In aer_root_reset(), if we 
-use "if (pcie_aer_is_native(dev) && aer)", when dev->aer_cap
-is NULL and root->aer_cap is not NULL, pcie_aer_is_native() will return 
-false. It's different from just using "(host->native_aer ||
-pcie_ports_native)".
-Or if we can use "if (pcie_aer_is_native(root))", at this time a NULL 
-pointer check should be added in pcie_aer_is_native() because root may 
-be NULL.
-
-> 
->> +	if (state == pci_channel_io_frozen)
->> +		pci_aer_clear_fatal_status(dev);
->> +	else
->>   		pci_aer_clear_nonfatal_status(dev);
->> -	}
->> +
->>   	pci_info(bridge, "device recovery successful\n");
->>   	return status;
+>> diff --git a/drivers/pci/pcie/aer.c b/drivers/pci/pcie/aer.c
+>> index d2996afa80f6..eb0193f279f2 100644
+>> --- a/drivers/pci/pcie/aer.c
+>> +++ b/drivers/pci/pcie/aer.c
+>> @@ -1287,12 +1287,7 @@ static void aer_enable_rootport(struct aer_rpc *rpc)
+>>   				   SYSTEM_ERROR_INTR_ON_MESG_MASK);
 >>   
->> -- 
->> 2.30.1 (Apple Git-130)
->>
+>>   	/* Clear error status */
+>> -	pci_read_config_dword(pdev, aer + PCI_ERR_ROOT_STATUS, &reg32);
+>> -	pci_write_config_dword(pdev, aer + PCI_ERR_ROOT_STATUS, reg32);
+>> -	pci_read_config_dword(pdev, aer + PCI_ERR_COR_STATUS, &reg32);
+>> -	pci_write_config_dword(pdev, aer + PCI_ERR_COR_STATUS, reg32);
+>> -	pci_read_config_dword(pdev, aer + PCI_ERR_UNCOR_STATUS, &reg32);
+>> -	pci_write_config_dword(pdev, aer + PCI_ERR_UNCOR_STATUS, reg32);
+>> +	pci_aer_raw_clear_status(pdev);
+> 
+> It's true that this is functionally equivalent.
+> 
+> But 20e15e673b05 ("PCI/AER: Add pci_aer_raw_clear_status() to
+> unconditionally clear Error Status") says pci_aer_raw_clear_status()
+> is only for use in the EDR path (this should have been included in the
+> function comment), so I think we should preserve that property and use
+> pci_aer_clear_status() here.
+> 
+> pci_aer_raw_clear_status() is the same as pci_aer_clear_status()
+> except it doesn't check pcie_aer_is_native().  And I'm pretty sure we
+> can't get to aer_enable_rootport() *unless* pcie_aer_is_native(),
+> because get_port_device_capability() checks the same thing, so they
+> should be equivalent here.
+> 
+> Bjorn
+Thanks Bjorn, this very detailed correction is helpful. By the way, 
+'only for use in the EDR path' obviously written in the function 
+comments may be better. So far only commit log has included these.
+
+I will change to use pci_aer_clear_status() in next patch.
 
 -- 
 Thanks,
