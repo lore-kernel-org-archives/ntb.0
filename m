@@ -1,136 +1,189 @@
-Received: from mail-pg1-f172.google.com (mail-pg1-f172.google.com [209.85.215.172])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from EUR05-AM6-obe.outbound.protection.outlook.com (mail-am6eur05on2054.outbound.protection.outlook.com [40.107.22.54])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2EA6D4406
-	for <ntb@lists.linux.dev>; Wed, 28 Sep 2022 15:54:12 +0000 (UTC)
-Received: by mail-pg1-f172.google.com with SMTP id 78so12557854pgb.13
-        for <ntb@lists.linux.dev>; Wed, 28 Sep 2022 08:54:12 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=bytedance-com.20210112.gappssmtp.com; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date;
-        bh=QSAEb2hPZjK1ev/lBZ3te+y9kjBYl6H9pPRLwr+M8HM=;
-        b=zVPtZAzw49EHbsqZqHSTXnYA4fCJVgV0ehiFbcHyaUHvs7WCLafoa7uK8ML2BgDos4
-         U3FTz1fzfHSRaG2aOZCd8/5mNO7Axa7rX0KW2D5mLDTSbLVEtkUQOx6vb/WyEcOgh4Uz
-         G3MWAF5BUbXqgxQMBe6juX25LkAKPlRyvo63Wzt+Yv3rhBiZNaVmN2vC4IinqkH8thMI
-         fcW+q5fTcp+dYGYs/mLBTunIT/PtRbJH+KvZjES40kJqik7SN1sR/JSsLEQ/r4w+dY53
-         yZdvlKWU6xrLQVlPNbzhwy4LOQyi9Q3bXls/2CE0MyPKoxajKOawzKhM6WGhLzi7H/dw
-         P2bA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date;
-        bh=QSAEb2hPZjK1ev/lBZ3te+y9kjBYl6H9pPRLwr+M8HM=;
-        b=eF5G6YYYR313Q/ASU4SDkjwSLbZ9YjEPgtcfr6pJQJ7XQWoS7TeWNrZfZ36NmWg871
-         TeOsVhW1YWh07edSds+b7/hm/yAFFqRyDX9sIy9B7xJ4X1q/GisT/MpwmLRVKT4ZOGeC
-         wI8uVzbfKkF9DXgcw+JlJZsr/fAnueaGWKdXZsF1P+pqJSwmhKdYlLAs0Bo5ulu4Uv3x
-         FE4XZO2elVkTUcJCEcHnmWU9BjZKp2ciUMK2GbiFj4tZkPDPO6F9bta09HTFzqIcieft
-         NbGdWWL52DWmtfHJXdknNccaM/mEuad3bv0kxClgXQpCVk+q+TekKjwQhj0Hjdvuw6kx
-         vTog==
-X-Gm-Message-State: ACrzQf0Z5jmZTKR19fQxOkWwxpJXlWZyYn44y8OWVvOgBaRoYdLwc66q
-	KEiWJi2h3wOHaHf4X2Nnpv2yEA==
-X-Google-Smtp-Source: AMsMyM7wU01xLNnTTslW5qPcH9U0d3210mJJyOX0dSh6iYjiDoTkBczR8AGldIXcdzIutrYwjwxMXw==
-X-Received: by 2002:a63:5c07:0:b0:43f:6af:7590 with SMTP id q7-20020a635c07000000b0043f06af7590mr7563656pgb.272.1664380451650;
-        Wed, 28 Sep 2022 08:54:11 -0700 (PDT)
-Received: from [10.2.223.68] ([61.120.150.77])
-        by smtp.gmail.com with ESMTPSA id i28-20020a056a00005c00b0053e72ed5252sm4231499pfk.42.2022.09.28.08.54.05
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 28 Sep 2022 08:54:11 -0700 (PDT)
-Message-ID: <eade28ce-97eb-ff96-e8cb-7e1c2127f77b@bytedance.com>
-Date: Wed, 28 Sep 2022 23:54:02 +0800
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0E4AD5381;
+	Wed, 28 Sep 2022 21:39:28 +0000 (UTC)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=GvENDMliue3/FxlO9ZBOmjNG1ODpOacSDWAQny0wJ+9rNf7tM2Mx6Lc6YsBncABeIns51ajrRu9hSIEB1XTUcZ3jDFqLkTUQGLAPkIk6K51d7QObcc6vY3Z6QxLiF54KtoZFdQ8nPshRJURGTxvUjU2xBO0zUDU4jMqN9aAqF+E9GNjuUD5tYRnJb7KEZx5pzIPUxchjCvV6weDhLRwrxGsLPI9yCNcFLkQ/pYMNiirhugkfKaWAskbF7CoAizkISugalRpa5x+n9/aWWcxDibqYrlRzNK7OqSPAPOS9RsbnlNdClvbjvqE+16KjKuGfyZh6sPznRqX0IvC7stQvGA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=rktDTD4A/iB32/kZ63Y3XStryDpmWWe53Z18bX+2+4I=;
+ b=ZEreDjflt9PuMM1xjkCQbVgO4EBqO1P83oyOQEMLStbJKqsQotkC1n7JyjvP5OOLInBJYpgDQajLl3NAgairHxycZBVWU9sNkfMQtpdYwYTfyi9c1cxI0AsDOt3otQs/PjG+TMufIakxcxeWST+5yizUZnHMgWT1P8KKMPM9eEg2f701QUFt5ORIkt8ES7sbdnDer47XLfPMpMJlbDVsked3eVMc/FmS+m89ZRQUJ1BSJiCGcT4HeMFLhUlqs3xXgXfap/moG323Zeu7nxjsP9OYxaIU6SyuIDgC5qddapLXr2luROyETWkLA4Qtkif9SsZLARKlNMKB9FgeOJ/Bjw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
+ header.d=nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=rktDTD4A/iB32/kZ63Y3XStryDpmWWe53Z18bX+2+4I=;
+ b=VZEswMuhSS/o+AwdT4KaR/BheEAS+63sGX+xxocOe2kQf02199eEhEXdTCIAOCgENDJ0iF2DNFdchBsJdfBn/a/viKrMgdCiXw/ZsO/Hiyb01EWz4mUQrsXyOy70+ia3fA6PH2XpRpfjU977qQCIM75E9CIpkhp7FfW3AosH8hM=
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nxp.com;
+Received: from AM9PR04MB8793.eurprd04.prod.outlook.com (2603:10a6:20b:408::22)
+ by DU2PR04MB9100.eurprd04.prod.outlook.com (2603:10a6:10:2f3::10) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5676.17; Wed, 28 Sep
+ 2022 21:39:24 +0000
+Received: from AM9PR04MB8793.eurprd04.prod.outlook.com
+ ([fe80::4d5d:40ae:e0c0:63a3]) by AM9PR04MB8793.eurprd04.prod.outlook.com
+ ([fe80::4d5d:40ae:e0c0:63a3%7]) with mapi id 15.20.5676.019; Wed, 28 Sep 2022
+ 21:39:18 +0000
+From: Frank Li <Frank.Li@nxp.com>
+To: fancer.lancer@gmail.com,
+	helgaas@kernel.org,
+	sergey.semin@baikalelectronics.ru,
+	kw@linux.com,
+	linux-pci@vger.kernel.org,
+	manivannan.sadhasivam@linaro.org,
+	ntb@lists.linux.dev,
+	jdmason@kudzu.us,
+	kishon@ti.com,
+	haotian.wang@sifive.com,
+	lznuaa@gmail.com,
+	imx@lists.linux.dev
+Subject: [RFC] PCI EP/RC network transfer by using eDMA
+Date: Wed, 28 Sep 2022 16:38:56 -0500
+Message-Id: <20220928213856.54211-1-Frank.Li@nxp.com>
+X-Mailer: git-send-email 2.35.1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+X-ClientProxiedBy: SJ0PR03CA0232.namprd03.prod.outlook.com
+ (2603:10b6:a03:39f::27) To AM9PR04MB8793.eurprd04.prod.outlook.com
+ (2603:10a6:20b:408::22)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:102.0)
- Gecko/20100101 Thunderbird/102.3.0
-Subject: Re: [External] Re: [PATCH v3 0/9] PCI/AER: Fix and optimize usage of
- status clearing api
-Content-Language: en-US
-To: Serge Semin <fancer.lancer@gmail.com>, bhelgaas@google.com,
- Sathyanarayanan Kuppuswamy <sathyanarayanan.kuppuswamy@linux.intel.com>
-Cc: ruscur@russell.cc, oohall@gmail.com, jdmason@kudzu.us,
- dave.jiang@intel.com, allenbh@gmail.com, james.smart@broadcom.com,
- dick.kennedy@broadcom.com, jejb@linux.ibm.com, martin.petersen@oracle.com,
- linuxppc-dev@lists.ozlabs.org, linux-pci@vger.kernel.org,
- linux-kernel@vger.kernel.org, ntb@lists.linux.dev, linux-scsi@vger.kernel.org
-References: <20220928105946.12469-1-chenzhuo.1@bytedance.com>
- <20220928110623.b3vocoubasrshyzk@mobilestation>
-From: Zhuo Chen <chenzhuo.1@bytedance.com>
-In-Reply-To: <20220928110623.b3vocoubasrshyzk@mobilestation>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: AM9PR04MB8793:EE_|DU2PR04MB9100:EE_
+X-MS-Office365-Filtering-Correlation-Id: 76cf1657-85e1-4ee0-0eaa-08daa199e5e7
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info:
+	Q3P7dBtz1Vacsa/Ua7XgzYoUpj5UUEFdx57CrUX4ojmAHN4VDwRALrXsjflSN72IKh/pBaDPRlAJs222qFi5yXavK1WP61N1rJwlR385bnBHvuG08nfCStO5BzTDFyz6i1FH7lYbQrXa/s3qx/D6GKzGv2vKDazBARO5j17jzzTHpLRXKxurxKYKseVBUVb0Env7+XNx5H1ENJNzqpo2UkJHidTU3QODub6UpynTF3wOSlaAQlftJRrWE6XaIS542gOSD07KE7owALxnjzxKH5OtguP++dAfd3WPWIQWmPenTXzFZ+ST2ilKihQoM2KTrXeVrqQkr4ouwY8e2W0y2ffFolXM5hFo9oUpr0AnAtHizgXj4Py6SJIcfQ9BmG83/2MKfdXEaQ7NLJtryfBLHsZ+efJhv/COo51Rx317ozwmhaOovFB1OhWBfLumkX8esKK4nPDk21Neek8dLRskXt9Akjqn3QzbMijmyP2jLksjZRsEf7OePubKb6neZDPBpTAzQpFaKV5a5o8u46EEhO9WG17t7i6XCMd3J/AFB5r4Gnq7Cb+poWpLceQmuRbNsfQqFPfIJvir1vsx+HJ8jysZpyLkbHWe17L6ZHAsWdLXQvPFN1GENgG/D2FuNzhsBlK4um2o5jjf59xIv0jGsFNG42DN6wU55ZrdD/ch7GGhOSwotQPaTBoutj/e8ofm34ffactiRDFTKY1Xro/jOo3QeHFUOqBRFsVexjbcrVcjd/p13q8S2V12wU9BoSt3umwBqx3e4pQ2OuEcqW/qbxZ0uPAB3BRtQ//NLfS9jHUleOfs2ZhwSKB0MpVcpDOpeeJ77F0OyWgOlkanCKAcOMF9d+TCMNCUidoZg/Pi77A=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:AM9PR04MB8793.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230022)(4636009)(396003)(39860400002)(376002)(136003)(366004)(346002)(451199015)(38100700002)(83380400001)(316002)(921005)(5660300002)(66556008)(478600001)(7416002)(2906002)(66946007)(6486002)(38350700002)(6666004)(41300700001)(66476007)(8676002)(6506007)(966005)(52116002)(8936002)(1076003)(186003)(2616005)(86362001)(36756003)(26005)(6512007);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?utf-8?B?bkdhL2VxcUVaZVYyYkFCRktjTURXc05Tc0s2NGF6eTUzZ21hZnUyUlJqT2wv?=
+ =?utf-8?B?M3F3L213d2tZYitIK2ZKQzRVQy84YU0yblZ5Z0g0V1cxNnpLempNZG1MVlQ5?=
+ =?utf-8?B?OUs0WS9IOGdOUU80YWRBRGJCU3FkczZ3Z0pxZkcrTzlieXpMM09nOTM4Y0RP?=
+ =?utf-8?B?dlErbE1rM1I2bjRaOTZpdGZuRHV2MHZCVld0bnpOK3BaVmNoS2U5S3VPWSt5?=
+ =?utf-8?B?UHlEMFhsblhzbGwvQ3hGdDdNQi9YZzBaRUd5MVNtYzZqRFhPNFkwaDF5Rjdq?=
+ =?utf-8?B?SmJHWVMxR0FFMDN6aWpTSHY0elNuNU9nclJGTUFpOU9FZE9VYXlHek9XUzNl?=
+ =?utf-8?B?SGdEZWcxRFY5UDhsWjhjelZzZ2FUQzdRZHd0SWZNZ2FIV3F3L3lTTGM2cVB3?=
+ =?utf-8?B?UmFSNkI2YU55QlFjNVByV0JybzF5OGtuQmFHWmFZY0tJN0NRWnVZWVVieHBI?=
+ =?utf-8?B?c21BQnhhUmNKejJRZVR0cmVKZlJJN3g0T3RBTlNpODQ1NHlqczVuSyt1c09D?=
+ =?utf-8?B?WUNqOU9FNWN4UFZscEFybjZ4UUlMVkNmbVA4UHYxV3FjNzhwNWQ4SDF6TzNn?=
+ =?utf-8?B?NFM2d0F2eEhWNjlBMkl5U3MrWXVHSmo4anNqaytmRlBCclFFUEUxdDZtaEht?=
+ =?utf-8?B?cHZpMHBTM3dPbVdiT1d1dm5MTEdGbktkM01KaXVhaWxXbHl4S1U3a1QxdGdr?=
+ =?utf-8?B?LzIwdWdYa2hkdHJObEhWeHBjLzM0dXcrdjQxRitFOGxEdmhESTlzNVZOSG1G?=
+ =?utf-8?B?c0VkT202MzZDL2lLN25TdTl2OEpBT2gySmlSQnV2RDVHTkp4ek82aHNEb2NK?=
+ =?utf-8?B?VkVBUnd3SWZrS0ZRMGNYYWNKTTJOand4b2tad0p3UTY1RFBHejJjM1lQUHVl?=
+ =?utf-8?B?RHhVb1dqcFg3M2tYaUlhSWVJcldIYlp3Zjlqam11Vjlqa1VvTjBPRlZzeno4?=
+ =?utf-8?B?REFrSjBBeEpRYytKdEN2MDdxMW1laXdJUXBrODhpVHJUcUE0bmR6VytGbEpX?=
+ =?utf-8?B?OFA1NW5JT2dVRklzTWRFZFplRnlrMmQ1RUhxMnUvYmlMRTE1akpxQmRRa1Ey?=
+ =?utf-8?B?c0k2UWV4OUFJWFNKU0V4SDNtSDREcys2Nzk4MlU2UWxHZ1p4QnMyUEg2QUxS?=
+ =?utf-8?B?UkFrZGVsVXRsS010WUVWKzNaamU2NlMwcWNlNHpVcWMva1RFR3pUSnU1WWJs?=
+ =?utf-8?B?TUdPaEdacFBkNEdjZmFVQ2lZeTFRYVpLS2ZwVXVZY2VmdWVqY0YvV1pBNlFl?=
+ =?utf-8?B?Mm9rT2RRSkY0U0RYSzhQT1E5Mi9WSDlVaklFajQ0TWVxMkZhZmYwNWw1R1FB?=
+ =?utf-8?B?ZnR0UHFZajBtTVRLdTVtdUppYUtKbUREZGc3VGZNY2UzSDh2bVZpZ0w3QTYv?=
+ =?utf-8?B?ZVp0Y1pGTTJtS3o4eGJXNTJmZlE3aS80SndyWUFseFUzRE1xSzAxSFFkb3BZ?=
+ =?utf-8?B?aStUTlRxbWJnYUxtaEw2cWVrMWNaV2dkbmZvZTZkZ3VYaTNGN1dhMGJVQmI1?=
+ =?utf-8?B?ZVZWTVRtWW1PbWxmSVF0dGk5enNlY2M1b083Qlp3ekJwOCsvckJFS3FlNm0r?=
+ =?utf-8?B?ZkF3R3NLR2I0S1VwMzkzUUg4ZktHbkd0bDFzQUFpYzBLWGxUSVBOT2tidlNr?=
+ =?utf-8?B?WnJYa2oyUTBiODc4OTQ1N0JCSHRHWG9uN2ZHVWJSc1dYSzFwR3hMTWZrSnBY?=
+ =?utf-8?B?eWRtKzRDczRPcFl3RW8xcnBwNkEySFRGeHVWM0xacFRhbnU3cnV6UXRCTWZj?=
+ =?utf-8?B?K0JlSUh1SndHTVYxNVJqbDg2SXcvbjZWKzkwTmhBbHdNMEw0VzIzYzBPYTJT?=
+ =?utf-8?B?L0NiYzdWakdoSG9WcmYxcnFFempQSkxiMks3NVZ2ZlhGeng3RjNzSCtYYXZD?=
+ =?utf-8?B?ajJMUklReUtEbzBYWDlheFI1bGFrdXBNV0xWNHFMdFcxUU02N3AyeTVVYy9p?=
+ =?utf-8?B?UlBmVFM5Vk81Y0RVQ3k2QUVmbFF5L09DeEQ1QVVZOFF2aU4ybEJxd1VSMzdM?=
+ =?utf-8?B?K3hHOFlQTTFiaWkzTCtsbm1LL25nQ3huTUNSQ3g4MmFrWWhqeGdvNm1Fc1V0?=
+ =?utf-8?B?cElqTjBvQkJ6T1VIcnBZY3dsRnRSSmpMTythdzlDb1pBMVpKRktBM0IwZWda?=
+ =?utf-8?Q?AGn6uOExHgYutdkT/LOr93GPK?=
+X-OriginatorOrg: nxp.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 76cf1657-85e1-4ee0-0eaa-08daa199e5e7
+X-MS-Exchange-CrossTenant-AuthSource: AM9PR04MB8793.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 28 Sep 2022 21:39:18.8976
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: DybJM5770QIckJIi6UgbeANIP5GnytgOgZ3FNSQM49jJ72oKSBLMVPm4xLbENQjaku4ARXPpD/MwDhWoT/VRwA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DU2PR04MB9100
 
 
+ALL:
 
-On 9/28/22 7:06 PM, Serge Semin wrote:
-> On Wed, Sep 28, 2022 at 06:59:37PM +0800, Zhuo Chen wrote:
->> Hello.
->>
->> Here comes patch v3, which contains some fixes and optimizations of
->> aer api usage. The v1 and v2 can be found on the mailing list.
->>
->> v3:
->> - Modifications to comments proposed by Sathyanarayanan.
-> 
->> Remove
->>    pci_aer_clear_nonfatal_status() call in NTB and improve commit log.
-> 
-> Failed to see who has requested that...
-> 
-> -Sergey
-> 
-Hi, Sergey
+       Recently some important PCI EP function patch already merged.  
+Especially DWC EDMA support. 
+       PCIe EDMA have nice feature, which can read/write all PCI host
+memory regardless EP side PCI memory map windows size.
+       Pci-epf-vntb.c also merged into mainline.  
+       And part of vntb msi patch already merged. 
+		https://lore.kernel.org/imx/86mtaj7hdw.wl-maz@kernel.org/T/#m35546867af07735c1070f596d653a2666f453c52
 
-Currently other vendor drivers do not clear error status in their own 
-init code, I don't exactly know what is special reason for clearing 
-error status during init code in ntb driver.
+       Although msi can improve transfer latency,  the transfer speed
+still quite slow because DMA have not supported yet. 
 
-An evidence is in pci_aer_init(), PCI core driver has do 
-pci_aer_clear_status() and pci_enable_pcie_error_reporting() in common 
-process. So vendor drivers don't need to do again.
+       I plan continue to improve transfer speed. But I find some
+fundamental limitation at original framework, which can’t use EDMA 100% benefits. 
+       After research some old thread: 
+		https://lore.kernel.org/linux-pci/20200702082143.25259-1-kishon@ti.com/
+		https://lore.kernel.org/linux-pci/9f8e596f-b601-7f97-a98a-111763f966d1@ti.com/T/
+		Some RDMA document and https://github.com/ntrdma/ntrdma-ext
 
-But I don't know the reason why many vendor drivers reserve 
-pci_enable_pcie_error_reporting() after commit f26e58bf6f54 ("PCI/AER: 
-Enable error reporting when AER is native"). Do they need to be removed?
-Could Bjorn and Sathyanarayanan help look into it, thanks a lot.
+       I think the solution, which based on haotian wang will be best one. 
 
-Thanks.
->>
->> v2:
->> - Modifications to comments proposed by Bjorn. Split patch into more
->>    obvious parts.
->>
->> Zhuo Chen (9):
->>    PCI/AER: Add pci_aer_clear_uncorrect_error_status() to PCI core
->>    PCI/DPC: Use pci_aer_clear_uncorrect_error_status() to clear
->>      uncorrectable error status
->>    NTB: Remove pci_aer_clear_nonfatal_status() call
->>    scsi: lpfc: Change to use pci_aer_clear_uncorrect_error_status()
->>    PCI/AER: Unexport pci_aer_clear_nonfatal_status()
->>    PCI/AER: Move check inside pcie_clear_device_status().
->>    PCI/AER: Use pcie_aer_is_native() to judge whether OS owns AER
->>    PCI/ERR: Clear fatal error status when pci_channel_io_frozen
->>    PCI/AER: Refine status clearing process with api
->>
->>   drivers/ntb/hw/idt/ntb_hw_idt.c |  2 --
->>   drivers/pci/pci.c               |  7 +++--
->>   drivers/pci/pci.h               |  2 ++
->>   drivers/pci/pcie/aer.c          | 45 +++++++++++++++++++--------------
->>   drivers/pci/pcie/dpc.c          |  3 +--
->>   drivers/pci/pcie/err.c          | 15 ++++-------
->>   drivers/pci/pcie/portdrv_core.c |  3 +--
->>   drivers/scsi/lpfc/lpfc_attr.c   |  4 +--
->>   include/linux/aer.h             |  4 +--
->>   9 files changed, 44 insertions(+), 41 deletions(-)
->>
->> -- 
->> 2.30.1 (Apple Git-130)
->>
+  ┌─────────────────────────────────┐   ┌──────────────┐
+  │                                 │   │              │
+  │                                 │   │              │
+  │   VirtQueue             RX      │   │  VirtQueue   │
+  │     TX                 ┌──┐     │   │    TX        │
+  │  ┌─────────┐           │  │     │   │ ┌─────────┐  │
+  │  │ SRC LEN ├─────┐  ┌──┤  │◄────┼───┼─┤ SRC LEN │  │
+  │  ├─────────┤     │  │  │  │     │   │ ├─────────┤  │
+  │  │         │     │  │  │  │     │   │ │         │  │
+  │  ├─────────┤     │  │  │  │     │   │ ├─────────┤  │
+  │  │         │     │  │  │  │     │   │ │         │  │
+  │  └─────────┘     │  │  └──┘     │   │ └─────────┘  │
+  │                  │  │           │   │              │
+  │     RX       ┌───┼──┘   TX      │   │    RX        │
+  │  ┌─────────┐ │   │     ┌──┐     │   │ ┌─────────┐  │
+  │  │         │◄┘   └────►│  ├─────┼───┼─┤         │  │
+  │  ├─────────┤           │  │     │   │ ├─────────┤  │
+  │  │         │           │  │     │   │ │         │  │
+  │  ├─────────┤           │  │     │   │ ├─────────┤  │
+  │  │         │           │  │     │   │ │         │  │
+  │  └─────────┘           │  │     │   │ └─────────┘  │
+  │   virtio_net           └──┘     │   │ virtio_net   │
+  │  Virtual PCI BUS   EDMA Queue   │   │              │
+  ├─────────────────────────────────┤   │              │
+  │  PCI EP Controller with eDMA    │   │  PCI Host    │
+  └─────────────────────────────────┘   └──────────────┘
 
--- 
-Zhuo Chen
+
+       Basic idea is
+	1.	Both EP and host probe virtio_net driver
+	2.	There are two queues,  one is EP side(EQ),  the other is Host side. 
+	3.	EP side epf driver map Host side’s queue into EP’s space. , Called HQ.
+	4.	One working thread 
+	a.	pick one TX from EQ and RX from HQ, combine and generate EDMA request, and put into DMA TX queue.
+	b.	Pick one RX from EQ and TX from HQ, combine and generate EDMA request, and put into DMA RX queue. 
+	5.	EDMA done irq will mark related item in EP and HQ finished.
+
+The whole transfer is zero copied and use DMA queue.
+
+      RDMA have similar idea and more coding efforts. 
+      I think Kishon Vijay Abraham I prefer use vhost,  but I don’t know how to build a queue at host side.
+      NTB transfer just do one directory EDMA transfer (DMA write) because Read actually local memory
+ to local memory.
+
+      Any comments about overall solution?
+
+best regards
+Frank Li
