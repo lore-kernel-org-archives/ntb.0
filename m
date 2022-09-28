@@ -1,104 +1,160 @@
-Received: from mail-lf1-f51.google.com (mail-lf1-f51.google.com [209.85.167.51])
+Received: from mail-pj1-f50.google.com (mail-pj1-f50.google.com [209.85.216.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 05FFD7B
-	for <ntb@lists.linux.dev>; Wed, 28 Sep 2022 11:00:39 +0000 (UTC)
-Received: by mail-lf1-f51.google.com with SMTP id bu25so17903210lfb.3
-        for <ntb@lists.linux.dev>; Wed, 28 Sep 2022 04:00:39 -0700 (PDT)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5F31C7B
+	for <ntb@lists.linux.dev>; Wed, 28 Sep 2022 11:00:44 +0000 (UTC)
+Received: by mail-pj1-f50.google.com with SMTP id cp18so3051306pjb.2
+        for <ntb@lists.linux.dev>; Wed, 28 Sep 2022 04:00:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date;
-        bh=OcX91QSmfcORtUJuhjxsYlI4jDkm84+aPMTKqsh2mFg=;
-        b=B22A+5wg/gpUg3toqo4rJeKFnUzSSnLoGxNGs8VRO3g0wdmQbtK6mgG/i3q14yO2vo
-         gQKY919BK1PBejNcNheYfn98WzgaSHM15ncLgQfaiSv2DhBcSYTHuRUVylsKvh8oVAxq
-         bAr9bG39yRRyRQIQG8hcT29xbgJhsghWNtUnP6zh6Nh2y3Y6R23E2SKY3OnbiNrlV9Hv
-         vBzjNHfwCIT+m791PM9xrvBJbhxLMcthuomHcNynvO/4FmtiwC+48v2C+CtK/9rKShPn
-         uZFVYF2G1sUIX2kXFCxThLI5i9YqGPzJtxXnhlK+hNJPnXFPNX51P8567jqadv01p1Cm
-         ahoQ==
+        d=bytedance-com.20210112.gappssmtp.com; s=20210112;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date;
+        bh=rCPVKZ50NkFbH9E+3DsIFhzlzdb9LrGYkPCbNAondgs=;
+        b=iLmZWvRN87k27aqqnGiiZyr/PIvIi6gyg+ubxnGsz6AYdpaL02gOAYpDwyX/av5gea
+         SGBHsgy3kqlL+UdASZ5ba0G0uglZ6uIB/hlEynmvUiwavZfENlilap49GoCKCO8jil5s
+         ykJhjtuNkA1jYk9HnORk/eRJKvKVIziGBjgU/YDTn0FHYWG/JIieXlD2ZML1eBckofJg
+         19/H6u5nMnCZs4ZVHPx9hSz4jjHELKTW2Scm/xgg4Zs20v+XcW0UfJh0UjtkgmRdL/p3
+         KO7B4Sni6jjjVPHeoGC8vnJK9t4cyJ26UjpqZrOFvpUSKtdd18rkQpcUIu0YBcdyw3Ez
+         /e0g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date;
-        bh=OcX91QSmfcORtUJuhjxsYlI4jDkm84+aPMTKqsh2mFg=;
-        b=pzKBFNGFkJK9YxMZDhKTkZXiz50SC9OfOUd2QTlWq5niAMvghxYlwJRd4/Dq3Sbsgv
-         0gLtB6wxKjh4MlCoBCTQU4qUQNuENtlSMhrV7IbV8MKBOzEctMmGk6FeNFzcHS3jnIrl
-         e2oCP5I1a8uDab6pDz4AFXHF8gu3MHn2OD+sOPh1YejxlZMBGrGMYpRuz6eTqutmwPKV
-         isfETFetjhGkUPrehG67ao3FByb8wWoobLXnixoqzoOgdwVPnvO2ahtolYUPQZqymrKc
-         0wvvU/GNlmvt6Lh2iw758kCtxRKC64njOuFKJPPxuBCooZtANm70PoZx41ZTazIduzCs
-         2N6A==
-X-Gm-Message-State: ACrzQf2AUmwdSxc5PB3cjoFrDi/1btL2tyYaF3Q47B/8Ako4S/6NGtTf
-	TptBf0ix/mzC2fzRmtQ4WL4=
-X-Google-Smtp-Source: AMsMyM7JGXbsNz0x5dE7UU8ItndkkQoelLZGntJ1miWPln8EohyuyG9V5ZZNjSRdJrKF5P6xSXVViQ==
-X-Received: by 2002:a05:6512:12c8:b0:49b:8005:1d9d with SMTP id p8-20020a05651212c800b0049b80051d9dmr13713891lfg.489.1664362838099;
-        Wed, 28 Sep 2022 04:00:38 -0700 (PDT)
-Received: from mobilestation ([95.79.140.178])
-        by smtp.gmail.com with ESMTPSA id z18-20020a19f712000000b00494a11c5f52sm442697lfe.256.2022.09.28.04.00.36
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 28 Sep 2022 04:00:37 -0700 (PDT)
-Date: Wed, 28 Sep 2022 14:00:35 +0300
-From: Serge Semin <fancer.lancer@gmail.com>
-To: Zhuo Chen <chenzhuo.1@bytedance.com>
-Cc: bhelgaas@google.com, ruscur@russell.cc, oohall@gmail.com,
-	jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com,
-	james.smart@broadcom.com, dick.kennedy@broadcom.com,
-	jejb@linux.ibm.com, martin.petersen@oracle.com,
-	linuxppc-dev@lists.ozlabs.org, linux-pci@vger.kernel.org,
-	linux-kernel@vger.kernel.org, ntb@lists.linux.dev,
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date;
+        bh=rCPVKZ50NkFbH9E+3DsIFhzlzdb9LrGYkPCbNAondgs=;
+        b=LJ5yDzyMv4cAMrCOfrXcC++B/0mBggBFM154sNUjFmE3FrzRBpYFaJDm/Rr7qsq9ZL
+         O9fseSkgOgAVrt7I3oPu1TLE357dEMIPV/GSvsgFJw93JKgNsNsqHvxEiLUDCc0Oe8Lk
+         TjpDvbl45nruaNPQ5UjuD0rHZcUgjU+3rMbxNJtsjBQVSs2YcInaaWtrqvFGZ8NjvIRS
+         UVq4L+IceavyAMCxid9wCZsFt6g8icjsn30IuZjC98vwUwSSC3uB8f7+TZkbufVXgFt6
+         TEPgbofzE1TiK96n2KbXHCNadMqkWGN92pZZNo+oOSuL4dogFRo0Vmq9HSqu41L4zfiQ
+         ZqyQ==
+X-Gm-Message-State: ACrzQf2Tx5z6MupuIlrGkFn7v+RrPWhjoi8IdVHTudU0E5woqonIWa/w
+	mE0QzAJCCP7S80cU2Eo55N+RZQ==
+X-Google-Smtp-Source: AMsMyM5lEci9yGqtj2f3PQKyVqu+eW1q1DBUopUebAIuNMUWTEcMe2lkXmVXLNNUz1watayaf6Zjww==
+X-Received: by 2002:a17:90a:3989:b0:205:e4c2:e09b with SMTP id z9-20020a17090a398900b00205e4c2e09bmr6011652pjb.190.1664362843851;
+        Wed, 28 Sep 2022 04:00:43 -0700 (PDT)
+Received: from C02F63J9MD6R.bytedance.net ([61.120.150.77])
+        by smtp.gmail.com with ESMTPSA id b13-20020a170902d50d00b00177efb56475sm1539524plg.85.2022.09.28.04.00.37
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 28 Sep 2022 04:00:43 -0700 (PDT)
+From: Zhuo Chen <chenzhuo.1@bytedance.com>
+To: sathyanarayanan.kuppuswamy@linux.intel.com,
+	bhelgaas@google.com,
+	ruscur@russell.cc,
+	oohall@gmail.com,
+	fancer.lancer@gmail.com,
+	jdmason@kudzu.us,
+	dave.jiang@intel.com,
+	allenbh@gmail.com,
+	james.smart@broadcom.com,
+	dick.kennedy@broadcom.com,
+	jejb@linux.ibm.com,
+	martin.petersen@oracle.com
+Cc: chenzhuo.1@bytedance.com,
+	linuxppc-dev@lists.ozlabs.org,
+	linux-pci@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	ntb@lists.linux.dev,
 	linux-scsi@vger.kernel.org
-Subject: Re: [PATCH v2 3/9] NTB: Change to use
- pci_aer_clear_uncorrect_error_status()
-Message-ID: <20220928110035.ehbdxvpzkitbomoe@mobilestation>
-References: <20220927153524.49172-1-chenzhuo.1@bytedance.com>
- <20220927153524.49172-4-chenzhuo.1@bytedance.com>
+Subject: [PATCH v3 6/9] PCI/AER: Move check inside pcie_clear_device_status().
+Date: Wed, 28 Sep 2022 18:59:43 +0800
+Message-Id: <20220928105946.12469-7-chenzhuo.1@bytedance.com>
+X-Mailer: git-send-email 2.30.1 (Apple Git-130)
+In-Reply-To: <20220928105946.12469-1-chenzhuo.1@bytedance.com>
+References: <20220928105946.12469-1-chenzhuo.1@bytedance.com>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220927153524.49172-4-chenzhuo.1@bytedance.com>
+Content-Transfer-Encoding: 8bit
 
-On Tue, Sep 27, 2022 at 11:35:18PM +0800, Zhuo Chen wrote:
-> Status bits for ERR_NONFATAL errors only are cleared in
-> pci_aer_clear_nonfatal_status(), but we want clear uncorrectable
-> error status in idt_init_pci(), so we change to use
-> pci_aer_clear_uncorrect_error_status().
+pcie_clear_device_status() doesn't check for pcie_aer_is_native()
+internally, but after commit 068c29a248b6 ("PCI/ERR: Clear PCIe Device
+Status errors only if OS owns AER") and commit aa344bc8b727 ("PCI/ERR:
+Clear AER status only when we control AER"), both callers check before
+calling it. So move the check inside pcie_clear_device_status().
 
-Have the modification changed since:
-https://lore.kernel.org/linux-pci/20220901181634.99591-2-chenzhuo.1@bytedance.com/
-?
-AFAICS it hasn't. Then my ab-tag should have been preserved on v2.
-One more time:
-Acked-by: Serge Semin <fancer.lancer@gmail.com>
+pcie_clear_device_status() and pci_aer_clear_nonfatal_status() both
+have check internally, so remove check when callers calling them.
 
-Don't forget to add it should you have some more patchset re-spins.
+Signed-off-by: Zhuo Chen <chenzhuo.1@bytedance.com>
+---
+ drivers/pci/pci.c      |  7 +++++--
+ drivers/pci/pcie/aer.c |  4 ++--
+ drivers/pci/pcie/err.c | 14 +++-----------
+ 3 files changed, 10 insertions(+), 15 deletions(-)
 
--Sergey
+diff --git a/drivers/pci/pci.c b/drivers/pci/pci.c
+index 95bc329e74c0..8caf4a5529a1 100644
+--- a/drivers/pci/pci.c
++++ b/drivers/pci/pci.c
+@@ -2282,9 +2282,12 @@ EXPORT_SYMBOL_GPL(pci_set_pcie_reset_state);
+ void pcie_clear_device_status(struct pci_dev *dev)
+ {
+ 	u16 sta;
++	struct pci_host_bridge *host = pci_find_host_bridge(dev->bus);
+ 
+-	pcie_capability_read_word(dev, PCI_EXP_DEVSTA, &sta);
+-	pcie_capability_write_word(dev, PCI_EXP_DEVSTA, sta);
++	if (host->native_aer || pcie_ports_native) {
++		pcie_capability_read_word(dev, PCI_EXP_DEVSTA, &sta);
++		pcie_capability_write_word(dev, PCI_EXP_DEVSTA, sta);
++	}
+ }
+ #endif
+ 
+diff --git a/drivers/pci/pcie/aer.c b/drivers/pci/pcie/aer.c
+index e2ebd108339d..e2320ab27a31 100644
+--- a/drivers/pci/pcie/aer.c
++++ b/drivers/pci/pcie/aer.c
+@@ -971,11 +971,11 @@ static void handle_error_source(struct pci_dev *dev, struct aer_err_info *info)
+ 		 * Correctable error does not need software intervention.
+ 		 * No need to go through error recovery process.
+ 		 */
+-		if (aer)
++		if (aer) {
+ 			pci_write_config_dword(dev, aer + PCI_ERR_COR_STATUS,
+ 					info->status);
+-		if (pcie_aer_is_native(dev))
+ 			pcie_clear_device_status(dev);
++		}
+ 	} else if (info->severity == AER_NONFATAL)
+ 		pcie_do_recovery(dev, pci_channel_io_normal, aer_root_reset);
+ 	else if (info->severity == AER_FATAL)
+diff --git a/drivers/pci/pcie/err.c b/drivers/pci/pcie/err.c
+index 59c90d04a609..f80b21244ef1 100644
+--- a/drivers/pci/pcie/err.c
++++ b/drivers/pci/pcie/err.c
+@@ -188,7 +188,6 @@ pci_ers_result_t pcie_do_recovery(struct pci_dev *dev,
+ 	int type = pci_pcie_type(dev);
+ 	struct pci_dev *bridge;
+ 	pci_ers_result_t status = PCI_ERS_RESULT_CAN_RECOVER;
+-	struct pci_host_bridge *host = pci_find_host_bridge(dev->bus);
+ 
+ 	/*
+ 	 * If the error was detected by a Root Port, Downstream Port, RCEC,
+@@ -241,16 +240,9 @@ pci_ers_result_t pcie_do_recovery(struct pci_dev *dev,
+ 	pci_dbg(bridge, "broadcast resume message\n");
+ 	pci_walk_bridge(bridge, report_resume, &status);
+ 
+-	/*
+-	 * If we have native control of AER, clear error status in the device
+-	 * that detected the error.  If the platform retained control of AER,
+-	 * it is responsible for clearing this status.  In that case, the
+-	 * signaling device may not even be visible to the OS.
+-	 */
+-	if (host->native_aer || pcie_ports_native) {
+-		pcie_clear_device_status(dev);
+-		pci_aer_clear_nonfatal_status(dev);
+-	}
++	pcie_clear_device_status(dev);
++	pci_aer_clear_nonfatal_status(dev);
++
+ 	pci_info(bridge, "device recovery successful\n");
+ 	return status;
+ 
+-- 
+2.30.1 (Apple Git-130)
 
-> 
-> Signed-off-by: Zhuo Chen <chenzhuo.1@bytedance.com>
-> ---
->  drivers/ntb/hw/idt/ntb_hw_idt.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/ntb/hw/idt/ntb_hw_idt.c b/drivers/ntb/hw/idt/ntb_hw_idt.c
-> index 0ed6f809ff2e..d5f0aa87f817 100644
-> --- a/drivers/ntb/hw/idt/ntb_hw_idt.c
-> +++ b/drivers/ntb/hw/idt/ntb_hw_idt.c
-> @@ -2657,8 +2657,8 @@ static int idt_init_pci(struct idt_ntb_dev *ndev)
->  	ret = pci_enable_pcie_error_reporting(pdev);
->  	if (ret != 0)
->  		dev_warn(&pdev->dev, "PCIe AER capability disabled\n");
-> -	else /* Cleanup nonfatal error status before getting to init */
-> -		pci_aer_clear_nonfatal_status(pdev);
-> +	else /* Cleanup uncorrectable error status before getting to init */
-> +		pci_aer_clear_uncorrect_error_status(pdev);
->  
->  	/* First enable the PCI device */
->  	ret = pcim_enable_device(pdev);
-> -- 
-> 2.30.1 (Apple Git-130)
-> 
