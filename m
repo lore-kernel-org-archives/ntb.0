@@ -1,132 +1,136 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pg1-f172.google.com (mail-pg1-f172.google.com [209.85.215.172])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 06F8710E2;
-	Wed, 28 Sep 2022 13:33:50 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A52D5C433D7;
-	Wed, 28 Sep 2022 13:33:50 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1664372030;
-	bh=b/FYU3aJ9ggOeVDclUSANnV7bmk+tzL6okjGvLPAgB4=;
-	h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
-	b=hwbitYwa7jrTpzhRAI1tqG4RiKIgY7HRXka+LcFvMHjPKCf2onHfdzt3NDIFKThRF
-	 ZUts1qeD4YqT/vESskDF94vQ5pL/9spKiPvRFkLcSU5va1/gDb6CbzIAOkwgGJO+dB
-	 xuFCoWhU4A8SMYb1HFZflOOs45AkOZv3t1FNN0PgxILtQPe7xf/V6puED8aIgFlbwS
-	 2tOsr9OEJzTf9rYLg/gaoZ2yZd9113OrrN+Cs/EZKY4Qk88PgmrM4xb2dkw8CeNrME
-	 5xEq7GHO3JoiJ38PWFAxC5VDSlWvwLDYhgc7h4xFh52+iMp+pxSfmZ/lDwDRNTRa23
-	 TPu/EeLGDwwZg==
-Received: from sofa.misterjones.org ([185.219.108.64] helo=goblin-girl.misterjones.org)
-	by disco-boy.misterjones.org with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-	(Exim 4.95)
-	(envelope-from <maz@kernel.org>)
-	id 1odXC8-00DI4S-FT;
-	Wed, 28 Sep 2022 14:33:48 +0100
-Date: Wed, 28 Sep 2022 09:33:47 -0400
-Message-ID: <86mtaj7hdw.wl-maz@kernel.org>
-From: Marc Zyngier <maz@kernel.org>
-To: Frank Li <Frank.Li@nxp.com>
-Cc: tglx@linutronix.de,
-	robh+dt@kernel.org,
-	krzysztof.kozlowski+dt@linaro.org,
-	shawnguo@kernel.org,
-	s.hauer@pengutronix.de,
-	kw@linux.com,
-	bhelgaas@google.com,
-	linux-kernel@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org,
-	linux-pci@vger.kernel.org,
-	peng.fan@nxp.com,
-	aisheng.dong@nxp.com,
-	jdmason@kudzu.us,
-	kernel@pengutronix.de,
-	festevam@gmail.com,
-	linux-imx@nxp.com,
-	kishon@ti.com,
-	lorenzo.pieralisi@arm.com,
-	ntb@lists.linux.dev,
-	lznuaa@gmail.com,
-	imx@lists.linux.dev,
-	manivannan.sadhasivam@linaro.org
-Subject: Re: [PATCH v11 0/6] PCI EP driver support MSI doorbell from host
-In-Reply-To: <20220922161246.20586-1-Frank.Li@nxp.com>
-References: <20220922161246.20586-1-Frank.Li@nxp.com>
-User-Agent: Wanderlust/2.15.9 (Almost Unreal) SEMI-EPG/1.14.7 (Harue)
- FLIM-LB/1.14.9 (=?UTF-8?B?R29qxY0=?=) APEL-LB/10.8 EasyPG/1.0.0 Emacs/27.1
- (aarch64-unknown-linux-gnu) MULE/6.0 (HANACHIRUSATO)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2EA6D4406
+	for <ntb@lists.linux.dev>; Wed, 28 Sep 2022 15:54:12 +0000 (UTC)
+Received: by mail-pg1-f172.google.com with SMTP id 78so12557854pgb.13
+        for <ntb@lists.linux.dev>; Wed, 28 Sep 2022 08:54:12 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=bytedance-com.20210112.gappssmtp.com; s=20210112;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date;
+        bh=QSAEb2hPZjK1ev/lBZ3te+y9kjBYl6H9pPRLwr+M8HM=;
+        b=zVPtZAzw49EHbsqZqHSTXnYA4fCJVgV0ehiFbcHyaUHvs7WCLafoa7uK8ML2BgDos4
+         U3FTz1fzfHSRaG2aOZCd8/5mNO7Axa7rX0KW2D5mLDTSbLVEtkUQOx6vb/WyEcOgh4Uz
+         G3MWAF5BUbXqgxQMBe6juX25LkAKPlRyvo63Wzt+Yv3rhBiZNaVmN2vC4IinqkH8thMI
+         fcW+q5fTcp+dYGYs/mLBTunIT/PtRbJH+KvZjES40kJqik7SN1sR/JSsLEQ/r4w+dY53
+         yZdvlKWU6xrLQVlPNbzhwy4LOQyi9Q3bXls/2CE0MyPKoxajKOawzKhM6WGhLzi7H/dw
+         P2bA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date;
+        bh=QSAEb2hPZjK1ev/lBZ3te+y9kjBYl6H9pPRLwr+M8HM=;
+        b=eF5G6YYYR313Q/ASU4SDkjwSLbZ9YjEPgtcfr6pJQJ7XQWoS7TeWNrZfZ36NmWg871
+         TeOsVhW1YWh07edSds+b7/hm/yAFFqRyDX9sIy9B7xJ4X1q/GisT/MpwmLRVKT4ZOGeC
+         wI8uVzbfKkF9DXgcw+JlJZsr/fAnueaGWKdXZsF1P+pqJSwmhKdYlLAs0Bo5ulu4Uv3x
+         FE4XZO2elVkTUcJCEcHnmWU9BjZKp2ciUMK2GbiFj4tZkPDPO6F9bta09HTFzqIcieft
+         NbGdWWL52DWmtfHJXdknNccaM/mEuad3bv0kxClgXQpCVk+q+TekKjwQhj0Hjdvuw6kx
+         vTog==
+X-Gm-Message-State: ACrzQf0Z5jmZTKR19fQxOkWwxpJXlWZyYn44y8OWVvOgBaRoYdLwc66q
+	KEiWJi2h3wOHaHf4X2Nnpv2yEA==
+X-Google-Smtp-Source: AMsMyM7wU01xLNnTTslW5qPcH9U0d3210mJJyOX0dSh6iYjiDoTkBczR8AGldIXcdzIutrYwjwxMXw==
+X-Received: by 2002:a63:5c07:0:b0:43f:6af:7590 with SMTP id q7-20020a635c07000000b0043f06af7590mr7563656pgb.272.1664380451650;
+        Wed, 28 Sep 2022 08:54:11 -0700 (PDT)
+Received: from [10.2.223.68] ([61.120.150.77])
+        by smtp.gmail.com with ESMTPSA id i28-20020a056a00005c00b0053e72ed5252sm4231499pfk.42.2022.09.28.08.54.05
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 28 Sep 2022 08:54:11 -0700 (PDT)
+Message-ID: <eade28ce-97eb-ff96-e8cb-7e1c2127f77b@bytedance.com>
+Date: Wed, 28 Sep 2022 23:54:02 +0800
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
-MIME-Version: 1.0 (generated by SEMI-EPG 1.14.7 - "Harue")
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-X-SA-Exim-Connect-IP: 185.219.108.64
-X-SA-Exim-Rcpt-To: Frank.Li@nxp.com, tglx@linutronix.de, robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org, shawnguo@kernel.org, s.hauer@pengutronix.de, kw@linux.com, bhelgaas@google.com, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-pci@vger.kernel.org, peng.fan@nxp.com, aisheng.dong@nxp.com, jdmason@kudzu.us, kernel@pengutronix.de, festevam@gmail.com, linux-imx@nxp.com, kishon@ti.com, lorenzo.pieralisi@arm.com, ntb@lists.linux.dev, lznuaa@gmail.com, imx@lists.linux.dev, manivannan.sadhasivam@linaro.org
-X-SA-Exim-Mail-From: maz@kernel.org
-X-SA-Exim-Scanned: No (on disco-boy.misterjones.org); SAEximRunCond expanded to false
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:102.0)
+ Gecko/20100101 Thunderbird/102.3.0
+Subject: Re: [External] Re: [PATCH v3 0/9] PCI/AER: Fix and optimize usage of
+ status clearing api
+Content-Language: en-US
+To: Serge Semin <fancer.lancer@gmail.com>, bhelgaas@google.com,
+ Sathyanarayanan Kuppuswamy <sathyanarayanan.kuppuswamy@linux.intel.com>
+Cc: ruscur@russell.cc, oohall@gmail.com, jdmason@kudzu.us,
+ dave.jiang@intel.com, allenbh@gmail.com, james.smart@broadcom.com,
+ dick.kennedy@broadcom.com, jejb@linux.ibm.com, martin.petersen@oracle.com,
+ linuxppc-dev@lists.ozlabs.org, linux-pci@vger.kernel.org,
+ linux-kernel@vger.kernel.org, ntb@lists.linux.dev, linux-scsi@vger.kernel.org
+References: <20220928105946.12469-1-chenzhuo.1@bytedance.com>
+ <20220928110623.b3vocoubasrshyzk@mobilestation>
+From: Zhuo Chen <chenzhuo.1@bytedance.com>
+In-Reply-To: <20220928110623.b3vocoubasrshyzk@mobilestation>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On Thu, 22 Sep 2022 12:12:40 -0400,
-Frank Li <Frank.Li@nxp.com> wrote:
->=20
->=20
->=20
->                   =E2=94=8C=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80=
-=E2=94=80=E2=94=80=E2=94=90          =E2=94=8C=E2=94=80=E2=94=80=E2=94=80=
-=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=90
->                   =E2=94=82       =E2=94=82          =E2=94=82          =
-=E2=94=82
-> =E2=94=8C=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80=
-=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=90   =E2=94=82=
-       =E2=94=82          =E2=94=82 PCI Host =E2=94=82
-> =E2=94=82 MSI         =E2=94=82=E2=97=84=E2=94=90 =E2=94=82       =E2=94=
-=82          =E2=94=82          =E2=94=82
-> =E2=94=82 Controller  =E2=94=82 =E2=94=82 =E2=94=82       =E2=94=82      =
-    =E2=94=82          =E2=94=82
-> =E2=94=94=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80=
-=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=98 =E2=94=94=
-=E2=94=80=E2=94=BC=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=
-=94=80=E2=94=BC=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=
-=80=E2=94=80=E2=94=80=E2=94=80=E2=94=BC=E2=94=80Bar0     =E2=94=82
->                   =E2=94=82 PCI   =E2=94=82          =E2=94=82 Bar1     =
-=E2=94=82
->                   =E2=94=82 Func  =E2=94=82          =E2=94=82 Bar2     =
-=E2=94=82
->                   =E2=94=82       =E2=94=82          =E2=94=82 Bar3     =
-=E2=94=82
->                   =E2=94=82       =E2=94=82          =E2=94=82 Bar4     =
-=E2=94=82
->                   =E2=94=82       =E2=94=9C=E2=94=80=E2=94=80=E2=94=80=E2=
-=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=96=BA=E2=94=82      =
-    =E2=94=82
->                   =E2=94=94=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80=
-=E2=94=80=E2=94=80=E2=94=98          =E2=94=94=E2=94=80=E2=94=80=E2=94=80=
-=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=98
->=20
-> Many PCI controllers provided Endpoint functions.
-> Generally PCI endpoint is hardware, which is not running a rich OS,
-> like linux.
->=20
-> But Linux also supports endpoint functions.  PCI Host write BAR<n> space
-> like write to memory. The EP side can't know memory changed by the Host
-> driver.=20
->=20
-> PCI Spec has not defined a standard method to do that.  Only define
-> MSI(x) to let EP notified RC status change.=20
 
-[...]
 
-FWIW, I have queued the first 4 patches of this series into -next. If
-there is a need for these patches to be pulled by another subsystem, I
-have pushed out a stable branch at [1].
+On 9/28/22 7:06 PM, Serge Semin wrote:
+> On Wed, Sep 28, 2022 at 06:59:37PM +0800, Zhuo Chen wrote:
+>> Hello.
+>>
+>> Here comes patch v3, which contains some fixes and optimizations of
+>> aer api usage. The v1 and v2 can be found on the mailing list.
+>>
+>> v3:
+>> - Modifications to comments proposed by Sathyanarayanan.
+> 
+>> Remove
+>>    pci_aer_clear_nonfatal_status() call in NTB and improve commit log.
+> 
+> Failed to see who has requested that...
+> 
+> -Sergey
+> 
+Hi, Sergey
 
-Thanks,
+Currently other vendor drivers do not clear error status in their own 
+init code, I don't exactly know what is special reason for clearing 
+error status during init code in ntb driver.
 
-	M.
+An evidence is in pci_aer_init(), PCI core driver has do 
+pci_aer_clear_status() and pci_enable_pcie_error_reporting() in common 
+process. So vendor drivers don't need to do again.
 
-[1] https://git.kernel.org/pub/scm/linux/kernel/git/maz/arm-platforms.git/l=
-og/?h=3Dirq/fsl-mu-msi
+But I don't know the reason why many vendor drivers reserve 
+pci_enable_pcie_error_reporting() after commit f26e58bf6f54 ("PCI/AER: 
+Enable error reporting when AER is native"). Do they need to be removed?
+Could Bjorn and Sathyanarayanan help look into it, thanks a lot.
 
---=20
-Without deviation from the norm, progress is not possible.
+Thanks.
+>>
+>> v2:
+>> - Modifications to comments proposed by Bjorn. Split patch into more
+>>    obvious parts.
+>>
+>> Zhuo Chen (9):
+>>    PCI/AER: Add pci_aer_clear_uncorrect_error_status() to PCI core
+>>    PCI/DPC: Use pci_aer_clear_uncorrect_error_status() to clear
+>>      uncorrectable error status
+>>    NTB: Remove pci_aer_clear_nonfatal_status() call
+>>    scsi: lpfc: Change to use pci_aer_clear_uncorrect_error_status()
+>>    PCI/AER: Unexport pci_aer_clear_nonfatal_status()
+>>    PCI/AER: Move check inside pcie_clear_device_status().
+>>    PCI/AER: Use pcie_aer_is_native() to judge whether OS owns AER
+>>    PCI/ERR: Clear fatal error status when pci_channel_io_frozen
+>>    PCI/AER: Refine status clearing process with api
+>>
+>>   drivers/ntb/hw/idt/ntb_hw_idt.c |  2 --
+>>   drivers/pci/pci.c               |  7 +++--
+>>   drivers/pci/pci.h               |  2 ++
+>>   drivers/pci/pcie/aer.c          | 45 +++++++++++++++++++--------------
+>>   drivers/pci/pcie/dpc.c          |  3 +--
+>>   drivers/pci/pcie/err.c          | 15 ++++-------
+>>   drivers/pci/pcie/portdrv_core.c |  3 +--
+>>   drivers/scsi/lpfc/lpfc_attr.c   |  4 +--
+>>   include/linux/aer.h             |  4 +--
+>>   9 files changed, 44 insertions(+), 41 deletions(-)
+>>
+>> -- 
+>> 2.30.1 (Apple Git-130)
+>>
+
+-- 
+Zhuo Chen
