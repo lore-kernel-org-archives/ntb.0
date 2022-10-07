@@ -1,358 +1,568 @@
-Received: from EUR02-AM5-obe.outbound.protection.outlook.com (mail-eopbgr00064.outbound.protection.outlook.com [40.107.0.64])
+Received: from EUR05-DB8-obe.outbound.protection.outlook.com (mail-db8eur05on2058.outbound.protection.outlook.com [40.107.20.58])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4628633FB;
-	Fri,  7 Oct 2022 14:55:03 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C91EE256D;
+	Fri,  7 Oct 2022 19:14:04 +0000 (UTC)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=ZUw9tn+YY0C0sXxAsjdzwOypgEcI8pTCz02WeET4JmH32MI29dalMcnOo95yHSHEW3/TOhJuE+UAo7iEXGR5qaXwseLHLn6mpmEvTHTxsHvKU2CaahnV8L9jA2yN226ef3dJmkcv1LqJVpioQydKN78uAxPPiRKDudbtAjZrt+2+77Co3S9XGyBKzqg6UB/a53PfgqIb9v8K7QUJ7Dnzdw4EKd+cSw1HFV3NXVCnc1dxi1RZ+9cjjTD9Kd7ES32wT0n3umrryRm3PUBuXBlEQ+qasrRnN2tmqx2P5IiTBm/bOKsFEgW36zAxmZkROUstoTtbyNcEaSZA3SZARAUVVA==
+ b=AGXwVJOFGqnvy9fq+4fCRYS2eDnDOpd6sm8iqAJCwjn6RtlUV+ORcZKJ/Hjp3C0ipCf4zPszN8poPr9BTiOIDdkgc35zEWsn1X2cR6SEzuzIOqi/oNiHLkZzHA0lxEy4SNdpRsi5gi8PjNua6yDxA1ookEsOyxSUplUt/XkrxOicVNZ90ELmaT7L88o/qJCp+Vj02daQUcn4xW0mMoFD1xrhq0rV9imTeyBPa/32gnJIC9wsekEwhtW8SQB6x+XLvXbIYUYw6kxPSh3u3xv2V5XvoObI0GxfvGMPC8TfZCAbM9uV4f/eQQeIUY1HC3cWckwveEF0xM+i51xtOTNfog==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=DuRosjbXfzfRvWozqBWn2w+L/hRif+OtyTHAvYThS7M=;
- b=NkfrFStgmS+Jpb7v/hj6ET3bRtjZ+jr28AR3Rr8f9Kkf4RIQKjva66F2/EKp+ov5f+nqToDSHLqRpL5gM5HY2wuiKuTfeClle/Y6N9FOc3ws4DNqJWR4kJ3huRI//nA4Hn7Pgl8cA26DI6UvL0+7yqPChaIABMOY8XuEFf1oUqD+h9HsBeRERH8IIvZE/RdfprIuYXvhDZw6OWiVrvFqDqO/zzVfc7VYxyOz8CLsI2ubDU+2w+rxLsZ1hSUrvKN75xTMPtKOOXa+fwH0DDxXPTgdfaUQvVe8Lqy6Pfo0JNIATwxlTHFRtj3Q1rFfno6Q2N/S3ey9CE0E4sukj7ORSA==
+ bh=Sv21a6BMPaapi/PwjWIE7c4OBzC9tkTbhunXpI4m54w=;
+ b=ONlIqSt6xIWGPJu50cfJ7Ln652Pl8kIhXeBex7jQ0JFCZGxudMNLlfQdfv5HmdyhZXnl0cLTu6A9EihEqZ/mGs/s1W+ocsBXIKEIxFyNPJqXYnGeBJvPs5amC/NOQS4q3EVmneFiAcWfq9RQABNoGMmt9JFNrEF2uYXnpq3cTredxweRW2Vq5OYTiZ8nwfjwZZ+CRCFZUVcvtsGBUpo+kOwFcFnU5vHiPfgfFH0zCltZ7DpUoume51s1bRB7c/ljnAdu7EKySciR00n+Vy8a0gT0Z3V5s9ZWXSqlxkrfbxWSGJ0mDxMKWfxh+QyOnENG2tGG9GC1tUQdOGeRdn5m+g==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
  header.d=nxp.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=DuRosjbXfzfRvWozqBWn2w+L/hRif+OtyTHAvYThS7M=;
- b=okwzLusiD4oAYiiewmelSW6xC4uImSTQ2tbXBZNQTu18U8dj58KnM7Uu4DF8OmgOXskRMEgvm2BnvYMjyJm4y4wwCraqd1Gw+8vH3dmUdoG7M3dl9BUEed1puir0MIiGS99Ak+JyNMmnmCIUzDSvRW+KZro7I8aJwmMHxxrLDWU=
+ bh=Sv21a6BMPaapi/PwjWIE7c4OBzC9tkTbhunXpI4m54w=;
+ b=AcBSK1Bg3KyiaI9hRWKB4uxZf7JYLgP1LzDzRfo7ZAUd7uy4vvDbE6dKHjj9s5QiNgkEhI9eqaY3GG5fsuuRyLwj0HoehVP5qbcno3kjAxLd5GbbSaU8MPSR4FdY7OxMGzwCY1vOdM3MJszODQNa7eBfsk5nY+gT1hVO2b8uRHE=
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nxp.com;
 Received: from AM9PR04MB8793.eurprd04.prod.outlook.com (2603:10a6:20b:408::22)
- by DB9PR04MB9452.eurprd04.prod.outlook.com (2603:10a6:10:367::13) with
+ by PAXPR04MB8192.eurprd04.prod.outlook.com (2603:10a6:102:1cd::17) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5676.28; Fri, 7 Oct
- 2022 14:55:00 +0000
+ 2022 19:14:01 +0000
 Received: from AM9PR04MB8793.eurprd04.prod.outlook.com
  ([fe80::54da:4ebc:2916:de90]) by AM9PR04MB8793.eurprd04.prod.outlook.com
  ([fe80::54da:4ebc:2916:de90%5]) with mapi id 15.20.5676.038; Fri, 7 Oct 2022
- 14:55:00 +0000
-From: Frank Li <frank.li@nxp.com>
-To: Lorenzo Pieralisi <lpieralisi@kernel.org>
-CC: "maz@kernel.org" <maz@kernel.org>, "tglx@linutronix.de"
-	<tglx@linutronix.de>, "robh+dt@kernel.org" <robh+dt@kernel.org>,
-	"krzysztof.kozlowski+dt@linaro.org" <krzysztof.kozlowski+dt@linaro.org>,
-	"shawnguo@kernel.org" <shawnguo@kernel.org>, "s.hauer@pengutronix.de"
-	<s.hauer@pengutronix.de>, "kw@linux.com" <kw@linux.com>,
-	"bhelgaas@google.com" <bhelgaas@google.com>, "linux-kernel@vger.kernel.org"
-	<linux-kernel@vger.kernel.org>, "devicetree@vger.kernel.org"
-	<devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org"
-	<linux-arm-kernel@lists.infradead.org>, "linux-pci@vger.kernel.org"
-	<linux-pci@vger.kernel.org>, Peng Fan <peng.fan@nxp.com>, Aisheng Dong
-	<aisheng.dong@nxp.com>, "jdmason@kudzu.us" <jdmason@kudzu.us>,
-	"kernel@pengutronix.de" <kernel@pengutronix.de>, "festevam@gmail.com"
-	<festevam@gmail.com>, dl-linux-imx <linux-imx@nxp.com>, "kishon@ti.com"
-	<kishon@ti.com>, "lorenzo.pieralisi@arm.com" <lorenzo.pieralisi@arm.com>,
-	"ntb@lists.linux.dev" <ntb@lists.linux.dev>, "lznuaa@gmail.com"
-	<lznuaa@gmail.com>, "imx@lists.linux.dev" <imx@lists.linux.dev>,
-	"manivannan.sadhasivam@linaro.org" <manivannan.sadhasivam@linaro.org>
-Subject: RE: [EXT] Re: [PATCH v12 6/6] PCI: endpoint: Add vNTB MSI support
-Thread-Topic: [EXT] Re: [PATCH v12 6/6] PCI: endpoint: Add vNTB MSI support
-Thread-Index: AQHYzp5SYpG2CGhFiUG9WzwFen0CCa4CvXQAgABYsyA=
-Date: Fri, 7 Oct 2022 14:54:59 +0000
-Message-ID:
- <AM9PR04MB879334D41A589604F70F36A4885F9@AM9PR04MB8793.eurprd04.prod.outlook.com>
-References: <20220922161246.20586-1-Frank.Li@nxp.com>
- <20220922161246.20586-7-Frank.Li@nxp.com> <Yz/uMiElbqB3ThGd@lpieralisi>
-In-Reply-To: <Yz/uMiElbqB3ThGd@lpieralisi>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=nxp.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: AM9PR04MB8793:EE_|DB9PR04MB9452:EE_
-x-ms-office365-filtering-correlation-id: fae20875-983c-426e-fa03-08daa873e85c
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info:
- Yj9mXuF3BNwPBMwzDZWI2WmknJhp0YVW96Z7xB4U5Dd5s2qh2nxeT4OB21oFBPGThM+MgpOXS8ewZIMKP8yQnz9quCf7K1kQZdQ4giqC2QqSaRTY2jZP4e4nBGUgNiULR5gCJzlcGCOScNi/gDUmKl/BRIE3+I75cJjky2TFMSyl5HHUWHRAFx8Cdp2Y5I7N40x3Ec18ZdxqmvCAC1STTJSZkOPVi56Gnm4JPYW75hZqvmIyjHDDwW6FpB0LUwdjJZUSYQ3Ce8fusjc14urKGTczH5YPnfzIS9A6YdxXSyx/QfyNmBFCfpULhTZAvQcf6ZxFvzzLEA/UZUA8LODia3qudvx28wAc5SyB9wpyam2q/6ig9b3hCr54dxJVQMWCwunnbkF/+obhZJz4wQdi9pCZA8H9CPpp0uazcMQtkbEBW02CSpv4BYbrvbwKh+fXxiAuXuVyMwdEn77rQ2hzylkwH1N8Ww4jjpC+0PLSYWiCu86uE9vmju31QPT+GiqF6uJUrI+r2Ll7pdz6TCiPCLhdPA8GjCA2TlZtl2d0oef3LjMmQ/JjYaUs1+Rzn8m+fVPPMfan13d3qg8CM6+PkHukRPNlYKm6Fu9xwv6ONSpZZ1+rFYykYO63eIXq14pXk94mSxOtq4hwoCAComFpz6RBG9pbwF6FjL0hNG7gv7oZRm+EFz2jlT4skxpOsg/eAEKoNGUIq5hjgH0CRW2hjNB3D6ikGgSN26sys6NdDean6wg+3v6bzsRyXBrnR2McG7+7kXxkh/bvsrqLMFwbm/yhyZeMbECXx/gbLkKcSUk=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:AM9PR04MB8793.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230022)(4636009)(396003)(376002)(366004)(136003)(346002)(39860400002)(451199015)(966005)(7696005)(4326008)(478600001)(54906003)(64756008)(66476007)(6916009)(66946007)(8676002)(76116006)(66556008)(41300700001)(44832011)(66446008)(122000001)(38100700002)(8936002)(83380400001)(9686003)(5660300002)(30864003)(55016003)(6506007)(53546011)(55236004)(86362001)(38070700005)(7416002)(26005)(52536014)(316002)(33656002)(2906002)(186003)(71200400001);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?VHEzZ29ZTTdvUFVuK1lzbmZjVUNNRGhobThMT0JpZWhFckRLMTFkd3VpaXdy?=
- =?utf-8?B?MVJpYlhlUFh1TkVKMlp6Y2NBYTlVRVRad0xUTnVWK1RsckxLajJ1MlllM2E4?=
- =?utf-8?B?TlptWTdiT2UvMmd4a1J1SDRxcXQzd05LVzExeVJPdjJWLzI3QUhzbHY0ak5k?=
- =?utf-8?B?eWpxUmJ2WlhRSVM0bEZZWXdjUDkrbnJEak5SM3VtbXNwNFA2QThJNDZqeW1M?=
- =?utf-8?B?eDhIRVJVc2VSN2pZU1NSNzlDTndhM255aGt4Q0FpRzZISkc2WE1zU25UY3NZ?=
- =?utf-8?B?Z0hWVkxjQkZINTBXTVR6eUwyVHk3WERhejhML1l5bVN1bFJ5ZTE5VzBtMVZQ?=
- =?utf-8?B?RGxMN1ZrZ1FaZ0plRWN4enFFRWcxRnR2b1Y0aDVUY1pIT0gwazBIUGVPZEZa?=
- =?utf-8?B?T3ArOE0yUHVMLzRWNlU2U1ZNdEJ3L2t5SFJDc2Yrd3AxdjRYVXZjODR0WlJN?=
- =?utf-8?B?Z2JvTGxuZWRYSklIQUhsNTljRmtST2FmTjU1YXNQK28wcHhUWmVjMWZTRmJl?=
- =?utf-8?B?ZHNLRUlqM3hQc0RNQzVwWWx3U2RCaWQveWM2dWJ6NDRrUVFKUXlSL2tZQ3cx?=
- =?utf-8?B?SWxhWE9JMGZWT3Y4QWh1TkY3UnhRZ21RYldGZTNndWsyWE5aakx6blVadU1a?=
- =?utf-8?B?aHUrdFJ1Q01aMVc5R0M4eldnTkdmdVJOWHpIbUlGTnVNNHZGZ04wSzdLZkhh?=
- =?utf-8?B?YXRRWkZOWUFxM2xQbWw5V0VjQ2ErcklTRnR4ZXJXcVNvcllsUSthTUZpamVu?=
- =?utf-8?B?anNzRWllKzE5WGpQKzZQZzhna1JtN0pWRUdxS2dpQ0xtNkxEblR5aDllZjlm?=
- =?utf-8?B?TDYrcCtuN0s4V0hBTmV6Qmp4dzU2N2VVNFR1K0NiZXF5MkZQU1Z5TWlFQkk5?=
- =?utf-8?B?L3NmM3BNSlBZRFNaK3pZckFBbGVETnNaNk0zYmNNbEtuRVZSOVhRRW5BMm50?=
- =?utf-8?B?aU9TbkdpKzR1THQ2S3Q3bW13cU1YUHRCdEZpMzFRUXdmL085aHBpSkozL0s0?=
- =?utf-8?B?NDVBMU5ycTlta21mS21iUkZaVHFseG1oOEd6OFhvSUhZV01wZ29rUkYyZ0ds?=
- =?utf-8?B?ZllIV1VDbHU3T0RSaWZsM3hEM0lBK21KRytLVjJjbXExRUlVK2lXWHM4Y1h4?=
- =?utf-8?B?VmZCN3k3dU9FQUpqY1YwNzlkbnpub1pxcHR2UUlUR0hNVVVpRm5paDZabTdQ?=
- =?utf-8?B?RGlETnE0SUFQNHlaT0x3SmZnVFFWMlhGVFpkYWRtNFNkVkxDRFFvejlVenBM?=
- =?utf-8?B?Zm1uV0xPMDN2RUVMMWM4ajliRmNjd3pYaEt3dm9SWkpLU25aQTIzYlVndkJr?=
- =?utf-8?B?VVdob1U3aktTOCs5RE9OR3hiUTlNZ0pZb2owRDlPMUtyMEw4eTBYaFAzb0Rh?=
- =?utf-8?B?YlJkVnlGM0dsQ21PVUpMLzJ4ZFZNSW1Bdzd5OEx2blFuaS8yTDhxUHZEWmlB?=
- =?utf-8?B?eEQvMUc4ZC9nYnp4N3RFZjJHQ2trc1F0TFZpaGVPaDUvZWRQR1pjZno1aTlp?=
- =?utf-8?B?US9scTlUQVVHZW1QQ2ppWm1ZWVJhR0NPcjZOY0w5ZXJteFI2OFZDZkFDUFlC?=
- =?utf-8?B?N2pJSk9aVllyWDFZeWllckVHWHZZQmFBU1o4UlR6OEg2WExaVFNheEdocXNj?=
- =?utf-8?B?ZlBWT3VvSWN6N3RhMWkrOGNXMk9sN25tcEZIN1U5aHlKS0MzK3pFeWRaejMw?=
- =?utf-8?B?U28zb0ZXSFhoTGZiK2FJc0dUUWc0SjFqQW1IQWFORXA3STdFWkdLN29oU1Bo?=
- =?utf-8?B?eXU2cFlua21RL21iMFduY3d0R29iNjluQWFMaU5UZ1I3bDFxQWNpTmVVUStL?=
- =?utf-8?B?TE5jNzNIZ2pGYnYvcFlMV1BNdUxhMzM5aHBSZ1lrZEY5S0h5SWRpa1ZJNElx?=
- =?utf-8?B?UWxOakF0TEp4aERQQmNTV1ZlNmJ3QmNjMWFjdnY1WXp2bzZNUVIralB1YmFZ?=
- =?utf-8?B?SzlqOGs2emw0RGdYNzFUZmQ4Rk80OEJnWlBpK29CYThWSkE5RkNkK2JZVkYr?=
- =?utf-8?B?RFJjSkU0Z0ViTUlpWXlaeXlxc3pqK0NRTzNDY0QyN2MrdzhEWGl1Y2I4V01t?=
- =?utf-8?B?TGZCYW9WUHpBaUp0RzI5Yzl2aENKQ1grM2Z6REw3OExXZWJIdE95L3ZpUUNj?=
- =?utf-8?Q?zoZ8=3D?=
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+ 19:14:01 +0000
+From: Frank Li <Frank.Li@nxp.com>
+To: imx@lists.linux.dev,
+	Jon Mason <jdmason@kudzu.us>,
+	Dave Jiang <dave.jiang@intel.com>,
+	Allen Hubbe <allenbh@gmail.com>,
+	Kishon Vijay Abraham I <kishon@ti.com>,
+	Lorenzo Pieralisi <lpieralisi@kernel.org>,
+	=?UTF-8?q?Krzysztof=20Wilczy=C5=84ski?= <kw@linux.com>,
+	Manivannan Sadhasivam <mani@kernel.org>,
+	Bjorn Helgaas <bhelgaas@google.com>,
+	ntb@lists.linux.dev (open list:NTB DRIVER CORE),
+	linux-pci@vger.kernel.org (open list:PCI ENDPOINT SUBSYSTEM),
+	linux-kernel@vger.kernel.org (open list)
+Subject: [PATCH v12 5/6] PCI: endpoint: pci-epf-vntb: Clean up
+Date: Fri,  7 Oct 2022 15:13:19 -0400
+Message-Id: <20221007191326.193079-1-Frank.Li@nxp.com>
+X-Mailer: git-send-email 2.34.1
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: BY3PR03CA0015.namprd03.prod.outlook.com
+ (2603:10b6:a03:39a::20) To AM9PR04MB8793.eurprd04.prod.outlook.com
+ (2603:10a6:20b:408::22)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: AM9PR04MB8793:EE_|PAXPR04MB8192:EE_
+X-MS-Office365-Filtering-Correlation-Id: a9079cd3-ba98-44b8-84ca-08daa8981777
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info:
+	1/YZRTPTEhU2vP7Tdl37MR7N0JHDR2OLGHPtcE14C63qUA2X0l3wq3tfJezKm1InodQINMWNPIHvfGx7tANPTdGhWBbalhURIPpQmQh8bAXcBZOxUtW2Gw94+Cp0Ep6RaLeave3T3SmfHbCFJiR0EEX2UmiYOpNwK/rSpumj2lI5/ngeYvGKVlgn0SAsl+vUKvXopC7Qdm9iMHdIA7QkwubeBgoy2rLVPPcUec2gA3y28ESjY/XBxeU6aku2eAm6h00YCwD95dyoBCp2eR8HuTe21WsWipBWWBRuTxeNJ7ptzYkVU1W8KPVLs6x8JUDwTdGoDqiHlt3dbk8BMIXTL73KsEvUbSMXSceCsDzzBARO8rXpAiv4ECbomUddZy2f/mAMSog65KdR4OEJb0f0Awo7UuB8gd9cFJMVcfVWkH4oYQfFeMFCUkAbVXAdiEAnWa09VDWdAlOFNp7DEEk4H0NRFlerxeyaW3StyAkdz0o4fztXkoIRZEwZJl/A63Zxfb9riSkNmw4i6xWvURTML6BJ6mLsJTaynaEJWtuN4WsyON3bUxBetK/qXvwzVKm95ZN6ZrmijPGg+hWjCOKGsLPjK19DReAazVMxWOuHjp6YFNhT/oqcyWkktN+UCWNJsgHJB2Nax1jECsUcyEpXq3d0HFWHt1JNvGduMKcuo5Z4uH/MVtSKJ9HyaSZtpeCD9NWn4v43zTnOMl4UVGQu6wuStfdQ8/3ri5rF1jwA0D9HtujudKSpUDFmavl1pM7VmkxRLutyolAJZ+B8IubfdhpPm21pUYvFIpIRoMB8c18=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:AM9PR04MB8793.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230022)(4636009)(396003)(136003)(39860400002)(346002)(376002)(366004)(451199015)(66946007)(36756003)(6666004)(7416002)(30864003)(38350700002)(8676002)(38100700002)(2906002)(1076003)(41300700001)(66476007)(186003)(66556008)(83380400001)(6512007)(8936002)(2616005)(52116002)(26005)(86362001)(5660300002)(921005)(6506007)(6486002)(110136005)(478600001)(316002);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?us-ascii?Q?P1OhdH+1A+uY06v43RGApMKlj0bZp2/UdlVxzg3uSW3eRjcgPXRb1BaaKLYL?=
+ =?us-ascii?Q?D+23upZTsiBqzcVFyfoOUBIWr0ZxUAVX1hq/zfAxZS95Z/+gIusXtb8zFMKe?=
+ =?us-ascii?Q?Vlpu9bK/7Pt6HzLKwBT11nOG1OLgS4FUku0BJ9hTD/J/nvozCUAf1ZgStpvR?=
+ =?us-ascii?Q?b81twAT+/kwDI18K39+qDL7DeCnj4GC7XS9AC8sMWumlr1+dtoQJjpg99ip0?=
+ =?us-ascii?Q?1a8FOHJykFnVXRq42JvAINI7k/fvDFahrAZQpETUWjitpMJEsBKulAKxG/9r?=
+ =?us-ascii?Q?veKhHAr4ZYMXyiZ/W41UN4GdtZGGhA7KUVs5gv2fm0CXDyZnd69czoZqlh4h?=
+ =?us-ascii?Q?qJAhuPa18IOR+BiFHmw6LQk2LbQRnBA5EVHj23cK8egWlpkqgEIUQvoTxueq?=
+ =?us-ascii?Q?HsULvAKw6qCzWumACwdrTgoCboNeWQg5eguqYypariHBcLQf4S7Sc21K1PIo?=
+ =?us-ascii?Q?+3tBIUbmPy82ZzYkf42NLeaZm4AZFGwfFapHGHRM9nS5Cf1+FlMWWxoYte8u?=
+ =?us-ascii?Q?rK/hrHmcWJkOWe6WEzKd6zvC6pf04nwLPtRu/21Ufo8FVOCqDFSxStVykoTX?=
+ =?us-ascii?Q?oczydSUzJiAuckOq1fObh00F+hxYDtT1pzGnlFLyS64N5pBj5c/HVJZvyqfA?=
+ =?us-ascii?Q?kihFzuBzz0G/Gg5T88u6oKiqPWiiXCT3EIDdjksvTYnuqb6H5PAUjJbtnCTd?=
+ =?us-ascii?Q?U9Q4iAtT21Q0f9AHexFRfvGB/HFyYhMksQ7DfBILHWeKvnb1do7rYggYkM2C?=
+ =?us-ascii?Q?83Eh0rjVTrHldMkGKrU/nsH63mNmSZyeyVtR23lw9+Blu4xGExTRQAoEJh4O?=
+ =?us-ascii?Q?jUNKN5vNejhg4M8kBqhH+kdaHxo9Vek/ytiHaxlNd5WtPPygzgIZnKCPL25h?=
+ =?us-ascii?Q?H0HfO1T4XHTDTTDtUcl8fKXxyM9oWGwDzhCH5Ipwxw4wN6oSWG9LpvSv9m0C?=
+ =?us-ascii?Q?wxszkLcUr5IaKq3sOE0CVqDzR8w55XFoZi4RYpnrOlmsntWL2okac5Mawzgy?=
+ =?us-ascii?Q?plg9s73CWti2zfl426OeSrf47sYpbJLZX+gkyWnSbE8vLIOp214baXJ4otvv?=
+ =?us-ascii?Q?WHG2KZgJzc3IDRbCaZkYf+9vt9a/Uf4nQI87BwywQnhvEcEOsYBiwgCLRBW6?=
+ =?us-ascii?Q?W5Lkc3VhmXXcKTuwXdiqAOxH7/Dzat1w5PdLiu1KPlzrNz+HbfRKgXG6Ypbs?=
+ =?us-ascii?Q?LbIDT9qX1YYTashFLGDeRX2PpIZTDJmWM15PiQHFnlhaavXomOsnsUSMjCo6?=
+ =?us-ascii?Q?XJhsWzZhoXI/17Jf0noHeCqKG02f5m1R5LHbHi5W/4NORezlKeGFZHIXA0Zi?=
+ =?us-ascii?Q?J+Lowt/bBOSsYYy2uPmXlgRxYc0YlY+3nc/yXyy6Z4otoEigOzTNjXx8gWHi?=
+ =?us-ascii?Q?g0zXII/s+Riv7OhzX1fHMhlY6e2kWnLP3Lxp4zBfJJSSLc3STlQ5W2Dr7qLu?=
+ =?us-ascii?Q?vCMCm8QQdHSDySarxbb5lA1TTNlFwPk8/jwKDfQjJbyzfgRDPsNF2vnKdouP?=
+ =?us-ascii?Q?85zvSiSCvTfjjfy69l9pS3yt9oxbk96HPanGqSz7dBHcR3TDVayj1b0ruhg+?=
+ =?us-ascii?Q?IPyDQro16YRhVrBqZbw=3D?=
 X-OriginatorOrg: nxp.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-Network-Message-Id: a9079cd3-ba98-44b8-84ca-08daa8981777
 X-MS-Exchange-CrossTenant-AuthSource: AM9PR04MB8793.eurprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: fae20875-983c-426e-fa03-08daa873e85c
-X-MS-Exchange-CrossTenant-originalarrivaltime: 07 Oct 2022 14:54:59.9302
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 07 Oct 2022 19:14:01.1665
  (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: 6GKum5N2o/uAGAxpfMfIKyDyt5YnMFk2uUVqQIrmnMU7PEvhv3+9GDnZPTH32H9tUN5emOz2yDvJpI/8MvD3NQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DB9PR04MB9452
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: aHte+MROXysI19E+qXK0Qeqb21TZtrX1WkfJMmiqo+3ACKTYfcYTtoxOibOJSMKd8Or3qS0m5GMO4ZLZqkJ67g==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PAXPR04MB8192
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogTG9yZW56byBQaWVyYWxp
-c2kgPGxwaWVyYWxpc2lAa2VybmVsLm9yZz4NCj4gU2VudDogRnJpZGF5LCBPY3RvYmVyIDcsIDIw
-MjIgNDoxNiBBTQ0KPiBUbzogRnJhbmsgTGkgPGZyYW5rLmxpQG54cC5jb20+DQo+IENjOiBtYXpA
-a2VybmVsLm9yZzsgdGdseEBsaW51dHJvbml4LmRlOyByb2JoK2R0QGtlcm5lbC5vcmc7DQo+IGty
-enlzenRvZi5rb3psb3dza2krZHRAbGluYXJvLm9yZzsgc2hhd25ndW9Aa2VybmVsLm9yZzsNCj4g
-cy5oYXVlckBwZW5ndXRyb25peC5kZTsga3dAbGludXguY29tOyBiaGVsZ2Fhc0Bnb29nbGUuY29t
-OyBsaW51eC0NCj4ga2VybmVsQHZnZXIua2VybmVsLm9yZzsgZGV2aWNldHJlZUB2Z2VyLmtlcm5l
-bC5vcmc7IGxpbnV4LWFybS0NCj4ga2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmc7IGxpbnV4LXBj
-aUB2Z2VyLmtlcm5lbC5vcmc7IFBlbmcgRmFuDQo+IDxwZW5nLmZhbkBueHAuY29tPjsgQWlzaGVu
-ZyBEb25nIDxhaXNoZW5nLmRvbmdAbnhwLmNvbT47DQo+IGpkbWFzb25Aa3VkenUudXM7IGtlcm5l
-bEBwZW5ndXRyb25peC5kZTsgZmVzdGV2YW1AZ21haWwuY29tOyBkbC1saW51eC0NCj4gaW14IDxs
-aW51eC1pbXhAbnhwLmNvbT47IGtpc2hvbkB0aS5jb207IGxvcmVuem8ucGllcmFsaXNpQGFybS5j
-b207DQo+IG50YkBsaXN0cy5saW51eC5kZXY7IGx6bnVhYUBnbWFpbC5jb207IGlteEBsaXN0cy5s
-aW51eC5kZXY7DQo+IG1hbml2YW5uYW4uc2FkaGFzaXZhbUBsaW5hcm8ub3JnDQo+IFN1YmplY3Q6
-IFtFWFRdIFJlOiBbUEFUQ0ggdjEyIDYvNl0gUENJOiBlbmRwb2ludDogQWRkIHZOVEIgTVNJIHN1
-cHBvcnQNCj4gDQo+IENhdXRpb246IEVYVCBFbWFpbA0KPiANCj4gT24gVGh1LCBTZXAgMjIsIDIw
-MjIgYXQgMTE6MTI6NDZBTSAtMDUwMCwgRnJhbmsgTGkgd3JvdGU6DQo+ID4gICAgICAgICAgICAg
-ICAgICAgICAgIOKUjOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUkCAgICAgICAgICAgICAgICAgICDi
-lIzilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilJANCj4gPiAgICAgICAgICAgICAgICAg
-ICAgICAg4pSCICAgICAgIOKUgiAgICAgICAgICAgICAgICAgICDilIIgICAgICAgICAg4pSCDQo+
-ID4gICAgIOKUjOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUkCAgIOKU
-giBQQ0kgICDilIIgICAgICAgICAgICAgICAgICAg4pSCIFBDSSBIb3N0IOKUgg0KPiA+ICAgICDi
-lIIgTVNJICAgICAgICAg4pSC4peE4pSQIOKUgiBFUCAgICDilIIgICAgICAgICAgICAgICAgICAg
-4pSCICAgICAgICAgIOKUgg0KPiA+ICAgICDilIIgQ29udHJvbGxlciAg4pSCIOKUgiDilIIgICAg
-ICAg4pSCIDMuTVNJIFdyaXRlICAgICAgIOKUgiAgICAgICAgICDilIINCj4gPiAgICAg4pSU4pSA
-4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSs4pSA4pSA4pSA4pSA4pSYIOKUlOKUgOKUvOKUgOKUgOKU
-gOKUgOKUgOKUgOKUgOKUvOKUgOKUgOKUgOKUgA0KPiDilIDilIDilIDilIDilIDilIDilIDilIDi
-lIDilIDilIDilIDilIDilIDilIDilKQgICAgICAgICAg4pSCDQo+ID4gICAgICAg4payICAgICAg
-4pSCICAgICAgICDilIIgICAgICAg4pSCICAgICAgICAgICAgICAgICAgIOKUnOKUgEJBUl9uICAg
-IOKUgg0KPiA+ICAgICAgIOKUgiAgICAgIOKUlOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUvOKU
-gOKUgOKUgOKUgOKUgOKUgOKUgOKUvOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgA0KPiDilIDi
-lIDilIDilIDilIDilIDilIDilIDilIDilrrilIIgICAgICAgICAg4pSCDQo+ID4gICAgICAg4pSC
-ICAgICAgICAgICAgICAg4pSCICAgICAgIOKUgiAyLkNhbGwgQmFjayAgICAgICDilIIgICAgICAg
-ICAg4pSCDQo+ID4gICAgICAg4pSCICAgICAgICAgICAgICAg4pSCICAgICAgIOKUgiAgIHdyaXRl
-X21zaV9tc2coKSDilIIgICAgICAgICAg4pSCDQo+ID4gICAgICAg4pSCICAgICAgICAgICAgICAg
-4pSCICAgICAgIOKUgiAgICAgICAgICAgICAgICAgICDilIIgICAgICAgICAg4pSCDQo+ID4gICAg
-ICAg4pSCICAgICAgICAgICAgICAg4pSU4pSA4pSA4pSA4pSs4pSA4pSA4pSA4pSYICAgICAgICAg
-ICAgICAgICAgIOKUlOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUmA0KPiA+ICAgICAg
-IOKUgiAgICAgICAgICAgICAgICAgICDilIINCj4gPiAgICAgICDilJTilIDilIDilIDilIDilIDi
-lIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilJgNCj4gPiAgICAgICAx
-LnBsYXRmb3JtX21zaV9kb21haW5fYWxsb2NfaXJxcygpDQo+ID4NCj4gPiBUaGVyZSBpcyBubyBk
-ZWZpbmVkIHdheSBvZiByYWlzaW5nIElSUXMgYnkgUENJIGhvc3QgdG8gdGhlIFBDSSBlbmRwb2lu
-dC4NCj4gPiBPbmx5IGRlZmluZSBNU0kvTVNJLVggdG8gbGV0IEVQIG5vdGlmaWVkIFJDIHN0YXR1
-cyBjaGFuZ2UuDQo+IA0KPiBUaGlzIHBpY3R1cmUgaXMgbWlzbGVhZGluZywgZXNwZWNpYWxseSAo
-MikuIA0KW0ZyYW5rIExpXSB3aGF0J3MgeW91ciBzdWdnZXN0aW9uPyAoMikgTW92ZSBpbnRvIFBD
-SS1FUCBibG9jayANCk9yIHRvdGFsbHkgcmVtb3ZlIHBpY3R1cmU/ICANCg0KPiBJSVVDIGFsbCB0
-aGlzIHBhdGNoIGlzDQo+IGRvaW5nIGlzIGltcGxlbWVudGluZyBhbiBOVEIgREIgaW4gdGhlIEVQ
-LCB0aGF0J3MgaXQsIHdlIHNob3VsZA0KPiByZXdvcmQgdGhlIGNvbW1pdCBsb2cgYXMgc3VjaC4N
-Cg0KW0ZyYW5rIExpXSBQcmV2aW91c2x5IHVzZSBwb2xsIG1ldGhvZCBhcyBOVEIgREIuIA0KTm93
-IGFkZCB1c2UgUGxhdGZvcm0gTVNJIGFzIERCLiAgDQp3aGF0IHlvdSBzcGVjaWZpYyBzdWdnZXN0
-aW9uPyANCg0KPiANCj4gV2UgYXJlIGluIHRoZSBtZXJnZSB3aW5kb3cgLSBpdCBpcyB2ZXJ5IGxp
-a2VseSB0aGlzIHBhdGNoIHNob3VsZA0KPiBiZSBwb3N0cG9uZWQgdG8gdjYuMiwgSSBkaWRuJ3Qg
-bm90aWNlIHRoYXQgdGhlIElSUWNoaXAgY2hhbmdlcw0KPiB3ZW50IGluIC0gYXBvbG9naWVzLg0K
-PiANCj4gPiBUaGUgbWVtb3J5IGFzc2lnbmVkIGZvciBCQVIgcmVnaW9uIGJ5IHRoZSBQQ0kgaG9z
-dCBpcyBtYXBwZWQgdG8gdGhlDQo+ID4gbWVzc2FnZSBhZGRyZXNzIG9mIHBsYXRmb3JtIG1zaSBp
-bnRlcnJ1cHQgY29udHJvbGxlciBpbiBQQ0kgRW5kcG9pbnQuDQo+ID4gU3VjaCB0aGF0LCB3aGVu
-ZXZlciB0aGUgUENJIGhvc3Qgd3JpdGVzIHRvIHRoZSBCQVIgcmVnaW9uLCBpdCB3aWxsDQo+ID4g
-dHJpZ2dlciBhbiBJUlEgaW4gdGhlIEVuZHBvaW50Lg0KPiA+DQo+ID4gQmFzaWMgd29ya2luZyBm
-b2xsb3cgYXMNCj4gPiAxLiBFUCBmdW5jdGlvbiBkcml2ZXIgY2FsbCBwbGF0Zm9ybV9tc2lfZG9t
-YWluX2FsbG9jX2lycXMoKSBhbGxvYyBhDQo+ID4gTVNJIGlycSBmcm9tIE1TSSBjb250cm9sbGVy
-IHdpdGggY2FsbCBiYWNrIGZ1bmN0aW9uIHdyaXRlX21zaV9tc2coKTsNCj4gPiAyLiB3cml0ZV9t
-c2dfbXNnIHdpbGwgY29uZmlnIEJBUiBhbmQgbWFwIHRvIGFkZHJlc3MgZGVmaW5lZCBpbiBtc2lf
-bXNnOw0KPiA+IDMuIEhvc3Qgc2lkZSB0cmlnZ2VyIGFuIElSUSBpbiBFbmRwb2ludCBieSB3cml0
-ZSB0byBCQVIgcmVnaW9uLg0KPiA+DQo+ID4gQWRkIE1TSSBzdXBwb3J0IGZvciBwY2ktZXBmLXZu
-dGIuIFF1ZXJ5IGlmIHN5c3RlbSBoYXMgYW4gTVNJIGNvbnRyb2xsZXIuDQo+ID4gU2V0IHVwIGRv
-b3JiZWxsIGFkZHJlc3MgYWNjb3JkaW5nIHRvIHN0cnVjdCBtc2lfbXNnLg0KPiA+DQo+ID4gU28g
-UENJIFJDIGNhbiB3cml0ZSB0aGlzIGRvb3JiZWxsIGFkZHJlc3MgdG8gdHJpZ2dlciBFUCBzaWRl
-J3MgSVJRLg0KPiA+DQo+ID4gSWYgbm8gTVNJIGNvbnRyb2xsZXIgZXhpc3RzLCBmYWxsIGJhY2sg
-dG8gc29mdHdhcmUgcG9sbGluZy4NCj4gPg0KPiA+IFNpZ25lZC1vZmYtYnk6IEZyYW5rIExpIDxG
-cmFuay5MaUBueHAuY29tPg0KPiA+IC0tLQ0KPiA+ICBkcml2ZXJzL3BjaS9lbmRwb2ludC9mdW5j
-dGlvbnMvcGNpLWVwZi12bnRiLmMgfCAxNDggKysrKysrKysrKysrKysrLS0tDQo+ID4gIDEgZmls
-ZSBjaGFuZ2VkLCAxMjcgaW5zZXJ0aW9ucygrKSwgMjEgZGVsZXRpb25zKC0pDQo+ID4NCj4gPiBk
-aWZmIC0tZ2l0IGEvZHJpdmVycy9wY2kvZW5kcG9pbnQvZnVuY3Rpb25zL3BjaS1lcGYtdm50Yi5j
-DQo+IGIvZHJpdmVycy9wY2kvZW5kcG9pbnQvZnVuY3Rpb25zL3BjaS1lcGYtdm50Yi5jDQo+ID4g
-aW5kZXggYWNlYTc1M2FmMjllZC4uOGZkZWFjMjIwMWUyOSAxMDA2NDQNCj4gPiAtLS0gYS9kcml2
-ZXJzL3BjaS9lbmRwb2ludC9mdW5jdGlvbnMvcGNpLWVwZi12bnRiLmMNCj4gPiArKysgYi9kcml2
-ZXJzL3BjaS9lbmRwb2ludC9mdW5jdGlvbnMvcGNpLWVwZi12bnRiLmMNCj4gPiBAQCAtNDQsNiAr
-NDQsNyBAQA0KPiA+ICAjaW5jbHVkZSA8bGludXgvcGNpLWVwYy5oPg0KPiA+ICAjaW5jbHVkZSA8
-bGludXgvcGNpLWVwZi5oPg0KPiA+ICAjaW5jbHVkZSA8bGludXgvbnRiLmg+DQo+ID4gKyNpbmNs
-dWRlIDxsaW51eC9tc2kuaD4NCj4gPg0KPiA+ICBzdGF0aWMgc3RydWN0IHdvcmtxdWV1ZV9zdHJ1
-Y3QgKmtwY2ludGJfd29ya3F1ZXVlOw0KPiA+DQo+ID4gQEAgLTEzNywxMSArMTM4LDE0IEBAIHN0
-cnVjdCBlcGZfbnRiIHsNCj4gPiAgICAgICBzdHJ1Y3QgZXBmX250Yl9jdHJsICpyZWc7DQo+ID4N
-Cj4gPiAgICAgICB1MzIgKmVwZl9kYjsNCj4gPiArICAgICBwaHlzX2FkZHJfdCBlcGZfZGJfcGh5
-czsNCj4gPg0KPiA+ICAgICAgIHBoeXNfYWRkcl90IHZwY2lfbXdfcGh5W01BWF9NV107DQo+ID4g
-ICAgICAgdm9pZCBfX2lvbWVtICp2cGNpX213X2FkZHJbTUFYX01XXTsNCj4gPg0KPiA+ICAgICAg
-IHN0cnVjdCBkZWxheWVkX3dvcmsgY21kX2hhbmRsZXI7DQo+ID4gKw0KPiA+ICsgICAgIGludCBt
-c2lfdmlycWJhc2U7DQo+ID4gIH07DQo+ID4NCj4gPiAgI2RlZmluZSB0b19lcGZfbnRiKGVwZl9n
-cm91cCkgY29udGFpbmVyX29mKChlcGZfZ3JvdXApLCBzdHJ1Y3QgZXBmX250YiwNCj4gZ3JvdXAp
-DQo+ID4gQEAgLTI1NiwxMCArMjYwLDEzIEBAIHN0YXRpYyB2b2lkIGVwZl9udGJfY21kX2hhbmRs
-ZXIoc3RydWN0DQo+IHdvcmtfc3RydWN0ICp3b3JrKQ0KPiA+DQo+ID4gICAgICAgbnRiID0gY29u
-dGFpbmVyX29mKHdvcmssIHN0cnVjdCBlcGZfbnRiLCBjbWRfaGFuZGxlci53b3JrKTsNCj4gPg0K
-PiA+IC0gICAgIGZvciAoaSA9IDE7IGkgPCBudGItPmRiX2NvdW50OyBpKyspIHsNCj4gPiAtICAg
-ICAgICAgICAgIGlmIChudGItPmVwZl9kYltpXSkgew0KPiA+IC0gICAgICAgICAgICAgICAgICAg
-ICBudGJfZGJfZXZlbnQoJm50Yi0+bnRiLCBpKTsNCj4gPiAtICAgICAgICAgICAgICAgICAgICAg
-bnRiLT5lcGZfZGJbaV0gPSAwOw0KPiA+ICsgICAgIGlmICghbnRiLT5lcGZfZGJfcGh5cykgew0K
-PiA+ICsgICAgICAgICAgICAgZm9yIChpID0gMTsgaSA8IG50Yi0+ZGJfY291bnQ7IGkrKykgew0K
-PiA+ICsgICAgICAgICAgICAgICAgICAgICBpZiAobnRiLT5lcGZfZGJbaV0pIHsNCj4gPiArICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICBudGItPmRiIHw9IDEgPDwgKGkgLSAxKTsNCj4gPiAr
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICBudGJfZGJfZXZlbnQoJm50Yi0+bnRiLCBpKTsN
-Cj4gPiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICBudGItPmVwZl9kYltpXSA9IDA7DQo+
-ID4gKyAgICAgICAgICAgICAgICAgICAgIH0NCj4gPiAgICAgICAgICAgICAgIH0NCj4gPiAgICAg
-ICB9DQo+ID4NCj4gPiBAQCAtNDY0LDcgKzQ3MSw3IEBAIHN0YXRpYyBpbnQgZXBmX250Yl9jb25m
-aWdfc3BhZF9iYXJfYWxsb2Moc3RydWN0DQo+IGVwZl9udGIgKm50YikNCj4gPg0KPiA+ICAgICAg
-IGZvciAoaSA9IDA7IGkgPCBudGItPmRiX2NvdW50OyBpKyspIHsNCj4gPiAgICAgICAgICAgICAg
-IG50Yi0+cmVnLT5kYl9kYXRhW2ldID0gMSArIGk7DQo+ID4gLSAgICAgICAgICAgICBudGItPnJl
-Zy0+ZGJfb2Zmc2V0W2ldID0gMDsNCj4gPiArICAgICAgICAgICAgIG50Yi0+cmVnLT5kYl9vZmZz
-ZXRbaV0gPSBzaXplb2YodTMyKSAqIGk7DQo+IA0KPiBXaHkgc2l6ZW9mKHUzMikgPw0KDQpbRnJh
-bmsgTGldIEluIGh0dHBzOi8vZ2l0Lmtlcm5lbC5vcmcvcHViL3NjbS9saW51eC9rZXJuZWwvZ2l0
-L25leHQvbGludXgtbmV4dC5naXQvdHJlZS9kcml2ZXJzL250Yi9ody9lcGYvbnRiX2h3X2VwZi5j
-DQpMaW5lIDQ4ODoNCgl3cml0ZWwoZGJfZGF0YSwgbmRldi0+ZGJfcmVnICsgKGRiX2VudHJ5X3Np
-emUgKiBpbnRlcnJ1cHRfbnVtKSArDQoJICAgICAgIGRiX29mZnNldCk7DQoNCldlIG5vdyBzZXQg
-ZGJfZW50cnlfc2l6ZSBpcyAwLiANCkRpcmVjdGx5IHVzZSBkYl9vZmZzZXQgYXMgREIgcmVnaXN0
-ZXIgb2Zmc2V0LiAgDQpFYWNoIERCIHJlZ2lzdGVyIGlzIHUzMi4NCg0KPiANCj4gPiAgICAgICB9
-DQo+ID4NCj4gPiAgICAgICByZXR1cm4gMDsNCj4gPiBAQCAtNTE3LDYgKzUyNCwyOCBAQCBzdGF0
-aWMgaW50IGVwZl9udGJfY29uZmlndXJlX2ludGVycnVwdChzdHJ1Y3QNCj4gZXBmX250YiAqbnRi
-KQ0KPiA+ICAgICAgIHJldHVybiAwOw0KPiA+ICB9DQo+ID4NCj4gPiArc3RhdGljIGludCBlcGZf
-bnRiX2RiX3NpemUoc3RydWN0IGVwZl9udGIgKm50YikNCj4gPiArew0KPiA+ICsgICAgIGNvbnN0
-IHN0cnVjdCBwY2lfZXBjX2ZlYXR1cmVzICplcGNfZmVhdHVyZXM7DQo+ID4gKyAgICAgc2l6ZV90
-IHNpemUgPSBzaXplb2YodTMyKSAqIG50Yi0+ZGJfY291bnQ7DQo+IA0KDQpbRnJhbmsgTGldIGh0
-dHBzOi8vZ2l0Lmtlcm5lbC5vcmcvcHViL3NjbS9saW51eC9rZXJuZWwvZ2l0L25leHQvbGludXgt
-bmV4dC5naXQvdHJlZS9kcml2ZXJzL250Yi9ody9lcGYvbnRiX2h3X2VwZi5jDQpVc2UgdTMyIGFz
-IERCIHJlZ2lzdGVyIHNpemUuICANCg0KPiBTYW1lIHF1ZXN0aW9uLg0KPiANCj4gPiArICAgICB1
-MzIgYWxpZ247DQo+ID4gKw0KPiA+ICsgICAgIGVwY19mZWF0dXJlcyA9IHBjaV9lcGNfZ2V0X2Zl
-YXR1cmVzKG50Yi0+ZXBmLT5lcGMsDQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgbnRiLT5lcGYtPmZ1bmNfbm8sDQo+ID4gKyAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgbnRiLT5lcGYtPnZmdW5jX25vKTsNCj4gPiArICAgICBhbGln
-biA9IGVwY19mZWF0dXJlcy0+YWxpZ247DQo+ID4gKw0KPiA+ICsgICAgIGlmIChzaXplIDwgMTI4
-KQ0KPiA+ICsgICAgICAgICAgICAgc2l6ZSA9IDEyODsNCj4gPiArDQo+ID4gKyAgICAgaWYgKGFs
-aWduKQ0KPiA+ICsgICAgICAgICAgICAgc2l6ZSA9IEFMSUdOKHNpemUsIGFsaWduKTsNCj4gPiAr
-ICAgICBlbHNlDQo+ID4gKyAgICAgICAgICAgICBzaXplID0gcm91bmR1cF9wb3dfb2ZfdHdvKHNp
-emUpOw0KPiA+ICsNCj4gPiArICAgICByZXR1cm4gc2l6ZTsNCj4gPiArfQ0KPiA+ICsNCj4gPiAg
-LyoqDQo+ID4gICAqIGVwZl9udGJfZGJfYmFyX2luaXQoKSAtIENvbmZpZ3VyZSBEb29yYmVsbCB3
-aW5kb3cgQkFScw0KPiA+ICAgKiBAbnRiOiBOVEIgZGV2aWNlIHRoYXQgZmFjaWxpdGF0ZXMgY29t
-bXVuaWNhdGlvbiBiZXR3ZWVuIEhPU1QgYW5kDQo+IFZIT1NUDQo+ID4gQEAgLTU0MCwyNyArNTY5
-LDI2IEBAIHN0YXRpYyBpbnQgZXBmX250Yl9kYl9iYXJfaW5pdChzdHJ1Y3QgZXBmX250Yg0KPiAq
-bnRiKQ0KPiA+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG50Yi0+
-ZXBmLT5mdW5jX25vLA0KPiA+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgIG50Yi0+ZXBmLT52ZnVuY19ubyk7DQo+ID4gICAgICAgYWxpZ24gPSBlcGNfZmVhdHVyZXMt
-PmFsaWduOw0KPiA+IC0NCj4gPiAtICAgICBpZiAoc2l6ZSA8IDEyOCkNCj4gPiAtICAgICAgICAg
-ICAgIHNpemUgPSAxMjg7DQo+ID4gLQ0KPiA+IC0gICAgIGlmIChhbGlnbikNCj4gPiAtICAgICAg
-ICAgICAgIHNpemUgPSBBTElHTihzaXplLCBhbGlnbik7DQo+ID4gLSAgICAgZWxzZQ0KPiA+IC0g
-ICAgICAgICAgICAgc2l6ZSA9IHJvdW5kdXBfcG93X29mX3R3byhzaXplKTsNCj4gPiArICAgICBz
-aXplID0gZXBmX250Yl9kYl9zaXplKG50Yik7DQo+ID4NCj4gPiAgICAgICBiYXJubyA9IG50Yi0+
-ZXBmX250Yl9iYXJbQkFSX0RCXTsNCj4gPiArICAgICBlcGZfYmFyID0gJm50Yi0+ZXBmLT5iYXJb
-YmFybm9dOw0KPiA+DQo+ID4gLSAgICAgbXdfYWRkciA9IHBjaV9lcGZfYWxsb2Nfc3BhY2UobnRi
-LT5lcGYsIHNpemUsIGJhcm5vLCBhbGlnbiwgMCk7DQo+ID4gLSAgICAgaWYgKCFtd19hZGRyKSB7
-DQo+ID4gLSAgICAgICAgICAgICBkZXZfZXJyKGRldiwgIkZhaWxlZCB0byBhbGxvY2F0ZSBPQiBh
-ZGRyZXNzXG4iKTsNCj4gPiAtICAgICAgICAgICAgIHJldHVybiAtRU5PTUVNOw0KPiA+ICsgICAg
-IGlmIChudGItPmVwZl9kYl9waHlzKSB7DQo+ID4gKyAgICAgICAgICAgICBtd19hZGRyID0gTlVM
-TDsNCj4gPiArICAgICAgICAgICAgIGVwZl9iYXItPnBoeXNfYWRkciA9IG50Yi0+ZXBmX2RiX3Bo
-eXM7DQo+ID4gKyAgICAgICAgICAgICBlcGZfYmFyLT5iYXJubyA9IGJhcm5vOw0KPiA+ICsgICAg
-ICAgICAgICAgZXBmX2Jhci0+c2l6ZSA9IHNpemU7DQo+ID4gKyAgICAgfSBlbHNlIHsNCj4gPiAr
-ICAgICAgICAgICAgIG13X2FkZHIgPSBwY2lfZXBmX2FsbG9jX3NwYWNlKG50Yi0+ZXBmLCBzaXpl
-LCBiYXJubywgYWxpZ24sIDApOw0KPiA+ICsgICAgICAgICAgICAgaWYgKCFtd19hZGRyKSB7DQo+
-ID4gKyAgICAgICAgICAgICAgICAgICAgIGRldl9lcnIoZGV2LCAiRmFpbGVkIHRvIGFsbG9jYXRl
-IGRvb3JiZWxsIGFkZHJlc3NcbiIpOw0KPiA+ICsgICAgICAgICAgICAgICAgICAgICByZXR1cm4g
-LUVOT01FTTsNCj4gPiArICAgICAgICAgICAgIH0NCj4gPiAgICAgICB9DQo+ID4NCj4gPiAgICAg
-ICBudGItPmVwZl9kYiA9IG13X2FkZHI7DQo+ID4NCj4gPiAtICAgICBlcGZfYmFyID0gJm50Yi0+
-ZXBmLT5iYXJbYmFybm9dOw0KPiA+IC0NCj4gPiAgICAgICByZXQgPSBwY2lfZXBjX3NldF9iYXIo
-bnRiLT5lcGYtPmVwYywgbnRiLT5lcGYtPmZ1bmNfbm8sIG50Yi0+ZXBmLQ0KPiA+dmZ1bmNfbm8s
-IGVwZl9iYXIpOw0KPiA+ICAgICAgIGlmIChyZXQpIHsNCj4gPiAgICAgICAgICAgICAgIGRldl9l
-cnIoZGV2LCAiRG9vcmJlbGwgQkFSIHNldCBmYWlsZWRcbiIpOw0KPiA+IEBAIC03MTksNiArNzQ3
-LDgzIEBAIHN0YXRpYyBpbnQgZXBmX250Yl9pbml0X2VwY19iYXIoc3RydWN0IGVwZl9udGINCj4g
-Km50YikNCj4gPiAgICAgICByZXR1cm4gMDsNCj4gPiAgfQ0KPiA+DQo+ID4gKyNpZmRlZiBDT05G
-SUdfR0VORVJJQ19NU0lfSVJRX0RPTUFJTg0KPiA+ICtzdGF0aWMgdm9pZCBlcGZfbnRiX3dyaXRl
-X21zaV9tc2coc3RydWN0IG1zaV9kZXNjICpkZXNjLCBzdHJ1Y3QgbXNpX21zZw0KPiAqbXNnKQ0K
-PiA+ICt7DQo+ID4gKyAgICAgc3RydWN0IGVwZl9udGIgKm50YiA9IGRldl9nZXRfZHJ2ZGF0YShk
-ZXNjLT5kZXYpOw0KPiA+ICsgICAgIHN0cnVjdCBlcGZfbnRiX2N0cmwgKnJlZyA9IG50Yi0+cmVn
-Ow0KPiA+ICsgICAgIGludCBzaXplID0gZXBmX250Yl9kYl9zaXplKG50Yik7DQo+ID4gKyAgICAg
-dTY0IGFkZHI7DQo+ID4gKw0KPiA+ICsgICAgIGFkZHIgPSBtc2ctPmFkZHJlc3NfaGk7DQo+ID4g
-KyAgICAgYWRkciA8PD0gMzI7DQo+ID4gKyAgICAgYWRkciB8PSBtc2ctPmFkZHJlc3NfbG87DQo+
-ID4gKw0KPiA+ICsgICAgIHJlZy0+ZGJfZGF0YVtkZXNjLT5tc2lfaW5kZXhdID0gbXNnLT5kYXRh
-Ow0KPiA+ICsNCj4gPiArICAgICBpZiAoIWRlc2MtPm1zaV9pbmRleCkNCj4gPiArICAgICAgICAg
-ICAgIG50Yi0+ZXBmX2RiX3BoeXMgPSByb3VuZF9kb3duKGFkZHIsIHNpemUpOw0KPiA+ICsNCj4g
-PiArICAgICByZWctPmRiX29mZnNldFtkZXNjLT5tc2lfaW5kZXhdID0gYWRkciAtIG50Yi0+ZXBm
-X2RiX3BoeXM7DQo+ID4gK30NCj4gPiArI2VuZGlmDQo+IA0KPiBDYW4gd2UgbW92ZSB0aGlzIGh1
-bmsgZG93biBpbnRvIHRoZSBzYW1lICNpZmRlZiBndWFyZCBwbGVhc2UgPw0KPiANCj4gPiArc3Rh
-dGljIGlycXJldHVybl90IGVwZl9udGJfaW50ZXJydXB0X2hhbmRsZXIoaW50IGlycSwgdm9pZCAq
-ZGF0YSkNCj4gPiArew0KPiA+ICsgICAgIHN0cnVjdCBlcGZfbnRiICpudGIgPSBkYXRhOw0KPiA+
-ICsgICAgIGludCBpbmRleDsNCj4gPiArDQo+ID4gKyAgICAgaW5kZXggPSBpcnEgLSBudGItPm1z
-aV92aXJxYmFzZTsNCj4gPiArICAgICBudGItPmRiIHw9IDEgPDwgKGluZGV4IC0gMSk7DQo+ID4g
-KyAgICAgbnRiX2RiX2V2ZW50KCZudGItPm50YiwgaW5kZXgpOw0KPiA+ICsNCj4gPiArICAgICBy
-ZXR1cm4gSVJRX0hBTkRMRUQ7DQo+ID4gK30NCj4gPiArDQo+ID4gKyNpZmRlZiBDT05GSUdfR0VO
-RVJJQ19NU0lfSVJRX0RPTUFJTg0KPiA+ICtzdGF0aWMgdm9pZCBlcGZfbnRiX2VwY19tc2lfaW5p
-dChzdHJ1Y3QgZXBmX250YiAqbnRiKQ0KPiA+ICt7DQo+ID4gKyAgICAgc3RydWN0IGRldmljZSAq
-ZGV2ID0gJm50Yi0+ZXBmLT5kZXY7DQo+ID4gKyAgICAgc3RydWN0IGlycV9kb21haW4gKmRvbWFp
-bjsNCj4gPiArICAgICBpbnQgdmlycTsNCj4gPiArICAgICBpbnQgcmV0Ow0KPiA+ICsgICAgIGlu
-dCBpOw0KPiA+ICsNCj4gPiArICAgICBkb21haW4gPSBkZXZfZ2V0X21zaV9kb21haW4obnRiLT5l
-cGYtPmVwYy0+ZGV2LnBhcmVudCk7DQo+ID4gKyAgICAgaWYgKCFkb21haW4pDQo+ID4gKyAgICAg
-ICAgICAgICByZXR1cm47DQo+ID4gKw0KPiA+ICsgICAgIGRldl9zZXRfbXNpX2RvbWFpbihkZXYs
-IGRvbWFpbik7DQo+ID4gKw0KPiA+ICsgICAgIGlmIChwbGF0Zm9ybV9tc2lfZG9tYWluX2FsbG9j
-X2lycXMoJm50Yi0+ZXBmLT5kZXYsDQo+ID4gKyAgICAgICAgICAgICBudGItPmRiX2NvdW50LA0K
-PiA+ICsgICAgICAgICAgICAgZXBmX250Yl93cml0ZV9tc2lfbXNnKSkgew0KPiA+ICsgICAgICAg
-ICAgICAgZGV2X2VycihkZXYsICJDYW4ndCBhbGxvY2F0ZSBNU0ksIGZhbGxpbmcgYmFjayB0byBw
-b2xsaW5nIG1vZGVcbiIpOw0KPiA+ICsgICAgICAgICAgICAgcmV0dXJuOw0KPiA+ICsgICAgIH0N
-Cj4gPiArICAgICBkZXZfaW5mbyhkZXYsICJVc2luZyBNU0kgYXMgZG9vcmJlbGxcbiIpOw0KPiAN
-Cj4gSXMgaXQgcmVhbGx5IHVzZWZ1bCB0byBwcmludCB0aGlzIGluIHRoZSBrZXJuZWwgbG9nID8g
-ZGV2X2RiZyBzZWVtcyBtb3JlDQo+IHN1aXRhYmxlIHRvIG1lLg0KPiANCj4gPiArDQo+ID4gKyAg
-ICAgZm9yIChpID0gMDsgaSA8IG50Yi0+ZGJfY291bnQ7IGkrKykgew0KPiA+ICsgICAgICAgICAg
-ICAgdmlycSA9IG1zaV9nZXRfdmlycShkZXYsIGkpOw0KPiA+ICsgICAgICAgICAgICAgcmV0ID0g
-ZGV2bV9yZXF1ZXN0X2lycShkZXYsIHZpcnEsDQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICBlcGZfbnRiX2ludGVycnVwdF9oYW5kbGVyLCAwLA0KPiA+ICsgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgInBjaV9lcGZfdm50YiIsIG50Yik7DQo+ID4gKw0KPiA+ICsgICAgICAgICAg
-ICAgaWYgKHJldCkgew0KPiA+ICsgICAgICAgICAgICAgICAgICAgICBkZXZfZXJyKGRldiwgIkZh
-aWxlZCB0byByZXF1ZXN0IGRvb3JiZWxsIElSUSEgRmFsbGluZyBiYWNrIHRvDQo+IHBvbGxpbmcg
-bW9kZSIpOw0KPiA+ICsgICAgICAgICAgICAgICAgICAgICBudGItPmVwZl9kYl9waHlzID0gMDsN
-Cj4gPiArICAgICAgICAgICAgICAgICAgICAgYnJlYWs7DQo+IA0KPiBEb2Vzbid0IHRoaXMgcmVx
-dWlyZSBhIHBsYXRmb3JtX21zaV9kb21haW5fZnJlZV9pcnFzKCkgPw0KW0ZyYW5rIExpXSB5b3Ug
-YXJlIHJpZ2h0Lg0KDQo+IA0KPiBUaGFua3MsDQo+IExvcmVuem8NCj4gDQo+ID4gKyAgICAgICAg
-ICAgICB9DQo+ID4gKw0KPiA+ICsgICAgICAgICAgICAgaWYgKCFpKQ0KPiA+ICsgICAgICAgICAg
-ICAgICAgICAgICBudGItPm1zaV92aXJxYmFzZSA9IHZpcnE7IC8qIG1zaSBzdGFydCB2aXJxIG51
-bWJlciAqLw0KPiA+ICsgICAgIH0NCj4gPiArfQ0KPiA+ICsjZWxzZQ0KPiA+ICtzdGF0aWMgdm9p
-ZCBlcGZfbnRiX2VwY19tc2lfaW5pdChzdHJ1Y3QgZXBmX250YiAqbnRiKQ0KPiA+ICt7DQo+ID4g
-K30NCj4gPiArI2VuZGlmIC8qIENPTkZJR19HRU5FUklDX01TSV9JUlFfRE9NQUlOICovDQo+ID4g
-IC8qKg0KPiA+ICAgKiBlcGZfbnRiX2VwY19pbml0KCkgLSBJbml0aWFsaXplIE5UQiBpbnRlcmZh
-Y2UNCj4gPiAgICogQG50YjogTlRCIGRldmljZSB0aGF0IGZhY2lsaXRhdGVzIGNvbW11bmljYXRp
-b24gYmV0d2VlbiBIT1NUIGFuZA0KPiBWSE9TVA0KPiA+IEBAIC0xMzIwLDE0ICsxNDI1LDE1IEBA
-IHN0YXRpYyBpbnQgZXBmX250Yl9iaW5kKHN0cnVjdCBwY2lfZXBmICplcGYpDQo+ID4gICAgICAg
-ICAgICAgICBnb3RvIGVycl9iYXJfYWxsb2M7DQo+ID4gICAgICAgfQ0KPiA+DQo+ID4gKyAgICAg
-ZXBmX3NldF9kcnZkYXRhKGVwZiwgbnRiKTsNCj4gPiArICAgICBlcGZfbnRiX2VwY19tc2lfaW5p
-dChudGIpOw0KPiA+ICsNCj4gPiAgICAgICByZXQgPSBlcGZfbnRiX2VwY19pbml0KG50Yik7DQo+
-ID4gICAgICAgaWYgKHJldCkgew0KPiA+ICAgICAgICAgICAgICAgZGV2X2VycihkZXYsICJGYWls
-ZWQgdG8gaW5pdGlhbGl6ZSBFUENcbiIpOw0KPiA+ICAgICAgICAgICAgICAgZ290byBlcnJfYmFy
-X2FsbG9jOw0KPiA+ICAgICAgIH0NCj4gPg0KPiA+IC0gICAgIGVwZl9zZXRfZHJ2ZGF0YShlcGYs
-IG50Yik7DQo+ID4gLQ0KPiA+ICAgICAgIHBjaV9zcGFjZVswXSA9IChudGItPnZudGJfcGlkIDw8
-IDE2KSB8IG50Yi0+dm50Yl92aWQ7DQo+ID4gICAgICAgcGNpX3ZudGJfdGFibGVbMF0udmVuZG9y
-ID0gbnRiLT52bnRiX3ZpZDsNCj4gPiAgICAgICBwY2lfdm50Yl90YWJsZVswXS5kZXZpY2UgPSBu
-dGItPnZudGJfcGlkOw0KPiA+IC0tDQo+ID4gMi4zNS4xDQo+ID4NCg==
+Remove unused field: epf_db_phy.
+Remove __iomem before epf_db.
+Change epf_db to u32* from void *
+Remove duplicate check if (readl(ntb->epf_db + i * 4)).
+Using sizeof(u32) instead of number 4 at all place.
+
+Clean up sparse build warning:
+  Using  epf_db[i] instead of readl() because epf_db is located in local
+  memory and allocated by dma_alloc_coherent(). Sparse build warning when
+  there are not __iomem at readl().
+  Added __iomem force type convert in vntb_epf_peer_spad_read\write() and
+  vntb_epf_spad_read\write(). This require strong order at read and write.
+
+Replace pci_epc_mem_free_addr() with pci_epf_free_space() at error handle
+path to match pci_epf_alloc_space().
+
+Cleanup warning found by scripts/kernel-doc
+Fix indentation of the struct epf_ntb_ctrl
+Consolidate term
+  host, host1 to HOST
+  vhost, vHost, Vhost, VHOST2 to VHOST
+
+Signed-off-by: Frank Li <Frank.Li@nxp.com>
+---
+ drivers/pci/endpoint/functions/pci-epf-vntb.c | 157 ++++++++++--------
+ 1 file changed, 90 insertions(+), 67 deletions(-)
+
+diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+index 1466dd1904175..acea753af29ed 100644
+--- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
++++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+@@ -11,7 +11,7 @@
+  * Author: Kishon Vijay Abraham I <kishon@ti.com>
+  */
+ 
+-/**
++/*
+  * +------------+         +---------------------------------------+
+  * |            |         |                                       |
+  * +------------+         |                        +--------------+
+@@ -99,20 +99,20 @@ enum epf_ntb_bar {
+  *       NTB Driver               NTB Driver
+  */
+ struct epf_ntb_ctrl {
+-	u32     command;
+-	u32     argument;
+-	u16     command_status;
+-	u16     link_status;
+-	u32     topology;
+-	u64     addr;
+-	u64     size;
+-	u32     num_mws;
+-	u32	reserved;
+-	u32     spad_offset;
+-	u32     spad_count;
+-	u32	db_entry_size;
+-	u32     db_data[MAX_DB_COUNT];
+-	u32     db_offset[MAX_DB_COUNT];
++	u32 command;
++	u32 argument;
++	u16 command_status;
++	u16 link_status;
++	u32 topology;
++	u64 addr;
++	u64 size;
++	u32 num_mws;
++	u32 reserved;
++	u32 spad_offset;
++	u32 spad_count;
++	u32 db_entry_size;
++	u32 db_data[MAX_DB_COUNT];
++	u32 db_offset[MAX_DB_COUNT];
+ } __packed;
+ 
+ struct epf_ntb {
+@@ -136,8 +136,7 @@ struct epf_ntb {
+ 
+ 	struct epf_ntb_ctrl *reg;
+ 
+-	phys_addr_t epf_db_phy;
+-	void __iomem *epf_db;
++	u32 *epf_db;
+ 
+ 	phys_addr_t vpci_mw_phy[MAX_MW];
+ 	void __iomem *vpci_mw_addr[MAX_MW];
+@@ -156,12 +155,14 @@ static struct pci_epf_header epf_ntb_header = {
+ };
+ 
+ /**
+- * epf_ntb_link_up() - Raise link_up interrupt to Virtual Host
++ * epf_ntb_link_up() - Raise link_up interrupt to Virtual Host (VHOST)
+  * @ntb: NTB device that facilitates communication between HOST and VHOST
+  * @link_up: true or false indicating Link is UP or Down
+  *
+  * Once NTB function in HOST invoke ntb_link_enable(),
+- * this NTB function driver will trigger a link event to vhost.
++ * this NTB function driver will trigger a link event to VHOST.
++ *
++ * Returns: Zero for success, or an error code in case of failure
+  */
+ static int epf_ntb_link_up(struct epf_ntb *ntb, bool link_up)
+ {
+@@ -175,9 +176,9 @@ static int epf_ntb_link_up(struct epf_ntb *ntb, bool link_up)
+ }
+ 
+ /**
+- * epf_ntb_configure_mw() - Configure the Outbound Address Space for vhost
+- *   to access the memory window of host
+- * @ntb: NTB device that facilitates communication between host and vhost
++ * epf_ntb_configure_mw() - Configure the Outbound Address Space for VHOST
++ *   to access the memory window of HOST
++ * @ntb: NTB device that facilitates communication between HOST and VHOST
+  * @mw: Index of the memory window (either 0, 1, 2 or 3)
+  *
+  *                          EP Outbound Window
+@@ -194,7 +195,9 @@ static int epf_ntb_link_up(struct epf_ntb *ntb, bool link_up)
+  * |        |              |           |
+  * |        |              |           |
+  * +--------+              +-----------+
+- *  VHost                   PCI EP
++ *  VHOST                   PCI EP
++ *
++ * Returns: Zero for success, or an error code in case of failure
+  */
+ static int epf_ntb_configure_mw(struct epf_ntb *ntb, u32 mw)
+ {
+@@ -219,7 +222,7 @@ static int epf_ntb_configure_mw(struct epf_ntb *ntb, u32 mw)
+ 
+ /**
+  * epf_ntb_teardown_mw() - Teardown the configured OB ATU
+- * @ntb: NTB device that facilitates communication between HOST and vHOST
++ * @ntb: NTB device that facilitates communication between HOST and VHOST
+  * @mw: Index of the memory window (either 0, 1, 2 or 3)
+  *
+  * Teardown the configured OB ATU configured in epf_ntb_configure_mw() using
+@@ -234,12 +237,12 @@ static void epf_ntb_teardown_mw(struct epf_ntb *ntb, u32 mw)
+ }
+ 
+ /**
+- * epf_ntb_cmd_handler() - Handle commands provided by the NTB Host
++ * epf_ntb_cmd_handler() - Handle commands provided by the NTB HOST
+  * @work: work_struct for the epf_ntb_epc
+  *
+  * Workqueue function that gets invoked for the two epf_ntb_epc
+  * periodically (once every 5ms) to see if it has received any commands
+- * from NTB host. The host can send commands to configure doorbell or
++ * from NTB HOST. The HOST can send commands to configure doorbell or
+  * configure memory window or to update link status.
+  */
+ static void epf_ntb_cmd_handler(struct work_struct *work)
+@@ -254,12 +257,9 @@ static void epf_ntb_cmd_handler(struct work_struct *work)
+ 	ntb = container_of(work, struct epf_ntb, cmd_handler.work);
+ 
+ 	for (i = 1; i < ntb->db_count; i++) {
+-		if (readl(ntb->epf_db + i * 4)) {
+-			if (readl(ntb->epf_db + i * 4))
+-				ntb->db |= 1 << (i - 1);
+-
++		if (ntb->epf_db[i]) {
+ 			ntb_db_event(&ntb->ntb, i);
+-			writel(0, ntb->epf_db + i * 4);
++			ntb->epf_db[i] = 0;
+ 		}
+ 	}
+ 
+@@ -321,8 +321,8 @@ static void epf_ntb_cmd_handler(struct work_struct *work)
+ 
+ /**
+  * epf_ntb_config_sspad_bar_clear() - Clear Config + Self scratchpad BAR
+- * @ntb_epc: EPC associated with one of the HOST which holds peer's outbound
+- *	     address.
++ * @ntb: EPC associated with one of the HOST which holds peer's outbound
++ *	 address.
+  *
+  * Clear BAR0 of EP CONTROLLER 1 which contains the HOST1's config and
+  * self scratchpad region (removes inbound ATU configuration). While BAR0 is
+@@ -331,8 +331,10 @@ static void epf_ntb_cmd_handler(struct work_struct *work)
+  * used for self scratchpad from epf_ntb_bar[BAR_CONFIG].
+  *
+  * Please note the self scratchpad region and config region is combined to
+- * a single region and mapped using the same BAR. Also note HOST2's peer
+- * scratchpad is HOST1's self scratchpad.
++ * a single region and mapped using the same BAR. Also note VHOST's peer
++ * scratchpad is HOST's self scratchpad.
++ *
++ * Returns: void
+  */
+ static void epf_ntb_config_sspad_bar_clear(struct epf_ntb *ntb)
+ {
+@@ -347,13 +349,15 @@ static void epf_ntb_config_sspad_bar_clear(struct epf_ntb *ntb)
+ 
+ /**
+  * epf_ntb_config_sspad_bar_set() - Set Config + Self scratchpad BAR
+- * @ntb: NTB device that facilitates communication between HOST and vHOST
++ * @ntb: NTB device that facilitates communication between HOST and VHOST
+  *
+- * Map BAR0 of EP CONTROLLER 1 which contains the HOST1's config and
++ * Map BAR0 of EP CONTROLLER which contains the VHOST's config and
+  * self scratchpad region.
+  *
+  * Please note the self scratchpad region and config region is combined to
+  * a single region and mapped using the same BAR.
++ *
++ * Returns: Zero for success, or an error code in case of failure
+  */
+ static int epf_ntb_config_sspad_bar_set(struct epf_ntb *ntb)
+ {
+@@ -380,7 +384,7 @@ static int epf_ntb_config_sspad_bar_set(struct epf_ntb *ntb)
+ /**
+  * epf_ntb_config_spad_bar_free() - Free the physical memory associated with
+  *   config + scratchpad region
+- * @ntb: NTB device that facilitates communication between HOST and vHOST
++ * @ntb: NTB device that facilitates communication between HOST and VHOST
+  */
+ static void epf_ntb_config_spad_bar_free(struct epf_ntb *ntb)
+ {
+@@ -393,11 +397,13 @@ static void epf_ntb_config_spad_bar_free(struct epf_ntb *ntb)
+ /**
+  * epf_ntb_config_spad_bar_alloc() - Allocate memory for config + scratchpad
+  *   region
+- * @ntb: NTB device that facilitates communication between HOST1 and HOST2
++ * @ntb: NTB device that facilitates communication between HOST and VHOST
+  *
+  * Allocate the Local Memory mentioned in the above diagram. The size of
+  * CONFIG REGION is sizeof(struct epf_ntb_ctrl) and size of SCRATCHPAD REGION
+  * is obtained from "spad-count" configfs entry.
++ *
++ * Returns: Zero for success, or an error code in case of failure
+  */
+ static int epf_ntb_config_spad_bar_alloc(struct epf_ntb *ntb)
+ {
+@@ -424,7 +430,7 @@ static int epf_ntb_config_spad_bar_alloc(struct epf_ntb *ntb)
+ 	spad_count = ntb->spad_count;
+ 
+ 	ctrl_size = sizeof(struct epf_ntb_ctrl);
+-	spad_size = 2 * spad_count * 4;
++	spad_size = 2 * spad_count * sizeof(u32);
+ 
+ 	if (!align) {
+ 		ctrl_size = roundup_pow_of_two(ctrl_size);
+@@ -454,7 +460,7 @@ static int epf_ntb_config_spad_bar_alloc(struct epf_ntb *ntb)
+ 	ctrl->num_mws = ntb->num_mws;
+ 	ntb->spad_size = spad_size;
+ 
+-	ctrl->db_entry_size = 4;
++	ctrl->db_entry_size = sizeof(u32);
+ 
+ 	for (i = 0; i < ntb->db_count; i++) {
+ 		ntb->reg->db_data[i] = 1 + i;
+@@ -465,11 +471,13 @@ static int epf_ntb_config_spad_bar_alloc(struct epf_ntb *ntb)
+ }
+ 
+ /**
+- * epf_ntb_configure_interrupt() - Configure MSI/MSI-X capaiblity
+- * @ntb: NTB device that facilitates communication between HOST and vHOST
++ * epf_ntb_configure_interrupt() - Configure MSI/MSI-X capability
++ * @ntb: NTB device that facilitates communication between HOST and VHOST
+  *
+  * Configure MSI/MSI-X capability for each interface with number of
+  * interrupts equal to "db_count" configfs entry.
++ *
++ * Returns: Zero for success, or an error code in case of failure
+  */
+ static int epf_ntb_configure_interrupt(struct epf_ntb *ntb)
+ {
+@@ -511,18 +519,22 @@ static int epf_ntb_configure_interrupt(struct epf_ntb *ntb)
+ 
+ /**
+  * epf_ntb_db_bar_init() - Configure Doorbell window BARs
+- * @ntb: NTB device that facilitates communication between HOST and vHOST
++ * @ntb: NTB device that facilitates communication between HOST and VHOST
++ *
++ * Returns: Zero for success, or an error code in case of failure
+  */
+ static int epf_ntb_db_bar_init(struct epf_ntb *ntb)
+ {
+ 	const struct pci_epc_features *epc_features;
+-	u32 align;
+ 	struct device *dev = &ntb->epf->dev;
+-	int ret;
+ 	struct pci_epf_bar *epf_bar;
+-	void __iomem *mw_addr;
+ 	enum pci_barno barno;
+-	size_t size = 4 * ntb->db_count;
++	void *mw_addr;
++	size_t size;
++	u32 align;
++	int ret;
++
++	size = sizeof(u32) * ntb->db_count;
+ 
+ 	epc_features = pci_epc_get_features(ntb->epf->epc,
+ 					    ntb->epf->func_no,
+@@ -557,14 +569,14 @@ static int epf_ntb_db_bar_init(struct epf_ntb *ntb)
+ 	return ret;
+ 
+ err_alloc_peer_mem:
+-	pci_epc_mem_free_addr(ntb->epf->epc, epf_bar->phys_addr, mw_addr, epf_bar->size);
++	pci_epf_free_space(ntb->epf, mw_addr, barno, 0);
+ 	return -1;
+ }
+ 
+ /**
+  * epf_ntb_db_bar_clear() - Clear doorbell BAR and free memory
+  *   allocated in peer's outbound address space
+- * @ntb: NTB device that facilitates communication between HOST and vHOST
++ * @ntb: NTB device that facilitates communication between HOST and VHOST
+  */
+ static void epf_ntb_db_bar_clear(struct epf_ntb *ntb)
+ {
+@@ -580,8 +592,9 @@ static void epf_ntb_db_bar_clear(struct epf_ntb *ntb)
+ 
+ /**
+  * epf_ntb_mw_bar_init() - Configure Memory window BARs
+- * @ntb: NTB device that facilitates communication between HOST and vHOST
++ * @ntb: NTB device that facilitates communication between HOST and VHOST
+  *
++ * Returns: Zero for success, or an error code in case of failure
+  */
+ static int epf_ntb_mw_bar_init(struct epf_ntb *ntb)
+ {
+@@ -629,7 +642,7 @@ static int epf_ntb_mw_bar_init(struct epf_ntb *ntb)
+ 
+ /**
+  * epf_ntb_mw_bar_clear() - Clear Memory window BARs
+- * @ntb: NTB device that facilitates communication between HOST and vHOST
++ * @ntb: NTB device that facilitates communication between HOST and VHOST
+  */
+ static void epf_ntb_mw_bar_clear(struct epf_ntb *ntb)
+ {
+@@ -652,7 +665,7 @@ static void epf_ntb_mw_bar_clear(struct epf_ntb *ntb)
+ 
+ /**
+  * epf_ntb_epc_destroy() - Cleanup NTB EPC interface
+- * @ntb: NTB device that facilitates communication between HOST and vHOST
++ * @ntb: NTB device that facilitates communication between HOST and VHOST
+  *
+  * Wrapper for epf_ntb_epc_destroy_interface() to cleanup all the NTB interfaces
+  */
+@@ -665,7 +678,9 @@ static void epf_ntb_epc_destroy(struct epf_ntb *ntb)
+ /**
+  * epf_ntb_init_epc_bar() - Identify BARs to be used for each of the NTB
+  * constructs (scratchpad region, doorbell, memorywindow)
+- * @ntb: NTB device that facilitates communication between HOST and vHOST
++ * @ntb: NTB device that facilitates communication between HOST and VHOST
++ *
++ * Returns: Zero for success, or an error code in case of failure
+  */
+ static int epf_ntb_init_epc_bar(struct epf_ntb *ntb)
+ {
+@@ -706,11 +721,13 @@ static int epf_ntb_init_epc_bar(struct epf_ntb *ntb)
+ 
+ /**
+  * epf_ntb_epc_init() - Initialize NTB interface
+- * @ntb: NTB device that facilitates communication between HOST and vHOST2
++ * @ntb: NTB device that facilitates communication between HOST and VHOST
+  *
+  * Wrapper to initialize a particular EPC interface and start the workqueue
+- * to check for commands from host. This function will write to the
++ * to check for commands from HOST. This function will write to the
+  * EP controller HW for configuring it.
++ *
++ * Returns: Zero for success, or an error code in case of failure
+  */
+ static int epf_ntb_epc_init(struct epf_ntb *ntb)
+ {
+@@ -777,7 +794,7 @@ static int epf_ntb_epc_init(struct epf_ntb *ntb)
+ 
+ /**
+  * epf_ntb_epc_cleanup() - Cleanup all NTB interfaces
+- * @ntb: NTB device that facilitates communication between HOST1 and HOST2
++ * @ntb: NTB device that facilitates communication between HOST and VHOST
+  *
+  * Wrapper to cleanup all NTB interfaces.
+  */
+@@ -934,6 +951,8 @@ static const struct config_item_type ntb_group_type = {
+  *
+  * Add configfs directory specific to NTB. This directory will hold
+  * NTB specific properties like db_count, spad_count, num_mws etc.,
++ *
++ * Returns: Pointer to config_group
+  */
+ static struct config_group *epf_ntb_add_cfs(struct pci_epf *epf,
+ 					    struct config_group *group)
+@@ -1084,11 +1103,11 @@ static int vntb_epf_link_enable(struct ntb_dev *ntb,
+ static u32 vntb_epf_spad_read(struct ntb_dev *ndev, int idx)
+ {
+ 	struct epf_ntb *ntb = ntb_ndev(ndev);
+-	int off = ntb->reg->spad_offset, ct = ntb->reg->spad_count * 4;
++	int off = ntb->reg->spad_offset, ct = ntb->reg->spad_count * sizeof(u32);
+ 	u32 val;
+-	void __iomem *base = ntb->reg;
++	void __iomem *base = (void __iomem *)ntb->reg;
+ 
+-	val = readl(base + off + ct + idx * 4);
++	val = readl(base + off + ct + idx * sizeof(u32));
+ 	return val;
+ }
+ 
+@@ -1096,10 +1115,10 @@ static int vntb_epf_spad_write(struct ntb_dev *ndev, int idx, u32 val)
+ {
+ 	struct epf_ntb *ntb = ntb_ndev(ndev);
+ 	struct epf_ntb_ctrl *ctrl = ntb->reg;
+-	int off = ctrl->spad_offset, ct = ctrl->spad_count * 4;
+-	void __iomem *base = ntb->reg;
++	int off = ctrl->spad_offset, ct = ctrl->spad_count * sizeof(u32);
++	void __iomem *base = (void __iomem *)ntb->reg;
+ 
+-	writel(val, base + off + ct + idx * 4);
++	writel(val, base + off + ct + idx * sizeof(u32));
+ 	return 0;
+ }
+ 
+@@ -1108,10 +1127,10 @@ static u32 vntb_epf_peer_spad_read(struct ntb_dev *ndev, int pidx, int idx)
+ 	struct epf_ntb *ntb = ntb_ndev(ndev);
+ 	struct epf_ntb_ctrl *ctrl = ntb->reg;
+ 	int off = ctrl->spad_offset;
+-	void __iomem *base = ntb->reg;
++	void __iomem *base = (void __iomem *)ntb->reg;
+ 	u32 val;
+ 
+-	val = readl(base + off + idx * 4);
++	val = readl(base + off + idx * sizeof(u32));
+ 	return val;
+ }
+ 
+@@ -1120,9 +1139,9 @@ static int vntb_epf_peer_spad_write(struct ntb_dev *ndev, int pidx, int idx, u32
+ 	struct epf_ntb *ntb = ntb_ndev(ndev);
+ 	struct epf_ntb_ctrl *ctrl = ntb->reg;
+ 	int off = ctrl->spad_offset;
+-	void __iomem *base = ntb->reg;
++	void __iomem *base = (void __iomem *)ntb->reg;
+ 
+-	writel(val, base + off + idx * 4);
++	writel(val, base + off + idx * sizeof(u32));
+ 	return 0;
+ }
+ 
+@@ -1275,6 +1294,8 @@ static struct pci_driver vntb_pci_driver = {
+  * Invoked when a primary interface or secondary interface is bound to EPC
+  * device. This function will succeed only when EPC is bound to both the
+  * interfaces.
++ *
++ * Returns: Zero for success, or an error code in case of failure
+  */
+ static int epf_ntb_bind(struct pci_epf *epf)
+ {
+@@ -1359,6 +1380,8 @@ static struct pci_epf_ops epf_ntb_ops = {
+  *
+  * Probe NTB function driver when endpoint function bus detects a NTB
+  * endpoint function.
++ *
++ * Returns: Zero for success, or an error code in case of failure
+  */
+ static int epf_ntb_probe(struct pci_epf *epf)
+ {
+-- 
+2.35.1
+
