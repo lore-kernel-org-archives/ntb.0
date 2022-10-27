@@ -1,159 +1,160 @@
-Received: from mail-lj1-f180.google.com (mail-lj1-f180.google.com [209.85.208.180])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 67C4110EA
-	for <ntb@lists.linux.dev>; Thu, 27 Oct 2022 01:43:28 +0000 (UTC)
-Received: by mail-lj1-f180.google.com with SMTP id b8so235274ljf.0
-        for <ntb@lists.linux.dev>; Wed, 26 Oct 2022 18:43:28 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=igel-co-jp.20210112.gappssmtp.com; s=20210112;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=tbk0eEYbnn7UKEVn0VjxKM1ZNInMpSiFCIPCtUXFOvs=;
-        b=vcuEklMwyzYukZhXgOEh3NEm2Y2yZpbE0LQpHdGh6ef/G/JA5hh4MOdbOtCXt2HIez
-         N4efK9tWJruDjEfO7wdMeQGUlPR0aZxqq+A7QySZgCJwHnN8UgMK8M6cK+zhfvVEsgPB
-         6Au7w+PZgloWRtYIORIzvH/fQV0XKsXGe6qOkDNtmekbGDTjW30ZUYXFHsBO6uEtunk8
-         u9By8xMiIfnkI35rw2zP10T1RGbNczd7Aie6P65nEjGBC98vkNTdjhGcc9x/7eiz6+xd
-         brNmpfHoVTPQdUpjYUSuujMNaErYgMsI6V+Kf37Rx/6vAVxcj5X3uTwaAxPGU7PMZEaG
-         PXxA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=tbk0eEYbnn7UKEVn0VjxKM1ZNInMpSiFCIPCtUXFOvs=;
-        b=rjXlbHouyNFvXSms+NdENsq04M7RlJtHgW/zv1KK4MO2WFrjksqU2Qr/nL4V56/uCv
-         5c27wIN5RIfKUu12LdL6D1IIgnrJG5gEljwl7k8PcYsO7+5NXxThk+TNPQNe2dQMD7MM
-         fyZMQsBK866IQmNxfavyON7f9ZmoinOo3FUgsZCF5kLeN7A2bcMGZfF59Z2b+owg6Fxb
-         QH/LkG1oY1SmO3S/o3pYjDvBywrQhUiEHsua7nWYOLLXBTVwPBUNG8xQH8reKB6lcPbb
-         hyfCN2aFBhKzusrOQtyma/qFqzIdza7n0lCvC1dKVrqIseF2XKvGCsxexbfz8ZL+iCt9
-         NMoQ==
-X-Gm-Message-State: ACrzQf2L0gQlAKh+/VFayffFYHU4EdjAXap/rTGrK8oupgvUt6q7uuGC
-	DiIoy3nrpZFxAgLxNsLZET73IMtgURWN+9ge8fWFLQ==
-X-Google-Smtp-Source: AMsMyM5clIdvVzDYgyLVmEepWcsuZSR1iy0Hq+hnVqzut780N0uW5jW40yCDD3lXn6vo7uZGtKTCO9CXsMk7cAngM3A=
-X-Received: by 2002:a2e:8881:0:b0:255:7790:25e6 with SMTP id
- k1-20020a2e8881000000b00255779025e6mr17440388lji.525.1666835006300; Wed, 26
- Oct 2022 18:43:26 -0700 (PDT)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CBBA8186A;
+	Thu, 27 Oct 2022 10:42:47 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 82BF3C433B5;
+	Thu, 27 Oct 2022 10:42:44 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1666867367;
+	bh=waQiYVNsE5pL9GEJ8DPj4IjUhC/thrnPEqbg9j/HH+I=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=dr+hSVG7jsB3+OXqWl9ONo9Q5EyopeKuPaUAtDpoJnI+yfv4h/m9YZ/ukYgOQn/Ek
+	 OWg8cR3ZhtE1RXCHqgBvKUVY8ewYQPPENZtdHJNCPK40TKxXXograuRpwyiL6URFQR
+	 J0749ItTFYEx3KaUrBbnuLKRbtnuFNTvrBy60XLjXmMvmA3EAqEWl5b5qQiUsEDfri
+	 e8A6CHi/r46/NvOirAP67mCsYe3GI4NeScqTBGEpT++USZTvVVIgpg2Un54LGtgH4B
+	 3kBiXuuLqhSOmTYs37P4IShctdLSy7SmQBvyEUIBwNUIJ3hzbc4Ni+fmxz/6pvuWWz
+	 bkXwntu8KoVCQ==
+Date: Thu, 27 Oct 2022 12:42:40 +0200
+From: Lorenzo Pieralisi <lpieralisi@kernel.org>
+To: Frank Li <Frank.Li@nxp.com>
+Cc: imx@lists.linux.dev, Jon Mason <jdmason@kudzu.us>,
+	Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>,
+	Kishon Vijay Abraham I <kishon@ti.com>,
+	Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kw@linux.com>,
+	Manivannan Sadhasivam <mani@kernel.org>,
+	Bjorn Helgaas <bhelgaas@google.com>,
+	"open list:NTB DRIVER CORE" <ntb@lists.linux.dev>,
+	"open list:PCI ENDPOINT SUBSYSTEM" <linux-pci@vger.kernel.org>,
+	open list <linux-kernel@vger.kernel.org>
+Subject: Re: [PATCH v13 6/6] PCI: endpoint: pci-epf-vntb: fix sparse build
+ warning
+Message-ID: <Y1pgoPAH/BZ46gif@lpieralisi>
+References: <20221007191326.193079-1-Frank.Li@nxp.com>
+ <20221007191326.193079-8-Frank.Li@nxp.com>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-References: <20220922092357.123732-1-mie@igel.co.jp> <20221025142143.GA109941@thinkpad>
- <HE1PR0401MB233126D2C7410EC5F6C3976488319@HE1PR0401MB2331.eurprd04.prod.outlook.com>
-In-Reply-To: <HE1PR0401MB233126D2C7410EC5F6C3976488319@HE1PR0401MB2331.eurprd04.prod.outlook.com>
-From: Shunsuke Mie <mie@igel.co.jp>
-Date: Thu, 27 Oct 2022 10:43:15 +0900
-Message-ID: <CANXvt5qjnbZMzFJt8kBtQz6FHc_QQYw7=fZp8kK87mZ-t75z+g@mail.gmail.com>
-Subject: Re: [EXT] Re: [PATCH v2] PCI: endpoint: pci-epf-{,v}ntb: fix a check
- for no epc alignment constraint
-To: Frank Li <frank.li@nxp.com>
-Cc: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>, Jon Mason <jdmason@kudzu.us>, 
-	Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, 
-	Kishon Vijay Abraham I <kishon@ti.com>, Lorenzo Pieralisi <lpieralisi@kernel.org>, 
-	=?UTF-8?Q?Krzysztof_Wilczy=C5=84ski?= <kw@linux.com>, 
-	Bjorn Helgaas <bhelgaas@google.com>, "ntb@lists.linux.dev" <ntb@lists.linux.dev>, 
-	"linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, 
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20221007191326.193079-8-Frank.Li@nxp.com>
 
-Hi Frank,
+On Fri, Oct 07, 2022 at 03:13:26PM -0400, Frank Li wrote:
+> From: Frank Li <frank.li@nxp.com>
+> 
+> Using  epf_db[i] instead of readl() because epf_db is located in local
+> memory and allocated by dma_alloc_coherent().
+> 
+> Sparse build warning when there are not __iomem at readl().
+> Added __iomem force type convert in vntb_epf_peer_spad_read\write()
+> and vntb_epf_spad_read\write(). This require strong order at read and
+> write.
 
-2022=E5=B9=B410=E6=9C=8826=E6=97=A5(=E6=B0=B4) 1:07 Frank Li <frank.li@nxp.=
-com>:
->
->
->
-> > -----Original Message-----
-> > From: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
-> > Sent: Tuesday, October 25, 2022 9:22 AM
-> > To: Shunsuke Mie <mie@igel.co.jp>
-> > Cc: Jon Mason <jdmason@kudzu.us>; Dave Jiang <dave.jiang@intel.com>;
-> > Allen Hubbe <allenbh@gmail.com>; Kishon Vijay Abraham I
-> > <kishon@ti.com>; Lorenzo Pieralisi <lpieralisi@kernel.org>; Krzysztof
-> > Wilczy=C5=84ski <kw@linux.com>; Bjorn Helgaas <bhelgaas@google.com>;
-> > ntb@lists.linux.dev; linux-pci@vger.kernel.org; linux-kernel@vger.kerne=
-l.org
-> > Subject: [EXT] Re: [PATCH v2] PCI: endpoint: pci-epf-{,v}ntb: fix a che=
-ck for no
-> > epc alignment constraint
-> >
-> > Caution: EXT Email
-> >
-> > On Thu, Sep 22, 2022 at 06:23:57PM +0900, Shunsuke Mie wrote:
-> > > Some PCI endpoint controllers have no alignment constraints, and the
-> > > epc_features->align becomes 0. In this case, IS_ALIGNED() in
->
-> [Frank Li] why not set epc_features->align 1
-> no alignment constraints should mean align to byte.
-It is one of the solutions too I think. But in that case,  we need to
-write epc_features->align =3D 1 to all epc drivers, dwc, qcom, rcar,
-tegra, and etc.
+This commit log is unreadable sorry and this patch fixes multiple things
+and even rearrange local variables in a way that is completely
+unrelated to the patch aim itself.
 
-I think that my change is better.
+If you are fixing sparse warning reports the warnings and fix them
+one by one.
 
-> > > epf_ntb_config_spad_bar_alloc() doesn't work well. Check for this bef=
-ore
-> > > IS_ALIGNED().
-> > >
-> > > Signed-off-by: Shunsuke Mie <mie@igel.co.jp>
-> >
-> > Reviewed-by: Manivannan Sadhasivam
-> > <manivannan.sadhasivam@linaro.org>
-> >
-> > Thanks,
-> > Mani
-> >
-> > > ---
-> > > Changes in v2:
-> > > * Fix the commit message in phrasings and words.
-> > > ---
-> > > ---
-> > >  drivers/pci/endpoint/functions/pci-epf-ntb.c  | 2 +-
-> > >  drivers/pci/endpoint/functions/pci-epf-vntb.c | 2 +-
-> > >  2 files changed, 2 insertions(+), 2 deletions(-)
-> > >
-> > > diff --git a/drivers/pci/endpoint/functions/pci-epf-ntb.c
-> > b/drivers/pci/endpoint/functions/pci-epf-ntb.c
-> > > index 9a00448c7e61..f74155ee8d72 100644
-> > > --- a/drivers/pci/endpoint/functions/pci-epf-ntb.c
-> > > +++ b/drivers/pci/endpoint/functions/pci-epf-ntb.c
-> > > @@ -1021,7 +1021,7 @@ static int epf_ntb_config_spad_bar_alloc(struct
-> > epf_ntb *ntb,
-> > >       peer_size =3D peer_epc_features->bar_fixed_size[peer_barno];
-> > >
-> > >       /* Check if epc_features is populated incorrectly */
-> > > -     if ((!IS_ALIGNED(size, align)))
-> > > +     if (align && (!IS_ALIGNED(size, align)))
-> > >               return -EINVAL;
-> > >
-> > >       spad_count =3D ntb->spad_count;
-> > > diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> > b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> > > index 0ea85e1d292e..5e346c0a0f05 100644
-> > > --- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> > > +++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> > > @@ -418,7 +418,7 @@ static int epf_ntb_config_spad_bar_alloc(struct
-> > epf_ntb *ntb)
-> > >       size =3D epc_features->bar_fixed_size[barno];
-> > >       align =3D epc_features->align;
-> > >
-> > > -     if ((!IS_ALIGNED(size, align)))
-> > > +     if (align && !IS_ALIGNED(size, align))
-> > >               return -EINVAL;
-> > >
-> > >       spad_count =3D ntb->spad_count;
-> > > --
-> > > 2.17.1
-> > >
-> >
-> > --
-> > =E0=AE=AE=E0=AE=A3=E0=AE=BF=E0=AE=B5=E0=AE=A3=E0=AF=8D=E0=AE=A3=E0=AE=
-=A9=E0=AF=8D =E0=AE=9A=E0=AE=A4=E0=AE=BE=E0=AE=9A=E0=AE=BF=E0=AE=B5=E0=AE=
-=AE=E0=AF=8D
+Could you please pay attention to these details ? I don't have time
+to do it for you, sorry.
 
-Best,
-Shunsuke
+Thanks,
+Lorenzo
+
+> Signed-off-by: Frank Li <frank.li@nxp.com>
+> ---
+>  drivers/pci/endpoint/functions/pci-epf-vntb.c | 27 +++++++++----------
+>  1 file changed, 13 insertions(+), 14 deletions(-)
+> 
+> diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> index 54616281da9e..9f1ec6788e51 100644
+> --- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> +++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> @@ -136,7 +136,7 @@ struct epf_ntb {
+>  
+>  	struct epf_ntb_ctrl *reg;
+>  
+> -	void __iomem *epf_db;
+> +	u32 *epf_db;
+>  
+>  	phys_addr_t vpci_mw_phy[MAX_MW];
+>  	void __iomem *vpci_mw_addr[MAX_MW];
+> @@ -257,12 +257,9 @@ static void epf_ntb_cmd_handler(struct work_struct *work)
+>  	ntb = container_of(work, struct epf_ntb, cmd_handler.work);
+>  
+>  	for (i = 1; i < ntb->db_count; i++) {
+> -		if (readl(ntb->epf_db + i * sizeof(u32))) {
+> -			if (readl(ntb->epf_db + i * sizeof(u32)))
+> -				ntb->db |= 1 << (i - 1);
+> -
+> +		if (ntb->epf_db[i]) {
+>  			ntb_db_event(&ntb->ntb, i);
+> -			writel(0, ntb->epf_db + i * sizeof(u32));
+> +			ntb->epf_db[i] = 0;
+>  		}
+>  	}
+>  
+> @@ -529,13 +526,15 @@ static int epf_ntb_configure_interrupt(struct epf_ntb *ntb)
+>  static int epf_ntb_db_bar_init(struct epf_ntb *ntb)
+>  {
+>  	const struct pci_epc_features *epc_features;
+> -	u32 align;
+>  	struct device *dev = &ntb->epf->dev;
+> -	int ret;
+>  	struct pci_epf_bar *epf_bar;
+> -	void __iomem *mw_addr;
+>  	enum pci_barno barno;
+> -	size_t size = sizeof(u32) * ntb->db_count;
+> +	void *mw_addr;
+> +	size_t size;
+> +	u32 align;
+> +	int ret;
+> +
+> +	size = sizeof(u32) * ntb->db_count;
+>  
+>  	epc_features = pci_epc_get_features(ntb->epf->epc,
+>  					    ntb->epf->func_no,
+> @@ -1123,7 +1122,7 @@ static u32 vntb_epf_spad_read(struct ntb_dev *ndev, int idx)
+>  	struct epf_ntb *ntb = ntb_ndev(ndev);
+>  	int off = ntb->reg->spad_offset, ct = ntb->reg->spad_count * sizeof(u32);
+>  	u32 val;
+> -	void __iomem *base = ntb->reg;
+> +	void __iomem *base = (void __iomem *)ntb->reg;
+>  
+>  	val = readl(base + off + ct + idx * sizeof(u32));
+>  	return val;
+> @@ -1134,7 +1133,7 @@ static int vntb_epf_spad_write(struct ntb_dev *ndev, int idx, u32 val)
+>  	struct epf_ntb *ntb = ntb_ndev(ndev);
+>  	struct epf_ntb_ctrl *ctrl = ntb->reg;
+>  	int off = ctrl->spad_offset, ct = ctrl->spad_count * sizeof(u32);
+> -	void __iomem *base = ntb->reg;
+> +	void __iomem *base = (void __iomem *)ntb->reg;
+>  
+>  	writel(val, base + off + ct + idx * sizeof(u32));
+>  	return 0;
+> @@ -1145,7 +1144,7 @@ static u32 vntb_epf_peer_spad_read(struct ntb_dev *ndev, int pidx, int idx)
+>  	struct epf_ntb *ntb = ntb_ndev(ndev);
+>  	struct epf_ntb_ctrl *ctrl = ntb->reg;
+>  	int off = ctrl->spad_offset;
+> -	void __iomem *base = ntb->reg;
+> +	void __iomem *base = (void __iomem *)ntb->reg;
+>  	u32 val;
+>  
+>  	val = readl(base + off + idx * sizeof(u32));
+> @@ -1157,7 +1156,7 @@ static int vntb_epf_peer_spad_write(struct ntb_dev *ndev, int pidx, int idx, u32
+>  	struct epf_ntb *ntb = ntb_ndev(ndev);
+>  	struct epf_ntb_ctrl *ctrl = ntb->reg;
+>  	int off = ctrl->spad_offset;
+> -	void __iomem *base = ntb->reg;
+> +	void __iomem *base = (void __iomem *)ntb->reg;
+>  
+>  	writel(val, base + off + idx * sizeof(u32));
+>  	return 0;
+> -- 
+> 2.34.1
+> 
