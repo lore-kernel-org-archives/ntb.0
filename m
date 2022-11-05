@@ -1,111 +1,87 @@
-Received: from mail-pj1-f54.google.com (mail-pj1-f54.google.com [209.85.216.54])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from szxga02-in.huawei.com (szxga02-in.huawei.com [45.249.212.188])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4279B8480
-	for <ntb@lists.linux.dev>; Fri,  4 Nov 2022 17:20:59 +0000 (UTC)
-Received: by mail-pj1-f54.google.com with SMTP id d13-20020a17090a3b0d00b00213519dfe4aso5112256pjc.2
-        for <ntb@lists.linux.dev>; Fri, 04 Nov 2022 10:20:59 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=bytedance-com.20210112.gappssmtp.com; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=OczEUwDaDCJagzs0QtMr8aHYN/ko8ymZX7lVummJVOs=;
-        b=uAw80S9vBEJp3aHojoMEpA/68sS1rwm2/DWeE+ULXnA6VihFLM1tIcWa71PfRN9kBY
-         0Dv2ncNI3cIHP1goXyeXZom0/uBfoDaO30ASdZEL4aGfHRhvJUIMCG8nrQlvfooqmoJO
-         hUAuGLtFkFgLnDesYbOIb/h2RG1W4Vfgffao9TGfEveZhdIZofkxgjiB9PJaysiRvxez
-         qh27EMHRn8B9dhv5bFV0Gj3bOcrEvWTaLB9Ua8Lz3QnnrjBVMODvXVdUSprTVXviQ9hj
-         D+qpWlXKArSY4d+JaCwNiIRypZgFLSZR3fDUcNuaeyz///hny0BZ0cHpkYlDAwWb4Z7k
-         HJqA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=OczEUwDaDCJagzs0QtMr8aHYN/ko8ymZX7lVummJVOs=;
-        b=h/W2nxjJlYVZ/yxuCArHlt5RhtkUTTivqTOJEa84ULg5+b4HqMBri6Q9hB0wG5Ma6M
-         cxn0BRYD8VKW9Az+K5uDMDnk4m6P139Rtlk6nZowzDawB3Xhk5303KI0C9AfEjYBO6Qw
-         J8/sYJZuOlHaQ4as/WZkti7WPTwqjG23Y3HGXILFWmXw+BWvQMS7zsYB0DFLxnLXh4YI
-         PAN2aShFO5QkLa94C0fBpnGOZbYpythw3LBTgdqM0srdLG5MfvvfnYGIham7f5wCk/il
-         5f7XMda5VzO2I9WQ7bwxcZrajde6L3WcKyxhdD7iyL01gWoWwC+LLD5AtUi6/DrQWqp3
-         e2Mg==
-X-Gm-Message-State: ACrzQf0tIXFmBPDzkHYTmE0Ctjrj+mam1UOHulp4K/Zc+30FUkw1Ho2C
-	oscUB256tu6ngPzCsD/J/zOTMg==
-X-Google-Smtp-Source: AMsMyM7qXmb1tKLbXoG2RN7MYH+OBDKZmahcKO3ZgUlIGFzbY77VBHGSlWccWa4sVOHz9dNTYKbNgg==
-X-Received: by 2002:a17:90a:6045:b0:212:fe9a:5792 with SMTP id h5-20020a17090a604500b00212fe9a5792mr53370678pjm.178.1667582458816;
-        Fri, 04 Nov 2022 10:20:58 -0700 (PDT)
-Received: from [10.255.167.72] ([139.177.225.230])
-        by smtp.gmail.com with ESMTPSA id x16-20020aa79a50000000b0056e0ff577edsm2990000pfj.43.2022.11.04.10.20.52
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 04 Nov 2022 10:20:58 -0700 (PDT)
-Message-ID: <17b88750-53c2-0653-045a-dde921e37e0c@bytedance.com>
-Date: Sat, 5 Nov 2022 01:20:50 +0800
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3DD261FA6
+	for <ntb@lists.linux.dev>; Sat,  5 Nov 2022 09:45:46 +0000 (UTC)
+Received: from dggpeml500024.china.huawei.com (unknown [172.30.72.56])
+	by szxga02-in.huawei.com (SkyGuard) with ESMTP id 4N4CKW41dXzRnxV
+	for <ntb@lists.linux.dev>; Sat,  5 Nov 2022 17:45:35 +0800 (CST)
+Received: from huawei.com (10.175.112.208) by dggpeml500024.china.huawei.com
+ (7.185.36.10) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.31; Sat, 5 Nov
+ 2022 17:45:38 +0800
+From: Yuan Can <yuancan@huawei.com>
+To: <fancer.lancer@gmail.com>, <jdmason@kudzu.us>, <dave.jiang@intel.com>,
+	<allenbh@gmail.com>, <ntb@lists.linux.dev>
+CC: <yuancan@huawei.com>
+Subject: [PATCH] ntb: idt: Fix error handling in idt_pci_driver_init()
+Date: Sat, 5 Nov 2022 09:43:01 +0000
+Message-ID: <20221105094301.106276-1-yuancan@huawei.com>
+X-Mailer: git-send-email 2.17.1
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:102.0)
- Gecko/20100101 Thunderbird/102.4.0
-Subject: Re: [PATCH v3 0/9] PCI/AER: Fix and optimize usage of status clearing
- api
-To: Bjorn Helgaas <helgaas@kernel.org>,
- Sathyanarayanan Kuppuswamy <sathyanarayanan.kuppuswamy@linux.intel.com>
-Cc: ruscur@russell.cc, oohall@gmail.com, fancer.lancer@gmail.com,
- jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com,
- james.smart@broadcom.com, dick.kennedy@broadcom.com, jejb@linux.ibm.com,
- martin.petersen@oracle.com, bhelgaas@google.com,
- linuxppc-dev@lists.ozlabs.org, linux-pci@vger.kernel.org,
- linux-kernel@vger.kernel.org, ntb@lists.linux.dev, linux-scsi@vger.kernel.org
-References: <20220928105946.12469-1-chenzhuo.1@bytedance.com>
-Content-Language: en-US
-From: Zhuo Chen <chenzhuo.1@bytedance.com>
-In-Reply-To: <20220928105946.12469-1-chenzhuo.1@bytedance.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
+X-Originating-IP: [10.175.112.208]
+X-ClientProxiedBy: dggems702-chm.china.huawei.com (10.3.19.179) To
+ dggpeml500024.china.huawei.com (7.185.36.10)
+X-CFilter-Loop: Reflected
 
-Hi Bjorn, a gentle reminder.
+A problem about ntb_hw_idt create debugfs failed is triggered with the
+following log given:
 
-Thanks and regards.
+ [ 1236.637636] IDT PCI-E Non-Transparent Bridge Driver 2.0
+ [ 1236.639292] debugfs: Directory 'ntb_hw_idt' with parent '/' already present!
 
-On 9/28/22 6:59 PM, Zhuo Chen wrote:
-> Hello.
-> 
-> Here comes patch v3, which contains some fixes and optimizations of
-> aer api usage. The v1 and v2 can be found on the mailing list.
-> 
-> v3:
-> - Modifications to comments proposed by Sathyanarayanan. Remove
->    pci_aer_clear_nonfatal_status() call in NTB and improve commit log.
-> 
-> v2:
-> - Modifications to comments proposed by Bjorn. Split patch into more
->    obvious parts.
-> 
-> Zhuo Chen (9):
->    PCI/AER: Add pci_aer_clear_uncorrect_error_status() to PCI core
->    PCI/DPC: Use pci_aer_clear_uncorrect_error_status() to clear
->      uncorrectable error status
->    NTB: Remove pci_aer_clear_nonfatal_status() call
->    scsi: lpfc: Change to use pci_aer_clear_uncorrect_error_status()
->    PCI/AER: Unexport pci_aer_clear_nonfatal_status()
->    PCI/AER: Move check inside pcie_clear_device_status().
->    PCI/AER: Use pcie_aer_is_native() to judge whether OS owns AER
->    PCI/ERR: Clear fatal error status when pci_channel_io_frozen
->    PCI/AER: Refine status clearing process with api
-> 
->   drivers/ntb/hw/idt/ntb_hw_idt.c |  2 --
->   drivers/pci/pci.c               |  7 +++--
->   drivers/pci/pci.h               |  2 ++
->   drivers/pci/pcie/aer.c          | 45 +++++++++++++++++++--------------
->   drivers/pci/pcie/dpc.c          |  3 +--
->   drivers/pci/pcie/err.c          | 15 ++++-------
->   drivers/pci/pcie/portdrv_core.c |  3 +--
->   drivers/scsi/lpfc/lpfc_attr.c   |  4 +--
->   include/linux/aer.h             |  4 +--
->   9 files changed, 44 insertions(+), 41 deletions(-)
-> 
+The reason is that idt_pci_driver_init() returns pci_register_driver()
+directly without checking its return value, if pci_register_driver()
+failed, it returns without destroy the newly created debugfs, resulting
+the debugfs of ntb_hw_idt can never be created later.
 
+ idt_pci_driver_init()
+   debugfs_create_dir() # create debugfs directory
+   pci_register_driver()
+     driver_register()
+       bus_add_driver()
+         priv = kzalloc(...) # OOM happened
+   # return without destroy debugfs directory
+
+Fix by removing debugfs when pci_register_driver() returns error.
+
+Fixes: bf2a952d31d2 ("NTB: Add IDT 89HPESxNTx PCIe-switches support")
+Signed-off-by: Yuan Can <yuancan@huawei.com>
+---
+ drivers/ntb/hw/idt/ntb_hw_idt.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/ntb/hw/idt/ntb_hw_idt.c b/drivers/ntb/hw/idt/ntb_hw_idt.c
+index 0ed6f809ff2e..51799fccf840 100644
+--- a/drivers/ntb/hw/idt/ntb_hw_idt.c
++++ b/drivers/ntb/hw/idt/ntb_hw_idt.c
+@@ -2891,6 +2891,7 @@ static struct pci_driver idt_pci_driver = {
+ 
+ static int __init idt_pci_driver_init(void)
+ {
++	int ret;
+ 	pr_info("%s %s\n", NTB_DESC, NTB_VER);
+ 
+ 	/* Create the top DebugFS directory if the FS is initialized */
+@@ -2898,7 +2899,11 @@ static int __init idt_pci_driver_init(void)
+ 		dbgfs_topdir = debugfs_create_dir(KBUILD_MODNAME, NULL);
+ 
+ 	/* Register the NTB hardware driver to handle the PCI device */
+-	return pci_register_driver(&idt_pci_driver);
++	ret = pci_register_driver(&idt_pci_driver);
++	if (ret)
++		debugfs_remove_recursive(dbgfs_topdir);
++
++	return ret;
+ }
+ module_init(idt_pci_driver_init);
+ 
 -- 
-Zhuo Chen
+2.17.1
+
