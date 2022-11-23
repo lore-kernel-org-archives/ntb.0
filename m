@@ -1,71 +1,76 @@
-Received: from cstnet.cn (smtp84.cstnet.cn [159.226.251.84])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 6A322EA8
-	for <ntb@lists.linux.dev>; Tue, 22 Nov 2022 03:32:48 +0000 (UTC)
-Received: from localhost.localdomain (unknown [124.16.138.125])
-	by APP-05 (Coremail) with SMTP id zQCowAAXHu7dQnxj2HOwAA--.11930S2;
-	Tue, 22 Nov 2022 11:32:45 +0800 (CST)
-From: Jiasheng Jiang <jiasheng@iscas.ac.cn>
-To: jdmason@kudzu.us,
-	dave.jiang@intel.com,
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5C82F4699;
+	Wed, 23 Nov 2022 17:12:02 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 481B1C433D6;
+	Wed, 23 Nov 2022 17:11:57 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1669223522;
+	bh=a81ckGxirIH6Asoiw6/cJVl5Ehwh4kZoTuM4zBBmWxY=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+	b=izmtaBSFLiyc52jNd0kuciaBQZJ+mOeuBCv1OqXfHjkHwXYfzGSGZ1wyQi0dG+CYo
+	 lzp65Eoa1TPcPr0lNgIpma+FA7cVgiwwCPJ30gL4lriCh6ZxCoS+Cg5LWK4PfFbz3L
+	 j34WzvRGHdwPw0WhEKstFE4VZrU401wd6ltsqAXEWEzYc2z9jQS+4PV/2qdmwBIpv4
+	 8L6uoUyCTwSw52rjhXYA9eunKGBXzn8VSfcn2nD02e5aocbgM31q3uW7K1D1iDU4x4
+	 /31w8kLc95wtGM2GeTwfGP671wPKKOQ4AxkqHZ0DySvNQZPMdouVqyx78xt170BfYq
+	 PY+toJQ2T0WXQ==
+From: Lorenzo Pieralisi <lpieralisi@kernel.org>
+To: mani@kernel.org,
+	Frank Li <Frank.Li@nxp.com>
+Cc: Lorenzo Pieralisi <lpieralisi@kernel.org>,
+	bhelgaas@google.com,
 	allenbh@gmail.com,
-	error27@gmail.com
-Cc: ntb@lists.linux.dev,
+	dave.jiang@intel.com,
+	kw@linux.com,
 	linux-kernel@vger.kernel.org,
-	Jiasheng Jiang <jiasheng@iscas.ac.cn>
-Subject: [PATCH] NTB: ntb_tool: Add check for devm_kcalloc
-Date: Tue, 22 Nov 2022 11:32:44 +0800
-Message-Id: <20221122033244.5777-1-jiasheng@iscas.ac.cn>
-X-Mailer: git-send-email 2.25.1
+	imx@lists.linux.dev,
+	linux-pci@vger.kernel.org,
+	helgaas@kernel.org,
+	ntb@lists.linux.dev,
+	jdmason@kudzu.us
+Subject: Re: [PATCH v16 0/7] pci-epf-vntb clean up
+Date: Wed, 23 Nov 2022 18:11:54 +0100
+Message-Id: <166922348979.29467.5900392743930970597.b4-ty@kernel.org>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20221102141014.1025893-1-Frank.Li@nxp.com>
+References: <20221102141014.1025893-1-Frank.Li@nxp.com>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:zQCowAAXHu7dQnxj2HOwAA--.11930S2
-X-Coremail-Antispam: 1UD129KBjvdXoW7Jw4DurWfJryxGFy8CFW8tFb_yoWfZFc_CF
-	y2qrsrGr45Cw45K3Z2yr4xZrWxA3WDuFZ7W3y8tan8urWDCw1xXry8urZxCa1fua48GFZr
-	G34jyry0yF1xujkaLaAFLSUrUUUUjb8apTn2vfkv8UJUUUU8Yxn0WfASr-VFAUDa7-sFnT
-	9fnUUIcSsGvfJTRUUUbsxFF20E14v26r4j6ryUM7CY07I20VC2zVCF04k26cxKx2IYs7xG
-	6rWj6s0DM7CIcVAFz4kK6r1j6r18M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48ve4kI8w
-	A2z4x0Y4vE2Ix0cI8IcVAFwI0_Ar0_tr1l84ACjcxK6xIIjxv20xvEc7CjxVAFwI0_Cr0_
-	Gr1UM28EF7xvwVC2z280aVAFwI0_GcCE3s1l84ACjcxK6I8E87Iv6xkF7I0E14v26rxl6s
-	0DM2AIxVAIcxkEcVAq07x20xvEncxIr21l5I8CrVACY4xI64kE6c02F40Ex7xfMcIj6xII
-	jxv20xvE14v26r106r15McIj6I8E87Iv67AKxVWUJVW8JwAm72CE4IkC6x0Yz7v_Jr0_Gr
-	1lF7xvr2IYc2Ij64vIr41lF7I21c0EjII2zVCS5cI20VAGYxC7MxkF7I0En4kS14v26r1q
-	6r43MxkIecxEwVAFwVW8GwCF04k20xvY0x0EwIxGrwCFx2IqxVCFs4IE7xkEbVWUJVW8Jw
-	C20s026c02F40E14v26r1j6r18MI8I3I0E7480Y4vE14v26r106r1rMI8E67AF67kF1VAF
-	wI0_JF0_Jw1lIxkGc2Ij64vIr41lIxAIcVC0I7IYx2IY67AKxVWUJVWUCwCI42IY6xIIjx
-	v20xvEc7CjxVAFwI0_Gr0_Cr1lIxAIcVCF04k26cxKx2IYs7xG6r1j6r1xMIIF0xvEx4A2
-	jsIE14v26r1j6r4UMIIF0xvEx4A2jsIEc7CjxVAFwI0_Gr0_Gr1UYxBIdaVFxhVjvjDU0x
-	ZFpf9x0JUk5rxUUUUU=
-X-Originating-IP: [124.16.138.125]
-X-CM-SenderInfo: pmld2xxhqjqxpvfd2hldfou0/
 
-As the devm_kcalloc may return NULL pointer,
-it should be better to add check for the return
-value, as same as the others.
+On Wed, 2 Nov 2022 10:10:07 -0400, Frank Li wrote:
+> continue patch series https://www.spinics.net/lists/linux-pci/msg130372.html
+> https://www.spinics.net/lists/linux-pci/msg130924.html
+> 
+> Lorenzo suggest create new series. Version number continue from old one
+> Change from v15 to v16
+>   consistent subject
+>   Add () after pci_epc_mem_free_addr
+> 
+> [...]
 
-Fixes: 7f46c8b3a552 ("NTB: ntb_tool: Add full multi-port NTB API support")
-Signed-off-by: Jiasheng Jiang <jiasheng@iscas.ac.cn>
----
- drivers/ntb/test/ntb_tool.c | 2 ++
- 1 file changed, 2 insertions(+)
+Applied to pci/endpoint, thanks!
 
-diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c
-index 5ee0afa621a9..eeeb4b1c97d2 100644
---- a/drivers/ntb/test/ntb_tool.c
-+++ b/drivers/ntb/test/ntb_tool.c
-@@ -998,6 +998,8 @@ static int tool_init_mws(struct tool_ctx *tc)
- 		tc->peers[pidx].outmws =
- 			devm_kcalloc(&tc->ntb->dev, tc->peers[pidx].outmw_cnt,
- 				   sizeof(*tc->peers[pidx].outmws), GFP_KERNEL);
-+		if (tc->peers[pidx].outmws == NULL)
-+			return -ENOMEM;
- 
- 		for (widx = 0; widx < tc->peers[pidx].outmw_cnt; widx++) {
- 			tc->peers[pidx].outmws[widx].pidx = pidx;
--- 
-2.25.1
+[1/7] PCI: endpoint: pci-epf-vntb: clean up kernel_doc warning
+      https://git.kernel.org/lpieralisi/pci/c/929880484045
+[2/7] PCI: endpoint: pci-epf-vntb: fix indentation of the struct epf_ntb_ctrl
+      https://git.kernel.org/lpieralisi/pci/c/1d118fed348f
+[3/7] PCI: endpoint: pci-epf-vntb: fix call pci_epc_mem_free_addr() at err path
+      https://git.kernel.org/lpieralisi/pci/c/0c031262d2dd
+[4/7] PCI: endpoint: pci-epf-vntb: remove unused field epf_db_phy
+      https://git.kernel.org/lpieralisi/pci/c/03d426ae5426
+[5/7] PCI: endpoint: pci-epf-vntb: replace hardcode 4 with sizeof(u32)
+      https://git.kernel.org/lpieralisi/pci/c/2b35c886556a
+[6/7] PCI: endpoint: pci-epf-vntb: fix sparse build warning at epf_db
+      https://git.kernel.org/lpieralisi/pci/c/01dcec6d57ce
+[7/7] PCI: endpoint: pci-epf-vntb: fix sparse build warning at ntb->reg
+      https://git.kernel.org/lpieralisi/pci/c/5f697b25009c
 
+Thanks,
+Lorenzo
