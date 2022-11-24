@@ -1,151 +1,118 @@
-Received: from mail-pj1-f53.google.com (mail-pj1-f53.google.com [209.85.216.53])
+Received: from mail-pl1-f176.google.com (mail-pl1-f176.google.com [209.85.214.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6516C23B9
-	for <ntb@lists.linux.dev>; Thu, 24 Nov 2022 09:19:33 +0000 (UTC)
-Received: by mail-pj1-f53.google.com with SMTP id o5-20020a17090a678500b00218cd5a21c9so1099391pjj.4
-        for <ntb@lists.linux.dev>; Thu, 24 Nov 2022 01:19:33 -0800 (PST)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CE5B02569
+	for <ntb@lists.linux.dev>; Thu, 24 Nov 2022 11:55:48 +0000 (UTC)
+Received: by mail-pl1-f176.google.com with SMTP id w23so1271457ply.12
+        for <ntb@lists.linux.dev>; Thu, 24 Nov 2022 03:55:48 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=5MaYzrsKaOUsi6MQmV9y7yVqR3tMclv0waDqtUyim+g=;
-        b=tft3yg81KscY4rqgi3gLlrBZExjeXAYKm4lMoVl6h2a9wKoYqNTQ24JMQ3b+Yoo7HD
-         KlLRk+3fHiUZticy3xPRebIC+ScjEG/UEnBB7qX05MZwl6M8vPjqERA2rdcPeUgmczwF
-         7f1L7hMy+LrCdvNdiMiIwBxNslMFGkzYZX3bN3RGkdyE6b7vrErz8Zhz++RMHmrjD783
-         Az33vstBw4zqkVWs9mJP6dMvzXOcM7ShoWjmgMWSuFE9kYpQuhn8aOZEKsUn4n3jnTWy
-         quUXwc/Wvb1NdBsfcFjns9NK+sc4cFjHzJqFh0fZ+AdQhmU9QIszZwRGK6mZqQV0l50u
-         Otpw==
+        d=bytedance-com.20210112.gappssmtp.com; s=20210112;
+        h=content-transfer-encoding:in-reply-to:references:cc:to:from
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=5tFoaZJ9Zngdk5YXFm9CRQu0l0Dt7f+Q0OVbqus0B9g=;
+        b=Szq1aC9Wra2IsZFqObHsGmeRI22JZDC77KB/fn/y5FDl1j/mH9t1bt2oRO2s/VsJg7
+         7++YyfrZAapEEDfLW0AwNAOxQj2JqhfS2eyYXsf83BRjBsaGqzALFQUn9U/JszeJRktf
+         4HqbJk+4e6lzOTNxBu3E14KsUMxicRA6V93jEnLg9JNNLXUcDSEIbwXmlHdBRVR0b9IJ
+         89QLi93nA9G6E7Cy9sfDxGpbYmsM/TtKM6qMLLLbwwcP7FdsCcg8PzWXqNKRVlzBaN7s
+         zesRFiiIFCpF7es4an9DB8E4QRu/X6DYVBbH4mUAbiePl2Xh9xTnkMT+Js/iC/OTZk0z
+         LILA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
+        h=content-transfer-encoding:in-reply-to:references:cc:to:from
+         :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=5MaYzrsKaOUsi6MQmV9y7yVqR3tMclv0waDqtUyim+g=;
-        b=cbgiZ/fXC41XJIm6/3ZFpWQwv9qLzKMdaCjVAiPz6kC62WGUjJbU0PbVtM0E/Fq5jq
-         7oUqiCeCM3MmIFsyNPVdEt0Z6BknZuFVNO6OUYqpEEHJhY0ahnYrsxIVxf+4Q/xHi4qr
-         qAlZm7yW9AB8zPv0yErOrEaTd/sEc9ZQ+LMCG7Ea0MpwhPIvSqafrZD48JfH/C/HgDPv
-         qx97xAsmkIJBuIKLlL7bEdqp3+yq/cYgp3/XYJTPHvA02xXr1GayXuvLN5AtQ4pENJrD
-         rcWPeEqo7IqOg62V8cW+lifE6gDJT4D0KVFrKkr70kTE2I6BWnA1FVHnsVRyiESGGdLV
-         ToGw==
-X-Gm-Message-State: ANoB5pm/8/7ZUFXvqzWFiN5ZM45TLijjoIFJOIlym/1f+lK5BgykbE6j
-	H7cKCgD1jUFraPjka85SPw9p
-X-Google-Smtp-Source: AA0mqf7bQu1RigIIFc6rH9iH8QZPqzGJwIPGNwOQ99KG6wgrm6TUgNaS+V9f68CDfw4mETtLc7Qzow==
-X-Received: by 2002:a17:903:258b:b0:189:1b50:f9e with SMTP id jb11-20020a170903258b00b001891b500f9emr13744776plb.74.1669281572754;
-        Thu, 24 Nov 2022 01:19:32 -0800 (PST)
-Received: from thinkpad ([59.92.97.13])
-        by smtp.gmail.com with ESMTPSA id z3-20020a626503000000b0056bee23a80bsm699118pfb.137.2022.11.24.01.19.24
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 24 Nov 2022 01:19:31 -0800 (PST)
-Date: Thu, 24 Nov 2022 14:49:21 +0530
-From: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
-To: Frank Li <Frank.Li@nxp.com>
-Cc: lpieralisi@kernel.org, aisheng.dong@nxp.com, bhelgaas@google.com,
-	devicetree@vger.kernel.org, festevam@gmail.com, imx@lists.linux.dev,
-	jdmason@kudzu.us, kernel@pengutronix.de, kishon@ti.com,
-	krzysztof.kozlowski+dt@linaro.org, kw@linux.com,
-	linux-arm-kernel@lists.infradead.org, linux-imx@nxp.com,
-	linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org,
-	lorenzo.pieralisi@arm.com, lznuaa@gmail.com, maz@kernel.org,
-	ntb@lists.linux.dev, peng.fan@nxp.com, robh+dt@kernel.org,
-	s.hauer@pengutronix.de, shawnguo@kernel.org, tglx@linutronix.de
-Subject: Re: [PATCH v13 1/2] PCI: endpoint: pci-epf-vntb: change doorbell
- register offset calc mathod
-Message-ID: <20221124091921.GD5119@thinkpad>
-References: <20221124055036.1630573-1-Frank.Li@nxp.com>
- <20221124055036.1630573-2-Frank.Li@nxp.com>
+        bh=5tFoaZJ9Zngdk5YXFm9CRQu0l0Dt7f+Q0OVbqus0B9g=;
+        b=QI4vLz6l16ikKY3p7K4qBQTK5YFpCx9MRkBe9eYrpm6w/hSzp/GeV47bRk/4YyFgOT
+         1lKIINkam+fzzKDnK9PYY6yFWDJ1GVQiBPWfrZR1bu9mW87DB54ibPF1dR5FDIhYvnet
+         EgSQP+uMvg+jcNHZcB0wTJ+Q7jCmdIIrrMt7507BukPTvomJaLHVmk1JR3ybyE4VfbuD
+         95Hvfjyr7AFMoclG1KizRQbHWByQWPj4/sAhWmoOchfbZRb1NxnH32Yo/wG/wU3TsVZL
+         /C5wz5nsUNr1STLEF6VLd5cr5mOgxY5OJH5x+wAHuy/H+EMQ7nc3AA+CTMpE2VoH/0tg
+         30sg==
+X-Gm-Message-State: ANoB5pne8ifmpVID6wef0BzzY2v3crSlqkmnTecdbzW7IBpuwzOKpklS
+	xptyqIWEaevzDTUb8vT2w7bHdg==
+X-Google-Smtp-Source: AA0mqf5ErK/yTLbHh6wS925owcGQFojLs0Qt5kfkDM8yW/n5AlgaTkNUM7UboZPZKsKTOdXfrMbQOA==
+X-Received: by 2002:a17:902:e294:b0:17c:620f:13ac with SMTP id o20-20020a170902e29400b0017c620f13acmr16312497plc.9.1669290948065;
+        Thu, 24 Nov 2022 03:55:48 -0800 (PST)
+Received: from [10.255.190.159] ([139.177.225.236])
+        by smtp.gmail.com with ESMTPSA id ij13-20020a170902ab4d00b0018685257c0dsm1139212plb.58.2022.11.24.03.55.41
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 24 Nov 2022 03:55:47 -0800 (PST)
+Message-ID: <af5c0fb7-0de7-7ca4-4dab-16f41e1d8ec6@bytedance.com>
+Date: Thu, 24 Nov 2022 19:55:39 +0800
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:102.0)
+ Gecko/20100101 Thunderbird/102.4.0
+Subject: Re: [PATCH v3 0/9] PCI/AER: Fix and optimize usage of status clearing
+ api
+Content-Language: en-US
+From: Zhuo Chen <chenzhuo.1@bytedance.com>
+To: Bjorn Helgaas <helgaas@kernel.org>,
+ Sathyanarayanan Kuppuswamy <sathyanarayanan.kuppuswamy@linux.intel.com>
+Cc: ruscur@russell.cc, oohall@gmail.com, fancer.lancer@gmail.com,
+ jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com,
+ james.smart@broadcom.com, dick.kennedy@broadcom.com, jejb@linux.ibm.com,
+ martin.petersen@oracle.com, bhelgaas@google.com,
+ linuxppc-dev@lists.ozlabs.org, linux-pci@vger.kernel.org,
+ linux-kernel@vger.kernel.org, ntb@lists.linux.dev, linux-scsi@vger.kernel.org
+References: <20220928105946.12469-1-chenzhuo.1@bytedance.com>
+ <17b88750-53c2-0653-045a-dde921e37e0c@bytedance.com>
+In-Reply-To: <17b88750-53c2-0653-045a-dde921e37e0c@bytedance.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <20221124055036.1630573-2-Frank.Li@nxp.com>
 
-On Thu, Nov 24, 2022 at 12:50:35AM -0500, Frank Li wrote:
-> In drivers/ntb/hw/epf/ntb_hw_epf.c
-> ntb_epf_peer_db_set()
-> {
->    ...
->    db_offset = readl(ndev->ctrl_reg + NTB_EPF_DB_OFFSET(interrupt_num));
->    writel(db_data, ndev->db_reg + (db_entry_size * interrupt_num) +
->                db_offset);
->    ...
-> }
+
+Ping. Gentle reminder
+
+
+On 11/5/22 1:20 AM, Zhuo Chen wrote:
+> Hi Bjorn, a gentle reminder.
 > 
-> The door register offset's formular is
-> 	offset = db_entry_size * interrupt_num + db_offset[interrupt_number]
-
-You did not mention the DB BAR here. Without that, this calculation doesn't
-make sense.
-
+> Thanks and regards.
 > 
-> Previous db_entry_size is 4, all db_offset is 0.
-
-s/Previous/Previously
-
-> 	irq | offset
->        --------------
->          0     0
->          1     4
->          2     8
->         ...
-> 
-> Change to db_entry_size is 0 and db_offset is 0, 4, 8, ...
-> So we can get the same map value between irq and offset. This will be
-> convenience for hardware doorbell register memory map.
-> 
-
-In your irq-imx-mu-msi.c driver, the msi_address is calculated as:
-
-```
-u64 addr = msi_data->msiir_addr + 4 * data->hwirq;
-```
-
-So the MSI addresses itself are of 4 bytes width. So the offsets will be
-separated by 8 bytes like, 0, 8, 16,... and this won't match the MSI addresses
-as they are 4 bytes apart.
-
-So you want to change the offset to 0, 4, 8,... by zeroing db_entry_size,
-right?
-
-> Signed-off-by: Frank Li <Frank.Li@nxp.com>
-> ---
->  drivers/pci/endpoint/functions/pci-epf-vntb.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> index 04698e7995a5..0d744975f815 100644
-> --- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> +++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> @@ -461,11 +461,11 @@ static int epf_ntb_config_spad_bar_alloc(struct epf_ntb *ntb)
->  	ctrl->num_mws = ntb->num_mws;
->  	ntb->spad_size = spad_size;
->  
-> -	ctrl->db_entry_size = sizeof(u32);
-> +	ctrl->db_entry_size = 0;
->  
->  	for (i = 0; i < ntb->db_count; i++) {
->  		ntb->reg->db_data[i] = 1 + i;
-> -		ntb->reg->db_offset[i] = 0;
-> +		ntb->reg->db_offset[i] = sizeof(u32) * i;
-
-If my above understanding is correct, then you could just reassign
-"db_entry_size" in epf_ntb_epc_msi_init().
-
-Thanks,
-Mani
-
->  	}
->  
->  	return 0;
-> -- 
-> 2.34.1
+> On 9/28/22 6:59 PM, Zhuo Chen wrote:
+>> Hello.
+>>
+>> Here comes patch v3, which contains some fixes and optimizations of
+>> aer api usage. The v1 and v2 can be found on the mailing list.
+>>
+>> v3:
+>> - Modifications to comments proposed by Sathyanarayanan. Remove
+>>    pci_aer_clear_nonfatal_status() call in NTB and improve commit log.
+>>
+>> v2:
+>> - Modifications to comments proposed by Bjorn. Split patch into more
+>>    obvious parts.
+>>
+>> Zhuo Chen (9):
+>>    PCI/AER: Add pci_aer_clear_uncorrect_error_status() to PCI core
+>>    PCI/DPC: Use pci_aer_clear_uncorrect_error_status() to clear
+>>      uncorrectable error status
+>>    NTB: Remove pci_aer_clear_nonfatal_status() call
+>>    scsi: lpfc: Change to use pci_aer_clear_uncorrect_error_status()
+>>    PCI/AER: Unexport pci_aer_clear_nonfatal_status()
+>>    PCI/AER: Move check inside pcie_clear_device_status().
+>>    PCI/AER: Use pcie_aer_is_native() to judge whether OS owns AER
+>>    PCI/ERR: Clear fatal error status when pci_channel_io_frozen
+>>    PCI/AER: Refine status clearing process with api
+>>
+>>   drivers/ntb/hw/idt/ntb_hw_idt.c |  2 --
+>>   drivers/pci/pci.c               |  7 +++--
+>>   drivers/pci/pci.h               |  2 ++
+>>   drivers/pci/pcie/aer.c          | 45 +++++++++++++++++++--------------
+>>   drivers/pci/pcie/dpc.c          |  3 +--
+>>   drivers/pci/pcie/err.c          | 15 ++++-------
+>>   drivers/pci/pcie/portdrv_core.c |  3 +--
+>>   drivers/scsi/lpfc/lpfc_attr.c   |  4 +--
+>>   include/linux/aer.h             |  4 +--
+>>   9 files changed, 44 insertions(+), 41 deletions(-)
+>>
 > 
 
 -- 
-மணிவண்ணன் சதாசிவம்
+Zhuo Chen
