@@ -1,44 +1,44 @@
-Received: from mail-pf1-f174.google.com (mail-pf1-f174.google.com [209.85.210.174])
+Received: from mail-pj1-f53.google.com (mail-pj1-f53.google.com [209.85.216.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6584323AE
-	for <ntb@lists.linux.dev>; Thu, 24 Nov 2022 09:00:40 +0000 (UTC)
-Received: by mail-pf1-f174.google.com with SMTP id x66so1103498pfx.3
-        for <ntb@lists.linux.dev>; Thu, 24 Nov 2022 01:00:40 -0800 (PST)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6516C23B9
+	for <ntb@lists.linux.dev>; Thu, 24 Nov 2022 09:19:33 +0000 (UTC)
+Received: by mail-pj1-f53.google.com with SMTP id o5-20020a17090a678500b00218cd5a21c9so1099391pjj.4
+        for <ntb@lists.linux.dev>; Thu, 24 Nov 2022 01:19:33 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=in-reply-to:content-transfer-encoding:content-disposition
          :mime-version:references:message-id:subject:cc:to:from:date:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=w+w4tmZDiPM69E7coV2CH15uQShu4W0QLk13WRdoYqo=;
-        b=dD5T/z9NKIJhTp/gaxnDGrU96mZ28E5PpqSuka/NwlG93DRTeTfBa75wdv99Fncy8D
-         puavEF4RcN5c2+Y35jocuaOW69CtUX+kkBEPhWsa0eGlGNPUCoHrwrUgLL5xC/puH3FM
-         q81wpISgFha+xw6j6WpjkF0/Kkt+KyMMNf/UgPGc1V9Q3kcuMkG2xO8Z6MCBYeT15/8S
-         j15flgsrb0Em9z5rcHvTlnMyD36xcdaPycMktGq18iOKEnrm1y+TCYKBGge3vWd39AWe
-         9nKKii5tMvSfR4TvKT7SiYnX5aczyB5llNYPkWBlfVp2ZziByxguNNW59TcJytD7KMC+
-         DW/g==
+        bh=5MaYzrsKaOUsi6MQmV9y7yVqR3tMclv0waDqtUyim+g=;
+        b=tft3yg81KscY4rqgi3gLlrBZExjeXAYKm4lMoVl6h2a9wKoYqNTQ24JMQ3b+Yoo7HD
+         KlLRk+3fHiUZticy3xPRebIC+ScjEG/UEnBB7qX05MZwl6M8vPjqERA2rdcPeUgmczwF
+         7f1L7hMy+LrCdvNdiMiIwBxNslMFGkzYZX3bN3RGkdyE6b7vrErz8Zhz++RMHmrjD783
+         Az33vstBw4zqkVWs9mJP6dMvzXOcM7ShoWjmgMWSuFE9kYpQuhn8aOZEKsUn4n3jnTWy
+         quUXwc/Wvb1NdBsfcFjns9NK+sc4cFjHzJqFh0fZ+AdQhmU9QIszZwRGK6mZqQV0l50u
+         Otpw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-transfer-encoding:content-disposition
          :mime-version:references:message-id:subject:cc:to:from:date
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=w+w4tmZDiPM69E7coV2CH15uQShu4W0QLk13WRdoYqo=;
-        b=3CNIFXiQapr3uOSur0gjjX/KQqWj5SOA2NICEIMC1SjTxMLlpFH/BumF4+wYFu0rYE
-         2Xm38FG2nXdavGquUckE4YGInBHMNIJUqVKUmFoMjnV0dgKcgNnf+OUG6KfGf5Lednwj
-         MyuF1UJvX1WGHNIeSxW6urqoMu6aQXvr0qwrzGz4Jfo2J8X+wVpYHm7Oehni2t85tEL0
-         0uwOS46rpycSRPR0W+jpgBNhEi7lvKoHV/uvJ9UDF9+uo+tA4ZXaJUKIUiPQQEzj8Oyu
-         Ubyy+ADecvEWM5claRl3UYvvepsNVd/fDhtVCrXB/98xdPz/FDmxoC+smMeVqv9IOylo
-         QhIQ==
-X-Gm-Message-State: ANoB5pn+wDBFjcuKLMXKKrgujtf4JeD9UfwVCxTOgKyeDyZZCVMsSp7Z
-	D5z5x45MMQh/8jReLkVBBTXT
-X-Google-Smtp-Source: AA0mqf61Q3kR3fx0rJaTtcPJhpcU3lR6pU8IQfMAubF9oJ8HCJATlfXwTnvlGQZa466xICWBLj/+jQ==
-X-Received: by 2002:a63:f241:0:b0:46f:da0:f093 with SMTP id d1-20020a63f241000000b0046f0da0f093mr10972642pgk.441.1669280439701;
-        Thu, 24 Nov 2022 01:00:39 -0800 (PST)
+        bh=5MaYzrsKaOUsi6MQmV9y7yVqR3tMclv0waDqtUyim+g=;
+        b=cbgiZ/fXC41XJIm6/3ZFpWQwv9qLzKMdaCjVAiPz6kC62WGUjJbU0PbVtM0E/Fq5jq
+         7oUqiCeCM3MmIFsyNPVdEt0Z6BknZuFVNO6OUYqpEEHJhY0ahnYrsxIVxf+4Q/xHi4qr
+         qAlZm7yW9AB8zPv0yErOrEaTd/sEc9ZQ+LMCG7Ea0MpwhPIvSqafrZD48JfH/C/HgDPv
+         qx97xAsmkIJBuIKLlL7bEdqp3+yq/cYgp3/XYJTPHvA02xXr1GayXuvLN5AtQ4pENJrD
+         rcWPeEqo7IqOg62V8cW+lifE6gDJT4D0KVFrKkr70kTE2I6BWnA1FVHnsVRyiESGGdLV
+         ToGw==
+X-Gm-Message-State: ANoB5pm/8/7ZUFXvqzWFiN5ZM45TLijjoIFJOIlym/1f+lK5BgykbE6j
+	H7cKCgD1jUFraPjka85SPw9p
+X-Google-Smtp-Source: AA0mqf7bQu1RigIIFc6rH9iH8QZPqzGJwIPGNwOQ99KG6wgrm6TUgNaS+V9f68CDfw4mETtLc7Qzow==
+X-Received: by 2002:a17:903:258b:b0:189:1b50:f9e with SMTP id jb11-20020a170903258b00b001891b500f9emr13744776plb.74.1669281572754;
+        Thu, 24 Nov 2022 01:19:32 -0800 (PST)
 Received: from thinkpad ([59.92.97.13])
-        by smtp.gmail.com with ESMTPSA id g16-20020aa796b0000000b005385e2e86eesm700314pfk.18.2022.11.24.01.00.31
+        by smtp.gmail.com with ESMTPSA id z3-20020a626503000000b0056bee23a80bsm699118pfb.137.2022.11.24.01.19.24
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 24 Nov 2022 01:00:38 -0800 (PST)
-Date: Thu, 24 Nov 2022 14:30:28 +0530
+        Thu, 24 Nov 2022 01:19:31 -0800 (PST)
+Date: Thu, 24 Nov 2022 14:49:21 +0530
 From: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
 To: Frank Li <Frank.Li@nxp.com>
 Cc: lpieralisi@kernel.org, aisheng.dong@nxp.com, bhelgaas@google.com,
@@ -50,11 +50,11 @@ Cc: lpieralisi@kernel.org, aisheng.dong@nxp.com, bhelgaas@google.com,
 	lorenzo.pieralisi@arm.com, lznuaa@gmail.com, maz@kernel.org,
 	ntb@lists.linux.dev, peng.fan@nxp.com, robh+dt@kernel.org,
 	s.hauer@pengutronix.de, shawnguo@kernel.org, tglx@linutronix.de
-Subject: Re: [PATCH v13 2/2] PCI: endpoint: pci-epf-vntb: using platform MSI
- as doorbell
-Message-ID: <20221124090028.GC5119@thinkpad>
+Subject: Re: [PATCH v13 1/2] PCI: endpoint: pci-epf-vntb: change doorbell
+ register offset calc mathod
+Message-ID: <20221124091921.GD5119@thinkpad>
 References: <20221124055036.1630573-1-Frank.Li@nxp.com>
- <20221124055036.1630573-3-Frank.Li@nxp.com>
+ <20221124055036.1630573-2-Frank.Li@nxp.com>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -64,352 +64,85 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <20221124055036.1630573-3-Frank.Li@nxp.com>
+In-Reply-To: <20221124055036.1630573-2-Frank.Li@nxp.com>
 
-On Thu, Nov 24, 2022 at 12:50:36AM -0500, Frank Li wrote:
-> ┌────────────┐   ┌───────────────────────────────────┐   ┌────────────────┐
-> │            │   │                                   │   │                │
-> │            │   │ PCI Endpoint                      │   │ PCI Host       │
-> │            │   │                                   │   │                │
-> │            │◄──┤ 1.platform_msi_domain_alloc_irqs()│   │                │
-> │            │   │                                   │   │                │
-> │ MSI        ├──►│ 2.write_msi_msg()                 ├──►├─BAR<n>         │
-> │ Controller │   │   update doorbell register address│   │                │
-> │            │   │   for BAR                         │   │                │
-> │            │   │                                   │   │ 3. Write BAR<n>│
-> │            │◄──┼───────────────────────────────────┼───┤                │
-> │            │   │                                   │   │                │
-> │            ├──►│ 4.Irq Handle                      │   │                │
-> │            │   │                                   │   │                │
-> │            │   │                                   │   │                │
-> └────────────┘   └───────────────────────────────────┘   └────────────────┘
+On Thu, Nov 24, 2022 at 12:50:35AM -0500, Frank Li wrote:
+> In drivers/ntb/hw/epf/ntb_hw_epf.c
+> ntb_epf_peer_db_set()
+> {
+>    ...
+>    db_offset = readl(ndev->ctrl_reg + NTB_EPF_DB_OFFSET(interrupt_num));
+>    writel(db_data, ndev->db_reg + (db_entry_size * interrupt_num) +
+>                db_offset);
+>    ...
+> }
+> 
+> The door register offset's formular is
+> 	offset = db_entry_size * interrupt_num + db_offset[interrupt_number]
+
+You did not mention the DB BAR here. Without that, this calculation doesn't
+make sense.
+
+> 
+> Previous db_entry_size is 4, all db_offset is 0.
+
+s/Previous/Previously
+
+> 	irq | offset
+>        --------------
+>          0     0
+>          1     4
+>          2     8
+>         ...
+> 
+> Change to db_entry_size is 0 and db_offset is 0, 4, 8, ...
+> So we can get the same map value between irq and offset. This will be
+> convenience for hardware doorbell register memory map.
 > 
 
-There are at least couple of BAR regions used in this patch but they were not
-mentioned in the above diagram.
+In your irq-imx-mu-msi.c driver, the msi_address is calculated as:
 
-The subject should be:
+```
+u64 addr = msi_data->msiir_addr + 4 * data->hwirq;
+```
 
-"PCI: endpoint: pci-epf-vntb: Use EP MSI controller to handle DB from host"
+So the MSI addresses itself are of 4 bytes width. So the offsets will be
+separated by 8 bytes like, 0, 8, 16,... and this won't match the MSI addresses
+as they are 4 bytes apart.
 
-> Using platform MSI interrupt controller as endpoint(EP)'s doorbell.
-> 
-
-Above line is not needed.
-
-> The memory assigned for BAR region by the PCI host is mapped to the
-
-Which BAR? (BAR 1 aka. DB BAR)? There are multiple BAR regions exposed by this function driver.
-
-> message address of platform msi interrupt controller in PCI Endpoint.
-
-s/msi/MSI. Also, use either Endpoint or EP, pick one but not both.
-
-> Such that, whenever the PCI host writes to the BAR region, it will
-> trigger an IRQ in the EP.
-> 
-> Basic working follow as
-
-"work flow is"?
-
-> 1. EP function driver call platform_msi_domain_alloc_irqs() alloc a
-
-pci-epf-vntb function driver calls platform_msi_domain_alloc_irqs() to allocate
-MSI's from the platform MSI controller.
-
-> MSI irq from MSI controller with call back function write_msi_msg();
-> 2. write_msg_msg will config BAR and map to address defined in msi_msg;
-
-The epf_ntb_write_msi_msg() passed as a callback will write the offset of the
-MSI controller's MSI address dedicated for each MSI to the doorbell register
-db_offset and also writes the MSI data to db_data register in the CTRL BAR
-region.
-
-> 3. Host side trigger an IRQ at Endpoint by write to BAR region.
-> 
-
-Finally, the host can trigger doorbell by reading the offset of the doorbell
-from db_offset register and writing the data read from db_data register in CTRL
-BAR region to the computed address in the DB BAR region.
-
-> Add MSI doorbell support for pci-epf-vntb. Query if system has an MSI
-> controller. Set up doorbell address according to struct msi_msg.
-> 
-> So PCI host can write this doorbell address to trigger EP side's IRQ.
-> 
-> If no MSI controller exists, fall back to software polling.
-> 
-
-"Add doorbell support to pci-epf-vntb function driver making use of the platform
-MSI controller. If the MSI controller is not available, fallback to the polling
-method."
-
-Also, please move this paragraph to the beginning of the description.
+So you want to change the offset to 0, 4, 8,... by zeroing db_entry_size,
+right?
 
 > Signed-off-by: Frank Li <Frank.Li@nxp.com>
 > ---
->  drivers/pci/endpoint/functions/pci-epf-vntb.c | 146 +++++++++++++++---
->  1 file changed, 125 insertions(+), 21 deletions(-)
+>  drivers/pci/endpoint/functions/pci-epf-vntb.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 > 
 > diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> index 0d744975f815..f770a068e58c 100644
+> index 04698e7995a5..0d744975f815 100644
 > --- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
 > +++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> @@ -44,6 +44,7 @@
->  #include <linux/pci-epc.h>
->  #include <linux/pci-epf.h>
->  #include <linux/ntb.h>
-> +#include <linux/msi.h>
+> @@ -461,11 +461,11 @@ static int epf_ntb_config_spad_bar_alloc(struct epf_ntb *ntb)
+>  	ctrl->num_mws = ntb->num_mws;
+>  	ntb->spad_size = spad_size;
 >  
->  static struct workqueue_struct *kpcintb_workqueue;
+> -	ctrl->db_entry_size = sizeof(u32);
+> +	ctrl->db_entry_size = 0;
 >  
-> @@ -137,11 +138,14 @@ struct epf_ntb {
->  	struct epf_ntb_ctrl *reg;
->  
->  	u32 *epf_db;
-> +	phys_addr_t epf_db_phys;
->  
->  	phys_addr_t vpci_mw_phy[MAX_MW];
->  	void __iomem *vpci_mw_addr[MAX_MW];
->  
->  	struct delayed_work cmd_handler;
-> +
-> +	int msi_virqbase;
->  };
+>  	for (i = 0; i < ntb->db_count; i++) {
+>  		ntb->reg->db_data[i] = 1 + i;
+> -		ntb->reg->db_offset[i] = 0;
+> +		ntb->reg->db_offset[i] = sizeof(u32) * i;
 
-You should add kernel doc comments for this struct in a separate patch. It will
-help in understanding the driver better.
-
->  
->  #define to_epf_ntb(epf_group) container_of((epf_group), struct epf_ntb, group)
-> @@ -256,11 +260,13 @@ static void epf_ntb_cmd_handler(struct work_struct *work)
->  
->  	ntb = container_of(work, struct epf_ntb, cmd_handler.work);
->  
-> -	for (i = 1; i < ntb->db_count; i++) {
-> -		if (ntb->epf_db[i]) {
-> -			ntb->db |= 1 << (i - 1);
-> -			ntb_db_event(&ntb->ntb, i);
-> -			ntb->epf_db[i] = 0;
-
-A comment here stating that polling is implemented would be better.
-
-> +	if (!ntb->epf_db_phys) {
-> +		for (i = 1; i < ntb->db_count; i++) {
-> +			if (ntb->epf_db[i]) {
-> +				ntb->db |= 1 << (i - 1);
-> +				ntb_db_event(&ntb->ntb, i);
-> +				ntb->epf_db[i] = 0;
-> +			}
->  		}
->  	}
->  
-> @@ -518,6 +524,28 @@ static int epf_ntb_configure_interrupt(struct epf_ntb *ntb)
->  	return 0;
->  }
->  
-> +static int epf_ntb_db_size(struct epf_ntb *ntb)
-> +{
-> +	const struct pci_epc_features *epc_features;
-> +	size_t size = sizeof(u32) * ntb->db_count;
-> +	u32 align;
-> +
-> +	epc_features = pci_epc_get_features(ntb->epf->epc,
-> +					    ntb->epf->func_no,
-> +					    ntb->epf->vfunc_no);
-> +	align = epc_features->align;
-> +
-> +	if (size < 128)
-
-Shouldn't this be (size > 128)?
-
-> +		size = 128;
-> +
-> +	if (align)
-> +		size = ALIGN(size, align);
-> +	else
-> +		size = roundup_pow_of_two(size);
-> +
-> +	return size;
-> +}
-> +
->  /**
->   * epf_ntb_db_bar_init() - Configure Doorbell window BARs
->   * @ntb: NTB device that facilitates communication between HOST and VHOST
-> @@ -539,27 +567,26 @@ static int epf_ntb_db_bar_init(struct epf_ntb *ntb)
->  					    ntb->epf->func_no,
->  					    ntb->epf->vfunc_no);
->  	align = epc_features->align;
-> -
-> -	if (size < 128)
-> -		size = 128;
-> -
-> -	if (align)
-> -		size = ALIGN(size, align);
-> -	else
-> -		size = roundup_pow_of_two(size);
-> +	size = epf_ntb_db_size(ntb);
->  
->  	barno = ntb->epf_ntb_bar[BAR_DB];
-> +	epf_bar = &ntb->epf->bar[barno];
->  
-> -	mw_addr = pci_epf_alloc_space(ntb->epf, size, barno, align, 0);
-> -	if (!mw_addr) {
-> -		dev_err(dev, "Failed to allocate OB address\n");
-> -		return -ENOMEM;
-> +	if (ntb->epf_db_phys) {
-> +		mw_addr = NULL;
-> +		epf_bar->phys_addr = ntb->epf_db_phys;
-> +		epf_bar->barno = barno;
-> +		epf_bar->size = size;
-> +	} else {
-> +		mw_addr = pci_epf_alloc_space(ntb->epf, size, barno, align, 0);
-> +		if (!mw_addr) {
-> +			dev_err(dev, "Failed to allocate doorbell address\n");
-> +			return -ENOMEM;
-> +		}
->  	}
->  
->  	ntb->epf_db = mw_addr;
->  
-> -	epf_bar = &ntb->epf->bar[barno];
-> -
->  	ret = pci_epc_set_bar(ntb->epf->epc, ntb->epf->func_no, ntb->epf->vfunc_no, epf_bar);
->  	if (ret) {
->  		dev_err(dev, "Doorbell BAR set failed\n");
-> @@ -728,6 +755,82 @@ static int epf_ntb_init_epc_bar(struct epf_ntb *ntb)
->  	return 0;
->  }
->  
-> +static irqreturn_t epf_ntb_interrupt_handler(int irq, void *data)
-
-Shouldn't this function also be guarded?
-
-> +{
-> +	struct epf_ntb *ntb = data;
-> +	int index;
-> +
-> +	index = irq - ntb->msi_virqbase;
-> +	ntb->db |= 1 << (index - 1);
-> +	ntb_db_event(&ntb->ntb, index);
-> +
-> +	return IRQ_HANDLED;
-> +}
-> +
-> +#ifdef CONFIG_GENERIC_MSI_IRQ_DOMAIN
-
-It'd be better to use the relevant commit description as a comment here.
-
-> +static void epf_ntb_write_msi_msg(struct msi_desc *desc, struct msi_msg *msg)
-> +{
-> +	struct epf_ntb *ntb = dev_get_drvdata(desc->dev);
-> +	struct epf_ntb_ctrl *reg = ntb->reg;
-> +	int size = epf_ntb_db_size(ntb);
-> +	u64 addr;
-> +
-> +	addr = msg->address_hi;
-> +	addr <<= 32;
-> +	addr |= msg->address_lo;
-> +
-> +	reg->db_data[desc->msi_index] = msg->data;
-> +
-
-A comment stating that the base address to be used as the DB BAR is set here
-would be useful too.
-
-> +	if (!desc->msi_index)
-> +		ntb->epf_db_phys = round_down(addr, size);
-> +
-> +	reg->db_offset[desc->msi_index] = addr - ntb->epf_db_phys;
-> +}
-> +
-> +static void epf_ntb_epc_msi_init(struct epf_ntb *ntb)
-> +{
-> +	struct device *dev = &ntb->epf->dev;
-> +	struct irq_domain *domain;
-> +	int virq;
-> +	int ret;
-> +	int i;
-> +
-> +	domain = dev_get_msi_domain(ntb->epf->epc->dev.parent);
-> +	if (!domain)
-> +		return;
-> +
-> +	dev_set_msi_domain(dev, domain);
-> +
-> +	if (platform_msi_domain_alloc_irqs(&ntb->epf->dev,
-> +		ntb->db_count,
-> +		epf_ntb_write_msi_msg)) {
-
-Please wrap above two in a single line till 100 column limit.
-
-> +		dev_err(dev, "Can't allocate MSI, falling back to polling mode\n");
-
-This should be dev_dbg().
-
-> +		return;
-> +	}
-> +	dev_dbg(dev, "Using MSI as doorbell\n");
-> +
-> +	for (i = 0; i < ntb->db_count; i++) {
-> +		virq = msi_get_virq(dev, i);
-> +		ret = devm_request_irq(dev, virq,
-> +			       epf_ntb_interrupt_handler, 0,
-> +			       "pci_epf_vntb", ntb);
-> +
-> +		if (ret) {
-> +			dev_err(dev, "Failed to request doorbell IRQ! Falling back to polling mode");
-
-Again, dev_dbg()
-
-> +			ntb->epf_db_phys = 0;
-> +			platform_msi_domain_free_irqs(&ntb->epf->dev);
-> +			break;
-> +		}
-> +
-> +		if (!i)
-> +			ntb->msi_virqbase = virq; /* msi start virq number */
-> +	}
-> +}
-> +#else
-
-Since this is not exposed as an API, just end the ifdef here and...
-
-> +static void epf_ntb_epc_msi_init(struct epf_ntb *ntb)
-> +{
-> +}
-> +#endif /* CONFIG_GENERIC_MSI_IRQ_DOMAIN */
->  /**
->   * epf_ntb_epc_init() - Initialize NTB interface
->   * @ntb: NTB device that facilitates communication between HOST and VHOST
-> @@ -1336,14 +1439,15 @@ static int epf_ntb_bind(struct pci_epf *epf)
->  		goto err_bar_alloc;
->  	}
->  
-> +	epf_set_drvdata(epf, ntb);
-> +	epf_ntb_epc_msi_init(ntb);
-
-Guard this function instead:
-
-#ifdef CONFIG_GENERIC_MSI_IRQ_DOMAIN
-	epf_ntb_epc_msi_init(ntb);
-#endif
+If my above understanding is correct, then you could just reassign
+"db_entry_size" in epf_ntb_epc_msi_init().
 
 Thanks,
 Mani
 
-> +
->  	ret = epf_ntb_epc_init(ntb);
->  	if (ret) {
->  		dev_err(dev, "Failed to initialize EPC\n");
->  		goto err_bar_alloc;
 >  	}
 >  
-> -	epf_set_drvdata(epf, ntb);
-> -
->  	pci_space[0] = (ntb->vntb_pid << 16) | ntb->vntb_vid;
->  	pci_vntb_table[0].vendor = ntb->vntb_vid;
->  	pci_vntb_table[0].device = ntb->vntb_pid;
+>  	return 0;
 > -- 
 > 2.34.1
 > 
