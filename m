@@ -1,90 +1,84 @@
-Received: from mail-pf1-f170.google.com (mail-pf1-f170.google.com [209.85.210.170])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mga04.intel.com (mga04.intel.com [192.55.52.120])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 071506135
-	for <ntb@lists.linux.dev>; Tue,  7 Mar 2023 12:20:27 +0000 (UTC)
-Received: by mail-pf1-f170.google.com with SMTP id y10so7861173pfi.8
-        for <ntb@lists.linux.dev>; Tue, 07 Mar 2023 04:20:27 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112; t=1678191627;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=zR3SqOIJEtppTiQ5ZJZtYtRZxphAv9rsA+9/zUbIboo=;
-        b=ntg9YKaHYSvNV0n9rp/He7GTZHoPjspMXn2a3Z+Xpo5HRF42WlyfzawcxBf4QHRaku
-         O4+92vfVHLH+8ZQeivMZ3He+9MnpmVGwzOjG6tcnn1ihhSv+vQFMAThps7doRHBsZBYS
-         Zag0lftoSAQs5oIBHyIC/Gb6HfJ9HrEjJ6MNBz5qagsT2AIzB8YMti7obBQVPvGM4Ssv
-         3HmB7NcuiMCeEvcvMOG8JeSY+FzhnWDG/SE4dvYOu4wi+qPQSQgrj+1U2AKWb+ZBcxsb
-         XA0C0VokCCxGvaHeMFj5NWevZa9/uhkIH4Za3uBUHGE8ojUN2LyKvN6Iq/w3poVHba9o
-         OFHg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678191627;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=zR3SqOIJEtppTiQ5ZJZtYtRZxphAv9rsA+9/zUbIboo=;
-        b=ZB79BOBYxv3CVxJh8+caLZPqMY2tM5u4K7sqSnCWJ8ze4Jw7uo5SzcqIaQDUAyf2Kb
-         QiC02yrLqAl0CyYZjco8Xv93/C5Yd/hkkfb4JaUKPEVpooOLIifCxSvSZGKRlQEbClIr
-         m/weMt0xikk+150c1utlvuVZja6kh0UhvfBlAsqkAJYBWhLkYWv6zc6ROcH37VhGn7ro
-         2547isyy9tuIvqt4tIpjCXzgJ+sxR6aoXfg9CML/QDiq8cqv4+WTkTCcZvmcz116ReV0
-         joKk7bqQndTO3A465GmCsASPDAA4xBHfUtEit5il6CiwD92PMlS3LY7v69T8SjNR9iDk
-         QXcA==
-X-Gm-Message-State: AO0yUKX0xQYTC6jSOl1rr5uNGjbO/kyii4HIebkyyKPI8YTvgoJtRxDY
-	KhWnYUREO5hV3xOCQ1USCrU=
-X-Google-Smtp-Source: AK7set9Q+ap+0E+m5VrEF2rj5byWm+UCrUB/9hVJ1TyAMY7po6SpVX3AwPn8hzHuj4Cg2gVVQk6y2Q==
-X-Received: by 2002:a62:7b03:0:b0:5a8:c699:3eaa with SMTP id w3-20020a627b03000000b005a8c6993eaamr14749539pfc.9.1678191627325;
-        Tue, 07 Mar 2023 04:20:27 -0800 (PST)
-Received: from passwd123-ThinkStation-P920.. ([222.20.94.23])
-        by smtp.gmail.com with ESMTPSA id k19-20020aa792d3000000b0058173c4b3d1sm7792506pfa.80.2023.03.07.04.20.24
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 07 Mar 2023 04:20:26 -0800 (PST)
-From: Kang Chen <void0red@gmail.com>
-To: fancer.lancer@gmail.com
-Cc: allenbh@gmail.com,
-	dave.jiang@intel.com,
-	jdmason@kudzu.us,
-	linux-kernel@vger.kernel.org,
-	ntb@lists.linux.dev,
-	void0red@gmail.com
-Subject: [PATCH v2] ntb_tool: check null return of devm_kcalloc in tool_init_mws
-Date: Tue,  7 Mar 2023 20:20:21 +0800
-Message-Id: <20230307122021.1569285-1-void0red@gmail.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20230306152810.ptb622tfhoxehhdc@mobilestation>
-References: <20230306152810.ptb622tfhoxehhdc@mobilestation>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7FA2EAD49
+	for <ntb@lists.linux.dev>; Tue,  7 Mar 2023 16:06:53 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1678205213; x=1709741213;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=v6waBatXx3XkI8tF12MNTcc05fpv5KRWhE7ptpCmzDo=;
+  b=jKQd2fKxk3FRG51sXPzs2vsdBHxTqh+BafyLikjgP3USM3cDXgdd0Pwm
+   r7x8F28CeaXprSlsEEe0/zXgxtTzb4QyHAxn9pFZdOjW66z7c6NIAOLEx
+   2jkHptXbWzuwMK+qV+HcshbKv9YVKS5aVtRmU+htGEeAV/zl3zyo6kiVT
+   bjBKhlteq3icHYh0IgzLlQB6uLnOc7r4Mvgx8SFpSbkBd0Vu763O9iLBB
+   BAfsHpn3+E/eazzRCFy9sdU+6Miena5aILq1ekXHMwNFCRq5wCGlnNPXX
+   PHMJD0HPPPsU6FsZkjxpiUH2zcdQ75rrLmDhILtMoc/XYfuu4qVH/h/bL
+   A==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10642"; a="334602816"
+X-IronPort-AV: E=Sophos;i="5.98,241,1673942400"; 
+   d="scan'208";a="334602816"
+Received: from orsmga005.jf.intel.com ([10.7.209.41])
+  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Mar 2023 08:05:40 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6500,9779,10642"; a="850747989"
+X-IronPort-AV: E=Sophos;i="5.98,241,1673942400"; 
+   d="scan'208";a="850747989"
+Received: from djiang5-mobl3.amr.corp.intel.com (HELO [10.212.116.173]) ([10.212.116.173])
+  by orsmga005-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Mar 2023 08:05:39 -0800
+Message-ID: <e4ac3d74-9a91-e4ff-eee3-67237f35ac7b@intel.com>
+Date: Tue, 7 Mar 2023 09:05:38 -0700
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.6.0
+Subject: Re: [PATCH v2] ntb_tool: check null return of devm_kcalloc in
+ tool_init_mws
+Content-Language: en-US
+To: Kang Chen <void0red@gmail.com>, fancer.lancer@gmail.com
+Cc: allenbh@gmail.com, jdmason@kudzu.us, linux-kernel@vger.kernel.org,
+ ntb@lists.linux.dev
+References: <20230306152810.ptb622tfhoxehhdc@mobilestation>
+ <20230307122021.1569285-1-void0red@gmail.com>
+From: Dave Jiang <dave.jiang@intel.com>
+In-Reply-To: <20230307122021.1569285-1-void0red@gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-devm_kcalloc may fails, tc->peers[pidx].outmws might be null
-and will cause null pointer dereference later.
 
-Fixes: 7f46c8b3a552 ("NTB: ntb_tool: Add full multi-port NTB API support")
-Signed-off-by: Kang Chen <void0red@gmail.com>
-Reviewed-by: Serge Semin <fancer.lancer@gmail.com>
----
-v2 -> v1: add Fixes and Reviewed-by tags
 
- drivers/ntb/test/ntb_tool.c | 2 ++
- 1 file changed, 2 insertions(+)
+On 3/7/23 5:20 AM, Kang Chen wrote:
+> devm_kcalloc may fails, tc->peers[pidx].outmws might be null
+> and will cause null pointer dereference later.
+> 
+> Fixes: 7f46c8b3a552 ("NTB: ntb_tool: Add full multi-port NTB API support")
+> Signed-off-by: Kang Chen <void0red@gmail.com>
+> Reviewed-by: Serge Semin <fancer.lancer@gmail.com>
 
-diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c
-index 5ee0afa62..eeeb4b1c9 100644
---- a/drivers/ntb/test/ntb_tool.c
-+++ b/drivers/ntb/test/ntb_tool.c
-@@ -998,6 +998,8 @@ static int tool_init_mws(struct tool_ctx *tc)
- 		tc->peers[pidx].outmws =
- 			devm_kcalloc(&tc->ntb->dev, tc->peers[pidx].outmw_cnt,
- 				   sizeof(*tc->peers[pidx].outmws), GFP_KERNEL);
-+		if (tc->peers[pidx].outmws == NULL)
-+			return -ENOMEM;
- 
- 		for (widx = 0; widx < tc->peers[pidx].outmw_cnt; widx++) {
- 			tc->peers[pidx].outmws[widx].pidx = pidx;
--- 
-2.34.1
+You forgot to pick up my review tag. I do recommend using the tool 'b4'. 
+It picks up all the tags for you and works rather well.
 
+> ---
+> v2 -> v1: add Fixes and Reviewed-by tags
+> 
+>   drivers/ntb/test/ntb_tool.c | 2 ++
+>   1 file changed, 2 insertions(+)
+> 
+> diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c
+> index 5ee0afa62..eeeb4b1c9 100644
+> --- a/drivers/ntb/test/ntb_tool.c
+> +++ b/drivers/ntb/test/ntb_tool.c
+> @@ -998,6 +998,8 @@ static int tool_init_mws(struct tool_ctx *tc)
+>   		tc->peers[pidx].outmws =
+>   			devm_kcalloc(&tc->ntb->dev, tc->peers[pidx].outmw_cnt,
+>   				   sizeof(*tc->peers[pidx].outmws), GFP_KERNEL);
+> +		if (tc->peers[pidx].outmws == NULL)
+> +			return -ENOMEM;
+>   
+>   		for (widx = 0; widx < tc->peers[pidx].outmw_cnt; widx++) {
+>   			tc->peers[pidx].outmws[widx].pidx = pidx;
