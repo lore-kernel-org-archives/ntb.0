@@ -1,128 +1,90 @@
-Received: from APC01-PSA-obe.outbound.protection.outlook.com (mail-psaapc01on2129.outbound.protection.outlook.com [40.107.255.129])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f41.google.com (mail-wm1-f41.google.com [209.85.128.41])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A7B987C
-	for <ntb@lists.linux.dev>; Thu, 13 Jul 2023 03:47:41 +0000 (UTC)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=OYlD1RM9xMPNhh++MIu/z0aLXcVCt00qlou2ep/wgKAGgR4PwsSwLgfw8bHmcppQC0GmSpCnVTVweWL5iGjWD8s7cYFgYeIvjmGn+Nfwdco3Cx6MQTwpSk/REj3cd4+URAwa2lOI3usJpNXw4fTyizi7QgQUuHtGig5UWzgmoUP7Xb+J+LKviYXd2bFmas9QRI3YUivIOYILbXGwC6wJ5ijUfTRHzAAI877y9f4veA4uCNL6NKD+aq4Ces6RCFfOT88vXPmWIeMn/CsKNVmhKkIYTb4P610NwQ4R+WXIqinYlW/b0QG+2T158wwlYv52jTrXw2UlJNf7xD8MUueCfg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=7/JW1zu886Vh1eVs/jekSXLSJFl47Myn7QWOsZl8+ZM=;
- b=UF4mpGbHMQoRvSFr+vPF7+JeHI1aWJBlwgO5ur1wWE4shVLQ+RgO5EE6KEmVdpB3BStx4Rvd2ac+v31u8ZffrWLY+pgsGQMCjjGnWiF9M02YR3HseT59IKc5wSLm7ovJ2pGTcAULa3skK2EHjdxlXKEaUeOWiUK6eupt3w6/F5cFRdIJCF4IvzubvFS1i8iKqsl9xjoOquMsbwrW0GMyPpCAMBfv8JhdLQ1eIqksXg3jhdO0H8RQR/Q5mqlyGXQQYcU6q3GU8NyohSOZpLUMgquJsTmjOtBc4RADBVZTiRCofnB2HQ82w1u4m52ps1cThYlENh1em6SfXnTovz2v5A==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=vivo.com; dmarc=pass action=none header.from=vivo.com;
- dkim=pass header.d=vivo.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=vivo.com; s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=7/JW1zu886Vh1eVs/jekSXLSJFl47Myn7QWOsZl8+ZM=;
- b=EfVw4gOWm1ETk326iW9qWrJghyNyQgAPWexaJeM4t/PFx7QkCNCzDC+KyrUCSD6/c6S313o/UhZ3ftpRiLQsfF/LwJrMYqDc9cflaI50b3U5WIxZNbBRl/b3SIS3nXoHAgrx7L3Rx71Eht3+t38fOlwekhTlFztYX0crfP7y4ruhB598X7gN5e3iLpTqdgdHcYTLL5SvJhZDLQFuvTRobXo2uKsNWK9Q9G/YMiL8Q5DLwgiRphEs2hBTsu5UYTaXgx1lQDvGhCb+S+efhSjNh168hnypBiFYn0DwLeE8HT80bFKyImlrMgUJ2m848myu/VGfwIdyO/1WygH0XXEGVQ==
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=vivo.com;
-Received: from SG2PR06MB5288.apcprd06.prod.outlook.com (2603:1096:4:1dc::9) by
- TY0PR06MB5236.apcprd06.prod.outlook.com (2603:1096:400:205::5) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.6565.30; Thu, 13 Jul 2023 03:47:37 +0000
-Received: from SG2PR06MB5288.apcprd06.prod.outlook.com
- ([fe80::f9b8:80b5:844e:f49a]) by SG2PR06MB5288.apcprd06.prod.outlook.com
- ([fe80::f9b8:80b5:844e:f49a%6]) with mapi id 15.20.6565.028; Thu, 13 Jul 2023
- 03:47:37 +0000
-From: Minjie Du <duminjie@vivo.com>
-To: Jon Mason <jdmason@kudzu.us>,
-	Dave Jiang <dave.jiang@intel.com>,
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F05EE53B1
+	for <ntb@lists.linux.dev>; Thu, 13 Jul 2023 06:00:28 +0000 (UTC)
+Received: by mail-wm1-f41.google.com with SMTP id 5b1f17b1804b1-3fbc54cab6fso2418545e9.0
+        for <ntb@lists.linux.dev>; Wed, 12 Jul 2023 23:00:28 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1689228027; x=1691820027;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=CD3yM43uVnHI58j5asWPMcNTIiJ0VXkGdNi8zJM5rl8=;
+        b=jPbN/2PN3o9FYzujK+crWu5CCRRJRoeTLtRw6l3ITIs32FKiFPJPLeOLwZq4h24rF8
+         7oAxo5tBIscu4EdByBgJZFm24LSWy/fc9wrZA6Tw3RrLicgmsn5Ucz5H3kwQlARQ06gO
+         f/BbDF3wzVAIUwd6nKXu8y6Q/2H8ScEsu83F+B9sWmZqtbatLnmExDgGb3Hh1B/bflth
+         EVq1MlVLP4StOFw8L2Ju7KfWi29gNTo7AbSFuTCm2fyLx6oCZvasny0RKOYlHE/rxhxT
+         M6YENiNygFmCLbjGrEeFPbny97ZvNqwchXSKwJBEMPeInyoQznQe/63M3gkcQWa/f3wX
+         7qWg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1689228027; x=1691820027;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=CD3yM43uVnHI58j5asWPMcNTIiJ0VXkGdNi8zJM5rl8=;
+        b=aGza3y6/HJFCMOzyACj+5sRAHDxePGrtkcXGA/5LSqNW/mb//jb9O5IiPudbPPObfP
+         9BK2clw8ohnZwHyNy0kQJMkHoXMMTCvKRykqTXK0+DoGe1xDGh5usu9aM9NhVQIJLGHv
+         T6dkJCwpnh4rzjWaHo1GhRbOSSUKA+amReoFgsuxN0oMM23ogkGVnYzb1HAc/WKp3b0V
+         MCm8B0S/sUoTOQct7mkz615gbUeG+wUanL3EsRUdfyHvE6iNcgahju72GcMRZbCEDnj1
+         37+95V3fJFNOcRPXWM+nODJ72c5l0nF4kyaJw1cnUciXqyuz4WNYemX+vZWbu0JfaG7p
+         P0ww==
+X-Gm-Message-State: ABy/qLauUd14ES6tiRbs4GH8IXas26cqidiQ8LgvH3XmxZa049bBqaMC
+	LCM7CX6/gK00xXOdcqbGZriQlQ==
+X-Google-Smtp-Source: APBJJlHonhciDEd++BHU5EGIRUCt/hp64szoeIPE8MHsVC2B6aCGlD5ZkVr3/Z2zEogB2D9OgGuHPA==
+X-Received: by 2002:a7b:c5ce:0:b0:3fb:dff2:9f17 with SMTP id n14-20020a7bc5ce000000b003fbdff29f17mr437447wmk.15.1689228026881;
+        Wed, 12 Jul 2023 23:00:26 -0700 (PDT)
+Received: from localhost ([102.36.222.112])
+        by smtp.gmail.com with ESMTPSA id f11-20020a7bc8cb000000b003fa98908014sm17443210wml.8.2023.07.12.23.00.23
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 12 Jul 2023 23:00:24 -0700 (PDT)
+Date: Thu, 13 Jul 2023 09:00:20 +0300
+From: Dan Carpenter <dan.carpenter@linaro.org>
+To: =?utf-8?B?546L5piOLei9r+S7tuW6leWxguaKgOacr+mDqA==?= <machel@vivo.com>
+Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>,
 	Allen Hubbe <allenbh@gmail.com>,
-	Minjie Du <duminjie@vivo.com>,
-	Stephen Rothwell <sfr@canb.auug.org.au>,
-	ntb@lists.linux.dev (open list:NTB DRIVER CORE),
-	linux-kernel@vger.kernel.org (open list)
-Cc: opensource.kernel@vivo.com
-Subject: [PATCH v1] dtivers: ntb: fix parameter check in perf_setup_dbgfs()
-Date: Thu, 13 Jul 2023 11:47:27 +0800
-Message-Id: <20230713034728.2157-1-duminjie@vivo.com>
-X-Mailer: git-send-email 2.39.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: SI2P153CA0027.APCP153.PROD.OUTLOOK.COM
- (2603:1096:4:190::22) To SG2PR06MB5288.apcprd06.prod.outlook.com
- (2603:1096:4:1dc::9)
+	Serge Semin <fancer.lancer@gmail.com>,
+	Dan Carpenter <error27@gmail.com>,
+	Jiasheng Jiang <jiasheng@iscas.ac.cn>,
+	"ntb@lists.linux.dev" <ntb@lists.linux.dev>,
+	LKML <linux-kernel@vger.kernel.org>,
+	"opensource.kernel" <opensource.kernel@vivo.com>
+Subject: Re: =?utf-8?B?5Zue5aSNOiBbUEFUQ0ggdjJdIG50?=
+ =?utf-8?Q?b=3AFix_an_NULL_v?= =?utf-8?Q?s?= IS_ERR() bug for
+ debugfs_create_dir() in tool_setup_dbgfs()
+Message-ID: <bc1efd80-a490-4037-9e83-e0bb5cc0cb47@kadam.mountain>
+References: <20230712124035.7981-1-machel@vivo.com>
+ <138ab604-27de-4ac6-88fb-0886ee8f6b6d@kadam.mountain>
+ <SG2PR06MB3743C36C711A4801F4CE2304BD37A@SG2PR06MB3743.apcprd06.prod.outlook.com>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: SG2PR06MB5288:EE_|TY0PR06MB5236:EE_
-X-MS-Office365-Filtering-Correlation-Id: 55c4fd29-04bc-4fb9-cd0c-08db8353e5e1
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info:
-	UsED/IO3UqQ4lOO0YCCCqlJb7ERBd4Cz/MVG152pEnCn+JAMU0ZO8OHTVnriCO9LU6gmGTMYGZhUIR3smS38/oleiEggHHQTEEbb4Ze4WrEPa97edFT43Ad/W5rmDUcyEtfHBMy19xyrHQycNNFX9JjOou7ahzEFXuptuft/hxOV+kyIJx34QugrQDbFM2Mi7GzzJnhXyi9OTVo3aj47Mc+lXuU1ANCecSxlbgGnUCGbXBl8klhOVjwf+VPI/ZFfhoh4SIZhrCx88cc1AmfOPiHuryk5Gp0VeJh4uwr0245Jw/UIh78PRViEF+OGwcl/dNbmA1iIdwVEyrIjnY5JY8jn12LRY0dkCeoP2IoP7kQvzV/JNaYYtBBBQQIjSXMNZ/Al1BBpEtTg2SbCSp0CSsxysBq/fpsQmHyIi8aln+cdA4BztaZtywrMFcl1f/IKEM2moAxPg7NEPCQLyBrNnENlEPKuRx40iRkxCJV3NmfBMuoson5CgmdMGSlOqUO/k1auTNxrLeUKUzy/o5MD2q5xjpCAQLIGf3o5VHD+aF+i4Y23wPcWIx4pqd7CeTXFSJIPyidzWLX+KK8z8HXAiCzBJRBkBsNNhmNWXR8Us22sukfRSS0Lfq5BCO4/uivp
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SG2PR06MB5288.apcprd06.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230028)(4636009)(39860400002)(136003)(396003)(346002)(366004)(376002)(451199021)(110136005)(478600001)(6486002)(52116002)(6666004)(36756003)(83380400001)(2616005)(86362001)(4744005)(2906002)(66946007)(186003)(1076003)(107886003)(6506007)(6512007)(38350700002)(8676002)(26005)(38100700002)(316002)(66476007)(4326008)(5660300002)(41300700001)(66556008)(8936002);DIR:OUT;SFP:1102;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?CMghlaHCWSTYRRYUdMVFYG99P07RP4j7goJedz/nXYf7ptVQabdzEx7gmRXU?=
- =?us-ascii?Q?viJ99QPq40JbGlfl2UYUQkPNB5p4KCKLlE/zw2aV/z0LIc+rxS8ClDooZSnk?=
- =?us-ascii?Q?kTG44ZF7TMdGuZmi3Aje6ltBg8ZbOrxM4oJ5CnQPfOs15gpUOc+Rwo5oEDyP?=
- =?us-ascii?Q?pU0XLqkX3bNjqyQmT4fVkAtg6bF6g+O65YWwhtefSB6EFZT2xedaM2lVulAj?=
- =?us-ascii?Q?WmVpP8R8E9s4EZDtCNVoFsOatFYE+16uLQ4z7stQkYb6ASqC1IahwF7yqFDX?=
- =?us-ascii?Q?M8vfC24LI1yxaL6BxCznm+AD/DGq1UvePMKavyd7tLRxUzLpmAf2MuQ/ANNQ?=
- =?us-ascii?Q?199n55pPxSH2w2lUDzYtHRVtUTNCBx0+MSZaphKqlAvbJbudIX2uZMYZV2st?=
- =?us-ascii?Q?U3nKHF7METaXV0Qf4nM9TM7dh2frri5+lXw9uwccOpEL2Q3hW9YG+EWYowRp?=
- =?us-ascii?Q?kd3vuO0D+4AW3iglY4vCSbJONmRUfsZJKbcw2X2Jxq5UaDpmV2KyL+hT8uLx?=
- =?us-ascii?Q?VSQ1CMu0X/GsNl95mJ89wjb7E6PGZRkCX5KSGoULZARYZI99BswXvIE0uRm6?=
- =?us-ascii?Q?U3jXWr22JQ0ECk/pkMRGTHu8Qf2zh5vj+ZZq+zJxhWQNZTYtETQiY+Wm6YGV?=
- =?us-ascii?Q?KTOcYhOn9/0vtQsOeu93q96U947iFLCKnI8xW/qOfpZy/G2yis6b1PEwsK5O?=
- =?us-ascii?Q?vAulyoKQLe227idETKDa/IcytKcUE6rs93e58Wpq4JWG1EN9vIN343snPXS/?=
- =?us-ascii?Q?bE68kCEh32LERmh2/p1/7bLWB4RA5qXmADfE6qWkTBs/xd65pY3jt69wGP9h?=
- =?us-ascii?Q?xqwHmIBCk6tc/5kX4vzbXHaJQHAbmtAToYp9sg2j13E/djkJ/w4bdJ+QWooK?=
- =?us-ascii?Q?GEDqPDzeQETG/kWIkAMMrCSqqth7qOgVlRCpG7F009GcBqhJ0f/0/Z8algnW?=
- =?us-ascii?Q?/kZIVfabj49dI0rrY/j6rGH3p6/8M+tF6AeXqWQZczZfu3mIyTwoe5rI9MCo?=
- =?us-ascii?Q?Y4PyPo2QacVojMkz2W1T+web/L+PKy2V5LFbim55Tmjn7Ub0f0fNUmqKGQGf?=
- =?us-ascii?Q?uY5dhmdubx4Xct0FXMmBhG8l3LwySIyO2kQdW1XqVrj1c3HxT9GZCH2ULQYZ?=
- =?us-ascii?Q?eHajxp8xt/rgM7/U+M+zKop0hoE2YKY66jIE6cQGji7f12D3NcpMif1ixz0S?=
- =?us-ascii?Q?ZS6xoorW7TIfsTPJwMIBj/7afrYCBfuAZVtCTWjV9qeA6LI4AJ9061MTZWFf?=
- =?us-ascii?Q?7EELRCxMyBZ5xc/EZg13BqPCwL0xm+w7JJJnzZ0UsDEcRC6We0ewqyDDiwUi?=
- =?us-ascii?Q?LZyoSvTFMmDHwNAzY7DhEISG36EEFtP3Dc4fgcsVX8VdvJWHZDvSrGO561xH?=
- =?us-ascii?Q?voWKp0lUtERLiXcKokQKGpWJNGOlnAX1NvOnO6yRCi4vFEO/DP7r0rV80YsT?=
- =?us-ascii?Q?6tuAGUbVYqoGkwGIwYKoTt7VJEkEj/n4lgQ1/6LacKMqHvC1X91e6EQqTn51?=
- =?us-ascii?Q?Vpl0Meej4nT5Ctc1wM/jzWa6HvTh1GCYh9TzDtF2+4cwQImbET9AmoAWoGuO?=
- =?us-ascii?Q?thvP8Trjf4Xl/GsLYA8RPTQwxPl11OQrxOCdSxDn?=
-X-OriginatorOrg: vivo.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 55c4fd29-04bc-4fb9-cd0c-08db8353e5e1
-X-MS-Exchange-CrossTenant-AuthSource: SG2PR06MB5288.apcprd06.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 13 Jul 2023 03:47:36.6752
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 923e42dc-48d5-4cbe-b582-1a797a6412ed
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: l2zUcf3wLEZGquqrR6Zcj1DYKrq/+WwgPSQD8x78m1LTdsZguq5/s0dg7Z3ncO95RV4f7Ub4tDgMMOMGEoAnbg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY0PR06MB5236
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <SG2PR06MB3743C36C711A4801F4CE2304BD37A@SG2PR06MB3743.apcprd06.prod.outlook.com>
 
-Make IS_ERR() judge the debugfs_create_dir() function return
-in perf_setup_dbgfs().
+On Thu, Jul 13, 2023 at 02:13:32AM +0000, 王明-软件底层技术部 wrote:
+> Hi dan carpenter
+> You mean that this modification is correct, but there is no need to do
+> so, is that the understanding?
 
-Signed-off-by: Minjie Du <duminjie@vivo.com>
----
- drivers/ntb/test/ntb_perf.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+No, this patch is wrong.  Possibly harmless, possibly harmful but either
+way it is wrong.  The correct way is:
 
-diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-index 65e1e5cf1..553f1f46b 100644
---- a/drivers/ntb/test/ntb_perf.c
-+++ b/drivers/ntb/test/ntb_perf.c
-@@ -1355,7 +1355,7 @@ static void perf_setup_dbgfs(struct perf_ctx *perf)
- 	struct pci_dev *pdev = perf->ntb->pdev;
+diff --git a/drivers/ntb/test/ntb_tool.c b/drivers/ntb/test/ntb_tool.c
+index eeeb4b1c97d2..e0acc11d29ba 100644
+--- a/drivers/ntb/test/ntb_tool.c
++++ b/drivers/ntb/test/ntb_tool.c
+@@ -1495,8 +1495,6 @@ static void tool_setup_dbgfs(struct tool_ctx *tc)
  
- 	perf->dbgfs_dir = debugfs_create_dir(pci_name(pdev), perf_dbgfs_topdir);
--	if (!perf->dbgfs_dir) {
-+	if (IS_ERR(perf->dbgfs_dir)) {
- 		dev_warn(&perf->ntb->dev, "DebugFS unsupported\n");
- 		return;
- 	}
--- 
-2.39.0
-
+ 	tc->dbgfs_dir = debugfs_create_dir(dev_name(&tc->ntb->dev),
+ 					   tool_dbgfs_topdir);
+-	if (!tc->dbgfs_dir)
+-		return;
+ 
+ 	debugfs_create_file("port", 0600, tc->dbgfs_dir,
+ 			    tc, &tool_port_fops);
