@@ -1,23 +1,23 @@
-Received: from mout.web.de (mout.web.de [212.227.15.14])
+Received: from mout.web.de (mout.web.de [217.72.192.78])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4E5A51371C
-	for <ntb@lists.linux.dev>; Fri, 14 Jul 2023 16:57:11 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5D9791549B
+	for <ntb@lists.linux.dev>; Fri, 14 Jul 2023 17:29:37 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=web.de;
- s=s29768273; t=1689353802; x=1689958602; i=markus.elfring@web.de;
- bh=QCiwSyb0TzLQSWgJIhjOMjaQ5YSX/3zOKPMbqyU5KIE=;
+ s=s29768273; t=1689355774; x=1689960574; i=markus.elfring@web.de;
+ bh=ZO2GJGwtIPWS3VRBv2Q3BuLedQvTTif2EB23yS7oqy4=;
  h=X-UI-Sender-Class:Date:Subject:To:Cc:References:From:In-Reply-To;
- b=XgoDKOF8yG1bLGax+WFKN9z18YAHuduQmfBjf+vDyBppg6orqHtPzNHMUWT9egLltxkvOuG
- SG4TpZUZeu2hsOnmnpdQQxAUZR26fUbYwcg0hW+1VR6MH/HJPf0IPfaUQoAeohE7BDsPvYGFK
- qhJn47N+2/7Dw6NmtmrRkmMVWl2E2XNGD2B7p8al62O4NKvrq4K/N8Bw6jX0PhJX+/d+l3waQ
- VV7zrWP8lgns7k50oICVcBt+rAdmWHJU63eYe6eERdBQzlr61AV5PXkbHQjCALmseShPMODVg
- oDCAkHupTy83Vmpwv1iAjnMqmT4BOVz+27WS8J8JIgh6rznF8flQ==
+ b=I0TAw2xS1GcgVzwkuqloy6zK5QWhzR8F+VwNOl1iWZNXkahGDIEYSkf13idrh/llcH51tQS
+ 8Mp+fIfRYzZopJQDelpZQPcfaoV1L7ItOhIDdKEz+IW778Ae2K4nAU5738fj3EjUQLqW3E1mq
+ s7SxbG8cQQl/qYldB17+6pMVS88beanjEg75Bs0KMo2LOQouPtGvyPKGFnPKodrbwtoX8AWEO
+ 9CYjlOFKO8wzTjNpbtGbCLpLEI3O1zupmhn3AjxyAGYIqbMqBJs3yqww6GzmctJijnT6qm97J
+ y4nwPWjZHi29hRgsqEzeDr1Nc+81wkutwItjA+/866Z5tPgvjbxw==
 X-UI-Sender-Class: 814a7b36-bfc1-4dae-8640-3722d8ec6cd6
-Received: from [192.168.178.21] ([94.31.90.83]) by smtp.web.de (mrweb005
- [213.165.67.108]) with ESMTPSA (Nemesis) id 1MKdHE-1qfAjV3beW-00LDLO; Fri, 14
- Jul 2023 18:56:41 +0200
-Message-ID: <764736f8-9d1a-fb8d-108f-5fa856b7ac64@web.de>
-Date: Fri, 14 Jul 2023 18:56:39 +0200
+Received: from [192.168.178.21] ([94.31.90.83]) by smtp.web.de (mrweb106
+ [213.165.67.124]) with ESMTPSA (Nemesis) id 1M91Po-1qHcy20vTi-006FTh; Fri, 14
+ Jul 2023 19:23:56 +0200
+Message-ID: <e4a0a8a3-1699-83b9-d713-aa40866f1720@web.de>
+Date: Fri, 14 Jul 2023 19:23:54 +0200
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -28,40 +28,41 @@ User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Thunderbird/102.13.0
 Subject: Re: [v3] ntb: Remove error checking for debugfs_create_dir()
 Content-Language: en-GB
-To: Serge Semin <fancer.lancer@gmail.com>, Wang Ming <machel@vivo.com>,
+To: Dan Carpenter <dan.carpenter@linaro.org>,
+ Serge Semin <fancer.lancer@gmail.com>, Wang Ming <machel@vivo.com>,
  opensource.kernel@vivo.com, kernel-janitors@vger.kernel.org,
- ntb@lists.linux.dev, Allen Hubbe <allenbh@gmail.com>,
- Dan Carpenter <error27@gmail.com>, Dave Jiang <dave.jiang@intel.com>,
- Jiasheng Jiang <jiasheng@iscas.ac.cn>, Jon Mason <jdmason@kudzu.us>
+ ntb@lists.linux.dev
 Cc: LKML <linux-kernel@vger.kernel.org>, Minjie Du <duminjie@vivo.com>,
- Dan Carpenter <dan.carpenter@linaro.org>
+ Allen Hubbe <allenbh@gmail.com>, Dan Carpenter <error27@gmail.com>,
+ Dave Jiang <dave.jiang@intel.com>, Jiasheng Jiang <jiasheng@iscas.ac.cn>,
+ Jon Mason <jdmason@kudzu.us>
 References: <ag2uziaj2mbsqryo6ss25w5s3ryenshoylraejtgp46gxce6hh@qcggqjnqheb5>
  <b5139e22-cf5e-e95c-fd33-7e1b9b4d665b@web.de>
- <gkiohfwsrxclkgkrlvfu37kvbv72tahc6c4kvz34uh6hhwrunk@surqby5talzt>
+ <5d0cd0e0-d92e-42d3-a6d9-ec9fc3229b7b@kadam.mountain>
 From: Markus Elfring <Markus.Elfring@web.de>
-In-Reply-To: <gkiohfwsrxclkgkrlvfu37kvbv72tahc6c4kvz34uh6hhwrunk@surqby5talzt>
+In-Reply-To: <5d0cd0e0-d92e-42d3-a6d9-ec9fc3229b7b@kadam.mountain>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:qwfT00pv8Okxa0ECtW66ATjuYdPrpyDk2eA8iMBtin/b2yX1ZjP
- otdgcW8wXvEqytycxUkFfR8LHvl7Raj7iLKB3sdJe7jZDmbfzq0p1lHVr+bi0qQU4wkO4uP
- WWlPyIvioFiZgNAG8rnp9nWuu08BjYCskrivjFE/EBmVebrzATISUqCHrfi4ph5srwx8QBY
- e9+8zHy+u08o4orNv6kig==
+X-Provags-ID: V03:K1:jWh1JM/0Prj7Y1G5lXUZRyNfXoaxPXOgnGaPonUaL9A/QgkBJB/
+ 1GXcwtT/gMbWwhVceaLHQjSUEIUpUKdWE2Me5GrVui7EVR8yiwYpoIVUoLiMByGzhCI5K38
+ wDWBVRCtQYdi16bLptbkbkpPr3aEN89lXPEDhOK1UFPopylylP0yML3XqCcmXqUlYsVSDA7
+ 3nwfTV8V31MrsiHy8qFMw==
 X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:ZoOAbF4nRB4=;O4lR6DJUlGEtDBkO3XRFUROsNIi
- 5xu4iH2TDbkNu07Ak7c5VE6+WluwOKpsQ39RaeB8qmldDqvhm6S4wiELW3+jBoPu59M42bKSb
- 8YE+mIAwh2XpD0KbxuvZz7x1W+82wAHXcPn89rrk7l66oPvTCx4tPiGK7qc6kEHIbxd7/hUyr
- RDen3uNWwwMtKQtMDDYf82jLHYr2S6YDH1/g/+I/zZYAbkkVUDZotqaJ6m8pGjVYiZ2n1/HVi
- D8zORV15Dzkn2gCzhh3NxNv+Y6lJ6Nnvcf7SiSzT5QedScMvY6oDJQRLo70NNQ1y9AA9PpjV5
- g+YiMFED8on50c3Na822Uj9NMOhiyxWICWKtf2pZC02HzzI0LP4q7gKoUXm42DWPjNDL4vbxB
- axa8zkNXMQB2YNvvuvL4uHKlKGTk+RfA/3vBlw7H4cRPKb4N+nWPP/3zUM+ARiSFut/aSPRYb
- YAS9/n2adXIQOFHHnxoDnQtGnV/OtpNA0SEXMBwOzBFDGJjBX/aUAOpspHfy2gw6j6KIpeL11
- DaxxzKQh/qkP3tgGEKBz5Bs9f0YzVmQsaDr0IXHjMdN1/0gqGQocxLK0C/uIl58k73JAcoPXa
- Ndjn8psGXio0rXW0UzNEWfX8RFxuN1ya0adv2YZsoC2/zzhVjvzhZ80yY9sDmjIsKt9PlWby3
- M7e683ScIaTlYaCxq7dDoINpERN6XOMp/ojhiJTNQVQtFxQrY4wdQXWphxh3+/yKG5V3/1MPM
- 1qoB7hRjQXVkHU3vP9R529q9Oz9pl0s14buRWRNEcNafSBKkeC0dNAnmNGh6uEWjwfwahoYmV
- ub2+0WelQDQtpMStJ3wpZleWsI3ZtBhZcaeqFRrM39HZO17snfkpb474xTkqFyblV6NzDu9rx
- 0D0JJXAvcDl3ZoxV6VoidkWxme8hbsAEAWI9u/Yo+h9sag6XZ5TFndHcT5DVRYj2MeBuxGSvB
- 1lOPKkBthKdGwUnhfB/ISddZatg=
+UI-OutboundReport: notjunk:1;M01:P0:iMCFS9/4PLw=;kOHfC8HDtS1I+AUN87gSKAVy68H
+ xkVEpIlPK8Ic/DxsODNsh9PSq4TuZB+H0lMK/h0GtiwXDwguj6Ty6DQtyttGaIxs1WDcUwbN5
+ cetw9V8yCYe3iZDGHn31aNSt5PaLvFAZXO8BXuWcfOHRKqYZxMhWLc7MH1CToGwxHCh8R+LM2
+ PPoA4AodcCWiKt69hswJEDwG782j+DVnz5/y9fUrPixjyryCCYYB66xy2PsH95WSDrXo3L6Pd
+ QSWeUVsuYZLDobjiytZQUg6I975ru31sj1NNsQRheIFlkPboxQbtMpAOQDMO7qZkgpmyTRlXY
+ lkXIM8ouYZ1tzxfhz4taVUVeURE1dvA290GuK529YUeO73PCqk4Y4ovFX2ir8dXkiuaeSFygC
+ lRUBj+ll/MKHdqTu7312ePQP5N0K+VJ17SlFus/eeYv0SFm+aWk5ascF7JNQeOxTH1sBps37F
+ KouTVDYf6DdzTpp9tojBjHvZDyCaYq99dZ9ThJdYQ3laatmDryVIfJo1LVIDilqY/xwQMFadh
+ hd+/x/OQhamD/RER6/Njn67bofjyrD3RDR2YXfUzX88PW06XH+pWzYlfBAJYrh2KN9w+1oIlr
+ dzsXA/vH9xir63fUl6D03S9zDDCmjFz+keBuByUI7N4PaFBNFON6NaoY1w8oVRcBZufB8XjIU
+ CvfPW7rWF3/x1mYyXfwKFpqNQXBUMzME1EKiDboEl6RYA/9SPdwp+sAdbFYSxr09WDGWe+yQZ
+ GLyQQMJvismh27jJp66EjTZNyyDNz57qxhKF/LvtKI1Mq59a017P9J7QBTL5s67aSVftey7X9
+ RXKF7nT4S0vEY87E0eLAenm9bUbzK9il2Ddz7pVIJPWQJAOtiaUM0zP/z4yEr+fP3e/4984j8
+ ymSxjLzHK6bZd0CqwDCrLWVl2bagwrLTfsiWk5N5KcEzrk8oNlammeEAChvgZ/RWkHJlRA4Ql
+ MbjZYg==
 
 >>>> It is expected that most callers should _ignore_ the errors
 >>>> return by debugfs_create_dir() in tool_setup_dbgfs()
@@ -69,72 +70,71 @@ UI-OutboundReport: notjunk:1;M01:P0:ZoOAbF4nRB4=;O4lR6DJUlGEtDBkO3XRFUROsNIi
 >>> The patch itself is correct for sure:
 >>> Reviewed-by: Serge Semin <fancer.lancer@gmail.com>
 >>
->
 >> How does such information fit to the Linux development requirement
 >> for imperative change descriptions?
->>
->> See also:
->> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree=
-/Documentation/process/submitting-patches.rst?h=3Dv6.5-rc1#n94
 >
-> Well, the patch author does follow that rule in the subject.
+> Markus, you already replied to this thread.
 
 Yes.
 
-Would any other subsystem specification variant or patch title become pref=
-erred?
+Some patch versions were similarly affected.
 
 
->                                                              Regarding t=
-he
-> patch log body it is impossible to use the "imperative mood" always in t=
-he
-> entire text.
+> Greg, HCH, Matthew Wilcox and Krzysztof Kozlowski have all asked you to =
+stop.
 
-This is usual.
+They responded in this way because of some communication factors
+(which might be unclear to some degree).
 
 
->              In this case the explanation is pretty much clear
+> Those are respected kernel maintainers.
 
-A terse hint is provided.
-
-I interpret the referenced Linux development documentation in the way
-that further imperative actions should be specified also in the =E2=80=9Cc=
-hangelog=E2=80=9D.
+Yes, of course.
 
 
->                                                                and doesn=
-'t
-> use the patterns like "This patch",
+> You should listen to them.
 
-Such a wording occurred also in a few other patches by Vivo developers.
+This happens.
 
-
->                                   , or any personal pronouns
-
-This detail seems to be fine (in just one sentence here).
+But several development discussions provide opportunities for different id=
+eas
+and corresponding advices.
 
 
->                                                              so IMO it's
-> fine to have the log as is.
+> If you see a bug, that's useful.
 
-I find the change description still improvable.
+The change acceptance can grow accordingly.
 
 
+>                                   But if you're just nitpicking the
+> commit message, that's not useful.
+
+I dare to present additional patch review concerns.
+
+It seems that further contributors occasionally dare also to support
+such open issues.
+
+
+>                                     We have explained this many times as
+> clearly as we know how.
+
+We came along recurring communication concerns
+(for which a consensus is not directly achieved so far).
+
+
+>> See also:
+>> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree=
+/Documentation/process/submitting-patches.rst?h=3Dv6.5-rc1#n94
+>>
+>>
 >> How do you think about to add the tag =E2=80=9CFixes=E2=80=9D because o=
 f the deletion
 >> of an inappropriate error detection?
 >
-> It doesn't fix any real bug. So there is no need in the tag.
+> No.  It's not a bug fix so a Fixes tag is innappropriate.
 
-Do you care if the previously used null pointer check was wrong
-(for the variable =E2=80=9Ctool_dbgfs_topdir=E2=80=9D)?
-https://elixir.bootlin.com/linux/v6.5-rc1/source/drivers/ntb/test/ntb_tool=
-.c#L1485
-
-Will the source code comment =E2=80=9CThis modules is useless without dbgf=
-s...=E2=80=9D
-be reconsidered any more?
+Would you eventually prefer any other solution for the discussed patch app=
+roach?
 
 Regards,
 Markus
