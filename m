@@ -1,69 +1,72 @@
-Received: from out-57.mta1.migadu.com (out-57.mta1.migadu.com [95.215.58.57])
+Received: from ale.deltatee.com (ale.deltatee.com [204.191.154.188])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9C36E17F7
-	for <ntb@lists.linux.dev>; Wed, 16 Aug 2023 08:33:20 +0000 (UTC)
-X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.dev; s=key1;
-	t=1692174798;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=uYnqDLoRJvJeZ1bXp0N97xRehL/FT+MxAZrkDB8mRIA=;
-	b=mrJMbOUz9XeM1gRa8KyZu8tojWMrDYayiJ0Zrc40Q+FD8IapOXuJZZO0ig8bD4PorOSppN
-	n1wqXcOLoeKpmWEMNgReox50bQ36T4JXWwAAL5kx3jQRksl/8o1ocu8oU6CqM9zLu1ENIw
-	Do+ifzql0P+Bp+e/PQSSAbiXf2rVqyo=
-From: Yajun Deng <yajun.deng@linux.dev>
-To: kurt.schwemmer@microsemi.com,
-	logang@deltatee.com,
-	jdmason@kudzu.us,
-	dave.jiang@intel.com,
-	allenbh@gmail.com
-Cc: linux-pci@vger.kernel.org,
-	ntb@lists.linux.dev,
-	linux-kernel@vger.kernel.org,
-	Yajun Deng <yajun.deng@linux.dev>
-Subject: [PATCH] ntb_hw_switchtec: Fix shift-out-of-bounds in switchtec_ntb_mw_set_trans
-Date: Wed, 16 Aug 2023 16:33:05 +0800
-Message-Id: <20230816083305.1426718-1-yajun.deng@linux.dev>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2D49C3D60
+	for <ntb@lists.linux.dev>; Wed, 16 Aug 2023 21:22:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=deltatee.com; s=20200525; h=Subject:In-Reply-To:From:References:Cc:To:
+	MIME-Version:Date:Message-ID:content-disposition;
+	bh=sw8EX7W/LW/Jwme06SDZwl0frTKXlowZ9/wflHHWXPQ=; b=Aqu7s3SdwVz/lN2At96Rmazjj1
+	8cWtZYYC1CTExE9ndC23BXoWFlx7H+PTgI7FHH7n6mxNqBAuSP5gjdehoXJQGpylYhWao/NPMdm21
+	YhDMGKTMlJsCZxdpvdB9ClM2D62zF4GkBPIek643q7j/SI5+H+oRlmgIhtX69GAURgtvGQg7XHu3H
+	jyPs7ZJZpfw6FqM/4EM9hEaGS+GbPs3ZuRnhvKUxa+P89mDtz9/p3uIpQlcaVo1ss+VSweWUDI081
+	a/+5sGu9eLe6lpOGHgslbYPvrSYXrabwF26KeVSLL8AKawtkaBvee4kwjzFTcW7u4sSifW3HRUk+f
+	MPJw7dig==;
+Received: from d75-158-34-12.abhsia.telus.net ([75.158.34.12] helo=[192.168.11.155])
+	by ale.deltatee.com with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+	(Exim 4.94.2)
+	(envelope-from <logang@deltatee.com>)
+	id 1qWNKz-00DCsd-UK; Wed, 16 Aug 2023 14:41:54 -0600
+Message-ID: <36368b25-0c13-107b-d1ba-77df7fac036d@deltatee.com>
+Date: Wed, 16 Aug 2023 14:41:51 -0600
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Migadu-Flow: FLOW_OUT
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.13.0
+Content-Language: en-US
+To: Yajun Deng <yajun.deng@linux.dev>, kurt.schwemmer@microsemi.com,
+ jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com
+Cc: linux-pci@vger.kernel.org, ntb@lists.linux.dev,
+ linux-kernel@vger.kernel.org
+References: <20230816083305.1426718-1-yajun.deng@linux.dev>
+From: Logan Gunthorpe <logang@deltatee.com>
+In-Reply-To: <20230816083305.1426718-1-yajun.deng@linux.dev>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-SA-Exim-Connect-IP: 75.158.34.12
+X-SA-Exim-Rcpt-To: yajun.deng@linux.dev, kurt.schwemmer@microsemi.com, jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com, linux-pci@vger.kernel.org, ntb@lists.linux.dev, linux-kernel@vger.kernel.org
+X-SA-Exim-Mail-From: logang@deltatee.com
+X-Spam-Checker-Version: SpamAssassin 3.4.6 (2021-04-09) on ale.deltatee.com
+X-Spam-Level: 
+X-Spam-Status: No, score=-10.1 required=5.0 tests=ALL_TRUSTED,BAYES_00,
+	NICE_REPLY_A autolearn=ham autolearn_force=no version=3.4.6
+Subject: Re: [PATCH] ntb_hw_switchtec: Fix shift-out-of-bounds in
+ switchtec_ntb_mw_set_trans
+X-SA-Exim-Version: 4.2.1 (built Sat, 13 Feb 2021 17:57:42 +0000)
+X-SA-Exim-Scanned: Yes (on ale.deltatee.com)
 
-There is a kernel API ntb_mw_clear_trans() would pass 0 to both addr and
-size. This would make xlate_pos negative.
 
-[   23.734156] switchtec switchtec0: MW 0: part 0 addr 0x0000000000000000 size 0x0000000000000000
-[   23.734158] ================================================================================
-[   23.734172] UBSAN: shift-out-of-bounds in drivers/ntb/hw/mscc/ntb_hw_switchtec.c:293:7
-[   23.734418] shift exponent -1 is negative
 
-Ensuring xlate_pos is a positive or zero before BIT.
+On 2023-08-16 02:33, Yajun Deng wrote:
+> There is a kernel API ntb_mw_clear_trans() would pass 0 to both addr and
+> size. This would make xlate_pos negative.
+> 
+> [   23.734156] switchtec switchtec0: MW 0: part 0 addr 0x0000000000000000 size 0x0000000000000000
+> [   23.734158] ================================================================================
+> [   23.734172] UBSAN: shift-out-of-bounds in drivers/ntb/hw/mscc/ntb_hw_switchtec.c:293:7
+> [   23.734418] shift exponent -1 is negative
+> 
+> Ensuring xlate_pos is a positive or zero before BIT.
+> 
+> Fixes: 1e2fd202f859 ("ntb_hw_switchtec: Check for alignment of the buffer in mw_set_trans()")
+> Signed-off-by: Yajun Deng <yajun.deng@linux.dev>
 
-Fixes: 1e2fd202f859 ("ntb_hw_switchtec: Check for alignment of the buffer in mw_set_trans()")
-Signed-off-by: Yajun Deng <yajun.deng@linux.dev>
----
- drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+That makes sense. Thanks!
 
-diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-index d6bbcc7b5b90..21468d4fef64 100644
---- a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-+++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-@@ -288,7 +288,7 @@ static int switchtec_ntb_mw_set_trans(struct ntb_dev *ntb, int pidx, int widx,
- 	if (size != 0 && xlate_pos < 12)
- 		return -EINVAL;
- 
--	if (!IS_ALIGNED(addr, BIT_ULL(xlate_pos))) {
-+	if (xlate_pos >= 0 && !IS_ALIGNED(addr, BIT_ULL(xlate_pos))) {
- 		/*
- 		 * In certain circumstances we can get a buffer that is
- 		 * not aligned to its size. (Most of the time
--- 
-2.25.1
+Reviewed-by: Logan Gunthorpe <logang@deltatee.com>
 
+Logan
