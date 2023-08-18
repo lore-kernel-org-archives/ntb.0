@@ -1,39 +1,38 @@
 Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.20])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E18B518C19
-	for <ntb@lists.linux.dev>; Fri, 18 Aug 2023 17:38:13 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1A26618C19
+	for <ntb@lists.linux.dev>; Fri, 18 Aug 2023 17:38:17 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1692380293; x=1723916293;
+  t=1692380297; x=1723916297;
   h=subject:from:to:cc:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=LhXYKwdOPaIBNJVeK6m285VnhnVXRjlO17CSeGvbmr0=;
-  b=MBjlUzifvD2CpSsOhMQei2LcM/oh/U6YTc8entXLtIO5tv3rknJeNd7b
-   tb/0vLD7Dmr/Iyn/xqkzERejlPbdfO5amPFdRwMBAxDgzOhIFMXswGqxS
-   vBtRAll8kGGZCCI/xv11cejK8lfaRN4lLtqMRVtZJBN/ggve0jJlwZsXk
-   wxGItHtdatGhw2KDSg9XFbe0wmB5n39JKyR5GhUhOIkPw7uxRastLrZcw
-   PcBuEhHnzgwZzTCdZDu3fYt8mV8WHhPbE7pehH+ttTz0ZOFkES2JCwdZc
-   Rq5JJVm86XTYR6qoUZ8Z2378yf6c1zo/vSBVeU9SSZRT8FwoFAxFcLpZd
-   A==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10806"; a="363317940"
+  bh=ZZwp9aaCym0lNR1/rHJVaCj+p8lkKvP/zFqPOg3X8Yw=;
+  b=Ybo1AV302mVFO9fSbtbWTm/Fk+4rcBoCHvmcQGJvpYPTmEfpEravmOA4
+   WFRId0INTznNyjzPVa99PH8b2ShiY6aXPufufhCqlNJxdT5yANZqLoUsS
+   N7vjTrfJZaaPIPcd/1q9RfHYh5soQC24zz/rG42brBb85pVhIqRoNrP/f
+   Fo50ulP+eI38YOp7ru5lOKxZi+di4uDTnIohlZiVdKCVTFSvhX6LY0jDn
+   Y/FTKMPsXW2LjVTpwnFWQUVJh+bCu0EcniAN67OnZA+OGgXkj0NAimUzk
+   hoKSWpS1lIa4ij1iHZi9cxR3lji9HOh361kx0+VQJnPoOeZ+17sD9ciK3
+   w==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10806"; a="363317951"
 X-IronPort-AV: E=Sophos;i="6.01,183,1684825200"; 
-   d="scan'208";a="363317940"
+   d="scan'208";a="363317951"
 Received: from orsmga001.jf.intel.com ([10.7.209.18])
-  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Aug 2023 10:38:13 -0700
+  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Aug 2023 10:38:16 -0700
 X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10806"; a="770202795"
+X-IronPort-AV: E=McAfee;i="6600,9927,10806"; a="770202824"
 X-IronPort-AV: E=Sophos;i="6.01,183,1684825200"; 
-   d="scan'208";a="770202795"
+   d="scan'208";a="770202824"
 Received: from djiang5-mobl3.amr.corp.intel.com (HELO [192.168.1.177]) ([10.212.12.146])
-  by orsmga001-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Aug 2023 10:38:05 -0700
-Subject: [PATCH 2/4] ntb: Drop packets when qp link is down
+  by orsmga001-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Aug 2023 10:38:16 -0700
+Subject: [PATCH 3/4] ntb: Fix calculation ntb_transport_tx_free_entry()
 From: Dave Jiang <dave.jiang@intel.com>
 To: jdmason@kudzu.us, allenbh@gmail.com
-Cc: Yuan Y Lu <yuan.y.lu@intel.com>, Yuan Y Lu <yuan.y.lu@intel.com>,
- ntb@lists.linux.dev
-Date: Fri, 18 Aug 2023 10:38:04 -0700
-Message-ID: <169238028453.3961033.10733818127894760322.stgit@djiang5-mobl3>
+Cc: renlonglong <ren.longlong@h3c.com>, ntb@lists.linux.dev
+Date: Fri, 18 Aug 2023 10:38:15 -0700
+Message-ID: <169238029582.3961033.7469539963376957559.stgit@djiang5-mobl3>
 In-Reply-To: <169238013566.3961033.4879718723608456809.stgit@djiang5-mobl3>
 References: <169238013566.3961033.4879718723608456809.stgit@djiang5-mobl3>
 User-Agent: StGit/1.5
@@ -46,37 +45,30 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 
-Currently when the transport receive packets after netdev has closed the
-transport returns error and triggers tx errors to be incremented and
-carrier to be stopped. There is no reason to return error if the device is
-already closed. Drop the packet and return 0.
+ntb_transport_tx_free_entry() never returns 0 with the current
+calculation. If head == tail, then it would return qp->tx_max_entry.
+Change compare to tail >= head and when they are equal, a 0 would be
+returned.
 
-Fixes: e26a5843f7f5 ("NTB: Split ntb_hw_intel and ntb_transport drivers")
-Reported-by: Yuan Y Lu <yuan.y.lu@intel.com>
-Tested-by: Yuan Y Lu <yuan.y.lu@intel.com>
+Fixes: e74bfeedad08 ("NTB: Add flow control to the ntb_netdev")
+Signed-off-by: renlonglong <ren.longlong@h3c.com>
 Signed-off-by: Dave Jiang <dave.jiang@intel.com>
 ---
- drivers/ntb/ntb_transport.c |    6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
+ drivers/ntb/ntb_transport.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index fbd3beb4c3e2..dd2aa3cf5c2e 100644
+index dd2aa3cf5c2e..ec6f706ff856 100644
 --- a/drivers/ntb/ntb_transport.c
 +++ b/drivers/ntb/ntb_transport.c
-@@ -2282,9 +2282,13 @@ int ntb_transport_tx_enqueue(struct ntb_transport_qp *qp, void *cb, void *data,
- 	struct ntb_queue_entry *entry;
- 	int rc;
+@@ -2428,7 +2428,7 @@ unsigned int ntb_transport_tx_free_entry(struct ntb_transport_qp *qp)
+ 	unsigned int head = qp->tx_index;
+ 	unsigned int tail = qp->remote_rx_info->entry;
  
--	if (!qp || !qp->link_is_up || !len)
-+	if (!qp || !len)
- 		return -EINVAL;
+-	return tail > head ? tail - head : qp->tx_max_entry + tail - head;
++	return tail >= head ? tail - head : qp->tx_max_entry + tail - head;
+ }
+ EXPORT_SYMBOL_GPL(ntb_transport_tx_free_entry);
  
-+	/* If the qp link is down already, just ignore. */
-+	if (!qp->link_is_up)
-+		return 0;
-+
- 	entry = ntb_list_rm(&qp->ntb_tx_free_q_lock, &qp->tx_free_q);
- 	if (!entry) {
- 		qp->tx_err_no_buf++;
 
 
