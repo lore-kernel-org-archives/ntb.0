@@ -1,121 +1,70 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from sender4-op-o15.zoho.com (sender4-op-o15.zoho.com [136.143.188.15])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7DFB417FA;
-	Fri, 25 Aug 2023 08:34:35 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 78E9DC433C8;
-	Fri, 25 Aug 2023 08:34:26 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1692952475;
-	bh=FCtRh2nslorTFJV46o2tCNp1DvRCnNrBaxwZsCG8tak=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=YjUNLrJPPiUJlG4lIcryD4r6V7wD8BPdtN0Ru12DQxleU4yaYHjuDkNDBDT/NXTYM
-	 foQVACKGxnBJNgqBD/Ws8daYb96WqoJeu+rQzFCM8cvktNR5z2N++6A+E3jjn+YTAk
-	 /ohehroDPeQdRm3mrlNgtQcwknIF7kyqIjYcOUr7lMgoGGxKSzTTPFWneav12hT9IU
-	 WqRprG4dHsJr+lkGpeZsLMMhIPlg+Nz8tV1LqqtAbqdnMFIsqCcX/tfh33E5TUCo2s
-	 hqXsqYxB2vEcU5tvL5c/JAWCneZdAKxec1eKgxrMUnLZGQ3TZeMpuEsuEMk6YWDGr0
-	 kP+8Ix7YnG26w==
-Date: Fri, 25 Aug 2023 14:04:22 +0530
-From: Manivannan Sadhasivam <mani@kernel.org>
-To: Frank Li <Frank.li@nxp.com>
-Cc: "tglx@linutronix.de" <tglx@linutronix.de>,
-	"lorenzo.pieralisi@arm.com" <lorenzo.pieralisi@arm.com>,
-	"manivannan.sadhasivam@linaro.org" <manivannan.sadhasivam@linaro.org>,
-	"bhelgaas@google.com" <bhelgaas@google.com>,
-	Aisheng Dong <aisheng.dong@nxp.com>,
-	"devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
-	"festevam@gmail.com" <festevam@gmail.com>,
-	"imx@lists.linux.dev" <imx@lists.linux.dev>,
-	"jdmason@kudzu.us" <jdmason@kudzu.us>,
-	"kernel@pengutronix.de" <kernel@pengutronix.de>,
-	"kishon@ti.com" <kishon@ti.com>,
-	"krzysztof.kozlowski+dt@linaro.org" <krzysztof.kozlowski+dt@linaro.org>,
-	"kw@linux.com" <kw@linux.com>,
-	"linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>,
-	dl-linux-imx <linux-imx@nxp.com>,
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-	"linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>,
-	"lpieralisi@kernel.org" <lpieralisi@kernel.org>,
-	"maz@kernel.org" <maz@kernel.org>,
-	"ntb@lists.linux.dev" <ntb@lists.linux.dev>,
-	Peng Fan <peng.fan@nxp.com>,
-	"robh+dt@kernel.org" <robh+dt@kernel.org>,
-	"s.hauer@pengutronix.de" <s.hauer@pengutronix.de>,
-	"shawnguo@kernel.org" <shawnguo@kernel.org>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D77FF1847;
+	Wed, 30 Aug 2023 07:37:04 +0000 (UTC)
+ARC-Seal: i=1; a=rsa-sha256; t=1693380989; cv=none; 
+	d=zohomail.com; s=zohoarc; 
+	b=Xh+6YYqVFs13LVGx52JUHtqyAYhbtT8LtZhcS/UPImSUToBxnKy388gOpj4B2oIM2dBHiPxKKIMO12FWT7wZoCkf2BFhB87Pjr7/3mhq+Yak2G4KoDYLaS36CAgzpVWQsbV8zeQl+FBEhHzhDfLlOiojeruBqV7T7V3u/c+BiZs=
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
+	t=1693380989; h=Content-Type:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
+	bh=jenJxNPD4sIUE9oxP6Q3NIl26GLGxyIRqGTHEYAup1E=; 
+	b=kAGY7pjuGVCOqff8MBzCUCUDmD+rv1Os3tJr3kzxv5KoCMNJYM9PtxZYSXTqLEmJkX3SbwgQnz7TCpMm6G82LJW6XoPvSXBHfAIi2su539vFVD65f1c11qxe4TKTxPcKkk/TcY+bvbZROGcBxzqBmwDnCrVcTPX/fAxrUF3p8+o=
+ARC-Authentication-Results: i=1; mx.zohomail.com;
+	dkim=pass  header.i=linux.beauty;
+	spf=pass  smtp.mailfrom=me@linux.beauty;
+	dmarc=pass header.from=<me@linux.beauty>
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1693380989;
+	s=zmail; d=linux.beauty; i=me@linux.beauty;
+	h=Date:Date:Message-ID:From:From:To:To:Subject:Subject:In-Reply-To:Cc:Cc:References:MIME-Version:Content-Type:Message-Id:Reply-To;
+	bh=jenJxNPD4sIUE9oxP6Q3NIl26GLGxyIRqGTHEYAup1E=;
+	b=mXnEp4LtfrSD1zWIqdrfehZXi5ir+35k+PpJBpxAdHZH56ArwR5xL694kUG2CgPx
+	IawhbSsjBXrPmdUxqHH8pcK7CxVBI1Ud+e93Ly+ugvVU8AYgnH+ieaXN/49rT7msiBM
+	YsU9rFL3RRMwQZSJUsKN/CpAOF0Sb4midiIvPTS0=
+Received: from lchen-ArchLinux.linux.beauty (180.169.129.130 [180.169.129.130]) by mx.zohomail.com
+	with SMTPS id 1693380987315851.5942332068321; Wed, 30 Aug 2023 00:36:27 -0700 (PDT)
+Date: Wed, 30 Aug 2023 15:36:05 +0800
+Message-ID: <877cpdvv6i.wl-me@linux.beauty>
+From: Li Chen <me@linux.beauty>
+To: Frank Li <Frank.Li@nxp.com>
 Subject: Re: [PATCH 0/3] Add RC-to-EP doorbell with platform MSI controller
-Message-ID: <20230825083422.GB6005@thinkpad>
+User-Agent: Wanderlust/2.15.9 (Almost Unreal) SEMI-EPG/1.14.7 (Harue)
+ FLIM-LB/1.14.9 (=?ISO-8859-4?Q?Goj=F2?=) APEL-LB/10.8 EasyPG/1.0.0
+ Emacs/28.2 (x86_64-pc-linux-gnu) MULE/6.0 (HANACHIRUSATO)
+In-Reply-To: <20230426203436.1277307-1-Frank.Li@nxp.com> (message from Frank Li on Wed, 26 Apr 2023 16:34:33 -0400)
+Cc: tglx@linutronix.de, aisheng.dong@nxp.com, bhelgaas@google.com,
+        devicetree@vger.kernel.org, festevam@gmail.com, frank.li@nxp.com,
+        imx@lists.linux.dev, jdmason@kudzu.us, kernel@pengutronix.de,
+        kishon@ti.com, krzysztof.kozlowski+dt@linaro.org, kw@linux.com,
+        linux-arm-kernel@lists.infradead.org, linux-imx@nxp.com,
+        linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org,
+        lorenzo.pieralisi@arm.com, lpieralisi@kernel.org,
+        manivannan.sadhasivam@linaro.org, maz@kernel.org,
+        ntb@lists.linux.dev, peng.fan@nxp.com, robh+dt@kernel.org,
+        s.hauer@pengutronix.de, shawnguo@kernel.org
 References: <20230426203436.1277307-1-Frank.Li@nxp.com>
- <AM6PR04MB483849BE4788EE893306F38E88759@AM6PR04MB4838.eurprd04.prod.outlook.com>
- <ZIdFFV5TdAy//Aat@lizhi-Precision-Tower-5810>
- <ZLVK7xX7kPjNaah+@lizhi-Precision-Tower-5810>
- <ZOepCkqSnUmTdGHX@lizhi-Precision-Tower-5810>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <ZOepCkqSnUmTdGHX@lizhi-Precision-Tower-5810>
+MIME-Version: 1.0 (generated by SEMI-EPG 1.14.7 - "Harue")
+Content-Type: text/plain; charset=US-ASCII
+X-ZohoMailClient: External
 
-On Thu, Aug 24, 2023 at 03:01:30PM -0400, Frank Li wrote:
-> On Mon, Jul 17, 2023 at 10:06:39AM -0400, Frank Li wrote:
-> > On Mon, Jun 12, 2023 at 12:17:25PM -0400, Frank Li wrote:
-> > > On Fri, May 12, 2023 at 02:45:12PM +0000, Frank Li wrote:
-> > > > > 
-> > > > > This patches add new API to pci-epf-core, so any EP driver can use it.
-> > > > > 
-> > > > > The key point is comments from Thomas Gleixner, who suggest use new
-> > > > > PCI/IMS. But arm platform change still not be merged yet.
-> > > > > 
-> > > > > git://git.kernel.org/pub/scm/linux/kernel/git/tglx/devel.git devmsi-v2-arm
-> > > > > 
-> > > > > So I still use existed method implement RC to EP doorbell.
-> > > > > 
-> > > > > If Thomas Gleixner want to continue work on devmsi-v2-arm, I can help test
-> > > > > and update this patch.
-> > > > > 
-> > > > 
-> > > > Ping?
-> > > 
-> > > Ping? 
-> > 
-> > ping? 
-> 
-> @Mani
->      Do you have chance to review these patches? It provide a common
-> method with GIC ITS to implement notification from RC to EP.
-> 
 
-Sorry for the delay. I was wating for a review from Thomas. But since this
-series hasn't caught his attention, I'll provide my review next week.
+Hi Frank,
 
-- Mani
+Frank Li <Frank.Li@nxp.com> writes:
 
-> Frank
-> 
-> > 
-> > > 
-> > > > 
-> > > > > Frank Li (3):
-> > > > >   PCI: endpoint: Add RC-to-EP doorbell support using platform MSI
-> > > > >     controller
-> > > > >   misc: pci_endpoint_test: Add doorbell test case
-> > > > >   tools: PCI: Add 'B' option for test doorbell
-> > > > > 
-> > > > >  drivers/misc/pci_endpoint_test.c    |  41 +++++++++++
-> > > > >  drivers/pci/endpoint/pci-epf-core.c | 109
-> > > > > ++++++++++++++++++++++++++++
-> > > > >  include/linux/pci-epf.h             |  16 ++++
-> > > > >  include/uapi/linux/pcitest.h        |   1 +
-> > > > >  tools/pci/pcitest.c                 |  16 +++-
-> > > > >  5 files changed, 182 insertions(+), 1 deletion(-)
-> > > > > 
-> > > > > --
-> > > > > 2.34.1
-> > > > 
+> drivers/misc/pci_endpoint_test.c | 41 +++++++++++
+> drivers/pci/endpoint/pci-epf-core.c | 109 ++++++++++++++++++++++++++++
+> include/linux/pci-epf.h | 16 ++++
+> include/uapi/linux/pcitest.h | 1 +
+> tools/pci/pcitest.c | 16 +++-
+> 5 files changed, 182 insertions(+), 1 deletion(-)
 
--- 
-மணிவண்ணன் சதாசிவம்
+It seems that you forgot to add changes to drivers/pci/endpoint/functions/pci-epf-test.c.
+
+Regards,
+Li
