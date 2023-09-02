@@ -1,171 +1,318 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.93])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f173.google.com (mail-pl1-f173.google.com [209.85.214.173])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1BCDF125AA
-	for <ntb@lists.linux.dev>; Thu, 31 Aug 2023 15:01:15 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1693494076; x=1725030076;
-  h=message-id:date:subject:to:references:from:in-reply-to:
-   content-transfer-encoding:mime-version;
-  bh=6Huz7w/uUxobFzpyfokDgZ4RMYy+XFh4GqjWX4Ovs44=;
-  b=J32DkeWS6V/u8+kAKm3y3t7In/TMXlfHdL5GWxOsQTdF500angYYWeCv
-   0CZ9DAcIO6nw668skbovjR5GYJHbIbmHC2l2rwl6/ZzZFqc4A4+S0SD1z
-   uR4D9CWoy5jBVGbhKca80/ihJ6NLeKCDmkeYncwvYaEoFsft+JvnOqxSI
-   3yFyD/SPKw5Yc8V36Z6YWuJ/9t1FHgm3GFp2UknT5SNd9E+3insy2Mgwh
-   2Ln9dLZNvVV5MS2V9eznfbqiPqgd9RV4pK+VaFA7ywN9S4SLv7QzJB4TW
-   a7RyPeY6a41wCMnfPOyAXsEWab8VPD74KxF8zR6l1SNdwerJ22ZXK7qbM
-   w==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10819"; a="373372099"
-X-IronPort-AV: E=Sophos;i="6.02,217,1688454000"; 
-   d="scan'208";a="373372099"
-Received: from fmsmga003.fm.intel.com ([10.253.24.29])
-  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 31 Aug 2023 08:00:22 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10819"; a="829727501"
-X-IronPort-AV: E=Sophos;i="6.02,217,1688454000"; 
-   d="scan'208";a="829727501"
-Received: from fmsmsx601.amr.corp.intel.com ([10.18.126.81])
-  by FMSMGA003.fm.intel.com with ESMTP/TLS/AES256-GCM-SHA384; 31 Aug 2023 08:00:21 -0700
-Received: from fmsmsx610.amr.corp.intel.com (10.18.126.90) by
- fmsmsx601.amr.corp.intel.com (10.18.126.81) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.27; Thu, 31 Aug 2023 08:00:20 -0700
-Received: from fmsedg602.ED.cps.intel.com (10.1.192.136) by
- fmsmsx610.amr.corp.intel.com (10.18.126.90) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.27 via Frontend Transport; Thu, 31 Aug 2023 08:00:20 -0700
-Received: from NAM10-MW2-obe.outbound.protection.outlook.com (104.47.55.104)
- by edgegateway.intel.com (192.55.55.71) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.1.2507.27; Thu, 31 Aug 2023 08:00:20 -0700
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=HLpGH0WJHb8E6Z4vP/QYKOK2zgjVVY9TsS6Maep+3xJcNcx/vZta9PaRnT2IuSY21D5yWsydKEcgD+9ALXvHJFp/MO0vN4JeCRiuM8NvpEVlZd9ngRg8E2/xrZAzgeZXtFpFXbOP+nCmC37T3FgFsoIex3tPNLFhOLY/BeOXMXTHOoxl21RVBHpNvQrx+OxMtoVe7V5KYxchKIvWaGvSFAGQcY1PVuNKOBc/2NdjxamgqNq72zBHAPe+NdaXnS2BGUi5uK00x04d8/WBLdaKgdoIP9muqMokoheHYjMLRq+jbdVlG1LOp7XtIC5mVLtDe+SyQfEZCIY7dCd0EgGUyQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=4D6qhzey/ZJME3LKsNSeY1bvGBH1H1l5ia0JSPy9Gb4=;
- b=kpZ/OM/eOyBsPC6zMJht8YEM3HYrs21iG3PFn+xfxMflDnvYxv/7ZIpwaSbmGTHzfD7RuOmIEYzmVa9xhDN8rUYMkrsV3vRlyxEYHXu+VWYLCuOoCqje6Hgekpcr0pY8+RWIqRnB7QcbOEgSRsMpRMOYM82G9Sdi+RLTHbeu4yu8TMLQLX6umzgWaU0IOMo8W+0mDgfpe1zCN724SEaoYcVFJBakYrIz2QyLw30EM2vHFSUm9+ohEPIGaMIISW0ewQOpovvvB9HUFzoGuJQ01OH9M2JsOEolvLhArunYQGuejKpAJR6MTcuNBbQ3BhrNpfCHF5iIHuOrzV4P0GMmrQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
- dkim=pass header.d=intel.com; arc=none
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=intel.com;
-Received: from PH7PR11MB5984.namprd11.prod.outlook.com (2603:10b6:510:1e3::15)
- by DM4PR11MB6238.namprd11.prod.outlook.com (2603:10b6:8:a8::13) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6745.20; Thu, 31 Aug
- 2023 15:00:18 +0000
-Received: from PH7PR11MB5984.namprd11.prod.outlook.com
- ([fe80::9563:9642:bbde:293f]) by PH7PR11MB5984.namprd11.prod.outlook.com
- ([fe80::9563:9642:bbde:293f%7]) with mapi id 15.20.6745.022; Thu, 31 Aug 2023
- 15:00:18 +0000
-Message-ID: <9b3bdb3d-f1bf-4278-479c-20f78493ce7c@intel.com>
-Date: Thu, 31 Aug 2023 08:00:14 -0700
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Betterbird/102.13.0
-Subject: Re: [PATCH] ntb: intel: Fix the NULL vs IS_ERR() bug for
- debugfs_create_dir()
-To: Jinjie Ruan <ruanjinjie@huawei.com>, <ntb@lists.linux.dev>, Jon Mason
-	<jdmason@kudzu.us>, Allen Hubbe <allenbh@gmail.com>
-References: <20230831123927.3137364-1-ruanjinjie@huawei.com>
-Content-Language: en-US
-From: Dave Jiang <dave.jiang@intel.com>
-In-Reply-To: <20230831123927.3137364-1-ruanjinjie@huawei.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: SJ0PR05CA0172.namprd05.prod.outlook.com
- (2603:10b6:a03:339::27) To PH7PR11MB5984.namprd11.prod.outlook.com
- (2603:10b6:510:1e3::15)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D37A15C1
+	for <ntb@lists.linux.dev>; Sat,  2 Sep 2023 04:52:26 +0000 (UTC)
+Received: by mail-pl1-f173.google.com with SMTP id d9443c01a7336-1c0bae4da38so4111145ad.0
+        for <ntb@lists.linux.dev>; Fri, 01 Sep 2023 21:52:26 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1693630346; x=1694235146; darn=lists.linux.dev;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=ijD/QXgkfcmQQpjgZVWk02lSeb5Kah86yA9TYX6zx1I=;
+        b=nVQ6huGlXRYUPlgv10ukoWEQIeXlNwUjGnvdJHgxN9DuASf8LmIcCGCtGKoXrDem/i
+         LiYX7Jev8sVS7mV+7HHtiQzx/cQcj3QnaqFU2Mu4ThP0xKfpe5E6NCDTiYCB/1pIjnGw
+         5aPS8OziUUdBbG87G53R6y0g+aiT7EN71MNJpBf4k4VQ3tP2L8KFD7SXkV3EJiwR7HX7
+         2ClL2QC4ebiEu4o+UzVgU0Y9uKzsWy347D8j/TRkxqB8kqKLaFAPy6xzCON9mLN5QuPN
+         wH7OpAkiNCHP+eyEFiKcSgoCCEiaGtT6PGE2mWI6NiMJZjCI+aEmCKtu0AXt80Cb6+Cu
+         Q7Aw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1693630346; x=1694235146;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=ijD/QXgkfcmQQpjgZVWk02lSeb5Kah86yA9TYX6zx1I=;
+        b=bZmJVkVfXvfRwwlE0qq6oIWhhs6KN5kQa5qObXnEToBOUUemWaggE3y247HerabOws
+         je5Cblc3xsIbXmPS/CfTvUCHvmdumo1oQddnHdBDkhSgfTsjtLWvnuCRMdS1bmwY5rRA
+         monQ+YkEMnPnOLtbT/TzDj0/SWHPzKK3DV6IGLJX2b/JzVMRbQlA2MN+LAeuIXJCNLAV
+         GrHi4MLsa+btNj2kNnCW/ehMSy8AzmqVHxuBYetLfaPDbcBjwj+ZILOGOvLF2bCDTRdU
+         CNeRnJ2FTiyLlFWqBp8tquId71xlsYgPsTWq9xr7nL8EVcS5Lo+1FACezl6vdbykixII
+         LEuw==
+X-Gm-Message-State: AOJu0YxkAZ5UvQtPRiykIQb8705M4h1oPtna26IlZGwbUcOoDIajUGSJ
+	F/oqbS8nbSYQtqWu2yDZEQw3
+X-Google-Smtp-Source: AGHT+IHn+lpzw9uFuVsUrK4hFksx30nUuJVmCY/9azhZGZuuOYfsE09NMsfHfbXcr11fLWIN9x+S/g==
+X-Received: by 2002:a17:902:ce83:b0:1bc:2fe1:1821 with SMTP id f3-20020a170902ce8300b001bc2fe11821mr6157887plg.17.1693630345688;
+        Fri, 01 Sep 2023 21:52:25 -0700 (PDT)
+Received: from thinkpad ([117.217.187.8])
+        by smtp.gmail.com with ESMTPSA id u10-20020a170902e80a00b001aadd0d7364sm3794308plg.83.2023.09.01.21.52.18
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 01 Sep 2023 21:52:24 -0700 (PDT)
+Date: Sat, 2 Sep 2023 10:22:14 +0530
+From: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+To: Frank Li <Frank.Li@nxp.com>
+Cc: tglx@linutronix.de, aisheng.dong@nxp.com, bhelgaas@google.com,
+	devicetree@vger.kernel.org, festevam@gmail.com, imx@lists.linux.dev,
+	jdmason@kudzu.us, kernel@pengutronix.de, kishon@ti.com,
+	krzysztof.kozlowski+dt@linaro.org, kw@linux.com,
+	linux-arm-kernel@lists.infradead.org, linux-imx@nxp.com,
+	linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org,
+	lorenzo.pieralisi@arm.com, lpieralisi@kernel.org, maz@kernel.org,
+	ntb@lists.linux.dev, peng.fan@nxp.com, robh+dt@kernel.org,
+	s.hauer@pengutronix.de, shawnguo@kernel.org
+Subject: Re: [PATCH 1/3] PCI: endpoint: Add RC-to-EP doorbell support using
+ platform MSI controller
+Message-ID: <20230902045214.GA2913@thinkpad>
+References: <20230426203436.1277307-1-Frank.Li@nxp.com>
+ <20230426203436.1277307-2-Frank.Li@nxp.com>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: PH7PR11MB5984:EE_|DM4PR11MB6238:EE_
-X-MS-Office365-Filtering-Correlation-Id: cc02d265-bf89-475c-c0e5-08dbaa32fd5a
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: fxRfQeFn6eZQh2HxwJidH+Q4BgHm1BpduC+XFVL+rNqjfHLjsZ6aN2ktdZ90pcYiAGUmtFwaFfDEouysXJjR+lK+i/1I3yQ62BuUvsfscPI8pY+dmsffVwy0/BPVKFMjevq+VEsPQWhsqad3rTWzNeRm8GEyCkF30S/zL3RJ0V0wIPuhZ5CfQpiDpiN8XpuQH04/DDnjTgvenT0RoWnKyw26dfQF/KYr8Q7h+8TuPIYVq/X+cjkSpUrdxZaauRCYu+YL9GLqv0QZ1CRTyWvLCmknvJB7++Vdo9VNkeZ024pYue1xWz7C5P5SlCTh+7ENAv5lkKX5ltPvO2GRIBMOaRjzM0Zb3aKKI4Y5D+0BtTN7rsZDyUHYJ96RNUK9Thrhp4ZXwa3iJ2RGz7nzjP34QLBz3uT9YCOmZtauE6sAaxRIxHBtvpYX7XgIxwc1pxysmy3H6/4Sydw6E6ehlIkKVIKcr2QDTiSMkD3n/a5kdThzgHyFO04KaCZmQ7e7gPQCvAbiDmwTFrIEuOV/us6Fq17Nauuih8NncN0oRclKAxtDsRD9SOS7+9kqJxDcp14aYfnNYTRlIYGcb/1+iXKFNfqMrTMArANOPhRoCA3gwqLcDrAKFNnyUR0BTd660U7rNJjNwSU4Kko3h/F49Buerg==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH7PR11MB5984.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(39860400002)(366004)(136003)(376002)(396003)(346002)(186009)(1800799009)(451199024)(83380400001)(66946007)(316002)(82960400001)(66476007)(478600001)(38100700002)(66556008)(2906002)(110136005)(4744005)(5660300002)(31696002)(8676002)(8936002)(53546011)(6506007)(86362001)(44832011)(6512007)(41300700001)(6666004)(6486002)(26005)(2616005)(36756003)(31686004)(45980500001)(43740500002);DIR:OUT;SFP:1102;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?UFpUZXh5S2JWWkJKRTJQcUxaemV5eDRHUDdTM2Fic2c1SllMelBDRmprL3FG?=
- =?utf-8?B?TWFFNk1YdE1rY0l3SENTMmRvMnFMck9wc29iMngzelIzMzJ4dm5IVnVPYzlS?=
- =?utf-8?B?WXlVdmo5VEF0L3M5ekJpQko1YVdwc1ZNQmlmZEdDcUE4OVlSSC9WTFFaUVVF?=
- =?utf-8?B?Z2FQWTV2OUo4NWp3ZzdjTHdhQzQ2ck5iQXN2UFBMNFFzOHVPUUpKcFJSV2x0?=
- =?utf-8?B?WWViNk1ydmNGL0hQbThwZDdlYkhtRjRjTThranV4WGlhRm1JRm1NOW1WZHJa?=
- =?utf-8?B?SkNvdS93aEp4QWVsbStCMFJ6d3JqcEhQTkJCbFRRZTRLcWFjcUw2OURVS2Fn?=
- =?utf-8?B?eXJCblVSYmkzdDcxZWFpbjdHMGRDdHVnbEJEd3ZsSlNpbDVIeUxibGF6VG94?=
- =?utf-8?B?N3lRWDlsNG5BNjZkaFpvVVVCUk96SHR0eGN0cWV5TndDQnAyeFFndWhvN2pz?=
- =?utf-8?B?ZGw3WUdzRWEvOWp6YlRlQ20xUURCalRpUFJUS2ZKSnppTkE2emVjV3EyWmdM?=
- =?utf-8?B?V0pQMjZORFMxbWlXL2FlM2NTaU1MckNMVkdQMWIvcmJjQ2c0dVFvcUtmQ1BS?=
- =?utf-8?B?RWhHeTF3NXRobUJuZnBiVm1VNjdxLzVkVmFCN2lwY1ZVaDY2YjU3QlBLUTRS?=
- =?utf-8?B?Q1BFTGgxS3k4Q0hSVmJZc0JHeVUydzdhQXR0NjJ5RUJOa0hQd2U4Uk9rUyt0?=
- =?utf-8?B?ZUxkTllTcTQ1OENPbTZMZEFiVFlQdEtGTEdjeURBRzk2dXZZTS9CUzBUY1pz?=
- =?utf-8?B?c05GVms0dnpBVzZkeC9CdXAycFJ0UFI0Q3hRdTNWbEVETHVuSWMxMGRNd1gy?=
- =?utf-8?B?TFBEWFd6dXJxWHJibjRnWjFlSko3a28veWRnN2RUME1DeVBqRlFLTFJRSzRu?=
- =?utf-8?B?RFgyZWw2ek8rVkpzTFJhTm9HRDFUZjhFZUJCM0dvY3FuV1dibm9pT1VVdC90?=
- =?utf-8?B?cVVVTjhkZjAreE8xTkpqZm5ONlp3MEhFTzRnRk5oL0ltVGVnSE03NTdEbmJM?=
- =?utf-8?B?bVVPdDZmUXlZbmo2SGRTWk84TDNyaFk0VXQ0RXQyY0FmZU5ra01OSTV1L2Rr?=
- =?utf-8?B?WXA3WTlhNWw2WW5VK0ZQTFlCNXlzcSt5b2xsZTNCWUNUU0xnbytLaVNzckFs?=
- =?utf-8?B?aDRlWHJNTnVqczlNS21LSGhhUXF4VHVvNExaQzVueTBLWGlMY3dhc2VRR09E?=
- =?utf-8?B?RWQyRnl1dDJaR2hLRkxlQkcyT2oxRVFzeW4yOEUrRGJvVVUrdUFraytxeXJt?=
- =?utf-8?B?MTdKNkJwUHl6M0xUSFVHbUI1bUFHMDlMbG1ZQi9TQ2hMcjJ0a1B4Tmw1a1Bs?=
- =?utf-8?B?RDlsTldzYlM3UGFPelpWNjUzeW9jS0NYNGVOcE9rNWJhQy93RnNHSGZFeFRT?=
- =?utf-8?B?NkhuTENUblJOU3NWbUliQWt2bDFwTllyYWpqVTJKaWl1VW10cC9ZVmw1a08y?=
- =?utf-8?B?OFNJNEtROHk2N0oyYlRpRzVJRW9Cd3IwVlNmN3FMaGVidlpWc0o3VUZhelc5?=
- =?utf-8?B?SFI5VUgzTUNteW5uQ003eUp3Q3g5VUVpZVdyR202bE5tbTRsVFFZNW9pUlhX?=
- =?utf-8?B?TnBReVpUanZOMVRaL2NsbCtNMEZyY1FCdi9oSitEd3YwZU1TQ01jQWprTURi?=
- =?utf-8?B?OHR1QkdJdDFNZGJmZXo4a00wZWpWMDVHWU1ldmFsM3JTTnpoemo1U0JsSDli?=
- =?utf-8?B?TzJ3NkM0R3VSdkNIQVBvU3RTb3hGSnVkK2F4OVZSVUFZdWIyTk5pVkR2a0Nn?=
- =?utf-8?B?bmg2QTBnak1GS2VCSlBJTnFKZWdzZWN2UEFqWm9aNlhTNUlETUpsWlR0dk03?=
- =?utf-8?B?Vm1acWVOMUdNdVFCdEM1ZU9kZjlxTEpWQVVnSXd6cjVoWlE4dC9zS09GclRm?=
- =?utf-8?B?UzVmbUZrZ1p5bzRUVmlDdXZ3cFVpdWpBaDM3aGhYeUlyOGpJdWJHNHVudVBV?=
- =?utf-8?B?NnRqRVowVnFlUzNKcHd1TU9icnVya3pSQ1p3UkNZdzdlcWtFQ2h3UmpWTmFD?=
- =?utf-8?B?algyMU9FMGEwVVVGTkNHaVdVeU96bURIbWc5bDJFa2lUS0J4Q09pUUJ0QWxF?=
- =?utf-8?B?NnM1Qk9qTzdWN09PU1lodHhsUUdKZ0pFOGtpbyt4ODhBVzk3OS9VT05wbFBM?=
- =?utf-8?Q?Ere3BdyyCgX/cY0icWTXGheKa?=
-X-MS-Exchange-CrossTenant-Network-Message-Id: cc02d265-bf89-475c-c0e5-08dbaa32fd5a
-X-MS-Exchange-CrossTenant-AuthSource: PH7PR11MB5984.namprd11.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 31 Aug 2023 15:00:18.1538
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 46c98d88-e344-4ed4-8496-4ed7712e255d
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: PixKcghMy4AaGq7PoIvVoWlTJq3vlaNLTegmssONFlhtmEIBH0ArTfIlFjDUL+E3qRTxreS2gxnxlQOtxpC+zw==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM4PR11MB6238
-X-OriginatorOrg: intel.com
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20230426203436.1277307-2-Frank.Li@nxp.com>
 
-
-
-On 8/31/23 05:39, Jinjie Ruan wrote:
-> The debugfs_create_dir() function returns error pointers.
-> It never returns NULL. So use IS_ERR() to check it.
+On Wed, Apr 26, 2023 at 04:34:34PM -0400, Frank Li wrote:
+> This commit introduces a common method for sending messages from the Root Complex
+> (RC) to the Endpoint (EP) by utilizing the platform MSI interrupt controller,
+> such as ARM GIC, as an EP doorbell. Maps the memory assigned for the BAR region
+> by the PCI host to the message address of the platform MSI interrupt controller
+> in the PCI EP. As a result, when the PCI RC writes to the BAR region, it triggers
+> an IRQ at the EP. This implementation serves as a common method for all endpoint
+> function drivers.
 > 
-> Fixes: e26a5843f7f5 ("NTB: Split ntb_hw_intel and ntb_transport drivers")
-> Signed-off-by: Jinjie Ruan <ruanjinjie@huawei.com>
+> However, it currently supports only one EP physical function due to limitations
+> in ARM MSI/IMS readiness.
+> 
 
-Thank you!
+I've provided generic comments below, but I will do one more thorough review
+after seeing epf-test driver patch.
 
-Reviewed-by: Dave Jiang <dave.jiang@intel.com>
+> Signed-off-by: Frank Li <Frank.Li@nxp.com>
 > ---
->   drivers/ntb/hw/intel/ntb_hw_gen1.c | 2 +-
->   1 file changed, 1 insertion(+), 1 deletion(-)
+>  drivers/pci/endpoint/pci-epf-core.c | 109 ++++++++++++++++++++++++++++
+>  include/linux/pci-epf.h             |  16 ++++
+>  2 files changed, 125 insertions(+)
 > 
-> diff --git a/drivers/ntb/hw/intel/ntb_hw_gen1.c b/drivers/ntb/hw/intel/ntb_hw_gen1.c
-> index 9ab836d0d4f1..079b8cd79785 100644
-> --- a/drivers/ntb/hw/intel/ntb_hw_gen1.c
-> +++ b/drivers/ntb/hw/intel/ntb_hw_gen1.c
-> @@ -778,7 +778,7 @@ static void ndev_init_debugfs(struct intel_ntb_dev *ndev)
->   		ndev->debugfs_dir =
->   			debugfs_create_dir(pci_name(ndev->ntb.pdev),
->   					   debugfs_dir);
-> -		if (!ndev->debugfs_dir)
-> +		if (IS_ERR(ndev->debugfs_dir))
->   			ndev->debugfs_info = NULL;
->   		else
->   			ndev->debugfs_info =
+> diff --git a/drivers/pci/endpoint/pci-epf-core.c b/drivers/pci/endpoint/pci-epf-core.c
+> index 355a6f56fcea..94ac82bf84c5 100644
+> --- a/drivers/pci/endpoint/pci-epf-core.c
+> +++ b/drivers/pci/endpoint/pci-epf-core.c
+> @@ -6,10 +6,12 @@
+>   * Author: Kishon Vijay Abraham I <kishon@ti.com>
+>   */
+>  
+> +#include <linux/irqreturn.h>
+
+Why is this needed?
+
+>  #include <linux/device.h>
+>  #include <linux/dma-mapping.h>
+>  #include <linux/slab.h>
+>  #include <linux/module.h>
+> +#include <linux/msi.h>
+>  
+>  #include <linux/pci-epc.h>
+>  #include <linux/pci-epf.h>
+> @@ -300,6 +302,113 @@ void *pci_epf_alloc_space(struct pci_epf *epf, size_t size, enum pci_barno bar,
+>  }
+>  EXPORT_SYMBOL_GPL(pci_epf_alloc_space);
+>  
+> +static enum irqreturn pci_epf_interrupt_handler(int irq, void *data)
+
+static irqreturn_t
+
+s/pci_epf_interrupt_handler/pci_epf_doorbell_handler
+
+> +{
+> +	struct pci_epf *epf = data;
+> +
+> +	if (epf->event_ops && epf->event_ops->doorbell)
+> +		epf->event_ops->doorbell(epf, irq - epf->virq_base);
+> +
+> +	return IRQ_HANDLED;
+> +}
+> +
+> +static void pci_epf_write_msi_msg(struct msi_desc *desc, struct msi_msg *msg)
+> +{
+> +	struct pci_epc *epc = container_of(desc->dev, struct pci_epc, dev);
+> +	struct pci_epf *epf;
+> +
+> +	/* Todo: Need check correct epf if multi epf supported */
+> +	list_for_each_entry(epf, &epc->pci_epf, list) {
+> +		if (epf->msg && desc->msi_index < epf->num_msgs)
+> +			epf->msg[desc->msi_index] = *msg;
+> +	}
+> +}
+> +
+> +int pci_epf_alloc_doorbell(struct pci_epf *epf, u16 num_msgs)
+> +{
+> +	struct irq_domain *domain;
+> +	struct pci_epc *epc;
+> +	struct device *dev;
+> +	int virq;
+> +	int ret;
+> +	int i;
+> +
+> +	epc = epf->epc;
+> +	dev = &epc->dev;
+
+"epc_dev" to make it explicit
+
+> +
+> +	/*
+> +	 * Current only support 1 function.
+
+What does this mean exactly? Even a single EPC can support multiple EPFs
+
+> +	 * PCI IMS(interrupt message store) ARM support have not been
+> +	 * ready yet.
+
+No need to mention platform irq controller name.
+
+> +	 */
+> +	if (epc->function_num_map != 1)
+
+Why can't you use, epf->func_no?
+
+> +		return -EOPNOTSUPP;
+> +
+> +	domain = dev_get_msi_domain(dev->parent);
+> +	if (!domain)
+> +		return -EOPNTSUPP;
+
+Newline
+
+> +	dev_set_msi_domain(dev, domain);
+> +
+> +	/* use parent of_node to get device id information */
+> +	dev->of_node = dev->parent->of_node;
+> +
+
+Why do you need of_node assignment inside EPF core?
+
+> +	epf->msg = kcalloc(num_msgs, sizeof(struct msi_msg), GFP_KERNEL);
+> +	if (!epf->msg)
+> +		return -ENOMEM;
+> +
+> +	epf->num_msgs = num_msgs;
+> +
+
+Move this to the start of the function, after checks.
+
+> +	ret = platform_msi_domain_alloc_irqs(dev, num_msgs, pci_epf_write_msi_msg);
+> +	if (ret) {
+> +		dev_err(dev, "Can't allocate MSI from system MSI controller\n");
+
+"Failed to allocate MSI"
+
+> +		goto err_mem;
+
+err_free_mem
+
+> +	}
+> +
+> +	for (i = 0; i < num_msgs; i++) {
+> +		virq = msi_get_virq(dev, i);
+> +		if (i == 0)
+> +			epf->virq_base = virq;
+> +
+> +		ret = request_irq(virq, pci_epf_interrupt_handler, 0,
+> +				  "pci-epf-doorbell", epf);
+
+IRQ name should have an index, otherwise all of them will have the same name.
+
+> +
+> +		if (ret) {
+> +			dev_err(dev, "Failure request doorbell IRQ\n");
+
+"Failed to request doorbell"
+
+> +			goto err_irq;
+
+err_free_irq
+
+> +		}
+> +	}
+> +
+> +	epf->num_msgs = num_msgs;
+
+Newline
+
+> +	return ret;
+> +
+> +err_irq:
+> +	platform_msi_domain_free_irqs(dev);
+> +err_mem:
+> +	kfree(epf->msg);
+> +	epf->msg = NULL;
+> +	epf->num_msgs = 0;
+> +
+> +	return ret;
+> +}
+> +EXPORT_SYMBOL_GPL(pci_epf_alloc_doorbell);
+> +
+> +void pci_epf_free_doorbell(struct pci_epf *epf)
+> +{
+> +	struct pci_epc *epc;
+> +	int i;
+> +
+> +	epc = epf->epc;
+> +
+> +	for (i = 0; i < epf->num_msgs; i++)
+> +		free_irq(epf->virq_base + i, epf);
+> +
+> +	platform_msi_domain_free_irqs(&epc->dev);
+> +	kfree(epf->msg);
+> +	epf->msg = NULL;
+> +	epf->num_msgs = 0;
+> +}
+> +EXPORT_SYMBOL_GPL(pci_epf_free_doorbell);
+> +
+>  static void pci_epf_remove_cfs(struct pci_epf_driver *driver)
+>  {
+>  	struct config_group *group, *tmp;
+> diff --git a/include/linux/pci-epf.h b/include/linux/pci-epf.h
+> index b8441db2fa52..e187e3ee48d2 100644
+> --- a/include/linux/pci-epf.h
+> +++ b/include/linux/pci-epf.h
+> @@ -75,6 +75,7 @@ struct pci_epf_ops {
+>  struct pci_epc_event_ops {
+>  	int (*core_init)(struct pci_epf *epf);
+>  	int (*link_up)(struct pci_epf *epf);
+> +	int (*doorbell)(struct pci_epf *epf, int index);
+>  };
+>  
+>  /**
+> @@ -173,6 +174,9 @@ struct pci_epf {
+>  	unsigned long		vfunction_num_map;
+>  	struct list_head	pci_vepf;
+>  	const struct pci_epc_event_ops *event_ops;
+> +	struct msi_msg *msg;
+> +	u16 num_msgs;
+> +	int virq_base;
+>  };
+>  
+>  /**
+> @@ -216,4 +220,16 @@ int pci_epf_bind(struct pci_epf *epf);
+>  void pci_epf_unbind(struct pci_epf *epf);
+>  int pci_epf_add_vepf(struct pci_epf *epf_pf, struct pci_epf *epf_vf);
+>  void pci_epf_remove_vepf(struct pci_epf *epf_pf, struct pci_epf *epf_vf);
+> +int pci_epf_alloc_doorbell(struct pci_epf *epf, u16 nums);
+> +void pci_epf_free_doorbell(struct pci_epf *epf);
+> +
+> +static inline struct msi_msg *epf_get_msg(struct pci_epf *epf)
+> +{
+> +	return epf->msg;
+> +}
+> +
+> +static inline u16 epf_get_msg_num(struct pci_epf *epf)
+> +{
+> +	return epf->num_msgs;
+> +}
+
+I don't see a need for these two functions as they are doing just dereferences.
+
+- Mani
+
+>  #endif /* __LINUX_PCI_EPF_H */
+> -- 
+> 2.34.1
+> 
+
+-- 
+மணிவண்ணன் சதாசிவம்
