@@ -1,78 +1,76 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f174.google.com (mail-yw1-f174.google.com [209.85.128.174])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB89D8469
-	for <ntb@lists.linux.dev>; Sun, 10 Sep 2023 19:18:27 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-	Content-Type:In-Reply-To:From:References:To:Subject:MIME-Version:Date:
-	Message-ID:Sender:Reply-To:Cc:Content-ID:Content-Description;
-	bh=xcilVeHv6ykY5H+2uQdXkLGtsOdwOH4P3neVlhn/mdQ=; b=T/wE5keXZTLFdt3W0rXxbq8g6P
-	YjqqnDGdu0e5W6yyHkIf5bvmTKqSz0/FRN2gVDixrRxUVQLkaxDiyrRKy7zfbp/8iZIBSkHOXSTZV
-	mL8a2PfgEtpAjrpoKGBBWMF05CoeCcQktpmjWqhSiipcJoVnog+84RQNzZVt7JJu6bnUNA5vUFPfn
-	0+GLSMZL/vMdLFfauzf2lVmeJn6x0vTNQAeN3L8vsQWboZacAtK4WgL+R10vuurQbm+lonTxWPE94
-	tDXKrJ2ELT0Lt3YgNtG/PzcCdFY6fcTlvYyJ7p4KPVVMzw33JKc7d61eMMiJE1K8CPfOUKVBRC0QC
-	zEZSyYIg==;
-Received: from [2601:1c2:980:9ec0::9fed]
-	by bombadil.infradead.org with esmtpsa (Exim 4.96 #2 (Red Hat Linux))
-	id 1qfPwp-00GqfE-2R;
-	Sun, 10 Sep 2023 19:18:19 +0000
-Message-ID: <4bd520bd-f0d5-7db2-30a2-5dea5d1ae4a8@infradead.org>
-Date: Sun, 10 Sep 2023 12:18:19 -0700
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C0D1B200AA
+	for <ntb@lists.linux.dev>; Mon,  2 Oct 2023 22:15:06 +0000 (UTC)
+Received: by mail-yw1-f174.google.com with SMTP id 00721157ae682-5a21ea6baccso3834327b3.1
+        for <ntb@lists.linux.dev>; Mon, 02 Oct 2023 15:15:06 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1696284905; x=1696889705; darn=lists.linux.dev;
+        h=to:subject:message-id:date:from:mime-version:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=s5a3Q1xhqNAcA5xTT9kTi0iSFNzhQO0gu9ItZ1UpTyY=;
+        b=B+M+Bz7L0nJAOfMFAJiAugIacmVFd+p2Sw55b5o0SkV3YBeUdYNEfWj4FO8F2slVmE
+         Eu83ycJyMV6cZAuc1MVrpvh38HKovzLHCaHo5eOzoBgr9ldClo2ZeYXeTfW7pr0tlxW3
+         9yFdfQ389sSQ7aAW6obwK4qPUKKB7Dpg2GXG8FSLKErZYu3Y2Mv3cG6BGopg3pSic7Kr
+         s1yQLJosB7YNT2Rz1zk9WmN22lRQbU8whAq6kcUc9mWggVn5UIOHF8Qr0uRkeQ21NRLp
+         GClEwX1pMn1Wlkvac0QzI9iJ2K8IEZjk03idsyTsjTc+OsvNnAeWz2AdNX+q3ez39CfW
+         I2Ig==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1696284905; x=1696889705;
+        h=to:subject:message-id:date:from:mime-version:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=s5a3Q1xhqNAcA5xTT9kTi0iSFNzhQO0gu9ItZ1UpTyY=;
+        b=EFH2KdRN1yaElUWWzMAhuk2VOb5r2OwjqliNJ4C8vH/6ydaY7ucEGkqd2W1CsDphrb
+         TgyD+tmvUb+riFMmAsM+zLCMw9WvPxdPrhhqbKTYEdajt5H6VU27/2Ff1vFtflqU+Uzy
+         30G2568yJ42+oR7JhbRY61opw2fWUurJ6ljpkCfkqu/e7LvP68P1d6lJxsj/RmQEpBeG
+         JqmqVl8Q1VQiuG4yOIrM+SzxRBNm7ScEg0AwM7ygCd65l4Y/2PO6h37BQuJD7rzMzm2u
+         /VekajhHpgvLIMs79pC6wbmrt2VxKQiZUucXrMq1EiMDWAEAzn+QTplAous/cZWah30X
+         w0Ng==
+X-Gm-Message-State: AOJu0YzC7D+bLNZZ8iVryUfEs1eI3Xml6lIEtyXJp2mslQSqbeWFQc2C
+	XSUIPutgifJ9b3x5SiU2eKycsVfD7/Fl0p0I0eMZk+CbmxY=
+X-Google-Smtp-Source: AGHT+IEJVwvifvIInX+rBLYA5P2+5pL+irfgHPjcwotqCKrS5mmPfFTD/10TYQwH/tjhaeKAXZxhkaynr5PHC8XDl2Q=
+X-Received: by 2002:a0d:d681:0:b0:576:bfc7:1e43 with SMTP id
+ y123-20020a0dd681000000b00576bfc71e43mr13148075ywd.25.1696284905354; Mon, 02
+ Oct 2023 15:15:05 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.14.0
-Subject: Re: [PATCH] ntb_perf: Fix printk format
-Content-Language: en-US
-To: Max Hawking <maxahawking@sonnenkinder.org>, Jon Mason <jdmason@kudzu.us>,
- Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>,
- Serge Semin <fancer.lancer@gmail.com>, Minjie Du <duminjie@vivo.com>,
- ntb@lists.linux.dev, linux-kernel@vger.kernel.org
-References: <f2fb85b9-278d-9e12-b61c-d951c71bf2f6@gmx.net>
-From: Randy Dunlap <rdunlap@infradead.org>
-In-Reply-To: <f2fb85b9-278d-9e12-b61c-d951c71bf2f6@gmx.net>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Received: by 2002:a05:7010:5304:b0:386:acc6:d160 with HTTP; Mon, 2 Oct 2023
+ 15:15:04 -0700 (PDT)
+From: am jom <amjom66@gmail.com>
+Date: Tue, 3 Oct 2023 01:45:04 +0330
+Message-ID: <CAJXBUywjYMh3xqJ=ePByWjzeP4LRE7Bc3K5qAcZuXG=tBx+20g@mail.gmail.com>
+Subject: Problem with 8G dma memory allocation
+To: ntb@lists.linux.dev
+Content-Type: text/plain; charset="UTF-8"
 
-Hi--
+I have a Supermicro x10drs-2u board, Intel Xeon E5, 2600v3, with PLX
+NTB switch. I have installed Centos 7 and mainline linux kernel 6.5.3
+with added PLX driver from TrueNAS. There 2 main boards with PLX ntb
+devices already attached in hardware through a bus named M2
 
-On 9/10/23 00:34, Max Hawking wrote:
-> The correct printk format is %pa or %pap, but not %pa[p].
-> 
-> Fixes: 99a06056124d ("NTB: ntb_perf: Fix address err in perf_copy_chunk")
-> Signed-off-by: Max Hawking <maxahawking@sonnenkinder.org>
-> ---
->  drivers/ntb/test/ntb_perf.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-> index 553f1f46bc66..72bc1d017a46 100644
-> --- a/drivers/ntb/test/ntb_perf.c
-> +++ b/drivers/ntb/test/ntb_perf.c
-> @@ -1227,7 +1227,7 @@ static ssize_t perf_dbgfs_read_info(struct file
-> *filep, char __user *ubuf,
+CMA and DMA are active and I can reserve like 8G, CMA memory at 4G.
+There are other network devices using CMA and they are working. I know
+that ntb_hw_plx.ko by Truenas needs 8G memory space
 
-Those 2 lines above should be on one line.
-(i.e., they should not wrap, so set tbird's wrap length to 0)
+When i load ntb_transport.ko module, the related kernel thread crashes
+by the following error message:
 
-Documentation/process/email-clients.rst has some info about
-how to coerce Thunderbird into working for patches.
+Unable to alloc MW buff of size 8,589,934,592
 
->  			"\tOut buffer addr 0x%pK\n", peer->outbuf);
-> 
->  		pos += scnprintf(buf + pos, buf_size - pos,
-> -			"\tOut buff phys addr %pa[p]\n", &peer->out_phys_addr);
-> +			"\tOut buff phys addr %pap\n", &peer->out_phys_addr);
-> 
->  		pos += scnprintf(buf + pos, buf_size - pos,
->  			"\tOut buffer size %pa\n", &peer->outbuf_size);
-> --
-> 2.41.0
+The problem is with dma_alloc_coherent() which fails and has errors
+and it seems that it can not find any CMA reserved memory as the crash
+dump reports (by dmesg) invalid operation in _alloc_pages() at last
+and the "cma" term is not seen in the crash dump .
 
--- 
-~Randy
+for CMA alignment i chose 2, and 2 areas and 8G size. what size and
+alignment should i set by the kernel config variables?
+
+Is there any kernel i can use to drive PLX ntb bridge device? Kernel
+detects several PLX devices regarding this switch like PEX8717,
+PEX8732 and 87d0 and ntb_hw_plx.ko is being attached to 8732 network
+device
