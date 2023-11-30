@@ -1,114 +1,136 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from dggsgout12.his.huawei.com (unknown [45.249.212.56])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 078D83985D;
-	Thu, 30 Nov 2023 09:41:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CqGCFIUz"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AFE3AC433C7;
-	Thu, 30 Nov 2023 09:40:56 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1701337260;
-	bh=oEoYW2AT0/jNITVsryKbKyTT6q9EeChyDt1rulwgiAQ=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=CqGCFIUzaoqzo1/kdBa76yEdfTAcAxiLWNEjheo07Rq1wWGMWhgwaFDKGAxELswxo
-	 vfh7j6FzRjncJyFRi6N1lLgQnn7jc9/GELMXYAZwP5sLep3SAPmm0Iwa6QN0NeE0dT
-	 JmH9asS7I3gZPB6FMeAQhd2w2MiCpI4X2cITdCq7R4c9mZ8NVszxVow4IonmbMTPvn
-	 zcPiTfzpjP2ApMzZTa208Cvi6qOuR3pTD+G82H4/mDsVTP/FxF8eO2BC2YtonjEQp9
-	 sLyCdlTH4WnQxctZP2Rnpqsjpy+mUw2e1fp1dwVWmJLBethEhCugXkC13VPf8cqcpO
-	 Q3iXnvAgqhEOg==
-Date: Thu, 30 Nov 2023 15:10:51 +0530
-From: Manivannan Sadhasivam <mani@kernel.org>
-To: Yang Yingliang <yangyingliang@huaweicloud.com>
-Cc: ntb@lists.linux.dev, linux-pci@vger.kernel.org, jdmason@kudzu.us,
-	dave.jiang@intel.com, allenbh@gmail.com, lpieralisi@kernel.org,
-	kw@linux.com, kishon@kernel.org, bhelgaas@google.com,
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E9DA04502E
+	for <ntb@lists.linux.dev>; Thu, 30 Nov 2023 12:24:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=huaweicloud.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=huaweicloud.com
+Authentication-Results: smtp.subspace.kernel.org; dkim=none
+Received: from mail.maildlp.com (unknown [172.19.163.216])
+	by dggsgout12.his.huawei.com (SkyGuard) with ESMTP id 4SgwPC3GzBz4f3lwV
+	for <ntb@lists.linux.dev>; Thu, 30 Nov 2023 20:24:47 +0800 (CST)
+Received: from mail02.huawei.com (unknown [10.116.40.112])
+	by mail.maildlp.com (Postfix) with ESMTP id 7164A1A01F5
+	for <ntb@lists.linux.dev>; Thu, 30 Nov 2023 20:24:49 +0800 (CST)
+Received: from huaweicloud.com (unknown [10.175.103.91])
+	by APP1 (Coremail) with SMTP id cCh0CgDn6hAMf2hld4RrCQ--.45412S4;
+	Thu, 30 Nov 2023 20:24:49 +0800 (CST)
+From: Yang Yingliang <yangyingliang@huaweicloud.com>
+To: ntb@lists.linux.dev,
+	linux-pci@vger.kernel.org
+Cc: jdmason@kudzu.us,
+	dave.jiang@intel.com,
+	allenbh@gmail.com,
+	lpieralisi@kernel.org,
+	kw@linux.com,
+	mani@kernel.org,
+	kishon@kernel.org,
+	bhelgaas@google.com,
 	yangyingliang@huawei.com
-Subject: Re: [PATCH] NTB: fix possible name leak in ntb_register_device()
-Message-ID: <20231130094051.GP3043@thinkpad>
-References: <20231130021350.2733064-1-yangyingliang@huaweicloud.com>
+Subject: [PATCH v2] NTB: fix possible name leak in ntb_register_device()
+Date: Thu, 30 Nov 2023 20:28:53 +0800
+Message-Id: <20231130122853.3736508-1-yangyingliang@huaweicloud.com>
+X-Mailer: git-send-email 2.25.1
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <20231130021350.2733064-1-yangyingliang@huaweicloud.com>
+X-CM-TRANSID:cCh0CgDn6hAMf2hld4RrCQ--.45412S4
+X-Coremail-Antispam: 1UD129KBjvJXoW7AFyxWw4DKF1xKFWDXr13urg_yoW8KrW7pw
+	15Was2yry0qr47ur45Xa1kAFy5Kay2v3y8CrWrCw12kwsxWrWrtFW8ta40qa17GrWUXFyU
+	tFW2qa1ruFWUZF7anT9S1TB71UUUUUUqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+	9KBjDU0xBIdaVrnRJUUUk2b4IE77IF4wAFF20E14v26r4j6ryUM7CY07I20VC2zVCF04k2
+	6cxKx2IYs7xG6rWj6s0DM7CIcVAFz4kK6r1j6r18M28lY4IEw2IIxxk0rwA2F7IY1VAKz4
+	vEj48ve4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_tr0E3s1l84ACjcxK6xIIjxv20xvEc7Cj
+	xVAFwI0_Gr1j6F4UJwA2z4x0Y4vEx4A2jsIE14v26rxl6s0DM28EF7xvwVC2z280aVCY1x
+	0267AKxVW0oVCq3wAS0I0E0xvYzxvE52x082IY62kv0487Mc02F40EFcxC0VAKzVAqx4xG
+	6I80ewAv7VC0I7IYx2IY67AKxVWUGVWUXwAv7VC2z280aVAFwI0_Jr0_Gr1lOx8S6xCaFV
+	Cjc4AY6r1j6r4UM4x0Y48IcxkI7VAKI48JM4IIrI8v6xkF7I0E8cxan2IY04v7MxAIw28I
+	cxkI7VAKI48JMxC20s026xCaFVCjc4AY6r1j6r4UMI8I3I0E5I8CrVAFwI0_Jr0_Jr4lx2
+	IqxVCjr7xvwVAFwI0_JrI_JrWlx4CE17CEb7AF67AKxVWUtVW8ZwCIc40Y0x0EwIxGrwCI
+	42IY6xIIjxv20xvE14v26r1j6r1xMIIF0xvE2Ix0cI8IcVCY1x0267AKxVW8JVWxJwCI42
+	IY6xAIw20EY4v20xvaj40_WFyUJVCq3wCI42IY6I8E87Iv67AKxVWUJVW8JwCI42IY6I8E
+	87Iv6xkF7I0E14v26r4j6r4UJbIYCTnIWIevJa73UjIFyTuYvjxUOyCJDUUUU
+X-CM-SenderInfo: 51dqw5xlqjzxhdqjqx5xdzvxpfor3voofrz/
 
-On Thu, Nov 30, 2023 at 10:13:50AM +0800, Yang Yingliang wrote:
-> From: Yang Yingliang <yangyingliang@huawei.com>
-> 
-> If device_register() returns error in ntb_register_device(),
-> the name allocated by dev_set_name() need be freed. As comment
-> of device_register() says, it should use put_device() to give
-> up the reference in the error path. So fix this by calling
-> put_device(), then the name can be freed in kobject_cleanup().
-> 
-> Fixes: a1bd3baeb2f1 ("NTB: Add NTB hardware abstraction layer")
-> Signed-off-by: Yang Yingliang <yangyingliang@huawei.com>
-> ---
->  drivers/ntb/core.c                            | 8 +++++++-
->  drivers/pci/endpoint/functions/pci-epf-vntb.c | 6 +-----
->  2 files changed, 8 insertions(+), 6 deletions(-)
-> 
-> diff --git a/drivers/ntb/core.c b/drivers/ntb/core.c
-> index 27dd93deff6e..d702bee78082 100644
-> --- a/drivers/ntb/core.c
-> +++ b/drivers/ntb/core.c
-> @@ -100,6 +100,8 @@ EXPORT_SYMBOL(ntb_unregister_client);
->  
->  int ntb_register_device(struct ntb_dev *ntb)
->  {
-> +	int ret;
-> +
->  	if (!ntb)
->  		return -EINVAL;
->  	if (!ntb->pdev)
-> @@ -120,7 +122,11 @@ int ntb_register_device(struct ntb_dev *ntb)
->  	ntb->ctx_ops = NULL;
->  	spin_lock_init(&ntb->ctx_lock);
->  
-> -	return device_register(&ntb->dev);
-> +	ret = device_register(&ntb->dev);
-> +	if (ret)
-> +		put_device(&ntb->dev);
-> +
-> +	return ret;
->  }
->  EXPORT_SYMBOL(ntb_register_device);
->  
-> diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> index 3f60128560ed..8e4ed188ad5c 100644
-> --- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> +++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> @@ -1278,15 +1278,11 @@ static int pci_vntb_probe(struct pci_dev *pdev, const struct pci_device_id *id)
->  	ret = ntb_register_device(&ndev->ntb);
->  	if (ret) {
->  		dev_err(dev, "Failed to register NTB device\n");
-> -		goto err_register_dev;
-> +		return -EINVAL;
+From: Yang Yingliang <yangyingliang@huawei.com>
 
-Even though this is the existing behavior, you should return ret.
+If device_register() returns error in ntb_register_device(),
+the name allocated by dev_set_name() need be freed. As comment
+of device_register() says, it should use put_device() to give
+up the reference in the error path. So fix this by calling
+put_device(), then the name can be freed in kobject_cleanup().
 
-- Mani
+Remove the outside put_device() in pci_vntb_probe() and return
+the error code.
 
->  	}
->  
->  	dev_dbg(dev, "PCI Virtual NTB driver loaded\n");
->  	return 0;
-> -
-> -err_register_dev:
-> -	put_device(&ndev->ntb.dev);
-> -	return -EINVAL;
->  }
->  
->  static struct pci_device_id pci_vntb_table[] = {
-> -- 
-> 2.25.1
-> 
+Fixes: a1bd3baeb2f1 ("NTB: Add NTB hardware abstraction layer")
+Signed-off-by: Yang Yingliang <yangyingliang@huawei.com>
+---
+v1 -> v2:
+   return the error code in the error path in pci_vntb_probe().
+---
+ drivers/ntb/core.c                            | 8 +++++++-
+ drivers/pci/endpoint/functions/pci-epf-vntb.c | 8 ++------
+ 2 files changed, 9 insertions(+), 7 deletions(-)
 
+diff --git a/drivers/ntb/core.c b/drivers/ntb/core.c
+index 27dd93deff6e..d702bee78082 100644
+--- a/drivers/ntb/core.c
++++ b/drivers/ntb/core.c
+@@ -100,6 +100,8 @@ EXPORT_SYMBOL(ntb_unregister_client);
+ 
+ int ntb_register_device(struct ntb_dev *ntb)
+ {
++	int ret;
++
+ 	if (!ntb)
+ 		return -EINVAL;
+ 	if (!ntb->pdev)
+@@ -120,7 +122,11 @@ int ntb_register_device(struct ntb_dev *ntb)
+ 	ntb->ctx_ops = NULL;
+ 	spin_lock_init(&ntb->ctx_lock);
+ 
+-	return device_register(&ntb->dev);
++	ret = device_register(&ntb->dev);
++	if (ret)
++		put_device(&ntb->dev);
++
++	return ret;
+ }
+ EXPORT_SYMBOL(ntb_register_device);
+ 
+diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+index 3f60128560ed..c6f07722cbac 100644
+--- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
++++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+@@ -1272,21 +1272,17 @@ static int pci_vntb_probe(struct pci_dev *pdev, const struct pci_device_id *id)
+ 	ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(32));
+ 	if (ret) {
+ 		dev_err(dev, "Cannot set DMA mask\n");
+-		return -EINVAL;
++		return ret;
+ 	}
+ 
+ 	ret = ntb_register_device(&ndev->ntb);
+ 	if (ret) {
+ 		dev_err(dev, "Failed to register NTB device\n");
+-		goto err_register_dev;
++		return ret;
+ 	}
+ 
+ 	dev_dbg(dev, "PCI Virtual NTB driver loaded\n");
+ 	return 0;
+-
+-err_register_dev:
+-	put_device(&ndev->ntb.dev);
+-	return -EINVAL;
+ }
+ 
+ static struct pci_device_id pci_vntb_table[] = {
 -- 
-மணிவண்ணன் சதாசிவம்
+2.25.1
+
