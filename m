@@ -1,94 +1,123 @@
-Received: from mail-oa1-f48.google.com (mail-oa1-f48.google.com [209.85.160.48])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from dggsgout11.his.huawei.com (unknown [45.249.212.51])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 70E5A27453
-	for <ntb@lists.linux.dev>; Tue, 10 Oct 2023 15:33:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kudzu.us
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=kudzu.us
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kudzu-us.20230601.gappssmtp.com header.i=@kudzu-us.20230601.gappssmtp.com header.b="fraLANI2"
-Received: by mail-oa1-f48.google.com with SMTP id 586e51a60fabf-1e1e25ab32bso3975377fac.1
-        for <ntb@lists.linux.dev>; Tue, 10 Oct 2023 08:33:26 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kudzu-us.20230601.gappssmtp.com; s=20230601; t=1696952005; x=1697556805; darn=lists.linux.dev;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=IGlpVdouqGa9tjwhATNKF2y55bHjxSTMENocH/RFUw0=;
-        b=fraLANI2sQWUZ0/j3RnKlpF9imNUjZJN6T3R1BINDwc3Wrc14HK0f56osjmNeUcK/B
-         aiHWMWJwBgTvdXzo1f/94MBeA6oK8gSoPZQi1nL7KTSo+x5O6+DltV1Zgq9IFB/CPltu
-         UrCMVTiX6zDJ5BQufRd0br6Clm/8BoxSs2/zXbxiVTkjEdvsoV3NS4OjXb9qfHz+kumo
-         5RFxal0V77pXkuwOeLWF8PcPQB/egq81z8QWUBimVKVDRtNzsNTByEOjiVcN9DwLlMe+
-         Yssem9eNCvW4iP5CuHpMdBZ6KwbU/Kmb8YqjBC2YHGEw380vpgmUKZxojV/FRRMD1a7q
-         lyLg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1696952005; x=1697556805;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=IGlpVdouqGa9tjwhATNKF2y55bHjxSTMENocH/RFUw0=;
-        b=STp733tfjHUDwn5Ayj7fDXCULWeKFcNKCMCRm3ad2V9mRKQkNXawhGP/4t6vVhnm8+
-         YsV2IVYX8+nvGcblUBSHxADsHa2OSGOgtoTWaZK5vHUQE8lGHte7ge0f3HAOBnqKZ5+h
-         fyMCTGYcTlo1z1uQTio2dG3JpErdBlKyx/26Qudr6ZnANXiixqxobCHQpYcD/OYFLkoH
-         lQh0jmZssiujEdgQxtTOQKQ9YEdjo/Xq/d93UlcWCmwOA+PKdi8DGt9ss3/deoqO3P33
-         2UBZjVwx22zJgg0/kcmLh4PEUjrDHqgZ5W++Smn8BuCpgd7owj2JLcDcKUBgMQ40k6LE
-         J94w==
-X-Gm-Message-State: AOJu0YwWGjWc8jTXxjXmEoW523it9G4bXf1XBxynuEn7mcVccBcLBkyj
-	ST/BuVc/R0Fbuye7KS/O/j49FKqvtTQ7YcN9kAw=
-X-Google-Smtp-Source: AGHT+IHaVjBX/KKQCZ+08ab9lVXi9B7/NzADTcWcYhQJpdODEVyyVsyCdZOr1780dfWB9WEehXuuBw==
-X-Received: by 2002:a05:6870:ac1f:b0:1bf:50e0:95d9 with SMTP id kw31-20020a056870ac1f00b001bf50e095d9mr22193563oab.26.1696952005357;
-        Tue, 10 Oct 2023 08:33:25 -0700 (PDT)
-Received: from kudzu.us ([2605:a601:a684:4100:8ac9:b3ff:febf:a2f8])
-        by smtp.gmail.com with ESMTPSA id w9-20020a0cb549000000b0065b14fcfca6sm4862356qvd.118.2023.10.10.08.33.24
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 10 Oct 2023 08:33:24 -0700 (PDT)
-Date: Tue, 10 Oct 2023 11:33:17 -0400
-From: Jon Mason <jdmason@kudzu.us>
-To: Max Hawking <maxahawking@sonnenkinder.org>
-Cc: Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>,
-	Serge Semin <fancer.lancer@gmail.com>,
-	Minjie Du <duminjie@vivo.com>, ntb@lists.linux.dev,
-	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH RESEND] ntb_perf: Fix printk format
-Message-ID: <ZSVuvSh0B4usJkMX@kudzu.us>
-References: <2ad3273e-1212-428d-b598-e6a82c2bc570@sonnenkinder.org>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 66085E553
+	for <ntb@lists.linux.dev>; Thu, 30 Nov 2023 02:09:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=huaweicloud.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=huaweicloud.com
+Authentication-Results: smtp.subspace.kernel.org; dkim=none
+Received: from mail.maildlp.com (unknown [172.19.163.235])
+	by dggsgout11.his.huawei.com (SkyGuard) with ESMTP id 4SgflW5cNZz4f3jqQ
+	for <ntb@lists.linux.dev>; Thu, 30 Nov 2023 10:09:43 +0800 (CST)
+Received: from mail02.huawei.com (unknown [10.116.40.112])
+	by mail.maildlp.com (Postfix) with ESMTP id A8DBF1A09BC
+	for <ntb@lists.linux.dev>; Thu, 30 Nov 2023 10:09:46 +0800 (CST)
+Received: from huaweicloud.com (unknown [10.175.103.91])
+	by APP1 (Coremail) with SMTP id cCh0CgDX2hDl7mdlWxFECQ--.12383S4;
+	Thu, 30 Nov 2023 10:09:46 +0800 (CST)
+From: Yang Yingliang <yangyingliang@huaweicloud.com>
+To: ntb@lists.linux.dev,
+	linux-pci@vger.kernel.org
+Cc: jdmason@kudzu.us,
+	dave.jiang@intel.com,
+	allenbh@gmail.com,
+	lpieralisi@kernel.org,
+	kw@linux.com,
+	mani@kernel.org,
+	kishon@kernel.org,
+	bhelgaas@google.com,
+	yangyingliang@huawei.com
+Subject: [PATCH] NTB: fix possible name leak in ntb_register_device()
+Date: Thu, 30 Nov 2023 10:13:50 +0800
+Message-Id: <20231130021350.2733064-1-yangyingliang@huaweicloud.com>
+X-Mailer: git-send-email 2.25.1
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <2ad3273e-1212-428d-b598-e6a82c2bc570@sonnenkinder.org>
+Content-Transfer-Encoding: 8bit
+X-CM-TRANSID:cCh0CgDX2hDl7mdlWxFECQ--.12383S4
+X-Coremail-Antispam: 1UD129KBjvJXoW7AFyxWw4DKFy3JFyxtw47Arb_yoW8Zw13p3
+	sxGasayrW0qr47ur45Xa1kZFy5Kay2v3y8CrWrCw1a9anxWrWFyFW8ta4rtF47JrW8ZFyU
+	tFW2qa18uFWUZF7anT9S1TB71UUUUUUqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+	9KBjDU0xBIdaVrnRJUUUkIb4IE77IF4wAFF20E14v26r4j6ryUM7CY07I20VC2zVCF04k2
+	6cxKx2IYs7xG6rWj6s0DM7CIcVAFz4kK6r1j6r18M28lY4IEw2IIxxk0rwA2F7IY1VAKz4
+	vEj48ve4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_tr0E3s1l84ACjcxK6xIIjxv20xvEc7Cj
+	xVAFwI0_Gr1j6F4UJwA2z4x0Y4vEx4A2jsIE14v26rxl6s0DM28EF7xvwVC2z280aVCY1x
+	0267AKxVW0oVCq3wAS0I0E0xvYzxvE52x082IY62kv0487Mc02F40EFcxC0VAKzVAqx4xG
+	6I80ewAv7VC0I7IYx2IY67AKxVWUGVWUXwAv7VC2z280aVAFwI0_Jr0_Gr1lOx8S6xCaFV
+	Cjc4AY6r1j6r4UM4x0Y48IcxkI7VAKI48JM4IIrI8v6xkF7I0E8cxan2IY04v7MxAIw28I
+	cxkI7VAKI48JMxC20s026xCaFVCjc4AY6r1j6r4UMI8I3I0E5I8CrVAFwI0_Jr0_Jr4lx2
+	IqxVCjr7xvwVAFwI0_JrI_JrWlx4CE17CEb7AF67AKxVWUtVW8ZwCIc40Y0x0EwIxGrwCI
+	42IY6xIIjxv20xvE14v26r1j6r1xMIIF0xvE2Ix0cI8IcVCY1x0267AKxVW8JVWxJwCI42
+	IY6xAIw20EY4v20xvaj40_Wr1j6rW3Jr1lIxAIcVC2z280aVAFwI0_Jr0_Gr1lIxAIcVC2
+	z280aVCY1x0267AKxVW8JVW8JrUvcSsGvfC2KfnxnUUI43ZEXa7IUbPEf5UUUUU==
+X-CM-SenderInfo: 51dqw5xlqjzxhdqjqx5xdzvxpfor3voofrz/
 
-On Sun, Oct 08, 2023 at 08:45:16PM -0700, Max Hawking wrote:
-> The correct printk format is %pa or %pap, but not %pa[p].
-> 
-> Fixes: 99a06056124d ("NTB: ntb_perf: Fix address err in perf_copy_chunk")
-> Signed-off-by: Max Hawking <maxahawking@sonnenkinder.org>
+From: Yang Yingliang <yangyingliang@huawei.com>
 
-Applied to my ntb branch
+If device_register() returns error in ntb_register_device(),
+the name allocated by dev_set_name() need be freed. As comment
+of device_register() says, it should use put_device() to give
+up the reference in the error path. So fix this by calling
+put_device(), then the name can be freed in kobject_cleanup().
 
-Thanks,
-Jon
+Fixes: a1bd3baeb2f1 ("NTB: Add NTB hardware abstraction layer")
+Signed-off-by: Yang Yingliang <yangyingliang@huawei.com>
+---
+ drivers/ntb/core.c                            | 8 +++++++-
+ drivers/pci/endpoint/functions/pci-epf-vntb.c | 6 +-----
+ 2 files changed, 8 insertions(+), 6 deletions(-)
 
-> ---
->  drivers/ntb/test/ntb_perf.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
-> index 553f1f46bc66..72bc1d017a46 100644
-> --- a/drivers/ntb/test/ntb_perf.c
-> +++ b/drivers/ntb/test/ntb_perf.c
-> @@ -1227,7 +1227,7 @@ static ssize_t perf_dbgfs_read_info(struct file *filep, char __user *ubuf,
->  			"\tOut buffer addr 0x%pK\n", peer->outbuf);
-> 
->  		pos += scnprintf(buf + pos, buf_size - pos,
-> -			"\tOut buff phys addr %pa[p]\n", &peer->out_phys_addr);
-> +			"\tOut buff phys addr %pap\n", &peer->out_phys_addr);
-> 
->  		pos += scnprintf(buf + pos, buf_size - pos,
->  			"\tOut buffer size %pa\n", &peer->outbuf_size);
-> --
-> 2.41.0
-> 
+diff --git a/drivers/ntb/core.c b/drivers/ntb/core.c
+index 27dd93deff6e..d702bee78082 100644
+--- a/drivers/ntb/core.c
++++ b/drivers/ntb/core.c
+@@ -100,6 +100,8 @@ EXPORT_SYMBOL(ntb_unregister_client);
+ 
+ int ntb_register_device(struct ntb_dev *ntb)
+ {
++	int ret;
++
+ 	if (!ntb)
+ 		return -EINVAL;
+ 	if (!ntb->pdev)
+@@ -120,7 +122,11 @@ int ntb_register_device(struct ntb_dev *ntb)
+ 	ntb->ctx_ops = NULL;
+ 	spin_lock_init(&ntb->ctx_lock);
+ 
+-	return device_register(&ntb->dev);
++	ret = device_register(&ntb->dev);
++	if (ret)
++		put_device(&ntb->dev);
++
++	return ret;
+ }
+ EXPORT_SYMBOL(ntb_register_device);
+ 
+diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+index 3f60128560ed..8e4ed188ad5c 100644
+--- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
++++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+@@ -1278,15 +1278,11 @@ static int pci_vntb_probe(struct pci_dev *pdev, const struct pci_device_id *id)
+ 	ret = ntb_register_device(&ndev->ntb);
+ 	if (ret) {
+ 		dev_err(dev, "Failed to register NTB device\n");
+-		goto err_register_dev;
++		return -EINVAL;
+ 	}
+ 
+ 	dev_dbg(dev, "PCI Virtual NTB driver loaded\n");
+ 	return 0;
+-
+-err_register_dev:
+-	put_device(&ndev->ntb.dev);
+-	return -EINVAL;
+ }
+ 
+ static struct pci_device_id pci_vntb_table[] = {
+-- 
+2.25.1
+
