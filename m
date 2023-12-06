@@ -1,92 +1,66 @@
-Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.24])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 32BAE3FB13
-	for <ntb@lists.linux.dev>; Tue,  5 Dec 2023 09:59:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux.intel.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5BC6A1096B
+	for <ntb@lists.linux.dev>; Wed,  6 Dec 2023 05:59:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="IY9vk7rj"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1701770400; x=1733306400;
-  h=date:from:to:cc:subject:in-reply-to:message-id:
-   references:mime-version;
-  bh=+jPQaiS0CLFcu1huBYFsPOpZc/7ncj6I1Rcc/Iu6fms=;
-  b=IY9vk7rj5UWD+MV+pimDhvQV8DtaOy1RW6no1JfkbyBGEVTdqfym6IBF
-   lvMNpawlUNcOwsXCx8UOehIa2lgb30axAZpVnIWqjLk3wPXomwcyz1QYD
-   wFb3OvwFsABh/oH0rd3tIRZMi9OC0XIEabfK0/honSIOYDs4JiqMFuddF
-   NWntjFP3hjjVEa5lkR/g0P/GdKs2YEhPqIvS7VV5dik4DtA4voFVO4nOq
-   WuhMLMtl6uSzH4xv+HPj9soPxnbzBA77rfbACreRDQGNgICD6ySVtTN+d
-   1QksZjLnMALZ8Jt+ae7QcNRxecE4Dq6t+a0l582bs8ihFnbeEz/6WmP5k
-   g==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10914"; a="396667840"
-X-IronPort-AV: E=Sophos;i="6.04,251,1695711600"; 
-   d="scan'208";a="396667840"
-Received: from fmsmga007.fm.intel.com ([10.253.24.52])
-  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Dec 2023 01:59:59 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10914"; a="774582000"
-X-IronPort-AV: E=Sophos;i="6.04,251,1695711600"; 
-   d="scan'208";a="774582000"
-Received: from nlawless-mobl.ger.corp.intel.com ([10.252.61.141])
-  by fmsmga007-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Dec 2023 01:59:55 -0800
-Date: Tue, 5 Dec 2023 11:59:53 +0200 (EET)
-From: =?ISO-8859-15?Q?Ilpo_J=E4rvinen?= <ilpo.jarvinen@linux.intel.com>
-To: Yang Yingliang <yangyingliang@huaweicloud.com>
-cc: ntb@lists.linux.dev, linux-pci@vger.kernel.org, jdmason@kudzu.us, 
-    dave.jiang@intel.com, allenbh@gmail.com, lpieralisi@kernel.org, 
-    kw@linux.com, mani@kernel.org, kishon@kernel.org, bhelgaas@google.com, 
-    yangyingliang@huawei.com
-Subject: Re: [PATCH 2/2] NTB: EPF: return error code in the error path in
- pci_vntb_probe()
-In-Reply-To: <20231201033057.1399131-2-yangyingliang@huaweicloud.com>
-Message-ID: <8eb01521-5eca-762c-c944-c7604564c54c@linux.intel.com>
-References: <20231201033057.1399131-1-yangyingliang@huaweicloud.com> <20231201033057.1399131-2-yangyingliang@huaweicloud.com>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="hsHYmFgD"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
+	Content-ID:Content-Description:In-Reply-To:References;
+	bh=2RhN/R0YtQaRZfvdX9T+5bKdAJ94ubAzV2OGwtbT7fA=; b=hsHYmFgDYL2PjaTEKgfj9KAeOF
+	ri4R7T/MbVbm+8WsHaq0dgIfH5ohWwJLtHPZABjUUmVOCXDz3BhegPiW06ZC3BcJC3I4MU9n9BlOF
+	OhqHFUzh57RiTS79yYMqNEKmuU98ghwcYCVw88i4UcDJl5bMM59SnTmKtcjWRxqW/zPPtYeGlqwTE
+	cbr8uFGYK1DDWAmCWp0z/4B8YFFD/bcnYVrr3GNvfTn4QxztS0bGHharOHdnX1RjUoL/hC2FQ+tyx
+	0E9v7XAXFboV5nZkeKvQyZo1dvBQjgLC9TXMGsmZQWa++yT8k5QXlYxHVE6vqv4fMO7S+GY+JvyT6
+	pGbTlr/g==;
+Received: from [50.53.46.231] (helo=bombadil.infradead.org)
+	by bombadil.infradead.org with esmtpsa (Exim 4.96 #2 (Red Hat Linux))
+	id 1rAkwZ-0098zJ-0w;
+	Wed, 06 Dec 2023 05:59:35 +0000
+From: Randy Dunlap <rdunlap@infradead.org>
+To: linux-kernel@vger.kernel.org
+Cc: Randy Dunlap <rdunlap@infradead.org>,
+	Jon Mason <jdmason@kudzu.us>,
+	Dave Jiang <dave.jiang@intel.com>,
+	Allen Hubbe <allenbh@gmail.com>,
+	ntb@lists.linux.dev
+Subject: [PATCH] NTB: epf: don't misuse kernel-doc marker
+Date: Tue,  5 Dec 2023 21:59:34 -0800
+Message-ID: <20231206055934.24079-1-rdunlap@infradead.org>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="8323329-1611894948-1701770398=:1829"
+Content-Transfer-Encoding: 8bit
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Use "/*" instead of "/**" for common C comments to prevent warnings
+from scripts/kernel-doc.
 
---8323329-1611894948-1701770398=:1829
-Content-Type: text/plain; charset=ISO-8859-15
-Content-Transfer-Encoding: 8BIT
+ntb_hw_epf.c:15: warning: expecting prototype for Host side endpoint driver to implement Non(). Prototype was for NTB_EPF_COMMAND() instead
 
-On Fri, 1 Dec 2023, Yang Yingliang wrote:
+Signed-off-by: Randy Dunlap <rdunlap@infradead.org>
+Cc: Jon Mason <jdmason@kudzu.us>
+Cc: Dave Jiang <dave.jiang@intel.com>
+Cc: Allen Hubbe <allenbh@gmail.com>
+Cc: ntb@lists.linux.dev
+---
+ drivers/ntb/hw/epf/ntb_hw_epf.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-> From: Yang Yingliang <yangyingliang@huawei.com>
-> 
-> If dma_set_mask_and_coherent() fails, return the error code instead
-> of -EINVAL.
-> 
-> Signed-off-by: Yang Yingliang <yangyingliang@huawei.com>
-> ---
->  drivers/pci/endpoint/functions/pci-epf-vntb.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> index 2b7bc5a731dd..c6f07722cbac 100644
-> --- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> +++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> @@ -1272,7 +1272,7 @@ static int pci_vntb_probe(struct pci_dev *pdev, const struct pci_device_id *id)
->  	ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(32));
->  	if (ret) {
->  		dev_err(dev, "Cannot set DMA mask\n");
-> -		return -EINVAL;
-> +		return ret;
->  	}
->  
->  	ret = ntb_register_device(&ndev->ntb);
-
-Reviewed-by: Ilpo Järvinen <ilpo.jarvinen@linux.intel.com>
-
--- 
- i.
-
---8323329-1611894948-1701770398=:1829--
+diff -- a/drivers/ntb/hw/epf/ntb_hw_epf.c b/drivers/ntb/hw/epf/ntb_hw_epf.c
+--- a/drivers/ntb/hw/epf/ntb_hw_epf.c
++++ b/drivers/ntb/hw/epf/ntb_hw_epf.c
+@@ -1,5 +1,5 @@
+ // SPDX-License-Identifier: GPL-2.0
+-/**
++/*
+  * Host side endpoint driver to implement Non-Transparent Bridge functionality
+  *
+  * Copyright (C) 2020 Texas Instruments
