@@ -1,66 +1,77 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f169.google.com (mail-pf1-f169.google.com [209.85.210.169])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5BC6A1096B
-	for <ntb@lists.linux.dev>; Wed,  6 Dec 2023 05:59:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=infradead.org
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="hsHYmFgD"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
-	Content-ID:Content-Description:In-Reply-To:References;
-	bh=2RhN/R0YtQaRZfvdX9T+5bKdAJ94ubAzV2OGwtbT7fA=; b=hsHYmFgDYL2PjaTEKgfj9KAeOF
-	ri4R7T/MbVbm+8WsHaq0dgIfH5ohWwJLtHPZABjUUmVOCXDz3BhegPiW06ZC3BcJC3I4MU9n9BlOF
-	OhqHFUzh57RiTS79yYMqNEKmuU98ghwcYCVw88i4UcDJl5bMM59SnTmKtcjWRxqW/zPPtYeGlqwTE
-	cbr8uFGYK1DDWAmCWp0z/4B8YFFD/bcnYVrr3GNvfTn4QxztS0bGHharOHdnX1RjUoL/hC2FQ+tyx
-	0E9v7XAXFboV5nZkeKvQyZo1dvBQjgLC9TXMGsmZQWa++yT8k5QXlYxHVE6vqv4fMO7S+GY+JvyT6
-	pGbTlr/g==;
-Received: from [50.53.46.231] (helo=bombadil.infradead.org)
-	by bombadil.infradead.org with esmtpsa (Exim 4.96 #2 (Red Hat Linux))
-	id 1rAkwZ-0098zJ-0w;
-	Wed, 06 Dec 2023 05:59:35 +0000
-From: Randy Dunlap <rdunlap@infradead.org>
-To: linux-kernel@vger.kernel.org
-Cc: Randy Dunlap <rdunlap@infradead.org>,
-	Jon Mason <jdmason@kudzu.us>,
-	Dave Jiang <dave.jiang@intel.com>,
-	Allen Hubbe <allenbh@gmail.com>,
-	ntb@lists.linux.dev
-Subject: [PATCH] NTB: epf: don't misuse kernel-doc marker
-Date: Tue,  5 Dec 2023 21:59:34 -0800
-Message-ID: <20231206055934.24079-1-rdunlap@infradead.org>
-X-Mailer: git-send-email 2.43.0
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0DD3749893;
+	Mon, 18 Dec 2023 22:43:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=linux.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-pf1-f169.google.com with SMTP id d2e1a72fcca58-6d7395ab92cso1002845b3a.2;
+        Mon, 18 Dec 2023 14:43:09 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1702939388; x=1703544188;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=+WdvhxypQSzlZWGhf+IU0LgPAf/h827UUi/xTvTvNns=;
+        b=hhqf+slGp0EZ1Z8nKkk4wPeCCDdCukChX24Mi7eJABrpReeKFzFf10NA3h4mIdSnFe
+         2Dbg3DW9D/pV2aNHf+LBFkvo7Y5MK69Deas0ZA1bNdMy/W82PSulYq+q+7lwiqk0yKxD
+         1HzRTkJYFrASmSeDatVqBhpD8EA6Ka9LZMyQwjXxwIdf79LhW9ognOJGYjkmBeDPEkms
+         hZCBnZE4prlKcQ7yd2RD6Est1TOBvzo5T0KxXcfsLgtsOktlWQ1Vem+OsMWpgsUAW+Rx
+         h6+9WxC+GIUmoXjL9Q3LTJnevwo6k3FEr5SIbrN3z6+9jmzpRhh2oA+nnrd3PRTYJSMn
+         I+sw==
+X-Gm-Message-State: AOJu0Yzg8epHvXCrJL+W9g8af6uiTg3SdCWeTraEJwWHvbQKBqjRLTXF
+	r2XKI+jnWhKo273v4qc7MR0=
+X-Google-Smtp-Source: AGHT+IHVpqC9SjFJK9PqtuBhR1gEkvAClhjy741NZa9o1NOfIAJTOcLzbrlN286BuduIo67vg2/3UA==
+X-Received: by 2002:a05:6a20:4287:b0:186:e53:b64b with SMTP id o7-20020a056a20428700b001860e53b64bmr10072399pzj.47.1702939388434;
+        Mon, 18 Dec 2023 14:43:08 -0800 (PST)
+Received: from localhost (fpd11144dd.ap.nuro.jp. [209.17.68.221])
+        by smtp.gmail.com with ESMTPSA id k9-20020a170902c40900b001d0cd9e4248sm19540300plk.196.2023.12.18.14.43.06
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 18 Dec 2023 14:43:07 -0800 (PST)
+Date: Tue, 19 Dec 2023 07:43:05 +0900
+From: Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kw@linux.com>
+To: Lars-Peter Clausen <lars@metafoo.de>
+Cc: Lorenzo Pieralisi <lpieralisi@kernel.org>,
+	Manivannan Sadhasivam <mani@kernel.org>,
+	Kishon Vijay Abraham I <kishon@kernel.org>,
+	Bjorn Helgaas <bhelgaas@google.com>, Jon Mason <jdmason@kudzu.us>,
+	Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>,
+	linux-pci@vger.kernel.org, mhi@lists.linux.dev, ntb@lists.linux.dev
+Subject: Re: [PATCH 1/5] PCI: endpoint: Make pci_epf_ops in pci_epf_driver
+ const
+Message-ID: <20231218224305.GA2983820@rocinante>
+References: <20230722230848.589428-1-lars@metafoo.de>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230722230848.589428-1-lars@metafoo.de>
 
-Use "/*" instead of "/**" for common C comments to prevent warnings
-from scripts/kernel-doc.
+Hello,
 
-ntb_hw_epf.c:15: warning: expecting prototype for Host side endpoint driver to implement Non(). Prototype was for NTB_EPF_COMMAND() instead
+> The pci_epf_ops struct contains a set of callbacks that are used by the
+> pci_epf_driver. The ops struct is never modified by the epf core itself.
+> 
+> Marking the ops pointer const allows epf drivers to declare their
+> pci_epf_ops struct to be const. This allows the struct to be placed in the
+> read-only section. Which for example brings some security benefits as the
+> callbacks can not be overwritten.
 
-Signed-off-by: Randy Dunlap <rdunlap@infradead.org>
-Cc: Jon Mason <jdmason@kudzu.us>
-Cc: Dave Jiang <dave.jiang@intel.com>
-Cc: Allen Hubbe <allenbh@gmail.com>
-Cc: ntb@lists.linux.dev
----
- drivers/ntb/hw/epf/ntb_hw_epf.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Applied to endpoint, thank you!
 
-diff -- a/drivers/ntb/hw/epf/ntb_hw_epf.c b/drivers/ntb/hw/epf/ntb_hw_epf.c
---- a/drivers/ntb/hw/epf/ntb_hw_epf.c
-+++ b/drivers/ntb/hw/epf/ntb_hw_epf.c
-@@ -1,5 +1,5 @@
- // SPDX-License-Identifier: GPL-2.0
--/**
-+/*
-  * Host side endpoint driver to implement Non-Transparent Bridge functionality
-  *
-  * Copyright (C) 2020 Texas Instruments
+[01/05] PCI: endpoint: Make struct pci_epf_ops in pci_epf_driver const
+        https://git.kernel.org/pci/pci/c/86362293044b
+[02/05] PCI: endpoint: pci-epf-mhi: Make structs pci_epf_ops and pci_epf_event_ops const
+        https://git.kernel.org/pci/pci/c/150d04ddf386
+[03/05] PCI: endpoint: pci-epf-ntb: Make struct pci_epf_ops const
+        https://git.kernel.org/pci/pci/c/54f22c9758dc
+[04/05] PCI: endpoint: pci-epf-vntb: Make struct pci_epf_ops const
+        https://git.kernel.org/pci/pci/c/c21b53deda09
+[05/05] PCI: endpoint: pci-epf-test: Make struct pci_epf_ops const
+        https://git.kernel.org/pci/pci/c/6f517e044096
+
+	Krzysztof
