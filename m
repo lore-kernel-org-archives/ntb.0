@@ -1,95 +1,93 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 581457B3D7;
-	Tue, 30 Jan 2024 19:32:59 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 229187B3C3;
+	Tue, 30 Jan 2024 19:43:37 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706643179; cv=none; b=a+i/i0I+7tt/2YuxEZlHhDZgqUp5CoDb0DG7cSADU//qfYAmJsTXP9m1H+b5YMurC17IA+AefJCga0SCOYKTCxTgn2+7r+LnwVDyOAZZ3HCpMGYW00tB3OceUczcSlyml6dnoaFvWNXAO7kG+4pUp8NBRDUc9ilBXofbrNkhsx4=
+	t=1706643818; cv=none; b=Mk+ziVp9O+8QznMjaJOS0ZVq8ZSgZ0pLWxC5ahrTbBe8aUu1VBjQdvG/Nhm2tKr1rHUhY5467Mo/nXAdvE0WpxpeKi0Esjsu8SgUdHsffFCX8JriXXT8rZ0/UMJKu5+viQkOnkAqC37FsM34jsO+30tZ1cuAw0497U6NC6TKEZM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706643179; c=relaxed/simple;
-	bh=t1zaT2PqWJmTPD8CEXsvLf7gjiZz+GzDPD84WF2ALbk=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=dNikxT+NmeJkzB3OkCeA7wj1WoArMSupbyRLrOcSzSv3f0LbvjAly1ORi/Jaritb+O2OF5vITlKNe7118jZreANxFhZTcHVj5aDqu6Zg6VC5Np9XncWT9TnFReVFWPNu4hJzglb7cnJ+cvWy+ESpoFLV81gTb3GDRdmPHia0S9U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=bqhj+ga6; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1706643818; c=relaxed/simple;
+	bh=jTu+NxsYyIa/g4xgHaisI+TEdtR6uBQYEZWvKOLa+ws=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=Z9fwl2O3d03dDk40yivhCd12wCeOZLGNkQTdP2EuKn2pJUHYsOYg9UUQ+6deKTW3eu/Ar1VoRJ92+jftETUnxhq6Jrsi12qto37gQg2rZpzvF3F+1SyeAsnoO20R9Wei6Yt9gAhEdV+nI0+3cuWsr0SFRTwIyhwp86Fi0tvnp3E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Ne/OBRA7; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="bqhj+ga6"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CB4E6C433F1;
-	Tue, 30 Jan 2024 19:32:51 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Ne/OBRA7"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7A25BC43390;
+	Tue, 30 Jan 2024 19:43:30 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1706643178;
-	bh=t1zaT2PqWJmTPD8CEXsvLf7gjiZz+GzDPD84WF2ALbk=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=bqhj+ga6J5EJIhQchzSWbTVYifYT4UUWWexEKOvFB6bQ8z3IJ8SwNoZbpV0rvrsA1
-	 i7RVlokFqjsyabsXGwhJawzMh/m/JXGke2AHYLas+NVfDOKlMDSFQ0AtCa+fazReJo
-	 vGPdXvaQoMbEVal1IcAwvbD6lbJWRBTbGwCG8sWoDvFZBE8Wzx8oQ5F9nWfmNSRWBW
-	 RJzYKpx4BcjBDQEzCght4AL8bnqDwf67UdBtLJA+G6yW2QmYOsN4KETmlXH810oi2R
-	 MPxYwo//wV2xiyeLejt4f6JZst88TZ7h2845ihwUmyRQXq/pcs9JMBMSwg7Wj9TXRv
-	 xL2EM4FQeaCYw==
+	s=k20201202; t=1706643817;
+	bh=jTu+NxsYyIa/g4xgHaisI+TEdtR6uBQYEZWvKOLa+ws=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=Ne/OBRA7S3YHZT2GZm9YQY9/wBnEzTd9uJ740fF4+RSeqDfY4m0MjonevaOgKNuU4
+	 VNnfCUcn8RlcfzLHEWT3iMHyQEhjfXjNnEUwRlnlSXrXNK0WxIhscvoi7BI08MXeGB
+	 A6bqBFs8hh0VEih2vhPjCToY8RSALHW0uo1oF+X8q4hZhDfaydo5054VxZPtiKiokd
+	 6DGR8rEUV/vnzQpvPCGbxXC/6eiYL7F93xr+E+n4iY0jVLTbZ6llnxmQ9hfba5exvh
+	 pGq5QfuZSzxCwvT9/qtmBnNTMwahkAPEfQZFKiH96x5hHUmUBwwc1S7IMvlv6t6z5s
+	 SPmzcqG1dAMlw==
+Date: Tue, 30 Jan 2024 20:43:24 +0100
 From: Niklas Cassel <cassel@kernel.org>
-To: Jon Mason <jdmason@kudzu.us>,
-	Dave Jiang <dave.jiang@intel.com>,
-	Allen Hubbe <allenbh@gmail.com>,
-	Lorenzo Pieralisi <lpieralisi@kernel.org>,
-	=?UTF-8?q?Krzysztof=20Wilczy=C5=84ski?= <kw@linux.com>,
-	Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
-	Kishon Vijay Abraham I <kishon@kernel.org>,
-	Bjorn Helgaas <bhelgaas@google.com>
-Cc: Damien Le Moal <dlemoal@kernel.org>,
-	Niklas Cassel <cassel@kernel.org>,
-	ntb@lists.linux.dev,
-	linux-pci@vger.kernel.org
-Subject: [PATCH 3/3] PCI: endpoint: pci-epf-vntb: remove superfluous checks
-Date: Tue, 30 Jan 2024 20:32:11 +0100
-Message-ID: <20240130193214.713739-4-cassel@kernel.org>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20240130193214.713739-1-cassel@kernel.org>
-References: <20240130193214.713739-1-cassel@kernel.org>
+To: Frank Li <Frank.li@nxp.com>
+Cc: mani@kernel.org, allenbh@gmail.com, bhelgaas@google.com,
+	dave.jiang@intel.com, imx@lists.linux.dev, jdmason@kudzu.us,
+	kishon@kernel.org, kw@linux.com, linux-kernel@vger.kernel.org,
+	linux-pci@vger.kernel.org, lpieralisi@kernel.org,
+	ntb@lists.linux.dev
+Subject: Re: [PATCH v4 1/1] PCI: endpoint: pci-epf-vntb: Fix transfer failure
+ for fixed size BARs
+Message-ID: <ZblRXOabZWzRRWoT@x1-carbon>
+References: <20240108151015.2030469-1-Frank.Li@nxp.com>
+ <ZbJ/P5ldcrSs16q8@lizhi-Precision-Tower-5810>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <ZbJ/P5ldcrSs16q8@lizhi-Precision-Tower-5810>
 
-Remove superfluous alignment checks, these checks are already done by
-pci_epf_alloc_space().
+On Thu, Jan 25, 2024 at 10:33:19AM -0500, Frank Li wrote:
+> On Mon, Jan 08, 2024 at 10:10:15AM -0500, Frank Li wrote:
+> > For the inbound MEM/IO TLPs, iATU on the endpoint expects the target
+> > address to be aligned to the size of the BAR. For configurable BARs, there
+> > is no issue because both host and endpoint will know the exact size of the
+> > BAR region. But for fixed size BARs available in some controllers, if the
+> > BAR size advertised by the endpoint is not same as of the actual BAR size
+> > used in the controller, then the MEM/IO TLPs generated by the host will not
+> > be translated properly by the endpoint iATU.
+> > 
+> > So if the fixed size BARs are available in endpoint controllers, always use
+> > the actual BAR size.
+> > 
+> > This only fixes doorbell (DB) BAR. A similar fix is needed for memory map
+> > windows(MW) BARs.
+> > 
+> > Fixes: e35f56bb0330 ("PCI: endpoint: Support NTB transfer between RC and EP")
+> > Cc: stable@vger.kernel.org
+> > Reviewed-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+> > Signed-off-by: Frank Li <Frank.Li@nxp.com>
+> > ---
+> 
+> @lpieralisi:
+> 
+> 	Could you please pick this fix patch?
 
-Signed-off-by: Niklas Cassel <cassel@kernel.org>
----
- drivers/pci/endpoint/functions/pci-epf-vntb.c | 11 -----------
- 1 file changed, 11 deletions(-)
 
-diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-index ba509d67188b..eda4b906868b 100644
---- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
-+++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-@@ -527,7 +527,6 @@ static int epf_ntb_configure_interrupt(struct epf_ntb *ntb)
- static int epf_ntb_db_bar_init(struct epf_ntb *ntb)
- {
- 	const struct pci_epc_features *epc_features;
--	u32 align;
- 	struct device *dev = &ntb->epf->dev;
- 	int ret;
- 	struct pci_epf_bar *epf_bar;
-@@ -538,16 +537,6 @@ static int epf_ntb_db_bar_init(struct epf_ntb *ntb)
- 	epc_features = pci_epc_get_features(ntb->epf->epc,
- 					    ntb->epf->func_no,
- 					    ntb->epf->vfunc_no);
--	align = epc_features->align;
--
--	if (size < 128)
--		size = 128;
--
--	if (align)
--		size = ALIGN(size, align);
--	else
--		size = roundup_pow_of_two(size);
--
- 	barno = ntb->epf_ntb_bar[BAR_DB];
- 
- 	mw_addr = pci_epf_alloc_space(ntb->epf, size, barno, epc_features, 0);
--- 
-2.43.0
+Hello Frank, Lorenzo, Mani,
 
+
+Frank, sorry for not seeing this patch earlier.
+
+Could you please see if this series fixes your issue:
+https://lore.kernel.org/linux-pci/20240130193214.713739-1-cassel@kernel.org/T/#t
+
+I think it is nicer since:
+1) It doesn't add copy pasted code from pci-epf-test.c to pci-epf-vntb.c.
+2) I would expect it to handle both the doorbell BAR and the MW BARs.
+
+
+Kind regards,
+Niklas
