@@ -1,47 +1,47 @@
-Received: from EUR02-DB5-obe.outbound.protection.outlook.com (mail-db5eur02on2040.outbound.protection.outlook.com [40.107.249.40])
+Received: from EUR03-AM7-obe.outbound.protection.outlook.com (mail-am7eur03on2049.outbound.protection.outlook.com [40.107.105.49])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A0581383BA
-	for <ntb@lists.linux.dev>; Tue, 30 Jan 2024 19:45:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.249.40
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7FB28383BA
+	for <ntb@lists.linux.dev>; Tue, 30 Jan 2024 19:51:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.105.49
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706643950; cv=fail; b=K4DdBcMI2cU9U0p+4QVqIdOgtruNsqf5E34/Q5fRFOWud1MHgtlPG8S9NIzhRajCsTTYilnJz/VRZ/r+/XBCOkWy9MBZNw55Uv8ZrLeE7adc84izs8ecHHgWrK1CCLSMA7xkvlbqvyZ+Av9Yh6alH0fwZ6JJ6kcz4L5YZ6W+qTY=
+	t=1706644274; cv=fail; b=OHXM9R9sK1xZf/PYNioIPRtw/s7SOD0tqOZOklsNsuWqxQXCfWkGWMYLuky8A1WqkU71fcgDGWu6X8BkmbOoXtnumPkC6aF1jrfSjQgFNL59a9+/7Htz4KaHiAklfU51b6sIZQz1o7LqRrDLNEwskzQ8+p7m/1gq5gWSrAyl/bE=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706643950; c=relaxed/simple;
-	bh=eUmpv7B7zRxQfaADmRgTZuA9/chxdPmEpa6sFaiY8Ao=;
+	s=arc-20240116; t=1706644274; c=relaxed/simple;
+	bh=UFAcgj2vwxfdutfrhZqTRnpmaSEL6nSd3c2lADMokgM=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
-	 Content-Disposition:In-Reply-To:MIME-Version; b=INnPNwbDGWiHlWe/E9LUKa17T3sR+W7t5Ko7PsBLPq5+pqZaMrruoKFBeijwZbIfsdRbC5pbU9+uHq7jywkW+3bkZ3t1OvbN1OA21w/OE5qC53ZsGgyo5iEWHNV1smIirIPKbYVXQIzZNWgotlMlF8cxVuXSDU2uCCNLulgrXPc=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com; spf=pass smtp.mailfrom=nxp.com; dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b=cbN6YSDB; arc=fail smtp.client-ip=40.107.249.40
+	 Content-Disposition:In-Reply-To:MIME-Version; b=URo0QTLjjtn0cda0mmBvKsOj0P9JazsiyssWq5qF1uLJOfDlCLTh36dcJMi43o0XgeXNisTmJqLNw+Upjwveq1A1WRjKimN3ips8acKYksgCefulbATdWeINIhUikQ0QTMU2RaGUkDnTCFsGblULTNawgPZbQ798nMhsn5lAZiw=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com; spf=pass smtp.mailfrom=nxp.com; dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b=XclzmR4X; arc=fail smtp.client-ip=40.107.105.49
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=nxp.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b="cbN6YSDB"
+	dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b="XclzmR4X"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=WUtwrL7D9elawAGspArAjjmEwey/onScLg4JBHTAFZd6SFx/3VKMPvd8jB4WyRZZ3Aojxj0hZ+3VrdEn1ERaDV+F6EXrNywyEeoiV5k5A4sX3XtCHO7XiclQr8eMOuCT+jKLCWnkID4RBRDXHmgE8kX8CBxJ8TrAZl5TCqc+kWxiIq0FPmn8H22Kp5n/+HD3ARySSa2TUQrjwBBuStPR0V158F40q/wlr30SkAFDNoFWNo8pWPLGxTpHr7uGwf498j3srYS4P5Hin7gyDR6a057w+YAnQ6fXpCyDkc8AqoVQbyuziJ1K6xGCGYa3do0YwxKuZ//54AnqvWylzKEQqQ==
+ b=hOqLIOOW+9W+pbaXKADtuLDBCd8nSE+nywNS2M9w6rYMK9d8pcoTZ87wJt2A45QFen4OogTOBX8Gh3E+Bmyi64U3FAgGtDKkl4sYvUxSz70D/wmBLpaUMsKZjHTxO3pGVaVvKLfncOrb6mzjVZ8zO15y/JitmT7P7IEHN7kvIz39BxbNLjd0KmgtAIQidKNh+5lXemK9NLjCcMXxqnV7sJ4ssZ/uZShLBMj7Qzlfblne8XtXLByuFbpsAH92wchmD79iTkR+oQLHN7dXmU7YFNp4bjxtszJ7wGyNEK2VJFVmQAtQXDVbTZ6G/fEsyxgpAga3Q1U/Fu6moVtre6CeDg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=CLcySYb9PnKqZLPYQz+bQvp/P1t5UxPh1nQyL3O83WI=;
- b=Qs9yQGb3iPtaPnFXq+D3B3IxHa/uWbv526sNcufz7ciJKzCiFi24M/hhzq6IKtMiLdqUoomImkdpzcVXOI3L4V6NRKAA0oRlWtq5loUrh1gxeDGusw7t73dLJI1OKYtVdlvOPxH9XmK0fKWeqJhlLyXsrdWUYOjLNcf9ZKS0Hg/GuLzsYMI2MD/CGBF9yXO+KczkQ0lClpweftsmBknVEvkfYjDghk4/txTngJTPWvNG2S8sapW1CvmIpACbVWpeEWeH208GhWgqNMmMsRdpcTaohUCcNAi26VyXMxK1Cc4JkuGEJP/YnGAIdhl49C2i4JNPeJ/cW2cktgTrd3MGLQ==
+ bh=Jmc1xpMm+7RhCM98X00xHz8VQODxYZujuhdB7RWqgQo=;
+ b=MUVCl/nzxXXAv8DAuGAFN7CDVhTuNnDTSKuoIdTgyYWMXgQujdWkYjU2Uie1Oqs7hJ2lNSn72PtigetoJBQ+qlbMrL5GyvdKtYBno4JAGlrm1EPNPF08rEILDQfK3pbhqvVZ4K4fF3l8Fnb4F4jPT8txIyPpqEq73D1uKvpeQzpTTbqrdUHwx2Ll4K7tLL67eeQOEf3vgRrQ5OR9km4CnPPw6WwUEmYhtawI/qYKKTBPz4vGA5t0igQaAKyn3GYlajC8Q+d42eswzSlxDIrdmOSjr2Weo0Czq36SVvpINRXR6RAsQ4/pFPpkz3QQJqSlK2b2RiqFM7az9K4cBmr1hg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
  header.d=nxp.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=CLcySYb9PnKqZLPYQz+bQvp/P1t5UxPh1nQyL3O83WI=;
- b=cbN6YSDBi8ziVtosC+5H9d/pqoAxXy8RHE3xzGck5FG8Sns2MpmkNlJVckb0QcBef1q+/1S3d+aEV9Vfb4yoa6VGorYOGB1Zbzf4cz1OFNexlPsyOmV5AgJAePA85hMp95Fi6fog0oDJp/xpN7oZfOoIK7+M789M7z0X2+HWsfI=
+ bh=Jmc1xpMm+7RhCM98X00xHz8VQODxYZujuhdB7RWqgQo=;
+ b=XclzmR4XcXw+LR2RMWReMFYZ9Q3ny2Lfv5jnmMPEdVpe4aEzhVC1IsMaFmmqGG3deXUwre3aNons64z+OZpIyJPYKOwTRDXgNxE4LuNoLXBWhD0WPoofWt7FTGOnGAiFqQhw3+aelLXYoX0Zp3u8TAFXpkMBRQTwOk05VtSl9zs=
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=nxp.com;
 Received: from PAXPR04MB9642.eurprd04.prod.outlook.com (2603:10a6:102:240::14)
  by DB9PR04MB8171.eurprd04.prod.outlook.com (2603:10a6:10:24f::19) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7228.34; Tue, 30 Jan
- 2024 19:45:44 +0000
+ 2024 19:51:09 +0000
 Received: from PAXPR04MB9642.eurprd04.prod.outlook.com
  ([fe80::c8b4:5648:8948:e85c]) by PAXPR04MB9642.eurprd04.prod.outlook.com
  ([fe80::c8b4:5648:8948:e85c%3]) with mapi id 15.20.7228.029; Tue, 30 Jan 2024
- 19:45:44 +0000
-Date: Tue, 30 Jan 2024 14:45:37 -0500
+ 19:51:09 +0000
+Date: Tue, 30 Jan 2024 14:51:01 -0500
 From: Frank Li <Frank.li@nxp.com>
 To: Niklas Cassel <cassel@kernel.org>
 Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>,
@@ -53,15 +53,16 @@ Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>,
 	Bjorn Helgaas <bhelgaas@google.com>,
 	Damien Le Moal <dlemoal@kernel.org>, ntb@lists.linux.dev,
 	linux-pci@vger.kernel.org
-Subject: Re: [PATCH 1/3] PCI: endpoint: refactor pci_epf_alloc_space()
-Message-ID: <ZblR4XkWNb4zYRcA@lizhi-Precision-Tower-5810>
+Subject: Re: [PATCH 3/3] PCI: endpoint: pci-epf-vntb: remove superfluous
+ checks
+Message-ID: <ZblTJRoiu7xmwkmv@lizhi-Precision-Tower-5810>
 References: <20240130193214.713739-1-cassel@kernel.org>
- <20240130193214.713739-2-cassel@kernel.org>
+ <20240130193214.713739-4-cassel@kernel.org>
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240130193214.713739-2-cassel@kernel.org>
-X-ClientProxiedBy: BY5PR13CA0010.namprd13.prod.outlook.com
- (2603:10b6:a03:180::23) To PAXPR04MB9642.eurprd04.prod.outlook.com
+In-Reply-To: <20240130193214.713739-4-cassel@kernel.org>
+X-ClientProxiedBy: BY3PR04CA0018.namprd04.prod.outlook.com
+ (2603:10b6:a03:217::23) To PAXPR04MB9642.eurprd04.prod.outlook.com
  (2603:10a6:102:240::14)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
@@ -71,174 +72,96 @@ List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
 X-MS-TrafficTypeDiagnostic: PAXPR04MB9642:EE_|DB9PR04MB8171:EE_
-X-MS-Office365-Filtering-Correlation-Id: ce565dac-d967-482e-f07e-08dc21cc0c81
+X-MS-Office365-Filtering-Correlation-Id: eb5f0880-8365-44b0-fb4d-08dc21ccce15
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
 X-Microsoft-Antispam-Message-Info:
-	RnrEEKkNb4gVqZ1xDkvDyjUEaryiZf+kYDBcJ2PODeX1KFdLAaRLUm//1T5SYteXyglzll7rGPeku562+o5/XamrFd1HZbbnysdDB/DJtQULp6L0Pg9DLlEPMBLoqFJV3ExbCuHKg2g4WPr88MzhwE3NCUudHe7C4aA03Yugrytjxhz6R8tFm00X00NL4uZVcQ7yya7eCQsmUu/qeqxyL6OSHaukN73fRozbEHabuHzG14LRsTndW35BSR68ST2uakrxG7yvD6yhZiHVnBqtGuJAm4OkELRB5LblKbc6/TI81Ysw4OVpXgd+JMiQcQd5SsTjoPu6lA5jHYTi9h+PmVAMWXADFhL3H0dbF454VgVMYOCCauN4S1HPWAVNlxoLqJq43pE/ryAWtm81JwSzAGmp5FHn/kQB9gJBXvqCQNQ1lDSIAoLegWFLs8t8ZoD2hDHEeOS531Uaa2KwPelNXC9LymMudwbkIriE9H0cFamYcBj1eoWt8/RWZf3/mMeOgDWlJhm6kIvDBTrrK4vZ35lsL5tjqdBmhfzJ13pIGt18Xtq+WjCJ7kkiMei0eTOVk/CRsoMM66pubH+NKdO9KcERYVr2o0AJvP+Vit4YTePULhBU5ie9XhsKm8WKFt4b
+	Ord5vkzsqRU6DrJw+4cH2x7zQZATFqV0jngoK3sYOc5FtbuJhX3hQhjp2S4CaeCxP7UPGbAXbsnqX23rLr/C3eVEZb41u6rGPsyQAoZqkDnhC+HT2IGiXN67xLnvCbDymFdKJGw/47gbv3P7wE9XdYmO93GulpNJi7bh9XBGeuwFMlq6XCjpzn+djxuCcD+EwlZNHgKrtkcxmIqMZql+WfFTLi3EM0kX5prp+5tF5pchO9dsR4CRBZJuVjux71LN6ZQu711nlGXApI01bAkQiD0HnihrRRzO2WQ/FslYITZe3yhMpFEwxvGtQxzszhy7ApAcTBuM6kiaK+dyDjg0zRflNd2DP+UFH6GpSs8RPhXAzjTdmN5L/O0iBR/A18kHvnIjdJE4BMi1Hs3BDpfBaoLdPJGWikfUO4XNzPJilqnwRmTt+iKNCx3sPBgxzRydxhnaJd2HAAz66rFBOI6bwNqKOuiHyoKAFGECvot1u9weaIgtmuHWbeqKN5StVU51Pixt9egqo/yPwGVdJwLJ8+T4kqRvR0iEuaJqJcy05eeXqT75Bk4/9Wy9lRoUzjMOXZd81kgnYi/3uMiFZ5fF1FODqgn4gUTe/pkOFFG5rQo2a/7BYY5UtamC2B5Zb/FV
 X-Forefront-Antispam-Report:
 	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PAXPR04MB9642.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(7916004)(396003)(376002)(346002)(136003)(366004)(39860400002)(230922051799003)(64100799003)(451199024)(186009)(1800799012)(66556008)(6916009)(66946007)(54906003)(66476007)(316002)(6486002)(478600001)(41300700001)(5660300002)(86362001)(38350700005)(2906002)(7416002)(33716001)(8936002)(8676002)(4326008)(38100700002)(26005)(9686003)(6512007)(83380400001)(6506007)(6666004)(52116002);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?mue+Y7szvyrHJ8RtpDBgynBr1ov5noPW8buDxybc1a25LO8hPhpkvQOYTV7d?=
- =?us-ascii?Q?B/hGuCIHmggeURTowmSyOvA/w4Pumbl57hM2+QFjGj89I4U8itCXyvsec6WN?=
- =?us-ascii?Q?rrV7zqPJFTSpmpYfn50ZR6Oacm4CJ7D1K60bv+4+zLI24DU72U8QInZ/nnVR?=
- =?us-ascii?Q?O/X55mo1yRt3Fe430KMp6BLgkkO3vO1m+0rA2h1z7iASZCtvHhcU6Nocux8+?=
- =?us-ascii?Q?7TpvU1bPQnxxuARgDaaqejtZmB2b2KwhI/wf5Nr9SclJ4DV9Y/ft13xpz9Is?=
- =?us-ascii?Q?dWaKW4FS+eaN6zulRRnZDOENlO5SEI4yAhUun9KP/bRmIdoH5SoJ5X+UMkWO?=
- =?us-ascii?Q?3pg17wwQIShtU0ueqY4MG0ygoU73qmRLiRXYmDUEfFd4vR0jsz2vP2s2/7D3?=
- =?us-ascii?Q?dXC6ZlxB1kWlpPdMH74NBzBe7tvTkKEIe/DSye/rCkx+s3yclmjf7JFgHQ7p?=
- =?us-ascii?Q?aWyb+BFQgJ8D/Xn77pI/cUoePH9C79bPk4jU3BBbKcsVklaz52A8ArH3DWj1?=
- =?us-ascii?Q?VwlLNPUjARHrFdIXpZWh3WBQA7tdFpiVNDW92gU4i1Muw6zuba/xkpv9TBuM?=
- =?us-ascii?Q?dlEJ0rITePGELIAAO7hwKXle3/CP0g7s2ZUymUiqoSUbXaxKWXGhdaZZzXo8?=
- =?us-ascii?Q?gjH1oumu7WTpgFfzb/1bpOSm7HrlY3Og05iwWqmeYNMHaaRzRORpVhjNXiiG?=
- =?us-ascii?Q?yANtGpQGq6h3UWRZDE7HXcztFd+priC0A17fZTdVN5mRZto3abIh3Fv8fYTX?=
- =?us-ascii?Q?nUAhaWhv4RRZxMUIsS4wXqHHAO+JOAD+LWRNp65Dhp0Ny3k3d62cDgnT/hRE?=
- =?us-ascii?Q?OQScS4XJvHu37hJs+gOYRzfM3KgjdHz0IKi++mr7aMapirW1GnZj5HPMll2G?=
- =?us-ascii?Q?5Cxd1yDxqkSxgX2P2H3jGgvRZwZf2YZGhcafm9c2sbf9wO7oYz3SspVYilpS?=
- =?us-ascii?Q?5k4gTTilqF4yjbGYwpmcSzqs1bRrkF+kC/f5J21+1BC+QQCTLMRJT52a9i8v?=
- =?us-ascii?Q?/SrAogdxEZFu2DIx191fVuhb+CKdbT2zX+7wDrcZF3r6fPAzVrvo6paej/2B?=
- =?us-ascii?Q?IGiuHRUVAfqFg5e8EhXZ6ihtHkzODyNVdQOnecMu5bBwXmRABMwY6ijpN7JU?=
- =?us-ascii?Q?0kL/BxkPh0vLW27Zn1JsCtT4+u40bXT/sFBY+raXdDJqc+nLWvVR0pBugFOG?=
- =?us-ascii?Q?V0go+dQeK1mRJKdUBwMxXnK2d12+lcKKMhaKO9K9/lf16+knSQChFxfILs39?=
- =?us-ascii?Q?Te+8yBvEfx814FJgEbQVE7H1zU+Dgali1FYMkYgMW0TDjYnCnDiikgusuKPE?=
- =?us-ascii?Q?y0pWrOmYJ4p1I3rnm2iKeYguL0VH7BlC5gK+tMajLPGup8lIhjlKcNsRjusU?=
- =?us-ascii?Q?Wv2apO+/JrVt6qwH1bUDm41Yo6j0qFFJHQGYYKNzyD7b+e0Njm7PZe2T7IoH?=
- =?us-ascii?Q?1J3aUUUsn2gt7cHSmSwQQicPEHB6T7qgv+FGB12fpC7Ori0jbop9YfOe9+Ax?=
- =?us-ascii?Q?vR8wNvCXohQBd9bf8H5PW+duwiPJRmC38UMkTXiuhk39NIO6AaqfqN3KptZD?=
- =?us-ascii?Q?nhkSZaL8pDd5UiBd7bWInVrlHeLQpxl0SONpYLFW?=
+	=?us-ascii?Q?0HAqpTvwI+FdM7SuHT2NnJAHrmvwkvhew/h2C4B/DwVdN2Zx9B7wIgxu33gN?=
+ =?us-ascii?Q?/Eryd1vvNLBbq2sreEcgIYCJURgn0V17P3zBrJClv+yxbgoWoCc+af+XXbXb?=
+ =?us-ascii?Q?RkZRWi7ypMBF5vLXJMiO2GIDgX6MFh4Ru/nAtIpiSUNeA0FImorAalR/v3+R?=
+ =?us-ascii?Q?vP/3EC3oBSkT6jLcRIFqxDOwPaXslF0S8Wpv9y+wPUhcL9Yd6NOnjHV0Z67L?=
+ =?us-ascii?Q?RGeDOmzaYobBSK1OtTEWp/X+DaP0faWIMbmEwKtdBGMMcb5hZFIjpjyNJ46Q?=
+ =?us-ascii?Q?C1mK5qn9tXG6JZgC7em6alnaHwBQh8VrLyuG+weB5E2XHmaBf5RB6fCoJ3NN?=
+ =?us-ascii?Q?/d8Ch/4V7Ttn6M43YUx5NMD2QrItKZQMwXey4FTzHDSfrFrulP3ktK690Gg7?=
+ =?us-ascii?Q?GiBqilrIQ2g/yhptj431CqTfY3aTMAfhdqpBCXCZimgu3vG76n+4H6Ml/x6b?=
+ =?us-ascii?Q?KDVriDu/xcodFv/GUB5uPdXJDKoES6OgS/GIpQa8Rlh9hs3tVeqC41NvvI4Y?=
+ =?us-ascii?Q?L1jNDALSX8+tdNt6YngDG0UGFVKLNSvAqYW6v6NAVOlI1iOOF+1zBpQpYOie?=
+ =?us-ascii?Q?9zdZKlQW/G4h0ltLXO0MJbjt7RTAFDprIBEwkGanNP7jAhpdVeoWSlrY0NnU?=
+ =?us-ascii?Q?RzTqjbC/a1LlxBgsOkI6c2khJfyibjEVeN3DGHI79blrD73NEGtUAj0tvxjt?=
+ =?us-ascii?Q?amGDA1NzySoNJO20awNwWKkXJKmfv1lNizDMXmdlTBZGP4yqT1AVTIMqHLpW?=
+ =?us-ascii?Q?fY/DaHnzLLc+3ayd4HkTl4lOaLvtF4kOj34EX6ssBGrw8E3xYi+/ci1pAMJp?=
+ =?us-ascii?Q?V9PQyJCXKIGyVEJUx0T/pWgY422qiLo6lSZ9CIHo8ir/PuVav7ofivqIBszg?=
+ =?us-ascii?Q?l+JI9dq6rpvrcTt+g+K8hLMziH3p4Mg7/YhHj0h3q91907uYDGPEV+SQ0Ojt?=
+ =?us-ascii?Q?UkMFbh8KrbejB+v4LvDUbiUj3PF5q87xJtuCjxLyY8/1PASuVdVc+UYvDOlK?=
+ =?us-ascii?Q?s/lIU9VXX6yK9vpducyPLpcKWn35utw93eF2vdcK2+YI6206ZRdH3JdGWD66?=
+ =?us-ascii?Q?/ZVYqiV597qaRL9XOCputEbkpJOfwsAkWERsiOSWCb/b24DIWWiA7hJyblmp?=
+ =?us-ascii?Q?ZzHkgC0CqcNJSvLlBtXHWC/sr4kvpsd0B933BH5Ttm/x0cxcSdAG8MgyTblC?=
+ =?us-ascii?Q?b7mWI4Tvwr9hJOleZH6XQGKFcFzRhbkPFAJZ6YgeHyHW5otRkHzMYm7pO0Ep?=
+ =?us-ascii?Q?1c+VVWdGSBD6AbRSRJJApXON8dNzX3GXkv/exM/065wVp5qoYjEm0rnJDBqy?=
+ =?us-ascii?Q?32E6kBdNiis1lvdL09C2s08xDq6a/kO4BcBHeccchN8JNhq4FTamx4Bhjxh/?=
+ =?us-ascii?Q?/3U+iYZZfN6Nb/555zOq8GtAT8pQQt86sFcUla/U2WLavCMQd9Kc8mXH51rI?=
+ =?us-ascii?Q?Vi/Og59Iaw8WXrDWy6j6gU9O7DgwH9GmiilMubz9/qt6yKP0nkAqQQM+MdYb?=
+ =?us-ascii?Q?KUFOz3rmBowmWtTc3+Zx3ewLbQZn3gj+95DGwVwRt+o0NhBNiAjo2Bqs2D5I?=
+ =?us-ascii?Q?VCMWuPwzx2XGgKLIiEvx4FUeO0QbKUGreeNqX1BF?=
 X-OriginatorOrg: nxp.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: ce565dac-d967-482e-f07e-08dc21cc0c81
+X-MS-Exchange-CrossTenant-Network-Message-Id: eb5f0880-8365-44b0-fb4d-08dc21ccce15
 X-MS-Exchange-CrossTenant-AuthSource: PAXPR04MB9642.eurprd04.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 30 Jan 2024 19:45:44.7456
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 30 Jan 2024 19:51:09.5661
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: nyQOf5RxBmWGKRel5JWL0jetuetZ0pQs71znk9vl8DhhoL8Hq4vyJl5foveAHZ09tYOihkX+sIJkZZn5SYFzjw==
+X-MS-Exchange-CrossTenant-UserPrincipalName: f4A/6ZkNEZ1a7d1l18GinSXEi8kA5aYczLBDKauO4oBf0Msb4ZVSCYFvpf4Rjrs8r3143ayKBnIVw1yq/TZU5A==
 X-MS-Exchange-Transport-CrossTenantHeadersStamped: DB9PR04MB8171
 
-On Tue, Jan 30, 2024 at 08:32:09PM +0100, Niklas Cassel wrote:
-> Refactor pci_epf_alloc_space() to take epc_features as a parameter.
-> This is a preparation patch needed for further cleanups.
+On Tue, Jan 30, 2024 at 08:32:11PM +0100, Niklas Cassel wrote:
+> Remove superfluous alignment checks, these checks are already done by
+> pci_epf_alloc_space().
 > 
 > Signed-off-by: Niklas Cassel <cassel@kernel.org>
 
 Reviewed-by: Frank Li <Frank.Li@nxp.com>
 
 > ---
->  drivers/pci/endpoint/functions/pci-epf-ntb.c  | 2 +-
->  drivers/pci/endpoint/functions/pci-epf-test.c | 5 ++---
->  drivers/pci/endpoint/functions/pci-epf-vntb.c | 4 ++--
->  drivers/pci/endpoint/pci-epf-core.c           | 6 ++++--
->  include/linux/pci-epf.h                       | 4 +++-
->  5 files changed, 12 insertions(+), 9 deletions(-)
+>  drivers/pci/endpoint/functions/pci-epf-vntb.c | 11 -----------
+>  1 file changed, 11 deletions(-)
 > 
-> diff --git a/drivers/pci/endpoint/functions/pci-epf-ntb.c b/drivers/pci/endpoint/functions/pci-epf-ntb.c
-> index 0553946005c4..43cd309ce22f 100644
-> --- a/drivers/pci/endpoint/functions/pci-epf-ntb.c
-> +++ b/drivers/pci/endpoint/functions/pci-epf-ntb.c
-> @@ -1067,7 +1067,7 @@ static int epf_ntb_config_spad_bar_alloc(struct epf_ntb *ntb,
->  	else if (size < ctrl_size + spad_size)
->  		return -EINVAL;
->  
-> -	base = pci_epf_alloc_space(epf, size, barno, align, type);
-> +	base = pci_epf_alloc_space(epf, size, barno, epc_features, type);
->  	if (!base) {
->  		dev_err(dev, "%s intf: Config/Status/SPAD alloc region fail\n",
->  			pci_epc_interface_string(type));
-> diff --git a/drivers/pci/endpoint/functions/pci-epf-test.c b/drivers/pci/endpoint/functions/pci-epf-test.c
-> index 18c80002d3bd..15bfa7d83489 100644
-> --- a/drivers/pci/endpoint/functions/pci-epf-test.c
-> +++ b/drivers/pci/endpoint/functions/pci-epf-test.c
-> @@ -848,7 +848,7 @@ static int pci_epf_test_alloc_space(struct pci_epf *epf)
->  	}
->  
->  	base = pci_epf_alloc_space(epf, test_reg_size, test_reg_bar,
-> -				   epc_features->align, PRIMARY_INTERFACE);
-> +				   epc_features, PRIMARY_INTERFACE);
->  	if (!base) {
->  		dev_err(dev, "Failed to allocated register space\n");
->  		return -ENOMEM;
-> @@ -866,8 +866,7 @@ static int pci_epf_test_alloc_space(struct pci_epf *epf)
->  			continue;
->  
->  		base = pci_epf_alloc_space(epf, bar_size[bar], bar,
-> -					   epc_features->align,
-> -					   PRIMARY_INTERFACE);
-> +					   epc_features, PRIMARY_INTERFACE);
->  		if (!base)
->  			dev_err(dev, "Failed to allocate space for BAR%d\n",
->  				bar);
 > diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> index e75a2af77328..ba509d67188b 100644
+> index ba509d67188b..eda4b906868b 100644
 > --- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
 > +++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> @@ -446,7 +446,7 @@ static int epf_ntb_config_spad_bar_alloc(struct epf_ntb *ntb)
->  	else if (size < ctrl_size + spad_size)
->  		return -EINVAL;
->  
-> -	base = pci_epf_alloc_space(epf, size, barno, align, 0);
-> +	base = pci_epf_alloc_space(epf, size, barno, epc_features, 0);
->  	if (!base) {
->  		dev_err(dev, "Config/Status/SPAD alloc region fail\n");
->  		return -ENOMEM;
-> @@ -550,7 +550,7 @@ static int epf_ntb_db_bar_init(struct epf_ntb *ntb)
->  
+> @@ -527,7 +527,6 @@ static int epf_ntb_configure_interrupt(struct epf_ntb *ntb)
+>  static int epf_ntb_db_bar_init(struct epf_ntb *ntb)
+>  {
+>  	const struct pci_epc_features *epc_features;
+> -	u32 align;
+>  	struct device *dev = &ntb->epf->dev;
+>  	int ret;
+>  	struct pci_epf_bar *epf_bar;
+> @@ -538,16 +537,6 @@ static int epf_ntb_db_bar_init(struct epf_ntb *ntb)
+>  	epc_features = pci_epc_get_features(ntb->epf->epc,
+>  					    ntb->epf->func_no,
+>  					    ntb->epf->vfunc_no);
+> -	align = epc_features->align;
+> -
+> -	if (size < 128)
+> -		size = 128;
+> -
+> -	if (align)
+> -		size = ALIGN(size, align);
+> -	else
+> -		size = roundup_pow_of_two(size);
+> -
 >  	barno = ntb->epf_ntb_bar[BAR_DB];
 >  
-> -	mw_addr = pci_epf_alloc_space(ntb->epf, size, barno, align, 0);
-> +	mw_addr = pci_epf_alloc_space(ntb->epf, size, barno, epc_features, 0);
->  	if (!mw_addr) {
->  		dev_err(dev, "Failed to allocate OB address\n");
->  		return -ENOMEM;
-> diff --git a/drivers/pci/endpoint/pci-epf-core.c b/drivers/pci/endpoint/pci-epf-core.c
-> index 2c32de667937..e44f4078fe8b 100644
-> --- a/drivers/pci/endpoint/pci-epf-core.c
-> +++ b/drivers/pci/endpoint/pci-epf-core.c
-> @@ -251,14 +251,16 @@ EXPORT_SYMBOL_GPL(pci_epf_free_space);
->   * @epf: the EPF device to whom allocate the memory
->   * @size: the size of the memory that has to be allocated
->   * @bar: the BAR number corresponding to the allocated register space
-> - * @align: alignment size for the allocation region
-> + * @epc: the features provided by the EPC specific to this endpoint function
->   * @type: Identifies if the allocation is for primary EPC or secondary EPC
->   *
->   * Invoke to allocate memory for the PCI EPF register space.
->   */
->  void *pci_epf_alloc_space(struct pci_epf *epf, size_t size, enum pci_barno bar,
-> -			  size_t align, enum pci_epc_interface_type type)
-> +			  const struct pci_epc_features *epc_features,
-> +			  enum pci_epc_interface_type type)
->  {
-> +	size_t align = epc_features->align;
->  	struct pci_epf_bar *epf_bar;
->  	dma_addr_t phys_addr;
->  	struct pci_epc *epc;
-> diff --git a/include/linux/pci-epf.h b/include/linux/pci-epf.h
-> index 77b146e0f672..adee6a1b35db 100644
-> --- a/include/linux/pci-epf.h
-> +++ b/include/linux/pci-epf.h
-> @@ -15,6 +15,7 @@
->  #include <linux/pci.h>
->  
->  struct pci_epf;
-> +struct pci_epc_features;
->  enum pci_epc_interface_type;
->  
->  enum pci_barno {
-> @@ -216,7 +217,8 @@ int __pci_epf_register_driver(struct pci_epf_driver *driver,
->  			      struct module *owner);
->  void pci_epf_unregister_driver(struct pci_epf_driver *driver);
->  void *pci_epf_alloc_space(struct pci_epf *epf, size_t size, enum pci_barno bar,
-> -			  size_t align, enum pci_epc_interface_type type);
-> +			  const struct pci_epc_features *epc_features,
-> +			  enum pci_epc_interface_type type);
->  void pci_epf_free_space(struct pci_epf *epf, void *addr, enum pci_barno bar,
->  			enum pci_epc_interface_type type);
->  int pci_epf_bind(struct pci_epf *epf);
+>  	mw_addr = pci_epf_alloc_space(ntb->epf, size, barno, epc_features, 0);
 > -- 
 > 2.43.0
 > 
