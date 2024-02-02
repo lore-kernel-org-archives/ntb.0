@@ -1,167 +1,125 @@
-Received: from EUR05-VI1-obe.outbound.protection.outlook.com (mail-vi1eur05on2060.outbound.protection.outlook.com [40.107.21.60])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-oi1-f179.google.com (mail-oi1-f179.google.com [209.85.167.179])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9EAFC79DD3;
-	Tue, 30 Jan 2024 20:30:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.21.60
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706646642; cv=fail; b=tlGoFEj5PTEF3abuQUUYDvdQfYgHwGMO+bG+1desCrHmPlUcvI9RwaZ6JJG+mBsVYWOe0B7o5NhmjaIPLDqbL33Hapfsom0+rI4w8l2bGIzQDaTMkbsjSLYxscJj47rEEBtE6apracOSbkd89VRzWrZj1kKb4ihMWL5d4WiR5jA=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706646642; c=relaxed/simple;
-	bh=Uz65AO1E2ya58u4tHufjPJ/ZxOjDyGBD9UtOTxF7jRI=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
-	 Content-Disposition:In-Reply-To:MIME-Version; b=euRfw1IrZuxglFL+uaep9hNwJG9zvwrp8dmyaYC5oEhYatANyYA51pBd3QF5kuI0Yi1fwvA9dLkVVG+rNsdw7cmQGRLfvpjYpvYVhGWaJIf/GHJxSYPJYdlyzDD/FDIJuUkKQqlTEku+hmHsT1oAS/aQFl/bWwboZGR6wIN+t5A=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com; spf=pass smtp.mailfrom=nxp.com; dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b=m5Si2kil; arc=fail smtp.client-ip=40.107.21.60
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=nxp.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 881E253E2E
+	for <ntb@lists.linux.dev>; Fri,  2 Feb 2024 08:37:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.179
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1706863032; cv=none; b=tPpbYW31LfcZI2qe4CFu+lQ/32+16YFG9g1BVpDfe5OT3sYfBoWmfkAsY7GPD/WcTecvYGz24jY5xsgytov6PL+F3h2y8z3E/qPo4OV43Z2DhNJPZ59KrU5cDQE41Abn7RiZZzd6BI1KDw1Vno0DjxElizyqC3T+N+QJGfZSMSU=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1706863032; c=relaxed/simple;
+	bh=Czyfyr+8UKrQ+XX6ruEHTKv5D+HXacJ7bTJvUHfQlFg=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=EQu6uNfQcPdRSNqVKlPNzdy/+i9Gr4IkhPlGfHNQ8TOk/e8HXVOknmVeXmDxgaR/NCNKcvMbKfrjb9btYITW5limh1IgzZO5Hgzgy3+yP2906D8GgPln9HQiwJO56U9V7XvMpL3N8JgQDJHIiy1A3lk6qN+Mvsefa2sf0LA59xs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Fqd3iGmP; arc=none smtp.client-ip=209.85.167.179
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b="m5Si2kil"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=Wbqen98KyVsM3aWQv89uO5xgWqieGhT6FjeyKU6/DpYJ3GP8uSgrBH/Ne/z21la2JaPqxIrwD9hX1lqJ0//pfAu4jGearJRM4KhKi6xRODlVtsKu5r61O7bwHkqTi7CIgh1voam2Ash1b/vC6Lpy2fjHmPjWGmqF1LOaWJwpSU68+EK1wUbPoYXk3yz7Lz+7HExrehDdE24W2TQn4j1UuM/9wnqRFS/tj3OtJ9uAjT7ucAAS6giMu+iiResG5urSrXLUwwYzvfQJCpPZj0t5yXttxnhnY6zA83IshAoRPrBQR68YXQP3lWQHMBQBsFnu2+JRFy7OIN64iwQJ83vulg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=cEEglG1DZF0kxyMfyBjQnyZz+O+yfijdSxbIckbAGqw=;
- b=SCuIMNEln+UfQPxB+DPMZcySyQ+wiEPh67WmeJfkvkNMLH3noRdIFaRmIsDl07S1W8hst7yaWoze3q2xTvLYWswaFE5A/8kKIGSC5ioEAuEZqT49r3UcwHacewPGYtybTsc1kINakb8JwMPQwzwETtsXr3c8M/lZN/gIw8RzBKjvrU0o7iPeO+96DnBgz7kwyHdKBDHv4+XB78biLEIc4ALqy4ja+2UeuAXRQkbh+n+3LcD2USB7iWPTJ3A9a1oC13xHvVo2DmlQ+I1xwjwwfyivzXv2MSBRePiQ3tv7TrhwkvynVWSiseR23tC3M22K7ji2oyuBFwvIdrbiowEZ6w==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
- header.d=nxp.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=cEEglG1DZF0kxyMfyBjQnyZz+O+yfijdSxbIckbAGqw=;
- b=m5Si2kilq6KveU/eTo9li2vCieKf75rVUr1No+tqioIF9lk6sz9tMqPChs0J31KpxH3b1JsvB0DtQ+0Xh1s9MdDsfNkA6dZJPhEGM/SOXlo1r0rXgGkXFj4hEsejYkvpNxFgCoFT8lPZzvrKl4FZ/0TMZtIUQIz/7AzeHwFDREM=
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=nxp.com;
-Received: from PAXPR04MB9642.eurprd04.prod.outlook.com (2603:10a6:102:240::14)
- by PA4PR04MB7661.eurprd04.prod.outlook.com (2603:10a6:102:e3::8) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7228.32; Tue, 30 Jan
- 2024 20:30:37 +0000
-Received: from PAXPR04MB9642.eurprd04.prod.outlook.com
- ([fe80::c8b4:5648:8948:e85c]) by PAXPR04MB9642.eurprd04.prod.outlook.com
- ([fe80::c8b4:5648:8948:e85c%3]) with mapi id 15.20.7228.029; Tue, 30 Jan 2024
- 20:30:37 +0000
-Date: Tue, 30 Jan 2024 15:30:30 -0500
-From: Frank Li <Frank.li@nxp.com>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Fqd3iGmP"
+Received: by mail-oi1-f179.google.com with SMTP id 5614622812f47-3bda741ad7dso1521418b6e.1
+        for <ntb@lists.linux.dev>; Fri, 02 Feb 2024 00:37:09 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1706863028; x=1707467828; darn=lists.linux.dev;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=bSVa4tdnarzL2RCty+6WSO/tCFxJU0zF/PeB4CCvMzU=;
+        b=Fqd3iGmPjSKF54EhCxlJITpExDJ2XGrAUX41KI8/3hIoG5pixnz8X/x/O60BIxFSk1
+         7yuW3tbCXPN5PNRzbNDn5OamSXDZmMQEQlyUwfAvSFJLJIVMvhHsHha4J/A2oSOPj2qR
+         oxhdszw0x/oLNCyq2SiCZZ0U123CAFoJuHyjtoYFRj+NDmgDbkQCt0h+wavN3DP5dks0
+         4r3MK+HORc7QWCaAaQ8r7Gjas3S8oicZ50+RDU6WLHGMt1v0sGE98n5773/DrLPfpMEn
+         TLF9v4jvYQW2fPzhTtsRvuBJhZyvCaJjJ4Mg9NKQY3FiW21ai5+BkMzvpMV/7sQF3KMH
+         6PEQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1706863028; x=1707467828;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=bSVa4tdnarzL2RCty+6WSO/tCFxJU0zF/PeB4CCvMzU=;
+        b=xBEzUjKaFC4n2KuEq4qikQSuq5ad6UY+dX9Mi1nkXczzOAFcDRMlFIHWcXUt2Z4nVi
+         yIomysA8pA9LS2q2ZZjiXrzbr8BNFU9ZGBeZkHWHW5LXH9DzIKDEYHcl+hj/p8XG62Sa
+         vH1JxMV7fNf13dVpOz2NtnxppU09oU3gHVXwtqhmKqnV1leB9OjQcea3juzlF79a8yzi
+         Ch+3X28KM5eG+V7hT6HuYa1yfSrh1UnLJ5hN3Nw7HU3TDojz7K3qUAg5EGGHaz0GQvqZ
+         ZwBbPMnJOYyA7W4oOzY3NclXsA9qQhGWED0WyjPpbrEhnOFaPcpoKTjzRpEsCpArMtfT
+         498Q==
+X-Gm-Message-State: AOJu0YzbaFwgWC/yBHHF9/IQUn0AEAXA05fnDXahtUTg61UWlnmSLaOA
+	qkDjbi59kfXHewPIY4gU8Z4HTnPK4sdmIK22Q+4T6ZmRTthdMCHUvYl1zJsmBw==
+X-Google-Smtp-Source: AGHT+IGPn26W49Y/fv0406NegzmywFht1rc4/4sVvSA2xSWRrwV8LyXlXjr6gVQA5zWJm3hYY+2P2Q==
+X-Received: by 2002:a05:6808:1a8c:b0:3be:5d77:cfa7 with SMTP id bm12-20020a0568081a8c00b003be5d77cfa7mr7226958oib.1.1706863028549;
+        Fri, 02 Feb 2024 00:37:08 -0800 (PST)
+X-Forwarded-Encrypted: i=0; AJvYcCWTL1PQAzxV0geR3WrgESJkz78kNMxmsYVbPIJbqltu/GulAojCJxjGumkUXdnOo1LrWQvIcQCDj5QQuoRAJrqrtt33m1Uk6GK510HfYKN2iC/Hla7bOdQx+UWR3U0Kmwlgn0zPdiFg98KhF6pmTYlMi08LO+KIK5ERvScCAhrBI3OK5LT01n1wjSJ7hC9VLQS2tD0Gb78QcQXxB/ju4B62VsdjMyN9BOSxq0cDTDLCFL7sO5RBXGxQs6aAdfqqYIYkIjshpISuPjhCShbLd/iO/M0XTOxJREtJp8OTjB6uvznF3bZpOda+
+Received: from thinkpad ([120.56.198.122])
+        by smtp.gmail.com with ESMTPSA id g3-20020a62e303000000b006d9a6a9992dsm1044148pfh.123.2024.02.02.00.37.03
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 02 Feb 2024 00:37:08 -0800 (PST)
+Date: Fri, 2 Feb 2024 14:07:01 +0530
+From: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
 To: Niklas Cassel <cassel@kernel.org>
-Cc: mani@kernel.org, allenbh@gmail.com, bhelgaas@google.com,
-	dave.jiang@intel.com, imx@lists.linux.dev, jdmason@kudzu.us,
-	kishon@kernel.org, kw@linux.com, linux-kernel@vger.kernel.org,
-	linux-pci@vger.kernel.org, lpieralisi@kernel.org,
-	ntb@lists.linux.dev
-Subject: Re: [PATCH v4 1/1] PCI: endpoint: pci-epf-vntb: Fix transfer failure
- for fixed size BARs
-Message-ID: <ZblcZnfUD7ZcEI8z@lizhi-Precision-Tower-5810>
-References: <20240108151015.2030469-1-Frank.Li@nxp.com>
- <ZbJ/P5ldcrSs16q8@lizhi-Precision-Tower-5810>
- <ZblRXOabZWzRRWoT@x1-carbon>
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ZblRXOabZWzRRWoT@x1-carbon>
-X-ClientProxiedBy: SJ0PR03CA0019.namprd03.prod.outlook.com
- (2603:10b6:a03:33a::24) To PAXPR04MB9642.eurprd04.prod.outlook.com
- (2603:10a6:102:240::14)
+Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>,
+	Allen Hubbe <allenbh@gmail.com>,
+	Lorenzo Pieralisi <lpieralisi@kernel.org>,
+	Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kw@linux.com>,
+	Kishon Vijay Abraham I <kishon@kernel.org>,
+	Bjorn Helgaas <bhelgaas@google.com>,
+	Damien Le Moal <dlemoal@kernel.org>, ntb@lists.linux.dev,
+	linux-pci@vger.kernel.org
+Subject: Re: [PATCH 1/3] PCI: endpoint: refactor pci_epf_alloc_space()
+Message-ID: <20240202083701.GC2961@thinkpad>
+References: <20240130193214.713739-1-cassel@kernel.org>
+ <20240130193214.713739-2-cassel@kernel.org>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: PAXPR04MB9642:EE_|PA4PR04MB7661:EE_
-X-MS-Office365-Filtering-Correlation-Id: ff5b604d-726b-41ef-c1af-08dc21d2515e
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info:
-	slG1w8dEmAivpWbSEnUrjll7Hlu7QMyWljw+v1AHf5JuxsWWj1VFK9AQ7RHwenid5H5zjT/LVZcm1p3BhiVGWShxKdU15OhoqrrdGuFIYTUbyphMRdoSwW08PCvA0Rah+2Gp0c3eR05WwvfUkhFUcqg4q0Cd93xs2ViRP+YTE8M1vU+fEYnjNbpwHFvglToCKn7ziLxyU0Mtnv0HWcpFAEVkQvaRLR/dq1Fq138W3oSsmbF8l7yJbnavJDvRoEubvp/mAfAIY0i+aHDLCXe3DCtkOLlz+Aq43p78Q75mjMhPVdyorAv3bP07qoblPHw3dCNOW1XXZd1/lNyYNTTOXbpo0E6iPzgnadLTD3YAHoMsYkTsmwNITh7B6JM/efWbu9FZRAgwVwHHs6GKw07ocVDB1oZ37d7iOizO0ZdS/xKkAVq+Uz43gK18euh/600Am9LFbAWIP3hXLwbkfDbCikR11QnjxOK7rQyxQSFfqLHbZ11FjUu86DSUmzfg+9oZuq8m07drBooYTiSFWuBNpZHZqw61oBcjHiCWJk+6nxl9uxghBRKhS22ELGRq43h861Loj72CxmzkrCb48rNMQS617x+hNkjIEj3a4jdUHFo=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PAXPR04MB9642.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(7916004)(346002)(376002)(39860400002)(396003)(366004)(136003)(230922051799003)(451199024)(186009)(64100799003)(1800799012)(33716001)(41300700001)(26005)(52116002)(38350700005)(316002)(6916009)(478600001)(9686003)(6512007)(6506007)(6486002)(6666004)(66946007)(38100700002)(66476007)(966005)(66556008)(2906002)(7416002)(86362001)(5660300002)(8676002)(8936002)(4326008);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?MGa+lxQGuVU3cWVj4E/iflPFxO1jq4XWMsjszdBb/mPSCZ8CgT0RKIbEjueR?=
- =?us-ascii?Q?VXGLnvY5O0ONTrxBkfYdlb1IanDD/mOEwRg09EWXODCxoWO+1ZBV59nTfvt3?=
- =?us-ascii?Q?UAN6ULsvJhunRV1hnYjdeJRkOXye2Pl2lS1m2eahFfyYkXkKo7VOZTbklh9O?=
- =?us-ascii?Q?WEkJUVLaUqK4qc3UtXqTXmuUZJeaDyyZU7fIGQGt8RiFL4eb2oAL4kjqE7mk?=
- =?us-ascii?Q?d2g8vATlb1gBXKm7pn6ux2gI4gJAGqNLrvY6pqSh7DA2kSBUV4WujC1ILW9o?=
- =?us-ascii?Q?SPZMZq1bQZ6gPPq8t6Icg5yR0U0soiUMH1KOe3GqTdawgxMxzAzqsQ/5XhXP?=
- =?us-ascii?Q?bZNom/2UdbNHAp0TlZl7lcMYcxkhRGBKYKKDbV0taC958Sc8WqZbatD84CRN?=
- =?us-ascii?Q?m3n8URM3Mqm44vniWoeuHK5rLJM5FOyiVBx9LF+GgB/LzTdlPpDYRcOzBP9X?=
- =?us-ascii?Q?zTecJJaVY+4UcOFnlg+xNILAIJT6wr6xqOS0SPxkiIpcMRO92HXnYd3dxxIo?=
- =?us-ascii?Q?Evv0tNKgpBc7lQjEiGsIBrW+YVcJhc4IAtaQnP0Z7YKrPV7KKbm6I9b65xgr?=
- =?us-ascii?Q?QVACRMviOBQQAAJri8vFpnpCbofGGhygY499+MNMOBwSWWPMA+w5LJ56AI6q?=
- =?us-ascii?Q?OUtK4SmrWdewVdAOmxfFUAbKHk3c2CL5bvH4bVpeMFMX+0FZ7wNVOVvbSnfW?=
- =?us-ascii?Q?xQVUC36ERQAhuEuJfgS25pqnV/6i/wW+wmjFE6AaUTqvFc4w59lQJP9vFOsD?=
- =?us-ascii?Q?fnKmS77WgBAWaLZXMVekBA6QH2o68CyGmC2yB4JQJ2gkUHs5kbJ+EIYf4isI?=
- =?us-ascii?Q?q3BzEA6ceFocJYtXWNZ1ltMNIqVwozfArkRsGQWYxksgsuYeSjqeZMPLfsmX?=
- =?us-ascii?Q?0/e9pVl5DdS8hzJKIArKYaG264YO/P75WnI5GmZyGFuSjKE8WAN4iE0CHip3?=
- =?us-ascii?Q?ZzpoatFWuzYDh6TbTKaujsHiCGXd0V9MCtuKYYQ+/hV1UJAg13YtyAxhr8zj?=
- =?us-ascii?Q?6F/M2+I0V0g+i9IHmnW7sIAowt/uTBccXXxVhjPf6cR6uEksfr62SFOyICeD?=
- =?us-ascii?Q?iuFShXUz/2f9r6L9ucU6SGkTitWy8RhiLydb9561fy3XrYZAJU/PQkK0DqPq?=
- =?us-ascii?Q?/a5lMgqwu/2Ril5Gb5dBVdHzjSD02U01BNBwAQYabt07Rzy7qjnG2Gveobwa?=
- =?us-ascii?Q?c/u3smcmWxkWSx8cjNMAX598CGxmSsFIKy9cLd+lZtLFNPpOoD4nShz35mn+?=
- =?us-ascii?Q?nyjZQ5m9z95jC5s8Joje3C7cqd+SYZLklzjkrdMFYldwSNKTIZ2f4nwr+L/E?=
- =?us-ascii?Q?FZPaOq/COim/EOE803oHDFGnM3Or7rK31483iHqY/C6ZvtV47EtCiM1izHiu?=
- =?us-ascii?Q?H9oFZiwkwYERM5ZMjsilAsr1D3FY05NTdH95njyGeiO5jPLc+z1uInTAwko4?=
- =?us-ascii?Q?9xOIzGq6zHo3un03Z/qYTCNeVs6Q6bv1fqH6uEDDoFEajZJxNZkhL1NAPTV/?=
- =?us-ascii?Q?tjcOTkzKltNBJGNs1J3oyFxiZsxaMPb384ovwwH16zP5+SXKOKoZ5BR+WoT9?=
- =?us-ascii?Q?ZJuJKRR/GDX4KUSMxqzDJuPFw64WKepFu4Uh9JE0?=
-X-OriginatorOrg: nxp.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: ff5b604d-726b-41ef-c1af-08dc21d2515e
-X-MS-Exchange-CrossTenant-AuthSource: PAXPR04MB9642.eurprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 30 Jan 2024 20:30:37.5332
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: pW2TJHbPzb9RZ9/32p+uPFHAO9nPo2xhe717GOXzj4Fao/g9OKkPLrhMsOYyzze4QxYPPsTChmYHYK5rn7VeBw==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PA4PR04MB7661
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20240130193214.713739-2-cassel@kernel.org>
 
-On Tue, Jan 30, 2024 at 08:43:24PM +0100, Niklas Cassel wrote:
-> On Thu, Jan 25, 2024 at 10:33:19AM -0500, Frank Li wrote:
-> > On Mon, Jan 08, 2024 at 10:10:15AM -0500, Frank Li wrote:
-> > > For the inbound MEM/IO TLPs, iATU on the endpoint expects the target
-> > > address to be aligned to the size of the BAR. For configurable BARs, there
-> > > is no issue because both host and endpoint will know the exact size of the
-> > > BAR region. But for fixed size BARs available in some controllers, if the
-> > > BAR size advertised by the endpoint is not same as of the actual BAR size
-> > > used in the controller, then the MEM/IO TLPs generated by the host will not
-> > > be translated properly by the endpoint iATU.
-> > > 
-> > > So if the fixed size BARs are available in endpoint controllers, always use
-> > > the actual BAR size.
-> > > 
-> > > This only fixes doorbell (DB) BAR. A similar fix is needed for memory map
-> > > windows(MW) BARs.
-> > > 
-> > > Fixes: e35f56bb0330 ("PCI: endpoint: Support NTB transfer between RC and EP")
-> > > Cc: stable@vger.kernel.org
-> > > Reviewed-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
-> > > Signed-off-by: Frank Li <Frank.Li@nxp.com>
-> > > ---
-> > 
-> > @lpieralisi:
-> > 
-> > 	Could you please pick this fix patch?
+On Tue, Jan 30, 2024 at 08:32:09PM +0100, Niklas Cassel wrote:
+> Refactor pci_epf_alloc_space() to take epc_features as a parameter.
+> This is a preparation patch needed for further cleanups.
 > 
-> 
-> Hello Frank, Lorenzo, Mani,
-> 
-> 
-> Frank, sorry for not seeing this patch earlier.
-> 
-> Could you please see if this series fixes your issue:
-> https://lore.kernel.org/linux-pci/20240130193214.713739-1-cassel@kernel.org/T/#t
-> 
-> I think it is nicer since:
-> 1) It doesn't add copy pasted code from pci-epf-test.c to pci-epf-vntb.c.
-> 2) I would expect it to handle both the doorbell BAR and the MW BARs.
+> Signed-off-by: Niklas Cassel <cassel@kernel.org>
 
-Agree! Thanks
+One comment below. With that addressed,
 
-Frank
+Reviewed-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+
+> ---
+>  drivers/pci/endpoint/functions/pci-epf-ntb.c  | 2 +-
+>  drivers/pci/endpoint/functions/pci-epf-test.c | 5 ++---
+>  drivers/pci/endpoint/functions/pci-epf-vntb.c | 4 ++--
+>  drivers/pci/endpoint/pci-epf-core.c           | 6 ++++--
+>  include/linux/pci-epf.h                       | 4 +++-
+>  5 files changed, 12 insertions(+), 9 deletions(-)
 > 
-> 
-> Kind regards,
-> Niklas
+
+[...]
+
+> diff --git a/drivers/pci/endpoint/pci-epf-core.c b/drivers/pci/endpoint/pci-epf-core.c
+> index 2c32de667937..e44f4078fe8b 100644
+> --- a/drivers/pci/endpoint/pci-epf-core.c
+> +++ b/drivers/pci/endpoint/pci-epf-core.c
+> @@ -251,14 +251,16 @@ EXPORT_SYMBOL_GPL(pci_epf_free_space);
+>   * @epf: the EPF device to whom allocate the memory
+>   * @size: the size of the memory that has to be allocated
+>   * @bar: the BAR number corresponding to the allocated register space
+> - * @align: alignment size for the allocation region
+> + * @epc: the features provided by the EPC specific to this endpoint function
+>   * @type: Identifies if the allocation is for primary EPC or secondary EPC
+>   *
+>   * Invoke to allocate memory for the PCI EPF register space.
+>   */
+>  void *pci_epf_alloc_space(struct pci_epf *epf, size_t size, enum pci_barno bar,
+> -			  size_t align, enum pci_epc_interface_type type)
+> +			  const struct pci_epc_features *epc_features,
+
+s/epc/epc_features
+
+- Mani
+
+-- 
+மணிவண்ணன் சதாசிவம்
