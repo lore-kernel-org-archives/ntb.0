@@ -1,61 +1,62 @@
-Received: from mail-pl1-f170.google.com (mail-pl1-f170.google.com [209.85.214.170])
+Received: from mail-pg1-f172.google.com (mail-pg1-f172.google.com [209.85.215.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6208322EED
-	for <ntb@lists.linux.dev>; Sun,  4 Feb 2024 16:21:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 31FF822F11
+	for <ntb@lists.linux.dev>; Sun,  4 Feb 2024 16:21:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707063697; cv=none; b=c4vadS1UB2k0vJP82YhB4JsCI3NX54u6eGqPu9XbAq7uQqWNFSrwyz55spfTWR8KHnS/mC46YgkqmtdesPpQL+PW+ayIcysQ6rQvhILd9GIEgzrqQPQaAUh7KzOXtApha2PFEzadVtYkNG+5zZyejjfIv4SmbkFgRRLfaeh89Ys=
+	t=1707063701; cv=none; b=NWBPBLa6uF/3K0Prd3MNTeQBnX9IlYICuv+Z0CZXGMAFpzQ68aD3mWsN+/mu+eTAF0UhRByZee7GrL2r/VLYH053ay1C/1UoEsJFV0avZp+NMFWA1aSVlhFEeKL3i9JC/JU1vgu4av6ZIry8njQFw6Nh4JW+HcOsdpv9/TSZLq4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707063697; c=relaxed/simple;
-	bh=f4g0B6Kx2qQGDzj5TKbHojILvQvjrOvj4uV5u0fl+gA=;
-	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=m00ckrI+J12nOYmMqd0L4tkEFmIV6R8Ktux3bzWMeOXf+foxN2XOW75o4Auhi7Tkgv2Zh2s9qcyn4ivWP/vXpeWENT1bRPllr2+N8+hoKOK8mEWsixnp9Rg2eWpB58Sb8vqd44xOPmpUKGQj4FyFWKCB5+3zwudDLhVLLgvKziA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=marliere.net; spf=pass smtp.mailfrom=gmail.com; dkim=fail (0-bit key) header.d=marliere.net header.i=@marliere.net header.b=m/PjIpdF reason="key not found in DNS"; arc=none smtp.client-ip=209.85.214.170
+	s=arc-20240116; t=1707063701; c=relaxed/simple;
+	bh=o2JftdH1Lhh0GDvslzWGXgMsYHPICO40Ht1z1kVrKj0=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
+	 In-Reply-To:To:Cc; b=Spbq3NbdRz8NBlpLqUL67GZKeL7XDiO2Fe9aCkz5EurSpewivzkymxkTqPAuQCuWEsnL3Lrm/bjP3mxEUuE4PVSvm4WD5jiXbqiw1ch19FZ4YjmnurgLvz6sOCV4WMXetjluRPu1RUD61c/B7T+y7RxLIZrRR4nR8pseWy/q+7E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=marliere.net; spf=pass smtp.mailfrom=gmail.com; dkim=fail (0-bit key) header.d=marliere.net header.i=@marliere.net header.b=O+Z2XWVv reason="key not found in DNS"; arc=none smtp.client-ip=209.85.215.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=marliere.net
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=fail reason="key not found in DNS" (0-bit key) header.d=marliere.net header.i=@marliere.net header.b="m/PjIpdF"
-Received: by mail-pl1-f170.google.com with SMTP id d9443c01a7336-1d93ddd76adso26324295ad.2
-        for <ntb@lists.linux.dev>; Sun, 04 Feb 2024 08:21:36 -0800 (PST)
+	dkim=fail reason="key not found in DNS" (0-bit key) header.d=marliere.net header.i=@marliere.net header.b="O+Z2XWVv"
+Received: by mail-pg1-f172.google.com with SMTP id 41be03b00d2f7-53fa455cd94so2736000a12.2
+        for <ntb@lists.linux.dev>; Sun, 04 Feb 2024 08:21:40 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1707063695; x=1707668495;
-        h=cc:to:content-transfer-encoding:mime-version:message-id:date
-         :subject:dkim-signature:from:x-gm-message-state:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=TBRzpZmKL8Mxt7wTIYbgyOd2f41J7zTkgClkvdrUgBI=;
-        b=O9YWzVJutk6WzjJ7utqqVDqxNNEQrC6NmM3abGYiTT7ivVuMAe4X2H/FP4Y5QIl46+
-         zYTvyhRqOIMA9bHQSFE/05ABiNwBtHljDuZ72SvnKPM2sHkyIRmMe4JkqWcUeU+RQgqf
-         O3+MOI+WaHyX0m8DkG3NTSfCAFd9Y/AXoi26kM9AvveoiHP4BA0nm6nI9CpJ+oP+p5YQ
-         TqJsSicm8bATfCIa2dAVNzRYIlHUdK+pItdQC/cPCnrxobt19z/DXPrv91mGKo5bC4Tj
-         dUUoqczG8GxRWz+URHBfiMQ4FvSePHEij824ru7pYqlt+fFPer6YESo1BJw3NnRC/2+1
-         i14w==
-X-Gm-Message-State: AOJu0Yx6p7Z9sdzDYu+b60n1EtjAtSMFHC4kbJCgB/joyJoohTy3BOil
-	XH4HvV/mil25eQyhVaQiVlwmGSNIeehrqBuAejWlaKG0LTC4eDKn
-X-Google-Smtp-Source: AGHT+IHfb/BjK97UTB84A52DmVrV+RJKQoJzm39ZyQgxGFSCxyv0EkXXrBhHVqWHX8b1MiQ8Mww/rg==
-X-Received: by 2002:a17:903:234f:b0:1d9:751f:3746 with SMTP id c15-20020a170903234f00b001d9751f3746mr7302939plh.49.1707063695590;
-        Sun, 04 Feb 2024 08:21:35 -0800 (PST)
-X-Forwarded-Encrypted: i=0; AJvYcCUaT2/SLJxNaPG0manu9DD4yvECh8wmyfxLIiTqRm8wM2tKN9AFWiY1Pf3Sg0d4dBe9bzj8j4+SYB4x1PE9lWh4GCf01Hkfap94kOg0zGRZ/U4Fdw8WHHnjMCGtpTaLfSG5vu7hXwDa+N7SVKAlMZniHwyF8lOIguip9fZ3xmUJxyxnDcjVduplErRs00TZczp1
+        d=1e100.net; s=20230601; t=1707063699; x=1707668499;
+        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
+         :mime-version:subject:date:dkim-signature:from:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=QjiJPQVvtwUyBqU7KJO38zWmQJXbmgfQDFzxeewrpks=;
+        b=TM5U7ClHJpxaRzO87mpOzCzYpywslKcTXrhHOlh0EiwL7KOh3m876EtTPpN+2KJiig
+         U8iTlvOEdlyTxFaG4ikOrUGJrPWPxj+srNgTqVrjkJh1iOAHbsp+kws+PinhoJr0vbe1
+         Ff2L5ET97aoSQ4Rj6WC6b2JgdhXOTMkvI9+h6qH3oB9rDBWNK6nKK7wVusDJA/leLBLo
+         SWegaCNcFJXooi/6eXLicl+69KoUhwoiSHskLFBGEqtgb9fMWehAwnBcgBPIPm2/HRdC
+         Tao4vKGSKUrGrT2Cf8qWxKsBffhnpoSlailP1PNwHf2aGHQComigV54vO49KMfqf/RS7
+         07Ag==
+X-Gm-Message-State: AOJu0YwR7fRdrY4Y4H+HpcCv8VxdUeLaIGEKTI5ysRTrbx07PLnfSF8x
+	PXrjL7z+H4DaLbwpaIerwXtuHDvI402aKFbcpMUT297hnEHE9+TT
+X-Google-Smtp-Source: AGHT+IF8je7qQu/s7vJVwCPZGn/23M5VeoaV3eOb9d1YPqK2zrOabeBIxhivh1P6Nrgc95i9dTRwTQ==
+X-Received: by 2002:a05:6a00:2b58:b0:6e0:3329:1044 with SMTP id du24-20020a056a002b5800b006e033291044mr1675780pfb.29.1707063699536;
+        Sun, 04 Feb 2024 08:21:39 -0800 (PST)
+X-Forwarded-Encrypted: i=0; AJvYcCUrR1KL5euiahwckJ9aaO9NAK2Z6RDRB7p1VBjX73QYAQuzLb4OEoHaNudmXQ7qO8bV2/O16epE6JYi0bSUCd+hMUAyZ5+pROfdp1p+Qmu4vwfocCgVpQJApXbIQ3n6jjpHR4JWnFxWnf+0QHBxB5H6vbg27cFsay39S3ZX0VnoedM7B6rJXkGFxmdVQwXOYc5e
 Received: from mail.marliere.net ([24.199.118.162])
-        by smtp.gmail.com with ESMTPSA id lc7-20020a170902fa8700b001d95a6afbc2sm4743979plb.244.2024.02.04.08.21.34
+        by smtp.gmail.com with ESMTPSA id h3-20020aa786c3000000b006ddd112c7c9sm5140654pfo.145.2024.02.04.08.21.38
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 04 Feb 2024 08:21:34 -0800 (PST)
+        Sun, 04 Feb 2024 08:21:38 -0800 (PST)
 From: "Ricardo B. Marliere" <ricardo@marliere.net>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=marliere.net;
-	s=2023; t=1707063693;
+	s=2023; t=1707063697;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=TBRzpZmKL8Mxt7wTIYbgyOd2f41J7zTkgClkvdrUgBI=;
-	b=m/PjIpdFgLg9xRMmEHpAB9P0saMwGW0iHVmvYgOGJWSV+VdFuHOLq0qTxNELUJUSu8yCN6
-	Fk4WGkMXqft4IT0QHwQ0xMBvC0BCzitBs9rKdT+UjLuCcru9wbC8i9/FE3ts5tMUxjiJtF
-	Mjc3Ho+PhPSNRin9H5LgBfZokLSMMNssJ7J6mwUFwxv5l+zbIkBI067vHpaYG7zO3Yt6jM
-	SCLqRmUeNr25rLmAktLLmIlQ6neT4EEhAK2hO0PQQ8tZLDYcYpVTMI8dN9NBUqjsvVJzNs
-	nb3Pqc7W2rkIbpBQDbAAP4vowLAw3KCDYz/U5EODMm25A/s+iTeakYfjnvrG9w==
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=QjiJPQVvtwUyBqU7KJO38zWmQJXbmgfQDFzxeewrpks=;
+	b=O+Z2XWVvP0UMKrW1QPxP07yofSO2OaCGbAltbXl9QrHxKQiTW4R3a46MLao8mVppQFSQlY
+	SoSOPJsMX/Nj7FTZcq9pdZ/VIvZvEVVS+PzwL6W+Iw4bf0BNlXNic4FQN1V7MbbgRnocp8
+	M8pdz0FeK1xgwxVSLwa1ek7QZXA0PY4DFP3It8xi5i8VgXJprQz+TwT2dak8WexMN005lC
+	r07kNwpgzWxY7q44Bgw+quTsxTdflVyuiJwnFtJmrGbonZwpPEQ6Xs/NWBs6iwSCco5H4o
+	qHGQE+QlUnxX89+pqiXVd5klgqTHNbHzpuqfcR6u8d7eFVq2Yq5WhzLmKPSMmw==
 Authentication-Results: ORIGINATING;
 	auth=pass smtp.auth=ricardo@marliere.net smtp.mailfrom=ricardo@marliere.net
-Subject: [PATCH 0/2] ntb: struct bus_type cleanup
-Date: Sun, 04 Feb 2024 13:21:59 -0300
-Message-Id: <20240204-bus_cleanup-ntb-v1-0-155184f60d5f@marliere.net>
+Date: Sun, 04 Feb 2024 13:22:00 -0300
+Subject: [PATCH 1/2] ntb: ntb_transport: make ntb_transport_bus const
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -64,56 +65,56 @@ List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-X-B4-Tracking: v=1; b=H4sIAKe5v2UC/6tWKk4tykwtVrJSqFYqSi3LLM7MzwNyDHUUlJIzE
- vPSU3UzU4B8JSMDIxMDIwMT3aTS4vjknNTEvNIC3bySJF0zA2MLAzOT1BRDSwsloK6CotS0zAq
- widGxtbUAchfht2EAAAA=
+Message-Id: <20240204-bus_cleanup-ntb-v1-1-155184f60d5f@marliere.net>
+References: <20240204-bus_cleanup-ntb-v1-0-155184f60d5f@marliere.net>
+In-Reply-To: <20240204-bus_cleanup-ntb-v1-0-155184f60d5f@marliere.net>
 To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, 
  Allen Hubbe <allenbh@gmail.com>
 Cc: ntb@lists.linux.dev, linux-kernel@vger.kernel.org, 
  Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
  "Ricardo B. Marliere" <ricardo@marliere.net>
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1043; i=ricardo@marliere.net;
- h=from:subject:message-id; bh=f4g0B6Kx2qQGDzj5TKbHojILvQvjrOvj4uV5u0fl+gA=;
- b=owEBbQKS/ZANAwAKAckLinxjhlimAcsmYgBlv7mr7gxg5DQZzX8XNHIVBQEsvx/AaYi6n9YVO
- w/ybG2AhBiJAjMEAAEKAB0WIQQDCo6eQk7jwGVXh+HJC4p8Y4ZYpgUCZb+5qwAKCRDJC4p8Y4ZY
- pkfbD/9W9vgwj6e7LA+r1b25ETLhICLFPoO/VNAD8QmoScmiadlsBFGUwkwc5MlJpVjMIIEgOrd
- 7m93y2eiBKBDB3+M+KnsGZP6/7Twpib38TnddXPIfEm0ltVLYy2MwxOioPIQoeypPpJyf+2Y/J/
- tFzK+tYMgYvSiKsbekkcohh0ViCj8glpoDWcWSoBAXM1hRrWPl4V5x7SkIfFUCB5VduNZ7BrmDw
- xScJrDxIh8olPQsVXHoXUtQhIRKIhLBbeghOK9YnUq+V63hCuZM8ZPNBFrO0v4UGxXU/IvzZw6r
- QFxeW6a7K4dKC29F/g/lcAR0IPHFcEhjhpj5DnU9KyBPNkIspq0YRfgeynwWSlrfW9id/93FUFI
- uWoEL1WLw09je+6PZDLUQalWMk6rlfGvnMl8OI0ZuhDkMZxD012nbyL4MJVv0sM5jYe9IRrARsR
- I/ke7ZH4CidgkmprT8qMed7bbQ9c2/6kIx5ixW7ro4FwZxEiRLwWUFIvMeBkbz7ikdWtc/zd9uX
- dbJVAdEeD9806OROmyoeK9cBz3OjshMtsjsF1MoESDMIhWuUvcuP9McL0mehzVa4PKpS0QQdM6t
- 33u92RZVoPlA+hIxO7St2M2tXb4dE9D4JEe37xkp4chyVLkCqljIU9ITCJAWQWK6DVpQKtHFKUB
- Ela6RpZlHnjEiaw==
+X-Developer-Signature: v=1; a=openpgp-sha256; l=991; i=ricardo@marliere.net;
+ h=from:subject:message-id; bh=o2JftdH1Lhh0GDvslzWGXgMsYHPICO40Ht1z1kVrKj0=;
+ b=owEBbQKS/ZANAwAKAckLinxjhlimAcsmYgBlv7mrsYfIx/tjByMzOoLAMVwhjhFxyD3oTBQsx
+ 9ozryIlcb+JAjMEAAEKAB0WIQQDCo6eQk7jwGVXh+HJC4p8Y4ZYpgUCZb+5qwAKCRDJC4p8Y4ZY
+ ptUUD/41Qi5N2w1Zlibh7z3PcppcnEYkxeEtme7bJ6LuGKcenNm3iPaZSn6RTbHLtiOa+L0PZEw
+ 0XIQERCz0BHrUUi4Uk8D1ZN/Zxp571wZVKxO+ecTvI2VEN6fQF8+IavxwfQ0DVu2oSKnR21amY1
+ jk1KhtopQFV7+uGEpTZMqSP97drkrRt7niDw+Djt4ub87qA3tn6/0pomPqO9SD3+Q0T2L1Jbqma
+ C+VikRZwu2QDV//aOC9eDryjNPVtohb+jdw9Tp6SMiukWF+ZxfYjgTxhv1e23XaUBGe87qaFH9i
+ bDZ31lB82p/52hBPyN3UPAMhjufcX86xY+9UriEIt4YoMcuK1yyjsTSYAgCmM/yJ79ZXZYm5ybl
+ LsGvERxf7mjEaO/UgfhDh5qIzsrzbQT+Q60zD/KkoPgG2b16ZsaDrY0SjZaKtkK+tI/zomZxo4U
+ m0yDhgPpf7OZQSkMQJ2Kb2BL2t9ujImoIHr5S4nEmj8l35Wp2r4J3qU6bQ6pW67ROPhglAiMdgN
+ WV7rjiy9ciTHIb6MHeh4NqJ3eUJGrcL80gi6YN8qpkAYmx4bE1j4StlapxxwsSUzgLCS4fRwSrm
+ QdNzwp0I+dwmpgPGMt7L7ZHTsIxR7IzRDvP08ljLE4w6Ykvl8j9BGGZVJbJZwuq+qI77UKbjUTK
+ 1Nh9ackxPgNawgw==
 X-Developer-Key: i=ricardo@marliere.net; a=openpgp;
  fpr=030A8E9E424EE3C0655787E1C90B8A7C638658A6
 
-This series is part of an effort to cleanup the users of the driver
-core, as can be seen in many recent patches authored by Greg across the
-tree (e.g. [1]). Specifically, this series is part of the task of
-splitting one of his TODOs [2].
-
----
-[1]: https://lore.kernel.org/lkml/?q=f%3Agregkh%40linuxfoundation.org+s%3A%22make%22+and+s%3A%22const%22
-[2]: https://git.kernel.org/pub/scm/linux/kernel/git/gregkh/driver-core.git/commit/?h=bus_cleanup&id=26105f537f0c60eacfeb430abd2e05d7ddcdd8aa
+Now that the driver core can properly handle constant struct bus_type,
+move the ntb_transport_bus variable to be a constant structure as well,
+placing it into read-only memory which can not be modified at runtime.
 
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Suggested-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 Signed-off-by: Ricardo B. Marliere <ricardo@marliere.net>
-
 ---
-Ricardo B. Marliere (2):
-      ntb: ntb_transport: make ntb_transport_bus const
-      ntb: core: make ntb_bus const
-
- drivers/ntb/core.c          | 4 ++--
  drivers/ntb/ntb_transport.c | 2 +-
- 2 files changed, 3 insertions(+), 3 deletions(-)
----
-base-commit: 9341b37ec17a8793e8439e9b18354ba69556b786
-change-id: 20240204-bus_cleanup-ntb-6038064ed198
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Best regards,
+diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+index f9e7847a378e..0291d80611dc 100644
+--- a/drivers/ntb/ntb_transport.c
++++ b/drivers/ntb/ntb_transport.c
+@@ -314,7 +314,7 @@ static void ntb_transport_bus_remove(struct device *dev)
+ 	put_device(dev);
+ }
+ 
+-static struct bus_type ntb_transport_bus = {
++static const struct bus_type ntb_transport_bus = {
+ 	.name = "ntb_transport",
+ 	.match = ntb_transport_bus_match,
+ 	.probe = ntb_transport_bus_probe,
+
 -- 
-Ricardo B. Marliere <ricardo@marliere.net>
+2.43.0
 
