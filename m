@@ -1,108 +1,127 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A42B418635;
-	Wed, 14 Feb 2024 10:38:59 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 570364D13F;
+	Fri, 16 Feb 2024 10:45:46 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707907139; cv=none; b=np+6X3qzsbj/GFiYJ8ycgOGoZ9FQ0REFDu2gfJOH9Z+TBTiIYIEM86wWCLm+xQBE274Wtywn3gJ+rRXVl2juvV6YYmSN1D65OaQF3+IWc+ZEl1akG0H3v0WGnU+3YDzLOnvZOnrbQnlennqxM9r5EC/Di37BzRmcTwoHbVgqku0=
+	t=1708080347; cv=none; b=ItH4LE8TVb9ifMmSGnks31wEUqPVam3Jxd8PWgygK0nqqHsCR85SWAD8vDnFw22ZOwFoG7NeEUT1UerRGza7w/K225TaT5mYSv3isxt2h5GNtG0OWE20/UUUNbqrr+hwgpK38Rw6ay8A3k4qFRR8UJaTYNHUor86MHZu4yU/Vf4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707907139; c=relaxed/simple;
-	bh=eslzQormGDUUKR6M3wUfA/wR65g2VVIMI2OcUV5+luQ=;
+	s=arc-20240116; t=1708080347; c=relaxed/simple;
+	bh=LpEdzatlMN1TBLSZkz+j9NyVGM389cIN4UKO0N2dGz4=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=sGmiOxKTP5aigfW6Ejr05LluhYH4NDA2DiKCYH28SCxe0MXmw2dgsJhnok0jQrBeEVH4gPXeIG4bXq9xaXtLJp4Yo682pjSyAuSsA2OmEHBk/nb+MwpH09uub0KqAfYQppGKuQB+EXm4yoeNBxq9gor95lclggMSUhL3CC5oru4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=NM4tcHce; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=fd+l/dH13Cpw8btEUFfdcU9oLI1vIHVIBLmPDIElWUMafoCS3mq7Sx+QxTHRunQNBbav5LEHLHE4lnU7xafsQWfoGlpccckPk5mMZB4N6fHu9YnSSEGvQ4QtDBMrqloHswyS0Uw3e30zfDWXq66w7+zeYiRGPZj8+nhazvoUMP4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Olg9jtyM; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="NM4tcHce"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 55909C433C7;
-	Wed, 14 Feb 2024 10:38:50 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Olg9jtyM"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3A47BC433F1;
+	Fri, 16 Feb 2024 10:45:42 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1707907139;
-	bh=eslzQormGDUUKR6M3wUfA/wR65g2VVIMI2OcUV5+luQ=;
+	s=k20201202; t=1708080346;
+	bh=LpEdzatlMN1TBLSZkz+j9NyVGM389cIN4UKO0N2dGz4=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=NM4tcHcenWq1MQ46lCcjZguB2y0u9a08wBEfpVvvyTs7aHG6ltzW76Dp3veftpT3j
-	 i1Z8OUTTxKwVUAmyDMA+HXFG+VHMfUSpBXFYQKnXtfp4zAw9tSsPC4LsKRiXuq2zAg
-	 HvqopQ1KrOMmaeAddUivvw1SPeSBFS4rs/JYB6OWbu8LyMbywWfLlGHwIwSoPCUba+
-	 CR/KZxC/S7C6BvcQ6xEq1ZAT/XwXhgiHFAmVMnZNvfQpiBQ54hkBW5XE+iCSel8XF/
-	 fPXVUiky2QMlDUFAJiVqHbMLhldLNckU/yM4uw7ip+kHMlzdMUBZ1fj64JKT3Rpf6g
-	 dEPOCUfNAx76A==
-Date: Wed, 14 Feb 2024 11:38:47 +0100
-From: Niklas Cassel <cassel@kernel.org>
-To: Kishon Vijay Abraham I <kvijayab@amd.com>
-Cc: Richard Zhu <hongxing.zhu@nxp.com>,
-	Lucas Stach <l.stach@pengutronix.de>,
-	Lorenzo Pieralisi <lpieralisi@kernel.org>,
-	Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kw@linux.com>,
-	Rob Herring <robh@kernel.org>, Bjorn Helgaas <bhelgaas@google.com>,
-	Shawn Guo <shawnguo@kernel.org>,
-	Sascha Hauer <s.hauer@pengutronix.de>,
-	Pengutronix Kernel Team <kernel@pengutronix.de>,
-	Fabio Estevam <festevam@gmail.com>,
-	NXP Linux Team <linux-imx@nxp.com>,
-	Minghuan Lian <minghuan.Lian@nxp.com>,
-	Mingkai Hu <mingkai.hu@nxp.com>, Roy Zang <roy.zang@nxp.com>,
-	Srikanth Thokala <srikanth.thokala@intel.com>,
-	Marek Vasut <marek.vasut+renesas@gmail.com>,
-	Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-	Thierry Reding <thierry.reding@gmail.com>,
-	Jonathan Hunter <jonathanh@nvidia.com>,
-	Kunihiko Hayashi <hayashi.kunihiko@socionext.com>,
-	Masami Hiramatsu <mhiramat@kernel.org>,
-	Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>,
-	Allen Hubbe <allenbh@gmail.com>,
-	Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
-	Kishon Vijay Abraham I <kishon@kernel.org>,
-	Damien Le Moal <dlemoal@kernel.org>, Frank Li <Frank.Li@nxp.com>,
-	linux-pci@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-	linuxppc-dev@lists.ozlabs.org, linux-renesas-soc@vger.kernel.org,
-	linux-tegra@vger.kernel.org, ntb@lists.linux.dev
-Subject: Re: [PATCH 0/2] PCI endpoint BAR hardware description cleanup
-Message-ID: <ZcyYNzYo9HiQi4DY@x1-carbon>
-References: <20240210012634.600301-1-cassel@kernel.org>
- <7a243a1e-6b47-bc2f-c538-b57db1c9c580@amd.com>
+	b=Olg9jtyMCMnhPK1WQrcsqODKIpj08UDPT0ppqRYngZcW1bgPZClbwc+eJTw9hX9YS
+	 O9bl8WmxjBpCUTSmQ2jb2JR95Gmx2xv/eCWt1AP3vaONix1n4sS0QljyakQ1AwDHzr
+	 3DxO+tgdP4f8e1XFpKU/9sZiPLgPeEMlUEZqszrxN4UOsgzvtvycMj0hBN9SiKK2uM
+	 vk/x0UbCreUvvasenlikXDtcZj6NvHzf45DdychNhdIgn4ENpzU3G0J66qnyqU6vPf
+	 Zyu7yauvHzMaW8mEw/w8oGI1ZjEIFbm/gsiUa3B0yUXK0sSt21mVbkTZkON2XynvPP
+	 X+Ywh0kQuoamQ==
+Date: Fri, 16 Feb 2024 16:15:39 +0530
+From: Manivannan Sadhasivam <mani@kernel.org>
+To: Yang Yingliang <yangyingliang@huaweicloud.com>
+Cc: ntb@lists.linux.dev, linux-pci@vger.kernel.org, jdmason@kudzu.us,
+	dave.jiang@intel.com, allenbh@gmail.com, lpieralisi@kernel.org,
+	kw@linux.com, mani@kernel.org, kishon@kernel.org,
+	bhelgaas@google.com, yangyingliang@huawei.com
+Subject: Re: [PATCH 1/2] NTB: fix possible name leak in ntb_register_device()
+Message-ID: <20240216104539.GA2559@thinkpad>
+References: <20231201033057.1399131-1-yangyingliang@huaweicloud.com>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <7a243a1e-6b47-bc2f-c538-b57db1c9c580@amd.com>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20231201033057.1399131-1-yangyingliang@huaweicloud.com>
 
-On Wed, Feb 14, 2024 at 09:47:54AM +0530, Kishon Vijay Abraham I wrote:
-> Hi Niklas,
+On Fri, Dec 01, 2023 at 11:30:56AM +0800, Yang Yingliang wrote:
+> From: Yang Yingliang <yangyingliang@huawei.com>
 > 
-> On 2/10/2024 6:56 AM, Niklas Cassel wrote:
-> > The series is based on top of:
-> > https://git.kernel.org/pub/scm/linux/kernel/git/pci/pci.git/log/?h=endpoint
-> > 
-> > 
-> > Hello all,
-> > 
-> > This series cleans up the hardware description for PCI endpoint BARs.
-> > 
-> > The problems with the existing hardware description:
-> > -The documentation is lackluster.
-> > -Some of the names are confusingly similar, e.g. fixed_64bit and
-> >   fixed_size, even though these are for completely unrelated things.
-> > -The way that the BARs are defined in the endpoint controller drivers
-> >   is messy, because the left hand side is not a BAR, so you can mark a
-> >   BAR as e.g. both fixed size and reserved.
-> > 
-> > This series tries to address all the problems above.
-> > 
-> > Personally, I think that the code is more readable, both the endpoint
-> > controller drivers, but also pci-epc-core.c.
+> If device_register() returns error in ntb_register_device(),
+> the name allocated by dev_set_name() need be freed. As comment
+> of device_register() says, it should use put_device() to give
+> up the reference in the error path. So fix this by calling
+> put_device(), then the name can be freed in kobject_cleanup().
 > 
-> Thank you for cleaning this up!
+> Remove the outside put_device() in pci_vntb_probe() and return
+> the error code.
 > 
-> FWIW:
-> Reviewed-by: Kishon Vijay Abraham I <kishon@kernel.org>
+> Fixes: a1bd3baeb2f1 ("NTB: Add NTB hardware abstraction layer")
+> Signed-off-by: Yang Yingliang <yangyingliang@huawei.com>
 
-IMHO, a FWIW is quite the undersell here, as there is no R-b I would value
-higher than the R-b from the original author or the pci endpoint subsystem :)
+Applied to pci/endpoint!
 
+- Mani
 
-Kind regards,
-Niklas
+> ---
+>  drivers/ntb/core.c                            | 8 +++++++-
+>  drivers/pci/endpoint/functions/pci-epf-vntb.c | 6 +-----
+>  2 files changed, 8 insertions(+), 6 deletions(-)
+> 
+> diff --git a/drivers/ntb/core.c b/drivers/ntb/core.c
+> index 27dd93deff6e..d702bee78082 100644
+> --- a/drivers/ntb/core.c
+> +++ b/drivers/ntb/core.c
+> @@ -100,6 +100,8 @@ EXPORT_SYMBOL(ntb_unregister_client);
+>  
+>  int ntb_register_device(struct ntb_dev *ntb)
+>  {
+> +	int ret;
+> +
+>  	if (!ntb)
+>  		return -EINVAL;
+>  	if (!ntb->pdev)
+> @@ -120,7 +122,11 @@ int ntb_register_device(struct ntb_dev *ntb)
+>  	ntb->ctx_ops = NULL;
+>  	spin_lock_init(&ntb->ctx_lock);
+>  
+> -	return device_register(&ntb->dev);
+> +	ret = device_register(&ntb->dev);
+> +	if (ret)
+> +		put_device(&ntb->dev);
+> +
+> +	return ret;
+>  }
+>  EXPORT_SYMBOL(ntb_register_device);
+>  
+> diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> index 3f60128560ed..2b7bc5a731dd 100644
+> --- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> +++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> @@ -1278,15 +1278,11 @@ static int pci_vntb_probe(struct pci_dev *pdev, const struct pci_device_id *id)
+>  	ret = ntb_register_device(&ndev->ntb);
+>  	if (ret) {
+>  		dev_err(dev, "Failed to register NTB device\n");
+> -		goto err_register_dev;
+> +		return ret;
+>  	}
+>  
+>  	dev_dbg(dev, "PCI Virtual NTB driver loaded\n");
+>  	return 0;
+> -
+> -err_register_dev:
+> -	put_device(&ndev->ntb.dev);
+> -	return -EINVAL;
+>  }
+>  
+>  static struct pci_device_id pci_vntb_table[] = {
+> -- 
+> 2.25.1
+> 
+> 
+
+-- 
+மணிவண்ணன் சதாசிவம்
