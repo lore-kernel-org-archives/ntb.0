@@ -1,73 +1,64 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A33918174F;
-	Mon, 25 Mar 2024 23:06:27 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BCF041292FD;
+	Tue, 26 Mar 2024 08:27:58 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711407987; cv=none; b=Z29K7eEwFD8D9Ohg3BbTwPi3/uonv1sd4VSpiOX0NiG+X2J5cC5E2pTG3FS04dqsrvjD9TEsy4aALd/UAQZmy/4UOWM7LX2QUQi1vWaFK2EFl1oiP816I30FVOk1K1N7YaL8bcb4Ic60ipXATPmKPZkh/QKgeURO/KrkAOBSDYM=
+	t=1711441679; cv=none; b=Bdzz7ITTDEcaqsqKP9gnhj2LJI/uFj7cus5ISTqq9VFtLyJTvElDG+yT4Pgin5FCF8hHCHem8H4H7YdXbkSTLPidqlX+H5OQklfHGfbESNti4HS/TzPrtFDbeqlpUWnCaXSZoZ7eTJMS8y9TXSRxubh/dD8FrL2Of9cRXNstaKk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711407987; c=relaxed/simple;
-	bh=1QyVL22FJBxcb4t1+dh5JP6zFPMFsBApFX/CuykGQcQ=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=HRMHVPKE1Fd9LSqmSwz8I1rSNnJkX4Wy6WS6K2IDieW1JHO8u/bvy5Zm+5hGyQGE9PP93o/8FqhNcJvlJbFPDmOqumSRoR3PEyq/YDPQHzLxq2hfalYGx5Su+DUMiG6Z9Txgs9OZmct7yg8oTNh/02gudtTvlu6UgUAM7UML6p8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=miVONJQ5; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1711441679; c=relaxed/simple;
+	bh=nQyk3qdNwZ8anxHMwxL1UdJZCo+TRv8Hz9hdRnnLqBk=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=gIvGGafcDht630G7qp1qfE8LIp4yhIOGWkOQPGcCvaAu/dZ+VxIMuDbCgsOaL1ZyF0cUrBD+nT7xY8s9bJVMjXqHHj8Qowv20z7xXMBo+IyZYYf2ukw6Zs7QWU+iOzMX8Jl5AmG6j3AZpNY4lDvtoMh8O2kkuzS3uD70pAJJs1M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b=Iw6U8WjZ; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="miVONJQ5"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D81ECC433F1;
-	Mon, 25 Mar 2024 23:06:23 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1711407987;
-	bh=1QyVL22FJBxcb4t1+dh5JP6zFPMFsBApFX/CuykGQcQ=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=miVONJQ5NXRsG7mtEQGjb5OCHUFlD7yIcjL8Zczot8iH1PlPuzLpzXUWN779YGM8y
-	 sdRSypBm9jXhiqw1IzSFooBJQq5k1wtRXrJIOTx4xbzUnA1RJeHfwPvxzQkJwqjAA2
-	 N6YIqez7RTTZpmbSlWcSMzhmaSXkYG9rvLI4m7dYZcw7TieXzKum/7A5nU+P13vC61
-	 T1cLGk10rXaP0S8Iok04wj1ZA1e/YPTPkHaE8qnOaUkw/8fA7OGzdEbCdysSpVND4U
-	 Gsl75wBe1MjtRVXYky/7xx56/oe9JwwwMEAsu3NP0isHTJVisTQU7YEP34h3oAU2oc
-	 dvb52RefFwqtw==
-Message-ID: <ea5a0baa-64f3-40f8-a775-433eeb0b430e@kernel.org>
-Date: Tue, 26 Mar 2024 08:06:22 +0900
+	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="Iw6U8WjZ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B8715C43394;
+	Tue, 26 Mar 2024 08:27:57 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
+	s=korg; t=1711441678;
+	bh=nQyk3qdNwZ8anxHMwxL1UdJZCo+TRv8Hz9hdRnnLqBk=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=Iw6U8WjZi0ZrwwftN3emjcJ/oZOIzjr7swKZOnMNp/4chnUfYm+SEpuiRo28qOLEZ
+	 05RijM8OUNxINXKYuwPEO7Ht/fCvBCqa1KgnTXedu6EYOEENmKvfR1mkZnQy9URTTN
+	 u4AC8W9q5PVErxInCdbfvkZkLUegBAglB4RLcz9Q=
+Date: Tue, 26 Mar 2024 09:27:55 +0100
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+To: Damien Le Moal <dlemoal@kernel.org>
+Cc: linux-pci@vger.kernel.org, Bjorn Helgaas <bhelgaas@google.com>,
+	Manivannan Sadhasivami <manivannan.sadhasivam@linaro.org>,
+	linux-scsi@vger.kernel.org,
+	"Martin K . Petersen" <martin.petersen@oracle.com>,
+	Jaroslav Kysela <perex@perex.cz>, linux-sound@vger.kernel.org,
+	linux-usb@vger.kernel.org, linux-serial@vger.kernel.org,
+	Hans de Goede <hdegoede@redhat.com>,
+	platform-driver-x86@vger.kernel.org, ntb@lists.linux.dev,
+	Lee Jones <lee@kernel.org>, David Airlie <airlied@gmail.com>,
+	amd-gfx@lists.freedesktop.org, Jason Gunthorpe <jgg@ziepe.ca>,
+	linux-rdma@vger.kernel.org,
+	"David S . Miller" <davem@davemloft.net>,
+	Eric Dumazet <edumazet@google.com>, netdev@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH 13/28] misc: vmci_guest: Use PCI_IRQ_ALL_TYPES
+Message-ID: <2024032646-cosigner-whoopee-cd17@gregkh>
+References: <20240325070944.3600338-1-dlemoal@kernel.org>
+ <20240325070944.3600338-14-dlemoal@kernel.org>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 00/28] Remove PCI_IRQ_LEGACY
-To: Bjorn Helgaas <helgaas@kernel.org>
-Cc: linux-pci@vger.kernel.org, Bjorn Helgaas <bhelgaas@google.com>,
- Manivannan Sadhasivami <manivannan.sadhasivam@linaro.org>,
- linux-scsi@vger.kernel.org, "Martin K . Petersen"
- <martin.petersen@oracle.com>, Jaroslav Kysela <perex@perex.cz>,
- linux-sound@vger.kernel.org, Greg Kroah-Hartman
- <gregkh@linuxfoundation.org>, linux-usb@vger.kernel.org,
- linux-serial@vger.kernel.org, Hans de Goede <hdegoede@redhat.com>,
- platform-driver-x86@vger.kernel.org, ntb@lists.linux.dev,
- Lee Jones <lee@kernel.org>, David Airlie <airlied@gmail.com>,
- amd-gfx@lists.freedesktop.org, Jason Gunthorpe <jgg@ziepe.ca>,
- linux-rdma@vger.kernel.org, "David S . Miller" <davem@davemloft.net>,
- Eric Dumazet <edumazet@google.com>, netdev@vger.kernel.org,
- linux-kernel@vger.kernel.org
-References: <20240325175941.GA1443646@bhelgaas>
-Content-Language: en-US
-From: Damien Le Moal <dlemoal@kernel.org>
-Organization: Western Digital Research
-In-Reply-To: <20240325175941.GA1443646@bhelgaas>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240325070944.3600338-14-dlemoal@kernel.org>
 
-On 3/26/24 02:59, Bjorn Helgaas wrote:
-> I applied all these to pci/enumeration for v6.10, thanks!
+On Mon, Mar 25, 2024 at 04:09:24PM +0900, Damien Le Moal wrote:
+> In vmci_guest_probe_device(), remove the reference to PCI_IRQ_LEGACY by
+> using PCI_IRQ_ALL_TYPES instead of an explicit OR of all IRQ types.
 > 
-> I added acks and reviewed-by and will update if we receive more, and
-> adjusted subject lines to add "... instead of PCI_IRQ_LEGACY" and in
-> some cases to match history of the file.
+> Signed-off-by: Damien Le Moal <dlemoal@kernel.org>
+> ---
 
-Thanks Bjorn !
-
--- 
-Damien Le Moal
-Western Digital Research
-
+Acked-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
