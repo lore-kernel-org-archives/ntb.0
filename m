@@ -1,77 +1,74 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from out30-113.freemail.mail.aliyun.com (out30-113.freemail.mail.aliyun.com [115.124.30.113])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1A7EE1E884;
-	Tue, 26 Mar 2024 21:14:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0CAE11CD11
+	for <ntb@lists.linux.dev>; Fri, 31 May 2024 07:21:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=115.124.30.113
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711487673; cv=none; b=TK8eihENos9bIj3hsSIXMhKelu50tKVirjaVCwkFMaVUXKQAxafRLk9y4cvfxrecICHZjwagtAqaPMXzMGW1g5+df4yxruCqfeyfuu1GwvrYl5Gr9WFh28f730QqXxAS2G737elH3YrDIX4ApUvjkeMQ8t+VdBfIBCZTWmhwz6g=
+	t=1717140092; cv=none; b=a71QIv4ol0CVKU+H/AB6QgcVujC3BtB26vK88+P8Nf2xY9fgxeAj2niNanZ68gf08l3NKW6SXt3pVZnSRqW+d/96tWBJK0zjSll8FziuDv629wkDFpZqasH+uDv8IzSq2L9tXOne8l7qB3lfM0hSG3jnDE1b2SHZ7aGO87zmf1o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711487673; c=relaxed/simple;
-	bh=cxfzcpVl6iw0nLD4z59WnZub1zdzpHD3Ab/gARw6LCQ=;
-	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
-	 Content-Disposition:In-Reply-To; b=WXjygm7jGJyJxeZdCwGhQSgc9luOnhCIwF/ghWQB1IWDnHkpP6TyCWxXPIkMN+YYrgmq4g66WtMGlm6WcUV5bk/nvaoucHfN98EXvO8D9lMwbz0lq63t1bJuHA5n5kJmdcdkKgmhik32+ktM9FH1GyxTpC986Jn5CIC9wtmy9+Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=NLVThY5Y; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1717140092; c=relaxed/simple;
+	bh=LDE8YRBxlSxOgZ6jcZUK+SvtohVTgLX/oJvE1MKf410=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=Bn+rKTbLFzoPdmV5dpgzviirCriA7zqjF4xlwRgJReSRbseoXCPjevkBPIR681ezlkqxEWZ7tAeXTXDjN4wDMRw+8fztscIvYyon7XcoeEvwsrwdSdq4GDtOoZMvn2XpE+RmwR2Y4BI+k7VHdqtu/1L2MH01vPdlqic4ZyCSlYE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.alibaba.com; spf=pass smtp.mailfrom=linux.alibaba.com; dkim=pass (1024-bit key) header.d=linux.alibaba.com header.i=@linux.alibaba.com header.b=CbhylTno; arc=none smtp.client-ip=115.124.30.113
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.alibaba.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.alibaba.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="NLVThY5Y"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5738BC433F1;
-	Tue, 26 Mar 2024 21:14:32 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1711487672;
-	bh=cxfzcpVl6iw0nLD4z59WnZub1zdzpHD3Ab/gARw6LCQ=;
-	h=Date:From:To:Cc:Subject:In-Reply-To:From;
-	b=NLVThY5Yh2SzMHj4gx9UytpQfFJgRigfFFXt+bm6Vuu3F1XJQiMr6mpQ5ZiPngd1n
-	 Y3oah6WxB6w8vOtameV4wbrxrY5wofrUOI9g31Io5EdLc/j+KK8tfXH3xtt0JxGB2N
-	 41zLFvHWmMYUpsRk36/3btrCOrPAtRy6KTbcAmYOIBNVugRcJC8xbhUFT667lR/66s
-	 K8/Ub7VERzydJeXZrf3U8gIU/jnq6GIZoo3e1f50o0x4S+IefKUpldWak2O8Z9945C
-	 M/N49IG+6Cnb/a1N5y474X7v3YHt+/i2pidMu6YhpMQK8dJegtAohGlEJNPNCUpTS8
-	 8oqh9BxzR+lAw==
-Date: Tue, 26 Mar 2024 16:14:30 -0500
-From: Bjorn Helgaas <helgaas@kernel.org>
-To: Andy Shevchenko <andriy.shevchenko@intel.com>
-Cc: Damien Le Moal <dlemoal@kernel.org>, linux-pci@vger.kernel.org,
-	Bjorn Helgaas <bhelgaas@google.com>,
-	Manivannan Sadhasivami <manivannan.sadhasivam@linaro.org>,
-	linux-scsi@vger.kernel.org,
-	"Martin K . Petersen" <martin.petersen@oracle.com>,
-	Jaroslav Kysela <perex@perex.cz>, linux-sound@vger.kernel.org,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	linux-usb@vger.kernel.org, linux-serial@vger.kernel.org,
-	Hans de Goede <hdegoede@redhat.com>,
-	platform-driver-x86@vger.kernel.org, ntb@lists.linux.dev,
-	Lee Jones <lee@kernel.org>, David Airlie <airlied@gmail.com>,
-	amd-gfx@lists.freedesktop.org, Jason Gunthorpe <jgg@ziepe.ca>,
-	linux-rdma@vger.kernel.org,
-	"David S . Miller" <davem@davemloft.net>,
-	Eric Dumazet <edumazet@google.com>, netdev@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 09/28] mfd: intel-lpss-pci: Use PCI_IRQ_INTX
-Message-ID: <20240326211430.GA1497386@bhelgaas>
+	dkim=pass (1024-bit key) header.d=linux.alibaba.com header.i=@linux.alibaba.com header.b="CbhylTno"
+DKIM-Signature:v=1; a=rsa-sha256; c=relaxed/relaxed;
+	d=linux.alibaba.com; s=default;
+	t=1717140086; h=From:To:Subject:Date:Message-Id:MIME-Version;
+	bh=K5oeXEXSVyaAY2t3+I789HO5yOIeItkWYp4h2MgBgf4=;
+	b=CbhylTnozX6o5a8Qm1YqsgviQm7K0oUMtz/63omUsFLG0iH9KfkqdNTj6xyOlfUMRWylH4mMK0Ec+1fHuxDB03NyL71yEiHZ+UKKtDl53jM8I3msSWv9HgmHJpF0np+XymDl3YLKichxnop7BuYdD/43thXzYUku42VMgqJxMfY=
+X-Alimail-AntiSpam:AC=PASS;BC=-1|-1;BR=01201311R111e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=maildocker-contentspam033037067111;MF=yang.lee@linux.alibaba.com;NM=1;PH=DS;RN=6;SR=0;TI=SMTPD_---0W7ZAtHt_1717140085;
+Received: from localhost(mailfrom:yang.lee@linux.alibaba.com fp:SMTPD_---0W7ZAtHt_1717140085)
+          by smtp.aliyun-inc.com;
+          Fri, 31 May 2024 15:21:26 +0800
+From: Yang Li <yang.lee@linux.alibaba.com>
+To: jdmason@kudzu.us,
+	dave.jiang@intel.com,
+	allenbh@gmail.com
+Cc: ntb@lists.linux.dev,
+	linux-kernel@vger.kernel.org,
+	Yang Li <yang.lee@linux.alibaba.com>
+Subject: [PATCH -next] ntb: Fix kernel-doc param for ntb_transport_create_queue
+Date: Fri, 31 May 2024 15:21:24 +0800
+Message-Id: <20240531072124.64352-1-yang.lee@linux.alibaba.com>
+X-Mailer: git-send-email 2.20.1.7.g153144c
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240325210444.GA1449676@bhelgaas>
+Content-Transfer-Encoding: 8bit
 
-On Mon, Mar 25, 2024 at 04:04:44PM -0500, Bjorn Helgaas wrote:
-> On Mon, Mar 25, 2024 at 09:39:38PM +0200, Andy Shevchenko wrote:
-> > On Mon, Mar 25, 2024 at 04:09:20PM +0900, Damien Le Moal wrote:
-> > > Use the macro PCI_IRQ_INTX instead of the deprecated PCI_IRQ_LEGACY
-> > > macro.
-> > 
-> > Not needed anymore. MFD subsystem has a patch moving this to MSI support.
-> > But you need to coordinate with Lee how to proceed (in case of conflicts MFD
-> > version should be taken).
-> 
-> Thanks!  It looks like your patch [1] has been applied already and
-> makes this one obsolete, so I dropped this one from the series.
+The patch updates the function documentation comment for
+ntb_transport_create_queue to adhere to the kernel-doc specification.
 
-I put this patch back in to prevent an ordering requirement between
-MFD and PCI.  There will be a trivial merge conflict as Andy
-mentioned.
+Signed-off-by: Yang Li <yang.lee@linux.alibaba.com>
+---
+ drivers/ntb/ntb_transport.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
-> [1] https://lore.kernel.org/all/20240312165905.1764507-1-andriy.shevchenko@linux.intel.com/
+diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+index f9e7847a378e..5d466a3f117b 100644
+--- a/drivers/ntb/ntb_transport.c
++++ b/drivers/ntb/ntb_transport.c
+@@ -1966,9 +1966,10 @@ static bool ntb_dma_filter_fn(struct dma_chan *chan, void *node)
+ 
+ /**
+  * ntb_transport_create_queue - Create a new NTB transport layer queue
+- * @rx_handler: receive callback function
+- * @tx_handler: transmit callback function
+- * @event_handler: event callback function
++ * @data: user-defined data to associate with the queue
++ * @client_dev: the device structure of the NTB client
++ * @handlers: structure containing receive, transmit, and event callback
++ *	      functions
+  *
+  * Create a new NTB transport layer queue and provide the queue with a callback
+  * routine for both transmit and receive.  The receive callback routine will be
+-- 
+2.20.1.7.g153144c
+
