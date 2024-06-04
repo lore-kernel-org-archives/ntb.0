@@ -1,102 +1,78 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.17])
+Received: from forward206b.mail.yandex.net (forward206b.mail.yandex.net [178.154.239.151])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 96F5F6F2EB
-	for <ntb@lists.linux.dev>; Fri, 31 May 2024 15:52:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.17
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 20667145FF6
+	for <ntb@lists.linux.dev>; Tue,  4 Jun 2024 12:24:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.154.239.151
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1717170765; cv=none; b=Jz1WDL2CHrw/aJwbfnQC/yGwk4b95nnNzEvipySQZ7l1yWPRDZciFlzWjRz4RnB7utRtT88myVvIBYXsSZVP99amoSr1+J1m/YBXrhVs6CfxtqEr9f8CApIyrPqQdrV4BV5OpcZmJb710bJDceIP0zW54lHjrIoA55cgHqHOtvU=
+	t=1717503897; cv=none; b=UQDpeoiS4BaEHFannR20CVpKVqTa0LoBhyCPCiuj/X+yZ/XeQarQi/E1KNh2ifOaAkcjtpQ+jJ/1L2A/QVsYpCOsKE/fie9tBw47/nrcQt/7LaOzNXlQYH+De+wwL8n+i0meZWVKfUqvaWm2iDAmu4/1tIjXK/ererQiyDhXx2w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1717170765; c=relaxed/simple;
-	bh=J0kbwRHmV/+gyGrwgRmUSbnanlbcmQ5Rx6idzys8fSY=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=Jfw0FH4bpiFELJLtLLM2WqRJM1VBDzHTpTsfOldJ+5hlpoe7UWoHHFdI/Zk1c3ds1k8gBru1iU9GY/QCq/bmYyiSMU41scVMSSgNRgelitvKDmSsUrWjyr/Kn7LbUzgl3sSZ6jX23UHidwgiBHRDvm7tZSYduDiKRqUDhSiiCDs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=V+Kll7eo; arc=none smtp.client-ip=192.198.163.17
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1717503897; c=relaxed/simple;
+	bh=1EYgD/DBV1IgO1JkLwEX2ZsAZvmCaAw2rZ+KPc0Aqfs=;
+	h=Message-ID:Subject:From:To:Cc:Date:Content-Type:MIME-Version; b=IakPAKcX5yGxkrlbF2y4x5mBrn01WHS6iVg99aXAJ/jMkZ8VQYy1esKPnvMMpo56/HUB1azF8FZRkCXUMxUvwoy59ePmuwh55N+TD0UauVEJUlnm5MzPO2Yc5Gi6Zrw6+9O8Q5BfeuPjvIed1T7X1avq9PzOM/OKbzP+q5cBv1k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=maquefel.me; spf=pass smtp.mailfrom=maquefel.me; dkim=pass (1024-bit key) header.d=maquefel.me header.i=@maquefel.me header.b=rXSNR6ck; arc=none smtp.client-ip=178.154.239.151
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=maquefel.me
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=maquefel.me
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="V+Kll7eo"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1717170764; x=1748706764;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=J0kbwRHmV/+gyGrwgRmUSbnanlbcmQ5Rx6idzys8fSY=;
-  b=V+Kll7eontUmoQcYHIaBDCkAeuM5srA5F9mQHmxs8DeHpggW8xikdgzN
-   KXX9dvSmR0Epp+Q38/cXAb5t4zsISfsq1gd0MSDV8g+4/jZcf0dseHOA0
-   5jMTyVo0t+aIESATdM3tgZYpuO+lcmTLPA4sAOxRM45FyIDmb9cbb77r/
-   UQ2ol/3gVSnTL1Mhm4t13AYDFpPoWSDRrkEvadQ6tLQMaTJ6/1W28X6Dc
-   LamaQqmR6XnwnbGtHvwJ0YslwH4kPDaoreH7J5TP5dab6ZmSMhr8BHdkC
-   pIzcKZYX5xxZD+Zxyf9F3PMevM50SxYaEFkkWj2Q9ARID1iu/qncI8+4e
-   w==;
-X-CSE-ConnectionGUID: oVpGhbNtR7ODzJ2H92Ok+w==
-X-CSE-MsgGUID: XnXboTjlS3ysF53okrMiDQ==
-X-IronPort-AV: E=McAfee;i="6600,9927,11089"; a="13587513"
-X-IronPort-AV: E=Sophos;i="6.08,204,1712646000"; 
-   d="scan'208";a="13587513"
-Received: from fmviesa002.fm.intel.com ([10.60.135.142])
-  by fmvoesa111.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 31 May 2024 08:52:43 -0700
-X-CSE-ConnectionGUID: zpuuR3eiRQ60zgBo3cKqcg==
-X-CSE-MsgGUID: +jYVfnZySUSdu642MgqtqQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.08,204,1712646000"; 
-   d="scan'208";a="59376531"
-Received: from djiang5-mobl3.amr.corp.intel.com (HELO [10.125.108.62]) ([10.125.108.62])
-  by fmviesa002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 31 May 2024 08:52:42 -0700
-Message-ID: <457b2e1c-00b7-45d5-9c66-6d03c39586d5@intel.com>
-Date: Fri, 31 May 2024 08:52:41 -0700
+	dkim=pass (1024-bit key) header.d=maquefel.me header.i=@maquefel.me header.b="rXSNR6ck"
+Received: from forward101b.mail.yandex.net (forward101b.mail.yandex.net [IPv6:2a02:6b8:c02:900:1:45:d181:d101])
+	by forward206b.mail.yandex.net (Yandex) with ESMTPS id C64E96552A
+	for <ntb@lists.linux.dev>; Tue,  4 Jun 2024 15:17:01 +0300 (MSK)
+Received: from mail-nwsmtp-smtp-production-main-46.sas.yp-c.yandex.net (mail-nwsmtp-smtp-production-main-46.sas.yp-c.yandex.net [IPv6:2a02:6b8:c10:7a2:0:640:7461:0])
+	by forward101b.mail.yandex.net (Yandex) with ESMTPS id 0127A60B47;
+	Tue,  4 Jun 2024 15:16:54 +0300 (MSK)
+Received: by mail-nwsmtp-smtp-production-main-46.sas.yp-c.yandex.net (smtp/Yandex) with ESMTPSA id pGWKXkH9TmI0-DWpcoFGU;
+	Tue, 04 Jun 2024 15:16:53 +0300
+X-Yandex-Fwd: 1
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=maquefel.me; s=mail;
+	t=1717503413; bh=uqekmTIEOyuqP8543lAbYzUCCebo/wxhNleSBMaHZLM=;
+	h=Date:Cc:To:From:Subject:Message-ID;
+	b=rXSNR6ckexWbPxKnRAE7t7Tg7jAcXoZXftoqDGymxFkitgEeIOStGC5XgLiVrXgaJ
+	 Gfzp+HvGfphWSTvnnrXQ2X1BNySTRUEUoFHDKWIrfaAqL4iS7t2pUoEy5d5rR0iJpc
+	 Ni5osf/FdmiX+AuH9e/oq26MzqJMahX0n+3nxCTI=
+Authentication-Results: mail-nwsmtp-smtp-production-main-46.sas.yp-c.yandex.net; dkim=pass header.i=@maquefel.me
+Message-ID: <686c55cc658564e8f37147e0d6d5ab62bb8372af.camel@maquefel.me>
+Subject: Question on ntb: Adding Skylake Xeon NTB support
+From: Nikita Shubin <nikita.shubin@maquefel.me>
+To: Dave Jiang <dave.jiang@intel.com>
+Cc: Jon Mason <jdmason@kudzu.us>, Allen Hubbe <allenbh@gmail.com>, 
+	ntb@lists.linux.dev, linux@yadro.com
+Date: Tue, 04 Jun 2024 15:16:52 +0300
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.48.4 
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH -next] ntb: Fix kernel-doc param for
- ntb_transport_create_queue
-To: Yang Li <yang.lee@linux.alibaba.com>, jdmason@kudzu.us, allenbh@gmail.com
-Cc: ntb@lists.linux.dev, linux-kernel@vger.kernel.org
-References: <20240531072124.64352-1-yang.lee@linux.alibaba.com>
-Content-Language: en-US
-From: Dave Jiang <dave.jiang@intel.com>
-In-Reply-To: <20240531072124.64352-1-yang.lee@linux.alibaba.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
 
+Hello Dave!
 
+I have a question about NTB_HWERR_MSIX_VECTOR32_BAD, i hope you can
+clarify a bit:
 
-On 5/31/24 12:21 AM, Yang Li wrote:
-> The patch updates the function documentation comment for
-> ntb_transport_create_queue to adhere to the kernel-doc specification.
+We are moving "link status down by one" indeed:
 
-I wouldn't say it's not adhering to kernel-doc specification but rather that it's documenting the incorrect/out of date parameters. So maybe something like:
+```
+intel_ntb_intvec_write addr=3D0xef idx=3D31 value=3D0x1f size=3D1
+intel_ntb_intvec_write addr=3D0xf0 idx=3D32 value=3D0x20 size=3D1
+...
+intel_ntb_intvec_write addr=3D0xf0 idx=3D32 value=3D0x1f size=3D1
+```
 
-Update ntb_transport_create_queue() kdoc header to specify the correct input parameters used by the function.
-> 
-> Signed-off-by: Yang Li <yang.lee@linux.alibaba.com>
+So basically Link now shares interrupt with DB 31, however doesn't this
+make 31 DB unusable, as we are clearing it with 0x180000000 in
+gen3_poll_link() ?
 
-Besides the commit log change,
-Reviewed-by: Dave Jiang <dave.jiang@intel.com>
+May be we should avoid using it by providing correct db_valid_mask ?
 
-> ---
->  drivers/ntb/ntb_transport.c | 7 ++++---
->  1 file changed, 4 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-> index f9e7847a378e..5d466a3f117b 100644
-> --- a/drivers/ntb/ntb_transport.c
-> +++ b/drivers/ntb/ntb_transport.c
-> @@ -1966,9 +1966,10 @@ static bool ntb_dma_filter_fn(struct dma_chan *chan, void *node)
->  
->  /**
->   * ntb_transport_create_queue - Create a new NTB transport layer queue
-> - * @rx_handler: receive callback function
-> - * @tx_handler: transmit callback function
-> - * @event_handler: event callback function
-> + * @data: user-defined data to associate with the queue
-> + * @client_dev: the device structure of the NTB client
-> + * @handlers: structure containing receive, transmit, and event callback
-> + *	      functions
->   *
->   * Create a new NTB transport layer queue and provide the queue with a callback
->   * routine for both transmit and receive.  The receive callback routine will be
+Some thing like:
+
+```
+if (ndev->hwerr_flags & NTB_HWERR_MSIX_VECTOR32_BAD)
+    ndev->db_valid_mask &=3D ~ndev->db_link_mask;
+```
+
+in gen3_init_ntb() ?
