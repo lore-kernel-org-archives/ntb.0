@@ -1,110 +1,74 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.20])
+Received: from out30-118.freemail.mail.aliyun.com (out30-118.freemail.mail.aliyun.com [115.124.30.118])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C6DF0224D1
-	for <ntb@lists.linux.dev>; Thu,  6 Jun 2024 16:42:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.20
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3EDF215ADA7
+	for <ntb@lists.linux.dev>; Fri,  7 Jun 2024 07:57:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=115.124.30.118
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1717692141; cv=none; b=nI2Z+9lYvy7F8YpSkPYobpgGZi/y0lUjqNaDSiSRuBcsoM/bFPat08ml+B7ysfOl6ajezxNQlptANYX2nv3dmKCYfbtvU+Ys99htoRLtoWzimPJ2NoNp92z9wBJ/iL3rDpPW9S9/GzRB/cK3KpVka7tnxHfM5HohVq4GQMHflrk=
+	t=1717747048; cv=none; b=Hcr/D+fW1jnDo8sqgHhiFnLgqAPzNwomn+eMi0XCOTG2Vh3BLSIldEZ8vfX0bTrNtcMEVQQiZzWIlNcbaEBYkAcvHtzaWFNOCqqDRLZU9daT6EpxKCM4+yOKYytkljotFKgYhATW2qEmy4/qcq9m8AwEUT8a4KN8jri58Rp75/Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1717692141; c=relaxed/simple;
-	bh=cWpzDaeOq4hbqXwXasp7bZKjFceO8AZcWZsT9YOGBX0=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=RcwFIBiMPtRbBRUJhSWBzppJzp1bt4zT6ZL/V/q1WbzJpy5WZnHZY/HI3vQ69wvmfwqddaCp2CbQAkhqSdcqUSnx8klYA1zkQ3uYpNkavlMAKBPD8GUio11ZkqZBd3LEDpi/zfmx2A/7XV3zf3V5leGo9SriY+Gt66lDO09aYb0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=YoQzvTM+; arc=none smtp.client-ip=198.175.65.20
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1717747048; c=relaxed/simple;
+	bh=FpuvL4593qRHlpmjQ1YfxZrUGHYKS16ufcV/X677aEk=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=B8XITYVdBRWMJYiMLLP3lQGMTcJ16sqQAXpEG7efscXdPiBhMTIkpOOX2AvwCCVS+OKCDj6f8A23pJx7T1RpS2ygvzbWPiwrvRfyWI4bMeM7H6YWNXaKKcrPmQNoR6tKBDWNP7JAaOv2cpuuZv6RFewgAN1zbR4vedTLVk0yjKg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.alibaba.com; spf=pass smtp.mailfrom=linux.alibaba.com; dkim=pass (1024-bit key) header.d=linux.alibaba.com header.i=@linux.alibaba.com header.b=tHm8i6C9; arc=none smtp.client-ip=115.124.30.118
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.alibaba.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.alibaba.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="YoQzvTM+"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1717692140; x=1749228140;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=cWpzDaeOq4hbqXwXasp7bZKjFceO8AZcWZsT9YOGBX0=;
-  b=YoQzvTM+v2pfk0i0phXkf8Jde795ieG2TKPpravSV+TqtjEdEcStWRvL
-   h+SlNXAuYdEdTUkTcB49VKcmEiCOkREqtVG7TlIH/QsB6lkdLHHAnjP3S
-   mpxYdOIq9+rjORKhFiEk+hyQsNi9cwALsmdi8zUPUvInyVP4JTS40HIAv
-   jQH/FiWgE3MGd+jtWSGmpG/BvT+V9/dw6zQnmldA75lueVWm8RTxRRkpG
-   p3N2f3K2iA7KVBWtYgU6jgjq/FPOt7cbDWHjuc4WpSW2BXXui50ywSS3t
-   ymveJ6JRw/rUVed054rE7dTnfN5Rqmcq8zwCROzvWU7q7eJT0wf2m1AOA
-   g==;
-X-CSE-ConnectionGUID: TvkbSEg/RtOSYoccdqIhuw==
-X-CSE-MsgGUID: XByyJHQwQeiUtWM6QpFVbw==
-X-IronPort-AV: E=McAfee;i="6600,9927,11095"; a="14219752"
-X-IronPort-AV: E=Sophos;i="6.08,219,1712646000"; 
-   d="scan'208";a="14219752"
-Received: from orviesa007.jf.intel.com ([10.64.159.147])
-  by orvoesa112.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Jun 2024 09:42:19 -0700
-X-CSE-ConnectionGUID: 2ZvPuiBmR8CKGoCENhdyrg==
-X-CSE-MsgGUID: A0TgiLWLRteTMIG6A7t1fA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.08,219,1712646000"; 
-   d="scan'208";a="38708199"
-Received: from djiang5-mobl3.amr.corp.intel.com (HELO [10.125.109.168]) ([10.125.109.168])
-  by orviesa007-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Jun 2024 09:42:19 -0700
-Message-ID: <b0b3b7f4-306c-4091-bf19-bf16d25c407c@intel.com>
-Date: Thu, 6 Jun 2024 09:42:18 -0700
+	dkim=pass (1024-bit key) header.d=linux.alibaba.com header.i=@linux.alibaba.com header.b="tHm8i6C9"
+DKIM-Signature:v=1; a=rsa-sha256; c=relaxed/relaxed;
+	d=linux.alibaba.com; s=default;
+	t=1717747042; h=From:To:Subject:Date:Message-Id:MIME-Version;
+	bh=LGPDSuEWYQNsSeMeTMESqBCmFs0R73CKvSwzI1HJPxw=;
+	b=tHm8i6C9rYGeoA8m7W7ZoA8ll4YNwS2xxfBmya/R819cuKF7sluM3EdNnd5JJdFdE/IHHqZNkv5FXFClVu81omwso4FDdn59dHffJAv9xzgxlEMByL9o4Drst91unMK7z+1GUUAvuwSxea6Dtq/lJu21uTlm1BvioEfkohjHCR4=
+X-Alimail-AntiSpam:AC=PASS;BC=-1|-1;BR=01201311R101e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=maildocker-contentspam033045046011;MF=yang.lee@linux.alibaba.com;NM=1;PH=DS;RN=6;SR=0;TI=SMTPD_---0W8-TjpP_1717747041;
+Received: from localhost(mailfrom:yang.lee@linux.alibaba.com fp:SMTPD_---0W8-TjpP_1717747041)
+          by smtp.aliyun-inc.com;
+          Fri, 07 Jun 2024 15:57:22 +0800
+From: Yang Li <yang.lee@linux.alibaba.com>
+To: dave.jiang@intel.com,
+	jdmason@kudzu.us,
+	allenbh@gmail.com
+Cc: ntb@lists.linux.dev,
+	linux-kernel@vger.kernel.org,
+	Yang Li <yang.lee@linux.alibaba.com>
+Subject: [PATCH -next v2] ntb: Fix kernel-doc param for ntb_transport_create_queue
+Date: Fri,  7 Jun 2024 15:57:20 +0800
+Message-Id: <20240607075720.77136-1-yang.lee@linux.alibaba.com>
+X-Mailer: git-send-email 2.20.1.7.g153144c
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] ntb: intel: Fix using link status DB's
-To: n.shubin@yadro.com, Jon Mason <jdmason@kudzu.us>,
- Allen Hubbe <allenbh@gmail.com>
-Cc: Nikita Shubin <nikita.shubin@maquefel.me>, ntb@lists.linux.dev,
- linux-kernel@vger.kernel.org, linux@yadro.com
-References: <20240606-ntb_intel_db_fix-v1-1-ba9033aea289@yadro.com>
-Content-Language: en-US
-From: Dave Jiang <dave.jiang@intel.com>
-In-Reply-To: <20240606-ntb_intel_db_fix-v1-1-ba9033aea289@yadro.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
+The patch updates ntb_transport_create_queue() kdoc header to specify the
+correct input parameters used by the function.
 
+Signed-off-by: Yang Li <yang.lee@linux.alibaba.com>
+---
+ drivers/ntb/ntb_transport.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
-On 6/6/24 1:15 AM, Nikita Shubin via B4 Relay wrote:
-> From: Nikita Shubin <n.shubin@yadro.com>
-> 
-> Make sure we are not using DB's which were remapped for link status.
-> 
-> Fixes: f6e51c354b60 ("ntb: intel: split out the gen3 code")
-> Signed-off-by: Nikita Shubin <n.shubin@yadro.com>
+diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+index f9e7847a378e..5d466a3f117b 100644
+--- a/drivers/ntb/ntb_transport.c
++++ b/drivers/ntb/ntb_transport.c
+@@ -1966,9 +1966,10 @@ static bool ntb_dma_filter_fn(struct dma_chan *chan, void *node)
+ 
+ /**
+  * ntb_transport_create_queue - Create a new NTB transport layer queue
+- * @rx_handler: receive callback function
+- * @tx_handler: transmit callback function
+- * @event_handler: event callback function
++ * @data: user-defined data to associate with the queue
++ * @client_dev: the device structure of the NTB client
++ * @handlers: structure containing receive, transmit, and event callback
++ *	      functions
+  *
+  * Create a new NTB transport layer queue and provide the queue with a callback
+  * routine for both transmit and receive.  The receive callback routine will be
+-- 
+2.20.1.7.g153144c
 
-Thank you for the patch.
-
-Reviewed-by: Dave Jiang <dave.jiang@intel.com>
-
-> ---
-> Hello Dave, sending a patch as planned.
-> 
-> Thank you for looking into this!
-> 
-> Link: https://lore.kernel.org/all/686c55cc658564e8f37147e0d6d5ab62bb8372af.camel@maquefel.me/
-> ---
->  drivers/ntb/hw/intel/ntb_hw_gen3.c | 3 +++
->  1 file changed, 3 insertions(+)
-> 
-> diff --git a/drivers/ntb/hw/intel/ntb_hw_gen3.c b/drivers/ntb/hw/intel/ntb_hw_gen3.c
-> index ffcfc3e02c35..a5aa96a31f4a 100644
-> --- a/drivers/ntb/hw/intel/ntb_hw_gen3.c
-> +++ b/drivers/ntb/hw/intel/ntb_hw_gen3.c
-> @@ -215,6 +215,9 @@ static int gen3_init_ntb(struct intel_ntb_dev *ndev)
->  	}
->  
->  	ndev->db_valid_mask = BIT_ULL(ndev->db_count) - 1;
-> +	/* Make sure we are not using DB's used for link status */
-> +	if (ndev->hwerr_flags & NTB_HWERR_MSIX_VECTOR32_BAD)
-> +		ndev->db_valid_mask &= ~ndev->db_link_mask;
->  
->  	ndev->reg->db_iowrite(ndev->db_valid_mask,
->  			      ndev->self_mmio +
-> 
-> ---
-> base-commit: 2df0193e62cf887f373995fb8a91068562784adc
-> change-id: 20240606-ntb_intel_db_fix-036299fabc48
-> 
-> Best regards,
