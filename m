@@ -1,67 +1,52 @@
-Received: from ale.deltatee.com (ale.deltatee.com [204.191.154.188])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 850EA1E4B0;
-	Mon, 10 Jun 2024 17:05:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=204.191.154.188
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C0B64B65E;
+	Mon, 10 Jun 2024 20:04:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718039131; cv=none; b=ktCflxdYtPgzzi+V4EQxlunZq5y/UjIzUxjTp3RvycEKhUCEvoyRPjnGVZ/4HffIU4Y011euMOhn27Gnl+rK/kSbUZCcNfaglp5eE4196KHshWKXeBq5WQMm2p/Vk971S8fbjGiRXdPDj445czCkNKWrGG6hXjDdsWWO3btucwk=
+	t=1718049876; cv=none; b=nRGeci4M4xrtJAF3mxfkDXFBhR67tiRYSoerwrOavHmRHtpCbs35ioDCjjh7KSt3KpkHnPJjfM9vropQmWHf0SSUBaeUWSKk61shsBejigfqXGBmYNypcP+cQdvvHsZtqZWAHGjAdsCbZE/5wXSYgfimM7v46BVFtU9Z4r6xcR8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718039131; c=relaxed/simple;
-	bh=jKS3MuwjOqVi1LYTcaBD5kWbzqgcc2y8GtTs8r6U+BU=;
-	h=Message-ID:Date:MIME-Version:To:Cc:References:From:In-Reply-To:
-	 Content-Type:Subject; b=qyD2rY/pMxPJW0gpIZLU1MyAcCabfMk1t3o6wnkO1DmCCy7G/CZRHoFPWhKScZVOmHZSfZIcfsBcInkthKQhMD5sqvJe0irXXA+5RGNOBC/OTVRNXV91SBSaje6uhyjAcplYBDcUbjY06HWm+cKetFsgEE5KN1SNOCVmp0rZevw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=deltatee.com; spf=pass smtp.mailfrom=deltatee.com; dkim=pass (2048-bit key) header.d=deltatee.com header.i=@deltatee.com header.b=n/SSVeLg; arc=none smtp.client-ip=204.191.154.188
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=deltatee.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=deltatee.com
+	s=arc-20240116; t=1718049876; c=relaxed/simple;
+	bh=AxmMtKgOguwKMibo2q1t63b0ArwV5cabYSTSkrpTae0=;
+	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition:In-Reply-To; b=X6+b5XXXv6ol+TMuUugWcbVVy/hAtv0dniF3YOXJEoLgek0DBrOsrW3mbl9AN8aDnRWGlVnbffBJs2DK9F5dfk2BVgW0B3WvDr33aI9D5sO/Dm7yaSf5RtACfZs/+RNwxf0rbXUtSEsubljWhdIoWpZ4KTGufh0Y+YRS8itOq0Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=oGGUwV6w; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=deltatee.com header.i=@deltatee.com header.b="n/SSVeLg"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=deltatee.com; s=20200525; h=Subject:In-Reply-To:From:References:Cc:To:
-	MIME-Version:Date:Message-ID:content-disposition;
-	bh=Qrv7Sttr41le5/dZwT/NWoIdvUouzD0OZoeprPF9tk8=; b=n/SSVeLgMBvbqR6V7an7yf5zJY
-	X4KSBiqmSr87uDZxv+8vP3nzFiPRFs5x1Pdmmt2v474p5GQ/DWeNr24p+qaQnt7Pr4Tk88DqiVVMo
-	bhVGvxz6EzHWdUIFT7WDc6SXoZDZmfMWBX+OmDB8hX6q67TLX1IS8a91JXzw2qiYI6qKa0m2JWpl2
-	4C8ywS8oVto3So5178sfgXHkEixAk8UbiIBUmjng52tEvkLubA5lmd9hK3Ijwf/1gWhy5NBFWfs79
-	SZxLy6kiIqbbF9I+NkdYI136qa+lUzCnOh8N2k250MOMyKAT/ddUJ2P5dTV+1c7WHhUTBsnDcl4Jo
-	hXsi2IgA==;
-Received: from [172.16.1.162]
-	by ale.deltatee.com with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
-	(Exim 4.96)
-	(envelope-from <logang@deltatee.com>)
-	id 1sGiSQ-0055ry-0M;
-	Mon, 10 Jun 2024 11:05:22 -0600
-Message-ID: <c0e0f7bf-845d-4d7d-857a-ca09acdb92af@deltatee.com>
-Date: Mon, 10 Jun 2024 11:05:12 -0600
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="oGGUwV6w"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 104A2C2BBFC;
+	Mon, 10 Jun 2024 20:04:35 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1718049876;
+	bh=AxmMtKgOguwKMibo2q1t63b0ArwV5cabYSTSkrpTae0=;
+	h=Date:From:To:Cc:Subject:In-Reply-To:From;
+	b=oGGUwV6wlkuuMXhIelwruH+R2JTmUX0ySl17ItKcvME4jvsDYbRhLLPL1CBRUnOBp
+	 vAMvtnQX4E0vE4xkvhRAwCEWeabV/71uwMukQeaXkHJdl3hJihemaHM9B15C6yjTEN
+	 RakU9bvu1yn5EiZAngSPVx7ABsrbQLE7WN3ZUrd6XQ00SUBsISVrcn0lBu23aMExKq
+	 sNMGnLCXM8uHLvhUqHSv1Ugl+hoyfRSBN2+6OiGldRUe5nH++0G4Bl1GkajkImJDZ+
+	 1YFePPaZA6Nwal0sfsZGqafwxe5pnbrlhQ/KSkBvqeGMOMOWMwcNItWUFvhI6sy5vY
+	 UXjkIBL1wsgnA==
+Date: Mon, 10 Jun 2024 15:04:34 -0500
+From: Bjorn Helgaas <helgaas@kernel.org>
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org,
+	Kurt Schwemmer <kurt.schwemmer@microsemi.com>,
+	Logan Gunthorpe <logang@deltatee.com>, Jon Mason <jdmason@kudzu.us>,
+	Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>,
+	Bjorn Helgaas <bhelgaas@google.com>, ntb@lists.linux.dev
+Subject: Re: [PATCH] PCI: switchtec: make switchtec_class constant
+Message-ID: <20240610200434.GA958238@bhelgaas>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-pci@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org,
- Kurt Schwemmer <kurt.schwemmer@microsemi.com>, Jon Mason <jdmason@kudzu.us>,
- Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>,
- Bjorn Helgaas <bhelgaas@google.com>, ntb@lists.linux.dev
-References: <2024061053-online-unwound-b173@gregkh>
-Content-Language: en-CA
-From: Logan Gunthorpe <logang@deltatee.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 In-Reply-To: <2024061053-online-unwound-b173@gregkh>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-X-SA-Exim-Connect-IP: 172.16.1.162
-X-SA-Exim-Rcpt-To: gregkh@linuxfoundation.org, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org, kurt.schwemmer@microsemi.com, jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com, bhelgaas@google.com, ntb@lists.linux.dev
-X-SA-Exim-Mail-From: logang@deltatee.com
-X-Spam-Level: 
-Subject: Re: [PATCH] PCI: switchtec: make switchtec_class constant
-X-SA-Exim-Version: 4.2.1 (built Wed, 06 Jul 2022 17:57:39 +0000)
-X-SA-Exim-Scanned: Yes (on ale.deltatee.com)
 
-
-
-On 2024-06-10 02:20, Greg Kroah-Hartman wrote:
+On Mon, Jun 10, 2024 at 10:20:53AM +0200, Greg Kroah-Hartman wrote:
 > Now that the driver core allows for struct class to be in read-only
 > memory, we should make all 'class' structures declared at build time
 > placing them into read-only memory, instead of having to be dynamically
@@ -77,6 +62,96 @@ On 2024-06-10 02:20, Greg Kroah-Hartman wrote:
 > Cc: ntb@lists.linux.dev
 > Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
-Looks good to me, thanks!
+Applied with reviewed-by from Dave and Logan to pci/switchtec for
+v6.11, thanks!
 
-Reviewed-By: Logan Gunthorpe <logang@deltatee.com>
+> ---
+>  drivers/ntb/hw/mscc/ntb_hw_switchtec.c |  2 +-
+>  drivers/pci/switch/switchtec.c         | 16 ++++++++--------
+>  include/linux/switchtec.h              |  2 +-
+>  3 files changed, 10 insertions(+), 10 deletions(-)
+> 
+> diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+> index d6bbcc7b5b90..31946387badf 100644
+> --- a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+> +++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+> @@ -1565,7 +1565,7 @@ static struct class_interface switchtec_interface  = {
+>  
+>  static int __init switchtec_ntb_init(void)
+>  {
+> -	switchtec_interface.class = switchtec_class;
+> +	switchtec_interface.class = &switchtec_class;
+>  	return class_interface_register(&switchtec_interface);
+>  }
+>  module_init(switchtec_ntb_init);
+> diff --git a/drivers/pci/switch/switchtec.c b/drivers/pci/switch/switchtec.c
+> index 5a4adf6c04cf..c7e1089ffdaf 100644
+> --- a/drivers/pci/switch/switchtec.c
+> +++ b/drivers/pci/switch/switchtec.c
+> @@ -37,7 +37,9 @@ MODULE_PARM_DESC(nirqs, "number of interrupts to allocate (more may be useful fo
+>  static dev_t switchtec_devt;
+>  static DEFINE_IDA(switchtec_minor_ida);
+>  
+> -struct class *switchtec_class;
+> +const struct class switchtec_class = {
+> +	.name = "switchtec",
+> +};
+>  EXPORT_SYMBOL_GPL(switchtec_class);
+>  
+>  enum mrpc_state {
+> @@ -1363,7 +1365,7 @@ static struct switchtec_dev *stdev_create(struct pci_dev *pdev)
+>  
+>  	dev = &stdev->dev;
+>  	device_initialize(dev);
+> -	dev->class = switchtec_class;
+> +	dev->class = &switchtec_class;
+>  	dev->parent = &pdev->dev;
+>  	dev->groups = switchtec_device_groups;
+>  	dev->release = stdev_release;
+> @@ -1851,11 +1853,9 @@ static int __init switchtec_init(void)
+>  	if (rc)
+>  		return rc;
+>  
+> -	switchtec_class = class_create("switchtec");
+> -	if (IS_ERR(switchtec_class)) {
+> -		rc = PTR_ERR(switchtec_class);
+> +	rc = class_register(&switchtec_class);
+> +	if (rc)
+>  		goto err_create_class;
+> -	}
+>  
+>  	rc = pci_register_driver(&switchtec_pci_driver);
+>  	if (rc)
+> @@ -1866,7 +1866,7 @@ static int __init switchtec_init(void)
+>  	return 0;
+>  
+>  err_pci_register:
+> -	class_destroy(switchtec_class);
+> +	class_unregister(&switchtec_class);
+>  
+>  err_create_class:
+>  	unregister_chrdev_region(switchtec_devt, max_devices);
+> @@ -1878,7 +1878,7 @@ module_init(switchtec_init);
+>  static void __exit switchtec_exit(void)
+>  {
+>  	pci_unregister_driver(&switchtec_pci_driver);
+> -	class_destroy(switchtec_class);
+> +	class_unregister(&switchtec_class);
+>  	unregister_chrdev_region(switchtec_devt, max_devices);
+>  	ida_destroy(&switchtec_minor_ida);
+>  
+> diff --git a/include/linux/switchtec.h b/include/linux/switchtec.h
+> index 8d8fac1626bd..cdb58d61c152 100644
+> --- a/include/linux/switchtec.h
+> +++ b/include/linux/switchtec.h
+> @@ -521,6 +521,6 @@ static inline struct switchtec_dev *to_stdev(struct device *dev)
+>  	return container_of(dev, struct switchtec_dev, dev);
+>  }
+>  
+> -extern struct class *switchtec_class;
+> +extern const struct class switchtec_class;
+>  
+>  #endif
+> -- 
+> 2.45.2
+> 
