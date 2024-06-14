@@ -1,157 +1,135 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.10])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C0B64B65E;
-	Mon, 10 Jun 2024 20:04:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0ACF519A296
+	for <ntb@lists.linux.dev>; Fri, 14 Jun 2024 12:57:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.10
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718049876; cv=none; b=nRGeci4M4xrtJAF3mxfkDXFBhR67tiRYSoerwrOavHmRHtpCbs35ioDCjjh7KSt3KpkHnPJjfM9vropQmWHf0SSUBaeUWSKk61shsBejigfqXGBmYNypcP+cQdvvHsZtqZWAHGjAdsCbZE/5wXSYgfimM7v46BVFtU9Z4r6xcR8=
+	t=1718369880; cv=none; b=TTdigJInpaEgwthvdMSFLv6tlwks4BFLM9nAuHDoumPEQC8KJp33lMkjdLBtmGJIgg1jUMq6Gy24OVKsM2Fq1zD+EBe3K1q3ferzQC/bJuuVK+jsudVHvtMKiDuY73oZvvmx98udrjGNS84noxFdIDgBDo28ldYSOmYCFeRS5nw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718049876; c=relaxed/simple;
-	bh=AxmMtKgOguwKMibo2q1t63b0ArwV5cabYSTSkrpTae0=;
-	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
-	 Content-Disposition:In-Reply-To; b=X6+b5XXXv6ol+TMuUugWcbVVy/hAtv0dniF3YOXJEoLgek0DBrOsrW3mbl9AN8aDnRWGlVnbffBJs2DK9F5dfk2BVgW0B3WvDr33aI9D5sO/Dm7yaSf5RtACfZs/+RNwxf0rbXUtSEsubljWhdIoWpZ4KTGufh0Y+YRS8itOq0Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=oGGUwV6w; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1718369880; c=relaxed/simple;
+	bh=HCRovoAa1zGmgG0Pz8GJKQKP/C/f+F6NWJoVTm3RPws=;
+	h=From:Date:To:cc:Subject:In-Reply-To:Message-ID:References:
+	 MIME-Version:Content-Type; b=sV1uDqu7bjfsu6KT7VqAWCPPZHj2do4+QjmXxEOYvouVD40oRyGaLYN+f2wkVC50T399evnm/t09NtVhk1BNekfUJxuFiyGmIEKGH4ozBWjVr+abHh1DmZr1EqxzdMY1zgYiShDY4J9LW05qJqgA9gf5wqv6QWIRUpW8bumB7Sc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=m3wNiDHn; arc=none smtp.client-ip=192.198.163.10
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="oGGUwV6w"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 104A2C2BBFC;
-	Mon, 10 Jun 2024 20:04:35 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1718049876;
-	bh=AxmMtKgOguwKMibo2q1t63b0ArwV5cabYSTSkrpTae0=;
-	h=Date:From:To:Cc:Subject:In-Reply-To:From;
-	b=oGGUwV6wlkuuMXhIelwruH+R2JTmUX0ySl17ItKcvME4jvsDYbRhLLPL1CBRUnOBp
-	 vAMvtnQX4E0vE4xkvhRAwCEWeabV/71uwMukQeaXkHJdl3hJihemaHM9B15C6yjTEN
-	 RakU9bvu1yn5EiZAngSPVx7ABsrbQLE7WN3ZUrd6XQ00SUBsISVrcn0lBu23aMExKq
-	 sNMGnLCXM8uHLvhUqHSv1Ugl+hoyfRSBN2+6OiGldRUe5nH++0G4Bl1GkajkImJDZ+
-	 1YFePPaZA6Nwal0sfsZGqafwxe5pnbrlhQ/KSkBvqeGMOMOWMwcNItWUFvhI6sy5vY
-	 UXjkIBL1wsgnA==
-Date: Mon, 10 Jun 2024 15:04:34 -0500
-From: Bjorn Helgaas <helgaas@kernel.org>
-To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org,
-	Kurt Schwemmer <kurt.schwemmer@microsemi.com>,
-	Logan Gunthorpe <logang@deltatee.com>, Jon Mason <jdmason@kudzu.us>,
-	Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>,
-	Bjorn Helgaas <bhelgaas@google.com>, ntb@lists.linux.dev
-Subject: Re: [PATCH] PCI: switchtec: make switchtec_class constant
-Message-ID: <20240610200434.GA958238@bhelgaas>
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="m3wNiDHn"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1718369878; x=1749905878;
+  h=from:date:to:cc:subject:in-reply-to:message-id:
+   references:mime-version;
+  bh=HCRovoAa1zGmgG0Pz8GJKQKP/C/f+F6NWJoVTm3RPws=;
+  b=m3wNiDHnFbzkBn9QSdiwK3s4gouMFcaGrQcdl4ICjta5YAbjg1Ddx2Qr
+   /METDPss+PZQ7RxlnptGBRAVM6G8VF/3VvnQi961zlHRS7sxxM2peeOLK
+   E3HvJv+9+AXYYGKMP7aTIe0X3OQyKWRuiYiAUsKyp8SfuFpBVidYG91qw
+   cr/OLrWyv0CjK20h7iC++biqNZYGT9oDpJv5txjHKDRqvUIzenGLtdM+7
+   aIExSTvfZNm2ZawS1F/QlHcLQta4wmVBx41MS6uoBA+qLEb6jA2en4DOE
+   thjcQ4ocLS/os3TioWmEkjU+ZYKHJHG2nrr4m1YZmFA9nJnCVsJDUtxg1
+   Q==;
+X-CSE-ConnectionGUID: v8s8ebcnTuy08vjqryYnFQ==
+X-CSE-MsgGUID: x7EvMG/OTvSTamNzI4e7GA==
+X-IronPort-AV: E=McAfee;i="6700,10204,11103"; a="26649477"
+X-IronPort-AV: E=Sophos;i="6.08,237,1712646000"; 
+   d="scan'208";a="26649477"
+Received: from fmviesa008.fm.intel.com ([10.60.135.148])
+  by fmvoesa104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Jun 2024 05:57:57 -0700
+X-CSE-ConnectionGUID: ND41G8VNRSCad+rFwIws0w==
+X-CSE-MsgGUID: +4i6ZaJFStGPQ2N0NBMx5g==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.08,237,1712646000"; 
+   d="scan'208";a="40456270"
+Received: from ijarvine-desk1.ger.corp.intel.com (HELO localhost) ([10.245.247.222])
+  by fmviesa008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Jun 2024 05:57:53 -0700
+From: =?UTF-8?q?Ilpo=20J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>
+Date: Fri, 14 Jun 2024 15:57:49 +0300 (EEST)
+To: Dan Carpenter <dan.carpenter@linaro.org>
+cc: Frank Li <Frank.Li@nxp.com>, Jon Mason <jdmason@kudzu.us>, 
+    Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, 
+    Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>, 
+    =?ISO-8859-2?Q?Krzysztof_Wilczy=F1ski?= <kw@linux.com>, 
+    Kishon Vijay Abraham I <kishon@kernel.org>, 
+    Bjorn Helgaas <bhelgaas@google.com>, ntb@lists.linux.dev, 
+    linux-pci@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, 
+    kernel-janitors@vger.kernel.org
+Subject: Re: [PATCH 1/2] PCI: endpoint: Clean up error handling in
+ vpci_scan_bus()
+In-Reply-To: <68e0f6a4-fd57-45d0-945b-0876f2c8cb86@moroto.mountain>
+Message-ID: <d8f510d1-db05-66a8-b379-464fdc817143@linux.intel.com>
+References: <68e0f6a4-fd57-45d0-945b-0876f2c8cb86@moroto.mountain>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <2024061053-online-unwound-b173@gregkh>
+Content-Type: multipart/mixed; boundary="8323328-1335945687-1718369869=:1013"
 
-On Mon, Jun 10, 2024 at 10:20:53AM +0200, Greg Kroah-Hartman wrote:
-> Now that the driver core allows for struct class to be in read-only
-> memory, we should make all 'class' structures declared at build time
-> placing them into read-only memory, instead of having to be dynamically
-> allocated at runtime.
-> 
-> Cc: Kurt Schwemmer <kurt.schwemmer@microsemi.com>
-> Cc: Logan Gunthorpe <logang@deltatee.com>
-> Cc: Jon Mason <jdmason@kudzu.us>
-> Cc: Dave Jiang <dave.jiang@intel.com>
-> Cc: Allen Hubbe <allenbh@gmail.com>
-> Cc: Bjorn Helgaas <bhelgaas@google.com>
-> Cc: linux-pci@vger.kernel.org
-> Cc: ntb@lists.linux.dev
-> Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Applied with reviewed-by from Dave and Logan to pci/switchtec for
-v6.11, thanks!
+--8323328-1335945687-1718369869=:1013
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
+On Mon, 10 Jun 2024, Dan Carpenter wrote:
+
+> Smatch complains about inconsistent NULL checking in vpci_scan_bus():
+>=20
+>     drivers/pci/endpoint/functions/pci-epf-vntb.c:1024 vpci_scan_bus()
+>     error: we previously assumed 'vpci_bus' could be null (see line 1021)
+>=20
+> Instead of printing an error message and then crashing we should return
+> an error code and clean up.  Also the NULL check is reversed so it
+> prints an error for success instead of failure.
+>=20
+> Fixes: e35f56bb0330 ("PCI: endpoint: Support NTB transfer between RC and =
+EP")
+> Signed-off-by: Dan Carpenter <dan.carpenter@linaro.org>
 > ---
->  drivers/ntb/hw/mscc/ntb_hw_switchtec.c |  2 +-
->  drivers/pci/switch/switchtec.c         | 16 ++++++++--------
->  include/linux/switchtec.h              |  2 +-
->  3 files changed, 10 insertions(+), 10 deletions(-)
-> 
-> diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-> index d6bbcc7b5b90..31946387badf 100644
-> --- a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-> +++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-> @@ -1565,7 +1565,7 @@ static struct class_interface switchtec_interface  = {
->  
->  static int __init switchtec_ntb_init(void)
->  {
-> -	switchtec_interface.class = switchtec_class;
-> +	switchtec_interface.class = &switchtec_class;
->  	return class_interface_register(&switchtec_interface);
->  }
->  module_init(switchtec_ntb_init);
-> diff --git a/drivers/pci/switch/switchtec.c b/drivers/pci/switch/switchtec.c
-> index 5a4adf6c04cf..c7e1089ffdaf 100644
-> --- a/drivers/pci/switch/switchtec.c
-> +++ b/drivers/pci/switch/switchtec.c
-> @@ -37,7 +37,9 @@ MODULE_PARM_DESC(nirqs, "number of interrupts to allocate (more may be useful fo
->  static dev_t switchtec_devt;
->  static DEFINE_IDA(switchtec_minor_ida);
->  
-> -struct class *switchtec_class;
-> +const struct class switchtec_class = {
-> +	.name = "switchtec",
-> +};
->  EXPORT_SYMBOL_GPL(switchtec_class);
->  
->  enum mrpc_state {
-> @@ -1363,7 +1365,7 @@ static struct switchtec_dev *stdev_create(struct pci_dev *pdev)
->  
->  	dev = &stdev->dev;
->  	device_initialize(dev);
-> -	dev->class = switchtec_class;
-> +	dev->class = &switchtec_class;
->  	dev->parent = &pdev->dev;
->  	dev->groups = switchtec_device_groups;
->  	dev->release = stdev_release;
-> @@ -1851,11 +1853,9 @@ static int __init switchtec_init(void)
->  	if (rc)
->  		return rc;
->  
-> -	switchtec_class = class_create("switchtec");
-> -	if (IS_ERR(switchtec_class)) {
-> -		rc = PTR_ERR(switchtec_class);
-> +	rc = class_register(&switchtec_class);
-> +	if (rc)
->  		goto err_create_class;
-> -	}
->  
->  	rc = pci_register_driver(&switchtec_pci_driver);
->  	if (rc)
-> @@ -1866,7 +1866,7 @@ static int __init switchtec_init(void)
->  	return 0;
->  
->  err_pci_register:
-> -	class_destroy(switchtec_class);
-> +	class_unregister(&switchtec_class);
->  
->  err_create_class:
->  	unregister_chrdev_region(switchtec_devt, max_devices);
-> @@ -1878,7 +1878,7 @@ module_init(switchtec_init);
->  static void __exit switchtec_exit(void)
->  {
->  	pci_unregister_driver(&switchtec_pci_driver);
-> -	class_destroy(switchtec_class);
-> +	class_unregister(&switchtec_class);
->  	unregister_chrdev_region(switchtec_devt, max_devices);
->  	ida_destroy(&switchtec_minor_ida);
->  
-> diff --git a/include/linux/switchtec.h b/include/linux/switchtec.h
-> index 8d8fac1626bd..cdb58d61c152 100644
-> --- a/include/linux/switchtec.h
-> +++ b/include/linux/switchtec.h
-> @@ -521,6 +521,6 @@ static inline struct switchtec_dev *to_stdev(struct device *dev)
->  	return container_of(dev, struct switchtec_dev, dev);
->  }
->  
-> -extern struct class *switchtec_class;
-> +extern const struct class switchtec_class;
->  
->  #endif
-> -- 
-> 2.45.2
-> 
+>  drivers/pci/endpoint/functions/pci-epf-vntb.c | 12 +++++++++---
+>  1 file changed, 9 insertions(+), 3 deletions(-)
+>=20
+> diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/=
+endpoint/functions/pci-epf-vntb.c
+> index 8e779eecd62d..7f05a44e9a9f 100644
+> --- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> +++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> @@ -1018,8 +1018,10 @@ static int vpci_scan_bus(void *sysdata)
+>  =09struct epf_ntb *ndev =3D sysdata;
+> =20
+>  =09vpci_bus =3D pci_scan_bus(ndev->vbus_number, &vpci_ops, sysdata);
+> -=09if (vpci_bus)
+> -=09=09pr_err("create pci bus\n");
+> +=09if (!vpci_bus) {
+> +=09=09pr_err("create pci bus failed\n");
+> +=09=09return -EINVAL;
+> +=09}
+> =20
+>  =09pci_bus_add_devices(vpci_bus);
+> =20
+> @@ -1338,10 +1340,14 @@ static int epf_ntb_bind(struct pci_epf *epf)
+>  =09=09goto err_bar_alloc;
+>  =09}
+> =20
+> -=09vpci_scan_bus(ntb);
+> +=09ret =3D vpci_scan_bus(ntb);
+> +=09if (ret)
+> +=09=09goto err_unregister;
+> =20
+>  =09return 0;
+> =20
+> +err_unregister:
+> +=09pci_unregister_driver(&vntb_pci_driver);
+>  err_bar_alloc:
+>  =09epf_ntb_config_spad_bar_free(ntb);
+
+Reviewed-by: Ilpo J=E4rvinen <ilpo.jarvinen@linux.intel.com>
+
+
+--=20
+ i.
+
+--8323328-1335945687-1718369869=:1013--
