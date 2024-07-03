@@ -1,79 +1,101 @@
-Received: from mail-pj1-f48.google.com (mail-pj1-f48.google.com [209.85.216.48])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 324FC16D9B6
-	for <ntb@lists.linux.dev>; Mon,  1 Jul 2024 20:34:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A117F1FAA;
+	Wed,  3 Jul 2024 02:00:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719866072; cv=none; b=MaAN83I54hhnT2JThxVwCFsIBEiPPJ3Itlwl55wSZT6/+NJfrb2M9pI9QPvsHfi4HdyLF3EJ1A3+Z86U0PhQxpI7QzSNL3DcS/w2EBOPQL5EV4yCIkUj2bXP8Sa3XSc5md/XsXdWXNoYMKyMCzukGWdQgLoT2Tn3oEimjxisa9k=
+	t=1719972034; cv=none; b=W1t7siR5uUm3OCf1Ta++YJvBRoX5iHsTTHweH7TcQij41PeLbvyYvrWv2CqmnO8XZIYAfWXX4IL0pwjpeq0NluPTovS9PYjfSnChrdgt25l+SDQTbMGyeCNaVlI3MvEkzIebXdk8KTVIzqm4JodS1ObZaN/14ERz/C3qlWs2iHs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1719866072; c=relaxed/simple;
-	bh=Wo6jYVKWt1XsfvW2kocRWwhdmJB1ArOA1W+ONgrcPUo=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=jeeTpVpQJILQUzP8XTq2bj4s3TzkB1JvVEK2tV5f5TRQfKECpXl0W35j7W6V+nx6Ao86LmhMck87rKc7Gcjqk+2HqUGMh5AOohZVbEfJR5ycEK6n5YtHcAUGs5gZEnDFfMmevC4roNwNlYV+cCsxeYqXiQxN6DK3qJQuc2JMEsg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=linux.com; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.216.48
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=linux.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-pj1-f48.google.com with SMTP id 98e67ed59e1d1-2c81ce83715so2540678a91.3
-        for <ntb@lists.linux.dev>; Mon, 01 Jul 2024 13:34:31 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1719866070; x=1720470870;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Gt/VCLG0XE9tYQ4KowekIVt6Vm28X9Pkg8zs7uMqPhA=;
-        b=Z+T8GBJdKAozyyWdC98YIz8tOAG+jFFiACzR+bl9zRZiYqxnwjRDNJ0RaMhhZZXJKT
-         xp6KR4ROBc8VIY2Z7RIPpoLspRMucuVVbp+vvTiIRf98saX3iaBF0sHSdqb8eH4T9QlL
-         /VJevVlzgwQPX+AOI/pUvtSh7h3svgs84T4RyxRosK70+FH3R0YDscIsLwPtcFTALn8M
-         RhK+ifDWlONmo7CnefIMxkSz/SrW64SKrupOvLEJ8F+4HufFulCe+fiYqXQfYynko6sb
-         w01i7LABvjm9RkvBIDWx5HpXceSCIU5sQzVyuxhXkZ7hBD9rNIDJT6GRI0cNrCHs3D+U
-         1ISQ==
-X-Forwarded-Encrypted: i=1; AJvYcCUyDn4Jm0mcIYqhlmwdAOXuHoS5qyrlspPBcDOa3RWAAHwHb2rISixHmGya90eAjYpVtarfObZViRMuu5brpeDcR5pR
-X-Gm-Message-State: AOJu0YxejAdroQtkNVxrnp9Ldv1FHnkCB2PXJlvgfFgYl+FRYI9fF12L
-	Ex0fVvxBqhAfdJ3E/nZU465376O164PRVHWeKWhvZwqFpsJ5gAAL
-X-Google-Smtp-Source: AGHT+IH37dM54+qflq0oEXeW4Muag9hwYXpu9YtpKLmCGG+T0D5FT3KmTqCArx3LOlD6TcYfx9xJMw==
-X-Received: by 2002:a17:90a:d70b:b0:2c2:d8d7:bf65 with SMTP id 98e67ed59e1d1-2c93d6d72famr5079101a91.7.1719866070429;
-        Mon, 01 Jul 2024 13:34:30 -0700 (PDT)
-Received: from localhost (fpd11144dd.ap.nuro.jp. [209.17.68.221])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2c91ce425bdsm7306981a91.14.2024.07.01.13.34.29
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 01 Jul 2024 13:34:30 -0700 (PDT)
-Date: Tue, 2 Jul 2024 05:34:28 +0900
-From: Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kw@linux.com>
-To: Dan Carpenter <dan.carpenter@linaro.org>
-Cc: Frank Li <Frank.Li@nxp.com>, Jon Mason <jdmason@kudzu.us>,
-	Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>,
-	Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
-	Kishon Vijay Abraham I <kishon@kernel.org>,
-	Bjorn Helgaas <bhelgaas@google.com>, ntb@lists.linux.dev,
-	linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org,
-	kernel-janitors@vger.kernel.org
-Subject: Re: [PATCH 0/2] PCI: endpoint: fix a couple error handling bugs
-Message-ID: <20240701203428.GA412915@rocinante>
-References: <6eacdf8e-bb07-4e01-8726-c53a9a508945@moroto.mountain>
+	s=arc-20240116; t=1719972034; c=relaxed/simple;
+	bh=ddoWIzMvun+BiAae8QNh2KY6WQqqmwq7hCuAmlJwRvo=;
+	h=Content-Type:MIME-Version:Subject:From:Message-Id:Date:References:
+	 In-Reply-To:To:Cc; b=kHgFeeOfW6uqvyFZhNScxLKHL+TGSPrxvr6MskPLi0eZPvdWyGXgRmgdXQrS3UurztldxSJIwnuL0Uw0IB4SpTf5dw7dlQcLCuwsTGp5blvhaDTqQKpuhNxrChn6N14hFVlozqi51GbRHUbnaEr4k37ObEDNpf7SJFqNRfx8h5w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jsZVXGri; arc=none smtp.client-ip=10.30.226.201
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jsZVXGri"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 4B71AC4AF0A;
+	Wed,  3 Jul 2024 02:00:34 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1719972034;
+	bh=ddoWIzMvun+BiAae8QNh2KY6WQqqmwq7hCuAmlJwRvo=;
+	h=Subject:From:Date:References:In-Reply-To:To:Cc:From;
+	b=jsZVXGriUXLqQVjuFYpI9QcX6hWXb7/UY4KSCr6VdQHERPLqpzcEyxKx85c3y2IKL
+	 Ad+nMrBGEpT4M1AVeuvPxE/y6jcDv/k2u+OVQmT6pB1Ije3rGF6G2p6nDIwj6qHeXX
+	 0JbET8ufHK5Fx4jSjlbAzGGnUnC8p2Ayh/Q88fuKMvOnRI0jefxLQeXb6OKMMfsEVr
+	 aPg6GPAH6rfPBxYECA5bNdRpeheEI6G8j+xOQqxiSXei9CAPnJjDxqRswuFwZPmumK
+	 +ZS4ULbCO8YRXkAEi0pxSdD9LB3ShosaqLBBpL7RLcE07ejexp5zGzgC+WHBCelLmx
+	 WvLuc0W6iIDGQ==
+Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
+	by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id 35FE1C43331;
+	Wed,  3 Jul 2024 02:00:34 +0000 (UTC)
+Content-Type: text/plain; charset="utf-8"
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <6eacdf8e-bb07-4e01-8726-c53a9a508945@moroto.mountain>
+Content-Transfer-Encoding: 8bit
+Subject: Re: [PATCH v2] net: ntb_netdev: Move ntb_netdev_rx_handler() to call
+ netif_rx() from __netif_rx()
+From: patchwork-bot+netdevbpf@kernel.org
+Message-Id: 
+ <171997203421.32241.9722125326402444129.git-patchwork-notify@kernel.org>
+Date: Wed, 03 Jul 2024 02:00:34 +0000
+References: <20240701181538.3799546-1-dave.jiang@intel.com>
+In-Reply-To: <20240701181538.3799546-1-dave.jiang@intel.com>
+To: Dave Jiang <dave.jiang@intel.com>
+Cc: ntb@lists.linux.dev, netdev@vger.kernel.org, jdmason@kudzu.us,
+ allenbh@gmail.com, davem@davemloft.net, edumazet@google.com, kuba@kernel.org,
+ abeni@redhat.com, jerry.dai@intel.com
 
-Hello,
+Hello:
 
-> Two small error error handling and cleanup patches.  The first one fixes
-> an incorrect error message printed on success.  The other one fixes some
-> cleanup.  Which is probably not required because PCI code is generally
-> required for a functioning system...
+This patch was applied to netdev/net.git (main)
+by Jakub Kicinski <kuba@kernel.org>:
 
-Applied to endpoint, thank you!
+On Mon,  1 Jul 2024 11:15:38 -0700 you wrote:
+> The following is emitted when using idxd (DSA) dmanegine as the data
+> mover for ntb_transport that ntb_netdev uses.
+> 
+> [74412.546922] BUG: using smp_processor_id() in preemptible [00000000] code: irq/52-idxd-por/14526
+> [74412.556784] caller is netif_rx_internal+0x42/0x130
+> [74412.562282] CPU: 6 PID: 14526 Comm: irq/52-idxd-por Not tainted 6.9.5 #5
+> [74412.569870] Hardware name: Intel Corporation ArcherCity/ArcherCity, BIOS EGSDCRB1.E9I.1752.P05.2402080856 02/08/2024
+> [74412.581699] Call Trace:
+> [74412.584514]  <TASK>
+> [74412.586933]  dump_stack_lvl+0x55/0x70
+> [74412.591129]  check_preemption_disabled+0xc8/0xf0
+> [74412.596374]  netif_rx_internal+0x42/0x130
+> [74412.600957]  __netif_rx+0x20/0xd0
+> [74412.604743]  ntb_netdev_rx_handler+0x66/0x150 [ntb_netdev]
+> [74412.610985]  ntb_complete_rxc+0xed/0x140 [ntb_transport]
+> [74412.617010]  ntb_rx_copy_callback+0x53/0x80 [ntb_transport]
+> [74412.623332]  idxd_dma_complete_txd+0xe3/0x160 [idxd]
+> [74412.628963]  idxd_wq_thread+0x1a6/0x2b0 [idxd]
+> [74412.634046]  irq_thread_fn+0x21/0x60
+> [74412.638134]  ? irq_thread+0xa8/0x290
+> [74412.642218]  irq_thread+0x1a0/0x290
+> [74412.646212]  ? __pfx_irq_thread_fn+0x10/0x10
+> [74412.651071]  ? __pfx_irq_thread_dtor+0x10/0x10
+> [74412.656117]  ? __pfx_irq_thread+0x10/0x10
+> [74412.660686]  kthread+0x100/0x130
+> [74412.664384]  ? __pfx_kthread+0x10/0x10
+> [74412.668639]  ret_from_fork+0x31/0x50
+> [74412.672716]  ? __pfx_kthread+0x10/0x10
+> [74412.676978]  ret_from_fork_asm+0x1a/0x30
+> [74412.681457]  </TASK>
+> 
+> [...]
 
-[01/02] PCI: endpoint: Clean up error handling in vpci_scan_bus()
-        https://git.kernel.org/pci/pci/c/72705e5b5957
+Here is the summary with links:
+  - [v2] net: ntb_netdev: Move ntb_netdev_rx_handler() to call netif_rx() from __netif_rx()
+    https://git.kernel.org/netdev/net/c/e15a5d821e51
 
-[02/02] PCI: endpoint: Fix error handling in epf_ntb_epc_cleanup()
-        https://git.kernel.org/pci/pci/c/05214340e133
+You are awesome, thank you!
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/patchwork/pwbot.html
 
-	Krzysztof
+
