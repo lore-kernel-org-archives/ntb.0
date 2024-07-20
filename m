@@ -1,35 +1,49 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp.smtpout.orange.fr (smtp-23.smtpout.orange.fr [80.12.242.23])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A117F1FAA;
-	Wed,  3 Jul 2024 02:00:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ADBC03A1C4
+	for <ntb@lists.linux.dev>; Sat, 20 Jul 2024 10:59:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=80.12.242.23
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719972034; cv=none; b=W1t7siR5uUm3OCf1Ta++YJvBRoX5iHsTTHweH7TcQij41PeLbvyYvrWv2CqmnO8XZIYAfWXX4IL0pwjpeq0NluPTovS9PYjfSnChrdgt25l+SDQTbMGyeCNaVlI3MvEkzIebXdk8KTVIzqm4JodS1ObZaN/14ERz/C3qlWs2iHs=
+	t=1721473193; cv=none; b=ZIa0r1qqEW0wrXWtN7GZRe104VBF1t8RYqyhJdLxZ9OSEOYjXet02aCwKaYYFlqJFbjrVDFXXWhngezimkROyfWTRg16HRWYdN3ao4XcyOm4pVj/nNwSrOp+KxjnT2WNVgj68pzah4dj6RNUvHTmSY+IbLJzxU/uEh0D5zHDUZU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1719972034; c=relaxed/simple;
-	bh=ddoWIzMvun+BiAae8QNh2KY6WQqqmwq7hCuAmlJwRvo=;
-	h=Content-Type:MIME-Version:Subject:From:Message-Id:Date:References:
-	 In-Reply-To:To:Cc; b=kHgFeeOfW6uqvyFZhNScxLKHL+TGSPrxvr6MskPLi0eZPvdWyGXgRmgdXQrS3UurztldxSJIwnuL0Uw0IB4SpTf5dw7dlQcLCuwsTGp5blvhaDTqQKpuhNxrChn6N14hFVlozqi51GbRHUbnaEr4k37ObEDNpf7SJFqNRfx8h5w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jsZVXGri; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1721473193; c=relaxed/simple;
+	bh=3eJP5D2gLY2qGLsJ+PSb5K2vvmVn2tcyQqDbjoG+glw=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ZpT0tdmvLeW3o6bY3moXB6Jt25FcCoF2/8VksUL37BNesGSvzxx42qjRAzu8rgn2kvGp78VgfHWoTqaQ8m1nYauZb5MX6R4sgtZBBM6t5Wk/Q2r3oNYwS99L+ceDltRrViXYseIBvT9rpY/HO9pGotCxv+cEfsulx5nLah/Bg7o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wanadoo.fr; spf=pass smtp.mailfrom=wanadoo.fr; dkim=pass (2048-bit key) header.d=wanadoo.fr header.i=@wanadoo.fr header.b=lngDg7eb; arc=none smtp.client-ip=80.12.242.23
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wanadoo.fr
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wanadoo.fr
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jsZVXGri"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 4B71AC4AF0A;
-	Wed,  3 Jul 2024 02:00:34 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1719972034;
-	bh=ddoWIzMvun+BiAae8QNh2KY6WQqqmwq7hCuAmlJwRvo=;
-	h=Subject:From:Date:References:In-Reply-To:To:Cc:From;
-	b=jsZVXGriUXLqQVjuFYpI9QcX6hWXb7/UY4KSCr6VdQHERPLqpzcEyxKx85c3y2IKL
-	 Ad+nMrBGEpT4M1AVeuvPxE/y6jcDv/k2u+OVQmT6pB1Ije3rGF6G2p6nDIwj6qHeXX
-	 0JbET8ufHK5Fx4jSjlbAzGGnUnC8p2Ayh/Q88fuKMvOnRI0jefxLQeXb6OKMMfsEVr
-	 aPg6GPAH6rfPBxYECA5bNdRpeheEI6G8j+xOQqxiSXei9CAPnJjDxqRswuFwZPmumK
-	 +ZS4ULbCO8YRXkAEi0pxSdD9LB3ShosaqLBBpL7RLcE07ejexp5zGzgC+WHBCelLmx
-	 WvLuc0W6iIDGQ==
-Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id 35FE1C43331;
-	Wed,  3 Jul 2024 02:00:34 +0000 (UTC)
-Content-Type: text/plain; charset="utf-8"
+	dkim=pass (2048-bit key) header.d=wanadoo.fr header.i=@wanadoo.fr header.b="lngDg7eb"
+Received: from fedora.home ([90.11.132.44])
+	by smtp.orange.fr with ESMTPA
+	id V7oSskCfXOGeaV7oSswaIZ; Sat, 20 Jul 2024 12:59:42 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=wanadoo.fr;
+	s=t20230301; t=1721473182;
+	bh=/Oc6zHUJ3PsZDwx3kEOlE52feOVHzNSUSRVZP+ZoPqE=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version;
+	b=lngDg7ebFxzciPH9gWGq9jkDnDew+kqNbMu28oDWUv1HQe3IN0S9BsCR/+QTtMeY8
+	 EoKSnB367Ck8ERNoIVnSt1oBAJYVGpDGjEojaOYuspkdHrXTOwl7lAsehu/V07s/Yf
+	 X2/H5N1Mh2gWqdf2drbimqHXj1KKSAjUMfRPyMvF1eIuk1Y47ITg2tjJ44l5ghYcKL
+	 QJGxSn3RiBCvt+o4hEhx/dyn0Ta5EAW7GXBGhrPIyob/Bax9L0Qgg92+84lVOu7lNu
+	 FuksPrBHgG3C4Bv1IFGdfyN1PdEM702c3n5d5lO4vI7LelG9o9Ct/cvguEhYT5rlJz
+	 dTttig84WNQeA==
+X-ME-Helo: fedora.home
+X-ME-Auth: Y2hyaXN0b3BoZS5qYWlsbGV0QHdhbmFkb28uZnI=
+X-ME-Date: Sat, 20 Jul 2024 12:59:42 +0200
+X-ME-IP: 90.11.132.44
+From: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+To: Jon Mason <jdmason@kudzu.us>,
+	Dave Jiang <dave.jiang@intel.com>,
+	Allen Hubbe <allenbh@gmail.com>
+Cc: linux-kernel@vger.kernel.org,
+	kernel-janitors@vger.kernel.org,
+	Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
+	ntb@lists.linux.dev
+Subject: [PATCH] ntb: Constify struct bus_type
+Date: Sat, 20 Jul 2024 12:59:36 +0200
+Message-ID: <50a28f39b1f0d0201b2645d2a8239e1819dc924b.1721473166.git.christophe.jaillet@wanadoo.fr>
+X-Mailer: git-send-email 2.45.2
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -37,65 +51,70 @@ List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Subject: Re: [PATCH v2] net: ntb_netdev: Move ntb_netdev_rx_handler() to call
- netif_rx() from __netif_rx()
-From: patchwork-bot+netdevbpf@kernel.org
-Message-Id: 
- <171997203421.32241.9722125326402444129.git-patchwork-notify@kernel.org>
-Date: Wed, 03 Jul 2024 02:00:34 +0000
-References: <20240701181538.3799546-1-dave.jiang@intel.com>
-In-Reply-To: <20240701181538.3799546-1-dave.jiang@intel.com>
-To: Dave Jiang <dave.jiang@intel.com>
-Cc: ntb@lists.linux.dev, netdev@vger.kernel.org, jdmason@kudzu.us,
- allenbh@gmail.com, davem@davemloft.net, edumazet@google.com, kuba@kernel.org,
- abeni@redhat.com, jerry.dai@intel.com
 
-Hello:
+'struct bus_type' is not modified in this driver.
 
-This patch was applied to netdev/net.git (main)
-by Jakub Kicinski <kuba@kernel.org>:
+Constifying this structure moves some data to a read-only section, so
+increase overall security, especially when the structure holds some
+function pointers.
 
-On Mon,  1 Jul 2024 11:15:38 -0700 you wrote:
-> The following is emitted when using idxd (DSA) dmanegine as the data
-> mover for ntb_transport that ntb_netdev uses.
-> 
-> [74412.546922] BUG: using smp_processor_id() in preemptible [00000000] code: irq/52-idxd-por/14526
-> [74412.556784] caller is netif_rx_internal+0x42/0x130
-> [74412.562282] CPU: 6 PID: 14526 Comm: irq/52-idxd-por Not tainted 6.9.5 #5
-> [74412.569870] Hardware name: Intel Corporation ArcherCity/ArcherCity, BIOS EGSDCRB1.E9I.1752.P05.2402080856 02/08/2024
-> [74412.581699] Call Trace:
-> [74412.584514]  <TASK>
-> [74412.586933]  dump_stack_lvl+0x55/0x70
-> [74412.591129]  check_preemption_disabled+0xc8/0xf0
-> [74412.596374]  netif_rx_internal+0x42/0x130
-> [74412.600957]  __netif_rx+0x20/0xd0
-> [74412.604743]  ntb_netdev_rx_handler+0x66/0x150 [ntb_netdev]
-> [74412.610985]  ntb_complete_rxc+0xed/0x140 [ntb_transport]
-> [74412.617010]  ntb_rx_copy_callback+0x53/0x80 [ntb_transport]
-> [74412.623332]  idxd_dma_complete_txd+0xe3/0x160 [idxd]
-> [74412.628963]  idxd_wq_thread+0x1a6/0x2b0 [idxd]
-> [74412.634046]  irq_thread_fn+0x21/0x60
-> [74412.638134]  ? irq_thread+0xa8/0x290
-> [74412.642218]  irq_thread+0x1a0/0x290
-> [74412.646212]  ? __pfx_irq_thread_fn+0x10/0x10
-> [74412.651071]  ? __pfx_irq_thread_dtor+0x10/0x10
-> [74412.656117]  ? __pfx_irq_thread+0x10/0x10
-> [74412.660686]  kthread+0x100/0x130
-> [74412.664384]  ? __pfx_kthread+0x10/0x10
-> [74412.668639]  ret_from_fork+0x31/0x50
-> [74412.672716]  ? __pfx_kthread+0x10/0x10
-> [74412.676978]  ret_from_fork_asm+0x1a/0x30
-> [74412.681457]  </TASK>
-> 
-> [...]
+On a x86_64, with allmodconfig:
+Before:
+======
+   text	   data	    bss	    dec	    hex	filename
+  69682	   4593	    152	  74427	  122bb	drivers/ntb/ntb_transport.o
+   5847	    448	     32	   6327	   18b7	drivers/ntb/core.o
 
-Here is the summary with links:
-  - [v2] net: ntb_netdev: Move ntb_netdev_rx_handler() to call netif_rx() from __netif_rx()
-    https://git.kernel.org/netdev/net/c/e15a5d821e51
+After:
+=====
+   text	   data	    bss	    dec	    hex	filename
+  69858	   4433	    152	  74443	  122cb	drivers/ntb/ntb_transport.o
+   6007	    288	     32	   6327	   18b7	drivers/ntb/core.o
 
-You are awesome, thank you!
+
+Signed-off-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+---
+Compile tested-only.
+---
+ drivers/ntb/core.c          | 4 ++--
+ drivers/ntb/ntb_transport.c | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/ntb/core.c b/drivers/ntb/core.c
+index d702bee78082..ed6f4adc6130 100644
+--- a/drivers/ntb/core.c
++++ b/drivers/ntb/core.c
+@@ -72,7 +72,7 @@ MODULE_VERSION(DRIVER_VERSION);
+ MODULE_AUTHOR(DRIVER_AUTHOR);
+ MODULE_DESCRIPTION(DRIVER_DESCRIPTION);
+ 
+-static struct bus_type ntb_bus;
++static const struct bus_type ntb_bus;
+ static void ntb_dev_release(struct device *dev);
+ 
+ int __ntb_register_client(struct ntb_client *client, struct module *mod,
+@@ -298,7 +298,7 @@ static void ntb_dev_release(struct device *dev)
+ 	complete(&ntb->released);
+ }
+ 
+-static struct bus_type ntb_bus = {
++static const struct bus_type ntb_bus = {
+ 	.name = "ntb",
+ 	.probe = ntb_probe,
+ 	.remove = ntb_remove,
+diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+index 77e55debeed6..a79f68e18d3f 100644
+--- a/drivers/ntb/ntb_transport.c
++++ b/drivers/ntb/ntb_transport.c
+@@ -314,7 +314,7 @@ static void ntb_transport_bus_remove(struct device *dev)
+ 	put_device(dev);
+ }
+ 
+-static struct bus_type ntb_transport_bus = {
++static const struct bus_type ntb_transport_bus = {
+ 	.name = "ntb_transport",
+ 	.match = ntb_transport_bus_match,
+ 	.probe = ntb_transport_bus_probe,
 -- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/patchwork/pwbot.html
-
+2.45.2
 
