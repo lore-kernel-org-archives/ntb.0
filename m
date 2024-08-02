@@ -1,157 +1,218 @@
-Received: from mail-ed1-f43.google.com (mail-ed1-f43.google.com [209.85.208.43])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 29FB31CA85
-	for <ntb@lists.linux.dev>; Fri,  2 Aug 2024 05:18:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.43
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D51871C0DE5
+	for <ntb@lists.linux.dev>; Fri,  2 Aug 2024 07:29:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1722575893; cv=none; b=QV8KoAXxb1AgAFA9H7ln06pM2vSUPQAHmYYuHVql/GQlEMmUxGx8T5zCwmpwftw8TDZy0YdiboFYbzdaervcupIDy3euOJhB2rz+fUFD06Y0IttdY77frqiK3+YnbFbK9VTYBqQTrzyV54HdohJEimoYBN/YkrZVsz3NK1qIiPk=
+	t=1722583780; cv=none; b=YGLgZYM/mOP/G9y3Fvm6qInMJr8syIP+u+zBBP5H4o0RZzKhhq+YMF4D88qMnqeSOEoCrxLg0PtVpgpuYZCB5kIuAmPoELTzj6fdekyDfKr83P4XW/MOtvSEQl32TCMTDPG5GIe6YtyChg2uJ7JNl88TEsPca94LgdgCv+i+wYI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1722575893; c=relaxed/simple;
-	bh=KBnywWN7spBgCoWrsqgsxLIdipGHzAll/sCSzpFWEyA=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=AOsU4Wm60rISKec6CzHn1vkm/CSIrqn4AXceFXbuYsrAmw5Wk8LxJccyUmIpprGsm+D9fCKZnjER0Fv605I37fRsEWCX0GgNQzjUyOw2DQtN6smWpIer2V/wvyaaSTkfjTZuqBTRJk4ZC32l2zcsB6sG5ndW0o2el5wgpSTMIw0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.208.43
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-ed1-f43.google.com with SMTP id 4fb4d7f45d1cf-5b7b6a30454so1914332a12.2
-        for <ntb@lists.linux.dev>; Thu, 01 Aug 2024 22:18:11 -0700 (PDT)
+	s=arc-20240116; t=1722583780; c=relaxed/simple;
+	bh=/qNa7b0UY2NN2bq6vNpDiP0TaRXi/KQpapeAk2I4r3A=;
+	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=PhfS60elM988IfhdTRAaPK7/IJX+VOBdnwp9UVtHa82/6psbynS9x1LXj77oGle6uTEaILGeHJPS+5Efg8UC/ARD60iYouG70yIcimeb0lpK7ehclbbgMLKTm9+IKXOvzw4+VmycTykdmR68/0M25EzXJC41ZfDnBiQd25PHHzA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=AmXjEitI; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="AmXjEitI"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1722583777;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=/qNa7b0UY2NN2bq6vNpDiP0TaRXi/KQpapeAk2I4r3A=;
+	b=AmXjEitIPJBnI4v1jFOH+eXVrvPWiohDcXiqQ0p48m+KjiPNyZ0qIIONpge62Rs7KkDq1l
+	Jm3LhpnxRFt1esBE/w5BkbbrKiXedpW1yaaqVS/HeOB+HefFEQDa1tH+Uv+ElLydQrMkl8
+	lQ4TJJi3LLOwF0OdOG2s+/FdRI2uozc=
+Received: from mail-ed1-f72.google.com (mail-ed1-f72.google.com
+ [209.85.208.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-225-Igb2pOBvOTCpfPhbUffORA-1; Fri, 02 Aug 2024 03:29:34 -0400
+X-MC-Unique: Igb2pOBvOTCpfPhbUffORA-1
+Received: by mail-ed1-f72.google.com with SMTP id 4fb4d7f45d1cf-5a121cd4d27so1064569a12.1
+        for <ntb@lists.linux.dev>; Fri, 02 Aug 2024 00:29:34 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1722575890; x=1723180690;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Dj9j6buMhufweuDFvVlwLCMoSOMtU4O0dz381mpjwf4=;
-        b=fYRrcHf9Abs2GWtDbMM3/8YVuVTzg1Jf1qYx1C/CVgJermkzWgC1ceRICD2Tt/1Mj6
-         +8yVctZu/80NYSMKKihBPJRTAc5J5AA800SkkwLNNwTVR82BQ5U0+psWf5ZU91Ml0BWB
-         RpAV2GCWcYONm4rDg8xXg5tevBNq6j0kLGSUb1IchuAFyZ6cUr121wIC9w1WfdUPDgiT
-         jW9/iaw1JPnTAGT9XSoJOwtWFMur3w2/W/T3t9z+uTtO8L0MaqZNb8RtwHCiwmz7r/K4
-         Lxo5p7ieGfoM1WSgDXD2Namyqm/S+ZRyO0UxHJqZ9L+tL9sgsVzWCzh6jSWN4kCHzNni
-         TOPA==
-X-Forwarded-Encrypted: i=1; AJvYcCXI5l0EK9LOHp1RUc/4eu0RwkbGJzyleBBjaQesHQhVMJLGjb5D5DqXNNYG961iCH3fJPwyOEGoxxPbYjXR6yFlNVM/
-X-Gm-Message-State: AOJu0YzWSMOpjEzrgeXWw4iT80NJuSCLuu9t3KlWmtGhaToAxGe2EO3v
-	MgWPmOYlHI8EMTpf70AIV0P82A+XGxjtY7eO3jUTC9nt/fwEy1oN
-X-Google-Smtp-Source: AGHT+IEh5xEcJZskqc4PliKP+yyJGP+S6jENM5xVY36nf+NI5thZLVuR/7sYo+93sVyNAhnzwAgWVg==
-X-Received: by 2002:a17:907:7e92:b0:a7a:929f:c0c2 with SMTP id a640c23a62f3a-a7dc509f3a9mr168123766b.51.1722575890007;
-        Thu, 01 Aug 2024 22:18:10 -0700 (PDT)
-Received: from ?IPV6:2a0b:e7c0:0:107::aaaa:69? ([2a0b:e7c0:0:107::aaaa:69])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-a7dc9ecb085sm52827166b.212.2024.08.01.22.18.07
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 01 Aug 2024 22:18:09 -0700 (PDT)
-Message-ID: <8d2e03ac-2a08-4a25-9929-dad375afb738@kernel.org>
-Date: Fri, 2 Aug 2024 07:18:05 +0200
+        d=1e100.net; s=20230601; t=1722583773; x=1723188573;
+        h=mime-version:user-agent:content-transfer-encoding:references
+         :in-reply-to:date:cc:to:from:subject:message-id:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=Oflud7+JAJ9QyEvfCkggZ4DJB6jzCHKS2M1exBnEcgI=;
+        b=PCriATeFgMCdcQcue0RdopaLquMlhbc9FSxG9niVp/MYVxuJJVjYT3M9AWj3OvU+cY
+         0gynpnGAsavIh4uGEh6TCPaKOPHJt0OdOIUoX6emfkX2H5OHx6utbgxUhrR4MTIiUzkb
+         r1fodc3nnf078FY6f8N9N/huFs8doDKcfatBXrRlD0nyfuAQ04tSk7okdyFOVAsfZFxA
+         PCGGa470vLSYcfI03bFML4h27w0LSfMm65OuCsK3mdo8zYeGbbs3TN74pSEwxln3SezY
+         uFeRyJeuJs/KE8xgDPz2shiLIfw0XTVASUzzzKBUNiR/M29r07VyGX7Boty8npHePewl
+         v/yg==
+X-Forwarded-Encrypted: i=1; AJvYcCXsZ0uofBLEhFRJDM36BO8DwhzDG5iwwlmp2c3x98Nol4eCyHBkCCIgeJah8TM7Uv0lkuU=@lists.linux.dev
+X-Gm-Message-State: AOJu0YyuyMqMqUVDarqpYVmyM7KuLe5Izjm1gdLZYQKE7iBEbx/tTeWs
+	ompL3aLsPvTaRr850DKUusUmVyAV54J2NQgUbM5krOPBWYen69oW56fGBD6Rq1M+189FMAlhr3M
+	iKREIOsJbemcuyMKCBVKfK6yKRL9T0jjJd1oq+OyiPrXx75cX2Q==
+X-Received: by 2002:a50:f69b:0:b0:5b0:c00:8e6a with SMTP id 4fb4d7f45d1cf-5b7f57f41damr1098625a12.3.1722583773133;
+        Fri, 02 Aug 2024 00:29:33 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFsji3VfhXPxlMrKr64Fn48CXyC0btftVqR91XWF6/2fd7ezeuTo6NKImFbFsMb8BsrTBId9w==
+X-Received: by 2002:a50:f69b:0:b0:5b0:c00:8e6a with SMTP id 4fb4d7f45d1cf-5b7f57f41damr1098574a12.3.1722583772521;
+        Fri, 02 Aug 2024 00:29:32 -0700 (PDT)
+Received: from eisenberg.fritz.box ([2001:16b8:3d6c:8e00:43f3:8884:76fa:d218])
+        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-5b839610c77sm741802a12.9.2024.08.02.00.29.30
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 02 Aug 2024 00:29:32 -0700 (PDT)
+Message-ID: <a1a7fbf3cca131955911c911e09f1b1d908a7c06.camel@redhat.com>
+Subject: Re: [PATCH 04/10] crypto: marvell - replace deprecated PCI functions
+From: Philipp Stanner <pstanner@redhat.com>
+To: Jonathan Corbet <corbet@lwn.net>, Damien Le Moal <dlemoal@kernel.org>, 
+ Niklas Cassel <cassel@kernel.org>, Giovanni Cabiddu
+ <giovanni.cabiddu@intel.com>, Herbert Xu <herbert@gondor.apana.org.au>,
+ "David S. Miller" <davem@davemloft.net>,  Boris Brezillon
+ <bbrezillon@kernel.org>, Arnaud Ebalard <arno@natisbad.org>, Srujana Challa
+ <schalla@marvell.com>,  Alexander Shishkin
+ <alexander.shishkin@linux.intel.com>, Miri Korenblit
+ <miriam.rachel.korenblit@intel.com>, Kalle Valo <kvalo@kernel.org>, Serge
+ Semin <fancer.lancer@gmail.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang
+ <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, Bjorn Helgaas
+ <bhelgaas@google.com>, Kevin Cernekee <cernekee@gmail.com>, Greg
+ Kroah-Hartman <gregkh@linuxfoundation.org>, Jiri Slaby
+ <jirislaby@kernel.org>, Jaroslav Kysela <perex@perex.cz>, Takashi Iwai
+ <tiwai@suse.com>,  Mark Brown <broonie@kernel.org>, David Lechner
+ <dlechner@baylibre.com>, Uwe =?ISO-8859-1?Q?Kleine-K=F6nig?=
+ <u.kleine-koenig@pengutronix.de>, Jonathan Cameron
+ <Jonathan.Cameron@huawei.com>,  Andy Shevchenko
+ <andriy.shevchenko@linux.intel.com>, Jie Wang <jie.wang@intel.com>, Adam
+ Guerin <adam.guerin@intel.com>, Shashank Gupta <shashank.gupta@intel.com>,
+ Damian Muszynski <damian.muszynski@intel.com>, Nithin Dabilpuram
+ <ndabilpuram@marvell.com>, Bharat Bhushan <bbhushan2@marvell.com>, Johannes
+ Berg <johannes.berg@intel.com>, Gregory Greenman
+ <gregory.greenman@intel.com>, Emmanuel Grumbach
+ <emmanuel.grumbach@intel.com>, Yedidya Benshimol
+ <yedidya.ben.shimol@intel.com>, Breno Leitao <leitao@debian.org>, Ilpo
+ =?ISO-8859-1?Q?J=E4rvinen?= <ilpo.jarvinen@linux.intel.com>, John Ogness
+ <john.ogness@linutronix.de>, Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ linux-ide@vger.kernel.org, qat-linux@intel.com,
+ linux-crypto@vger.kernel.org,  linux-wireless@vger.kernel.org,
+ ntb@lists.linux.dev, linux-pci@vger.kernel.org, 
+ linux-serial@vger.kernel.org, linux-sound@vger.kernel.org
+Date: Fri, 02 Aug 2024 09:29:30 +0200
+In-Reply-To: <20240801174608.50592-5-pstanner@redhat.com>
+References: <20240801174608.50592-1-pstanner@redhat.com>
+	 <20240801174608.50592-5-pstanner@redhat.com>
+User-Agent: Evolution 3.52.3 (3.52.3-1.fc40)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 08/10] serial: rp2: Remove deprecated PCI functions
-To: Philipp Stanner <pstanner@redhat.com>, Jonathan Corbet <corbet@lwn.net>,
- Damien Le Moal <dlemoal@kernel.org>, Niklas Cassel <cassel@kernel.org>,
- Giovanni Cabiddu <giovanni.cabiddu@intel.com>,
- Herbert Xu <herbert@gondor.apana.org.au>,
- "David S. Miller" <davem@davemloft.net>,
- Boris Brezillon <bbrezillon@kernel.org>, Arnaud Ebalard <arno@natisbad.org>,
- Srujana Challa <schalla@marvell.com>,
- Alexander Shishkin <alexander.shishkin@linux.intel.com>,
- Miri Korenblit <miriam.rachel.korenblit@intel.com>,
- Kalle Valo <kvalo@kernel.org>, Serge Semin <fancer.lancer@gmail.com>,
- Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>,
- Allen Hubbe <allenbh@gmail.com>, Bjorn Helgaas <bhelgaas@google.com>,
- Kevin Cernekee <cernekee@gmail.com>,
- Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
- Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>,
- Mark Brown <broonie@kernel.org>, David Lechner <dlechner@baylibre.com>,
- =?UTF-8?Q?Uwe_Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>,
- Jonathan Cameron <Jonathan.Cameron@huawei.com>,
- Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
- Jie Wang <jie.wang@intel.com>, Adam Guerin <adam.guerin@intel.com>,
- Shashank Gupta <shashank.gupta@intel.com>,
- Damian Muszynski <damian.muszynski@intel.com>,
- Nithin Dabilpuram <ndabilpuram@marvell.com>,
- Bharat Bhushan <bbhushan2@marvell.com>,
- Johannes Berg <johannes.berg@intel.com>,
- Gregory Greenman <gregory.greenman@intel.com>,
- Emmanuel Grumbach <emmanuel.grumbach@intel.com>,
- Yedidya Benshimol <yedidya.ben.shimol@intel.com>,
- Breno Leitao <leitao@debian.org>,
- =?UTF-8?Q?Ilpo_J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>,
- John Ogness <john.ogness@linutronix.de>, Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-ide@vger.kernel.org, qat-linux@intel.com,
- linux-crypto@vger.kernel.org, linux-wireless@vger.kernel.org,
- ntb@lists.linux.dev, linux-pci@vger.kernel.org,
- linux-serial@vger.kernel.org, linux-sound@vger.kernel.org
-References: <20240801174608.50592-1-pstanner@redhat.com>
- <20240801174608.50592-9-pstanner@redhat.com>
-Content-Language: en-US
-From: Jiri Slaby <jirislaby@kernel.org>
-Autocrypt: addr=jirislaby@kernel.org; keydata=
- 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
-In-Reply-To: <20240801174608.50592-9-pstanner@redhat.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+X-Mimecast-Spam-Score: 0
+X-Mimecast-Originator: redhat.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On 01. 08. 24, 19:46, Philipp Stanner wrote:
+On Thu, 2024-08-01 at 19:46 +0200, Philipp Stanner wrote:
 > pcim_iomap_table() and pcim_iomap_regions_request_all() have been
-> deprecated by the PCI subsystem in commit e354bb84a4c1 ("PCI: Deprecate
+> deprecated by the PCI subsystem in commit e354bb84a4c1 ("PCI:
+> Deprecate
 > pcim_iomap_table(), pcim_iomap_regions_request_all()").
-> 
+>=20
 > Replace these functions with their successors, pcim_iomap() and
 > pcim_request_all_regions()
-
-Reviewed-by: Jiri Slaby <jirislaby@kernel.org>
-
+>=20
 > Signed-off-by: Philipp Stanner <pstanner@redhat.com>
 > ---
->   drivers/tty/serial/rp2.c | 12 +++++++-----
->   1 file changed, 7 insertions(+), 5 deletions(-)
+> =C2=A0drivers/crypto/marvell/octeontx2/otx2_cptpf_main.c | 14 +++++++++--=
+-
+> --
+> =C2=A0drivers/crypto/marvell/octeontx2/otx2_cptvf_main.c | 13 +++++++++--=
+-
+> -
+> =C2=A02 files changed, 18 insertions(+), 9 deletions(-)
+>=20
+> diff --git a/drivers/crypto/marvell/octeontx2/otx2_cptpf_main.c
+> b/drivers/crypto/marvell/octeontx2/otx2_cptpf_main.c
+> index 400e36d9908f..ace39b2f2627 100644
+> --- a/drivers/crypto/marvell/octeontx2/otx2_cptpf_main.c
+> +++ b/drivers/crypto/marvell/octeontx2/otx2_cptpf_main.c
+> @@ -739,18 +739,22 @@ static int otx2_cptpf_probe(struct pci_dev
+> *pdev,
+> =C2=A0=09=09dev_err(dev, "Unable to get usable DMA
+> configuration\n");
+> =C2=A0=09=09goto clear_drvdata;
+> =C2=A0=09}
+> -=09/* Map PF's configuration registers */
+> -=09err =3D pcim_iomap_regions_request_all(pdev, 1 <<
+> PCI_PF_REG_BAR_NUM,
+> -=09=09=09=09=09=C2=A0=C2=A0=C2=A0=C2=A0 OTX2_CPT_DRV_NAME);
+> +=09err =3D pcim_request_all_regions(pdev, OTX2_CPT_DRV_NAME);
+> =C2=A0=09if (err) {
+> -=09=09dev_err(dev, "Couldn't get PCI resources 0x%x\n",
+> err);
+> +=09=09dev_err(dev, "Couldn't request PCI resources
+> 0x%x\n", err);
+> =C2=A0=09=09goto clear_drvdata;
+> =C2=A0=09}
+> =C2=A0=09pci_set_master(pdev);
+> =C2=A0=09pci_set_drvdata(pdev, cptpf);
+> =C2=A0=09cptpf->pdev =3D pdev;
+> =C2=A0
+> -=09cptpf->reg_base =3D
+> pcim_iomap_table(pdev)[PCI_PF_REG_BAR_NUM];
+> +=09/* Map PF's configuration registers */
+> +=09cptpf->reg_base =3D pcim_iomap(pdev, PCI_PF_REG_BAR_NUM, 0);
+> +=09if (!cptpf->reg_base) {
+> +=09=09dev_err(dev, "Couldn't ioremap PCI resource 0x%x\n",
+> err);
+> +=09=09err =3D -ENOMEM;
 
-thanks,
--- 
-js
-suse labs
+Just saw I messed that one up. err has to be set before printing it, of
+course. Will fix that in a v2.
+
+> +=09=09goto clear_drvdata;
+> +=09}
+> =C2=A0
+> =C2=A0=09/* Check if AF driver is up, otherwise defer probe */
+> =C2=A0=09err =3D cpt_is_pf_usable(cptpf);
+> diff --git a/drivers/crypto/marvell/octeontx2/otx2_cptvf_main.c
+> b/drivers/crypto/marvell/octeontx2/otx2_cptvf_main.c
+> index 527d34cc258b..e2210bf9605a 100644
+> --- a/drivers/crypto/marvell/octeontx2/otx2_cptvf_main.c
+> +++ b/drivers/crypto/marvell/octeontx2/otx2_cptvf_main.c
+> @@ -358,9 +358,8 @@ static int otx2_cptvf_probe(struct pci_dev *pdev,
+> =C2=A0=09=09dev_err(dev, "Unable to get usable DMA
+> configuration\n");
+> =C2=A0=09=09goto clear_drvdata;
+> =C2=A0=09}
+> -=09/* Map VF's configuration registers */
+> -=09ret =3D pcim_iomap_regions_request_all(pdev, 1 <<
+> PCI_PF_REG_BAR_NUM,
+> -=09=09=09=09=09=C2=A0=C2=A0=C2=A0=C2=A0 OTX2_CPTVF_DRV_NAME);
+> +
+> +=09ret =3D pcim_request_all_regions(pdev, OTX2_CPTVF_DRV_NAME);
+> =C2=A0=09if (ret) {
+> =C2=A0=09=09dev_err(dev, "Couldn't get PCI resources 0x%x\n",
+> ret);
+> =C2=A0=09=09goto clear_drvdata;
+> @@ -369,7 +368,13 @@ static int otx2_cptvf_probe(struct pci_dev
+> *pdev,
+> =C2=A0=09pci_set_drvdata(pdev, cptvf);
+> =C2=A0=09cptvf->pdev =3D pdev;
+> =C2=A0
+> -=09cptvf->reg_base =3D
+> pcim_iomap_table(pdev)[PCI_PF_REG_BAR_NUM];
+> +=09/* Map VF's configuration registers */
+> +=09cptvf->reg_base =3D pcim_iomap(pdev, PCI_PF_REG_BAR_NUM, 0);
+> +=09if (!cptvf->reg_base) {
+> +=09=09dev_err(dev, "Couldn't ioremap PCI resource 0x%x\n",
+> ret);
+> +=09=09ret =3D -ENOMEM;
+
+Same here.
+
+P.
+
+> +=09=09goto clear_drvdata;
+> +=09}
+> =C2=A0
+> =C2=A0=09otx2_cpt_set_hw_caps(pdev, &cptvf->cap_flag);
+> =C2=A0
 
