@@ -1,63 +1,105 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 746A71494A3;
-	Mon, 23 Sep 2024 22:34:38 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 20F4C1ADFF8;
+	Fri,  4 Oct 2024 18:19:26 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727130878; cv=none; b=BF+0tswhEuLCkmWS0NOJmtnQ1pZzgM3BcEqiQagEfrRy19Pb8iBOH2fMWhwLd+EbMQLthRMqQh8bF9WCA1mEhLLRxJZ2j/pjn7nI7E/l/TdGt2K2fFd9ayXyq4ix4Wg962nQUTnO7xt5woPRqdUtI+Jeo0Q9zwgqij0btVXXUxk=
+	t=1728065967; cv=none; b=tfGhkLa3bNhLPKiJYk/l0cKn3E+eAZ8x3d6s8mOuRKGk6kGTqeRcyXax2018UZxn0GiW8uGxHoA55ZVkLJLaxE+Rks/vTB/q9/UKe060eErOnSGwsRo0H6n8nK3zvyUXxbp/JmDobA6gD1B+HlSH01C9CTUMl+FQ2TqleUFCHbs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727130878; c=relaxed/simple;
-	bh=mNl9ZW/8x/9Bmdu0puULKIllYIXv6qMujAu2N1qxPmc=;
-	h=Subject:From:In-Reply-To:References:Message-Id:Date:To:Cc; b=aEZETVe5fJdLNzpmOrR35klsyd8OFNtjnLElb9u38eAJ+boJ/YkuHaEKsQChc10W5h6NnWlyTkLsuFoe1tZ1buALSd/vk6UBWJJq0RphsQ7+e8r7I4yUzqZQ9wMq89e19sKcGK3BjhL09imvYZAq4pw3j9Gb4ruZmaugqbxCOZI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=EXFeWsO0; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1728065967; c=relaxed/simple;
+	bh=xczGj8LAk1ZXCAUD6H5JCP/mF914IU5/eMqAFX5PpOI=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=btOic+6JnlT/z5SS/GnxA3On/LAdC4BzD5CmFvbpwClmo3PXPqFGW00VdUctO/c6XsaO4GDxkWGrMqBS/E35lLXwvhdP69sX9J+uqvL0tHzG1m5Tl7e1sb/Mz9+L4/YNbvpPrO5tAvtQ+z6MnJQDhigkv1gAVDnUsOutruAiDKM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=tWz4oqBw; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="EXFeWsO0"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 56861C4CEC4;
-	Mon, 23 Sep 2024 22:34:38 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="tWz4oqBw"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 90BBDC4CECE;
+	Fri,  4 Oct 2024 18:19:25 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1727130878;
-	bh=mNl9ZW/8x/9Bmdu0puULKIllYIXv6qMujAu2N1qxPmc=;
-	h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-	b=EXFeWsO0qADEl3IkmOdBq/OtLBeEVXUx3qWSn2qILrsl2XAvZ+6FC0/9NMLH3KT6Q
-	 hVVfw0F/7z3uc+a4nmm1rxPVhQPzhDu8bxxdgMNEzMXLxUCcDXa/8LgGJ9+kpHfVqE
-	 h8ETikoSijt6g6AcX42uP6GdNmfXRpwm/p0pGIWF9odUAZBRaAaS5wtidbG1b7Ssxe
-	 LZXFgUlBGA0FmCHvE++ifCOPtFylK7XZ9bV2/CwKAvSt5eWNzh0XC61AC2dnF4Xdly
-	 m/G2XRB7MtD1I9ytYADGfrK3LztDkKYLbIuPnxu+HFNRSF1Dhek7wN6vuhpc/b+GCl
-	 ov93jUaUUcBPA==
-Received: from [10.30.226.235] (localhost [IPv6:::1])
-	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id E3B643809A8F;
-	Mon, 23 Sep 2024 22:34:41 +0000 (UTC)
-Subject: Re: [GIT PULL] NTB bug fixes for v6.12
-From: pr-tracker-bot@kernel.org
-In-Reply-To: <Zu9yehc5ZdgUO_Ws@athena.kudzu.us>
-References: <Zu9yehc5ZdgUO_Ws@athena.kudzu.us>
-X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
-X-PR-Tracked-Message-Id: <Zu9yehc5ZdgUO_Ws@athena.kudzu.us>
-X-PR-Tracked-Remote: https://github.com/jonmason/ntb tags/ntb-6.12
-X-PR-Tracked-Commit-Id: 061a785a114f159e990ea8ed8d1b7dca4b41120f
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 5f153b63302af24e7f807b0208f380f5c8654df4
-Message-Id: <172713088085.3509221.7076363341498174269.pr-tracker-bot@kernel.org>
-Date: Mon, 23 Sep 2024 22:34:40 +0000
-To: Jon Mason <jdmason@kudzu.us>
-Cc: torvalds@linux-foundation.org, linux-kernel@vger.kernel.org, ntb@lists.linux.dev
+	s=k20201202; t=1728065966;
+	bh=xczGj8LAk1ZXCAUD6H5JCP/mF914IU5/eMqAFX5PpOI=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+	b=tWz4oqBw3CjJQBekmez16IiqG3NrWJtLgaiDo9iKcrV3zL8hPp3asaZbS8obcbh5F
+	 +HTOy5/bJU5IMlZihMYbbf4Zq15sXhOfylVpRgzgUCRg4IQTJJyX6t9F19MzM6p/WV
+	 IRuju1DiK6joYYcJuZ+hQR9lPF+nNu3pVjjROhBKsrPzkxrtqRc63vgpgWMb+mYiI+
+	 WJ9STM+XksHcj8ZlaKj/PRoYsLTgqs+QtKIa4Nsp4EuABaFTbA0xRb4yTNhBII6Ta9
+	 x4TA1JJhcQ4gVSFcH9jQmUWWHswYVrXPgjEu8uS7sOxdjjNNRDXp4+8Ca/0dDGC5uI
+	 mQTUb2rEWBx0A==
+From: Sasha Levin <sashal@kernel.org>
+To: linux-kernel@vger.kernel.org,
+	stable@vger.kernel.org
+Cc: Kaixin Wang <kxwang23@m.fudan.edu.cn>,
+	Logan Gunthorpe <logang@deltatee.com>,
+	Jon Mason <jdmason@kudzu.us>,
+	Sasha Levin <sashal@kernel.org>,
+	kurt.schwemmer@microsemi.com,
+	dave.jiang@intel.com,
+	allenbh@gmail.com,
+	linux-pci@vger.kernel.org,
+	ntb@lists.linux.dev
+Subject: [PATCH AUTOSEL 6.11 33/76] ntb: ntb_hw_switchtec: Fix use after free vulnerability in switchtec_ntb_remove due to race condition
+Date: Fri,  4 Oct 2024 14:16:50 -0400
+Message-ID: <20241004181828.3669209-33-sashal@kernel.org>
+X-Mailer: git-send-email 2.43.0
+In-Reply-To: <20241004181828.3669209-1-sashal@kernel.org>
+References: <20241004181828.3669209-1-sashal@kernel.org>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+X-stable: review
+X-Patchwork-Hint: Ignore
+X-stable-base: Linux 6.11.2
+Content-Transfer-Encoding: 8bit
 
-The pull request you sent on Sat, 21 Sep 2024 21:27:22 -0400:
+From: Kaixin Wang <kxwang23@m.fudan.edu.cn>
 
-> https://github.com/jonmason/ntb tags/ntb-6.12
+[ Upstream commit e51aded92d42784313ba16c12f4f88cc4f973bbb ]
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/5f153b63302af24e7f807b0208f380f5c8654df4
+In the switchtec_ntb_add function, it can call switchtec_ntb_init_sndev
+function, then &sndev->check_link_status_work is bound with
+check_link_status_work. switchtec_ntb_link_notification may be called
+to start the work.
 
-Thank you!
+If we remove the module which will call switchtec_ntb_remove to make
+cleanup, it will free sndev through kfree(sndev), while the work
+mentioned above will be used. The sequence of operations that may lead
+to a UAF bug is as follows:
 
+CPU0                                 CPU1
+
+                        | check_link_status_work
+switchtec_ntb_remove    |
+kfree(sndev);           |
+                        | if (sndev->link_force_down)
+                        | // use sndev
+
+Fix it by ensuring that the work is canceled before proceeding with
+the cleanup in switchtec_ntb_remove.
+
+Signed-off-by: Kaixin Wang <kxwang23@m.fudan.edu.cn>
+Reviewed-by: Logan Gunthorpe <logang@deltatee.com>
+Signed-off-by: Jon Mason <jdmason@kudzu.us>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+index 31946387badf0..ad1786be2554b 100644
+--- a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
++++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
+@@ -1554,6 +1554,7 @@ static void switchtec_ntb_remove(struct device *dev)
+ 	switchtec_ntb_deinit_db_msg_irq(sndev);
+ 	switchtec_ntb_deinit_shared_mw(sndev);
+ 	switchtec_ntb_deinit_crosslink(sndev);
++	cancel_work_sync(&sndev->check_link_status_work);
+ 	kfree(sndev);
+ 	dev_info(dev, "ntb device unregistered\n");
+ }
 -- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+2.43.0
+
