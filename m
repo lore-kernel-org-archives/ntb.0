@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4A04C1F5BF4;
-	Fri,  4 Oct 2024 18:22:58 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 006E6206786;
+	Fri,  4 Oct 2024 18:25:56 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728066178; cv=none; b=nnQi1UKxMYKbv/e4IWGShXChXHqHQADfN5jWFN2MNynDJsXIUH/ZDuiFIBQpLVuJJdtbDhNl2c30ujH2Ks/yhSJZRgnOAUrJxth0kOHllmTm+YBur1LN+VR57fFtWpGAZ62WAmjs+3VXN4Xuqsn2aeAQfMkTb0causd+6deN96o=
+	t=1728066357; cv=none; b=Y8j4+r6p1Z9e4xBoxz7MWJ32Pw10cY6XM8yGtDqbepwc0mipcDX0aEN2jmv7h7YykQL3Qna4dlSHcYYaiGCOEdXwB6G2FLsC8zSInV+AoU1vDTmejFgv0bLovlkaE1CjbqRyhbDLG09Y64GfftQzy/xmTEyZWXSUkpTPqQoFHso=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728066178; c=relaxed/simple;
+	s=arc-20240116; t=1728066357; c=relaxed/simple;
 	bh=7biog2O1wtlDY/U3f/tEE7P320v8j07FtsbL4Do3tIg=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=C3IlP61Nwm6R5KuQtuCdYIyzL6z3w7xpCih9d6mVo2Epzi8YIJ30dKQYuO78cFYvsYsMtTvPfg+An2VzNLU6P02e4WNvEm9SI25UGDRiE3n1M7TwEvEdiIvpmx8GJ4DbIDWXZzzey0qrRN8eXRYXxTN7BaJwi/fS7P/m/n99SWM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=r7cJlccX; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=JXcFSYLG/TGdp7pph9CzY5py45dwmJyruTEePpAjgiT6Nl2Oj3Ga7OmwiOmZsHoO7q+H3jFLunfd7YdTH4UWNJZ+2+FR/UgSw65zv7zoQpvTI3CDMq/HI8Ip3JM59SmS5g3L/3XzhOuFs5bghd8EH72tR1pd6r431ok3bAsk5fo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=l/KZPikc; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="r7cJlccX"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BD8D0C4CECE;
-	Fri,  4 Oct 2024 18:22:56 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="l/KZPikc"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7F984C4CEC6;
+	Fri,  4 Oct 2024 18:25:55 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1728066178;
+	s=k20201202; t=1728066356;
 	bh=7biog2O1wtlDY/U3f/tEE7P320v8j07FtsbL4Do3tIg=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=r7cJlccXkRMExy+Vd3yIaKIgmjuJ8h3w3pa3clFFF+ye5gpmJjvGz4mJUZRXYrhXe
-	 E+xSxdM6mYSLnEwulrdw5ThZKHkmGrcco53TYO6Dl0naoAc16e9fQOGPMaXCUrkKPS
-	 P84zup5iD1zMEfeorVeWss89r0+VFBJes3/t5JFKfGcBODavI8Ha21ln0O6xSc0Hb5
-	 qDLo0CaH0akTQ7n6oE0PIGF38n9GGBvKlCr+MPydm/SRj/t7J6Odo5HI9YAhNZm0ru
-	 itI/ts5isVMQmOb0LKf2WSjr0oj17Wj8ri6cCEVTJUCVinK8fku1rJ1UN/B8nU4t64
-	 eeyapEAOzV9qw==
+	b=l/KZPikc/SXIKaT5RxNL2laVUEUyvRB9n6dIjjTR3mTc+FU4exPOakOZ+g9Zgj1J1
+	 38G37PM/FJobY3NQPwa685fIug0aucMobOlStC+GhiP0svIRPzc8jql3dl+6zjPSnz
+	 fJ89s6a/NCwKSV41J6Y80H2rutQFToawpUHmPL3zQoLqlcdU7OguHlb7k1YIhBt5f+
+	 yRBBIyNH93G+qpr0iemBt+lkbbB48oWeUB8D0mlYtC7fJgRTF+TP/CUv57mSZOeZS+
+	 rfceY8PuWe5vZ6NdAK2XGdWRvI06zAlhQkjoo51SfXGu2NXQH3suJD6c7BvXbOcsFF
+	 rEaIKpAYTYcsw==
 From: Sasha Levin <sashal@kernel.org>
 To: linux-kernel@vger.kernel.org,
 	stable@vger.kernel.org
@@ -38,12 +38,12 @@ Cc: Kaixin Wang <kxwang23@m.fudan.edu.cn>,
 	allenbh@gmail.com,
 	linux-pci@vger.kernel.org,
 	ntb@lists.linux.dev
-Subject: [PATCH AUTOSEL 6.10 32/70] ntb: ntb_hw_switchtec: Fix use after free vulnerability in switchtec_ntb_remove due to race condition
-Date: Fri,  4 Oct 2024 14:20:30 -0400
-Message-ID: <20241004182200.3670903-32-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 6.6 30/58] ntb: ntb_hw_switchtec: Fix use after free vulnerability in switchtec_ntb_remove due to race condition
+Date: Fri,  4 Oct 2024 14:24:03 -0400
+Message-ID: <20241004182503.3672477-30-sashal@kernel.org>
 X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20241004182200.3670903-1-sashal@kernel.org>
-References: <20241004182200.3670903-1-sashal@kernel.org>
+In-Reply-To: <20241004182503.3672477-1-sashal@kernel.org>
+References: <20241004182503.3672477-1-sashal@kernel.org>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -52,7 +52,7 @@ List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
-X-stable-base: Linux 6.10.13
+X-stable-base: Linux 6.6.54
 Content-Transfer-Encoding: 8bit
 
 From: Kaixin Wang <kxwang23@m.fudan.edu.cn>
