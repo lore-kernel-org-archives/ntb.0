@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F446228B23;
-	Fri,  4 Oct 2024 18:30:38 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E01BE22D280;
+	Fri,  4 Oct 2024 18:31:31 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728066638; cv=none; b=M0mTn0J6vz4f2T3R5+dR4V6mbT4ZhYHjjrxUOlMrGVmM35VSusPM3kUtzbMOUnqeZkdFvKIJUi8honuUkgNW5SthOXNADf+VbHavt36rvrRw7af9iVLECDd/YaPr5zmk6oWxY5hKPBxOjkRwKeZqwMU9v2Xgj+g1hLv/o0lSUp4=
+	t=1728066692; cv=none; b=cvmrATTMblRSULYkFlapGuNXVh/p9/H1Zzn8qGoNZ9DGpfnY25EXV1TlJCPfiGbb2krJkMplvnOOqFTZ7rzq8CZdGqIXsaqLff2elQYFFvhOg1xbt/+qEK0ASVP9CYs63YirZCko5gy4Ukovl1iaZOP8ROtJHGBRdlobyi2mbPY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728066638; c=relaxed/simple;
-	bh=IoiKVtKpLwjUIwn3kU48+A7z58Di4HgMpWqRhItVb+w=;
+	s=arc-20240116; t=1728066692; c=relaxed/simple;
+	bh=R+64p4hwRnDv9uSJCRD1eyJF5TnVQ5rxxFQxgICrCrg=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=kqb1yV8TJ2L1tt98JuinhuTU8P8BDHcExv/oQ7CNjx+tEG7VNLlbIqlf5/la1XmOyhbhkqsbmuf2aZkIWgk7hnKOVoZlihDNDZR4jlonuXUzzPI2S/u5J3b5tZiHTTFZq1pXWRE9tmwQKfjsJvXtKVouA0h7KTNEq74P5AXQzPU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Oqpf81/0; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=niHrppqnbqnMq2RF37sNNI7OQwE3ty4K6GxF7sYebslbxFq7m+/EIUIJDQ6fHOLKGHBusSoELrKF//8wUpurDylzP/lO2hfX78QkTohJC6f2+NIo5JZ6B6C3Q/ZC5ktTW39bTufj7YXJ/E9pcxfTgUwqwX+LwWDfAOjQ3MZvcpQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hI2OS9r7; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Oqpf81/0"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7BB5FC4CED0;
-	Fri,  4 Oct 2024 18:30:36 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hI2OS9r7"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4AAAAC4CECD;
+	Fri,  4 Oct 2024 18:31:30 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1728066638;
-	bh=IoiKVtKpLwjUIwn3kU48+A7z58Di4HgMpWqRhItVb+w=;
+	s=k20201202; t=1728066691;
+	bh=R+64p4hwRnDv9uSJCRD1eyJF5TnVQ5rxxFQxgICrCrg=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=Oqpf81/0A6UJajHGKbT5ZNtFQ2hoK9pFimh67ywV5/1LUma9WLp+k+s3hMVmG5Rzb
-	 eb+NrYnaRyGvyk+5NqvPzZ1L+aUYHhwqWDJIEIv7itjceCodY7ysk2eInfnk/4dE3L
-	 bQ7s/JWMcZsFwaYzLKDv+40RJM4AB/cwSoM7Rd9Lf+kRvRSCo7Dfr1OZrLNFfTPQT5
-	 H3a5kL9r6SZWRGAm8C69PiK/ZQPxSU8PHcrlYPtNVN/Za5yhZ5StC33Vs88RS9Wwvz
-	 z/W7mtzGz2MglIySVeJevOiczi83UUFqQtQOvZO3DqGLtWKLgvv7jjuKDouNZHoNq1
-	 mEkXtIltmVuzg==
+	b=hI2OS9r71XeP/BpeIjhoMJ1qI8IWJN2ufOyP02WUy7Z/DF1O0FqBNczBlN2zHV3QH
+	 zNgOdrnqc/8XQgfDq6eDQ+jyk5C/73HKMXEUHSxgiG353sms0lMtLrgGmsYyawB9k8
+	 QKuFD23tlRfejp3YwcrI2yiaOQSTXAZR1tsBifM1oOojzXEc6IQV8OnZxDg+lZVsVW
+	 hlliaSB6exbViHxosJHL/j0uqDfcMr0ebdcukg3u5tKrubGJqGw5+BVcMjSNZJCo4l
+	 I18S6tGzj5uvbXnX90DqUZmxby3rPvJ2XgLQ/PrTU1aGyyXupVVEGN2XfxGj9KvUu0
+	 9XA6PPIe3a49w==
 From: Sasha Levin <sashal@kernel.org>
 To: linux-kernel@vger.kernel.org,
 	stable@vger.kernel.org
@@ -38,12 +38,12 @@ Cc: Kaixin Wang <kxwang23@m.fudan.edu.cn>,
 	allenbh@gmail.com,
 	linux-pci@vger.kernel.org,
 	ntb@lists.linux.dev
-Subject: [PATCH AUTOSEL 5.10 17/26] ntb: ntb_hw_switchtec: Fix use after free vulnerability in switchtec_ntb_remove due to race condition
-Date: Fri,  4 Oct 2024 14:29:43 -0400
-Message-ID: <20241004183005.3675332-17-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.4 14/21] ntb: ntb_hw_switchtec: Fix use after free vulnerability in switchtec_ntb_remove due to race condition
+Date: Fri,  4 Oct 2024 14:30:49 -0400
+Message-ID: <20241004183105.3675901-14-sashal@kernel.org>
 X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20241004183005.3675332-1-sashal@kernel.org>
-References: <20241004183005.3675332-1-sashal@kernel.org>
+In-Reply-To: <20241004183105.3675901-1-sashal@kernel.org>
+References: <20241004183105.3675901-1-sashal@kernel.org>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -52,7 +52,7 @@ List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
-X-stable-base: Linux 5.10.226
+X-stable-base: Linux 5.4.284
 Content-Transfer-Encoding: 8bit
 
 From: Kaixin Wang <kxwang23@m.fudan.edu.cn>
@@ -89,7 +89,7 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 1 insertion(+)
 
 diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-index 4c6eb61a6ac62..ad09946100b56 100644
+index 86ffa716eaf22..db9be3ce1cd0d 100644
 --- a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
 +++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
 @@ -1558,6 +1558,7 @@ static void switchtec_ntb_remove(struct device *dev,
