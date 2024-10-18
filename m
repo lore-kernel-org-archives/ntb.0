@@ -1,35 +1,38 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1F4671B81CC;
-	Thu, 17 Oct 2024 07:51:16 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 75011817;
+	Fri, 18 Oct 2024 23:45:39 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729151477; cv=none; b=rINgb2ge31/2/kagIYNBLaP1TzrUm5MtV3Blq/TBMor0gns2MZyQkHl3rGBi/O8HEmrtbugIBKfuvmQ8+G+Miy17063D6nCz3hAxMNGHCwofJUZ9zgANle+jWCKCatv1rrIKGo0jF7p55LMeQYOc+GgXvYfm8ivO60uqddpXYu8=
+	t=1729295139; cv=none; b=OmiOMG8Lys/smUXmH59CeiZe0fgD2Tu+J9+rCerZ5N3b5erD1Op3kUalu3z0Iaj+gyPrvqpNYBZYSXiLCT0BAvCoiZqVrZEZIid2W3b0oSzrOXEbfcRZW/7+jCk2j16fEts/ibTfYGKnJ8stHR6bpx+RszoKeFHZPY74/5IB9hg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729151477; c=relaxed/simple;
-	bh=S7jKXDCTV0a7mjHjenpVgcs/7uJFTwTY0Mo7sljId2E=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=QxtspXTxzLbQXZ2mnOYWzLKQX7p3BEDU1tdGN6esBT1HtxghZ9N1e8bMkJm9Of2c0WlhBiWa6M4+lwr6D922xnIFgPiBemwjHWgJE8DKjAVAN+j12uQ6SaUd5l4k2keHbB0Naffttrtfod6Rp9xL4xoNbLJomx1TGUDWnEsvnDU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=nnuHR7jw; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1729295139; c=relaxed/simple;
+	bh=lFZnjV8RlVPG6PrVOgGg9hgB2Ob3uus6nsFdYXxg0xQ=;
+	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition:In-Reply-To; b=TcCmc9xGp5zi+KyatlAp1nCUjrl7OhoX5KPxHwT9SPd8wUmeRdsJZPurUONEIEzZVv+xr1UyvGmyQwPFvFT0EvQU8PUS0O/FqQ1v46ZBKds9MxQuwhAx6v8esadfO+poUJaiyGyCccxH4pzs9jmkIdmJwzVeUdMTjrOARFzipLo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=evtxctpR; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="nnuHR7jw"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 65243C4CEC3;
-	Thu, 17 Oct 2024 07:51:04 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="evtxctpR"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C6996C4CEC3;
+	Fri, 18 Oct 2024 23:45:38 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1729151476;
-	bh=S7jKXDCTV0a7mjHjenpVgcs/7uJFTwTY0Mo7sljId2E=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=nnuHR7jwc5IT9MUnpqTkftP717SgFq2tdbzrAXLJr0NNXMPwkfDRz0DOmpmLKdpfB
-	 vI3dj/r0aj6unSib+Ajn75Z/dVWMfwwAZLpYTqgTPN94WoXpHKZzvx4BCkQqYmF+E5
-	 sR1NtbnU+Y91mNgozQBJkBSYpH9pnxU2CjcuXGV01SwAIff4HHp3dH6d6CsWINCYJa
-	 EKqLVtbTJ61f/74WcKhy8To0jm0Hrduf43nC2norZ95y8fry4OQV6dQexDDbgqGFHD
-	 h/Ylk92vVrLZrg8kZjQAjS9wRS6OBoMYHYqrTeVcuOx4jHmwdkCBhDaUoptKso9F4D
-	 3rAyz4IDimhmg==
-Date: Thu, 17 Oct 2024 09:51:01 +0200
-From: Niklas Cassel <cassel@kernel.org>
+	s=k20201202; t=1729295139;
+	bh=lFZnjV8RlVPG6PrVOgGg9hgB2Ob3uus6nsFdYXxg0xQ=;
+	h=Date:From:To:Cc:Subject:In-Reply-To:From;
+	b=evtxctpRyaoTSOigJT5cFz8FlzinZ4CiqIbWurTmKrRfQkXyPwANmEAW+wstE4BGx
+	 TIN4rKkxFq5bRqf1RYbu8X5+GaKP8PCUkJCSI7XdnVuPyggqqCKegX2g9xYIK1RWWo
+	 +b0kx6X/7xFOXGXdvbNco/L2DpCtD2beey4jXYhDZqcjQ6tHOX7X1U5wq38aQ9bZXw
+	 j4FYzQwUpZeifU9a96tVVuahIFbm86NthAcccPlNw2GRZ0nybq3IyuM42izSzAVkj8
+	 T19Q5jWyld7A4Ht/0K1UYHtBeST5LII4RfUrhhhbZUkSRif8tr3x1ApUVAUGVSTvJT
+	 Ma/8xyjaHk33A==
+Date: Fri, 18 Oct 2024 18:45:37 -0500
+From: Bjorn Helgaas <helgaas@kernel.org>
 To: Philipp Stanner <pstanner@redhat.com>
-Cc: Damien Le Moal <dlemoal@kernel.org>,
+Cc: Heiner Kallweit <hkallweit1@gmail.com>,
+	Alex Williamson <alex.williamson@redhat.com>,
+	Damien Le Moal <dlemoal@kernel.org>,
+	Niklas Cassel <cassel@kernel.org>,
 	Sergey Shtylyov <s.shtylyov@omp.ru>,
 	Basavaraj Natikar <basavaraj.natikar@amd.com>,
 	Jiri Kosina <jikos@kernel.org>,
@@ -50,7 +53,6 @@ Cc: Damien Le Moal <dlemoal@kernel.org>,
 	Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>,
 	Allen Hubbe <allenbh@gmail.com>,
 	Bjorn Helgaas <bhelgaas@google.com>,
-	Alex Williamson <alex.williamson@redhat.com>,
 	Juergen Gross <jgross@suse.com>,
 	Stefano Stabellini <sstabellini@kernel.org>,
 	Oleksandr Tyshchenko <oleksandr_tyshchenko@epam.com>,
@@ -78,31 +80,145 @@ Cc: Damien Le Moal <dlemoal@kernel.org>,
 	netdev@vger.kernel.org, linux-wireless@vger.kernel.org,
 	ntb@lists.linux.dev, linux-pci@vger.kernel.org, kvm@vger.kernel.org,
 	xen-devel@lists.xenproject.org, linux-sound@vger.kernel.org
-Subject: Re: [PATCH 09/13] ata: Use always-managed version of pci_intx()
-Message-ID: <ZxDB5TOb-sgiZfXg@ryzen.lan>
-References: <20241015185124.64726-1-pstanner@redhat.com>
- <20241015185124.64726-10-pstanner@redhat.com>
+Subject: Re: [PATCH 13/13] PCI: Deprecate pci_intx(), pcim_intx()
+Message-ID: <20241018234537.GA770692@bhelgaas>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20241015185124.64726-10-pstanner@redhat.com>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <f871a77fb51e54332886882e8ecb1a4a5f5d296b.camel@redhat.com>
 
-On Tue, Oct 15, 2024 at 08:51:19PM +0200, Philipp Stanner wrote:
-> pci_intx() is a hybrid function which can sometimes be managed through
-> devres. To remove this hybrid nature from pci_intx(), it is necessary to
-> port users to either an always-managed or a never-managed version.
+On Wed, Oct 16, 2024 at 10:53:16AM +0200, Philipp Stanner wrote:
+> On Wed, 2024-10-16 at 10:43 +0200, Heiner Kallweit wrote:
+> > On 16.10.2024 08:57, Philipp Stanner wrote:
+> > > On Tue, 2024-10-15 at 13:53 -0600, Alex Williamson wrote:
+> > > > On Tue, 15 Oct 2024 20:51:23 +0200
+> > > > Philipp Stanner <pstanner@redhat.com> wrote:
+> > > > 
+> > > > > pci_intx() and its managed counterpart pcim_intx() only exist
+> > > > > for
+> > > > > older
+> > > > > drivers which have not been ported yet for various reasons.
+> > > > > Future
+> > > > > drivers should preferably use pci_alloc_irq_vectors().
+> > > > > 
+> > > > > Mark pci_intx() and pcim_intx() as deprecated and encourage
+> > > > > usage
+> > > > > of
+> > > > > pci_alloc_irq_vectors() in its place.
+> > > > 
+> > > > I don't really understand this.  As we've discussed previously
+> > > > pci_alloc_irq_vectors() is, unsurprisingly, for allocating PCI
+> > > > IRQ
+> > > > vectors while pci_intx() is for manipulating the INTx disable bit
+> > > > on
+> > > > PCI devices.  The latter is a generic mechanism for preventing
+> > > > PCI
+> > > > devices from generating INTx, regardless of whether there's a
+> > > > vector
+> > > > allocated for it.  How does the former replace the latter and why
+> > > > do
+> > > > we
+> > > > feel the need to deprecate the latter?
+> > > > 
+> > > > It feels like this fits some narrow narrative and makes all users
+> > > > of
+> > > > these now deprecated functions second class citizens.  Why?  At
+> > > > it's
+> > > > root these are simply providing mask and set or mask and clear
+> > > > register
+> > > > bit operations.  Thanks,
+> > > 
+> > > I got the feeling from the RFC discussion that that was basically
+> > > the
+> > > consensus: people should use pci_alloc_irq_vectors(). Or did I
+> > > misunderstand Andy and Heiner?
+> > > 
+> > I think there are two different use cases for pci_intx().
+> > At first there are several drivers where the direct usage of
+> > pci_intx()
+> > can be eliminated by switching to the pci_alloc_irq_vectors() API.
+> > 
+> > And then there's usage of pci_intx() in
+> > drivers/vfio/pci/vfio_pci_intrs.c
+> > drivers/xen/xen-pciback/conf_space_header.c
+> > There we have to keep the (AFAICS unmanaged) pci_intx() calls.
 > 
-> All users in ata enable their PCI-Device with pcim_enable_device(). Thus,
-> they need the always-managed version.
+> There is also the usage within PCI itself, in MSI. Patch №8 touches
+> that.
 > 
-> Replace pci_intx() with pcim_intx().
-> 
-> Signed-off-by: Philipp Stanner <pstanner@redhat.com>
-> ---
+> It's why I think this series should land before anyone should port
+> direct pci_intx() users to the irq vectors function, because the latter
+> also uses pci_intx() and its own devres, which sounds explosive to me.
+>
+> > > I'm perfectly happy with dropping this patch and continue offering
+> > > pci{m}_intx() to users, since after removing that hybrid hazzard I
+> > > don't see any harm in them anymore.
 
-Acked-by: Niklas Cassel <cassel@kernel.org>
+So is the bottom line that we should drop *this* patch and apply the
+rest of the series?
+
+> > > > > Signed-off-by: Philipp Stanner <pstanner@redhat.com>
+> > > > > ---
+> > > > >  drivers/pci/devres.c | 5 ++++-
+> > > > >  drivers/pci/pci.c    | 5 ++++-
+> > > > >  2 files changed, 8 insertions(+), 2 deletions(-)
+> > > > > 
+> > > > > diff --git a/drivers/pci/devres.c b/drivers/pci/devres.c
+> > > > > index 6f8f712fe34e..4c76fc063104 100644
+> > > > > --- a/drivers/pci/devres.c
+> > > > > +++ b/drivers/pci/devres.c
+> > > > > @@ -435,7 +435,7 @@ static struct pcim_intx_devres
+> > > > > *get_or_create_intx_devres(struct device *dev)
+> > > > >  }
+> > > > >  
+> > > > >  /**
+> > > > > - * pcim_intx - managed pci_intx()
+> > > > > + * pcim_intx - managed pci_intx() (DEPRECATED)
+> > > > >   * @pdev: the PCI device to operate on
+> > > > >   * @enable: boolean: whether to enable or disable PCI INTx
+> > > > >   *
+> > > > > @@ -443,6 +443,9 @@ static struct pcim_intx_devres
+> > > > > *get_or_create_intx_devres(struct device *dev)
+> > > > >   *
+> > > > >   * Enable/disable PCI INTx for device @pdev.
+> > > > >   * Restore the original state on driver detach.
+> > > > > + *
+> > > > > + * This function is DEPRECATED. Do not use it in new code.
+> > > > > + * Use pci_alloc_irq_vectors() instead (there is no managed
+> > > > > version, currently).
+> > > > >   */
+> > > > >  int pcim_intx(struct pci_dev *pdev, int enable)
+> > > > >  {
+> > > > > diff --git a/drivers/pci/pci.c b/drivers/pci/pci.c
+> > > > > index 7ce1d0e3a1d5..dc69e23b8982 100644
+> > > > > --- a/drivers/pci/pci.c
+> > > > > +++ b/drivers/pci/pci.c
+> > > > > @@ -4477,11 +4477,14 @@ void pci_disable_parity(struct pci_dev
+> > > > > *dev)
+> > > > >  }
+> > > > >  
+> > > > >  /**
+> > > > > - * pci_intx - enables/disables PCI INTx for device dev
+> > > > > + * pci_intx - enables/disables PCI INTx for device dev
+> > > > > (DEPRECATED)
+> > > > >   * @pdev: the PCI device to operate on
+> > > > >   * @enable: boolean: whether to enable or disable PCI INTx
+> > > > >   *
+> > > > >   * Enables/disables PCI INTx for device @pdev
+> > > > > + *
+> > > > > + * This function is DEPRECATED. Do not use it in new code.
+> > > > > + * Use pci_alloc_irq_vectors() instead.
+> > > > >   */
+> > > > >  void pci_intx(struct pci_dev *pdev, int enable)
+> > > > >  {
+> > > > 
+> > > 
+> > > 
+> > 
+> 
