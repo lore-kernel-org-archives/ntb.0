@@ -1,109 +1,134 @@
-Received: from smtpbgau2.qq.com (smtpbgau2.qq.com [54.206.34.216])
+Received: from relay5.mymailcheap.com (relay5.mymailcheap.com [159.100.248.207])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2D92A145324
-	for <ntb@lists.linux.dev>; Wed, 23 Oct 2024 06:31:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=54.206.34.216
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7075C1531C2;
+	Wed, 23 Oct 2024 07:33:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=159.100.248.207
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729665076; cv=none; b=LZg8y2I8HSB7pq2YlO651MPdjwjabZiddGD3qy8MtTdRWhqjoBldXDlGzv5WpS7YZHkC02tZ19P4ZvBFMeo3gae6amZr1Bq5pMuZTdf8P3MgLGjjwqQLR1MyYypZvSqJcw9Hldd8otZqXWcSO8nQ6CXyFHZnNOWyDmSRIJbfzqk=
+	t=1729668790; cv=none; b=myYjNxo6ZwvDoLSBVIKFz9/LTLpi/665O5AldBLMM+rVsMQ67XxUbwv2/3JFcbm3CPZx0DuX8DkHtyT4ElU285gSemaJEQCcSqLptKZfXirdl7DucEKvRmx0nHn2X3K3ETuph+RX3+npPTe373iJNR2e4QpH6GkJIz3iC7ixJaU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729665076; c=relaxed/simple;
-	bh=ngQUyspk0u5tmnuw4tF5HJKltqCiL9AJbZfUWTdGVNU=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=CQEkWVr2Lp2XBZV1zuP81IDB18N/OS5WP7hAYa/CUpi/9OPJ6KZp3d0WaetALFiTgWkQScrVScHGXKPdtmhQhy7CFCA9li64YfCLFrcrk+QUfnknyDfaJKMcUafySPeQilKV+e9z6a6GHGC3A3uhfvYt3S7Si912i5XFb2og5ws=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=uniontech.com; spf=pass smtp.mailfrom=uniontech.com; dkim=pass (1024-bit key) header.d=uniontech.com header.i=@uniontech.com header.b=iGpQUzuf; arc=none smtp.client-ip=54.206.34.216
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=uniontech.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=uniontech.com
+	s=arc-20240116; t=1729668790; c=relaxed/simple;
+	bh=xEo0swbVCdrGjVdei/ZvZa4U5Cg1mfinNBvemiRZC+8=;
+	h=MIME-Version:Date:From:To:Cc:Subject:In-Reply-To:References:
+	 Message-ID:Content-Type; b=Wdl4/A3S1BPrftLGY3W44hPwg3meYg/fQAtQkoUX5/baLV58koXx87wOwXZniApTP+vbVo206zKGSA1d7K4+7vB9WUvKqlIgX8NqbhfFcmOUUUuafJTZo1KYq398PnbOeHoZtyASl9hgdnQ1mziT9yHIy4ymCpfU0PBQ/Ul6Zsk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=aosc.io; spf=pass smtp.mailfrom=aosc.io; dkim=pass (1024-bit key) header.d=aosc.io header.i=@aosc.io header.b=SvSqZDdq; arc=none smtp.client-ip=159.100.248.207
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=aosc.io
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=aosc.io
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=uniontech.com header.i=@uniontech.com header.b="iGpQUzuf"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=uniontech.com;
-	s=onoh2408; t=1729665067;
-	bh=ngQUyspk0u5tmnuw4tF5HJKltqCiL9AJbZfUWTdGVNU=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version;
-	b=iGpQUzufGKagQD2p8OJ9+o1rv05GO3s0irkkzl+B/jVQzK62CKg8qVz67X69ysnlY
-	 guTCSgPYkdN689aKc9jSkAv2q1YkVkLU9aW1hyxIu8y95ubUmp7oLbbBrYPzSuQtxk
-	 b6AP1aH471/Gf/Mf0lCx04AOx9Z8n7u1eTbhDMCE=
-X-QQ-mid: bizesmtp85t1729665063t7rgkpzf
-X-QQ-Originating-IP: /Pu5B/BFVMh1l61DmVeOAJ9BOb/PIqdl2onMEJbSJ3s=
-Received: from localhost.localdomain ( [113.57.152.160])
-	by bizesmtp.qq.com (ESMTP) with 
-	id ; Wed, 23 Oct 2024 14:30:59 +0800 (CST)
-X-QQ-SSF: 0000000000000000000000000000000
-X-QQ-GoodBg: 1
-X-BIZMAIL-ID: 5490330265754036757
-From: WangYuli <wangyuli@uniontech.com>
-To: gregkh@linuxfoundation.org
-Cc: patches@lists.linux.dev,
-	nikita@trvn.ru,
-	ink@jurassic.park.msu.ru,
-	shc_work@mail.ru,
-	richard.henderson@linaro.org,
-	mattst88@gmail.com,
-	linux-alpha@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org,
-	fancer.lancer@gmail.com,
-	linux-hwmon@vger.kernel.org,
-	dmaengine@vger.kernel.org,
-	xeb@mail.ru,
-	netdev@vger.kernel.org,
-	s.shtylyov@omp.ru,
-	linux-ide@vger.kernel.org,
-	serjk@netup.ru,
-	aospan@netup.ru,
-	linux-media@vger.kernel.org,
-	ddrokosov@sberdevices.ru,
-	linux-iio@vger.kernel.org,
-	v.georgiev@metrotek.ru,
-	linux-mips@vger.kernel.org,
-	ntb@lists.linux.dev,
-	linux-renesas-soc@vger.kernel.org,
-	linux-gpio@vger.kernel.org,
-	linux-spi@vger.kernel.org,
-	dushistov@mail.ru,
-	manivannan.sadhasivam@linaro.org,
-	conor.dooley@microchip.com,
-	linux-fpga@vger.kernel.org,
-	tsbogend@alpha.franken.de,
-	hoan@os.amperecomputing.com,
-	geert@linux-m68k.org,
-	wsa+renesas@sang-engineering.com
-Subject: Re: [PATCH] MAINTAINERS: Remove some entries due to various compliance requirements.
-Date: Wed, 23 Oct 2024 14:30:58 +0800
-Message-ID: <A74519B4332040FA+20241023063058.223139-1-wangyuli@uniontech.com>
-X-Mailer: git-send-email 2.45.2
-In-Reply-To: <2024101835-tiptop-blip-09ed@gregkh>
-References: <2024101835-tiptop-blip-09ed@gregkh>
+	dkim=pass (1024-bit key) header.d=aosc.io header.i=@aosc.io header.b="SvSqZDdq"
+Received: from relay1.mymailcheap.com (relay1.mymailcheap.com [144.217.248.100])
+	by relay5.mymailcheap.com (Postfix) with ESMTPS id 799E526760;
+	Wed, 23 Oct 2024 07:33:00 +0000 (UTC)
+Received: from nf2.mymailcheap.com (nf2.mymailcheap.com [54.39.180.165])
+	by relay1.mymailcheap.com (Postfix) with ESMTPS id 4B4033E9D6;
+	Wed, 23 Oct 2024 07:32:53 +0000 (UTC)
+Received: from mail20.mymailcheap.com (mail20.mymailcheap.com [51.83.111.147])
+	by nf2.mymailcheap.com (Postfix) with ESMTPSA id F1FA140071;
+	Wed, 23 Oct 2024 07:32:52 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=aosc.io; s=default;
+	t=1729668771; bh=xEo0swbVCdrGjVdei/ZvZa4U5Cg1mfinNBvemiRZC+8=;
+	h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
+	b=SvSqZDdqa/ICtW2R15erWVPbVyfE4hGMXwFYFIIFJULUy5Gsz/e9Obz0kKMRpZuuP
+	 qWt7ccWb2aX9Jr1l6fU1NnihUmbwmhhq3BEauxQRazcsa4UFnWWMyVWO4yVj3b5/HO
+	 +QksPHbpOl9qNeYXOjk0WVaL2Xvcd3NvmI8bkKZM=
+Received: from mail20.mymailcheap.com (mail20.mymailcheap.com [51.83.111.147])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mail20.mymailcheap.com (Postfix) with ESMTPSA id 457BE407D9;
+	Wed, 23 Oct 2024 07:32:51 +0000 (UTC)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
+Date: Wed, 23 Oct 2024 15:32:50 +0800
+From: Mingcong Bai <jeffbai@aosc.io>
+To: WangYuli <wangyuli@uniontech.com>
+Cc: gregkh@linuxfoundation.org, patches@lists.linux.dev, nikita@trvn.ru,
+ ink@jurassic.park.msu.ru, shc_work@mail.ru, richard.henderson@linaro.org,
+ mattst88@gmail.com, linux-alpha@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org, fancer.lancer@gmail.com,
+ linux-hwmon@vger.kernel.org, dmaengine@vger.kernel.org, xeb@mail.ru,
+ netdev@vger.kernel.org, s.shtylyov@omp.ru, linux-ide@vger.kernel.org,
+ serjk@netup.ru, aospan@netup.ru, linux-media@vger.kernel.org,
+ ddrokosov@sberdevices.ru, linux-iio@vger.kernel.org, v.georgiev@metrotek.ru,
+ linux-mips@vger.kernel.org, ntb@lists.linux.dev,
+ linux-renesas-soc@vger.kernel.org, linux-gpio@vger.kernel.org,
+ linux-spi@vger.kernel.org, dushistov@mail.ru,
+ manivannan.sadhasivam@linaro.org, conor.dooley@microchip.com,
+ linux-fpga@vger.kernel.org, tsbogend@alpha.franken.de,
+ hoan@os.amperecomputing.com, geert@linux-m68k.org,
+ wsa+renesas@sang-engineering.com
+Subject: Re: [PATCH] MAINTAINERS: Remove some entries due to various
+ compliance requirements.
+In-Reply-To: <A74519B4332040FA+20241023063058.223139-1-wangyuli@uniontech.com>
+References: <2024101835-tiptop-blip-09ed@gregkh>
+ <A74519B4332040FA+20241023063058.223139-1-wangyuli@uniontech.com>
+Message-ID: <a08dc31ab773604d8f206ba005dc4c7a@aosc.io>
+X-Sender: jeffbai@aosc.io
+Organization: Anthon Open Source Community
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
 Content-Transfer-Encoding: 8bit
-X-QQ-SENDSIZE: 520
-Feedback-ID: bizesmtp:uniontech.com:qybglogicsvrgz:qybglogicsvrgz8a-1
-X-QQ-XMAILINFO: N6+UlSQllctNd9z1plWZnnP8kKpd9MPfEVy1geCnF8BkGlfZL4FIZ+Vc
-	C2RgjlHoyHGYxctHsmGSNdu50xYWG3s2eRIFDqxucpg7CFpjAQgR2H3Azf5VcHPl9oANQ1Y
-	XUE6UsBUK1oYctWCGDI7XM1PjaNlTFTmc/SYgjRaKvOvGCAZL/nb5DJjX23uUZv1BytU2+k
-	fhcUAR57NZ2AJ9kWGV2fQrwj8h9Fq9eb0o5qwFREuD0sJd25KczX0TtlNXlLSOc4jD2N+rZ
-	ZyygYFHtZhWVItO4bwZzyI/iLGF7d5J7WxORAu5gQY1tU49b4BF4mGRdcWEHsSpJjyOo/4+
-	ZR3/JNbr6i8U2EY7kuzuj7U+3esrw7gFVqWdBXOqfh+OdBkeWOq9hKD/msrWYhD5sGn+x8P
-	eqJlBurObi7PpeXimGcbW4N++6vPFXaQW5NzVtUHRxDaVZjbx9DSJo6KseBuW9rmtfGyVj8
-	ISc0aWM0bXIHbN5uUXDYmYnOqbKDgVrdeTNmj7SJcAl0TadGOxyYDwmuRbuECHzvidi3ciW
-	nFg2BAmPLyJOHIZAwblLi9ZF7gFawH87Ok/zAhqJy7qwCpXy5V0joaWGMyvg0hBMr6KPRVO
-	hughSUUNKaaV2XdqzqCdv84D+GAKIqPCNzRqn4VOcP80fRAuxsRFSi1kpZNJPI0wdRZflK5
-	zazUaHV3wbfigNVv+YFGflsa5rsQkTUeuF/3jOCwB5mMyP3vutVdxHDX+z3+T4CrE3aKBFT
-	3I+3sfBmMuZehUunKJcIVUftU5Zwvp+ENEL/L8DIpmwuS03Hn1anJy14/W1fTBLYXjAkbun
-	zdNXv8+JIHkBJd9EgELO2Sud16rCRYLn7q+3Iwy5S+JzsC/xRMN0+U+VpnuD2IhwKJ5EL6Z
-	0eo79wHgbyjfFVwzC3sSusu2q+SRWOtNsZStDSkSuee+wxaDjykDI+80NHwvvRusvZFEAcj
-	oxnSCdG9toT1qktgl84NDmCuy
-X-QQ-XMRINFO: OD9hHCdaPRBwq3WW+NvGbIU=
-X-QQ-RECHKSPAM: 0
+X-Rspamd-Server: nf2.mymailcheap.com
+X-Rspamd-Queue-Id: F1FA140071
+X-Rspamd-Action: no action
+X-Spamd-Result: default: False [1.40 / 10.00];
+	SUSPICIOUS_RECIPS(1.50)[];
+	MIME_GOOD(-0.10)[text/plain];
+	ASN(0.00)[asn:16276, ipnet:51.83.0.0/16, country:FR];
+	ARC_NA(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	RCVD_TLS_ALL(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	RCVD_COUNT_ONE(0.00)[1];
+	RCPT_COUNT_TWELVE(0.00)[36];
+	TAGGED_RCPT(0.00)[renesas];
+	MID_RHS_MATCH_FROM(0.00)[];
+	HAS_ORG_HEADER(0.00)[];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	TO_DN_SOME(0.00)[];
+	FREEMAIL_ENVRCPT(0.00)[gmail.com,mail.ru];
+	FREEMAIL_CC(0.00)[linuxfoundation.org,lists.linux.dev,trvn.ru,jurassic.park.msu.ru,mail.ru,linaro.org,gmail.com,vger.kernel.org,lists.infradead.org,omp.ru,netup.ru,sberdevices.ru,metrotek.ru,microchip.com,alpha.franken.de,os.amperecomputing.com,linux-m68k.org,sang-engineering.com];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	MISSING_XM_UA(0.00)[]
 
-Although this commit has been merged, it's still important to know the specific reason (or even an example) that triggered this change for everyone here, right?
+Greetings all,
 
-And those maintainers who have been removed should be notified.
+在 2024-10-23 14:30，WangYuli 写道：
+> Although this commit has been merged, it's still important to know the 
+> specific reason (or even an example) that triggered this change for 
+> everyone here, right?
+> 
+> And those maintainers who have been removed should be notified.
 
-It should be CC'd everyone who might need to be aware of this change, including the removed maintainers, other maintainers on the subsystem, and the subsystem's mailing list.
+Seconded.
 
-To ensure transparency.
+> It should be CC'd everyone who might need to be aware of this change, 
+> including the removed maintainers, other maintainers on the subsystem, 
+> and the subsystem's mailing list.
+> 
+> To ensure transparency.
+
+This patch is one such instance where we find ourselves questioning the 
+legitimacy and indeed, the feasibility, of an international, open, and 
+open source project. Vagueness breeds distrust.
+
+It's not difficult to deduce what the "various compliance requirements" 
+are and I'm sure Greg is aware of this. The Linux Foundation, if 
+interested in continuing their governance role over the Linux kernel, 
+should be ready to explain themselves over this decision. Greg and 
+Linus, I'm not sure if I'm ready to believe that this is supposed to be 
+a political show - but if this is the case, please leave the ground for 
+the Foundation - they should be the one responsible and receiving the 
+scrutiny (or insult, as I'm sure many - myself included - find this 
+patch insulting).
+
+So I repeat - call the decision-makers out and ask for their 
+explanation.
+
+Best Regards,
+Mingcong Bai
