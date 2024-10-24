@@ -1,200 +1,190 @@
-Received: from mail-pf1-f195.google.com (mail-pf1-f195.google.com [209.85.210.195])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from flow-a2-smtp.messagingengine.com (flow-a2-smtp.messagingengine.com [103.168.172.137])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 349FE1F893B
-	for <ntb@lists.linux.dev>; Thu, 24 Oct 2024 16:58:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.195
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B63FF1F76BF
+	for <ntb@lists.linux.dev>; Thu, 24 Oct 2024 16:59:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.137
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729789125; cv=none; b=G7eoKLrPB5OZ49o5kAVNv19bnmUwyh+vT6It3cJYAj/xQVEDT4oij6sPlQYI6lBvMhBrL2NDpHaH6c2k/ezIMzlFK+vGvt4PFYEUZSvE5rttB+jRYsfxH4OqS67FUylo6XPKTbu7M6NreW8EtFrxYtYLIhIaCWkYlAsIrZj6pjk=
+	t=1729789152; cv=none; b=abTnAiaJ5/uLAzHIU7/KG0tcfZTKaaTvg8GhjenvKqWV+hoJ0Ly9l/zHQrsOjat4KliNLGG3mCeXiSg4iaASn607bUZhdd1FLbsij0pTmuF2Gfg3LtipT4lhLcE8MYWs6C/dbT132rVgq37R5khmBnGGl5h1xwiL7wyLr5ZRJl0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729789125; c=relaxed/simple;
-	bh=LQUqq41rKKi2DZ6ziCnRzGqwgHnRtqlW6CGDMmHRRV0=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=KGQrBwInP+7O6ZC04BeGBenD9agI/00MRmAD/858NYwn1Hw6qefFKkwusvioK745UQTx0fmpW5jjHJd4PIkx1W8WXFfilymkgzcZNXohV+SnXQ25Kmp1brADGXlsRCBZ3DT4Tim+iieHtM4u2qyZ8zG5vfb9vzWgqEYuhVr6bHU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=gAd9DCre; arc=none smtp.client-ip=209.85.210.195
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1729789152; c=relaxed/simple;
+	bh=1D9MXsAVWcNpk072yB1qs3fINFV1pE9hhttXGeJgq0w=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=ZvLiVA4zOKKYO2Oh7CnXJ/tMcEFB65cKXX5ubc/aTddLkIWKMGTS0RyXoREHDfIGt4IipjaXd4+uQiLI5dhNZ3ZNrF8vsqm3QkKZV5qmjDLfiyXH8y1vEZZPhYW50neUxrfvhNX+gCTIguk7Ptj4j2VT7/sz0mhMIxjbCJZxaCg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=flygoat.com; spf=pass smtp.mailfrom=flygoat.com; dkim=pass (2048-bit key) header.d=flygoat.com header.i=@flygoat.com header.b=ep0XILZo; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=OV3ypg6c; arc=none smtp.client-ip=103.168.172.137
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=flygoat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flygoat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="gAd9DCre"
-Received: by mail-pf1-f195.google.com with SMTP id d2e1a72fcca58-71e67d12d04so875942b3a.1
-        for <ntb@lists.linux.dev>; Thu, 24 Oct 2024 09:58:42 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1729789122; x=1730393922; darn=lists.linux.dev;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=xfJ8p+8q2+xxwuBNnMevVX62Z8jej5Rz7JLXYkmoeTk=;
-        b=gAd9DCrelwxgbhLP5LgZfqqfklmwNptk4AKUk3l5nvpzNhsrVReiDDgNImnfNkb8q5
-         z07/kUN7aSyr3EyMpXt/pc+fsG1R6Ul9iWk8QURKnrkRvfqeptcJ9D3/IVwbrP6mobVl
-         66LMERKYOGHkOQUi1nifxv4YoIX1HjFc8hgySyaE7IHHg/9wGKIw/RaweME/0/N3ZEXT
-         lFXhu4VmbcbEWK0wGEhDrefkFsbHpsF7nL7sZRV7cYY4lwYWj7hKc9VC0VS6f8CgqN5j
-         CVoozLsXPhq+kQot1PC0RIz3MwnBBoKw6tQQUSAI/2/idHe5M5gLTouamiSMBz8zjBb8
-         APtg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1729789122; x=1730393922;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=xfJ8p+8q2+xxwuBNnMevVX62Z8jej5Rz7JLXYkmoeTk=;
-        b=Wtcn/iajvcB2S2fVNFTU1jRoSP4DJ4CgVejzy1xLSlFxqR/H/Gy3znJcGd/0IhGzZN
-         dP+62it+HdQyvL3Hc3tooc0rMV1cfKV75+y6Fdi1PoFp21PUKCTpv1vN1crxnDFDcR98
-         ugDEGIuyd5HQCl8/XEgjS+Zy/skh1wnOZYC3XNkSpPgJ1SZuorez+5j/I+5i1WXo2ea/
-         wusJMcY8iepD53Xeic5WTN3XT8h2SOySdVtw7F6Ox0+BQjl/H+G3oFD7EZfs+VWYo+4C
-         +HtG9BmBEyus72+OcJjs9FFq7sGYDvMVN6eyULyNwafXXAAIgYJF2cVHrYEOkLitg0Tl
-         J9fQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVMDCxLDIzBbpnuOed4TSK38cCYtVBwcdoadyTAbv/B6nfM7WEq6ofzQgonpy+1etPHEGY=@lists.linux.dev
-X-Gm-Message-State: AOJu0YxGHOPcw+0953/ODlPia8ZUhDoNF5G28R4ZGMp3NQGM7hRNA/HZ
-	6nJHCmoUYCGrst3KQWW8Tz0be98eX3+vbzR3Wj/ofQcF2TX7bnVc
-X-Google-Smtp-Source: AGHT+IHkRrL+646WJX5jMNiRVOq7St1d5iL/wDNXUA9UQNOX6Gcj9xqgJzmbGWgDaCdtnMTv+h1KbQ==
-X-Received: by 2002:a05:6a21:4a4c:b0:1d9:175a:c2ba with SMTP id adf61e73a8af0-1d978b0245fmr8971311637.20.1729789122186;
-        Thu, 24 Oct 2024 09:58:42 -0700 (PDT)
-Received: from localhost.localdomain ([240b:4001:20c:6000::1])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-71ec132ffdcsm8203615b3a.46.2024.10.24.09.58.22
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 24 Oct 2024 09:58:41 -0700 (PDT)
-From: Hantong Chen <cxwdyx620@gmail.com>
-To: james.bottomley@hansenpartnership.com
-Cc: ajhalaney@gmail.com,
-	allenbh@gmail.com,
-	andrew@lunn.ch,
-	andriy.shevchenko@linux.intel.com,
-	andy@kernel.org,
-	arnd@arndb.de,
-	bhelgaas@google.com,
-	bp@alien8.de,
-	broonie@kernel.org,
-	cai.huoqing@linux.dev,
-	dave.jiang@intel.com,
-	davem@davemloft.net,
-	dlemoal@kernel.org,
-	dmaengine@vger.kernel.org,
-	dushistov@mail.ru,
-	fancer.lancer@gmail.com,
-	geert@linux-m68k.org,
-	gregkh@linuxfoundation.org,
-	ink@jurassic.park.msu.ru,
-	jdmason@kudzu.us,
-	jiaxun.yang@flygoat.com,
-	keguang.zhang@gmail.com,
-	kory.maincent@bootlin.com,
-	krzk@kernel.org,
-	kuba@kernel.org,
-	linux-edac@vger.kernel.org,
-	linux-hwmon@vger.kernel.org,
-	linux-ide@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	linux-mips@vger.kernel.org,
-	linux-pci@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org,
-	linux-serial@vger.kernel.org,
-	linux-spi@vger.kernel.org,
-	linux@armlinux.org.uk,
-	linux@roeck-us.net,
-	manivannan.sadhasivam@linaro.org,
-	netdev@vger.kernel.org,
-	nikita.shubin@maquefel.me,
-	nikita@trvn.ru,
-	ntb@lists.linux.dev,
-	olteanv@gmail.com,
-	pabeni@redhat.com,
-	paulburton@kernel.org,
-	robh@kernel.org,
-	s.shtylyov@omp.ru,
-	sergio.paracuellos@gmail.com,
-	shc_work@mail.ru,
-	siyanteng@loongson.cn,
-	tsbogend@alpha.franken.de,
-	xeb@mail.ru,
-	yoshihiro.shimoda.uh@renesas.com
-Subject: Re: linux: Goodbye from a Linux community volunteer
-Date: Thu, 24 Oct 2024 16:56:50 +0000
-Message-ID: <20241024165650.174-1-cxwdyx620@gmail.com>
-X-Mailer: git-send-email 2.47.0.windows.1
-In-Reply-To: <e7d548a7fc835f9f3c9cb2e5ed97dfdfa164813f.camel@HansenPartnership.com>
-References: <e7d548a7fc835f9f3c9cb2e5ed97dfdfa164813f.camel@HansenPartnership.com>
+	dkim=pass (2048-bit key) header.d=flygoat.com header.i=@flygoat.com header.b="ep0XILZo";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="OV3ypg6c"
+Received: from phl-compute-09.internal (phl-compute-09.phl.internal [10.202.2.49])
+	by mailflow.phl.internal (Postfix) with ESMTP id A59A6200789;
+	Thu, 24 Oct 2024 12:59:09 -0400 (EDT)
+Received: from phl-imap-12 ([10.202.2.86])
+  by phl-compute-09.internal (MEProxy); Thu, 24 Oct 2024 12:59:09 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=flygoat.com; h=
+	cc:cc:content-transfer-encoding:content-type:content-type:date
+	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to; s=fm1; t=1729789149;
+	 x=1729796349; bh=SG3wwx+g/r6vJORvVjNOrsa8CYeWjsvioBIcUqvZ0Gc=; b=
+	ep0XILZoJhOwPW3tle1lxD1HjrJWpITYzUsHm2zOfmXFqwaUnNZ3h7/jpDzjv8yN
+	VG6WWFbIxZ7arovOdONHpLLJkma36z1NnhWQu977IF9HO9KZ68MLf0nCQ2ydlVr5
+	ji7PRP2eBFvEUNXHyEX8oVg7BtgcFFKX4yTwjr+KpZzFUfpH/bxTWjWD6z7yvMkA
+	UEKRziWV3Q1jLfXSuob7zWc889wUnIICAPeYUzt3ky5APj1OmXIW4G944P/RmEh2
+	AhzvftYpTuebLKX1fP9ppQUdFW++SpHC6ff1VDS4iuL/mc+Wmk0OHilBpK7hYEhV
+	CHs06OO4opBCp1rG43CJbg==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:content-type:date:date:feedback-id:feedback-id
+	:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to:x-me-proxy:x-me-proxy
+	:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; t=1729789149; x=
+	1729796349; bh=SG3wwx+g/r6vJORvVjNOrsa8CYeWjsvioBIcUqvZ0Gc=; b=O
+	V3ypg6cRR80FVCGt3iJbt1d8uUDSVnNfTbcrxh1AvdSoxoKlJqOqwr5zZw5GveJ5
+	uy8wn4YSYmLpvIMwJJ7kORHOdpEgJyPTte15PTQgyo91IglxWguDmN4gP3pLAe9m
+	wk9hTmuaeaYaXVX5DGCxfRWh+N4YR93oAILAmss1lBaUNPUqkBhud4wsLyBZ17P+
+	F0sS/KhUZeod6ydZ5XzTH8C3s1qt2uOLAJEBTq4Fys8P10Wff+h4wl9wwEjEpxNy
+	L6w+cNxOXhipxm5Yw6vap72AO8PSLVScLYT8iFGGYKjduZ84lbkW32PnR9OzXFM4
+	RU5lClV8FhEgD5s1FikSw==
+X-ME-Sender: <xms:2nwaZ5_7YU3V2G5aXQIMJVibPQYjTxulAl0jIA6FWJqHw114OgtLYQ>
+    <xme:2nwaZ9sYUxuDQt3s9pQYPXNd0F94BVrwTp-9yhCst1RmWQPQA0XkyT88CUOAbr-S5
+    5bC46g4k_XA2AFDzbs>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeeftddrvdejtddgkeduucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdggtfgfnhhsuhgsshgtrhhisggvpdfu
+    rfetoffkrfgpnffqhgenuceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnh
+    htshculddquddttddmnecujfgurhepofggfffhvfevkfgjfhfutgfgsehtqhertdertdej
+    necuhfhrohhmpedflfhirgiguhhnucgjrghnghdfuceojhhirgiguhhnrdihrghnghesfh
+    hlhihgohgrthdrtghomheqnecuggftrfgrthhtvghrnhepjeehfeduvddtgffgvdffkeet
+    hefhlefgvdevvdekuefffeekheehgeevhfevteejnecuvehluhhsthgvrhfuihiivgeptd
+    enucfrrghrrghmpehmrghilhhfrhhomhepjhhirgiguhhnrdihrghnghesfhhlhihgohgr
+    thdrtghomhdpnhgspghrtghpthhtohephedtpdhmohguvgepshhmthhpohhuthdprhgtph
+    htthhopegsphesrghlihgvnhekrdguvgdprhgtphhtthhopehtshgsohhgvghnugesrghl
+    phhhrgdrfhhrrghnkhgvnhdruggvpdhrtghpthhtoheplhhinhhugiesrghrmhhlihhnuh
+    igrdhorhhgrdhukhdprhgtphhtthhopegrrhhnugesrghrnhgusgdruggvpdhrtghpthht
+    ohepkhhorhihrdhmrghinhgtvghnthessghoohhtlhhinhdrtghomhdprhgtphhtthhope
+    gurghvvghmsegurghvvghmlhhofhhtrdhnvghtpdhrtghpthhtoheprghjhhgrlhgrnhgv
+    hiesghhmrghilhdrtghomhdprhgtphhtthhopegrlhhlvghnsghhsehgmhgrihhlrdgtoh
+    hmpdhrtghpthhtohepfhgrnhgtvghrrdhlrghntggvrhesghhmrghilhdrtghomh
+X-ME-Proxy: <xmx:2nwaZ3Cv-hVEkx1Pr8q_BWJjkhrzEk9-mHQ7C2q7gA7CMMZL0qI7NQ>
+    <xmx:2nwaZ9e-frUJhk9ka0CLyX-noOJeTWSuiiRFa1wF7QTiIj17LraGBQ>
+    <xmx:2nwaZ-Mv5MLAM_50zIR4-F1_WcNhjiWHJmtj6uYMSwmAZ1_sbnspbw>
+    <xmx:2nwaZ_nxWH5oAqdmZQ0izKk8A9nliyXxQCCDRPN1Ld86KUJwXs1sRg>
+    <xmx:3XwaZxfkKD_qGLFKaVmN5Q4HWgdetZn2bkIYd8lQizBi7lvGEMzBD8_x>
+Feedback-ID: ifd894703:Fastmail
+Received: by mailuser.phl.internal (Postfix, from userid 501)
+	id 37E8F1C20066; Thu, 24 Oct 2024 12:59:06 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
+Date: Thu, 24 Oct 2024 17:58:45 +0100
+From: "Jiaxun Yang" <jiaxun.yang@flygoat.com>
+To: "James Bottomley" <James.Bottomley@hansenpartnership.com>,
+ "Serge Semin" <fancer.lancer@gmail.com>, "Jon Mason" <jdmason@kudzu.us>,
+ "Dave Jiang" <dave.jiang@intel.com>, "Allen Hubbe" <allenbh@gmail.com>,
+ ntb@lists.linux.dev, "Andy Shevchenko" <andy@kernel.org>,
+ "Andy Shevchenko" <andriy.shevchenko@linux.intel.com>,
+ "Kory Maincent" <kory.maincent@bootlin.com>,
+ "Cai Huoqing" <cai.huoqing@linux.dev>, dmaengine@vger.kernel.org,
+ "Mark Brown" <broonie@kernel.org>, linux-spi@vger.kernel.org,
+ "Damien Le Moal" <dlemoal@kernel.org>, linux-ide@vger.kernel.org,
+ "paulburton@kernel.org" <paulburton@kernel.org>,
+ "Thomas Bogendoerfer" <tsbogend@alpha.franken.de>,
+ "Arnd Bergmann" <arnd@arndb.de>,
+ "linux-mips@vger.kernel.org" <linux-mips@vger.kernel.org>,
+ "Bjorn Helgaas" <bhelgaas@google.com>,
+ "Manivannan Sadhasivam" <manivannan.sadhasivam@linaro.org>,
+ "Yoshihiro Shimoda" <yoshihiro.shimoda.uh@renesas.com>,
+ linux-pci <linux-pci@vger.kernel.org>,
+ "David S . Miller" <davem@davemloft.net>,
+ "Jakub Kicinski" <kuba@kernel.org>, "Paolo Abeni" <pabeni@redhat.com>,
+ "Andrew Lunn" <andrew@lunn.ch>, "Russell King" <linux@armlinux.org.uk>,
+ "Vladimir Oltean" <olteanv@gmail.com>,
+ "Kelvin Cheung" <keguang.zhang@gmail.com>,
+ "Yanteng Si" <siyanteng@loongson.cn>, netdev@vger.kernel.org,
+ "Rob Herring" <robh@kernel.org>, "Krzysztof Kozlowski" <krzk@kernel.org>,
+ "Guenter Roeck" <linux@roeck-us.net>, linux-hwmon@vger.kernel.org,
+ "Borislav Petkov" <bp@alien8.de>, linux-edac@vger.kernel.org,
+ "Greg Kroah-Hartman" <gregkh@linuxfoundation.org>,
+ linux-serial@vger.kernel.org
+Cc: "Andrew Halaney" <ajhalaney@gmail.com>, "Nikita Travkin" <nikita@trvn.ru>,
+ "Ivan Kokshaysky" <ink@jurassic.park.msu.ru>,
+ "Alexander Shiyan" <shc_work@mail.ru>, "Dmitry Kozlov" <xeb@mail.ru>,
+ "Sergey Shtylyov" <s.shtylyov@omp.ru>,
+ "Evgeniy Dushistov" <dushistov@mail.ru>,
+ "Geert Uytterhoeven" <geert@linux-m68k.org>,
+ "Sergio Paracuellos" <sergio.paracuellos@gmail.com>,
+ "Nikita Shubin" <nikita.shubin@maquefel.me>,
+ linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org
+Message-Id: <2f203b14-be13-4eef-bcb1-743dd9e9e9bd@app.fastmail.com>
+In-Reply-To: 
+ <f90bba20e86dac698472d686be7ec565736adca0.camel@HansenPartnership.com>
+References: <2m53bmuzemamzc4jzk2bj7tli22ruaaqqe34a2shtdtqrd52hp@alifh66en3rj>
+ <e7d548a7fc835f9f3c9cb2e5ed97dfdfa164813f.camel@HansenPartnership.com>
+ <753d203a-a008-4cd3-b053-38b5ce31281b@app.fastmail.com>
+ <f90bba20e86dac698472d686be7ec565736adca0.camel@HansenPartnership.com>
+Subject: Re: linux: Goodbye from a Linux community volunteer
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
-> If you haven't heard of Russian sanctions yet, you should try to read=0D
-> the news some day.  And by "news", I don't mean Russian=0D
-> state-sponsored spam.=0D
-=0D
-> As to sending me a revert patch - please use whatever mush you call=0D
-> brains. I'm Finnish. Did you think I'd be *supporting* Russian=0D
-> aggression? Apparently it's not just lack of real news, it's lack of=0D
-> history knowledge too.=0D
-=0D
-Hi James,=0D
-=0D
-Here's what Linus has said, and it's more than just "sanction."=0D
-=0D
-Moreover, we have to remove any maintainers who come from the following cou=
-ntries or regions, as they are listed in *Countries of Particular Concern* =
-and are subject to impending sanctions:=0D
-=0D
-- Burma, People=E2=80=99s Republic of China, Cuba, Eritrea, Iran, the Democ=
-ratic People=E2=80=99s Republic of Korea, Nicaragua, Pakistan, Russia, Saud=
-i Arabia, Tajikistan, and Turkmenistan.=0D
-- Algeria, Azerbaijan, the Central African Republic, Comoros, and Vietnam.=
-=0D
-=0D
-For People=E2=80=99s Republic of China, there are about 500 entities that a=
-re on the U.S. OFAC SDN / non-SDN lists, especially HUAWEI, which is one of=
- the most active employers from versions 5.16 through 6.1, according to sta=
-tistics. This is unacceptable, and we must take immediate action to address=
- it, with the **same** reason.=0D
-=0D
-On 10/24/24 10:50 AM, James Bottomley wrote:=0D
-> On Thu, 2024-10-24 at 07:27 +0300, Serge Semin wrote:=0D
->> Hello Linux-kernel community,=0D
->>=0D
->> I am sure you have already heard the news caused by the recent Greg'=0D
->> commit 6e90b675cf942e ("MAINTAINERS: Remove some entries due to=0D
->> various compliance requirements."). As you may have noticed the=0D
->> change concerned some of the Ru-related developers removal from the=0D
->> list of the official kernel maintainers, including me.=0D
->>=0D
->> The community members rightly noted that the _quite_ short commit log=0D
->> contained very vague terms with no explicit change justification. No=0D
->> matter how hard I tried to get more details about the reason, alas=0D
->> the senior maintainer I was discussing the matter with haven't given=0D
->> an explanation to what compliance requirements that was.=0D
-> =0D
-> Please accept all of our apologies for the way this was handled.  A=0D
-> summary of the legal advice the kernel is operating under is=0D
-> =0D
->     If your company is on the U.S. OFAC SDN lists, subject to an OFAC=0D
->     sanctions program, or owned/controlled by a company on the list, our=
-=0D
->     ability to collaborate with you will be subject to restrictions, and=
-=0D
->     you cannot be in the MAINTAINERS file.=0D
-> =0D
-> Anyone who wishes to can query the list here:=0D
-> =0D
-> https://sanctionssearch.ofac.treas.gov/=0D
-> =0D
-> In your specific case, the problem is your employer is on that list.=0D
-> If there's been a mistake and your employer isn't on the list, that's=0D
-> the documentation Greg is looking for.=0D
-> =0D
-> I would also like to thank you for all your past contributions and if=0D
-> you (or anyone else) would like an entry in the credit file, I'm happy=0D
-> to shepherd it for you if you send me what you'd like.=0D
-> =0D
-> Again, we're really sorry it's come to this, but all of the Linux=0D
-> infrastructure and a lot of its maintainers are in the US and we can't=0D
-> ignore the requirements of US law.  We are hoping that this action=0D
-> alone will be sufficient to satisfy the US Treasury department in=0D
-> charge of sanctions and we won't also have to remove any existing=0D
-> patches.=0D
-> =0D
-> Regards,=0D
-> =0D
-> James Bottomley=0D
-> =0D
+
+
+=E5=9C=A82024=E5=B9=B410=E6=9C=8824=E6=97=A5=E5=8D=81=E6=9C=88 =E4=B8=8B=
+=E5=8D=885:27=EF=BC=8CJames Bottomley=E5=86=99=E9=81=93=EF=BC=9A
+> On Thu, 2024-10-24 at 16:59 +0100, Jiaxun Yang wrote:
+[...]
+
+Hi James,
+
+>
+> It's Linux, so no official capacity at all.  However, I am expressing
+> the views of a number of people I talked to but it's not fair of me to
+> name them.
+
+Fair enough, I was hoping that it's from Linux Foundation but it's still
+good news to me that it do represent some respectful individuals.
+
+>
+[...]
+>> How should we handle it?
+>
+> A big chunk of the reason it's taken so long just to get the above is
+> that the Lawyers (of which I'm not one) are still discussing the
+> specifics and will produce a much longer policy document later, so they
+> don't want to be drawn into questions like this.  However, my non-
+> legal-advice rule of thumb that I'm applying until I hear otherwise is
+> not on the SDN list, not a problem.
+
+Thank you for sharing your insights. I'm looking forward to the document.
+
+While I remain quite upset about how things were handled, your message h=
+as
+helped restore some of my confidence in the community.
+
+I agree with Peter Cai's earlier comment that steps should be taken to a=
+ddress
+the harm caused by the initial reckless actions, particularly to those w=
+ho were
+humiliated.
+
+It is also important to put measures in place to prevent such drama from=
+ recurring.
+A formal procedure for handling urgent compliance requests may be a sens=
+ible step
+forward.
+
+I hold our community in high regard and would be heartbreaking to see th=
+e reputation
+of the Linux Kernel undermined in such an unfortunate manner. I would ap=
+preciate it
+if you could convey those thoughts to the relevant individuals.
+
+Thanks
+>
+> James
+
+--=20
+- Jiaxun
