@@ -1,307 +1,135 @@
-Received: from mail-lj1-f195.google.com (mail-lj1-f195.google.com [209.85.208.195])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8427B2170CD;
-	Thu, 24 Oct 2024 19:09:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.195
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AC5FE1EC00F
+	for <ntb@lists.linux.dev>; Thu, 24 Oct 2024 19:38:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729796980; cv=none; b=GKk3OpJs6zElf0fEylUIBkDk3UWlBAbg60ZNYMpD3pHqUOmAB72qoEL6c4p95VUsRQWVadiRN18X5ETWHZCqkpK3c8+7fCDzXxqijavaUAAWJKov63CDrvfPf/QQuaDxetCJl93xIzaLYRnYoI9H4UCht6MeUFIaNoEk8dGwTvc=
+	t=1729798740; cv=none; b=VEFwLUpxlDJi5CO83AJvAQz0u0j0m+96GXeMzWEpRMduT+H1L6Ziec0NR+hp5d3FHeYd71oGMD10rWxGzWl1KqX8FO/UEcuAIaY7GksqziKThkyE8ZcQgGFKAQoFLppni6m/ahhapTqITnU30mj2BV60atRtmtLe//foRluO9gE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729796980; c=relaxed/simple;
-	bh=6rLVkYT85aPE762YWX/Qza6i4TLO/D+UE9Oy6vAHa5Y=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=VuWce2eXAxhXTOh2bfouHebkPjmPFyP7FEeVy9RCrGXdsemRTkSNFdl/ihOVK/K/IB3YaAn0K3rCC4XSX+RO5PdX7yloO5yUml0ryYReCzaED1UK2AMlSaAT7nbv4yCUZSGeVFs/TVxRNEy4d/wJ6dcOJar+Jx1R/a1KXc+iB7A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=kvyW3u/m; arc=none smtp.client-ip=209.85.208.195
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1729798740; c=relaxed/simple;
+	bh=O1dcXIyUjlAbIPr9ZrfWvPFBrJ1WmrTHcLovVsabp0Y=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=BkRrMNzQ0Y08We+ZN0ag7m8spmIG4Zrjl+nJDgq5h6b6FbTLSLr15pBh0CrexbnGiljVz5DzJd5l+JkZFJa63OyZvpujHTM7ztG8w24NDeRgR3E99ivSGS7yIU34rNbHjUd7eo+sziErv6NsZ3gt/hYqgezwwpbklDidwEWIT4Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=R8fs2ChI; arc=none smtp.client-ip=18.9.28.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="kvyW3u/m"
-Received: by mail-lj1-f195.google.com with SMTP id 38308e7fff4ca-2fb5111747cso13314401fa.2;
-        Thu, 24 Oct 2024 12:09:38 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1729796977; x=1730401777; darn=lists.linux.dev;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=6rLVkYT85aPE762YWX/Qza6i4TLO/D+UE9Oy6vAHa5Y=;
-        b=kvyW3u/m2Lx//G7KtgLuPwMglJ4/9DjpqOCuWT4NBL+4k7oE8NZyRQ7Tawj+xa5nxS
-         wyISjeIFTKheFUtB30aZmEURib4GJ//cABlhvdvmG3JAQ7Hdu0kCLhgroOpvAD1wj3/2
-         zxmUSmoXALtN77OrukFQ2bZBhe21qcF9QQNHyeJWKc59P92dLWbwXp9rXLYiVlEHCHZk
-         bbAiGTuTRtryytnDzz75KjUrSN9dDpAs7H0WwhQ1JMWQijgRYM0FdF1On7oJ1COcF/4d
-         65F0m3BVAuIzejHeI8K8WmVPLVXhtKTTIPZ/N+fTltBQnJmNHgE1anHEYSgQoXQkGb+T
-         UjpQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1729796977; x=1730401777;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=6rLVkYT85aPE762YWX/Qza6i4TLO/D+UE9Oy6vAHa5Y=;
-        b=G1s1ExNIcKghQtYqtfnAq4e/K1xClwwXBD+v+BmLR+naoYc2kHMBF1pUye5c8ZI3RG
-         cLPmwJyZo9eebmxIBxxZLI6AFqnOH38RKXBuJUKXRn3RTb74tP5IHRWlXxbE6TyLXww3
-         ctc4Ml637NX3Ub7jMK/p4sTSeV+6BJlkJE9k/TjcHqfMI5flALwl/XQO/2b3t7Xqxari
-         LzNQEJFelqwjqOc1x4fG3prmtGMCP3OW++hZicGJx/mvQO9/sZL+duYLcvgfc4/qv+AR
-         pj3u48ciTxe0DM3Ez+wm8hUd65ctmVRMuP9I3WBPXdFYow/LUfUii1k3CacvBnv3Elv/
-         IFLw==
-X-Forwarded-Encrypted: i=1; AJvYcCVG+3fW4Id2owOoJM4l0Kenn1r0HyX0OAk+Eqb4Ar/Mx5U0BYbm8bY0GepjBRvtSUA4+0hyA3TSww==@lists.linux.dev, AJvYcCWB9pg02jhjdMImycn0cLq7kqswWjU08jYXV3RkJv8TkiCBnD1S2KyecqzwVAKcvAxgvHo=@lists.linux.dev
-X-Gm-Message-State: AOJu0YzQb6fQ9VOoXDibo9bjDo7WG9+CIokfFWujyUqVLfJweyilj5ot
-	OqqFMNXc1M7X/hxqF+wwQqydOkAr2DSzAm0GTFoiXt/XiETqqNsp
-X-Google-Smtp-Source: AGHT+IGDZSxlCbsTRRDrlADY9xf/FeuikVNO0XKyrbvhvT68OG6hcNp/RMPI6u9Uj4MeELBy7mQJQQ==
-X-Received: by 2002:a2e:d09:0:b0:2fb:44ca:801c with SMTP id 38308e7fff4ca-2fc9d5e335cmr33424471fa.35.1729796976493;
-        Thu, 24 Oct 2024 12:09:36 -0700 (PDT)
-Received: from localhost.localdomain ([176.106.245.80])
-        by smtp.gmail.com with ESMTPSA id 38308e7fff4ca-2fb9ae12072sm14875321fa.110.2024.10.24.12.09.33
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 24 Oct 2024 12:09:35 -0700 (PDT)
-From: Russian Troll Factory No271241182262529470158368334307958208204522924631681408115158110636801578517908140749826211402494881312487421951176430536853 <vladimirputin693389@gmail.com>
-To: torvalds@linux-foundation.org
-Cc: aospan@netup.ru,
-	conor.dooley@microchip.com,
-	ddrokosov@sberdevices.ru,
-	dmaengine@vger.kernel.org,
-	dushistov@mail.ru,
-	fancer.lancer@gmail.com,
-	geert@linux-m68k.org,
-	gregkh@linuxfoundation.org,
-	hoan@os.amperecomputing.com,
-	ink@jurassic.park.msu.ru,
-	jeffbai@aosc.io,
-	kexybiscuit@aosc.io,
-	linux-alpha@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org,
-	linux-fpga@vger.kernel.org,
-	linux-gpio@vger.kernel.org,
-	linux-hwmon@vger.kernel.org,
-	linux-ide@vger.kernel.org,
-	linux-iio@vger.kernel.org,
-	linux-media@vger.kernel.org,
-	linux-mips@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org,
-	linux-spi@vger.kernel.org,
-	manivannan.sadhasivam@linaro.org,
-	mattst88@gmail.com,
-	netdev@vger.kernel.org,
-	nikita@trvn.ru,
-	ntb@lists.linux.dev,
-	patches@lists.linux.dev,
-	richard.henderson@linaro.org,
-	s.shtylyov@omp.ru,
-	serjk@netup.ru,
-	shc_work@mail.ru,
-	torvic9@mailbox.org,
-	tsbogend@alpha.franken.de,
-	v.georgiev@metrotek.ru,
-	wangyuli@uniontech.com,
-	wsa+renesas@sang-engineering.com,
-	xeb@mail.ru
-Subject: Magisk patch for android nox devices
-Date: Thu, 24 Oct 2024 22:09:31 +0300
-Message-ID: <20241024190931.14805-1-vladimirputin693389@gmail.com>
-X-Mailer: git-send-email 2.47.0
-In-Reply-To: <CAHk-=whNGNVnYHHSXUAsWds_MoZ-iEgRMQMxZZ0z-jY4uHT+Gg@mail.gmail.com>
-References: <CAHk-=whNGNVnYHHSXUAsWds_MoZ-iEgRMQMxZZ0z-jY4uHT+Gg@mail.gmail.com>
+	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="R8fs2ChI"
+Received: from cwcc.thunk.org (pool-173-48-115-113.bstnma.fios.verizon.net [173.48.115.113])
+	(authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 49OJbTWu001700
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Thu, 24 Oct 2024 15:37:30 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+	t=1729798665; bh=okMMcBGH5/TsuAYsZMeQd9odZhnIVG8nrgmmktEZgjE=;
+	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
+	b=R8fs2ChICzYzHoORWY0TGyuLGcRZ/iRnqCQWyYhJimwXjbUfRi6XceFJZA+gHyxuZ
+	 xL4W0b/efMryxORB6vle0p3gsXveCnGoUnS6pSgoGSyf34BLdVkHHBXH4SDDOq0HB0
+	 c6Sx7xktLa7DcOcuwU/fk4OvdTbarl5XsmV/RctOxT6/X8mQ7mILQVzDe7Q+8Y0XTt
+	 NOVgAyFRBJIjw8CY9yefNE9Ppn/+2FIG/ldE3grvR1/bDa3PIKPIzKr8rQj0Db2pXd
+	 Cbq47JZ/Is3uffqYmMQZDrCqDVJSBTYLo14jsArP9D9ddy06MwCGE3/D3nsaxMuX6L
+	 HG1osXMNtxVNQ==
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+	id 3A2FE15C0329; Thu, 24 Oct 2024 15:37:29 -0400 (EDT)
+Date: Thu, 24 Oct 2024 15:37:29 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: Hantong Chen <cxwdyx620@gmail.com>
+Cc: ajhalaney@gmail.com, allenbh@gmail.com, andrew@lunn.ch,
+        andriy.shevchenko@linux.intel.com, andy@kernel.org, arnd@arndb.de,
+        bhelgaas@google.com, bp@alien8.de, broonie@kernel.org,
+        cai.huoqing@linux.dev, dave.jiang@intel.com, davem@davemloft.net,
+        dlemoal@kernel.org, dmaengine@vger.kernel.org, dushistov@mail.ru,
+        fancer.lancer@gmail.com, geert@linux-m68k.org,
+        gregkh@linuxfoundation.org, ink@jurassic.park.msu.ru,
+        james.bottomley@hansenpartnership.com, jdmason@kudzu.us,
+        jiaxun.yang@flygoat.com, keguang.zhang@gmail.com,
+        kory.maincent@bootlin.com, krzk@kernel.org, kuba@kernel.org,
+        linux-edac@vger.kernel.org, linux-hwmon@vger.kernel.org,
+        linux-ide@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mips@vger.kernel.org, linux-pci@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org, linux-serial@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux@armlinux.org.uk, linux@roeck-us.net,
+        manivannan.sadhasivam@linaro.org, netdev@vger.kernel.org,
+        nikita.shubin@maquefel.me, nikita@trvn.ru, ntb@lists.linux.dev,
+        olteanv@gmail.com, pabeni@redhat.com, paulburton@kernel.org,
+        robh@kernel.org, s.shtylyov@omp.ru, sergio.paracuellos@gmail.com,
+        shc_work@mail.ru, siyanteng@loongson.cn, tsbogend@alpha.franken.de,
+        xeb@mail.ru, yoshihiro.shimoda.uh@renesas.com
+Subject: Re: linux: Goodbye from a Linux community volunteer
+Message-ID: <20241024193729.GP3204734@mit.edu>
+References: <20241024173504.GN3204734@mit.edu>
+ <20241024181917.1119-1-cxwdyx620@gmail.com>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20241024181917.1119-1-cxwdyx620@gmail.com>
 
+On Thu, Oct 24, 2024 at 06:19:16PM +0000, Hantong Chen wrote:
+> 
+> I wonder some of Ukrainian misiles and drones might also be using
+> the embedded Linux controllers, and why aren't there any sanctions.
+> This cannot be used as an excuse.
 
-Hi, the linux mailing list.
-You have asked me for your opinion. I present my opinion to you:
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
-LINUS TORVALDS IS A DICK
+The question of whether there are any sanctions is up to governments
+and legislatures of those countries that have enacted the relevant
+laws and regulations.  This is not up to the Linux development
+community.  But given that we are citizes of our respective countries,
+we are obliged to follow the laws of our countries --- and if we
+don't, we can be subject to enforcement actions of our countries'
+governments.  For someone who is a Chinese citizen, the same would
+apply to any rules and regulations promulgated by the Chinese
+government, no?
 
+The question of why a particular country has decided to sanction
+Russia and not Ukraine, and why a country has decided to support one
+country versus another, whether it's Germany, France, and Poland
+sending tanks and armored vehicles to Ukraine, or North Korea sending
+artillary shells to Russia, is not up to the Linux development
+commuity.  As individuals we may have our own opinions of the
+appropriatness one one versus another, but the fact remains that there
+are sanctions imposed on one set of countries, but not the against the
+other set.
 
+Hypothetically, if someone was a Russian Citizen, and there was a
+Russian Law forbidding them to provide technical assistance to US
+entities, then that person would be obliged to respect that law, and
+not send any patches to US-based open source projects.  Depending on
+how that law was worded, a Russian-based open source project might not
+be allowed to accept changes from US entities, and again, if you were
+a Russian open source project maintainer, you would be obliged to
+follow that law --- or maybe you would be thrown into a Russian jail.
+Whether you are a Russian patriot and are 100% behind the Russian law,
+or think that perhaps it's not the best policy, doesn't really matter;
+you are still obliged to follow the law one way or another.
 
+(Personally, my sympathies are entirely with Ukraine, but my opinions
+really don't matter for the purposes of this discussion, because I
+don't make my country's foreign policy.)
+
+> What LF and Linus done will inevitably create a climate of fear where
+> contributors and maintainers from the *Countries of Particular Concern*
+> feels endangered.
+
+In the ideal world, one country would't be invading another conutry,
+and we wouldn't have these sanctions regimes.  But they were not
+*caused* by the decisions of the LF and Linus.  The sanctions regimes
+were enacted by multiple countries' legal governmnts, and now the
+question is how can we best protect the Linux development comunity,
+the operators of web and git servers that are redistributing Linux
+kernel sources. etc.
+
+The Linux community may be an international open source project.  But
+it is composed of individuals who have to respect the rule of law of
+their individual country; and many countries have spoken quite clearly
+on this subject.
+
+Cheers,
+
+					- Ted
