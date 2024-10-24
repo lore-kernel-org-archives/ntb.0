@@ -1,135 +1,140 @@
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pj1-f48.google.com (mail-pj1-f48.google.com [209.85.216.48])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AC5FE1EC00F
-	for <ntb@lists.linux.dev>; Thu, 24 Oct 2024 19:38:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9B2CA147C91
+	for <ntb@lists.linux.dev>; Thu, 24 Oct 2024 19:47:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729798740; cv=none; b=VEFwLUpxlDJi5CO83AJvAQz0u0j0m+96GXeMzWEpRMduT+H1L6Ziec0NR+hp5d3FHeYd71oGMD10rWxGzWl1KqX8FO/UEcuAIaY7GksqziKThkyE8ZcQgGFKAQoFLppni6m/ahhapTqITnU30mj2BV60atRtmtLe//foRluO9gE=
+	t=1729799232; cv=none; b=oY5ifSi5mw3wE6P848sGCUceshIBHBZSC9l6qDNFunrb5xCX/PyiYvt6PWKOu/VMKXet8KqfQz/JU3Ig3Odh3VVeDUqmpmalR0KWavgb+6mrUFOeiT29COLYrfhZVoTvTsFgVFKH+iRESBPRUBraTLB5lDkXCxkyzC+sj+b8kds=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729798740; c=relaxed/simple;
-	bh=O1dcXIyUjlAbIPr9ZrfWvPFBrJ1WmrTHcLovVsabp0Y=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=BkRrMNzQ0Y08We+ZN0ag7m8spmIG4Zrjl+nJDgq5h6b6FbTLSLr15pBh0CrexbnGiljVz5DzJd5l+JkZFJa63OyZvpujHTM7ztG8w24NDeRgR3E99ivSGS7yIU34rNbHjUd7eo+sziErv6NsZ3gt/hYqgezwwpbklDidwEWIT4Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=R8fs2ChI; arc=none smtp.client-ip=18.9.28.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
+	s=arc-20240116; t=1729799232; c=relaxed/simple;
+	bh=lIMOl16Oc+gkmljkhXJFmkCvewir3f7Gjx9L1UYJb1g=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=SJVoo2mzBn3T/OKggFGQXk+tMh0g6cuDoFp1PIlSBPoRJ1JCPvmofhyU+HswAxyyONbzQeIUKvwUA6Z0r6mXe4faAjMwtoe04s3BC8f9I14laupZV5t/58oElSVocOvQ4TTwq5NJuYdAyHHeRvyQLUA0RsiTpb8hlQYIHXlrsp4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Q8eQ+DUl; arc=none smtp.client-ip=209.85.216.48
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="R8fs2ChI"
-Received: from cwcc.thunk.org (pool-173-48-115-113.bstnma.fios.verizon.net [173.48.115.113])
-	(authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 49OJbTWu001700
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 24 Oct 2024 15:37:30 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-	t=1729798665; bh=okMMcBGH5/TsuAYsZMeQd9odZhnIVG8nrgmmktEZgjE=;
-	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
-	b=R8fs2ChICzYzHoORWY0TGyuLGcRZ/iRnqCQWyYhJimwXjbUfRi6XceFJZA+gHyxuZ
-	 xL4W0b/efMryxORB6vle0p3gsXveCnGoUnS6pSgoGSyf34BLdVkHHBXH4SDDOq0HB0
-	 c6Sx7xktLa7DcOcuwU/fk4OvdTbarl5XsmV/RctOxT6/X8mQ7mILQVzDe7Q+8Y0XTt
-	 NOVgAyFRBJIjw8CY9yefNE9Ppn/+2FIG/ldE3grvR1/bDa3PIKPIzKr8rQj0Db2pXd
-	 Cbq47JZ/Is3uffqYmMQZDrCqDVJSBTYLo14jsArP9D9ddy06MwCGE3/D3nsaxMuX6L
-	 HG1osXMNtxVNQ==
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-	id 3A2FE15C0329; Thu, 24 Oct 2024 15:37:29 -0400 (EDT)
-Date: Thu, 24 Oct 2024 15:37:29 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-To: Hantong Chen <cxwdyx620@gmail.com>
-Cc: ajhalaney@gmail.com, allenbh@gmail.com, andrew@lunn.ch,
-        andriy.shevchenko@linux.intel.com, andy@kernel.org, arnd@arndb.de,
-        bhelgaas@google.com, bp@alien8.de, broonie@kernel.org,
-        cai.huoqing@linux.dev, dave.jiang@intel.com, davem@davemloft.net,
-        dlemoal@kernel.org, dmaengine@vger.kernel.org, dushistov@mail.ru,
-        fancer.lancer@gmail.com, geert@linux-m68k.org,
-        gregkh@linuxfoundation.org, ink@jurassic.park.msu.ru,
-        james.bottomley@hansenpartnership.com, jdmason@kudzu.us,
-        jiaxun.yang@flygoat.com, keguang.zhang@gmail.com,
-        kory.maincent@bootlin.com, krzk@kernel.org, kuba@kernel.org,
-        linux-edac@vger.kernel.org, linux-hwmon@vger.kernel.org,
-        linux-ide@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mips@vger.kernel.org, linux-pci@vger.kernel.org,
-        linux-renesas-soc@vger.kernel.org, linux-serial@vger.kernel.org,
-        linux-spi@vger.kernel.org, linux@armlinux.org.uk, linux@roeck-us.net,
-        manivannan.sadhasivam@linaro.org, netdev@vger.kernel.org,
-        nikita.shubin@maquefel.me, nikita@trvn.ru, ntb@lists.linux.dev,
-        olteanv@gmail.com, pabeni@redhat.com, paulburton@kernel.org,
-        robh@kernel.org, s.shtylyov@omp.ru, sergio.paracuellos@gmail.com,
-        shc_work@mail.ru, siyanteng@loongson.cn, tsbogend@alpha.franken.de,
-        xeb@mail.ru, yoshihiro.shimoda.uh@renesas.com
-Subject: Re: linux: Goodbye from a Linux community volunteer
-Message-ID: <20241024193729.GP3204734@mit.edu>
-References: <20241024173504.GN3204734@mit.edu>
- <20241024181917.1119-1-cxwdyx620@gmail.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Q8eQ+DUl"
+Received: by mail-pj1-f48.google.com with SMTP id 98e67ed59e1d1-2e5b1aaad96so218504a91.0
+        for <ntb@lists.linux.dev>; Thu, 24 Oct 2024 12:47:10 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1729799230; x=1730404030; darn=lists.linux.dev;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=lIMOl16Oc+gkmljkhXJFmkCvewir3f7Gjx9L1UYJb1g=;
+        b=Q8eQ+DUlROaZLguZjts4IAy96pzXgDmXlbFpZ9qb8de8ymT88eA2b6cR5mnCQOZCHb
+         zEXlO1cCeavOR0XsIAkqVDRu37dwE5kS4d5MNhys9t8ziqZQNO1L8Krm9NoFP+PKW0f1
+         8KFYbm77n8mQnWmpziLtdfsavENWpeAvicZqgJ23EiEGybE40jQ6IrI48u9yJUVdDVup
+         TV2+AXfcTTC1QU6QY8WFWzIt44uaKWXySGoFaJWfJQ1YMgWDnOG0y3CWSMYxQYcSYb/h
+         +hY9HQmfRgGpD0s+g1AqhIZq9pTph12J0BDJ2G5otx+Q1qEYGKW7mP8PIciKe4Me+kkV
+         xjkA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1729799230; x=1730404030;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=lIMOl16Oc+gkmljkhXJFmkCvewir3f7Gjx9L1UYJb1g=;
+        b=oQZl452nJzlTm5kGduC8HbdBuErr3s1C5sNqzjYhHjnqklkvvntFkmqvPv7PLHMvQd
+         oYTExhKde8npy1EmHDEdlwqnWTNWBh6v+PDWucyhFSGsH1m49beIT4dfAoUCG2ksxXBL
+         hfP6vfU++iDidM5WSxQHXIKbSG3XZTWgWjnTPCuSPQ4poNQsIwSwYMvsFqaQygKclPiS
+         tE1yF3EOkAo6CBkLrgYnPjUrQr9q2BS+RjQhwpgi9rRsg4gEScMUY2I0rDXmJJfi9n1Y
+         DL5FicFhbc+TL+jPvriKHUZD60XKZ5wQWkqqi9noeN4PAA84F1JTtcs6qWfdzXxyPAuq
+         vQwA==
+X-Forwarded-Encrypted: i=1; AJvYcCXTyiKuJjKmxKWEoVymGnopLBT+vn8TPkn+sOah0PiUKLwEblyLPfCsWZYTDBMK+ukN/oA=@lists.linux.dev
+X-Gm-Message-State: AOJu0YzfFHIxHUVHCBZQmRvZRv+evGqASt0C1FDuQYtXmoCbduCa59M8
+	3xE8wdFExyCzdh/eqzYSAZnANj/IIxqTmU5PG3uf3fCZ2tVsxs2YCNjp1mQnSbQOk6AXyxq6iE9
+	nkHmUWVSMnWbGAp3CJ3h38tBA6Lc=
+X-Google-Smtp-Source: AGHT+IGNwTEvTbFWLMloYKQZCr/zKAp0DdNKMjGQfdnRQjfPBj0mdcky5TmmQt/Pc5lbMRaat58vPrZb6iSfoQeDocM=
+X-Received: by 2002:a17:90a:474f:b0:2e2:9026:8bee with SMTP id
+ 98e67ed59e1d1-2e76b84f393mr3469899a91.9.1729799229802; Thu, 24 Oct 2024
+ 12:47:09 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20241024181917.1119-1-cxwdyx620@gmail.com>
+References: <2m53bmuzemamzc4jzk2bj7tli22ruaaqqe34a2shtdtqrd52hp@alifh66en3rj>
+ <e7d548a7fc835f9f3c9cb2e5ed97dfdfa164813f.camel@HansenPartnership.com>
+ <6beb4070-1946-4387-bd0e-34608a76b19e@typeblog.net> <CALtW_agj1rurb3DRrPd9o2mkfku5fq_M3CEKY5sW+Zz7shKYHA@mail.gmail.com>
+ <ZxqK75WdFBod0rZ9@smile.fi.intel.com>
+In-Reply-To: <ZxqK75WdFBod0rZ9@smile.fi.intel.com>
+From: =?UTF-8?Q?Dragan_Milivojevi=C4=87?= <d.milivojevic@gmail.com>
+Date: Thu, 24 Oct 2024 21:46:58 +0200
+Message-ID: <CALtW_ajKAYYwYVGnEArPWz_XaCkEiMFwpoCtzeiO1OLbAk77Sw@mail.gmail.com>
+Subject: Re: linux: Goodbye from a Linux community volunteer
+To: Andy Shevchenko <andy@kernel.org>
+Cc: Peter Cai <peter@typeblog.net>, 
+	James Bottomley <James.Bottomley@hansenpartnership.com>, 
+	Serge Semin <fancer.lancer@gmail.com>, Jon Mason <jdmason@kudzu.us>, 
+	Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, ntb@lists.linux.dev, 
+	Kory Maincent <kory.maincent@bootlin.com>, Cai Huoqing <cai.huoqing@linux.dev>, 
+	dmaengine@vger.kernel.org, Mark Brown <broonie@kernel.org>, linux-spi@vger.kernel.org, 
+	Damien Le Moal <dlemoal@kernel.org>, linux-ide@vger.kernel.org, 
+	Paul Burton <paulburton@kernel.org>, Thomas Bogendoerfer <tsbogend@alpha.franken.de>, 
+	Arnd Bergmann <arnd@arndb.de>, Jiaxun Yang <jiaxun.yang@flygoat.com>, linux-mips@vger.kernel.org, 
+	Bjorn Helgaas <bhelgaas@google.com>, 
+	Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>, 
+	Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-pci@vger.kernel.org, 
+	"David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>, 
+	Andrew Lunn <andrew@lunn.ch>, Russell King <linux@armlinux.org.uk>, 
+	Vladimir Oltean <olteanv@gmail.com>, Keguang Zhang <keguang.zhang@gmail.com>, 
+	Yanteng Si <siyanteng@loongson.cn>, netdev@vger.kernel.org, 
+	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk@kernel.org>, Guenter Roeck <linux@roeck-us.net>, 
+	linux-hwmon@vger.kernel.org, Borislav Petkov <bp@alien8.de>, linux-edac@vger.kernel.org, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-serial@vger.kernel.org, 
+	Andrew Halaney <ajhalaney@gmail.com>, Nikita Travkin <nikita@trvn.ru>, 
+	Ivan Kokshaysky <ink@jurassic.park.msu.ru>, Alexander Shiyan <shc_work@mail.ru>, Dmitry Kozlov <xeb@mail.ru>, 
+	Sergey Shtylyov <s.shtylyov@omp.ru>, Evgeniy Dushistov <dushistov@mail.ru>, 
+	Geert Uytterhoeven <geert@linux-m68k.org>, Sergio Paracuellos <sergio.paracuellos@gmail.com>, 
+	Nikita Shubin <nikita.shubin@maquefel.me>, linux-renesas-soc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, Kexy Biscuit <kexybiscuit@aosc.io>, jeffbai@aosc.io, 
+	Linus Torvalds <torvalds@linux-foundation.org>
+Content-Type: text/plain; charset="UTF-8"
 
-On Thu, Oct 24, 2024 at 06:19:16PM +0000, Hantong Chen wrote:
-> 
-> I wonder some of Ukrainian misiles and drones might also be using
-> the embedded Linux controllers, and why aren't there any sanctions.
-> This cannot be used as an excuse.
+> Yeah, with my hat of the person whose home town is under (Russian) attack for
+> the 10+ years (don't be surprised, please, the war lasts more than a decade
+> already) on I am fully understand Linus' arguments about history and being not
+> very friendly about Russians.
 
-The question of whether there are any sanctions is up to governments
-and legislatures of those countries that have enacted the relevant
-laws and regulations.  This is not up to the Linux development
-community.  But given that we are citizes of our respective countries,
-we are obliged to follow the laws of our countries --- and if we
-don't, we can be subject to enforcement actions of our countries'
-governments.  For someone who is a Chinese citizen, the same would
-apply to any rules and regulations promulgated by the Chinese
-government, no?
+How about your hat off to the people in the Donbas,
+~12K of them that had died from Ukrainian artillery fire,
+that were under imminent threat of being overrun by
+the Ukrainian forces in February 2022? Are you going
+to scream about Russian propaganda when I link
+the OSCE reports about a 10 fold increase in attacks
+at that same time?
 
-The question of why a particular country has decided to sanction
-Russia and not Ukraine, and why a country has decided to support one
-country versus another, whether it's Germany, France, and Poland
-sending tanks and armored vehicles to Ukraine, or North Korea sending
-artillary shells to Russia, is not up to the Linux development
-commuity.  As individuals we may have our own opinions of the
-appropriatness one one versus another, but the fact remains that there
-are sanctions imposed on one set of countries, but not the against the
-other set.
+BTW can I be racist towards Germans and Croats since
+their ancestors exterminated my kin in their death camps?
 
-Hypothetically, if someone was a Russian Citizen, and there was a
-Russian Law forbidding them to provide technical assistance to US
-entities, then that person would be obliged to respect that law, and
-not send any patches to US-based open source projects.  Depending on
-how that law was worded, a Russian-based open source project might not
-be allowed to accept changes from US entities, and again, if you were
-a Russian open source project maintainer, you would be obliged to
-follow that law --- or maybe you would be thrown into a Russian jail.
-Whether you are a Russian patriot and are 100% behind the Russian law,
-or think that perhaps it's not the best policy, doesn't really matter;
-you are still obliged to follow the law one way or another.
+>
+> As you showed above seems like you also will benefit from digging to the
+> history a bit. The nice questions to be answered (but not limited to) are:
+> 1) What had happened to Finland in 1939?
+> 2) Has Finland territory been changed (occupied by another country) in time?
+> 2a) (bonus Q) How many times and by which countries / empires?
+> 3) (speaking of WW II) How many Jews were killed by Finland?
 
-(Personally, my sympathies are entirely with Ukraine, but my opinions
-really don't matter for the purposes of this discussion, because I
-don't make my country's foreign policy.)
+Maybe you should look up the Finnish concentration camps
+ (they called them work camps), that had death percentages
+similar to some of Nazi death camps, where Russians, Roma,
+Serbs and plenty of other E.Europeans perished, including children?
 
-> What LF and Linus done will inevitably create a climate of fear where
-> contributors and maintainers from the *Countries of Particular Concern*
-> feels endangered.
+The fact that they fought alongside Nazis and that they were allowed
+to remain independent (and neutral) after the war is, I hope, common
+knowledge.
 
-In the ideal world, one country would't be invading another conutry,
-and we wouldn't have these sanctions regimes.  But they were not
-*caused* by the decisions of the LF and Linus.  The sanctions regimes
-were enacted by multiple countries' legal governmnts, and now the
-question is how can we best protect the Linux development comunity,
-the operators of web and git servers that are redistributing Linux
-kernel sources. etc.
+How TF in this day and age is it considered acceptable to be openly
+racist towards some people
+because you hold historical grievances from 70 years ago?
 
-The Linux community may be an international open source project.  But
-it is composed of individuals who have to respect the rule of law of
-their individual country; and many countries have spoken quite clearly
-on this subject.
+And for those of you doubting my words, here is a test: Replace the
+statements from various
+prominent figures, including USA officials, about Russians and Russia
+with Jews and Israel and post
+them on your social media accounts. See how fast you will be denounced
+as a racist.
 
-Cheers,
-
-					- Ted
+To paraphrase Noam Chomsky: Approved racism.
