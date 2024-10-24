@@ -1,153 +1,153 @@
-Received: from mail-pl1-f171.google.com (mail-pl1-f171.google.com [209.85.214.171])
+Received: from mail-pj1-f41.google.com (mail-pj1-f41.google.com [209.85.216.41])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7F6661F8191;
-	Thu, 24 Oct 2024 17:18:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BD78D1FBF48
+	for <ntb@lists.linux.dev>; Thu, 24 Oct 2024 17:18:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729790336; cv=none; b=eLnfRRAG1cqr1A0q1xl0vUDSioBZk/+OYBf4xh5A2x9YvJ2VBhEhkfd40qXT6HyRxQg5GzWYqDWz/rpNYxdHNN80JDWOcH5ZNbogjb6p7ABuHftFKLnOAGRJ7cdbz3qniS/CRCIYAZeTOgSlmcCsueFtMFQ8EdDJIACR0XcDhzY=
+	t=1729790338; cv=none; b=sxhlDvjEIr1nRaJXOmqHT1ySyOgIJwF3lsrp9DuiFFfgCTeIkjL2AJAb435UgCeEJdArN7E+wlvHg3qgA0KonLNojjZkJ4ba3BMCK911acz0NL6xNxJWBp/zJK8xPCxwcQJ+XYCJv3PviQGRpPfNdrh5ow6WuUyG6dx3eYAidFY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729790336; c=relaxed/simple;
-	bh=CwW7xf5pVxswj8CHaH7OyHsgU59O8BXxIvlim+vHjF8=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=b2crF3romaYhWalRr0/tL3VoEjk7WsA3IpyrYVDohw2LUusnWlmatiFK86zZYpclV+zuT1Td/ztAfL2ahfqVwbBR3vPmxatq8ISZ3m8z/vxtLBkNWD6If6tRzf1wcXni/uK4G05nEMp0aFFH5Q8HXsDwu6V/W6TDAsFVFRRhUX4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=roeck-us.net; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=h02TUfiW; arc=none smtp.client-ip=209.85.214.171
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=roeck-us.net
+	s=arc-20240116; t=1729790338; c=relaxed/simple;
+	bh=nTVRYLsAvfk/lLXdgAe/3h3LsHu4QnTJysO1smFIuPY=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=rI+5xd8lyVenAIe0yasEvq6UVvEcrfLKfyCmygcbXZruvMmeURc8NfvZKcfB+euCyK3hwGcKyPEZRe1Lc8nGG8NKRetdnRJhPT7Elh+Zxhyn/fX+pJXaJd7ku6mEtn4FvDZDBOPNnONSRbERffEP1K4zSuYKYaq/q3GlEfBN1W0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=VHlzZelW; arc=none smtp.client-ip=209.85.216.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="h02TUfiW"
-Received: by mail-pl1-f171.google.com with SMTP id d9443c01a7336-20ca1b6a80aso11433315ad.2;
-        Thu, 24 Oct 2024 10:18:54 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="VHlzZelW"
+Received: by mail-pj1-f41.google.com with SMTP id 98e67ed59e1d1-2e2af4dca5cso220648a91.3
+        for <ntb@lists.linux.dev>; Thu, 24 Oct 2024 10:18:56 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1729790334; x=1730395134; darn=lists.linux.dev;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:sender:from:to:cc:subject:date:message-id:reply-to;
-        bh=MUnL715/3LxfsngyI3qhOjpz6/8IYCMLAIoj+2ZIeFg=;
-        b=h02TUfiWZPfW3hxU2lN8rbIhpVlYTZpAB9d6IJO1QJo8RNKmQYZe5y2BbrjaPbICE/
-         VAO3srMeOVbKN6M9mVoIOeZsjrCuTj0EH2Xyy3gf25I7SAr+/1wrMI7TyXil3wO7y5hA
-         RxRlS0kxOxtksDCpOmNK4cSw/g/Kd0t48/agppmWzQYNbTYdc4wob/GaVqYDh5GAp1pa
-         P9tduj7CLbMJR5S5lWCbR2YPrNMwDwDejYziexTuDl/bU4r8ObN3Vbai3E6IBqPP5wK0
-         M5+cYmqNhooXkwtL+g4yJ9pDG4sbGxweY+Yc1Qb0r89lFFNFJZp69rNiRPBky/JbS3BW
-         XvHw==
+        d=gmail.com; s=20230601; t=1729790336; x=1730395136; darn=lists.linux.dev;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=nTVRYLsAvfk/lLXdgAe/3h3LsHu4QnTJysO1smFIuPY=;
+        b=VHlzZelWroXmtx6Ffw1wj2fZwnKGUYurEWfLWR1li4ACnZoD9F/GYvrN2XOiLUNFEn
+         +BQFe2gUAsCaQnSMDFueSKXTSq2Zf/mkBj9Cr7gtW9HpAJFP7usCmV1bu+vnZGg6U78B
+         gw57ywCKRvSrkS1FdF3MD7GpXcgVCdnwYMSSFPoYf++TxSkfBrA2G3eCo9mQHqkbTr7c
+         nPlJzcXI3sOZjbtV5kyprLRPtxmfyWDv2gF2FkM7DyRtKNXPW3RsdX4y/6qDkjAoypaE
+         rAveE7TH146lhYrgFQsc0sf/G7daRApHkQUmbGy84ITBq45CRpAOshLTeLdsM0GHYVLA
+         79JA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1729790334; x=1730395134;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:sender:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=MUnL715/3LxfsngyI3qhOjpz6/8IYCMLAIoj+2ZIeFg=;
-        b=UiVqWrjGdSQW8h1+Rm0RgnM4QjF8Qm3KhNTqR1oYQlj6iuPdPYRQFeelaVg76828f8
-         /mt5M1ZpCoaoDQusDcHTU20C7gwZINnMKZYctjkueVu3T70VLMzgY6olbPd0NhWOAQi1
-         vEwx1WQ9zlqmborVdq6A0wNmU3h+jEquFJDG3QpM3GeNoLdI8Fi6nQkZQNcJE0WiHWtc
-         PHK6guXaDIkJDGso9xt2QT+rqtU/+Inov1GQvEwpUP48VMSkL3o5q5SaXlon8ayuu4xy
-         sAXmzEsZNIqL+2NtKf2tckb1lWxx7iQhMb9TZXh5grfaRonq7DwQ/E9jza5B5OXz5ziY
-         Vh6w==
-X-Forwarded-Encrypted: i=1; AJvYcCW8YVqYySubXbyZQkh6ZIghlTfc2dE0rcbAJ/Ott2WAMXB2fsVZjiN/xae5lGAbPz28k5Y=@lists.linux.dev, AJvYcCWmCiMXKwX3nZ08Wl55clkuz+oxH37WRi6Auc/tMJp2vUowxpavrg3Il6VLvpFehaaMZNZlgxlMNQ==@lists.linux.dev
-X-Gm-Message-State: AOJu0Yw8hItg+slw55RuoNx3e4wD4BvwQh88/TF7mNqVdEmEBdOCCbqu
-	d3BsPUrIvveK9H1WQrtY2VHymYOZVheNf4mdMUU03z5deonGcWVa
-X-Google-Smtp-Source: AGHT+IEKCAZFjKxo/Nyr/QfETLSbnXhkrol1AjduntpjOaMi5BDqrJIxxdVcVIotS2EHx7dz+GdLtg==
-X-Received: by 2002:a17:902:da8a:b0:205:8275:768 with SMTP id d9443c01a7336-20fa9e6990amr87460475ad.21.1729790333794;
-        Thu, 24 Oct 2024 10:18:53 -0700 (PDT)
-Received: from ?IPV6:2600:1700:e321:62f0:329c:23ff:fee3:9d7c? ([2600:1700:e321:62f0:329c:23ff:fee3:9d7c])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-20e7f12ea2csm74665655ad.62.2024.10.24.10.18.50
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 24 Oct 2024 10:18:53 -0700 (PDT)
-Sender: Guenter Roeck <groeck7@gmail.com>
-Message-ID: <68e35542-d360-4a37-9ff1-16fe76594b6f@roeck-us.net>
-Date: Thu, 24 Oct 2024 10:18:49 -0700
+        d=1e100.net; s=20230601; t=1729790336; x=1730395136;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=nTVRYLsAvfk/lLXdgAe/3h3LsHu4QnTJysO1smFIuPY=;
+        b=cYi7/7dIh/bHNP+pLJPZAmpY12rS6Nl85srZcTUgP9D9NsOcFJRrpFK7tYy3OQD5OC
+         7yVK9kc+jE4vURNAdWImQ37EUAVZ/1NJqVfSFM/r2ob1jwiTfeolPzAmhTpbky2bSEmU
+         MKqZMnTANlLQMAi6Sl88Q9OjCmHPYf6PJWsr0D5av3I5jywtyb7fumDOPpMUzo5HoCMB
+         UpZEC3gAWb0s78XzuGOaNvJAWccpfIJf32RnoKzKFXm3ZASEzEwXEzM3oaY+gK8GTdFX
+         UJViyC26tqyWwqb2r8cp4W8zI2jqEhvulSxQPRLixUdOGlTY87/aznfX4Jr/7Gcyrt3L
+         f6sg==
+X-Forwarded-Encrypted: i=1; AJvYcCUftbJ1PTYKea40ocnULLYRYExG66Qox2VKylfBwoyT8CiWbyqjRb0MIo8LhMna6gGB7zA=@lists.linux.dev
+X-Gm-Message-State: AOJu0YwnzHtXHHzD49QRnDOQeZXJMG8zer5k+ERk2JqlokPRhYaQ1Eg0
+	plaHBHTEShfVk5av+lFwrmOqjfph4WMyYt7vWjqHNYkxhiKIoAyo29v9UXAOSXZ6TenZUV48i2r
+	kDAohqdjHoj8aYa7Hmqht5vpmjyk=
+X-Google-Smtp-Source: AGHT+IHlG1XLwcp7JbpxEPhwJbRhJPhkOVwX1+UQqAPGsdjFxfa26tBKYAcI0RMZCzFwbNjxjrRmsEC+sV+YOtvF3B8=
+X-Received: by 2002:a17:90b:4a83:b0:2e2:e929:e8d2 with SMTP id
+ 98e67ed59e1d1-2e76b6c3194mr3216467a91.4.1729790335973; Thu, 24 Oct 2024
+ 10:18:55 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] Revert "MAINTAINERS: Remove some entries due to various
- compliance requirements."
-To: Ivan Epifanov <isage.dna@gmail.com>
-Cc: andriy.shevchenko@intel.com, aospan@netup.ru, conor.dooley@microchip.com,
- ddrokosov@sberdevices.ru, dmaengine@vger.kernel.org, dushistov@mail.ru,
- fancer.lancer@gmail.com, geert@linux-m68k.org, gregkh@linuxfoundation.org,
- hoan@os.amperecomputing.com, ink@jurassic.park.msu.ru, jeffbai@aosc.io,
- kexybiscuit@aosc.io, linux-alpha@vger.kernel.org,
- linux-arm-kernel@lists.infradead.org, linux-fpga@vger.kernel.org,
- linux-gpio@vger.kernel.org, linux-hwmon@vger.kernel.org,
- linux-ide@vger.kernel.org, linux-iio@vger.kernel.org,
- linux-media@vger.kernel.org, linux-mips@vger.kernel.org,
- linux-renesas-soc@vger.kernel.org, linux-spi@vger.kernel.org,
- manivannan.sadhasivam@linaro.org, mattst88@gmail.com,
- netdev@vger.kernel.org, nikita@trvn.ru, ntb@lists.linux.dev,
- patches@lists.linux.dev, richard.henderson@linaro.org, s.shtylyov@omp.ru,
- serjk@netup.ru, shc_work@mail.ru, torvalds@linux-foundation.org,
- torvic9@mailbox.org, tsbogend@alpha.franken.de, v.georgiev@metrotek.ru,
- wangyuli@uniontech.com, wsa+renesas@sang-engineering.com, xeb@mail.ru
-References: <61a622bd-7597-45e2-96d9-9cba02fba407@roeck-us.net>
- <20241024171301.241949-1-isage.dna@gmail.com>
-Content-Language: en-US
-From: Guenter Roeck <linux@roeck-us.net>
-Autocrypt: addr=linux@roeck-us.net; keydata=
- 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
- mDW4+i+XlNFUPUYMrIKi9joBhu18ssf5i5Q=
-In-Reply-To: <20241024171301.241949-1-isage.dna@gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+References: <2m53bmuzemamzc4jzk2bj7tli22ruaaqqe34a2shtdtqrd52hp@alifh66en3rj>
+ <e7d548a7fc835f9f3c9cb2e5ed97dfdfa164813f.camel@HansenPartnership.com> <6beb4070-1946-4387-bd0e-34608a76b19e@typeblog.net>
+In-Reply-To: <6beb4070-1946-4387-bd0e-34608a76b19e@typeblog.net>
+From: =?UTF-8?Q?Dragan_Milivojevi=C4=87?= <d.milivojevic@gmail.com>
+Date: Thu, 24 Oct 2024 19:18:44 +0200
+Message-ID: <CALtW_agj1rurb3DRrPd9o2mkfku5fq_M3CEKY5sW+Zz7shKYHA@mail.gmail.com>
+Subject: Re: linux: Goodbye from a Linux community volunteer
+To: Peter Cai <peter@typeblog.net>
+Cc: James Bottomley <James.Bottomley@hansenpartnership.com>, 
+	Serge Semin <fancer.lancer@gmail.com>, Jon Mason <jdmason@kudzu.us>, 
+	Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, ntb@lists.linux.dev, 
+	Andy Shevchenko <andy@kernel.org>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, 
+	Kory Maincent <kory.maincent@bootlin.com>, Cai Huoqing <cai.huoqing@linux.dev>, 
+	dmaengine@vger.kernel.org, Mark Brown <broonie@kernel.org>, linux-spi@vger.kernel.org, 
+	Damien Le Moal <dlemoal@kernel.org>, linux-ide@vger.kernel.org, 
+	Paul Burton <paulburton@kernel.org>, Thomas Bogendoerfer <tsbogend@alpha.franken.de>, 
+	Arnd Bergmann <arnd@arndb.de>, Jiaxun Yang <jiaxun.yang@flygoat.com>, linux-mips@vger.kernel.org, 
+	Bjorn Helgaas <bhelgaas@google.com>, 
+	Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>, 
+	Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-pci@vger.kernel.org, 
+	"David S. Miller" <davem@davemloft.net>, Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>, 
+	Andrew Lunn <andrew@lunn.ch>, Russell King <linux@armlinux.org.uk>, 
+	Vladimir Oltean <olteanv@gmail.com>, Keguang Zhang <keguang.zhang@gmail.com>, 
+	Yanteng Si <siyanteng@loongson.cn>, netdev@vger.kernel.org, 
+	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk@kernel.org>, Guenter Roeck <linux@roeck-us.net>, 
+	linux-hwmon@vger.kernel.org, Borislav Petkov <bp@alien8.de>, linux-edac@vger.kernel.org, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-serial@vger.kernel.org, 
+	Andrew Halaney <ajhalaney@gmail.com>, Nikita Travkin <nikita@trvn.ru>, 
+	Ivan Kokshaysky <ink@jurassic.park.msu.ru>, Alexander Shiyan <shc_work@mail.ru>, Dmitry Kozlov <xeb@mail.ru>, 
+	Sergey Shtylyov <s.shtylyov@omp.ru>, Evgeniy Dushistov <dushistov@mail.ru>, 
+	Geert Uytterhoeven <geert@linux-m68k.org>, Sergio Paracuellos <sergio.paracuellos@gmail.com>, 
+	Nikita Shubin <nikita.shubin@maquefel.me>, linux-renesas-soc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, Kexy Biscuit <kexybiscuit@aosc.io>, jeffbai@aosc.io, 
+	Linus Torvalds <torvalds@linux-foundation.org>
+Content-Type: text/plain; charset="UTF-8"
 
-On 10/24/24 10:13, Ivan Epifanov wrote:
->> I really don't want to get involved, but this misinformation really goes too far.
-> 
-> Then don't.
-> 
->> https://en.wikipedia.org/wiki/Finland_in_World_War_II
-> 
->> provides context. And it does sound familiar. Turns out the Finnish defended
->> themselves against invasion from the Soviet Union. Sounds familiar ? Guess it's
->> the same as those alleged Nazis in Ukraine nowadays.
-> 
-> Especially if you can't read beyond few pararaphs.
-> 
+On Thu, 24 Oct 2024 at 18:31, Peter Cai <peter@typeblog.net> wrote:
+>
+> Hi James,
+>
+> Thanks for your clarification. This sort of non-provocative
+> clarifications of the regulations you need to comply to has always been
+> what the community wants to see. _This_ should have been the first
+> official statement when anyone raised the concern, instead of Greg's
+> attempt to "defuse" the situation over private correspondence, or Linus
+> Torvald's outright defamation and accusing anyone who dares to disagree
+> of being a "Russian troll". This is not even to mention the _complete
+> ignorance_ and arrogance shown by his statement on what sending a revert
+> patch means.
+>
+> With sanctions in place, there is no reasonable person who will demand
+> the LF or the Linux Kernel maintainers to do otherwise. However, as
+> someone who does rely on Linux for daily work, and as someone who has
+> contributed to the Linux project and its community, I think seeing the
+> following should be the minimum:
+>
+> 1. Linus Torvalds (+Cc) send an apology letter to **everyone** who he
+> accused of being a Russian troll;
+> 2. Linus Torvalds need to **unconditionally retract** his personal
+> attack on Kexy Biscuit, the person who sent the revert patch in protest
+> (+Cc), and acknowledge that people who work with AOSC.io aren't
+> "state-sponsored paid actors";
+> 3. This type of statement should be included somewhere public as soon as
+> practically possible should sanction compliance affect kernel
+> development again in the future;
+> 4. No personal attacks should be allowed based on tinfoil-hat reasoning.
+>
+> Thanks,
+> Peter.
+>
 
-Yes, everyone should do that, and I did.
+That list is great but it will never happen, Linus is high on his
+western supremacy complex.
+Most of the anger (including mine) comes from people who have just
+realized what kind of a person Linus is.
 
-Guenter
+He has exposed his lack of morals and inability of self reflection
+with the trolls comment.
+He has exposed his ignorance, coming from his state media
+brainwashing, with the media comment.
+He has exposed his ignorance, arrogance and blatant Russophobia with
+his "I'm Finish" comment, as if
+Finland has any high moral ground when it comes to WWII (for the
+historically ignorant: Finnish "concentration camps").
 
+And this is not over, there are plenty of other countries and entities
+on the official USA enemies list.
+The real majority of the world, all of us outside the USA and their
+vassal states, their so called "free world" (one maintainer
+actually used that blatant display of American supremacy in a commit
+removing Huawei maintainers) are looking at this
+with sadness and anger.
+The Cold War 2.0 has came to the Linux world and as in the first one,
+the Iron curtain has been erected
+by those that claim moral high ground with their false values of
+freedom, openes, merit etc.
