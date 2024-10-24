@@ -1,116 +1,123 @@
-Received: from mail-lf1-f52.google.com (mail-lf1-f52.google.com [209.85.167.52])
+Received: from mail-lf1-f66.google.com (mail-lf1-f66.google.com [209.85.167.66])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3D173208968
-	for <ntb@lists.linux.dev>; Thu, 24 Oct 2024 18:52:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 489EB20C02D;
+	Thu, 24 Oct 2024 18:53:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.66
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729795975; cv=none; b=C91ij7zDK9SCG/sneTtDwokOoOTJLOQ/H9CVc8J/BSmwAtu4mYbg8V0p7zoGm1WjJBQ0sY+ih1aKj7h5HgR/goYBCWZM0+pkpZEb2xOiGmyvjqFI0uyWq/EkGzLYeTrvSVRvecXLVYeyAk4Sm7ioKSwTCcq1QacC4QstCvuuQHw=
+	t=1729796005; cv=none; b=LwUe1fFqS9kzCqLPDWAKFetRVI1puTdOu17xc8lt7jdm0IseCmS93ghJzw32IjwiLC0Gk8PBfL0w0KWXvV4GR7MAQzhu/BiUEpWCp3OD+vBYz7BLRJRcEZbW8f8y9n20lY2Y65tMmDUWj1cTDsXJOmTyIwefgIgVJn0NNlksi+g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729795975; c=relaxed/simple;
-	bh=r74jz5+bt7Kz/XerhmjUfwWYh22pkCkRhE9To457D2o=;
+	s=arc-20240116; t=1729796005; c=relaxed/simple;
+	bh=6rLVkYT85aPE762YWX/Qza6i4TLO/D+UE9Oy6vAHa5Y=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=SE63dyp9nxMJev/C+tg9E0Tvq0yaiNEmQVVz+CXUDyEUT/3P416GZYfQLd78A7+vtxAxSGFXHkoyLONGsfNuaTAz4+niU9o6+k3474gF6ygaQddhSNQqIdBbhe6BngJiIq8mo+SHyoT6xf+oZz6hnttck8rIdj1c5hCP/7Lmjf0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=L2e2IHwm; arc=none smtp.client-ip=209.85.167.52
+	 MIME-Version; b=VHeNI+DCouEnJv9TL/1dWfZhHHXlxH2FZ2wmYE0/kX4jMJBqbUSGtmvJ4UgjLw8wgzwts0Vs+ux0Vo8HCbpO/wbKuQUyrEr0iE4Ojc4a7GZUbkJLtTCIdvewVmELdklszUXQKTFoa76Ca6EOqja1M9RvMnju2IQx1jHnCe1nZQw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=i8QPqT95; arc=none smtp.client-ip=209.85.167.66
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="L2e2IHwm"
-Received: by mail-lf1-f52.google.com with SMTP id 2adb3069b0e04-539983beb19so1687381e87.3
-        for <ntb@lists.linux.dev>; Thu, 24 Oct 2024 11:52:52 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="i8QPqT95"
+Received: by mail-lf1-f66.google.com with SMTP id 2adb3069b0e04-53a097aa3daso1133638e87.1;
+        Thu, 24 Oct 2024 11:53:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1729795971; x=1730400771; darn=lists.linux.dev;
+        d=gmail.com; s=20230601; t=1729796001; x=1730400801; darn=lists.linux.dev;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=r74jz5+bt7Kz/XerhmjUfwWYh22pkCkRhE9To457D2o=;
-        b=L2e2IHwmRsWY8Sdrwuw2hVAaSFbzx85SUUJ7KErEn6qUD0NJEseNFBNY+02AeqeTw5
-         Echz9AnlkyKQuV5r92DK0zc5AFeVRUYm0gzOxfz8IVl6Ups9JGpntHv+VgcqaDvoUYa5
-         XAdRpS4jXlKyqtOgvtFm1DaGLzH9mCJQKukgQ/A0ecQtBh2/DGgY1VH5uTimJvvnpKMr
-         8e96+1kVz4FvImwPe0FJzuDjQkixEHogxfbHyJyFbkVfUpsZee3OJrnpGgOF3L1sv+dE
-         O0at5u5LNTV017UsyFv4mgGhZ8sdoD+D+/Z+EZqSoZTFtV/BSObJdnEkuQmSbRPjTahN
-         5ttA==
+        bh=6rLVkYT85aPE762YWX/Qza6i4TLO/D+UE9Oy6vAHa5Y=;
+        b=i8QPqT95MxHJ940QeFizgWz1sVhQr164+x2rytrNZVFOr88CPW30Nn9gl7sSGrSkSK
+         Izi9hhGBuaYuDPkRJQnBqT6oo1TIWK9YtVEGAi4fBXNIAYu/Hlat1WRWDvjUYMPATADq
+         lpDEu3/kbpW1rPA+R0KgKpvfSAUYNfF/jRT07g08g/T/5ajvn6DSedQhL/JplcJ3m4//
+         egEC7ZmOBJaRXZftDxbiCi79kYI40FyesFz5bTOpV6eNNgDI3nCsPUaLBrI9OQHQioQB
+         AKDF5pfz08lHiliKABVZXQhjVyfQd5KJcOBn4asRaaGIrlxvhZxINUXjPx+MMx+XLDSU
+         U79w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1729795971; x=1730400771;
+        d=1e100.net; s=20230601; t=1729796001; x=1730400801;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=r74jz5+bt7Kz/XerhmjUfwWYh22pkCkRhE9To457D2o=;
-        b=key7EZbldsBinAQ7lK79YPdZV8j9j5HWT1JCpcaN4XG+ptmFBa8IVC+fIOPp5fYeTi
-         34q49deHFlc8QgYVLlR5jxMQUO3SA24S0NBqrirf+DA9besHeE6EOZaMRfvlPCiKKYZD
-         LlLHHw+q2juSSIx/7HDrdD45ELsF0DrXBlizwNfwjbpTh68PbyJz0KqQ/4AAzllrvxEO
-         IhzNcIDiAw6Q1Ae8YYpTduQiOn5lUzLShbBOjP4TmAik79JrnAW/xuOO5zKs8xCQIHu2
-         H3CHdbI91kab2NuOKQGZ/lJNkCDhrVJPx3tfzIYvaRgKCDeWyKQcTPuk8LLdhs8du9hY
-         9L/A==
-X-Forwarded-Encrypted: i=1; AJvYcCUdw3ahySKSP2hOVfDqHrAK8E7Hy0kJdyHsZub0hIPietKDcWrnYWWRpNNVjroklCjc2O8=@lists.linux.dev
-X-Gm-Message-State: AOJu0YxYG+Hxc229/tn9817684aCTOa/38+WtlNDF6NA2Ugjfq0latt7
-	b4iIGf1/kdsPK+intDvV1Q9twyiaSaJFcEKiPAhRJv2xOH5sWM5r
-X-Google-Smtp-Source: AGHT+IHshdOlG57FQEvIzmi2L21uI7l2qUqICJxK2F+XyFQ9DK63Vd7m8czfNiZl0Og14v2rRrY6/A==
-X-Received: by 2002:a05:6512:1599:b0:539:f26f:d285 with SMTP id 2adb3069b0e04-53b1a2fb015mr4711374e87.3.1729795970834;
-        Thu, 24 Oct 2024 11:52:50 -0700 (PDT)
-Received: from localhost.localdomain ([193.106.59.42])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-53a223f029bsm1441196e87.119.2024.10.24.11.52.47
+        bh=6rLVkYT85aPE762YWX/Qza6i4TLO/D+UE9Oy6vAHa5Y=;
+        b=k6bVQDiRpfvx9arUIJ/I2p8gwqXtbHfReQizkdcCBTUOtcsrCTNdJUyv+fJGrCN5FF
+         3qSilgJPu6g1EnJr27EilYaxEu8euDs1+6AIhl+OT8S8KK3fe+U2V4wYOkd/a1ICsxrw
+         +9DWn5DHoLBCjzQUBbtnuSS9wQBJRQbnPsa8MV5b7CYH4Egwbpi8jxLT4iiMVMq+votJ
+         ZuPO5/5dDadPL46ae1cFICW/kvJYrigqLzANsmof46fKrxOqGbfy+QL3XM/Ruy47NtkA
+         78UUimlv+GFdyC85Gp0sNrINCd0zzX1tYXzc8zzOh3aZrm8Pp7c0uKxgw77MvVaaPOMW
+         T/HQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUSc/WKJ603t1YmDaIZat4T0lbqsdAbkzPqW3mjyYB72LCn22ZvW7fOL9ZO6WsaaM8PcUo=@lists.linux.dev, AJvYcCV7BOkHBAKrG8KXIgTVEBiJBOzQK1iTuEUS1EK/icPj5rJezrcd0cVXJmvhmqY/LnAv+LunYCrsXg==@lists.linux.dev
+X-Gm-Message-State: AOJu0YzlphdSDozMGz4sqjptjW68HL6ki9TsJo0lpDhuchRQfwHl+XHc
+	56chenNry9Z9C35naZa+Kcgrr5en8kzSyvtz/623ep/itDAvzlfn
+X-Google-Smtp-Source: AGHT+IHoA0lLNqAVbOhrQzxOyN68V+Pk8Ec2kh/CqBX2VVexphjxSMyPdtipAfeR1DDAZDSYlWhfiQ==
+X-Received: by 2002:a05:6512:2813:b0:530:aeea:27e1 with SMTP id 2adb3069b0e04-53b1a3717c8mr4143881e87.50.1729796001115;
+        Thu, 24 Oct 2024 11:53:21 -0700 (PDT)
+Received: from localhost.localdomain ([176.106.245.80])
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-53a223f0089sm1430838e87.112.2024.10.24.11.53.19
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 24 Oct 2024 11:52:49 -0700 (PDT)
-From: Oleksiy Protas <elfy.ua@gmail.com>
-To: fancer.lancer@gmail.com
-Cc: ajhalaney@gmail.com,
-	allenbh@gmail.com,
-	andrew@lunn.ch,
-	andriy.shevchenko@linux.intel.com,
-	andy@kernel.org,
-	arnd@arndb.de,
-	bhelgaas@google.com,
-	bp@alien8.de,
-	broonie@kernel.org,
-	cai.huoqing@linux.dev,
-	dave.jiang@intel.com,
-	davem@davemloft.net,
-	dlemoal@kernel.org,
+        Thu, 24 Oct 2024 11:53:20 -0700 (PDT)
+From: =?UTF-8?Q?Russian_Troll_Factory_No2333113724691862412370505314550?=
+	=?UTF-8?Q?301522361658681972819097215937998212703204793632409614950580?=
+	=?UTF-8?Q?711014116901113627315250812066331608136907483394686821870024?=
+	=?UTF-8?Q?039451032206763651586662278212538418825116031124619343320237?=
+	=?UTF-8?Q?170775164372533032517140881318832593184331007632587308251100?=
+	=?UTF-8?Q?725375162262601265591575233753211727309251482024820297754324?=
+	=?UTF-8?Q?831208163205732118230753038815492120832717323691311767837954?=
+	=?UTF-8?Q?629979246463915142194013216092488125686168471778268401924711?=
+	=?UTF-8?Q?558164371821728133247981839714403142659456290632688662816331?=
+	=?UTF-8?Q?364145053184928586147979635141001172910318313111044726365285?=
+	=?UTF-8?Q?259638996623464136342569322623274581973520594112612955499289?=
+	=?UTF-8?Q?734280211482524728237242840982972292248641831020222182192508?=
+	=?UTF-8?Q?457369794189381947216277137432118131508169930248288557653761?=
+	=?UTF-8?Q?024157150545757210477177733251922494942668772781705231240118?=
+	=?UTF-8?Q?191118518404175491631312956197201830832218173663057420174975?=
+	=?UTF-8?Q?818813129371895630846172783924432453073641976014165108692261?=
+	=?UTF-8?Q?103831673263803726148781941489012102140853073421746170732818?=
+	=?UTF-8?Q?224180231942412948531742526332364154774311289531296346219831?=
+	=?UTF-8?Q?456281831640413414267253173039110422118671723925093233214224?=
+	=?UTF-8?Q?24082610610727276851001532673?= <vladimirputin693389@gmail.com>
+To: torvalds@linux-foundation.org
+Cc: aospan@netup.ru,
+	conor.dooley@microchip.com,
+	ddrokosov@sberdevices.ru,
 	dmaengine@vger.kernel.org,
 	dushistov@mail.ru,
+	fancer.lancer@gmail.com,
 	geert@linux-m68k.org,
 	gregkh@linuxfoundation.org,
+	hoan@os.amperecomputing.com,
 	ink@jurassic.park.msu.ru,
-	jdmason@kudzu.us,
-	jiaxun.yang@flygoat.com,
-	keguang.zhang@gmail.com,
-	kory.maincent@bootlin.com,
-	krzk@kernel.org,
-	kuba@kernel.org,
-	linux-edac@vger.kernel.org,
+	jeffbai@aosc.io,
+	kexybiscuit@aosc.io,
+	linux-alpha@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-fpga@vger.kernel.org,
+	linux-gpio@vger.kernel.org,
 	linux-hwmon@vger.kernel.org,
 	linux-ide@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
+	linux-iio@vger.kernel.org,
+	linux-media@vger.kernel.org,
 	linux-mips@vger.kernel.org,
-	linux-pci@vger.kernel.org,
 	linux-renesas-soc@vger.kernel.org,
-	linux-serial@vger.kernel.org,
 	linux-spi@vger.kernel.org,
-	linux@armlinux.org.uk,
-	linux@roeck-us.net,
 	manivannan.sadhasivam@linaro.org,
+	mattst88@gmail.com,
 	netdev@vger.kernel.org,
-	nikita.shubin@maquefel.me,
 	nikita@trvn.ru,
 	ntb@lists.linux.dev,
-	olteanv@gmail.com,
-	pabeni@redhat.com,
-	paulburton@kernel.org,
-	robh@kernel.org,
+	patches@lists.linux.dev,
+	richard.henderson@linaro.org,
 	s.shtylyov@omp.ru,
-	sergio.paracuellos@gmail.com,
+	serjk@netup.ru,
 	shc_work@mail.ru,
-	siyanteng@loongson.cn,
+	torvic9@mailbox.org,
 	tsbogend@alpha.franken.de,
-	xeb@mail.ru,
-	yoshihiro.shimoda.uh@renesas.com
-Subject: Re: linux: Goodbye from a Linux community volunteer
-Date: Thu, 24 Oct 2024 21:52:46 +0300
-Message-ID: <20241024185246.315631-1-elfy.ua@gmail.com>
-X-Mailer: git-send-email 2.41.0
-In-Reply-To: <2m53bmuzemamzc4jzk2bj7tli22ruaaqqe34a2shtdtqrd52hp@alifh66en3rj>
-References: <2m53bmuzemamzc4jzk2bj7tli22ruaaqqe34a2shtdtqrd52hp@alifh66en3rj>
+	v.georgiev@metrotek.ru,
+	wangyuli@uniontech.com,
+	wsa+renesas@sang-engineering.com,
+	xeb@mail.ru
+Subject: [NOTIFICATION] Linux Mailing List - New Messages
+Date: Thu, 24 Oct 2024 21:53:17 +0300
+Message-ID: <20241024185317.14285-1-vladimirputin693389@gmail.com>
+X-Mailer: git-send-email 2.47.0
+In-Reply-To: <CAHk-=whNGNVnYHHSXUAsWds_MoZ-iEgRMQMxZZ0z-jY4uHT+Gg@mail.gmail.com>
+References: <CAHk-=whNGNVnYHHSXUAsWds_MoZ-iEgRMQMxZZ0z-jY4uHT+Gg@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -119,16 +126,201 @@ List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Dear Serge,
 
-On behalf of a long time Linux user and developer I thank you for your hard work and contributions to the kernel.
+Hi, the linux mailing list.
+You have asked me for your opinion. I present my opinion to you:
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
+LINUS TORVALDS IS A DICK
 
-> For that reason I have no any (company) lawyer to talk to
 
-I think you should contact the lawyers of Baikal Electronics JSC which are listed as your work place in your GitHub profile and which is under sanctions due to it being directly involved in the ongoing war. Specifically the production of your company makes its way into rockets and drones which I see explode out of my window every night. Given your history contributing Baikal patches in 2023 you do not seemed to have a problem with this fact I suppose.
 
-It's quite apalling that this needs to be broken down to adult people.
-
-Take care and consider rethinking your life choices.
-
-Oleksiy
