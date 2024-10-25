@@ -1,233 +1,200 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.17])
+Received: from mout-p-101.mailbox.org (mout-p-101.mailbox.org [80.241.56.151])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DB84E21A4BF
-	for <ntb@lists.linux.dev>; Fri, 25 Oct 2024 16:29:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.17
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A62420C314;
+	Fri, 25 Oct 2024 18:45:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=80.241.56.151
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729873784; cv=none; b=TFoxkDXK3NaPgW3t9fhfGDAuXUTnFmPxrm6xjnccLXlAbJ6eGFIb4+U2JkaRFy+6gd8NedVUxHW9TADSB9AhHfjIsqOD1gz2vyV6mkLBfCb5vi0ja+Qi6TPUq/vb75PE+x3nj1k0NJqpJedEiB5s/EEwzVk8RrPh1bPs+gId6X0=
+	t=1729881950; cv=none; b=qt7qI9WWxkJ7pkgFioFWaH/9wVwv2LDyG0NyFwQvGYaK4vnEup4xiHgmISkGGqXwbNfh1mOGmsToc6kgrCkRoqiEdP1W9B/85qNbvCouB0/uyPdNGPHPB3Jff8u6PFDYyLyNn+J/Votl6GIAICgHnuBYqPX9+DOKJ+H65hPYlP0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729873784; c=relaxed/simple;
-	bh=smbRo0dTxi8SCxwEPoPtcgpQrjs8XbGMk6SZqHL9U3k=;
-	h=From:Date:To:cc:Subject:In-Reply-To:Message-ID:References:
-	 MIME-Version:Content-Type; b=m6u/Ov6Gw/0zkrdn9YeHQ1jMqTK+LU3f1zOtWKmRHHlagVYh9Aq3epgR0l6b44SmagQ7gztzv2MuSG+HHat1mjjHrifpr2opUUS+Tyggg2WZ9Gh6nJnwwacN7+x5CLCp3VSoyILHI6JygaVcYkVAkOG2tTChicOG0cfOimNQB0w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Dt1lABpu; arc=none smtp.client-ip=198.175.65.17
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux.intel.com
+	s=arc-20240116; t=1729881950; c=relaxed/simple;
+	bh=eoe/fP8YHFbJUGJWPDVWR2pm8bdAzVvuYmLMkOvFUCc=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=s5Ld4AF2zg5xfBatop7nXqenoaZYeXvlebP509Wab0KC1SkTmqDR7J3bmPgMQm0WoYQlN+eSbt33GZ/YckryYrmL5I29wYpm8jeOaq4NHc4txpvZHwmxxT00yAm2FMVNwsgkIeIhuVHIcOsYXGJXtjQydZqOb1ZY6K24mPhlxUM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=mailbox.org; spf=pass smtp.mailfrom=mailbox.org; dkim=pass (2048-bit key) header.d=mailbox.org header.i=@mailbox.org header.b=gdBTGg9q; arc=none smtp.client-ip=80.241.56.151
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=mailbox.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mailbox.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Dt1lABpu"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1729873782; x=1761409782;
-  h=from:date:to:cc:subject:in-reply-to:message-id:
-   references:mime-version;
-  bh=smbRo0dTxi8SCxwEPoPtcgpQrjs8XbGMk6SZqHL9U3k=;
-  b=Dt1lABpug491it3/ewFBRaiv6dZD+MwQOcajaCFc+yEMo578l7WWfFyd
-   RSl51epi+BVj2kvzYRHgBVVDWk1XiS+KJLaQGCsOxpN/gdcJqIu2qz79C
-   7/YRCBvYYsw+838X4OXJbcS6KrOV/b1eAN3zNdf+ZuFwiXyH3nRjYNjKM
-   CteI4WrDnxZdUvegYLHKHzA1KcAbb04RuPYMJEnDagD5Thwnej8kxztSw
-   ++qrBn87PaJ4hf4nzIkvYqF+u9PW6C2l2NONJq1e17bU6ZCD95lgs3pDB
-   x1zKBrzEkGxhwE2XTH3qjEl+oHZZBCfdx4jOodPouj9OELCxIJ5Q1y+Tq
-   w==;
-X-CSE-ConnectionGUID: SqYoimZ6RT2qAmKGwzQYiA==
-X-CSE-MsgGUID: vhMe90c2Qw+6GZ9Otezd3A==
-X-IronPort-AV: E=McAfee;i="6700,10204,11236"; a="29657721"
-X-IronPort-AV: E=Sophos;i="6.11,232,1725346800"; 
-   d="scan'208";a="29657721"
-Received: from fmviesa005.fm.intel.com ([10.60.135.145])
-  by orvoesa109.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Oct 2024 09:29:41 -0700
-X-CSE-ConnectionGUID: 1qRScS1RQ0+H+CcJJK+QMw==
-X-CSE-MsgGUID: +IA6zuqJQvihiK3yPko5gw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.11,232,1725346800"; 
-   d="scan'208";a="85505472"
-Received: from ijarvine-mobl1.ger.corp.intel.com (HELO localhost) ([10.245.244.225])
-  by fmviesa005-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Oct 2024 09:29:26 -0700
-From: =?UTF-8?q?Ilpo=20J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>
-Date: Fri, 25 Oct 2024 19:29:22 +0300 (EEST)
-To: Philipp Stanner <pstanner@redhat.com>
-cc: Jonathan Corbet <corbet@lwn.net>, Damien Le Moal <dlemoal@kernel.org>, 
-    Niklas Cassel <cassel@kernel.org>, 
-    Giovanni Cabiddu <giovanni.cabiddu@intel.com>, 
-    Herbert Xu <herbert@gondor.apana.org.au>, 
-    "David S. Miller" <davem@davemloft.net>, 
-    Boris Brezillon <bbrezillon@kernel.org>, 
-    Arnaud Ebalard <arno@natisbad.org>, Srujana Challa <schalla@marvell.com>, 
-    Alexander Shishkin <alexander.shishkin@linux.intel.com>, 
-    Miri Korenblit <miriam.rachel.korenblit@intel.com>, 
-    Kalle Valo <kvalo@kernel.org>, Serge Semin <fancer.lancer@gmail.com>, 
-    Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, 
-    Allen Hubbe <allenbh@gmail.com>, Bjorn Helgaas <bhelgaas@google.com>, 
-    Kevin Cernekee <cernekee@gmail.com>, 
-    Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
-    Jiri Slaby <jirislaby@kernel.org>, Jaroslav Kysela <perex@perex.cz>, 
-    Takashi Iwai <tiwai@suse.com>, Mark Brown <broonie@kernel.org>, 
-    David Lechner <dlechner@baylibre.com>, 
-    =?ISO-8859-15?Q?Uwe_Kleine-K=F6nig?= <u.kleine-koenig@pengutronix.de>, 
-    Jie Wang <jie.wang@intel.com>, Tero Kristo <tero.kristo@linux.intel.com>, 
-    Adam Guerin <adam.guerin@intel.com>, 
-    Shashank Gupta <shashank.gupta@intel.com>, 
-    Przemek Kitszel <przemyslaw.kitszel@intel.com>, 
-    Bharat Bhushan <bbhushan2@marvell.com>, 
-    Nithin Dabilpuram <ndabilpuram@marvell.com>, 
-    Johannes Berg <johannes.berg@intel.com>, 
-    Emmanuel Grumbach <emmanuel.grumbach@intel.com>, 
-    Gregory Greenman <gregory.greenman@intel.com>, 
-    Benjamin Berg <benjamin.berg@intel.com>, 
-    Yedidya Benshimol <yedidya.ben.shimol@intel.com>, 
-    Breno Leitao <leitao@debian.org>, 
-    Florian Fainelli <florian.fainelli@broadcom.com>, 
-    linux-doc@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, 
-    linux-ide@vger.kernel.org, qat-linux@intel.com, 
-    linux-crypto@vger.kernel.org, linux-wireless@vger.kernel.org, 
-    ntb@lists.linux.dev, linux-pci@vger.kernel.org, 
-    linux-serial <linux-serial@vger.kernel.org>, linux-sound@vger.kernel.org
-Subject: Re: [PATCH 06/10] wifi: iwlwifi: replace deprecated PCI functions
-In-Reply-To: <18fa3bec44aaee473f9d0955891fc63300400de7.camel@redhat.com>
-Message-ID: <c12899f6-bb77-f8cb-3d36-30a65a169e97@linux.intel.com>
-References: <20241025145959.185373-1-pstanner@redhat.com>   <20241025145959.185373-7-pstanner@redhat.com>   <ea7b805a-6c8e-8060-1c6b-4d62c69f78ae@linux.intel.com>  <415402ba495b402b67ae9ece0ca96ab3ea5ee823.camel@redhat.com>  <a3e6808f-195c-7174-64f9-a4392d7a02f0@linux.intel.com>
- <18fa3bec44aaee473f9d0955891fc63300400de7.camel@redhat.com>
+	dkim=pass (2048-bit key) header.d=mailbox.org header.i=@mailbox.org header.b="gdBTGg9q"
+Received: from smtp1.mailbox.org (smtp1.mailbox.org [10.196.197.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mout-p-101.mailbox.org (Postfix) with ESMTPS id 4XZs5L3sP6z9snx;
+	Fri, 25 Oct 2024 20:39:34 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mailbox.org; s=mail20150812;
+	t=1729881574;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=lSojNFdw8ftg3T7NakOd4AZhT9UMaiDwBHmwcORfhmk=;
+	b=gdBTGg9qaBnIiiH6XUTjeUDIpm/w19h2mJ2NxyWek4JBdbfHEfy1l85WLscQ4teM7X3Y8E
+	SzmAWuY6Tiv8TrbprFm973WyyZ+4RlCRZSgfEyQVNqd0vqp4fkqFnrWEBZthKLrpibPdn8
+	zOUeUEpcyhLgwtmKEbx1GfoJj+wV9qWVvuN6kVStn1ig/Bghe328CY4APIAqqMM1/M6DTp
+	Oi88jdSqZLP4fc+Ctf69KIG1PcmVc9Uqx7eoBdxCRl/yvszGacX3FksxcbsLOSr1RTVZ7U
+	RwAHePsvYqanhR6nADNx5z06lDr7cIO+uU+cHTctUfx45NWDJnFzydXg0RISPg==
+Message-ID: <872c8823-f62b-42f8-8bf3-86342374aa84@mailbox.org>
+Date: Fri, 25 Oct 2024 20:39:19 +0200
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="8323328-818714952-1729873762=:946"
+Subject: Re: [PATCH] Revert "MAINTAINERS: Remove some entries due to various
+ compliance requirements."
+Content-Language: en-US
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Kexy Biscuit <kexybiscuit@aosc.io>, jeffbai@aosc.io,
+ gregkh@linuxfoundation.org, wangyuli@uniontech.com, aospan@netup.ru,
+ conor.dooley@microchip.com, ddrokosov@sberdevices.ru,
+ dmaengine@vger.kernel.org, dushistov@mail.ru, fancer.lancer@gmail.com,
+ geert@linux-m68k.org, hoan@os.amperecomputing.com, ink@jurassic.park.msu.ru,
+ linux-alpha@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+ linux-fpga@vger.kernel.org, linux-gpio@vger.kernel.org,
+ linux-hwmon@vger.kernel.org, linux-ide@vger.kernel.org,
+ linux-iio@vger.kernel.org, linux-media@vger.kernel.org,
+ linux-mips@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+ linux-spi@vger.kernel.org, manivannan.sadhasivam@linaro.org,
+ mattst88@gmail.com, netdev@vger.kernel.org, nikita@trvn.ru,
+ ntb@lists.linux.dev, patches@lists.linux.dev, richard.henderson@linaro.org,
+ s.shtylyov@omp.ru, serjk@netup.ru, shc_work@mail.ru,
+ tsbogend@alpha.franken.de, v.georgiev@metrotek.ru,
+ wsa+renesas@sang-engineering.com, xeb@mail.ru
+References: <a08dc31ab773604d8f206ba005dc4c7a@aosc.io>
+ <20241023080935.2945-2-kexybiscuit@aosc.io>
+ <124c1b03-24c9-4f19-99a9-6eb2241406c2@mailbox.org>
+ <CAHk-=whNGNVnYHHSXUAsWds_MoZ-iEgRMQMxZZ0z-jY4uHT+Gg@mail.gmail.com>
+From: Tor Vic <torvic9@mailbox.org>
+In-Reply-To: <CAHk-=whNGNVnYHHSXUAsWds_MoZ-iEgRMQMxZZ0z-jY4uHT+Gg@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-MBO-RS-META: fcapfso3xo4bfkqbzachb4s163eexrjr
+X-MBO-RS-ID: 80e4fa8c609ea0e1360
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
 
---8323328-818714952-1729873762=:946
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-On Fri, 25 Oct 2024, Philipp Stanner wrote:
+On 10/23/24 19:45, Linus Torvalds wrote:
+> Ok, lots of Russian trolls out and about.
 
-> On Fri, 2024-10-25 at 19:11 +0300, Ilpo J=C3=A4rvinen wrote:
-> > On Fri, 25 Oct 2024, Philipp Stanner wrote:
-> >=20
-> > > On Fri, 2024-10-25 at 18:31 +0300, Ilpo J=C3=A4rvinen wrote:
-> > > > On Fri, 25 Oct 2024, Philipp Stanner wrote:
-> > > >=20
-> > > > > pcim_iomap_table() and pcim_iomap_regions_request_all() have
-> > > > > been
-> > > > > deprecated by the PCI subsystem in commit e354bb84a4c1 ("PCI:
-> > > > > Deprecate
-> > > > > pcim_iomap_table(), pcim_iomap_regions_request_all()").
-> > > > >=20
-> > > > > Replace these functions with their successors, pcim_iomap() and
-> > > > > pcim_request_all_regions().
-> > > > >=20
-> > > > > Signed-off-by: Philipp Stanner <pstanner@redhat.com>
-> > > > > Acked-by: Kalle Valo <kvalo@kernel.org>
-> > > > > ---
-> > > > > =C2=A0drivers/net/wireless/intel/iwlwifi/pcie/trans.c | 16 ++++--=
----
-> > > > > ----
-> > > > > ---
-> > > > > =C2=A01 file changed, 4 insertions(+), 12 deletions(-)
-> > > > >=20
-> > > > > diff --git a/drivers/net/wireless/intel/iwlwifi/pcie/trans.c
-> > > > > b/drivers/net/wireless/intel/iwlwifi/pcie/trans.c
-> > > > > index 3b9943eb6934..4b41613ad89d 100644
-> > > > > --- a/drivers/net/wireless/intel/iwlwifi/pcie/trans.c
-> > > > > +++ b/drivers/net/wireless/intel/iwlwifi/pcie/trans.c
-> > > > > @@ -3533,7 +3533,6 @@ struct iwl_trans
-> > > > > *iwl_trans_pcie_alloc(struct
-> > > > > pci_dev *pdev,
-> > > > > =C2=A0=09struct iwl_trans_pcie *trans_pcie, **priv;
-> > > > > =C2=A0=09struct iwl_trans *trans;
-> > > > > =C2=A0=09int ret, addr_size;
-> > > > > -=09void __iomem * const *table;
-> > > > > =C2=A0=09u32 bar0;
-> > > > > =C2=A0
-> > > > > =C2=A0=09/* reassign our BAR 0 if invalid due to possible
-> > > > > runtime
-> > > > > PM races */
-> > > > > @@ -3659,22 +3658,15 @@ struct iwl_trans
-> > > > > *iwl_trans_pcie_alloc(struct pci_dev *pdev,
-> > > > > =C2=A0=09=09}
-> > > > > =C2=A0=09}
-> > > > > =C2=A0
-> > > > > -=09ret =3D pcim_iomap_regions_request_all(pdev, BIT(0),
-> > > > > DRV_NAME);
-> > > > > +=09ret =3D pcim_request_all_regions(pdev, DRV_NAME);
-> > > > > =C2=A0=09if (ret) {
-> > > > > -=09=09dev_err(&pdev->dev,
-> > > > > "pcim_iomap_regions_request_all failed\n");
-> > > > > +=09=09dev_err(&pdev->dev, "pcim_request_all_regions
-> > > > > failed\n");
-> > > > > =C2=A0=09=09goto out_no_pci;
-> > > > > =C2=A0=09}
-> > > > > =C2=A0
-> > > > > -=09table =3D pcim_iomap_table(pdev);
-> > > > > -=09if (!table) {
-> > > > > -=09=09dev_err(&pdev->dev, "pcim_iomap_table
-> > > > > failed\n");
-> > > > > -=09=09ret =3D -ENOMEM;
-> > > > > -=09=09goto out_no_pci;
-> > > > > -=09}
-> > > > > -
-> > > > > -=09trans_pcie->hw_base =3D table[0];
-> > > > > +=09trans_pcie->hw_base =3D pcim_iomap(pdev, 0, 0);
-> > > > > =C2=A0=09if (!trans_pcie->hw_base) {
-> > > > > -=09=09dev_err(&pdev->dev, "couldn't find IO mem in
-> > > > > first
-> > > > > BAR\n");
-> > > > > +=09=09dev_err(&pdev->dev, "pcim_iomap failed\n");
-> > > >=20
-> > > > This seems a step backwards as a human readable English error
-> > > > message
-> > > > was=20
-> > > > replaced with a reference to a function name.
-> > >=20
-> > > I think it's still an improvement because "couldn't find IO mem in
-> > > first BAR" is a nonsensical statement. What the author probably
-> > > meant
-> > > was: "Couldn't find first BAR's IO mem in magic pci_iomap_table" ;)
-> >=20
-> > Well, that's just spelling things on a too low level too. It's
-> > irrelevant
-> > detail to the _user_ that kernel used some "magic table". Similarly,
-> > it's=20
-> > irrelevant to the user that function called pcim_iomap failed.
-> >=20
-> > > The reason I just wrote "pcim_iomap failed\n" is that this seems to
-> > > be
-> > > this driver's style for those messages. See the dev_err() above,
-> > > there
-> > > they also just state that this or that function failed.
-> >=20
-> > The problem in using function names is they have obvious meaning for=20
-> > developers/coders but dev_err() is presented to user with varying
-> > level
-> > of knowledge about kernel internals/code.
-> >=20
-> > While users might be able to derive some information from the
-> > function=20
-> > name, it would be simply better to explain on higher level what
-> > failed=20
-> > which is what I think the original message tried to do even if it was
-> > a bit clumsy. There is zero need to know about kernel internals to=20
-> > interpret that message (arguably one needs to know some PCI to
-> > understand=20
-> > BAR, though).
-> >=20
-> > (Developers can find the internals by looking up the error message
-> > from
-> > the code so it doesn't take away something from developers.)
->=20
-> Feel free to make a suggestion for a better error message.
->=20
-> sth like "could not ioremap PCI BAR 0.\n" could satisfy your criteria.
+I was a little bit sick when I wrote my previous comment, but I wanted 
+to elaborate, so here we go:
+> 
+> It's entirely clear why the change was done, it's not getting
+> reverted, and using multiple random anonymous accounts to try to
+> "grass root" it by Russian troll factories isn't going to change
+> anything.
+> 
 
-Yes.
+Of course it's not going to be reverted, and I don't mind.
 
---=20
- i.
+I do however mind about the fact that you accuse contributors (however 
+minimal their contributions were, like in my case) of being "Russian 
+trolls" using "multiple accounts".
 
-> (I just now noticed that so far it called BAR 0 the "first bar", which
-> is also not gold standard)
+I would have thought that a man of your stature, knowledge and 
+publicity, wrote a more sensible, neutral comment than that childish 
+gibberish you produced.
+Such comments can be seen in the hundreds on every major news website's 
+comment section.
+Unfortunately, this is now common discussion standard at least in the 
+Western world:
 
---8323328-818714952-1729873762=:946--
+"You don't agree with X? You must be a Y!"
+
+There is no doubt that there are Russian troll factories - but there is 
+equally no doubt that there are Western troll factories. Without them, 
+this "game" wouldn't work.
+
+You could just have done a simple 'git log --grep="Name"' to find out 
+that most of those people who you accused of being trolls are actually 
+not trolls. Because trolls do not contribute.
+
+> And FYI for the actual innocent bystanders who aren't troll farm
+> accounts - the "various compliance requirements" are not just a US
+> thing.
+
+Of course not. It's a USUKEU thing. Or, dare I say, a thing of the 
+unipolar anglo-american empire. There is no way around a multipolar 
+world order if we as humans want to progress.
+
+Why didn't you (or Greg) elaborate on the "various compliance 
+requirements" in the first place?
+You could just have said:
+
+"Due to the sanctions against Russia, we as a US-based foundation are 
+required to abide and therefore we have to remove some maintainers that 
+are thought to be directly collaborating with the current regime" (I 
+specifically used a "Western" language).
+That, at least, would have been somewhat honest, though still hypocrite.
+
+And I did read through (most of) these EU compliance requirements 
+because of my job (not IT), so I'm not *that* clueless.
+
+The sanctions are absurd anyway - I don't remember that the US had been 
+sanctioned because of their illegal invasion of [insert country of your 
+choice]. US athletes excluded from the Olympics?? How dare you?
+
+I also don't remember that France or UK had been sanctioned because they 
+abused their UN mandate to get rid of Gaddafi.
+
+The "country" Kosovo, created by a war, isn't even recognized by all EU 
+member states!
+
+And don't even get me started on that Eastern Mediterranian country that 
+can commit the worst atrocities without ever getting seriously sanctioned.
+
+Meanwhile, we sanction Iran (hasn't started a war in ages), Cuba (hasn't 
+started a war in ages), North Korea (hasn't started a war in ages) etc.
+
+The Western arrogance and decadence is disgusting, and I say that as a 
+born and bred Western European.
+
+> 
+> If you haven't heard of Russian sanctions yet, you should try to read
+> the news some day.  And by "news", I don't mean Russian
+> state-sponsored spam.
+
+I'm already more than fed up with the state-sponsored spam on German TV 
+- and I even have to pay for that BS!
+Now, I don't know how it is in Finland because I don't follow Finnish 
+news due to a total lack of language knowledge.
+
+I wish my country would quit NATO, and then I see that Finland *joined*. 
+Sorry, but I don't understand. No NATO, no war in Ukraine.
+Even as late as 2013, Russia and Ukraine did naval manoevers in the 
+Black Sea - together!
+
+This war is sooo totally unnecessary. Maybe you should ask Vicky "F!ck 
+the EU" Newland why this all happened.
+
+> 
+> As to sending me a revert patch - please use whatever mush you call
+> brains. I'm Finnish. Did you think I'd be *supporting* Russian
+> aggression? Apparently it's not just lack of real news, it's lack of
+> history knowledge too.
+
+Why do you even mention your nationality?
+Just a few weeks ago, I read about the role of Finland in (and before) WW2.
+I don't think there is a big lack of history knowledge on my side.
+
+My country was occupied by Germany twice, in 1914 and in 1940.
+And yet, I have absolutely no bad feelings about either Germany as a 
+country nor Germans as a people. OK, their government is the worst since 
+1945, but that's a different matter.
+
+Wasn't Mannerheim married to a Russian? Eh?
+
+The former German Minister of Foreign Affairs, Guido Westerwelle, once 
+talked about "late Roman decadence", albeit in a different context.
+
+And yet, he was totally right even in other contexts. The Western world 
+is actually in the state of "late Roman decadence".
+And what follows after that decadence? Right, the downfall. And it might 
+be a huge chance to create a better, more equitable world.
+
+> 
+>                        Linus
+
+Tor Vic
