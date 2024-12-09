@@ -1,69 +1,69 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1FAD9230D1F
-	for <ntb@lists.linux.dev>; Mon,  9 Dec 2024 13:06:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 08F7C234972
+	for <ntb@lists.linux.dev>; Mon,  9 Dec 2024 13:07:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733749628; cv=none; b=NYtiplzymg6hRBH34U3UBAziIC0qO2omIkQnrfiv8AiEdnSwni58LehZuUpfY4E+MtGoZU2cYviY+MG04PnGAbtixEm47cSmGyQWD7GYeeTpg53AYSvF76XTVSHgBUnDjTlT5jOF8fmO3jBNBVp387G8T26JKrNiJW0DE7lQYP8=
+	t=1733749629; cv=none; b=SfigWdhI8tRhNc5PKAWUd6512qMW1ExyWNiTRvSOGq7WCZHP4kHK6yeKHp5XJIrMMIjGmh1EhFfK+DtyBeYcq04tL2WHpPuTCicgXN6ZAkNXx7HGTYjyTx6EL9cSLqZ074YTKrWtmzESV7BhyHjuFQ9ekklr0XbtZNJs9wvzE4U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733749628; c=relaxed/simple;
-	bh=MrbDrpIsvZ1dKVLDYervP0Vycy2eBw/58VpDKwA2pz0=;
+	s=arc-20240116; t=1733749629; c=relaxed/simple;
+	bh=9Z1Cy2anDz0HAw/5Tw9Wb58QkDW/mnPO9GaPuFYE3VA=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:content-type; b=r++GuReIIr/F6fRO1yH62dHRhlPf316oU3pxRkzPMmSwbgJp9XL7BmPvfjFtCGK1oehdX3MtuaNW9zUEI3B1bxMwtc+TLCUerN893jPjIw05E9GDkcNDSjTDcPoGtlrUNhSKTooa2bG3UjO2bG4NDen/RPh2HGQiW3gHO3rC3GM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=FQQGU/eL; arc=none smtp.client-ip=170.10.133.124
+	 MIME-Version:content-type; b=C580RROlBzJQYxLbdYTXs14SuH4uCAvrh5L+6ylAX9kj5KviDgP5e2wnpsl/nE2/wHI2uq3GmrXM/SKULa/BuNu5gPcTXKBfMJv6u+a3IDj5vT8GLqEJr9uSBZZWSTEXiFjiqu+2j8Iw2cP1IZ4jIZChe4IEt5OryT/rRbS1z2A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=eUs8Rv4T; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="FQQGU/eL"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="eUs8Rv4T"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1733749619;
+	s=mimecast20190719; t=1733749626;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=jVrHbQL/WtPUoVmg5iNOH6KPahEUlaDR0JYKoVLlaPE=;
-	b=FQQGU/eLyXeosp5gHBq1ad4KTyJhj28poXUFVI/N7vwfJf7nOgnTONQORJ4puWZLAkZ6DX
-	schHeQIxcksso3yrl+INtDimcnUWXCyng/KFahEmzoUiYZLBiSXiR3FjYKFbZbNFQ3WOZw
-	zG9E3ixvaYnrnp4GVXzwpImEd2WY6jY=
-Received: from mail-wm1-f69.google.com (mail-wm1-f69.google.com
- [209.85.128.69]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=oiILKR2a3QjvArtxAPrSG5MTRD3aI59eir0l7Eg71/Q=;
+	b=eUs8Rv4TbziekXVV36RNSDyOsZlArC5rtz6d9u9rQoFTG+vS4M9tDgeorAfJWvQm6ptea1
+	bfgeURj/kezC2d8gbgNDqu2Rz72woxZmo9z+EsboN5RX/pbVl4nWJdOq73gRxyRKBuRH9V
+	yG3+IbPi9adgB3f5N3QuLnCNAcmIwjg=
+Received: from mail-wr1-f69.google.com (mail-wr1-f69.google.com
+ [209.85.221.69]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-496-MVmN-DUuNjiBbhDC3LaQDA-1; Mon, 09 Dec 2024 08:06:56 -0500
-X-MC-Unique: MVmN-DUuNjiBbhDC3LaQDA-1
-X-Mimecast-MFC-AGG-ID: MVmN-DUuNjiBbhDC3LaQDA
-Received: by mail-wm1-f69.google.com with SMTP id 5b1f17b1804b1-434f47b0512so8002035e9.2
-        for <ntb@lists.linux.dev>; Mon, 09 Dec 2024 05:06:56 -0800 (PST)
+ us-mta-589-79uHokEKNruHsu4vlSS-iw-1; Mon, 09 Dec 2024 08:07:03 -0500
+X-MC-Unique: 79uHokEKNruHsu4vlSS-iw-1
+X-Mimecast-MFC-AGG-ID: 79uHokEKNruHsu4vlSS-iw
+Received: by mail-wr1-f69.google.com with SMTP id ffacd0b85a97d-385dcae001fso1583767f8f.1
+        for <ntb@lists.linux.dev>; Mon, 09 Dec 2024 05:07:02 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1733749615; x=1734354415;
+        d=1e100.net; s=20230601; t=1733749622; x=1734354422;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=jVrHbQL/WtPUoVmg5iNOH6KPahEUlaDR0JYKoVLlaPE=;
-        b=kxGNOz0735r3xegSlrHHAJbw9SCJTqfjtv63Ai2Adt/M6mL/kQtgomIu65GdH++pZJ
-         EIQ9wQ+30Ob58jjH/5uF9QtHDPfC6e4idubVHJvgfjw6v+shJbLyYVuIgbh3gSEyyxtK
-         GUJzIO2XqXu/uDIkYc7cnRHh9y8kSSD1WeWiezIVUMAkzDR3T4hPxZhYa4g8XKN3KJNU
-         DkvDwZEMY3zYUQ9HAG2ZOdQEkmYbqWk5+gJ+VW6Qf1INmgIhxVSAaoCrIjM7RRrBSd50
-         eFxX/jZZTwzPEKyxvvo/VoMALON89s4I4la7Wyra746xhdo8FaSAX6xkU4vH2LsIRxKC
-         YM1g==
-X-Forwarded-Encrypted: i=1; AJvYcCWegIqcPyx0rjp+6AZa7292XheI1JooDFoCcp6cHfcYnema3pdYgkU2hiVPxk8E+GPh0/w=@lists.linux.dev
-X-Gm-Message-State: AOJu0Yx7oCPRWATj0NwWrKFHduAxZ5oX6xZGb8O3LiZ6lcmH3lvG9Ps3
-	inkuouIXO6EYRhrKvhNEn/jamsxH/RxA6BqkLDyz7a43/jFg6w7CeEhvYBsFvlxp3vVsJg4cjQ3
-	9ct1LqW5gM2lsXDC34q1phPvsmtgQWqsjFEf1eZH8bz2W6Hv57w==
-X-Gm-Gg: ASbGncueIeKLbIuR8g82IOYzgMRgmOJmHqIObtpxOUXT0vOjwMkzu+4GluDBb0LK4IA
-	d2bJUh/fgJWL9zbb/n9dtC6d1DlphGur3raV2IL/5uoAF8BV3o+yRdxrhqsMWIIRBH2KB1/TBZE
-	hk0LDHURtAZuwSOp9VIlju+FxGFjVa56rkmTWxmr1TqDqUWx62+EpCbonzThGMs6Hg54xsmR0g4
-	nGOPCkKKrDo4LCIHcboqn2ocMda1weKBv214cdVIwLqhvrhENGxk/lva/4T0bLQnBYWxoGD1p3E
-	GLd8+Sd1
-X-Received: by 2002:a05:600c:3544:b0:431:60ec:7a91 with SMTP id 5b1f17b1804b1-434ddeade70mr103095295e9.2.1733749615444;
-        Mon, 09 Dec 2024 05:06:55 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IG8dWBtsXMwPpsQh4FEW+o80sVo3gsVutdK8rZwCICXTNWn24DfDXUekpZhDfdomYwt5/+rkA==
-X-Received: by 2002:a05:600c:3544:b0:431:60ec:7a91 with SMTP id 5b1f17b1804b1-434ddeade70mr103094435e9.2.1733749614932;
-        Mon, 09 Dec 2024 05:06:54 -0800 (PST)
+        bh=oiILKR2a3QjvArtxAPrSG5MTRD3aI59eir0l7Eg71/Q=;
+        b=xFZXMSTjqRzs3eX+ht5/3CLqMDF/thoTZj1iJRqZ1s4Eln4Tf4+ihZ/L7OcK1VZ21I
+         vJTMrEEc+daA5Lh+Zs6QUe56tGOJvRYDcP5UcV9bW5wpMZjrZr5K+9IZz/fookCZinYo
+         hYpywEM9KKaLWaUvFH44NMi6SdSaNpgAKyXohGjPftAcf4VXzijI2UVTCY8FttBws8ha
+         QGxr35QShujVcM4t5r30hNPERmct0mOSJsb87U3lURTE52OVwFKuc4cEGzTgkk/8n244
+         XY8CZFKhoXMr0dwYucGC5RrAe21MhCIb6YWpr0/WSWolTtuK6fcKc2raS6taOdkAdp53
+         wtPA==
+X-Forwarded-Encrypted: i=1; AJvYcCUpp8ZR/wc8Bj21Le3Q1gQ2Ilu/60jRHlNXZl0rKlKouJAj2t32mjUR0hQ2C6c3pf3isug=@lists.linux.dev
+X-Gm-Message-State: AOJu0Ywn+54lpTQM2xYLxp8Xi4MhEfEUYzo9F5vxtirTNfLcxuuIudDI
+	xSmYFZdX9VC9lw0iiAb5KFsY3o0IK3U1yZJMmWjwiLuj28F0XLw2xpJgihZkB3mGZTqfzYHosjp
+	//Tmj8Og0FiBlHv/QxWBBTUQIA44lCSEjhpNIyfCtKrmKJ1h+Xw==
+X-Gm-Gg: ASbGncsJL0qj/6PYAVsbkgifMyxVHfk6jjmus2OUYTTB/GYRAb6tj9M3jhVq9I9yCsb
+	WQag4jThGX+gmwA9cy4vKb+91gvvbiNM52SmZMwiCCq+RaajsO6QAUyuq3rAa7+TsaDRbT0Kmc5
+	hk3OyrdvcTe3JsF+yeaped7AlCmgKSowu+L9HTSzdP9SsYf3JYARlanzcXYF29f2TTDFFoGRJmP
+	IYvnzrTFcVSxBFWAAR0Hjyg72su3D3T6uD0f4IegUTu8+YN2tR/dVe7fTqDdgIaEghhy0T/NlFj
+	oLAfW8dv
+X-Received: by 2002:adf:e18a:0:b0:385:e3b8:f331 with SMTP id ffacd0b85a97d-3862b355ed9mr8982762f8f.14.1733749621855;
+        Mon, 09 Dec 2024 05:07:01 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IFEcWIoVaHlqXXOi6I/o8U0Sx4v85WRQCbXdmf3r6S4bXIGyWlICGFsXbMo+gcSn1pLdSeKWw==
+X-Received: by 2002:adf:e18a:0:b0:385:e3b8:f331 with SMTP id ffacd0b85a97d-3862b355ed9mr8982697f8f.14.1733749621414;
+        Mon, 09 Dec 2024 05:07:01 -0800 (PST)
 Received: from eisenberg.redhat.com (nat-pool-muc-u.redhat.com. [149.14.88.27])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-3862190965asm13200127f8f.82.2024.12.09.05.06.53
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-3862190965asm13200127f8f.82.2024.12.09.05.06.59
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 09 Dec 2024 05:06:54 -0800 (PST)
+        Mon, 09 Dec 2024 05:07:01 -0800 (PST)
 From: Philipp Stanner <pstanner@redhat.com>
 To: amien Le Moal <dlemoal@kernel.org>,
 	Niklas Cassel <cassel@kernel.org>,
@@ -123,9 +123,9 @@ Cc: linux-ide@vger.kernel.org,
 	linux-pci@vger.kernel.org,
 	kvm@vger.kernel.org,
 	xen-devel@lists.xenproject.org
-Subject: [PATCH v3 04/11] net/ntb: Use never-managed version of pci_intx()
-Date: Mon,  9 Dec 2024 14:06:26 +0100
-Message-ID: <20241209130632.132074-6-pstanner@redhat.com>
+Subject: [PATCH v3 07/11] PCI: MSI: Use never-managed version of pci_intx()
+Date: Mon,  9 Dec 2024 14:06:29 +0100
+Message-ID: <20241209130632.132074-9-pstanner@redhat.com>
 X-Mailer: git-send-email 2.47.1
 In-Reply-To: <20241209130632.132074-2-pstanner@redhat.com>
 References: <20241209130632.132074-2-pstanner@redhat.com>
@@ -136,7 +136,7 @@ List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 X-Mimecast-Spam-Score: 0
-X-Mimecast-MFC-PROC-ID: 2H5WnIOVIZVZhQlxjcXf6Ds0IaZ29YeYnnS5725nhDQ_1733749615
+X-Mimecast-MFC-PROC-ID: QkjGUBEXTgAUfTXR5wjOU_j69wq1uSxSGe5QkGv5A9o_1733749622
 X-Mimecast-Originator: redhat.com
 Content-Transfer-Encoding: 8bit
 content-type: text/plain; charset="US-ASCII"; x-default=true
@@ -145,54 +145,49 @@ pci_intx() is a hybrid function which can sometimes be managed through
 devres. To remove this hybrid nature from pci_intx(), it is necessary to
 port users to either an always-managed or a never-managed version.
 
-hw/amd and how/intel enable their PCI-Device with pci_enable_device().
-Thus, they need the never-managed version.
+MSI sets up its own separate devres callback implicitly in
+pcim_setup_msi_release(). This callback ultimately uses pci_intx(),
+which is problematic since the callback of course runs on driver-detach.
 
-Replace pci_intx() with pci_intx_unmanaged().
+That problem has last been described here:
+https://lore.kernel.org/all/ee44ea7ac760e73edad3f20b30b4d2fff66c1a85.camel@redhat.com/
+
+Replace the call to pci_intx() with one to the never-managed version
+pci_intx_unmanaged().
 
 Signed-off-by: Philipp Stanner <pstanner@redhat.com>
-Acked-by: Shyam Sundar S K <Shyam-sundar.S-k@amd.com> #for ntb_hw_amd.c
-Acked-by: Dave Jiang <dave.jiang@intel.com> # for ntb_hw_gen1.c
+Reviewed-by: Thomas Gleixner <tglx@linutronix.de>
 ---
- drivers/ntb/hw/amd/ntb_hw_amd.c    | 4 ++--
- drivers/ntb/hw/intel/ntb_hw_gen1.c | 2 +-
- 2 files changed, 3 insertions(+), 3 deletions(-)
+ drivers/pci/msi/api.c | 2 +-
+ drivers/pci/msi/msi.c | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.c b/drivers/ntb/hw/amd/ntb_hw_amd.c
-index d687e8c2cc78..b146f170e839 100644
---- a/drivers/ntb/hw/amd/ntb_hw_amd.c
-+++ b/drivers/ntb/hw/amd/ntb_hw_amd.c
-@@ -791,7 +791,7 @@ static int ndev_init_isr(struct amd_ntb_dev *ndev,
- err_msi_enable:
- 
- 	/* Try to set up intx irq */
--	pci_intx(pdev, 1);
-+	pci_intx_unmanaged(pdev, 1);
- 
- 	rc = request_irq(pdev->irq, ndev_irq_isr, IRQF_SHARED,
- 			 "ndev_irq_isr", ndev);
-@@ -831,7 +831,7 @@ static void ndev_deinit_isr(struct amd_ntb_dev *ndev)
- 		if (pci_dev_msi_enabled(pdev))
- 			pci_disable_msi(pdev);
- 		else
--			pci_intx(pdev, 0);
-+			pci_intx_unmanaged(pdev, 0);
+diff --git a/drivers/pci/msi/api.c b/drivers/pci/msi/api.c
+index b956ce591f96..c95e2e7dc9ab 100644
+--- a/drivers/pci/msi/api.c
++++ b/drivers/pci/msi/api.c
+@@ -289,7 +289,7 @@ int pci_alloc_irq_vectors_affinity(struct pci_dev *dev, unsigned int min_vecs,
+ 			 */
+ 			if (affd)
+ 				irq_create_affinity_masks(1, affd);
+-			pci_intx(dev, 1);
++			pci_intx_unmanaged(dev, 1);
+ 			return 1;
+ 		}
  	}
+diff --git a/drivers/pci/msi/msi.c b/drivers/pci/msi/msi.c
+index 3a45879d85db..53f13b09db50 100644
+--- a/drivers/pci/msi/msi.c
++++ b/drivers/pci/msi/msi.c
+@@ -268,7 +268,7 @@ EXPORT_SYMBOL_GPL(pci_write_msi_msg);
+ static void pci_intx_for_msi(struct pci_dev *dev, int enable)
+ {
+ 	if (!(dev->dev_flags & PCI_DEV_FLAGS_MSI_INTX_DISABLE_BUG))
+-		pci_intx(dev, enable);
++		pci_intx_unmanaged(dev, enable);
  }
  
-diff --git a/drivers/ntb/hw/intel/ntb_hw_gen1.c b/drivers/ntb/hw/intel/ntb_hw_gen1.c
-index 079b8cd79785..9ad9d7fe227e 100644
---- a/drivers/ntb/hw/intel/ntb_hw_gen1.c
-+++ b/drivers/ntb/hw/intel/ntb_hw_gen1.c
-@@ -445,7 +445,7 @@ int ndev_init_isr(struct intel_ntb_dev *ndev,
- 
- 	/* Try to set up intx irq */
- 
--	pci_intx(pdev, 1);
-+	pci_intx_unmanaged(pdev, 1);
- 
- 	rc = request_irq(pdev->irq, ndev_irq_isr, IRQF_SHARED,
- 			 "ndev_irq_isr", ndev);
+ static void pci_msi_set_enable(struct pci_dev *dev, int enable)
 -- 
 2.47.1
 
