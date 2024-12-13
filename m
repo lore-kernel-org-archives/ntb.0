@@ -1,106 +1,71 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from arara2.ipen.br (arara2.ipen.br [200.136.52.33])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 861481B6CFD;
-	Fri, 13 Dec 2024 10:30:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1C188291E
+	for <ntb@lists.linux.dev>; Fri, 13 Dec 2024 10:47:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=200.136.52.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1734085856; cv=none; b=ExWiUu+qloeSOTopfgIQ9bPgCOOylAEjCHTZrBRaZpNeLCL4dnSX2ydekr6qxtmiZkMZnaEakQhRa1z2Cma+cCgVmK+aNVFtVA/CPkIpNL/SDJomq/gJUJFPZSmQiTPzwAEtWoMC1yMsFSg6/aq863ygOIvMH9+ArmeNWzMJE3U=
+	t=1734086880; cv=none; b=QZ0cWrbHK/YQWf3kXA+HfCT+IbIDoaR4TAJdAzRtn6lIbebNxCDs8vXAohMEBdmBREH9g+gj8RB/C+SUCEAbNAYZOSdV14oBtB4/0Vgw0iTd/U8Cb4e7qqEYFKkD3KMZHjuovLlOI7bBnHYonmbSIw7YkNho5AJcPvbmqc1Sq8M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1734085856; c=relaxed/simple;
-	bh=BTQhG+pcPpVWdFU7M6WGNSEHiOAWlPk9OMovbRGe8jk=;
-	h=From:To:Cc:Subject:References:Date:In-Reply-To:Message-ID:
-	 MIME-Version:Content-Type; b=dnKbCgMEx1TUk/UVLXfkPV6OB9XV2Fse775L3/C86brW6n5/9Ax5EqtJDZ7F9AxqcmUF1IwI9wRjUcktS2q+fO2FtqFG2HaoHwFDqlDlRq6Yv+yKAoetO4sb16Z8KJQqxCGiND+c9GM/a1SvPK1W0UfXn8jxQ9lBz8mTmQ5H6kI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=KwAmFDLe; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="KwAmFDLe"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 65922C4CED0;
-	Fri, 13 Dec 2024 10:30:44 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1734085855;
-	bh=BTQhG+pcPpVWdFU7M6WGNSEHiOAWlPk9OMovbRGe8jk=;
-	h=From:To:Cc:Subject:References:Date:In-Reply-To:From;
-	b=KwAmFDLewAK8qtG2JcgTDln5oAPvX7T6s21n+sVrQK/zovEQltlKTZMfOOydVCYBZ
-	 wexQmXSVYI3h7TBHmpxxuKJCAtIKDA3xJNa8/Im/UBR7LXeWQh180GN2AD0v8T0VFC
-	 xau4jIIld3rUWglJe0O5Ly1c3n+LVRPKkn4Ap2bFPikm9rfX1t0FvFxCEdhmOO7GmQ
-	 T1Kv1o7hm5xTuEGg8jC3v4laVOub2r/1lqEAAYkD9VqHdQWO6/vYMu4tQswLjScRFC
-	 qcBNgWj6+WXQRdmWrvKriaNXsmUfp6QHYu1lvvdq1sD36YHJ/Kyex37L0CjkCkv8o5
-	 SYIrwECkF64TQ==
-From: Kalle Valo <kvalo@kernel.org>
-To: Bjorn Helgaas <helgaas@kernel.org>
-Cc: Philipp Stanner <pstanner@redhat.com>,  Igor Mitsyanko
- <imitsyanko@quantenna.com>,  amien Le Moal <dlemoal@kernel.org>,  Niklas
- Cassel <cassel@kernel.org>,  Basavaraj Natikar
- <basavaraj.natikar@amd.com>,  Jiri Kosina <jikos@kernel.org>,  Benjamin
- Tissoires <bentiss@kernel.org>,  Arnd Bergmann <arnd@arndb.de>,  Sergey
- Matyukevich <geomatsi@gmail.com>,  Greg Kroah-Hartman
- <gregkh@linuxfoundation.org>,  Alex Dubov <oakad@yahoo.com>,  Sudarsana
- Kalluru <skalluru@marvell.com>,  Manish Chopra <manishc@marvell.com>,
-  Andrew Lunn <andrew+netdev@lunn.ch>,  "David S. Miller"
- <davem@davemloft.net>,  Eric Dumazet <edumazet@google.com>,  Jakub
- Kicinski <kuba@kernel.org>,  Paolo Abeni <pabeni@redhat.com>,  Rasesh Mody
- <rmody@marvell.com>,  GR-Linux-NIC-Dev@marvell.com,  Sanjay R Mehta
- <sanju.mehta@amd.com>,  Shyam Sundar S K <Shyam-sundar.S-k@amd.com>,  Jon
- Mason <jdmason@kudzu.us>,  Dave Jiang <dave.jiang@intel.com>,  Allen Hubbe
- <allenbh@gmail.com>,  Bjorn Helgaas <bhelgaas@google.com>,  Alex
- Williamson <alex.williamson@redhat.com>,  Juergen Gross <jgross@suse.com>,
-  Stefano Stabellini <sstabellini@kernel.org>,  Oleksandr Tyshchenko
- <oleksandr_tyshchenko@epam.com>,  Mario Limonciello
- <mario.limonciello@amd.com>,  Chen Ni <nichen@iscas.ac.cn>,  Ricky Wu
- <ricky_wu@realtek.com>,  Al Viro <viro@zeniv.linux.org.uk>,  Breno Leitao
- <leitao@debian.org>,  Thomas Gleixner <tglx@linutronix.de>,  Kevin Tian
- <kevin.tian@intel.com>,  Andy Shevchenko
- <andriy.shevchenko@linux.intel.com>,  Mostafa Saleh <smostafa@google.com>,
-  Jason Gunthorpe <jgg@ziepe.ca>,  Yi Liu <yi.l.liu@intel.com>,  Kunwu Chan
- <chentao@kylinos.cn>,  Dan Carpenter <dan.carpenter@linaro.org>,  "Dr.
- David Alan Gilbert" <linux@treblig.org>,  Ankit Agrawal
- <ankita@nvidia.com>,  Reinette Chatre <reinette.chatre@intel.com>,  Eric
- Auger <eric.auger@redhat.com>,  Ye Bin <yebin10@huawei.com>,
-  linux-ide@vger.kernel.org,  linux-kernel@vger.kernel.org,
-  linux-input@vger.kernel.org,  netdev@vger.kernel.org,
-  linux-wireless@vger.kernel.org,  ntb@lists.linux.dev,
-  linux-pci@vger.kernel.org,  kvm@vger.kernel.org,
-  xen-devel@lists.xenproject.org
-Subject: Re: [PATCH v3 09/11] wifi: qtnfmac: use always-managed version of
- pcim_intx()
-References: <20241212192935.GA3360239@bhelgaas>
-Date: Fri, 13 Dec 2024 12:30:42 +0200
-In-Reply-To: <20241212192935.GA3360239@bhelgaas> (Bjorn Helgaas's message of
-	"Thu, 12 Dec 2024 13:29:35 -0600")
-Message-ID: <87cyhvoox9.fsf@kernel.org>
-User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/28.2 (gnu/linux)
+	s=arc-20240116; t=1734086880; c=relaxed/simple;
+	bh=Cgr97JBiSX1QIcd2ZZZsKVChGTY1ZlWJ/4AhaVFA7Wc=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version:Content-Type; b=OHDW+/I2jy3QLqeiLkPjkoA0iCZ82iy2oopQ/+B9+LNLqtKI4VqtiZytifziE7ItINPavT1k6jkzWAc3HYS80S1WOkdtAT43CMPVmYtUHSgnVv6tJRI9njapg8kiKCWyyRryub9yruLNIEOOK2VPDC9OEc75Mg+3B3YFb7Q01gY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=ipen.br; spf=pass smtp.mailfrom=ipen.br; arc=none smtp.client-ip=200.136.52.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=ipen.br
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ipen.br
+X-ASG-Debug-ID: 1734086856-055fc729eb14ad290007-3Fu2Fl
+Received: from arara.ipen.br (webmail.ip.ipen.br [10.0.10.11]) by arara2.ipen.br with ESMTP id zLlabHkI6A2n8wrf for <ntb@lists.linux.dev>; Fri, 13 Dec 2024 07:47:53 -0300 (BRT)
+X-Barracuda-Envelope-From: TCWM179724@ipen.br
+X-Barracuda-RBL-Trusted-Forwarder: 10.0.10.11
+Received: from ipen.br (unknown [102.129.145.191])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by arara.ipen.br (Postfix) with ESMTPSA id 7FF2EFBE6CB
+	for <ntb@lists.linux.dev>; Fri, 13 Dec 2024 01:25:59 -0300 (-03)
+Reply-To: t.mazowieckie@mazowieckie.org
+X-Barracuda-Effective-Source-IP: UNKNOWN[102.129.145.191]
+X-Barracuda-Apparent-Source-IP: 102.129.145.191
+X-Barracuda-RBL-IP: 102.129.145.191
+From: <TCWM179724@ipen.br>
+To: ntb@lists.linux.dev
+Subject:  I urge you to understand my viewpoint accurately.
+Date: 13 Dec 2024 12:25:58 +0800
+X-ASG-Orig-Subj: I urge you to understand my viewpoint accurately.
+Message-ID: <20241213122558.1E35F7FDD1A0EBFD@ipen.br>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+X-Barracuda-Connect: webmail.ip.ipen.br[10.0.10.11]
+X-Barracuda-Start-Time: 1734086873
+X-Barracuda-URL: https://10.40.40.18:443/cgi-mod/mark.cgi
+X-Barracuda-Scan-Msg-Size: 512
+X-Virus-Scanned: by bsmtpd at ipen.br
+X-Barracuda-BRTS-Status: 1
+X-Barracuda-BRTS-Evidence: 34fbb5788938ad5710ad28835fd12206-499-txt
+X-Barracuda-Spam-Score: 0.00
+X-Barracuda-Spam-Status: No, SCORE=0.00 using global scores of TAG_LEVEL=1000.0 QUARANTINE_LEVEL=1000.0 KILL_LEVEL=1000.0 tests=NO_REAL_NAME
+X-Barracuda-Spam-Report: Code version 3.2, rules version 3.2.3.45577
+	Rule breakdown below
+	 pts rule name              description
+	---- ---------------------- --------------------------------------------------
+	0.00 NO_REAL_NAME           From: does not include a real name
 
-Bjorn Helgaas <helgaas@kernel.org> writes:
+I am Tomasz Chmielewski, a Portfolio Manager and Chartered=20
+Financial Analyst affiliated with Iwoca Poland Sp. Z OO in=20
+Poland. I have the privilege of working with distinguished=20
+investors who are eager to support your company's current=20
+initiatives, thereby broadening their investment portfolios. If=20
+this proposal aligns with your interests, I invite you to=20
+respond, and I will gladly share more information to assist you.
 
-> [cc->to: Igor]
->
-> On Mon, Dec 09, 2024 at 02:06:31PM +0100, Philipp Stanner wrote:
->> pci_intx() is a hybrid function which can sometimes be managed through
->> devres. To remove this hybrid nature from pci_intx(), it is necessary to
->> port users to either an always-managed or a never-managed version.
->> 
->> qtnfmac enables its PCI-Device with pcim_enable_device(). Thus, it needs
->> the always-managed version.
->> 
->> Replace pci_intx() with pcim_intx().
->> 
->> Signed-off-by: Philipp Stanner <pstanner@redhat.com>
->> Acked-by: Kalle Valo <kvalo@kernel.org>
->
-> Hoping for an ack from Igor, too.
-
-Igor hasn't been around for a while so I'm not expecting see an ack from
-him, I think the whole qtnfmac driver should be removed in the future.
-Feel free to take the patch as is.
-
--- 
-https://patchwork.kernel.org/project/linux-wireless/list/
-
-https://wireless.wiki.kernel.org/en/developers/documentation/submittingpatches
+=20
+Yours sincerely,=20
+Tomasz Chmielewski Warsaw, Mazowieckie,
+=20
+Poland.
