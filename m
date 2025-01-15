@@ -1,100 +1,83 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
+	(using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 52A1B2101B1;
-	Fri, 10 Jan 2025 14:28:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1A8E178F3B
+	for <ntb@lists.linux.dev>; Wed, 15 Jan 2025 18:28:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=83.149.199.84
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736519315; cv=none; b=ceR27TePyGbKRE3CFhFTMgerbAXGZPfcQ8bi0R4CMIgFQGuxRcmfyNYag2mdHFbxOEe9agtNdjtsellSfIEZ3XCeS86ip6t4WCAXeCCRlr0sLr2fLPYYyL3k4nQunLoF4ZA10pgvBkvFDf2Xa+B+CXYoBc//kJGWAzHGJ76O8d8=
+	t=1736965725; cv=none; b=j0OPzbDRaPFWfhz2Gh9fGOSIMaEUJZjSATeiJi8gAfDVRza6Q0LHcEtlMEtdmjmbEoJC/Q7BbRVb3x84sDhn1vheKfYi8TFL8q2M2rJXyEzvh45WlZTFzIHIA8U+VpHIkxft9l2YTAQ+Ma8+rr4x9uOyPZJbSGCH0UETTmJGRFs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736519315; c=relaxed/simple;
-	bh=3pBOH7d9tl4Ey6CeHCMF5/wGwbp+k8zOM+QYd5Ry+Vk=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=rzcoXfrVX4oj4vf9EPjUES1c9eLdHlq66h2Q7K4VqnpPJ6h/6ScpPq4rQ4Giqr33QzR0OfTEwbC/6RBYQxQblVaqtJoK6k/naLYTnyvXaN1nPPBbTJKGGUMfkbfI0CHpjE2J4QQjqfI07x7BmdhIFpl4lkFK5XQFx0ygFUWu+jE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b=FN/vx8wl; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1736965725; c=relaxed/simple;
+	bh=xNeYzSK3zL2lGDOr6R1RJV1FuHlfXpO8MLFSu4jISbc=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=k0YYGSu7YzRULW5ukTdSyAvcdyr21W4SPWro43E63wmWJjVRrlGIKFLXtqWUuswn+t90jXavx7tiNgdjDVyxC1pUoH7FaxEBapuobUZtovwo+jlP0i0IpuwVsDxLSrGHbenbMN0gLEAuCSY3UcW9k9K5uGwpn/lv3ffG6IhxKzQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ispras.ru; spf=pass smtp.mailfrom=ispras.ru; dkim=pass (1024-bit key) header.d=ispras.ru header.i=@ispras.ru header.b=RmfnBgs8; arc=none smtp.client-ip=83.149.199.84
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ispras.ru
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ispras.ru
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="FN/vx8wl"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A8B86C4CED6;
-	Fri, 10 Jan 2025 14:28:33 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-	s=korg; t=1736519315;
-	bh=3pBOH7d9tl4Ey6CeHCMF5/wGwbp+k8zOM+QYd5Ry+Vk=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=FN/vx8wlpkwlPM2m3b6cbT2/bOBjkS0UtUXsDQYDOM9MJGdnRhUu6ntgWuEP+hb6I
-	 DqTbI13RfuE9Imou7PtxAwDxdfBclNY5CaSyu/d5nGzOInNQaoHv/qn8qsj9L8DXW5
-	 YuWIAN2tAS6j1wdzWTSJRniH5DkbkcVfKiOfzSIs=
-Date: Fri, 10 Jan 2025 15:28:31 +0100
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To: Philipp Stanner <pstanner@redhat.com>
-Cc: amien Le Moal <dlemoal@kernel.org>, Niklas Cassel <cassel@kernel.org>,
-	Basavaraj Natikar <basavaraj.natikar@amd.com>,
-	Jiri Kosina <jikos@kernel.org>,
-	Benjamin Tissoires <bentiss@kernel.org>,
-	Arnd Bergmann <arnd@arndb.de>, Alex Dubov <oakad@yahoo.com>,
-	Sudarsana Kalluru <skalluru@marvell.com>,
-	Manish Chopra <manishc@marvell.com>,
-	Andrew Lunn <andrew+netdev@lunn.ch>,
-	"David S. Miller" <davem@davemloft.net>,
-	Eric Dumazet <edumazet@google.com>,
-	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
-	Rasesh Mody <rmody@marvell.com>, GR-Linux-NIC-Dev@marvell.com,
-	Igor Mitsyanko <imitsyanko@quantenna.com>,
-	Sergey Matyukevich <geomatsi@gmail.com>,
-	Kalle Valo <kvalo@kernel.org>, Sanjay R Mehta <sanju.mehta@amd.com>,
-	Shyam Sundar S K <Shyam-sundar.S-k@amd.com>,
-	Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>,
+	dkim=pass (1024-bit key) header.d=ispras.ru header.i=@ispras.ru header.b="RmfnBgs8"
+Received: from fpc.intra.ispras.ru (unknown [10.10.165.17])
+	by mail.ispras.ru (Postfix) with ESMTPSA id 6BD9E40777BC;
+	Wed, 15 Jan 2025 18:28:33 +0000 (UTC)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 6BD9E40777BC
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ispras.ru;
+	s=default; t=1736965713;
+	bh=/8Eyh7O9bpDg/OyeWKB2DrDQebuGwJUMHzlI8f8c3+c=;
+	h=From:To:Cc:Subject:Date:From;
+	b=RmfnBgs8y57Wtm0yVOvSNzvSKhVWlksCZtzTYLaHayuR9Not45ns5v8AM1L8z2jOs
+	 F2NjrTid2xR2NGxl/06rWX3467ONMtDmk8gPZ4quzGQLCtq8BoXKXnwZYmHNJPWx1C
+	 cGAPI8AFXjbm2EdaYNJ1jNfiHuFqsHI3ULksVHg4=
+From: Fedor Pchelkin <pchelkin@ispras.ru>
+To: Jon Mason <jdmason@kudzu.us>
+Cc: Fedor Pchelkin <pchelkin@ispras.ru>,
+	Dave Jiang <dave.jiang@intel.com>,
 	Allen Hubbe <allenbh@gmail.com>,
-	Bjorn Helgaas <bhelgaas@google.com>,
-	Alex Williamson <alex.williamson@redhat.com>,
-	Juergen Gross <jgross@suse.com>,
-	Stefano Stabellini <sstabellini@kernel.org>,
-	Oleksandr Tyshchenko <oleksandr_tyshchenko@epam.com>,
-	Mario Limonciello <mario.limonciello@amd.com>,
-	Chen Ni <nichen@iscas.ac.cn>, Ricky Wu <ricky_wu@realtek.com>,
-	Al Viro <viro@zeniv.linux.org.uk>, Breno Leitao <leitao@debian.org>,
-	Thomas Gleixner <tglx@linutronix.de>,
-	Kevin Tian <kevin.tian@intel.com>,
-	Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-	Mostafa Saleh <smostafa@google.com>, Jason Gunthorpe <jgg@ziepe.ca>,
-	Yi Liu <yi.l.liu@intel.com>, Kunwu Chan <chentao@kylinos.cn>,
-	Dan Carpenter <dan.carpenter@linaro.org>,
-	"Dr. David Alan Gilbert" <linux@treblig.org>,
-	Ankit Agrawal <ankita@nvidia.com>,
-	Reinette Chatre <reinette.chatre@intel.com>,
-	Eric Auger <eric.auger@redhat.com>, Ye Bin <yebin10@huawei.com>,
-	linux-ide@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-input@vger.kernel.org, netdev@vger.kernel.org,
-	linux-wireless@vger.kernel.org, ntb@lists.linux.dev,
-	linux-pci@vger.kernel.org, kvm@vger.kernel.org,
-	xen-devel@lists.xenproject.org
-Subject: Re: [PATCH v3 05/11] misc: Use never-managed version of pci_intx()
-Message-ID: <2025011022-garnet-matriarch-e6a0@gregkh>
-References: <20241209130632.132074-2-pstanner@redhat.com>
- <20241209130632.132074-7-pstanner@redhat.com>
+	Logan Gunthorpe <logang@deltatee.com>,
+	ntb@lists.linux.dev,
+	linux-kernel@vger.kernel.org,
+	lvc-project@linuxtesting.org,
+	stable@vger.kernel.org
+Subject: [PATCH] ntb: use 64-bit arithmetic for the MSI doorbell mask
+Date: Wed, 15 Jan 2025 21:28:17 +0300
+Message-Id: <20250115182817.24445-1-pchelkin@ispras.ru>
+X-Mailer: git-send-email 2.39.5
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20241209130632.132074-7-pstanner@redhat.com>
+Content-Transfer-Encoding: 8bit
 
-On Mon, Dec 09, 2024 at 02:06:27PM +0100, Philipp Stanner wrote:
-> pci_intx() is a hybrid function which can sometimes be managed through
-> devres. To remove this hybrid nature from pci_intx(), it is necessary to
-> port users to either an always-managed or a never-managed version.
-> 
-> cardreader/rtsx_pcr.c and tifm_7xx1.c enable their PCI-Device with
-> pci_enable_device(). Thus, they need the never-managed version.
-> 
-> Replace pci_intx() with pci_intx_unmanaged().
-> 
-> Signed-off-by: Philipp Stanner <pstanner@redhat.com>
-> ---
->  drivers/misc/cardreader/rtsx_pcr.c | 2 +-
->  drivers/misc/tifm_7xx1.c           | 6 +++---
->  2 files changed, 4 insertions(+), 4 deletions(-)
+msi_db_mask is of type 'u64', still the standard 'int' arithmetic is
+performed to compute its value.
 
-Acked-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+While most of the ntb_hw drivers actually don't utilize the higher 32
+bits of the doorbell mask now, this may be the case for Switchtec - see
+switchtec_ntb_init_db().
+
+Found by Linux Verification Center (linuxtesting.org) with SVACE static
+analysis tool.
+
+Fixes: 2b0569b3b7e6 ("NTB: Add MSI interrupt support to ntb_transport")
+Cc: stable@vger.kernel.org
+Signed-off-by: Fedor Pchelkin <pchelkin@ispras.ru>
+---
+ drivers/ntb/ntb_transport.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+index a22ea4a4b202..4f775c3e218f 100644
+--- a/drivers/ntb/ntb_transport.c
++++ b/drivers/ntb/ntb_transport.c
+@@ -1353,7 +1353,7 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
+ 	qp_count = ilog2(qp_bitmap);
+ 	if (nt->use_msi) {
+ 		qp_count -= 1;
+-		nt->msi_db_mask = 1 << qp_count;
++		nt->msi_db_mask = BIT_ULL(qp_count);
+ 		ntb_db_clear_mask(ndev, nt->msi_db_mask);
+ 	}
+ 
+-- 
+2.39.5
+
