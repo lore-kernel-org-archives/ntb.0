@@ -1,44 +1,46 @@
-Received: from mx.treblig.org (mx.treblig.org [46.235.229.95])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6CE0B2862B7;
-	Thu, 20 Feb 2025 02:04:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=46.235.229.95
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 80DAF33EA;
+	Fri, 21 Feb 2025 08:57:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740017046; cv=none; b=J5xv6EKZSVcwrWJAIefPMe8oYlvRnexAc/xKlj8kxqLHfkHmKtqCbTDgzOvTVBqNKPRZeD/kH+Nj6d8xDdZFF0viXWlk+M0CaCKtYvBDUpZDaUURibvk/Hz+O/vcpWcInyHnwZ6sgQ0nvMIW2FFUs0sFmzSImes0CCvzNx+TQa0=
+	t=1740128276; cv=none; b=aHIgtNJ9AvcxQQ2WwcKs3ogCQ3paI6RCg5CkxA2ps0HAlHnojVK9U/azDEvzIULepG6q2d/4Fo9Ep5LUh19apvAzbJ9nYFx92ZFbf3EQ+YU8ET5pSMh8ZaQSP0SmsaknuFK9S16XukPn4FlV6FsTvU7QiFh2cnvO1wbVWA6dXMk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740017046; c=relaxed/simple;
-	bh=x5cjDMDsv7w85Yapce22+pZzXw+ddrsPkbcqrguWU9E=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=m3CzwAiG7HbySWppnK2/fNXQlCf/mSe+K3+nBeQZKxibvdJjY8sw+JhIxy6rryrPIBrrPksMRwPlW8y51KTXuR+eU+XXo7zyrL9fSvIoJzWuA8ZlZhce73CJaTjnR3n4H67+sJHK3AIrKooCRc0gIRcwfxHAhM+PPlJFx3tZ7wI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=treblig.org; spf=pass smtp.mailfrom=treblig.org; dkim=pass (2048-bit key) header.d=treblig.org header.i=@treblig.org header.b=E6wGL2zM; arc=none smtp.client-ip=46.235.229.95
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=treblig.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=treblig.org
+	s=arc-20240116; t=1740128276; c=relaxed/simple;
+	bh=fBw0UDC89FHrebKrtI/LVhQbDEBN1NoKY48D4jfNI/4=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=g+BTgLbcQNE7ww/NskVQO3Ap4YXgIRyfl8oXBaEfhkRba1k2YQbGdi+Dir0iFxFuusPjRsigC5Pbp9a0qWA8vrtyDksSaf20KpnI304sxhwIBZ5Kp0HMGPkmvpFhQSouj9MedI3iec/V0LKt/fh6ZFlgKPdPVoCiWineu3zksOQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=e7osRNB1; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=treblig.org header.i=@treblig.org header.b="E6wGL2zM"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=treblig.org
-	; s=bytemarkmx; h=MIME-Version:Message-ID:Date:Subject:From:Content-Type:From
-	:Subject; bh=61OljuFLi7l3nQhb+KjzkmEHrgBFPI8Hr7sRlq6rWZc=; b=E6wGL2zMpuMApSOS
-	5JL6u4TUBxWezXwjUp0eWrvq3CPF05dtqOkp7BppMHGvlWhMrL+CkCUv6ycEPScES0K5ATcCdavh3
-	ifFLSd/p/S4SAMxTX0whh7+pMacFysf9UfYbVhAoDeCKP/g9YYq18ePSQfqYz4eCPr2LARpfbCQ/V
-	yutZu//hGVWm3F32ypI0bqJBUQpHfqGmrlqNPrvlNtBUyn01oecKSAffXXeMLnzqOp6necBdHFQ5P
-	6gAGtAWzkqh9RkAREzuSV4f2ctwUciuxdFozHPTWdaJ5+Tm51/59lm0w5t4kD1EbrT5++CNAwwTzR
-	I6vCRG427UrSNXZgMQ==;
-Received: from localhost ([127.0.0.1] helo=dalek.home.treblig.org)
-	by mx.treblig.org with esmtp (Exim 4.96)
-	(envelope-from <linux@treblig.org>)
-	id 1tkvuw-00H3Zg-1m;
-	Thu, 20 Feb 2025 02:03:58 +0000
-From: linux@treblig.org
-To: jdmason@kudzu.us,
-	dave.jiang@intel.com,
-	allenbh@gmail.com
-Cc: ntb@lists.linux.dev,
-	linux-kernel@vger.kernel.org,
-	"Dr. David Alan Gilbert" <linux@treblig.org>
-Subject: [PATCH] NTB/msi: Remove unused functions
-Date: Thu, 20 Feb 2025 02:03:57 +0000
-Message-ID: <20250220020357.122973-1-linux@treblig.org>
-X-Mailer: git-send-email 2.48.1
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="e7osRNB1"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BEF7FC4CED6;
+	Fri, 21 Feb 2025 08:57:53 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1740128275;
+	bh=fBw0UDC89FHrebKrtI/LVhQbDEBN1NoKY48D4jfNI/4=;
+	h=From:To:Cc:Subject:Date:From;
+	b=e7osRNB1vgiJM2lAyOgcJTiKzPsS4C9vEWWgtvHhyI+qQ5MYeb/DrEEcUxbRF92cS
+	 r1tfUJW/bGTWJDRoo/JmGIkybzYak7KUd45njB/NKpE08vJkHvtzDOM8v6t5n2yP78
+	 oZ99aVg/b0tvW245qk2ktNfDYzWkeubMvcTMe+HVpzg8feb4ZYNnFyN0fYwCgYKGWg
+	 dZzQ9r9W2SsMvyYtB1CJBK8+/6azVbi3OZOYwEELSujq8JNRTxSk6dp10TYCHzslPn
+	 Y4ZmtzuHW5rHbqD3IREwleZr+a/K4XQUFRc+CtugNLNjErcX0k/rzjVC/tuYoXCITo
+	 i0bDJYxaquWWw==
+From: Arnd Bergmann <arnd@kernel.org>
+To: Jon Mason <jdmason@kudzu.us>,
+	Dave Jiang <dave.jiang@intel.com>,
+	Allen Hubbe <allenbh@gmail.com>
+Cc: Arnd Bergmann <arnd@arndb.de>,
+	kernel test robot <lkp@intel.com>,
+	Bjorn Helgaas <bhelgaas@google.com>,
+	Damien Le Moal <dlemoal@kernel.org>,
+	zhang jiao <zhangjiao2@cmss.chinamobile.com>,
+	Philipp Stanner <pstanner@redhat.com>,
+	ntb@lists.linux.dev,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH] ntb: reduce stack usage in idt_scan_mws
+Date: Fri, 21 Feb 2025 09:57:25 +0100
+Message-Id: <20250221085748.2298463-1-arnd@kernel.org>
+X-Mailer: git-send-email 2.39.5
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -47,139 +49,72 @@ List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-From: "Dr. David Alan Gilbert" <linux@treblig.org>
+From: Arnd Bergmann <arnd@arndb.de>
 
-ntbm_msi_free_irq() and ntb_msi_peer_addr() were both added in 2019's
-commit 26b3a37b9284 ("NTB: Introduce MSI library")
-but have remained unused.
+idt_scan_mws() puts a large fixed-size array on the stack and copies
+it into a smaller dynamically allocated array at the end. On 32-bit
+targets, the fixed size can easily exceed the warning limit for
+possible stack overflow:
 
-Remove them, and the ntbm_msi_callback_match() helper that
-was used by ntbm_msi_free_irq().
+drivers/ntb/hw/idt/ntb_hw_idt.c:1041:27: error: stack frame size (1032) exceeds limit (1024) in 'idt_scan_mws' [-Werror,-Wframe-larger-than]
 
-Signed-off-by: Dr. David Alan Gilbert <linux@treblig.org>
+Change it to instead just always use dynamic allocation for the
+array from the start. It's too big for the stack, but not actually
+all that much for a permanent allocation.
+
+Reported-by: kernel test robot <lkp@intel.com>
+Closes: https://lore.kernel.org/all/202205111109.PiKTruEj-lkp@intel.com/
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 ---
- drivers/ntb/msi.c   | 64 ---------------------------------------------
- include/linux/ntb.h | 14 ----------
- 2 files changed, 78 deletions(-)
+A number of users have reported this in the past, but I couldn't
+find any other patch for it so far.
+---
+ drivers/ntb/hw/idt/ntb_hw_idt.c | 18 +++++++-----------
+ 1 file changed, 7 insertions(+), 11 deletions(-)
 
-diff --git a/drivers/ntb/msi.c b/drivers/ntb/msi.c
-index 6295e55ef85e..8ad9be95518f 100644
---- a/drivers/ntb/msi.c
-+++ b/drivers/ntb/msi.c
-@@ -321,37 +321,6 @@ int ntbm_msi_request_threaded_irq(struct ntb_dev *ntb, irq_handler_t handler,
- }
- EXPORT_SYMBOL(ntbm_msi_request_threaded_irq);
- 
--static int ntbm_msi_callback_match(struct device *dev, void *res, void *data)
--{
--	struct ntb_dev *ntb = dev_ntb(dev);
--	struct ntb_msi_devres *dr = res;
--
--	return dr->ntb == ntb && dr->entry == data;
--}
--
--/**
-- * ntbm_msi_free_irq() - free an interrupt
-- * @ntb:	NTB device context
-- * @irq:	Interrupt line to free
-- * @dev_id:	Device identity to free
-- *
-- * This function should be used to manually free IRQs allocated with
-- * ntbm_request_[threaded_]irq().
-- */
--void ntbm_msi_free_irq(struct ntb_dev *ntb, unsigned int irq, void *dev_id)
--{
--	struct msi_desc *entry = irq_get_msi_desc(irq);
--
--	entry->write_msi_msg = NULL;
--	entry->write_msi_msg_data = NULL;
--
--	WARN_ON(devres_destroy(&ntb->dev, ntbm_msi_callback_release,
--			       ntbm_msi_callback_match, entry));
--
--	devm_free_irq(&ntb->dev, irq, dev_id);
--}
--EXPORT_SYMBOL(ntbm_msi_free_irq);
--
- /**
-  * ntb_msi_peer_trigger() - Trigger an interrupt handler on a peer
-  * @ntb:	NTB device context
-@@ -379,36 +348,3 @@ int ntb_msi_peer_trigger(struct ntb_dev *ntb, int peer,
- 	return 0;
- }
- EXPORT_SYMBOL(ntb_msi_peer_trigger);
--
--/**
-- * ntb_msi_peer_addr() - Get the DMA address to trigger a peer's MSI interrupt
-- * @ntb:	NTB device context
-- * @peer:	Peer index
-- * @desc:	MSI descriptor data which triggers the interrupt
-- * @msi_addr:   Physical address to trigger the interrupt
-- *
-- * This function allows using DMA engines to trigger an interrupt
-- * (for example, trigger an interrupt to process the data after
-- * sending it). To trigger the interrupt, write @desc.data to the address
-- * returned in @msi_addr
-- *
-- * Return: Zero on success, otherwise a negative error number.
-- */
--int ntb_msi_peer_addr(struct ntb_dev *ntb, int peer,
--		      struct ntb_msi_desc *desc,
--		      phys_addr_t *msi_addr)
--{
--	int peer_widx = ntb_peer_mw_count(ntb) - 1 - peer;
--	phys_addr_t mw_phys_addr;
--	int ret;
--
--	ret = ntb_peer_mw_get_addr(ntb, peer_widx, &mw_phys_addr, NULL);
--	if (ret)
--		return ret;
--
--	if (msi_addr)
--		*msi_addr = mw_phys_addr + desc->addr_offset;
--
--	return 0;
--}
--EXPORT_SYMBOL(ntb_msi_peer_addr);
-diff --git a/include/linux/ntb.h b/include/linux/ntb.h
-index 191b524e5c0d..8ff9d663096b 100644
---- a/include/linux/ntb.h
-+++ b/include/linux/ntb.h
-@@ -1647,12 +1647,8 @@ int ntbm_msi_request_threaded_irq(struct ntb_dev *ntb, irq_handler_t handler,
- 				  irq_handler_t thread_fn,
- 				  const char *name, void *dev_id,
- 				  struct ntb_msi_desc *msi_desc);
--void ntbm_msi_free_irq(struct ntb_dev *ntb, unsigned int irq, void *dev_id);
- int ntb_msi_peer_trigger(struct ntb_dev *ntb, int peer,
- 			 struct ntb_msi_desc *desc);
--int ntb_msi_peer_addr(struct ntb_dev *ntb, int peer,
--		      struct ntb_msi_desc *desc,
--		      phys_addr_t *msi_addr);
- 
- #else /* not CONFIG_NTB_MSI */
- 
-@@ -1674,21 +1670,11 @@ static inline int ntbm_msi_request_threaded_irq(struct ntb_dev *ntb,
+diff --git a/drivers/ntb/hw/idt/ntb_hw_idt.c b/drivers/ntb/hw/idt/ntb_hw_idt.c
+index 544d8a4d2af5..f27df8d7f3b9 100644
+--- a/drivers/ntb/hw/idt/ntb_hw_idt.c
++++ b/drivers/ntb/hw/idt/ntb_hw_idt.c
+@@ -1041,7 +1041,7 @@ static inline char *idt_get_mw_name(enum idt_mw_type mw_type)
+ static struct idt_mw_cfg *idt_scan_mws(struct idt_ntb_dev *ndev, int port,
+ 				       unsigned char *mw_cnt)
  {
- 	return -EOPNOTSUPP;
- }
--static inline void ntbm_msi_free_irq(struct ntb_dev *ntb, unsigned int irq,
--				     void *dev_id) {}
- static inline int ntb_msi_peer_trigger(struct ntb_dev *ntb, int peer,
- 				       struct ntb_msi_desc *desc)
- {
- 	return -EOPNOTSUPP;
- }
--static inline int ntb_msi_peer_addr(struct ntb_dev *ntb, int peer,
--				    struct ntb_msi_desc *desc,
--				    phys_addr_t *msi_addr)
--{
--	return -EOPNOTSUPP;
--
--}
--
- #endif /* CONFIG_NTB_MSI */
+-	struct idt_mw_cfg mws[IDT_MAX_NR_MWS], *ret_mws;
++	struct idt_mw_cfg *mws;
+ 	const struct idt_ntb_bar *bars;
+ 	enum idt_mw_type mw_type;
+ 	unsigned char widx, bidx, en_cnt;
+@@ -1049,6 +1049,11 @@ static struct idt_mw_cfg *idt_scan_mws(struct idt_ntb_dev *ndev, int port,
+ 	int aprt_size;
+ 	u32 data;
  
- static inline int ntbm_msi_request_irq(struct ntb_dev *ntb,
++	mws = devm_kcalloc(&ndev->ntb.pdev->dev, IDT_MAX_NR_MWS,
++			   sizeof(*mws), GFP_KERNEL);
++	if (!mws)
++		return ERR_PTR(-ENOMEM);
++
+ 	/* Retrieve the array of the BARs registers */
+ 	bars = portdata_tbl[port].bars;
+ 
+@@ -1103,16 +1108,7 @@ static struct idt_mw_cfg *idt_scan_mws(struct idt_ntb_dev *ndev, int port,
+ 		}
+ 	}
+ 
+-	/* Allocate memory for memory window descriptors */
+-	ret_mws = devm_kcalloc(&ndev->ntb.pdev->dev, *mw_cnt, sizeof(*ret_mws),
+-			       GFP_KERNEL);
+-	if (!ret_mws)
+-		return ERR_PTR(-ENOMEM);
+-
+-	/* Copy the info of detected memory windows */
+-	memcpy(ret_mws, mws, (*mw_cnt)*sizeof(*ret_mws));
+-
+-	return ret_mws;
++	return mws;
+ }
+ 
+ /*
 -- 
-2.48.1
+2.39.5
 
