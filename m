@@ -1,142 +1,128 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.8])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3E47D1E493
-	for <ntb@lists.linux.dev>; Fri, 21 Feb 2025 15:47:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.8
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CFA2B214A9A
+	for <ntb@lists.linux.dev>; Fri, 21 Feb 2025 16:53:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740152871; cv=none; b=KtE4q08tZGvPY14fjVUnz2QT3mbtsnxSgBpJ5xw9+wBTOv+RqT6ejTPtRxDJgwrxXttJo1mOM2iQHnd1bpQzBXBN474BLnWYyGoJ6uZoSQ7QkK2F8CYH8CU5QWyMc5gKUTkY4WO/HITRLUyrqhVRc5pdXFMcenfRyyKHr98b89Q=
+	t=1740156823; cv=none; b=pnCfhVn/HF8YjZA2vczmh5DEldRqBRm9PV48R2hk8e7Q3OmctxdH9bBRj1gxnmZCL/0bwH/zoVUjuE4zcfjvewN93vCWsv+Np3Qkbrjp251XH7tLNXXKYp5T83DkQnd2R+OxYnizwVnVnavLr88z2q5HCCcoxWIEU5wS2HsS0H8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740152871; c=relaxed/simple;
-	bh=g+HuL5PbvHlLrqAdSGE6xkj7LNnhPB5aBd77hBqjA2s=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=mZC8pyWtjqShNnO1ZQj/6QbNShCELIoENxpZRjheSCuiNL08LuAPlhZ5TLm921mg4JvCu5LFThhIdgBIoLb1A8Hja11I4pP/UbmRNWocHnO9mvIfpoI1HdklYBiVT0STfyrDrnvf+bk18BZS+Nq+VmoyM3dqIZJtZvsrLwDYUFU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=lFeCZQLU; arc=none smtp.client-ip=192.198.163.8
+	s=arc-20240116; t=1740156823; c=relaxed/simple;
+	bh=2rRlTeGBa/v+F/AVLqrsIcSSJAryM6w5Ldgl/1cCG8Y=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=nnk41xQJyqV8UZBmuOF3yduWM1dxTwhwAv4vCfl75LnNr4lXe8Zv0JypZerYthQLWm2Utjidwf4UClVTPiV+aMzlsYEmweoSAuMgBS42M187P23TCsQVSw/4v/uoZpS94t2nFcY0xU7Zam8Yxvv6I/xIT0QgvTtWNoqJ3C6e4dE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=TVBw0SDh; arc=none smtp.client-ip=198.175.65.18
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="lFeCZQLU"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="TVBw0SDh"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1740152870; x=1771688870;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=g+HuL5PbvHlLrqAdSGE6xkj7LNnhPB5aBd77hBqjA2s=;
-  b=lFeCZQLU2F+NUbu0EuOaOfCTaN3nQuH3OXevYxHZBAwieQ3LZAH7rU5p
-   b3phMO+XHiU4FkN+spRCJPDAdf+UWGoEIUkT5PhnY9RZLOb/WcAhUQ0Zk
-   fslHMI8HD+kb466pv34MCYFgZ3n71hCEqjv7WDEdGlWYQp4dg9TvuQ8p8
-   yBCd7HigSafm9MUK0qaB8ZfbzoGyOGCnQ/04xCHPTsxmFglhPcVk5pXOy
-   /1m3iydr1HdNVIwRElfviJGBAjBBKgVkJWYX0mc1GamWrcjs4ko2WKTI2
-   d82/qt85W6B1q57rIZL1VLMAhAlm0ejMnvadQYlaa3sXVAqHUP8SsJ/x7
+  t=1740156821; x=1771692821;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=2rRlTeGBa/v+F/AVLqrsIcSSJAryM6w5Ldgl/1cCG8Y=;
+  b=TVBw0SDhRRajyo2oowxxlchSqr82JNSPKjoZtggi7wr81fbQuwFhX5VN
+   PqfKmmkela7pevq7qKvBorvbPUUrVJxgED+uVbWxmM6o7OqtUsKGtIEvc
+   D8jTcgpBybb9PcXuDu1uD5FrTgoPt2RGsifKM63oM72BFfkgTuRkNT4gz
+   30g+L13/n912+/6W3KXvE27sFJycllTmvjqmxne9WqgqqyVzSRMml9fbq
+   60c3dJDkOnqFDc6oEw+DLUVIyejToGv2SqupGda+6B3Tb43x+nlQpvFJs
+   eNwbl0bYhgMg8Ac3eU1okYMhe7bvCvhKYZM8IMixl6m3Jg4uUsDspChdD
    g==;
-X-CSE-ConnectionGUID: 06/vYQ3ESB+SGZhqc+V6aQ==
-X-CSE-MsgGUID: 9NaDuyiQRsKcVMS5ObPbaw==
-X-IronPort-AV: E=McAfee;i="6700,10204,11352"; a="58524604"
-X-IronPort-AV: E=Sophos;i="6.13,305,1732608000"; 
-   d="scan'208";a="58524604"
-Received: from orviesa010.jf.intel.com ([10.64.159.150])
-  by fmvoesa102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 21 Feb 2025 07:47:49 -0800
-X-CSE-ConnectionGUID: +pSRTvMaQnaahvl/d6uFNQ==
-X-CSE-MsgGUID: YlgDdXvdRmqP7cAl+zgw9Q==
+X-CSE-ConnectionGUID: 3scPa7iPQBCF51rdaPiWgA==
+X-CSE-MsgGUID: Tm8tFUzTQE2W6QXcksSCiQ==
+X-IronPort-AV: E=McAfee;i="6700,10204,11314"; a="41186801"
+X-IronPort-AV: E=Sophos;i="6.12,310,1728975600"; 
+   d="scan'208";a="41186801"
+Received: from fmviesa003.fm.intel.com ([10.60.135.143])
+  by orvoesa110.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 21 Feb 2025 08:53:41 -0800
+X-CSE-ConnectionGUID: etn1Crk0T8mejC6g/A9O+g==
+X-CSE-MsgGUID: bHwbSUa4R7qC9s8Tvw6bSQ==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.12,224,1728975600"; 
-   d="scan'208";a="115237204"
-Received: from inaky-mobl1.amr.corp.intel.com (HELO [10.125.110.189]) ([10.125.110.189])
-  by orviesa010-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 21 Feb 2025 07:47:49 -0800
-Message-ID: <0e7e6ce7-7d7b-49cc-90eb-a07e831441d8@intel.com>
-Date: Fri, 21 Feb 2025 08:47:47 -0700
+   d="scan'208";a="119540590"
+Received: from jraag-z790m-itx-wifi.iind.intel.com ([10.190.239.23])
+  by fmviesa003.fm.intel.com with ESMTP; 21 Feb 2025 08:53:36 -0800
+From: Raag Jadav <raag.jadav@intel.com>
+To: perex@perex.cz,
+	tiwai@suse.com,
+	broonie@kernel.org,
+	lgirdwood@gmail.com,
+	deller@gmx.de,
+	andriy.shevchenko@linux.intel.com,
+	sre@kernel.org,
+	sakari.ailus@linux.intel.com,
+	mchehab@kernel.org,
+	hverkuil-cisco@xs4all.nl,
+	jdmason@kudzu.us,
+	fancer.lancer@gmail.com
+Cc: linux-sound@vger.kernel.org,
+	linux-fbdev@vger.kernel.org,
+	linux-pm@vger.kernel.org,
+	linux-media@vger.kernel.org,
+	ntb@lists.linux.dev,
+	linux-kernel@vger.kernel.org,
+	Raag Jadav <raag.jadav@intel.com>
+Subject: [PATCH v1 00/13] Convert to use devm_kmemdup_array()
+Date: Fri, 21 Feb 2025 22:23:20 +0530
+Message-Id: <20250221165333.2780888-1-raag.jadav@intel.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] ntb: reduce stack usage in idt_scan_mws
-To: Arnd Bergmann <arnd@kernel.org>, Jon Mason <jdmason@kudzu.us>,
- Allen Hubbe <allenbh@gmail.com>
-Cc: Arnd Bergmann <arnd@arndb.de>, kernel test robot <lkp@intel.com>,
- Bjorn Helgaas <bhelgaas@google.com>, Damien Le Moal <dlemoal@kernel.org>,
- zhang jiao <zhangjiao2@cmss.chinamobile.com>,
- Philipp Stanner <pstanner@redhat.com>, ntb@lists.linux.dev,
- linux-kernel@vger.kernel.org
-References: <20250221085748.2298463-1-arnd@kernel.org>
-Content-Language: en-US
-From: Dave Jiang <dave.jiang@intel.com>
-In-Reply-To: <20250221085748.2298463-1-arnd@kernel.org>
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+
+This series is the second wave of patches to add users of newly introduced
+devm_kmemdup_array() helper. Original series on [1].
+
+This depends on changes available on immutable tag[2]. Feel free to pick
+your subsystem patches with it, or share your preferred way to route them.
+
+[1] https://lore.kernel.org/r/20250212062513.2254767-1-raag.jadav@intel.com
+[2] https://lore.kernel.org/r/Z7cqCaME4LxTTBn6@black.fi.intel.com
+
+Raag Jadav (13):
+  ASoC: Intel: avs: use devm_kmemdup_array()
+  ASoC: hdac_hdmi: use devm_kmemdup_array()
+  ASoC: tlv320dac33: use devm_kmemdup_array()
+  ASoC: uda1380: use devm_kmemdup_array()
+  ASoC: meson: axg-tdm-interface: use devm_kmemdup_array()
+  ASoC: uniphier: use devm_kmemdup_array()
+  fbdev: pxafb: use devm_kmemdup_array()
+  power: supply: sc27xx: use devm_kmemdup_array()
+  regulator: devres: use devm_kmemdup_array()
+  regulator: cros-ec: use devm_kmemdup_array()
+  media: atmel-isi: use devm_kmemdup_array()
+  media: stm32-dcmi: use devm_kmemdup_array()
+  ntb: idt: use devm_kmemdup_array()
+
+ drivers/media/platform/atmel/atmel-isi.c     |  8 ++------
+ drivers/media/platform/st/stm32/stm32-dcmi.c |  8 ++------
+ drivers/ntb/hw/idt/ntb_hw_idt.c              | 11 +++-------
+ drivers/power/supply/sc27xx_fuel_gauge.c     |  5 ++---
+ drivers/regulator/cros-ec-regulator.c        |  4 ++--
+ drivers/regulator/devres.c                   |  5 ++---
+ drivers/video/fbdev/pxafb.c                  | 21 ++++++++------------
+ sound/soc/codecs/hdac_hdmi.c                 |  3 +--
+ sound/soc/codecs/tlv320dac33.c               |  6 ++----
+ sound/soc/codecs/uda1380.c                   |  6 ++----
+ sound/soc/intel/avs/boards/da7219.c          |  3 ++-
+ sound/soc/intel/avs/boards/es8336.c          |  3 ++-
+ sound/soc/intel/avs/boards/nau8825.c         |  3 ++-
+ sound/soc/intel/avs/boards/rt274.c           |  3 ++-
+ sound/soc/intel/avs/boards/rt286.c           |  3 ++-
+ sound/soc/intel/avs/boards/rt298.c           |  3 ++-
+ sound/soc/intel/avs/boards/rt5663.c          |  3 ++-
+ sound/soc/intel/avs/boards/rt5682.c          |  3 ++-
+ sound/soc/meson/axg-tdm-interface.c          |  9 ++-------
+ sound/soc/uniphier/aio-cpu.c                 |  8 ++------
+ 20 files changed, 46 insertions(+), 72 deletions(-)
 
 
-
-On 2/21/25 1:57 AM, Arnd Bergmann wrote:
-> From: Arnd Bergmann <arnd@arndb.de>
-> 
-> idt_scan_mws() puts a large fixed-size array on the stack and copies
-> it into a smaller dynamically allocated array at the end. On 32-bit
-> targets, the fixed size can easily exceed the warning limit for
-> possible stack overflow:
-> 
-> drivers/ntb/hw/idt/ntb_hw_idt.c:1041:27: error: stack frame size (1032) exceeds limit (1024) in 'idt_scan_mws' [-Werror,-Wframe-larger-than]
-> 
-> Change it to instead just always use dynamic allocation for the
-> array from the start. It's too big for the stack, but not actually
-> all that much for a permanent allocation.
-> 
-> Reported-by: kernel test robot <lkp@intel.com>
-> Closes: https://lore.kernel.org/all/202205111109.PiKTruEj-lkp@intel.com/
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-
-LGTM. Old code didn't make sense to declare on stack, allocate later and memcpy.
-Reviewed-by: Dave Jiang <dave.jiang@intel.com>
-> ---
-> A number of users have reported this in the past, but I couldn't
-> find any other patch for it so far.
-> ---
->  drivers/ntb/hw/idt/ntb_hw_idt.c | 18 +++++++-----------
->  1 file changed, 7 insertions(+), 11 deletions(-)
-> 
-> diff --git a/drivers/ntb/hw/idt/ntb_hw_idt.c b/drivers/ntb/hw/idt/ntb_hw_idt.c
-> index 544d8a4d2af5..f27df8d7f3b9 100644
-> --- a/drivers/ntb/hw/idt/ntb_hw_idt.c
-> +++ b/drivers/ntb/hw/idt/ntb_hw_idt.c
-> @@ -1041,7 +1041,7 @@ static inline char *idt_get_mw_name(enum idt_mw_type mw_type)
->  static struct idt_mw_cfg *idt_scan_mws(struct idt_ntb_dev *ndev, int port,
->  				       unsigned char *mw_cnt)
->  {
-> -	struct idt_mw_cfg mws[IDT_MAX_NR_MWS], *ret_mws;
-> +	struct idt_mw_cfg *mws;
->  	const struct idt_ntb_bar *bars;
->  	enum idt_mw_type mw_type;
->  	unsigned char widx, bidx, en_cnt;
-> @@ -1049,6 +1049,11 @@ static struct idt_mw_cfg *idt_scan_mws(struct idt_ntb_dev *ndev, int port,
->  	int aprt_size;
->  	u32 data;
->  
-> +	mws = devm_kcalloc(&ndev->ntb.pdev->dev, IDT_MAX_NR_MWS,
-> +			   sizeof(*mws), GFP_KERNEL);
-> +	if (!mws)
-> +		return ERR_PTR(-ENOMEM);
-> +
->  	/* Retrieve the array of the BARs registers */
->  	bars = portdata_tbl[port].bars;
->  
-> @@ -1103,16 +1108,7 @@ static struct idt_mw_cfg *idt_scan_mws(struct idt_ntb_dev *ndev, int port,
->  		}
->  	}
->  
-> -	/* Allocate memory for memory window descriptors */
-> -	ret_mws = devm_kcalloc(&ndev->ntb.pdev->dev, *mw_cnt, sizeof(*ret_mws),
-> -			       GFP_KERNEL);
-> -	if (!ret_mws)
-> -		return ERR_PTR(-ENOMEM);
-> -
-> -	/* Copy the info of detected memory windows */
-> -	memcpy(ret_mws, mws, (*mw_cnt)*sizeof(*ret_mws));
-> -
-> -	return ret_mws;
-> +	return mws;
->  }
->  
->  /*
+base-commit: b16e9f8547a328b19af59afc213ce323124d11e9
+-- 
+2.34.1
 
