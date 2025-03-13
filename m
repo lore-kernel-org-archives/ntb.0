@@ -1,130 +1,120 @@
-Received: from lelvem-ot02.ext.ti.com (lelvem-ot02.ext.ti.com [198.47.23.235])
+Received: from galois.linutronix.de (Galois.linutronix.de [193.142.43.55])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4958F1E51EB
-	for <ntb@lists.linux.dev>; Thu, 13 Mar 2025 12:07:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.235
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AB8801EFF98
+	for <ntb@lists.linux.dev>; Thu, 13 Mar 2025 13:03:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=193.142.43.55
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741867640; cv=none; b=Y5KkVa8BWGLwQRGMLdvLJtuIi8e8W1Q3+7HKt9Ivks7MLhVAlJjPJh9HXyE4pIcqXBC34SUvL/Dt1RqUn0pzJK2SHqIrAPMz1vw+UM/ZDtdKR/MRLoCy6lbwxjhCS0O0rwjRlaj94MCtTMxS038pb/NuNwSsvhdLcRPE76oP2TA=
+	t=1741871020; cv=none; b=tjhpvw3M12+WS2LdYCkfL0As8LWFGIHaIdUpvNZJhxfwQPAgsGj3ZkZqFCkOpMRMp8yJ7XGr+KFdNG2swk16Bw+/2kHs9HLUomO2qzv7JeSTXBAKpd/40zmd0Ehau378KoX70hzwpJDZWncW1FCxbOrDSoLJVA/PxZ0Zdo6Ttg8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741867640; c=relaxed/simple;
-	bh=Ne9bu4AIDTj8Q9X7Md4hyfZO5+zIRYhUdbapdiAxKLA=;
-	h=Date:From:To:CC:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=d5jXYNTMmXKtZ3QExkQtNyAMk05O/mIojZJ/nYpvknTAJGnwB/yMFBY6uoBVl3+JA3SVeSuk+BIU8xMVpucOOALRUWsRKtp/q8o+8psZ69fXN6Bbqo5RHHijzFwEq+pdvutrXHtn0HzHMSfAXlQ2H7vvLW9VcsH4qLyLhFx3kBU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=GxCw559e; arc=none smtp.client-ip=198.47.23.235
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
+	s=arc-20240116; t=1741871020; c=relaxed/simple;
+	bh=itf7yPjVu4MDdvOWYPG+ta0dwjJEz7i5UcsuklyablM=;
+	h=Message-ID:From:To:Cc:Subject:Date; b=hgAOza3XL5qUC48687S9ggWi3gKkxVFCnpTOu+NxhHtUQ2iUxi04fQ2kHBvazg7hQDp8LW5Jy0nP+pdP8vaxjrys73HKNsafbVbFkwQL4Ylq1fSVlnZUNQKE/sced/i4gIrgYFYyFIktUO4fmeF1xglOOsADTEt3SnT4ZJqXUYk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de; spf=pass smtp.mailfrom=linutronix.de; dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=xu9B6jX0; dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=dmm9pipc; arc=none smtp.client-ip=193.142.43.55
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linutronix.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="GxCw559e"
-Received: from lelv0265.itg.ti.com ([10.180.67.224])
-	by lelvem-ot02.ext.ti.com (8.15.2/8.15.2) with ESMTPS id 52DC74d11863344
-	(version=TLSv1.2 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Thu, 13 Mar 2025 07:07:04 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-	s=ti-com-17Q1; t=1741867624;
-	bh=jjf48QJ5dtYgMD1JQM2Mlfhy8pxv4LcRNvoLveym56k=;
-	h=Date:From:To:CC:Subject:References:In-Reply-To;
-	b=GxCw559eoPGYb9fX3q4TLyLRN2QNZ3S0+Mp0sJZ0CVOXqdHZDb5zRTXy1y8DLJ+2P
-	 vACo6EtyFGTCaD2I++3Gnwe4mxvcpytLATrP20+FeQTeYzyCjN/VdoNbrl27qUk+y/
-	 DDCtbO8j/X+ta/0pgoes46okh5M1FIKNP9GCZwlc=
-Received: from DFLE100.ent.ti.com (dfle100.ent.ti.com [10.64.6.21])
-	by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 52DC74bk004764
-	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-	Thu, 13 Mar 2025 07:07:04 -0500
-Received: from DFLE109.ent.ti.com (10.64.6.30) by DFLE100.ent.ti.com
- (10.64.6.21) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Thu, 13
- Mar 2025 07:07:04 -0500
-Received: from lelvsmtp5.itg.ti.com (10.180.75.250) by DFLE109.ent.ti.com
- (10.64.6.30) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
- Frontend Transport; Thu, 13 Mar 2025 07:07:04 -0500
-Received: from localhost (lcpd911.dhcp.ti.com [172.24.227.226])
-	by lelvsmtp5.itg.ti.com (8.15.2/8.15.2) with ESMTP id 52DC73mJ113302;
-	Thu, 13 Mar 2025 07:07:04 -0500
-Date: Thu, 13 Mar 2025 17:37:03 +0530
-From: Dhruva Gole <d-gole@ti.com>
-To: Thomas Gleixner <tglx@linutronix.de>
-CC: LKML <linux-kernel@vger.kernel.org>, Marc Zyngier <maz@kernel.org>,
-        Nishanth Menon <nm@ti.com>, Tero Kristo <kristo@kernel.org>,
-        Santosh
- Shilimkar <ssantosh@kernel.org>, Jon Mason <jdmason@kudzu.us>,
-        Dave Jiang
-	<dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>,
-        <ntb@lists.linux.dev>, Bjorn Helgaas <bhelgaas@google.com>,
-        <linux-pci@vger.kernel.org>, Haiyang Zhang <haiyangz@microsoft.com>,
-        Wei Liu
-	<wei.liu@kernel.org>, <linux-hyperv@vger.kernel.org>,
-        Wei Huang
-	<wei.huang2@amd.com>,
-        Manivannan Sadhasivam
-	<manivannan.sadhasivam@linaro.org>,
-        "James E.J. Bottomley"
-	<James.Bottomley@HansenPartnership.com>,
-        "Martin K. Petersen"
-	<martin.petersen@oracle.com>,
-        <linux-scsi@vger.kernel.org>
-Subject: Re: [patch 03/10] soc: ti: ti_sci_inta_msi: Switch MSI descriptor
- locking to guard()
-Message-ID: <20250313120703.nchgmrvgx2dt5fjc@lcpd911>
-References: <20250309083453.900516105@linutronix.de>
- <20250309084110.330984023@linutronix.de>
+	dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="xu9B6jX0";
+	dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="dmm9pipc"
+Message-ID: <20250313130212.450198939@linutronix.de>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linutronix.de;
+	s=2020; t=1741871016;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc; bh=xPY90hzZgcytKWwY72qh7D+Sw/TVwHNJaHMkC6cM7Tk=;
+	b=xu9B6jX0BitUNzaISeFeThEJnp7Seq4R6IOnTZdLDeCbyqddtCIJZ6mZF4NEFznX8REBDg
+	klHluoz+jf3dHBAG1uhG6aU1xKomYyz4oznZnY8I/ppEYJBo4NqALgVg8LtqAzLV53VJ6m
+	Rbbg5wwxU1049pFZfESGAGzaI5EPCw6fWFMSvi9RqCNUVBCodu+oI7icNaRj59Oas8V8rs
+	of/HpIIjdzWftq62usw2x2Pzuj0K7pwMXMgVHcJ6LzHHx4Nrp/93CrD8ytIDMk+J/78weE
+	cR7oJxhjgfWWugEG96AiyfW6JhgPNDJCZzfw+Y2ehCb/uyscj1TAHAe6/7xIBg==
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=linutronix.de;
+	s=2020e; t=1741871016;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc; bh=xPY90hzZgcytKWwY72qh7D+Sw/TVwHNJaHMkC6cM7Tk=;
+	b=dmm9pipcXb6n8F9sdeZ6O1motxtWkyA4tc/Ln7g9jEpLmDYQUomQgAPMieHs1PDkordDEK
+	LtZ/GMy3hhl6RtCw==
+From: Thomas Gleixner <tglx@linutronix.de>
+To: LKML <linux-kernel@vger.kernel.org>
+Cc: Marc Zyngier <maz@kernel.org>,
+ Peter Zijlstra <peterz@infradead.org>,
+ Nishanth Menon <nm@ti.com>,
+ Jonathan Cameron <Jonathan.Cameron@huawei.com>,
+ Dhruva Gole <d-gole@ti.com>,
+ Tero Kristo <kristo@kernel.org>,
+ Santosh Shilimkar <ssantosh@kernel.org>,
+ Logan Gunthorpe <logang@deltatee.com>,
+ Dave Jiang <dave.jiang@intel.com>,
+ Jon Mason <jdmason@kudzu.us>,
+ Allen Hubbe <allenbh@gmail.com>,
+ ntb@lists.linux.dev,
+ Bjorn Helgaas <bhelgaas@google.com>,
+ linux-pci@vger.kernel.org,
+ Michael Kelley <mhklinux@outlook.com>,
+ Wei Liu <wei.liu@kernel.org>,
+ Haiyang Zhang <haiyangz@microsoft.com>,
+ linux-hyperv@vger.kernel.org,
+ Wei Huang <wei.huang2@amd.com>,
+ Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
+ "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
+ "Martin K. Petersen" <martin.petersen@oracle.com>,
+ linux-scsi@vger.kernel.org,
+ Jonathan Cameron <Jonathan.Cameron@huwei.com>
+Subject: [patch V2 00/10] genirq/msi: Spring cleaning
+Date: Thu, 13 Mar 2025 14:03:36 +0100 (CET)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Disposition: inline
-In-Reply-To: <20250309084110.330984023@linutronix.de>
-X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
 
-On Mar 09, 2025 at 09:41:46 +0100, Thomas Gleixner wrote:
-> Convert the code to use the new guard(msi_descs_lock).
-> 
-> No functional change intended.
-> 
-> Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
-> Cc: Nishanth Menon <nm@ti.com>
-> Cc: Tero Kristo <kristo@kernel.org>
-> Cc: Santosh Shilimkar <ssantosh@kernel.org>
-> ---
->  drivers/soc/ti/ti_sci_inta_msi.c |   10 +++-------
->  1 file changed, 3 insertions(+), 7 deletions(-)
+This is version 2 of the cleanup work. The previous version can be found
+here:
 
-Reviewed-by: Dhruva Gole <d-gole@ti.com>
+   https://lore.kernel.org/all/20250309083453.900516105@linutronix.de
 
-> 
-> --- a/drivers/soc/ti/ti_sci_inta_msi.c
-> +++ b/drivers/soc/ti/ti_sci_inta_msi.c
-> @@ -103,19 +103,15 @@ int ti_sci_inta_msi_domain_alloc_irqs(st
->  	if (ret)
->  		return ret;
->  
-> -	msi_lock_descs(dev);
-> +	guard(msi_descs_lock)(dev);
->  	nvec = ti_sci_inta_msi_alloc_descs(dev, res);
-> -	if (nvec <= 0) {
-> -		ret = nvec;
-> -		goto unlock;
-> -	}
-> +	if (nvec <= 0)
-> +		return nvec;
->  
->  	/* Use alloc ALL as it's unclear whether there are gaps in the indices */
->  	ret = msi_domain_alloc_irqs_all_locked(dev, MSI_DEFAULT_DOMAIN, nvec);
->  	if (ret)
->  		dev_err(dev, "Failed to allocate IRQs %d\n", ret);
-> -unlock:
-> -	msi_unlock_descs(dev);
->  	return ret;
->  }
->  EXPORT_SYMBOL_GPL(ti_sci_inta_msi_domain_alloc_irqs);
-> 
-> 
+While converting the MSI descriptor locking to a lock guard() I stumbled
+over various abuse of MSI descriptors (again).
 
--- 
-Best regards,
-Dhruva Gole
-Texas Instruments Incorporated
+The following series cleans up the offending code and converts the MSI
+descriptor locking over to lock guards.
+
+Changes vs. V1:
+
+   - Introduce retain_ptr() to allow using __free() when the allocation is
+     consumed by a called function (on success) and therefore no_free_ptr()
+     can't be used.
+
+   - Rework the PCI/MSI changes to avoid gotos in guard sections
+
+   - Drop patch 1 as it's already applied
+
+   - Collect Reviewed/Tested/Acked-by tags where appropriate
+
+Patches 3,4,6-10 are unmodifed.
+
+The series applies on:
+
+    git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git irq/msi
+
+and is available from git:
+
+    git://git.kernel.org/pub/scm/linux/kernel/git/tglx/devel.git irq/msi
+
+Thanks,
+
+	tglx
+---
+ drivers/ntb/msi.c                   |   22 +---
+ drivers/pci/controller/pci-hyperv.c |   14 ---
+ drivers/pci/msi/api.c               |    6 -
+ drivers/pci/msi/msi.c               |  168 ++++++++++++++++++++++--------------
+ drivers/pci/pci.h                   |    9 +
+ drivers/pci/tph.c                   |   44 ---------
+ drivers/soc/ti/ti_sci_inta_msi.c    |   10 --
+ drivers/ufs/host/ufs-qcom.c         |   75 ++++++++--------
+ include/linux/cleanup.h             |   17 +++
+ include/linux/irqdomain.h           |    2 
+ include/linux/msi.h                 |    7 +
+ kernel/irq/msi.c                    |  125 ++++++++++----------------
+ 12 files changed, 247 insertions(+), 252 deletions(-)
+
+
