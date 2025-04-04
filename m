@@ -1,66 +1,66 @@
-Received: from mail-wr1-f44.google.com (mail-wr1-f44.google.com [209.85.221.44])
+Received: from mail-wr1-f53.google.com (mail-wr1-f53.google.com [209.85.221.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 69145214230
-	for <ntb@lists.linux.dev>; Fri,  4 Apr 2025 17:46:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.44
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0B20C219306
+	for <ntb@lists.linux.dev>; Fri,  4 Apr 2025 17:46:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1743788798; cv=none; b=msa3N7nu1/5RM21pn6bu+T/zQx0KGDD3wukIhkm65fDdd6/XUeF8XatjGyO8wY90E/QrB3PevaWw0MtdMycfMlOtNVh+JFam2oMrAXLE0RHZpYkS72xiHSBOPpsdl1lBKNfoDgUinOhWIIvfSv6WhIZu3d6uSWKtZyDcPw5aXPg=
+	t=1743788799; cv=none; b=FYNzh/qleuNr6s3/vfinAcDUz2srmIznQ/tpG5GGkbAdozfj5YbwJGnEUOcux4I364liGPJYPW7OWq5DSGLiraroTA5i08up/cNOqnPcN6KB/Kw+YYwCR2g1hO4/5TtAUuxcmFldZnNB938vfGU6NY1/oWDDeDyu0EOTDG7m0jM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1743788798; c=relaxed/simple;
-	bh=4uieBqT7gmN5Utt0O/2pT4/9I2ULrrNvfRrwQOFLCm4=;
+	s=arc-20240116; t=1743788799; c=relaxed/simple;
+	bh=VMQRvj8CO60hVIlMMgdkTE1dtBACF+fNeO1bhBVnQsU=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=uWAeA4GlkbPozgBX0A9u4v4rVmZWPJMlceFfOWQCVdUKX3I9CjGDkr8BGoUEeDOrSn5PO4j9/cTCWWF5XAhYLiX/pScnZz+eepKdvhhqOlUpcXozLov2uhvUkISbyNxO+fUSHn2T1l2sugtlmourZFd+xXiQZr8639YVh0rpoBE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=a5sTcPLB; arc=none smtp.client-ip=209.85.221.44
+	 In-Reply-To:To:Cc; b=WbcH1FS+Z+lX3r4pFoFfxKk0xj9vwhLXZOp1VEfBg+dtu1mTgdC8FUqqSVKagPlrtH1vBs1G5RHQzzqE2paj1L+jkOEIhRvOYIsl58dcSi9dK8zSlO946sAzlXOYKMnkUj7K8ks+F1BLqMoqESvKu1Z2m6Cn1MRktH0UbdyuyZ8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=ibBHaXhH; arc=none smtp.client-ip=209.85.221.53
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="a5sTcPLB"
-Received: by mail-wr1-f44.google.com with SMTP id ffacd0b85a97d-39bf44be22fso1640892f8f.0
-        for <ntb@lists.linux.dev>; Fri, 04 Apr 2025 10:46:35 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="ibBHaXhH"
+Received: by mail-wr1-f53.google.com with SMTP id ffacd0b85a97d-39c13fa05ebso1421496f8f.0
+        for <ntb@lists.linux.dev>; Fri, 04 Apr 2025 10:46:36 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1743788794; x=1744393594; darn=lists.linux.dev;
+        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1743788795; x=1744393595; darn=lists.linux.dev;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=60FugxO6v0YRFtzoey5lDeif30RhYzbYmC0Dvosg4Ck=;
-        b=a5sTcPLBj6aEfQeSE1x9vw6CcCT42uf2bDVCqET/PDz5fvTEaKiAKc/St5lPvc/S53
-         ySVNueGT0xdH8nzVhjFpXCQzUMkrZo/QQV2fw/gGICwi+ENNV9D9/EwC3OMKzKFS1SJm
-         2rYYwHpsbiAoYkvUiR/I6XT5a7YLy7aDOo5l9qgxPI3Z8G81ykfLbTi0Ka66rkr4HdxU
-         4v7ZK43ykEtQyutoZT3k3HunvbX0Or4j02/KjmgDbFLl/pbHfu61uxz9F+1FzB2p3S0t
-         i/IpK0fr9uq4T0Yu9b69roDkBMAclp97iqJiaFam3TnKOQFAjJANPEYJFPdhQI8+agtu
-         b/yw==
+        bh=pxPRinaB0R9MRMHkqtzs6Jksu6ZEexxFz8Cu5WJ1Zw0=;
+        b=ibBHaXhHePSZTcIfwRDsmIwRnW7+cmcMjd4pAU0dBCbS7sJRcyZA4KTOJ6UuQQ1X7Z
+         hPtVcKdEJH9CIP5G3Spa3E0ZiySfEWeWiJfRz1v+xlGOghgXhDUxz8RJ3VZvnpkS5XNr
+         f80XQSJoyRMMhgdQDRmB4p/BV4zDPjA73a7PkC49URMxxMUoOlr/zIGpD8THAGjrqeZA
+         CKZtqvwGlJLJvuu46mXqr3Z2EMLmZTl/ssBBr3nUoW+jRlyLhK8r9Conk6FE89UW+hpt
+         CtwYCki9TbcrhqfbLiHzx+iSqduSYBfSz6Q0yuxJpFdCUXGXbH4Mfr8Wbfa71J4bxfJA
+         iZfg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1743788794; x=1744393594;
+        d=1e100.net; s=20230601; t=1743788795; x=1744393595;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=60FugxO6v0YRFtzoey5lDeif30RhYzbYmC0Dvosg4Ck=;
-        b=EtykJluhquHMzAwwY6LwMdmiAaTv8OKz7fA08YPpLToBYV3JdfMUL/HedavevwxM2o
-         3selAXW+tgpLnUS/bhv5lfZQxp0iE70fpCzm9q/vizSICgDnUw9OFORjqOD3m60BorIy
-         HIQuFF+WuDoA3Z8LFITChSlU11dQvaMDDnEd2RuFn4TvVCCSfgr6X56t1LeMxqNX/nG/
-         lvvspTScD25CUC2/j3I1/cXqC/JrvDDmOjwayNJMauYuGXBhd1q6x6qy/CI3MatZzzqp
-         xHXfBqZsK5bilEfgaIU6lSuQXdPDv+Jg4tQR04kR1Y666HWOaV5UDEzO3epq07C7z7Ku
-         ae+w==
-X-Forwarded-Encrypted: i=1; AJvYcCXdnH/av1H8cZvmuKjB0nDuLESdo2GP7k74odJJyJ3Gp9iLq/RY0Ski/piH978kawDFneM=@lists.linux.dev
-X-Gm-Message-State: AOJu0YzIaixrL3JZlkkt/hswlXppzaygiPGJDpLesZ+9h0vjag+MxE0E
-	IyjggmoK2LGe/xtVU3g3ms6WY4utrHRPxAJCa0+ZsZmSnykT+KP8aJFqe6p4jaA=
-X-Gm-Gg: ASbGncu7tTtcZxb6HbmfPh7FFBFizeaExy5mz+O3Xvop5fyyI1W4A5nV/3ZWn1KOOHM
-	v6mm8WapikUZDD3bQ5naKR23e63GOLHBj+IO7P/zDMSCJ3wmYhatu4eo0tOfqXRU4EkKuGq83Hp
-	UMpx/YImlW5Ppr5cY+RfrGtidLo0hPrAEiyoye7aIFbUkTAWHjz5b5BZqdngCLfccmqATTMeaRD
-	I5NXob7kJyM1+uGxvdIKX13QUDjDHKdq21749WssOyyWpXLZobVGuFdpKCmXCPBhvr5sR/XxBFH
-	V9y3KvBZes2rwoxjd/LLOVuXa3z0+L4Jzk+f6QD4z3S6DDoXwVcRhV8zkw==
-X-Google-Smtp-Source: AGHT+IFceB1324JoXOWMIqxbwKQDL3IqddpAqcTL7wFdsVu4aneHN/xUo6VXTYzYA5DUcd8e7Y74kQ==
-X-Received: by 2002:a5d:5f8a:0:b0:399:7f2b:8531 with SMTP id ffacd0b85a97d-39d6fce113emr185504f8f.38.1743788793428;
-        Fri, 04 Apr 2025 10:46:33 -0700 (PDT)
+        bh=pxPRinaB0R9MRMHkqtzs6Jksu6ZEexxFz8Cu5WJ1Zw0=;
+        b=lJ1nqWVI3xJZyrOvX/a/EbEHg/xwaHu0QNd9yBPOUihHZ0y5R6J5wBb+FmpN/2eHI8
+         LSz+E4FHe984SCTwIsKSbOdjHqyBFZb7gVfoeUpb5kwZbQ/b1pK1Q36HhZYQIpWNMGUP
+         aAFseC/+eohnHGBUlAbiN4j9wnBvNsS9d7YwO56y9iERB4cBEd2O6UVZ53S58eUNBR57
+         XcIxh/xnydL3SjreaZ/B8o4sqvLjp14g9tlokR5mXYL2FAW1vfwogOFMsgjYjn7KihWT
+         YXgN255tt3213X79W3rAiwz5qcOJd2+qr4gaqbSgEAZyNKlw2sEG3SxUpVzQcLG6cNoi
+         pCMg==
+X-Forwarded-Encrypted: i=1; AJvYcCX7zz/cDlJ68o2c59CGs33WXFxm/m9xjI+4e0YHhJSm6LftfNPyo+gsJoGxScGU7NT7xFI=@lists.linux.dev
+X-Gm-Message-State: AOJu0YxnuVqR3rg2qPHVB2nI6d0DLqsNzlUnaoSvwuhvCljDT6dt9mnc
+	LFpDsgikHbK+a4OOCcM6C9aVtOGOA2V1r+WY4Yani+3C15vJpxXCB7SBUs9Ijnk=
+X-Gm-Gg: ASbGncvMoEjSceor6rvQ9JoDseoothJ63VuZ92IXulPToBRjFxx8zLixzsr2vLLJP1l
+	dsA+z020Rend2ZEo8jH2iT0R5Uc31IQRFeGl6xM6fyFkiYGBnyqZ4cSx9i2cralUSP6KzhnUp2j
+	O6oZmQ0L3DipIPqXtTNH0T32ekpFF0IzYqEHuu6PX9jJjpfsZZjs0BIdlMm5uRoK1vV3TxZQ1ZN
+	ZZ3CO9IJVbkAzw00KuGuymGSlliPCa2+OneZRj/QoqO9ef1DCrq0onbBaAWEE4AWqxalsROtHsS
+	+27HCbREyWDQ1lJmx5SWnBQ9ywDwe06EbUbAbSTitXs7Bs4joswdx+0wtfHV+mxiNpXH
+X-Google-Smtp-Source: AGHT+IGJK67GjTDKDpj5bH038uXsv6Y5SZCtrTzwfFsjB58QOdWQqxfjOKhYa5MkwP/MU+TWVGqe2w==
+X-Received: by 2002:a05:6000:270e:b0:39c:1257:c96c with SMTP id ffacd0b85a97d-39cba93f966mr3020079f8f.56.1743788795236;
+        Fri, 04 Apr 2025 10:46:35 -0700 (PDT)
 Received: from toaster.baylibre.com ([2a01:e0a:3c5:5fb1:331:144d:74c3:a7a4])
-        by smtp.googlemail.com with ESMTPSA id ffacd0b85a97d-39c30226dfesm4939535f8f.97.2025.04.04.10.46.32
+        by smtp.googlemail.com with ESMTPSA id ffacd0b85a97d-39c30226dfesm4939535f8f.97.2025.04.04.10.46.34
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 04 Apr 2025 10:46:33 -0700 (PDT)
+        Fri, 04 Apr 2025 10:46:34 -0700 (PDT)
 From: Jerome Brunet <jbrunet@baylibre.com>
-Date: Fri, 04 Apr 2025 19:46:20 +0200
-Subject: [PATCH v2 1/3] PCI: endpoint: add epc_feature argument for
- pci_epf_free_space()
+Date: Fri, 04 Apr 2025 19:46:22 +0200
+Subject: [PATCH v2 3/3] PCI: endpoint: pci-epf-vntb: simplify ctrl/spad
+ space allocation
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -69,7 +69,7 @@ List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20250404-pci-ep-size-alignment-v2-1-c3a0db4cfc57@baylibre.com>
+Message-Id: <20250404-pci-ep-size-alignment-v2-3-c3a0db4cfc57@baylibre.com>
 References: <20250404-pci-ep-size-alignment-v2-0-c3a0db4cfc57@baylibre.com>
 In-Reply-To: <20250404-pci-ep-size-alignment-v2-0-c3a0db4cfc57@baylibre.com>
 To: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>, 
@@ -84,147 +84,93 @@ Cc: Marek Vasut <marek.vasut+renesas@gmail.com>,
  linux-kernel@vger.kernel.org, ntb@lists.linux.dev, 
  Jerome Brunet <jbrunet@baylibre.com>
 X-Mailer: b4 0.14.2
-X-Developer-Signature: v=1; a=openpgp-sha256; l=5399; i=jbrunet@baylibre.com;
- h=from:subject:message-id; bh=4uieBqT7gmN5Utt0O/2pT4/9I2ULrrNvfRrwQOFLCm4=;
- b=owEBbQKS/ZANAwAKAeb8Dxw38tqFAcsmYgBn8Br1Q6kEuYoAQE/bmEcnQHkFE2CYtfsAuAcca
- fK2YBNaIfKJAjMEAAEKAB0WIQT04VmuGPP1bV8btxvm/A8cN/LahQUCZ/Aa9QAKCRDm/A8cN/La
- hYt9EACfZPJwbj3KH7gUvv+4V+47BZs/0lx6Idi+Pq0fdQy+NK0N16UVt3VfRIAeTxI9GAx99d9
- dbZ0NR9HrfWiM31VeFXKUDGmT610XOmyc6uyR01lERr+6ubO09bNNf/k+6AT5i1wxDSS/jNAXCj
- Jc6ZsCfNNCzLjNpmTsb6HJx6WraeKMQTYmDx85FwC4ylh1tmw9Gsmfc8USnKvJAT0qeUcqLCDaf
- MIX8rm3pHX+94ugr2aNKNmRRhMnYXMJGkk8uzGVBdKgUt1pnz+VGjnsZKlVYcZj4iaQGLcrs7V6
- aMVzJYhC+4JU1xhcSQTmHV4wZtf8UG4VR4NBNLJzJtvrdsyVMEm8WiDZvbABWygjh5sfKiHNhyZ
- Ah61cPG6xTfQvVC223MopGaXlaRTomeCr4asErOFDzedE2IMyIIlG2Kt7Lqe2u3dCNgOb6lUZaD
- ghUUXbmqJTGYiGzlOHaH6Wy3hhwwz3GSQS1TlHmAnDe3LaXxaM7gMqgekdUUbcQIVdqUJqZFnoL
- E6tKOYSn15e5XWs6wCtVDt+gxgCxixkB3CQPY8FLI5c0BeLIjAHPRKXavNEShvKtzg0XgfP6T3O
- GgeQck/qdD3auhtDM+mYZkB8unVYkPt0tBBlY96abvrHCxhBsdKc3Jkzje4vlw4gzhGcE+jCqyN
- 0GBxYDbFx6Wm4cA==
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2649; i=jbrunet@baylibre.com;
+ h=from:subject:message-id; bh=VMQRvj8CO60hVIlMMgdkTE1dtBACF+fNeO1bhBVnQsU=;
+ b=owEBbQKS/ZANAwAKAeb8Dxw38tqFAcsmYgBn8Br21+RpEyu7VflBJ+7DQPDTHDsNR/iu152/c
+ AfIb7ODPZ2JAjMEAAEKAB0WIQT04VmuGPP1bV8btxvm/A8cN/LahQUCZ/Aa9gAKCRDm/A8cN/La
+ haVOD/94gKh4Rwrb9XZS7wgvtm4xpuUyG+eCwYuUMEyNfOou0meG7+SOlSJhtvZ1NsV6kD7V4HB
+ ngGvBJwsU0P8WC5cRU9CLVrc8i3A61jPsLvNnhVrJ77uvSg2C0HRqgHw15xyRsvIZArIb8CU040
+ A5JupzLwaZDYkREjQjLEBNqAuUVCwD1MT3sm61cZFKdXJoxqRr67QoUoZ10GzQTv/X28JQL5WeD
+ 1IAy6A3fkHtphYdtl1vFCY5PDeijD0KzoIycqy3dDl0gFiMFKYCVBCIsOXI8ms25+GlwwlR7jmr
+ KmXHh8zMIoCtoVTRXR5zeCq1lqvi/V4m7MFSpW7uC9iaTFfFYEmPDFxK2xDemp8L4++PHROmJ5u
+ 7CPXSakNhZVd9WGCVQEZkifF5j1ciFeaeBmWbCoBFtVHjzioGu0Ss+9cTluMndT1YxZwhHJF9cr
+ oHScr42ldiZkUIDW1DkshspaPEpv3+Y1TSIsPrvN+hztJzk+OcKTp9RlR3Y4X6f2JlAk7gBPUml
+ wkrZh30XKCKDfZAQ8DYmIRGV34JTkX7GOPSSsQrfp5SOLZJ7XvcIEqTbdf+kX/GD6lHLtTfiTzN
+ ZmBFc5ZcRokYQuO2ciUIO9fsoRZpg+CGU25E0E+08pGb9b45MlAvo8mc3JWcE6ql2TykQ9kl+PZ
+ G6+yE31B/oorRXg==
 X-Developer-Key: i=jbrunet@baylibre.com; a=openpgp;
  fpr=F29F26CF27BAE1A9719AE6BDC3C92AAF3E60AED9
 
-Add epc_feature argument for pci_epf_free_space(), same as
-pci_epf_alloc_space(). Doing so will allow to better handle
-the iATU alignment requirements.
+When allocating the shared ctrl/spad space, epf_ntb_config_spad_bar_alloc()
+should not try to handle the size quirks for underlying BAR, whether it is
+fixed size or alignment. This is already handled by pci_epf_alloc_space().
+
+Also, when handling the alignment, this allocate more space than necessary.
+For example, with a spad size of 1024B and a ctrl size of 308B, the space
+necessary is 1332B. If the alignment is 1MB,
+epf_ntb_config_spad_bar_alloc() tries to allocate 2MB where 1MB would have
+been more than enough.
+
+Drop the handling of the BAR size quirks and let
+pci_epf_alloc_space() handle that. Just make sure the 32bits SPAD register
+are aligned on 32bits.
 
 Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
 ---
- drivers/pci/endpoint/functions/pci-epf-ntb.c  |  3 ++-
- drivers/pci/endpoint/functions/pci-epf-test.c |  2 ++
- drivers/pci/endpoint/functions/pci-epf-vntb.c | 16 +++++++++++++---
- drivers/pci/endpoint/pci-epf-core.c           |  2 ++
- include/linux/pci-epf.h                       |  1 +
- 5 files changed, 20 insertions(+), 4 deletions(-)
+ drivers/pci/endpoint/functions/pci-epf-vntb.c | 26 +++-----------------------
+ 1 file changed, 3 insertions(+), 23 deletions(-)
 
-diff --git a/drivers/pci/endpoint/functions/pci-epf-ntb.c b/drivers/pci/endpoint/functions/pci-epf-ntb.c
-index e01a98e74d211174db3075c20457a3183f37e0a5..44775c41c10b90a56b1167f3f3869a60c686cf9e 100644
---- a/drivers/pci/endpoint/functions/pci-epf-ntb.c
-+++ b/drivers/pci/endpoint/functions/pci-epf-ntb.c
-@@ -957,7 +957,8 @@ static void epf_ntb_config_spad_bar_free(struct epf_ntb *ntb)
- 		ntb_epc = ntb->epc[type];
- 		barno = ntb_epc->epf_ntb_bar[BAR_CONFIG];
- 		if (ntb_epc->reg)
--			pci_epf_free_space(epf, ntb_epc->reg, barno, type);
-+			pci_epf_free_space(epf, ntb_epc->reg, barno,
-+					   ntb_epc->epc_features, type);
- 	}
- }
- 
-diff --git a/drivers/pci/endpoint/functions/pci-epf-test.c b/drivers/pci/endpoint/functions/pci-epf-test.c
-index 50eb4106369f41afa00ed3ae58c84922e0a49e51..8d5df47967226e1f02444e8d45f7aad1394afd04 100644
---- a/drivers/pci/endpoint/functions/pci-epf-test.c
-+++ b/drivers/pci/endpoint/functions/pci-epf-test.c
-@@ -740,6 +740,7 @@ static int pci_epf_test_set_bar(struct pci_epf *epf)
- 				      &epf->bar[bar]);
- 		if (ret) {
- 			pci_epf_free_space(epf, epf_test->reg[bar], bar,
-+					   epf_test->epc_features,
- 					   PRIMARY_INTERFACE);
- 			epf_test->reg[bar] = NULL;
- 			dev_err(dev, "Failed to set BAR%d\n", bar);
-@@ -941,6 +942,7 @@ static void pci_epf_test_free_space(struct pci_epf *epf)
- 			continue;
- 
- 		pci_epf_free_space(epf, epf_test->reg[bar], bar,
-+				   epf_test->epc_features,
- 				   PRIMARY_INTERFACE);
- 		epf_test->reg[bar] = NULL;
- 	}
 diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-index 874cb097b093ae645bbc4bf3c9d28ca812d7689d..8f59a5b9b7adec2c05eebae71c6a246bc5a8e88c 100644
+index 8f59a5b9b7adec2c05eebae71c6a246bc5a8e88c..bc4a9c7c4338db6cc89fa47de89dc704d0a03806 100644
 --- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
 +++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-@@ -389,10 +389,15 @@ static int epf_ntb_config_sspad_bar_set(struct epf_ntb *ntb)
+@@ -413,11 +413,9 @@ static void epf_ntb_config_spad_bar_free(struct epf_ntb *ntb)
   */
- static void epf_ntb_config_spad_bar_free(struct epf_ntb *ntb)
+ static int epf_ntb_config_spad_bar_alloc(struct epf_ntb *ntb)
  {
-+	const struct pci_epc_features *epc_features;
+-	size_t align;
  	enum pci_barno barno;
- 
-+	epc_features = pci_epc_get_features(ntb->epf->epc,
-+					    ntb->epf->func_no,
-+					    ntb->epf->vfunc_no);
-+
+ 	struct epf_ntb_ctrl *ctrl;
+ 	u32 spad_size, ctrl_size;
+-	u64 size;
+ 	struct pci_epf *epf = ntb->epf;
+ 	struct device *dev = &epf->dev;
+ 	u32 spad_count;
+@@ -427,31 +425,13 @@ static int epf_ntb_config_spad_bar_alloc(struct epf_ntb *ntb)
+ 								epf->func_no,
+ 								epf->vfunc_no);
  	barno = ntb->epf_ntb_bar[BAR_CONFIG];
--	pci_epf_free_space(ntb->epf, ntb->reg, barno, 0);
-+	pci_epf_free_space(ntb->epf, ntb->reg, barno, epc_features, 0);
- }
+-	size = epc_features->bar[barno].fixed_size;
+-	align = epc_features->align;
+-
+-	if ((!IS_ALIGNED(size, align)))
+-		return -EINVAL;
+-
+ 	spad_count = ntb->spad_count;
  
- /**
-@@ -557,7 +562,7 @@ static int epf_ntb_db_bar_init(struct epf_ntb *ntb)
- 	return ret;
+-	ctrl_size = sizeof(struct epf_ntb_ctrl);
++	ctrl_size = ALIGN(sizeof(struct epf_ntb_ctrl), sizeof(u32));
+ 	spad_size = 2 * spad_count * sizeof(u32);
  
- err_alloc_peer_mem:
--	pci_epf_free_space(ntb->epf, mw_addr, barno, 0);
-+	pci_epf_free_space(ntb->epf, mw_addr, barno, epc_features, 0);
- 	return -1;
- }
- 
-@@ -570,10 +575,15 @@ static void epf_ntb_mw_bar_clear(struct epf_ntb *ntb, int num_mws);
-  */
- static void epf_ntb_db_bar_clear(struct epf_ntb *ntb)
- {
-+	const struct pci_epc_features *epc_features;
- 	enum pci_barno barno;
- 
-+	epc_features = pci_epc_get_features(ntb->epf->epc,
-+					    ntb->epf->func_no,
-+					    ntb->epf->vfunc_no);
-+
- 	barno = ntb->epf_ntb_bar[BAR_DB];
--	pci_epf_free_space(ntb->epf, ntb->epf_db, barno, 0);
-+	pci_epf_free_space(ntb->epf, ntb->epf_db, barno, epc_features, 0);
- 	pci_epc_clear_bar(ntb->epf->epc,
- 			  ntb->epf->func_no,
- 			  ntb->epf->vfunc_no,
-diff --git a/drivers/pci/endpoint/pci-epf-core.c b/drivers/pci/endpoint/pci-epf-core.c
-index 394395c7f8decfa2010469655a4bd58a002993fd..b7deb0ee1760b23a24f49abf3baf53ea2f273476 100644
---- a/drivers/pci/endpoint/pci-epf-core.c
-+++ b/drivers/pci/endpoint/pci-epf-core.c
-@@ -213,11 +213,13 @@ EXPORT_SYMBOL_GPL(pci_epf_remove_vepf);
-  * @epf: the EPF device from whom to free the memory
-  * @addr: the virtual address of the PCI EPF register space
-  * @bar: the BAR number corresponding to the register space
-+ * @epc_features: the features provided by the EPC specific to this EPF
-  * @type: Identifies if the allocated space is for primary EPC or secondary EPC
-  *
-  * Invoke to free the allocated PCI EPF register space.
-  */
- void pci_epf_free_space(struct pci_epf *epf, void *addr, enum pci_barno bar,
-+			const struct pci_epc_features *epc_features,
- 			enum pci_epc_interface_type type)
- {
- 	struct device *dev;
-diff --git a/include/linux/pci-epf.h b/include/linux/pci-epf.h
-index 879d19cebd4fc6d8df9d724e3a52fa7fbd61e535..d2d1c60fd5e0487b25aad51fee1b30554f630557 100644
---- a/include/linux/pci-epf.h
-+++ b/include/linux/pci-epf.h
-@@ -222,6 +222,7 @@ void *pci_epf_alloc_space(struct pci_epf *epf, size_t size, enum pci_barno bar,
- 			  const struct pci_epc_features *epc_features,
- 			  enum pci_epc_interface_type type);
- void pci_epf_free_space(struct pci_epf *epf, void *addr, enum pci_barno bar,
-+			const struct pci_epc_features *epc_features,
- 			enum pci_epc_interface_type type);
- int pci_epf_bind(struct pci_epf *epf);
- void pci_epf_unbind(struct pci_epf *epf);
+-	if (!align) {
+-		ctrl_size = roundup_pow_of_two(ctrl_size);
+-		spad_size = roundup_pow_of_two(spad_size);
+-	} else {
+-		ctrl_size = ALIGN(ctrl_size, align);
+-		spad_size = ALIGN(spad_size, align);
+-	}
+-
+-	if (!size)
+-		size = ctrl_size + spad_size;
+-	else if (size < ctrl_size + spad_size)
+-		return -EINVAL;
+-
+-	base = pci_epf_alloc_space(epf, size, barno, epc_features, 0);
++	base = pci_epf_alloc_space(epf, ctrl_size + spad_size,
++				   barno, epc_features, 0);
+ 	if (!base) {
+ 		dev_err(dev, "Config/Status/SPAD alloc region fail\n");
+ 		return -ENOMEM;
 
 -- 
 2.47.2
