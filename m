@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0853B27CCD4;
-	Mon,  7 Apr 2025 18:18:18 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5189B27D76C;
+	Mon,  7 Apr 2025 18:18:27 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744049899; cv=none; b=EwCP4fqx4dWuY9/KakLT49aWdApPWZgcxa94beugmEYNN0F5dChhvqhe1AXqGVA9afInPpuAG7/+rcrsJxomAa+nR6puYqkj4KNundZAQ9C/pbcfsDnjG0W5lkPSo66LCUCuJQqZP6rVL/bBgnAxIoysl9wCGDfh3QJ1pEp29Pw=
+	t=1744049907; cv=none; b=VibMXnDv0ZD6lgCDt3N236gfmQkKfIz17fqLzXZiC2tPgDiUH7LU6RP5zCoJw1RTbke5cPRdxsVGKAlHQsnHoQ8k3N8vCH+Sffie9DPSXpoXuOdnLKkeBYoGq5tmfT53MIi4eYw+m31nSjQM6PpMxtYbhTxzEXE2gJUUglnTBms=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744049899; c=relaxed/simple;
-	bh=FlV4Jkh0MjOxubU4XDHeoQi4Zqm7mUHsS/yjuDre5JU=;
+	s=arc-20240116; t=1744049907; c=relaxed/simple;
+	bh=mdIifArwyXz4/ZczMIaCq+iUjcqbunI0QzXvWx8/oew=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=gaA+mK/aAjn2OKkRKI3vCBx1gvRkI6q1fbzMhmoyLft5ZWLd3vIqnCPjimy7B39YuONOfPLQxruF0Djneqx5C69d8qgbI91UNwE6SzImxDfzctDxUYKaoW6XGes7r7mvzv47zlHrBABVElt3DoOa8hvdskSjQqHDa8lOp/ioOnU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hFVQKWsw; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=o5ag5yDTx5Tc6TBVAnZfHZoDN+9yf7NB/Y5MYkI+prQMCn+Vvcb6oxobIHMAIDixaHx1UkAI4aY5WbxaMy52lbzS63MmQw/4eZn2LAXfdqSbLveTSLd7KPKDdqBqDd0U31rilcl3ipmr6CO3T3aiC4UDCB3biXr3iFIQOZ0cpbM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=e+3+0/l/; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hFVQKWsw"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4CB21C4CEDD;
-	Mon,  7 Apr 2025 18:18:17 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="e+3+0/l/"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B550BC4CEDD;
+	Mon,  7 Apr 2025 18:18:25 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1744049898;
-	bh=FlV4Jkh0MjOxubU4XDHeoQi4Zqm7mUHsS/yjuDre5JU=;
+	s=k20201202; t=1744049907;
+	bh=mdIifArwyXz4/ZczMIaCq+iUjcqbunI0QzXvWx8/oew=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=hFVQKWswPfjdQ95gGXEUeheZ8c4bmiYmVrBS2/NnT4K2J0D6Z4GjFXve8FF1I7l5M
-	 Vqnl3fZt4Q77QPKdWVVFjjac9WV3Zvrm7r107d1Omm2l4wgD0GuUG/cu4+eZsVBbI3
-	 SbenL8D2U5BFaYcZx1iaoMVfyIxWHwrrgEcViyhgETtY3X00Z8asYqY/EZe5QxQ7fl
-	 Tj453BUlfYsu/wC3mimdzNQLUOowSPFGLO/3ljF0u8P8iDVKkKsV3KZjYdWMexrVBq
-	 bvA73JT6uX1jZ0+tjOYxinmf9Ia5DIW+T69HuYHrRJ5glBLO5m2EHLj0UKTYR4SdXj
-	 awo7568Le1eag==
+	b=e+3+0/l/ismCrXnJmv0eFfkor15ACpWgu70WAAMaMnFd86fYdTX/ntomTvsCDYipQ
+	 I1gT1DNpNh2IFdv+HxoXEYp+YnfaaBoJP1BZ5D2phJEPnokoeaI7COdmhz0aQZaO8z
+	 YQGR8HUVV+mLu8agF1R3laCphZwVZsuyuWL7vZOD6CGV2yC1X+vbQtMWPvPggjqmLF
+	 5Bao5acuA4tZqeYmnmM/AXPSiKB5yxjgUkl3/ni4zX3ByhBuumJIJjB4qQzkxhkwAR
+	 /Knb7UOb9W8C00J2JKR61NG2bQUgzC5fpSge4K8vrxdjfzlK0UZKMZ20GIYTfvoCSH
+	 eVGHw7XndSHRQ==
 From: Sasha Levin <sashal@kernel.org>
 To: linux-kernel@vger.kernel.org,
 	stable@vger.kernel.org
@@ -38,15 +38,15 @@ Cc: Arnd Bergmann <arnd@arndb.de>,
 	allenbh@gmail.com,
 	bhelgaas@google.com,
 	fancer.lancer@gmail.com,
-	zhangjiao2@cmss.chinamobile.com,
 	pstanner@redhat.com,
+	zhangjiao2@cmss.chinamobile.com,
 	ntb@lists.linux.dev
-Subject: [PATCH AUTOSEL 5.10 2/2] ntb: reduce stack usage in idt_scan_mws
-Date: Mon,  7 Apr 2025 14:18:10 -0400
-Message-Id: <20250407181810.3184654-2-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.4 2/2] ntb: reduce stack usage in idt_scan_mws
+Date: Mon,  7 Apr 2025 14:18:19 -0400
+Message-Id: <20250407181819.3184695-2-sashal@kernel.org>
 X-Mailer: git-send-email 2.39.5
-In-Reply-To: <20250407181810.3184654-1-sashal@kernel.org>
-References: <20250407181810.3184654-1-sashal@kernel.org>
+In-Reply-To: <20250407181819.3184695-1-sashal@kernel.org>
+References: <20250407181819.3184695-1-sashal@kernel.org>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -55,7 +55,7 @@ List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
-X-stable-base: Linux 5.10.235
+X-stable-base: Linux 5.4.291
 Content-Transfer-Encoding: 8bit
 
 From: Arnd Bergmann <arnd@arndb.de>
@@ -85,7 +85,7 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 7 insertions(+), 11 deletions(-)
 
 diff --git a/drivers/ntb/hw/idt/ntb_hw_idt.c b/drivers/ntb/hw/idt/ntb_hw_idt.c
-index 99711dd0b6e8e..d39fc55f8b0cc 100644
+index a0091900b0cfb..c74d958ffc62f 100644
 --- a/drivers/ntb/hw/idt/ntb_hw_idt.c
 +++ b/drivers/ntb/hw/idt/ntb_hw_idt.c
 @@ -1041,7 +1041,7 @@ static inline char *idt_get_mw_name(enum idt_mw_type mw_type)
