@@ -1,47 +1,52 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D11C3279325;
-	Mon,  7 Apr 2025 18:17:44 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0DF0E25743A;
+	Mon,  7 Apr 2025 18:17:57 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744049864; cv=none; b=UBwWuvvPEJotpysyRT54QxhzztJ5+TXxNUq3zkC5SHFtLO3lj2F6wtqu6ROrFtGR4nZ80YnLpS8HeZgL1jdErmg1V+kzjGrkBTvvR3jzwAqUQtmb4n477LU0ILzXXKwJZ0ypkrcvcwDMhlN/+1D4/53Jpjp9kz3XdRECrm+4QK4=
+	t=1744049877; cv=none; b=UPyQFfj3Eobnjocu9YVBBpt+nI0eydnoz+GkygxGO6ih+QJ9iDgCstY9asnsbbmCUHxsb0kkuy0e7SC7r4uKZ/zpMd0KtrsUiLVIwpFpJ550xO1w76sSD6ucHQkm7+DX19pz540L8k8p5WSb8VbZbzsySyQVegmA/RGo+mtjq+4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744049864; c=relaxed/simple;
-	bh=EeNyzSPVB15bkTHwbGNE4TC98r6iZP9QZnHs4daBLNk=;
+	s=arc-20240116; t=1744049877; c=relaxed/simple;
+	bh=wsk/UR5Tcm+EPJNKKtRxbzJeGipu7B54s1YULyH0ZYs=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=mk8JGCZB9UVcByURKX9QX8DnxyGTa5MbnpC91Zql8Zz/05TVw3f82TJ6GwTnWmE88UeAg2iOW3/87SK5ApaNGCgyYtNAXK/eIiW0VjZePUoJPLLdXVOmnDkraaFhsY1odX9US9CC2DwAkBg2n1mczZc9KGMdK4b56EHVbc1+Jis=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ecIUR+v0; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=rf0zDAAGRVIAYWl9dquegpD+ohilQ9Vc//zUG1kqVZp0L+l0oa9oEshO8ngZOBEI0T0toDoKhMUgB6aal6iRSlBOYSISceuDDh0MX0yA7d9eiikJLID9lluQIVm3/3aMuMyt2ip7SVV45CWwlzBDxyB1bupUwPDvOgwdtYfF2TY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=qw8rsn6U; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ecIUR+v0"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5267EC4CEE9;
-	Mon,  7 Apr 2025 18:17:43 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="qw8rsn6U"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7376FC4CEE9;
+	Mon,  7 Apr 2025 18:17:55 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1744049864;
-	bh=EeNyzSPVB15bkTHwbGNE4TC98r6iZP9QZnHs4daBLNk=;
+	s=k20201202; t=1744049876;
+	bh=wsk/UR5Tcm+EPJNKKtRxbzJeGipu7B54s1YULyH0ZYs=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=ecIUR+v0p0NBCmn+A6pHP5pOIFQkj3WTiF1ktxwqebQF+XhbsDZuPZ+BCGGjJ/kzX
-	 /TfSpxHHlTUOIF8JHXS0SGPx7ZMyKJ0oTnwJcmJQt9oE034LVhzwnSwsJm4ir4brvV
-	 TKvR/saHyPA1HBglTviG2vx4kQRlI2C87wXVB7+upNrD6mAwjEBNhVAonB/TycIn4l
-	 KDYBvjW9F+D9jBLZnjpgoP9UNuOmZD3vwLxhEZmCOb8Rntxc0wny5vbm+LbguNmDhr
-	 oaTm02pGn/mnmSJZBNwHw6qTJrFPsHPRWwfQq8od/nAv0PqiLOO9A3yyA4Nrr9UDPk
-	 S9ymA4UNK07CA==
+	b=qw8rsn6Uz3chDBMaTG6hv/7QDcrzt8KLF511Og5TNIdixTe8+RzP90Xjoxob3OKeL
+	 ehteOZZsSoppIC4nVYTkpJ2hYmzfY42Rodc+LVhTkxaDKe5HQoLD5mEda3LQmPSJTQ
+	 egqHfsyHV4Bkrl5CNdELYrvi2DlVGlXaA0tg+/T5AflKu2p8zeO8XaMDubS0QqJzNW
+	 vEujWJ9BTTaATMJFSFA0y2J11mAunanh9d823NQJ7YHp3RS73TLsiRBKqSQOpjm26S
+	 LmHCteIUdFjDFAsAQtLVPUwl0tcZyknUXmY6YkTGzrt/dyrY3P0ibIIzaudzqR7qXP
+	 zp37T1E3R9xzA==
 From: Sasha Levin <sashal@kernel.org>
 To: linux-kernel@vger.kernel.org,
 	stable@vger.kernel.org
-Cc: Basavaraj Natikar <Basavaraj.Natikar@amd.com>,
+Cc: Arnd Bergmann <arnd@arndb.de>,
+	kernel test robot <lkp@intel.com>,
+	Dave Jiang <dave.jiang@intel.com>,
+	Damien Le Moal <dlemoal@kernel.org>,
 	Jon Mason <jdmason@kudzu.us>,
 	Sasha Levin <sashal@kernel.org>,
-	Shyam-sundar.S-k@amd.com,
-	dave.jiang@intel.com,
 	allenbh@gmail.com,
+	fancer.lancer@gmail.com,
+	bhelgaas@google.com,
+	zhangjiao2@cmss.chinamobile.com,
+	pstanner@redhat.com,
 	ntb@lists.linux.dev
-Subject: [PATCH AUTOSEL 6.6 3/6] ntb_hw_amd: Add NTB PCI ID for new gen CPU
-Date: Mon,  7 Apr 2025 14:17:31 -0400
-Message-Id: <20250407181734.3184450-3-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 6.1 2/5] ntb: reduce stack usage in idt_scan_mws
+Date: Mon,  7 Apr 2025 14:17:45 -0400
+Message-Id: <20250407181749.3184538-2-sashal@kernel.org>
 X-Mailer: git-send-email 2.39.5
-In-Reply-To: <20250407181734.3184450-1-sashal@kernel.org>
-References: <20250407181734.3184450-1-sashal@kernel.org>
+In-Reply-To: <20250407181749.3184538-1-sashal@kernel.org>
+References: <20250407181749.3184538-1-sashal@kernel.org>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -50,34 +55,78 @@ List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
-X-stable-base: Linux 6.6.86
+X-stable-base: Linux 6.1.133
 Content-Transfer-Encoding: 8bit
 
-From: Basavaraj Natikar <Basavaraj.Natikar@amd.com>
+From: Arnd Bergmann <arnd@arndb.de>
 
-[ Upstream commit bf8a7ce7e4c7267a6f5f2b2023cfc459b330b25e ]
+[ Upstream commit aff12700b8dd7422bfe2277696e192af4df9de8f ]
 
-Add NTB support for new generation of processor.
+idt_scan_mws() puts a large fixed-size array on the stack and copies
+it into a smaller dynamically allocated array at the end. On 32-bit
+targets, the fixed size can easily exceed the warning limit for
+possible stack overflow:
 
-Signed-off-by: Basavaraj Natikar <Basavaraj.Natikar@amd.com>
+drivers/ntb/hw/idt/ntb_hw_idt.c:1041:27: error: stack frame size (1032) exceeds limit (1024) in 'idt_scan_mws' [-Werror,-Wframe-larger-than]
+
+Change it to instead just always use dynamic allocation for the
+array from the start. It's too big for the stack, but not actually
+all that much for a permanent allocation.
+
+Reported-by: kernel test robot <lkp@intel.com>
+Closes: https://lore.kernel.org/all/202205111109.PiKTruEj-lkp@intel.com/
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+Reviewed-by: Dave Jiang <dave.jiang@intel.com>
+Reviewed-by: Damien Le Moal <dlemoal@kernel.org>
 Signed-off-by: Jon Mason <jdmason@kudzu.us>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/ntb/hw/amd/ntb_hw_amd.c | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/ntb/hw/idt/ntb_hw_idt.c | 18 +++++++-----------
+ 1 file changed, 7 insertions(+), 11 deletions(-)
 
-diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.c b/drivers/ntb/hw/amd/ntb_hw_amd.c
-index d687e8c2cc78d..63ceed89b62ef 100644
---- a/drivers/ntb/hw/amd/ntb_hw_amd.c
-+++ b/drivers/ntb/hw/amd/ntb_hw_amd.c
-@@ -1318,6 +1318,7 @@ static const struct pci_device_id amd_ntb_pci_tbl[] = {
- 	{ PCI_VDEVICE(AMD, 0x148b), (kernel_ulong_t)&dev_data[1] },
- 	{ PCI_VDEVICE(AMD, 0x14c0), (kernel_ulong_t)&dev_data[1] },
- 	{ PCI_VDEVICE(AMD, 0x14c3), (kernel_ulong_t)&dev_data[1] },
-+	{ PCI_VDEVICE(AMD, 0x155a), (kernel_ulong_t)&dev_data[1] },
- 	{ PCI_VDEVICE(HYGON, 0x145b), (kernel_ulong_t)&dev_data[0] },
- 	{ 0, }
- };
+diff --git a/drivers/ntb/hw/idt/ntb_hw_idt.c b/drivers/ntb/hw/idt/ntb_hw_idt.c
+index 51799fccf8404..6f7620b153032 100644
+--- a/drivers/ntb/hw/idt/ntb_hw_idt.c
++++ b/drivers/ntb/hw/idt/ntb_hw_idt.c
+@@ -1041,7 +1041,7 @@ static inline char *idt_get_mw_name(enum idt_mw_type mw_type)
+ static struct idt_mw_cfg *idt_scan_mws(struct idt_ntb_dev *ndev, int port,
+ 				       unsigned char *mw_cnt)
+ {
+-	struct idt_mw_cfg mws[IDT_MAX_NR_MWS], *ret_mws;
++	struct idt_mw_cfg *mws;
+ 	const struct idt_ntb_bar *bars;
+ 	enum idt_mw_type mw_type;
+ 	unsigned char widx, bidx, en_cnt;
+@@ -1049,6 +1049,11 @@ static struct idt_mw_cfg *idt_scan_mws(struct idt_ntb_dev *ndev, int port,
+ 	int aprt_size;
+ 	u32 data;
+ 
++	mws = devm_kcalloc(&ndev->ntb.pdev->dev, IDT_MAX_NR_MWS,
++			   sizeof(*mws), GFP_KERNEL);
++	if (!mws)
++		return ERR_PTR(-ENOMEM);
++
+ 	/* Retrieve the array of the BARs registers */
+ 	bars = portdata_tbl[port].bars;
+ 
+@@ -1103,16 +1108,7 @@ static struct idt_mw_cfg *idt_scan_mws(struct idt_ntb_dev *ndev, int port,
+ 		}
+ 	}
+ 
+-	/* Allocate memory for memory window descriptors */
+-	ret_mws = devm_kcalloc(&ndev->ntb.pdev->dev, *mw_cnt, sizeof(*ret_mws),
+-			       GFP_KERNEL);
+-	if (!ret_mws)
+-		return ERR_PTR(-ENOMEM);
+-
+-	/* Copy the info of detected memory windows */
+-	memcpy(ret_mws, mws, (*mw_cnt)*sizeof(*ret_mws));
+-
+-	return ret_mws;
++	return mws;
+ }
+ 
+ /*
 -- 
 2.39.5
 
