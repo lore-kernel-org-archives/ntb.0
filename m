@@ -1,158 +1,157 @@
-Received: from mail-pf1-f172.google.com (mail-pf1-f172.google.com [209.85.210.172])
+Received: from mail-wr1-f54.google.com (mail-wr1-f54.google.com [209.85.221.54])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F07671DA3D
-	for <ntb@lists.linux.dev>; Sat, 19 Apr 2025 04:34:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0ED211F4706
+	for <ntb@lists.linux.dev>; Tue, 22 Apr 2025 14:54:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745037258; cv=none; b=R66pUc5WVIX//wjZC51PItgKsted7BZOWVwOMf/ouXxZvux2m9gciBswxaoGa3x+mQr4RS/BAVAM6cm2wgvvXVvy5qEQmbu3+/Hj3MOpx90KIr5WSzu4UH/TJ3t0rfiLQ5YbPJnOM0tR3qqhd0o5sWw6/mnDjNzY2lcTZL0P0NA=
+	t=1745333679; cv=none; b=sL1jOSwaEoKKMlqiDQT/4xpbBY6V1OT75IEX0tvhw6SxHN8IcA8L660YssoAgnCfznDWie1HkpDS3Yd2PksVI/p+pg7h7fPAbaIPOkohEvMxahxCiIw0RzwcyBMGi33vgI4H/Frsrm4sT+geg3ihLhbeZPIayvCJkoZgTzRUBgU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745037258; c=relaxed/simple;
-	bh=5tPkOfZzduiC15DP5jXeToXHofbdMRVLi2k4bBQyVyA=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=gD3i/KWtYySjZ4M4Xe2iSiBbnoa4RqQGGieTfLCbJQq+afm1y3OvmO4pWMziOXDbe4OdDjEiJLh3rEpI0p9DhiEU4mahc5B9qZ6jvS7nwKI5TeDnIFwG5bBh3e4zabWkusPv1oAq0cXBJXAuei/Iz1vRdQjyIACUN48nSzTs5k8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Q348KEN2; arc=none smtp.client-ip=209.85.210.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1745333679; c=relaxed/simple;
+	bh=5jwVtzCgD4uNjqyYTuvqwhiQR8nTsDDM1aNFemeBRzg=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=NveUFfqX03vG95f2u5C5kgGWZafzGkF1Jmqeq7SOXa87hh7h/F9qy2mU5RbNy6872DGFsOcGyxpJF57ylag6hM+p7z0OTgIHaqQ5BswrTdNruf+GVNvjB3dZVrmNHhGXNHlACyMhDPUNsiibQb3PBkDqW1uFemEyrc6a/aXP2Bw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=s7gcqEFt; arc=none smtp.client-ip=209.85.221.54
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Q348KEN2"
-Received: by mail-pf1-f172.google.com with SMTP id d2e1a72fcca58-736c1cf75e4so2204829b3a.2
-        for <ntb@lists.linux.dev>; Fri, 18 Apr 2025 21:34:16 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="s7gcqEFt"
+Received: by mail-wr1-f54.google.com with SMTP id ffacd0b85a97d-39ee651e419so3024313f8f.3
+        for <ntb@lists.linux.dev>; Tue, 22 Apr 2025 07:54:35 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1745037256; x=1745642056; darn=lists.linux.dev;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=uXzOal0nfIQ8bFg2XccSM090HwsdWEh3UWZ58CwncMQ=;
-        b=Q348KEN2U8SQYQKYm2SN+xn1ZL+9nK/2ux5RCyW/US8x7Ud8epJsCdQDOrsYXZE/wa
-         8Y1uXYf81HkPSKXoN7M9VV/xDXbtAKidyZOzcx8e+Vqm6fuXiM4sd0KG4l/CPpUyLoBC
-         j1ACB7xVGkW2/waC1WjYfQ0kHIc1tULaAwhBzyTsNB2IegZ+AMcwzFlEKOuDr3IEjzDI
-         F32mQA0knRhw9YoQkPau4anwD+wQuGzbxhNe//mCWdwSP/bmuTMJbFYTqRhCauTAtQT0
-         KGU2dTqkNkJHw7cqSEiDBUms8df4TUxICxqKV3AaFjGnGhDJ2ksXLWf5V20ytrY5Sy0M
-         ws6g==
+        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1745333674; x=1745938474; darn=lists.linux.dev;
+        h=cc:to:content-transfer-encoding:mime-version:message-id:date
+         :subject:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=gG9ubyGdNF+k3tFycmy59fjgpr52bVfS4Acl0aGZAog=;
+        b=s7gcqEFt11yamgn342A6OKHl0OXXxL+sh8GSwRsKMLMY8roYRmP25if72zu8OSJMSW
+         +rONPkWg+Bm+WimcAn5l1OUz0ZE3FrI+LuXmtbGfkszKyV2cVLKWAS3V6veTRoXwlXKU
+         7A7kSkxIRw4uSrqVY2LJA/AEVIosLWJl7bA/B7vDYcFL5cHSjV2cK3NPMabvD2RrnrpJ
+         HwPS7VM31bbvQHmoKTgtdatKlBU4OpAa4he0FoDoG7J9aAuYbWOHrCchhtcJxYdF6ac3
+         TgzLFG96ojClVmnb9FsmmLtveOyhulg/ylvuP5sf07dKFb7vF6MKVfH7yJvKj3I419Ci
+         /fEg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1745037256; x=1745642056;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=uXzOal0nfIQ8bFg2XccSM090HwsdWEh3UWZ58CwncMQ=;
-        b=Heu1ddvSnx9ZzZMfl4NnJNMIKBPky/axho1Woi2pGkQfV+Sh7XCrMQ2RC60opZlYLj
-         ladQMBXCSs6dDmAqTe4leMlXA+EykZwttJqfEE76n5divO3QkwvuJqR6Ply74x7LOzxY
-         SHVxu+aEfXdKkGF2uhsZhKdAuTbbYvFwsF569pB+macGk4WH0APjYFtPKw+B8CjEgA2I
-         AjnsFv9tAO51LAOVaOwmwnJBbx0DHk4ZDB0kF5PlZ0Vr1Nv92Jx1dI8l79tpZnyLT04V
-         Cmrse/NwDl4iv7YpdEb1cS67j7AhRmEPwSNh/qw8LU1SvTgEPh6pBPsyJTn2CEHTra6c
-         47fg==
-X-Forwarded-Encrypted: i=1; AJvYcCVOqrOKhxLG+FT19HIKq5mzRj9XdRruEl7E8zLNLZWvvXeR+FZJwaVx4uhwaVvoE4heIaI=@lists.linux.dev
-X-Gm-Message-State: AOJu0YysQPsyj8A+I05qkWyWsZ7zByjU0i8ZmXmmN7XmIl7yBIblW0iF
-	r2UwdfR4HSQsN69iEQKDvdzhq2kVSfHdkGvwzcs2ChSHmwcPijrXy2iVC9WAHg==
-X-Gm-Gg: ASbGncuPxMarC3RPDJMW0vhrBEY0z12MkcNpCjJmW4v8YWZz7R6TiLIkWYNl33NPd8b
-	usk1813SdGAqCzRzgWvi0mwb0dilHX6DYNjjL5naNRJulAl0XDiceqH5pfcm4XlQA9f9Wb/OHfr
-	0MRrzdKtnYovcZPBfTCErA4AeUMRrHxUNvERNUU8KEEZ8f53gX5a5CMoZoD2N2iB4OcIVPJa30/
-	fw25Glrx9xOm9kobY/idjsUS93zEDco81DItU++1Pj/zWtSWXKGRXqXjPv2Uf5VuidvUNUev/H4
-	hjvOUIal/NgIZrJgB3eLC96M2LbdB0/X9MvMZG+ebdA9/3zYejGx
-X-Google-Smtp-Source: AGHT+IEP9iQj2KkpKrslEj+551ckgO39xK+3CJrtgDzGeG3sOciJvji42KgL9hedUsr1SldlGwzI4w==
-X-Received: by 2002:a05:6a00:4606:b0:739:3f55:b23f with SMTP id d2e1a72fcca58-73dc14d3124mr5780129b3a.14.1745037256037;
-        Fri, 18 Apr 2025 21:34:16 -0700 (PDT)
-Received: from thinkpad ([220.158.156.81])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-73dbfa58333sm2450467b3a.118.2025.04.18.21.34.10
+        d=1e100.net; s=20230601; t=1745333674; x=1745938474;
+        h=cc:to:content-transfer-encoding:mime-version:message-id:date
+         :subject:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=gG9ubyGdNF+k3tFycmy59fjgpr52bVfS4Acl0aGZAog=;
+        b=c3nlwwaGZrd+VL1/RQHU15KtiWqXQeJzxlE1g3W523IzC95m17MVZwz9EtvuHR+H5W
+         GvMZP9dcpOT+MY9CmDZxRQcs5SbHob8vRA2vyWlPUBNoE1HiS6uJzoarby4NIqnvz61S
+         yP0+vYMpnC8yaqkKzE3koHq1gHC7346vUjrHyw6h/TDVbpB6xjUbbD7ScR3P4X1LFo0O
+         G3QKWkJzDSEVa0umZSWUQjliA6pvtBa0R6F4ZZZRss84UHYAP4NqNWZgYuKIzKGvUrHo
+         2W/LxYQF5kJtyXxo8FBdNDIOJTMqpB/TFY5Macs0AKmELGC9bAnDxNLxozIAeN4Gc8wE
+         9QKw==
+X-Forwarded-Encrypted: i=1; AJvYcCWS+YXH9qxf3LuIJuhjRYEYLbtWX48Ra2J1xhfNIYKkUy+l7OJt2x8GaAHIzTAslFFtkhg=@lists.linux.dev
+X-Gm-Message-State: AOJu0YyJ/771v7eegDjaNXFFrIiPmBhgiL/NJvuRt3zGb5HGtwlKs40Q
+	WUKG3dCeX34k9DSe0upMD7c17rF6sonnljWP09rvw9tp7zUfH+p09HNjluPzNXI=
+X-Gm-Gg: ASbGncvje+x4j+UE8f8tvRrxE07fKNM6Dz0VbIACygJrr1L6YJDEzV0KaSeX8UkLLnV
+	UpBn2lUZfifuKXG5uKx85NSrBaOcYs0jxKcXASkls8OtzVPuuyLP8gpho9fQIQ0A7p+vxpLuBjP
+	YBaNORvBzLG8TVrz3TzL7TxRX+nBTBEPm+tSARu89RFfGH8ZefZnEAU+229pIDYHoYFseRkYG2e
+	dFro7lTiSZSIWsKQYIbaHz38ADv4fwVr/Lm3kzRGQJBoKxq4BZrh+T6q7Hc/8HR1ao0g60OpWjR
+	OJuaUTZEJp3e9B2hJvUp62uevRrsZ4YFMJYlrC5+wMo2WrXQKL9BTDzUZSzpl0LWQg==
+X-Google-Smtp-Source: AGHT+IFiry1aEcsv4RSjsJlDXhIh520EjsJLXwPy2Ze0MY+e/aA2sn5B9Azs+BhIspTbKr+bPv5+Ag==
+X-Received: by 2002:a05:6000:2281:b0:390:ea34:7d83 with SMTP id ffacd0b85a97d-39efba6dcb8mr14706176f8f.31.1745333674270;
+        Tue, 22 Apr 2025 07:54:34 -0700 (PDT)
+Received: from toaster.baylibre.com ([2a01:e0a:3c5:5fb1:5f77:7d42:6228:3358])
+        by smtp.googlemail.com with ESMTPSA id 5b1f17b1804b1-4406d5a9de9sm177304635e9.6.2025.04.22.07.54.33
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 18 Apr 2025 21:34:15 -0700 (PDT)
-Date: Sat, 19 Apr 2025 10:04:08 +0530
-From: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
-To: Niklas Cassel <cassel@kernel.org>
-Cc: Jerome Brunet <jbrunet@baylibre.com>, 
-	Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kw@linux.com>, Kishon Vijay Abraham I <kishon@kernel.org>, 
-	Bjorn Helgaas <bhelgaas@google.com>, Lorenzo Pieralisi <lpieralisi@kernel.org>, 
-	Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, 
-	Allen Hubbe <allenbh@gmail.com>, Christoph Hellwig <hch@lst.de>, Sagi Grimberg <sagi@grimberg.me>, 
-	Chaitanya Kulkarni <kch@nvidia.com>, Marek Vasut <marek.vasut+renesas@gmail.com>, 
-	Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Yuya Hamamachi <yuya.hamamachi.sx@renesas.com>, 
-	linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org, ntb@lists.linux.dev, 
-	linux-nvme@lists.infradead.org
-Subject: Re: [PATCH v3 2/3] PCI: endpoint: improve fixed_size bar handling
- when allocating space
-Message-ID: <xzn36fjifrwgmxpymmn6v7truzan5of37oxvvriegitnqeuwwr@cgrckqiittfh>
-References: <20250407-pci-ep-size-alignment-v3-0-865878e68cc8@baylibre.com>
- <20250407-pci-ep-size-alignment-v3-2-865878e68cc8@baylibre.com>
- <Z_Pw3I2xO7BMSGWW@ryzen>
- <1jjz7wvuyj.fsf@starbuckisacylon.baylibre.com>
- <Z_TuIP-k1yLbjcys@ryzen>
+        Tue, 22 Apr 2025 07:54:33 -0700 (PDT)
+From: Jerome Brunet <jbrunet@baylibre.com>
+Subject: [PATCH v4 0/2] PCI: endpoint: space allocation fixups
+Date: Tue, 22 Apr 2025 16:54:18 +0200
+Message-Id: <20250422-pci-ep-size-alignment-v4-0-6bd58443fee9@baylibre.com>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <Z_TuIP-k1yLbjcys@ryzen>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAJqtB2gC/4XNTQ6CMBCG4auYrq0phcLgynsYF20ZYRL+0pJGN
+ NzdwkZjNC7fL5lnHsyjI/TsuHswh4E8DX2MbL9jttF9jZyq2EwKqUQqgY+WOI7c0x25bqnuO+w
+ nXlagjAQDQgkWb0eHV7pt7vkSuyE/DW7e3oRkXf+JIeGCIypTgEmULvXJ6Lkl4/Bgh46taJAvK
+ BPZL0hGyKZaVCazV6uKL1D6DhW/oDRCkCsoAHOwFj6gZVmey+3KfU8BAAA=
+X-Change-ID: 20250328-pci-ep-size-alignment-9d85b28b8050
+To: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>, 
+ =?utf-8?q?Krzysztof_Wilczy=C5=84ski?= <kw@linux.com>, 
+ Kishon Vijay Abraham I <kishon@kernel.org>, 
+ Bjorn Helgaas <bhelgaas@google.com>, 
+ Lorenzo Pieralisi <lpieralisi@kernel.org>, Jon Mason <jdmason@kudzu.us>, 
+ Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, 
+ Christoph Hellwig <hch@lst.de>, Sagi Grimberg <sagi@grimberg.me>, 
+ Chaitanya Kulkarni <kch@nvidia.com>
+Cc: Marek Vasut <marek.vasut+renesas@gmail.com>, 
+ Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, 
+ Yuya Hamamachi <yuya.hamamachi.sx@renesas.com>, linux-pci@vger.kernel.org, 
+ linux-kernel@vger.kernel.org, ntb@lists.linux.dev, 
+ linux-nvme@lists.infradead.org, Jerome Brunet <jbrunet@baylibre.com>
+X-Mailer: b4 0.14.2
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2104; i=jbrunet@baylibre.com;
+ h=from:subject:message-id; bh=5jwVtzCgD4uNjqyYTuvqwhiQR8nTsDDM1aNFemeBRzg=;
+ b=owEBbQKS/ZANAwAKAeb8Dxw38tqFAcsmYgBoB62msl/2CkXYLO9zyFLv1uQ0Yj/jKbC/61ZS3
+ 7z19ghgj7yJAjMEAAEKAB0WIQT04VmuGPP1bV8btxvm/A8cN/LahQUCaAetpgAKCRDm/A8cN/La
+ heIoEACzFnt6rpj7masrbEMu1F8A9oCj4q9PQWn5yJSbzp9ySmczV8yUCf4bW5FDI4pMN2BRRQT
+ BeyfH72Up79X20K+hWqCaX4m/eE7C2F0elheS5MNiShHsS7TzDzP6sytfMyYnv308uOB03JaCh0
+ 6jNw0ETb3brLlGAlNwV15cGhGZLtzTEClDHPwOj3OtoVXlmEaRJR//5vMR+SeP5xwJSo57Eoiwk
+ bfdIQ7QXz47zR8wFC46oc/EvnSW5YYy/LvHsfffRIuavC/e/6gJOlgV+npmzDI3xrcJ6lMx1rh1
+ T+WwfNdlSBy09hhpCQLMOmUfAL20Tyes2v64SbkSc3TST3ybbhzH6tO2N/3kuOtfmuAow/GQAOJ
+ 28eJUpx/tt0IQ/XXfs63Qd3lJH3fqLjhENN4FHVX94LhcAlcv1vbH07SbLXAQi9NyBONqr5vXVy
+ Z8ebnH5+QLPfmU57CWaYEWIXnzZue1kWCiTZuQMJZ3iwc9qo2Qfhdtt7NkEpqCWWYZT0dfbImwj
+ Y3vNxPzyRXEuLNxWx2oofbHn/B8bC8pi/7voKoqR3Wm/eqNhGxIEl5+1OXiVVVeacKw2HLsxeye
+ xvMZ8a/IypQ20/VrSTxJhgvxmZkAzOYU4v+MpidhrkAksGFJVLjDsCa9CsTLb/NUlM5deHvYRJm
+ 67VQCvd59/k2aqw==
+X-Developer-Key: i=jbrunet@baylibre.com; a=openpgp;
+ fpr=F29F26CF27BAE1A9719AE6BDC3C92AAF3E60AED9
 
-On Tue, Apr 08, 2025 at 11:36:32AM +0200, Niklas Cassel wrote:
-> On Mon, Apr 07, 2025 at 05:43:00PM +0200, Jerome Brunet wrote:
-> > On Mon 07 Apr 2025 at 17:35, Niklas Cassel <cassel@kernel.org> wrote:
-> > 
-> > > Hello Jerome,
-> > >
-> > > On Mon, Apr 07, 2025 at 04:39:08PM +0200, Jerome Brunet wrote:
-> > >> When trying to allocate space for an endpoint function on a BAR with a
-> > >> fixed size, the size saved in the 'struct pci_epf_bar' should be the fixed
-> > >> size. This is expected by pci_epc_set_bar().
-> > >> 
-> > >> However, if the fixed_size is smaller that the alignment, the size saved
-> > >> in the 'struct pci_epf_bar' matches the alignment and it is a problem for
-> > >> pci_epc_set_bar().
-> > >> 
-> > >> To solve this, continue to allocate space that match the iATU alignment
-> > >> requirement but save the size that matches what is present in the BAR.
-> > >> 
-> > >> Fixes: 2a9a801620ef ("PCI: endpoint: Add support to specify alignment for buffers allocated to BARs")
-> > >> Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
-> > >> ---
-> > >>  drivers/pci/endpoint/pci-epf-core.c | 25 +++++++++++++++++--------
-> > >>  1 file changed, 17 insertions(+), 8 deletions(-)
-> > >> 
-> > >> diff --git a/drivers/pci/endpoint/pci-epf-core.c b/drivers/pci/endpoint/pci-epf-core.c
-> > >> index b7deb0ee1760b23a24f49abf3baf53ea2f273476..fb902b751e1c965c902c5199d57969ae0a757c2e 100644
-> > >> --- a/drivers/pci/endpoint/pci-epf-core.c
-> > >> +++ b/drivers/pci/endpoint/pci-epf-core.c
-> > >> @@ -225,6 +225,7 @@ void pci_epf_free_space(struct pci_epf *epf, void *addr, enum pci_barno bar,
-> > >>  	struct device *dev;
-> > >>  	struct pci_epf_bar *epf_bar;
-> > >>  	struct pci_epc *epc;
-> > >> +	size_t size;
-> > >>  
-> > >>  	if (!addr)
-> > >>  		return;
-> > >> @@ -237,9 +238,12 @@ void pci_epf_free_space(struct pci_epf *epf, void *addr, enum pci_barno bar,
-> > >>  		epf_bar = epf->sec_epc_bar;
-> > >>  	}
-> > >>  
-> > >> +	size = epf_bar[bar].size;
-> > >> +	if (epc_features->align)
-> > >> +		size = ALIGN(size, epc_features->align);
-> > >
-> > > Personally, I think that you should just save the aligned_size / mem_size /
-> > > backing_mem_size as a new struct member, as that avoids the risk that someone
-> > > later modifies pci_epf_alloc_space() but forgets to update
-> > > pci_epf_free_space() accordingly.
+This patchset fixes problems while trying to allocate space for PCI
+endpoint function.
 
-+1. It is always a better approach to store the aligned size during allocation
-and use it while freeing. It indeed avoids the alloc/free to go unsymmetry in
-the future.
+The problems, and related fixups, have been found while trying to link two
+renesas rcar-gen4 r8a779f0-spider devices with the vNTB endpoint
+function. This platform has 2 configurable BAR0 and BAR2, with an alignment
+of 1MB, and fairly small fixed BAR4 of 256B.
 
-> > 
-> > I tried but it looked a bit silly to store that when it was only a
-> > matter of calling ALIGN() with parameters we already had, and it is
-> > supposed to be only used in those two functions.
-> 
-> Another advantage is that you could kill patch 1/3 in this series, as
-> there would be no need to supply epc_features to pci_epf_free_space().
-> 
+This was tested with
+ * BAR0 (1MB):  CTRL+SPAD
+ * BAR2 (1MB):  MW0
+ * BAR4 (256B): Doorbell
 
-Yes!
+This setup is currently not supported by the vNTB EP driver and requires a
+small hack. I'm working on that too.
 
-- Mani
+Changes in v4:
+- Drop patch 1 of v3 and add new .aligned_size in struct pci_epf_bar
+  instead re-computing the aligned size on the path freeing the memory
+- Link to v3: https://lore.kernel.org/r/20250407-pci-ep-size-alignment-v3-0-865878e68cc8@baylibre.com
 
+Changes in v3:
+- Rebased on v6.15-rc1
+- Fix build issue with newly introduced nvme endpoint function
+- Link to v2: https://lore.kernel.org/r/20250404-pci-ep-size-alignment-v2-0-c3a0db4cfc57@baylibre.com
+
+Changes in v2:
+- Allocate space that match the iATU alignment requirement, as previously
+  done.
+- Chose not to add a new member in struct pci_epf_bar, as initially
+  discussed. After reworking the code, that did not seem necessary.
+- Make sure SPAD registers are 4 bytes aligned in the vNTB endpoint function
+- Link to v1: https://lore.kernel.org/r/20250328-pci-ep-size-alignment-v1-0-ee5b78b15a9a@baylibre.com
+
+Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
+---
+Jerome Brunet (2):
+      PCI: endpoint: improve fixed_size bar handling when allocating space
+      PCI: endpoint: pci-epf-vntb: simplify ctrl/spad space allocation
+
+ drivers/pci/endpoint/functions/pci-epf-vntb.c | 26 +++-----------------------
+ drivers/pci/endpoint/pci-epf-core.c           | 21 ++++++++++++++-------
+ include/linux/pci-epf.h                       |  3 +++
+ 3 files changed, 20 insertions(+), 30 deletions(-)
+---
+base-commit: 92713f0ea620bbe923eb4e7bda408e5c79597cd4
+change-id: 20250328-pci-ep-size-alignment-9d85b28b8050
+
+Best regards,
 -- 
-மணிவண்ணன் சதாசிவம்
+Jerome
+
