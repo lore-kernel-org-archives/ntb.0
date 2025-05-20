@@ -1,356 +1,502 @@
-Received: from mail-wm1-f44.google.com (mail-wm1-f44.google.com [209.85.128.44])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from EUR02-AM0-obe.outbound.protection.outlook.com (mail-am0eur02on2051.outbound.protection.outlook.com [40.107.247.51])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E889E25CC48
-	for <ntb@lists.linux.dev>; Tue, 20 May 2025 08:11:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.44
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747728700; cv=none; b=sezsVbQNmD2gQ84Y1ZGpWSwS1o59835jQnkzLMY6299ueZMoX3sZCxYqNVdkJ/qUD+PRPo95MYvAnJhO1QVWu5HrVVrPbUQNh9nY0YlY3oECZiiUU7+AsxMgIOJ1Awb10b0pOPGQJZmvovP5dL172QJekR5TBo78djAcaPsZtlc=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747728700; c=relaxed/simple;
-	bh=qjH47GrG87pNSlPUuN452xvygvFX5iLewuJM3iBM2pE=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 MIME-Version:Content-Type; b=HbDvXqWssV4NoVkaBiFI1ephQIvO6Mqamb+zV94bLvtSKbMb1rMfIoHM2PvSCNHwWw/Pqdf0wr6/nizvWizJTupEN4c+f/+TOfRl9A0GuC33YPQjt3USL/mK7XINQiDAssQptCQLJmzR/DwohXwfdVaT0tmzuuDMTaGmwmMzQgs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=hwTjbccx; arc=none smtp.client-ip=209.85.128.44
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4DE122B9A9
+	for <ntb@lists.linux.dev>; Tue, 20 May 2025 17:08:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.247.51
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1747760900; cv=fail; b=Ef4fYadjqwjU/g2A6P1VXotrz5Et5UZPZatAVB/AWz77J7JmMyyMVHYN67wQC0hQx41vytY5rhM4ZfvbI2PG7pubeb3BNdHSWyd1/4u2Z8FM5P0RCgsHgQF6HJOUDyFLOAHMcCijtOZRv61q7sdGUZ5M5kOU/YzZImWTc8lGIgQ=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1747760900; c=relaxed/simple;
+	bh=Mcc3pgRebJiD3QM8hr96cp4Lvmb5G/kqflViNdwm2w8=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
+	 Content-Disposition:In-Reply-To:MIME-Version; b=ufgn2v7IVfgx/TN1RrL9fX0Fd8azv7XivAAz28BRj7SNaaOdjCXdoRuQUnX5+vCqrng7lfSeouKjWTMNz9d/p21GvvnEXitBQCC/fU/ucK0VB4nHYs65enH3fOipW7xBhRZ+0MOovVcjlCnHMfvcmm85QcIPLHknRaDA2diZ4ug=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com; spf=pass smtp.mailfrom=nxp.com; dkim=pass (2048-bit key) header.d=nxp.com header.i=@nxp.com header.b=fBbss4nD; arc=fail smtp.client-ip=40.107.247.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=nxp.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="hwTjbccx"
-Received: by mail-wm1-f44.google.com with SMTP id 5b1f17b1804b1-43d0618746bso41859965e9.2
-        for <ntb@lists.linux.dev>; Tue, 20 May 2025 01:11:37 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1747728696; x=1748333496; darn=lists.linux.dev;
-        h=mime-version:message-id:date:user-agent:references:in-reply-to
-         :subject:cc:to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=THF+HMUCeR+ZEHyvD0Jg4qnj89QwaX1MllBVWuesBV8=;
-        b=hwTjbccxh2SnZMTr2EIkDEA5y063avU5zeosKLpz3OO0Lk+8SJcwxut/6j7WA7p2Oo
-         vcxvKsDQHSaO8pnGE+/XyA/5fRCISakv73u1mm1NKH3VLbDky+XwUgBKSgO3SrX9/MOb
-         MMWJNYg3X+QwqE9OJ8MtaAlryq6ZNIt5QYX4DSd5xFDN3B9Ff2g3zQAcrQXQ6X5nTM3h
-         /ZO1RyRdmv+LmTuaauVpskixjVAmldgXpjbHHpFDn3VRZpYWtERU+n0NRVCOaZ7+v9aN
-         smDvkWWns2HNv7yZzAKdObpINuroTU4lciPRaWJh7VueCIqZsTFudKLt4ayg13hRAsSq
-         TUfA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1747728696; x=1748333496;
-        h=mime-version:message-id:date:user-agent:references:in-reply-to
-         :subject:cc:to:from:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=THF+HMUCeR+ZEHyvD0Jg4qnj89QwaX1MllBVWuesBV8=;
-        b=BQ1KrAWa9YhhXGkcIfPOcRgWHIfgOJju+44kQJKKMNKxiiuL2BajNryDSoWXukES2F
-         mJV+ceBWOfS2rBYsotbNKYFrcXppBPrmLLTwVagxS6qw8Qoya5BXLFlZitE+hfGVl8T4
-         8m8HMWzr5xSolFrE+O7kYj7VZMeD5bnNz77y9aetQOgYjkoHpOyYc4h4IlEw2WQKElh9
-         bwJogb33kcq8Ic6VLW+2+V0GCtr3agZSUE1+ZScBv1SpoQFlItbIfWc/OTaN9Ul7vukc
-         5AK+AcJlxPZexFL0mtMJVOEPgm8NwyFyVEeQ/Ps3h7IRHCJ/5O7dcMF5YXN3cgmEnDum
-         cSaQ==
-X-Forwarded-Encrypted: i=1; AJvYcCWA8+Y9kwieYKgp6veUJ6V4vyjF2MJy4tMD5yZ+B61sSdd6RhSYBmmM09cqGTDFc/jTk7w=@lists.linux.dev
-X-Gm-Message-State: AOJu0YyyUzXmm3Zud2h7j5mmaCP6rO/7hiJryrWlj/0202rHOYf7GGLC
-	OBwgA2gbwXs4yr5A4m0LeEH9gr8UeIul214NA8kNI7D5nGCp3m5y09KBm9AFxiICs/I=
-X-Gm-Gg: ASbGnct8J8JstF5FCFvCffAnBkxS2RtyB0iYKcvpBZpKXuPSYZoKlSAbOjgxyAwCGed
-	UunMefBrUHK6IM/uke/Ixd06EJHytP/kU/3TZUpmMkZXhjrfcC4dLXTkVqAJggK2p5e2bEcmVBB
-	zz1n1c5KEKd0MNSMy/viuDHLZI++0VYcMrNgScN2TXAJDh2FvrICCTxzDlUoy8W4WJ7QQFvohko
-	AoqWDmPhA/Xrv4fwXdkXd7i3YeIbT6ElMuxcA+wrWZ0wBzii2qHG0CLRoogoXiiepxsWOjdkcYL
-	Bk6IN+RSNZx676BqnS7TJ4lrfiBH8YjFrVCYS+/u8gVCECvZpHU=
-X-Google-Smtp-Source: AGHT+IHtId6x3szrS7b6effYezOLNKLAda69T0xvOKtzK7SCyXc6cFPh10PQsKA7MJT0nqyWBYBUvA==
-X-Received: by 2002:a05:600c:5491:b0:440:6a1a:d8a0 with SMTP id 5b1f17b1804b1-442fefd6da8mr128464775e9.7.1747728696095;
-        Tue, 20 May 2025 01:11:36 -0700 (PDT)
-Received: from localhost ([2a01:e0a:3c5:5fb1:f683:3887:7e7c:b492])
-        by smtp.gmail.com with UTF8SMTPSA id 5b1f17b1804b1-447f45a8434sm22137365e9.0.2025.05.20.01.11.34
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 20 May 2025 01:11:35 -0700 (PDT)
-From: Jerome Brunet <jbrunet@baylibre.com>
-To: Frank Li <Frank.li@nxp.com>
-Cc: Jon Mason <jdmason@kudzu.us>,  Dave Jiang <dave.jiang@intel.com>,  Allen
- Hubbe <allenbh@gmail.com>,  Manivannan Sadhasivam
- <manivannan.sadhasivam@linaro.org>,  Krzysztof =?utf-8?Q?Wilczy=C5=84ski?=
- <kw@linux.com>,
-  Kishon Vijay Abraham I <kishon@kernel.org>,  Bjorn Helgaas
- <bhelgaas@google.com>,  ntb@lists.linux.dev,  linux-pci@vger.kernel.org,
-  linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 4/4] NTB: epf: Allow arbitrary BAR mapping
-In-Reply-To: <aCu0Wem4KkaybW4f@lizhi-Precision-Tower-5810> (Frank Li's message
-	of "Mon, 19 May 2025 18:44:41 -0400")
+	dkim=pass (2048-bit key) header.d=nxp.com header.i=@nxp.com header.b="fBbss4nD"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=Z4yIKlW14uFQYGt1GPvdZCRPSr9QARqPuf0IVJv8uH6dhd7MEZ83uKNk1dP3vS0I80V/XfZ9KExvkvJUqpVNwqPeiknMYdcY1QH8LgTJ/I8H4P/VJ4Ng4KdDog5mhD+JTy0NnDJpz9h15yh1lKI5twgwTAheVckqh2+93fjXT3tXl+dMUlMHIfk3Wq/ePVAGmdm0V2avw5xvzAz5rHM9mxe2vR8Hr5qfJOB3/pZcCALAme6N8TAWVjx8W2188dTm9F0PP+ltgQEQbMZCQTSXy9xVWdiiIht6ZajSwjYo4fHAeaP1huhlWB2PfpuuW3stiQ6/U2jC+kBMrJSnZT8uIw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=84JtjWTUGGsJDLSGOSuIII7fcxsoJb9Z4sjlxzj7Lp4=;
+ b=KZ9YvyL65SAOZvziykiG37dC+fFywcon/jKkxo/Xkwis7JIrN82Sxb6MwActwmZNLBH533iQKMm3d6QvefrBqZqMZU8URoHIxe0BHUYm3QuNLhvKFAGSxVGRzFi9Q+kNTtOS7dMJfPIdo/g7qmmzIKS2Y8qbN7luSkvHXYNDaie9f8VJ3qQzfkPysvB5GyszKU/Vp0lVvRy1wf1E5I81VKMxAu0stWEE+FBaCHmZWxZZK/Kp5Ni5GgZMSxhmLHvMIIrs2y/WyrCrpCsogS+klOpQPeXe+aGfSeT+Ds+MoD5O5Rjgd69nMzDKT++cTm0XJ9EZqrZD/y9mf2uBg1lPJg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
+ header.d=nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=84JtjWTUGGsJDLSGOSuIII7fcxsoJb9Z4sjlxzj7Lp4=;
+ b=fBbss4nDv1AGKP2Ei3vUF/dACC7G5d8oAB1KAkqyjizYFu2wJwTKDLVaxyEllRuGWDz7pKNNy6DdPN7gU/LttKD21GFDAcu77nSw5PBPI85Gkw3CPpKaLYoHpHz0FPhC8t7G6qApC6M0OUkq//JvEMr90IFaX5LkqQUTwgHhDfuJn2EYWOuDgwxlXEAdKaq8KWdLyehTZYrzNi1k7A2Wwb4wP9UEgNez5bIr+iHDQEAQCLxJznJP4ROH+F16u3GyhC9wzgegJhTFWLBJ1wYVu83MQUZVlxUW3HPnNdTMkTuN06TGACLP4cv1XGopo0g4njusUXbyy8sQ5f0evsH5mA==
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nxp.com;
+Received: from PAXPR04MB9642.eurprd04.prod.outlook.com (2603:10a6:102:240::14)
+ by AS8PR04MB8770.eurprd04.prod.outlook.com (2603:10a6:20b:42d::21) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8746.31; Tue, 20 May
+ 2025 17:08:13 +0000
+Received: from PAXPR04MB9642.eurprd04.prod.outlook.com
+ ([fe80::9126:a61e:341d:4b06]) by PAXPR04MB9642.eurprd04.prod.outlook.com
+ ([fe80::9126:a61e:341d:4b06%2]) with mapi id 15.20.8746.030; Tue, 20 May 2025
+ 17:08:13 +0000
+Date: Tue, 20 May 2025 13:08:05 -0400
+From: Frank Li <Frank.li@nxp.com>
+To: Jerome Brunet <jbrunet@baylibre.com>
+Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>,
+	Allen Hubbe <allenbh@gmail.com>,
+	Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
+	Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kw@linux.com>,
+	Kishon Vijay Abraham I <kishon@kernel.org>,
+	Bjorn Helgaas <bhelgaas@google.com>, ntb@lists.linux.dev,
+	linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH 3/4] PCI: endpoint: pci-epf-vntb: allow arbitrary BAR
+ configuration
+Message-ID: <aCy29TCa4t05r7q/@lizhi-Precision-Tower-5810>
 References: <20250505-pci-vntb-bar-mapping-v1-0-0e0d12b2fa71@baylibre.com>
-	<20250505-pci-vntb-bar-mapping-v1-4-0e0d12b2fa71@baylibre.com>
-	<aCu0Wem4KkaybW4f@lizhi-Precision-Tower-5810>
-User-Agent: mu4e 1.12.9; emacs 30.1
-Date: Tue, 20 May 2025 10:11:34 +0200
-Message-ID: <1j34czn1l5.fsf@starbuckisacylon.baylibre.com>
+ <20250505-pci-vntb-bar-mapping-v1-3-0e0d12b2fa71@baylibre.com>
+ <aCuwy5ZjkhAiCPoZ@lizhi-Precision-Tower-5810>
+ <1j8qmrn1tg.fsf@starbuckisacylon.baylibre.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1j8qmrn1tg.fsf@starbuckisacylon.baylibre.com>
+X-ClientProxiedBy: PH8PR20CA0017.namprd20.prod.outlook.com
+ (2603:10b6:510:23c::17) To PAXPR04MB9642.eurprd04.prod.outlook.com
+ (2603:10a6:102:240::14)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: PAXPR04MB9642:EE_|AS8PR04MB8770:EE_
+X-MS-Office365-Filtering-Correlation-Id: 9b56c706-3a0f-43e3-7502-08dd97c0e7c0
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|366016|1800799024|52116014|376014|7416014|38350700014|7053199007;
+X-Microsoft-Antispam-Message-Info:
+	=?us-ascii?Q?6jSTGtciAtdKxMSwUWTR7a1FrkfPUfZDURaEBj76Iw6W5Dpv4Vlg9LcZhRXP?=
+ =?us-ascii?Q?c+Tm8QeMwauPI77+eAB4/bF5FOrMi7uTq5K3yyDqmnFtjjBwi+pkiBhBROGO?=
+ =?us-ascii?Q?cdKP/J9C5i+LAR6+0NCmkZd1C0XzwK2eFTVgJU2edGLKZKBS8kLh5r43IeN7?=
+ =?us-ascii?Q?RqQsl1uUkGM73LCkxPcVOkdTVUgVjUggE2qKCRnatp/YbK7NAz4DFCQ1U9u+?=
+ =?us-ascii?Q?bCohc1Z+fQxe9iuN3I7tTQeFZwQC/N9JJEHHksorjJykY1jTeyuz89KRvYjP?=
+ =?us-ascii?Q?3MZfhSPry/PGAc+xbbJkeTFYSgFDr8dF4NmFo5J6zvwGF2n9HauEBoZRFktv?=
+ =?us-ascii?Q?JKSHS5bx44YIMpIag8egn7Zbt2NZ8YvPBbmh6JJd5F8vQADNcXDXOX/3Ymdr?=
+ =?us-ascii?Q?HPX4LyG4xHZ1mM9LxkOU8T6FKTzxBT9+PkfEj30uVbUfVUORrf4O8AKSAvDC?=
+ =?us-ascii?Q?tVLn31Z4VkKxo3xuZOyqQFj/lMw+BeW3BzShuD999XImlAPtWIunqh32wUfp?=
+ =?us-ascii?Q?GVjyEcdO1ibVcA/apNdQ4UtwUdRwB7sbK1aOjtlN1u4SewqIZsPJahHJdcZD?=
+ =?us-ascii?Q?naUDE2fNgGEWxEAInZd/yTk9LmdwSh1fKJpMNq844PSG/p2Jj4qTXinPDTfJ?=
+ =?us-ascii?Q?4FlORTJQAjbJJEKvurXMzrty1uhKXydeDaou/nszdScDiZMshENo7f3qrRoj?=
+ =?us-ascii?Q?0G09jTw37xb1p59BRDzxBg+GVyvaMFH4gnyMJM3m5Nn5DTlWYZ92/RV0FQeO?=
+ =?us-ascii?Q?11+uyEH9CW6FT40E2vO7NPO0deMicKdn63u74sIXn0IzLA8v5yUh5OLFcLkA?=
+ =?us-ascii?Q?kZc8UA0UDNjD1K9oCgssUvvRPYb646z2IWSq8WOLT3fwjz8P/gxoWDyzFPUY?=
+ =?us-ascii?Q?b+Ms9kWHSxp3wD27ifDqR02E2pCdXix3qwPICeYYWwmouvzvr1OABflzCsyb?=
+ =?us-ascii?Q?trYFSezdqmfN8mzf4UbWCnTM8NxSPDzCLAbUf44Caq8A3DJ9sgh5MzuVjxBu?=
+ =?us-ascii?Q?OoF3289PUNxOCoP0EeEcs9Isf1qF6EUvc+CFJ5oHodYN3d1R8CxlFEMdF+XW?=
+ =?us-ascii?Q?7CZGZE9i4LanITabvL9iPdnQ9vUWEGDvgJrBGqcyO/LaLrLDmfMfTEGcjwE3?=
+ =?us-ascii?Q?sMEVyljeltgY3SD5JiRxDVnccq0eDNY21mksLUkdwrOaLxJOrcCWsK7+F4yN?=
+ =?us-ascii?Q?PFH1EvyN08wRz2QbRMcX7aIBFVCtY48oMBuE1fgM3XxpnqEtoZil6CTd9uz5?=
+ =?us-ascii?Q?sv62tbiBaBbw6I41tQ6NfAwKFdIk1ABDpPqb5txIToritlEwcCITH/G0Illr?=
+ =?us-ascii?Q?tWkN+BPlKenfvO/vQ1UhIbx6IP9GDafpG8SSTz2S3uap6Aw8pogbGsoHC/qr?=
+ =?us-ascii?Q?KRoooKbBAWULDaEfyk7HtpKrIVELPSULvfor7VPnMZNLf8AsZLS6s8Oo8G15?=
+ =?us-ascii?Q?aYoofdrZqvkxBqoYIfVBHFHfZTZwVs+goZm27DgPCrX59FfXtsYd1Q=3D=3D?=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PAXPR04MB9642.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(52116014)(376014)(7416014)(38350700014)(7053199007);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?us-ascii?Q?BbBJa6mshj7TL01nMxWY4cC7S6YIZh0yeq8dcduQoP2zo9bC5hOzl+ULziXB?=
+ =?us-ascii?Q?XXZxmZfmmzsfSPxX6MfQzwdwEXtxhleP1Qg83HpgorOg4ysBOe+MOj14DCN3?=
+ =?us-ascii?Q?tIvNsGB3Mqt3v4ZsEVdZ5/nPpK4cY6ffG/SxOpPzC2UpEUUtBhIfBCsbdmQL?=
+ =?us-ascii?Q?CSPV/zyEPWdpu34Sw/8VmjLBedLiYxx8/QotOMaeX8fI1RsYGaRvlFhazaHE?=
+ =?us-ascii?Q?uAU4rnBFgqTu0nAiWzkxWDu/O9ndYfTFRqUQ2eBq99iBEJ+JtTxZ84usZfmr?=
+ =?us-ascii?Q?Z6pLo70z4G3uh5QD+ZAuezlPahpQho+LJEDPlY6W58qYGHl9s5iGRacmTus8?=
+ =?us-ascii?Q?t6DlEb+OekH3ej/sj1S+wBHpeiBTt4H9XOBW2i2BBRxHHSioyrgTfojlYTRt?=
+ =?us-ascii?Q?qOFc/2Ix/4CoWPUH2gE3xxMIB1P0CfFwh3NE/MjBZqyhCIjIgVA0dk79/t6M?=
+ =?us-ascii?Q?qGxXCpM/FzWv4ukXu7qOc/O4icJHr5leFSbqvSgFE0Js7YJIz6j25Cet9dLj?=
+ =?us-ascii?Q?d9Iu8SsRY5DuO1yTE10WVq7NBzJ0w/b5FptSWAwsWtx8gMRA6/Ub6PbpuZyW?=
+ =?us-ascii?Q?jUC1SamNmtPYnszOCXRZW9QZmo/RuvzPd+JM+kdlNTeXYqVjgErnwrirHWJ4?=
+ =?us-ascii?Q?FPXGOQiKx0Yg/yLM93DLLEOjo2UOVeJid5wd9D2HBpZ/ZC0J5Wp7uFoq6V1T?=
+ =?us-ascii?Q?zKcQC8O7qo0NZHH3CUTjknTI4cesCXwZkoNpW3Gp4RGXx5X/T8uJByeS8YDx?=
+ =?us-ascii?Q?FSJdlhyGUt7u4ZIVKucgfsQXiqjzUQoqIVxsfJpIuPk0hjuTSLIfODcJjAgV?=
+ =?us-ascii?Q?goY5jzJnQ7TJZ5xLzAc7qlALoLALLMetNUdymARVtwamR8iKzo8civQz8+WG?=
+ =?us-ascii?Q?Jh/ic4FZEAgrnHgrrWSoR8NnRhTNgkHYhJvOYfcwTsj7Heus9YH6KtOhPkRz?=
+ =?us-ascii?Q?wAmsYBDMpOmm7LViTjLHDI1shmKT3ukBqv9uDZ9RdV7j4NaggUTqGUXWqoXr?=
+ =?us-ascii?Q?KyK7HPYJF9IklhZjLKejfBCPbm4OxSqpIkFdAVQgIYzm80v0Zzj5P0Z8xOjW?=
+ =?us-ascii?Q?qdJA1kwbLSahf21mhirbRRrp5AEzubmJFc1dzAfAWrI8EWJIunPkvgh3/Hnz?=
+ =?us-ascii?Q?cY0F2jH9m9+dIbQytkY3Oc6b64fW4nf31Mr7J/AWGuif30YI+hD3gHCKoDy1?=
+ =?us-ascii?Q?gNn8OnjLHoA0IBMJDbCyBlLsvIIA+TUFnSxDaaz92p2NRuPy+bcRgjswkX26?=
+ =?us-ascii?Q?Kcg2L/u1bQy6wqT5AsaMa3/kmzVwMjtD4iH89gEmyhRqAr06irMqXHAn6Th0?=
+ =?us-ascii?Q?4VWnZCNr2NEu00yhZkrzFRAK62VHM1EQSi/pzygJ+O82ZYyMDt2qU9uCvy0/?=
+ =?us-ascii?Q?t6q1H88TjnbBW+V6Tfl2JikoNOV5bauCas0ZPsM/rne3cRywBiBkxALGCnoP?=
+ =?us-ascii?Q?eV4lxofpIX/QntfawwXuOnlk2NiCUa2+KeIEobw9tylgiH8gmD6MfNIQnTI+?=
+ =?us-ascii?Q?rjsYSvf2p80++FahHbCFPfZohEN49xsmb8AhO/YNt8lixYHkj+A2b8y/98a5?=
+ =?us-ascii?Q?pIu+h6Avfe6Qk3qHx/2EbsnKQOplWUlwCkeZXgsx?=
+X-OriginatorOrg: nxp.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 9b56c706-3a0f-43e3-7502-08dd97c0e7c0
+X-MS-Exchange-CrossTenant-AuthSource: PAXPR04MB9642.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 20 May 2025 17:08:13.7671
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: wPtbKCgomlmPNN2uhRYY9GV1ymum81yweFbSdkjJs9bB7sdqS5R1dI7lc9EurGPZfyW/bSn2okVwgejMwgntmw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: AS8PR04MB8770
 
-On Mon 19 May 2025 at 18:44, Frank Li <Frank.li@nxp.com> wrote:
-
-> On Mon, May 05, 2025 at 07:41:50PM +0200, Jerome Brunet wrote:
->> The NTB epf host driver assumes the BAR number associated with a memory
->> window is just incremented from the BAR number associated with MW1. This
->> seems to have been enough so far but this is not really how the endpoint
->> side work and the two could easily become mis-aligned.
->>
->> ntb_epf_mw_to_bar() even assumes that the BAR number is the memory window
->> index + 2, which means the function only returns a proper result if BAR_2
->> is associated with MW1.
->>
->> Instead, fully describe and allow arbitrary NTB BAR mapping.
->>
->> Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
->> ---
->>  drivers/ntb/hw/epf/ntb_hw_epf.c | 108 ++++++++++++++++++++--------------------
->>  1 file changed, 55 insertions(+), 53 deletions(-)
->>
->> diff --git a/drivers/ntb/hw/epf/ntb_hw_epf.c b/drivers/ntb/hw/epf/ntb_hw_epf.c
->> index 00f0e78f685bf7917b02dd8a52b5b35f68d5bb64..9539cdcd0f8fa4b5c5e66477672f8f97d5ec4e52 100644
->> --- a/drivers/ntb/hw/epf/ntb_hw_epf.c
->> +++ b/drivers/ntb/hw/epf/ntb_hw_epf.c
->> @@ -49,6 +49,7 @@
->>  #define NTB_EPF_COMMAND_TIMEOUT	1000 /* 1 Sec */
->>
->>  enum pci_barno {
->> +	NO_BAR = -1,
+On Tue, May 20, 2025 at 10:06:35AM +0200, Jerome Brunet wrote:
+> On Mon 19 May 2025 at 18:29, Frank Li <Frank.li@nxp.com> wrote:
 >
-> Not related with this patch, but there are too many place to define
-> enum pci_barno. it need be consolidate.
+> > On Mon, May 05, 2025 at 07:41:49PM +0200, Jerome Brunet wrote:
+> >> The BAR configuration used by the PCI vNTB endpoint function is rather
+> >> fixed and does not allow to account for platform quirks. It simply
+> >> allocate BAR in order.
+> >>
+> >> This is a problem on the Renesas platforms which have a 256B fixed BAR_4
+> >> which end-up being the MW1 BAR. While this BAR is not ideal for a MW, it
+> >> is adequate for the doorbells.
+> >>
+> >> Add more configfs attributes to allow arbitrary BAR configuration to be
+> >> provided through the driver configfs. If not configuration is provided,
+> >> the driver should retain the old behaviour and allocate BARs in order.
+> >> This should keep existing userspace scripts working.
+> >>
+> >> In the Renesas case mentioned above, the change allows to use BAR_2 as for
+> >> the MW1 region and BAR_4 for the doorbells.
+> >
+> > Suggest commit message.
+> >
+> > PCI: endpoint: pci-epf-vntb: Allow configurable BAR assignment via configfs
+> >
+> > The current BAR configuration for the PCI vNTB endpoint function allocates
+> > BARs in order, which lacks flexibility and does not account for
+> > platform-specific quirks. This is problematic on Renesas platforms, where
+> > BAR_4 is a fixed 256B region that ends up being used for MW1, despite being
+> > better suited for doorbells.
+> >
+> > Add new configfs attributes to allow users to specify arbitrary BAR
+> > assignments. If no configuration is provided, the driver retains its
+> > original behavior of sequential BAR allocation, preserving compatibility
+> > with existing userspace setups.
+> >
+> > This enables use cases such as assigning BAR_2 for MW1 and using the
+> > limited BAR_4 for doorbells on Renesas platforms.
+>
+> Great, thanks
+>
+> >
+> >>
+> >> Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
+> >> ---
+> >>  drivers/pci/endpoint/functions/pci-epf-vntb.c | 127 ++++++++++++++++++++++++--
+> >>  1 file changed, 120 insertions(+), 7 deletions(-)
+> >>
+> >> diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> >> index f9f4a8bb65f364962dbf1e9011ab0e4479c61034..3cdccfe870e0cf738c93ca7c525fa2daa7c87fcb 100644
+> >> --- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> >> +++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> >> @@ -74,6 +74,7 @@ enum epf_ntb_bar {
+> >>  	BAR_MW2,
+> >>  	BAR_MW3,
+> >>  	BAR_MW4,
+> >> +	VNTB_BAR_NUM,
+> >>  };
+> >>
+> >>  /*
+> >> @@ -133,7 +134,7 @@ struct epf_ntb {
+> >>  	bool linkup;
+> >>  	u32 spad_size;
+> >>
+> >> -	enum pci_barno epf_ntb_bar[6];
+> >> +	enum pci_barno epf_ntb_bar[VNTB_BAR_NUM];
+> >
+> > It should be PCI_STD_NUM_BARS
+>
+> I thought so too initially but that's actually not the same thing and
+> wrong, if it happens to be 6 here.
+>
+> This tracks the mapping of function to bar number, not which function is
+> assigned to a BAR.
 
-I agree it needs to consilidated at some point but that's another topic
-and there are tiny differences between the 3 definitions so it won't be
-as trivial as one might initially think
+Okay.
 
 >
->>  	BAR_0,
->>  	BAR_1,
->>  	BAR_2,
->> @@ -57,16 +58,26 @@ enum pci_barno {
->>  	BAR_5,
->>  };
->>
->> +enum epf_ntb_bar {
->> +	BAR_CONFIG,
->> +	BAR_PEER_SPAD,
->> +	BAR_DB,
->> +	BAR_MW1,
->> +	BAR_MW2,
->> +	BAR_MW3,
->> +	BAR_MW4,
->> +	NTB_BAR_NUM,
->> +};
->> +
->> +#define NTB_EPF_MAX_MW_COUNT	(NTB_BAR_NUM - BAR_MW1)
->> +
->>  struct ntb_epf_dev {
->>  	struct ntb_dev ntb;
->>  	struct device *dev;
->>  	/* Mutex to protect providing commands to NTB EPF */
->>  	struct mutex cmd_lock;
->>
->> -	enum pci_barno ctrl_reg_bar;
->> -	enum pci_barno peer_spad_reg_bar;
->> -	enum pci_barno db_reg_bar;
->> -	enum pci_barno mw_bar;
->> +	const enum pci_barno *barno;
+> >
+> >>
+> >>  	struct epf_ntb_ctrl *reg;
+> >>
+> >> @@ -655,6 +656,59 @@ static void epf_ntb_epc_destroy(struct epf_ntb *ntb)
+> >>  	pci_epc_put(ntb->epf->epc);
+> >>  }
+> >>
+> >> +
+> >> +/**
+> >> + * epf_ntb_is_bar_used() - Check if a bar is used in the ntb configuration
+> >
+> > epf_ntb_is_bar_pre_reverved()?
 >
-> barno_map?
+> That would be mis-leading because the result change as the sequential
+> allocation goes, so it is not limited to pre-reservation.
+>
+> >
+> >> + * @ntb: NTB device that facilitates communication between HOST and VHOST
+> >
+> > missed @barno
+> >
+> >> + *
+> >> + * Returns: 0 if unused, 1 if used.
+> >> + */
+> >> +static int epf_ntb_is_bar_used(struct epf_ntb *ntb,
+> >> +			   enum pci_barno barno)
+> >
+> > return value bool is better
+>
+> Fine by me
+>
+> >
+> >> +{
+> >> +	int i;
+> >> +
+> >> +	for (i = 0; i < VNTB_BAR_NUM; i++) {
+> >
+> > PCI_STD_NUM_BARS
+>
+> As noted above, it is easy to get confused on this but that would be incorrect.
+>
+> >
+> >> +		if (ntb->epf_ntb_bar[i] == barno)
+> >> +			return 1;
+> >> +	}
+> >> +
+> >> +	return 0;
+> >> +}
+> >> +
+> >> +/**
+> >> + * epf_ntb_set_bar() - Assign BAR number when no configuration is provided
+> >
+> > Look like it is find a free bar number, which have not reserved by configfs.
+> > so
+> > epf_ntb_find_bar() or epf_ntb_alloc_bar()?
+>
+> I'll replace with find_bar sure.
+>
+> >
+> >> + * @ntb: NTB device that facilitates communication between HOST and VHOST
+> >
+> > missed bar and barno
+> >
+> >> + *
+> >> + * When the BAR configuration was not provided through the userspace
+> >> + * configuration, automatically assign BAR as it has been historically
+> >> + * done by this endpoint function.
+> >> + *
+> >> + * Returns: the BAR number found, if any. -1 otherwise
+> >> + */
+> >> +static int epf_ntb_set_bar(struct epf_ntb *ntb,
+> >> +			   const struct pci_epc_features *epc_features,
+> >> +			   enum epf_ntb_bar bar,
+> >> +			   enum pci_barno barno)
+> >> +{
+> >> +	while (ntb->epf_ntb_bar[bar] < 0) {
+> >> +		barno = pci_epc_get_next_free_bar(epc_features, barno);
+> >> +		if (barno < 0)
+> >> +			break; /* No more BAR available */
+> >> +
+> >> +		/*
+> >> +		 * Verify if the BAR found is not already assigned
+> >> +		 * through the provided configuration
+> >> +		 */
+> >> +		if (!epf_ntb_is_bar_used(ntb, barno))
+> >> +			ntb->epf_ntb_bar[bar] = barno;
+> >
+> > missed "break" ? you find one free bar.
+>
+> No ... the while exit condition is already correct I think
 
-ok
+You are right.
 
 >
->>
->>  	unsigned int mw_count;
->>  	unsigned int spad_count;
->> @@ -85,17 +96,6 @@ struct ntb_epf_dev {
->>
->>  #define ntb_ndev(__ntb) container_of(__ntb, struct ntb_epf_dev, ntb)
->>
->> -struct ntb_epf_data {
->> -	/* BAR that contains both control region and self spad region */
->> -	enum pci_barno ctrl_reg_bar;
->> -	/* BAR that contains peer spad region */
->> -	enum pci_barno peer_spad_reg_bar;
->> -	/* BAR that contains Doorbell region and Memory window '1' */
->> -	enum pci_barno db_reg_bar;
->> -	/* BAR that contains memory windows*/
->> -	enum pci_barno mw_bar;
->> -};
->> -
->>  static int ntb_epf_send_command(struct ntb_epf_dev *ndev, u32 command,
->>  				u32 argument)
->>  {
->> @@ -144,7 +144,7 @@ static int ntb_epf_mw_to_bar(struct ntb_epf_dev *ndev, int idx)
->>  		return -EINVAL;
->>  	}
->>
->> -	return idx + 2;
->> +	return ndev->barno[BAR_MW1 + idx];
->>  }
->>
->>  static int ntb_epf_mw_count(struct ntb_dev *ntb, int pidx)
->> @@ -413,7 +413,9 @@ static int ntb_epf_mw_set_trans(struct ntb_dev *ntb, int pidx, int idx,
->>  		return -EINVAL;
->>  	}
->>
->> -	bar = idx + ndev->mw_bar;
->> +	bar = ntb_epf_mw_to_bar(ndev, idx);
->> +	if (bar < 0)
->> +		return bar;
->>
->>  	mw_size = pci_resource_len(ntb->pdev, bar);
->>
->> @@ -455,7 +457,9 @@ static int ntb_epf_peer_mw_get_addr(struct ntb_dev *ntb, int idx,
->>  	if (idx == 0)
->>  		offset = readl(ndev->ctrl_reg + NTB_EPF_MW1_OFFSET);
->>
->> -	bar = idx + ndev->mw_bar;
->> +	bar = ntb_epf_mw_to_bar(ndev, idx);
->> +	if (bar < 0)
->> +		return bar;
->>
->>  	if (base)
->>  		*base = pci_resource_start(ndev->ntb.pdev, bar) + offset;
->> @@ -557,8 +561,13 @@ static int ntb_epf_init_dev(struct ntb_epf_dev *ndev)
->>  	}
->>
->>  	ndev->db_valid_mask = BIT_ULL(ndev->db_count) - 1;
->> -	ndev->mw_count = readl(ndev->ctrl_reg + NTB_EPF_MW_COUNT);
->>  	ndev->spad_count = readl(ndev->ctrl_reg + NTB_EPF_SPAD_COUNT);
->> +	ndev->mw_count = readl(ndev->ctrl_reg + NTB_EPF_MW_COUNT);
->> +
->> +	if (ndev->mw_count > NTB_EPF_MAX_MW_COUNT) {
->> +		dev_err(dev, "Unsupported MW count: %u\n", ndev->mw_count);
->> +		return -EINVAL;
->> +	}
->>
->>  	return 0;
->>  }
->> @@ -596,14 +605,14 @@ static int ntb_epf_init_pci(struct ntb_epf_dev *ndev,
->>  		dev_warn(&pdev->dev, "Cannot DMA highmem\n");
->>  	}
->>
->> -	ndev->ctrl_reg = pci_iomap(pdev, ndev->ctrl_reg_bar, 0);
->> +	ndev->ctrl_reg = pci_iomap(pdev, ndev->barno[BAR_CONFIG], 0);
->>  	if (!ndev->ctrl_reg) {
->>  		ret = -EIO;
->>  		goto err_pci_regions;
->>  	}
->>
->> -	if (ndev->peer_spad_reg_bar) {
->> -		ndev->peer_spad_reg = pci_iomap(pdev, ndev->peer_spad_reg_bar, 0);
->> +	if (ndev->barno[BAR_PEER_SPAD] != ndev->barno[BAR_CONFIG]) {
->> +		ndev->peer_spad_reg = pci_iomap(pdev, ndev->barno[BAR_PEER_SPAD], 0);
->>  		if (!ndev->peer_spad_reg) {
->>  			ret = -EIO;
->>  			goto err_pci_regions;
->> @@ -614,7 +623,7 @@ static int ntb_epf_init_pci(struct ntb_epf_dev *ndev,
->>  		ndev->peer_spad_reg = ndev->ctrl_reg + spad_off  + spad_sz;
->>  	}
->>
->> -	ndev->db_reg = pci_iomap(pdev, ndev->db_reg_bar, 0);
->> +	ndev->db_reg = pci_iomap(pdev, ndev->barno[BAR_DB], 0);
->>  	if (!ndev->db_reg) {
->>  		ret = -EIO;
->>  		goto err_pci_regions;
->> @@ -656,15 +665,20 @@ static void ntb_epf_cleanup_isr(struct ntb_epf_dev *ndev)
->>  	pci_free_irq_vectors(pdev);
->>  }
->>
->> +static const enum pci_barno ntb_epf_default_barno[NTB_BAR_NUM] = {
->> +	[BAR_CONFIG]	= BAR_0,
->> +	[BAR_PEER_SPAD]	= BAR_1,
->> +	[BAR_DB]	= BAR_2,
->> +	[BAR_MW1]	= BAR_2,
->> +	[BAR_MW2]	= BAR_3,
->> +	[BAR_MW3]	= BAR_4,
->> +	[BAR_MW4]	= BAR_5
->> +};
->> +
->>  static int ntb_epf_pci_probe(struct pci_dev *pdev,
->>  			     const struct pci_device_id *id)
->>  {
->> -	enum pci_barno peer_spad_reg_bar = BAR_1;
->> -	enum pci_barno ctrl_reg_bar = BAR_0;
->> -	enum pci_barno db_reg_bar = BAR_2;
->> -	enum pci_barno mw_bar = BAR_2;
->>  	struct device *dev = &pdev->dev;
->> -	struct ntb_epf_data *data;
->>  	struct ntb_epf_dev *ndev;
->>  	int ret;
->>
->> @@ -675,18 +689,10 @@ static int ntb_epf_pci_probe(struct pci_dev *pdev,
->>  	if (!ndev)
->>  		return -ENOMEM;
->>
->> -	data = (struct ntb_epf_data *)id->driver_data;
->> -	if (data) {
->> -		peer_spad_reg_bar = data->peer_spad_reg_bar;
->> -		ctrl_reg_bar = data->ctrl_reg_bar;
->> -		db_reg_bar = data->db_reg_bar;
->> -		mw_bar = data->mw_bar;
->> -	}
->> +	ndev->barno = (const enum pci_barno *)id->driver_data;
->> +	if (!ndev->barno)
->> +		ndev->barno = ntb_epf_default_barno;
+> >
+> >> +
+> >> +		barno += 1;
+> >> +	}
+> >> +
+> >> +	return barno;
+> >
+> >
+> > return ntb->epf_ntb_bar[bar] ?
+> >
+> > if pre reserved, while loop will be skipped.  reversed bar number should be
+> > return, instead of input barno.
 >
-> I think needn't check it because all .driver_data already set in ntb_epf_pci_tbl
+> I don't think so.
 >
+> Say a config sets DB on BAR6, while still having everything unused from
+> 2 to 5, you'd get stuck with what you are proposing. What's done here
+> emulate the old behavior while making sure we iterate over all BARs
+>
+> That being said, mixing the old ways with explicit config would be weird
+> but it is possible.
+>
+> >
+> >> +}
+> >> +
+> >>  /**
+> >>   * epf_ntb_init_epc_bar() - Identify BARs to be used for each of the NTB
+> >>   * constructs (scratchpad region, doorbell, memorywindow)
+> >> @@ -677,23 +731,21 @@ static int epf_ntb_init_epc_bar(struct epf_ntb *ntb)
+> >>  	epc_features = pci_epc_get_features(ntb->epf->epc, ntb->epf->func_no, ntb->epf->vfunc_no);
+> >>
+> >>  	/* These are required BARs which are mandatory for NTB functionality */
+> >> -	for (bar = BAR_CONFIG; bar <= BAR_MW1; bar++, barno++) {
+> >> -		barno = pci_epc_get_next_free_bar(epc_features, barno);
+> >> +	for (bar = BAR_CONFIG; bar <= BAR_MW1; bar++) {
+> >> +		barno = epf_ntb_set_bar(ntb, epc_features, bar, barno);
+> >>  		if (barno < 0) {
+> >>  			dev_err(dev, "Fail to get NTB function BAR\n");
+> >>  			return -EINVAL;
+> >>  		}
+> >> -		ntb->epf_ntb_bar[bar] = barno;
+> >>  	}
+> >>
+> >>  	/* These are optional BARs which don't impact NTB functionality */
+> >> -	for (bar = BAR_MW1, i = 1; i < num_mws; bar++, barno++, i++) {
+> >> -		barno = pci_epc_get_next_free_bar(epc_features, barno);
+> >> +	for (bar = BAR_MW1, i = 1; i < num_mws; bar++, i++) {
+> >> +		barno = epf_ntb_set_bar(ntb, epc_features, bar, barno);
+> >>  		if (barno < 0) {
+> >>  			ntb->num_mws = i;
+> >>  			dev_dbg(dev, "BAR not available for > MW%d\n", i + 1);
+> >>  		}
+> >> -		ntb->epf_ntb_bar[bar] = barno;
+> >>  	}
+> >>
+> >>  	return 0;
+> >> @@ -861,6 +913,37 @@ static ssize_t epf_ntb_##_name##_store(struct config_item *item,	\
+> >>  	return len;							\
+> >>  }
+> >>
+> >> +#define EPF_NTB_BAR_R(_name, _id)					\
+> >> +	static ssize_t epf_ntb_##_name##_show(struct config_item *item,	\
+> >> +					      char *page)		\
+> >> +	{								\
+> >> +		struct config_group *group = to_config_group(item);	\
+> >> +		struct epf_ntb *ntb = to_epf_ntb(group);		\
+> >> +									\
+> >> +		return sprintf(page, "%d\n", ntb->epf_ntb_bar[_id]);	\
+> >> +	}
+> >> +
+> >> +#define EPF_NTB_BAR_W(_name, _id)					\
+> >> +	static ssize_t epf_ntb_##_name##_store(struct config_item *item, \
+> >> +					       const char *page, size_t len) \
+> >> +	{								\
+> >> +	struct config_group *group = to_config_group(item);		\
+> >> +	struct epf_ntb *ntb = to_epf_ntb(group);			\
+> >> +	int val;							\
+> >> +	int ret;							\
+> >> +									\
+> >> +	ret = kstrtoint(page, 0, &val);					\
+> >> +	if (ret)							\
+> >> +		return ret;						\
+> >> +									\
+> >> +	if (val < NO_BAR || val > BAR_5)				\
+> >> +		return -EINVAL;						\
+> >> +									\
+> >> +	ntb->epf_ntb_bar[_id] = val;					\
+> >
+> > do you need check the same val to assign two difference ntb bar?
+>
+> I rely on the user input being correct indeed. Worst case, an allocation
+> will fail later on. I could try to implement something in that direction
+> but will get complex. For example, I would eventually like to allow
+> sharing the BAR for DB and MW1, as done on the NTB function. (The idea
+> is to get 2nd MW and enable MSI on the ntb transport but I'm not there yet)
 
-A check was there before, I'm not changing what was done in that regard.
-I'll another patch to implement your suggestion seperately.
+Okay.
 
-> Frank
->>
->> -	ndev->peer_spad_reg_bar = peer_spad_reg_bar;
->> -	ndev->ctrl_reg_bar = ctrl_reg_bar;
->> -	ndev->db_reg_bar = db_reg_bar;
->> -	ndev->mw_bar = mw_bar;
->>  	ndev->dev = dev;
->>
->>  	ntb_epf_init_struct(ndev, pdev);
->> @@ -730,30 +736,26 @@ static void ntb_epf_pci_remove(struct pci_dev *pdev)
->>  	ntb_epf_deinit_pci(ndev);
->>  }
->>
->> -static const struct ntb_epf_data j721e_data = {
->> -	.ctrl_reg_bar = BAR_0,
->> -	.peer_spad_reg_bar = BAR_1,
->> -	.db_reg_bar = BAR_2,
->> -	.mw_bar = BAR_2,
->> -};
->> -
->> -static const struct ntb_epf_data mx8_data = {
->> -	.ctrl_reg_bar = BAR_0,
->> -	.peer_spad_reg_bar = BAR_0,
->> -	.db_reg_bar = BAR_2,
->> -	.mw_bar = BAR_4,
->> +static const enum pci_barno mx8_barno[NTB_BAR_NUM] = {
->> +	[BAR_CONFIG]	= BAR_0,
->> +	[BAR_PEER_SPAD]	= BAR_0,
->> +	[BAR_DB]	= BAR_2,
->> +	[BAR_MW1]	= BAR_4,
->> +	[BAR_MW2]	= BAR_5,
->> +	[BAR_MW3]	= NO_BAR,
->> +	[BAR_MW4]	= NO_BAR,
->>  };
->>
->>  static const struct pci_device_id ntb_epf_pci_tbl[] = {
->>  	{
->>  		PCI_DEVICE(PCI_VENDOR_ID_TI, PCI_DEVICE_ID_TI_J721E),
->>  		.class = PCI_CLASS_MEMORY_RAM << 8, .class_mask = 0xffff00,
->> -		.driver_data = (kernel_ulong_t)&j721e_data,
->> +		.driver_data = (kernel_ulong_t)ntb_epf_default_barno,
->>  	},
->>  	{
->>  		PCI_DEVICE(PCI_VENDOR_ID_FREESCALE, 0x0809),
->>  		.class = PCI_CLASS_MEMORY_RAM << 8, .class_mask = 0xffff00,
->> -		.driver_data = (kernel_ulong_t)&mx8_data,
->> +		.driver_data = (kernel_ulong_t)mx8_barno,
->>  	},
->>  	{ },
->>  };
->>
->> --
->> 2.47.2
->>
-
--- 
-Jerome
+Frank
+>
+> >
+> > Frank
+> >
+> >> +									\
+> >> +	return len;							\
+> >> +	}
+> >> +
+> >>  static ssize_t epf_ntb_num_mws_store(struct config_item *item,
+> >>  				     const char *page, size_t len)
+> >>  {
+> >> @@ -900,6 +983,18 @@ EPF_NTB_MW_R(mw3)
+> >>  EPF_NTB_MW_W(mw3)
+> >>  EPF_NTB_MW_R(mw4)
+> >>  EPF_NTB_MW_W(mw4)
+> >> +EPF_NTB_BAR_R(ctrl_bar, BAR_CONFIG)
+> >> +EPF_NTB_BAR_W(ctrl_bar, BAR_CONFIG)
+> >> +EPF_NTB_BAR_R(db_bar, BAR_DB)
+> >> +EPF_NTB_BAR_W(db_bar, BAR_DB)
+> >> +EPF_NTB_BAR_R(mw1_bar, BAR_MW1)
+> >> +EPF_NTB_BAR_W(mw1_bar, BAR_MW1)
+> >> +EPF_NTB_BAR_R(mw2_bar, BAR_MW1)
+> >> +EPF_NTB_BAR_W(mw2_bar, BAR_MW1)
+> >> +EPF_NTB_BAR_R(mw3_bar, BAR_MW3)
+> >> +EPF_NTB_BAR_W(mw3_bar, BAR_MW3)
+> >> +EPF_NTB_BAR_R(mw4_bar, BAR_MW4)
+> >> +EPF_NTB_BAR_W(mw4_bar, BAR_MW4)
+> >>
+> >>  CONFIGFS_ATTR(epf_ntb_, spad_count);
+> >>  CONFIGFS_ATTR(epf_ntb_, db_count);
+> >> @@ -911,6 +1006,12 @@ CONFIGFS_ATTR(epf_ntb_, mw4);
+> >>  CONFIGFS_ATTR(epf_ntb_, vbus_number);
+> >>  CONFIGFS_ATTR(epf_ntb_, vntb_pid);
+> >>  CONFIGFS_ATTR(epf_ntb_, vntb_vid);
+> >> +CONFIGFS_ATTR(epf_ntb_, ctrl_bar);
+> >> +CONFIGFS_ATTR(epf_ntb_, db_bar);
+> >> +CONFIGFS_ATTR(epf_ntb_, mw1_bar);
+> >> +CONFIGFS_ATTR(epf_ntb_, mw2_bar);
+> >> +CONFIGFS_ATTR(epf_ntb_, mw3_bar);
+> >> +CONFIGFS_ATTR(epf_ntb_, mw4_bar);
+> >>
+> >>  static struct configfs_attribute *epf_ntb_attrs[] = {
+> >>  	&epf_ntb_attr_spad_count,
+> >> @@ -923,6 +1024,12 @@ static struct configfs_attribute *epf_ntb_attrs[] = {
+> >>  	&epf_ntb_attr_vbus_number,
+> >>  	&epf_ntb_attr_vntb_pid,
+> >>  	&epf_ntb_attr_vntb_vid,
+> >> +	&epf_ntb_attr_ctrl_bar,
+> >> +	&epf_ntb_attr_db_bar,
+> >> +	&epf_ntb_attr_mw1_bar,
+> >> +	&epf_ntb_attr_mw2_bar,
+> >> +	&epf_ntb_attr_mw3_bar,
+> >> +	&epf_ntb_attr_mw4_bar,
+> >>  	NULL,
+> >>  };
+> >>
+> >> @@ -1380,6 +1487,7 @@ static int epf_ntb_probe(struct pci_epf *epf,
+> >>  {
+> >>  	struct epf_ntb *ntb;
+> >>  	struct device *dev;
+> >> +	int i;
+> >>
+> >>  	dev = &epf->dev;
+> >>
+> >> @@ -1390,6 +1498,11 @@ static int epf_ntb_probe(struct pci_epf *epf,
+> >>  	epf->header = &epf_ntb_header;
+> >>  	ntb->epf = epf;
+> >>  	ntb->vbus_number = 0xff;
+> >> +
+> >> +	/* Initially, no bar is assigned */
+> >> +	for (i = 0; i < VNTB_BAR_NUM; i++)
+> >> +		ntb->epf_ntb_bar[i] = NO_BAR;
+> >> +
+> >>  	epf_set_drvdata(epf, ntb);
+> >>
+> >>  	dev_info(dev, "pci-ep epf driver loaded\n");
+> >>
+> >> --
+> >> 2.47.2
+> >>
+>
+> --
+> Jerome
