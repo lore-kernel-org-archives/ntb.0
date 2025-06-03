@@ -1,210 +1,150 @@
-Received: from mail-wm1-f49.google.com (mail-wm1-f49.google.com [209.85.128.49])
+Received: from mail-wm1-f43.google.com (mail-wm1-f43.google.com [209.85.128.43])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 655BD1E1DE8
-	for <ntb@lists.linux.dev>; Wed, 21 May 2025 16:42:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DC8C91A256E
+	for <ntb@lists.linux.dev>; Tue,  3 Jun 2025 17:04:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.43
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747845757; cv=none; b=sFoyAkb9Whqk58yPp21qUQ3PzrAvNgkdULm7dLZsV/Dhuc/Ikj+RWz82I7/DmtoxC8vRxoeAHCYfPSfpTmdbm5NB9gmNIAL3CjQ2cG24jbRHjRBuY1i6nPi/HPgfjQwzHc+PtR2D9aFNUrz/1MKsbcKaXKMny0Ban34FuRDAO3E=
+	t=1748970247; cv=none; b=AAu5ifLJRmmccjHgIPV/9CYl6BZxr67kWbWVnyP98n4JpQP3zGKN6WsKtvs4ULcGIaKN9kGq5vxd8CYGPhxl5PT4kTvjsLOnSe+weckETKrS8xYwKCxoU4cSoRv2XAr1K7a21+3F/6/w5QGBP8rvnmvez2NpksSc+jGB5+jjLxI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747845757; c=relaxed/simple;
-	bh=Pr2iXeGarO2eWOWIEMNqbxZ1u9Fg64PXjfplyLT7Rjg=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 MIME-Version:Content-Type; b=moDbnWEJHEOg32hZCV7jloiAN5uMoRnV3pAqI36gpH5beCyL9bSqXmmn3r4CFd7L2fj0y0mjmoSbNZYNq9Pn7vJH1hYgmcIvM3yrdKCLuA/4ybgotew9NuxXGtjG5t6KZGuvdluQJL2t7NBfISRKLE6q8o7bXxUoz9Uge9D/cfc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=cBhFSP0U; arc=none smtp.client-ip=209.85.128.49
+	s=arc-20240116; t=1748970247; c=relaxed/simple;
+	bh=JozCp67AnlSYShwlsFNUrel1ROhupwez9JoaLcJqwi0=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=JMto+BYRLv3kuBFUpDq1zYA2oKZyfRPTQA55RAGfX4lLh5DeX4eAKAN3p78Tj9YMUzxZrxk7q8U987MqCdgVa1tlUc0NHPEvvoMJOWj/pnN1wYKJJ75A/E1tcY1cMXSpPpidlEMVs4/9KA2535tzakZfmxTe/lHCdDtKO7kPkbI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=jazDsO4y; arc=none smtp.client-ip=209.85.128.43
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="cBhFSP0U"
-Received: by mail-wm1-f49.google.com with SMTP id 5b1f17b1804b1-441d1ed82faso54863345e9.0
-        for <ntb@lists.linux.dev>; Wed, 21 May 2025 09:42:34 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="jazDsO4y"
+Received: by mail-wm1-f43.google.com with SMTP id 5b1f17b1804b1-442f4a3a4d6so472345e9.0
+        for <ntb@lists.linux.dev>; Tue, 03 Jun 2025 10:04:04 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1747845752; x=1748450552; darn=lists.linux.dev;
-        h=mime-version:message-id:date:user-agent:references:in-reply-to
-         :subject:cc:to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=p+rpUaNjQK4QRzCb0yqL+gVJP+k0UxVN5eahq6kD2BQ=;
-        b=cBhFSP0UOQkFNvEHBFV//4hjJ6C2juxiLzDbKujnTzW0VBzr1Wyv03PXQ4LPErRnCd
-         KU/DhyYPf2NZNZLs1zJDEsmBczL0pCqlofGhWnIx/Ck7EuuRv/x4IT+NbvjI2gOGBGTd
-         VBrPyBYtwbgpywQiL8zM9FHJu4lgsXLnI3oYFpwYS21lXXp84A6n+wAceuwBtrLfGp4V
-         xg8ooxw82Qa4MMqn1lpYigRi/3VcQpKgR4/RQgGEoMacNDADoun3/gbEg6FSvk1xnhZ6
-         iio1wsjP7E93t9IxKXpVFnmVZ4TXEUWRZQDS7XhW5SveLQK+5uOYhWpKzFxBM0WXS/j1
-         7CUQ==
+        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1748970243; x=1749575043; darn=lists.linux.dev;
+        h=cc:to:content-transfer-encoding:mime-version:message-id:date
+         :subject:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=3Ex2bRTEEKAaHGwwEHbqDYgjYKXMrIuwAO6C+EJ6JNE=;
+        b=jazDsO4yi/MchRhpDrCUqLMxflgrSLg/6DK7ox6wWyB7DeieKx3bgcZKYq3uNBhtnN
+         NEGVyLEKeN4SrGyBxlQBOH5IsPe7Mnujqkmg9jlUpE4vJqiX1dHIOOAXD3iYDbEVv5Z7
+         UXCc1vBwE8+NjdrXLeyw8etfo5M+OKE3CtaRUZ1BIyxzpmA8TJdUIGJWWDZpdX70VJ4V
+         WKMjVEAIqXxcD/zED1JEhDVWkxGvuRFSz8zqo9+oN5hfZKkXCfzEOyGbcsbWwxqX8ioj
+         9UeGT64CU9MvzGkeUU9HL0oeQIq75fj0b42crBYKOFrQoxV6HG/QBu7yvnPV9+AvkOVy
+         4HqQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1747845752; x=1748450552;
-        h=mime-version:message-id:date:user-agent:references:in-reply-to
-         :subject:cc:to:from:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=p+rpUaNjQK4QRzCb0yqL+gVJP+k0UxVN5eahq6kD2BQ=;
-        b=dqsoZUmIuo/NdVFejHo/vJVT7KAUvvalo5JqxmLChGhrtJOabZz4aKplw9SKhy2Gak
-         VWaGtkIWoKt5krZVbRopqH+Cf8+i237+9FMI6S2zImrWLjpCDvX8KJgaG1mNWS8j8n7Y
-         9Z2K7kWomTq1d6OOLX1+1YSbcWVD8hmILDz4jg4v4WuwqYwuKeQJ+iUsseZXK8NDVLgk
-         OR+bxMI79y/a78u7ZDcsMpw7QcwXXlHLovYmN+Q0qBkZ8ogaulCfOioQXGn5l0HKsoY/
-         UHt7vhxxdzsd3mvmLAkL3dKcKqj65WYFGzFgVgMWk5o9VF9JdoRoT/LB2/BDkkT2zkM3
-         +Q7w==
-X-Forwarded-Encrypted: i=1; AJvYcCW0HTsQ0hET+7XdkeTWD51D8cRVqCX/c6go92LYHNYm2Q5y4jl3KORaA84vcekGJY25omM=@lists.linux.dev
-X-Gm-Message-State: AOJu0YxyMgw7R1w3/ruYb0s8JYfURkajx4lM272WhooE15giMl29tGbr
-	nUJQU1ODC1FYOs4f1FwGMHVIjH965xD+0OMGNAmkD8rNCbahqlWNng5G4WP3KR78Q2g=
-X-Gm-Gg: ASbGnctt9jdLgbw35UQoRdqBIDgefvv6THLHqRvCuzs21q26OtAZdeVbLnJqUYYl/KS
-	qtcu5EUCoht4OSZ+5UOYsOvLYtjHI5uFK14GaAFQSwK/fm0sxE3rhDD9ir8VWoSBNuvAprXiU69
-	BDJc/o4gQTEL5qYqsbVZMyoN1eq/0FZtYEa7e8MQuQXPWGOq96hhCu/C0X+vvk1AU6tDImgB0oU
-	hzmxt04ve6j36EmOr/N1Rol68V4Uv33TEydtrtNaKBJvs3wGVweEFWK/V4uhqKJHyysu0gXQjps
-	SeiwtVVobCkIJuvMHO7W2ZQiaj4TPeH6bTFJGaUGyoET5HoDbg==
-X-Google-Smtp-Source: AGHT+IEeXDpnI4NwMcbKV1XjqWsxVe0v1X9IAk4NWkX0pUgdvpaaFVRgCRCctQA58qHtRm5Ki9qQtw==
-X-Received: by 2002:a05:600c:1992:b0:43d:45a:8fca with SMTP id 5b1f17b1804b1-442ff039684mr199120715e9.30.1747845752620;
-        Wed, 21 May 2025 09:42:32 -0700 (PDT)
-Received: from localhost ([2a01:e0a:3c5:5fb1:9e2b:b056:8709:130])
-        by smtp.gmail.com with UTF8SMTPSA id 5b1f17b1804b1-442ebda7d2csm167543525e9.3.2025.05.21.09.42.31
+        d=1e100.net; s=20230601; t=1748970243; x=1749575043;
+        h=cc:to:content-transfer-encoding:mime-version:message-id:date
+         :subject:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=3Ex2bRTEEKAaHGwwEHbqDYgjYKXMrIuwAO6C+EJ6JNE=;
+        b=NykJ4CY7hnVl8KrsRyQa/9kBochpjZ+Ldzj3rlYaEnMIZPZbKEd6nhvyf8aKPxzPQZ
+         qQYUs8mvkcGGfygkGnt90FvU511I4ylDaA7fxHshf/KGkWIGVO4uEK0ussWohHqIqn+M
+         qO5Npvc2pwSG8VLL8tcKsjEslaho84yIPkz4UZqiHi10tYTFKUI4etIQuHWngnHdEZVM
+         HSdaXldzp1Jbcjo04UsHt9TGEZCc40tVQnuyt7z2TP8ScqrCUpnTq0hczdDQTyJUW968
+         yvqZqF1dD7gTRveNMWIDMcmNpkks+W7DLKD/cTRyyAAmbjRTDkTgpAuQfRNKDYbd/3NP
+         LyFQ==
+X-Gm-Message-State: AOJu0YzTIw7ZuLl1Z+f7XlEAD2WW6jsyQNyS3+OIlv3nYK9FDPePdoBD
+	khEpOI/qV0hpb0PSvGinZUE0vxQGjT1X00ObV+DgirwVxZlhzl5sIpQ5wBU1e7ZklR4=
+X-Gm-Gg: ASbGncujBPmz5UT81I+0sLOS3VBMbB7jPRNiM2x9tD+6AZz0vm032/sUx7NxMYZ/GYl
+	14J6i+NAuZcAQhdNtfh0Rs3KlTJsUdHgHMMQRwBnMZ56jyX7k61vbb8C1xxoE7r8MYS9eVkvMCu
+	MRmYOgkG9dqoyYmFdIzw9CB86LJYHj0gbuOE0f/GvdkW4fjFIpTihUyKUq+7kpw/iuy5hZtmlRH
+	oOctfq50vyMbFEolR6YGx3c55lWe1G8Ucsxw4lvPe2sFViUx7tkKm9ZpY7DA3D7gLNlezGPoVO8
+	oSUpI4H+dwA2QZPB3spNLbwlbQLjlvUrbfBtHw78U2LKbUp5+28RB8J1o0P6+vcsdw==
+X-Google-Smtp-Source: AGHT+IF5Dhul75lrTEl3J/ypMqK/4hDiuurg9bam0ViaibUWgPSEYcpCtLq+55HUirHbAIfEI2cO9g==
+X-Received: by 2002:a05:600c:a03:b0:442:f861:3536 with SMTP id 5b1f17b1804b1-451ef0129a9mr1112745e9.7.1748970242858;
+        Tue, 03 Jun 2025 10:04:02 -0700 (PDT)
+Received: from toaster.baylibre.com ([2a01:e0a:3c5:5fb1:ce70:8503:aea6:a8ed])
+        by smtp.googlemail.com with ESMTPSA id ffacd0b85a97d-3a4f00972f3sm19165796f8f.69.2025.06.03.10.04.01
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 21 May 2025 09:42:32 -0700 (PDT)
+        Tue, 03 Jun 2025 10:04:02 -0700 (PDT)
 From: Jerome Brunet <jbrunet@baylibre.com>
-To: Frank Li <Frank.li@nxp.com>
-Cc: Jon Mason <jdmason@kudzu.us>,  Dave Jiang <dave.jiang@intel.com>,  Allen
- Hubbe <allenbh@gmail.com>,  Manivannan Sadhasivam
- <manivannan.sadhasivam@linaro.org>,  Krzysztof =?utf-8?Q?Wilczy=C5=84ski?=
- <kw@linux.com>,
-  Kishon Vijay Abraham I <kishon@kernel.org>,  Bjorn Helgaas
- <bhelgaas@google.com>,  ntb@lists.linux.dev,  linux-pci@vger.kernel.org,
-  linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 2/4] PCI: endpoint: pci-epf-vntb: align mw naming with
- config names
-In-Reply-To: <aC3/PL3jdGMVHX3n@lizhi-Precision-Tower-5810> (Frank Li's message
-	of "Wed, 21 May 2025 12:28:44 -0400")
-References: <20250505-pci-vntb-bar-mapping-v1-0-0e0d12b2fa71@baylibre.com>
-	<20250505-pci-vntb-bar-mapping-v1-2-0e0d12b2fa71@baylibre.com>
-	<aCugvDoKTflV9+P0@lizhi-Precision-Tower-5810>
-	<1jecwjn2pp.fsf@starbuckisacylon.baylibre.com>
-	<aC3/PL3jdGMVHX3n@lizhi-Precision-Tower-5810>
-User-Agent: mu4e 1.12.9; emacs 30.1
-Date: Wed, 21 May 2025 18:42:30 +0200
-Message-ID: <1jwma9lxu1.fsf@starbuckisacylon.baylibre.com>
+Subject: [PATCH v2 0/3] PCI: endpoint: pci-epf-vntb: allow arbitrary BAR
+ mapping
+Date: Tue, 03 Jun 2025 19:03:37 +0200
+Message-Id: <20250603-pci-vntb-bar-mapping-v2-0-fc685a22ad28@baylibre.com>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAOkqP2gC/4WNQQqDMBBFryKz7pQktgpd9R7FRRInOlBjSCRUJ
+ Hdv6gXKX70P//0DEkWmBI/mgEiZE6++gro0YGftJ0IeK4MS6i5qMFjG7DeDRkdcdAjsJ2ytbZ3
+ r1I36Duo0RHL8ObWvofLMaVvjfr5k+Wv/CLNEgYLEKJVRTvfyafT+ZhPpatcFhlLKFzQV20+7A
+ AAA
+X-Change-ID: 20250505-pci-vntb-bar-mapping-3cc3ff624e76
+To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, 
+ Allen Hubbe <allenbh@gmail.com>, 
+ Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>, 
+ Kishon Vijay Abraham I <kishon@kernel.org>, 
+ Bjorn Helgaas <bhelgaas@google.com>, Frank Li <Frank.Li@nxp.com>, 
+ =?utf-8?q?Krzysztof_Wilczy=C5=84ski?= <kwilczynski@kernel.org>, 
+ =?utf-8?q?Krzysztof_Wilczy=C5=84ski?= <kwilczynski@kernel.org>
+Cc: ntb@lists.linux.dev, linux-pci@vger.kernel.org, 
+ linux-kernel@vger.kernel.org, Jerome Brunet <jbrunet@baylibre.com>
+X-Mailer: b4 0.14.2
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1932; i=jbrunet@baylibre.com;
+ h=from:subject:message-id; bh=JozCp67AnlSYShwlsFNUrel1ROhupwez9JoaLcJqwi0=;
+ b=owEBbQKS/ZANAwAKAeb8Dxw38tqFAcsmYgBoPyr+4FQSbqXPzNxUs6+o4a40BkRBh1wQbRX37
+ 8voEuN7k0SJAjMEAAEKAB0WIQT04VmuGPP1bV8btxvm/A8cN/LahQUCaD8q/gAKCRDm/A8cN/La
+ heWDEACkRo5R+AWvaG8KCmliu8MLD1sJeFpSmJhITe/w3K55jw+N4hvySZrU5N33Sa8ETogbnfj
+ PTHGmakRhQsWEjLMnaq9MrYW/1mUteyRj8GZT8D+q3Ag0xznLCzuoYgHHdUP4dE4s2c7PZcpKHE
+ AkDAIARsD/MnIeO2knavb4EyOxZo0o6cGDtiWdnmtw3+JuvhgWunc9LlAje7QaA/5Q7IhMvOlC/
+ mJ6jCvKq4ctfXvw/yAH2+yWVVdTSBsocCttcr8ijC5WcIQ2aXvhc7ORBEk0j/ZZGy5lQW3zKMXZ
+ FEI8ueAzCdaQ/f3pKSQT7fui11qcUKyxTDIC9v3w9NKWNbNMZAPJBojddW0KsiwD+cLjJcp7jOn
+ gS+kcEMRT8JKmQJJG9MwOi0fGILF577h2iAUQpj61VZXzzV1baA5mQmuXym8dWERkER6q1ShC/1
+ RcKHdWq8vmTVnWbMfXLbI3o6gi1ACbscmGDxeYV7I2XL877ffiuiXaBCuGICFv9JSPrgDegJe0k
+ weOGNimEalQz5YmCbTcErBtSkPGJ/Y+4XR4fcMz+OHlJklsBd2dCMxIuuyeE28kKpLF3So9vx1u
+ 55tK7l4SWgWoCuHxf06pvvFb0JUy4qE8f3bpEJi4UGFQVJ980k9CZ0q+EvmQOBlLGQp1t6ZKG/a
+ +H/ysSoDUjGNx/A==
+X-Developer-Key: i=jbrunet@baylibre.com; a=openpgp;
+ fpr=F29F26CF27BAE1A9719AE6BDC3C92AAF3E60AED9
 
-On Wed 21 May 2025 at 12:28, Frank Li <Frank.li@nxp.com> wrote:
+The patchset allows arbitrary BAR mapping for vNTB PCI endpoint function.
 
-> On Tue, May 20, 2025 at 09:47:14AM +0200, Jerome Brunet wrote:
->> On Mon 19 May 2025 at 17:21, Frank Li <Frank.li@nxp.com> wrote:
->>
->> > On Mon, May 05, 2025 at 07:41:48PM +0200, Jerome Brunet wrote:
->> >
->> > PCI tree require keep consistent at subject
->> > git log --oneline drivers/pci/endpoint/functions/pci-epf-vntb.c
->> >
->> > require first char is UP case.
->>
->> Noted
->>
->> >
->> > Align memory window naming with configfs names.
->> >
->> >> The config file related to the memory windows start the numbering of
->> >
->> >                                  memory windows (MW)
->> >  then you can use MW later.
->>
->> Sure
->>
->> >
->> >> the MW from 1. The other NTB function does the same, yet the enumeration
->> >> defining the BARs of the vNTB function starts numbering the MW from 0.
->> >>
->> >> Both numbering are fine I suppose but mixing the two is a bit confusing.
->> >> The configfs file being the interface with userspace, lets keep that stable
->> >> and consistently start the numbering of the MW from 1.
->> >>
->> >> Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
->> >> ---
->> >>  drivers/pci/endpoint/functions/pci-epf-vntb.c | 11 ++++++-----
->> >>  1 file changed, 6 insertions(+), 5 deletions(-)
->> >>
->> >> diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
->> >> index 35fa0a21fc91100a5539bff775e7ebc25e1fb9c1..f9f4a8bb65f364962dbf1e9011ab0e4479c61034 100644
->> >> --- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
->> >> +++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
->> >> @@ -70,9 +70,10 @@ static struct workqueue_struct *kpcintb_workqueue;
->> >>  enum epf_ntb_bar {
->> >>  	BAR_CONFIG,
->> >>  	BAR_DB,
->> >> -	BAR_MW0,
->> >>  	BAR_MW1,
->> >>  	BAR_MW2,
->> >> +	BAR_MW3,
->> >> +	BAR_MW4,
->> >
->> > where use BAR_MW3 and BAR_MW4?
->>
->> This is aligned with the file available in configfs and what is possible
->> in theory with the function, same as the NTB function and NTB host driver.
->>
->> Stopping at MW1 because it is only one used in the driver would be weird
->> and the number later introduced would be wrong.
->
-> Yes, but BAR_MW3 and BAR_MW4 should be added only when both was used in code
-> actaully.
+This was developed for the Renesas platform with requires a mapping that
+was not possible before:
+* BAR0 (1MB):  CTRL+SPAD
+* BAR2 (1MB):  MW0
+* BAR4 (256B): Doorbell
 
-If you want to be strict about that then BAR_MW4 should go to the next change,
-it is needed in the enum.
+It is possible to setup the host side driver with the mapping above without any
+functional change but it makes sense to also add arbitrary mapping support
+there. This is will be sent in a dedicated series.
 
-BAR_MW3 shall stay here because the purpose of this change is to shift the MW
-naming by one. MW2 which was present becomes MW3.
+The patchset should not change anything for existing users.
 
->
-> Frank
->>
->>
->> >
->> > Frank
->> >>  };
->> >>
->> >>  /*
->> >> @@ -576,7 +577,7 @@ static int epf_ntb_mw_bar_init(struct epf_ntb *ntb)
->> >>
->> >>  	for (i = 0; i < ntb->num_mws; i++) {
->> >>  		size = ntb->mws_size[i];
->> >> -		barno = ntb->epf_ntb_bar[BAR_MW0 + i];
->> >> +		barno = ntb->epf_ntb_bar[BAR_MW1 + i];
->> >>
->> >>  		ntb->epf->bar[barno].barno = barno;
->> >>  		ntb->epf->bar[barno].size = size;
->> >> @@ -629,7 +630,7 @@ static void epf_ntb_mw_bar_clear(struct epf_ntb *ntb, int num_mws)
->> >>  	int i;
->> >>
->> >>  	for (i = 0; i < num_mws; i++) {
->> >> -		barno = ntb->epf_ntb_bar[BAR_MW0 + i];
->> >> +		barno = ntb->epf_ntb_bar[BAR_MW1 + i];
->> >>  		pci_epc_clear_bar(ntb->epf->epc,
->> >>  				  ntb->epf->func_no,
->> >>  				  ntb->epf->vfunc_no,
->> >> @@ -676,7 +677,7 @@ static int epf_ntb_init_epc_bar(struct epf_ntb *ntb)
->> >>  	epc_features = pci_epc_get_features(ntb->epf->epc, ntb->epf->func_no, ntb->epf->vfunc_no);
->> >>
->> >>  	/* These are required BARs which are mandatory for NTB functionality */
->> >> -	for (bar = BAR_CONFIG; bar <= BAR_MW0; bar++, barno++) {
->> >> +	for (bar = BAR_CONFIG; bar <= BAR_MW1; bar++, barno++) {
->> >>  		barno = pci_epc_get_next_free_bar(epc_features, barno);
->> >>  		if (barno < 0) {
->> >>  			dev_err(dev, "Fail to get NTB function BAR\n");
->> >> @@ -1048,7 +1049,7 @@ static int vntb_epf_mw_set_trans(struct ntb_dev *ndev, int pidx, int idx,
->> >>  	struct device *dev;
->> >>
->> >>  	dev = &ntb->ntb.dev;
->> >> -	barno = ntb->epf_ntb_bar[BAR_MW0 + idx];
->> >> +	barno = ntb->epf_ntb_bar[BAR_MW1 + idx];
->> >>  	epf_bar = &ntb->epf->bar[barno];
->> >>  	epf_bar->phys_addr = addr;
->> >>  	epf_bar->barno = barno;
->> >>
->> >> --
->> >> 2.47.2
->> >>
->>
->> --
->> Jerome
+Possible next steps:
+- Align the NTB endpoint function: I'd be happy to propose something there
+  but I would only be able to compile test it since I do not have the HW
+  to test it.
+- Expose BAR configuration in the CTRL registers: I've been doodling with
+  the idea to add a few extra registers in the CTRL region to describe
+  the BAR mapping of the other regions. That way, there would less chance
+  for the 2 sides to become mis-aligned. I'm not certain it makes sense and
+  would welcome others opinion on this :)
 
+Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
+---
+Changes in v2:
+- Align commit description casing style
+- Delay adding MW4 enumeration to patch 3
+- Apply renaming suggestion on patch 3
+- Dropped patch 4 for the NTB: will be re-sent separately.
+- Link to v1: https://lore.kernel.org/r/20250505-pci-vntb-bar-mapping-v1-0-0e0d12b2fa71@baylibre.com
+
+---
+Jerome Brunet (3):
+      PCI: endpoint: pci-epf-vntb: Return an error code on bar init
+      PCI: endpoint: pci-epf-vntb: Align mw naming with config names
+      PCI: endpoint: pci-epf-vntb: Allow BAR assignment via configfs
+
+ drivers/pci/endpoint/functions/pci-epf-vntb.c | 141 +++++++++++++++++++++++---
+ 1 file changed, 129 insertions(+), 12 deletions(-)
+---
+base-commit: db2e86db6ec76de51aff24fb0ae43987d4c02355
+change-id: 20250505-pci-vntb-bar-mapping-3cc3ff624e76
+
+Best regards,
 -- 
 Jerome
+
