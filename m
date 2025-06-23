@@ -1,156 +1,79 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 202A22F532C;
-	Tue, 17 Jun 2025 23:25:57 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4BFDB2550A4;
+	Mon, 23 Jun 2025 12:06:46 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750202758; cv=none; b=BHJHwNsEznfBW1aPWCmuoYGP27+diKQyLrz7GL4ld4q5gsf9VzFw52Kay+h349o3jUGhm68B0pyff7alSWoolyGYbOcg7u/gbcK+lUoPNeePhewynLjMa7JOoC2bM1AmVlz8LWwNDUgWlLrkU7kwAeu9C5N4FnTop6hLvlr78qk=
+	t=1750680407; cv=none; b=CwjRgnnhe9Te1TX/UKEJ41Dd9TADouqsGkedtND85An8Azg1+FIpDhwTrnx0RoJEmlHYW3MtmVpnlRY54kL/WqfqRs/w2xnLsgAFCVnRbooaaoeRdP6Pr0vYIxi8VxqtOdkUsY3ZTBvSQ8ppudL2dZtuz+/Hcxe5j27CFuCl6C8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750202758; c=relaxed/simple;
-	bh=xt7/Fe7EQ3OwNo1cmh493TU1lPrwQWbplHjQhSs0xXg=;
-	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
-	 Content-Disposition:In-Reply-To; b=IUY4AtrxBpenmIGRHYA+lD3oIx3IX+/XNAIB3RTajdC6WF9HRcIYMrDczx7JV5iFnzA5jc6C2a76ZJLe4AraxcGZeMX7BS/noOnIY5hYTEqnIevcV7IuKJpewC678aTZp1N8kVOdgZGl1OT2//Z3+tqcZV/0+AJbgy1IUuI5EvQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=CGshCCWs; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1750680407; c=relaxed/simple;
+	bh=OdSD8nYZGOkV8fnciDyV48OQwABe71AhiAIazDnGy0E=;
+	h=From:To:Cc:In-Reply-To:References:Subject:Message-Id:Date:
+	 MIME-Version:Content-Type; b=fuQC6sxbb8JUODvrIKGUnNfbqaZ6xJSYzYGRu1V8afuwlWQQqjyxolrrJQERClsV3l7P+lfEQm885MgQWsEiPlVchhLFZfuA/Kn0v4AydQaxMXb1OZGV9OpgN+7IPpX3hWpBie7mvdh4mps8W/0TvWqhjSkEacUkBO8GPxLV0co=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=bT/LjJgN; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CGshCCWs"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7DF7EC4CEE3;
-	Tue, 17 Jun 2025 23:25:57 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="bT/LjJgN"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 52F9CC4CEF0;
+	Mon, 23 Jun 2025 12:06:46 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1750202757;
-	bh=xt7/Fe7EQ3OwNo1cmh493TU1lPrwQWbplHjQhSs0xXg=;
-	h=Date:From:To:Cc:Subject:In-Reply-To:From;
-	b=CGshCCWsG/mKLt3rDhhDhuqXb3Sbgo5/WeCo6yWoUyUty8kTEQtK2E0UYYXijJl5j
-	 D6tEEMz5PnjydoODziIVFkiE6BulpRqJ7EAyNkjuK8wGuLX6PBENSmSXt6u4i782yz
-	 60cfl1dwS3I5XvpbEDMwP1xUqyEUlaJ8ribNAbu8rgRHzWMQhAO5wEmB8Zmke7HfCQ
-	 RUGRp/sSrO8/PkkXIDNUi99HRYJRJAtEUARQ9IVMqfrRL8q0UeMS71JFPBn6MyW+uP
-	 HF/jpYFL4UD3jIoDljgqpMle3xiy3+h8fLo8kvKRRMnolNIH6V/0HcdhtAZOkHsdMf
-	 S6xihLbRSAKMw==
-Date: Tue, 17 Jun 2025 18:25:56 -0500
-From: Bjorn Helgaas <helgaas@kernel.org>
-To: Thomas Gleixner <tglx@linutronix.de>
-Cc: LKML <linux-kernel@vger.kernel.org>, Marc Zyngier <maz@kernel.org>,
-	Peter Zijlstra <peterz@infradead.org>,
-	Bjorn Helgaas <bhelgaas@google.com>, Wei Huang <wei.huang2@amd.com>,
-	linux-pci@vger.kernel.org,
-	Jonathan Cameron <Jonathan.Cameron@huawei.com>,
-	Nishanth Menon <nm@ti.com>, Dhruva Gole <d-gole@ti.com>,
-	Tero Kristo <kristo@kernel.org>,
-	Santosh Shilimkar <ssantosh@kernel.org>,
-	Logan Gunthorpe <logang@deltatee.com>,
-	Dave Jiang <dave.jiang@intel.com>, Jon Mason <jdmason@kudzu.us>,
-	Allen Hubbe <allenbh@gmail.com>, ntb@lists.linux.dev,
-	Michael Kelley <mhklinux@outlook.com>, Wei Liu <wei.liu@kernel.org>,
-	Haiyang Zhang <haiyangz@microsoft.com>,
-	linux-hyperv@vger.kernel.org,
-	Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
-	"James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>,
-	"Martin K. Petersen" <martin.petersen@oracle.com>,
-	linux-scsi@vger.kernel.org,
-	Jonathan Cameron <Jonathan.Cameron@huwei.com>
-Subject: Re: [patch V4 11/14] PCI/MSI: Provide a sane mechanism for TPH
-Message-ID: <20250617232556.GA1176283@bhelgaas>
+	s=k20201202; t=1750680406;
+	bh=OdSD8nYZGOkV8fnciDyV48OQwABe71AhiAIazDnGy0E=;
+	h=From:To:Cc:In-Reply-To:References:Subject:Date:From;
+	b=bT/LjJgN3A7McGMME8EdhZ6ny6E6SXKCbFxo6o9r8gxql98GAkpTm3cIDX0Y4LkEW
+	 ekp5vNTXTgp1nR5SHWqieiHB3EFNM8Jh3FA6sL1UuPdS4HK/8VVtT7PIlu9+kUDeur
+	 JfdYLSo9Rm3eLbPnrgzlVvTt9j0pklUnGPKAp8W134awIEb04ahcbRzlaMeozQIULH
+	 m0Nt/N3v9ID6m2Dba0/kGWSOP49EV7/bLGUSABuSGKjnEeEKwPC1qP6WLoxAzIlDxT
+	 30y2rM3urJw8AFG2qw3FJ0zRosHFS3C+DJsKr5QNJyaphUnwRlIsMA94wSO/OoYgTI
+	 tJHFLtCTQTmqA==
+From: Manivannan Sadhasivam <mani@kernel.org>
+To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, 
+ Allen Hubbe <allenbh@gmail.com>, Kishon Vijay Abraham I <kishon@kernel.org>, 
+ Bjorn Helgaas <bhelgaas@google.com>, Frank Li <Frank.Li@nxp.com>, 
+ =?utf-8?q?Krzysztof_Wilczy=C5=84ski?= <kwilczynski@kernel.org>, 
+ =?utf-8?q?Krzysztof_Wilczy=C5=84ski?= <kwilczynski@kernel.org>, 
+ Manivannan Sadhasivam <mani@kernel.org>, 
+ Jerome Brunet <jbrunet@baylibre.com>
+Cc: ntb@lists.linux.dev, linux-pci@vger.kernel.org, 
+ linux-kernel@vger.kernel.org
+In-Reply-To: <20250603-pci-vntb-bar-mapping-v2-0-fc685a22ad28@baylibre.com>
+References: <20250603-pci-vntb-bar-mapping-v2-0-fc685a22ad28@baylibre.com>
+Subject: Re: [PATCH v2 0/3] PCI: endpoint: pci-epf-vntb: allow arbitrary
+ BAR mapping
+Message-Id: <175068040623.12516.4425064763865712731.b4-ty@kernel.org>
+Date: Mon, 23 Jun 2025 06:06:46 -0600
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250617232232.GA1175597@bhelgaas>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-Mailer: b4 0.14.2
 
-On Tue, Jun 17, 2025 at 06:22:34PM -0500, Bjorn Helgaas wrote:
-> On Wed, Mar 19, 2025 at 11:56:57AM +0100, Thomas Gleixner wrote:
-> > The PCI/TPH driver fiddles with the MSI-X control word of an active
-> > interrupt completely unserialized against concurrent operations issued
-> > from the interrupt core. It also brings the PCI/MSI-X internal cached
-> > control word out of sync.
-> > 
-> > Provide a function, which has the required serialization and keeps the
-> > control word cache in sync.
-> > 
-> > Unfortunately this requires to look up and lock the interrupt descriptor,
-> > which should be only done in the interrupt core code. But confining this
-> > particular oddity in the PCI/MSI core is the lesser of all evil. A
-> > interrupt core implementation would require a larger pile of infrastructure
-> > and indirections for dubious value.
-> > 
-> > Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
-> > Acked-by: Bjorn Helgaas <bhelgaas@google.com>
-> > Cc: Wei Huang <wei.huang2@amd.com>
-> > Cc: linux-pci@vger.kernel.org
-> > 
-> > 
-> > 
-> > ---
-> >  drivers/pci/msi/msi.c |   47 +++++++++++++++++++++++++++++++++++++++++++++++
-> >  drivers/pci/pci.h     |    9 +++++++++
-> >  2 files changed, 56 insertions(+)
-> > 
-> > --- a/drivers/pci/msi/msi.c
-> > +++ b/drivers/pci/msi/msi.c
-> > @@ -910,6 +910,53 @@ void pci_free_msi_irqs(struct pci_dev *d
-> >  	}
-> >  }
-> >  
-> > +#ifdef CONFIG_PCIE_TPH
-> > +/**
-> > + * pci_msix_write_tph_tag - Update the TPH tag for a given MSI-X vector
-> > + * @pdev:	The PCIe device to update
-> > + * @index:	The MSI-X index to update
-> > + * @tag:	The tag to write
-> > + *
-> > + * Returns: 0 on success, error code on failure
-> > + */
-> > +int pci_msix_write_tph_tag(struct pci_dev *pdev, unsigned int index, u16 tag)
-> > +{
-> > +	struct msi_desc *msi_desc;
-> > +	struct irq_desc *irq_desc;
-> > +	unsigned int virq;
-> > +
-> > +	if (!pdev->msix_enabled)
-> > +		return -ENXIO;
-> > +
-> > +	guard(msi_descs_lock)(&pdev->dev);
-> > +	virq = msi_get_virq(&pdev->dev, index);
-> > +	if (!virq)
-> > +		return -ENXIO;
-> > +	/*
-> > +	 * This is a horrible hack, but short of implementing a PCI
-> > +	 * specific interrupt chip callback and a huge pile of
-> > +	 * infrastructure, this is the minor nuissance. It provides the
-> > +	 * protection against concurrent operations on this entry and keeps
-> > +	 * the control word cache in sync.
-> > +	 */
-> > +	irq_desc = irq_to_desc(virq);
-> > +	if (!irq_desc)
-> > +		return -ENXIO;
-> > +
-> > +	guard(raw_spinlock_irq)(&irq_desc->lock);
-> > +	msi_desc = irq_data_get_msi_desc(&irq_desc->irq_data);
-> > +	if (!msi_desc || msi_desc->pci.msi_attrib.is_virtual)
-> > +		return -ENXIO;
-> > +
-> > +	msi_desc->pci.msix_ctrl &= ~PCI_MSIX_ENTRY_CTRL_ST;
-> > +	msi_desc->pci.msix_ctrl |= FIELD_PREP(PCI_MSIX_ENTRY_CTRL_ST, tag);
-> > +	pci_msix_write_vector_ctrl(msi_desc, msi_desc->pci.msix_ctrl);
-> > +	/* Flush the write */
-> > +	readl(pci_msix_desc_addr(msi_desc));
-> > +	return 0;
-> > +}
+
+On Tue, 03 Jun 2025 19:03:37 +0200, Jerome Brunet wrote:
+> The patchset allows arbitrary BAR mapping for vNTB PCI endpoint function.
 > 
-> Looks like this change might add this warning, which I don't claim to
-> understand:
+> This was developed for the Renesas platform with requires a mapping that
+> was not possible before:
+> * BAR0 (1MB):  CTRL+SPAD
+> * BAR2 (1MB):  MW0
+> * BAR4 (256B): Doorbell
 > 
->   $ make C=2 drivers/pci/msi/msi.o
->   drivers/pci/msi/msi.c:928:5: warning: context imbalance in 'pci_msix_write_tph_tag' - wrong count at exit
-> 
-> This appeared in v6.16-rc1 as d5124a9957b2 ("PCI/MSI: Provide a sane
-> mechanism for TPH")
+> [...]
 
-Sorry, I guess I just rediscovered this sparse deficiency:
+Applied, thanks!
 
-  https://lore.kernel.org/r/20250422174156.GA344533@bhelgaas
+[1/3] PCI: endpoint: pci-epf-vntb: Return an error code on bar init
+      commit: 7ea488cce73263231662e426639dd3e836537068
+[2/3] PCI: endpoint: pci-epf-vntb: Align mw naming with config names
+      commit: a079d83c4afd4896f7f29bd9e807cb382043b360
+[3/3] PCI: endpoint: pci-epf-vntb: Allow BAR assignment via configfs
+      commit: a0cc6e6fd072616315147ac68a12672d5a2fa223
 
-Never mind, I'll just try to remember to ignore these warnings.
+Best regards,
+-- 
+Manivannan Sadhasivam <mani@kernel.org>
+
