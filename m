@@ -1,65 +1,63 @@
-Received: from mail-wm1-f51.google.com (mail-wm1-f51.google.com [209.85.128.51])
+Received: from mail-wm1-f45.google.com (mail-wm1-f45.google.com [209.85.128.45])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2DC3C2F5091
-	for <ntb@lists.linux.dev>; Wed,  2 Jul 2025 16:48:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BF9C320766C
+	for <ntb@lists.linux.dev>; Tue,  8 Jul 2025 14:50:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.45
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751474930; cv=none; b=hgNplksrWeU6bIzymuUyoGr0OUzrf8KpasCYaZLAfpmnRSRsuzmXcVX5Sli2Fcl/KCKfiZgpYyDf7qleUGG7XWAlDMY9MmwbYbK3eNk/+5c1tvcMuC9b9KqdfuJrYYoFewCsMG8DuhcHKWrElkPWGG2tOqkalb2frL1o3IeYWXE=
+	t=1751986216; cv=none; b=BQ9IWW+/3+r+xgII8uzmMfnJZxEmpG/oRpFgwJ6/QfpHr4DBJfCyvWEpdw/L6D+wEOIbmV3KQ3OopvIITq+fd9J6T2uLr8UEVTpxfN7EN4CKuwIVHkaS0SEGF38r2NmAD34RcSQNQA+iZH9GNJLfk/wESzGlG4hsHdNguChvgcw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751474930; c=relaxed/simple;
-	bh=3NNDUeuHsvo2VX6nwrGAtLPPIQB8S69YI6TjV7kH6Xo=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=O8KHhv6QDsLtnqF8z0Ji+R0ZzWMFQZ5zxaLN/Xf8xnobwwJmtUq5c9CwicdhsVU7q5t6gLwomvGnLVLa4Lzj5n34hlQSpxqbx/E75XWxkv9u2j3l68jEfMOz+TIzzD3Zd2ReTq32mQPenNdLo1h1Hl5FXLIOBcnrekW1/0GkXKY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=GPUfAZM1; arc=none smtp.client-ip=209.85.128.51
+	s=arc-20240116; t=1751986216; c=relaxed/simple;
+	bh=HEgvTY7DvqUTASXbAkoz2Cq2W+UACAG7D0XiharOkiI=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=BHvVzABIDcs1zInRpzGX0h1bVFbkf2HVMQV2zw7scPuZCo3Xzc64NOp0zYOKCcxZPz+2pce90hnnU7btmhDVy0KuUGj4bcST7iJ25KH2PN0DvGDRHYAnBZWqb0hncwinx6IZuLQOvWvMzpTUCnOVaKb0+7bWQ8KBeZ/Wv1fULbc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=1d8POkiu; arc=none smtp.client-ip=209.85.128.45
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="GPUfAZM1"
-Received: by mail-wm1-f51.google.com with SMTP id 5b1f17b1804b1-4538bc1cffdso44921995e9.0
-        for <ntb@lists.linux.dev>; Wed, 02 Jul 2025 09:48:46 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="1d8POkiu"
+Received: by mail-wm1-f45.google.com with SMTP id 5b1f17b1804b1-453066fad06so31649635e9.2
+        for <ntb@lists.linux.dev>; Tue, 08 Jul 2025 07:50:12 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1751474925; x=1752079725; darn=lists.linux.dev;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=wQYTPO1XpKJCQcWh+sfxZYptd6FBAp1btwUGf5q+fT0=;
-        b=GPUfAZM1H9VpdQZsiOvz2tMBBqI8C9Alc0n7bA/TRpvWSWy2+rh/irQmk5CuaLxtEN
-         L5CcO1uGyx0XgAYDaIypaC+LO0QWiYpNm4/Gs1C2Ea1eBXcqNUeV9Mk72oxLecfcxK0Q
-         bTt++MNlBrPtPShpwoMtFHJmGoekuMP4H/2EyXItDqqoBeMpEkZ4CEMx5oVk7lXLKROE
-         QQxZ0OQmtolTEOtA6IdAWqKb2NsNFLmxdnWbGabnjtM3od5XZ+biKbkZlUS1n7Oj8JUm
-         Xz6xuzOwvAXYJxjPdqEwG0tne5LBmkfwmMQ7P/aIYdfHsLJd18DpDDAe869x+WuHjSfp
-         SPtQ==
+        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1751986211; x=1752591011; darn=lists.linux.dev;
+        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
+         :date:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=p+mcJ7ZL40yfdI/6L1U2sq8kmJCRggUCq7uPF858vik=;
+        b=1d8POkiumho2WlLNndth8h4pMvU0JywEX83mt9rxx7FA+t4mlR09mbWkI4Veiit1f6
+         Bv1IfZJq+1PO+/OWRO2AW8IEhY+gkPcmEfRogujGa020k7i2D0lo1cD4dGyn7NoZonDK
+         XG8s83B8NsCstNjJBvQZas4VzWEIqXNd697cJb+RTwJO6OPl8M7o7/9BMg6LBEy1MwJu
+         6BHS9XzKTcdaU8+NZWN27Q43OWgZ5muVFKSKP6LbNUAsv7LNxhYYMtVdoBYPllLyLjqC
+         Cfh+rMdgQuMFtgqCVNzpbqbO0kS+Ku8yrhDyX1ri3CaYzhqA+mr3qwun55Q8Xtj/PllA
+         s8kg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1751474925; x=1752079725;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=wQYTPO1XpKJCQcWh+sfxZYptd6FBAp1btwUGf5q+fT0=;
-        b=oc0vajFKWYH1NjkDM/h4Snyva+b3Rl0brGHnyNpqsoSaezZ7CXan/vajGbwSSPHVSE
-         W+oSSiA9Ue1xsDfkfFZM5JXD+cEr1lA8wPQDIoxXPQjLMhviSgayHk32+WjjmHKQKFMd
-         xYISUy5cJvWedo83NC9ccdkSvRQjS8eq0xtoJzigQBQhxyK568VUVukGOROQdP3sKs8s
-         4EJHi/sgsRWAtg1Uea22/hLC1tvK1R/gkmND1w5UBfin/lFnSaKfqYNmeAmg947y1igx
-         PHjWZKrSeNvuc+UOFcvPzkonRN4tOBeZqj/wn7s0deFFJ5ho5V5QAdGyVyQGuAK8Ys8f
-         oCSg==
-X-Gm-Message-State: AOJu0YwnwA93Qw3eMdMgHvzt/FgeSNVpcFdNmdBodeYeN9lDQDMfB2bO
-	jQvnAYlnNoj4bwvVu23zO8aeDUGWh7PbxjAodRbwChPAqWt4pgLsAcYO1rmNx8+5gbs=
-X-Gm-Gg: ASbGncvxqUesYsp9MkBk9pXMLjE/yYu2oBJ22UgYS3yuFCsY04CFpO9QU2U1gj+IfG1
-	l8qwtP0U08o8KX0jdwqzx0v8Rur0LHbBo3HXCy1IKVllEcuwJkz2es9gxcC8o6CcpQF6M0+8IWR
-	x5M5MH65Op9mXRI9tBGTDUVqES3s7/+4zj8IQ+Zs1bjcJOahMzgZetnCgd5cZ1MDe2Io2HthpBp
-	QNhracw4faFxVfClqehpwBiRDq0uY87/tPHFZXE0oSL7ca8nHaTKh8mucjPvw25yPFD9zbRTdew
-	+9pSroWGy6UX5BPc4IPD+PxuQt7nl8gozSyDuwrheC3EQN85Yk38W5+zTFpmZNxV4EVTpFvhlOq
-	E
-X-Google-Smtp-Source: AGHT+IEPJ3J0rEglf3oRey19XgMB/CO1+HMV7zcZXiSO8hUTEF7svDZo9kfDS9gTj/hL3PROF/qvPw==
-X-Received: by 2002:a05:600c:138c:b0:43d:ac5:11e8 with SMTP id 5b1f17b1804b1-454a37030a9mr35785855e9.21.1751474925290;
-        Wed, 02 Jul 2025 09:48:45 -0700 (PDT)
-Received: from toaster.baylibre.com ([2a01:e0a:3c5:5fb1:5542:4bad:e07b:9489])
-        by smtp.googlemail.com with ESMTPSA id 5b1f17b1804b1-454a9bac51bsm2871155e9.39.2025.07.02.09.48.44
+        d=1e100.net; s=20230601; t=1751986211; x=1752591011;
+        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
+         :date:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=p+mcJ7ZL40yfdI/6L1U2sq8kmJCRggUCq7uPF858vik=;
+        b=OPmFmqiv16tUZN4p8nnJGDzvLsvS40n7OOBFWuhQzZyxqBgyw6WHMXUIo+8zZ8tT/n
+         2Z+onUmf89yUHuAiyn0lMUhEjUoh7nXDAePrvsJiRtZkUeRqmxoePSPycsRhp1muTXIf
+         J3KDCsItEgsdhkIQw2CW0pvDdnirDZcmHRsnGx6oeX+BY2jt0DTGRbWXJt8Le9kXg8pn
+         Thypx7w1ntCEIjnvEEdyMZQHwE+x6DDymBHpUvXCRBcTz+ak9aHSjKcBnnZHGJxwuIPq
+         0PhkUrx9utT8fmpegvlopO4qDIa8CHtMIrwNjXrNLJghqrp3RdblT9Sfehrw0+bDP3Sj
+         3SUg==
+X-Gm-Message-State: AOJu0YyKq4mKmyiCrJtCzvFU92dNvtpciX4PAxoRE+LvGaBygieSmAsO
+	I4xGIAz4qQbpjXVmxVpNCHrXC1e2TBKxbQdcstYZ+mVZckiNYiUhCMjivZBdvtiEWL4=
+X-Gm-Gg: ASbGncsWYq1qEzOB3LhB4+NV6zpi/KXytABO9ylDtomY7yjJat79wL746QKEEZwkeP/
+	njIpSXtE9qasXTxHVnJZ8xmPCGlOOfVMFH5ro8kbzUtmBTBjWU8Po62stUPDwsiFY/o5NOCX8P3
+	YR/YdsJUX1Rwcoi4MRtlsrnerrcCkVk1kV7URT5WQvJrIHU4M1Tl1zk0Q5Cl40Pk7ZNI7uym8nk
+	URYhEsmgPSWLITNV1WLD3mQi89GgYGimXgQhmR0i5jC6X0X8lxgc5J1il7S4/wvBGmlmAJVFi7B
+	ZLxojnsEpKSmWG1L5dQRbwUwxtxn9ME6bpplMhFxM+GLidC7D9tTg0msftvueR4GEtXK2VMMtK+
+	0
+X-Google-Smtp-Source: AGHT+IH2G2zx5csQczqgTBlBit9l6rKgdpM4AL2R7/oW/cCxn22xdVAIxyhu7QXZ0RNJGTHll7v0Sw==
+X-Received: by 2002:a05:600c:8b0d:b0:43c:fe5e:f040 with SMTP id 5b1f17b1804b1-454cd5234b7mr32681735e9.23.1751986211084;
+        Tue, 08 Jul 2025 07:50:11 -0700 (PDT)
+Received: from toaster.baylibre.com ([2a01:e0a:3c5:5fb1:dfdf:dfe3:8269:12e7])
+        by smtp.googlemail.com with ESMTPSA id ffacd0b85a97d-3b47030cdf5sm12988879f8f.1.2025.07.08.07.50.10
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 02 Jul 2025 09:48:44 -0700 (PDT)
+        Tue, 08 Jul 2025 07:50:10 -0700 (PDT)
 From: Jerome Brunet <jbrunet@baylibre.com>
-Date: Wed, 02 Jul 2025 18:48:33 +0200
-Subject: [PATCH v3 1/2] NTB: epf: Allow arbitrary BAR mapping
+Date: Tue, 08 Jul 2025 16:49:57 +0200
+Subject: [PATCH] PCI: endpoint: pci-epf-vntb: fix MW2 configfs id
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -68,267 +66,69 @@ List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20250702-ntb-rcar-support-v3-1-4268d9c85eb7@baylibre.com>
-References: <20250702-ntb-rcar-support-v3-0-4268d9c85eb7@baylibre.com>
-In-Reply-To: <20250702-ntb-rcar-support-v3-0-4268d9c85eb7@baylibre.com>
+Message-Id: <20250708-vntb-mw-fixup-v1-1-22da511247ed@baylibre.com>
+X-B4-Tracking: v=1; b=H4sIABQwbWgC/6tWKk4tykwtVrJSqFYqSi3LLM7MzwNyDHUUlJIzE
+ vPSU3UzU4B8JSMDI1MDcwML3bK8kiTd3HLdtMyK0gLdpGRjg0TjVCNLAzNDJaCegqJUoATYvOj
+ Y2loA1x0n8F8AAAA=
+X-Change-ID: 20250708-vntb-mw-fixup-bc30a3e29061
 To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, 
- Allen Hubbe <allenbh@gmail.com>
-Cc: ntb@lists.linux.dev, linux-kernel@vger.kernel.org, 
- Frank Li <Frank.li@nxp.com>, 
- Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, 
- Yuya Hamamachi <yuya.hamamachi.sx@renesas.com>, 
- Jerome Brunet <jbrunet@baylibre.com>
+ Allen Hubbe <allenbh@gmail.com>, Manivannan Sadhasivam <mani@kernel.org>, 
+ =?utf-8?q?Krzysztof_Wilczy=C5=84ski?= <kwilczynski@kernel.org>, 
+ Kishon Vijay Abraham I <kishon@kernel.org>, 
+ Bjorn Helgaas <bhelgaas@google.com>, Frank Li <Frank.Li@nxp.com>
+Cc: ntb@lists.linux.dev, linux-pci@vger.kernel.org, 
+ linux-kernel@vger.kernel.org, Jerome Brunet <jbrunet@baylibre.com>
 X-Mailer: b4 0.14.2
-X-Developer-Signature: v=1; a=openpgp-sha256; l=7038; i=jbrunet@baylibre.com;
- h=from:subject:message-id; bh=3NNDUeuHsvo2VX6nwrGAtLPPIQB8S69YI6TjV7kH6Xo=;
- b=owEBbQKS/ZANAwAKAeb8Dxw38tqFAcsmYgBoZWLq4jf9IHzmy8o9jT+bID9kK6LiS7h9DfG9m
- lk4fM25b5+JAjMEAAEKAB0WIQT04VmuGPP1bV8btxvm/A8cN/LahQUCaGVi6gAKCRDm/A8cN/La
- hbJBD/4w0rnGn+LFyUs7FufUN9eRBCGjVuT4+6lnVtibIcv+PiiNCRgUnr6Pu/uFIPQXj1q4pNI
- rv56iocDz84MXwDZVSxx6ppA/3NzYDN3ZUIznMvLoWAP4lE3vpe9c4L1ywwtdyOcbx98osCsxU9
- 3Y4zcujnKdqAVcr2NYs7kGw5nBXwGDMn7yAUZMtr0xju4J6rFz6XahqcGDMEyeOXcSanPNwsgga
- iGCUS1n93xUUTU+O15LI24Ar0LASWtLw9WVs/wdwP1IFGSzAqQUlmk5Mt23/8j1mvELzpFvqj6A
- sYc2NLy4V1Q2SenLghs43ADk/sRA5NAdqAqdfGOEvFqa2aypfZlXDF05s8FllMdtTseZB6RZSk3
- EjPQL7mLN7BsNw2ISfs24HvOxaKXSHf4WPT+sjcd5J32BRt1pyXW0gxRnKMn0PWWhr/ww/mAd20
- lLtMjNPk+eG4+Tg+O0A4Tord8oLafjOK/1dcojHVGB9+Zkf5sD5sBkAoL0MjRx6EaBXabzURF9H
- ZCUQXcOtxMIdG2WCPAd5SRmM5OvXjcNtouB9cbUMOoBuLtbHzuolRLhU6s+kja3dTqLFytbWLq1
- E8VFL3ER92LPUIL+7rTAkOit4fE5468zsEKA9Hrcq3qenqGHFKQua9+v5wvOxN7Xt38oFmY5uBd
- s1SE+X++DTOLiQA==
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1285; i=jbrunet@baylibre.com;
+ h=from:subject:message-id; bh=HEgvTY7DvqUTASXbAkoz2Cq2W+UACAG7D0XiharOkiI=;
+ b=owEBbQKS/ZANAwAKAeb8Dxw38tqFAcsmYgBobTAdm1+n8PQLlMWBQtM3sujQ9VlXuPytqjO/b
+ RX4fjO7geCJAjMEAAEKAB0WIQT04VmuGPP1bV8btxvm/A8cN/LahQUCaG0wHQAKCRDm/A8cN/La
+ hbW9EACZxPPbx9A9N7wzBBwK+X69FdGNxhFWZa4r0v2iig7LecShid9JdCCgxxpoMTiJ4Y7h/WD
+ iepvHs56AKjPYLS3TQ1QSc0bhbHJco0KzUCQn+zJq153Oz9QNAYjSAYTXDblnUxvBHUE2TIT0nP
+ UKcKt1RKzVpbMNSoNEuONomEejyFT35evSOKpyVwRiBENRx/IJipuJu3unfu6AzvVPsTRFsVaL0
+ Lmc8lU+DFtm9eeA91jTOsStJBhdrz6ROjci+1WTlq6zdhJox60lw0FndiXEGAEI59CYsqSttzCL
+ V7e8bZcPiJ4jeqt/FhpTO9dLn6gN42Xs6u/sOBxIKp1YHhME+zTphrFXptfSJUl3qa3PJRcW0Id
+ Rz/y6L+YqCuAj3I12VWuJPloVzQZ30Iv/nQxk+zMICLF5ktrtpKQt7w7DPRbFnqR7NYF4xlIeox
+ qFgBgTF5DPamsFhI2Rb0tYLY8LnmyYK6NYOri3ZUnibpXG6D0Q7s9rteRkbyT7ZyNZWZpQSN4nV
+ 3EnS5022AvlTmNfq3FqWqmGJphqMc+udewNL1w7PZbhlCpqF+zzQ4zE2og0wHhz+HNRyaNGDC3t
+ IWg3bFShM8KgULCpQXVoiodbPpMix9DlvXjZiRvCme3UokWoxG1wc3WmNDxkNv909JVLYjrhDEi
+ oG1fcYX8ebohO8g==
 X-Developer-Key: i=jbrunet@baylibre.com; a=openpgp;
  fpr=F29F26CF27BAE1A9719AE6BDC3C92AAF3E60AED9
 
-The NTB epf host driver assumes the BAR number associated with a memory
-window is just incremented from the BAR number associated with MW1. This
-seems to have been enough so far but this is not really how the endpoint
-side work and the two could easily become mis-aligned.
+The id associated with MW2 configfs entry is wrong.
+Trying to use MW2 will overwrite the existing BAR setup associated with
+MW1.
 
-ntb_epf_mw_to_bar() even assumes that the BAR number is the memory window
-index + 2, which means the function only returns a proper result if BAR_2
-is associated with MW1.
+Just put the correct id for MW2 to fix the situation
 
-Instead, fully describe and allow arbitrary NTB BAR mapping.
-
+Fixes: 4eacb24f6fa3 ("PCI: endpoint: pci-epf-vntb: Allow BAR assignment via configfs")
 Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
 ---
- drivers/ntb/hw/epf/ntb_hw_epf.c | 103 +++++++++++++++++++++-------------------
- 1 file changed, 53 insertions(+), 50 deletions(-)
+ drivers/pci/endpoint/functions/pci-epf-vntb.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/ntb/hw/epf/ntb_hw_epf.c b/drivers/ntb/hw/epf/ntb_hw_epf.c
-index 00f0e78f685bf7917b02dd8a52b5b35f68d5bb64..2b51156e01b0f22ef282d80c08c22af92f49307b 100644
---- a/drivers/ntb/hw/epf/ntb_hw_epf.c
-+++ b/drivers/ntb/hw/epf/ntb_hw_epf.c
-@@ -49,6 +49,7 @@
- #define NTB_EPF_COMMAND_TIMEOUT	1000 /* 1 Sec */
- 
- enum pci_barno {
-+	NO_BAR = -1,
- 	BAR_0,
- 	BAR_1,
- 	BAR_2,
-@@ -57,16 +58,26 @@ enum pci_barno {
- 	BAR_5,
- };
- 
-+enum epf_ntb_bar {
-+	BAR_CONFIG,
-+	BAR_PEER_SPAD,
-+	BAR_DB,
-+	BAR_MW1,
-+	BAR_MW2,
-+	BAR_MW3,
-+	BAR_MW4,
-+	NTB_BAR_NUM,
-+};
-+
-+#define NTB_EPF_MAX_MW_COUNT	(NTB_BAR_NUM - BAR_MW1)
-+
- struct ntb_epf_dev {
- 	struct ntb_dev ntb;
- 	struct device *dev;
- 	/* Mutex to protect providing commands to NTB EPF */
- 	struct mutex cmd_lock;
- 
--	enum pci_barno ctrl_reg_bar;
--	enum pci_barno peer_spad_reg_bar;
--	enum pci_barno db_reg_bar;
--	enum pci_barno mw_bar;
-+	const enum pci_barno *barno_map;
- 
- 	unsigned int mw_count;
- 	unsigned int spad_count;
-@@ -85,17 +96,6 @@ struct ntb_epf_dev {
- 
- #define ntb_ndev(__ntb) container_of(__ntb, struct ntb_epf_dev, ntb)
- 
--struct ntb_epf_data {
--	/* BAR that contains both control region and self spad region */
--	enum pci_barno ctrl_reg_bar;
--	/* BAR that contains peer spad region */
--	enum pci_barno peer_spad_reg_bar;
--	/* BAR that contains Doorbell region and Memory window '1' */
--	enum pci_barno db_reg_bar;
--	/* BAR that contains memory windows*/
--	enum pci_barno mw_bar;
--};
--
- static int ntb_epf_send_command(struct ntb_epf_dev *ndev, u32 command,
- 				u32 argument)
- {
-@@ -144,7 +144,7 @@ static int ntb_epf_mw_to_bar(struct ntb_epf_dev *ndev, int idx)
- 		return -EINVAL;
- 	}
- 
--	return idx + 2;
-+	return ndev->barno_map[BAR_MW1 + idx];
- }
- 
- static int ntb_epf_mw_count(struct ntb_dev *ntb, int pidx)
-@@ -413,7 +413,9 @@ static int ntb_epf_mw_set_trans(struct ntb_dev *ntb, int pidx, int idx,
- 		return -EINVAL;
- 	}
- 
--	bar = idx + ndev->mw_bar;
-+	bar = ntb_epf_mw_to_bar(ndev, idx);
-+	if (bar < 0)
-+		return bar;
- 
- 	mw_size = pci_resource_len(ntb->pdev, bar);
- 
-@@ -455,7 +457,9 @@ static int ntb_epf_peer_mw_get_addr(struct ntb_dev *ntb, int idx,
- 	if (idx == 0)
- 		offset = readl(ndev->ctrl_reg + NTB_EPF_MW1_OFFSET);
- 
--	bar = idx + ndev->mw_bar;
-+	bar = ntb_epf_mw_to_bar(ndev, idx);
-+	if (bar < 0)
-+		return bar;
- 
- 	if (base)
- 		*base = pci_resource_start(ndev->ntb.pdev, bar) + offset;
-@@ -560,6 +564,11 @@ static int ntb_epf_init_dev(struct ntb_epf_dev *ndev)
- 	ndev->mw_count = readl(ndev->ctrl_reg + NTB_EPF_MW_COUNT);
- 	ndev->spad_count = readl(ndev->ctrl_reg + NTB_EPF_SPAD_COUNT);
- 
-+	if (ndev->mw_count > NTB_EPF_MAX_MW_COUNT) {
-+		dev_err(dev, "Unsupported MW count: %u\n", ndev->mw_count);
-+		return -EINVAL;
-+	}
-+
- 	return 0;
- }
- 
-@@ -596,14 +605,15 @@ static int ntb_epf_init_pci(struct ntb_epf_dev *ndev,
- 		dev_warn(&pdev->dev, "Cannot DMA highmem\n");
- 	}
- 
--	ndev->ctrl_reg = pci_iomap(pdev, ndev->ctrl_reg_bar, 0);
-+	ndev->ctrl_reg = pci_iomap(pdev, ndev->barno_map[BAR_CONFIG], 0);
- 	if (!ndev->ctrl_reg) {
- 		ret = -EIO;
- 		goto err_pci_regions;
- 	}
- 
--	if (ndev->peer_spad_reg_bar) {
--		ndev->peer_spad_reg = pci_iomap(pdev, ndev->peer_spad_reg_bar, 0);
-+	if (ndev->barno_map[BAR_PEER_SPAD] != ndev->barno_map[BAR_CONFIG]) {
-+		ndev->peer_spad_reg = pci_iomap(pdev,
-+						ndev->barno_map[BAR_PEER_SPAD], 0);
- 		if (!ndev->peer_spad_reg) {
- 			ret = -EIO;
- 			goto err_pci_regions;
-@@ -614,7 +624,7 @@ static int ntb_epf_init_pci(struct ntb_epf_dev *ndev,
- 		ndev->peer_spad_reg = ndev->ctrl_reg + spad_off  + spad_sz;
- 	}
- 
--	ndev->db_reg = pci_iomap(pdev, ndev->db_reg_bar, 0);
-+	ndev->db_reg = pci_iomap(pdev, ndev->barno_map[BAR_DB], 0);
- 	if (!ndev->db_reg) {
- 		ret = -EIO;
- 		goto err_pci_regions;
-@@ -659,12 +669,7 @@ static void ntb_epf_cleanup_isr(struct ntb_epf_dev *ndev)
- static int ntb_epf_pci_probe(struct pci_dev *pdev,
- 			     const struct pci_device_id *id)
- {
--	enum pci_barno peer_spad_reg_bar = BAR_1;
--	enum pci_barno ctrl_reg_bar = BAR_0;
--	enum pci_barno db_reg_bar = BAR_2;
--	enum pci_barno mw_bar = BAR_2;
- 	struct device *dev = &pdev->dev;
--	struct ntb_epf_data *data;
- 	struct ntb_epf_dev *ndev;
- 	int ret;
- 
-@@ -675,18 +680,10 @@ static int ntb_epf_pci_probe(struct pci_dev *pdev,
- 	if (!ndev)
- 		return -ENOMEM;
- 
--	data = (struct ntb_epf_data *)id->driver_data;
--	if (data) {
--		peer_spad_reg_bar = data->peer_spad_reg_bar;
--		ctrl_reg_bar = data->ctrl_reg_bar;
--		db_reg_bar = data->db_reg_bar;
--		mw_bar = data->mw_bar;
--	}
-+	ndev->barno_map = (const enum pci_barno *)id->driver_data;
-+	if (!ndev->barno_map)
-+		return -EINVAL;
- 
--	ndev->peer_spad_reg_bar = peer_spad_reg_bar;
--	ndev->ctrl_reg_bar = ctrl_reg_bar;
--	ndev->db_reg_bar = db_reg_bar;
--	ndev->mw_bar = mw_bar;
- 	ndev->dev = dev;
- 
- 	ntb_epf_init_struct(ndev, pdev);
-@@ -730,30 +727,36 @@ static void ntb_epf_pci_remove(struct pci_dev *pdev)
- 	ntb_epf_deinit_pci(ndev);
- }
- 
--static const struct ntb_epf_data j721e_data = {
--	.ctrl_reg_bar = BAR_0,
--	.peer_spad_reg_bar = BAR_1,
--	.db_reg_bar = BAR_2,
--	.mw_bar = BAR_2,
-+static const enum pci_barno j721e_map[NTB_BAR_NUM] = {
-+	[BAR_CONFIG]	= BAR_0,
-+	[BAR_PEER_SPAD]	= BAR_1,
-+	[BAR_DB]	= BAR_2,
-+	[BAR_MW1]	= BAR_2,
-+	[BAR_MW2]	= BAR_3,
-+	[BAR_MW3]	= BAR_4,
-+	[BAR_MW4]	= BAR_5
- };
- 
--static const struct ntb_epf_data mx8_data = {
--	.ctrl_reg_bar = BAR_0,
--	.peer_spad_reg_bar = BAR_0,
--	.db_reg_bar = BAR_2,
--	.mw_bar = BAR_4,
-+static const enum pci_barno mx8_map[NTB_BAR_NUM] = {
-+	[BAR_CONFIG]	= BAR_0,
-+	[BAR_PEER_SPAD]	= BAR_0,
-+	[BAR_DB]	= BAR_2,
-+	[BAR_MW1]	= BAR_4,
-+	[BAR_MW2]	= BAR_5,
-+	[BAR_MW3]	= NO_BAR,
-+	[BAR_MW4]	= NO_BAR
- };
- 
- static const struct pci_device_id ntb_epf_pci_tbl[] = {
- 	{
- 		PCI_DEVICE(PCI_VENDOR_ID_TI, PCI_DEVICE_ID_TI_J721E),
- 		.class = PCI_CLASS_MEMORY_RAM << 8, .class_mask = 0xffff00,
--		.driver_data = (kernel_ulong_t)&j721e_data,
-+		.driver_data = (kernel_ulong_t)j721e_map,
- 	},
- 	{
- 		PCI_DEVICE(PCI_VENDOR_ID_FREESCALE, 0x0809),
- 		.class = PCI_CLASS_MEMORY_RAM << 8, .class_mask = 0xffff00,
--		.driver_data = (kernel_ulong_t)&mx8_data,
-+		.driver_data = (kernel_ulong_t)mx8_map,
- 	},
- 	{ },
- };
+diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+index 41b297b16574558e7ab99fb047204ac29f6f3391..ac83a6dc6116be190f955adc46a30d065d3724fd 100644
+--- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
++++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+@@ -993,8 +993,8 @@ EPF_NTB_BAR_R(db_bar, BAR_DB)
+ EPF_NTB_BAR_W(db_bar, BAR_DB)
+ EPF_NTB_BAR_R(mw1_bar, BAR_MW1)
+ EPF_NTB_BAR_W(mw1_bar, BAR_MW1)
+-EPF_NTB_BAR_R(mw2_bar, BAR_MW1)
+-EPF_NTB_BAR_W(mw2_bar, BAR_MW1)
++EPF_NTB_BAR_R(mw2_bar, BAR_MW2)
++EPF_NTB_BAR_W(mw2_bar, BAR_MW2)
+ EPF_NTB_BAR_R(mw3_bar, BAR_MW3)
+ EPF_NTB_BAR_W(mw3_bar, BAR_MW3)
+ EPF_NTB_BAR_R(mw4_bar, BAR_MW4)
 
+---
+base-commit: 38be2ac97d2df0c248b57e19b9a35b30d1388852
+change-id: 20250708-vntb-mw-fixup-bc30a3e29061
+
+Best regards,
 -- 
-2.47.2
+Jerome
 
