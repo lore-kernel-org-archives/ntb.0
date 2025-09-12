@@ -1,157 +1,140 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.16])
+Received: from NAM10-BN7-obe.outbound.protection.outlook.com (mail-bn7nam10on2070.outbound.protection.outlook.com [40.107.92.70])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6A461238C0D
-	for <ntb@lists.linux.dev>; Wed,  3 Sep 2025 15:26:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.16
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756913192; cv=none; b=mEA63zTMN7nFn3Wo+nrXxbu8BfiWgyMtsLORmsLBJIlci83S5am7xRxDzxJFwOU1w3G8Pzkh7x/EdvXu1ODVJqFZ+PI33KwO2yeh+PTvZgWHlee9O735zT1fIUfmn38aCJ5cYgy6HyCvnoFVh0Gtb7N/DOztMKjEpYMiZUgcF6U=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756913192; c=relaxed/simple;
-	bh=b5KF24PioFT9bG43Xm15ktTrj3yZUBBhV9mrwRN+cnQ=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=TzVN4XjHv78PztOL0okNbtmjxkOcv2ec7ERBvFIu40wbudrYQ/12EW+21R7mXLb8V/jwHXS02ibjfCkdgYl0J8WlnmdOhSn3kwhY1n+tpERfZlPPk3oR1lJpnxUEgdSyrtDRVmkwL7c71gkitbtRSH9Tmvb/Jm5tARIln3pRaR8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Q+DkxYys; arc=none smtp.client-ip=192.198.163.16
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E4F24286D73
+	for <ntb@lists.linux.dev>; Fri, 12 Sep 2025 10:26:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.92.70
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1757672798; cv=fail; b=A8K3pEVQGx3lDAbD+4FGR2At32AaWVGCZd/AHb0kKgDmLBMRfQDkFMTFMK42sMccy9eScss/VHVY7ONV60n0GbkSWfzgZQyM4Nt/PebNGNwFuwAtLgyzyL2+K6TTU+IexBcfWJ/AI/zlM6SIHAOb1jAWPQ+5SOQwU0u3f7Rbats=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1757672798; c=relaxed/simple;
+	bh=TSm5zYw+GM6MF/D6tFk0dHUrc5FMKUkwlL0+2WXbjxk=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=hiX12SAfG8oUQsgkGGQwVDtNapBkk4iP3JKIdyeRmmHNL5kSbL2GQBkVDBv+ioQ/LtW+c8aFBwIZLusI66AQ2YzCxnPOGX5FN0osQUs3W/FQ365GCsf9gJo3VKAaTgppf0KP7x8kOuqymVJGjJF3arMtElz4CGVmQV2L3PVQI5o=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=amd.com; spf=fail smtp.mailfrom=amd.com; dkim=pass (1024-bit key) header.d=amd.com header.i=@amd.com header.b=fZfKWpsT; arc=fail smtp.client-ip=40.107.92.70
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=amd.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=amd.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Q+DkxYys"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1756913190; x=1788449190;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=b5KF24PioFT9bG43Xm15ktTrj3yZUBBhV9mrwRN+cnQ=;
-  b=Q+DkxYysdTvrj16aJvR/bBolD3CpLH4Saiu645uP4JCvhvwLmKHv7HNn
-   DDFeJEXCRsm3DS/VNYjvyffcIksl4YGIRAPvumVXdVF3TZXYSZ+TfXzaO
-   Su578AQGRmZke1t5QXKFF25Ne5NfZ/AeuFWv+prgnuwZrIriS9vfR36z/
-   QbXQIDQTMMbiGtGU4h4J199wq8fIjL8zxEH57jGfY4NDK0mX8oj/J4iA1
-   oYMuZ4KaJCj9aIBPhXr362EJo+1ZtXURFS7sLu1vRQYLrey7ybwHsPRJJ
-   bKGkZ/jw0Tqb4cEP2+kmpUMKc2cQcWIDeT6TCzTqJQXxzzfDg77o44e8a
-   Q==;
-X-CSE-ConnectionGUID: D+0XFyw+QM+U0tWWFRbfKg==
-X-CSE-MsgGUID: 2Xrjn8tAR96GyPgUHyU6Xw==
-X-IronPort-AV: E=McAfee;i="6800,10657,11542"; a="46805014"
-X-IronPort-AV: E=Sophos;i="6.18,236,1751266800"; 
-   d="scan'208";a="46805014"
-Received: from fmviesa006.fm.intel.com ([10.60.135.146])
-  by fmvoesa110.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Sep 2025 08:26:30 -0700
-X-CSE-ConnectionGUID: pZw52fH8QumqUcG7EMa9pg==
-X-CSE-MsgGUID: 5azvJawbTme5+kT/ZE9A9A==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.18,236,1751266800"; 
-   d="scan'208";a="171561645"
-Received: from anmitta2-mobl4.gar.corp.intel.com (HELO [10.247.118.90]) ([10.247.118.90])
-  by fmviesa006-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Sep 2025 08:26:27 -0700
-Message-ID: <f755b775-b87a-4a3f-b7b9-f37cdadf21e3@intel.com>
-Date: Wed, 3 Sep 2025 08:26:21 -0700
+	dkim=pass (1024-bit key) header.d=amd.com header.i=@amd.com header.b="fZfKWpsT"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=LrKEk/VgYeEvRVmCaD/cYZOM6R7bFRgHRY/K7JHefyaHbm8Yoxakmpv+IZ4VFkDqb2DzOKzW8PMsTPLSWseK0JBGTYMkGemIK9EZOErW+DogQNHpRq3H+DZQbOensapwmaFzEmTP6uI3ulgF8lWnJij9Gg1Yb87WkQWFI7cS6OEE6QndkJGbrdz8Qvbsx6E7FlzrIx5zhvETywsxIa6MkXpywzr7RM3hxnPmpzlvkwwiRXu9eozJA7nKYRQNQz1sTrAvvAatX5qpDRP0l2J0wFtPX5AXLdxr1BTX9CLGyNLyaolSS48LJlyiyyhv7YdRohxNgE1VzSqib323bt79gA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=jpL72/ZC1NkhFEaNPCpZy9PdTFL1VVbXXY8wI+WXG4E=;
+ b=EM4f5IXAJDdifEg9LSkAQd26JZFDUdkBClUFHIYAXu+YvS8fuwdDyyTmIFoB99mEaNroqdzayuXZA7EAWBxgOCz68HAZmpHABGU+73QV4SIfCCBxWu7dH7XYutDE4miXrZMWv9iR6O9/4Ytdxu9VseS3/w+s9VrrQ4pR0x+euY8FNXdl51Z1i74EmsSIN1N93gQOlXji0bXg0ThhdlhtDefouQy5cwL1EfrDVognIESty6coffeB9noLeyaWIqv27QKkMRAsM/kWUJZOh8+Qt+RdNA/7GZVJh3LEAGU+nwKmPn+m+A2lQbk8U+euuPFdyHPF5uVsYABu1UoQTMuUyA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=kudzu.us smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none (0)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=jpL72/ZC1NkhFEaNPCpZy9PdTFL1VVbXXY8wI+WXG4E=;
+ b=fZfKWpsTgjLl8jQQRI74VAHeA0X3+p+9XUkQ48qNScRNGUWxQjJQgcCn5h+bvnwjGNvWT9ULoeeh5qikHlBJ2cJRi8rC9J8U1Hk5yWvYALt8fMy4+4bQFDCaJpIro2h/eHPXHpdOT/Yp/0QovlWVyEsUlD78FhSGeKgZ2ndTl14=
+Received: from SJ0PR13CA0149.namprd13.prod.outlook.com (2603:10b6:a03:2c6::34)
+ by IA0PR12MB7650.namprd12.prod.outlook.com (2603:10b6:208:436::14) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9094.22; Fri, 12 Sep
+ 2025 10:26:33 +0000
+Received: from CO1PEPF000075EF.namprd03.prod.outlook.com
+ (2603:10b6:a03:2c6:cafe::86) by SJ0PR13CA0149.outlook.office365.com
+ (2603:10b6:a03:2c6::34) with Microsoft SMTP Server (version=TLS1_3,
+ cipher=TLS_AES_256_GCM_SHA384) id 15.20.9137.8 via Frontend Transport; Fri,
+ 12 Sep 2025 10:26:33 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=satlexmb07.amd.com; pr=C
+Received: from satlexmb07.amd.com (165.204.84.17) by
+ CO1PEPF000075EF.mail.protection.outlook.com (10.167.249.38) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.9115.13 via Frontend Transport; Fri, 12 Sep 2025 10:26:32 +0000
+Received: from jatayu.amd.com (10.180.168.240) by satlexmb07.amd.com
+ (10.181.42.216) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.17; Fri, 12 Sep
+ 2025 03:26:29 -0700
+From: Basavaraj Natikar <Basavaraj.Natikar@amd.com>
+To: <Shyam-sundar.S-k@amd.com>, <jdmason@kudzu.us>, <dave.jiang@intel.com>,
+	<allenbh@gmail.com>, <ntb@lists.linux.dev>
+CC: Basavaraj Natikar <Basavaraj.Natikar@amd.com>
+Subject: [PATCH 0/2] Updates to AMD NTB driver 
+Date: Fri, 12 Sep 2025 15:56:02 +0530
+Message-ID: <20250912102604.765444-1-Basavaraj.Natikar@amd.com>
+X-Mailer: git-send-email 2.25.1
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] ntb: Add mutex to make link_event_callback executed
- linearly.
-To: yuanli fu <fuyuanli0722@gmail.com>
-Cc: jdmason@kudzu.us, allenbh@gmail.com, ntb@lists.linux.dev,
- linux-kernel@vger.kernel.org
-References: <aKwpnFtdtBlDv69O@didi-ThinkCentre-M930t-N000>
- <483cc0f8-6caa-4124-a724-433ff0d798fa@intel.com>
- <CABbqxmc+jkpgiHrWb5UH2FRZtaNpe4754qis=cPKtidW6+Vj6Q@mail.gmail.com>
-Content-Language: en-US
-From: Dave Jiang <dave.jiang@intel.com>
-In-Reply-To: <CABbqxmc+jkpgiHrWb5UH2FRZtaNpe4754qis=cPKtidW6+Vj6Q@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: satlexmb08.amd.com (10.181.42.217) To satlexmb07.amd.com
+ (10.181.42.216)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: CO1PEPF000075EF:EE_|IA0PR12MB7650:EE_
+X-MS-Office365-Filtering-Correlation-Id: bd6e735a-cc2b-4385-9fee-08ddf1e6d839
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|82310400026|1800799024|36860700013|376014;
+X-Microsoft-Antispam-Message-Info:
+	=?us-ascii?Q?UVw4OVpHXwtPvO718iO40xkfSP2HT6TiIuzce32tPJNPAhWdEjMvcv44vAZm?=
+ =?us-ascii?Q?VIJQ10MGKbZN2lh8KvAc9rZXpMQkpA2ZmgzNy2rPgYbXQqRSUUlTQg0t2ffs?=
+ =?us-ascii?Q?MhDtQNVGzQGdWpSosIYs0cbws/SMUGhkkNa7rvs0EpiYv67gCX4ASSGInX/L?=
+ =?us-ascii?Q?we8RrhgKTE0CN+iT5q22SLmRDdJa2tlEEqp52ykD7LiKcfnsqEF1J0/I+s2R?=
+ =?us-ascii?Q?nMWH6g4SrznWAklPSKfB+wCSdlF52WdvljK905+Eb2GRhrfkZcJZ2FcywKpu?=
+ =?us-ascii?Q?V0YHUT51SXNBIY0u6y0aOe7ENnso4gBRr07tDpOjArYVfYsB9zA3LiFXktBb?=
+ =?us-ascii?Q?+M/o9IUOumLEy5xfH3HcxCkE1ammCA36TfzfxzbSjuHgo22qv5YT45+hrYjz?=
+ =?us-ascii?Q?8TBMk2Uad3+drZLSeB4TZen91NO0oO1LtPA5IwzeQJm1N5s3tMyHq475mLEs?=
+ =?us-ascii?Q?ISfdOVzdibTITCUt6vGg+oByNWUut8HqwaC3aIijZEXdwtxgYru7dZa+OeGr?=
+ =?us-ascii?Q?Gt9QKCImR3lil4U1Y+0/2kZbj5g5ajxVxrUJkFnMMLEn4egXuYT/8PFFrWdh?=
+ =?us-ascii?Q?ctp0c6CStlIGUpqAWSQRc9nSMing2MbO+Rrw/OAo65SgBeaWvPMS8piqIKph?=
+ =?us-ascii?Q?8YuN97eqGTuax9DinkjewESzQafx2UEZt5fwkGSu9jol1m2UMeAVWefMibYu?=
+ =?us-ascii?Q?DV7ea/gLQok7YYkBTIpGoFhgOY13tkT+3oJcll3z3vyZmTZrAJPI4oZGdd2+?=
+ =?us-ascii?Q?IhuRov8gL60GVuPebkWEebGXKSkL+JArIaO4+t+yTdgRDxW05nB8oBk3D2sw?=
+ =?us-ascii?Q?R3aH7WdFVkg285FEek8ANYYObbrOozIM74jp2A2PJa7n5pnMKsRPkLldZIzg?=
+ =?us-ascii?Q?LDiUewG9/t1ZCbRT3UHVpaAhNZ3zeq76Vf1W83SptRKnvZTC08slzKgQiLCn?=
+ =?us-ascii?Q?yA5gj3qkUTePNlVoA5KTWFdSxsEgoTCVQnUe9K9HNUDTgvmAc1bujCxkb0qO?=
+ =?us-ascii?Q?PQGlNXR94ykjYKHp0MTJT1TK/SUYonBz3VCGtbwKmm7bVlAdFs+bZlNxpTfx?=
+ =?us-ascii?Q?BbC09X0VPnEd6pCYE76kmOSxa8FuU9nMYRRqT5H/xVe3OFurHC7/iWbCvW5w?=
+ =?us-ascii?Q?Et1MywKbH5bzWVwbXORMNvS27S8bc4+3D5A4ZpvahNRbE2VQfzTSXQr46DEj?=
+ =?us-ascii?Q?d+DMt808h2/FA9m+5G2O3khL+4x2MGvoUPMQxzq6C60Wkh85A9ChhzFLH+KS?=
+ =?us-ascii?Q?KgMbt2kGl7lOHPboTTiSQBMBz9FTsU4AlYZCbzxcTyg2DucnS61IvlYPLZna?=
+ =?us-ascii?Q?dqxciGBjrH8rCbOMzi2l+xc5Aby3taNv63XXEZNP5mbVrK+nteVihrbJ4MAO?=
+ =?us-ascii?Q?91D8fjDWCmJQzqjT6TgTkqqVK0y1DdeDSX4DqQPomfCu3Qfzk+wzbJq2IF5A?=
+ =?us-ascii?Q?sS3B2nc0ssWRiBRlAFd5UMbu92g0MyK8tlgGS1WNsCm+GQx8wfDuPpcxG1Jv?=
+ =?us-ascii?Q?0DmTpl+iPEpQKrEq8GXQtgND9QiydR1+oHoV?=
+X-Forefront-Antispam-Report:
+	CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:satlexmb07.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230040)(82310400026)(1800799024)(36860700013)(376014);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 12 Sep 2025 10:26:32.7570
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: bd6e735a-cc2b-4385-9fee-08ddf1e6d839
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[satlexmb07.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource:
+	CO1PEPF000075EF.namprd03.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: IA0PR12MB7650
 
+This patch series include changes for:
+ - Adding a new gen CPU support.
+ - Update for the NTB AMD driver maintainer.
 
+Basavaraj Natikar (2):
+  ntb_hw_amd: Update amd_ntb_get_link_status to support latest
+    generation secondary topology
+  MAINTAINERS: Update for the NTB AMD driver maintainer
 
-On 9/2/25 7:20 PM, yuanli fu wrote:
-> Dave Jiang <dave.jiang@intel.com> 于2025年8月25日周一 23:06写道：
->>
->>
->>
->> On 8/25/25 2:15 AM, fuyuanli wrote:
->>> Since the CPU selected by schedule_work is uncertain, multiple link_event
->>> callbacks may be executed at same time. For example, after peer's link is
->>> up, it is down quickly before local link_work completed. If link_cleanup
->>> is added to the workqueue of another CPU, then link_work and link_cleanup
->>> may be executed at the same time. So add a mutex to prevent them from being
->>> executed concurrently.
->>>
->>> Signed-off-by: fuyuanli <fuyuanli@didiglobal.com>
->>
->> Reviewed-by: Dave Jiang <dave.jiang@intel.com>
-> 
-> Hi Dave,
-> 
-> Hope you are doing well.
-> 
-> Just wanted to gently follow up on this patch which you had acked
-> before. Is there
-> anything else I can do to help get this merged? Perhaps it needs a rebase on a
-> different tree?
+ MAINTAINERS                     |  1 +
+ drivers/ntb/hw/amd/ntb_hw_amd.c | 45 +++++++++++++++++++++------------
+ drivers/ntb/hw/amd/ntb_hw_amd.h |  1 +
+ 3 files changed, 31 insertions(+), 16 deletions(-)
 
-Jon will merge it when he has a chance.
-
-> 
-> Thanks for your time and all your work!
-> 
-> Best regards,
-> Yuanli Fu
-> 
-> 
->>
->>> ---
->>> v2:
->>> 1) use guard() instead of lock & unlock functions.
->>>
->>> v1:
->>> Link: https://lore.kernel.org/all/aKiBi4ZDlbgzed%2Fz@didi-ThinkCentre-M930t-N000/
->>> ---
->>>  drivers/ntb/ntb_transport.c | 7 +++++++
->>>  1 file changed, 7 insertions(+)
->>>
->>> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
->>> index 4f775c3e218f..eb875e3db2e3 100644
->>> --- a/drivers/ntb/ntb_transport.c
->>> +++ b/drivers/ntb/ntb_transport.c
->>> @@ -59,6 +59,7 @@
->>>  #include <linux/slab.h>
->>>  #include <linux/types.h>
->>>  #include <linux/uaccess.h>
->>> +#include <linux/mutex.h>
->>>  #include "linux/ntb.h"
->>>  #include "linux/ntb_transport.h"
->>>
->>> @@ -241,6 +242,9 @@ struct ntb_transport_ctx {
->>>       struct work_struct link_cleanup;
->>>
->>>       struct dentry *debugfs_node_dir;
->>> +
->>> +     /* Make sure workq of link event be executed serially */
->>> +     struct mutex link_event_lock;
->>>  };
->>>
->>>  enum {
->>> @@ -1024,6 +1028,7 @@ static void ntb_transport_link_cleanup_work(struct work_struct *work)
->>>       struct ntb_transport_ctx *nt =
->>>               container_of(work, struct ntb_transport_ctx, link_cleanup);
->>>
->>> +     guard(mutex)(&nt->link_event_lock);
->>>       ntb_transport_link_cleanup(nt);
->>>  }
->>>
->>> @@ -1047,6 +1052,8 @@ static void ntb_transport_link_work(struct work_struct *work)
->>>       u32 val;
->>>       int rc = 0, i, spad;
->>>
->>> +     guard(mutex)(&nt->link_event_lock);
->>> +
->>>       /* send the local info, in the opposite order of the way we read it */
->>>
->>>       if (nt->use_msi) {
->>
+-- 
+2.25.1
 
