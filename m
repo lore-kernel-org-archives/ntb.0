@@ -1,45 +1,46 @@
-Received: from PH8PR06CU001.outbound.protection.outlook.com (mail-westus3azon11012016.outbound.protection.outlook.com [40.107.209.16])
+Received: from SN4PR0501CU005.outbound.protection.outlook.com (mail-southcentralusazon11011015.outbound.protection.outlook.com [40.93.194.15])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 14B232E8DF3
-	for <ntb@lists.linux.dev>; Thu, 18 Sep 2025 07:37:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.209.16
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B241B2E7186
+	for <ntb@lists.linux.dev>; Thu, 18 Sep 2025 07:37:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.93.194.15
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758181030; cv=fail; b=OKDF8Ixi1vBojfh8K6DPB9sEPY0W9qxk8fDVy41U0Cw4QuOQcf90Bw2c1OdetrKz8F8TLW621pemlEm/KQeZ3XiumlFZfHpa095PXlp5elMssA4/edEbpMNmjE/yFJb4wfxkNQ0J9FQTDxgv7EKVuuXs3TXpSPfdRf0+sLyFRaA=
+	t=1758181037; cv=fail; b=LEoRD0PxYHUGQczH3Kw17TVfQN1dvjatis554SUwJgm480ve8SSJKD2f7aJYvq5w9qAQpXa5mmEnmKKJYY3Cw2mpzvRPoktxvJkGlbGVoDlNx6883i5D6hLnCVA03K+WqBAdL/HExRDfDWxybrrcZExBB8W2GJD1eeTVT4hDGbU=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758181030; c=relaxed/simple;
-	bh=BOYrS002mJuUL3VMavPbgLtIMv+C++FKKk+WHd9S+7I=;
-	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=lGEbHPqbm3S0vsoMF0D981WYWSajh89S258pxXoS+CZrn+V8slKL/4spG7grYPrvbaddWA1stV++reKnLzuD5CuUdbawB+ksRAwJzeiE7xBh2TaKZcmVG5vPQ7a7/IGGnU4qseO3p9I2tjWxHjXzidGoMPdHr4rs1/LO0/dVdjM=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=amd.com; spf=fail smtp.mailfrom=amd.com; dkim=pass (1024-bit key) header.d=amd.com header.i=@amd.com header.b=aaZpjJic; arc=fail smtp.client-ip=40.107.209.16
+	s=arc-20240116; t=1758181037; c=relaxed/simple;
+	bh=A7Xz50JZmk+oDT90Pfvcfz2QnmZHdbKesYabgKms5Vc=;
+	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=OkTCBcEZmZJmL5h154Ii2XkHM2znoIe59p2P28F2jdMVAkGUuExx2U2jjiVDm18acuvNs59J1+Z11LloXqM7FsGtzesut2DxKemnCxSGyhzvhAwPLltTfuRkBBWseWZjDKTbZOmX1zpOZYq9GNdcz9k7If4/cAVsAzrIen0EoJY=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=amd.com; spf=fail smtp.mailfrom=amd.com; dkim=pass (1024-bit key) header.d=amd.com header.i=@amd.com header.b=V76Pa5bR; arc=fail smtp.client-ip=40.93.194.15
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=amd.com
 Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=amd.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=amd.com header.i=@amd.com header.b="aaZpjJic"
+	dkim=pass (1024-bit key) header.d=amd.com header.i=@amd.com header.b="V76Pa5bR"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=m9HYDY10XspFI/r1RKwcgFmiR3gIgAxcMgjkxAPpVLSjLGs60/zu8EdrdSBQ3iPPcNVsX0DAGfKUeEdF+qopMFtvvVd/xCuIz6Inr0oA7Vd42NoB1SzPaDwu9GAJlBKYv+tuIKCj4Rqp0TuJoiwSYt5R+dqxnzB+W45K/0lVlgqL09ew+4LVKt6Ft2VtzLEhUnnS2nU+DOru6GEl9ymspqM/QTohIQuntIQKxIQPofSVItxAuQJd0flSEHKffJZInHKFVkWkZVfSfBEzOklWD8n0YoYtGVh5uhTQKnDhVXxJ39E/AQCRl9SuC1LNO683UTv+6ohLLMOTIqgf53BLug==
+ b=u7YUaXHEm8ueB7tmMkWmC8FJpGR0tp1uc09oAxkU9aPO4qRxVLkrvKlOGFvKztisAdrsPy0jBlui8hjgMBH76tmHyoITqSnuDA80gCOtqNr4y9ToW/e6kyOSj1FVhA5SwXOvCuHKCvIWGOOit4Xn1bBPBNzKIkbOeAmoixJUtXKf3V7nOYTbT5KSvPWP3KVtu1HFi2/C48IyiMepdzVVoowj01E5QIPBHJb2N7rzWg0/HQ/Lfe53rYQTu5t0Jy+SbaLxKhoLUlLn/DWxAUbJmdh6qciyywnl+gM209EbEhnfPaqhOQ1NPpfIKKem9exFyQP+7SRJ0NrPz58hgk/XEQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=hH4/pDzjO9mn9deNJP2nUG/Q3yzL2TnbYP1vufcFXvc=;
- b=vfDRwS3cGjyBY9mk8+gsKiU/3p//SS8vECgG5UBgz2poYnGb21bHwvhYbfFcNKychVAsgiBeY8qBXugT5Vt1ofuQakzeVir0r4aXXXRtQ+a42r/Jjpk0koh+R/noSE0VPC2nxVXSQiDZEHdfIGMDXvr4sh0wm2gws6+P1fai3LMFOdHDL/5Vcy5homqld4yOFA/whGVfcAEiOqHcMeQBe51QLdke6McJomqOqTf/j2NHMSLgLWjalgTceYwrQytF8Yf3P1NLPVeBWtWt/J/8C8Ni0NBxW4PC41AYVZtdChwgwtn6ZR9q62flJxS9SUF3bunphZCh43pzCpZyEf0qqQ==
+ bh=pAAjw56pCQbQdUviz7/Rw3neMnRB9k37KLjmyEO7KQY=;
+ b=UdDI/BsfZKyLdvdU1DunkVn+6JYG8Uwe2KbNvAu0EX1qkHNNxBlMAmSda3xaBltadlRgP3WtTsnJrvzbsBVqPQehvu1zuzgaazMxYc91jLuhFVNMCi3NnUO1g6f+0nGU7a/CdK4+qZx8vUvWvqBsP0PJE56Pt8MkzCI981xhNKNMZg48QWfincw14QsnAeqokinaxL6uorK7zBvM5Zw3mTVVR93kAipomNuj4hN4dnVvnIfg/MpxaZCvfVeIPoldxf93dRIfCFAVdy+iGGfvysWThlZkz1jsoK1BEk/y15ZqoJdQf3Ua5p7cO7DVxnO3YuSYkYY1fHTkgegHSi0nOA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
  165.204.84.17) smtp.rcpttodomain=kudzu.us smtp.mailfrom=amd.com; dmarc=pass
  (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
  dkim=none (message not signed); arc=none (0)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=hH4/pDzjO9mn9deNJP2nUG/Q3yzL2TnbYP1vufcFXvc=;
- b=aaZpjJicTaGKTAQ9T0aWjuS5u5dUHSt6MDYbDcJtOW+bS/N3yadoWH1wIf2/p0WD46LsQT5emnjitd16kp5AnlE5KXrgdBXMvV4iGMcPpGbD0aQpI+BqeBOWCcntCoN1huzci4hs54rH68En2M+0V0LvNsgd42uJk3f+6ov761Y=
-Received: from BLAPR03CA0155.namprd03.prod.outlook.com (2603:10b6:208:32f::13)
- by BN7PPF5D27497F1.namprd12.prod.outlook.com (2603:10b6:40f:fc02::6d1) with
+ bh=pAAjw56pCQbQdUviz7/Rw3neMnRB9k37KLjmyEO7KQY=;
+ b=V76Pa5bRYcbmTPBJuWKOsvVYZTHTeE7p93KeiAaoycGl/bRn4p9hSWISR8Jm7bpuEXwa9AMgnr2hVRbQDlAfzeBwKcaNqoJ/wjM5kns4Y/m9A/OidVSiYU4gB1TZ5aBEpWgqAEga3Di5PQaqHA9mdOOpk5NoxP/fA9/rSVxFr5U=
+Received: from BLAPR03CA0167.namprd03.prod.outlook.com (2603:10b6:208:32f::23)
+ by DS2PR12MB9638.namprd12.prod.outlook.com (2603:10b6:8:27b::13) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9115.22; Thu, 18 Sep
- 2025 07:37:05 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9137.14; Thu, 18 Sep
+ 2025 07:37:09 +0000
 Received: from BN1PEPF00005FFF.namprd05.prod.outlook.com
- (2603:10b6:208:32f:cafe::dc) by BLAPR03CA0155.outlook.office365.com
- (2603:10b6:208:32f::13) with Microsoft SMTP Server (version=TLS1_3,
+ (2603:10b6:208:32f:cafe::45) by BLAPR03CA0167.outlook.office365.com
+ (2603:10b6:208:32f::23) with Microsoft SMTP Server (version=TLS1_3,
  cipher=TLS_AES_256_GCM_SHA384) id 15.20.9137.14 via Frontend Transport; Thu,
- 18 Sep 2025 07:37:05 +0000
+ 18 Sep 2025 07:37:09 +0000
 X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
  smtp.mailfrom=amd.com; dkim=none (message not signed)
  header.d=none;dmarc=pass action=none header.from=amd.com;
@@ -49,19 +50,21 @@ Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
 Received: from satlexmb07.amd.com (165.204.84.17) by
  BN1PEPF00005FFF.mail.protection.outlook.com (10.167.243.231) with Microsoft
  SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.9137.12 via Frontend Transport; Thu, 18 Sep 2025 07:37:05 +0000
+ 15.20.9137.12 via Frontend Transport; Thu, 18 Sep 2025 07:37:09 +0000
 Received: from jatayu.amd.com (10.180.168.240) by satlexmb07.amd.com
  (10.181.42.216) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.17; Thu, 18 Sep
- 2025 00:37:02 -0700
+ 2025 00:37:05 -0700
 From: Basavaraj Natikar <Basavaraj.Natikar@amd.com>
 To: <Shyam-sundar.S-k@amd.com>, <jdmason@kudzu.us>, <dave.jiang@intel.com>,
 	<allenbh@gmail.com>, <ntb@lists.linux.dev>
-CC: Basavaraj Natikar <Basavaraj.Natikar@amd.com>
-Subject: [PATCH v2 0/2] Updates to AMD NTB driver
-Date: Thu, 18 Sep 2025 13:04:46 +0530
-Message-ID: <20250918073448.1070104-1-Basavaraj.Natikar@amd.com>
+CC: Basavaraj Natikar <Basavaraj.Natikar@amd.com>, Sanath S <Sanath.S@amd.com>
+Subject: [PATCH v2 1/2] ntb_hw_amd: Update amd_ntb_get_link_status to support latest generation secondary topology
+Date: Thu, 18 Sep 2025 13:04:47 +0530
+Message-ID: <20250918073448.1070104-2-Basavaraj.Natikar@amd.com>
 X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20250918073448.1070104-1-Basavaraj.Natikar@amd.com>
+References: <20250918073448.1070104-1-Basavaraj.Natikar@amd.com>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -74,71 +77,126 @@ X-ClientProxiedBy: satlexmb08.amd.com (10.181.42.217) To satlexmb07.amd.com
  (10.181.42.216)
 X-EOPAttributedMessage: 0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: BN1PEPF00005FFF:EE_|BN7PPF5D27497F1:EE_
-X-MS-Office365-Filtering-Correlation-Id: 59dcf7fc-b301-4b3a-e44f-08ddf6862a37
+X-MS-TrafficTypeDiagnostic: BN1PEPF00005FFF:EE_|DS2PR12MB9638:EE_
+X-MS-Office365-Filtering-Correlation-Id: da72c878-2e10-4149-7679-08ddf6862c9c
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|1800799024|36860700013|82310400026|376014;
+	BCL:0;ARA:13230040|1800799024|376014|82310400026|36860700013;
 X-Microsoft-Antispam-Message-Info:
-	=?us-ascii?Q?+agl8RjSed7CUYK1/4EkDbysH8+m2XkfDkmLEL5LwLLmZqCuFYuy9PamDybD?=
- =?us-ascii?Q?5AhdIeejdeOkjR7+ug9Nj2yZfNC3twWT67QARfKJ+uaDybAmGjCKaxI/SqIx?=
- =?us-ascii?Q?4kzo1CoZgv+FiJs9yaiofzA7MeDT0IKekyd/lw+Wgx9CaeaBhNiY6PK7/LGn?=
- =?us-ascii?Q?I7dXM0Y7ul9kWYRuJUPlJluAc561Z5ASjbz18jZumlhnautcbLOSo8GDGRvi?=
- =?us-ascii?Q?bM35iqh+V2abpRIQQPCHqpvc/78AiH7bnlMVnrvHAEEDMtblX94feNC0pEpz?=
- =?us-ascii?Q?c4Rimyh2e+VeoIozHue10FUjosLQ8riCvEZ8w5M1Z+l9b5kANuhk+YoS+lDR?=
- =?us-ascii?Q?1AxUSgKDd22rA5tbsEwqAw0EhgSo1rLaLGRwXe4uXYE2Gjec09DI6O/UAjns?=
- =?us-ascii?Q?NguqU9puh3nh47m/uppoMMX+TfKXEemLQ7eJ3WZ1GQXHrY295vTqgMf/nDcn?=
- =?us-ascii?Q?2gT4ucX5bG8bqNQoaiBCpEhPj2bwg7tSJWjAO7PmFPqBKw11hYCmeLIZSMGy?=
- =?us-ascii?Q?ysYm0koVVsTo2hzrY47UxPcGVsnZHJun3RU+LHlnBACZFX+A7MFBjeXZXFI6?=
- =?us-ascii?Q?5UWbbaSbj5ubndXxYGQ1x0liwwlYCfuf8AV6oNElxYe2rFUXeAzEbzng2z0B?=
- =?us-ascii?Q?kQ8xARL3sxR4hLMN9rIQg++6MHAus7zSF1zKHO4pOtj6cysC1ovV/06Z7cTq?=
- =?us-ascii?Q?O0TKYxlQeNtHnAAkiySp3/Hkon9KJWbdP17pnNdcFtfhUuxBGQjF6n7HAyYk?=
- =?us-ascii?Q?v12nQHBAzqOxN81Kl7R8LrPJWi9taleDa0EcZUdNpBcsjyqjJG3C86tgXI2P?=
- =?us-ascii?Q?mbId8IcXLP162lRLdCGPqqrtXSXUI8oC8iTDFZnJEK4Bjfe1r8u1ZZWNpNnc?=
- =?us-ascii?Q?UHil0/TFlgElJqjWc7HMepKjpQuxIr+BRAIhekw27AIdBPTU3pq6tVtQYodZ?=
- =?us-ascii?Q?46OX3nUEfMHMBwxTycuNjxwUZa79Jh58amA6qG4FavYoEUHmF9kA1CJIZa/B?=
- =?us-ascii?Q?1Wk9PtkMnPIQq0+tzBvjxV/j6ZEs2xOTAlriu6B30z96rkz622+ktMfQ77gz?=
- =?us-ascii?Q?yYQssOO2y0xxnZhZ7H56whNOGZbNHq9sNFpPgSitT04dRsonFuJVMGJphiJM?=
- =?us-ascii?Q?l+6zdSyDzIfSFicYxJTjp2XtrXPYymw7fWlf6Phs5P3MjJnGOSizGYSGH+BT?=
- =?us-ascii?Q?bn3wTulkmZT27U0iaKJM3vtrwiGTlpUil6nNPL6tMZGLWW6JSTzqVAj3PIUX?=
- =?us-ascii?Q?MQrpuYR2BXCSM1hyK74CMlzBwyXb2nFLVFVtWmw0T0zQAiSP7dz/wXnGxJn2?=
- =?us-ascii?Q?dW4Z/+9rnx3+pu0toJd018ziXrbOi5177TggIJx+lzUqwYgrlOg8nSUegufk?=
- =?us-ascii?Q?jBG3HE9Ki3mLp+lOWviMNsZvn6TTZ2AYAJ8rGe+muwpnvy/PdrkOT/rRxhJF?=
- =?us-ascii?Q?qnos9I2SuZz+qQ5ZDnELitotgYwPpbYgkQsNl67LW/rEMk+135wvTIdiJtBp?=
- =?us-ascii?Q?uvrMXBHwHeF1kBzo8TP23xV9nt49VwbNR14Q?=
+	=?us-ascii?Q?Sy9kp5dA71sfjrPHJUZNmj5uX0t1WuwpfOA8AQ+YGMpQNd/7lZPj3onLpXEc?=
+ =?us-ascii?Q?glxuHmTun1kpK8y8ywiawVaeBVem2lYkoXzKBBzxkyPS2rOQeNNhLd/DEX21?=
+ =?us-ascii?Q?BNEr0CcwbjGxe5qmferj5+ZFyZ0+/ljVFVg7lfQ/n+5FujUaC65FifY8FDlJ?=
+ =?us-ascii?Q?/RmBnWYez0lChRdfbhLV4P1d0RPUgJB7gyv9iNW6fWDTkEh6vrT21gs+6+g6?=
+ =?us-ascii?Q?+hpOuBJq7VgGQuppAmnlFgeeVOSl51Uof5OkTUMB7wRWRF3oFKIHbcgK2wKa?=
+ =?us-ascii?Q?qTBQvGryLIijgOJCj9OgJfzTf1tddT8ic51doHv+sXdILCROF8erb/y80tgA?=
+ =?us-ascii?Q?5Z8Iw2E0otM5vOyQIkfNsQvvODuNiPQmsaaFNbx4et2R04aPqQ0qWJGZwUYm?=
+ =?us-ascii?Q?pkzZhVq6XclA+LofA8N0xniB51yqhh0+lhtjw2uHR770gAj6XEpBp64oXRqY?=
+ =?us-ascii?Q?b9YsVLdzUzPxnOfR12Yk2euPGFuZF6r5C0q8rFKLQfi1sp/9FqJpPE0brcI8?=
+ =?us-ascii?Q?gfySA1NEIi6+Jz8pioF71uIC3d09SxrZrEVmWzE7eVqXcmtEmP2i7ft5n0Zx?=
+ =?us-ascii?Q?x/bVRuxCVCcZv9IzLpyvKwL6jo6GLoFSXm2ssKpxw0AaJtea2yOdGJeKkutR?=
+ =?us-ascii?Q?4bgRdnpiFMcOiArFnxh5Ubh5z2b2em0Cfv4kywPEjf+kTfPUuOBFS1J4RZci?=
+ =?us-ascii?Q?tFuDbcwq9bqChDlTV8a6b4f5qN648jCZmWd9aTDuKH26g/USE5Vy79WmNDLt?=
+ =?us-ascii?Q?NQBSRdQkDCsAA5H9yoqGnuKBPGHV2mL/CLlyl6Dh65fV0uancqEryhM6Py9W?=
+ =?us-ascii?Q?pTECJcvFJgJ3L2UXkxpDW7g1p4X+5x9J8QhM7613NAU5zvnnHn0vp3tciApw?=
+ =?us-ascii?Q?BCUUQnAQaZvl6APuM8tY4lfk/mIwhStJSmu2U2rxAz71IruAkv/tSSItr8Ja?=
+ =?us-ascii?Q?XpJ+ZWPr2G4yw2zvkbsQGXvLbobn9IvDoRUz/3yumCAuNXew0SqtVnhn2JSD?=
+ =?us-ascii?Q?GpRJy+XEgM3rKdAnMwPXgCvO6THrXYfXcj5cR4wpvaJg+vGpW8rHNBokfyp7?=
+ =?us-ascii?Q?QCZHcISvqXDbjfRQq8aLXe551lG4pGFVPmeo285v3aDVuiPOYEOVA8U3DgZt?=
+ =?us-ascii?Q?VWvJ7J0Mqx5C685FbwdLVWsc4YArzTO6DcG9QWFcB5OAYU/M0CpwkrXZwTlI?=
+ =?us-ascii?Q?32iOZdSCoQn0zA5b4uMI4HMoydhXbzeSl+t/UKJV8TPi9JKY67iRiO+XJCl0?=
+ =?us-ascii?Q?GX8o6J2bQ/sCbFc0dFufZvUIgAPWQDP7DFkcs8V7cefVBp5J1txmTMFdoAGl?=
+ =?us-ascii?Q?sYjCfNBNx8CcRl573rH9dtXtcTcNKEPVUq1mv7LJJYyGS02bwRcek0/4lhPN?=
+ =?us-ascii?Q?1nsrXKEC9m86MCZWqfJrbhOuRfNPUcUDIb1Mn8g6gQ8oVO2Qfv1EDlbVf0ue?=
+ =?us-ascii?Q?BlqZQ+zBdns6F1xVJHpNhC+2SoXc8Za6wv9OonEhG80i9D+CRmScWv0FZxif?=
+ =?us-ascii?Q?gOKkYJd3envFcA7MvrLU5O7+evtB382KmSnZ?=
 X-Forefront-Antispam-Report:
-	CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:satlexmb07.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230040)(1800799024)(36860700013)(82310400026)(376014);DIR:OUT;SFP:1101;
+	CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:satlexmb07.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230040)(1800799024)(376014)(82310400026)(36860700013);DIR:OUT;SFP:1101;
 X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 18 Sep 2025 07:37:05.0425
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 18 Sep 2025 07:37:09.0515
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 59dcf7fc-b301-4b3a-e44f-08ddf6862a37
+X-MS-Exchange-CrossTenant-Network-Message-Id: da72c878-2e10-4149-7679-08ddf6862c9c
 X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
 X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[satlexmb07.amd.com]
 X-MS-Exchange-CrossTenant-AuthSource:
 	BN1PEPF00005FFF.namprd05.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Anonymous
 X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BN7PPF5D27497F1
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS2PR12MB9638
 
-This patch series include changes for:
- - Adding a new gen CPU support.
- - Update for the NTB AMD driver maintainer.
+In the NTB secondary topology configuration of the latest generation,
+the device behaves like an endpoint. Hence, add endpoint support and
+update amd_ntb_get_link_status to accommodate endpoint devices.
 
-Changes in v2:
-	-  Reformatted block to reduce indentation
-	   by using early returns.
-
-Basavaraj Natikar (2):
-  ntb_hw_amd: Update amd_ntb_get_link_status to support latest
-    generation secondary topology
-  MAINTAINERS: Update for the NTB AMD driver maintainer
-
- MAINTAINERS                     |  1 +
+Co-developed-by: Sanath S <Sanath.S@amd.com>
+Signed-off-by: Sanath S <Sanath.S@amd.com>
+Signed-off-by: Basavaraj Natikar <Basavaraj.Natikar@amd.com>
+---
  drivers/ntb/hw/amd/ntb_hw_amd.c | 18 +++++++++++++++++-
  drivers/ntb/hw/amd/ntb_hw_amd.h |  1 +
- 3 files changed, 19 insertions(+), 1 deletion(-)
+ 2 files changed, 18 insertions(+), 1 deletion(-)
 
+diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.c b/drivers/ntb/hw/amd/ntb_hw_amd.c
+index 63ceed89b62e..1a163596ddf5 100644
+--- a/drivers/ntb/hw/amd/ntb_hw_amd.c
++++ b/drivers/ntb/hw/amd/ntb_hw_amd.c
+@@ -197,13 +197,22 @@ static int amd_ntb_mw_set_trans(struct ntb_dev *ntb, int pidx, int idx,
+ 
+ static int amd_ntb_get_link_status(struct amd_ntb_dev *ndev)
+ {
+-	struct pci_dev *pdev = NULL;
++	struct pci_dev *pdev = ndev->ntb.pdev;
+ 	struct pci_dev *pci_swds = NULL;
+ 	struct pci_dev *pci_swus = NULL;
+ 	u32 stat;
+ 	int rc;
+ 
+ 	if (ndev->ntb.topo == NTB_TOPO_SEC) {
++		if (ndev->dev_data->is_endpoint) {
++			rc = pcie_capability_read_dword(pdev, PCI_EXP_LNKCTL, &stat);
++			if (rc)
++				return rc;
++
++			ndev->lnk_sta = stat;
++			return 0;
++		}
++
+ 		/* Locate the pointer to Downstream Switch for this device */
+ 		pci_swds = pci_upstream_bridge(ndev->ntb.pdev);
+ 		if (pci_swds) {
+@@ -1311,6 +1320,11 @@ static const struct ntb_dev_data dev_data[] = {
+ 		.mw_count = 2,
+ 		.mw_idx = 2,
+ 	},
++	{ /* for device 0x17d7 */
++		.mw_count = 2,
++		.mw_idx = 2,
++		.is_endpoint = true,
++	},
+ };
+ 
+ static const struct pci_device_id amd_ntb_pci_tbl[] = {
+@@ -1319,6 +1333,8 @@ static const struct pci_device_id amd_ntb_pci_tbl[] = {
+ 	{ PCI_VDEVICE(AMD, 0x14c0), (kernel_ulong_t)&dev_data[1] },
+ 	{ PCI_VDEVICE(AMD, 0x14c3), (kernel_ulong_t)&dev_data[1] },
+ 	{ PCI_VDEVICE(AMD, 0x155a), (kernel_ulong_t)&dev_data[1] },
++	{ PCI_VDEVICE(AMD, 0x17d4), (kernel_ulong_t)&dev_data[1] },
++	{ PCI_VDEVICE(AMD, 0x17d7), (kernel_ulong_t)&dev_data[2] },
+ 	{ PCI_VDEVICE(HYGON, 0x145b), (kernel_ulong_t)&dev_data[0] },
+ 	{ 0, }
+ };
+diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.h b/drivers/ntb/hw/amd/ntb_hw_amd.h
+index 5f337b1572a0..e8c3165fa38b 100644
+--- a/drivers/ntb/hw/amd/ntb_hw_amd.h
++++ b/drivers/ntb/hw/amd/ntb_hw_amd.h
+@@ -168,6 +168,7 @@ enum {
+ struct ntb_dev_data {
+ 	const unsigned char mw_count;
+ 	const unsigned int mw_idx;
++	const bool is_endpoint;
+ };
+ 
+ struct amd_ntb_dev;
 -- 
 2.25.1
 
