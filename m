@@ -1,173 +1,152 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f67.google.com (mail-ed1-f67.google.com [209.85.208.67])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5026030CB50;
-	Fri, 26 Sep 2025 17:14:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 36B512BCF4A
+	for <ntb@lists.linux.dev>; Tue, 30 Sep 2025 06:51:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.67
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758906879; cv=none; b=Bi/O+gEx/2C+HpxYXtwWYF5qXWiSBog+LkLcUJS5BTnJzIR21eqUUrqDxCBLByA5O2Pkm7MsL5UHEI2yLKYhGTcX5CwdaMCUPOxfiDbWPMMw0JeAHcovECh5lzS7YvTJxwusdZ3lcqHjM6YmyJARg0m/lUY9fepHvXfGovWaN8w=
+	t=1759215067; cv=none; b=Y9sOLfyl9xqAizoyANBqJlmQbYWnIGzuqm5BLsHPfZkcf6Agg4bf14HkBk70H/egt68JyrxuUtJm0a0C8hmPH031SViCExCB5yKTX1Pndr4rFnJqYRhtbUlUmaMbGDDZqmMo5LRXN4WuMs9nNyI+WNqdZvU0HcRWJmaJjuP74CA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758906879; c=relaxed/simple;
-	bh=ACLLyTH6WzBUIy6EmJzPFE4VsZS26yNgY1PV+Hi3dKY=;
-	h=Date:From:To:CC:Subject:In-Reply-To:References:Message-ID:
-	 MIME-Version:Content-Type; b=D3LW1Nxs9rz/0s9qkpznoNFUO1ZMGquH4oKev+gyZLavwfAeQoXQvswrGy5sLtHRSTo4tlWfW13wxJjQnCQF0NDexCILhoBROMNrcrZ/bp/XjlwEwv9sujq7hmZzA8aHryWEEby/aCw4b/OTe8NgSPsQeBWCi/vl7wDtcr4w9YE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=sNGR1qfG; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1759215067; c=relaxed/simple;
+	bh=QuKU6InmvBPlK5tmaJn1Vy4p1SVmh7nLnic7bLw69X8=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=cWT4AWxdXo3sCoTvBYxnWa/jTi9Cj1fLfQuEdWbQg7hNC95DQ42NvgKmpeFBm0jMgXrtbVI25y/xFoKlOxpZuIPuZyoeNNUtLwUEHMt64iKxHkbX7C9lhJrQosIOJAI/61M7LsaSXZ2ZD5Ik3lSMTmB3mZ8bLIZxF2H8Rzne4xk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=QZiqsQW9; arc=none smtp.client-ip=209.85.208.67
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="sNGR1qfG"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 29E54C4CEF4;
-	Fri, 26 Sep 2025 17:14:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1758906878;
-	bh=ACLLyTH6WzBUIy6EmJzPFE4VsZS26yNgY1PV+Hi3dKY=;
-	h=Date:From:To:CC:Subject:In-Reply-To:References:From;
-	b=sNGR1qfG42JFYCO5k/n7dorfGNrwgbW3MmFZpb9Bh9LRS0VuauOd+I8wsQI055OJ5
-	 0+USKbkaWUCDwGKK/ytGyq6CdleSufXYI47qWpWuVptTTjWVJFVLMgoAHtcPQomU1K
-	 j/zEtcH2r6x8k1F0VfjzYHyMkj6Db8CJ+5awYzyRRP+HW/3wkHqAUxF0mmwvUtJtyG
-	 ZY1yEIy1hsMp+lOMFX48jaWUGvKKyshAPbU9S1PUwUp1l8Idqo02JVsEZhXwB0wswL
-	 ttDs7oQx2yu6TLYdAh/5u1eA1n+DSo6OK0qKBA3TjC71rlacqDcwscaYFjUWu8f8va
-	 fPjiQa5UVfOAw==
-Date: Fri, 26 Sep 2025 19:14:38 +0200
-From: Niklas Cassel <cassel@kernel.org>
-To: Frank Li <Frank.li@nxp.com>
-CC: Manivannan Sadhasivam <mani@kernel.org>,
- =?UTF-8?Q?Krzysztof_Wilczy=C5=84ski?= <kwilczynski@kernel.org>,
- Kishon Vijay Abraham I <kishon@kernel.org>,
- Bjorn Helgaas <bhelgaas@google.com>, Jon Mason <jdmason@kudzu.us>,
- Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>,
- linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org, ntb@lists.linux.dev,
- imx@lists.linux.dev
-Subject: =?US-ASCII?Q?Re=3A_=5BPATCH_v3_1/3=5D_PCI=3A_endpoint=3A_Add_help?=
- =?US-ASCII?Q?er_function_pci=5Fepf=5Fget=5Fbar=5Frequired=5Fsize=28=29?=
-User-Agent: Thunderbird for Android
-In-Reply-To: <aNbI+KrPJW4kgy4e@lizhi-Precision-Tower-5810>
-References: <20250925-vntb_msi_doorbell-v3-0-ae0b0c93caae@nxp.com> <20250925-vntb_msi_doorbell-v3-1-ae0b0c93caae@nxp.com> <aNaHrj0rwLTtSRS3@ryzen> <aNaprpfaeXIcqeGD@lizhi-Precision-Tower-5810> <aNauaSVs5ytzsVFt@ryzen> <aNbI+KrPJW4kgy4e@lizhi-Precision-Tower-5810>
-Message-ID: <924D03A9-0206-4FCA-AE83-4724643561C2@kernel.org>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="QZiqsQW9"
+Received: by mail-ed1-f67.google.com with SMTP id 4fb4d7f45d1cf-62ec5f750f7so8159355a12.3
+        for <ntb@lists.linux.dev>; Mon, 29 Sep 2025 23:51:04 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1759215063; x=1759819863; darn=lists.linux.dev;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=xVNXZw775c2Js71zktA/SBezJeedYDwOHGneKmoyTVk=;
+        b=QZiqsQW9hayss83CPcxyQOI9QYBov976zxOklnBwHrm6UxnF5pwr9pF4M0l/kaQGOm
+         q2WhDgLmT6GGWYbMAEGYCbksCFQc9CvKxRtEUP4ktUgAsXhn6Wl1gwIxhItLBjv5Wn1Z
+         lt//s6xYcfVvBIE3v87+9jVvCDEGtySMsekqstNQXHwbjLH2l2w3XhYUCaIvx6IXEUX0
+         Sb9E/tSBLGucB4A5SdoYJcbxM1HLhRg8hyzz0DFoKa+bS4uz2m3PpANvd2H0t8Xji880
+         KBkpULmuOgnQfD2D+9QrVHmkS0jnBkcXiz2TFbdJhuARHmOCLDeRZPSsK3Ja4QjCBkee
+         6e3g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1759215063; x=1759819863;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=xVNXZw775c2Js71zktA/SBezJeedYDwOHGneKmoyTVk=;
+        b=GVkwKWqhFj6kIevK9LQIEtQUn7pb3HGLKTg/NajtqxB1iUCSTPQdKvqxV45zBqesSd
+         UbpZ5EQ1W+6UNy+tU2mFLjG+LZaaawSJUzhHBu0KHc8TSxNpNN7UDi1OpZGi7ABEPAYR
+         59bDVkBit0iMp0D5SjXwzi6Z5KM7PYKt5hbCQur1IYW+5xxmQCDiXwzowG25Ab12g/hf
+         9TX24gJmU5X4ZLqt1Ocm6v8J5N2Ipy4alZ9S6pNSBmzTpGfPwdDeRiQVYZY1h8cNlJir
+         69uXPqcegSUXN0jdz8LboOecixJdFo97KoICSHug5iLf6wOPlTyc5wKcchalMoPXDRJg
+         JXXA==
+X-Forwarded-Encrypted: i=1; AJvYcCVuyamV+G/Ub5rFIIscWMVrBf4U/XGjyepiK7We42YOcPPNhXyM5Zd9yUsDqzsxDZa/sUI=@lists.linux.dev
+X-Gm-Message-State: AOJu0YwzeCTyp/Hjevn6Rgk8UC0vC96PLQjrv73oIRSYJ8osemErXNVg
+	cue1PN4x9TII2km+XrTwQL1jLvpNeKGHSh6VBuEy1wUEdqbaRiiZyykbMP+yDAYTeihscQBI6/L
+	AlSZq2mpEIqOt1SjL3NQvyc6usHRCeM9K8sNrxQ==
+X-Gm-Gg: ASbGncuCt6IVXABz1785Tse6mUEVGXCEM5tq37htJz/g2P+VCpYJJVBTE3mYZjxDSdx
+	YCzwMshPCC+94XsbDj3fEFVzgxiJJfcog7oL+df0kfEl0MuJKNIFi+S50/MU/YgcDg0t6F9NipK
+	1TSTKeUWaMA9tWnJngIiZ6v5Xnop61+3KXeVPR62sFkHdN2fGZvf01uuRFCvGROrDGX3YB0OY24
+	JCzQHrKPnhx4vY2IbN74BKUbwv4PQ==
+X-Google-Smtp-Source: AGHT+IEXSWGf6sD3vo7rf9EQ6i9O9UJK5AOiX0IqobrI8JkX5Gc6scxof3vXuUDm37WJvIfDO2cxBPjjf6V2BYq4PYs=
+X-Received: by 2002:a17:907:971b:b0:b3c:a161:684c with SMTP id
+ a640c23a62f3a-b3ca1617ce7mr943624266b.2.1759215063208; Mon, 29 Sep 2025
+ 23:51:03 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8
+References: <aKwpnFtdtBlDv69O@didi-ThinkCentre-M930t-N000>
+In-Reply-To: <aKwpnFtdtBlDv69O@didi-ThinkCentre-M930t-N000>
+From: yuanli fu <fuyuanli0722@gmail.com>
+Date: Tue, 30 Sep 2025 14:50:52 +0800
+X-Gm-Features: AS18NWA0IfkM4D9WprNelBpW7fL-eSZ2hdWPleHyjbG7Hx95fmcgy3a8WlR9DDU
+Message-ID: <CABbqxmfMLAFT8vMeCz4dXY5RfgZ-65VYXZm+P1-sO_pqKR-sPw@mail.gmail.com>
+Subject: Re: [PATCH v2] ntb: Add mutex to make link_event_callback executed linearly.
+To: jdmason@kudzu.us
+Cc: dave.jiang@intel.com, allenbh@gmail.com, ntb@lists.linux.dev, 
+	linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On 26 September 2025 19:10:16 CEST, Frank Li <Frank=2Eli@nxp=2Ecom> wrote:
->On Fri, Sep 26, 2025 at 05:16:57PM +0200, Niklas Cassel wrote:
->> On Fri, Sep 26, 2025 at 10:56:46AM -0400, Frank Li wrote:
->> > On Fri, Sep 26, 2025 at 02:31:42PM +0200, Niklas Cassel wrote:
->> > > On Thu, Sep 25, 2025 at 01:01:47PM -0400, Frank Li wrote:
->> > > > Introduce pci_epf_get_bar_required_size() to retrieve the require=
-d BAR
->> > > > size and memory size=2E Prepare for adding support to set an MMIO=
- address to
->> > > > a specific BAR=2E
->> > > >
->> > > > Use two variables 'aligned_bar_size' and 'aligned_mem_size' to av=
-oid
->> > > > confuse=2E
->> > >
->> > > s/confuse/confusion/
->> > >
->> > >
->> > > >
->> > > > No functional changes=2E
->> > > >
->> > > > Signed-off-by: Frank Li <Frank=2ELi@nxp=2Ecom>
->> > > > ---
->> > > > change in v3
->> > > > - change return value to int=2E
->> > > > - use two pointers return bar size aligned and memory start addre=
-ss aligned
->> > > > - update comments about why need memory align size=2E Actually iA=
-TU require
->> > > > start address match aligned requirement=2E Since kernel return al=
-ign to
->> > > > size's address=2E
->> > > > - use two varible aligned_bar_size and aligned_mem_size to avoid =
-confuse
->> > > > use 'size'=2E
->> > > >
->> > > > change in v2
->> > > > - new patch
->> > > > ---
->> > > >  drivers/pci/endpoint/pci-epf-core=2Ec | 84 +++++++++++++++++++++=
-++--------------
->> > > >  1 file changed, 53 insertions(+), 31 deletions(-)
->> > > >
->> > > > diff --git a/drivers/pci/endpoint/pci-epf-core=2Ec b/drivers/pci/=
-endpoint/pci-epf-core=2Ec
->> > > > index d54e18872aefc07c655c94c104a347328ff7a432=2E=2E2cd0257831f98=
-85a4381c087ed8f3326f5960966 100644
->> > > > --- a/drivers/pci/endpoint/pci-epf-core=2Ec
->> > > > +++ b/drivers/pci/endpoint/pci-epf-core=2Ec
->> > > > @@ -208,6 +208,49 @@ void pci_epf_remove_vepf(struct pci_epf *epf=
-_pf, struct pci_epf *epf_vf)
->> > > >  }
->> > > >  EXPORT_SYMBOL_GPL(pci_epf_remove_vepf);
->> > > >
->> > > > +static int
->> > > > +pci_epf_get_bar_required_size(struct pci_epf *epf, size_t size,
->> > > > +			      size_t *aligned_bar_size,
->> > > > +			      size_t *aligned_mem_size,
->> > > > +			      enum pci_barno bar,
->> > > > +			      const struct pci_epc_features *epc_features,
->> > > > +			      enum pci_epc_interface_type type)
->> > > > +{
->> > > > +	u64 bar_fixed_size =3D epc_features->bar[bar]=2Efixed_size;
->> > > > +	size_t align =3D epc_features->align;
->> > > > +
->> > > > +	if (size < 128)
->> > > > +		size =3D 128;
->> > > > +
->> > > > +	/* According to PCIe base spec, min size for a resizable BAR is=
- 1 MB=2E */
->> > > > +	if (epc_features->bar[bar]=2Etype =3D=3D BAR_RESIZABLE && size =
-< SZ_1M)
->> > > > +		size =3D SZ_1M;
->> > > > +
->> > > > +	if (epc_features->bar[bar]=2Etype =3D=3D BAR_FIXED && bar_fixed=
-_size) {
->> > > > +		if (size > bar_fixed_size) {
->> > > > +			dev_err(&epf->dev,
->> > > > +				"requested BAR size is larger than fixed size\n");
->> > > > +			return -ENOMEM;
->> > > > +		}
->> > > > +		size =3D bar_fixed_size;
->> > > > +	} else {
->> > > > +		/* BAR size must be power of two */
->> > > > +		size =3D roundup_pow_of_two(size);
->> > > > +	}
->> > > > +
->> > > > +	*aligned_bar_size =3D size;
->> > >
->> > > I think this name is wrong=2E
->> > > The BAR size has not been aligned to anything=2E
->> > > The BAR size has to be a power of two, but that is a requirement of=
- the PCI
->> > > specification, so that in an inherent property of a BAR=2E
->> > >
->> > > Perhaps just name it size or bar_size?
->> >
->> > there already have 'size' for input=2E  It should match epc required'=
-s size=2E
->>
->> Why do you need both "size_t size" and "size_t *bar_size"?
->>
->> Isn't it enough with "size_t *bar_size" ?
->>
->> The user can supply a value, and the function could update that value=
-=2E
+Hi Jon
+
+just a gentle ping on patch, Is there anything else needed from my side?
+Thank you!
+
+Best regards,
+Yuanli Fu
+
+fuyuanli <fuyuanli0722@gmail.com> =E4=BA=8E2025=E5=B9=B48=E6=9C=8825=E6=97=
+=A5=E5=91=A8=E4=B8=80 17:15=E5=86=99=E9=81=93=EF=BC=9A
 >
->If not 'aligned_mem_size' in list, it looks fine=2E But after add
->'aligned_mem_size', I think use difference varible for two outputs will b=
-e
->clear and consistent and easy to understand=2E
-
-
-What am trying to say is:
-Why not make "size_t *bar_size" both an input and an output?
-
-
-Kind regards,
-Niklas
+> Since the CPU selected by schedule_work is uncertain, multiple link_event
+> callbacks may be executed at same time. For example, after peer's link is
+> up, it is down quickly before local link_work completed. If link_cleanup
+> is added to the workqueue of another CPU, then link_work and link_cleanup
+> may be executed at the same time. So add a mutex to prevent them from bei=
+ng
+> executed concurrently.
+>
+> Signed-off-by: fuyuanli <fuyuanli@didiglobal.com>
+> ---
+> v2:
+> 1) use guard() instead of lock & unlock functions.
+>
+> v1:
+> Link: https://lore.kernel.org/all/aKiBi4ZDlbgzed%2Fz@didi-ThinkCentre-M93=
+0t-N000/
+> ---
+>  drivers/ntb/ntb_transport.c | 7 +++++++
+>  1 file changed, 7 insertions(+)
+>
+> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+> index 4f775c3e218f..eb875e3db2e3 100644
+> --- a/drivers/ntb/ntb_transport.c
+> +++ b/drivers/ntb/ntb_transport.c
+> @@ -59,6 +59,7 @@
+>  #include <linux/slab.h>
+>  #include <linux/types.h>
+>  #include <linux/uaccess.h>
+> +#include <linux/mutex.h>
+>  #include "linux/ntb.h"
+>  #include "linux/ntb_transport.h"
+>
+> @@ -241,6 +242,9 @@ struct ntb_transport_ctx {
+>         struct work_struct link_cleanup;
+>
+>         struct dentry *debugfs_node_dir;
+> +
+> +       /* Make sure workq of link event be executed serially */
+> +       struct mutex link_event_lock;
+>  };
+>
+>  enum {
+> @@ -1024,6 +1028,7 @@ static void ntb_transport_link_cleanup_work(struct =
+work_struct *work)
+>         struct ntb_transport_ctx *nt =3D
+>                 container_of(work, struct ntb_transport_ctx, link_cleanup=
+);
+>
+> +       guard(mutex)(&nt->link_event_lock);
+>         ntb_transport_link_cleanup(nt);
+>  }
+>
+> @@ -1047,6 +1052,8 @@ static void ntb_transport_link_work(struct work_str=
+uct *work)
+>         u32 val;
+>         int rc =3D 0, i, spad;
+>
+> +       guard(mutex)(&nt->link_event_lock);
+> +
+>         /* send the local info, in the opposite order of the way we read =
+it */
+>
+>         if (nt->use_msi) {
+> --
+> 2.34.1
+>
