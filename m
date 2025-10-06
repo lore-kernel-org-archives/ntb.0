@@ -1,70 +1,94 @@
-Received: from vmicros1.altlinux.org (vmicros1.altlinux.org [194.107.17.57])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 66A082D0602;
-	Fri,  3 Oct 2025 16:45:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.107.17.57
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C989C246BB8;
+	Mon,  6 Oct 2025 10:43:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1759509921; cv=none; b=TwkH4dAC9BpLJkQaPOClDNtnDPLuidxrEzjP+9sQnlXmK8S4ojKsMAtPwmi5ejPcCTsVZsvzTqAHfqZJINbRKdaYJODnql6viCC8qmZpzjS06/kJvqTt12UKEHtb4roJYd6vSKG4vhhPIz1NvLiL2zfOhA213cyatRYE1P+fUJA=
+	t=1759747437; cv=none; b=CQPfH1bpor1tQGHD2ZoLkoR1/yl27mYHF8+mmT6KiiB0o7ymuXZDykxWDWUSqkldePKRAwTdL6Ve5Z9agELOdBLz27P4NVxlQT37LXYMTihtu47dagSC0N1ipgzARTUx+sR+CAbOZhZsjWaNNR0WVa/VdGCLcXPgY16GBho9otM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1759509921; c=relaxed/simple;
-	bh=dssgCzltttWWVbtDuxXyHlgcBj3U4zXAPU0QQmfapf0=;
+	s=arc-20240116; t=1759747437; c=relaxed/simple;
+	bh=l/o/ZdfQ6BEWu7LeBwywJyRN51NFnbNzGbCL+Oqum2Q=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=EE/zFoBMAYWKX9ARW0jzbFqr9yIaTAtvCWUiJ/upGfzMH7/57oVz7jfF0RKaK1spqTVF/Es7ttmryZ440GJU5FIQH/kehXIRL4oum+OMDN3/JHjfHk/JuLpUk8noREr1PHOw3fqIs/44fkBQPmWdtzykhS/fpfd8wzbaWuVjtXs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=altlinux.org; spf=pass smtp.mailfrom=altlinux.org; arc=none smtp.client-ip=194.107.17.57
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=altlinux.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=altlinux.org
-Received: from imap.altlinux.org (imap.altlinux.org [194.107.17.38])
-	by vmicros1.altlinux.org (Postfix) with ESMTP id 5C5AC72C8CC;
-	Fri,  3 Oct 2025 19:45:11 +0300 (MSK)
-Received: by imap.altlinux.org (Postfix, from userid 705)
-	id 4F2B736D070F; Fri,  3 Oct 2025 19:45:11 +0300 (MSK)
-Date: Fri, 3 Oct 2025 19:45:11 +0300
-From: Michael Shigorin <mike@altlinux.org>
-To: Alexander Lobakin <aleksander.lobakin@intel.com>
-Cc: Michael Shigorin <mike@altlinux.ru>,
-	Linus Torvalds <torvalds@linux-foundation.org>,
-	Tor Vic <torvic9@mailbox.org>, Kexy Biscuit <kexybiscuit@aosc.io>,
-	jeffbai@aosc.io, gregkh@linuxfoundation.org, wangyuli@uniontech.com,
-	aospan@netup.ru, conor.dooley@microchip.com,
-	ddrokosov@sberdevices.ru, dmaengine@vger.kernel.org,
-	dushistov@mail.ru, fancer.lancer@gmail.com, geert@linux-m68k.org,
-	hoan@os.amperecomputing.com, ink@jurassic.park.msu.ru,
-	linux-alpha@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-	linux-fpga@vger.kernel.org, linux-gpio@vger.kernel.org,
-	linux-hwmon@vger.kernel.org, linux-ide@vger.kernel.org,
-	linux-iio@vger.kernel.org, linux-media@vger.kernel.org,
-	linux-mips@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-	linux-spi@vger.kernel.org, manivannan.sadhasivam@linaro.org,
-	mattst88@gmail.com, netdev@vger.kernel.org, nikita@trvn.ru,
-	ntb@lists.linux.dev, patches@lists.linux.dev,
-	richard.henderson@linaro.org, s.shtylyov@omp.ru, serjk@netup.ru,
-	shc_work@mail.ru, tsbogend@alpha.franken.de, v.georgiev@metrotek.ru,
-	wsa+renesas@sang-engineering.com, xeb@mail.ru
-Subject: Re: what about CoC?
-Message-ID: <20251003164511.GK7291@imap.altlinux.org>
-References: <a08dc31ab773604d8f206ba005dc4c7a@aosc.io>
- <20241023080935.2945-2-kexybiscuit@aosc.io>
- <124c1b03-24c9-4f19-99a9-6eb2241406c2@mailbox.org>
- <CAHk-=whNGNVnYHHSXUAsWds_MoZ-iEgRMQMxZZ0z-jY4uHT+Gg@mail.gmail.com>
- <20241024095339.GA32487@imap.altlinux.org>
- <20251001101148.GA30625@imap.altlinux.org>
- <87371abc-e43f-4afb-83d0-b9a04fc015c0@intel.com>
+	 Content-Type:Content-Disposition:In-Reply-To; b=r/RNUIkIC7AxXX8dRtZd5ciUoXK5xH6wVmNUqaWqUiAsOUmGUFn3+ulue8lQhK5J3v707Yh+o53z2R9bfOjxF5h1Al4kU2CBco6yj8ha5aLemWjPgqBrBblvNHCQu37qXVz50Bxt0+ZcFUQmDrZdtLVQNgipg8EFRBuDMkjEYAM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=E8Y8FSAq; arc=none smtp.client-ip=10.30.226.201
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="E8Y8FSAq"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C0775C4CEF5;
+	Mon,  6 Oct 2025 10:43:54 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1759747437;
+	bh=l/o/ZdfQ6BEWu7LeBwywJyRN51NFnbNzGbCL+Oqum2Q=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=E8Y8FSAqROWRUvcLBdssNUqfYa/b3x64jbUT1nsUHDOZjlH3UTKodH8tpDn495E6D
+	 v0lSMi82cRwq8bjjbL4ZxkIjZyzQUlI+gh12enavejj7VUsIHi0/MXQ2u4iKQp+TEy
+	 iG0m98/UaznH0xFeIJYNCYCbyspwq+euUSvvUr7yWI+y5eVSEptJxnNb6gZweVlcem
+	 UfWAd4dftS4L/wPR3wvGWG/jOeoLEySEnciwm3TEY0JB+AfztJCpOnEtDg+d29ULuH
+	 KiwBKNDe/PQQG6kyIf4woNMhZljB2qoVNerK50tlwlyN9Cm9/+W/Jh4f4A0vVdK3LR
+	 XtvToTw5U48eg==
+Date: Mon, 6 Oct 2025 12:43:52 +0200
+From: Niklas Cassel <cassel@kernel.org>
+To: Frank Li <Frank.Li@nxp.com>
+Cc: Manivannan Sadhasivam <mani@kernel.org>,
+	Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kwilczynski@kernel.org>,
+	Kishon Vijay Abraham I <kishon@kernel.org>,
+	Bjorn Helgaas <bhelgaas@google.com>, Jon Mason <jdmason@kudzu.us>,
+	Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>,
+	linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org,
+	ntb@lists.linux.dev, imx@lists.linux.dev
+Subject: Re: [PATCH v4 1/3] PCI: endpoint: Add helper function
+ pci_epf_get_bar_required_size()
+Message-ID: <aOOdaDdxCAkmGbkd@ryzen>
+References: <20250930-vntb_msi_doorbell-v4-0-ea2c94c6ff2e@nxp.com>
+ <20250930-vntb_msi_doorbell-v4-1-ea2c94c6ff2e@nxp.com>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=koi8-r
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <87371abc-e43f-4afb-83d0-b9a04fc015c0@intel.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+In-Reply-To: <20250930-vntb_msi_doorbell-v4-1-ea2c94c6ff2e@nxp.com>
 
-On Fri, Oct 03, 2025 at 05:48:40PM +0200, Alexander Lobakin wrote:
-> It's about companies that sponsor the war or are a part of it.
+On Tue, Sep 30, 2025 at 04:39:37PM -0400, Frank Li wrote:
+> Introduce pci_epf_get_bar_required_size() to retrieve the required BAR
+> size and memory size. Prepare for adding support to set an MMIO address to
+> a specific BAR.
+> 
+> Use two variables 'aligned_bar_size' and 'aligned_mem_size' to avoid
+> confuse.
 
-So ban Intel.
+'aligned_bar_size' has been renamed, so this sentence should be updated.
 
--- 
-Michael Shigorin
-...хотя вырусь не поймёт даже почему
+
+(snip)
+
+> @@ -308,7 +327,9 @@ void *pci_epf_alloc_space(struct pci_epf *epf, size_t size, enum pci_barno bar,
+>  	}
+>  
+>  	dev = epc->dev.parent;
+> -	space = dma_alloc_coherent(dev, aligned_size, &phys_addr, GFP_KERNEL);
+> +
+> +	space = dma_alloc_coherent(dev, aligned_mem_size,
+> +				   &phys_addr, GFP_KERNEL);
+>  	if (!space) {
+>  		dev_err(dev, "failed to allocate mem space\n");
+>  		return NULL;
+> @@ -317,7 +338,7 @@ void *pci_epf_alloc_space(struct pci_epf *epf, size_t size, enum pci_barno bar,
+>  	epf_bar[bar].phys_addr = phys_addr;
+>  	epf_bar[bar].addr = space;
+>  	epf_bar[bar].size = size;
+> -	epf_bar[bar].aligned_size = aligned_size;
+> +	epf_bar[bar].aligned_size = aligned_mem_size;
+
+I like that this local variable is now named aligned_mem_size
+to more clearly highlight that it is the aligned _memory_ size.
+
+Perhaps you could also rename the struct pci_epf_bar struct member
+'aligned_size' to 'aligned_mem_size' or perhaps even better,
+'backing_mem_size' or 'mem_size' ?
+
+
+Kind regards,
+Niklas
