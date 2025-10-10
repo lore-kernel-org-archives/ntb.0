@@ -1,120 +1,63 @@
-Received: from mail-qt1-f172.google.com (mail-qt1-f172.google.com [209.85.160.172])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8335222688C
-	for <ntb@lists.linux.dev>; Fri, 10 Oct 2025 12:26:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CED4E2BE7AF;
+	Fri, 10 Oct 2025 18:26:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760099210; cv=none; b=hYRaKAqL6tD/iIrNv8wEdfLC/NW9DH/PiSsd1oQcMnt/S6xCwZcHRoE/Lt05sVZO6pRGRglXiPeO7iGsEQsNXaw7Gf4AhtLa04jLLfA/QWzrmZ0hyJimhVc/630BdOFSDVW0pyrxvtnN0E1xqtuYjir5X1kLFDD3QXrUxA4eqEk=
+	t=1760120794; cv=none; b=fkGzqDoc8F+gEqI0KkOh7iqfQ/P/ugl3gR/W5lT5vZh4Si+OR7XM/mUQCWS7gqdpFlm/+zdf7dAMKarRtdFX/vDtuspPhgia9WCeCxclrciZBDaop9yJRspi27AHHiS+5F11mkYf4kx7STkqbSHxTf08lVd2uP13rYZ+Md4FlfY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760099210; c=relaxed/simple;
-	bh=PX9B8k66g5YeGpw1A1Ig4K6GqsxMcbr2aBy03ro+orU=;
-	h=From:Date:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
-	 Content-Disposition; b=OVHv+8D9P4qbnycq5dKYgJW8m4eAaeLSOW7v0MYCMnwhFWsx6lyL3aYvuqXPvHWKpVhEAJXwu9TO+8jVnsUnwY7W3fQ0yG9VjScD/giwOeduuct0F15y6VHdj/CutSqT45J1rMi0bF4doamS++gKoBclyC6yNHAL06BliyjM2WU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kudzu.us; spf=none smtp.mailfrom=kudzu.us; dkim=pass (2048-bit key) header.d=kudzu-us.20230601.gappssmtp.com header.i=@kudzu-us.20230601.gappssmtp.com header.b=bQIDgWL1; arc=none smtp.client-ip=209.85.160.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kudzu.us
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=kudzu.us
+	s=arc-20240116; t=1760120794; c=relaxed/simple;
+	bh=dZqBGvLHyVCVNYTbb9Tk7glDD7tQm16LfHBEx9TzXrI=;
+	h=Subject:From:In-Reply-To:References:Message-Id:Date:To:Cc; b=SUbmEZ+Lx9l2fLWu2fxsWICH4llRsa81LhrmaBIRhAU1LxEFTMJZYmsgGPDLKuol+qRnz/9VimjFPdW/66tIj+B6u1L090mDX16SpL6eoVP4/CEzdXj/TqoikLOq4IPENFnTmGvxksEhy8je6WIExqbRxlRexlgRllMRoEN4W0E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=p0sqdtlK; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kudzu-us.20230601.gappssmtp.com header.i=@kudzu-us.20230601.gappssmtp.com header.b="bQIDgWL1"
-Received: by mail-qt1-f172.google.com with SMTP id d75a77b69052e-4e6d9573c2aso28893881cf.3
-        for <ntb@lists.linux.dev>; Fri, 10 Oct 2025 05:26:48 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kudzu-us.20230601.gappssmtp.com; s=20230601; t=1760099207; x=1760704007; darn=lists.linux.dev;
-        h=content-disposition:mime-version:message-id:subject:cc:to:date:from
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=xrf5ZmorMGG0BuXOb/ZsEyv1LRNCievVRv+1nSG0+KY=;
-        b=bQIDgWL1X4VvA4FLBDXMt1RjX1Y8k5m0xv12ODZtdPR3wyJuyxSCOBpDzDqBWXDZNh
-         9Sg0r/jbw0VQEEAmpWylLWWZfm9dZjyYAvJXZqJrjrBNU+AHIjwb4vW5wOfFrc/PYpMW
-         EJJZTo7qoRanaXPwMrwQNoy5PvVnpmVTbHGVYFHa8eJyh7l9We19RS/PJ82M6qk6iYJa
-         LWVO8FxGymHMq1K3NT1Y2XPM3Lw1kOmZ7WGC4p7kENXHBw4jimDZHEvsSrOXfDc6pPoB
-         OXVfv6PsDW1W1ZujgfBJ2Ie/73/wbnYpR1Ln94dYSpiqZi4Tv0OmuvdfrbWDhGnICbvS
-         4bzg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1760099207; x=1760704007;
-        h=content-disposition:mime-version:message-id:subject:cc:to:date:from
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=xrf5ZmorMGG0BuXOb/ZsEyv1LRNCievVRv+1nSG0+KY=;
-        b=Fetahz3YsJU6KqB/baEjWpr7vg/8fPi7cBfWTt2wuvwoTBJU963Qy0JGB2qyaiKlVd
-         yZXyU/Fbg9QI/7M0atStRYAhpijNY/H+c9/L4aR0DSK5+AGfiZFeuLSxYyIrOamp5oXP
-         kq5tV0sTNZnQQRRV7Et7NXLCPaVXfWJevA44tI+pWgxP/H+NhZsKbDJ60xPG8Wp2Vyck
-         4quvNm5V+o8hmHVKXRy8pRWKh31c8Vjsynsvu3Ee684qW9HYVSw+t8Jwzi3/OsU7R2/4
-         AE1os38XqcZpbUqj2IXs+ZxVfvi0xYxsO/tVvLwuF2P0IpGKEoOzy33vzEpyCDlvH1hU
-         yt+g==
-X-Forwarded-Encrypted: i=1; AJvYcCVk+GLA9N6a7eCL5x0Gm+cYQKnsudVgH8nG3TuGwM5luj2HCQJe0mOsjWnZB964HEMFArM=@lists.linux.dev
-X-Gm-Message-State: AOJu0YzVe7GKT88B9HOaf/TJ5U+ffpTTd7abi9ietJqZNKs0wX3oMOuJ
-	KvyEVBOOLRf4X5cf752OVU4ioGDVObt8gwkKI4kGjTbfsHmEVD3XJO1/oQWfmld6xg==
-X-Gm-Gg: ASbGncsp1wNDkNI5CldgMKd27+ts7cV9UrCtmWGErsl0Qc8zMrft4jS21vj/qxKrgvV
-	zCwijfnRp9DSid9kNo7d56ijSIDjAOsq9KeoFZbOPPkS/IrpbzevTtiNArxMSzSdr5aSO4Ulgdf
-	slj2m6C/QnZC0pOUCdosey5OuONpmXBy5jEUEXhXHefczlOAHy66wnHmdLCTVzfmY3NldDHN1oE
-	xuoZAUmYLBHzwr0+vJyNUOqMln5G02S1kxM+I9K7wIrhtyhWhBScONqMagfV/0CSbrn7IHY0oEM
-	JbUFSNAPXXau0F9X1fX9dRA9tEnddcD9mUECrGcLhS5+sb2bgm8Ejm4/wcMa+LYsf/oamLsyd+m
-	OMwer1fWYJBzXBmKZlPmZk1ii+0C2L90j
-X-Google-Smtp-Source: AGHT+IFWlqSZfOgtooYr5mvAawvwnK23V9obB0l1oEdeoDOyt34Lx4eI1XsTuexHYBHwo7UfWP+Avg==
-X-Received: by 2002:a05:622a:40c4:b0:4b3:26c:bc44 with SMTP id d75a77b69052e-4e6eace79c2mr159296531cf.20.1760099207163;
-        Fri, 10 Oct 2025 05:26:47 -0700 (PDT)
-Received: from localhost ([136.56.27.188])
-        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-87bc35713afsm15183926d6.30.2025.10.10.05.26.46
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 10 Oct 2025 05:26:46 -0700 (PDT)
-From: Jon Mason <jdmason@kudzu.us>
-X-Google-Original-From: Jon Mason <jdm@athena.kudzu.us>
-Date: Fri, 10 Oct 2025 08:26:42 -0400
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, ntb@lists.linux.dev
-Subject: [GIT PULL] NTB bug fixes for 6.18
-Message-ID: <aOj7glAc85SXWodE@athena.kudzu.us>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="p0sqdtlK"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C823FC4CEF1;
+	Fri, 10 Oct 2025 18:26:32 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1760120792;
+	bh=dZqBGvLHyVCVNYTbb9Tk7glDD7tQm16LfHBEx9TzXrI=;
+	h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
+	b=p0sqdtlKX4O664Ou2gKmqOb7oojsrXTdEGaZH8olgCuMW7FNsfIZYWnhNS+u5Zo6R
+	 YyMMBj6hcZ/GMl+AjxIK6EwJ/paivpNdRrBIqCFf/UfwWo3ZzH40ZcqUBmlrKIbsAW
+	 4EmNWxZihT/2JsIlzO0Kq+d9x0E0DNKF+ZNXulMXQdSrkbcDY8/JJH8F9BJgFaqPKl
+	 7ieA6G/tKbIfFNmdVN+TrN6YyYy7kPLtIrs2Pt6R7wMSOkex9ACfBxFpgRtcTapAfB
+	 2ZCyFKLW1L0/kTLGH+HCo8r49v5HLeZwjEU8szvdE8m8wsvGPvipD/LCoK4F4oZNpj
+	 /havLMvAS7RtA==
+Received: from [10.30.226.235] (localhost [IPv6:::1])
+	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id 714343809A00;
+	Fri, 10 Oct 2025 18:26:21 +0000 (UTC)
+Subject: Re: [GIT PULL] NTB bug fixes for 6.18
+From: pr-tracker-bot@kernel.org
+In-Reply-To: <aOj7glAc85SXWodE@athena.kudzu.us>
+References: <aOj7glAc85SXWodE@athena.kudzu.us>
+X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
+X-PR-Tracked-Message-Id: <aOj7glAc85SXWodE@athena.kudzu.us>
+X-PR-Tracked-Remote: https://github.com/jonmason/ntb tags/ntb-6.18
+X-PR-Tracked-Commit-Id: 006824a1cb3bd4001745a2b1cc83c43fad522851
+X-PR-Merge-Tree: torvalds/linux.git
+X-PR-Merge-Refname: refs/heads/master
+X-PR-Merge-Commit-Id: dcf50ca7823506fb3f20b8ffd3f928003cddaeed
+Message-Id: <176012078001.1074429.13724167832628111344.pr-tracker-bot@kernel.org>
+Date: Fri, 10 Oct 2025 18:26:20 +0000
+To: Jon Mason <jdmason@kudzu.us>
+Cc: torvalds@linux-foundation.org, linux-kernel@vger.kernel.org, ntb@lists.linux.dev
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
 
-Hello Linus,
-Here are a few NTB bug fixes and minor updates for 6.18.  The patches
-have been in my tree for some time, but the tag is new.
-Please consider pulling them.
+The pull request you sent on Fri, 10 Oct 2025 08:26:42 -0400:
 
-Thanks,
-Jon
+> https://github.com/jonmason/ntb tags/ntb-6.18
 
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/dcf50ca7823506fb3f20b8ffd3f928003cddaeed
 
+Thank you!
 
-The following changes since commit 8f5ae30d69d7543eee0d70083daf4de8fe15d585:
-
-  Linux 6.17-rc1 (2025-08-10 19:41:16 +0300)
-
-are available in the Git repository at:
-
-  https://github.com/jonmason/ntb tags/ntb-6.18
-
-for you to fetch changes up to 006824a1cb3bd4001745a2b1cc83c43fad522851:
-
-  NTB: epf: Add Renesas rcar support (2025-09-22 09:35:21 -0400)
-
-----------------------------------------------------------------
-Add support for Renesas R-Car and allow arbitrary BAR mapping in EPF. Update
-ntb_hw_amd to support the latest generation secondary topology and add a
-new maintainer. Fix a bug by adding a mutex to ensure `link_event_callback`
-executes sequentially.
-
-----------------------------------------------------------------
-Basavaraj Natikar (2):
-      ntb_hw_amd: Update amd_ntb_get_link_status to support latest generation secondary topology
-      MAINTAINERS: Update for the NTB AMD driver maintainer
-
-Jerome Brunet (2):
-      NTB: epf: Allow arbitrary BAR mapping
-      NTB: epf: Add Renesas rcar support
-
-fuyuanli (1):
-      ntb: Add mutex to make link_event_callback executed linearly.
-
- MAINTAINERS                     |   1 +
- drivers/ntb/hw/amd/ntb_hw_amd.c |  18 +++++-
- drivers/ntb/hw/amd/ntb_hw_amd.h |   1 +
- drivers/ntb/hw/epf/ntb_hw_epf.c | 118 +++++++++++++++++++++++-----------------
- drivers/ntb/ntb_transport.c     |   7 +++
- 5 files changed, 94 insertions(+), 51 deletions(-)
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/prtracker.html
