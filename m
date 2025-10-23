@@ -1,321 +1,130 @@
-Received: from mail-wm1-f48.google.com (mail-wm1-f48.google.com [209.85.128.48])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.16])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8A3732E5D2A
-	for <ntb@lists.linux.dev>; Thu, 23 Oct 2025 07:55:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AEA883314DF
+	for <ntb@lists.linux.dev>; Thu, 23 Oct 2025 14:59:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.16
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761206148; cv=none; b=jFa5zYHFSdeKugD55QDVDDBECJSiXt0zbM37GAgJ5JBK+IUs0kuDMpHUHl+7xFH/gOsmXANLQM6kQQJmjyWLGmm0AQywETzPR7tNvQDjjYEMS4bLgwfBnIgaHlyQC1IzGA8CGr3y4VBXa170j+ER2PrtrlhKMBa5hE6Z4/2TWn8=
+	t=1761231575; cv=none; b=ZgshTpj4lFm7oRyKInhIgyGCrbrNymofOrtevhXeKu83L93BKkI1p2VESu9QJTkuexylByi8YmDTNtY9Cynp9oL4uuZqfwFgX/3+im0+M811iqLDssumPGJT/zM/E6AgSZGu+Zq4UyjD0Npex6EO3TguSUlf8rQaYtw0DSppM80=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761206148; c=relaxed/simple;
-	bh=2mW2ufPwK26AhdRx9EYoLmILverODcdS8Sg1ER/tufo=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 MIME-Version:Content-Type; b=AOyY737s++9e8PkIrqhVtPod2Dge+VAw97QZ4QSQgqDHB4qeV6OCxBEbVr+UAa9hhtzmcm+uGaJqYVfnCWIpAq71F4wBSIPdo1eC0odmoXzwa/7GIH/nBfyyjbhpnYl+N8xDhyrAh+axRMJMe6ztEWbwJOfMEqpJ1NL30DZND2M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=Et2gXQEI; arc=none smtp.client-ip=209.85.128.48
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
+	s=arc-20240116; t=1761231575; c=relaxed/simple;
+	bh=JNBnkDYH4wR6V0MiUiS+6gufeKxWGxxvHeOWw3deuWs=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=DaAb1gsyjGakRAln9FFam68eQ7VQR+9vWpCxrxXO247OksmLumnzjjC8EkJetQSewdmykAjQ7vG419qU3IrS1B7DnUUWly2+xe32lAUt7wOCjjcl/xsfsOvfRG6lFI7HUrSGzYR6W7+8ULHWVq+02VpU9rUoa+k4oflrG2U7YO0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=NFZJ4ezu; arc=none smtp.client-ip=198.175.65.16
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="Et2gXQEI"
-Received: by mail-wm1-f48.google.com with SMTP id 5b1f17b1804b1-47112a73785so3018085e9.3
-        for <ntb@lists.linux.dev>; Thu, 23 Oct 2025 00:55:45 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1761206144; x=1761810944; darn=lists.linux.dev;
-        h=mime-version:message-id:date:user-agent:references:in-reply-to
-         :subject:cc:to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=yP7Zvul1aJ+pzBJTLArL0ELIUpNFf5csxKan8A8VPjY=;
-        b=Et2gXQEImA+TaA5ul6LkgO/rgmfP9mhcU4Gsog4n3R3KhQTbf7ykm9gHSuqr2TECpG
-         4mL6a/1uhtr50Iyn/O8Vq3EaOPksvKV/U8sIjd5H2wLWk4ufjc/kZhRRrceg0ODJuM6h
-         2kdxBWUpoJBzs3haBv3sVfqp9+XxM8mWb0LUS+RhzbgX19lEyL4ypOpBNtKPhkCrWqjP
-         +3RLnfBgwjPXTdTtz00sMIUW6gXRB/jq+XF5H5CPrDfoBfjaOVQnj4MCDB0rmtUvfTDZ
-         y+b7D6ynvMMReI9EurFIh5ZbVdtzcRoJFLRpDXiPWAAK2vXqIRdcZZae2PEfX2i0j2nH
-         KVww==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1761206144; x=1761810944;
-        h=mime-version:message-id:date:user-agent:references:in-reply-to
-         :subject:cc:to:from:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=yP7Zvul1aJ+pzBJTLArL0ELIUpNFf5csxKan8A8VPjY=;
-        b=qHZY0Rux2Vu8hY101bxTKMgSWVrgDjEeZb6wsyE7T2mLkkTge+/C4ukrMhksrKVwC8
-         lWNwoTm82FUTySMq4nialb+VcsQNk809BJ7Jy/EJJN9+7isS7Sw8sm+E6NgMGQzagRZt
-         DRDuB7bfogRAouKkG7ZT6V6/xM1FsPUROg6mfdgSykBzmwdZJ/rHLICLjmP2d5ooT/pR
-         txSRkZOLC+HMQY2occYDQ8vatRDqg4UEX0qva5lddIP19Hqwjw4Nw0n1khZXSqscwSn8
-         0/j9H+FEgfW6IypMT+m0XXZfUprY159r1djtOkBbNOQQx14xg0Q/0fzKEKCBY4JwxywO
-         0+Yg==
-X-Gm-Message-State: AOJu0YxfM62CO7YLKEjOoCmgC5ik53btdpBhTLmngqm3/2xSUCiVjW3L
-	znmHZfOM1O8G+O8j9sfyyM0FfAlUWbUvCDlHl8/JAHHw/Uv6ynPEzUGP2zL11SgUXZE=
-X-Gm-Gg: ASbGncsrRb3qu6zHCLQOJQQBkTgMxYbqIOX6F/WHrVpOiDRnKfM0aqQ8f2TufwSF8y0
-	4R/Cntdy6jCJiNNIEbE+g4OLf83d7TOv9GQ/1BpyTFEYjj6Ies5qetBWEdV0l8PGP2GAouBOEa0
-	3UlRNRWLxIo4aC3OfxtWmPnGwgvKTcea+NqJj9vO4uV7mw9dcohT4Pjt6spAXhNtQEFZeFO1ZLp
-	7aoBHqqjPfDvvUVA7kyPiOtZ0jY87FA6fYPVtyGYcUv79fHSA6y9AFoM8I1nwYfth9ITE8YdLFm
-	xoxLiWzEnuttiVxZ2IsVgO/ufubgPXDwAwTb+3NQC1gEpOD6ouec3Ew+llEoPFpSdRu8ApY7s4G
-	TSoCARpR1X1bfaFxLNEy7H8a6h132vM/eWh49OQ7oWDmLkzhU5aWiPvZv8kugVAsNCaxcIsTLB8
-	+SKYq1LMbc
-X-Google-Smtp-Source: AGHT+IHfejwjiA0rmTrIPIQL9pQttVcomeiavvXgPCYnLp3S1n4oYYBb/LewOnrxM9mg10WKWzhDig==
-X-Received: by 2002:a05:600c:3e07:b0:471:13fc:e356 with SMTP id 5b1f17b1804b1-471178760f8mr174411675e9.3.1761206143582;
-        Thu, 23 Oct 2025 00:55:43 -0700 (PDT)
-Received: from localhost ([2a01:e0a:3c5:5fb1:6aef:b8f:aa92:c859])
-        by smtp.gmail.com with UTF8SMTPSA id 5b1f17b1804b1-475c4342946sm81833535e9.10.2025.10.23.00.55.43
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 23 Oct 2025 00:55:43 -0700 (PDT)
-From: Jerome Brunet <jbrunet@baylibre.com>
-To: Koichiro Den <den@valinux.co.jp>
-Cc: ntb@lists.linux.dev,  linux-pci@vger.kernel.org,
-  dmaengine@vger.kernel.org,  linux-kernel@vger.kernel.org,
-  mani@kernel.org,  kwilczynski@kernel.org,  kishon@kernel.org,
-  bhelgaas@google.com,  corbet@lwn.net,  vkoul@kernel.org,
-  jdmason@kudzu.us,  dave.jiang@intel.com,  allenbh@gmail.com,
-  Basavaraj.Natikar@amd.com,  Shyam-sundar.S-k@amd.com,
-  kurt.schwemmer@microsemi.com,  logang@deltatee.com,
-  jingoohan1@gmail.com,  lpieralisi@kernel.org,  robh@kernel.org,
-  Frank.Li@nxp.com,  fancer.lancer@gmail.com,  arnd@arndb.de,
-  pstanner@redhat.com,  elfring@users.sourceforge.net
-Subject: Re: [RFC PATCH 00/25] NTB/PCI: Add DW eDMA intr fallback and BAR MW
- offsets
-In-Reply-To: <20251023071916.901355-1-den@valinux.co.jp> (Koichiro Den's
-	message of "Thu, 23 Oct 2025 16:18:51 +0900")
-References: <20251023071916.901355-1-den@valinux.co.jp>
-User-Agent: mu4e 1.12.9; emacs 30.1
-Date: Thu, 23 Oct 2025 09:55:42 +0200
-Message-ID: <1jqzuu2gsh.fsf@starbuckisacylon.baylibre.com>
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="NFZJ4ezu"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1761231574; x=1792767574;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=JNBnkDYH4wR6V0MiUiS+6gufeKxWGxxvHeOWw3deuWs=;
+  b=NFZJ4ezuEN/e8lrkdYgw4aOokEmRY2a7Wfkd+q4ELtH12KKgBxkN7YEj
+   Fy15D3hvytQu21mFwgP6gOnFP01APsV7U7u50Fr5Y2ZL7iFCJvQmm0g0L
+   RIDeDOFdzhRR/+OnY3qbkIAUvU+7MDCiwrq1GG/tcc392DXa7Um71ZvYo
+   aYaj9H5tvK2vW7ucV3UK6zeJTztZe8eEQfzGOdiwzB1Rsa7PLVDdzG5BO
+   GOknEH/GidMCdFdaMAKdVv975Uyi6//ZrWwCEf5enO1iR9mOYsAMjmN8g
+   HaEs0gyvf3MPc24xMlWoxPcoQiZqQ87UYFtwn/nj5SeLAjfg6dmsSTKX7
+   Q==;
+X-CSE-ConnectionGUID: a1G+sJvaTyS7KyOfo+6ghw==
+X-CSE-MsgGUID: 7sI222NxTbWKdkGUCjb5Ag==
+X-IronPort-AV: E=McAfee;i="6800,10657,11586"; a="63550358"
+X-IronPort-AV: E=Sophos;i="6.19,250,1754982000"; 
+   d="scan'208";a="63550358"
+Received: from orviesa006.jf.intel.com ([10.64.159.146])
+  by orvoesa108.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Oct 2025 07:59:34 -0700
+X-CSE-ConnectionGUID: tzLhNoYGQEemqX2ire/dTQ==
+X-CSE-MsgGUID: AipfVlmhTUSHyRh/ny/32g==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.19,250,1754982000"; 
+   d="scan'208";a="183349396"
+Received: from gabaabhi-mobl2.amr.corp.intel.com (HELO [10.125.109.4]) ([10.125.109.4])
+  by orviesa006-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Oct 2025 07:59:32 -0700
+Message-ID: <f703de61-5616-40b8-b9b5-08529f711e64@intel.com>
+Date: Thu, 23 Oct 2025 07:59:32 -0700
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 1/2] NTB: ntb_transport: Remove unused 'retries' field
+ from ntb_queue_entry
+To: Koichiro Den <den@valinux.co.jp>, ntb@lists.linux.dev,
+ linux-kernel@vger.kernel.org
+Cc: jdmason@kudzu.us, allenbh@gmail.com
+References: <20251023072105.901707-1-den@valinux.co.jp>
+ <20251023072105.901707-2-den@valinux.co.jp>
+From: Dave Jiang <dave.jiang@intel.com>
+Content-Language: en-US
+In-Reply-To: <20251023072105.901707-2-den@valinux.co.jp>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Thu 23 Oct 2025 at 16:18, Koichiro Den <den@valinux.co.jp> wrote:
 
-> Hi all,
->
-> Motivation
-> ==========
->
-> On Renesas R-Car S4 the PCIe Endpoint is DesignWare-based and the platform
-> does not allow mapping GITS_TRANSLATER as an inbound iATU target. As a
-> result, forwarding MSI writes from the Root Complex (RC) to the Endpoint
-> (EP) is not possible even if we would add implementation to create a MSI
-> domain for the vNTB device to use existing drivers/ntb/msi.c, and NTB
-> traffic must fall back to doorbells (polling). In addition, BAR resources
-> are scarce, which makes it difficult to dedicate a BAR solely to an
-> NTB/msi window.
->
-> This RFC introduces a generic interrupt backend for NTB. The existing MSI
-> path is converted to a backend, and a new DW eDMA test-interrupt backend
-> provides an RC-to-EP interrupt fallback when MSI cannot be used. In
-> parallel, EPC/DWC gains inbound subrange mapping so multiple NTB memory
-> windows (MWs) can share a single BAR at arbitrary offsets (via mwN_offset).
-> The vNTB EPF and ntb_transport are taught about offsets.
->
-> Backend selection is automatic: if MSI is available we use the MSI backend.
-> Otherwise, if enabled, the DW eDMA backend is used. If neither is
-> available, we continue to use doorbells. Existing systems remain unaffected
-> unless use_intr=1 is set.
->
-> Example layout (R-Car S4):
->
->   BAR0: Config/Spad
->   BAR2 [0x00000-0xF0000]: MW1 (data)
->   BAR2 [0xF0000-0xF8000]: MW2 (interrupts)
->   BAR4: Doorbell
 
-Have you considered putting the doorbell in BAR0 along Config/SPAD
-instead ? Doorbells already have an offset in the config and it would
-allow the following setup
+On 10/23/25 12:21 AM, Koichiro Den wrote:
+> Drop the unused field 'retries' from struct ntb_queue_entry for
+> simplicity's sake.
+> 
+> Signed-off-by: Koichiro Den <den@valinux.co.jp>
 
-BAR0 : Config/Spad/Doorbell
-BAR2 : MW1
-BAR4 : MW2
+Reviewed-by: Dave Jiang <dave.jiang@intel.com>> ---
+>  drivers/ntb/ntb_transport.c | 11 ++---------
+>  1 file changed, 2 insertions(+), 9 deletions(-)
+> 
+> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+> index eb875e3db2e3..39b2398b95a6 100644
+> --- a/drivers/ntb/ntb_transport.c
+> +++ b/drivers/ntb/ntb_transport.c
+> @@ -113,7 +113,6 @@ struct ntb_queue_entry {
+>  	void *buf;
+>  	unsigned int len;
+>  	unsigned int flags;
+> -	int retries;
+>  	int errors;
+>  	unsigned int tx_index;
+>  	unsigned int rx_index;
+> @@ -1630,9 +1629,7 @@ static void ntb_async_rx(struct ntb_queue_entry *entry, void *offset)
+>  	if (res < 0)
+>  		goto err;
+>  
+> -	if (!entry->retries)
+> -		qp->rx_async++;
+> -
+> +	qp->rx_async++;
+>  	return;
+>  
+>  err:
+> @@ -1910,9 +1907,7 @@ static void ntb_async_tx(struct ntb_transport_qp *qp,
+>  	if (res < 0)
+>  		goto err;
+>  
+> -	if (!entry->retries)
+> -		qp->tx_async++;
+> -
+> +	qp->tx_async++;
+>  	return;
+>  
+>  err:
+> @@ -2273,7 +2268,6 @@ int ntb_transport_rx_enqueue(struct ntb_transport_qp *qp, void *cb, void *data,
+>  	entry->buf = data;
+>  	entry->len = len;
+>  	entry->flags = 0;
+> -	entry->retries = 0;
+>  	entry->errors = 0;
+>  	entry->rx_index = 0;
+>  
+> @@ -2323,7 +2317,6 @@ int ntb_transport_tx_enqueue(struct ntb_transport_qp *qp, void *cb, void *data,
+>  	entry->len = len;
+>  	entry->flags = 0;
+>  	entry->errors = 0;
+> -	entry->retries = 0;
+>  	entry->tx_index = 0;
+>  
+>  	rc = ntb_process_tx(qp, entry);
 
-If MW2 handle the IRQs, I suppose the size requirement is rather
-limited so it should fit ?
-
-The modification to allow this setup is minimal and you would not need
-all the offset related changes below ... This is something I
-was experimenting on. I can share that if you are interested.
-
->
->   # The corresponding configfs settings (see Patch #25):
->   echo 0xF0000 > ./mw1
->   echo 0x8000  > ./mw2
->   echo 0xF0000 > ./mw2_offset
->   echo 2       > ./mw1_bar
->   echo 2       > ./mw2_bar
->
-> Summary of changes
-> ==================
->
-> * NTB core/transport
->   - Introduce struct ntb_intr_backend and convert MSI to the new backend.
->   - Add DW eDMA interrupt backend (CONFIG_NTB_DW_EDMA) as MSI-less fallback.
->   - Rename module parameter to use_intr (keep use_msi as deprecated alias).
->   - Support offsetted partial MWs in ntb_transport.
->   - Hardening for peer-reported interrupt values and minor cleanups.
->
-> * PCI Endpoint core and DWC EP controller
->   - Add EPC ops map_inbound()/unmap_inbound() for BAR subrange mapping.
->   - Implement inbound mapping for DesignWare EP (Address Match mode), with
->     tracking of multiple inbound iATU entries per BAR and proper teardown.
->
-> * EPF vNTB
->   - Add mwN_offset configfs attributes and propagate offsets to inbound maps.
-
-... then you would not need this with and it would remove significant
-part of the necessary changes below
-
->   - Prefer pci_epc_map_inbound() when supported. Otherwise fall back to
->     set_bar().
->   - Provide .get_pci_epc() so backends can locate the common eDMA instance.
->
-> * DW eDMA
->   - Add self-interrupt registration and expose test-IRQ register offsets.
->   - Provide dw_edma_find_by_child().
->
-> * Renesas R-Car
->   - Place MW2 in BAR2 to host the interrupt window alongside the data MW.
->
-> * Documentation
->
-> Patch layout
-> ============
->
-> * Patches 01-11 : BAR subrange and MW offsets (EPC/DWC EP, vNTB, core helpers)
-> * Patches 12-14 : Interrupt handling hardening in ntb_transport/MSI
-> * Patches 15-17 : DW eDMA: self-IRQ API, offsets, lookup helper
-> * Patches 18-19 : NTB/EPF glue (.get_pci_epc())
-> * Patch 20      : Module param name change (use_msi->use_intr, alias preserved)
-> * Patches 21-23 : Generic interrupt backend + MSI conversion + DW eDMA backend
-> * Patch 24      : R-Car: add MW2 in BAR2 for interrupts
-> * Patch 25      : Documentation updates
->
-> Tested on
-> =========
->
-> * Renesas R-Car S4 Spider
-> * Kernel base: commit 68113d260674 ("NTB/msi: Remove unused functions") (ntb-driver-core/ntb-next)
->
-> Performance measurement
-> =======================
->
-> Even without the DMA acceleration patches for R-Car S4 (which I keep
-> separate from this RFC patch series), enabling RC-to-EP interrupts
-> dramatically improves NTB latency on R-Car S4:
->
-> * Before this patch series (NB. use_msi doesn't work on R-Car S4)
->
->   # Server: sockperf server -i 0.0.0.0
->   # Client: sockperf ping-pong -i $SERVER_IP
->   ========= Printing statistics for Server No: 0
->   [Valid Duration] RunTime=0.540 sec; SentMessages=45; ReceivedMessages=45
->   ====> avg-latency=5995.680 (std-dev=70.258, mean-ad=57.478, median-ad=85.978,\
->         siqr=59.698, cv=0.012, std-error=10.473, 99.0% ci=[5968.702, 6022.658])
->   # dropped messages = 0; # duplicated messages = 0; # out-of-order messages = 0
->   Summary: Latency is 5995.680 usec
->   Total 45 observations; each percentile contains 0.45 observations
->   ---> <MAX> observation = 6121.137
->   ---> percentile 99.999 = 6121.137
->   ---> percentile 99.990 = 6121.137
->   ---> percentile 99.900 = 6121.137
->   ---> percentile 99.000 = 6121.137
->   ---> percentile 90.000 = 6099.178
->   ---> percentile 75.000 = 6054.418
->   ---> percentile 50.000 = 5993.040
->   ---> percentile 25.000 = 5935.021
->   ---> <MIN> observation = 5883.362
->
-> * With this series (use_intr=1)
->
->   # Server: sockperf server -i 0.0.0.0
->   # Client: sockperf ping-pong -i $SERVER_IP
->   ========= Printing statistics for Server No: 0
->   [Valid Duration] RunTime=0.550 sec; SentMessages=2145; ReceivedMessages=2145
->   ====> avg-latency=127.677 (std-dev=21.719, mean-ad=11.759, median-ad=3.779,\
->         siqr=2.699, cv=0.170, std-error=0.469, 99.0% ci=[126.469, 128.885])
->   # dropped messages = 0; # duplicated messages = 0; # out-of-order messages = 0
->   Summary: Latency is 127.677 usec
->   Total 2145 observations; each percentile contains 21.45 observations
->   ---> <MAX> observation =  446.691
->   ---> percentile 99.999 =  446.691
->   ---> percentile 99.990 =  446.691
->   ---> percentile 99.900 =  291.234
->   ---> percentile 99.000 =  221.515
->   ---> percentile 90.000 =  149.277
->   ---> percentile 75.000 =  124.497
->   ---> percentile 50.000 =  121.137
->   ---> percentile 25.000 =  119.037
->   ---> <MIN> observation =  113.637
->
-> Feedback welcome on both the approach and the splitting/routing preference.
->
-> (The series spans NTB, PCI EP/DWC and dmaengine/dw-edma. I'm happy to split
-> later if preferred.)
->
-> Thanks for reviewing.
->
->
-> Koichiro Den (25):
->   PCI: endpoint: pci-epf-vntb: Use array_index_nospec() on mws_size[]
->     access
->   PCI: endpoint: pci-epf-vntb: Add mwN_offset configfs attributes
->   NTB: epf: Handle mwN_offset for inbound MW regions
->   PCI: endpoint: Add inbound mapping ops to EPC core
->   PCI: dwc: ep: Implement EPC inbound mapping support
->   PCI: endpoint: pci-epf-vntb: Use pci_epc_map_inbound() for MW mapping
->   NTB: Add offset parameter to MW translation APIs
->   PCI: endpoint: pci-epf-vntb: Propagate MW offset from configfs when
->     present
->   NTB: ntb_transport: Support offsetted partial memory windows
->   NTB/msi: Support offsetted partial memory window for MSI
->   NTB/msi: Do not force MW to its maximum possible size
->   NTB: ntb_transport: Stricter checks for peer-reported interrupt values
->   NTB/msi: Skip mw_set_trans() if already configured
->   NTB/msi: Add a inner loop for PCI-MSI cases
->   dmaengine: dw-edma: Add self-interrupt registration API
->   dmaengine: dw-edma: Expose self-IRQ register offsets
->   dmaengine: dw-edma: Add dw_edma_find_by_child() helper
->   NTB: core: Add .get_pci_epc() to ntb_dev_ops
->   NTB: epf: vntb: Implement .get_pci_epc() callback
->   NTB: ntb_transport: Rename use_msi to use_intr (keep alias)
->   NTB: Introduce generic interrupt backend abstraction and convert MSI
->   NTB: ntb_transport: Rename MSI symbols to generic interrupt form
->   NTB: intr_dw_edma: Add DW eDMA emulated interrupt backend
->   NTB: epf: Add MW2 for interrupt use on Renesas R-Car
->   Documentation: PCI: endpoint: pci-epf-vntb: Update and add mwN_offset
->     usage
->
->  Documentation/PCI/endpoint/pci-vntb-howto.rst |  16 +-
->  drivers/dma/dw-edma/dw-edma-core.c            | 109 ++++++++
->  drivers/dma/dw-edma/dw-edma-core.h            |  18 ++
->  drivers/dma/dw-edma/dw-edma-v0-core.c         |  15 ++
->  drivers/ntb/Kconfig                           |  15 ++
->  drivers/ntb/Makefile                          |   6 +-
->  drivers/ntb/hw/amd/ntb_hw_amd.c               |   6 +-
->  drivers/ntb/hw/epf/ntb_hw_epf.c               |  46 ++--
->  drivers/ntb/hw/idt/ntb_hw_idt.c               |   3 +-
->  drivers/ntb/hw/intel/ntb_hw_gen1.c            |   6 +-
->  drivers/ntb/hw/intel/ntb_hw_gen1.h            |   2 +-
->  drivers/ntb/hw/intel/ntb_hw_gen3.c            |   3 +-
->  drivers/ntb/hw/intel/ntb_hw_gen4.c            |   6 +-
->  drivers/ntb/hw/mscc/ntb_hw_switchtec.c        |   6 +-
->  drivers/ntb/intr_common.c                     |  61 +++++
->  drivers/ntb/intr_dw_edma.c                    | 253 ++++++++++++++++++
->  drivers/ntb/msi.c                             | 186 +++++++------
->  drivers/ntb/ntb_transport.c                   | 155 ++++++-----
->  drivers/ntb/test/ntb_msi_test.c               |  26 +-
->  drivers/ntb/test/ntb_perf.c                   |   4 +-
->  drivers/ntb/test/ntb_tool.c                   |   6 +-
->  .../pci/controller/dwc/pcie-designware-ep.c   | 242 +++++++++++++++--
->  drivers/pci/controller/dwc/pcie-designware.c  |   1 +
->  drivers/pci/controller/dwc/pcie-designware.h  |   2 +
->  drivers/pci/endpoint/functions/pci-epf-vntb.c | 197 ++++++++++++--
->  drivers/pci/endpoint/pci-epc-core.c           |  44 +++
->  include/linux/dma/edma.h                      |  31 +++
->  include/linux/ntb.h                           | 134 +++++++---
->  include/linux/pci-epc.h                       |  11 +
->  29 files changed, 1310 insertions(+), 300 deletions(-)
->  create mode 100644 drivers/ntb/intr_common.c
->  create mode 100644 drivers/ntb/intr_dw_edma.c
-
--- 
-Jerome
