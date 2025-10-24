@@ -1,370 +1,253 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.18])
+Received: from AS8PR04CU009.outbound.protection.outlook.com (mail-westeuropeazon11011011.outbound.protection.outlook.com [52.101.70.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 46607344022
-	for <ntb@lists.linux.dev>; Fri, 24 Oct 2025 17:05:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.18
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761325505; cv=none; b=WWnEjIm6rnHDB4o/hKLxZxrx4tf/O3JvJpwPeq2bn4V2OECiRkedLLJ7WpSlUM6v08zVYRiRFYRDz4/t1ilKsndOFDeANbXAdOAUf23TMdjH1oLGfqkG6hWtcAbwlRYwH+0jrhGWFponEdYpTao5HZkUNipXXFH5AQSnMXJ1OSc=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761325505; c=relaxed/simple;
-	bh=xpW6PIYJVvn9pZoV6trrJoqn2+ZTwWJ94TP995ks4Wk=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=jrXsM04k9eFjCjRMyiCN49KBcryX7I60XlvdfSP9saXXu5dsqWRwk1wxQWYV2zm/jrXZQcAxkGQl3Xp+nodSGxXPik20eSStQxoxPdqJEKpZ3B6ASUhMiYlEciM005CJU4RPwWbxtYWYP6RpZyDml8Deq5SmQe+FIuv9mctPgi8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Dv9f4tgM; arc=none smtp.client-ip=198.175.65.18
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 18CDC32B9A5
+	for <ntb@lists.linux.dev>; Fri, 24 Oct 2025 18:40:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.70.11
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1761331251; cv=fail; b=FqKAAzbxIjb0ISeGR1cxmX+sZEIysyZOdd5BOT6a02VtdYqRGahDU0hEkMABNrrpf75xAWsl6BqM6PO2ZoaKFbFDF+6IcvV6OPxy0vTqiLybXNXQuh/mjI+nMq7h8sUzT8Dvs9KyYI2y3KH951Sw8PCz6KVUR2JR9G4Vn+Li3yo=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1761331251; c=relaxed/simple;
+	bh=XZVkPXPko/UE3hm8tMgJT0EtdwubDkOsaOV6ArKj3vg=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
+	 Content-Disposition:In-Reply-To:MIME-Version; b=elP31PfcuZG2xNaSJsOgNaaoDzgqfoYdNDB06b3nQ0BOTc2wzWv/ew2BvBK4oM3rLTCUPUCMuWLSd/yZyXI6MSpikGip/7YlLJrK+jtT/ILpCalVOHrI7hweFPLjA4aXp5+T9hYrF3sK0ANa9KeZcVA+hBlN7Htn4KUQhmkF1XY=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com; spf=pass smtp.mailfrom=nxp.com; dkim=pass (2048-bit key) header.d=nxp.com header.i=@nxp.com header.b=BNzIGJa/; arc=fail smtp.client-ip=52.101.70.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=nxp.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Dv9f4tgM"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1761325503; x=1792861503;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=xpW6PIYJVvn9pZoV6trrJoqn2+ZTwWJ94TP995ks4Wk=;
-  b=Dv9f4tgMPeUG4xyKke0PBoJCk+YiCQp0+hSpb8VBJOYReynZwx6DBpSE
-   fpE3pOo9GYfCzfrxHHZthgYt5OrFkMB8bRqInmH4zepQbyi1dMEiCmlhh
-   AEfoncP6cNRZh8JGZ3FcY8yjty/ahhrWnsFG4hKLgZI6sxrpmko8nPIKC
-   z4X+f0B1EkcaWlwEZaj6/SKWd7Fhs+d9QEhnc1ce+bTrWcNv6M4dVmK6m
-   IZNF9Ea4e+4QOT4LMaPegqV7ZhuXa4A3Zs+Yphgx+GO0FdIF1lBFM0+6D
-   LVBg60SfP1yskSt9/IjC5z/oY9Am2eyuVnVjOn2Ak2sav2tYassmOSMlD
-   w==;
-X-CSE-ConnectionGUID: pWMYnaaGTkuMZv2Cfc0p2g==
-X-CSE-MsgGUID: qeE3QZOARAO81LhdxSJNeA==
-X-IronPort-AV: E=McAfee;i="6800,10657,11586"; a="63550440"
-X-IronPort-AV: E=Sophos;i="6.19,252,1754982000"; 
-   d="scan'208";a="63550440"
-Received: from fmviesa010.fm.intel.com ([10.60.135.150])
-  by orvoesa110.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Oct 2025 10:05:02 -0700
-X-CSE-ConnectionGUID: qfcG/ceGQlCirEOEZPYchw==
-X-CSE-MsgGUID: kcRmOIKBRwCf0i2Mg3ZWsg==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.19,252,1754982000"; 
-   d="scan'208";a="185243038"
-Received: from vverma7-desk1.amr.corp.intel.com (HELO [10.125.109.43]) ([10.125.109.43])
-  by fmviesa010-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Oct 2025 10:05:01 -0700
-Message-ID: <0ba47a4d-3fc8-4812-b80b-b3ccb7e7a251@intel.com>
-Date: Fri, 24 Oct 2025 10:05:00 -0700
+	dkim=pass (2048-bit key) header.d=nxp.com header.i=@nxp.com header.b="BNzIGJa/"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=DYOfLZX9QVw3xhrkZwqaEy1lCj3QqdfkotNs2199L3uDCRGNmSrIiNPHRQVzSB6dID1d8zrL1KPC9Up3x2znhl4SjXhWWa6RyFkv1MOQSEzPMAM5dgS9GYHFqVkqfXg+4EnGPK0+KS5fk7e77k89+7EBQEeluyzUUGCCqVTDY9Ez0452QsMrfeF0ioifPFYPcaPvU/SOfmKJUTDOY1lrAPGkY/v91I54uMSLcljptzyineZEeErayDmsCjd9xIUgZyA+Ao90raKfXK0C4wmX41MvCsiyjxr2npaQEd8it4oxfFZd95gcyrUGoHsVwvU9bG153wI7HS6ImG5IOQ2nxA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=Y0/Qq/FMUAlbe+S0xugEvhmTBy017igHcmqsIstIv4w=;
+ b=HmVv52fWzR6NDAyTafktTEZmTEPxoxClv7J69BfXiLTaGSznjN1VKNb8w5yLwxbzP93BO606VUtopP2wwkqJT7AeVzJTuEhFCx0g9UOdBQ/DpDoofgUhIPS+UAE26sSbfUZw7Mq2351gVcr+iSHFfE9NyxnVMYsS9XzyUZ76GkBhs6/I6ZrsuOXYsN9FiaBPQ92SkU2GAkWlz5bU4PxggrnWlfMLdPBct1+oImnCOWRchlUIDAu97nw0KvJXZq12Jd1txCo7XUILSVmv2ApQkm49GstjBzaw2n2qE13HlNXWga5QrrrguNieJxB2tNqhyYiCqQFg1mCPHcYT+WBbWg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
+ header.d=nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=Y0/Qq/FMUAlbe+S0xugEvhmTBy017igHcmqsIstIv4w=;
+ b=BNzIGJa/PAdBMh6Zkj1X9aoCPA8t5Z6bkoR3b8otnq37V6GKV242qdCA+2mj2LSk8oVxAC9HZTaJQRhyvVdi8dBsu2xoisIDjOV5sBHshOln31N/iTX4DKhMfAhZM4aOla0SKx/Wwk/SFehSySkkS1DmnJKIl+fUNZfW/ay024OtDAqSI+7SF25bqRMDiQubfxvuhmEAA5S1ClFrLIcJH3TNZkxNGX+rboi+1RmeYOUCkvCkSGlTBBmIWDje1Sa7TvYs8J1fW//jGRlQIsYV/6rn5F940ll5XWxjLq+/0B56a0TqBeS1qXtATEpgmkhkh74+TZH1vnXDS9DAUF1TAg==
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nxp.com;
+Received: from DB9PR04MB9626.eurprd04.prod.outlook.com (2603:10a6:10:309::18)
+ by AS8PR04MB8513.eurprd04.prod.outlook.com (2603:10a6:20b:340::8) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9253.13; Fri, 24 Oct
+ 2025 18:40:44 +0000
+Received: from DB9PR04MB9626.eurprd04.prod.outlook.com
+ ([fe80::55ef:fa41:b021:b5dd]) by DB9PR04MB9626.eurprd04.prod.outlook.com
+ ([fe80::55ef:fa41:b021:b5dd%4]) with mapi id 15.20.9253.011; Fri, 24 Oct 2025
+ 18:40:43 +0000
+Date: Fri, 24 Oct 2025 14:40:32 -0400
+From: Frank Li <Frank.li@nxp.com>
+To: Koichiro Den <den@valinux.co.jp>
+Cc: ntb@lists.linux.dev, linux-pci@vger.kernel.org,
+	dmaengine@vger.kernel.org, linux-kernel@vger.kernel.org,
+	mani@kernel.org, kwilczynski@kernel.org, kishon@kernel.org,
+	bhelgaas@google.com, corbet@lwn.net, vkoul@kernel.org,
+	jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com,
+	Basavaraj.Natikar@amd.com, Shyam-sundar.S-k@amd.com,
+	kurt.schwemmer@microsemi.com, logang@deltatee.com,
+	jingoohan1@gmail.com, lpieralisi@kernel.org, robh@kernel.org,
+	jbrunet@baylibre.com, fancer.lancer@gmail.com, arnd@arndb.de,
+	pstanner@redhat.com, elfring@users.sourceforge.net
+Subject: Re: [RFC PATCH 01/25] PCI: endpoint: pci-epf-vntb: Use
+ array_index_nospec() on mws_size[] access
+Message-ID: <aPvIIPHk0L4jSv9H@lizhi-Precision-Tower-5810>
+References: <20251023071916.901355-1-den@valinux.co.jp>
+ <20251023071916.901355-2-den@valinux.co.jp>
+ <aPrDEE80hSLbL57a@lizhi-Precision-Tower-5810>
+ <iskqrcn6z2bnfnzrfc7kyy3x3ng7djn4ygral5cjtz3xiet4or@ktapppsfpzo7>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <iskqrcn6z2bnfnzrfc7kyy3x3ng7djn4ygral5cjtz3xiet4or@ktapppsfpzo7>
+X-ClientProxiedBy: SJ0PR03CA0365.namprd03.prod.outlook.com
+ (2603:10b6:a03:3a1::10) To DB9PR04MB9626.eurprd04.prod.outlook.com
+ (2603:10a6:10:309::18)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 2/2] NTB: ntb_transport: Add 'tx_memcpy_offload' module
- option
-To: Koichiro Den <den@valinux.co.jp>
-Cc: ntb@lists.linux.dev, linux-kernel@vger.kernel.org, jdmason@kudzu.us,
- allenbh@gmail.com
-References: <20251023072105.901707-1-den@valinux.co.jp>
- <20251023072105.901707-3-den@valinux.co.jp>
- <b7a5ed5e-f4ca-4045-a956-73594a286fee@intel.com>
- <t4u73ozmucboxkml5p3xss44aafvr23hisewq3qvpgp7lbpx5y@f2haptgd2wzu>
-From: Dave Jiang <dave.jiang@intel.com>
-Content-Language: en-US
-In-Reply-To: <t4u73ozmucboxkml5p3xss44aafvr23hisewq3qvpgp7lbpx5y@f2haptgd2wzu>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: DB9PR04MB9626:EE_|AS8PR04MB8513:EE_
+X-MS-Office365-Filtering-Correlation-Id: 5eb84bcc-27ba-4648-9690-08de132cd684
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|366016|7416014|19092799006|376014|52116014|1800799024|7053199007|38350700014;
+X-Microsoft-Antispam-Message-Info:
+	=?us-ascii?Q?A2SHMO//b3yE6KlDNJf3WJNVfeE9dIU2YIINCbuvfYD2MYHHEPK++2JRdR2n?=
+ =?us-ascii?Q?5jt9ZoRTt0ObB4qaUtCeSzlTi1wwfEIkIgGQIvBX+Gl8UTa9UL3Yk+RZlcwL?=
+ =?us-ascii?Q?uC/MxOgEVLq0yadXPEYfvQozkqYdBzRCdKG8BI76C/ZEOmJgAs/IF8G8QVbZ?=
+ =?us-ascii?Q?tgcx+FfmTGZBJdYEEdi+0yC7BN4BOcu4JdOzw+J04Ml8HrPH8mAtE6dlQxUj?=
+ =?us-ascii?Q?Hkwn48md9WlPl5yqACTTctA/AQLsqOu/D3Ltqd9V9gGijeAtIAE+hW2cDBzG?=
+ =?us-ascii?Q?YM4uuEu+Zk7GZV9U45TDHs99sVdyfB7AXWNyrUHpVGOgUo56Y+cuePHAJO6k?=
+ =?us-ascii?Q?8XNCaUBuCnq/tSuEfwXYEMy5txsAD1sc9mMxDNkPhoOS17TFV8naSsPHGU0n?=
+ =?us-ascii?Q?8fvjPwzsJ2uZIpNf0/JK73N4ZRheiHPRBOFbKgLeolyXHAfZzX+m8EDL1jA+?=
+ =?us-ascii?Q?G+rtiapM0eCoXvXLXWAJ6VbCDxE+q7VitAgi2+kR1Bw2JQWmBmH5lvUPaCUn?=
+ =?us-ascii?Q?GSnAbxLAOKGhu/v1t4MPgnHOzwQO7wo2+6BFB7fK6CwrxSwUS0juNnmADlVg?=
+ =?us-ascii?Q?SvOq0Q42xEy67qzypV4y50Bjz2hVdOHUPB7RGywlLWWCKreNH0btLaHSAcdm?=
+ =?us-ascii?Q?HZFdPnyCKXt81T9VNsrs5tcQv2G0cFMFh9UOeVRziHZT5IBHXjIv+4Pnh6Y4?=
+ =?us-ascii?Q?l+nvzkqA8wSjDVQWo5qbL3nIjhubFrfT7CRhWwX55RaZd667DvnpFdeEot+J?=
+ =?us-ascii?Q?yOjN/fskuZDwFmc+1xnoZ8q31XihJSUVLBUS1HkcOCkM/kUKtel4I3E9HCn3?=
+ =?us-ascii?Q?R3Wad8QsuwXIQgdtH6sYUhzs/V5XKRmrcWcY/fI8k0xljv3KTH2bMSY6Vyp+?=
+ =?us-ascii?Q?iXAw2YJ66AaIxHBKPBJ1IX7KZUDwFpxBqTVRv5g7eQlfaY+2XsrR5YhEk7Xf?=
+ =?us-ascii?Q?40U2sTC+EjqyRED3Jxn+QEuYW2sAqvluB01XZLHts2bUP/VgbrGnE+ZEobIQ?=
+ =?us-ascii?Q?7GDKkusXiGuOXslHUnLBJ/aelACrM7CIVXcbopAypwh4TqooNGHbasZc/x68?=
+ =?us-ascii?Q?I8MOa0dDR7L4EIytmZLqIgorbsoQEacSITPxgflo7SfOhTM8ygEtfoCBUY1L?=
+ =?us-ascii?Q?5iNzuaFvUxVKk37JP5F8iJNb7hvm+no4QM/L9XlX5QjIpKppNmcELu2ErCYq?=
+ =?us-ascii?Q?3CJjqsYdvyuMSzLxJBK4lQnmX9hV7X9dyRtefm731lLH0eXl2n7gm/77D2QO?=
+ =?us-ascii?Q?tP1P3ezlRQTTv5kptoQNphUAU434qEmobW7rfiqPzK4tfUdX9Vjh679f4xAE?=
+ =?us-ascii?Q?Dp8NQjtFQ1TQJGccv1fenvm5qV3tYOGeq+2Ew9Y0dxdK8pbHufRtJp6d1EtE?=
+ =?us-ascii?Q?3XzySJBMJoX1Mk9ydmA8ALnA63vKtiuzoZa4OFc2yh3IbMnfgCjE+JkmwMZf?=
+ =?us-ascii?Q?XVZRSk0z0tivvK94fA7c6R39Rmv5Jsr+2txt3Nj0fEWVlX8lmY13n/fAIVg/?=
+ =?us-ascii?Q?WaREm/E+BtTAWpiXXxOELNGluSzOSkx0YRmk?=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DB9PR04MB9626.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(7416014)(19092799006)(376014)(52116014)(1800799024)(7053199007)(38350700014);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?us-ascii?Q?bDOAdw0GB/1Pne/yVYA3zlG1kIyqide1cmu3r8dh3W6BM8NsQ8A8bypGsuPB?=
+ =?us-ascii?Q?RY68I54yyBkN4/sb4+APZSjc3nZcv2NDqbO94633uRBXv4UF7QVnz//iAsgv?=
+ =?us-ascii?Q?2oQxBDXgkWdu9EB81hXMwYdK1hh3a8nrPNfeDvoBX3cwprEG6L3N8rj1pr5Y?=
+ =?us-ascii?Q?EDRBWkfYDN3ok8F1O/ifiyKxzp1af/nFIX/ScJUbPd8AcEbMZ/UM4YToOdFT?=
+ =?us-ascii?Q?spocLZ+80ajLWWwC9XP2jTKdmvjvCyJL2MZPmemi3BP1TyB7sdrJhq0Xl+LK?=
+ =?us-ascii?Q?DLoHFnx6CNsuC1RvQd7tE+Z3z933uwLSlqNCC9dve7HGfxPdTYm7Ofl249TP?=
+ =?us-ascii?Q?p84U59oNh+hZ8bGZ1n+XSuVXbWx0la9J9YUfr7GmPNC38ebGSmEP2GoiBfRN?=
+ =?us-ascii?Q?woA/oAqO81j/HRG2XeqirwVoK2urSKrx65E26NBq7rp8rtnmM3+hwQRSJu6G?=
+ =?us-ascii?Q?CIoD2FtnU+ya+0teuxMSfd0Ehrak0vFwK6KaL2fR5thhGUaT5gsJY83H6hpn?=
+ =?us-ascii?Q?JJTmAbFxCcJ7swU2NoblXgN3tMZ5bkRc+r8Gd82YqbTbOL/I3zphjGWwLun0?=
+ =?us-ascii?Q?6mQZPHEItUzxeOi8B9bp/CJwiU4aUsDohwqJE14MCmfeVC7kfZL169SjR9Mu?=
+ =?us-ascii?Q?RmbGL1RX0z63o6BkyDkE/sUdKEzMX2JeM131J+cXyQytKL7M76wQ3XnstQku?=
+ =?us-ascii?Q?m/2xUh+KvGpTSVAJwszAyH2uru/icBkjgNzCB8nBE6JcwHC6lpOAfmzYsk4l?=
+ =?us-ascii?Q?CM7PWqL48m28R3sbrMmg5rhZP1Cg5dmCW+LYF3IQP0nbkHexW1E5jQGWitdq?=
+ =?us-ascii?Q?loTv46MHxiUFV4fYJbZ8/jBQ/P8soIVxMqf8V0ICjQnSciEi7zPbrUsOAESB?=
+ =?us-ascii?Q?ObRna+dzHE8QpvGnGen+uHGGYlHpKfXwngGDSOK/xU+PuL0utUVbSNGRkPC9?=
+ =?us-ascii?Q?P7cNQe4mKkTz1bfgnOd4wm1Ueb0XL2QQYhLfCWFoIXyQsL4cK43bjZWeHnz1?=
+ =?us-ascii?Q?YB8iqaNoj3LzOz6cRdRhPGMEomDgLmpvkZDnog4iv8THtHj5AymSZgvYMAlE?=
+ =?us-ascii?Q?ATZBfJcuf904h3oq4Y11w4RMFiavmLBhXpgQW4F/2QoveNJoNqVuV71zXZrv?=
+ =?us-ascii?Q?oxXYnz9fmc7NNWdYEepgdJuiIMes95m14UOA52kNtiFdS/j9ZKxYLsAokWtm?=
+ =?us-ascii?Q?wIa9tSU+Z4IoBOU+/zzvAgIY5QtvWKV9HjSVdTTUXIvVnBTKeYzDU0vqT4dN?=
+ =?us-ascii?Q?WRmMNWPOikKtF0OJjyhWSrcQHjS1aI9M5ffYXK8GhyGgON9csGBtCPpiR+EG?=
+ =?us-ascii?Q?Wfza7Td7qulHag0YlLGcEhgwSlKkXsnb5+Yg0RKpAo7tbwZ+1CGocJZt2vbo?=
+ =?us-ascii?Q?iecAzk/y3OGdkL+hboM9sZ1tuZEt3QQxX6NU85wqnLjydad+HXLFGC1GdQT3?=
+ =?us-ascii?Q?XeydXaXLmwrnnA+jfGsF8S0UfC+5XK4PimOZIAWXY7Fqh3l980DB3V06EyQf?=
+ =?us-ascii?Q?aVjYjwqDY8gYrX6CpN6M0Grfr2n0NkVMV/De8FKAXeyN+cPmr6ke6G/pb7kh?=
+ =?us-ascii?Q?E7hEReBD5e3vh6yieuz87c7MCEp+49G6N3iogT53?=
+X-OriginatorOrg: nxp.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 5eb84bcc-27ba-4648-9690-08de132cd684
+X-MS-Exchange-CrossTenant-AuthSource: DB9PR04MB9626.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Oct 2025 18:40:43.8636
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: B+QmM6wdNfLIGD3oeVLlOtC6SK6YQL3xHmk3IerucgcYnir/UuLnW1Ye24AIfTBw5LjNOfgn5Modj9+nGN7DDQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: AS8PR04MB8513
 
+On Sat, Oct 25, 2025 at 01:24:29AM +0900, Koichiro Den wrote:
+> On Thu, Oct 23, 2025 at 08:06:40PM -0400, Frank Li wrote:
+> > On Thu, Oct 23, 2025 at 04:18:52PM +0900, Koichiro Den wrote:
+> > > Follow common kernel idioms for indices derived from configfs attributes
+> > > and suppress Smatch warnings:
+> > >
+> > >   epf_ntb_mw1_show() warn: potential spectre issue 'ntb->mws_size' [r]
+> > >   epf_ntb_mw1_store() warn: potential spectre issue 'ntb->mws_size' [w]
+> > >
+> > > No functional changes.
+> > >
+> > > Signed-off-by: Koichiro Den <den@valinux.co.jp>
+> > > ---
+> > >  drivers/pci/endpoint/functions/pci-epf-vntb.c | 23 +++++++++++--------
+> > >  1 file changed, 14 insertions(+), 9 deletions(-)
+> > >
+> > > diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> > > index 83e9ab10f9c4..55307cd613c9 100644
+> > > --- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> > > +++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> > > @@ -876,17 +876,19 @@ static ssize_t epf_ntb_##_name##_show(struct config_item *item,		\
+> > >  	struct config_group *group = to_config_group(item);		\
+> > >  	struct epf_ntb *ntb = to_epf_ntb(group);			\
+> > >  	struct device *dev = &ntb->epf->dev;				\
+> > > -	int win_no;							\
+> > > +	int win_no, idx;						\
+> > >  									\
+> > >  	if (sscanf(#_name, "mw%d", &win_no) != 1)			\
+> > >  		return -EINVAL;						\
+> > >  									\
+> > > -	if (win_no <= 0 || win_no > ntb->num_mws) {			\
+> > > -		dev_err(dev, "Invalid num_nws: %d value\n", ntb->num_mws); \
+> > > +	idx = win_no - 1;						\
+> > > +	if (idx < 0 || idx >= ntb->num_mws) {				\
+> > > +		dev_err(dev, "MW%d out of range (num_mws=%d)\n",	\
+> > > +			win_no, ntb->num_mws);				\
+> > >  		return -EINVAL;						\
+> > >  	}								\
+> > > -									\
+> > > -	return sprintf(page, "%lld\n", ntb->mws_size[win_no - 1]);	\
+> > > +	idx = array_index_nospec(idx, ntb->num_mws);			\
+> > > +	return sprintf(page, "%lld\n", ntb->mws_size[idx]);		\
+> >
+> > keep original check if (win_no <= 0 || win_no > ntb->num_mws)
+> >
+> > just
+> > 	idx = array_index_nospec(win_no - 1, ntb->num_mws);
+> > 	return sprintf(page, "%lld\n", ntb->mws_size[idx]);
+> >
+> > It should be more simple.
+>
+> Thanks for the review.
+>
+> For minimal changes, that makes sense. I'd also like to update the dev_err
+> message (the "num_nws" typo, and I think what's invalid is win_no, not
+> num_mws). So how about combining your suggestion with the log message
+> update?
 
+Okay!
 
-On 10/24/25 9:41 AM, Koichiro Den wrote:
-> On Thu, Oct 23, 2025 at 08:18:07AM -0700, Dave Jiang wrote:
->>
->>
->> On 10/23/25 12:21 AM, Koichiro Den wrote:
->>> Some platforms (e.g. R-Car S4) do not gain from using a DMAC on TX path
->>> in ntb_transport and end up CPU-bound on memcpy_toio(). Add a module
->>> parameter 'tx_memcpy_offload' that moves the TX memcpy_toio() and
->>> descriptor writes to a per-QP kernel thread. It is disabled by default.
->>
->> please add comments by the module parameter that if this is set, tx DMA is disabled (right?).> 
->>> This change also fixes a rare ordering hazard in ntb_tx_copy_callback(),
->>> that was observed on R-Car S4 once throughput improved with the new
->>> module parameter: the DONE flag write to the peer MW, which is WC
->>> mapped, could be observed after the DB/MSI trigger. Both operations are
->>> posted PCIe MWr (often via different OB iATUs), so WC buffering and
->>> bridges may reorder visibility. Insert dma_mb() to enforce store->load
->>> ordering and then read back hdr->flags to flush the posted write before
->>> ringing the doorbell / issuing MSI.
->>
->> Can you please split out the fix to this issue so it can be backported to stable?
-> 
-> Thanks for the review, and I got it.
-> 
->>
->>>
->>> While at it, update tx_index with WRITE_ONCE() at the earlier possible
->>> location to make ntb_transport_tx_free_entry() robust.
->>
->> Please also split out this change if the intention is to address an existing issue and accompany with appropriate justification.
-> 
-> This can be omitted (as far as I remember the part did not lead to any
-> severe issues) so maybe I'll drop the change at the moment, thanks.
-> 
->>
->>>
->>> Signed-off-by: Koichiro Den <den@valinux.co.jp>
->>> ---
->>>  drivers/ntb/ntb_transport.c | 104 ++++++++++++++++++++++++++++++++++--
->>>  1 file changed, 100 insertions(+), 4 deletions(-)
->>>
->>> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
->>> index 39b2398b95a6..f4ed616c6ab8 100644
->>> --- a/drivers/ntb/ntb_transport.c
->>> +++ b/drivers/ntb/ntb_transport.c
->>> @@ -54,12 +54,14 @@
->>>  #include <linux/errno.h>
->>>  #include <linux/export.h>
->>>  #include <linux/interrupt.h>
->>> +#include <linux/kthread.h>
->>>  #include <linux/module.h>
->>>  #include <linux/pci.h>
->>>  #include <linux/slab.h>
->>>  #include <linux/types.h>
->>>  #include <linux/uaccess.h>
->>>  #include <linux/mutex.h>
->>> +#include <linux/wait.h>
->>>  #include "linux/ntb.h"
->>>  #include "linux/ntb_transport.h"
->>>  
->>> @@ -100,6 +102,10 @@ module_param(use_msi, bool, 0644);
->>>  MODULE_PARM_DESC(use_msi, "Use MSI interrupts instead of doorbells");
->>>  #endif
->>>  
->>> +static bool tx_memcpy_offload;
->>> +module_param(tx_memcpy_offload, bool, 0644);
->>> +MODULE_PARM_DESC(tx_memcpy_offload, "Offload TX memcpy_toio() to a kernel thread");
->>
->> Offload typically points to moving an operation to an independent piece of hardware like DMA engine. The naming can cause confusion. May I suggest something like 'tx_threaded_copy' instead to make it more clearer?
-> 
-> This really makes sense, 'tx_threaded_copy' sounds really fit. Thank you!
-> 
->>
->> Also to make it easier for people to understand what this parameter is used for, please include a comment block explaining why this parameter is needed.
-> 
-> Got it, I'll do so.
-> 
->>
->>> +
->>>  static struct dentry *nt_debugfs_dir;
->>>  
->>>  /* Only two-ports NTB devices are supported */
->>> @@ -148,7 +154,9 @@ struct ntb_transport_qp {
->>>  	void (*tx_handler)(struct ntb_transport_qp *qp, void *qp_data,
->>>  			   void *data, int len);
->>>  	struct list_head tx_free_q;
->>> +	struct list_head tx_offl_q;
->>>  	spinlock_t ntb_tx_free_q_lock;
->>> +	spinlock_t ntb_tx_offl_q_lock;
->>>  	void __iomem *tx_mw;
->>>  	phys_addr_t tx_mw_phys;
->>>  	size_t tx_mw_size;
->>> @@ -199,6 +207,9 @@ struct ntb_transport_qp {
->>>  	int msi_irq;
->>>  	struct ntb_msi_desc msi_desc;
->>>  	struct ntb_msi_desc peer_msi_desc;
->>> +
->>> +	struct task_struct *tx_offload_thread;
->>> +	wait_queue_head_t tx_offload_wq;
->>>  };
->>>  
->>>  struct ntb_transport_mw {
->>> @@ -284,7 +295,13 @@ static int ntb_async_tx_submit(struct ntb_transport_qp *qp,
->>>  static void ntb_memcpy_tx(struct ntb_queue_entry *entry, void __iomem *offset);
->>>  static int ntb_async_rx_submit(struct ntb_queue_entry *entry, void *offset);
->>>  static void ntb_memcpy_rx(struct ntb_queue_entry *entry, void *offset);
->>> +static int ntb_tx_memcpy_kthread(void *data);
->>> +
->>>  
->>> +static inline bool ntb_tx_offload_enabled(struct ntb_transport_qp *qp)
->>> +{
->>> +	return tx_memcpy_offload && qp && qp->tx_offload_thread;
->>> +}
->>>  
->>>  static int ntb_transport_bus_match(struct device *dev,
->>>  				   const struct device_driver *drv)
->>> @@ -1254,11 +1271,13 @@ static int ntb_transport_init_queue(struct ntb_transport_ctx *nt,
->>>  
->>>  	spin_lock_init(&qp->ntb_rx_q_lock);
->>>  	spin_lock_init(&qp->ntb_tx_free_q_lock);
->>> +	spin_lock_init(&qp->ntb_tx_offl_q_lock);
->>>  
->>>  	INIT_LIST_HEAD(&qp->rx_post_q);
->>>  	INIT_LIST_HEAD(&qp->rx_pend_q);
->>>  	INIT_LIST_HEAD(&qp->rx_free_q);
->>>  	INIT_LIST_HEAD(&qp->tx_free_q);
->>> +	INIT_LIST_HEAD(&qp->tx_offl_q);
->>>  
->>>  	tasklet_init(&qp->rxc_db_work, ntb_transport_rxc_db,
->>>  		     (unsigned long)qp);
->>> @@ -1784,6 +1803,13 @@ static void ntb_tx_copy_callback(void *data,
->>>  
->>>  	iowrite32(entry->flags | DESC_DONE_FLAG, &hdr->flags);
->>>  
->>> +	/*
->>> +	 * Make DONE flag visible before DB/MSI. WC + posted MWr may reorder
->>> +	 * across iATU/bridge (platform-dependent). Order and flush here.
->>> +	 */
->>> +	dma_mb();
->>> +	ioread32(&hdr->flags);
->>
->> Is dma_mb() needed if you are also doing an mmio read? Read can't pass write with PCI ordering rule and the ioread32() alone should be sufficient that the data has reached the destination host.
-> 
-> I experimented with (1). ioread32() only, (2). wmb()+ioread32() and (3).
-> dma_wmb()+ioread32() on R-Car S4 Spider boards, and none eliminated the
-> issue. Only dma_mb()+ioread32() did.
-> 
-> So this suggests the problem is in the pre-PCIe domain. The DONE write
-> goes to a WC-mapped MMIO, so the CPU/interconnect may still hold or merge
-> it while the subsequent MMIO read gets issued first. In that case the
-> MRd/CplD does not imply the earlier store has even reached the PCIe core
-> yet. dma_mb() orders and drains the CPU/WC side (store->load), ensuring the
-> write is at least at the PCIe core. ioread32() then performs the PCIe-level
-> flush. Please correct me if my understanding here is off.
+Frank
 
-I see. Then please leave a sufficient comment explaining what's going on here so in the future there is a reference for future code readers (and maintainers). Thanks! I do wonder what is the general performance hit of having an MMIO read in the I/O flow. But having the doorbell write go before the data write is definitely not something we want.
-
-DJ
-
-> 
+>
 > -Koichiro
-> 
->>
->> DJ
->>
->>> +
->>>  	if (qp->use_msi)
->>>  		ntb_msi_peer_trigger(qp->ndev, PIDX, &qp->peer_msi_desc);
->>>  	else
->>> @@ -1804,7 +1830,7 @@ static void ntb_tx_copy_callback(void *data,
->>>  	ntb_list_add(&qp->ntb_tx_free_q_lock, &entry->entry, &qp->tx_free_q);
->>>  }
->>>  
->>> -static void ntb_memcpy_tx(struct ntb_queue_entry *entry, void __iomem *offset)
->>> +static void ntb_memcpy_tx_on_stack(struct ntb_queue_entry *entry, void __iomem *offset)
->>>  {
->>>  #ifdef ARCH_HAS_NOCACHE_UACCESS
->>>  	/*
->>> @@ -1822,6 +1848,54 @@ static void ntb_memcpy_tx(struct ntb_queue_entry *entry, void __iomem *offset)
->>>  	ntb_tx_copy_callback(entry, NULL);
->>>  }
->>>  
->>> +static int ntb_tx_memcpy_kthread(void *data)
->>> +{
->>> +	struct ntb_transport_qp *qp = data;
->>> +	struct ntb_queue_entry *entry, *tmp;
->>> +	const int resched_nr = 64;
->>> +	LIST_HEAD(local_list);
->>> +	void __iomem *offset;
->>> +	int processed = 0;
->>> +
->>> +	while (!kthread_should_stop()) {
->>> +		spin_lock_irq(&qp->ntb_tx_offl_q_lock);
->>> +		wait_event_interruptible_lock_irq_timeout(qp->tx_offload_wq,
->>> +				kthread_should_stop() ||
->>> +				!list_empty(&qp->tx_offl_q),
->>> +				qp->ntb_tx_offl_q_lock, 5*HZ);
->>> +		list_splice_tail_init(&qp->tx_offl_q, &local_list);
->>> +		spin_unlock_irq(&qp->ntb_tx_offl_q_lock);
->>> +
->>> +		list_for_each_entry_safe(entry, tmp, &local_list, entry) {
->>> +			list_del(&entry->entry);
->>> +			offset = qp->tx_mw + qp->tx_max_frame * entry->tx_index;
->>> +			ntb_memcpy_tx_on_stack(entry, offset);
->>> +			if (++processed >= resched_nr) {
->>> +				cond_resched();
->>> +				processed = 0;
->>> +			}
->>> +		}
->>> +		cond_resched();
->>> +	}
->>> +
->>> +	return 0;
->>> +}
->>> +
->>> +static void ntb_memcpy_tx(struct ntb_queue_entry *entry, void __iomem *offset)
->>> +{
->>> +	struct ntb_transport_qp *qp = entry->qp;
->>> +
->>> +	if (WARN_ON_ONCE(!qp))
->>> +		return;
->>> +
->>> +	if (ntb_tx_offload_enabled(qp)) {
->>> +		ntb_list_add(&qp->ntb_tx_offl_q_lock, &entry->entry,
->>> +			     &qp->tx_offl_q);
->>> +		wake_up(&qp->tx_offload_wq);
->>> +	} else
->>> +		ntb_memcpy_tx_on_stack(entry, offset);
->>> +}
->>> +
->>>  static int ntb_async_tx_submit(struct ntb_transport_qp *qp,
->>>  			       struct ntb_queue_entry *entry)
->>>  {
->>> @@ -1894,6 +1968,9 @@ static void ntb_async_tx(struct ntb_transport_qp *qp,
->>>  	hdr = offset + qp->tx_max_frame - sizeof(struct ntb_payload_header);
->>>  	entry->tx_hdr = hdr;
->>>  
->>> +	WARN_ON_ONCE(!ntb_transport_tx_free_entry(qp));
->>> +	WRITE_ONCE(qp->tx_index, (qp->tx_index + 1) % qp->tx_max_entry);
->>> +
->>>  	iowrite32(entry->len, &hdr->len);
->>>  	iowrite32((u32)qp->tx_pkts, &hdr->ver);
->>>  
->>> @@ -1934,9 +2011,6 @@ static int ntb_process_tx(struct ntb_transport_qp *qp,
->>>  
->>>  	ntb_async_tx(qp, entry);
->>>  
->>> -	qp->tx_index++;
->>> -	qp->tx_index %= qp->tx_max_entry;
->>> -
->>>  	qp->tx_pkts++;
->>>  
->>>  	return 0;
->>> @@ -2033,6 +2107,20 @@ ntb_transport_create_queue(void *data, struct device *client_dev,
->>>  	qp->tx_handler = handlers->tx_handler;
->>>  	qp->event_handler = handlers->event_handler;
->>>  
->>> +	init_waitqueue_head(&qp->tx_offload_wq);
->>> +	if (tx_memcpy_offload) {
->>> +		qp->tx_offload_thread = kthread_run(ntb_tx_memcpy_kthread, qp,
->>> +						    "ntb-txcpy/%s/%u",
->>> +						    pci_name(ndev->pdev), qp->qp_num);
->>> +		if (IS_ERR(qp->tx_offload_thread)) {
->>> +			dev_warn(&nt->ndev->dev,
->>> +				 "tx memcpy offload thread creation failed: %ld; falling back to inline copy\n",
->>> +				 PTR_ERR(qp->tx_offload_thread));
->>> +			qp->tx_offload_thread = NULL;
->>> +		}
->>> +	} else
->>> +		qp->tx_offload_thread = NULL;
->>> +
->>>  	dma_cap_zero(dma_mask);
->>>  	dma_cap_set(DMA_MEMCPY, dma_mask);
->>>  
->>> @@ -2140,6 +2228,11 @@ void ntb_transport_free_queue(struct ntb_transport_qp *qp)
->>>  
->>>  	qp->active = false;
->>>  
->>> +	if (qp->tx_offload_thread) {
->>> +		kthread_stop(qp->tx_offload_thread);
->>> +		qp->tx_offload_thread = NULL;
->>> +	}
->>> +
->>>  	if (qp->tx_dma_chan) {
->>>  		struct dma_chan *chan = qp->tx_dma_chan;
->>>  		/* Putting the dma_chan to NULL will force any new traffic to be
->>> @@ -2203,6 +2296,9 @@ void ntb_transport_free_queue(struct ntb_transport_qp *qp)
->>>  	while ((entry = ntb_list_rm(&qp->ntb_tx_free_q_lock, &qp->tx_free_q)))
->>>  		kfree(entry);
->>>  
->>> +	while ((entry = ntb_list_rm(&qp->ntb_tx_offl_q_lock, &qp->tx_offl_q)))
->>> +		kfree(entry);
->>> +
->>>  	qp->transport->qp_bitmap_free |= qp_bit;
->>>  
->>>  	dev_info(&pdev->dev, "NTB Transport QP %d freed\n", qp->qp_num);
->>
-
-
+>
+> >
+> > Frank
+> > >  }
+> > >
+> > >  #define EPF_NTB_MW_W(_name)						\
+> > > @@ -896,7 +898,7 @@ static ssize_t epf_ntb_##_name##_store(struct config_item *item,	\
+> > >  	struct config_group *group = to_config_group(item);		\
+> > >  	struct epf_ntb *ntb = to_epf_ntb(group);			\
+> > >  	struct device *dev = &ntb->epf->dev;				\
+> > > -	int win_no;							\
+> > > +	int win_no, idx;						\
+> > >  	u64 val;							\
+> > >  	int ret;							\
+> > >  									\
+> > > @@ -907,12 +909,15 @@ static ssize_t epf_ntb_##_name##_store(struct config_item *item,	\
+> > >  	if (sscanf(#_name, "mw%d", &win_no) != 1)			\
+> > >  		return -EINVAL;						\
+> > >  									\
+> > > -	if (win_no <= 0 || win_no > ntb->num_mws) {			\
+> > > -		dev_err(dev, "Invalid num_nws: %d value\n", ntb->num_mws); \
+> > > +	idx = win_no - 1;						\
+> > > +	if (idx < 0 || idx >= ntb->num_mws) {				\
+> > > +		dev_err(dev, "MW%d out of range (num_mws=%d)\n",	\
+> > > +			win_no, ntb->num_mws);				\
+> > >  		return -EINVAL;						\
+> > >  	}								\
+> > >  									\
+> > > -	ntb->mws_size[win_no - 1] = val;				\
+> > > +	idx = array_index_nospec(idx, ntb->num_mws);			\
+> > > +	ntb->mws_size[idx] = val;					\
+> > >  									\
+> > >  	return len;							\
+> > >  }
+> > > --
+> > > 2.48.1
+> > >
