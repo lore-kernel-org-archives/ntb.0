@@ -1,110 +1,198 @@
-Received: from cstnet.cn (smtp84.cstnet.cn [159.226.251.84])
-	(using TLSv1.2 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+Received: from MRWPR03CU001.outbound.protection.outlook.com (mail-francesouthazon11011038.outbound.protection.outlook.com [40.107.130.38])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7122D299924
-	for <ntb@lists.linux.dev>; Mon, 10 Nov 2025 04:04:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=159.226.251.84
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762747501; cv=none; b=E9kJ0sJITHyH90AeJWnTYSFauhxRkrKpVhm8JWvv4ZKj8FEoxJHY8QQgqSo06eFDX9wKEIamx/Lq5fQy0SpetUsADI2/mOiaae/+reoxlUB40FDvotF2QbgLzXYREqfZriRNZJkEBdzo/Cgn1NRKy+m5F4ILs0ngHvVvemNW4gw=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762747501; c=relaxed/simple;
-	bh=RTjKEpIDzrwmwtqOKmKcQDUA+BQVu2gXoDCgg7LL/9Y=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=CTGgPwat4LDleiJJWvbGKf5hN/AJVjjFXKbfrMe1+MYCE8IBA/AbZy9rOvzQyjIvq2u0y46fm8kA9cWxo2iRC4p8zvNjDrNpk5wl/EXe+XIVmR2k1r0Of16gBo/h+1nNccnVHqPZ0/kqRZmhFzZ7GhDuhZo+vWQp2lW93GC0i70=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iscas.ac.cn; spf=pass smtp.mailfrom=iscas.ac.cn; arc=none smtp.client-ip=159.226.251.84
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iscas.ac.cn
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=iscas.ac.cn
-Received: from DESKTOP-L0HPE2S (unknown [124.16.141.245])
-	by APP-05 (Coremail) with SMTP id zQCowAC3f3BjZBFpGlkwAA--.16112S2;
-	Mon, 10 Nov 2025 12:04:52 +0800 (CST)
-From: Haotian Zhang <vulab@iscas.ac.cn>
-To: jdmason@kudzu.us,
-	dave.jiang@intel.com,
-	allenbh@gmail.com,
-	mani@kernel.org,
-	kwilczynski@kernel.org,
-	kishon@kernel.org,
-	bhelgaas@google.com
-Cc: ntb@lists.linux.dev,
-	linux-pci@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Haotian Zhang <vulab@iscas.ac.cn>
-Subject: [PATCH] pci: endpoint: Add missing NULL check for alloc_workqueue()
-Date: Mon, 10 Nov 2025 12:04:46 +0800
-Message-ID: <20251110040446.2065-1-vulab@iscas.ac.cn>
-X-Mailer: git-send-email 2.50.1.windows.1
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6359E22173F
+	for <ntb@lists.linux.dev>; Mon, 10 Nov 2025 19:51:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.130.38
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1762804287; cv=fail; b=A+27C7kxuo8I2t2RkLFUreQJ1w88iYaeDPoWVEmqjWFQGumy0T4r6/1/jSTNgzS7rz4dG0ksV21cyXfAL8PR3Q/yjvE6IjQ1t0ih5ysc8c/LkZXnM0MWhbSuBg6Pe5BXL7EFV2spEo6QBuKePqE6K8CGumXM2KejyKtZIwo7bIM=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1762804287; c=relaxed/simple;
+	bh=hyXsqgji7eUF+uvULihDkdMcTmTp3BDjEYfdNZ6vR2Y=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
+	 Content-Disposition:In-Reply-To:MIME-Version; b=Dr4lspd8o7EP8OKX1UdUL7K0t/cDaPxKbHuS4AOn87IdIs+u+n2fugrOPZ8taa8Q/9uQnzBZW2xxps7VBkJmZWGzXphg2lMGIAyjFKb70B//gYLAz5kHKOXbz///nKnLnDuU6BsAoYyFNNbH5UxNgPRPzVmiIxuXusoSLd9czjA=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com; spf=pass smtp.mailfrom=nxp.com; dkim=pass (2048-bit key) header.d=nxp.com header.i=@nxp.com header.b=jTFJfTdW; arc=fail smtp.client-ip=40.107.130.38
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=nxp.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=nxp.com header.i=@nxp.com header.b="jTFJfTdW"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=hGwou2i1G3u2eSGsNZ+ieknEu5InVgUYwj8nFwZtJXfCNO2DMFjKrcyLA6LdSPZnnxP2VKpkqb1jyjo8NbmgQiUqG2D8I2FXkGWHVOultTWX8AojSIU2PxXEha1lERS7qgSRGcBijglXW8GoPuHDosXRcs/mx62nMh5rr46DPqM2/zRyyin2pEV3rhj7jZCq/eo5q2y180xJV2q5eEEKZsdl3fW4qksAut9Tl6xEXYR82SaIRzSux0FWi8uG0g/quderVuEqvunSsDsT/VIzOP5PFZulePXsbHiPE0lMs1V7LYId/wKYqjgURpzYrKvkxtC2ijmD54qNjdi7cKFDzQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=utLLCX83RgIiwBUEaqyEEC8cmiCpVqWkVkQnsu9+DfE=;
+ b=AycK0TdISV1qrJihzpwuCBdkG3QNiSJrSJHENleqBNt8rwTtCFYgPuAbciE1nBaA6joN3Jxhf6eQJ51DFVa1dLt5mRP63lP7bgRWT7Ql1WjpWSJsHrjZ06tawG6LSKQsc/fV+aRXXpMekEzPE10KXIkfD7k+c1/AXF7XdQhbPupdrN0Q1Uy53qgyKJaorg04jv85xWOXHJkJ5W9dwyyTw8n2OkeIjONmeXRxPmNZyQQqvEt/5atxEx0NuGdk2z2UlnIt0yLOdecL5XOpkQ1hW6um2vDux2/HqXkifVolNPMMQDf0eMwjQb/UpS76GUV1k22kNDYCwa7uNOg/PFp+cg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
+ header.d=nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=utLLCX83RgIiwBUEaqyEEC8cmiCpVqWkVkQnsu9+DfE=;
+ b=jTFJfTdWfXOMpC0Zl/pz78008ZFz3e8BSW3QJ0CmmTtHhna1N1PxbGNxhc7wjfrOGAoyfOB7ud6j3D1qiBjrqMGFgxE9WzJ1dhHGmpri5Z52Tsga5EsZZqLEdrR5fMl+e7CT0iOdo4DZv3BU72coBRhQyA+nJixfTy/2otVOyheM5mkdJ3DOM4Dl0Q+0OhD7NrzKnWK5mBO8MGLkyltx4vjU7ddZKkjt1NyYqARJiVnwd3dcYHrsllfX5ZXB7Lvw5rYaxsg6spTQRDVRuTg/DPfcRD8F5UeZMsllZga7wx1li3ZmSmcNsgWJo7DkIfsxF48CQmq3yUF/Piq2kHXWRw==
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nxp.com;
+Received: from DB9PR04MB9626.eurprd04.prod.outlook.com (2603:10a6:10:309::18)
+ by AS8PR04MB8086.eurprd04.prod.outlook.com (2603:10a6:20b:3f6::22) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9298.16; Mon, 10 Nov
+ 2025 19:51:21 +0000
+Received: from DB9PR04MB9626.eurprd04.prod.outlook.com
+ ([fe80::55ef:fa41:b021:b5dd]) by DB9PR04MB9626.eurprd04.prod.outlook.com
+ ([fe80::55ef:fa41:b021:b5dd%4]) with mapi id 15.20.9298.015; Mon, 10 Nov 2025
+ 19:51:21 +0000
+Date: Mon, 10 Nov 2025 14:51:12 -0500
+From: Frank Li <Frank.li@nxp.com>
+To: Haotian Zhang <vulab@iscas.ac.cn>
+Cc: jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com,
+	mani@kernel.org, kwilczynski@kernel.org, kishon@kernel.org,
+	bhelgaas@google.com, ntb@lists.linux.dev, linux-pci@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] pci: endpoint: Add missing NULL check for
+ alloc_workqueue()
+Message-ID: <aRJCMEUdjxh5K2UG@lizhi-Precision-Tower-5810>
+References: <20251110040446.2065-1-vulab@iscas.ac.cn>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20251110040446.2065-1-vulab@iscas.ac.cn>
+X-ClientProxiedBy: SJ0PR05CA0121.namprd05.prod.outlook.com
+ (2603:10b6:a03:33d::6) To DB9PR04MB9626.eurprd04.prod.outlook.com
+ (2603:10a6:10:309::18)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:zQCowAC3f3BjZBFpGlkwAA--.16112S2
-X-Coremail-Antispam: 1UD129KBjvJXoW7ZFW7Jr18WrW5XF45Cr4xtFb_yoW8uF43pr
-	ZayFy0yrW0qr4UtFZ8Xw4kCFyakanYg34UCF1fuw1avw47WFZYqan5try5tF1DCrWUXw45
-	ta98X3sFqF1UAr7anT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-	9KBjDU0xBIdaVrnRJUUU9014x267AKxVW8JVW5JwAFc2x0x2IEx4CE42xK8VAvwI8IcIk0
-	rVWrJVCq3wAFIxvE14AKwVWUJVWUGwA2ocxC64kIII0Yj41l84x0c7CEw4AK67xGY2AK02
-	1l84ACjcxK6xIIjxv20xvE14v26r4j6ryUM28EF7xvwVC0I7IYx2IY6xkF7I0E14v26r4j
-	6F4UM28EF7xvwVC2z280aVAFwI0_Cr1j6rxdM28EF7xvwVC2z280aVCY1x0267AKxVW0oV
-	Cq3wAS0I0E0xvYzxvE52x082IY62kv0487Mc02F40EFcxC0VAKzVAqx4xG6I80ewAv7VC0
-	I7IYx2IY67AKxVWUJVWUGwAv7VC2z280aVAFwI0_Jr0_Gr1lOx8S6xCaFVCjc4AY6r1j6r
-	4UM4x0Y48IcxkI7VAKI48JM4x0x7Aq67IIx4CEVc8vx2IErcIFxwACI402YVCY1x02628v
-	n2kIc2xKxwCY1x0262kKe7AKxVWUtVW8ZwCF04k20xvY0x0EwIxGrwCFx2IqxVCFs4IE7x
-	kEbVWUJVW8JwC20s026c02F40E14v26r1j6r18MI8I3I0E7480Y4vE14v26r106r1rMI8E
-	67AF67kF1VAFwI0_Jw0_GFylIxkGc2Ij64vIr41lIxAIcVC0I7IYx2IY67AKxVWUJVWUCw
-	CI42IY6xIIjxv20xvEc7CjxVAFwI0_Gr0_Cr1lIxAIcVCF04k26cxKx2IYs7xG6r1j6r1x
-	MIIF0xvEx4A2jsIE14v26r1j6r4UMIIF0xvEx4A2jsIEc7CjxVAFwI0_Gr0_Gr1UYxBIda
-	VFxhVjvjDU0xZFpf9x0JUd-B_UUUUU=
-X-CM-SenderInfo: pyxotu46lvutnvoduhdfq/1tbiBwwCA2kRR2h3EwAAs5
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: DB9PR04MB9626:EE_|AS8PR04MB8086:EE_
+X-MS-Office365-Filtering-Correlation-Id: a3ed4b62-89b8-4f3d-7889-08de20928534
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|52116014|376014|7416014|19092799006|1800799024|366016|38350700014|7053199007;
+X-Microsoft-Antispam-Message-Info:
+	=?us-ascii?Q?gI0Gthsu5+C26jMchSwFd5dVnSPVUHoJFA5Ghra5MIGtbCI+REFTFjnvAnHk?=
+ =?us-ascii?Q?oSiRADkJfoN2RlAEiu13oLus2y6sYY2b3SjTacr5/EO8fgLxLdZQyOh8iowk?=
+ =?us-ascii?Q?maAO0BUsO41+wmWIWYtwKfiGWClxSMOZ4g0V90Q2oE+EChjp2JD+7It+t6Ml?=
+ =?us-ascii?Q?W3eU/2lMBHaxbywijjy2/z9aPoAMLExXGeCbWonI8emCKJ/GK+V7+pcoOe4L?=
+ =?us-ascii?Q?AUML+RuoBMlREtAUJe2WYsKtCT813jKqFarSW11zTI97mKWPXejtnbgVXRTJ?=
+ =?us-ascii?Q?WSBM/klPnjXQTSIhy2xGwNp/ERB5WSeBEHXjYRWr55UKJuFqNWAN4/PRT3A0?=
+ =?us-ascii?Q?wk8Hb01I0utQ8YDggFMvOxWVgoinQS0R4Cn2jOfzgiT/yAaBXUXFyimAsL5z?=
+ =?us-ascii?Q?OWgFWWNIS8FedGnnJFWp2nL5modEMhSifvRSR9p6wtNft2GpsC6T2QJ7RIGl?=
+ =?us-ascii?Q?SoNShKJP/Zgbrp4jGAEwc5fO9NM8KUGAMGd34r0ROVitshPUwrD2eW49sx7b?=
+ =?us-ascii?Q?2vlizzPKdm57Lv83d5gRkYVXN184klOXu4m1qNb6Rh74KaPFWpdutwR3NyBn?=
+ =?us-ascii?Q?KI09XgXxJPj0+nUtEXGu2UUYEYBx2bP3fMJ+GXPs0NTl5kR0jO6HUFqD4UlH?=
+ =?us-ascii?Q?urBPTp6iuyjPfaOWAoKWiLfYhXQ5sz+bifvqGx3Pe2dJ10wicY+/gCr4SHQm?=
+ =?us-ascii?Q?PWUrpN4JLWN9hO/XQW+v9C3C5pH0YZFAtE7yEGkhCz+EA/GwkHQCj2Iu+akJ?=
+ =?us-ascii?Q?IssLhaS2Nai9YSXIQB0pEENQ0sfmW+wW3MMN+XrQHH1oAdlBM0TAwu9wcQxz?=
+ =?us-ascii?Q?p8tm6Sz7h2sIUUGjfzAb4iZgRDD/I8N5+r0n2H0mDvkXioBdLbhWwaPuQvZ0?=
+ =?us-ascii?Q?TElFsUYa5YEAoIZmXRAxI+aBJt2r3YVPHkurcNaExW0UTCXXZptZHgzQiCr0?=
+ =?us-ascii?Q?D64YWkNcYGe6lLokatU2IAH4t8b6W6YVldJ9FJSrdP0RXfm2rhpAgB5jca0D?=
+ =?us-ascii?Q?Co6VMoSOA12wOcaE7YteP3ZV1FAu0FsfuhmNH8UGgjki2pBP9MWnWujY/5eN?=
+ =?us-ascii?Q?PYnKq0p8BQplIQrYQY8I/mfgWnq2eXkRpCbBuTWWfdQGrjrFns8ex5XLAHK1?=
+ =?us-ascii?Q?ZU4q6lVnF7ox2M1Vjs9MQ6fPFxiHGZOFIqwVFYl9WCkTWk3VEBDcjY+o1OMD?=
+ =?us-ascii?Q?oactH2fzwe9An+GED5UDCOVp/Oi8C32xGgS8GesYF5cH7OS72/aaa4cpPjMk?=
+ =?us-ascii?Q?s4IEcYNSPg64xnK9BBOk6W7wWJxHdrZPiXDbDwUPziKjzEOxVKjcJCd5My/9?=
+ =?us-ascii?Q?xym7L+kTIiEbRhxbVury3e+YBJ33FU1OXGhf1JYXOM3k7mt8oWQhbiuwyvA+?=
+ =?us-ascii?Q?8ZOv8jMrsFZyNMwGFt3obTcL0AfkC9FwmV1lmP3oBoeQjwDI40mBUJnTI2GO?=
+ =?us-ascii?Q?0SPD4Z8rTTy2D2jmYcr4dkQWYNmpUwtPNSba67gTrfHYWNWi9L8UlXNxa19b?=
+ =?us-ascii?Q?KEilm6oWfXBaE/a1G99S9LD2gvB3WJ6ALy+Z?=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DB9PR04MB9626.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(52116014)(376014)(7416014)(19092799006)(1800799024)(366016)(38350700014)(7053199007);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?us-ascii?Q?tSA7xWQhaGe5p7sR8Lqm6oxGKpUkJrpvQQ7r7gN8NMsMp/Vw3QLqbMsw5zsB?=
+ =?us-ascii?Q?55AMYiRKpj6NPrH3Ix1oFuyBrar9685Kq1wlC1xXknWCSavhF8nvJX51+MH2?=
+ =?us-ascii?Q?gVf41nxJuMD6ohYIomAiZiGgdW5b+skUTz4LX4C/p8UE5nsxJWLZmet9l867?=
+ =?us-ascii?Q?rumgxO6BXwRVUe9BzBhgXoziNW7v2OyjToN9FaXwZLNLr6/SsKSNZ9ozdlbo?=
+ =?us-ascii?Q?vN2q/2vM2szycORZpoWTT3nGMnj5XiijMySZJLYaAuIal3BhgbDgZJfCKhGH?=
+ =?us-ascii?Q?sDLcgIqTjirqo38MICOPIB82i4fxzTdr3YTVWRkUTeFLBiPRD/Tduaw04bBK?=
+ =?us-ascii?Q?Zuu+NdHoE7+1eys81eBJcjX1vMHej2uQJmLoFunyOk/nipjsaJiqxybliM7V?=
+ =?us-ascii?Q?33OWj1MnHkrb+qV/1cM3xw1sldOCJdfGS/JMH/U3qj46sV8bfCU9zVdLRGoO?=
+ =?us-ascii?Q?/gctc+ec0vYUX33gBuzWyuQ4C+SHreDYfxkhd/of5nQVoq2k6445fbXClnoR?=
+ =?us-ascii?Q?aNyVcwcBJrgHlUhEn3CQitnzPR0aUbyhcBN1nn0QkVUs3oOcvYB0uwUWNIRr?=
+ =?us-ascii?Q?bQfvvyXsGmbohnj/VryFcpwa6mdv7M7TbssJgYb/OvO7mYTmGkuOHJCNeW9Y?=
+ =?us-ascii?Q?RF4tS2N943x4Y4qylVElfxDCMuKuNOYCFf7jGM6UcK8TbZq+RyBK1w2PVQnN?=
+ =?us-ascii?Q?1K5hZZGy2UHcWbWM4a21d25/WYgr1aYoYZrxtRA9v4Sy5SP686/mVho073EA?=
+ =?us-ascii?Q?FVl2gWMpOxaKTQs8sPJD36pCstpZLom2D5qNaokugK+PSFBHs5H20S31+7r0?=
+ =?us-ascii?Q?FGBZxl7z3uoMWtzeThU21QpKV06wGmLx+5VTJVWw57hkzNBF/sxnjsLXb4Zf?=
+ =?us-ascii?Q?qFf5sO4MCcs4QOrUIbkGMqOGgjcctndYI0dyW24LY2MZOKFo4phfuKQ5yDai?=
+ =?us-ascii?Q?4kE+Kfhib4pb+4Mh+xSozEitHzo5PYb78vbzj4Lde95BR3zKiBvfz5CTNi5O?=
+ =?us-ascii?Q?4VLai/SuI/sHw9GkeO7gZne2TDhJmLmixYXYl+LMTRbX6SwcaS5thwBkgzFt?=
+ =?us-ascii?Q?DEAlrXnCINXAAuyq9pXbE8OllAjKeUbD8H597jbRr7C0wBKlBy5/SaJ3PyAU?=
+ =?us-ascii?Q?VER6aDwOmGaN9rC34Y3Ka7U3xNgRuqM36wk5RxAAXfAPSCpyN0zPeDy/eBq7?=
+ =?us-ascii?Q?Stp5mPNcdaiUdn30EXeySgsgd01Oh17N+hXAUePbCBEt1r8nuXG3l8ermErf?=
+ =?us-ascii?Q?o6LUkFE2u9hhC2RGHq9i95PD0LVBznBv4KI0yeoMSqz3n4QK91HdiDUw74xK?=
+ =?us-ascii?Q?gEC5i6yjOGEFXmnKJ8hp3dMFk9xPlU4IvtNaT/GR1O/CLh9SpDkWFpoySKBQ?=
+ =?us-ascii?Q?PisvBK7xrwupYL0h0mVwf5EED+vYFaoETu950aDpZ0jK57sDG1jpJ8Rddkgo?=
+ =?us-ascii?Q?jCIevhJnfvU2qKYvXZMpp42xc9IWeQ9rx5mYwtRU2Fl5NPluRH/4/QM6vGBY?=
+ =?us-ascii?Q?b39wbPassiItMy+kJWGWiaZHtFFQN6JENZJgxYKLWoyS2kB4G5R8q/uA/LJ+?=
+ =?us-ascii?Q?DUDMJj8viG6Ljp05kaW3vreUDHQdX7uYKgPsaLwl?=
+X-OriginatorOrg: nxp.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: a3ed4b62-89b8-4f3d-7889-08de20928534
+X-MS-Exchange-CrossTenant-AuthSource: DB9PR04MB9626.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Nov 2025 19:51:20.9312
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: /Hkp9xPHZxP7tfYLdAW8Hg6lihT5dh05V3UA+7vqko07sfXBZjJNGXs7aUhR+Kn+fZtaTdOLQo4YfVtzi4ItWQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: AS8PR04MB8086
 
-The alloc_workqueue() function can return NULL on memory allocation
-failure. Without proper error checking, this leads to a NULL pointer
-dereference when queue_work() is later called with the NULL workqueue
-pointer in epf_ntb_epc_init().
+On Mon, Nov 10, 2025 at 12:04:46PM +0800, Haotian Zhang wrote:
+> The alloc_workqueue() function can return NULL on memory allocation
+> failure. Without proper error checking, this leads to a NULL pointer
+> dereference when queue_work() is later called with the NULL workqueue
+> pointer in epf_ntb_epc_init().
+>
+> Add a NULL check immediately after alloc_workqueue() and return -ENOMEM
+> on failure to prevent the driver from loading with an invalid workqueue
+> pointer.
+>
+> Fixes: e35f56bb0330 ("PCI: endpoint: Support NTB transfer between RC and EP")
+> Fixes: 8b821cf76150 ("PCI: endpoint: Add EP function driver to provide NTB functionality")
+> Signed-off-by: Haotian Zhang <vulab@iscas.ac.cn>
+> ---
+>  drivers/pci/endpoint/functions/pci-epf-ntb.c  | 4 ++++
+>  drivers/pci/endpoint/functions/pci-epf-vntb.c | 4 ++++
+>  2 files changed, 8 insertions(+)
+>
+> diff --git a/drivers/pci/endpoint/functions/pci-epf-ntb.c b/drivers/pci/endpoint/functions/pci-epf-ntb.c
+> index e01a98e74d21..b3d96a2e3a8c 100644
+> --- a/drivers/pci/endpoint/functions/pci-epf-ntb.c
+> +++ b/drivers/pci/endpoint/functions/pci-epf-ntb.c
+> @@ -2126,6 +2126,10 @@ static int __init epf_ntb_init(void)
+>
+>  	kpcintb_workqueue = alloc_workqueue("kpcintb", WQ_MEM_RECLAIM |
+>  					    WQ_HIGHPRI, 0);
+> +	if (!kpcintb_workqueue) {
+> +		pr_err("Failed to allocate kpcintb workqueue\n");
+> +		return -ENOMEM;
+> +	}
 
-Add a NULL check immediately after alloc_workqueue() and return -ENOMEM
-on failure to prevent the driver from loading with an invalid workqueue
-pointer.
+Can we direct use system_highpri_wq?
 
-Fixes: e35f56bb0330 ("PCI: endpoint: Support NTB transfer between RC and EP")
-Fixes: 8b821cf76150 ("PCI: endpoint: Add EP function driver to provide NTB functionality")
-Signed-off-by: Haotian Zhang <vulab@iscas.ac.cn>
----
- drivers/pci/endpoint/functions/pci-epf-ntb.c  | 4 ++++
- drivers/pci/endpoint/functions/pci-epf-vntb.c | 4 ++++
- 2 files changed, 8 insertions(+)
-
-diff --git a/drivers/pci/endpoint/functions/pci-epf-ntb.c b/drivers/pci/endpoint/functions/pci-epf-ntb.c
-index e01a98e74d21..b3d96a2e3a8c 100644
---- a/drivers/pci/endpoint/functions/pci-epf-ntb.c
-+++ b/drivers/pci/endpoint/functions/pci-epf-ntb.c
-@@ -2126,6 +2126,10 @@ static int __init epf_ntb_init(void)
- 
- 	kpcintb_workqueue = alloc_workqueue("kpcintb", WQ_MEM_RECLAIM |
- 					    WQ_HIGHPRI, 0);
-+	if (!kpcintb_workqueue) {
-+		pr_err("Failed to allocate kpcintb workqueue\n");
-+		return -ENOMEM;
-+	}
- 	ret = pci_epf_register_driver(&epf_ntb_driver);
- 	if (ret) {
- 		destroy_workqueue(kpcintb_workqueue);
-diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-index 83e9ab10f9c4..79800f1fecc3 100644
---- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
-+++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-@@ -1534,6 +1534,10 @@ static int __init epf_ntb_init(void)
- 
- 	kpcintb_workqueue = alloc_workqueue("kpcintb", WQ_MEM_RECLAIM |
- 					    WQ_HIGHPRI, 0);
-+	if (!kpcintb_workqueue) {
-+		pr_err("Failed to allocate kpcintb workqueue\n");
-+		return -ENOMEM;
-+	}
- 	ret = pci_epf_register_driver(&epf_ntb_driver);
- 	if (ret) {
- 		destroy_workqueue(kpcintb_workqueue);
--- 
-2.50.1.windows.1
-
+Frank Li
+>  	ret = pci_epf_register_driver(&epf_ntb_driver);
+>  	if (ret) {
+>  		destroy_workqueue(kpcintb_workqueue);
+> diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> index 83e9ab10f9c4..79800f1fecc3 100644
+> --- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> +++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> @@ -1534,6 +1534,10 @@ static int __init epf_ntb_init(void)
+>
+>  	kpcintb_workqueue = alloc_workqueue("kpcintb", WQ_MEM_RECLAIM |
+>  					    WQ_HIGHPRI, 0);
+> +	if (!kpcintb_workqueue) {
+> +		pr_err("Failed to allocate kpcintb workqueue\n");
+> +		return -ENOMEM;
+> +	}
+>  	ret = pci_epf_register_driver(&epf_ntb_driver);
+>  	if (ret) {
+>  		destroy_workqueue(kpcintb_workqueue);
+> --
+> 2.50.1.windows.1
+>
