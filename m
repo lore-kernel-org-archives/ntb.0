@@ -1,137 +1,205 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.8])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B0E1221770B;
-	Tue,  2 Dec 2025 09:32:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C4F711F91D6
+	for <ntb@lists.linux.dev>; Tue,  2 Dec 2025 14:49:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.8
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764667947; cv=none; b=hBdYWk4eAu+9+NfoKrIXHkfUSOiolfg49Ud4ToQCV/b3YXOmPRR9NZ1PjQs5og+ZBiuwPOX6oJdBjc2Di+dwYCl9EAYeefMM8jaq9K3BMpVqUKRqpboSzBb0VVjbEzgwtRiHk43mwaE9/qUsXfI8Ac/goSq22BlAXGP7FJBhlrE=
+	t=1764686955; cv=none; b=QtDb6CBNUtGpkzXFPVruFNhZbwClunDZe6Qeo/7NSZA7tOBrVe0e9iAwWqNhWDLrGZZ+SCrh10YXPXuvxhxyfg+kiMd7NqOgCj2hbFTf6jnq5xHc7iByc2Ky+O850ba4wsaCIT96XbDLPhii1pa/PXs/SVMFLUauHekJv39VnZ8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764667947; c=relaxed/simple;
-	bh=cH6Bwn7z9r2z9m08O1SwvgWAiLz178mtM9yKwmWkowc=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=qg4DNRyH00vi1wwvrFBcS6OgTTJ56Ap/PiyNzcwfmZt+IWX3DZYtqPBaKSUU/aukRAjlkiP93petkPREzQ7qj9csWaaXV0y8TxEm36r87Wp343PuHKCOSCej7hRyyGIpXdHn9mkoEQGd8Zhup/l5raXg3hPaq8NP+CkKLsDhntM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=H9HSMYxa; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1764686955; c=relaxed/simple;
+	bh=Cl1k5I7XFkRThZI4D+HTvkvuadLAhicPx5RXTab3AAE=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=dM1uEpZamw5fxkwHTuj579izGSIyfsDPqjyfBJDPIUGpsBAr8nG83K/6PgDl/yORqp32o2PPe84JnOljNpfczcOOd2O5kMDHuWecmFSM50E/vNJYO5NDS+6kuoZ2FTeFFPgegYmB6KPR374h2A/E0dLiUxIPYkobVceNEyVsRgM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=QjJ7J0sQ; arc=none smtp.client-ip=192.198.163.8
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="H9HSMYxa"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F20FAC4CEF1;
-	Tue,  2 Dec 2025 09:32:21 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1764667947;
-	bh=cH6Bwn7z9r2z9m08O1SwvgWAiLz178mtM9yKwmWkowc=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=H9HSMYxadUXzH9OEBq5dZ1GxtURPzhnNzTZ4Z/v563Gs9P1bMgN4G8bEg40xIBarx
-	 is2IycG+ZYg7QEiAWwbFeCRYTJP0U7GJubQB1KF5VjH+RLOmCdK+Y6vncMeO38jXSA
-	 FVyjIfehECBQxXU65Uxz/Hawqeu/cwsaTuigxoAkqp1gKZ6BrchdfoFJ6wsam7VZtR
-	 yWw/KaS+EWkGG/udG3WLgBPU9j8TH70wM6KtPZNljGT3YiXUi1bOPPLMPkiNpSc/In
-	 8Y7FnlGnRHfEllELPJ4r6QDeGD79/JJxuwYKHhzrh8FjE6IdgeClY8XydN0g1HtLB+
-	 JsQTBU5GwBEPg==
-Date: Tue, 2 Dec 2025 10:32:19 +0100
-From: Niklas Cassel <cassel@kernel.org>
-To: Koichiro Den <den@valinux.co.jp>
-Cc: Frank Li <Frank.li@nxp.com>, ntb@lists.linux.dev,
-	linux-pci@vger.kernel.org, dmaengine@vger.kernel.org,
-	linux-kernel@vger.kernel.org, mani@kernel.org,
-	kwilczynski@kernel.org, kishon@kernel.org, bhelgaas@google.com,
-	corbet@lwn.net, vkoul@kernel.org, jdmason@kudzu.us,
-	dave.jiang@intel.com, allenbh@gmail.com, Basavaraj.Natikar@amd.com,
-	Shyam-sundar.S-k@amd.com, kurt.schwemmer@microsemi.com,
-	logang@deltatee.com, jingoohan1@gmail.com, lpieralisi@kernel.org,
-	robh@kernel.org, jbrunet@baylibre.com, fancer.lancer@gmail.com,
-	arnd@arndb.de, pstanner@redhat.com, elfring@users.sourceforge.net,
-	Damien Le Moal <dlemoal@kernel.org>
-Subject: Re: [RFC PATCH v2 19/27] PCI: dwc: ep: Cache MSI outbound iATU
- mapping
-Message-ID: <aS6yIz94PgikWBXf@ryzen>
-References: <20251129160405.2568284-1-den@valinux.co.jp>
- <20251129160405.2568284-20-den@valinux.co.jp>
- <aS39gkJS144og1d/@lizhi-Precision-Tower-5810>
- <ddriorsgyjs6klcb6d7pi2u3ah3wxlzku7v2dpyjlo6tmalvfw@yj5dczlkggt6>
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="QjJ7J0sQ"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1764686954; x=1796222954;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=Cl1k5I7XFkRThZI4D+HTvkvuadLAhicPx5RXTab3AAE=;
+  b=QjJ7J0sQM4G8ooFFwzNNtyaSeX2fMJAEVGzqftm4lQoiu/YZGmuQw4WN
+   IoVneX14Z8GUoFrUugEC8/wp6OcLtSD//uYXDIO2gQqBQa5cV0Hmk1k2K
+   AVAAsSb0QRolExNWfZskxdXumh4gikO/bqw1TUsdj5K6YCf1XtvI/ffSO
+   Ttme4kO3euhnpwlK2u4vObqRVaRlx4jG3geoL6Vxu3j10G4iBZE+wSZtm
+   GNWYASs8j0LHOFuGSRbj6SYlnTn2rKFbaEv7Hv8J5EnTQbCBmAXLFRYGm
+   Hl2h86BBGcO1yG6PCy/9qA9EkbnWgUJEVNJXaNh4q8tNkRaJVAwwd0H/b
+   Q==;
+X-CSE-ConnectionGUID: U6/9TtreSsOAwGZP6ZG3Sg==
+X-CSE-MsgGUID: FPO4frJETkePYkdvRmMAaw==
+X-IronPort-AV: E=McAfee;i="6800,10657,11630"; a="84254299"
+X-IronPort-AV: E=Sophos;i="6.20,243,1758610800"; 
+   d="scan'208";a="84254299"
+Received: from fmviesa001.fm.intel.com ([10.60.135.141])
+  by fmvoesa102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Dec 2025 06:49:12 -0800
+X-CSE-ConnectionGUID: qZsDMbeQRwuFhyaAK5ZcAQ==
+X-CSE-MsgGUID: QT4IPoTwQZCJjZbFD53fUA==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.20,243,1758610800"; 
+   d="scan'208";a="225356200"
+Received: from ldmartin-desk2.corp.intel.com (HELO [10.125.111.202]) ([10.125.111.202])
+  by smtpauth.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Dec 2025 06:49:10 -0800
+Message-ID: <3c07161d-f1df-4409-a11c-b4a60afda226@intel.com>
+Date: Tue, 2 Dec 2025 07:49:08 -0700
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ddriorsgyjs6klcb6d7pi2u3ah3wxlzku7v2dpyjlo6tmalvfw@yj5dczlkggt6>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [RFC PATCH v2 10/27] NTB: core: Add .get_pci_epc() to ntb_dev_ops
+To: Koichiro Den <den@valinux.co.jp>
+Cc: ntb@lists.linux.dev, linux-pci@vger.kernel.org,
+ dmaengine@vger.kernel.org, linux-kernel@vger.kernel.org, Frank.Li@nxp.com,
+ mani@kernel.org, kwilczynski@kernel.org, kishon@kernel.org,
+ bhelgaas@google.com, corbet@lwn.net, vkoul@kernel.org, jdmason@kudzu.us,
+ allenbh@gmail.com, Basavaraj.Natikar@amd.com, Shyam-sundar.S-k@amd.com,
+ kurt.schwemmer@microsemi.com, logang@deltatee.com, jingoohan1@gmail.com,
+ lpieralisi@kernel.org, robh@kernel.org, jbrunet@baylibre.com,
+ fancer.lancer@gmail.com, arnd@arndb.de, pstanner@redhat.com,
+ elfring@users.sourceforge.net
+References: <20251129160405.2568284-1-den@valinux.co.jp>
+ <20251129160405.2568284-11-den@valinux.co.jp>
+ <8b209241-99a7-42c0-8025-e75a11176f1b@intel.com>
+ <f6jo2z4dnk23dun7g7d6d4ul2rw7do2cugb7jtq4tfb4vixzsw@lmpl5p4kqxc6>
+From: Dave Jiang <dave.jiang@intel.com>
+Content-Language: en-US
+In-Reply-To: <f6jo2z4dnk23dun7g7d6d4ul2rw7do2cugb7jtq4tfb4vixzsw@lmpl5p4kqxc6>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-Hello Koichiro,
 
-On Tue, Dec 02, 2025 at 03:35:36PM +0900, Koichiro Den wrote:
-> On Mon, Dec 01, 2025 at 03:41:38PM -0500, Frank Li wrote:
-> > On Sun, Nov 30, 2025 at 01:03:57AM +0900, Koichiro Den wrote:
-> > > dw_pcie_ep_raise_msi_irq() currently programs an outbound iATU window
-> > > for the MSI target address on every interrupt and tears it down again
-> > > via dw_pcie_ep_unmap_addr().
-> > >
-> > > On systems that heavily use the AXI bridge interface (for example when
-> > > the integrated eDMA engine is active), this means the outbound iATU
-> > > registers are updated while traffic is in flight. The DesignWare
-> > > endpoint spec warns that updating iATU registers in this situation is
-> > > not supported, and the behavior is undefined.
-> > >
-> > > Under high MSI and eDMA load this pattern results in occasional bogus
-> > > outbound transactions and IOMMU faults such as:
-> > >
-> > >   ipmmu-vmsa eed40000.iommu: Unhandled fault: status 0x00001502 iova 0xfe000000
-> > >
-> > 
-> > I agree needn't map/unmap MSI every time. But I think there should be
-> > logic problem behind this. IOMMU report error means page table already
-> > removed, but you still try to access it after that. You'd better find where
-> > access MSI memory after dw_pcie_ep_unmap_addr().
+
+On 12/1/25 11:32 PM, Koichiro Den wrote:
+> On Mon, Dec 01, 2025 at 02:08:14PM -0700, Dave Jiang wrote:
+>>
+>>
+>> On 11/29/25 9:03 AM, Koichiro Den wrote:
+>>> Add an optional get_pci_epc() callback to retrieve the underlying
+>>> pci_epc device associated with the NTB implementation.
+>>>
+>>> Signed-off-by: Koichiro Den <den@valinux.co.jp>
+>>> ---
+>>>  drivers/ntb/hw/epf/ntb_hw_epf.c | 11 +----------
+>>>  include/linux/ntb.h             | 21 +++++++++++++++++++++
+>>>  2 files changed, 22 insertions(+), 10 deletions(-)
+>>>
+>>> diff --git a/drivers/ntb/hw/epf/ntb_hw_epf.c b/drivers/ntb/hw/epf/ntb_hw_epf.c
+>>> index a3ec411bfe49..d55ce6b0fad4 100644
+>>> --- a/drivers/ntb/hw/epf/ntb_hw_epf.c
+>>> +++ b/drivers/ntb/hw/epf/ntb_hw_epf.c
+>>> @@ -9,6 +9,7 @@
+>>>  #include <linux/delay.h>
+>>>  #include <linux/module.h>
+>>>  #include <linux/pci.h>
+>>> +#include <linux/pci-epf.h>
+>>>  #include <linux/slab.h>
+>>>  #include <linux/ntb.h>
+>>>  
+>>> @@ -49,16 +50,6 @@
+>>>  
+>>>  #define NTB_EPF_COMMAND_TIMEOUT	1000 /* 1 Sec */
+>>>  
+>>> -enum pci_barno {
+>>> -	NO_BAR = -1,
+>>> -	BAR_0,
+>>> -	BAR_1,
+>>> -	BAR_2,
+>>> -	BAR_3,
+>>> -	BAR_4,
+>>> -	BAR_5,
+>>> -};
+>>> -
+>>>  enum epf_ntb_bar {
+>>>  	BAR_CONFIG,
+>>>  	BAR_PEER_SPAD,
+>>> diff --git a/include/linux/ntb.h b/include/linux/ntb.h
+>>> index d7ce5d2e60d0..04dc9a4d6b85 100644
+>>> --- a/include/linux/ntb.h
+>>> +++ b/include/linux/ntb.h
+>>> @@ -64,6 +64,7 @@ struct ntb_client;
+>>>  struct ntb_dev;
+>>>  struct ntb_msi;
+>>>  struct pci_dev;
+>>> +struct pci_epc;
+>>>  
+>>>  /**
+>>>   * enum ntb_topo - NTB connection topology
+>>> @@ -256,6 +257,7 @@ static inline int ntb_ctx_ops_is_valid(const struct ntb_ctx_ops *ops)
+>>>   * @msg_clear_mask:	See ntb_msg_clear_mask().
+>>>   * @msg_read:		See ntb_msg_read().
+>>>   * @peer_msg_write:	See ntb_peer_msg_write().
+>>> + * @get_pci_epc:	See ntb_get_pci_epc().
+>>>   */
+>>>  struct ntb_dev_ops {
+>>>  	int (*port_number)(struct ntb_dev *ntb);
+>>> @@ -331,6 +333,7 @@ struct ntb_dev_ops {
+>>>  	int (*msg_clear_mask)(struct ntb_dev *ntb, u64 mask_bits);
+>>>  	u32 (*msg_read)(struct ntb_dev *ntb, int *pidx, int midx);
+>>>  	int (*peer_msg_write)(struct ntb_dev *ntb, int pidx, int midx, u32 msg);
+>>> +	struct pci_epc *(*get_pci_epc)(struct ntb_dev *ntb);
+>>
+>> Seems very specific call to this particular hardware instead of something generic for the NTB dev ops. Maybe it should be something like get_private_data() or something like that?
 > 
-> I don't see any other callers that access the MSI region after
-> dw_pcie_ep_unmap_addr(), but I might be missing something. Also, even if I
-> serialize dw_pcie_ep_raise_msi_irq() invocations, the problem still
-> appears.
+> Thank you for the suggestion.
 > 
-> A couple of details I forgot to describe in the commit message:
-> (1). The IOMMU error is only reported on the RC side.
-> (2). Sometimes there is no IOMMU error printed and the board just freezes (becomes unresponsive).
+> I also felt that it's too specific, but I couldn't come up with a clean
+> generic interface at the time, so I left it in this form.
 > 
-> The faulting iova is 0xfe000000. The iova 0xfe000000 is the base of
-> "addr_space" for R-Car S4 in EP mode:
-> https://github.com/jonmason/ntb/blob/68113d260674/arch/arm64/boot/dts/renesas/r8a779f0.dtsi#L847
+> .get_private_data() might indeed be better. In the callback doc comment we
+> could describe it as "may be used to obtain a backing PCI controller
+> pointer"?
+
+I would add that comment in the defined callback for the hardware driver. For the actual API, it would be something like "for retrieving private data specific to the hardware driver"?
+
+DJ
+
 > 
-> So it looks like the EP sometimes issue MWr at "addr_space" base (offset 0),
-> the RC forwards it to its IOMMU (IPMMUHC) and that faults. My working theory
-> is that when the iATU registers are updated under heavy DMA load, the DAR of
-> some in-flight transfer can get corrupted to 0xfe000000. That would match one
-> possible symptom of the undefined behaviour that the DW EPC spec warns about
-> when changing iATU configuration under load.
+> -Koichiro
+> 
+>>
+>> DJ
+>>
+>>
+>>>  };
+>>>  
+>>>  static inline int ntb_dev_ops_is_valid(const struct ntb_dev_ops *ops)
+>>> @@ -393,6 +396,9 @@ static inline int ntb_dev_ops_is_valid(const struct ntb_dev_ops *ops)
+>>>  		/* !ops->msg_clear_mask == !ops->msg_count	&& */
+>>>  		!ops->msg_read == !ops->msg_count		&&
+>>>  		!ops->peer_msg_write == !ops->msg_count		&&
+>>> +
+>>> +		/* Miscellaneous optional callbacks */
+>>> +		/* ops->get_pci_epc			&& */
+>>>  		1;
+>>>  }
+>>>  
+>>> @@ -1567,6 +1573,21 @@ static inline int ntb_peer_msg_write(struct ntb_dev *ntb, int pidx, int midx,
+>>>  	return ntb->ops->peer_msg_write(ntb, pidx, midx, msg);
+>>>  }
+>>>  
+>>> +/**
+>>> + * ntb_get_pci_epc() - get backing PCI endpoint controller if possible.
+>>> + * @ntb:	NTB device context.
+>>> + *
+>>> + * Get the backing PCI endpoint controller representation.
+>>> + *
+>>> + * Return: A pointer to the pci_epc instance if available. or %NULL if not.
+>>> + */
+>>> +static inline struct pci_epc __maybe_unused *ntb_get_pci_epc(struct ntb_dev *ntb)
+>>> +{
+>>> +	if (!ntb->ops->get_pci_epc)
+>>> +		return NULL;
+>>> +	return ntb->ops->get_pci_epc(ntb);
+>>> +}
+>>> +
+>>>  /**
+>>>   * ntb_peer_resource_idx() - get a resource index for a given peer idx
+>>>   * @ntb:	NTB device context.
+>>
 
-For your information, in the NVMe PCI EPF driver:
-https://github.com/torvalds/linux/blob/v6.18/drivers/nvme/target/pci-epf.c#L389-L429
-
-We take a mutex around the dmaengine_slave_config() and dma_sync_wait() calls,
-because without a mutex, we noticed that having multiple outstanding transfers,
-since the dmaengine_slave_config() specifies the src/dst address, the function
-call would affect other concurrent DMA transfers, leading to corruption because
-of invalid src/dst addresses.
-
-Having a mutex so that we can only have one outstanding transfer solves these
-issues, but is obviously very bad for performance.
-
-
-I did try to add DMA_MEMCPY support to the dw-edma driver:
-https://lore.kernel.org/linux-pci/20241217160448.199310-4-cassel@kernel.org/
-
-Since that would allow us to specify both the src and dst address in a single
-dmaengine function call (so that we would no longer need a mutex).
-However, because the eDMA hardware (at least for EDMA_LEGACY_UNROLL) does not
-support transfers between PCI to PCI, only PCI to local DDR or local DDR to
-PCI, using prep_memcpy() is wrong, as it does not take a direction:
-https://lore.kernel.org/linux-pci/Z4jf2s5SaUu3wdJi@ryzen/
-
-If we want to improve the dw-edma driver, so that an EPF driver can have
-multiple outstanding transfers, I think the best way forward would be to create
-a new _prep_slave_memcpy() or similar, that does take a direction, and thus
-does not require dmaengine_slave_config() to be called before every
-_prep_slave_memcpy() call.
-
-
-Kind regards,
-Niklas
