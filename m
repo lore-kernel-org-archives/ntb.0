@@ -1,32 +1,32 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5B1B01EF0B0;
-	Mon,  8 Dec 2025 07:57:28 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A69323B8D64;
+	Tue,  9 Dec 2025 08:16:05 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765180648; cv=none; b=ZBlwtKfSTaC6XMRGrQMP6ctjQBynMC/EpA6owCVlrLQdqrdBs4FatNAHX5a5zNX/EyEZBTcYt8+OlYSlTL0vu/iE1WoVtYn87rrJDH001WL3w4p2SuE3A4NCRAEuuUpsSVLQE03O+IlwbbPm10uREGAE9KPzdmXO4YHU1xPlEtc=
+	t=1765268165; cv=none; b=mYIf1TM2c2yHBMB2a63T+Bm0u7qpSecGDXPcsEN1W7FhTMF6wTOSItMMIVn0PnHAUc2qzqR7HSBOBGSx7QcfdtyrdB9qsXKrbhbQI6wMBFqx3W/Tepge4rcbgNftEPEH4X74+gymPKYs40IzppZaWAGXTgK0upXMhSjYC9bmFgY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765180648; c=relaxed/simple;
-	bh=j8oWjVwkHFBC1tJGURNhcjmPeuMGWK1e31YVEBQPuqI=;
+	s=arc-20240116; t=1765268165; c=relaxed/simple;
+	bh=XnHT+V9QtuZ5gcDpy0Vw8acht1bOsv0SGcdX4i9Cq0Q=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=j66RnKfswRTsI5YrYD/UpyeVbVfs4PliVpM0Fu/tOb25xh4iYfa094EXB56RNKf7+87vp/SqLBTCQTaG4sBypwAki+9IF7UlInDFrbK2KjlZo9TkWl9zVWHwr6exRE8CNJVlzAszhViTBF0JmdpAODl+tYg+dq49rDfTioIQqP4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OCcZSls7; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=XFgoUr2tYIfdpbopthJWnE9iGtOexCvvu53ucBpqJKJygBduY3Updg/tc/hkzHqLJItvD7BMzBL1453mUI6SwmJ+whLzo+fEvgyiyALEh1OsXyrgGHkNM1HijTpeAMwdhboYmFCU5Nn1LmYovS07lZNISiGS5pLFTl5ix/p9q/o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=uX+AmI4A; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OCcZSls7"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 36AFDC4CEF1;
-	Mon,  8 Dec 2025 07:57:22 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="uX+AmI4A"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0483CC4CEF5;
+	Tue,  9 Dec 2025 08:15:59 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1765180647;
-	bh=j8oWjVwkHFBC1tJGURNhcjmPeuMGWK1e31YVEBQPuqI=;
+	s=k20201202; t=1765268165;
+	bh=XnHT+V9QtuZ5gcDpy0Vw8acht1bOsv0SGcdX4i9Cq0Q=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=OCcZSls7ka97pwp7Rf7eGBZh3+91dhPxfBm6p9JsQyjzGu1W5FXNe9F3bWqaRyoVT
-	 WbdR4xtURGD6VKp4nGgW3ECjaDHHB7G6wfekV1H/pp6TEDGNXRDmK4fNOo3EEAg2Pk
-	 8F4b1ZiLz3VHxj62fzkq3VPUIhEJWUBT6zVxEXR4/lj37zZ4QCWho25ZXvAkf3UHIx
-	 Y31efflkKCbp24gHOQ9jYoBMzOLkW2DxB43i+qbD51/vuM5PJ4gdSaTfkyVu0HYY3z
-	 OLEpQEyGgnWPz7lAIr+KRkfJPA0tDF75lcCsCQyQuIG1HPghqXsYoyZAD8iUI/z3yW
-	 wzuW2dR49lFxw==
-Date: Mon, 8 Dec 2025 08:57:19 +0100
+	b=uX+AmI4AUAC7sbo9DvaOkzDFyV5xtnfpbiMbvuycbGLIPCl4mGIzyHd2IQ40zX6R1
+	 c45i/n/6obdZnLsegO4P9K1HkeiYX7FjBsUU+tEG0z4C4TV0GBaEJ9myAjmbxGfbuQ
+	 tCqcjbOlhbLdROvhfhUEsqDe6/8V7NpJXflQ/aTuZ3TCJpS8OItylZ1TkEpRqmmpn/
+	 AAlrIyb8vhF32ioqff6YZWq6KpoL6Dd7D9BSPUlL0Shu9IS8NxqCTT9pOwIYMQGubL
+	 kd9WRlzgp5dX6rhc/uoVjDxOY3WvcdUFfoAV0Q8NzP6pXLd4zaq29mPCl1vOu8ZxFL
+	 OrnMjmxLSc0dQ==
+Date: Tue, 9 Dec 2025 09:15:57 +0100
 From: Niklas Cassel <cassel@kernel.org>
 To: Koichiro Den <den@valinux.co.jp>
 Cc: ntb@lists.linux.dev, linux-pci@vger.kernel.org,
@@ -41,105 +41,120 @@ Cc: ntb@lists.linux.dev, linux-pci@vger.kernel.org,
 	arnd@arndb.de, pstanner@redhat.com, elfring@users.sourceforge.net
 Subject: Re: [RFC PATCH v2 19/27] PCI: dwc: ep: Cache MSI outbound iATU
  mapping
-Message-ID: <aTaE3yB7tQ-Homju@ryzen>
+Message-ID: <aTfavdjoc2ob2j2g@ryzen>
 References: <20251129160405.2568284-1-den@valinux.co.jp>
  <20251129160405.2568284-20-den@valinux.co.jp>
+ <aTaE3yB7tQ-Homju@ryzen>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20251129160405.2568284-20-den@valinux.co.jp>
+In-Reply-To: <aTaE3yB7tQ-Homju@ryzen>
 
-On Sun, Nov 30, 2025 at 01:03:57AM +0900, Koichiro Den wrote:
-> dw_pcie_ep_raise_msi_irq() currently programs an outbound iATU window
-> for the MSI target address on every interrupt and tears it down again
-> via dw_pcie_ep_unmap_addr().
-> 
-> On systems that heavily use the AXI bridge interface (for example when
-> the integrated eDMA engine is active), this means the outbound iATU
-> registers are updated while traffic is in flight. The DesignWare
-> endpoint spec warns that updating iATU registers in this situation is
-> not supported, and the behavior is undefined.
-> 
-> Under high MSI and eDMA load this pattern results in occasional bogus
-> outbound transactions and IOMMU faults such as:
-> 
->   ipmmu-vmsa eed40000.iommu: Unhandled fault: status 0x00001502 iova 0xfe000000
-> 
-> followed by the system becoming unresponsive. This is the actual output
-> observed on Renesas R-Car S4, with its ipmmu_hc used with PCIe ch0.
-> 
-> There is no need to reprogram the iATU region used for MSI on every
-> interrupt. The host-provided MSI address is stable while MSI is enabled,
-> and the endpoint driver already dedicates a scratch buffer for MSI
-> generation.
-> 
-> Cache the aligned MSI address and map size, program the outbound iATU
-> once, and keep the window enabled. Subsequent interrupts only perform a
-> write to the MSI scratch buffer, avoiding dynamic iATU reprogramming in
-> the hot path and fixing the lockups seen under load.
-> 
-> Signed-off-by: Koichiro Den <den@valinux.co.jp>
-> ---
->  .../pci/controller/dwc/pcie-designware-ep.c   | 48 ++++++++++++++++---
->  drivers/pci/controller/dwc/pcie-designware.h  |  5 ++
->  2 files changed, 47 insertions(+), 6 deletions(-)
-> 
+On Mon, Dec 08, 2025 at 08:57:19AM +0100, Niklas Cassel wrote:
+> On Sun, Nov 30, 2025 at 01:03:57AM +0900, Koichiro Den wrote:
+>
+> I don't like that this patch modifies dw_pcie_ep_raise_msi_irq() but does
+> not modify dw_pcie_ep_raise_msix_irq()
+>
+> both functions call dw_pcie_ep_map_addr() before doing the writel(),
+> so I think they should be treated the same.
 
-I don't like that this patch modifies dw_pcie_ep_raise_msi_irq() but does
-not modify dw_pcie_ep_raise_msix_irq()
+Btw, when using nvmet-pci-epf:
+drivers/nvme/target/pci-epf.c
 
-both functions call dw_pcie_ep_map_addr() before doing the writel(),
-so I think they should be treated the same.
+With queue depth == 32, I get:
+[  106.585811] arm-smmu-v3 fc900000.iommu: event 0x10 received:
+[  106.586349] arm-smmu-v3 fc900000.iommu:      0x0000010000000010
+[  106.586846] arm-smmu-v3 fc900000.iommu:      0x0000020000000000
+[  106.587341] arm-smmu-v3 fc900000.iommu:      0x000000090000f040
+[  106.587841] arm-smmu-v3 fc900000.iommu:      0x0000000000000000
+[  106.588335] arm-smmu-v3 fc900000.iommu: event: F_TRANSLATION client: 0000:01:00.0 sid: 0x100 ssid: 0x0 iova: 0x90000f040 ipa: 0x0
+[  106.589383] arm-smmu-v3 fc900000.iommu: unpriv data write s1 "Input address caused fault" stag: 0x0
+
+(If I only run with queue depth == 1, I cannot trigger this IOMMU error.)
 
 
-I do however understand that it is a bit wasteful to dedicate one
-outbound iATU for MSI and one outbound iATU for MSI-X, as the PCI
-spec does not allow both of them to be enabled at the same PCI,
-see:
-
-6.1.4 MSI and MSI-X Operation § in PCIe 6.0 spec:
-"A Function is permitted to implement both MSI and MSI-X,
-but system software is prohibited from enabling both at the
-same time. If system software enables both at the same time,
-the behavior is undefined."
+So, I really think that this patch is important, as it solves a real
+problem also for the nvmet-pci-epf driver.
 
 
-I guess the problem is that some EPF drivers, even if only
-one capability can be enabled (MSI/MSI-X), call both
-pci_epc_set_msi() and pci_epc_set_msix(), e.g.:
-https://github.com/torvalds/linux/blob/v6.18/drivers/pci/endpoint/functions/pci-epf-test.c#L969-L987
-
-To fill in the number of MSI/MSI-X irqs.
-
-While other EPF drivers only call either pci_epc_set_msi() or
-pci_epc_set_msix(), depending on the IRQ type that will actually
-be used:
-https://github.com/torvalds/linux/blob/v6.18/drivers/nvme/target/pci-epf.c#L2247-L2262
-
-I think both versions is okay, just because the number of IRQs
-is filled in for both MSI/MSI-X, AFAICT, only one of them will
-get enabled.
+With this patch applied, I cannot trigger the IOMMU error,
+so I really think that you should send this a a stand alone patch.
 
 
-I guess it might be hard for an EPC driver to know which capability
-that is currently enabled, as to enable a capability is only a config
-space write by the host side.
+I still think that we need to modify dw_pcie_ep_raise_msix_irq() in a similar
+way.
 
-I guess in most real hardware, e.g. a NIC device, you do an
-"enable engine"/"stop enginge" type of write to a BAR.
 
-Perhaps we should have similar callbacks in struct pci_epc_ops ?
+Perhaps instead of:
 
-My thinking is that after "start engine", an EPC driver could read
-the MSI and MSI-X capabilities, to see which is enabled.
-As it should not be allowed to change between MSI and MSI-X without
-doing a "stop engine" first.
+
+	if (!ep->msi_iatu_mapped) {
+		ret = dw_pcie_ep_map_addr(epc, func_no, 0,
+					  ep->msi_mem_phys, msg_addr,
+					  map_size);
+		if (ret)
+			return ret;
+
+		ep->msi_iatu_mapped = true;
+		ep->msi_msg_addr = msg_addr;
+		ep->msi_map_size = map_size;
+	} else if (WARN_ON_ONCE(ep->msi_msg_addr != msg_addr ||
+				ep->msi_map_size != map_size)) {
+		/*
+		 * The host changed the MSI target address or the required
+		 * mapping size. Reprogramming the iATU at runtime is unsafe
+		 * on this controller, so bail out instead of trying to update
+		 * the existing region.
+		 */
+		return -EINVAL;
+	}
+
+	writel(msg_data | (interrupt_num - 1), ep->msi_mem + offset);
+
+
+
+We could modify both dw_pcie_ep_raise_msix_irq and dw_pcie_ep_raise_msi_irq
+to do something like:
+
+
+
+	if (!ep->msi_iatu_mapped) {
+		ret = dw_pcie_ep_map_addr(epc, func_no, 0,
+					  ep->msi_mem_phys, msg_addr,
+					  map_size);
+		if (ret)
+			return ret;
+
+		ep->msi_iatu_mapped = true;
+		ep->msi_msg_addr = msg_addr;
+		ep->msi_map_size = map_size;
+	} else if (WARN_ON_ONCE(ep->msi_msg_addr != msg_addr ||
+				ep->msi_map_size != map_size)) {
+		/*
+		 * Host driver might have changed from MSI to MSI-X
+		 * or the other way around.
+		 */
+		 dw_pcie_ep_unmap_addr(epc, 0, 0, ep->msi_mem_phys);
+		 ret = dw_pcie_ep_map_addr(epc, func_no, 0,
+		 			   ep->msi_mem_phys, msg_addr,
+					   map_size);
+		if (ret)
+			return ret;
+	}
+
+	writel(msg_data | (interrupt_num - 1), ep->msi_mem + offset);
+
+
+
+I think that should work without needing to introuce any
+.start_engine() / .stop_engine() APIs.
+
 
 
 Kind regards,
