@@ -1,564 +1,235 @@
-Received: from TYVP286CU001.outbound.protection.outlook.com (mail-japaneastazon11011039.outbound.protection.outlook.com [52.101.125.39])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA7032E40E
-	for <ntb@lists.linux.dev>; Sat, 20 Dec 2025 15:44:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.125.39
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1766245446; cv=fail; b=tp3JcpTYXZud83i47fUhfK3xRGGbCq5J6Un1ixW/99jTJ3FKsaKBQ7M1obZoTiw5pF5e1VG0SaJT3XZJnSpGCQwI+DkTHoqds1oR7uIALyIWRqG1YwZiPEJwakkXHuAq7/ZIuYg4CIngJDLnSEN6HYGXMF0ZyB0zlJ+IEmqIamg=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1766245446; c=relaxed/simple;
-	bh=EY1GHvJj5GrT/lt9z5Tlz5mQYAJy1IwY6KCHbBxO9gE=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
-	 Content-Disposition:In-Reply-To:MIME-Version; b=hGiR+qnQgzwlUTMPnPRl78827/UeQXEkV5zBI8ATFdoXVzOmM5MZ9hHUtjdWoFjT8fKZDFbYDg+GBcAy+r2j9mQRoHZamLQ7i2Q2MICtUxh3FDbX3Y9r4PafStTaDO9isfQ58TmCz8Afh4TXQ9W6WAdiyffQ/LfH97qq/+obQVo=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=wna5nAf1; arc=fail smtp.client-ip=52.101.125.39
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0A9812FF143
+	for <ntb@lists.linux.dev>; Mon, 22 Dec 2025 05:10:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1766380224; cv=none; b=UOuBhXxLErXO7AN4jTdTrZhptS6sbGFL1F3vjKhJHbWRQsnjUjIOvNMEWrc0seIj+6RnySwIJpG1x1nUikcdK/oDJA1dv4a0eUYcYlp2acnJUuPocoWahmIvCnnl0Kdih7RfKcDAEK66/0NPGoiEFu4rStrbOkx0P5dKEUcVclY=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1766380224; c=relaxed/simple;
+	bh=lEz1EO9+5vHP/vkBtalnXRHK5Kz28Zn3kdtPr8JcOLM=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=tLilJ151+bccH9nkb30HmckgfVz+AQWN/Aja9z8C1130d2VLklbcWKyhGiM4eXJbLDPqBuX+vXGDJ438ryh2R6YC/fOQy82GZA8f2qRvxp9u9bJrbAR84tDoSOV6hkE1EN/BHbHdpfUEnvq0Zov8CzhuKTkyju73HMOQmuU6PT4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=JaqE8PFX; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=AmXrC68H; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="wna5nAf1"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=mBh8SP8kwAXHffzZTjUloI5HdAZ/Z3DCth+sGdKWPQAeqW+tU1FzlqWiu1nTNuxiMY4MKUBBy7BDTXH0jLI/4xPIuV84iDhT5RpDGz5QxksZvYc/oXdMtgDy1j3ydOq901AImp0CGtNSU25K3pCWTzevmQZQE63muTLkFeueuKGnenZ/Dz5TKlb5qpC5qEfJCo7r2WAGtjRiihAOUCJIDO4FuewwkaQny1wARgD1qYzKEoqnVGR0mb55alA1fKRq0Iv3IezQNP8T3FoygxANoUCi3PBtlWZ+v5jv6PjWf2+vzy79JW/oW6XS+RKY268uwvsoF+ZuuN6JXw6kQM6VrA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=wCoPMmK+6nGrbk5fdth9Gqy8wbXF/sTCrO79kL2ZHh8=;
- b=q7K1+Rr+NlcvRXcV1XRrgitzDW2nHLFr7b1RUWyxEwbJxl/72nAFVhgjG/IQVxWwjgFg1KAk/B6uq58UkI8y/L/2ENk4IENQc20srhulYW1CRmXDoliUbZK252qAFzox5nLz7WWdqD21sC7Z4qupl9S0s7Sl1RcBmP+BxmWKkYnGhQ07bDVL4z24KN6GQFTpHmC5Wo8tGCrI91TLvbmanPye3cMVhuWgAkLhcQNakllD9vmxY3g81eLPcCGffiZ2wlMj6QfN0QLxOQaq2CilCjNu6+H4xTIv78UuKWM1PX87JfgmR300A0fsAUpO0CQ9FmcrJ4f2vKZ1yru6UcWUGQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
- header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
- s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=wCoPMmK+6nGrbk5fdth9Gqy8wbXF/sTCrO79kL2ZHh8=;
- b=wna5nAf1HWS0H2EbtVrBnf0N4AOsujnDR0zleatGYOpVf0kiWu537TyVY+b0r51JHjXGi6C7gsr8SHET/2lVMNjCMKxg8FplHTitwX+kdvYeQG5SuVsho8nvlzLIf88wpa517Ml+m/iZnDas1kDFCABfbtMVjhD7EM6zD/7Vzk0=
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=valinux.co.jp;
-Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:38f::10)
- by OS3P286MB2742.JPNP286.PROD.OUTLOOK.COM (2603:1096:604:1fe::12) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9434.9; Sat, 20 Dec
- 2025 15:44:01 +0000
-Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
- ([fe80::2b5:5bff:7938:b48c]) by TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
- ([fe80::2b5:5bff:7938:b48c%7]) with mapi id 15.20.9434.001; Sat, 20 Dec 2025
- 15:44:01 +0000
-Date: Sun, 21 Dec 2025 00:44:00 +0900
-From: Koichiro Den <den@valinux.co.jp>
-To: Frank Li <Frank.li@nxp.com>
-Cc: dave.jiang@intel.com, ntb@lists.linux.dev, linux-pci@vger.kernel.org, 
-	dmaengine@vger.kernel.org, linux-renesas-soc@vger.kernel.org, netdev@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, mani@kernel.org, kwilczynski@kernel.org, kishon@kernel.org, 
-	bhelgaas@google.com, corbet@lwn.net, geert+renesas@glider.be, magnus.damm@gmail.com, 
-	robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org, vkoul@kernel.org, 
-	joro@8bytes.org, will@kernel.org, robin.murphy@arm.com, jdmason@kudzu.us, 
-	allenbh@gmail.com, andrew+netdev@lunn.ch, davem@davemloft.net, edumazet@google.com, 
-	kuba@kernel.org, pabeni@redhat.com, Basavaraj.Natikar@amd.com, 
-	Shyam-sundar.S-k@amd.com, kurt.schwemmer@microsemi.com, logang@deltatee.com, 
-	jingoohan1@gmail.com, lpieralisi@kernel.org, utkarsh02t@gmail.com, 
-	jbrunet@baylibre.com, dlemoal@kernel.org, arnd@arndb.de, elfring@users.sourceforge.net
-Subject: Re: [RFC PATCH v3 00/35] NTB transport backed by endpoint DW eDMA
-Message-ID: <vnbx7mbz5v6cdcfacj45pfqlqckqrpe7nwl63u63udvqnfkcxy@sfgjk75gdmlw>
-References: <20251217151609.3162665-1-den@valinux.co.jp>
- <aUVrS/R+DM30UEhC@lizhi-Precision-Tower-5810>
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <aUVrS/R+DM30UEhC@lizhi-Precision-Tower-5810>
-X-ClientProxiedBy: TY4PR01CA0101.jpnprd01.prod.outlook.com
- (2603:1096:405:378::11) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
- (2603:1096:405:38f::10)
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="JaqE8PFX";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="AmXrC68H"
+Received: from pps.filterd (m0279864.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 5BLN42Wh1365903
+	for <ntb@lists.linux.dev>; Mon, 22 Dec 2025 05:10:22 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	HXbQkXLbPCcnMf8qSQ3UYnKPQBMFv/tHJAxobOvHBqU=; b=JaqE8PFXQGSwLVGB
+	Y1+/XHQ0OATA7vElUPkQoDgaUiFG1HJ5h7BlgYAJ502tsiSZnEBYNDzWBuJA26Qx
+	JnJ6dp18sjrQN+yQYGBqJPOT7pPDvwrr4sSFjk+zqDwwaMVYiU8UyOCRjmrZTq6P
+	toXDd1mZHvV5u79MqQ5kzh+A0Ku7lJUsgkio1mjpjorCp2d/zKorTWkQ+lZ5EEY/
+	VsXgNi7Z+o17XUODF2RY9i+DI0Y3CQm5/AKti/UWHCvZqD1TpDyStqwYfNmP4FG7
+	ijrN0Wq52YuIpR436dAfRubAPjt+beIKjSJDNOqpmm0qxoydDfNLtprDZ74Bika6
+	PkHkaA==
+Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com [209.85.210.198])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4b5mydup8f-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <ntb@lists.linux.dev>; Mon, 22 Dec 2025 05:10:22 +0000 (GMT)
+Received: by mail-pf1-f198.google.com with SMTP id d2e1a72fcca58-7ba92341f38so4056413b3a.0
+        for <ntb@lists.linux.dev>; Sun, 21 Dec 2025 21:10:22 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=oss.qualcomm.com; s=google; t=1766380221; x=1766985021; darn=lists.linux.dev;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=HXbQkXLbPCcnMf8qSQ3UYnKPQBMFv/tHJAxobOvHBqU=;
+        b=AmXrC68H7JuifVERcnnb4gClbFqX7Mrd4KspdqKDQ2aK0hhj4BviH8bqvSNKjfTLb1
+         yNxRNyaEKVIb5+hhCk7K00IJcRz2uLUK+OqNWUsoFK1e/++Dq9qEjUqrQS1/SPyt+zD5
+         e6xrUOOTR5ZBw+V10WBQQcryPYCKEvaDAzcdJ7Ype7FtQ5UMKFbHL5jzAF2Cd8J2lgwx
+         GvY46OZ8oppVv3bmYnl6DF0oLwIizOH2pwXQa9nNK/RWq1ysVFa9g2hWkhw2LxlKMcTd
+         6CB/Hlgn5dPPqJrrf36S8nAVa+Q7JMga6bgE2qDoi5MqcnYxtMm1t/vRwoxaEjXwMXnc
+         4kzw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1766380221; x=1766985021;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=HXbQkXLbPCcnMf8qSQ3UYnKPQBMFv/tHJAxobOvHBqU=;
+        b=SiZI0lq1npFtEZlOwIbyvz+DmcmMgHPyZR6qy5th1B/qFPbyyHZ5umSTtZis2OtJzW
+         pooPhLBdwuBSH2cN86cMsXXcNVi4eaJ6J6NJJMJ109djxv8aEKFaPmDJHVyH6BKX76Fn
+         zEZ88viAscoRYCzCIK9R2IEeNjT5LfLZYylX7mlUU4LbG/mqin3flwmLvkA+qLfc88zu
+         qUtpN3w/WQmV505mMUytEweSN5AXeQfa90Lx8G9P7Jv/24fsLETHHLcEPZ15//ywwNc1
+         /10vq+0YosjsTMFIHtxyv9eh4PDu84N9Q/4kc2mvlbVgN/cBRcP5IIrYZc6Uzx8qTmxr
+         Nf8w==
+X-Gm-Message-State: AOJu0YymTZA1//sFUyqr4rm86nks2DoryMB5mYghQgfV6cKRFxa9kiIY
+	y8VIsbKnBlJOLftvvmUOEHKe9xkNIR3L+ad1/AfQQR7Wh5LEPNuH4kiUllxWptu//K0mTsulCle
+	CKeO1mYyu4C8JgmKrYAG8S/O8uSDhEDa69Qz5PpgLwr12jQntDsQUEGU=
+X-Gm-Gg: AY/fxX4xnjPQ/ehPwMpfZ1PApAPCnltdbgEFgc9sEXTBs28yjCuBuCH+1dfc3cUMJBI
+	HvvcEm+6ZlcDcSvqJw1XyRHtr3aR5qN6AR4tAoFvRjcXU/hQEK0fqi7Etp6fCniI+ipWCqyom5m
+	eyfgvzBYbwoz4VOVGVgknIXWnqBHhFZUMOyKCuoxfBcg42+ZZCYAuZtdjXZgQBUBlBTbqLy8LWt
+	nTDSpqJdd1DfbhVzT6YndunKYR53DHMRwWllDMFbUfbY/X285gzBPhTpCM1qDPb3BwXNeh2v5Md
+	GbRDsTvsErXAhdP8yncxTBfNWCQra6QlsgMFFInIO+LwRtFUl3jSnE3OUF+Qg6nki0+PsBkP2DS
+	FuRQCr9Y/HYk9SAb8lNfDhCK4yexJCd6RjqBwWThJeg==
+X-Received: by 2002:a05:6a00:300a:b0:7fb:e662:5b9 with SMTP id d2e1a72fcca58-7ff65b89e90mr8924688b3a.31.1766380221463;
+        Sun, 21 Dec 2025 21:10:21 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IEFpOv39fyYe3Y6DO36gLzXz15wWvy6fF5eZcOkSsJ9t+fQWdknuEDuZFFuexgvKPURThzOzQ==
+X-Received: by 2002:a05:6a00:300a:b0:7fb:e662:5b9 with SMTP id d2e1a72fcca58-7ff65b89e90mr8924636b3a.31.1766380220877;
+        Sun, 21 Dec 2025 21:10:20 -0800 (PST)
+Received: from [10.218.35.45] ([202.46.22.19])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7ff7dfac29bsm8894204b3a.39.2025.12.21.21.10.14
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 21 Dec 2025 21:10:20 -0800 (PST)
+Message-ID: <4909f70a-2f65-4cac-96ac-5cd4371bc867@oss.qualcomm.com>
+Date: Mon, 22 Dec 2025 10:40:12 +0530
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|OS3P286MB2742:EE_
-X-MS-Office365-Filtering-Correlation-Id: 772e6717-29c6-4c6c-8f78-08de3fde98f8
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|7416014|1800799024|376014|366016|10070799003|13003099007;
-X-Microsoft-Antispam-Message-Info:
-	=?us-ascii?Q?MrriMCYT0Iokt/nPmQvVvUDaJbfWmW8ALncuPQrDXzwgrBkDHfUjyQi0yd3W?=
- =?us-ascii?Q?+ZdKkZbqz9JGPhyZuz+IR7+K7vxqaU4v8NshmWYapW4H/OvY74xaz3UvvV/8?=
- =?us-ascii?Q?9cfFhdJnhZfr28l/fFDNR9YTqMQTgxCUdPhF09+2uUW4Aca5j4GZG4/IVI0j?=
- =?us-ascii?Q?H+Bi7rIl2mloBFCWslbrGvuLnFH8LuV90Og+6vWZM6pXqcQ8bUOYNDcXyjxe?=
- =?us-ascii?Q?KfeQfNkGoMDyhA5ZLuB0XoHupwicjQ44ACVSIbpmitN+JwMHtQsj0up7aWOj?=
- =?us-ascii?Q?AcqmbQUziDsfLkNkWrulTNPuYSJFuptSnkJBNAn7mb53JnjIPJytEafXnkMo?=
- =?us-ascii?Q?+tUweeFh2Xu5pPC8y27ujZLdJ3nNitXO3Ry1zo+krmXs8xAkWB3bpeSsfnxv?=
- =?us-ascii?Q?y/X1Dr8qG/2iBlBYvR2FNHLHYuLmM91BXvIKjCd2QmLz97hfGKZ3zezdu6Ys?=
- =?us-ascii?Q?Y2eInQl4WiTqBNAjbnbAp2xlgzCe5jxya7AL8gjakyULqG9FFYLFiK87kaE0?=
- =?us-ascii?Q?wZOS+Da+vcWoz7sseVgqLOAZIW667gLR+5e9K+iht9Xk1UJknEwujBYYW6bo?=
- =?us-ascii?Q?eIHeddw5gIyJwfIFBj7Oqq9GYVoKtJga8H6i1kZHGLXebUyeATf9dY5LEKME?=
- =?us-ascii?Q?mu+B5dP2YObiKdqEv/J1PJc1CUZtF8SAKViBB9QWd/6ZWuv6keoIc1xSEsYz?=
- =?us-ascii?Q?+Lngmc6gHetxsRGnllX5crhLq/kpqy5UVo7HAXGwZp9/D64QdSwMg0tZdFF2?=
- =?us-ascii?Q?R6TSrQUnc77vZEmXE/NDP2zDz4HkwCCWRzX+0MPVxKqn26XK348DRqsiphhK?=
- =?us-ascii?Q?AQzOojQj67j6GqgSITz9WxV0CW5Fu7JLUoGGtoipzqO60qt8lLML0HSVGhzw?=
- =?us-ascii?Q?Kd9KbPnbnVdPkcGYqpsHeQzp/RE/vsq5OHSljtELCfnuLdl3GfBjRdb13oOT?=
- =?us-ascii?Q?Vl8jfMwNt+VFsQcWQfrCBGtl7fBrlp1fmC6onJ9jrg1udgRJXErlsO1ym+6Q?=
- =?us-ascii?Q?RSSnEr61iWLeIlIOKSwP6ptmhh4Smjrmw+8BcpcQ38gexkyKuAKQaiCMNJLd?=
- =?us-ascii?Q?fkF4NGVeWySgYqkdzu7uwP8UavkIwrHt7bBDoKSH//vTyysPqGEF9JgxL+j1?=
- =?us-ascii?Q?UyImmC+tRDrYk2NaYF/tl2rA6C8yINBC8RpCw9c8YetGJZy7BCLpp/Aq0bfr?=
- =?us-ascii?Q?YPO5NoQLE+vhf4IRZPRgzgAsLt5J3nFpkpK5qVMM5pJf0TXDkjxKBnFt6AaE?=
- =?us-ascii?Q?tEhYwOeIdgPPxJ5NB1Y+GL4aJV1i8OSz5bIakANBHZdo5LOHc/36fb+5OvC3?=
- =?us-ascii?Q?s/wX8tfWnNEgDmiTncTfXDk2wzKsHSSO8IjaIcjoSrbShWzRdNadR0Up/gsy?=
- =?us-ascii?Q?0rGZVAm0Xl+dm/WoP2OPKJs2lWruQ9zLh02j8cnPXsyoHILL6UP+MQgNwOBI?=
- =?us-ascii?Q?0ExjaLXpcZ4giatRxiF+3RZy+WZtOkVx?=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(7416014)(1800799024)(376014)(366016)(10070799003)(13003099007);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?19L4/eaxAnnqm4aOzOHTG4ZCqOwtAe7KzxmFeutdIQzNc41F68PRkciG24sk?=
- =?us-ascii?Q?nwXBvVHR4wJfQn2nX5+tK7e3jlUn8e2Az02rZMiO3rk9KKP5YSBNVSolEQv7?=
- =?us-ascii?Q?kKJ7mxGFglfuRBtGWoTO2ILk/ERehO7keKn9+78LD+429pl81LExntWWIUHK?=
- =?us-ascii?Q?aOktXDp+60/LE2/gq+Q825BvE2H1fMx/wWkAAEVp3kdYsKS18m9U8kSm5OjO?=
- =?us-ascii?Q?9IP3v+MOvKw0vlZl3asGgf1rFLqlkHJzeLKCPCWLsSdGBMQJRdhSovqheAP/?=
- =?us-ascii?Q?/V7isaPlUah0BiaQswaa0eixh8wxLl0yaba8kNo7UOFjHqwSJc4rDki7LTk5?=
- =?us-ascii?Q?tSVMSXkkwZa0yzTCUee+Z52keo3pGnN4LbHKE+rBrUnrwKo1jjPJyEUWUw3N?=
- =?us-ascii?Q?qyOAcpB6jky5aqCTS9U8Un2lxzfxs7mA29VqW+Ery12U8yeQpxhuuA1OC9w2?=
- =?us-ascii?Q?6h9RSdAFzWaGobHbCNeRDo2BNqDe8NzHELhtkPV4NLTkfN+CEOmS6njtyC+r?=
- =?us-ascii?Q?xVmRRs7mzbJnXbCqo6pUVRE0VySoSx7ddcwXI7coJ4nQkhlOqdTFqPoVlnWZ?=
- =?us-ascii?Q?iqOr6DqCsqMDphp80lhEgKMncRtIzKTMdQkTp+6G8PRTzNn0lCAZuW3L4B6p?=
- =?us-ascii?Q?PDinxidh2GOSySBvCg2nlCFF6Ixm0e6QXRBobisvP1Hhp2zcKrxKTE5dFRRg?=
- =?us-ascii?Q?3ec3Z5IEnrxgDwrtuoewH0wFUYvVIO9JVw0Vcp9Zq2eCyabaZfVnLLXVt21C?=
- =?us-ascii?Q?1+3NgtT0lfT+NDy4iRD+hhFBa6sMz5rB9pi8oDEnYMaKGTnUHHw5X+gT5pCt?=
- =?us-ascii?Q?XpA9cWxTga4BpqsJRwkzmkB4D37+LqjxwRuR4jhNAt50Pi0ByRat8qd9nCOw?=
- =?us-ascii?Q?IEaQO9uvOfeac5yQpPEXoZBy7slnx2LUrwV5VcEgFaGjzGkKoNfj4BDyIVzB?=
- =?us-ascii?Q?FPA64hffuAC6UrDE5u10+2he4yxrt0yyQRMV7C42m4wKnu1fP+/YQDRkXC3U?=
- =?us-ascii?Q?KvulfiFDeK31h4dFRLKHXmBEchWpJ7k591HCTC7JVUGA5gyHrFclE2Xsk0Rd?=
- =?us-ascii?Q?ZcYQR3/uafHoZqtM3diaJy3cgscLxlUwkQsUPkZBKi6peL6LSeyb4Glmr9x+?=
- =?us-ascii?Q?pzxRUWeCue/yIXefPkOyCWIM3ViL3byZehYQ5pkZOntF/iISuHMDMmln0WLD?=
- =?us-ascii?Q?uojZHwa6v45x76fMoVHvBB9hTqn7TzUp5svEYIeznruS7eP7jDa7HQZmVuQh?=
- =?us-ascii?Q?Lcl6ax1X0oO8Z+YVNbWF/ExYn+qduv3iWpso86/4E0MP1TlH+xM4GVvXEixw?=
- =?us-ascii?Q?+CX0Gm30iEuh+wY+aTeeBmu5it+zq649ZnghloCj5OLWZBLrv0R9EZ22iDnu?=
- =?us-ascii?Q?cpoIEKsTUdKn+Uh9BWP/fWtmfMb57kuWuJPsyfiMWg/4ioFpBht//aLBYtsR?=
- =?us-ascii?Q?VwMxWhDR0U3msqqRerWsG84z47RZs1Kor2Gb8XfTfLm9ELijfHFm0eyh7Mvo?=
- =?us-ascii?Q?obNCTdiskR15ejevLDsw2qkDEWYYZXl7X/IMKVWNMM53U64ku/I65r0/Y35q?=
- =?us-ascii?Q?+VqR8InqmUPAlRSm0N6cfX8IeEkZ98a5ACx3ix6Qci/mniIaPP/ps4iJLDHX?=
- =?us-ascii?Q?m6h/c+EADzN7leL15XycEtgSiUHDNLtiKg3LNeYy4RHR0u9Qesx89zLdWQgD?=
- =?us-ascii?Q?pY2dsTh7KxsfbD3VZ35Kt/E91B1+z5iKhr8WfzcmqA8guNEQJKVpkW3o0ggv?=
- =?us-ascii?Q?v/SfEpKlVEnd+Xg/2DBSTEZlo83yp8TpsBe4w/BHLJqjfLsxHa7B?=
-X-OriginatorOrg: valinux.co.jp
-X-MS-Exchange-CrossTenant-Network-Message-Id: 772e6717-29c6-4c6c-8f78-08de3fde98f8
-X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 20 Dec 2025 15:44:01.5435
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: VnSPSo1MIGTje6NyBAyJRVfw763PyMmX27GRJbs/mPNgQVPh1ZQbZWdiMTqxfPgZpZQEZl+MidPHiY0mRBC8aw==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: OS3P286MB2742
+User-Agent: Mozilla Thunderbird
+Subject: Re: [RFC PATCH v2 19/27] PCI: dwc: ep: Cache MSI outbound iATU
+ mapping
+To: Niklas Cassel <cassel@kernel.org>, Koichiro Den <den@valinux.co.jp>
+Cc: ntb@lists.linux.dev, linux-pci@vger.kernel.org, dmaengine@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Frank.Li@nxp.com, mani@kernel.org,
+        kwilczynski@kernel.org, kishon@kernel.org, bhelgaas@google.com,
+        corbet@lwn.net, vkoul@kernel.org, jdmason@kudzu.us,
+        dave.jiang@intel.com, allenbh@gmail.com, Basavaraj.Natikar@amd.com,
+        Shyam-sundar.S-k@amd.com, kurt.schwemmer@microsemi.com,
+        logang@deltatee.com, jingoohan1@gmail.com, lpieralisi@kernel.org,
+        robh@kernel.org, jbrunet@baylibre.com, fancer.lancer@gmail.com,
+        arnd@arndb.de, pstanner@redhat.com, elfring@users.sourceforge.net
+References: <20251129160405.2568284-1-den@valinux.co.jp>
+ <20251129160405.2568284-20-den@valinux.co.jp> <aTaE3yB7tQ-Homju@ryzen>
+Content-Language: en-US
+From: Krishna Chaitanya Chundru <krishna.chundru@oss.qualcomm.com>
+In-Reply-To: <aTaE3yB7tQ-Homju@ryzen>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-Proofpoint-GUID: 6yAM_-lDEGalio4r7ks6p4ZTq_eimHS4
+X-Proofpoint-ORIG-GUID: 6yAM_-lDEGalio4r7ks6p4ZTq_eimHS4
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMjIyMDA0MyBTYWx0ZWRfX4slBlSjxpnIX
+ kGiniajhq0JmZORhZ7diSZi5lZxoSyYfOTBi99XOFJ7t4QGcPwIpuFFphtcgxf588BvDTc1XZB3
+ Swl5jpqzm9lS+tZ8IFgdoqUEDRDWBDizXEHu1/0ADSvqetpU0x1G4cFQQpkTLXAN1VYiIc2QCqC
+ zUzW/qpZLXsHqN0gdv/5rEGIVtkjjqlhrfxXRibkMAUEUr4b9bvcK1QSMAxTJkzZYzUnhWrR41K
+ 5t+IclBX3n9LyTi2q+ad2Q8XrV9YfTSfngh0vKv8Vvg4EYnKXyCU5nsrg+Uz9okNoR5Gb9klTYh
+ lakBxODl3V9d+nbV6/3kTB02YMXCfjr2xkDV+WGAyWRRdG4cvTiQgq/Z4DJf6aMhUDLqwd/1yLj
+ 4m6PvIP0TsAiZuI/SDUr5gjNOzud/l2mkjlWvndCpdsm/z9ztUdsTw+mB5kYnoHjJ/vqYQUwpfi
+ 0Y2Yf+D6p/GR1gCi2nQ==
+X-Authority-Analysis: v=2.4 cv=N6wk1m9B c=1 sm=1 tr=0 ts=6948d2be cx=c_pps
+ a=m5Vt/hrsBiPMCU0y4gIsQw==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
+ a=IkcTkHD0fZMA:10 a=wP3pNCr1ah4A:10 a=s4-Qcg_JpJYA:10
+ a=VkNPw1HP01LnGYTKEx00:22 a=9AdMxfjQAAAA:20 a=lh4N-NlUUnQL023WPUYA:9
+ a=3ZKOabzyN94A:10 a=QEXdDO2ut3YA:10 a=IoOABgeZipijB_acs4fv:22
+ a=bA3UWDv6hWIuX7UZL3qL:22
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.100.49
+ definitions=2025-12-21_05,2025-12-19_02,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ priorityscore=1501 impostorscore=0 phishscore=0 malwarescore=0 bulkscore=0
+ lowpriorityscore=0 adultscore=0 spamscore=0 clxscore=1011 suspectscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2512120000 definitions=main-2512220043
 
-On Fri, Dec 19, 2025 at 10:12:11AM -0500, Frank Li wrote:
-> On Thu, Dec 18, 2025 at 12:15:34AM +0900, Koichiro Den wrote:
-> > Hi,
-> >
-> > This is RFC v3 of the NTB/PCI series that introduces NTB transport backed
-> > by DesignWare PCIe integrated eDMA.
-> >
-> >   RFC v2: https://lore.kernel.org/all/20251129160405.2568284-1-den@valinux.co.jp/
-> >   RFC v1: https://lore.kernel.org/all/20251023071916.901355-1-den@valinux.co.jp/
-> >
-> > The goal is to improve performance between a host and an endpoint over
-> > ntb_transport (typically with ntb_netdev on top). On R-Car S4, preliminary
-> > iperf3 results show 10~20x throughput improvement. Latency improvements are
-> > also observed.
-> 
-> Great!
-> 
-> >
-> > In this approach, payload is transferred by DMA directly between host and
-> > endpoint address spaces, and the NTB Memory Window is primarily used as a
-> > control/metadata window (and to expose the eDMA register/LL regions).
-> > Compared to the memcpy-based transport, this avoids extra copies and
-> > enables deeper rings and scales out to multiple queue pairs.
-> >
-> > Compared to RFC v2, data plane works in a symmetric manner in both
-> > directions (host-to-endpoint and endpoint-to-host). The host side drives
-> > remote read channels for its TX transfer while the endpoint drives local
-> > write channels.
-> >
-> > Again, I recognize that this is quite a large series. Sorry for the volume,
-> > but for the RFC stage I believe presenting the full picture in a single set
-> > helps with reviewing the overall architecture (Of course detail feedback
-> > would be appreciated as well). Once the direction is agreed, I will respin
-> > it split by subsystem and topic.
-> >
-> > Many thanks for all the reviews and feedback from multiple perspectives.
-> 
-> In next two weeks, it is holiday, I have not much time to review this long
-> thread. I glace for over all.
-> 
-> You can do some prepare work to speed up this great work's upstream.
-> 
-> Split prepare work for ntb change to new thread.
-> Split fix/code cleanup to new thread.
-> 
-> Beside some simple clean up,
-> - you start iatu for address mode match support first.
-> - eDMA some change, such as export reg base and LL region to support
-> remote DMA mode.  (you can add it to pci-epf-test.c to do base test).
 
-Thank you for the review and for the guidance.
 
-As suggested, I'll start preparing smaller, focused patchsets per
-subsystem, dropping RFC tag. Honestly I still haven't prepared anything for
-pci-epf-test.c addition yet, I'll start working on that first.
+On 12/8/2025 1:27 PM, Niklas Cassel wrote:
+> On Sun, Nov 30, 2025 at 01:03:57AM +0900, Koichiro Den wrote:
+>> dw_pcie_ep_raise_msi_irq() currently programs an outbound iATU window
+>> for the MSI target address on every interrupt and tears it down again
+>> via dw_pcie_ep_unmap_addr().
+>>
+>> On systems that heavily use the AXI bridge interface (for example when
+>> the integrated eDMA engine is active), this means the outbound iATU
+>> registers are updated while traffic is in flight. The DesignWare
+>> endpoint spec warns that updating iATU registers in this situation is
+>> not supported, and the behavior is undefined.
+>>
+>> Under high MSI and eDMA load this pattern results in occasional bogus
+>> outbound transactions and IOMMU faults such as:
+>>
+>>    ipmmu-vmsa eed40000.iommu: Unhandled fault: status 0x00001502 iova 0xfe000000
+>>
+>> followed by the system becoming unresponsive. This is the actual output
+>> observed on Renesas R-Car S4, with its ipmmu_hc used with PCIe ch0.
+>>
+>> There is no need to reprogram the iATU region used for MSI on every
+>> interrupt. The host-provided MSI address is stable while MSI is enabled,
+>> and the endpoint driver already dedicates a scratch buffer for MSI
+>> generation.
+>>
+>> Cache the aligned MSI address and map size, program the outbound iATU
+>> once, and keep the window enabled. Subsequent interrupts only perform a
+>> write to the MSI scratch buffer, avoiding dynamic iATU reprogramming in
+>> the hot path and fixing the lockups seen under load.
+>>
+>> Signed-off-by: Koichiro Den <den@valinux.co.jp>
+>> ---
+>>   .../pci/controller/dwc/pcie-designware-ep.c   | 48 ++++++++++++++++---
+>>   drivers/pci/controller/dwc/pcie-designware.h  |  5 ++
+>>   2 files changed, 47 insertions(+), 6 deletions(-)
+>>
+> I don't like that this patch modifies dw_pcie_ep_raise_msi_irq() but does
+> not modify dw_pcie_ep_raise_msix_irq()
+>
+> both functions call dw_pcie_ep_map_addr() before doing the writel(),
+> so I think they should be treated the same.
+>
+>
+> I do however understand that it is a bit wasteful to dedicate one
+> outbound iATU for MSI and one outbound iATU for MSI-X, as the PCI
+> spec does not allow both of them to be enabled at the same PCI,
+> see:
+>
+> 6.1.4 MSI and MSI-X Operation § in PCIe 6.0 spec:
+> "A Function is permitted to implement both MSI and MSI-X,
+> but system software is prohibited from enabling both at the
+> same time. If system software enables both at the same time,
+> the behavior is undefined."
+>
+>
+> I guess the problem is that some EPF drivers, even if only
+> one capability can be enabled (MSI/MSI-X), call both
+> pci_epc_set_msi() and pci_epc_set_msix(), e.g.:
+> https://github.com/torvalds/linux/blob/v6.18/drivers/pci/endpoint/functions/pci-epf-test.c#L969-L987
+>
+> To fill in the number of MSI/MSI-X irqs.
+>
+> While other EPF drivers only call either pci_epc_set_msi() or
+> pci_epc_set_msix(), depending on the IRQ type that will actually
+> be used:
+> https://github.com/torvalds/linux/blob/v6.18/drivers/nvme/target/pci-epf.c#L2247-L2262
+>
+> I think both versions is okay, just because the number of IRQs
+> is filled in for both MSI/MSI-X, AFAICT, only one of them will
+> get enabled.
+>
+>
+> I guess it might be hard for an EPC driver to know which capability
+> that is currently enabled, as to enable a capability is only a config
+> space write by the host side.
+As the host is the one which enables MSI/MSIX, it should be better the 
+controller
+driver takes this decision and the EPF driver just sends only raise_irq.
+Because technically, host can disable MSI and enable MSIX at runtime also.
 
-Have a nice holiday,
-Koichiro
+In the controller driver,  it can check which is enabled and chose b/w 
+MSIX/MSI/Legacy.
 
-> 
-> Frank
-> >
-> >
-> > Data flow overview
-> > ==================
-> >
-> >     Figure 1. RC->EP traffic via ntb_netdev+ntb_transport
-> >                      backed by Remote eDMA
-> >
-> >           EP                                   RC
-> >        phys addr                            phys addr
-> >          space                                space
-> >           +-+                                  +-+
-> >           | |                                  | |
-> >           | |                ||                | |
-> >           +-+-----.          ||                | |
-> >  EDMA REG | |      \    [A]  ||                | |
-> >           +-+----.  '---+-+  ||                | |
-> >           | |     \     | |<---------[0-a]----------
-> >           +-+-----------| |<----------[2]----------.
-> >   EDMA LL | |           | |  ||                | | :
-> >           | |           | |  ||                | | :
-> >           +-+-----------+-+  ||  [B]           | | :
-> >           | |                ||  ++            | | :
-> >        ---------[0-b]----------->||----------------'
-> >           | |            ++  ||  ||            | |
-> >           | |            ||  ||  ++            | |
-> >           | |            ||<----------[4]-----------
-> >           | |            ++  ||                | |
-> >           | |           [C]  ||                | |
-> >        .--|#|<------------------------[3]------|#|<-.
-> >        :  |#|                ||                |#|  :
-> >       [5] | |                ||                | | [1]
-> >        :  | |                ||                | |  :
-> >        '->|#|                                  |#|--'
-> >           |#|                                  |#|
-> >           | |                                  | |
-> >
-> >
-> >     Figure 2. EP->RC traffic via ntb_netdev+ntb_transport
-> >                      backed by EP-Local eDMA
-> >
-> >           EP                                   RC
-> >        phys addr                            phys addr
-> >          space                                space
-> >           +-+                                  +-+
-> >           | |                                  | |
-> >           | |                ||                | |
-> >           +-+                ||                | |
-> >  EDMA REG | |                ||                | |
-> >           +-+                ||                | |
-> > ^         | |                ||                | |
-> > :         +-+                ||                | |
-> > : EDMA LL | |                ||                | |
-> > :         | |                ||                | |
-> > :         +-+                ||  [C]           | |
-> > :         | |                ||  ++            | |
-> > :      -----------[4]----------->||            | |
-> > :         | |            ++  ||  ||            | |
-> > :         | |            ||  ||  ++            | |
-> > '----------------[2]-----||<--------[0-b]-----------
-> >           | |            ++  ||                | |
-> >           | |           [B]  ||                | |
-> >        .->|#|--------[3]---------------------->|#|--.
-> >        :  |#|                ||                |#|  :
-> >       [1] | |                ||                | | [5]
-> >        :  | |                ||                | |  :
-> >        '--|#|                                  |#|<-'
-> >           |#|                                  |#|
-> >           | |                                  | |
-> >
-> >
-> >       0-a. configure Remote eDMA
-> >       0-b. DMA-map and produce DAR
-> >       1.   memcpy while building skb in ntb_netdev case
-> >       2.   consume DAR, DMA-map SAR and kick DMA read transfer
-> >       3.   DMA transfer
-> >       4.   consume (commit)
-> >       5.   memcpy to application side
-> >
-> >       [A]: MemoryWindow that aggregates eDMA regs and LL.
-> >            IB iATU translations (Address Match Mode).
-> >       [B]: Control plane ring buffer (for "produce")
-> >       [C]: Control plane ring buffer (for "consume")
-> >
-> >   Note:
-> >     - Figure 1 is unchanged from RFC v2.
-> >     - Figure 2 differs from the one depicted in RFC v2 cover letter.
-> >
-> >
-> > Changes since RFC v2
-> > ====================
-> >
-> > RFCv2->RFCv3 changes:
-> >   - Architecture
-> >     - Have EP side use its local write channels, while leaving RC side to
-> >       use remote read channels.
-> >     - Abstraction/HW-specific stuff encapsulation improved.
-> >   - Added control/config region versioning for the vNTB/EPF control region
-> >     so that mismatched RC/EP kernels fail early instead of silently using an
-> >     incompatible layout.
-> >   - Reworked BAR subrange / multi-region mapping support:
-> >     - Dropped the v2 approach that added new inbound mapping ops in the EPC
-> >       core.
-> >     - Introduced `struct pci_epf_bar.submap` and extended DesignWare EP to
-> >       support BAR subrange inbound mapping via Address Match Mode IB iATU.
-> >     - pci-epf-vntb now provides a subrange mapping hint to the EPC driver
-> >       when offsets are used.
-> >   - Changed .get_pci_epc() to .get_private_data()
-> >   - Dropped two commits from RFC v2 that should be submitted separately:
-> >     (1) ntb_transport debugfs seq_file conversion
-> >     (2) DWC EP outbound iATU MSI mapping/cache fix (will be re-posted separately)
-> >   - Added documentation updates.
-> >   - Addressed assorted review nits from the RFC v2 thread (naming/structure).
-> >
-> > RFCv1->RFCv2 changes:
-> >   - Architecture
-> >     - Drop the generic interrupt backend + DW eDMA test-interrupt backend
-> >       approach and instead adopt the remote eDMA-backed ntb_transport mode
-> >       proposed by Frank Li. The BAR-sharing / mwN_offset / inbound
-> >       mapping (Address Match Mode) infrastructure from RFC v1 is largely
-> >       kept, with only minor refinements and code motion where necessary
-> >       to fit the new transport-mode design.
-> >   - For Patch 01
-> >     - Rework the array_index_nospec() conversion to address review
-> >       comments on "[RFC PATCH 01/25]".
-> >
-> > RFCv2: https://lore.kernel.org/all/20251129160405.2568284-1-den@valinux.co.jp/
-> > RFCv1: https://lore.kernel.org/all/20251023071916.901355-1-den@valinux.co.jp/
-> >
-> >
-> > Patch layout
-> > ============
-> >
-> >   Patch 01-25 : preparation for Patch 26
-> >                 - 01-07: support multiple MWs in a BAR
-> > 		- 08-25: other misc preparations
-> >   Patch 26    : main and most important patch, adds eDMA-backed transport
-> >   Patch 27-28 : multi-queue use, thanks to the remote eDMA, performance
-> >                 scales
-> >   Patch 29-33 : handle several SoC-specific issues so that remote eDMA
-> >                 mode ntb_transport works on R-Car S4
-> >   Patch 34-35 : kernel doc updates
-> >
-> >
-> > Tested on
-> > =========
-> >
-> > * 2x Renesas R-Car S4 Spider (RC<->EP connected with OcuLink cable)
-> > * Kernel base: next-20251216 + [1] + [2] + [3]
-> >
-> >   [1]: https://lore.kernel.org/all/20251210071358.2267494-2-cassel@kernel.org/
-> >        (this is a spin-out patch from
-> >         https://lore.kernel.org/linux-pci/20251129160405.2568284-20-den@valinux.co.jp/)
-> >   [2]: https://lore.kernel.org/all/20251208-dma_prep_config-v1-0-53490c5e1e2a@nxp.com/
-> >        (while it appears to still be under active discussion)
-> >   [3]: https://lore.kernel.org/all/20251217081955.3137163-1-den@valinux.co.jp/
-> >        (this is a spin-out patch from
-> >         https://lore.kernel.org/all/20251129160405.2568284-14-den@valinux.co.jp/)
-> >
-> >
-> > Performance measurement
-> > =======================
-> >
-> > No serious measurements yet, because:
-> >   * For "before the change", even use_dma/use_msi does not work on the
-> >     upstream kernel unless we apply some patches for R-Car S4. With some
-> >     unmerged patch series I had posted earlier (but superseded by this RFC
-> >     attempt), it was observed that we can achieve about 7 Gbps for the
-> >     RC->EP direction. Pure upstream kernel can achieve around 500 Mbps
-> >     though.
-> >   * For "after the change", measurements are not mature because this
-> >     RFC v3 patch series is not yet performance-optimized at this stage.
-> >
-> > Here are the rough measurements showing the achievable performance on
-> > the R-Car S4:
-> >
-> > - Before this change:
-> >
-> >   * ping
-> >     64 bytes from 10.0.0.11: icmp_seq=1 ttl=64 time=12.3 ms
-> >     64 bytes from 10.0.0.11: icmp_seq=2 ttl=64 time=6.58 ms
-> >     64 bytes from 10.0.0.11: icmp_seq=3 ttl=64 time=1.26 ms
-> >     64 bytes from 10.0.0.11: icmp_seq=4 ttl=64 time=7.43 ms
-> >     64 bytes from 10.0.0.11: icmp_seq=5 ttl=64 time=1.39 ms
-> >     64 bytes from 10.0.0.11: icmp_seq=6 ttl=64 time=7.38 ms
-> >     64 bytes from 10.0.0.11: icmp_seq=7 ttl=64 time=1.42 ms
-> >     64 bytes from 10.0.0.11: icmp_seq=8 ttl=64 time=7.41 ms
-> >
-> >   * RC->EP (`sudo iperf3 -ub0 -l 65480 -P 2`)
-> >     [ ID] Interval           Transfer     Bitrate         Jitter    Lost/Total Datagrams
-> >     [  5]   0.00-10.01  sec   344 MBytes   288 Mbits/sec  3.483 ms  51/5555 (0.92%)  receiver
-> >     [  6]   0.00-10.01  sec   342 MBytes   287 Mbits/sec  3.814 ms  38/5517 (0.69%)  receiver
-> >     [SUM]   0.00-10.01  sec   686 MBytes   575 Mbits/sec  3.648 ms  89/11072 (0.8%)  receiver
-> >
-> >   * EP->RC (`sudo iperf3 -ub0 -l 65480 -P 2`)
-> >     [  5]   0.00-10.03  sec   334 MBytes   279 Mbits/sec  3.164 ms  390/5731 (6.8%)  receiver
-> >     [  6]   0.00-10.03  sec   334 MBytes   279 Mbits/sec  2.416 ms  396/5741 (6.9%)  receiver
-> >     [SUM]   0.00-10.03  sec   667 MBytes   558 Mbits/sec  2.790 ms  786/11472 (6.9%)  receiver
-> >
-> >     Note: with `-P 2`, the best total bitrate (receiver side) was achieved.
-> >
-> > - After this change (use_remote_edma=1):
-> >
-> >   * ping
-> >     64 bytes from 10.0.0.11: icmp_seq=1 ttl=64 time=1.42 ms
-> >     64 bytes from 10.0.0.11: icmp_seq=2 ttl=64 time=1.38 ms
-> >     64 bytes from 10.0.0.11: icmp_seq=3 ttl=64 time=1.21 ms
-> >     64 bytes from 10.0.0.11: icmp_seq=4 ttl=64 time=1.02 ms
-> >     64 bytes from 10.0.0.11: icmp_seq=5 ttl=64 time=1.06 ms
-> >     64 bytes from 10.0.0.11: icmp_seq=6 ttl=64 time=0.995 ms
-> >     64 bytes from 10.0.0.11: icmp_seq=7 ttl=64 time=0.964 ms
-> >     64 bytes from 10.0.0.11: icmp_seq=8 ttl=64 time=1.49 ms
-> >
-> >   * RC->EP (`sudo iperf3 -ub0 -l 65480 -P 4`)
-> >     [  5]   0.00-10.02  sec  3.00 GBytes  2.58 Gbits/sec  0.437 ms  33053/82329 (40%)  receiver
-> >     [  6]   0.00-10.02  sec  3.00 GBytes  2.58 Gbits/sec  0.174 ms  46379/95655 (48%)  receiver
-> >     [  9]   0.00-10.02  sec  2.88 GBytes  2.47 Gbits/sec  0.106 ms  47672/94924 (50%)  receiver
-> >     [ 11]   0.00-10.02  sec  2.87 GBytes  2.46 Gbits/sec  0.364 ms  23694/70817 (33%)  receiver
-> >     [SUM]   0.00-10.02  sec  11.8 GBytes  10.1 Gbits/sec  0.270 ms  150798/343725 (44%)  receiver
-> >
-> >   * EP->RC (`sudo iperf3 -ub0 -l 65480 -P 4`)
-> >     [  5]   0.00-10.01  sec  3.28 GBytes  2.82 Gbits/sec  0.380 ms  38578/92355 (42%)  receiver
-> >     [  6]   0.00-10.01  sec  3.24 GBytes  2.78 Gbits/sec  0.430 ms  14268/67340 (21%)  receiver
-> >     [  9]   0.00-10.01  sec  2.92 GBytes  2.51 Gbits/sec  0.074 ms  0/47890 (0%)  receiver
-> >     [ 11]   0.00-10.01  sec  4.76 GBytes  4.09 Gbits/sec  0.037 ms  0/78073 (0%)  receiver
-> >     [SUM]   0.00-10.01  sec  14.2 GBytes  12.2 Gbits/sec  0.230 ms  52846/285658 (18%)  receiver
-> >
-> >   * configfs settings:
-> >       # modprobe pci_epf_vntb
-> >       # cd /sys/kernel/config/pci_ep/
-> >       # mkdir functions/pci_epf_vntb/func1
-> >       # echo 0x1912 >   functions/pci_epf_vntb/func1/vendorid
-> >       # echo 0x0030 >   functions/pci_epf_vntb/func1/deviceid
-> >       # echo 32 >       functions/pci_epf_vntb/func1/msi_interrupts
-> >       # echo 16 >       functions/pci_epf_vntb/func1/pci_epf_vntb.0/db_count
-> >       # echo 128 >      functions/pci_epf_vntb/func1/pci_epf_vntb.0/spad_count
-> >       # echo 2 >        functions/pci_epf_vntb/func1/pci_epf_vntb.0/num_mws
-> >       # echo 0xe0000 >  functions/pci_epf_vntb/func1/pci_epf_vntb.0/mw1
-> >       # echo 0x20000 >  functions/pci_epf_vntb/func1/pci_epf_vntb.0/mw2
-> >       # echo 0xe0000 >  functions/pci_epf_vntb/func1/pci_epf_vntb.0/mw2_offset
-> >       # echo 0x1912 >   functions/pci_epf_vntb/func1/pci_epf_vntb.0/vntb_vid
-> >       # echo 0x0030 >   functions/pci_epf_vntb/func1/pci_epf_vntb.0/vntb_pid
-> >       # echo 0x10 >     functions/pci_epf_vntb/func1/pci_epf_vntb.0/vbus_number
-> >       # echo 0 >        functions/pci_epf_vntb/func1/pci_epf_vntb.0/ctrl_bar
-> >       # echo 4 >        functions/pci_epf_vntb/func1/pci_epf_vntb.0/db_bar
-> >       # echo 2 >        functions/pci_epf_vntb/func1/pci_epf_vntb.0/mw1_bar
-> >       # echo 2 >        functions/pci_epf_vntb/func1/pci_epf_vntb.0/mw2_bar
-> >       # ln -s controllers/e65d0000.pcie-ep functions/pci_epf_vntb/func1/primary/
-> >       # echo 1 > controllers/e65d0000.pcie-ep/start
-> >
-> >
-> >
-> > Thank you for reviewing,
-> >
-> >
-> > Koichiro Den (35):
-> >   PCI: endpoint: pci-epf-vntb: Use array_index_nospec() on mws_size[]
-> >     access
-> >   NTB: epf: Add mwN_offset support and config region versioning
-> >   PCI: dwc: ep: Support BAR subrange inbound mapping via address match
-> >     iATU
-> >   NTB: Add offset parameter to MW translation APIs
-> >   PCI: endpoint: pci-epf-vntb: Propagate MW offset from configfs when
-> >     present
-> >   NTB: ntb_transport: Support partial memory windows with offsets
-> >   PCI: endpoint: pci-epf-vntb: Hint subrange mapping preference to EPC
-> >     driver
-> >   NTB: core: Add .get_private_data() to ntb_dev_ops
-> >   NTB: epf: vntb: Implement .get_private_data() callback
-> >   dmaengine: dw-edma: Fix MSI data values for multi-vector IMWr
-> >     interrupts
-> >   NTB: ntb_transport: Move TX memory window setup into setup_qp_mw()
-> >   NTB: ntb_transport: Dynamically determine qp count
-> >   NTB: ntb_transport: Introduce get_dma_dev() helper
-> >   NTB: epf: Reserve a subset of MSI vectors for non-NTB users
-> >   NTB: ntb_transport: Move internal types to ntb_transport_internal.h
-> >   NTB: ntb_transport: Introduce ntb_transport_backend_ops
-> >   dmaengine: dw-edma: Add helper func to retrieve register base and size
-> >   dmaengine: dw-edma: Add per-channel interrupt routing mode
-> >   dmaengine: dw-edma: Poll completion when local IRQ handling is
-> >     disabled
-> >   dmaengine: dw-edma: Add notify-only channels support
-> >   dmaengine: dw-edma: Add a helper to retrieve LL (Linked List) region
-> >   dmaengine: dw-edma: Serialize RMW on shared interrupt registers
-> >   NTB: ntb_transport: Split core into ntb_transport_core.c
-> >   NTB: ntb_transport: Add additional hooks for DW eDMA backend
-> >   NTB: hw: Introduce DesignWare eDMA helper
-> >   NTB: ntb_transport: Introduce DW eDMA backed transport mode
-> >   NTB: epf: Provide db_vector_count/db_vector_mask callbacks
-> >   ntb_netdev: Multi-queue support
-> >   NTB: epf: Add per-SoC quirk to cap MRRS for DWC eDMA (128B for R-Car)
-> >   iommu: ipmmu-vmsa: Add PCIe ch0 to devices_allowlist
-> >   iommu: ipmmu-vmsa: Add support for reserved regions
-> >   arm64: dts: renesas: Add Spider RC/EP DTs for NTB with remote DW PCIe
-> >     eDMA
-> >   NTB: epf: Add an additional memory window (MW2) barno mapping on
-> >     Renesas R-Car
-> >   Documentation: PCI: endpoint: pci-epf-vntb: Update and add mwN_offset
-> >     usage
-> >   Documentation: driver-api: ntb: Document remote eDMA transport backend
-> >
-> >  Documentation/PCI/endpoint/pci-vntb-howto.rst |  16 +-
-> >  Documentation/driver-api/ntb.rst              |  58 +
-> >  arch/arm64/boot/dts/renesas/Makefile          |   2 +
-> >  .../boot/dts/renesas/r8a779f0-spider-ep.dts   |  37 +
-> >  .../boot/dts/renesas/r8a779f0-spider-rc.dts   |  52 +
-> >  drivers/dma/dw-edma/dw-edma-core.c            | 233 ++++-
-> >  drivers/dma/dw-edma/dw-edma-core.h            |  13 +-
-> >  drivers/dma/dw-edma/dw-edma-v0-core.c         |  39 +-
-> >  drivers/iommu/ipmmu-vmsa.c                    |   7 +-
-> >  drivers/net/ntb_netdev.c                      | 341 ++++--
-> >  drivers/ntb/Kconfig                           |  12 +
-> >  drivers/ntb/Makefile                          |   4 +
-> >  drivers/ntb/hw/amd/ntb_hw_amd.c               |   6 +-
-> >  drivers/ntb/hw/edma/ntb_hw_edma.c             | 754 +++++++++++++
-> >  drivers/ntb/hw/edma/ntb_hw_edma.h             |  76 ++
-> >  drivers/ntb/hw/epf/ntb_hw_epf.c               | 187 +++-
-> >  drivers/ntb/hw/idt/ntb_hw_idt.c               |   3 +-
-> >  drivers/ntb/hw/intel/ntb_hw_gen1.c            |   6 +-
-> >  drivers/ntb/hw/intel/ntb_hw_gen1.h            |   2 +-
-> >  drivers/ntb/hw/intel/ntb_hw_gen3.c            |   3 +-
-> >  drivers/ntb/hw/intel/ntb_hw_gen4.c            |   6 +-
-> >  drivers/ntb/hw/mscc/ntb_hw_switchtec.c        |   6 +-
-> >  drivers/ntb/msi.c                             |   6 +-
-> >  .../{ntb_transport.c => ntb_transport_core.c} | 482 ++++-----
-> >  drivers/ntb/ntb_transport_edma.c              | 987 ++++++++++++++++++
-> >  drivers/ntb/ntb_transport_internal.h          | 220 ++++
-> >  drivers/ntb/test/ntb_perf.c                   |   4 +-
-> >  drivers/ntb/test/ntb_tool.c                   |   6 +-
-> >  .../pci/controller/dwc/pcie-designware-ep.c   | 198 +++-
-> >  drivers/pci/controller/dwc/pcie-designware.c  |  25 +
-> >  drivers/pci/controller/dwc/pcie-designware.h  |   2 +
-> >  drivers/pci/endpoint/functions/pci-epf-vntb.c | 246 ++++-
-> >  drivers/pci/endpoint/pci-epc-core.c           |   2 +-
-> >  include/linux/dma/edma.h                      | 106 ++
-> >  include/linux/ntb.h                           |  38 +-
-> >  include/linux/ntb_transport.h                 |   5 +
-> >  include/linux/pci-epf.h                       |  27 +
-> >  37 files changed, 3716 insertions(+), 501 deletions(-)
-> >  create mode 100644 arch/arm64/boot/dts/renesas/r8a779f0-spider-ep.dts
-> >  create mode 100644 arch/arm64/boot/dts/renesas/r8a779f0-spider-rc.dts
-> >  create mode 100644 drivers/ntb/hw/edma/ntb_hw_edma.c
-> >  create mode 100644 drivers/ntb/hw/edma/ntb_hw_edma.h
-> >  rename drivers/ntb/{ntb_transport.c => ntb_transport_core.c} (91%)
-> >  create mode 100644 drivers/ntb/ntb_transport_edma.c
-> >  create mode 100644 drivers/ntb/ntb_transport_internal.h
-> >
-> > --
-> > 2.51.0
-> >
+- Krishna Chaitanya.
+> I guess in most real hardware, e.g. a NIC device, you do an
+> "enable engine"/"stop enginge" type of write to a BAR.
+>
+> Perhaps we should have similar callbacks in struct pci_epc_ops ?
+>
+> My thinking is that after "start engine", an EPC driver could read
+> the MSI and MSI-X capabilities, to see which is enabled.
+> As it should not be allowed to change between MSI and MSI-X without
+> doing a "stop engine" first.
+>
+>
+> Kind regards,
+> Niklas
+>
+
