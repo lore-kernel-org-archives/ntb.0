@@ -1,47 +1,47 @@
-Received: from TY3P286CU002.outbound.protection.outlook.com (mail-japaneastazon11020114.outbound.protection.outlook.com [52.101.229.114])
+Received: from TY3P286CU002.outbound.protection.outlook.com (mail-japaneastazon11020116.outbound.protection.outlook.com [52.101.229.116])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 182A933343C;
-	Sun, 18 Jan 2026 13:55:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.229.114
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C5480339848;
+	Sun, 18 Jan 2026 13:55:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.229.116
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768744529; cv=fail; b=Xot2p76NCOUiTS29mxYRAHm8tHm2XwDSAIAtn+3uLIaTfQ7v161f5+mpGsP3bh07hOyEbw3sFv4EC7IDrBdy5pIQMVO2AKBJeyX3S+zaPCZyJpyJlk32zyF/5Mx/QUIaw7080Na3tdGsQPXCtO6xNYfj98LDlaDaASMvVlvb5/w=
+	t=1768744529; cv=fail; b=IjdruEyy0D6oMuDlBycXvmxhbjHbYvSV/1xbPh5j5+7wLYRZXgXPkdIpA34hnoF+Ah/YH04DNQNiM73uLrano6CzSMbN7YqDgEI82x7qn3byy6rf/r0PwnhBOZU8A0ksugQWSvGHkDV8gT2+N94nxSGL3wlftdZgtUZNK4+bAOQ=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1768744529; c=relaxed/simple;
-	bh=yOgg90bn+TbyK+EkOgU6sgdcXqycSB3wkAswnG18YrY=;
+	bh=JvKmW7ZssHBp5C2XY00R1o5zga6ehzCwLe3nWFQHBEQ=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=oD6X5YP0HVCPLNz8c6ApwJRjK3nZ2HTqlov68YhcXVVN/kDWRqIA8rPZ/KmZLi7uCTFjT/VYLssPE7EYFYyiMyNQ/SplzE1+rUZQr5lBeN5BXm8/+wwNgVaanu/QYbwROHPfxke+Pegpid0rclD83xH5jKIGn1aOek6hq7YQgbM=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=lPg7Yxnx; arc=fail smtp.client-ip=52.101.229.114
+	 Content-Type:MIME-Version; b=E3WcninqvpBnk7U7vP9QmDu69BAx/MsRfr9gpxZYjcSZeo089sTsRTEB4wsmkxNLlDaY5iDjBa5l6XPfgok/4SL7uO5n8QsrZkJX7hkwRqsQzKqeSOKuYxvgJD2laZ2GAUECat8RMHScRmHGWEJVnjJqG9+L5d2HO/SJddP+GDo=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=tjcBv6Ty; arc=fail smtp.client-ip=52.101.229.116
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="lPg7Yxnx"
+	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="tjcBv6Ty"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=HLOZd/kkuoIPCxdozL534tDAaiziT471W9hlHNnxgIQ1xXqS1zRVjBXkmib9/1XVUpLXJs85kyJ9n3wTZVdzNLe1qtNXj06+KGJPp+IzJCtkBilNIAM1hi2gYPZbjL+6fOfrl+sMgdazj/UJh+Domw6qMFjnpQpMTKVX+xl+hZ9H0R+7l5NJjuZJ5CoDzqemvzuWxauaORnC4Eu/zuaYjnaJlXYVHynltWs+7TeW97aoQG5FncBRGESdd3jUCzJ5fhELcc1Kc7USTYSUAx+eDIUsWBIGldY2/iMJo1Ltd0ybb0fKBLCuIOhIlehkUw7Rqomtm0gF2Bn6x2OnjWFSxA==
+ b=H6RExKCuHGRQfpBlrSVKPPhMWaH0rc86lXehMcGqnXZ606vaCDXcWlRJkcaLs/BIdep7vPNii5luqX8t0L906kyR1l+OGJFsQrWt9DQ+DbrussB4ew4DSFlL0a4juf3nkp+YxkrNKKbBR6BZFOwbdN6au6WMZzk65lf11gVwfBGDipOV6l64UafbguT0BcHs3sBxR1GWYCj9mTlpSWyDR87iqTq60MvCRcQ8DslUn1Rifz4pY2CSudKP8O9BbZ5nUJ73xyRciQsWMtMXdydXY4d2jf8YrXUtRFM855BFJDfBNE0vFQ84kSz0iEhv6mKvpQfNf0bOJe7YHJIvUEl6yw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=uPI+aEiG+02KSiVUSxI06CQ1pW3rO8Rq2croOS4o0e0=;
- b=qS1/ZxNgRPCHbNZCHc7O+umGycF0sialXRMl/bNvboTW7iUYZb/dmpY1QAwFjwKtPItm4G0ONc2GKYRdn0olTDEIVHqunbrZhQQHwr4h77KIbLjrPGWAXyEHFex+K6h091XKhyNMbCZMPBvbe/bJYVosl4W3WNYJggxfdb44R4HVRtVHaVgPSzTvZSQVpNW1YxgRPy9ndRIhqJAFYwIb3RkHQP/zpQtvrFPAVMXc+BKfzF1K9f8tdv1XUZCMiIVbLuZqeqqxqNSxYfJlCWzvfTrw9eNwUKZlYGNWr8E1alP5GK6gphXu3EAyBu/PXkdyQ00/mXOyDLHXIU7NQ7gOqA==
+ bh=zswC/WL1m+0wWV0erwBLM9QrWKu3KjjqN0lYeTSaMbk=;
+ b=uvSvyXYethlG/w/PtPhO47/2mTMOkUtACJjN5XMQTRwlUFdkJ8z9FgiOMlqU/d9XJTHUU97U9/wF6ka+UtQNWpRAyRoy+lnY26fF5k7ucLogZ6eRxsTJy6neKxYmIZjHAMEUQne3/X5A8pwiobxafsbFhABjaDNIASThi2kX11lUQi4q2LNI0uMHoBoL/ph7nyQB9ZLL/YBe2A/xg9IY+z6FCsT5mEjYRwHlFVJYCw2JB4vFfd3mKJpeEdDQRQ1KWO7WZj8LDJsKkL98kiS/cw2r0tO/m1kBCXLqPaB60pBrQjUNoYvivmFXKbZPQErQNUppQbmG9ilhY9eOBAtNcA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
  header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
  s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=uPI+aEiG+02KSiVUSxI06CQ1pW3rO8Rq2croOS4o0e0=;
- b=lPg7YxnxDubwcZBMJy9dRlzJ8/KlfOzdm+vvDrXFlnGxsGR97gAKhQI01TvanWoDroxoSMiIr+a/CTLIe9QyX/UNx1kRiFDd6p+mNGLRB1+3S02/dZIN4uOS1rSmmDi1p9qNrytDyIG6j35UqyhsDe1IIHF7suh/KetG9Rc6KAk=
+ bh=zswC/WL1m+0wWV0erwBLM9QrWKu3KjjqN0lYeTSaMbk=;
+ b=tjcBv6TyAZ1rVo0Y2hTtYNt5hWDQBFYL/CKezdYRa+G5X4GdL6AC8vKlWdWkLZUzI83Zpc7S2rHr0Afl6YCZTgCZyEl3TZu1UYBO08iEfFMibajwr70J1+nygOum4MhBnzv2b41TPY7gcHT0wTgfGAwnE7S9A0TviURXAZ78F6M=
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=valinux.co.jp;
 Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:38f::10)
  by OSZP286MB2093.JPNP286.PROD.OUTLOOK.COM (2603:1096:604:180::7) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9520.10; Sun, 18 Jan
- 2026 13:55:12 +0000
+ 2026 13:55:10 +0000
 Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  ([fe80::2305:327c:28ec:9b32]) by TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  ([fe80::2305:327c:28ec:9b32%5]) with mapi id 15.20.9520.009; Sun, 18 Jan 2026
- 13:55:12 +0000
+ 13:55:10 +0000
 From: Koichiro Den <den@valinux.co.jp>
 To: Frank.Li@nxp.com,
 	dave.jiang@intel.com,
@@ -80,16 +80,16 @@ Cc: linux-pci@vger.kernel.org,
 	andriy.shevchenko@linux.intel.com,
 	jbrunet@baylibre.com,
 	utkarsh02t@gmail.com
-Subject: [RFC PATCH v4 24/38] NTB: ntb_transport: Run ntb_set_mw() before link-up negotiation
-Date: Sun, 18 Jan 2026 22:54:26 +0900
-Message-ID: <20260118135440.1958279-25-den@valinux.co.jp>
+Subject: [RFC PATCH v4 22/38] NTB: ntb_transport: Split core library and default NTB client
+Date: Sun, 18 Jan 2026 22:54:24 +0900
+Message-ID: <20260118135440.1958279-23-den@valinux.co.jp>
 X-Mailer: git-send-email 2.51.0
 In-Reply-To: <20260118135440.1958279-1-den@valinux.co.jp>
 References: <20260118135440.1958279-1-den@valinux.co.jp>
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
-X-ClientProxiedBy: TY4P286CA0122.JPNP286.PROD.OUTLOOK.COM
- (2603:1096:405:37c::7) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+X-ClientProxiedBy: TYCP286CA0044.JPNP286.PROD.OUTLOOK.COM
+ (2603:1096:400:29d::17) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  (2603:1096:405:38f::10)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
@@ -99,126 +99,477 @@ List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
 X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|OSZP286MB2093:EE_
-X-MS-Office365-Filtering-Correlation-Id: a85bb668-09ae-42dd-4b3e-08de56993329
+X-MS-Office365-Filtering-Correlation-Id: c01f8d4b-7e78-4607-335f-08de569931f2
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
 	BCL:0;ARA:13230040|366016|376014|7416014|10070799003|1800799024|921020;
 X-Microsoft-Antispam-Message-Info:
-	=?us-ascii?Q?RBlK2djq2RmOhkDHD3pyUVdRCRwraffekNsOQLZHJQBpGTx7k9ZGIlW1LpqH?=
- =?us-ascii?Q?q07EITLi8uAx2UpBZUCoG4Zw3xw4qvDOYXTLAYD7JqCA7xf0tvsJv6lzUA89?=
- =?us-ascii?Q?b7TL585Lk6civDry5SgAEcbB/9W5DA6sWxYG6Ca0kfUPiLd/D8Rw84BoqMUN?=
- =?us-ascii?Q?bAu9BRj/G/UQgS07H6u5vJ68Hx9A0OToCKcA7F303VH3V8vl3vrWm76USJun?=
- =?us-ascii?Q?gMCIZuDvAyUEuDUHqUs0kvAO4Ig7iosTZr+if2Q7X5nYPtqi8YWXktaqLW6b?=
- =?us-ascii?Q?2KJ9oLyASTT5cU41t8HHZzv8Lvh9cLEIv7GvIVhVEUb9jXpUprjOUKb6D3dn?=
- =?us-ascii?Q?d3aKVsH27JWaEPhjc6Pn+hDDCkiEGfg/qjUbUsAlAt7njzLyImytGgbvgnZV?=
- =?us-ascii?Q?wgwcsHcl5QMmz28bmejS1f3TFo1575m11bhxDAkGQ4MBUiEjabznDM5pjW4S?=
- =?us-ascii?Q?OPuhRHH487vVgLTAxi96tiJ0VeqKSnpSZTAi1GuINN+HfV/3cMWdHYG70NxI?=
- =?us-ascii?Q?jTsil+fW4ZS6K+g5B9iWkY46MtxTQJMZtX4FVVELgBrSCGctW5nUcGZZzUXO?=
- =?us-ascii?Q?7R14LAq2174va6pphVTf1MsjMZpqwQYG4/ErNPb7/UUWGWsun7Abb+J6j+9M?=
- =?us-ascii?Q?ZTUSysogy8FK5zcWh4OuY4QJXTN+uQN10SsDV+BgVMnVfI0YZkCt7f7uFV34?=
- =?us-ascii?Q?1qj8LWrLHUKt+JgigQAum7xdgb7OWCxu7l8ywVthoJICGlwwKUrQfJe03kJT?=
- =?us-ascii?Q?YDcE3OleGWn/swWfTCOEryBA8BN5f8yAX0c1BSukbjFncJTszC1pEzJCCbba?=
- =?us-ascii?Q?lyVEFDkv2R66KNVM80xCY/I2/IgdlWccQOSvQxXCtMVmln90zNYeqaMWl+iT?=
- =?us-ascii?Q?FBtPwMtqilhHPulMr/jWgw+JsEVLhV9jhkA8fl0QcqmnSwJFWjHCsODRk6Xg?=
- =?us-ascii?Q?q86c6iWXY4CWybaGvjxNj2FPDHqV+JR1IZT13wbnkt642x2EJe3a7zHr7wgQ?=
- =?us-ascii?Q?JpUcXb4zoo/2bK6AnUVkZ2wpstHTojV3E7GqTmDHz1LnxzAh+JuQyluOBof4?=
- =?us-ascii?Q?Km6zYSBgCWXnxDt9MY5iGJleDTpLbjiAe8UzgBTJn53aneNNaQ1yH+12UU+7?=
- =?us-ascii?Q?fXZhtfAbw0P3F8fGNGXMVGWCbxECvIDh2oyR4kKdTRxgJojqjt7KxwcJZetF?=
- =?us-ascii?Q?7qWxYsmFr9n8pE6LkR40mxDXa4uKTRBChxEbQnTZoNekBORac39G48R4+fwF?=
- =?us-ascii?Q?aKz7lkpRx6PcIh+ydB2hDzrAkB3H2dLMcfmyXpQ2p/TOu9JS192PLviwU3qr?=
- =?us-ascii?Q?hrtLehdeR4cJsfhxd6jBh2utxWI4TIJkfbfTe4V7XIEtsgsDrCh3Ng4+uapp?=
- =?us-ascii?Q?CcUxOoBQ29z2F51tyl7bPbm8kapOGK/vBtvSZGzPS6RYguHu/jmj+/1mhkjD?=
- =?us-ascii?Q?dDgdifozRALC74aNYAdm7QHZVi6Ie3bkBuQc9HF1AVX40f0UFajlCqr+Jzqe?=
- =?us-ascii?Q?9W2DInD8jm43KvLTdwHB3qsfO+OeG3WD9a0GkstGvWTdQz2ZoWFsSiLuE0Co?=
- =?us-ascii?Q?R0LWqjBMrulWvNP/x5p8hxbMMQqv5t3QXtetVBOwhAWw1JEmF7e0mJeOYOrI?=
- =?us-ascii?Q?eQ=3D=3D?=
+	=?us-ascii?Q?FPiF/Akjze1wlbzLSjxYXRo54tzmffN1pu8ryBavLvCS053W25YPfpMjar0f?=
+ =?us-ascii?Q?bXgZYPftfFq/oglKxh3UvbiInTm177kiIfgMIATAdFnBy9Bif0D5MJa68tFg?=
+ =?us-ascii?Q?/q4DiVfJAgFtjIQ3W99VvL2DFHQge6ZOMKlHnK4WgNwJzQv0yveN0yixFUxq?=
+ =?us-ascii?Q?5DionEcSoOGM1Z+YaYBvxV19UKwnqCQWgrIMr2kq5oOXqcleQuhvQrNnvXM5?=
+ =?us-ascii?Q?651O+CFbTsrxXPhBC8aJBgzu0tp7nhjaRIPI2QuHTQy+4BaDqV8vaunufjpw?=
+ =?us-ascii?Q?pPozk7KaFwQuke0FMyactS7nYwYU0o+3m0K/PVy/szXmb1xM8Fcag+BJPpYX?=
+ =?us-ascii?Q?rEJT6gu7hBz+WyILwa9yBp+VMVnuIEmBy0x3OpApe1XEh+VVX4k6eG3dcoRx?=
+ =?us-ascii?Q?wlXOPOWnwdnqWHDVbTkh9iPsUNUgI1fcN/EDWIL9/Xt/+e2YJTwGBB0BKv+Y?=
+ =?us-ascii?Q?6mr+wzHyWGgOGRgGF+tsu6j5hTkJKu2PFv+a9D3JS/4GS8AEu7uJ1l2tTuTN?=
+ =?us-ascii?Q?34Xx2n1p5YmkeroojJwZyXO0tJiRywbJl+amsWVolsXRe2pG3EwI+VfEreCl?=
+ =?us-ascii?Q?4qmZcNFFXnBtTQ3QWmkqYuxqX9ppGQn6hDccdZZXEni60GOido0JXUc6aCsv?=
+ =?us-ascii?Q?7ySnTy4uJTZtP73EoLBd+iSkfKbKAHZtLpZUkkRTQEQTH00rno1IZFeH0LY/?=
+ =?us-ascii?Q?eHpxWC75dWYCDoKtsRnI5y4A6eCBvB4nrBE3R5GMuXhIONwyn+3NXPqcwmYP?=
+ =?us-ascii?Q?hiUuaOTtX/QJbo+/zvT6//Wv0dwQDyO4ntAPPCs7xVJgwowNuoqky0+R/xde?=
+ =?us-ascii?Q?EPoik7OkHhcPcPfW7n3fGafy2/igxlYdBpQrjeNtK+e1/Cm4PTGdXw2VINBO?=
+ =?us-ascii?Q?7HFntAoRzyvG11KAD4ee6VTKbFzfwaT6ZIlaZqabcdL8a60FnZK+dCMObRU+?=
+ =?us-ascii?Q?ZZZBBuGNMXGfW0eY263uQujAp2gIAcl5PiQPRZ1hhglfw7rbST54z/ITsuoF?=
+ =?us-ascii?Q?n5npiwNO0m9FbiRHFkjEs1zWwy/aoYu7c92fj/PYphyyOQXoTa2IIZ3xhrRH?=
+ =?us-ascii?Q?2WCqTfrM8lNWUckSCkBZREoZLU4TNpfVhSNAR9FecgybulugJYLGqdG3kC2h?=
+ =?us-ascii?Q?4ctiQqwlqbRNi1oPXb5n6UlylLAjgjDuJ2rP+lWDP755ZRYdBR2mO2/rjJvO?=
+ =?us-ascii?Q?eGWpPI3prIIE91B0fRsXwprCdOyTCU0KrgQjrV76ht7+6fYGr2XqWZ+8wSWD?=
+ =?us-ascii?Q?yb3LK9xiNP7zUeVmoJgi/T+Ec2qu7tT7UWkDDxfNqh1LE//npzz/Nxa/ewHZ?=
+ =?us-ascii?Q?sYcn+L6yPcoFGAdLZTYv1K9b1uOsdkFNO/ILPynBBK0WLjJHj+e7MiPC+IBm?=
+ =?us-ascii?Q?B/cso8cuRovbyIQZ6wgOC+yQYff6WlDwVeLxd+pIy47U6pDvW1Im62TsrX00?=
+ =?us-ascii?Q?tH69i8AOC5gmcrWyckmJBz1xHsW60wrRTFIeN1QD4dZy1kEOz3+mUeYY93i/?=
+ =?us-ascii?Q?8QKhgv/nA4ashFa/2APzm/N4imzLWor3vEeMtQqhBBZmnIOSTPMD11SS02xF?=
+ =?us-ascii?Q?7B9vXQUlHmN/u2bhuFglPUctKnXH0XUdG4ZqOpzi1qQf/Dw5qy32KhYYMtkh?=
+ =?us-ascii?Q?YQ=3D=3D?=
 X-Forefront-Antispam-Report:
 	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(366016)(376014)(7416014)(10070799003)(1800799024)(921020);DIR:OUT;SFP:1102;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?WC3sl1ujWLaKCMyj0oHLl6gXOgz020b7/he7x59lvMH7VPqKtwaB4ifpqIRs?=
- =?us-ascii?Q?TaTnVPB4rcCnnUapPrr7KbhR+2byhtT3ylQEh0n0G+s5PWicMSS7JVnR5zad?=
- =?us-ascii?Q?2NyMbwLpvvCF96DyG60s8YWwJWdPD7tWTcVsxHispBe1Ptwv36YpV/xwZjmj?=
- =?us-ascii?Q?84UsKwUKKHzHhQPlFkGvUA1PQ0cRzgBP27EemO+mpjHiTlMrKK5p5VE2p/At?=
- =?us-ascii?Q?wpVAp7V6uuTSJHdl5t06RRdpeEzDf+qadSE0vvhHMQTMHWrKJyrLFDXzWKfO?=
- =?us-ascii?Q?9UuFrwFfvgJCClM0x0sCmbMaiUje/gf6TBOtYK+e0NoehYJrehh7MdASxOop?=
- =?us-ascii?Q?/gvrz9YDPojjDracZ/ewiUOjuhctAWgaBDZnu2/26KAs7YhOycXyGkCrIekH?=
- =?us-ascii?Q?1fmSawiPVea7eMNd4s+6rpsyFMWaC/jQ/ckUF/UZDL5414Vez2f5NmbBFFET?=
- =?us-ascii?Q?Rcc4tRU/pFjsxH0zwMTAqDPynnMQvDx3aLgWFEnjd78FRr9pNlduDqoOS0h5?=
- =?us-ascii?Q?4GSujNPPI+LjS+oxWHvahzZ6SCef63Ble1SQ6vMftOU+XwLWnKKjmVuIgqTi?=
- =?us-ascii?Q?7DgbuEouZrMH4sn2ypZpV9reE/8vHTVnarDnc4se5SsZjx3HwntNyO30mT/F?=
- =?us-ascii?Q?4ns3P3NfSJ8qBoBj5F9zpZIbUFbvcmxRES+pX2eEn5HGXivjrm4PCbwyS7pf?=
- =?us-ascii?Q?xhlJPsa+KFOGaHZNEE1advhJH5BrQsuNeWlZvGqmmJ/hhpAVvisEtDGw83Da?=
- =?us-ascii?Q?Ym52RBgR1zbQRzZRxPZkQDPIYkrCo6emHnIVZu8G3QXB8f4+IAsBJYy8bgsD?=
- =?us-ascii?Q?U3jbbV7dlaZ1FR7J8KwJLVgl5bUcdyFH0yVJwJLZTl3ny5Y3/OaprRwDipjB?=
- =?us-ascii?Q?WlhqLIOs+DYnFluqTZ4LhxdXfT1zXEqRzBxn7xBVl1lFbl/qvSsbaiRL6NYK?=
- =?us-ascii?Q?bEg4c+GOu4cH9RTbgSilzNhuBveV0V7i3RTipXFfbH0gVnDijw5OVrH0Zltj?=
- =?us-ascii?Q?1S6CCTHQ1tsz9u38x2EFqRhi9T3nEX+NUDEKyX/2983pWh4QCW0S96NUnlPa?=
- =?us-ascii?Q?HVxg63MjG28fl1jXUntOTQ1QHoAsv57K5spKQq2uendaNCY6bFYwnat5A0Gk?=
- =?us-ascii?Q?vg/Xg+zxBpmCM6McrDk9Q1WZmuF5goW9X+qjnmm3nXHhoRiZ3coDG33UdLK0?=
- =?us-ascii?Q?FH8aJjabPnSTbREleRUc8HYprdVuwT3nXhtFJXap7HHIeXaLSQ3SXu4beOQz?=
- =?us-ascii?Q?mVIRjGsHb7e51QqHu606Fp0BF2shYctbKxonnPyLl1gVWMQF3NObtEodHEy6?=
- =?us-ascii?Q?t7lpBbUGb3PGPSLyXNsRZzAN4sxZq1GV0ESHa1qPgFwn26lOd9duHAmnBBaV?=
- =?us-ascii?Q?1n1BzaDmptHl1LgK7ByKHeNwB75wKeq40KRkmjVE3cvzpokby1F4YGoM97+M?=
- =?us-ascii?Q?o8+echj+woPeSUuJBtgIQZCXVlZ9nnEHtCV2NWIvAI/4gvmLLSn2ObPUDda2?=
- =?us-ascii?Q?ZwxVVtF2QkATUlxmVAi4BIs7WTCi9Kn22kQ9Al1WolMjkLpatasG6+pu5Joj?=
- =?us-ascii?Q?xEBaCh1qYQI/7+F8yKQoKkf5Yf5xs3ILfrdvub2xsTHv+In72r9wSBtXk3iT?=
- =?us-ascii?Q?ac1iLCUxED2Ppy6NBT+b5dJQ0ws080i1RCmZ4CiM7uU6Mem4RVg+e0mBaK7J?=
- =?us-ascii?Q?kAkA0U3k2K5lPw9VaLAyeOqML9OKQMk1MazeHU55SCzuNI0aHuut/gVfgYA2?=
- =?us-ascii?Q?dl3RW3oC8KApqwOBTZ25ELDc2lzODWv6hqlyPjkK7c1AchiMr7K1?=
+	=?us-ascii?Q?2XKGMr0Qc5uLhtklV4v+VOf9yXNG+aQsMGcPIHBUvnH5Q1XzafO1dx63wUL4?=
+ =?us-ascii?Q?g44ozUGD32B2uECqqO3Bp80zB29QBAw6DMCsmpO3mUZuTqxFJKXW5e+yWiVN?=
+ =?us-ascii?Q?3jHlEjOwPc5VMUwSBvdR8H5edyEdBXi5t7LsV6QR/02djlgpQV+EVSmY13DM?=
+ =?us-ascii?Q?IOgcD+6ju7KNs66FjmdCF5YcxmdEJfHGXajisdveJ1qzBGhi7WsYfQaV/8CP?=
+ =?us-ascii?Q?wPAhL2LrUUE/8Z8aODnDw3Ve9FkQt82Sp8oItmsUBiYzzhKTEzheDS3tKEOO?=
+ =?us-ascii?Q?c+87DqC2NSIhi9SeWZ7kNV9NJjRVFkb+P/gX7ORZlotsjHdAO9WuuvCjm51A?=
+ =?us-ascii?Q?Ho5UXNLoumEzt1BBaa/VXqxFhs6P1BgFHHHcyqUFVPOuGYfxFPlHBBS5RtBL?=
+ =?us-ascii?Q?hHubMxCbnNFQtuWcFEgsvxGh0nN+PaWXhW4bu7QuojqlcXl2dIWtuefWQpf7?=
+ =?us-ascii?Q?9ngM0x2cEXccGYqmgWTx9RiMq8Y7stt6L2c5aVCFgTy1VvMqTR4lOA0vqQ2E?=
+ =?us-ascii?Q?wA6CnoEGsa9Zpfo1qP3/mggN9UVKPaJKsiHGINnfWaCDj+0P3OozzQYs1JTY?=
+ =?us-ascii?Q?7nRPpxeWGlqnzm8HsZC09QPtegSel2W6mvO0qutiZyf/zfrlCB7+A0LTO/Ki?=
+ =?us-ascii?Q?ab+3e2JhsOf5m3CM4poA5qog8zUGNUaLir4TM8VEpF47TOZFHYzuITymAvjq?=
+ =?us-ascii?Q?KYVvSRyRPMuRsftt64PmlA0lw8qAw0BRubKlXuMoud+IgigZBQ21Pu99ukqB?=
+ =?us-ascii?Q?KinKSx9YZ2UNLa+gafeK7OGAkbxixU+oVR7Bn2HjDZyRV6ssZ/25RqIqzvql?=
+ =?us-ascii?Q?bapEAfjH+VWLbGPiyehGHU/HzDz0YiEgutjw7kHDkeZowJNIN83lh7VpsRjA?=
+ =?us-ascii?Q?NyZb358TXB0wQjQqH8XdSy0AiGm/8KNe7qcO+SGPZdIW28JNbnb/lfYr8MMy?=
+ =?us-ascii?Q?GNGmfcYNLAufNzsu0xRhRyFOMbHBVl4NDoGhbwECDvJmb8NvEgNvBP2mtMF8?=
+ =?us-ascii?Q?RsXe3XsjDq9oyQvJR+M2ueBeOEsqBvmDM3GnxhtLOq/kLUwf/EvKy0BfzMzP?=
+ =?us-ascii?Q?DDDKgrDImoLNqooOeBJ+gLgcHflZWvowmMkZO3jeS7y5LQk7lhQfOc/5RV/1?=
+ =?us-ascii?Q?DjXAutoM5AH31hktlu9mwZLpZe1E+3z+fnnfz0y0NNxCyGD1ph5U3LO6vX0o?=
+ =?us-ascii?Q?ZTkq08UOcLMMmtuxJr3Eg46nQl0D4PIiwWj7GXqhhhjGDOJvgVzsEmz42YDc?=
+ =?us-ascii?Q?svYJtFZ3LtgSOmUqEd96l781qVMIYgXfcQL7p2J1OM7huaRFIOR6hfzIFbna?=
+ =?us-ascii?Q?6MSoN4wZ38PkpbSu+3TRPBi/zUKCcCy6k4DEwcvOEc/n3zufRJJFrbjryp9O?=
+ =?us-ascii?Q?1pp2mKqoZ8KnLmKyZpmly6EqOm5xFPRrBQvkgjhK4O2xkWS4g0lSdx2N2lf2?=
+ =?us-ascii?Q?EPEZW8+hQZkM13VVorR+VYZwiBCVOjzA205XBuMgZExNF6IJvIcjqhFmK87l?=
+ =?us-ascii?Q?QXplCmHclc1lV0DW3mPN504crYrVPZHPZJRQWY+i1ykSscGy/qkiBqnd4Bl/?=
+ =?us-ascii?Q?xQYOVaoItgDc4iwrmVsN9CvwQTSfNEyxKA3uqE/37H0sp0HmHL7/58IhY/Op?=
+ =?us-ascii?Q?Krpe/EJVM5wuzcO+ZDAo0mVn8bMzdksV3kJDnsgHlVb7hsk+7IxYp/olMm5w?=
+ =?us-ascii?Q?8MJ7XWuL/yZx2wGIe3OQ/Zeg8sghM1T/QZM0lC6BXtHe/Sa4bcS97DEdzDvx?=
+ =?us-ascii?Q?WYCTMhIpXj8Xxfd2KGRNAwni4pI1daGUp5iTy0AEjQEyWkp4asgw?=
 X-OriginatorOrg: valinux.co.jp
-X-MS-Exchange-CrossTenant-Network-Message-Id: a85bb668-09ae-42dd-4b3e-08de56993329
+X-MS-Exchange-CrossTenant-Network-Message-Id: c01f8d4b-7e78-4607-335f-08de569931f2
 X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 18 Jan 2026 13:55:12.1886
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 18 Jan 2026 13:55:10.1602
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 3G1Q2K07jYdU+kMAvZQHLRDBa1ujWtIPZx5nlMNrpwaUoYEfc2dLkLbjzivFBFihjV2vwxoE4+o7fBIijTukXA==
+X-MS-Exchange-CrossTenant-UserPrincipalName: BpHqTuaAcRuwW33HxeQHq4YGPG4wnwDNXEP4zj90/MSyWIxGt+Boy2Pbk/Bu4gwCflpaV9wtbSP8OMXhedDLbA==
 X-MS-Exchange-Transport-CrossTenantHeadersStamped: OSZP286MB2093
 
-Some backends may need to program BAR subrange mappings, and due to
-pci_epc_set_bar() submap API constraint, the entire BAR layout needs to
-be provided when calling the function. Since one MW that is to be
-programmed by ntb_set_mw() can be the last piece that allows us to call
-pci_epc_set_bar() for the BAR, calling it only after link-up can race
-with post-link-up setup on the host.
+The transport code is being refactored to support multiple clients and
+transport backends. As a first step, split the module into a core
+library and a thin default client that binds to NTB ports.
 
-Invoke ntb_set_mw() before the link-up handshake so the MW translation
-is established early and the post-link-up setup can run without relying
-on late MW programming. Since ntb_set_mw() can re-setup the MW when it
-turns out that the size differs, it's safe to do so.
+Move module parameters and the legacy ntb_client glue into a new
+ntb_transport.c. Export ntb_transport_attach()/ntb_transport_detach()
+from the core so other clients can reuse the common transport
+infrastructure.
+
+No functional change intended for the default transport.
 
 Signed-off-by: Koichiro Den <den@valinux.co.jp>
 ---
- drivers/ntb/ntb_transport_core.c | 5 +++++
- 1 file changed, 5 insertions(+)
+ drivers/ntb/Makefile                 |  3 +-
+ drivers/ntb/ntb_transport.c          | 81 ++++++++++++++++++++++++
+ drivers/ntb/ntb_transport_core.c     | 93 ++++++++++------------------
+ drivers/ntb/ntb_transport_internal.h | 15 +++++
+ 4 files changed, 128 insertions(+), 64 deletions(-)
+ create mode 100644 drivers/ntb/ntb_transport.c
 
+diff --git a/drivers/ntb/Makefile b/drivers/ntb/Makefile
+index 9b66e5fafbc0..47e6b95ef7ce 100644
+--- a/drivers/ntb/Makefile
++++ b/drivers/ntb/Makefile
+@@ -1,8 +1,7 @@
+ # SPDX-License-Identifier: GPL-2.0-only
+ obj-$(CONFIG_NTB) += ntb.o hw/ test/
+ obj-$(CONFIG_NTB_TRANSPORT) += ntb_transport.o
++obj-$(CONFIG_NTB_TRANSPORT) += ntb_transport_core.o
+ 
+ ntb-y			:= core.o
+ ntb-$(CONFIG_NTB_MSI)	+= msi.o
+-
+-ntb_transport-y		:= ntb_transport_core.o
+diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+new file mode 100644
+index 000000000000..dafb97e38883
+--- /dev/null
++++ b/drivers/ntb/ntb_transport.c
+@@ -0,0 +1,81 @@
++// SPDX-License-Identifier: (GPL-2.0 OR BSD-3-Clause)
++/*
++ * Copyright(c) 2012 Intel Corporation. All rights reserved.
++ * Copyright (C) 2015 EMC Corporation. All Rights Reserved.
++ *
++ * Default NTB transport client module.
++ *
++ * The transport core library and backend infrastructure are implemented in
++ * ntb_transport_core.c. This module provides the default client that binds
++ * to NTB ports and instantiates the default transport for consumers such
++ * as ntb_netdev.
++ */
++
++#include <linux/module.h>
++#include <linux/ntb.h>
++
++#include "ntb_transport_internal.h"
++
++static unsigned long max_mw_size;
++module_param(max_mw_size, ulong, 0644);
++MODULE_PARM_DESC(max_mw_size, "Limit size of large memory windows");
++
++static unsigned int transport_mtu = 0x10000;
++module_param(transport_mtu, uint, 0644);
++MODULE_PARM_DESC(transport_mtu, "Maximum size of NTB transport packets");
++
++static unsigned char max_num_clients;
++module_param(max_num_clients, byte, 0644);
++MODULE_PARM_DESC(max_num_clients, "Maximum number of NTB transport clients");
++
++static unsigned int copy_bytes = 1024;
++module_param(copy_bytes, uint, 0644);
++MODULE_PARM_DESC(copy_bytes, "Threshold under which NTB will use the CPU to copy instead of DMA");
++
++static bool use_dma;
++module_param(use_dma, bool, 0644);
++MODULE_PARM_DESC(use_dma, "Use DMA engine to perform large data copy");
++
++static bool use_msi;
++#ifdef CONFIG_NTB_MSI
++module_param(use_msi, bool, 0644);
++MODULE_PARM_DESC(use_msi, "Use MSI interrupts instead of doorbells");
++#endif
++
++#define NTB_QP_DEF_NUM_ENTRIES	100
++
++static int ntb_transport_host_probe(struct ntb_client *self,
++				    struct ntb_dev *ndev)
++{
++	return ntb_transport_attach(ndev, "default", use_msi, max_mw_size,
++				    transport_mtu, max_num_clients, copy_bytes,
++				    use_dma, NTB_QP_DEF_NUM_ENTRIES);
++}
++
++static void ntb_transport_host_remove(struct ntb_client *self, struct ntb_dev *ndev)
++{
++	ntb_transport_detach(ndev);
++}
++
++static struct ntb_client ntb_transport_host_client = {
++	.ops = {
++		.probe = ntb_transport_host_probe,
++		.remove = ntb_transport_host_remove,
++	},
++};
++
++static int __init ntb_transport_host_init(void)
++{
++	return ntb_register_client(&ntb_transport_host_client);
++}
++module_init(ntb_transport_host_init);
++
++static void __exit ntb_transport_host_exit(void)
++{
++	ntb_unregister_client(&ntb_transport_host_client);
++}
++module_exit(ntb_transport_host_exit);
++
++MODULE_LICENSE("Dual BSD/GPL");
++MODULE_AUTHOR("Intel Corporation");
++MODULE_DESCRIPTION("Software Queue-Pair Transport over NTB");
 diff --git a/drivers/ntb/ntb_transport_core.c b/drivers/ntb/ntb_transport_core.c
-index 2129fa7a22d8..185d73f8ea93 100644
+index 04a13fdce71c..86181fe1eadd 100644
 --- a/drivers/ntb/ntb_transport_core.c
 +++ b/drivers/ntb/ntb_transport_core.c
-@@ -977,6 +977,10 @@ static void ntb_transport_link_work(struct work_struct *work)
+@@ -69,7 +69,7 @@
+ #define NTB_TRANSPORT_VERSION	4
+ #define NTB_TRANSPORT_VER	"4"
+ #define NTB_TRANSPORT_NAME	"ntb_transport"
+-#define NTB_TRANSPORT_DESC	"Software Queue-Pair Transport over NTB"
++#define NTB_TRANSPORT_DESC	"NTB transport core library"
+ #define NTB_TRANSPORT_MIN_SPADS (MW0_SZ_HIGH + 2)
  
- 		spad = MW0_SZ_LOW + (i * 2);
- 		ntb_peer_spad_write(ndev, PIDX, spad, lower_32_bits(size));
-+
-+		rc = ntb_set_mw(nt, i, size);
-+		if (rc)
-+			goto out;
+ MODULE_DESCRIPTION(NTB_TRANSPORT_DESC);
+@@ -77,31 +77,6 @@ MODULE_VERSION(NTB_TRANSPORT_VER);
+ MODULE_LICENSE("Dual BSD/GPL");
+ MODULE_AUTHOR("Intel Corporation");
+ 
+-static unsigned long max_mw_size;
+-module_param(max_mw_size, ulong, 0644);
+-MODULE_PARM_DESC(max_mw_size, "Limit size of large memory windows");
+-
+-static unsigned int transport_mtu = 0x10000;
+-module_param(transport_mtu, uint, 0644);
+-MODULE_PARM_DESC(transport_mtu, "Maximum size of NTB transport packets");
+-
+-static unsigned char max_num_clients;
+-module_param(max_num_clients, byte, 0644);
+-MODULE_PARM_DESC(max_num_clients, "Maximum number of NTB transport clients");
+-
+-static unsigned int copy_bytes = 1024;
+-module_param(copy_bytes, uint, 0644);
+-MODULE_PARM_DESC(copy_bytes, "Threshold under which NTB will use the CPU to copy instead of DMA");
+-
+-static bool use_dma;
+-module_param(use_dma, bool, 0644);
+-MODULE_PARM_DESC(use_dma, "Use DMA engine to perform large data copy");
+-
+-static bool use_msi;
+-#ifdef CONFIG_NTB_MSI
+-module_param(use_msi, bool, 0644);
+-MODULE_PARM_DESC(use_msi, "Use MSI interrupts instead of doorbells");
+-#endif
+ 
+ static struct dentry *nt_debugfs_dir;
+ 
+@@ -135,12 +110,10 @@ enum {
+ #define drv_client(__drv) \
+ 	container_of((__drv), struct ntb_transport_client, driver)
+ 
+-#define NTB_QP_DEF_NUM_ENTRIES	100
+ #define NTB_LINK_DOWN_TIMEOUT	10
+ 
+ static void ntb_transport_rxc_db(unsigned long data);
+ static const struct ntb_ctx_ops ntb_transport_ops;
+-static struct ntb_client ntb_transport_client;
+ static int ntb_async_tx_submit(struct ntb_transport_qp *qp,
+ 			       struct ntb_queue_entry *entry);
+ static void ntb_memcpy_tx(struct ntb_queue_entry *entry, void __iomem *offset);
+@@ -456,8 +429,8 @@ static int ntb_transport_setup_qp_mw(struct ntb_transport_ctx *nt,
+ 
+ 	if (mw_size > mw->xlat_size)
+ 		mw_size = mw->xlat_size;
+-	if (max_mw_size && mw_size > max_mw_size)
+-		mw_size = max_mw_size;
++	if (nt->max_mw_size && mw_size > nt->max_mw_size)
++		mw_size = nt->max_mw_size;
+ 
+ 	tx_size = (unsigned int)mw_size / num_qps_mw;
+ 	qp_offset = tx_size * (qp_num / mw_count);
+@@ -481,9 +454,9 @@ static int ntb_transport_setup_qp_mw(struct ntb_transport_ctx *nt,
+ 	qp->rx_info = qp->tx_mw + tx_size;
+ 
+ 	/* Due to housekeeping, there must be atleast 2 buffs */
+-	qp->tx_max_frame = min(transport_mtu, tx_size / 2);
++	qp->tx_max_frame = min(nt->transport_mtu, tx_size / 2);
+ 	qp->tx_max_entry = tx_size / qp->tx_max_frame;
+-	qp->rx_max_frame = min(transport_mtu, rx_size / 2);
++	qp->rx_max_frame = min(nt->transport_mtu, rx_size / 2);
+ 	qp->rx_max_entry = rx_size / qp->rx_max_frame;
+ 	qp->rx_index = 0;
+ 
+@@ -909,8 +882,8 @@ static void ntb_transport_link_work(struct work_struct *work)
+ 	for (i = 0; i < nt->mw_count; i++) {
+ 		size = nt->mw_vec[i].phys_size;
+ 
+-		if (max_mw_size && size > max_mw_size)
+-			size = max_mw_size;
++		if (nt->max_mw_size && size > nt->max_mw_size)
++			size = nt->max_mw_size;
+ 
+ 		spad = MW0_SZ_HIGH + (i * 2);
+ 		ntb_peer_spad_write(ndev, PIDX, spad, upper_32_bits(size));
+@@ -1084,7 +1057,12 @@ static int ntb_transport_init_queue(struct ntb_transport_ctx *nt,
+ 	return 0;
+ }
+ 
+-static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
++int ntb_transport_attach(struct ntb_dev *ndev, const char *backend_name,
++			 bool use_msi, unsigned long max_mw_size,
++			 unsigned int transport_mtu,
++			 unsigned char max_num_clients,
++			 unsigned int copy_bytes, bool use_dma,
++			 unsigned int num_rx_entries)
+ {
+ 	struct ntb_transport_ctx *nt;
+ 	struct ntb_transport_mw *mw;
+@@ -1117,6 +1095,11 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
+ 		return -ENOMEM;
+ 
+ 	nt->ndev = ndev;
++	nt->max_mw_size = max_mw_size;
++	nt->transport_mtu = transport_mtu;
++	nt->copy_bytes = copy_bytes;
++	nt->use_dma = use_dma;
++	nt->num_rx_entries = num_rx_entries;
+ 
+ 	/*
+ 	 * If we are using MSI, and have at least one extra memory window,
+@@ -1241,8 +1224,9 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
+ 	kfree(nt);
+ 	return rc;
+ }
++EXPORT_SYMBOL_GPL(ntb_transport_attach);
+ 
+-static void ntb_transport_free(struct ntb_client *self, struct ntb_dev *ndev)
++void ntb_transport_detach(struct ntb_dev *ndev)
+ {
+ 	struct ntb_transport_ctx *nt = ndev->ctx;
+ 	struct ntb_transport_qp *qp;
+@@ -1262,6 +1246,7 @@ static void ntb_transport_free(struct ntb_client *self, struct ntb_dev *ndev)
+ 			ntb_transport_free_queue(qp);
+ 		debugfs_remove_recursive(qp->debugfs_dir);
  	}
++	debugfs_remove(nt->debugfs_node_dir);
  
- 	ntb_peer_spad_write(ndev, PIDX, NUM_MWS, nt->mw_count);
-@@ -1032,6 +1036,7 @@ static void ntb_transport_link_work(struct work_struct *work)
+ 	ntb_link_disable(ndev);
+ 	ntb_clear_ctx(ndev);
+@@ -1277,6 +1262,7 @@ static void ntb_transport_free(struct ntb_client *self, struct ntb_dev *ndev)
+ 	kfree(nt->mw_vec);
+ 	kfree(nt);
+ }
++EXPORT_SYMBOL_GPL(ntb_transport_detach);
  
- 		dev_dbg(&pdev->dev, "Remote MW%d size = %#llx\n", i, val64);
+ static void ntb_complete_rxc(struct ntb_transport_qp *qp)
+ {
+@@ -1438,7 +1424,7 @@ static void ntb_async_rx(struct ntb_queue_entry *entry, void *offset)
+ 	if (!chan)
+ 		goto err;
  
-+		/* If it turns out that the size differs, reconfigure it */
- 		rc = ntb_set_mw(nt, i, val64);
- 		if (rc)
- 			goto out1;
+-	if (entry->len < copy_bytes)
++	if (entry->len < qp->transport->copy_bytes)
+ 		goto err;
+ 
+ 	res = ntb_async_rx_submit(entry, offset);
+@@ -1718,7 +1704,7 @@ static void ntb_async_tx(struct ntb_transport_qp *qp,
+ 	if (!chan)
+ 		goto err;
+ 
+-	if (entry->len < copy_bytes)
++	if (entry->len < qp->transport->copy_bytes)
+ 		goto err;
+ 
+ 	res = ntb_async_tx_submit(qp, entry);
+@@ -1856,7 +1842,7 @@ ntb_transport_create_queue(void *data, struct device *client_dev,
+ 	dma_cap_zero(dma_mask);
+ 	dma_cap_set(DMA_MEMCPY, dma_mask);
+ 
+-	if (use_dma) {
++	if (nt->use_dma) {
+ 		qp->tx_dma_chan =
+ 			dma_request_channel(dma_mask, ntb_dma_filter_fn,
+ 					    (void *)(unsigned long)node);
+@@ -1892,7 +1878,7 @@ ntb_transport_create_queue(void *data, struct device *client_dev,
+ 	dev_dbg(&pdev->dev, "Using %s memcpy for RX\n",
+ 		qp->rx_dma_chan ? "DMA" : "CPU");
+ 
+-	for (i = 0; i < NTB_QP_DEF_NUM_ENTRIES; i++) {
++	for (i = 0; i < nt->num_rx_entries; i++) {
+ 		entry = kzalloc_node(sizeof(*entry), GFP_KERNEL, node);
+ 		if (!entry)
+ 			goto err1;
+@@ -1901,7 +1887,7 @@ ntb_transport_create_queue(void *data, struct device *client_dev,
+ 		ntb_list_add(&qp->ntb_rx_q_lock, &entry->entry,
+ 			     &qp->rx_free_q);
+ 	}
+-	qp->rx_alloc_entry = NTB_QP_DEF_NUM_ENTRIES;
++	qp->rx_alloc_entry = nt->num_rx_entries;
+ 
+ 	for (i = 0; i < qp->tx_max_entry; i++) {
+ 		entry = kzalloc_node(sizeof(*entry), GFP_KERNEL, node);
+@@ -2301,13 +2287,6 @@ static const struct ntb_ctx_ops ntb_transport_ops = {
+ 	.db_event = ntb_transport_doorbell_callback,
+ };
+ 
+-static struct ntb_client ntb_transport_client = {
+-	.ops = {
+-		.probe = ntb_transport_probe,
+-		.remove = ntb_transport_free,
+-	},
+-};
+-
+ static int __init ntb_transport_init(void)
+ {
+ 	int rc;
+@@ -2318,26 +2297,16 @@ static int __init ntb_transport_init(void)
+ 		nt_debugfs_dir = debugfs_create_dir(KBUILD_MODNAME, NULL);
+ 
+ 	rc = bus_register(&ntb_transport_bus);
+-	if (rc)
+-		goto err_bus;
+-
+-	rc = ntb_register_client(&ntb_transport_client);
+-	if (rc)
+-		goto err_client;
+-
+-	return 0;
+-
+-err_client:
+-	bus_unregister(&ntb_transport_bus);
+-err_bus:
+-	debugfs_remove_recursive(nt_debugfs_dir);
++	if (rc) {
++		bus_unregister(&ntb_transport_bus);
++		debugfs_remove_recursive(nt_debugfs_dir);
++	}
+ 	return rc;
+ }
+ module_init(ntb_transport_init);
+ 
+ static void __exit ntb_transport_exit(void)
+ {
+-	ntb_unregister_client(&ntb_transport_client);
+ 	bus_unregister(&ntb_transport_bus);
+ 	debugfs_remove_recursive(nt_debugfs_dir);
+ }
+diff --git a/drivers/ntb/ntb_transport_internal.h b/drivers/ntb/ntb_transport_internal.h
+index 6b45790cc88e..406033dbddb7 100644
+--- a/drivers/ntb/ntb_transport_internal.h
++++ b/drivers/ntb/ntb_transport_internal.h
+@@ -134,9 +134,17 @@ struct ntb_transport_ctx {
+ 	struct ntb_transport_qp *qp_vec;
+ 	unsigned int mw_count;
+ 	unsigned int qp_count;
++	unsigned int max_qp_count;
+ 	u64 qp_bitmap;
+ 	u64 qp_bitmap_free;
+ 
++	/* Parameters */
++	unsigned int num_rx_entries;
++	unsigned int transport_mtu;
++	unsigned long max_mw_size;
++	unsigned int copy_bytes;
++	bool use_dma;
++
+ 	bool use_msi;
+ 	unsigned int msi_spad_offset;
+ 	u64 msi_db_mask;
+@@ -162,5 +170,12 @@ struct ntb_queue_entry *ntb_list_rm(spinlock_t *lock, struct list_head *list);
+ struct ntb_queue_entry *ntb_list_mv(spinlock_t *lock, struct list_head *list,
+ 				    struct list_head *to_list);
+ void ntb_qp_link_down(struct ntb_transport_qp *qp);
++int ntb_transport_attach(struct ntb_dev *ndev, const char *backend_name,
++			 bool use_msi, unsigned long max_mw_size,
++			 unsigned int transport_mtu,
++			 unsigned char max_num_clients,
++			 unsigned int copy_bytes, bool use_dma,
++			 unsigned int num_rx_entries);
++void ntb_transport_detach(struct ntb_dev *ndev);
+ 
+ #endif /* _NTB_TRANSPORT_INTERNAL_H_ */
 -- 
 2.51.0
 
