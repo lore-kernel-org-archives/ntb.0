@@ -1,760 +1,540 @@
-Received: from PA4PR04CU001.outbound.protection.outlook.com (mail-francecentralazon11013044.outbound.protection.outlook.com [40.107.162.44])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.21])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E89EF25CC79;
-	Mon, 19 Jan 2026 20:47:44 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.162.44
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768855667; cv=fail; b=EqH9ZStm5aoSdOQT1N5mFgU09uHsNN/ebh2A3pxVJ9mSIHo1qLdzFtTb/ujQGEZ1cotEEyYyKaSRpQ15tHrLQJgDKxtHTb4hSlbzHDoiefr3QmwrSVfaScqXFLiKvxMIiQ2C4VVfchVn27MokZCcmpMrdAe64QsuTLOdOVNmPiM=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768855667; c=relaxed/simple;
-	bh=/jZ+VFo8ubBvgHshFOb/XvlHwsYrLXZgTnauK0NIFtk=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
-	 Content-Disposition:In-Reply-To:MIME-Version; b=DkxsG+Btg3cKTLr7L5RZjST+HvkGQXxAgX7bixi8PVcxy78abk1+3+6OW6I+64KiXeprbeuO+bFdFFT5D5DzBeRApb5vBccsGvQ2p9/f/IXQ3jTTogtE45XLW9rSyFZM4075YpAz6QPVdXk7ZkyY9rEsB3h8jFfFzlbVD+l2v3Y=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com; spf=pass smtp.mailfrom=nxp.com; dkim=pass (2048-bit key) header.d=nxp.com header.i=@nxp.com header.b=mOE0uRNM; arc=fail smtp.client-ip=40.107.162.44
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=nxp.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D45B643CEE4;
+	Tue, 20 Jan 2026 18:30:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.21
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1768933814; cv=none; b=bf5v2skXxtjnC+SgV1O4SzGQrJcv7kWHoCvtOMQzhRvMJh5Gz26ZYZGTWjl+A6H7NSSVSSK6yt72Wq26VRZ/8g6a4aOvth/8XCyN7EeJ9ttxZZnFkkw8QKoVZlx/aLW95+HqValOST005fAnE1uSMLbygSasTj9ydL+BK+loO0A=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1768933814; c=relaxed/simple;
+	bh=km3HjgnU7wgjaUhMxS9FwHTpr+q5UFHbNek+XbOadRk=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=L21rrLRBChUphrcSLeHP3zkLatj1Yc2aaNaQTtqLUvdTzighigsswCE96Udk3qj6GCC7otuehxvaU7DXP7dh1OKkBMUEXuWCsyVOtBoHddV/NUq002RBVZepHn5QCSMSEKWjlSP79cjxmezftM/KEuU8K58J3Z2LoFx8hg84t00=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=hjlPxybX; arc=none smtp.client-ip=198.175.65.21
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=nxp.com header.i=@nxp.com header.b="mOE0uRNM"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=zTGRo+nVqmEvPFpNCpxfoVzeg9NvcytM+CJm19IyOaZECso0w/g2F8pYnqOSkvHq0vWdNTocHKN1jwj9UuR7ikHSal9uj7g76AX43mnHx+OQNmeC8XbiVSkbgJL9DIDp/b1suKizQnnCMQPxm2R86rAsP+kRLODa5sIIHFWZwN4bId1ac2rdKU6/Uh/d5M7BfwPd7LxECkUslYr35x+AAPU+r463cWYWGMzlOvbjtVian8peCFemi82DhmzqY5IHGr7W45+d/sCqIhg7C0bzq4tRVDebsLbvgjDj8VjkDfZqLPZZIeqkWk35FRaj52hwZ1lWKYV1kPDBBEX5AeI6/g==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=SY5LKv4oCUhPexRPBkdD49RmNhecKYm84Hd+ebGpZPI=;
- b=PW69/F78O66cO30KsxjLbO/eUtEw8+WAhw//V5YYiBvvn59Jeh2qzTw9x26N9nRUFE/ZfEGm/nt71TwzN16yDRpWGvDsFeYRMYTBaXTI2UkRkf+J1XSKr/pNLgxB3kbk1QW5ea1GdcOQVr0KuDxkltzpH+OnhWS7BV26X/eLOeBg9phkYv4bZusOC+HwR7pNBll9Wf93jUa3VPhkTNV82lZEKMF8XQYuE296owI974i63DoPtGV7VTQdvQRANUMk9N8jvpXkpZirWRPZWuH2N2v6eg1Ek3Khmf2GmkrGLyiHwWlFxr85f0Ctt+w5PXVI1nJqGI2RWxXT4KNuMdHpAg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
- header.d=nxp.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=SY5LKv4oCUhPexRPBkdD49RmNhecKYm84Hd+ebGpZPI=;
- b=mOE0uRNM8BX8o6RljBPW4NJjKNgLmgdFxUbjXldWW3uklnucgbfJ4WIQwYmHex2D0fHI/dloQPaoL247MDSatgkH6M8C5aPqo5O4fo0+PSquu+KN7MtBfiSK9o2vU24Zoi36qoP+nosHGatLGC8a6vE5Ph1KIEMLwDA7x+ZI0/x2sSc6s9VwBXNU07xywupc2Hy5q0zRPVQg6mTkghXQqRABfSACJJkxAaTrz69sqo0sq6g6Uql99EwqRXgKGxNpG1ouzt2FrigJmPgw+ci7BoNKIA0Plz6HirV8qndwrFDjUzPpW0Wm6mcVbWQ7geOBFOaH5qgA6oPG/GhrmHrx1Q==
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=nxp.com;
-Received: from PRASPRMB0004.eurprd04.prod.outlook.com (2603:10a6:102:29b::6)
- by AS4PR04MB9575.eurprd04.prod.outlook.com (2603:10a6:20b:4fd::11) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9520.12; Mon, 19 Jan
- 2026 20:47:40 +0000
-Received: from PRASPRMB0004.eurprd04.prod.outlook.com
- ([fe80::6ab3:f427:606a:1ecd]) by PRASPRMB0004.eurprd04.prod.outlook.com
- ([fe80::6ab3:f427:606a:1ecd%4]) with mapi id 15.20.9520.009; Mon, 19 Jan 2026
- 20:47:40 +0000
-Date: Mon, 19 Jan 2026 15:47:27 -0500
-From: Frank Li <Frank.li@nxp.com>
-To: Koichiro Den <den@valinux.co.jp>
-Cc: dave.jiang@intel.com, cassel@kernel.org, mani@kernel.org,
-	kwilczynski@kernel.org, kishon@kernel.org, bhelgaas@google.com,
-	geert+renesas@glider.be, robh@kernel.org, vkoul@kernel.org,
-	jdmason@kudzu.us, allenbh@gmail.com, jingoohan1@gmail.com,
-	lpieralisi@kernel.org, linux-pci@vger.kernel.org,
-	linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org, devicetree@vger.kernel.org,
-	dmaengine@vger.kernel.org, iommu@lists.linux.dev,
-	ntb@lists.linux.dev, netdev@vger.kernel.org,
-	linux-kselftest@vger.kernel.org, arnd@arndb.de,
-	gregkh@linuxfoundation.org, joro@8bytes.org, will@kernel.org,
-	robin.murphy@arm.com, magnus.damm@gmail.com, krzk+dt@kernel.org,
-	conor+dt@kernel.org, corbet@lwn.net, skhan@linuxfoundation.org,
-	andriy.shevchenko@linux.intel.com, jbrunet@baylibre.com,
-	utkarsh02t@gmail.com
-Subject: Re: [RFC PATCH v4 36/38] PCI: endpoint: pci-epf-test: Add remote
- eDMA-backed mode
-Message-ID: <aW6YX0A0Ogc6KLF5@lizhi-Precision-Tower-5810>
-References: <20260118135440.1958279-1-den@valinux.co.jp>
- <20260118135440.1958279-37-den@valinux.co.jp>
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260118135440.1958279-37-den@valinux.co.jp>
-X-ClientProxiedBy: SJ0PR05CA0042.namprd05.prod.outlook.com
- (2603:10b6:a03:33f::17) To PRASPRMB0004.eurprd04.prod.outlook.com
- (2603:10a6:102:29b::6)
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="hjlPxybX"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1768933813; x=1800469813;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=km3HjgnU7wgjaUhMxS9FwHTpr+q5UFHbNek+XbOadRk=;
+  b=hjlPxybXS1dlTTKt7w+dtjIMh/bBS1BtD/FPanGXUjSGiM8oqWvHgvDf
+   I4BmYpAdO3lukJ1S0c3qIlVpBSv8Y/gl+4uiqFdsSb6JVpd5xABcg04GC
+   WhRQFXC1ydSikf1Xm8tMER6fCz8NP+MbCuqm0TBwsbySHWb6z3s5gHnPH
+   eAg2khYVpErJrBTorRnVnf9JLlzek4qKdk2aoddKdIHrQRwcMoaBljrbY
+   FJc+rCJIxX430cbXB2Baznxz//lOtw/lOy4Aut+fdBteNiGNG1PCo2c1a
+   YZHsnSCTwGuTT0esukePjbsanRB26QHfNTGT0elOhrm5wUvsMmEe0nL/N
+   w==;
+X-CSE-ConnectionGUID: 8ZicIFyESzGjv0HZtF9zQA==
+X-CSE-MsgGUID: 8PCP0NnmQOSKFU9s8PaZ8Q==
+X-IronPort-AV: E=McAfee;i="6800,10657,11677"; a="70060405"
+X-IronPort-AV: E=Sophos;i="6.21,241,1763452800"; 
+   d="scan'208";a="70060405"
+Received: from orviesa007.jf.intel.com ([10.64.159.147])
+  by orvoesa113.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Jan 2026 10:30:12 -0800
+X-CSE-ConnectionGUID: 2SqOv8OmTG6sgUYYd8Os6g==
+X-CSE-MsgGUID: /H0rTdYRT1GWA+ucnLUVZw==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.21,241,1763452800"; 
+   d="scan'208";a="206245824"
+Received: from cjhill-mobl.amr.corp.intel.com (HELO [10.125.108.33]) ([10.125.108.33])
+  by orviesa007-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Jan 2026 10:30:09 -0800
+Message-ID: <120e42c4-9ba8-4f4b-a06c-61888fc961d1@intel.com>
+Date: Tue, 20 Jan 2026 11:30:07 -0700
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: PRASPRMB0004:EE_|AS4PR04MB9575:EE_
-X-MS-Office365-Filtering-Correlation-Id: 30baabf8-90b1-42e0-163f-08de579bfc93
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|19092799006|52116014|7416014|376014|366016|1800799024|38350700014|7053199007|18082099003;
-X-Microsoft-Antispam-Message-Info:
-	=?us-ascii?Q?x1offhixC2MWJhC2XP3b7VPAB0z3b/E9056cIWsMmyVRaFM1cSy0QBKpmUk4?=
- =?us-ascii?Q?wZEKpeymMHiJXakjeLnddMVVOCY87D02g6M4nGbFmWgQ/jMELeQRsUmJFgv8?=
- =?us-ascii?Q?/1RqV5cX1A1EW7qtmeBwJ0To5BGfXk3wJXC/5u33c4VN3CtEToJgyiPQqogS?=
- =?us-ascii?Q?klaYyCmGccIeToXAJJNH68G5fa2GJ7GBX+kZMrH+eyPXaUmZpHKJud0E0sy1?=
- =?us-ascii?Q?FR7Q2UU/v/SJHsjZmomASV4pSuKYfFlQaeJr0SIttazS1Aw0Arp+MmW/l2ED?=
- =?us-ascii?Q?RkxwhsDPAjtFbXNVOOeR+RJJUpzWdsd0KtTF4fxKd0a1nRp6P5eWV481bzWu?=
- =?us-ascii?Q?tSw4EgsVapQKTl5OkD2G069vWrQH0Mmdl4n2nJetJUWPPbQAp8x2P7mfsrTz?=
- =?us-ascii?Q?of/CloZbq+XRSq7MYHkADrMaIAneGB3bTPhsAl7ws03A1gh29xNd/1eco6l0?=
- =?us-ascii?Q?vAcAIfju7t3/hOR9s54NGIpWvm75tJGjE5ZoYghZHbO6NgblsuMkww+w9upP?=
- =?us-ascii?Q?qmVSy/HbN40ElrTD3vyTbk6hPoO+6owHumnkI691ixUQUcikpLb+m2QgGPXU?=
- =?us-ascii?Q?AyK0gjg6nGrvKsWAn/QXwNESZjdWy9zKpPmgJQdGsw24+10EANuHt45DzR/5?=
- =?us-ascii?Q?jT3S29arxvW+fG1HZVSyij00bRClMSVUGUe1Li6NKZyB2d33XmnKcg1OrbKb?=
- =?us-ascii?Q?8EPz91HGOU1nSVEJ8/SJSrQsAB/PqKIchW3EKSGGoFqzsFyInby63Qwbue6q?=
- =?us-ascii?Q?sWPIJ8QRRmXgwYcO82dUBsmrnP72qdnBwyYQtA/n6ABrs4duvuFHNQoI0Sm7?=
- =?us-ascii?Q?V4ruyyOYUFsLise9BGoc7kBsjjR/VvW2yqBKfaCbm33Ewp8QWN7UCzhPVNWI?=
- =?us-ascii?Q?oPune2sdBRiAoUT2FUUFmf0JXwZP0SzkK/g38YguSkVZt1Yy1eriQuWFVwig?=
- =?us-ascii?Q?sEQu2wqQPyk7RtiGeKE51HUzz/taHv94+qLK6pRwwPz8IqlQvIMDiP/pC8tP?=
- =?us-ascii?Q?47sBTZ9PcXZx4+Z/WzfxbJYMmrrVyRCpjCtXOfYofxqmcrQJanYB5E/RfxkG?=
- =?us-ascii?Q?WIT4lQIQV4eDyTKGq6nnpWDU5tLFtDHluHBOZnqURE9PL2EkfgTUb8q1vgGF?=
- =?us-ascii?Q?lsvGx7jLGGoMWLjddK+1GsSWOlLoWkdshtiKk1ATjb5I6M4iASf6g/qG94uL?=
- =?us-ascii?Q?mzEWuhpjueRGQnchXDI0XOKhPFWzkZJtEz/jzsXbidwVMCCU3+1gvFG2q5gx?=
- =?us-ascii?Q?REmWOdWcFCaebqNWVQkyOK8xUX3Y731Bdt6ba2XWCuUswEzZgsbqDS2eur5a?=
- =?us-ascii?Q?q91NlAfvxMJCtGXxjOcd80AThew2herZkWOxp5ljQohKKBAP7pY9PF5powom?=
- =?us-ascii?Q?aZhZ1j5Olgt3cqKh/j7d210rvIb7EpLGkM5Vi8akq93s5ud+/RGElc90h36g?=
- =?us-ascii?Q?w9V6gP3rRY5NJh4TBXubiUISfQZkL+qwJU+IvAhts820kq3rLl9/ES/vfTfj?=
- =?us-ascii?Q?9UAHAqq74f9UqRjCyfVrdkBByXS4L86v0KrJMy0esTTgMGJ2jiPDyJsOGAGW?=
- =?us-ascii?Q?Lq3eKXtCobY0FabPQ465FDE/aAOB2xP7HH5YZVxQAo1hv9T/L9uurIUu/lGw?=
- =?us-ascii?Q?wnkGvH8b5TzFV0yjQaQH/7Q=3D?=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PRASPRMB0004.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(19092799006)(52116014)(7416014)(376014)(366016)(1800799024)(38350700014)(7053199007)(18082099003);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?WttgAbA9WTWxmem0OD9EGRyFlmQTzEcZeRXEdZZ8vWPW8D/zIk8JcsvN7w13?=
- =?us-ascii?Q?PdiVckYTRaJ1Z1PotUeALscWHeUQYqTvkDr5+vxljKOjF8dC2RkuSpDlxRA2?=
- =?us-ascii?Q?tfOz50NknU6F9SsI/U3w1sQOUnS1qaODHCiU1n5uRtrOV2pFYAV1gb31tSy/?=
- =?us-ascii?Q?VeZt+HVRFYqv9gXHE7DjunMi7YeU9MKQ2x8jo7dVrt0hyyDw2M1HIQs3gz4r?=
- =?us-ascii?Q?RZ+VGyDntrgZ4OXpllOrbqn8czJXJTiz4ygZtfbJpE/DSCuaevVO84Sop6dX?=
- =?us-ascii?Q?RNFant8hCBH4Kw1qCDvDsXqOJ14ksBWqZa6YGnQNAI5QxZRjtndVntY01E1B?=
- =?us-ascii?Q?jpjjR38fABICXyrYtOg04Xzc9oMsIDYJsV8PIC9rOaqYK0rar15xHcR0bWgG?=
- =?us-ascii?Q?U3ni9r+oIUVBu9DCDKvS5czBGoBgp+mXEcYpHy+23B6VkhQksEn0R8lsstZo?=
- =?us-ascii?Q?L8Ga3xJHlQa3vZf5ey53uSezvmhO+bIz3sdrbA1a5HBAQZoEJ6gbDFhZ1MjV?=
- =?us-ascii?Q?p40bdyai/FlsScCcGhA40OgIfRwOScpb7j8te2WuWB2MQgWWEOudAww1wd39?=
- =?us-ascii?Q?fGknjGFbXjI7sERTqGL5Xo3wuHUujakCoT/ATZY+gHHozbgR1RbCjgF/NNKa?=
- =?us-ascii?Q?8EbrbBDCnLe3dybGxDZA+hQimFst3Wx63eGcsV+UJBZOLn+IgLwXoslOPLDN?=
- =?us-ascii?Q?ajseZue6rb2a8nX9h1Nub9hLCxQ2d97k5UWf2FlXY3svJyIPNiJMD3dPm8zv?=
- =?us-ascii?Q?cM5FbpEnvBb6B8qwKx3gaNi2z2o7dudRL9arLjhnqkoa3dRgRve/BO3TQLBb?=
- =?us-ascii?Q?4SIFFxGm0IApTqrDzk2Q9HTbVTfkpkK0d+OfUbk1PnXywYxWU8CiwTCXuCO1?=
- =?us-ascii?Q?dd6ozVGTrF9si7NBGODyWL7olAArhmJPDjWsKcLAD2GWBC/4aUZTNEV4ILbL?=
- =?us-ascii?Q?hnUtywVDLj1iqv6U1IiEY7mwcelk9IOZynHM+KQlNJyav9BZfuL2AFMfweT8?=
- =?us-ascii?Q?ZZLtQLBjjJbWCK0D8li40fnDBPxIuJ+rLImK9ZUozbW+Bmas1TNUAdoGBQgz?=
- =?us-ascii?Q?d9QdEJ1hoiHRuAktMdgOW8pB1rsKMoQXb8OhjBxWt3htgtMJtGeStEIyhYGN?=
- =?us-ascii?Q?1n5a30+LmHPL0sh8cPRKlkyCHOHfOdCsbA08EQOKGuDXt9GrjCp+DF1KDwTT?=
- =?us-ascii?Q?IJbizqlB6WGTKkHi2XuzM/o1oxeLNUbTh8mrDhQLQyzEt9fLtk2dbEuRNSyu?=
- =?us-ascii?Q?P/ZfWgnCh5XNFhaVUoiJKliFPzP5odT3jnWuQ71MXr7fMYRomEekepYz+nB9?=
- =?us-ascii?Q?tkXh1XYfx5rW6CMjz/EhTu7k/mvH7IpXpL4UZyedRk5Uk+WePnYAtDwmMi4y?=
- =?us-ascii?Q?+ktNcgmMwGWzeV2O5hHFAKWLI8LKfLZsNEfi6F2lnqbfnR62h8SFkUMSKKTy?=
- =?us-ascii?Q?jG8IBgvlsiPecLB+vr5l3tB5B9hYbDaWyJQMIWxSh+IHxZygt/InSwgmJGsh?=
- =?us-ascii?Q?x295dT4yVr5aBoNMjVuPKqclAcUz9wPipIYYOnHwKqTIuXnqNjRc+qz3Aiiu?=
- =?us-ascii?Q?RfHQxozI9yMUtqWaG0MQUiCl6i5wur2IFC2F4Nw4uF3l99B+kRZrvRmEQPrK?=
- =?us-ascii?Q?gPb7r3eBRwVJvj45Bd29xDuItakNLIN7U3TW1iL2OVhL+gUGdJL7eOpQ2hme?=
- =?us-ascii?Q?7tDjxhhH7PojxW3hyelU/fDkpG+hqj96Ebk/w92ZX7OnltaJ?=
-X-OriginatorOrg: nxp.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 30baabf8-90b1-42e0-163f-08de579bfc93
-X-MS-Exchange-CrossTenant-AuthSource: PRASPRMB0004.eurprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 19 Jan 2026 20:47:40.4937
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: O/RWVp3El61cUgEA18AS7GUGIJbGHykIYucS0LEwm8L+0jXS4PfzHcqIdM/QCJHyjh9A7ajMoIfFv1nl23Xntw==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: AS4PR04MB9575
+User-Agent: Mozilla Thunderbird
+Subject: Re: [RFC PATCH v4 00/38] NTB transport backed by PCI EP embedded DMA
+To: Koichiro Den <den@valinux.co.jp>, Frank.Li@nxp.com, cassel@kernel.org,
+ mani@kernel.org, kwilczynski@kernel.org, kishon@kernel.org,
+ bhelgaas@google.com, geert+renesas@glider.be, robh@kernel.org,
+ vkoul@kernel.org, jdmason@kudzu.us, allenbh@gmail.com, jingoohan1@gmail.com,
+ lpieralisi@kernel.org
+Cc: linux-pci@vger.kernel.org, linux-doc@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+ devicetree@vger.kernel.org, dmaengine@vger.kernel.org,
+ iommu@lists.linux.dev, ntb@lists.linux.dev, netdev@vger.kernel.org,
+ linux-kselftest@vger.kernel.org, arnd@arndb.de, gregkh@linuxfoundation.org,
+ joro@8bytes.org, will@kernel.org, robin.murphy@arm.com,
+ magnus.damm@gmail.com, krzk+dt@kernel.org, conor+dt@kernel.org,
+ corbet@lwn.net, skhan@linuxfoundation.org,
+ andriy.shevchenko@linux.intel.com, jbrunet@baylibre.com, utkarsh02t@gmail.com
+References: <20260118135440.1958279-1-den@valinux.co.jp>
+Content-Language: en-US
+From: Dave Jiang <dave.jiang@intel.com>
+In-Reply-To: <20260118135440.1958279-1-den@valinux.co.jp>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Sun, Jan 18, 2026 at 10:54:38PM +0900, Koichiro Den wrote:
-> Some DesignWare-based endpoints integrate an eDMA engine that can be
-> programmed by the host via MMIO. The upcoming NTB transport remote-eDMA
-> backend relies on this capability, but there is currently no upstream
-> test coverage for the end-to-end control and data path.
->
-> Extend pci-epf-test with an optional remote eDMA test backend (built when
-> CONFIG_DW_EDMA is enabled).
->
-> - Reserve a spare BAR and expose a small 'pcitest_edma_info' header at
->   BAR offset 0. The header carries a magic/version and describes the
->   endpoint eDMA register window, per-direction linked-list (LL)
->   locations and an endpoint test buffer.
-> - Map the eDMA registers and LL locations into that BAR using BAR
->   subrange mappings (address-match inbound iATU).
->
-> To run this extra testing, two new endpoint commands are added:
->   * COMMAND_REMOTE_EDMA_SETUP
->   * COMMAND_REMOTE_EDMA_CHECKSUM
->
-> When the former command is received, the endpoint prepares for the
-> remote eDMA transfer. The CHECKSUM command is useful for Host-to-EP
-> transfer testing, as the endpoint side is not expected to receive the
-> DMA completion interrupt directly. Instead, the host asks the endpoint
-> to compute a CRC32 over the transferred data.
->
-> This backend is exercised by the host-side pci_endpoint_test driver via a
-> new UAPI flag.
->
-> Signed-off-by: Koichiro Den <den@valinux.co.jp>
-> ---
->  drivers/pci/endpoint/functions/pci-epf-test.c | 477 ++++++++++++++++++
 
-This patch should be combined into your submap patches, which is one user
-of submap.
 
-Frank
+On 1/18/26 6:54 AM, Koichiro Den wrote:
+> Hi,
+> 
+> This is RFC v4 of the NTB/PCI/dmaengine series that introduces an
+> optional NTB transport variant where payload data is moved by a PCI
+> embedded-DMA engine (eDMA) residing on the endpoint side.
 
->  1 file changed, 477 insertions(+)
->
-> diff --git a/drivers/pci/endpoint/functions/pci-epf-test.c b/drivers/pci/endpoint/functions/pci-epf-test.c
-> index e560c3becebb..eea10bddcd2a 100644
-> --- a/drivers/pci/endpoint/functions/pci-epf-test.c
-> +++ b/drivers/pci/endpoint/functions/pci-epf-test.c
-> @@ -10,6 +10,7 @@
->  #include <linux/delay.h>
->  #include <linux/dmaengine.h>
->  #include <linux/io.h>
-> +#include <linux/iommu.h>
->  #include <linux/module.h>
->  #include <linux/msi.h>
->  #include <linux/slab.h>
-> @@ -33,6 +34,8 @@
->  #define COMMAND_COPY			BIT(5)
->  #define COMMAND_ENABLE_DOORBELL		BIT(6)
->  #define COMMAND_DISABLE_DOORBELL	BIT(7)
-> +#define COMMAND_REMOTE_EDMA_SETUP	BIT(8)
-> +#define COMMAND_REMOTE_EDMA_CHECKSUM	BIT(9)
->
->  #define STATUS_READ_SUCCESS		BIT(0)
->  #define STATUS_READ_FAIL		BIT(1)
-> @@ -48,6 +51,10 @@
->  #define STATUS_DOORBELL_ENABLE_FAIL	BIT(11)
->  #define STATUS_DOORBELL_DISABLE_SUCCESS BIT(12)
->  #define STATUS_DOORBELL_DISABLE_FAIL	BIT(13)
-> +#define STATUS_REMOTE_EDMA_SETUP_SUCCESS	BIT(14)
-> +#define STATUS_REMOTE_EDMA_SETUP_FAIL		BIT(15)
-> +#define STATUS_REMOTE_EDMA_CHECKSUM_SUCCESS	BIT(16)
-> +#define STATUS_REMOTE_EDMA_CHECKSUM_FAIL	BIT(17)
->
->  #define FLAG_USE_DMA			BIT(0)
->
-> @@ -77,6 +84,9 @@ struct pci_epf_test {
->  	bool			dma_private;
->  	const struct pci_epc_features *epc_features;
->  	struct pci_epf_bar	db_bar;
-> +
-> +	/* For extended tests that rely on vendor-specific features */
-> +	void *data;
->  };
->
->  struct pci_epf_test_reg {
-> @@ -117,6 +127,454 @@ static enum pci_barno pci_epf_test_next_free_bar(struct pci_epf_test *epf_test)
->  	return bar;
->  }
->
-> +#if IS_REACHABLE(CONFIG_DW_EDMA)
-> +#include <linux/dma/edma.h>
-> +
-> +#define PCITEST_EDMA_INFO_MAGIC		0x414d4445U /* 'EDMA' */
-> +#define PCITEST_EDMA_INFO_VERSION	0x00010000U
-> +#define PCITEST_EDMA_TEST_BUF_SIZE	(1024 * 1024)
-> +
-> +struct pci_epf_test_edma {
-> +	/* Remote eDMA test resources */
-> +	bool			enabled;
-> +	enum pci_barno		bar;
-> +	void			*info;
-> +	size_t			total_size;
-> +	void			*test_buf;
-> +	dma_addr_t		test_buf_phys;
-> +	size_t			test_buf_size;
-> +
-> +	/* DW eDMA specifics */
-> +	phys_addr_t		reg_phys;
-> +	size_t			reg_submap_sz;
-> +	unsigned long		reg_iova;
-> +	size_t			reg_iova_sz;
-> +	phys_addr_t		ll_rd_phys;
-> +	size_t			ll_rd_sz_aligned;
-> +	phys_addr_t		ll_wr_phys;
-> +	size_t			ll_wr_sz_aligned;
-> +};
-> +
-> +struct pcitest_edma_info {
-> +	__le32 magic;
-> +	__le32 version;
-> +
-> +	__le32 reg_off;
-> +	__le32 reg_size;
-> +
-> +	__le64 ll_rd_phys;
-> +	__le32 ll_rd_off;
-> +	__le32 ll_rd_size;
-> +
-> +	__le64 ll_wr_phys;
-> +	__le32 ll_wr_off;
-> +	__le32 ll_wr_size;
-> +
-> +	__le64 test_buf_phys;
-> +	__le32 test_buf_size;
-> +};
-> +
-> +static bool pci_epf_test_bar_is_reserved(struct pci_epf_test *test,
-> +					 enum pci_barno barno)
-> +{
-> +	struct pci_epf_test_edma *edma = test->data;
-> +
-> +	if (!edma)
-> +		return false;
-> +
-> +	return barno == edma->bar;
-> +}
-> +
-> +static void pci_epf_test_clear_submaps(struct pci_epf_bar *bar)
-> +{
-> +	kfree(bar->submap);
-> +	bar->submap = NULL;
-> +	bar->num_submap = 0;
-> +}
-> +
-> +static int pci_epf_test_add_submap(struct pci_epf_bar *bar, phys_addr_t phys,
-> +				   size_t size)
-> +{
-> +	struct pci_epf_bar_submap *submap, *new;
-> +
-> +	new = krealloc_array(bar->submap, bar->num_submap + 1, sizeof(*new),
-> +			     GFP_KERNEL);
-> +	if (!new)
-> +		return -ENOMEM;
-> +
-> +	bar->submap = new;
-> +	submap = &bar->submap[bar->num_submap];
-> +	submap->phys_addr = phys;
-> +	submap->size = size;
-> +	bar->num_submap++;
-> +
-> +	return 0;
-> +}
-> +
-> +static void pci_epf_test_clean_remote_edma(struct pci_epf_test *test)
-> +{
-> +	struct pci_epf_test_edma *edma = test->data;
-> +	struct pci_epf *epf = test->epf;
-> +	struct pci_epc *epc = epf->epc;
-> +	struct device *dev = epc->dev.parent;
-> +	struct iommu_domain *dom;
-> +	struct pci_epf_bar *bar;
-> +	enum pci_barno barno;
-> +
-> +	if (!edma)
-> +		return;
-> +
-> +	barno = edma->bar;
-> +	if (barno == NO_BAR)
-> +		return;
-> +
-> +	bar = &epf->bar[barno];
-> +
-> +	dom = iommu_get_domain_for_dev(dev);
-> +	if (dom && edma->reg_iova_sz) {
-> +		iommu_unmap(dom, edma->reg_iova, edma->reg_iova_sz);
-> +		edma->reg_iova = 0;
-> +		edma->reg_iova_sz = 0;
-> +	}
-> +
-> +	if (edma->test_buf) {
-> +		dma_free_coherent(dev, edma->test_buf_size,
-> +				  edma->test_buf,
-> +				  edma->test_buf_phys);
-> +		edma->test_buf = NULL;
-> +		edma->test_buf_phys = 0;
-> +		edma->test_buf_size = 0;
-> +	}
-> +
-> +	if (edma->info) {
-> +		pci_epf_free_space(epf, edma->info, barno, PRIMARY_INTERFACE);
-> +		edma->info = NULL;
-> +	}
-> +
-> +	pci_epf_test_clear_submaps(bar);
-> +	pci_epc_clear_bar(epc, epf->func_no, epf->vfunc_no, bar);
-> +
-> +	edma->bar = NO_BAR;
-> +	edma->enabled = false;
-> +}
-> +
-> +static int pci_epf_test_init_remote_edma(struct pci_epf_test *test)
-> +{
-> +	const struct pci_epc_features *epc_features = test->epc_features;
-> +	struct pci_epf_test_edma *edma;
-> +	struct pci_epf *epf = test->epf;
-> +	struct pci_epc *epc = epf->epc;
-> +	struct pcitest_edma_info *info;
-> +	struct device *dev = epc->dev.parent;
-> +	struct dw_edma_region region;
-> +	struct iommu_domain *dom;
-> +	size_t reg_sz_aligned, ll_rd_sz_aligned, ll_wr_sz_aligned;
-> +	phys_addr_t phys, ll_rd_phys, ll_wr_phys;
-> +	size_t ll_rd_size, ll_wr_size;
-> +	resource_size_t reg_size;
-> +	unsigned long iova;
-> +	size_t off, size;
-> +	int ret;
-> +
-> +	if (!test->dma_chan_tx || !test->dma_chan_rx)
-> +		return -ENODEV;
-> +
-> +	edma = devm_kzalloc(&epf->dev, sizeof(*edma), GFP_KERNEL);
-> +	if (!edma)
-> +		return -ENOMEM;
-> +	test->data = edma;
-> +
-> +	edma->bar = pci_epf_test_next_free_bar(test);
-> +	if (edma->bar == NO_BAR) {
-> +		dev_err(&epf->dev, "No spare BAR for remote eDMA (remote eDMA disabled)\n");
-> +		ret = -ENOSPC;
-> +		goto err;
-> +	}
-> +
-> +	ret = dw_edma_get_reg_window(epc, &edma->reg_phys, &reg_size);
-> +	if (ret) {
-> +		dev_err(dev, "failed to get edma reg window: %d\n", ret);
-> +		goto err;
-> +	}
-> +	dom = iommu_get_domain_for_dev(dev);
-> +	if (dom) {
-> +		phys = edma->reg_phys & PAGE_MASK;
-> +		size = PAGE_ALIGN(reg_size + edma->reg_phys - phys);
-> +		iova = phys;
-> +
-> +		ret = iommu_map(dom, iova, phys, size,
-> +				IOMMU_READ | IOMMU_WRITE | IOMMU_MMIO,
-> +				GFP_KERNEL);
-> +		if (ret) {
-> +			dev_err(dev, "failed to direct map eDMA reg: %d\n", ret);
-> +			goto err;
-> +		}
-> +		edma->reg_iova = iova;
-> +		edma->reg_iova_sz = size;
-> +	}
-> +
-> +	/* Get LL location addresses and sizes */
-> +	ret = dw_edma_chan_get_ll_region(test->dma_chan_rx, &region);
-> +	if (ret) {
-> +		dev_err(dev, "failed to get edma ll region for rx: %d\n", ret);
-> +		goto err;
-> +	}
-> +	ll_rd_phys = region.paddr;
-> +	ll_rd_size = region.sz;
-> +
-> +	ret = dw_edma_chan_get_ll_region(test->dma_chan_tx, &region);
-> +	if (ret) {
-> +		dev_err(dev, "failed to get edma ll region for tx: %d\n", ret);
-> +		goto err;
-> +	}
-> +	ll_wr_phys = region.paddr;
-> +	ll_wr_size = region.sz;
-> +
-> +	edma->test_buf_size = PCITEST_EDMA_TEST_BUF_SIZE;
-> +	edma->test_buf = dma_alloc_coherent(dev, edma->test_buf_size,
-> +					    &edma->test_buf_phys, GFP_KERNEL);
-> +	if (!edma->test_buf) {
-> +		ret = -ENOMEM;
-> +		goto err;
-> +	}
-> +
-> +	reg_sz_aligned = PAGE_ALIGN(reg_size);
-> +	ll_rd_sz_aligned = PAGE_ALIGN(ll_rd_size);
-> +	ll_wr_sz_aligned = PAGE_ALIGN(ll_wr_size);
-> +	edma->total_size = PAGE_SIZE + reg_sz_aligned + ll_rd_sz_aligned +
-> +			   ll_wr_sz_aligned;
-> +	size = roundup_pow_of_two(edma->total_size);
-> +
-> +	info = pci_epf_alloc_space(epf, size, edma->bar,
-> +				   epc_features, PRIMARY_INTERFACE);
-> +	if (!info) {
-> +		ret = -ENOMEM;
-> +		goto err;
-> +	}
-> +	memset(info, 0, size);
-> +
-> +	off = PAGE_SIZE;
-> +	info->magic = cpu_to_le32(PCITEST_EDMA_INFO_MAGIC);
-> +	info->version = cpu_to_le32(PCITEST_EDMA_INFO_VERSION);
-> +
-> +	info->reg_off = cpu_to_le32(off);
-> +	info->reg_size = cpu_to_le32(reg_size);
-> +	off += reg_sz_aligned;
-> +
-> +	info->ll_rd_phys = cpu_to_le64(ll_rd_phys);
-> +	info->ll_rd_off = cpu_to_le32(off);
-> +	info->ll_rd_size = cpu_to_le32(ll_rd_size);
-> +	off += ll_rd_sz_aligned;
-> +
-> +	info->ll_wr_phys = cpu_to_le64(ll_wr_phys);
-> +	info->ll_wr_off = cpu_to_le32(off);
-> +	info->ll_wr_size = cpu_to_le32(ll_wr_size);
-> +	off += ll_wr_sz_aligned;
-> +
-> +	info->test_buf_phys = cpu_to_le64(edma->test_buf_phys);
-> +	info->test_buf_size = cpu_to_le32(edma->test_buf_size);
-> +
-> +	edma->info = info;
-> +	edma->reg_submap_sz = reg_sz_aligned;
-> +	edma->ll_rd_phys = ll_rd_phys;
-> +	edma->ll_wr_phys = ll_wr_phys;
-> +	edma->ll_rd_sz_aligned = ll_rd_sz_aligned;
-> +	edma->ll_wr_sz_aligned = ll_wr_sz_aligned;
-> +
-> +	ret = pci_epc_set_bar(epc, epf->func_no, epf->vfunc_no,
-> +			      &epf->bar[edma->bar]);
-> +	if (ret) {
-> +		dev_err(dev,
-> +			"failed to init BAR%d for remote eDMA: %d\n",
-> +			edma->bar, ret);
-> +		goto err;
-> +	}
-> +	dev_info(dev, "BAR%d initialized for remote eDMA\n", edma->bar);
-> +
-> +	return 0;
-> +
-> +err:
-> +	pci_epf_test_clean_remote_edma(test);
-> +	devm_kfree(&epf->dev, edma);
-> +	test->data = NULL;
-> +	return ret;
-> +}
-> +
-> +static int pci_epf_test_map_remote_edma(struct pci_epf_test *test)
-> +{
-> +	struct pci_epf_test_edma *edma = test->data;
-> +	struct pcitest_edma_info *info;
-> +	struct pci_epf *epf = test->epf;
-> +	struct pci_epc *epc = epf->epc;
-> +	struct pci_epf_bar *bar;
-> +	enum pci_barno barno;
-> +	struct device *dev = epc->dev.parent;
-> +	int ret;
-> +
-> +	if (!edma)
-> +		return -ENODEV;
-> +
-> +	info = edma->info;
-> +	barno = edma->bar;
-> +
-> +	if (barno == NO_BAR)
-> +		return -ENOSPC;
-> +	if (!info || !edma->test_buf)
-> +		return -ENODEV;
-> +
-> +	bar = &epf->bar[barno];
-> +	pci_epf_test_clear_submaps(bar);
-> +
-> +	ret = pci_epf_test_add_submap(bar, bar->phys_addr, PAGE_SIZE);
-> +	if (ret)
-> +		return ret;
-> +
-> +	ret = pci_epf_test_add_submap(bar, edma->reg_phys, edma->reg_submap_sz);
-> +	if (ret)
-> +		goto err_submap;
-> +
-> +	ret = pci_epf_test_add_submap(bar, edma->ll_rd_phys,
-> +				      edma->ll_rd_sz_aligned);
-> +	if (ret)
-> +		goto err_submap;
-> +
-> +	ret = pci_epf_test_add_submap(bar, edma->ll_wr_phys,
-> +				      edma->ll_wr_sz_aligned);
-> +	if (ret)
-> +		goto err_submap;
-> +
-> +	if (bar->size > edma->total_size) {
-> +		ret = pci_epf_test_add_submap(bar, 0,
-> +					      bar->size - edma->total_size);
-> +		if (ret)
-> +			goto err_submap;
-> +	}
-> +
-> +	ret = pci_epc_set_bar(epc, epf->func_no, epf->vfunc_no, bar);
-> +	if (ret) {
-> +		dev_err(dev, "failed to map BAR%d: %d\n", barno, ret);
-> +		goto err_submap;
-> +	}
-> +
-> +	/*
-> +	 * Endpoint-local interrupts must be ignored even if the host fails to
-> +	 * mask them.
-> +	 */
-> +	ret = dw_edma_chan_irq_config(test->dma_chan_tx, DW_EDMA_CH_IRQ_REMOTE);
-> +	if (ret) {
-> +		dev_err(dev, "failed to set irq mode for tx channel: %d\n",
-> +			ret);
-> +		goto err_bar;
-> +	}
-> +	ret = dw_edma_chan_irq_config(test->dma_chan_rx, DW_EDMA_CH_IRQ_REMOTE);
-> +	if (ret) {
-> +		dev_err(dev, "failed to set irq mode for rx channel: %d\n",
-> +			ret);
-> +		goto err_bar;
-> +	}
-> +
-> +	return 0;
-> +err_bar:
-> +	pci_epc_clear_bar(epc, epf->func_no, epf->vfunc_no, &epf->bar[barno]);
-> +err_submap:
-> +	pci_epf_test_clear_submaps(bar);
-> +	return ret;
-> +}
-> +
-> +static void pci_epf_test_remote_edma_setup(struct pci_epf_test *epf_test,
-> +					   struct pci_epf_test_reg *reg)
-> +{
-> +	struct pci_epf_test_edma *edma = epf_test->data;
-> +	size_t size = le32_to_cpu(reg->size);
-> +	void *buf;
-> +	int ret;
-> +
-> +	if (!edma || !edma->test_buf || size > edma->test_buf_size) {
-> +		reg->status = cpu_to_le32(STATUS_REMOTE_EDMA_SETUP_FAIL);
-> +		return;
-> +	}
-> +
-> +	buf = edma->test_buf;
-> +
-> +	if (!edma->enabled) {
-> +		/* NB. Currently DW eDMA is the only supported backend */
-> +		ret = pci_epf_test_map_remote_edma(epf_test);
-> +		if (ret) {
-> +			WRITE_ONCE(reg->status,
-> +				   cpu_to_le32(STATUS_REMOTE_EDMA_SETUP_FAIL));
-> +			return;
-> +		}
-> +		edma->enabled = true;
-> +	}
-> +
-> +	/* Populate the test buffer with random data */
-> +	get_random_bytes(buf, size);
-> +	reg->checksum = cpu_to_le32(crc32_le(~0, buf, size));
-> +
-> +	WRITE_ONCE(reg->status, cpu_to_le32(STATUS_REMOTE_EDMA_SETUP_SUCCESS));
-> +}
-> +
-> +static void pci_epf_test_remote_edma_checksum(struct pci_epf_test *epf_test,
-> +					      struct pci_epf_test_reg *reg)
-> +{
-> +	struct pci_epf_test_edma *edma = epf_test->data;
-> +	u32 status = le32_to_cpu(reg->status);
-> +	size_t size;
-> +	void *addr;
-> +	u32 crc32;
-> +
-> +	size = le32_to_cpu(reg->size);
-> +	if (!edma || !edma->test_buf || size > edma->test_buf_size) {
-> +		status |= STATUS_REMOTE_EDMA_CHECKSUM_FAIL;
-> +		reg->status = cpu_to_le32(status);
-> +		return;
-> +	}
-> +
-> +	addr = edma->test_buf;
-> +	crc32 = crc32_le(~0, addr, size);
-> +	status |= STATUS_REMOTE_EDMA_CHECKSUM_SUCCESS;
-> +
-> +	reg->checksum = cpu_to_le32(crc32);
-> +	reg->status = cpu_to_le32(status);
-> +}
-> +
-> +static void pci_epf_test_reset_dma_chan(struct dma_chan *chan)
-> +{
-> +	dw_edma_chan_irq_config(chan, DW_EDMA_CH_IRQ_DEFAULT);
-> +}
-> +#else
-> +static bool pci_epf_test_bar_is_reserved(struct pci_epf_test *test,
-> +					 enum pci_barno barno)
-> +{
-> +	return false;
-> +}
-> +
-> +static void pci_epf_test_clean_remote_edma(struct pci_epf_test *test)
-> +{
-> +}
-> +
-> +static int pci_epf_test_init_remote_edma(struct pci_epf_test *test)
-> +{
-> +	return -EOPNOTSUPP;
-> +}
-> +
-> +static void pci_epf_test_remote_edma_setup(struct pci_epf_test *epf_test,
-> +					   struct pci_epf_test_reg *reg)
-> +{
-> +	reg->status = cpu_to_le32(STATUS_REMOTE_EDMA_SETUP_FAIL);
-> +}
-> +
-> +static void pci_epf_test_remote_edma_checksum(struct pci_epf_test *epf_test,
-> +					      struct pci_epf_test_reg *reg)
-> +{
-> +	reg->status = cpu_to_le32(STATUS_REMOTE_EDMA_CHECKSUM_FAIL);
-> +}
-> +
-> +static void pci_epf_test_reset_dma_chan(struct dma_chan *chan)
-> +{
-> +}
-> +#endif
-> +
->  static void pci_epf_test_dma_callback(void *param)
->  {
->  	struct pci_epf_test *epf_test = param;
-> @@ -168,6 +626,8 @@ static int pci_epf_test_data_transfer(struct pci_epf_test *epf_test,
->  		return -EINVAL;
->  	}
->
-> +	pci_epf_test_reset_dma_chan(chan);
-> +
->  	if (epf_test->dma_private) {
->  		sconf.direction = dir;
->  		if (dir == DMA_MEM_TO_DEV)
-> @@ -870,6 +1330,14 @@ static void pci_epf_test_cmd_handler(struct work_struct *work)
->  		pci_epf_test_disable_doorbell(epf_test, reg);
->  		pci_epf_test_raise_irq(epf_test, reg);
->  		break;
-> +	case COMMAND_REMOTE_EDMA_SETUP:
-> +		pci_epf_test_remote_edma_setup(epf_test, reg);
-> +		pci_epf_test_raise_irq(epf_test, reg);
-> +		break;
-> +	case COMMAND_REMOTE_EDMA_CHECKSUM:
-> +		pci_epf_test_remote_edma_checksum(epf_test, reg);
-> +		pci_epf_test_raise_irq(epf_test, reg);
-> +		break;
->  	default:
->  		dev_err(dev, "Invalid command 0x%x\n", command);
->  		break;
-> @@ -961,6 +1429,10 @@ static int pci_epf_test_epc_init(struct pci_epf *epf)
->  	if (ret)
->  		epf_test->dma_supported = false;
->
-> +	ret = pci_epf_test_init_remote_edma(epf_test);
-> +	if (ret && ret != -EOPNOTSUPP)
-> +		dev_warn(dev, "Remote eDMA setup failed\n");
-> +
->  	if (epf->vfunc_no <= 1) {
->  		ret = pci_epc_write_header(epc, epf->func_no, epf->vfunc_no, header);
->  		if (ret) {
-> @@ -1007,6 +1479,7 @@ static void pci_epf_test_epc_deinit(struct pci_epf *epf)
->  	struct pci_epf_test *epf_test = epf_get_drvdata(epf);
->
->  	cancel_delayed_work_sync(&epf_test->cmd_handler);
-> +	pci_epf_test_clean_remote_edma(epf_test);
->  	pci_epf_test_clean_dma_chan(epf_test);
->  	pci_epf_test_clear_bar(epf);
->  }
-> @@ -1076,6 +1549,9 @@ static int pci_epf_test_alloc_space(struct pci_epf *epf)
->  		if (bar == test_reg_bar)
->  			continue;
->
-> +		if (pci_epf_test_bar_is_reserved(epf_test, bar))
-> +			continue;
-> +
->  		if (epc_features->bar[bar].type == BAR_FIXED)
->  			test_reg_size = epc_features->bar[bar].fixed_size;
->  		else
-> @@ -1146,6 +1622,7 @@ static void pci_epf_test_unbind(struct pci_epf *epf)
->
->  	cancel_delayed_work_sync(&epf_test->cmd_handler);
->  	if (epc->init_complete) {
-> +		pci_epf_test_clean_remote_edma(epf_test);
->  		pci_epf_test_clean_dma_chan(epf_test);
->  		pci_epf_test_clear_bar(epf);
->  	}
-> --
-> 2.51.0
->
+Just a fly by comment. This series is huge. I do suggest break it down to something more manageable to prevent review fatigue from patch reviewers. For example, linux network sub-system has a rule to restrict patch series to no more than 15 patches. NTB sub-system does not have that rule. But maybe split out the dmaengine changes and the hardware specific dw-edma bits from the ntb core changes.
+
+DJ
+ 
+> 
+> The primary target is Synopsys DesignWare PCIe endpoint controllers that
+> integrate a DesignWare eDMA instance (dw-edma). In the remote
+> embedded-DMA mode, payload is transferred by DMA directly between the
+> two systems' memory, and NTB Memory Windows are used primarily for
+> control/metadata and for exposing the endpoint eDMA resources (register
+> window + linked-list rings) to the host.
+> 
+> Compared to the existing cpu/dma memcpy-based implementation, this
+> approach avoids window-backed payload rings and the associated extra
+> copies, and it is less sensitive to scarce MW space. This also enables
+> scaling out to multiple queue pairs, which is particularly beneficial
+> for ntb_netdev. On R-Car S4, preliminary iperf3 results show 10~20x
+> throughput improvement. Latency improvements are also observed.
+> 
+> RFC history:
+>   RFC v3: https://lore.kernel.org/all/20251217151609.3162665-1-den@valinux.co.jp/
+>   RFC v2: https://lore.kernel.org/all/20251129160405.2568284-1-den@valinux.co.jp/
+>   RFC v1: https://lore.kernel.org/all/20251023071916.901355-1-den@valinux.co.jp/
+> 
+> Parts of RFC v3 series have already been split out and posted separately
+> (see "Kernel base / dependencies" section below). However, feedback on
+> the remaining parts led to substantial restructuring and code changes,
+> so I am sending an RFC v4 as a refreshed version of the full series.
+> 
+> RFC v4 is still a large, cross-subsystem series. At this RFC stage,
+> I am sending the full picture in a single set to make it easier to
+> review the overall direction and architecture. Once the direction is
+> agreed upon and no further large restructuring appears necessary, I will stop
+> posting the new RFC-tagged revisions and continue development on
+> separate threads, split by sub-topic.
+> 
+> Many thanks for all the reviews and feedback from multiple perspectives.
+> 
+> 
+> Software architecture overview (RFC v4)
+> =======================================
+> 
+> A major change in RFC v4 is the software layering and module split.
+> 
+> The existing memcpy-based transport and the new remote embedded-DMA
+> transport are implemented as two independent NTB client drivers on top
+> of a shared core library:
+> 
+>                        +--------------------+
+>                        | ntb_transport_core |
+>                        +--------------------+
+>                            ^            ^
+>                            |            |
+>         ntb_transport -----+            +----- ntb_transport_edma
+>        (cpu/dma memcpy)                   (remote embedded DMA transfer)
+>                                                        |
+>                                                        v
+>                                                  +-----------+
+>                                                  |  ntb_edma |
+>                                                  +-----------+
+>                                                        ^
+>                                                        |
+>                                                +----------------+
+>                                                |                |
+>                                           ntb_dw_edma         [...]
+> 
+> Key points:
+>   * ntb_transport_core provides the queue-pair abstraction used by upper
+>     layer clients (e.g. ntb_netdev).
+>   * ntb_transport is the legacy shared-memory transport client (CPU/DMA
+>     memcpy).
+>   * ntb_transport_edma is the remote embedded-DMA transport client.
+>   * ntb_transport_edma relies on an ntb_edma backend registry.
+>     This RFC provides an initial DesignWare backend (ntb_dw_edma).
+>   * Transport selection is per-NTB device via the standard
+>     driver_override mechanism. To enable that, this RFC adds
+>     driver_override support to ntb_bus. This allows mixing transports
+>     across multiple NTB ports and provides an explicit fallback path to
+>     the legacy transport.
+> 
+> So, if ntb_transport / ntb_transport_edma are built as loadable modules,
+> you can just run modprobe ntb_transport as before and the original cpu/dma
+> memcpy-based implementation will be active. If they are built-in, whether
+> ntb_transport or ntb_transport_edma are bound by default depends on
+> initcall order. Regarding how to switch the driver, please see Patch 34
+> ("Documentation: driver-api: ntb: Document remote embedded-DMA transport")
+> for details.
+> 
+> 
+> Data flow overview (remote embedded-DMA transport)
+> ==================================================
+> 
+> At a high level:
+>   * One MW is reserved as an "eDMA window". The endpoint exposes the
+>     eDMA register block plus LL descriptor rings through that window, so
+>     the peer can ioremap it and drive DMA reads remotely.
+>   * Remaining MWs carry only small control-plane rings used to exchange
+>     buffer addresses and completion information.
+>   * For RC->EP traffic, the RC drives endpoint DMA read channels through
+>     the peer-visible eDMA window.
+>   * For EP->RC traffic, the endpoint uses its local DMA write channels.
+> 
+> The following figures illustrate the data flow when ntb_netdev sits on
+> top of the transport:
+> 
+>      Figure 1. RC->EP traffic via ntb_netdev + ntb_transport_edma
+>                    backed by ntb_edma/ntb_dw_edma
+> 
+>              EP                                   RC
+>           phys addr                            phys addr
+>             space                                space
+>              +-+                                  +-+
+>              | |                                  | |
+>              | |                ||                | |
+>              +-+-----.          ||                | |
+>     EDMA REG | |      \     [A] ||                | |
+>              +-+----.  '---+-+  ||                | |
+>              | |     \     | |<---------[0-a]----------
+>              +-+-----------| |<----------[2]----------.
+>      EDMA LL | |           | |  ||                | | :
+>              | |           | |  ||                | | :
+>              +-+-----------+-+  ||  [B]           | | :
+>              | |                ||  ++            | | :
+>           ---------[0-b]----------->||----------------'
+>              | |            ++  ||  ||            | |
+>              | |            ||  ||  ++            | |
+>              | |            ||<----------[4]-----------
+>              | |            ++  ||                | |
+>              | |           [C]  ||                | |
+>           .--|#|<------------------------[3]------|#|<-.
+>           :  |#|                ||                |#|  :
+>          [5] | |                ||                | | [1]
+>           :  | |                ||                | |  :
+>           '->|#|                                  |#|--'
+>              |#|                                  |#|
+>              | |                                  | |
+> 
+>      Figure 2. EP->RC traffic via ntb_netdev + ntb_transport_edma
+>                   backed by ntb_edma/ntb_dw_edma
+> 
+>              EP                                   RC
+>           phys addr                            phys addr
+>             space                                space
+>              +-+                                  +-+
+>              | |                                  | |
+>              | |                ||                | |
+>              +-+                ||                | |
+>     EDMA REG | |                ||                | |
+>              +-+                ||                | |
+>     ^        | |                ||                | |
+>     :        +-+                ||                | |
+>     : EDMA LL| |                ||                | |
+>     :        | |                ||                | |
+>     :        +-+                ||  [C]           | |
+>     :        | |                ||  ++            | |
+>     :     -----------[4]----------->||            | |
+>     :        | |            ++  ||  ||            | |
+>     :        | |            ||  ||  ++            | |
+>     '----------------[2]-----||<--------[0-b]-----------
+>              | |            ++  ||                | |
+>              | |           [B]  ||                | |
+>           .->|#|--------[3]---------------------->|#|--.
+>           :  |#|                ||                |#|  :
+>          [1] | |                ||                | | [5]
+>           :  | |                ||                | |  :
+>           '--|#|                                  |#|<-'
+>              |#|                                  |#|
+>              | |                                  | |
+> 
+>     0-a. configure remote embedded DMA (program endpoint DMA registers)
+>     0-b. DMA-map and publish destination address (DAR)
+>     1.   network stack builds skb (copy from application/user memory)
+>     2.   consume DAR, DMA-map source address (SAR) and kick DMA transfer
+>     3.   DMA transfer (payload moves between RC/EP memory)
+>     4.   consume completion (commit)
+>     5.   network stack delivers data to application/user memory
+> 
+>     [A]: Dedicated MW that aggregates DMA regs and LL (peer ioremaps it)
+>     [B]: Control-plane ring buffer for "produce"
+>     [C]: Control-plane ring buffer for "consume"
+> 
+> 
+> Kernel base / dependencies
+> ==========================
+> 
+> This series is based on:
+> 
+>   - next-20260114 (commit b775e489bec7)
+> 
+> plus the following seven unmerged patch series or standalone patches:
+> 
+>   - [PATCH v4 0/7] PCI: endpoint/NTB: Harden vNTB resource management
+>     https://lore.kernel.org/all/20251202072348.2752371-1-den@valinux.co.jp/
+> 
+>   - [PATCH v2 0/2] NTB: ntb_transport: debugfs cleanups
+>     https://lore.kernel.org/all/20260107042458.1987818-1-den@valinux.co.jp/
+> 
+>   - [PATCH v3 0/9] dmaengine: Add new API to combine configuration and descriptor preparation
+>     https://lore.kernel.org/all/20260105-dma_prep_config-v3-0-a8480362fd42@nxp.com/
+> 
+>   - [PATCH v8 0/5] PCI: endpoint: BAR subrange mapping support
+>     https://lore.kernel.org/all/20260115084928.55701-1-den@valinux.co.jp/
+> 
+>   - [PATCH] PCI: endpoint: pci-epf-vntb: Use array_index_nospec() on mws_size[] access
+>     https://lore.kernel.org/all/20260105075606.1253697-1-den@valinux.co.jp/
+> 
+>   - [PATCH] dmaengine: dw-edma: Fix MSI data values for multi-vector IMWr interrupts
+>     https://lore.kernel.org/all/20260105075904.1254012-1-den@valinux.co.jp/
+> 
+>   - [PATCH v2 01/11] dmaengine: dw-edma: Add spinlock to protect DONE_INT_MASK and ABORT_INT_MASK
+>     https://lore.kernel.org/imx/20260109-edma_ll-v2-1-5c0b27b2c664@nxp.com/
+>     (only this single commit is cherry-picked from the series)
+> 
+> 
+> Patch layout
+> ============
+> 
+>   1. dw-edma / DesignWare EP helpers needed for remote embedded-DMA (export
+>      register/LL windows, IRQ routing control, etc.)
+> 
+>      Patch 01 : dmaengine: dw-edma: Export helper to get integrated register window
+>      Patch 02 : dmaengine: dw-edma: Add per-channel interrupt routing control
+>      Patch 03 : dmaengine: dw-edma: Poll completion when local IRQ handling is disabled
+>      Patch 04 : dmaengine: dw-edma: Add notify-only channels support
+>      Patch 05 : dmaengine: dw-edma: Add a helper to query linked-list region
+> 
+>   2. NTB EPF/core + vNTB prep (mwN_offset + versioning, MSI vector
+>      management, new ntb_dev_ops helpers, driver_override, vntb glue)
+> 
+>      Patch 06 : NTB: epf: Add mwN_offset support and config region versioning
+>      Patch 07 : NTB: epf: Reserve a subset of MSI vectors for non-NTB users
+>      Patch 08 : NTB: epf: Provide db_vector_count/db_vector_mask callbacks
+>      Patch 09 : NTB: core: Add mw_set_trans_ranges() for subrange programming
+>      Patch 10 : NTB: core: Add .get_private_data() to ntb_dev_ops
+>      Patch 11 : NTB: core: Add .get_dma_dev() to ntb_dev_ops
+>      Patch 12 : NTB: core: Add driver_override support for NTB devices
+>      Patch 13 : PCI: endpoint: pci-epf-vntb: Support BAR subrange mappings for MWs
+>      Patch 14 : PCI: endpoint: pci-epf-vntb: Implement .get_private_data() callback
+>      Patch 15 : PCI: endpoint: pci-epf-vntb: Implement .get_dma_dev()
+> 
+>   3. ntb_transport refactor/modularization and backend infrastructure
+> 
+>      Patch 16 : NTB: ntb_transport: Move TX memory window setup into setup_qp_mw()
+>      Patch 17 : NTB: ntb_transport: Dynamically determine qp count
+>      Patch 18 : NTB: ntb_transport: Use ntb_get_dma_dev()
+>      Patch 19 : NTB: ntb_transport: Rename ntb_transport.c to ntb_transport_core.c
+>      Patch 20 : NTB: ntb_transport: Move internal types to ntb_transport_internal.h
+>      Patch 21 : NTB: ntb_transport: Export common helpers for modularization
+>      Patch 22 : NTB: ntb_transport: Split core library and default NTB client
+>      Patch 23 : NTB: ntb_transport: Add transport backend infrastructure
+>      Patch 24 : NTB: ntb_transport: Run ntb_set_mw() before link-up negotiation
+> 
+>   4. ntb_edma backend registry + DesignWare backend + transport client
+> 
+>      Patch 25 : NTB: hw: Add remote eDMA backend registry and DesignWare backend
+>      Patch 26 : NTB: ntb_transport: Add remote embedded-DMA transport client
+> 
+>   5. ntb_netdev multi-queue support
+> 
+>      Patch 27 : ntb_netdev: Multi-queue support
+> 
+>   6. Renesas R-Car S4 enablement (IOMMU, DTs, quirks)
+> 
+>      Patch 28 : iommu: ipmmu-vmsa: Add PCIe ch0 to devices_allowlist
+>      Patch 29 : iommu: ipmmu-vmsa: Add support for reserved regions
+>      Patch 30 : arm64: dts: renesas: Add Spider RC/EP DTs for NTB with remote DW PCIe eDMA
+>      Patch 31 : NTB: epf: Add per-SoC quirk to cap MRRS for DWC eDMA (128B for R-Car)
+>      Patch 32 : NTB: epf: Add an additional memory window (MW2) barno mapping on Renesas R-Car
+> 
+>   7. Documentation updates
+> 
+>      Patch 33 : Documentation: PCI: endpoint: pci-epf-vntb: Update and add mwN_offset usage
+>      Patch 34 : Documentation: driver-api: ntb: Document remote embedded-DMA transport
+> 
+>   8. pci-epf-test / pci_endpoint_test / kselftest coverage for remote eDMA
+> 
+>      Patch 35 : PCI: endpoint: pci-epf-test: Add pci_epf_test_next_free_bar() helper
+>      Patch 36 : PCI: endpoint: pci-epf-test: Add remote eDMA-backed mode
+>      Patch 37 : misc: pci_endpoint_test: Add remote eDMA transfer test mode
+>      Patch 38 : selftests: pci_endpoint: Add remote eDMA transfer coverage
+> 
+> 
+> Tested on
+> =========
+> 
+> * 2x Renesas R-Car S4 Spider (RC<->EP connected with OCuLink cable)
+> * Kernel base as described above
+> 
+> 
+> Performance notes
+> =================
+> 
+> The primary motivation remains improving throughput/latency for ntb_transport
+> users (typically ntb_netdev). On R-Car S4, the earlier prototype (RFC v3)
+> showed roughly 10-20x throughput improvement in preliminary iperf3 tests and
+> lower ping RTT. I have not yet re-measured after the v4 refactor and
+> module split.
+> 
+> 
+> Changelog
+> =========
+> 
+> RFCv3->RFCv4 changes:
+>   - Major refactor of the transport layering:
+>     - Introduce ntb_transport_core as a shared library module.
+>     - Split the legacy shared-memory transport client (ntb_transport) and the
+>       remote embedded-DMA transport client (ntb_transport_edma).
+>     - Add driver_override support for ntb_bus and use it for per-port transport
+>       selection.
+>   - Introduce a vendor-agnostic remote embedded-DMA backend registry (ntb_edma)
+>     and add the initial DesignWare backend (ntb_dw_edma).
+>   - Rebase to next-20260114 and move several prerequisite/fixup patchsets into
+>     separate threads (listed above), including BAR subrange mapping support and
+>     dw-edma fixes.
+>   - Add PCI endpoint test coverage for the remote embedded-DMA path:
+>     - extend pci-epf-test / pci_endpoint_test
+>     - add a kselftest variant to exercise remote-eDMA transfers
+>     Note: to keep the changes as small as possible, I added a few #ifdefs
+>     in the main test code. Feedback on whether/how/to what extent this
+>     should be split into separate modules would be appreciated.
+>   - Expand documentation (Documentation/driver-api/ntb.rst) to describe transport
+>     variants, the new module structure, and the remote embedded-DMA data flow.
+>   - Addressed other feedbacks from the RFC v3 thread.
+> 
+> RFCv2->RFCv3 changes:
+>   - Architecture
+>     - Have EP side use its local write channels, while leaving RC side to
+>       use remote read channels.
+>     - Abstraction/HW-specific stuff encapsulation improved.
+>   - Added control/config region versioning for the vNTB/EPF control region
+>     so that mismatched RC/EP kernels fail early instead of silently using an
+>     incompatible layout.
+>   - Reworked BAR subrange / multi-region mapping support:
+>     - Dropped the v2 approach that added new inbound mapping ops in the EPC
+>       core.
+>     - Introduced `struct pci_epf_bar.submap` and extended DesignWare EP to
+>       support BAR subrange inbound mapping via Address Match Mode IB iATU.
+>     - pci-epf-vntb now provides a subrange mapping hint to the EPC driver
+>       when offsets are used.
+>   - Changed .get_pci_epc() to .get_private_data()
+>   - Dropped two commits from RFC v2 that should be submitted separately:
+>     (1) ntb_transport debugfs seq_file conversion
+>     (2) DWC EP outbound iATU MSI mapping/cache fix (will be re-posted separately)
+>   - Added documentation updates.
+>   - Addressed assorted review nits from the RFC v2 thread (naming/structure).
+> 
+> RFCv1->RFCv2 changes:
+>   - Architecture
+>     - Drop the generic interrupt backend + DW eDMA test-interrupt backend
+>       approach and instead adopt the remote eDMA-backed ntb_transport mode
+>       proposed by Frank Li. The BAR-sharing / mwN_offset / inbound
+>       mapping (Address Match Mode) infrastructure from RFC v1 is largely
+>       kept, with only minor refinements and code motion where necessary
+>       to fit the new transport-mode design.
+>   - For Patch 01
+>     - Rework the array_index_nospec() conversion to address review
+>       comments on "[RFC PATCH 01/25]".
+> 
+> RFCv3: https://lore.kernel.org/all/20251217151609.3162665-1-den@valinux.co.jp/
+> RFCv2: https://lore.kernel.org/all/20251129160405.2568284-1-den@valinux.co.jp/
+> RFCv1: https://lore.kernel.org/all/20251023071916.901355-1-den@valinux.co.jp/
+> 
+> Thank you for reviewing,
+> 
+> 
+> Koichiro Den (38):
+>   dmaengine: dw-edma: Export helper to get integrated register window
+>   dmaengine: dw-edma: Add per-channel interrupt routing control
+>   dmaengine: dw-edma: Poll completion when local IRQ handling is
+>     disabled
+>   dmaengine: dw-edma: Add notify-only channels support
+>   dmaengine: dw-edma: Add a helper to query linked-list region
+>   NTB: epf: Add mwN_offset support and config region versioning
+>   NTB: epf: Reserve a subset of MSI vectors for non-NTB users
+>   NTB: epf: Provide db_vector_count/db_vector_mask callbacks
+>   NTB: core: Add mw_set_trans_ranges() for subrange programming
+>   NTB: core: Add .get_private_data() to ntb_dev_ops
+>   NTB: core: Add .get_dma_dev() to ntb_dev_ops
+>   NTB: core: Add driver_override support for NTB devices
+>   PCI: endpoint: pci-epf-vntb: Support BAR subrange mappings for MWs
+>   PCI: endpoint: pci-epf-vntb: Implement .get_private_data() callback
+>   PCI: endpoint: pci-epf-vntb: Implement .get_dma_dev()
+>   NTB: ntb_transport: Move TX memory window setup into setup_qp_mw()
+>   NTB: ntb_transport: Dynamically determine qp count
+>   NTB: ntb_transport: Use ntb_get_dma_dev()
+>   NTB: ntb_transport: Rename ntb_transport.c to ntb_transport_core.c
+>   NTB: ntb_transport: Move internal types to ntb_transport_internal.h
+>   NTB: ntb_transport: Export common helpers for modularization
+>   NTB: ntb_transport: Split core library and default NTB client
+>   NTB: ntb_transport: Add transport backend infrastructure
+>   NTB: ntb_transport: Run ntb_set_mw() before link-up negotiation
+>   NTB: hw: Add remote eDMA backend registry and DesignWare backend
+>   NTB: ntb_transport: Add remote embedded-DMA transport client
+>   ntb_netdev: Multi-queue support
+>   iommu: ipmmu-vmsa: Add PCIe ch0 to devices_allowlist
+>   iommu: ipmmu-vmsa: Add support for reserved regions
+>   arm64: dts: renesas: Add Spider RC/EP DTs for NTB with remote DW PCIe
+>     eDMA
+>   NTB: epf: Add per-SoC quirk to cap MRRS for DWC eDMA (128B for R-Car)
+>   NTB: epf: Add an additional memory window (MW2) barno mapping on
+>     Renesas R-Car
+>   Documentation: PCI: endpoint: pci-epf-vntb: Update and add mwN_offset
+>     usage
+>   Documentation: driver-api: ntb: Document remote embedded-DMA transport
+>   PCI: endpoint: pci-epf-test: Add pci_epf_test_next_free_bar() helper
+>   PCI: endpoint: pci-epf-test: Add remote eDMA-backed mode
+>   misc: pci_endpoint_test: Add remote eDMA transfer test mode
+>   selftests: pci_endpoint: Add remote eDMA transfer coverage
+> 
+>  Documentation/PCI/endpoint/pci-vntb-howto.rst |   19 +-
+>  Documentation/driver-api/ntb.rst              |  193 ++
+>  arch/arm64/boot/dts/renesas/Makefile          |    2 +
+>  .../boot/dts/renesas/r8a779f0-spider-ep.dts   |   37 +
+>  .../boot/dts/renesas/r8a779f0-spider-rc.dts   |   52 +
+>  drivers/dma/dw-edma/dw-edma-core.c            |  207 +-
+>  drivers/dma/dw-edma/dw-edma-core.h            |   10 +
+>  drivers/dma/dw-edma/dw-edma-v0-core.c         |   26 +-
+>  drivers/iommu/ipmmu-vmsa.c                    |    7 +-
+>  drivers/misc/pci_endpoint_test.c              |  633 +++++
+>  drivers/net/ntb_netdev.c                      |  341 ++-
+>  drivers/ntb/Kconfig                           |   13 +
+>  drivers/ntb/Makefile                          |    2 +
+>  drivers/ntb/core.c                            |   68 +
+>  drivers/ntb/hw/Kconfig                        |    1 +
+>  drivers/ntb/hw/Makefile                       |    1 +
+>  drivers/ntb/hw/edma/Kconfig                   |   28 +
+>  drivers/ntb/hw/edma/Makefile                  |    5 +
+>  drivers/ntb/hw/edma/backend.c                 |   87 +
+>  drivers/ntb/hw/edma/backend.h                 |  102 +
+>  drivers/ntb/hw/edma/ntb_dw_edma.c             |  977 +++++++
+>  drivers/ntb/hw/epf/ntb_hw_epf.c               |  199 +-
+>  drivers/ntb/ntb_transport.c                   | 2458 +---------------
+>  drivers/ntb/ntb_transport_core.c              | 2523 +++++++++++++++++
+>  drivers/ntb/ntb_transport_edma.c              | 1110 ++++++++
+>  drivers/ntb/ntb_transport_internal.h          |  261 ++
+>  drivers/pci/controller/dwc/pcie-designware.c  |   26 +
+>  drivers/pci/endpoint/functions/pci-epf-test.c |  497 +++-
+>  drivers/pci/endpoint/functions/pci-epf-vntb.c |  380 ++-
+>  include/linux/dma/edma.h                      |  106 +
+>  include/linux/ntb.h                           |   88 +
+>  include/uapi/linux/pcitest.h                  |    3 +-
+>  .../pci_endpoint/pci_endpoint_test.c          |   17 +
+>  33 files changed, 7855 insertions(+), 2624 deletions(-)
+>  create mode 100644 arch/arm64/boot/dts/renesas/r8a779f0-spider-ep.dts
+>  create mode 100644 arch/arm64/boot/dts/renesas/r8a779f0-spider-rc.dts
+>  create mode 100644 drivers/ntb/hw/edma/Kconfig
+>  create mode 100644 drivers/ntb/hw/edma/Makefile
+>  create mode 100644 drivers/ntb/hw/edma/backend.c
+>  create mode 100644 drivers/ntb/hw/edma/backend.h
+>  create mode 100644 drivers/ntb/hw/edma/ntb_dw_edma.c
+>  create mode 100644 drivers/ntb/ntb_transport_core.c
+>  create mode 100644 drivers/ntb/ntb_transport_edma.c
+>  create mode 100644 drivers/ntb/ntb_transport_internal.h
+> 
+
