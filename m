@@ -1,74 +1,78 @@
-Received: from TY3P286CU002.outbound.protection.outlook.com (mail-japaneastazon11020109.outbound.protection.outlook.com [52.101.229.109])
+Received: from AM0PR02CU008.outbound.protection.outlook.com (mail-westeuropeazon11013008.outbound.protection.outlook.com [52.101.72.8])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 56AC12DF153;
-	Wed, 21 Jan 2026 08:41:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.229.109
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3A19C4A5AE4;
+	Wed, 21 Jan 2026 15:24:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.72.8
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768984878; cv=fail; b=uvuusWoXk43x0YAQKpvoRksMnjS298dRdfHDA5nKjMkh28OWaz+V5ZsOv2amXO7pk21xScF0yVXUzU7g19Suz/0gVAsKo2In6vUMI6cUvIwFs381GYYWnj4MVmqlzmfVZoNQ9i8ceU7NJkMEujns/Guz/DoqYTNtf6vKrUJKTqY=
+	t=1769009058; cv=fail; b=DJr94tWK/lU7pIK98gF1AI05HKqgsXjtbM5O+jgvIbIxxonnZPTNpd2K/XM/5PPsilzRd2yIDf3euPU/fmcCIB5/LPaIH3xdXTWSPOKjg6vubJnFE39GieGcF5zMEdu9YdwWgRSXUerRfQYGMOn0a72eGJbzwkKtLh3maExCp6M=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768984878; c=relaxed/simple;
-	bh=+G8w9IL86tW8aZZR42c1KtC9YdxqKuc0506uoAtZHYQ=;
+	s=arc-20240116; t=1769009058; c=relaxed/simple;
+	bh=1OgAO6lq441B51rHqFjgWT3NUlyLZveY5qZu6AWiAhQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
-	 Content-Disposition:In-Reply-To:MIME-Version; b=QfHGn6l0AVhKUxqgt7cJOX3qWE+ebp8Ob1lp3xDnmjuTmVfq0yIOEGmsU6bVjMrEfTkMe9QCqoVTBJdR3nK09Ds50P2LTuto32lwPAq3BYyifl9LKDrI8bZCYbI5ofo0cjmcqtHyO6BCYZhX7AHspchc8PHy7mCCok0ePCJwKf8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=wjCJJPRu; arc=fail smtp.client-ip=52.101.229.109
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
+	 Content-Disposition:In-Reply-To:MIME-Version; b=p6m+sNgwrxY2hGxVqg7/xttk2PR2hp09+zUa/xwSKPpeh/EOPOX0ncymMdkxRhfS1Z9FGTR8yyrs5FVreB/9QzLe3wUQFp/MDpr7DgJvPJhnK20S0oikQMwmLuuEuCm7dZvSnbNwQPBT7Fwf77YKntxrhX25ppyYoAy+uvIzoOg=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com; spf=pass smtp.mailfrom=nxp.com; dkim=pass (2048-bit key) header.d=nxp.com header.i=@nxp.com header.b=RS66Kbty; arc=fail smtp.client-ip=52.101.72.8
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=nxp.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="wjCJJPRu"
+	dkim=pass (2048-bit key) header.d=nxp.com header.i=@nxp.com header.b="RS66Kbty"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=eeRVlpsYvADXzU0hIo59kUntd0kLjsWDwllfKz0OqCzU6KDjEKrw8GPiiCZ++lSKa6hGkTIpmGYMypSMum/hBviv8PPHgUvislee76ryl2iJTesD2JIM4BvuBPxP8qM6YinlPm1NKw1hpa6uhmIpa04zABT/u28ef8ihVoMQj24SaFsitH1ZEB9FS52JvJPBcRyXytfP3thj6zLnTpbUDjSn4+n12sGegrC4MQkuUubbRg2sLDjzC5b+qXSmfZD66oqFxG91MDMpEgDAVTvUSuyc4rTfjpZqnr90U01nv+1v0Lao+ZKSlCwIhaTRcSRRPKjE+h6Wk5BFhIaYOeg5LQ==
+ b=Wq8ZXydGAObKFFZeIJN9n0DMXllQjL5ZfLT0fz/WhAHm+yeQJx8WqQwHst6EH2y/gPkpXcZpz79IqTblRcqlr8MzSpWxSsOrc3KWvTuGOQPpJ/8T8NMuS/v5RbG843KZxToz1UKReETIjluNo3J9J3GgCGqdzTMV2bue42u/Ql65GVtQFr8IdS5Bm9Y2axefcXGlIfv27XEGrKMy44IV27eejwCU6tGlyz/CZoBrm5XvdK7GX6uF+WgZrGt9sIYxePWLaqCXSIHoyLSTEF/i4LL4H4taEfJIYfLLCcVGt1vUNJ4m1yubNknQpWsMaeQADYaD+lZbVuNFAkLhGZde3A==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=GOSVzEYsXXVLtUtGw3S2fHju9pRo1CgGCLhFI2gHzTE=;
- b=vZagksvoAWZMJBs5acCZpvi5p/ETwCTNdF6YoV6XBibhCPQXqcuJ1jnU/w8DCmQ1mEl27/BQTtA6vAnsZ+GleVxGN8zP/AiBmf1DUsc8qOHqq2/Yt5Lo4Of1PUThBEoC1mQux5fPmUlKzPupozQiC6392OwT2RMIj5WrpsJFR0DJmKF8PfGPlmI0VkDw4iBAplVvdKzEJFvq+EhJBVnANfNnpME0MhdD0RCYmj0C3NlsWYbX3Ju+sQVFT3LbZuwtJFHD2GYXsBeBUn9HMREU/t059n0u9z4zXCnSp26S/xREryQtdUY0FLp5PoQOm/B1WtJAuS2yU/9F++ykgiKCzA==
+ bh=1GT6ICyEycLultmfqSNN0qm9MZSItpnVp1gcD8f1wCw=;
+ b=qWQG+dnlgFiBfDRdWUUc/HsPIm3Rvp2DcfYPhG5Il7vpJJKUm5hR7R/NdDqRueX/z++1cIDgdEtpndlCp+63mdI+9Vb45g7Bdy183U1uFZBDTHHblxADiDEgEHhbKWM/sLQ2IRZL3LiAZXQ5SxyiiI3gsSLHdqQxkXOOV/dTaqrGUK0xvrTUDl3q5v6YBLPvki7tko+ma3XTW2TEMjt0iRDKg7tqPRsYTDvahaQzeVqRYgGJjWGy3jdLueK6B4vEv00zDf64RIgWoQObnTwI9pFs4SulT+y+X/ZqFnJ+n3syd+63G2s+x+/JEd5O52e0sjtkNtLSqEll3HQw+j2JSA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
- header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
- s=selector1;
+ smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
+ header.d=nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=GOSVzEYsXXVLtUtGw3S2fHju9pRo1CgGCLhFI2gHzTE=;
- b=wjCJJPRuJVlRP4L4jjHsSX+cQzg04XSkgmU1SeuiE5vVP9j05cNZakQD0pCWNAseFqmFbL5OWOir0ysiqpuJH4x1R6gyD2H50WpBsc49nRrjYC9y/z7BWqxhae3GSBQiSa31zltFymJfMMDZCTw0lpUYlbITJiaPWs8YJIhXD+w=
+ bh=1GT6ICyEycLultmfqSNN0qm9MZSItpnVp1gcD8f1wCw=;
+ b=RS66KbtyeoDBwGLWrrag2BSnRlZ2TTf9VaTiy8+H8A7pFYUl7sjXJKvb18VKdrQGK/c+bh6gWlysoJc7i4570j/JNkvXwOrlCnCueCE+nBJcM/XX61BqyvgEK+3JjfEHvGcXdGtnFJ3RRuL6gyNpyGVnathlH9Fanwvsct2LtGEJM+8npl7y6ZXMtf/VtgrrO8qjduOn2/MqDJM9tTAlDd2trtT/Nhr99H7Ll1Wwr1Q2Of2gTgeDnpkKYKJnTrlqc8jeswLo7PSrMGbHOkI+Xnk1MQ8XvzeoJUj+3DpJ3a+I5gnWiKf3UnFK0GUVr/CAp0BN7+f637MOp+CHJFPIKQ==
 Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=valinux.co.jp;
-Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:38f::10)
- by TY4P286MB6959.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:343::13) with
+ header.d=none;dmarc=none action=none header.from=nxp.com;
+Received: from DU2PR04MB8951.eurprd04.prod.outlook.com (2603:10a6:10:2e2::22)
+ by DU4PR04MB10982.eurprd04.prod.outlook.com (2603:10a6:10:589::5) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9542.9; Wed, 21 Jan
- 2026 08:41:13 +0000
-Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
- ([fe80::2305:327c:28ec:9b32]) by TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
- ([fe80::2305:327c:28ec:9b32%5]) with mapi id 15.20.9542.008; Wed, 21 Jan 2026
- 08:41:12 +0000
-Date: Wed, 21 Jan 2026 17:41:11 +0900
-From: Koichiro Den <den@valinux.co.jp>
-To: Frank Li <Frank.li@nxp.com>
-Cc: dave.jiang@intel.com, cassel@kernel.org, mani@kernel.org, 
-	kwilczynski@kernel.org, kishon@kernel.org, bhelgaas@google.com, geert+renesas@glider.be, 
-	robh@kernel.org, vkoul@kernel.org, jdmason@kudzu.us, allenbh@gmail.com, 
-	jingoohan1@gmail.com, lpieralisi@kernel.org, linux-pci@vger.kernel.org, 
-	linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
-	devicetree@vger.kernel.org, dmaengine@vger.kernel.org, iommu@lists.linux.dev, 
-	ntb@lists.linux.dev, netdev@vger.kernel.org, linux-kselftest@vger.kernel.org, 
-	arnd@arndb.de, gregkh@linuxfoundation.org, joro@8bytes.org, will@kernel.org, 
-	robin.murphy@arm.com, magnus.damm@gmail.com, krzk+dt@kernel.org, conor+dt@kernel.org, 
-	corbet@lwn.net, skhan@linuxfoundation.org, andriy.shevchenko@linux.intel.com, 
-	jbrunet@baylibre.com, utkarsh02t@gmail.com
+ 2026 15:24:12 +0000
+Received: from DU2PR04MB8951.eurprd04.prod.outlook.com
+ ([fe80::753c:468d:266:196]) by DU2PR04MB8951.eurprd04.prod.outlook.com
+ ([fe80::753c:468d:266:196%4]) with mapi id 15.20.9520.011; Wed, 21 Jan 2026
+ 15:24:12 +0000
+Date: Wed, 21 Jan 2026 10:24:01 -0500
+From: Frank Li <Frank.li@nxp.com>
+To: Koichiro Den <den@valinux.co.jp>
+Cc: dave.jiang@intel.com, cassel@kernel.org, mani@kernel.org,
+	kwilczynski@kernel.org, kishon@kernel.org, bhelgaas@google.com,
+	geert+renesas@glider.be, robh@kernel.org, vkoul@kernel.org,
+	jdmason@kudzu.us, allenbh@gmail.com, jingoohan1@gmail.com,
+	lpieralisi@kernel.org, linux-pci@vger.kernel.org,
+	linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org, devicetree@vger.kernel.org,
+	dmaengine@vger.kernel.org, iommu@lists.linux.dev,
+	ntb@lists.linux.dev, netdev@vger.kernel.org,
+	linux-kselftest@vger.kernel.org, arnd@arndb.de,
+	gregkh@linuxfoundation.org, joro@8bytes.org, will@kernel.org,
+	robin.murphy@arm.com, magnus.damm@gmail.com, krzk+dt@kernel.org,
+	conor+dt@kernel.org, corbet@lwn.net, skhan@linuxfoundation.org,
+	andriy.shevchenko@linux.intel.com, jbrunet@baylibre.com,
+	utkarsh02t@gmail.com
 Subject: Re: [RFC PATCH v4 05/38] dmaengine: dw-edma: Add a helper to query
  linked-list region
-Message-ID: <tuhaxwmmcjfltih7ckfo2l5ltzicnj6zfc5ka3pvqlljn7ldu2@ibo5eo62lndn>
+Message-ID: <aXDvkRCZXQ/dPwRd@lizhi-Precision-Tower-5810>
 References: <20260118135440.1958279-1-den@valinux.co.jp>
  <20260118135440.1958279-6-den@valinux.co.jp>
  <aW0S60D2uALBXdtQ@lizhi-Precision-Tower-5810>
  <e4y664ylum35wvj4endwprzpp4cvfaggklik5mxvdkgmakuqyj@lgevmhllem72>
+ <tuhaxwmmcjfltih7ckfo2l5ltzicnj6zfc5ka3pvqlljn7ldu2@ibo5eo62lndn>
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <e4y664ylum35wvj4endwprzpp4cvfaggklik5mxvdkgmakuqyj@lgevmhllem72>
-X-ClientProxiedBy: TY4PR01CA0095.jpnprd01.prod.outlook.com
- (2603:1096:405:37d::6) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
- (2603:1096:405:38f::10)
+In-Reply-To: <tuhaxwmmcjfltih7ckfo2l5ltzicnj6zfc5ka3pvqlljn7ldu2@ibo5eo62lndn>
+X-ClientProxiedBy: PH7PR02CA0024.namprd02.prod.outlook.com
+ (2603:10b6:510:33d::10) To DU2PR04MB8951.eurprd04.prod.outlook.com
+ (2603:10a6:10:2e2::22)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -76,200 +80,212 @@ List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|TY4P286MB6959:EE_
-X-MS-Office365-Filtering-Correlation-Id: 183226ac-5552-40e4-6169-08de58c8d516
+X-MS-TrafficTypeDiagnostic: DU2PR04MB8951:EE_|DU4PR04MB10982:EE_
+X-MS-Office365-Filtering-Correlation-Id: 0863f963-9aa0-42a4-f85d-08de59012148
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|376014|7416014|366016|10070799003|1800799024;
+	BCL:0;ARA:13230040|1800799024|52116014|7416014|376014|366016|19092799006|7053199007|38350700014;
 X-Microsoft-Antispam-Message-Info:
-	=?us-ascii?Q?HTUvQ1fcAqlnc9ISfUWYNkWfIOtSAWSAbcwoLAooWCguvh/haowSg0zADT/a?=
- =?us-ascii?Q?8jUkBBKQ4c+GG83TVUO+HlKM1mKACjQ7D9YnEu21lB6fxHBu0DEcTemf8lr8?=
- =?us-ascii?Q?lyaMoIMe8mSM09Z/T2g9zUcz92kGfStOR7CPAlD2WENFVLBh+CCcSfbc8j7e?=
- =?us-ascii?Q?udX8zfAgcmZqLgFsOQs61bqO+oKJNDRVoeAE+dmV5IRpChJSTp+TUwSK7ua2?=
- =?us-ascii?Q?GREwsGwJbIkJQvD7B7jja0yPtkn1s0j0OP9r97fSZbZXlxAHZPXwntElFEbI?=
- =?us-ascii?Q?kaYXHuRCViEvG5zpxfWCrlxmc53JiITiVKciDy5w2CX65MSuBHr1CzLKamIm?=
- =?us-ascii?Q?7+fCsFBwmY+HDl+5GlV9HT6ZuoszHWgUzyHeC0x69c96glLRFcKvf8PI59jU?=
- =?us-ascii?Q?J0V1exTJnPN70wjphH9qINPP07bXP6hdXFMF7fhztAPIDNG1Cg9aUTypUraF?=
- =?us-ascii?Q?w6ygwOu2O/WXGGajhQyn65LbzNhGLca+rBY6ai3rZoo54rsakXJJOqWhpDpG?=
- =?us-ascii?Q?ULlwA3oQaBTbEmzncqeRfzGksQZ4qLp92zOSj/r6rhbGzY8YsxhhhpNmPt49?=
- =?us-ascii?Q?oTcYiZWumcUQN/kDKv4JZFzZgCHoj3aysIJrfWOu8DLa8Sih221drgyOAP6h?=
- =?us-ascii?Q?7L6bNk2XmvYVeVZ2IEuomMCX847amqtelx3BhU6O3FpCvyH7uMoH13wGt4AC?=
- =?us-ascii?Q?a66Njb+D/qxFGRY4sM9bwVRr5MtIFjw/wH7eoxocIOlgEkYYWO+ttWb23JFs?=
- =?us-ascii?Q?DYoPA11qovUegNxH0j6qC+6KeZt25UfrjjHVjLEi226zkkuqqUndGO57BhEU?=
- =?us-ascii?Q?1ZJD6qFpjE+vDfUxIV4o1/hRvCD3uEimUKp6WjU8Hv/s7VDKOwo7WAKwaOtt?=
- =?us-ascii?Q?FDopG7HbJ4EshWoS3P2AGhENz1ddTcDjLgl37BIP7RcCBL56diLrCGlVg9W3?=
- =?us-ascii?Q?QM82vCMLGG1cYoqqvoX0d57fHcaUMjjCEZF+T//h7C1RtzWHKlhMv0/HkdeX?=
- =?us-ascii?Q?m6KNm7HcerhAw59lmmuf6isA+5RijmffD8fFPbYOhknerWrWOOLhw2dU29yW?=
- =?us-ascii?Q?20Ryu8IJURtdgoxlS7TtInGxYuEC9WrXlVPFPSresv4P5AtlgTeY/BrgD+I4?=
- =?us-ascii?Q?SQ3+HgOvp0/87fSkGm71DNxQw4y2RuEwoYa02b064LbsnWB3MjQgQQvqJLB+?=
- =?us-ascii?Q?mFjmQYv0xDXpOfJyj1OB2YDrSDddd0F8LJqt7afD7osfiDxvHmGetTys2pzi?=
- =?us-ascii?Q?bsAOm3bXNjO4bJR+Th6m2vvF3Rbqj3BLGfZXDILSaoVKsZzPrDvH7PzDr4Js?=
- =?us-ascii?Q?UltbRTMzsxFcXTR+17rPui5oAc6NsuQ364wZznW06mgjNqdE1VRk89OaXQMn?=
- =?us-ascii?Q?Zn/RA4gXbarhFGYpjZ24PjDGlTmwhfR9+7xD2A4S4vZAFz5cuqcK9tGsHnTM?=
- =?us-ascii?Q?p7Cvou90YwmUPdxEFMiEGPctpk//UWEtz3TYd6reRVre3xZh8JhsC5Zh357O?=
- =?us-ascii?Q?ONKzUTGWmPY0oZACO2I24IK111TbBBDRLQfRMbl/wfHDFgXIT5BfTlt4H8fQ?=
- =?us-ascii?Q?vYo++uy8UPEpjdecGWI=3D?=
+	=?us-ascii?Q?RRQMHWjjRZ6eLGVhgUsbNQVaoLuDa5YsA0ngMD0ZR4U5QLlJ2LaNboPBHbTw?=
+ =?us-ascii?Q?OF/KdSgg6M3C7IiHTPvJw6Ix72f1g/PSJj6uFX65OwaCZNejaEfLzgOJFMPu?=
+ =?us-ascii?Q?YSR5gdDp85kQnJkkEOAn3F0QopuNZ2FzgP5QYQ7rknmgeovEvagCysodLDkk?=
+ =?us-ascii?Q?9a/g4G7SGGoYsPLQKkdibzygzBG6Dm/CT8WfiIfysdkl71hR2mxHM9RI9Thb?=
+ =?us-ascii?Q?vSL3ORpR3XNaeS8ebCtbCcRMOtHaCSHfD9tjtBsaMV0YS77VvDbBX5A6bS1S?=
+ =?us-ascii?Q?QzpTe8igWUtT/h8iDmprXJGqCRvvRfMBs9hOO/1e4L72OyUlNk++xWuXWMqa?=
+ =?us-ascii?Q?vLI6Dhm3oLIDXL/F+ZYLPcfbUzVCUsZS+eH0QAnfj3uJUe8ddJy/jf1Jx2Il?=
+ =?us-ascii?Q?STlZZBymMIorwyjkw+pEBqta4X+RVczv78UU/ot/bjORg1ig+GuEY4AyNXsR?=
+ =?us-ascii?Q?upHzJBm3T/yAVKHCmB/hoAl+0qsGEujUiTFwqTz8c8tcRv7xtr7R4W5U7PFY?=
+ =?us-ascii?Q?LVSeyL+iFxfbhuHYRwca0bYN6vr1PHA3TVIlQFq/IN2PIVdv1NkT8HZvym4V?=
+ =?us-ascii?Q?W3csWMY6qHDj9QdQILmZTEqIaK/XwwTp1We8fzO1ROmiUUb9ngDyE6Oj3gfK?=
+ =?us-ascii?Q?pwBcxPLu6QZp6gGBQ+n7KSWHqz2iAtqvvG6ymf66B95iEnV4rQIT6EV0JDST?=
+ =?us-ascii?Q?pmxVl1JWV0tYBhmdizgaz3OB5sFZa0q2tP3Cn8s9vT1NGI0Gf8qz6A5+xR0d?=
+ =?us-ascii?Q?6qY0IqDwzwzD8SGWYMmpPWkm83nnh/HOM4iZR1qJWCqBthmgWQjsnL/sAQBi?=
+ =?us-ascii?Q?c8FLZrfXUNZfSiWFhpWO5zubTHmQcAiu0GoU+UayVmKMBpAfqggIKakj7mJF?=
+ =?us-ascii?Q?1JdzV/J9MKdPadSkWECqo/88GD/7rSYnUUMCyUYVwT+dz11LhwmFEQplWp4l?=
+ =?us-ascii?Q?9pWNCzadaOL9C4hLoqp3stPu8hMYofmy9hRwr0fq+DbFZP8865noUGv3cJo9?=
+ =?us-ascii?Q?bLH0OlotCru3DFTihlyiBPqDe/y62gMT7HCdajRwUiJKp2W4IlUpKZ1XIDjr?=
+ =?us-ascii?Q?bbKsvO1CFdRiV1eg4AjTsjuLRUohjlns4Du4XpbY6G4K343rXaNpILmR2RPk?=
+ =?us-ascii?Q?cnk3fIN/fUZvdEYgnNi+Z8pLFxCC4wMB96PdhnA4TGckw79XW6oVVj5kr/Qn?=
+ =?us-ascii?Q?nU8JMs00MMEIh6Gr8NFpPHcSm5E7+PZijinmsMTBj93gCwMfXsNDNhan6tio?=
+ =?us-ascii?Q?8Qwqx88Fk2/o1GGXJMzwg3C0xtpbT0H4zjP3ezQOA39ninS5XnpRxSFXRqqg?=
+ =?us-ascii?Q?FPKo3kAfjGQNr8sQv/KvB+Fp4U31ruIuBFS7shpflR3W9gusfQTZCyLaqVdx?=
+ =?us-ascii?Q?1umcecBmUuVGPKJ7qYMy4h4epytcXVa2wAMDjpQrs/r8X55YgOGsgtrZ/kAL?=
+ =?us-ascii?Q?jVP+L6gBA6/4Tjqkf5mjQQrRdHNZdn8dh8SgzG7H6tg2c+z+s4oZpbnAzF91?=
+ =?us-ascii?Q?Lg44UY/AceT1WjiHybpua9Yh0wFbEL1STZfLn8ASg54KZYilLGWNaIFxeDrv?=
+ =?us-ascii?Q?eds8U45W5RQExWAL0PWiDGea6AETsGy1VkJ7ZmF5aTEiz+lszS7oNUnqP1Zc?=
+ =?us-ascii?Q?NrrvUCmaPZ/wA5uSgg2QtzA=3D?=
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(376014)(7416014)(366016)(10070799003)(1800799024);DIR:OUT;SFP:1102;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DU2PR04MB8951.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(52116014)(7416014)(376014)(366016)(19092799006)(7053199007)(38350700014);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?oQZ+J2M8Qdxq3ktf4q5zZ+R9nO/Dir2DgQtpn0zQrtzeWmOhgHr9N/tLbbq1?=
- =?us-ascii?Q?iTeq1NEeCJP1K3vw5ZD+x2z5/CkMTUzPSzkkyGJVMWiQjGtJQEv7Oq+iD0lq?=
- =?us-ascii?Q?vcz7POQ1iIoLMwXclenKNbidjB33BA7yMsSp9gVMJoHF4NMZJ/njsHFZcAUs?=
- =?us-ascii?Q?zqDsAP0tf6Mcm2k/yJNMXeShLaL/MUVq4smzQ9itUgajzeqklhpVaRoXohXx?=
- =?us-ascii?Q?oeojOjT4G3hybs/l74aAF71o5YZ7oSbqTkhntGSFPx0vLhYv9lR9f+ZtD54I?=
- =?us-ascii?Q?R4Ciav/T8A08Su9ylWGfWo6FSJbYATPRnjQVL3JS0lKD1juCcVN8HioOUVwL?=
- =?us-ascii?Q?Hyzx72NtEF1ERtS/NvNz54j9sbyw1vQAlevUqmonMTEteTP65bs+m+wBEEfI?=
- =?us-ascii?Q?nK/wyyJxkuqqGQcofbHWTNFWEgzq1YGwoFKJqMEqgF/Azd2x5llOqt9wFf7J?=
- =?us-ascii?Q?ZImFkMWofwQVeTY7L9bHS7jgJScN/cONRyrUgFDqd5s8yU0nSJqzsZk61LPm?=
- =?us-ascii?Q?tONqvFucjJrjARJ8QC+Zc86BjGaiuH08drSrMfosaaKeKlIiebWPR+Bmh9Tp?=
- =?us-ascii?Q?8bUy0XzVrOOm5LB9sxpfOK9+s4VDCQKU4iUe4dq1Ogwl5LI/H6Kx8SpOFWcw?=
- =?us-ascii?Q?WjBqNfS+x4pTnIEaCMws1AJPCL1i4Rah6KwdK2dNHKblGDFybl2BtzuP5mzj?=
- =?us-ascii?Q?126jI0K8XCsDWQwYhub7+ApmtM/BE0QLpOZIi8y+MV6wwGBPrx1vnkBLv73w?=
- =?us-ascii?Q?YbtHcmUEchFB+EU20KjDCaTkOqPPdFy27pUO55SUYzIm/klWblSGd6KiVifd?=
- =?us-ascii?Q?gcQTV8kmFBD3eVZvFCCMLVmq6AnxZsgeAOWn2v8ZBIGqmQL4/zhjQ21w9o7x?=
- =?us-ascii?Q?cvp26tDIiVtqiq+LWAbuSqky+JmAHEFwLY/fPB0p4a1LiZfCX4//CcnRzvY0?=
- =?us-ascii?Q?/nTm5DIrt+7da+hOmPv6KEfO/H882xDfRmc9GDRcPRQgZVljiPnLTe8ER62O?=
- =?us-ascii?Q?DrNKcQR8gSNzCQutpKOave54qJ+xReFszzpb8gVx3u1hDe/wwE6SQ/pfZs+w?=
- =?us-ascii?Q?2TLGWrxiPnIVT4CHHi6Lbhccbxp0ZtNmHWF79L//3zSDDR61FD+xgyt3LY95?=
- =?us-ascii?Q?b22gWI4UZmhG8t6U6S7q5Vw5SPN+KO70Yxf1/bPwMxDVIu6+fymm0yK49IMG?=
- =?us-ascii?Q?JiiivnmpHREzxiUSu0eC5CYIcZnwETKZlU4AZqeVU3zjRhUURsHvc+w/6QtI?=
- =?us-ascii?Q?pWUXd56XeX+J36K0EoxOuNGjB2ehFazqivP10ukoycUkZY0SDXEsDnuI5/cO?=
- =?us-ascii?Q?syXUq4R6Zi6XVkfeJe/A2adU09Ib9HXGBYqr2QM43DOo762VV0CnNyv7ktht?=
- =?us-ascii?Q?HPlhayUEtICZ+aM3XV4oxm54YgBYpYC7zIP3xnuPK51y5SEpT6MR8QOn2B4t?=
- =?us-ascii?Q?jvGKxcDZOA/XAqYFsrRyMvcbiLPksCInGhTpGtlFtXLyOWTkwsEgQjyo00GS?=
- =?us-ascii?Q?FBGkeTVySj2qntaAG+Ca3eBXQzxFLQ6gW7owp0JrhmyPBDzFKcqAhW0wzaG9?=
- =?us-ascii?Q?gautmMWqH1p1K9RQ1WsBANRK3+lkhI+zXRsX+a7zDbHHuCwgCygusqS/1My5?=
- =?us-ascii?Q?uTYYZmX5m/VIUpNLftKFNrNzbymaBwZs3RXKR/F8DR5wz0p/DYhZa3x702FC?=
- =?us-ascii?Q?COlVXJ4wjFJAgpa9kYZO6MtCQkRTqx3sIu36VuyhIHvVOCTcEt8kfN14Vhba?=
- =?us-ascii?Q?J+dE/iN9dq3iun3IT+0U5ieQg4gMsmd6spdP8u4eVb5SoOqbIiFs?=
-X-OriginatorOrg: valinux.co.jp
-X-MS-Exchange-CrossTenant-Network-Message-Id: 183226ac-5552-40e4-6169-08de58c8d516
-X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+	=?us-ascii?Q?+SPTKHrU1NBch0tnGzibuOmEefVa39qLNxjImfjhBy/4f2gfNAggWBfVTZbh?=
+ =?us-ascii?Q?LNzVpomkqAeFDy3F1ZTXBpq66nxHs8K6fXADGdDWj4Mjwr7vz/NAvjoRjore?=
+ =?us-ascii?Q?Ymwp4Qt3mNHzYDu7sqSt3kcBFERGIzC/7pcJwU6KYZARmfl/2VSm7AXt+tgo?=
+ =?us-ascii?Q?+S6VCLNp/mvXY1H1cnqT9IfwwaFsGCUmDtM0pQezqb9Nafvtni4VDNfy2skC?=
+ =?us-ascii?Q?kmbU53x3bgKmji68ocYznszy+ZgIebkAi/A0qzdrfZEsATfDrqEg9Cc5nXMF?=
+ =?us-ascii?Q?h/A6QTG9myV+12vAJhHwLkLPticNGKR1TPmVJLChl7IXcLevcc8Tz/L6Egjy?=
+ =?us-ascii?Q?tDrn1LQW/wODEQTEveiTdEnFiU+u+JcoECQzZNRc80rErfHaK7lmuU/QPSqO?=
+ =?us-ascii?Q?emQbzeOanmnVwHrBT4Irz+wF2pJFC8OTPAk2izlimnaJtFDLSWUpJkeFEj7Q?=
+ =?us-ascii?Q?Re35eeX7WVpYlUUCUtIYl+1PUj07Gegetk3Ch8w8/azyBu4b62Nmp4Gj4zyv?=
+ =?us-ascii?Q?Xkb1cHqxAeI4Rv+T0hS83Z6aj4ny4PJGN3I+iIvVmsc32Vfkeo+zg2ywI+tU?=
+ =?us-ascii?Q?sucSz0wr4lxnHJ/yxtkc7mP81rhARqeOTkaJBQI2T4VoIgWjFWSZ5DFuxEew?=
+ =?us-ascii?Q?5VGTKBw7tR/aRKtA8ujylpeeotujmj35/kwo7z0YtJXVB76u91k/7pQx2TmA?=
+ =?us-ascii?Q?yt9Uv4UKTYp9vVSkVLN4gT8CBsd8cW5ZhZMnfoj2gC1QuD1ls9gtE6H/B0wi?=
+ =?us-ascii?Q?aYxKnZpdt1f+FThWd+bit+szMyl183MiTkDueds+k+4fIBDKr0keN719nI16?=
+ =?us-ascii?Q?lTkiN2qA7vkE1toOc7xKv6idZRop501rfJ10eP9TXhwiZPi00Vk5S7wbTBmo?=
+ =?us-ascii?Q?KgAa/XUVtK5k8mCIOnN5rAzxoCNWqA3WO6arL+/N3Q8Mz4ERtrKouDS6ajX0?=
+ =?us-ascii?Q?e+OnGjclMkgq4bQaqbKmnAIf7T3FnwtzU7FSz25CTo3JfV1LBRDsUkYvilLI?=
+ =?us-ascii?Q?SLqT2tM6oH2LmavfL/UwWMgFfXDjiCJE099qMiwnCYgkZvgr42/Hzul8vzW0?=
+ =?us-ascii?Q?FgAM9giVlojofUAzwr9iDOoGPJrMBuUu5hDw8f27WVPkN9vu5rUc/O5D8XZU?=
+ =?us-ascii?Q?wRTnRu1pC6yfIFAjL38TKev2ukgjFbJQYSZTP1bPUWHndv8T7O7/ucHWUXtz?=
+ =?us-ascii?Q?b07lwmhjF6Ydg553AOKs2gIbBXHJU/IBgqZP6H8iL/aljxNe+7+EMtxXB2rt?=
+ =?us-ascii?Q?GvyC0iZ5kLeAq39rz9ztIRh5OGY+Bj3Ww/C2gzPoYhI4b2jvbyHKOEBg1o+S?=
+ =?us-ascii?Q?IO0ii9WSOJLnqsdBXwoNkqW02i6Yxk18T7pLjOyYVrdNg/iJKvAMEVOI3fGT?=
+ =?us-ascii?Q?Yl9KHuGnLNZEcdDyyDlSbf/nnZqNBRG6klf1YzKw68+Q3AnTcM9E2uGJtXq2?=
+ =?us-ascii?Q?yKzi6CzD2s3KOIUHGOKX7aDfQSev0KgxoTiZpRGvLn1zzLvTqPvYJ2hFWRqo?=
+ =?us-ascii?Q?BHzhbqvhyXSNF8dtGj6MCtWq6YsmvkfQvfSZIQ8I4sBtcHpwvRsBfgCQoew1?=
+ =?us-ascii?Q?1F0IA3+KSpAYh6NVdmy8FWmyFPU188NUvSHducJKo1s6Qbmq1b8KlUBrz0Da?=
+ =?us-ascii?Q?iCiQS1n8iI4Q4ZyUI/LVHxYT7PidMqkoGpCb7CMkc6UjP5VUYJOuZPObLSXf?=
+ =?us-ascii?Q?4DNBAutwSPFXMm5r0cJoV7a6tsyfGvDFNdt83SbUTzOW+aoX?=
+X-OriginatorOrg: nxp.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 0863f963-9aa0-42a4-f85d-08de59012148
+X-MS-Exchange-CrossTenant-AuthSource: DU2PR04MB8951.eurprd04.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 21 Jan 2026 08:41:12.6158
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 21 Jan 2026 15:24:12.2537
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
+X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 2vz+4fD3WlvkNuJsjdCJ7ZuSWFMxB9tliwzXHH81R19T/FcC6HMwNrEFAVVL9vlteUWxnRcOn6rwIC7vj9Pnaw==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY4P286MB6959
+X-MS-Exchange-CrossTenant-UserPrincipalName: Supy9cjjClTy+5FueGwvGWWk1jcd2BcU4dwI5g4O+69xCEhaTG5GQcxOuHCwRnMXh+zblKq9gKPd+NborIj1zQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DU4PR04MB10982
 
-On Wed, Jan 21, 2026 at 10:38:53AM +0900, Koichiro Den wrote:
-> On Sun, Jan 18, 2026 at 12:05:47PM -0500, Frank Li wrote:
-> > On Sun, Jan 18, 2026 at 10:54:07PM +0900, Koichiro Den wrote:
-> > > A remote eDMA provider may need to expose the linked-list (LL) memory
-> > > region that was configured by platform glue (typically at boot), so the
-> > > peer (host) can map it and operate the remote view of the controller.
+On Wed, Jan 21, 2026 at 05:41:11PM +0900, Koichiro Den wrote:
+> On Wed, Jan 21, 2026 at 10:38:53AM +0900, Koichiro Den wrote:
+> > On Sun, Jan 18, 2026 at 12:05:47PM -0500, Frank Li wrote:
+> > > On Sun, Jan 18, 2026 at 10:54:07PM +0900, Koichiro Den wrote:
+> > > > A remote eDMA provider may need to expose the linked-list (LL) memory
+> > > > region that was configured by platform glue (typically at boot), so the
+> > > > peer (host) can map it and operate the remote view of the controller.
+> > > >
+> > > > Export dw_edma_chan_get_ll_region() to return the LL region associated
+> > > > with a given dma_chan.
 > > >
-> > > Export dw_edma_chan_get_ll_region() to return the LL region associated
-> > > with a given dma_chan.
-> > 
-> > This informaiton passed from dwc epc driver. Is it possible to get it from
-> > EPC driver.
-> 
-> That makes sense, from an API cleanness perspective, thanks.
-> I'll add a helper function dw_pcie_edma_get_ll_region() in
-> drivers/pci/controller/dwc/pcie-designware.c, instead of the current
-> dw_edma_chan_get_ll_region() in dw-edma-core.c.
+> > > This informaiton passed from dwc epc driver. Is it possible to get it from
+> > > EPC driver.
+> >
+> > That makes sense, from an API cleanness perspective, thanks.
+> > I'll add a helper function dw_pcie_edma_get_ll_region() in
+> > drivers/pci/controller/dwc/pcie-designware.c, instead of the current
+> > dw_edma_chan_get_ll_region() in dw-edma-core.c.
+>
+> Hi Frank,
+>
+> I looked into exposing LL regions from the EPC driver side, but the key
+> issue is channel identification under possibly concurrent dmaengine users.
+> In practice, the only stable handle a consumer has is a pointer to struct
+> dma_chan, and the only reliable way to map that to the eDMA hardware
+> channel is via dw_edma_chan->id.
 
-Hi Frank,
+If possible, I suggest change to one page pre-channel. So there are a fixed
+ll mapping.
 
-I looked into exposing LL regions from the EPC driver side, but the key
-issue is channel identification under possibly concurrent dmaengine users.
-In practice, the only stable handle a consumer has is a pointer to struct
-dma_chan, and the only reliable way to map that to the eDMA hardware
-channel is via dw_edma_chan->id. I think an EPC-facing API would still need
-that mapping in any case, so keeping the helper in dw-edma seems simpler
-and more robust.
-If you have another idea, I'd appreciate your insights.
+> I think an EPC-facing API would still need
+> that mapping in any case, so keeping the helper in dw-edma seems simpler
+> and more robust.
+> If you have another idea, I'd appreciate your insights.
 
-Regards,
-Koichiro
+I suggest add generally DMA engine API to get such property, some likes
+a kind ioctrl \ dma_get_config().
 
-> 
-> Thanks for the review,
+Frank
+
+>
+> Regards,
 > Koichiro
-> 
-> > 
-> > Frank
+>
+> >
+> > Thanks for the review,
+> > Koichiro
+> >
 > > >
-> > > Signed-off-by: Koichiro Den <den@valinux.co.jp>
-> > > ---
-> > >  drivers/dma/dw-edma/dw-edma-core.c | 26 ++++++++++++++++++++++++++
-> > >  include/linux/dma/edma.h           | 14 ++++++++++++++
-> > >  2 files changed, 40 insertions(+)
-> > >
-> > > diff --git a/drivers/dma/dw-edma/dw-edma-core.c b/drivers/dma/dw-edma/dw-edma-core.c
-> > > index 0eb8fc1dcc34..c4fb66a9b5f5 100644
-> > > --- a/drivers/dma/dw-edma/dw-edma-core.c
-> > > +++ b/drivers/dma/dw-edma/dw-edma-core.c
-> > > @@ -1209,6 +1209,32 @@ int dw_edma_chan_register_notify(struct dma_chan *dchan,
-> > >  }
-> > >  EXPORT_SYMBOL_GPL(dw_edma_chan_register_notify);
-> > >
-> > > +int dw_edma_chan_get_ll_region(struct dma_chan *dchan,
-> > > +			       struct dw_edma_region *region)
-> > > +{
-> > > +	struct dw_edma_chip *chip;
-> > > +	struct dw_edma_chan *chan;
-> > > +
-> > > +	if (!dchan || !region || !dchan->device)
-> > > +		return -ENODEV;
-> > > +
-> > > +	chan = dchan2dw_edma_chan(dchan);
-> > > +	if (!chan)
-> > > +		return -ENODEV;
-> > > +
-> > > +	chip = chan->dw->chip;
-> > > +	if (!(chip->flags & DW_EDMA_CHIP_LOCAL))
-> > > +		return -EINVAL;
-> > > +
-> > > +	if (chan->dir == EDMA_DIR_WRITE)
-> > > +		*region = chip->ll_region_wr[chan->id];
-> > > +	else
-> > > +		*region = chip->ll_region_rd[chan->id];
-> > > +
-> > > +	return 0;
-> > > +}
-> > > +EXPORT_SYMBOL_GPL(dw_edma_chan_get_ll_region);
-> > > +
-> > >  MODULE_LICENSE("GPL v2");
-> > >  MODULE_DESCRIPTION("Synopsys DesignWare eDMA controller core driver");
-> > >  MODULE_AUTHOR("Gustavo Pimentel <gustavo.pimentel@synopsys.com>");
-> > > diff --git a/include/linux/dma/edma.h b/include/linux/dma/edma.h
-> > > index 3c538246de07..c9ec426e27ec 100644
-> > > --- a/include/linux/dma/edma.h
-> > > +++ b/include/linux/dma/edma.h
-> > > @@ -153,6 +153,14 @@ bool dw_edma_chan_ignore_irq(struct dma_chan *chan);
-> > >  int dw_edma_chan_register_notify(struct dma_chan *chan,
-> > >  				 void (*cb)(struct dma_chan *chan, void *user),
-> > >  				 void *user);
-> > > +
-> > > +/**
-> > > + * dw_edma_chan_get_ll_region - get linked list (LL) memory for a dma_chan
-> > > + * @chan: the target DMA channel
-> > > + * @region: output parameter returning the corresponding LL region
-> > > + */
-> > > +int dw_edma_chan_get_ll_region(struct dma_chan *chan,
-> > > +			       struct dw_edma_region *region);
-> > >  #else
-> > >  static inline int dw_edma_probe(struct dw_edma_chip *chip)
-> > >  {
-> > > @@ -182,6 +190,12 @@ static inline int dw_edma_chan_register_notify(struct dma_chan *chan,
-> > >  {
-> > >  	return -ENODEV;
-> > >  }
-> > > +
-> > > +static inline int dw_edma_chan_get_ll_region(struct dma_chan *chan,
-> > > +					     struct dw_edma_region *region)
-> > > +{
-> > > +	return -EINVAL;
-> > > +}
-> > >  #endif /* CONFIG_DW_EDMA */
-> > >
-> > >  struct pci_epc;
-> > > --
-> > > 2.51.0
-> > >
+> > > Frank
+> > > >
+> > > > Signed-off-by: Koichiro Den <den@valinux.co.jp>
+> > > > ---
+> > > >  drivers/dma/dw-edma/dw-edma-core.c | 26 ++++++++++++++++++++++++++
+> > > >  include/linux/dma/edma.h           | 14 ++++++++++++++
+> > > >  2 files changed, 40 insertions(+)
+> > > >
+> > > > diff --git a/drivers/dma/dw-edma/dw-edma-core.c b/drivers/dma/dw-edma/dw-edma-core.c
+> > > > index 0eb8fc1dcc34..c4fb66a9b5f5 100644
+> > > > --- a/drivers/dma/dw-edma/dw-edma-core.c
+> > > > +++ b/drivers/dma/dw-edma/dw-edma-core.c
+> > > > @@ -1209,6 +1209,32 @@ int dw_edma_chan_register_notify(struct dma_chan *dchan,
+> > > >  }
+> > > >  EXPORT_SYMBOL_GPL(dw_edma_chan_register_notify);
+> > > >
+> > > > +int dw_edma_chan_get_ll_region(struct dma_chan *dchan,
+> > > > +			       struct dw_edma_region *region)
+> > > > +{
+> > > > +	struct dw_edma_chip *chip;
+> > > > +	struct dw_edma_chan *chan;
+> > > > +
+> > > > +	if (!dchan || !region || !dchan->device)
+> > > > +		return -ENODEV;
+> > > > +
+> > > > +	chan = dchan2dw_edma_chan(dchan);
+> > > > +	if (!chan)
+> > > > +		return -ENODEV;
+> > > > +
+> > > > +	chip = chan->dw->chip;
+> > > > +	if (!(chip->flags & DW_EDMA_CHIP_LOCAL))
+> > > > +		return -EINVAL;
+> > > > +
+> > > > +	if (chan->dir == EDMA_DIR_WRITE)
+> > > > +		*region = chip->ll_region_wr[chan->id];
+> > > > +	else
+> > > > +		*region = chip->ll_region_rd[chan->id];
+> > > > +
+> > > > +	return 0;
+> > > > +}
+> > > > +EXPORT_SYMBOL_GPL(dw_edma_chan_get_ll_region);
+> > > > +
+> > > >  MODULE_LICENSE("GPL v2");
+> > > >  MODULE_DESCRIPTION("Synopsys DesignWare eDMA controller core driver");
+> > > >  MODULE_AUTHOR("Gustavo Pimentel <gustavo.pimentel@synopsys.com>");
+> > > > diff --git a/include/linux/dma/edma.h b/include/linux/dma/edma.h
+> > > > index 3c538246de07..c9ec426e27ec 100644
+> > > > --- a/include/linux/dma/edma.h
+> > > > +++ b/include/linux/dma/edma.h
+> > > > @@ -153,6 +153,14 @@ bool dw_edma_chan_ignore_irq(struct dma_chan *chan);
+> > > >  int dw_edma_chan_register_notify(struct dma_chan *chan,
+> > > >  				 void (*cb)(struct dma_chan *chan, void *user),
+> > > >  				 void *user);
+> > > > +
+> > > > +/**
+> > > > + * dw_edma_chan_get_ll_region - get linked list (LL) memory for a dma_chan
+> > > > + * @chan: the target DMA channel
+> > > > + * @region: output parameter returning the corresponding LL region
+> > > > + */
+> > > > +int dw_edma_chan_get_ll_region(struct dma_chan *chan,
+> > > > +			       struct dw_edma_region *region);
+> > > >  #else
+> > > >  static inline int dw_edma_probe(struct dw_edma_chip *chip)
+> > > >  {
+> > > > @@ -182,6 +190,12 @@ static inline int dw_edma_chan_register_notify(struct dma_chan *chan,
+> > > >  {
+> > > >  	return -ENODEV;
+> > > >  }
+> > > > +
+> > > > +static inline int dw_edma_chan_get_ll_region(struct dma_chan *chan,
+> > > > +					     struct dw_edma_region *region)
+> > > > +{
+> > > > +	return -EINVAL;
+> > > > +}
+> > > >  #endif /* CONFIG_DW_EDMA */
+> > > >
+> > > >  struct pci_epc;
+> > > > --
+> > > > 2.51.0
+> > > >
