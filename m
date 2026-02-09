@@ -1,107 +1,321 @@
-Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
+Received: from OS0P286CU011.outbound.protection.outlook.com (mail-japanwestazon11020080.outbound.protection.outlook.com [52.101.228.80])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6FEAE946A
-	for <ntb@lists.linux.dev>; Sun,  8 Feb 2026 16:49:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.177.32
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770569359; cv=none; b=hxM4rjfdlqU7ORxektQpalv5XIoN9acKECfQ8FxuAuWvOOZckMARIJ26CHuIQyNpRBbXilU8aZnmr8FKwZ7z3fKYkrbQdgH3Ov8nOS0JjPNALlXyrlbSAdzLl+X4QeYgCTzbZ50aQw1W27aL8oFTss8//fsWeMaKwD6ht62b28A=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770569359; c=relaxed/simple;
-	bh=8XHzIx0yTGMkri5WdILEXTbmjdUJdrdKd99C60B/nKo=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Nw4QhSEufeJnSaAD4jAlo0UNX6c1iZnaVhNLbKGbgebhgvK2K5CSnvxrHrj7umuTfd55FJRRzl7dIEifTyFlU6ObNb5cKEXgcXa2bQZRDyGnJ1EYR1eDy2PpuMhL26xibC6GrWloedhHp+NFq4W61pJ/aJQLEhj+wY15hGJR84I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=a0PeRVnM; arc=none smtp.client-ip=205.220.177.32
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EDF092EB5AF
+	for <ntb@lists.linux.dev>; Mon,  9 Feb 2026 06:30:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.228.80
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1770618603; cv=fail; b=erV8h2RLBCLAleX7WfoxqS5IYkP2XlRP9ntzhNC9fQDqXCLmteIFAOxoqJpjbxsrv/Txayx1REtDHBacfeU1+Bvp31d4o7WuGqUrhyBfQONY2Ycr5ZNctHZRrQJSQdW8T5JkgUR7inLQ7FpuORM78IYwB6cG89IylxMa+OyxLnY=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1770618603; c=relaxed/simple;
+	bh=LMPeG76zaN7/1vJRvj/3N35XHgYnWdSP9xVsfUjo45o=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=hPsPMeixwStXQugsjT9gM+jCMCQx1OJGi/fXcHp8LIEq896axiAdGTGLDqANRHJAqrxqfxpMDxqaHB/DS+C0xo+giKGLqURakVycSkL3t5zKdiMms9m0Yl+nWGvSafzZXPvfW2w74inr9xAOsdosGq5bCYbg7Cy+HjlCyJvKGwQ=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=a5eB+E60; arc=fail smtp.client-ip=52.101.228.80
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="a0PeRVnM"
-Received: from pps.filterd (m0246631.ppops.net [127.0.0.1])
-	by mx0b-00069f02.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 618G3HXx3882595;
-	Sun, 8 Feb 2026 16:49:07 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=cc
-	:content-transfer-encoding:date:from:message-id:mime-version
-	:subject:to; s=corp-2025-04-25; bh=NngNLLJ1u18eerIX1P84PYwVb1BKd
-	/WZrpGI6g56zLM=; b=a0PeRVnMO8fn8F6mtNzVwKkz4S1KyxEIlT2lTAiqy/z/U
-	8CDLg9EqfqRUOYEt+XwRYXVoUMxU5y2GVc6L3jBDPxf48DNpzMdKTzDnuYY4kePo
-	4whef55ebBC8iFHemtRCb7TyoKHjVpCRyqpOMvjFN1W6cWADkTzBNcSpimNrAznE
-	gs8Y6ou+mH5+l5qCL2bKZgGg1VqxrBZv1nXgXZ6QDtUJRjO9b51DSxzkYulXcv8y
-	NJn1RKcshnRnZ10ouPTUKWjMSDflFr+8vnY0qS9LDIcqf5fsE+mDrI9hQ9NWUyXL
-	+XN3qb9kwDT7k8L/fDPPS/uXyIjmGolADI7cTt/4A==
-Received: from phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta03.appoci.oracle.com [138.1.37.129])
-	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 4c5xk4ryq6-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Sun, 08 Feb 2026 16:49:07 +0000 (GMT)
-Received: from pps.filterd (phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
-	by phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 618FcZBX031880;
-	Sun, 8 Feb 2026 16:49:06 GMT
-Received: from pps.reinject (localhost [127.0.0.1])
-	by phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTPS id 4c5uu887cu-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Sun, 08 Feb 2026 16:49:06 +0000
-Received: from phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
-	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 618Gn5BD012605;
-	Sun, 8 Feb 2026 16:49:05 GMT
-Received: from ca-dev112.us.oracle.com (ca-dev112.us.oracle.com [10.129.136.47])
-	by phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTP id 4c5uu887cc-1;
-	Sun, 08 Feb 2026 16:49:05 +0000
-From: Alok Tiwari <alok.a.tiwari@oracle.com>
-To: Basavaraj.Natikar@amd.com, Shyam-sundar.S-k@amd.com, jdmason@kudzu.us,
-        dave.jiang@intel.com, allenbh@gmail.com, ntb@lists.linux.dev
-Cc: alok.a.tiwarilinux@gmail.com, alok.a.tiwari@oracle.com
-Subject: [PATCH] ntb_hw_amd: Fix incorrect debug message in link disable path
-Date: Sun,  8 Feb 2026 08:49:00 -0800
-Message-ID: <20260208164902.349805-1-alok.a.tiwari@oracle.com>
-X-Mailer: git-send-email 2.50.1
+	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="a5eB+E60"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=e531d505+Z4hkQ4EgCtI3V12VnQrMlVbu76bm4TeUB7uUjqn48nTEAqwrupqmo68VhYjYR/Fs4Ah43VaxR+f9A8DrcP9tPeZULN+Nf0HphpEsYR8CNm/2Q/j6eY9KdMg99RKck4QyMO6ObHVgZNApRXl8rB/Pi6J+W1Juw54updCnZKweQPt5cpwiYG4CqDBfYdeSnoiCQrTQospUx2MLZ5obOprNd9BSmZ36Xux03R2EsM4voM0CgduRc6gHdlg3uSRa2J9wzRcDj4ttGUakp0UlMBpKsVqCTicn6crRGhsyMkuq03wuYywdcQCaPPCpCB8jKoS0MX1Sc+qwVeOfw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=IGIqxRGFaq1HG5iwebCn64y/g2AUOrVzlmhB8S1cZGg=;
+ b=FUrC8ViR102b/YLthBKZ5FYwn3YXtW8J0ku9cLBdCl8I4FgDxd+HJqrP0BsBgu81qei0gW+fwuqofcktknIUmiTR6/EF10W1Lq8pQZa8zkdEIAN700xjvi80WWFVjWdbxruHlgqNOIrhKIzAPoxlaMiN0xGHXbd8Zs0s2CSXIwMcIlDw8yxnXIyyBdBR25N4ehDa93HX0iwHVgOP7Xncxg4Cgj0UaEEoH8FJ0jRqVnmMyozwPJJLdFjSyDNt4kfSJAzi8RLlrdh15hRzCATTlAyPysdmP3LUtus412+m4jImahlQrBIWE6p+15F5K385gJAaE3A6sXGkyPk16WVJxg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
+ header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=IGIqxRGFaq1HG5iwebCn64y/g2AUOrVzlmhB8S1cZGg=;
+ b=a5eB+E60CNdBoWOGRKGff8bFS1MVCTPdQjoI6ooxCtfqehF8yAQ/kCNqbYHhIf20rA42AhqduEPowmMnR6lYBzTU2712JXQYua9GyOEfHp1qSXujfN+JuWaB8ktSb2Vf2hKGb73baYG63ugHr0ZxmiTJnRsRxSs8W6fsXWf38CY=
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=valinux.co.jp;
+Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:38f::10)
+ by TYYP286MB4425.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:10b::6) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9587.17; Mon, 9 Feb
+ 2026 06:30:00 +0000
+Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+ ([fe80::2305:327c:28ec:9b32]) by TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+ ([fe80::2305:327c:28ec:9b32%5]) with mapi id 15.20.9587.017; Mon, 9 Feb 2026
+ 06:30:00 +0000
+From: Koichiro Den <den@valinux.co.jp>
+To: vkoul@kernel.org,
+	mani@kernel.org,
+	Frank.Li@nxp.com,
+	cassel@kernel.org,
+	jingoohan1@gmail.com,
+	lpieralisi@kernel.org,
+	kwilczynski@kernel.org,
+	robh@kernel.org,
+	bhelgaas@google.com,
+	kishon@kernel.org,
+	jdmason@kudzu.us,
+	allenbh@gmail.com
+Cc: dmaengine@vger.kernel.org,
+	linux-pci@vger.kernel.org,
+	ntb@lists.linux.dev,
+	linux-kselftest@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v5 1/8] dmaengine: dw-edma: Deassert emulated interrupts in the IRQ handler
+Date: Mon,  9 Feb 2026 15:29:44 +0900
+Message-ID: <20260209062952.2049053-2-den@valinux.co.jp>
+X-Mailer: git-send-email 2.51.0
+In-Reply-To: <20260209062952.2049053-1-den@valinux.co.jp>
+References: <20260209062952.2049053-1-den@valinux.co.jp>
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: TYCP286CA0319.JPNP286.PROD.OUTLOOK.COM
+ (2603:1096:400:3b7::18) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+ (2603:1096:405:38f::10)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.51,FMLib:17.12.100.49
- definitions=2026-02-08_04,2026-02-05_03,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 spamscore=0
- malwarescore=0 phishscore=0 mlxscore=0 mlxlogscore=999 adultscore=0
- bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2601150000 definitions=main-2602080145
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMjA4MDE0NSBTYWx0ZWRfX8XtugPhCM/xy
- 6GeFxOWUXj8eiXqqtmGVqHaWA59cPaIwu9dj4GzvKC3iNxJXRkdqXFzJUZWqWM7NY2ncM/zddX2
- 7kqjUPspvky86y7KQlFqUsS2iVov/2SSqMJlglCmxBj+HqV7mAR+U3lP8I/4U3ymLieNWhZ1HDO
- liXk5rjITvxYXF22g2blPUBSWjI33a/+RFL1YaWwgxxYiCnuzriakqiuTRdrx9VpN91cmJKKQDJ
- zc5U+WtnC7ZEh3YPZ99k4ovyjFiWB9psDSuLXt7qjhCP6Ru77fewTXy3yCOTKoJisot6cXUH8Y4
- TZwxm8k4Av/GeLLn8DnYYTcjQpWS7vAQV3BEmEUw8RcULqLGJxZg00bwB6ActCMS6e4Tyuz6SOC
- FOhb+FI+z6vEyddwJajFTQn7IT0jZkntRhNK6V6H9RiWr3kgLHu+FKSpijvoLRriYNmnoGC5pe7
- +dXrPaYEC2lE1RnRCQQ==
-X-Proofpoint-GUID: 2nJe5YFTdHSKp1KhAKWWvXL8I4vCFhXR
-X-Authority-Analysis: v=2.4 cv=ccnfb3DM c=1 sm=1 tr=0 ts=6988be83 b=1 cx=c_pps
- a=WeWmnZmh0fydH62SvGsd2A==:117 a=WeWmnZmh0fydH62SvGsd2A==:17
- a=HzLeVaNsDn8A:10 a=VkNPw1HP01LnGYTKEx00:22 a=Mpw57Om8IfrbqaoTuvik:22
- a=GgsMoib0sEa3-_RKJdDe:22 a=yPCof4ZbAAAA:8 a=yhp_3V0rEs855MI0f4oA:9
-X-Proofpoint-ORIG-GUID: 2nJe5YFTdHSKp1KhAKWWvXL8I4vCFhXR
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|TYYP286MB4425:EE_
+X-MS-Office365-Filtering-Correlation-Id: a1deff82-ee0a-4bca-ddde-08de67a4a69d
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|7416014|376014|366016|1800799024|10070799003|921020;
+X-Microsoft-Antispam-Message-Info:
+	=?us-ascii?Q?HEDNr9CxsBwkKCvfF4P7NEnwQ5P9cLjKBY2KDJi78YX1EKcvUduGCkyWAnIu?=
+ =?us-ascii?Q?RaKsk0mXGSExyT9zbbOGRueTFu5EN2GiJucP3c7EezxHNFrcKQ5CZ8Mnf2Nh?=
+ =?us-ascii?Q?sxESeV8XG7TEdODdDU073I1X2VtXfgBS83F/vB2eZgjz1UQgpKTZwaWFHiwu?=
+ =?us-ascii?Q?h2EPi214oPjzqMxuXgidMWHSaStXwi5T18Z4HDeDSMg3xblWBHv7bNxkWytm?=
+ =?us-ascii?Q?F711ncBUUag59k+U59+tYP3EaKBVUIri6s6LOYvq/7MXFXQgNnnOvg6QP41b?=
+ =?us-ascii?Q?DlNQo43kk7+PPQlj41YYWEYBb0K3QEeih9j50pyUHsxV5h3njfMV7+KC6Qqe?=
+ =?us-ascii?Q?lCTzvnQ93FBBEPc36ettD6EajZ2fF11TvfXWp5T1DhD55JrvqoB0+AAHcEQC?=
+ =?us-ascii?Q?kf+mn5j7R+nHTXky/ymtk0s/1i7J4OomiluhIRx9wBYwnZ37L/rbdAnW58S8?=
+ =?us-ascii?Q?9tyLdn9i9bzfZjVeAw6C1mcLaETvep6NcsdyAYaNM+6+420laIg4+CkqPBta?=
+ =?us-ascii?Q?b5hq4ahX1zFY6+/QgTHTd5x2pLbQ2ZYPJTFg19V4I15A2f3lMxqJmZnRTmzj?=
+ =?us-ascii?Q?b/fBbkW1tcC1FKL9f1iea1+WkeoqpW+hantRz/3keEc+54fapyUCl201UgVm?=
+ =?us-ascii?Q?w7IMJ8DY0Iwcnti4iL3tl1P5ylNiw1bqFLBV/AG7UBm8JSzXTQxwlcADUT56?=
+ =?us-ascii?Q?Fs7ESQjZgRkKHHd/gDK1GY5VTBFP47RsWlt3m9G5aj50O9pwmaSvGPgSZhMf?=
+ =?us-ascii?Q?yksgthtjABxCB3+KCF0ISkCGcpAw1LrgQd6Ztg4XibyLk2mZnCV2jM+LeO6/?=
+ =?us-ascii?Q?o6gMjLRwkbkvOz5qWks4N0Vo0QuibzigYILQhsfOKo3D0xWv0rJWsHQHZFB7?=
+ =?us-ascii?Q?K/H5qs1gwmXfh/RPS/IlVy922ltMjumblrEU9HCKu7i8rOpFDEpE7SZgterc?=
+ =?us-ascii?Q?paJwV0imef6Kuf6qpvvfUs8T2UtcJq5YtEkVlFjSeNPXeoPj0TqQvZybQ9D8?=
+ =?us-ascii?Q?kNyCWBUa0731cuuNpu1G/F0mM3vZtstZnpssswVCLfJVF95xczPAGNEwv0pE?=
+ =?us-ascii?Q?GNHHo/1y/Tw09iK9grk/bKogHwSlpSjRq09sG2JZcg3mYE36trhKvZ05SEVr?=
+ =?us-ascii?Q?jTZmWc6ewTHthj3KuyV99syDxQsdSEYqXQnCSMikWWoESG04pe5aWvGA0Wgz?=
+ =?us-ascii?Q?e6TkXGU8/ejjtYb77+mAGyuGQ15zyV4osEyAV/3/tTSe5Fla3KCNAS4XCEZK?=
+ =?us-ascii?Q?FUOXiSJ+2gKcI73mAFJdj5RfcLB+TfM+KD9yPfCM+E6KTcZyjLuuy2psF03X?=
+ =?us-ascii?Q?Ly6BABfkPSnfRl+eejAZDTmm+qnBLcTKiDmnwLkpfEK5IO8ISr5XwJUflaRK?=
+ =?us-ascii?Q?r75U/KJYq6uISlqVNKnTfNUkGZBFrEef+ROlWgHQcuE/mXsy6vUdGmsjKQ+D?=
+ =?us-ascii?Q?X+T9Po6X6tdleGMs2Nw46fBIIW3CoXPSZKtBhmpygg46Zm811FAMAFK0tn9K?=
+ =?us-ascii?Q?TtOzdUoEPV0o80oCNMPELSO/MqKyDRaQvcjNZHxjEesq4s5dh/YjRBnDZrir?=
+ =?us-ascii?Q?6rFY06SBiqA+pOYWxqqTGMDdozscY/4DiLOkZc5Ip7WwE34rpT6TSmAxSAYA?=
+ =?us-ascii?Q?1w=3D=3D?=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(7416014)(376014)(366016)(1800799024)(10070799003)(921020);DIR:OUT;SFP:1102;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?us-ascii?Q?c4BbFzGPcC7q6EH3OA7OF2yKwsGGeV/PIUleC8Sg4tzSmmSsOG7SwmZU31Ch?=
+ =?us-ascii?Q?5W2ri02RIolUj34vSFsxgIgld1wXEJtFEjnrcGeoUQl6Bd/1iYtfms/3auTa?=
+ =?us-ascii?Q?PHDkTnwywLFe965eUOLiJedMq9b05S2VTBsffihM5OaMkxyOjEH9Yr+8atuX?=
+ =?us-ascii?Q?LlRm+QWkKWsVlJyzRjXXsEgMrdB56Rihf8SwKQR5Rpn7URdnSZklScOcXaOz?=
+ =?us-ascii?Q?bEaG3o2eSYF5GPVYku/1DDgHmgiglDAN2V1BBbZsm/Rxbx1Q2AoL+ndhtgab?=
+ =?us-ascii?Q?6lMiMEqrPumtGoU5THFCgMQHweER2sw4o8Md4LY4AoMElNz5O8pRJ/wStxvB?=
+ =?us-ascii?Q?HdwTeOH7QCOXPtAESkmEdNQxHEvtXt2KQIBJj8XWqZFljd+TLBtLmywiDHyE?=
+ =?us-ascii?Q?L6D9UMjoEZBSop37lpMvRR15WiyL2fip3sm+ag/jWKcFgHP1kEoTCuVXfJVP?=
+ =?us-ascii?Q?9rqSlJLvzngtSHyIRoCse5KiAcdjWRtT6cvQlJWQ1j4OZGFgIA48SCNEL5Ui?=
+ =?us-ascii?Q?SlP5iuuh58x36mN1KaSxzBau2MRGBgLX7DZKkMzw/uefcIvmsMMfvPUqZril?=
+ =?us-ascii?Q?bNc0FnfdtSXrFpRbcgncTWSit5beAgUEBPQ7/v4/WFz2ZLIGL26LwH5zXzR7?=
+ =?us-ascii?Q?Bv+iCXe89MNbzoYOdwr1lnUA1ZpdnGiY46d146TaPPiGgiRi1WXyedzz0bex?=
+ =?us-ascii?Q?lEtIcP9Wr22poGkXlWF4l75/FseZUXOevH15g6WhdbgGyoMgTREhilmUe3vu?=
+ =?us-ascii?Q?NaAoPToudF3t6cJhrQGFTxyCH+3oZ8lr4xKBIvyVWspSxO1YtIblSF2qNtop?=
+ =?us-ascii?Q?l7nYprKY1nrlHoLS6wZatMXEQGhNYijiZNiGDO1lOUmUMtHIfn/G1/WdZxkB?=
+ =?us-ascii?Q?aPRJDxkskYlzGrtxvoc5QgdYElZhqe44ziYcgbJBAufRdGI2E9PkFoWmLIZs?=
+ =?us-ascii?Q?+mzN6SVCKDano9Pc/2tsKw4eN40kYefrXxM9vM8KbQ7oqJ74nNkfpkx+cJQI?=
+ =?us-ascii?Q?qtmLlVUEL3I0bTw8WHpVq1OhXhOia8WLLePNzzR/I9mIXNEpZMdqHSTf9/BR?=
+ =?us-ascii?Q?2X9crqMrTVtm5IaI8C8f5xSmuuBU+Fy3Ky9YnkPGVYai6wF4miGdVXjmE3JN?=
+ =?us-ascii?Q?d5IRT71a6TkRF60tCHkDSmLI/ICkmvpsckCV/J1Qy1MSjCAVmvSjm8GgyCUK?=
+ =?us-ascii?Q?HWq2UsqRduQRuGTSg18AVtwgSsQhGYQfN0O7dVHWOuNy1VnfSQI0UQwaG9gX?=
+ =?us-ascii?Q?vTaGQBHeWFAaa5B9en/U+eW4MQAcxeBAiXltXQ0WLvCoB1YJin50ZJCcQFGH?=
+ =?us-ascii?Q?nZCssmp64I15JujuWvXT+LrpOujuOfqFADK9RDEGLI73BJmxU4yYQ66pS01T?=
+ =?us-ascii?Q?gJ2NZlBG4K7LleZ1VUerkvt2XmeL5a9Ge3j6AFUB2jHJIZTfrkVpR/vkhHdA?=
+ =?us-ascii?Q?u3Ul2VpKTLQT76004Vd21E5xUSTaQuSpMwzH7J2gvZh6nU9FMMumLQoATIip?=
+ =?us-ascii?Q?oUvdHjTd6qdeiqQ5ZCL6xBc9FwjErojCvi+LJHv5oQ9dp1bmFKQOMvwgobO4?=
+ =?us-ascii?Q?U8mGC/z076rQS1MfXs/4KZ7WBADM4tu5hrKHiIE8IV7OSOXnW1/lv3QXmrpV?=
+ =?us-ascii?Q?yEHfL3QPB4QAa/rCGSeTJvfLg/DwcR8Exxohh4XFrHxc2khEGwGkf9agUhs4?=
+ =?us-ascii?Q?ryH+ZbXfCcQ5GT5q3IjlkIfVPsKn2DS2zWluA5DYzSi0klCbMNXPmLw2rY68?=
+ =?us-ascii?Q?3smQ1pXu5onUwNr/D8CXAaKfvXZ+jyn9NCpodGkyLp5kQ6Vrf/Ti?=
+X-OriginatorOrg: valinux.co.jp
+X-MS-Exchange-CrossTenant-Network-Message-Id: a1deff82-ee0a-4bca-ddde-08de67a4a69d
+X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 09 Feb 2026 06:30:00.1392
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: GKf/7qZdnoLdmCpSMCfuUhLNFf06SgbuF/78visigIydnuVpPuWwJ9ygjIG7ZWs8Znm8fFIyKAdNl4HRqPoVAg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYYP286MB4425
 
-amd_ntb_link_disable() prints "Enabling Link" which is misleading.
-Update the message to reflect that the link is being disabled.
+Some DesignWare eDMA instances support "interrupt emulation", where a
+software write can assert the IRQ line without setting the normal
+DONE/ABORT status bits.
 
-Signed-off-by: Alok Tiwari <alok.a.tiwari@oracle.com>
+With a shared IRQ handler the driver cannot reliably distinguish an
+emulated interrupt from a real one by only looking at DONE/ABORT status
+bits. Leaving the emulated IRQ asserted may leave a level-triggered IRQ
+line permanently asserted.
+
+Add a core callback, .ack_emulated_irq(), to perform the core-specific
+deassert sequence and call it from the read/write/common IRQ handlers.
+Note that previously a direct software write could assert the emulated
+IRQ without DMA activity, leading to the interrupt never getting
+deasserted. This patch resolves it.
+
+For v0, a zero write to INT_CLEAR deasserts the emulated IRQ and is a
+no-op for real interrupts. HDMA is not tested or verified and is
+therefore unsupported for now.
+
+Signed-off-by: Koichiro Den <den@valinux.co.jp>
 ---
- drivers/ntb/hw/amd/ntb_hw_amd.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/dma/dw-edma/dw-edma-core.c    | 48 ++++++++++++++++++++++++---
+ drivers/dma/dw-edma/dw-edma-core.h    | 10 ++++++
+ drivers/dma/dw-edma/dw-edma-v0-core.c | 11 ++++++
+ 3 files changed, 64 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/ntb/hw/amd/ntb_hw_amd.c b/drivers/ntb/hw/amd/ntb_hw_amd.c
-index 1a163596ddf5..df9150669ad3 100644
---- a/drivers/ntb/hw/amd/ntb_hw_amd.c
-+++ b/drivers/ntb/hw/amd/ntb_hw_amd.c
-@@ -376,7 +376,7 @@ static int amd_ntb_link_disable(struct ntb_dev *ntb)
- 
- 	if (ndev->ntb.topo == NTB_TOPO_SEC)
- 		return -EINVAL;
--	dev_dbg(&ntb->pdev->dev, "Enabling Link.\n");
-+	dev_dbg(&ntb->pdev->dev, "Disabling Link.\n");
- 
- 	return 0;
+diff --git a/drivers/dma/dw-edma/dw-edma-core.c b/drivers/dma/dw-edma/dw-edma-core.c
+index 8e5f7defa6b6..fe131abf1ca3 100644
+--- a/drivers/dma/dw-edma/dw-edma-core.c
++++ b/drivers/dma/dw-edma/dw-edma-core.c
+@@ -663,7 +663,24 @@ static void dw_edma_abort_interrupt(struct dw_edma_chan *chan)
+ 	chan->status = EDMA_ST_IDLE;
  }
+ 
+-static inline irqreturn_t dw_edma_interrupt_write(int irq, void *data)
++static inline irqreturn_t dw_edma_interrupt_emulated(void *data)
++{
++	struct dw_edma_irq *dw_irq = data;
++	struct dw_edma *dw = dw_irq->dw;
++
++	/*
++	 * Interrupt emulation may assert the IRQ line without updating the
++	 * normal DONE/ABORT status bits. With a shared IRQ handler we
++	 * cannot reliably detect such events by status registers alone, so
++	 * always perform the core-specific deassert sequence.
++	 */
++	if (dw_edma_core_ack_emulated_irq(dw))
++		return IRQ_NONE;
++
++	return IRQ_HANDLED;
++}
++
++static inline irqreturn_t dw_edma_interrupt_write_inner(int irq, void *data)
+ {
+ 	struct dw_edma_irq *dw_irq = data;
+ 
+@@ -672,7 +689,7 @@ static inline irqreturn_t dw_edma_interrupt_write(int irq, void *data)
+ 				       dw_edma_abort_interrupt);
+ }
+ 
+-static inline irqreturn_t dw_edma_interrupt_read(int irq, void *data)
++static inline irqreturn_t dw_edma_interrupt_read_inner(int irq, void *data)
+ {
+ 	struct dw_edma_irq *dw_irq = data;
+ 
+@@ -681,12 +698,33 @@ static inline irqreturn_t dw_edma_interrupt_read(int irq, void *data)
+ 				       dw_edma_abort_interrupt);
+ }
+ 
+-static irqreturn_t dw_edma_interrupt_common(int irq, void *data)
++static inline irqreturn_t dw_edma_interrupt_write(int irq, void *data)
++{
++	irqreturn_t ret = IRQ_NONE;
++
++	ret |= dw_edma_interrupt_write_inner(irq, data);
++	ret |= dw_edma_interrupt_emulated(data);
++
++	return ret;
++}
++
++static inline irqreturn_t dw_edma_interrupt_read(int irq, void *data)
++{
++	irqreturn_t ret = IRQ_NONE;
++
++	ret |= dw_edma_interrupt_read_inner(irq, data);
++	ret |= dw_edma_interrupt_emulated(data);
++
++	return ret;
++}
++
++static inline irqreturn_t dw_edma_interrupt_common(int irq, void *data)
+ {
+ 	irqreturn_t ret = IRQ_NONE;
+ 
+-	ret |= dw_edma_interrupt_write(irq, data);
+-	ret |= dw_edma_interrupt_read(irq, data);
++	ret |= dw_edma_interrupt_write_inner(irq, data);
++	ret |= dw_edma_interrupt_read_inner(irq, data);
++	ret |= dw_edma_interrupt_emulated(data);
+ 
+ 	return ret;
+ }
+diff --git a/drivers/dma/dw-edma/dw-edma-core.h b/drivers/dma/dw-edma/dw-edma-core.h
+index 71894b9e0b15..50b87b63b581 100644
+--- a/drivers/dma/dw-edma/dw-edma-core.h
++++ b/drivers/dma/dw-edma/dw-edma-core.h
+@@ -126,6 +126,7 @@ struct dw_edma_core_ops {
+ 	void (*start)(struct dw_edma_chunk *chunk, bool first);
+ 	void (*ch_config)(struct dw_edma_chan *chan);
+ 	void (*debugfs_on)(struct dw_edma *dw);
++	void (*ack_emulated_irq)(struct dw_edma *dw);
+ };
+ 
+ struct dw_edma_sg {
+@@ -206,4 +207,13 @@ void dw_edma_core_debugfs_on(struct dw_edma *dw)
+ 	dw->core->debugfs_on(dw);
+ }
+ 
++static inline int dw_edma_core_ack_emulated_irq(struct dw_edma *dw)
++{
++	if (!dw->core->ack_emulated_irq)
++		return -EOPNOTSUPP;
++
++	dw->core->ack_emulated_irq(dw);
++	return 0;
++}
++
+ #endif /* _DW_EDMA_CORE_H */
+diff --git a/drivers/dma/dw-edma/dw-edma-v0-core.c b/drivers/dma/dw-edma/dw-edma-v0-core.c
+index b75fdaffad9a..82b9c063c10f 100644
+--- a/drivers/dma/dw-edma/dw-edma-v0-core.c
++++ b/drivers/dma/dw-edma/dw-edma-v0-core.c
+@@ -509,6 +509,16 @@ static void dw_edma_v0_core_debugfs_on(struct dw_edma *dw)
+ 	dw_edma_v0_debugfs_on(dw);
+ }
+ 
++static void dw_edma_v0_core_ack_emulated_irq(struct dw_edma *dw)
++{
++	/*
++	 * Interrupt emulation may assert the IRQ without setting
++	 * DONE/ABORT status bits. A zero write to INT_CLEAR deasserts the
++	 * emulated IRQ, while being a no-op for real interrupts.
++	 */
++	SET_BOTH_32(dw, int_clear, 0);
++}
++
+ static const struct dw_edma_core_ops dw_edma_v0_core = {
+ 	.off = dw_edma_v0_core_off,
+ 	.ch_count = dw_edma_v0_core_ch_count,
+@@ -517,6 +527,7 @@ static const struct dw_edma_core_ops dw_edma_v0_core = {
+ 	.start = dw_edma_v0_core_start,
+ 	.ch_config = dw_edma_v0_core_ch_config,
+ 	.debugfs_on = dw_edma_v0_core_debugfs_on,
++	.ack_emulated_irq = dw_edma_v0_core_ack_emulated_irq,
+ };
+ 
+ void dw_edma_v0_core_register(struct dw_edma *dw)
 -- 
-2.50.1
+2.51.0
 
