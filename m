@@ -1,79 +1,110 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.12])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 647C439E6CA;
-	Tue, 24 Feb 2026 13:38:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AB6EB23AB87
+	for <ntb@lists.linux.dev>; Tue, 24 Feb 2026 14:42:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.12
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771940319; cv=none; b=kTJHdMbz/DwcJo/wjgljOxyEyL+BEkX9Vc9F8WUPPJmEukb8FdmjU5pZYk6mINncChxGZlu461gsBlX3f4H1cM7+KmUO/zQpyuma+r/Y8dnHTksOitL7xYhnCyv7JY2UL5nnSpA1HD2gOom3wK3di9wDeD7PM+a2jBm5yR4T6Rg=
+	t=1771944144; cv=none; b=cC36sHbXQ9ZXzQHv/5DaBIo6e/949F4+wYZU7a46LVIQDQFT55/aqA8MuOLv/2lSvijWCTJ5TDEVOio5oKnukOfcNGvTwMAtargNwVBSA3rahj2iGVMgcgzS5Ih4fr0psMCT3GzRRb2bA5c2NY6HprCuhuDgIpMqVw1dOfJbQgw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771940319; c=relaxed/simple;
-	bh=D6KDP7mLfC7K9PBYKLx9XDujyOIToWseGbbi633OOLM=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ilsuBcH/lThtr5RiT6I97XOitqkT/tVd1sQ775K3ZUcaXPyvzC+xKdLOHTr9rycu7wWMAsyO3Lh5p7wkcygQE6WWwLdThivxxkTa8MDmXT0vbpBVoJifyJxjBlhPTtnIqfnZk2C8r+5c9wNV1d1+EmfIIkLiRpc59wW4uZLzkak=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=RuV/3bWa; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1771944144; c=relaxed/simple;
+	bh=5ZNIZoIJym+AaiB5vhhF5rYP9sCgmaJ6czhporeCOVk=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=YHyIZp2z6jPM4gj/qwlU+XkvDCRv7RAMEnNjsONLhgFZtxmpV4YMWogu9p4c+ZwMWVNLmqNe9y2e4J4VqgKlWAxlaZaR81iWpT6pVWeodlMeFoJSlw09sL5lZYEVN8zufHwYga5tvKsTjt7pPGiamcz7Gh+UlJiqSF1Iwab2KSU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=GnR3powK; arc=none smtp.client-ip=192.198.163.12
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="RuV/3bWa"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CF9D5C116D0;
-	Tue, 24 Feb 2026 13:38:36 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1771940319;
-	bh=D6KDP7mLfC7K9PBYKLx9XDujyOIToWseGbbi633OOLM=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=RuV/3bWaV0MvVBZJ/zWZCp2J6s24t7UDVy0m0GiSO24N2X4bT6Uxgl+P+3JKqgq6U
-	 n3rR/QE9ajRDdxT1WZExIg51S7oRGQdawBGscOT2Rugb34S5QuzWyru6yyzktHgKUt
-	 55TOh8EsEB+sLoez82FZ1n5z0u+v2GU8sP9gRAI5VMB51ePIuwNtOh5mUUq8TpL6j6
-	 Qvpex8ClP1y8ftsg4gqQlZK+Iwe50FNCxvDiavtr9AvlHvz9UW00Dvx0jjIV7uVT4j
-	 GExh3Aj4TZT/yeyPjIWpDhjQLTNNK9S/s9/Foq52qLXEehA53tD05YqUvlTviaw08J
-	 1mmAWaEBUCOvQ==
-Date: Tue, 24 Feb 2026 14:38:33 +0100
-From: Niklas Cassel <cassel@kernel.org>
-To: Alok Tiwari <alok.a.tiwari@oracle.com>
-Cc: den@valinux.co.jp, jdmason@kudzu.us, dave.jiang@intel.com,
-	allenbh@gmail.com, mani@kernel.org, kwilczynski@kernel.org,
-	kishon@kernel.org, bhelgaas@google.com, ntb@lists.linux.dev,
-	linux-pci@vger.kernel.org, alok.a.tiwarilinux@gmail.com
-Subject: Re: [PATCH] PCI: endpoint: pci-epf-vntb: Check
- pci_epc_get_features() return value
-Message-ID: <aZ2p08thDzZdSdNc@ryzen>
-References: <20260224133112.1356612-1-alok.a.tiwari@oracle.com>
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="GnR3powK"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1771944142; x=1803480142;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=5ZNIZoIJym+AaiB5vhhF5rYP9sCgmaJ6czhporeCOVk=;
+  b=GnR3powKfQHYZLWUu+N3mATZZMmVKysMwtAK5i30CstVVZ1ZUXrYaccH
+   yagS/jnxgQABCI90z4TjH9CC6aTcORrA2bOS94vkFFZydgJS8yoU91XJZ
+   4ghqv5IbRg7P4jlIq29dfrDmx/IKWpiOucWHX9r3prAMwymlyEU201j/w
+   ydSjRdpMmlDTWerzod9ndUu6f/PMmwXXCxrLTYfarhTHwvo3jxI3EcJWb
+   TUQj+EZ8rni/vzSiJnxdykneyHePXN75BTDoPSceW2jGek0oCfqurH3nV
+   IuOCYlyFjTwqMucnprljvUL57pfWW67cEff0AWdwWlGYsjbDu2NgI8Ea0
+   Q==;
+X-CSE-ConnectionGUID: 1JvgMQZCTny4z7nNAF35gA==
+X-CSE-MsgGUID: /DFvAwa1Rb2Xqt6UH6kpjw==
+X-IronPort-AV: E=McAfee;i="6800,10657,11711"; a="76821450"
+X-IronPort-AV: E=Sophos;i="6.21,308,1763452800"; 
+   d="scan'208";a="76821450"
+Received: from fmviesa005.fm.intel.com ([10.60.135.145])
+  by fmvoesa106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Feb 2026 06:42:21 -0800
+X-CSE-ConnectionGUID: ZJUn7VEURY6APU6E/zr+vg==
+X-CSE-MsgGUID: WSZ2pWV5SyWiQdtr0gwnNg==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.21,308,1763452800"; 
+   d="scan'208";a="220507571"
+Received: from ldmartin-desk2.corp.intel.com (HELO [10.125.111.19]) ([10.125.111.19])
+  by fmviesa005-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Feb 2026 06:42:20 -0800
+Message-ID: <07904415-19a8-4381-9292-2f0625fd69ca@intel.com>
+Date: Tue, 24 Feb 2026 07:42:18 -0700
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260224133112.1356612-1-alok.a.tiwari@oracle.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH net-next] net: ntb_netdev: Fix NULL check ordering in TX
+ handler
+To: Alok Tiwari <alok.a.tiwari@oracle.com>, pabeni@redhat.com,
+ kuba@kernel.org, edumazet@google.com, davem@davemloft.net,
+ andrew+netdev@lunn.ch, jdmason@kudzu.us, allenbh@gmail.com,
+ ntb@lists.linux.dev, netdev@vger.kernel.org
+Cc: alok.a.tiwarilinux@gmail.com
+References: <20260224130458.1355686-1-alok.a.tiwari@oracle.com>
+Content-Language: en-US
+From: Dave Jiang <dave.jiang@intel.com>
+In-Reply-To: <20260224130458.1355686-1-alok.a.tiwari@oracle.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Tue, Feb 24, 2026 at 05:31:03AM -0800, Alok Tiwari wrote:
-> pci_epc_get_features() may return NULL for invalid function numbers or
-> if the EPC driver does not provide feature information. Other EPF drivers
-> such as pci-epf-ntb.c and pci-epf-test.c already handle this case.
+
+
+On 2/24/26 6:04 AM, Alok Tiwari wrote:
+> ntb_netdev_tx_handler() calls netdev_priv(ndev) before checking
+> whether ndev is NULL. Although qp_data is expected to always be
+> valid in normal operation, dereferencing the pointer before the
+> NULL check is logically incorrect.
 > 
-> Add a defensive NULL check to avoid a potential NULL pointer dereference.
+> Move netdev_priv() after validating ndev.
 > 
 > No functional change intended.
 > 
 > Signed-off-by: Alok Tiwari <alok.a.tiwari@oracle.com>
 
-I think a better solution is to do like pci-epf-test.c, which calls
-pci_epc_get_features() once in .bind() and if it fails, it fails bind(),
-if it returns non-NULL, it caches the result:
-https://github.com/torvalds/linux/blob/v6.19/drivers/pci/endpoint/functions/pci-epf-test.c#L1112-L1123
+Acked-by: Dave Jiang <dave.jiang@intel.com>
 
-That way, all other functions do not need to NULL check
-pci_epc_get_features(). (Instead it can use the cached value)
+> ---
+>  drivers/net/ntb_netdev.c | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/net/ntb_netdev.c b/drivers/net/ntb_netdev.c
+> index fbeae05817e9..6792b3b1f253 100644
+> --- a/drivers/net/ntb_netdev.c
+> +++ b/drivers/net/ntb_netdev.c
+> @@ -177,13 +177,15 @@ static void ntb_netdev_tx_handler(struct ntb_transport_qp *qp, void *qp_data,
+>  				  void *data, int len)
+>  {
+>  	struct net_device *ndev = qp_data;
+> +	struct ntb_netdev *dev;
+>  	struct sk_buff *skb;
+> -	struct ntb_netdev *dev = netdev_priv(ndev);
+>  
+>  	skb = data;
+>  	if (!skb || !ndev)
+>  		return;
+>  
+> +	dev = netdev_priv(ndev);
+> +
+>  	if (len > 0) {
+>  		ndev->stats.tx_packets++;
+>  		ndev->stats.tx_bytes += skb->len;
 
-pci-epf-vntb.c should probably do something similar to avoid sprinkling
-NULL checks all over pci-epf-vntb.c.
-
-And, if there are any existing
-if (!epc_features) return -EINVAL;
-
-they can be removed once you've added the check in .bind().
-
-
-Kind regards,
-Niklas
