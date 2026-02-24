@@ -1,58 +1,58 @@
 Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0A53D39B48E
-	for <ntb@lists.linux.dev>; Tue, 24 Feb 2026 13:05:12 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9E38539E186
+	for <ntb@lists.linux.dev>; Tue, 24 Feb 2026 13:31:23 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.177.32
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771938314; cv=none; b=Pi3QD97DbHF/yxEz43h/fNGwkqFIN/2arAe5xiXw8+OjevmL84c4gXY7pWQZnWCYqiw3IUByUAStm9SY0lh0FCSvmIDCx9rr+GhD30Bmybf9C762hJq0ljlO+ErAxalpyaDhMaYxCPtUkX+aYJEt8kLLAtSsvNrXv34xkabJN74=
+	t=1771939885; cv=none; b=e3WnUa3YdHA94k9IOssVY3dbw3FUyLDutMOA2HC09WcLbudNDFl0okGLs+e0cAUFHgIPZejSINA50gcOIGjOoVOBMmPXaCzqovAfgwpLZq9rWv3fPUQrBzw0mNBkrimeqh5bNIQbPD6Jxjj2wmuuVEDWoDbXf2U1zMsiW1mpWlA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771938314; c=relaxed/simple;
-	bh=WA9F2BUhPPQWJ3KUnSwG0GvgcRanSBYwKOaGdDznZ5g=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=diCGjKyxVgPTQGMaqUckmIDW+PgRN2vIwgoUCwjsVB85rlT3GpJYdsavqg4H/Fps3SZqWM6WZkiVb5T7e8Ylqr+QEpG6vwpm8vphAzq+v116DJNhSokOjTiz9En/I6JA8lyeVI8ytxHRE4BpLCtbyW+lZS8KLrYIlU4mEJSmfQ0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=SBNiKP/U; arc=none smtp.client-ip=205.220.177.32
+	s=arc-20240116; t=1771939885; c=relaxed/simple;
+	bh=N67muGVMMaNUvFqHpwUJ9JsdLG0+JM3wXLk6t4iaMbs=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=JTV2wr4Yts9f+67rhLGaYhnuLDU4MW7r7zxAf/z+LosYGMiiNkUDFSlxQfXCteb1tO1MIrTPgGm1u/MMU5SwfxGAQu4md+CdSZsQ+3AUvdZ5KMlTdl/f/k/p8Yz7lgWSeFAV1FsQpCnu/PSir5hhWLGfH7WYMjBCswcGtvwVxW8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=gDr0hCO7; arc=none smtp.client-ip=205.220.177.32
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="SBNiKP/U"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="gDr0hCO7"
 Received: from pps.filterd (m0246632.ppops.net [127.0.0.1])
-	by mx0b-00069f02.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 61NMv5D23045533;
-	Tue, 24 Feb 2026 13:05:04 GMT
+	by mx0b-00069f02.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 61NMvDHT3045656;
+	Tue, 24 Feb 2026 13:31:17 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=cc
 	:content-transfer-encoding:date:from:message-id:mime-version
-	:subject:to; s=corp-2025-04-25; bh=8Hy3EX2xXj68thJlLm0pRPZafLuv3
-	evQ7IZ7/HLWn1w=; b=SBNiKP/Uf9TlgqEfYHoZfyIsqdRGLkZQSVNj9fPOeb4uR
-	DqMglwXN0OD2/hM1MDZ1IjZYrwbfGnEzasiA99AQ6uYIIVNPgITxm3Mv+gpcKduy
-	irAjxaLBPmpNcD6dAViYwY5aJVtW3LvAbMmFay89IR6bQQ4qjmhn+O3Bb4kcD7ic
-	ZT/nrt+10yuyHs6a3ISUxqN1++2jRI5Wc+SsdO7fk6h6vMLHEaA81DLj4FZ8sgmu
-	TdGBnLpDX2HsFxmoVoSCPsmxb43OOKZqDst2GaXDr8fiNCEjf+9Wb1ChjQGA2hr/
-	S9InL0n2nJn3Vmda8SHCtSkgN6pN4tCqeFEXeUKIw==
-Received: from iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta01.appoci.oracle.com [130.35.100.223])
-	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 4cf4arc608-1
+	:subject:to; s=corp-2025-04-25; bh=eHpecezAaayEL7nPJ6sUKPgxxZIft
+	H4YXT/wwzCN5qA=; b=gDr0hCO7p8ZxjPodQZjDSjJGAQaOxBGhfHQt18ypwOUp9
+	t8uNkPt5/43qWcldeUIUnOjoqonZ6vQhUrTklA6GMrCh98Od/K3kWgjzJ3G9U9mQ
+	46mnSIUsk9gvvBHGkFOtK0cloyK5oF3Wx19hCmEx8UIX+rVnYz4/u+Q9xpSpNN9R
+	GxaurwZYZ6BSIXoOjuHN+t3aTyd4Xn/yNkFDjL5XLnEsuZLBiVrORVDLVjS6DXJP
+	zsEplYguqtblTvepuTS8HjoMdu6ytNqTta6ZgbwvyD+GYOSsfhkt1KKymN7Gic5g
+	hh09WR4H1ibn4TLao4rK5pfD3GhuKfFKnJedJIIJQ==
+Received: from iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta03.appoci.oracle.com [130.35.103.27])
+	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 4cf4arc7c5-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Tue, 24 Feb 2026 13:05:03 +0000 (GMT)
-Received: from pps.filterd (iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
-	by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 61OCckPg038415;
-	Tue, 24 Feb 2026 13:05:03 GMT
+	Tue, 24 Feb 2026 13:31:17 +0000 (GMT)
+Received: from pps.filterd (iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
+	by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 61ODKYsk027938;
+	Tue, 24 Feb 2026 13:31:16 GMT
 Received: from pps.reinject (localhost [127.0.0.1])
-	by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 4cf35kxae4-1
+	by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 4cf35eqfu6-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Tue, 24 Feb 2026 13:05:03 +0000
-Received: from iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
-	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 61OD0sAR020702;
-	Tue, 24 Feb 2026 13:05:02 GMT
+	Tue, 24 Feb 2026 13:31:16 +0000
+Received: from iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
+	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 61ODVFb4039292;
+	Tue, 24 Feb 2026 13:31:15 GMT
 Received: from ca-dev112.us.oracle.com (ca-dev112.us.oracle.com [10.129.136.47])
-	by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTP id 4cf35kxab4-1;
-	Tue, 24 Feb 2026 13:05:02 +0000
+	by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTP id 4cf35eqfte-1;
+	Tue, 24 Feb 2026 13:31:15 +0000
 From: Alok Tiwari <alok.a.tiwari@oracle.com>
-To: pabeni@redhat.com, kuba@kernel.org, edumazet@google.com,
-        davem@davemloft.net, andrew+netdev@lunn.ch, jdmason@kudzu.us,
-        dave.jiang@intel.com, allenbh@gmail.com, ntb@lists.linux.dev,
-        netdev@vger.kernel.org
+To: den@valinux.co.jp, cassel@kernel.org, jdmason@kudzu.us,
+        dave.jiang@intel.com, allenbh@gmail.com, mani@kernel.org,
+        kwilczynski@kernel.org, kishon@kernel.org, bhelgaas@google.com,
+        ntb@lists.linux.dev, linux-pci@vger.kernel.org
 Cc: alok.a.tiwarilinux@gmail.com, alok.a.tiwari@oracle.com
-Subject: [PATCH net-next] net: ntb_netdev: Fix NULL check ordering in TX handler
-Date: Tue, 24 Feb 2026 05:04:47 -0800
-Message-ID: <20260224130458.1355686-1-alok.a.tiwari@oracle.com>
+Subject: [PATCH] PCI: endpoint: pci-epf-vntb: Check pci_epc_get_features() return value
+Date: Tue, 24 Feb 2026 05:31:03 -0800
+Message-ID: <20260224133112.1356612-1-alok.a.tiwari@oracle.com>
 X-Mailer: git-send-email 2.50.1
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
@@ -63,62 +63,80 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.51,FMLib:17.12.100.49
- definitions=2026-02-24_01,2026-02-23_03,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 mlxscore=0 suspectscore=0
- spamscore=0 bulkscore=0 adultscore=0 malwarescore=0 mlxlogscore=999
+ definitions=2026-02-24_02,2026-02-23_03,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0 adultscore=0 mlxscore=0
+ phishscore=0 spamscore=0 malwarescore=0 mlxlogscore=999 suspectscore=0
  classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2602130000
- definitions=main-2602240107
-X-Authority-Analysis: v=2.4 cv=La0xKzfi c=1 sm=1 tr=0 ts=699da1ff b=1 cx=c_pps
- a=zPCbziy225d3KhSqZt3L1A==:117 a=zPCbziy225d3KhSqZt3L1A==:17
+ definitions=main-2602240110
+X-Authority-Analysis: v=2.4 cv=La0xKzfi c=1 sm=1 tr=0 ts=699da825 b=1 cx=c_pps
+ a=qoll8+KPOyaMroiJ2sR5sw==:117 a=qoll8+KPOyaMroiJ2sR5sw==:17
  a=HzLeVaNsDn8A:10 a=VkNPw1HP01LnGYTKEx00:22 a=Mpw57Om8IfrbqaoTuvik:22
- a=GgsMoib0sEa3-_RKJdDe:22 a=yPCof4ZbAAAA:8 a=KUN_3tzMj68wRxwuEm4A:9 cc=ntf
- awl=host:12261
-X-Proofpoint-ORIG-GUID: mqknJSqL-UUZUsE2bbGJDkuCp6mQrN66
-X-Proofpoint-GUID: mqknJSqL-UUZUsE2bbGJDkuCp6mQrN66
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMjI0MDEwNyBTYWx0ZWRfX1x2wa94So9RV
- fG9w3jqEw2nyOhroeG2cQkLYrcOEFVUHvHrA0jYi1TzZ6ZeHEVkAqsCHzaq2uyu5qKeG8B6hlWb
- aMXzXPNDUxikoFe8uo/KjLw9ryHVgdc4OmqVM98Cifj4piM/115+5CnXb3Pnall0FmYREqLHGIt
- Jq2FtXZsAiVjg/0uxEdI/d0pEkc1i5Ngep5UrnsIuVEGEmxaeRoHWAr3DJCwTqfaRbprdxT4sRb
- 4lXYHXE/k4WnKq5V+rB0nScx4Fq2GB0hqI6qIiDMjEmhSsejBaFox+FG4y6akFuMOB+k0a3T5hL
- 8jErBIZDT8vXbBkSd6GEUg3hoYyv1Kbi/6YMKjKgbdY30t83lLilNPigbr/258n/+DmDZrwiatI
- 1vNHYNoo995kCAOdU/MwWmSRcOTBdUVx4VZVSTa0Vi3riMaobd6KMRTMrjur9HRIxcpXooCQiab
- VGEV5UJ17AEqsr0PMTOAIrWxdXFUdJuUlE5lMRbU=
+ a=GgsMoib0sEa3-_RKJdDe:22 a=yPCof4ZbAAAA:8 a=hFsYNecxb_C1xynCrzEA:9 cc=ntf
+ awl=host:12262
+X-Proofpoint-ORIG-GUID: mDqv-jb2l4P3tTo2DNatJoxUgGy6AQUQ
+X-Proofpoint-GUID: mDqv-jb2l4P3tTo2DNatJoxUgGy6AQUQ
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMjI0MDExMCBTYWx0ZWRfX7QFs0X3EPBbB
+ +HDlf/ODQ3BTQhdr1mtpPc5yRlMGhvJevSelGFYYRcOlGytFFSnCvIeQE6vhVycXBVN3drO9LfR
+ l0Zlc5/C7tTVUoPNfxDZ3mCa0h6nmzX4wr3oMPfRGgl3Jr3OWyuCm7aLig3vH3XrOQyxXNj3ZR2
+ Evbv5pSRAA687fAghLpiRqnxYidwBUpFWmfynD7ghLpf2iJxxTDFWgtOCnjdQdnFla4DdKYWMBC
+ wfJfGTAfyokOxUqpMHkZQBKlMilXtc8zb/piJP3q0q/DYJKJmAvnavCsK5pKI6BwVanx8ZOs17P
+ NgzWYfDfwkLAsouzBpLJfBLnmZQ0Cc99fnyY99wif8JjygzJeK8dKLWZPft7g2BwiKcIKnKMasT
+ DlMWX1HvZ4wDlR5b6haM2JJasrdzR1xpDcIQt7hoKm+NqgrNU8m3axOPKVtAplP6AZQ2q5plq6v
+ C+BrrdIYMMAUAY64YwpjMAMiXr7c2W2RjalCQG+E=
 
-ntb_netdev_tx_handler() calls netdev_priv(ndev) before checking
-whether ndev is NULL. Although qp_data is expected to always be
-valid in normal operation, dereferencing the pointer before the
-NULL check is logically incorrect.
+pci_epc_get_features() may return NULL for invalid function numbers or
+if the EPC driver does not provide feature information. Other EPF drivers
+such as pci-epf-ntb.c and pci-epf-test.c already handle this case.
 
-Move netdev_priv() after validating ndev.
+Add a defensive NULL check to avoid a potential NULL pointer dereference.
 
 No functional change intended.
 
 Signed-off-by: Alok Tiwari <alok.a.tiwari@oracle.com>
 ---
- drivers/net/ntb_netdev.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ drivers/pci/endpoint/functions/pci-epf-vntb.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
-diff --git a/drivers/net/ntb_netdev.c b/drivers/net/ntb_netdev.c
-index fbeae05817e9..6792b3b1f253 100644
---- a/drivers/net/ntb_netdev.c
-+++ b/drivers/net/ntb_netdev.c
-@@ -177,13 +177,15 @@ static void ntb_netdev_tx_handler(struct ntb_transport_qp *qp, void *qp_data,
- 				  void *data, int len)
- {
- 	struct net_device *ndev = qp_data;
-+	struct ntb_netdev *dev;
- 	struct sk_buff *skb;
--	struct ntb_netdev *dev = netdev_priv(ndev);
+diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+index 20a400e83439..93943e4497a6 100644
+--- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
++++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+@@ -438,6 +438,8 @@ static int epf_ntb_config_spad_bar_alloc(struct epf_ntb *ntb)
+ 	const struct pci_epc_features *epc_features = pci_epc_get_features(epf->epc,
+ 								epf->func_no,
+ 								epf->vfunc_no);
++	if (!epc_features)
++		return -EINVAL;
+ 	barno = ntb->epf_ntb_bar[BAR_CONFIG];
+ 	spad_count = ntb->spad_count;
  
- 	skb = data;
- 	if (!skb || !ndev)
- 		return;
+@@ -489,6 +491,8 @@ static int epf_ntb_configure_interrupt(struct epf_ntb *ntb)
+ 	dev = &ntb->epf->dev;
  
-+	dev = netdev_priv(ndev);
-+
- 	if (len > 0) {
- 		ndev->stats.tx_packets++;
- 		ndev->stats.tx_bytes += skb->len;
+ 	epc_features = pci_epc_get_features(ntb->epf->epc, ntb->epf->func_no, ntb->epf->vfunc_no);
++	if (!epc_features)
++		return -EINVAL;
+ 
+ 	if (!(epc_features->msix_capable || epc_features->msi_capable)) {
+ 		dev_err(dev, "MSI or MSI-X is required for doorbell\n");
+@@ -624,6 +628,8 @@ static int epf_ntb_db_bar_init(struct epf_ntb *ntb)
+ 	epc_features = pci_epc_get_features(ntb->epf->epc,
+ 					    ntb->epf->func_no,
+ 					    ntb->epf->vfunc_no);
++	if (!epc_features)
++		return -EINVAL;
+ 	barno = ntb->epf_ntb_bar[BAR_DB];
+ 	epf_bar = &ntb->epf->bar[barno];
+ 
+@@ -852,6 +858,8 @@ static int epf_ntb_init_epc_bar(struct epf_ntb *ntb)
+ 	num_mws = ntb->num_mws;
+ 	dev = &ntb->epf->dev;
+ 	epc_features = pci_epc_get_features(ntb->epf->epc, ntb->epf->func_no, ntb->epf->vfunc_no);
++	if (!epc_features)
++		return -EINVAL;
+ 
+ 	/* These are required BARs which are mandatory for NTB functionality */
+ 	for (bar = BAR_CONFIG; bar <= BAR_MW1; bar++) {
 -- 
 2.50.1
 
