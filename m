@@ -1,174 +1,150 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C264730DEB7;
-	Mon, 23 Feb 2026 16:17:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 57F2F376BC6
+	for <ntb@lists.linux.dev>; Tue, 24 Feb 2026 10:21:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771863431; cv=none; b=aHjJrI257lR8VsWG6cxVhw+E97ukh1UggJ0Drty6xmZhasc1MalK64JvE1gearck5Edg1PKdG5eOsmj9kO2J09th5N19AxWwbqX02+UuO2YGz29WuL5muatrGYmMld/hRRH+j43R+W+YEjcAOQE3WLsz5kQgnp7VNnaAkc5NJSY=
+	t=1771928514; cv=none; b=Re0KYlKTFxoK9NgNldDpZZc9NT1dGGjzJzwRANRAbuRYg1ZANAtjuzKr+znqs3g0Cy0GEFCFY2KUfy4ErkfCpcrCb+XPR9ojjtN0hhGIWmhcCtiY3GWFAIMl4rNdtvIk+yM4IX6w/XTbRNgpg0QyujZxqcCZiQGpUGj5uaD0WaY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771863431; c=relaxed/simple;
-	bh=11j/YgPS1K5gNtNQRU2un7idsUfbyDDUSpshVpfWE4Y=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=SuSjUXv+7AW3O4xwPmkIfadnNAVB9lqg8yGqOhyZAAdVcUHHKKflHYhME0J8OqiASuSC6RPUwUFm5jeSug9OqD1mM/3+oBQupztd74Dy0XeZIp/4jXVlvGZ/A4OW8EkiapG3k4Cij/FoCfh9lRVr79ejVcg0DYSw4vklFoYuFAA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=f3quHLrc; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1771928514; c=relaxed/simple;
+	bh=uEjYZ/XehFsqLbbpv0XnDNLQoZ+JPk8zSm65y7wR6G8=;
+	h=From:To:Cc:In-Reply-To:References:Subject:Message-Id:Date:
+	 MIME-Version:Content-Type; b=tkSPVMhBMVUyf9u3TI7ssY4jKsyp93V04j2QgOhfSMDETOy21HV358/FZtT2uw4Impde1lVZMehxHhWvWCi2w4VuVDWCDyufs/IKxClcYI+YBVealRTs27Q2LGVbGHsMEbYZuRN6RR517PQ0a8w5jCw0hTMuqcfrc2PjeIL2e+s=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=IU7LbsuO; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=cVM/hnz2; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="f3quHLrc"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 579D2C19421;
-	Mon, 23 Feb 2026 16:17:10 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1771863431;
-	bh=11j/YgPS1K5gNtNQRU2un7idsUfbyDDUSpshVpfWE4Y=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=f3quHLrcnj8ESjsm6UaK8qTTGK/VSPHK1mGR2oygAQqknGX7bKyBZ2ZtPi3nTd6LK
-	 5NL3FGfC1prj/hi1YgUrdHvsAW+zXuV3ydHWkEaH22go8AESPH265tHEbHv78l8BQ3
-	 QhjqiyY9jIF1ZOgf84MiaiFUMPJs4DrKTGznW+58y4f/2FdNZwwpphY+CB/6FRoTzs
-	 +MRFEOAnbVuvn7pOfJ218v6Vy95OM3VqeIf4Nt7ik6gUyI/O915htRosQuVFHHNoKg
-	 l5pnOx6pWMOqY2+O5eQEyNMYAMaDp9O2TzrjWhBbHCh3/sIsGsvAADxMoNXS88gRzJ
-	 BlneJ/Vlbn47Q==
-From: Sasha Levin <sashal@kernel.org>
-To: patches@lists.linux.dev,
-	stable@vger.kernel.org
-Cc: Maciej Grochowski <Maciej.Grochowski@sony.com>,
-	Jon Mason <jdmason@kudzu.us>,
-	Sasha Levin <sashal@kernel.org>,
-	kurt.schwemmer@microsemi.com,
-	logang@deltatee.com,
-	dave.jiang@intel.com,
-	allenbh@gmail.com,
-	linux-pci@vger.kernel.org,
-	ntb@lists.linux.dev,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH AUTOSEL 6.19-5.10] ntb: ntb_hw_switchtec: Fix array-index-out-of-bounds access
-Date: Mon, 23 Feb 2026 11:17:06 -0500
-Message-ID: <20260223161707.2714732-2-sashal@kernel.org>
-X-Mailer: git-send-email 2.51.0
-In-Reply-To: <20260223161707.2714732-1-sashal@kernel.org>
-References: <20260223161707.2714732-1-sashal@kernel.org>
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="IU7LbsuO";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="cVM/hnz2"
+Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 61OAFSTd2774555
+	for <ntb@lists.linux.dev>; Tue, 24 Feb 2026 10:21:52 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	vnZs9JLORsd3/5S5l0NT2vH/Yh64RNDPIyuOJI1p4h8=; b=IU7LbsuOrDD0PFAB
+	Hmq6GZNfa5uFbdwXz0+W7DLjsr/PtH4fDxLfiliBo5fK9xXU9TW1IpW5u2ZsCDQV
+	59hm/J4BsayGqnzAJN2c6v4Gtd+6pB1y8uFPofRfMDNccp//pIxsX8Hq86ND6mFt
+	llk06gYY1kgC5oGitRxUJR08iVNU5YIKmbp8E1BrMoaswSvlk6hhuOUxvz2Zg1A+
+	cA8MVAtyeJZaTbbg362rUuMt8Q1gV6ZdZCQeYMKrQtKP5BfpyT11B6GZbDe1nvK8
+	SJYBgeBc9iExryVKvWLd7LsPpKn0THyWI2Kn1oEgnK8XeV6JlV4+SGE11qHXybr6
+	C/hT7Q==
+Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com [209.85.216.72])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4cgr69katf-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <ntb@lists.linux.dev>; Tue, 24 Feb 2026 10:21:52 +0000 (GMT)
+Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-358f42fad0bso446967a91.0
+        for <ntb@lists.linux.dev>; Tue, 24 Feb 2026 02:21:52 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=oss.qualcomm.com; s=google; t=1771928512; x=1772533312; darn=lists.linux.dev;
+        h=content-transfer-encoding:mime-version:date:message-id:subject
+         :references:in-reply-to:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=vnZs9JLORsd3/5S5l0NT2vH/Yh64RNDPIyuOJI1p4h8=;
+        b=cVM/hnz28hNgUTHYSxFdOc3XuWToMlhEd0zoF5I1gihXRyEUf97GCBJsKm2fUk87JQ
+         eO9Ur/DO/tzDXEfXLvrBQDGNlHEd0jgBqkUQabxK9jkZRXBunqKzCTw9yeVGITt98LCx
+         UtmoUu9DKedS1y3hwnhfTq+VlHtefSTvxDzIO0/ooQP93c8wO8mW6MRvl/WGObwUiKDW
+         uvWv0MBFMpMgFUSEM8KDiW+Mb2UCIqbpq4gwPVDDE34x818bQjD9l9QC1uHN8DEnazcA
+         l1GUip8DhmnONb4odn0l4xvTqD6uxo8V1RI6dM+E+/ZRi4KmydmoNIuqs16LNHMqCAuz
+         wETg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1771928512; x=1772533312;
+        h=content-transfer-encoding:mime-version:date:message-id:subject
+         :references:in-reply-to:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=vnZs9JLORsd3/5S5l0NT2vH/Yh64RNDPIyuOJI1p4h8=;
+        b=iypRvyOTw9/A2Ri0yqJS08aMVFcA0GFTA3sIy8SRIkzzVts2mvRVf6+ZPDDb7SWj9O
+         +fRp4cG7us1588e9Kzy+5k4iMG7U9LS8gK/Pjpdhu+Umc3xSdSVASllp3YGDOmbIzNpF
+         YCvFT355Q/qtVXg/pBLXKAoFeG6haqQvdgEi2HVTzKvhjyNqjKSD7nBPAMthNC9KKq67
+         AmZuGmY+ih6z1p4cl8HsmjCXoZGxVRunxzbsDj3/sdfiEMi9fP3I5oa3Vclj701vTase
+         K7zElDvEdjgA//ZT+JAqpVitTF79kkzD6N32G7D62qm5Vrcy4HjnCmrFm/ps182GWg/J
+         NZJA==
+X-Forwarded-Encrypted: i=1; AJvYcCV1tvruKq1QnkVLKW7buTcPeMC37KvV4jmPK85+Cp5xeXjmHBUEDav/VeOotVCMMfHg3Pc=@lists.linux.dev
+X-Gm-Message-State: AOJu0Yz/jhomObYiDGSqeYQlMuTNqGtwiSqdKSR7u720ps6+P+gl1Y/g
+	UvfAOdpYVLE2mExKR5ONdC2so0RsvTturde8F0l3ByN0yNdcAwgxJujcH1J3uCiAXEDtXXvKpgW
+	8vd8MXUjdpQ1JkTaoWlUBLNPHIkZwP3o5klMVE6AMc6IVzVcMiNnIrfw=
+X-Gm-Gg: ATEYQzxO0nAH28WO/aMgROQSqg29NdCQgq95s5uQiggVWN+C2inWHb1AlOax/Pz/KnA
+	Zqbq3exk0gYdDs85BAoVDV2ObkcuzbkzxbeC9evtuFtdv+R1yWfp6EHlpX1gj9qCnGscZvITIBB
+	6OxCQn8L4AAyO+XFFPK1Q8kp86+3YS2f9Uc/JdpXDobfmM13+xFCDe4kdtj0ngB00x0xczN/uTb
+	L/Xn1qXHHuWMHa3CFMAXyghGW1avhqiTzn+J6fCY++weXX9tv4lkPZ+yFOorTujm5uqvX99tVRH
+	DF42KDhp4NTk4VKRjHIdCX02XtvUgSVHyXBmP/zIhLzzRutvgHR1hWhw/KZUBVFNqrF4ut05FjW
+	nNGqJZdOs5QeqzzoMk4oaGTA=
+X-Received: by 2002:a17:90b:4d11:b0:32e:a5ae:d00 with SMTP id 98e67ed59e1d1-358ae804f90mr10156753a91.13.1771928511830;
+        Tue, 24 Feb 2026 02:21:51 -0800 (PST)
+X-Received: by 2002:a17:90b:4d11:b0:32e:a5ae:d00 with SMTP id 98e67ed59e1d1-358ae804f90mr10156733a91.13.1771928511229;
+        Tue, 24 Feb 2026 02:21:51 -0800 (PST)
+Received: from [192.168.1.2] ([2401:4900:8fe5:3076:bc82:a67f:ae4a:6d25])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-358af701c7bsm9605940a91.1.2026.02.24.02.21.46
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 24 Feb 2026 02:21:50 -0800 (PST)
+From: Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
+X-Google-Original-From: Manivannan Sadhasivam <mani@kernel.org>
+To: kwilczynski@kernel.org, kishon@kernel.org, bhelgaas@google.com,
+        jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com,
+        cassel@kernel.org, Frank.Li@nxp.com, Koichiro Den <den@valinux.co.jp>
+Cc: linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org,
+        ntb@lists.linux.dev
+In-Reply-To: <20260217063856.3759713-1-den@valinux.co.jp>
+References: <20260217063856.3759713-1-den@valinux.co.jp>
+Subject: Re: [PATCH v2 0/3] PCI: endpoint: Doorbell-related fixes
+Message-Id: <177192850650.7284.5708606131647741554.b4-ty@kernel.org>
+Date: Tue, 24 Feb 2026 15:51:46 +0530
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-X-stable: review
-X-Patchwork-Hint: Ignore
-X-stable-base: Linux 6.19.3
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-Mailer: b4 0.14.3
+X-Authority-Analysis: v=2.4 cv=O6A0fR9W c=1 sm=1 tr=0 ts=699d7bc0 cx=c_pps
+ a=RP+M6JBNLl+fLTcSJhASfg==:117 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
+ a=HzLeVaNsDn8A:10 a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22
+ a=u7WPNUs3qKkmUXheDGA7:22 a=Um2Pa8k9VHT-vaBCBUpS:22 a=VwQbUJbxAAAA:8
+ a=GccvDg418-FT051PfnEA:9 a=QEXdDO2ut3YA:10 a=ZXulRonScM0A:10
+ a=iS9zxrgQBfv6-_F4QbHw:22
+X-Proofpoint-ORIG-GUID: dk4i9IPlawFbr2BC2HmTc8lf8IxAfRD4
+X-Proofpoint-GUID: dk4i9IPlawFbr2BC2HmTc8lf8IxAfRD4
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMjI0MDA4NSBTYWx0ZWRfX8rh5Js5CISMo
+ yTmBobYLsX+LokFugme57wiRC/VhaX9WrwBI0YeqFu/wpvv4EYEvoHOmFA681hQL8VJXWqj4noL
+ vqQ3edrLsowLLzheWQlXZi115xzQDlzuzREdBY2XRqeGQA3vgloPZu4cpXDKEPlGFHyRXTd90FO
+ X6NsfL1qd2KlvPLTOa03KkP6L8tqneQipsXbT5uIZMZ3rT45UGrp9CsyYNyp7hE7xT09vrj1o1g
+ 40cd5Thd4IsNvIfN7ANBysJ9bPqbduFvtiodFtN8bYjSZmGj4niYSnoPbEqbbzdRYSdFKHjy3E3
+ dYV3R2yd6x9hl5MWBRQbjnqfy3AeDtl8X4uDhl2/QOAP0xGJdDXk4skVjxj1bvNZAT/22tEpIOm
+ 0oHC23ttzn3pGeSmymE8RIa3nmXQ2vI/IwhegSgIvm9i4FD2+QTZKmOgtqN4ABLzCWJWKRqC7TS
+ 4HgZDA4nSZ93gcCENlw==
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.51,FMLib:17.12.100.49
+ definitions=2026-02-24_01,2026-02-23_03,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ spamscore=0 clxscore=1011 lowpriorityscore=0 adultscore=0 priorityscore=1501
+ impostorscore=0 phishscore=0 malwarescore=0 bulkscore=0 suspectscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2602130000 definitions=main-2602240085
 
-From: Maciej Grochowski <Maciej.Grochowski@sony.com>
 
-[ Upstream commit c8ba7ad2cc1c7b90570aa347b8ebbe279f1eface ]
+On Tue, 17 Feb 2026 15:38:53 +0900, Koichiro Den wrote:
+> This is a small fix-only series related to the previous (v6)
+> doorbell-related series:
+> https://lore.kernel.org/linux-pci/20260209125316.2132589-1-den@valinux.co.jp/
+> 
+> These patches address a few independent fixes in pci-epf-vntb,
+> pci-epf-test and pci-ep-msi:
+> 
+> [...]
 
-Number of MW LUTs depends on NTB configuration and can be set to MAX_MWS,
-This patch protects against invalid index out of bounds access to mw_sizes
-When invalid access print message to user that configuration is not valid.
+Applied, thanks!
 
-Signed-off-by: Maciej Grochowski <Maciej.Grochowski@sony.com>
-Signed-off-by: Jon Mason <jdmason@kudzu.us>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
+[1/3] PCI: endpoint: pci-epf-vntb: Fix MSI doorbell IRQ unwind
+      commit: d61ad1bf4cd447f023eaf801dd836ce2c8d579dc
+[2/3] PCI: endpoint: pci-epf-test: Don't free doorbell IRQ unless requested
+      commit: 18b1650d6850040ebe7612504b9cf5e86dd48d84
+[3/3] PCI: endpoint: pci-ep-msi: Fix error unwind and prevent double alloc
+      commit: 53f49de2df2790db085d1ddf3a2251fd7b1d960b
 
-LLM Generated explanations, may be completely bogus:
-
-Now I have a clear picture. Let me verify the key claim about the bug.
-
-The critical finding from the exploration:
-- `mw_sizes` is declared as `u64 mw_sizes[MAX_MWS]` where `MAX_MWS =
-  128`
-- `nr_direct_mw` can be at most 6 (MAX_DIRECT_MW)
-- `nr_lut_mw` is read from hardware via `ioread16()` and can be up to
-  512 (rounded down to power of 2, so max 256 or 512)
-- The buggy loop computes `idx = nr_direct_mw + i` where `i` ranges from
-  `0` to `nr_lut_mw - 1`
-- If `nr_lut_mw` is large enough (e.g., 256), then `idx` can exceed
-  `MAX_MWS (128)`, causing an out-of-bounds write to `mw_sizes[idx]`
-
-This is a real out-of-bounds array access bug. The `nr_lut_mw` value
-comes from hardware registers (`ioread16`), and there's no validation
-that `nr_direct_mw + nr_lut_mw` stays within `MAX_MWS`. If the hardware
-reports a large number of LUT entries, the loop will write past the end
-of the `mw_sizes[128]` array, corrupting adjacent memory in the
-`shared_mw` structure (the `spad[128]` array) or beyond.
-
-## Analysis
-
-### What the commit fixes
-An array-index-out-of-bounds write in `switchtec_ntb_init_shared()`. The
-`nr_lut_mw` value is read from hardware registers and can exceed
-`MAX_MWS - nr_direct_mw`. When this happens,
-`sndev->self_shared->mw_sizes[idx]` writes past the 128-element array
-boundary, corrupting the subsequent `spad[128]` field or memory beyond
-the structure.
-
-### Bug severity
-- **Out-of-bounds write**: This is a memory corruption bug. Writing past
-  `mw_sizes` corrupts the `spad` array in the shared memory window
-  structure, which could cause unpredictable behavior.
-- The shared memory buffer is DMA-allocated (`dma_alloc_coherent`), so
-  corrupting it could affect hardware/firmware interaction.
-- Triggered by hardware configuration — if a Switchtec NTB device
-  reports many LUT table entries, this will fire during driver
-  initialization.
-
-### Meets stable criteria
-1. **Obviously correct**: The fix adds a simple bounds check `if (idx >=
-   MAX_MWS)` before the array access, prints an error, and breaks out of
-   the loop. This is straightforward and safe.
-2. **Fixes a real bug**: Out-of-bounds array write — memory corruption.
-3. **Small and contained**: Only adds 5 lines of bounds-checking code in
-   a single function.
-4. **No new features**: Pure defensive fix.
-5. **Low risk**: The break simply stops filling in MW sizes for indices
-   beyond the array — existing valid entries are unaffected.
-
-### Risk assessment
-- **Very low risk**. The change is a simple bounds check that prevents
-  memory corruption. It cannot break any working configuration — it only
-  affects cases where the index would have been out of bounds.
-- The affected code has existed since the driver was introduced, so this
-  fix applies to all stable trees that include this driver.
-
-### Verification
-
-- Confirmed `MAX_MWS = 128` at line 32, `mw_sizes[MAX_MWS]` at line 38
-  of `ntb_hw_switchtec.c`
-- Confirmed `nr_lut_mw` is read from hardware via `ioread16()` at line
-  1204 and rounded to power of 2 at line 1205 — can be up to 256 or 512
-- Confirmed `nr_direct_mw` max is 6 (bounded by `MAX_DIRECT_MW =
-  ARRAY_SIZE(bar_entry)` where `bar_entry[6]`)
-- Confirmed the `shared_mw` struct layout: `mw_sizes[128]` followed by
-  `spad[128]` — OOB write corrupts `spad`
-- `git log` shows the file has had other bug fixes backported (shift-
-  out-of-bounds, UAF), confirming the driver is in stable trees
-- The first loop over `nr_direct_mw` is safe (max index 5), but the
-  second loop over `nr_lut_mw` is unbounded before this fix
-- Could NOT verify via lore.kernel.org the specific mailing list
-  discussion (not fetched), but the commit message and code are clear
-
-**YES**
-
- drivers/ntb/hw/mscc/ntb_hw_switchtec.c | 6 ++++++
- 1 file changed, 6 insertions(+)
-
-diff --git a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-index f851397b65d6e..f15ebab138144 100644
---- a/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-+++ b/drivers/ntb/hw/mscc/ntb_hw_switchtec.c
-@@ -1314,6 +1314,12 @@ static void switchtec_ntb_init_shared(struct switchtec_ntb *sndev)
- 	for (i = 0; i < sndev->nr_lut_mw; i++) {
- 		int idx = sndev->nr_direct_mw + i;
- 
-+		if (idx >= MAX_MWS) {
-+			dev_err(&sndev->stdev->dev,
-+				"Total number of MW cannot be bigger than %d", MAX_MWS);
-+			break;
-+		}
-+
- 		sndev->self_shared->mw_sizes[idx] = LUT_SIZE;
- 	}
- }
+Best regards,
 -- 
-2.51.0
+Manivannan Sadhasivam <mani@kernel.org>
 
