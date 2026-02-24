@@ -1,110 +1,246 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.12])
+Received: from OS0P286CU011.outbound.protection.outlook.com (mail-japanwestazon11020090.outbound.protection.outlook.com [52.101.228.90])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AB6EB23AB87
-	for <ntb@lists.linux.dev>; Tue, 24 Feb 2026 14:42:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.12
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771944144; cv=none; b=cC36sHbXQ9ZXzQHv/5DaBIo6e/949F4+wYZU7a46LVIQDQFT55/aqA8MuOLv/2lSvijWCTJ5TDEVOio5oKnukOfcNGvTwMAtargNwVBSA3rahj2iGVMgcgzS5Ih4fr0psMCT3GzRRb2bA5c2NY6HprCuhuDgIpMqVw1dOfJbQgw=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771944144; c=relaxed/simple;
-	bh=5ZNIZoIJym+AaiB5vhhF5rYP9sCgmaJ6czhporeCOVk=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=YHyIZp2z6jPM4gj/qwlU+XkvDCRv7RAMEnNjsONLhgFZtxmpV4YMWogu9p4c+ZwMWVNLmqNe9y2e4J4VqgKlWAxlaZaR81iWpT6pVWeodlMeFoJSlw09sL5lZYEVN8zufHwYga5tvKsTjt7pPGiamcz7Gh+UlJiqSF1Iwab2KSU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=GnR3powK; arc=none smtp.client-ip=192.198.163.12
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5FA803A0E87
+	for <ntb@lists.linux.dev>; Tue, 24 Feb 2026 15:28:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.228.90
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1771946896; cv=fail; b=DOT1MBE86ZVZL5dE069ZSvuLuXLb3Er3N55aiBuOSAdifH1tYXEIPKm2Brm8lQs3LzZ8mZusNkyag8K/3q1Yld2TOWAsReFbt4CExF08qdHI9tm4xu/t7G98XASQJeseyg3NmAGCBVPxyNUOsp46rXwYfoYlk4OeSNjSDrC/0zE=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1771946896; c=relaxed/simple;
+	bh=wYkzjjGIyULVhJeHFh4az4uhsAObrseNmcYpGZ2QxjI=;
+	h=From:To:Cc:Subject:Date:Message-ID:Content-Type:MIME-Version; b=JBBGu0XlCx5EBhN48gNBGZGAepgCR/aphoM2N/jy1PoEmBmLCW3ADmusdHW6kWNtfcK9Lh2pPUTZeSizFpKIUSCxZSe8rjWRbwFeZ8tZny+f1bWzitkjzUttBf6lsyS76ekDE6Ta60xNA0t8+ZEC4EKAC+57G/HutEzbxbxxjUU=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=V6x3V+5o; arc=fail smtp.client-ip=52.101.228.90
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="GnR3powK"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1771944142; x=1803480142;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=5ZNIZoIJym+AaiB5vhhF5rYP9sCgmaJ6czhporeCOVk=;
-  b=GnR3powKfQHYZLWUu+N3mATZZMmVKysMwtAK5i30CstVVZ1ZUXrYaccH
-   yagS/jnxgQABCI90z4TjH9CC6aTcORrA2bOS94vkFFZydgJS8yoU91XJZ
-   4ghqv5IbRg7P4jlIq29dfrDmx/IKWpiOucWHX9r3prAMwymlyEU201j/w
-   ydSjRdpMmlDTWerzod9ndUu6f/PMmwXXCxrLTYfarhTHwvo3jxI3EcJWb
-   TUQj+EZ8rni/vzSiJnxdykneyHePXN75BTDoPSceW2jGek0oCfqurH3nV
-   IuOCYlyFjTwqMucnprljvUL57pfWW67cEff0AWdwWlGYsjbDu2NgI8Ea0
-   Q==;
-X-CSE-ConnectionGUID: 1JvgMQZCTny4z7nNAF35gA==
-X-CSE-MsgGUID: /DFvAwa1Rb2Xqt6UH6kpjw==
-X-IronPort-AV: E=McAfee;i="6800,10657,11711"; a="76821450"
-X-IronPort-AV: E=Sophos;i="6.21,308,1763452800"; 
-   d="scan'208";a="76821450"
-Received: from fmviesa005.fm.intel.com ([10.60.135.145])
-  by fmvoesa106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Feb 2026 06:42:21 -0800
-X-CSE-ConnectionGUID: ZJUn7VEURY6APU6E/zr+vg==
-X-CSE-MsgGUID: WSZ2pWV5SyWiQdtr0gwnNg==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.21,308,1763452800"; 
-   d="scan'208";a="220507571"
-Received: from ldmartin-desk2.corp.intel.com (HELO [10.125.111.19]) ([10.125.111.19])
-  by fmviesa005-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Feb 2026 06:42:20 -0800
-Message-ID: <07904415-19a8-4381-9292-2f0625fd69ca@intel.com>
-Date: Tue, 24 Feb 2026 07:42:18 -0700
+	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="V6x3V+5o"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=Na3qS0KnQTwAJfafs7FSLsWHx+qrOM3uOBFz6ijrwFrmlDP1UyMPvrnjCFZNS3cNXoNm1oyCSA4PPCMIZnNe70QAWY6jwIoKBZBHIMlf2xVA881FW9rHPuY3udZGq2kLGXtw7mtFmlYHay6w5mPCOrMw6/uZ+gkjO+9FhvAXH/bm9XOqXySm2mtcFHbR2t+lOGEkWsXphr0Jmb0wWIMiqNzx/+5gnNoIuL1GlmAqbRe438aSQFBgkr1ENG/WvRp4fcuGvHKdPoCW+ha+R1mcPoOXj9Is5eVTexwZXEyBT51A3xHZu7wJnB7Zf/NqKrDf+FK1GQ4YNhWIQFctsOtTjw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=TJclkj0IlxVJlvk4RF/d0/huWUY+08ygBmcB7A2LKbE=;
+ b=WiY0l8vUxvFl65fqlkP5HzRO8lzaYv6znvnhD/hRQQtCD3h3EqZ4C2Q1+62g9nBei8MZ1k09gDqTCjqvbALeJibm8UsFZxjf81ik0NElGx0ETZlBOZ4j7yIDXPBowQVRXryT1LGnqXK1W+OA72f45zEvvi6BDhVmcphWClqYpRomen9YDs+tpTTHjPJREnXa8zH4XxNRwGgZb7ZrFv1QUQtXm9/Xag3CTJ//h/oPx5uAilDrOIR/yEKLOah1Mu1pheZGiUyvgivwV991U0yYxJZBCb+a3I9jbTmYyfNscVW1zSjKRrH+iKl6KL0ASVgPtnleFyzWGYB5gRXvw/n+3Q==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
+ header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=TJclkj0IlxVJlvk4RF/d0/huWUY+08ygBmcB7A2LKbE=;
+ b=V6x3V+5oZKNp+n4gP51I8e9daChou/Txj0eCy1uEwKdhRgLmvw9WkKoI92rU3uu64D+UsDAh+KHtSNLOb/sR8BAYYiO6DHjXHvB4v+VaGr3JhTdYOZk/bvta/pIPRQI/q6KRtrC8jM+qlbc+jPAIPGn6WNHepY7rx6bq5XQAgtk=
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=valinux.co.jp;
+Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:38f::10)
+ by OS9P286MB6904.JPNP286.PROD.OUTLOOK.COM (2603:1096:604:418::6) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9632.22; Tue, 24 Feb
+ 2026 15:28:12 +0000
+Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+ ([fe80::2305:327c:28ec:9b32]) by TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+ ([fe80::2305:327c:28ec:9b32%5]) with mapi id 15.20.9632.017; Tue, 24 Feb 2026
+ 15:28:11 +0000
+From: Koichiro Den <den@valinux.co.jp>
+To: Jon Mason <jdmason@kudzu.us>,
+	Dave Jiang <dave.jiang@intel.com>,
+	Allen Hubbe <allenbh@gmail.com>,
+	Andrew Lunn <andrew+netdev@lunn.ch>,
+	"David S. Miller" <davem@davemloft.net>,
+	Eric Dumazet <edumazet@google.com>,
+	Jakub Kicinski <kuba@kernel.org>,
+	Paolo Abeni <pabeni@redhat.com>
+Cc: ntb@lists.linux.dev,
+	netdev@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH 0/3] net: ntb_netdev: Add Multi-queue support
+Date: Wed, 25 Feb 2026 00:28:06 +0900
+Message-ID: <20260224152809.1799199-1-den@valinux.co.jp>
+X-Mailer: git-send-email 2.51.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: TYCP301CA0030.JPNP301.PROD.OUTLOOK.COM
+ (2603:1096:400:381::20) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+ (2603:1096:405:38f::10)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH net-next] net: ntb_netdev: Fix NULL check ordering in TX
- handler
-To: Alok Tiwari <alok.a.tiwari@oracle.com>, pabeni@redhat.com,
- kuba@kernel.org, edumazet@google.com, davem@davemloft.net,
- andrew+netdev@lunn.ch, jdmason@kudzu.us, allenbh@gmail.com,
- ntb@lists.linux.dev, netdev@vger.kernel.org
-Cc: alok.a.tiwarilinux@gmail.com
-References: <20260224130458.1355686-1-alok.a.tiwari@oracle.com>
-Content-Language: en-US
-From: Dave Jiang <dave.jiang@intel.com>
-In-Reply-To: <20260224130458.1355686-1-alok.a.tiwari@oracle.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|OS9P286MB6904:EE_
+X-MS-Office365-Filtering-Correlation-Id: 3df5a0f8-5e57-4e06-d67b-08de73b951ac
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|366016|7416014|376014|10070799003|1800799024;
+X-Microsoft-Antispam-Message-Info:
+	=?us-ascii?Q?nYu7YdI2me3Uc0AWhr49XaxGxHgRFyuk0Q+jX7WOfCcnI9u9a8YShPlwi9Mr?=
+ =?us-ascii?Q?lASAd31+vhRmpDZh3JM/IMoj8qgQ/mWsaH4iOSFf6H7DjjQATea8CgCjAHF9?=
+ =?us-ascii?Q?x93HL32bOxVFpmspZSOadWIdqSblBr+SiWfqK31kxeMpLLunYjR/CrjywPUH?=
+ =?us-ascii?Q?tBzgJ6lvNKlVwWILO6dB/5kBMucPy+lECK1WcotyBhK3NeUAIlw5C8Vf0snq?=
+ =?us-ascii?Q?94ohvwVxdTo/uFdCjKhLcYhAefD8595cE8yDMPJvZjQJwRyFPxw80pTnfbkO?=
+ =?us-ascii?Q?yEkPSSuDXRdvRHoohaelHmCEEjNmnPPAirBpZPvPJJ7LyNZTMnJKT9xWX0Gt?=
+ =?us-ascii?Q?mSAbYBlcLFF9C/nmVClG9tEVbfgcg/cJLur84UAEMruCs+LcbyZNADO3R9XT?=
+ =?us-ascii?Q?NxRe05a06Kw1o3LuXjb/nxZPeED+liAFF2R/wyp7y7poiAjV2V9LnlG24dP7?=
+ =?us-ascii?Q?i+zezOg7TTBcYGSQkFfmQiW+0GU0P24yHweZPCpQmlMWpsWYaZwMZ+9iZp+L?=
+ =?us-ascii?Q?SQD7vBfbyP7qrQKtehB9Pbd79V5Lm251arUGZ+aIMOIbK1xzzW0y34hRec6S?=
+ =?us-ascii?Q?ETYCvaTE3GNX0J8D7WRsZPoUQYoIo8oQF2OBESsJUj83mQVtEmU3P3rTibif?=
+ =?us-ascii?Q?nVKljaxtt8J1AGXcwYyqR6Y3+EUsuSNoLWnekwsVZdgsibyVG5550KmqCDWW?=
+ =?us-ascii?Q?19PMk4ojAyU/BfieB8r61xv9Vcbi6h9b3bD3k6MaFGd8WK1WtUgIcf2fDG29?=
+ =?us-ascii?Q?J5AyvBfSKD0DQ2PE8jU8IaW40/9DDGhB+nlgWLWcBHxSxA7rzBOOmHp9bJzi?=
+ =?us-ascii?Q?wreca1+iVSn496BKumOwyps4h1CpA3nDfkMS0h5jNo1mxMPzP0RiS5R5FFwU?=
+ =?us-ascii?Q?jGUI7nXBmDcDyCoGKitaPJZQkgP43FEY+C3DE0C0VmiPsQQYIgC77jl7ZSOf?=
+ =?us-ascii?Q?DKwmx8o46SKguNSpW/mkKke7wtUuVssT8+BtaPCQir4cFiDSGUSrUDW0tCRu?=
+ =?us-ascii?Q?YFi+2iScJSyelAlnbSS0Bjseo1zEh83FgdbfZjMGIFLsqV6//Qy8wtD6Twpu?=
+ =?us-ascii?Q?SIYhN38tw2RXmWKQqyuReEgYJFyErzgLDd1TkEBTFeXA/pDLx/VJuSfrZa0a?=
+ =?us-ascii?Q?ykzPKUivwayeMbzjMWG6Waw1AH/kZ6ffTqkraH5fIponWv4LKE+8nRlAFiQ3?=
+ =?us-ascii?Q?Fh3wG4EVen5UzBt6yt++oPSrqsdbwMyFUjEGZoL5gcnRPTsgtUXxbd+6fjrN?=
+ =?us-ascii?Q?Uhng6qKaU3V8rn4qaY4YRCg2+bxYlk94LtU/SxXoilRi7oY13JNgyg6TFV2G?=
+ =?us-ascii?Q?vEMczWzN9omK0T51vVr+ulHvtoEDGjhUXzmfqZ71OosMgz2cBvGbxioCnSjx?=
+ =?us-ascii?Q?Rj2HTe5akKN4QMnD7QW8L7Ps6UVOum8XObqPgNtHguVlNC+kvxMp1yTLVQsr?=
+ =?us-ascii?Q?zguthPjyUpo/MIkofyOL3xltwvfEY6efhupKmpUgJAyj2ABzfGqxKK3nK6bs?=
+ =?us-ascii?Q?lQFzKdcCoVPSuGyKPnpo/wT8RJuNLiKYo9rDQ3+LUn1URoWBWquAEYqjRHEs?=
+ =?us-ascii?Q?76cm7QojzW0KBeU/jk4=3D?=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(366016)(7416014)(376014)(10070799003)(1800799024);DIR:OUT;SFP:1102;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?us-ascii?Q?FLN1tWvxz1XfRRWcPmhl0PfTcrzIO6xg/UCvPMpvrLDKW4MscNzcpdvd/sYJ?=
+ =?us-ascii?Q?wEB1Ivz8fEEATa9qM9RfMxU2//9UhquC5s5O8Zxc1Xm/KQonxyv2ef/TpeMl?=
+ =?us-ascii?Q?kHJlXD5E8UlUWav7CJRzyt3WbZKUU9taxThW7YYAVKtheFGaJgofUKPBoAdg?=
+ =?us-ascii?Q?x56hiXmlmYHAm1ASEGLFDtcKjRhfdrMMwh3W6cZUNuTYjVww7dbA379evy7d?=
+ =?us-ascii?Q?8gBSlCXp45+rxpzSkoDB1MMDr9hXLD/AvuAP5wqJ5nLJhLqHKnjElaSvyUWv?=
+ =?us-ascii?Q?KUl7rwnJCteymLnv9hb5mttFh1kpUGmJl1NLh/QYWYKOTD36S6+FHEX4loK6?=
+ =?us-ascii?Q?hAJvFkQD9G+iS2JiMwMxbqpskTSGV6H+aVnhIqeoOWKhXZY0hPursNE74E6v?=
+ =?us-ascii?Q?YpUZyWgvehI5BTfibXe9XE3jswkWYbSaDsJ3pILQgmB8s+BU9A5PC+SLxsQR?=
+ =?us-ascii?Q?gq2Bv3Bq5RfAsirHxhYGDX9DEf7QrUkwiqRTs7e3pZyZY1uZbPt7SjaN73B+?=
+ =?us-ascii?Q?R9OOJssa+T3Q06I7PsRAH+sUNsCcusT1NBQTOmk3UeH7em8Q/u2QUTqBIlay?=
+ =?us-ascii?Q?FFTCe4E0tZ/3lxQPZfZitud+Ws/9qYT1ETQDFZLI0OlInqI/F8R4K20MwYrQ?=
+ =?us-ascii?Q?J+eVPl6i7gh4ZyrNQFb9Zi7pgZFzCiqcQ4L3dIiWDJP42bQGBRaUiECC6s4J?=
+ =?us-ascii?Q?/zHBIed5vI3IuCvoVbVjIu4iGzjxNSQFOtTMKI3rC2jdityjRZ3Bqu/fmZAe?=
+ =?us-ascii?Q?M8wwR6oYypv+nYi8aru5L9eGfiTikhc+Rt2XIs4VZLuwkDUqbxIoNxwamWgs?=
+ =?us-ascii?Q?hH477MUiFJb/7PDWVN8tMuy9KBQwqr6V54vh9rZ8xNQCEzLh9Rd7+5uR0jzX?=
+ =?us-ascii?Q?hlW7nSs4Y506Z7uY9VeCZ0/GSe72F2KYpe+YfH0+6PGFGL56TlE2FoIn5Cyd?=
+ =?us-ascii?Q?S9Bo//MvboZtaTPITRZcIQn72hiz3kVzSSRGYwrtX69msA+KjDk1QrEeXDHs?=
+ =?us-ascii?Q?mr1UZmWa/x6eSADn5cd4H5ksTTEhMAUCNavOLeV8WUPhl+fAGIoK4ewabRgy?=
+ =?us-ascii?Q?A/mXTOJsqX9d1S7GTrTiIUhQG+xVHmFGxbLJM2F6vhb/SqPkJgkw7Ekersch?=
+ =?us-ascii?Q?ICNCejy8ABGh5BGpL+qj1VQj7uHwrqDhHwoBunfLEq+rAcFFKvTT7SEj8QKg?=
+ =?us-ascii?Q?xqk+o4ZyG8+IkRrEjywRdLwF84eJNis5ZVa4pJVTMmIviVSE1V0FFNbDmi56?=
+ =?us-ascii?Q?TFJEmLSec7uhaUROYI5afL19OSsByG5cGXqDMD2X608X18z3BAYvYTgXWq5L?=
+ =?us-ascii?Q?bLaLTexKkfmcC30Y10D0aECpd0Lonr0rmdWsR2AGVRvz2JOBtof42BnN8hjG?=
+ =?us-ascii?Q?MtwEGOxbw/5fixI229fUewZ7OeOOl9aT3rl0tR0pNAIHtRN0tSn2erd65HxH?=
+ =?us-ascii?Q?hHYUpqpYOdF0/jgmnvhT65CYhJT1Na9fBWLHNqLRtZTLuivpu1poAVkAOFPk?=
+ =?us-ascii?Q?/UW9QhWMW+l5w9kjR/Hg29Vbn/At6rwcM3xWJ3I4j0GohVQzZeLk0WZwKjcw?=
+ =?us-ascii?Q?YJ8E6JWBOHLcyKCEHDJOKt21V6mhEf5ZYpfM0wrMddFzxFw2kw4onSMXbqRD?=
+ =?us-ascii?Q?34oF9Nrc/U88U5AAETzE4hjg7MeNB6+ZEk4MShZpkVgHx89xZHBk2GfLTj37?=
+ =?us-ascii?Q?CoL6hO6o9pKJDcMNtaIlhLOavnxBGrsfa0coFPxme8/+L5E3GC2g0d8WgDaX?=
+ =?us-ascii?Q?cUiFT0LMHDomNOdpRysELxz0nY61QtXTzjIybmwc3Gg1H4hkhWXZ?=
+X-OriginatorOrg: valinux.co.jp
+X-MS-Exchange-CrossTenant-Network-Message-Id: 3df5a0f8-5e57-4e06-d67b-08de73b951ac
+X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Feb 2026 15:28:11.0339
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: 5+fSuNRKAbZFM80IkCMDrnvDojDDl5Q9e8c4pqqdz63ZOuOC2Sx53XzuCnRTlv2vDnW9RjfhdUZEdBFRfFgNiA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: OS9P286MB6904
+
+Hi,
+
+ntb_netdev currently hard-codes a single NTB transport queue pair, which
+means the datapath effectively runs as a single-queue netdev regardless
+of available CPUs / parallel flows.
+
+The longer-term motivation here is throughput scale-out: allow
+ntb_netdev to grow beyond the single-QP bottleneck and make it possible
+to spread TX/RX work across multiple queue pairs as link speeds and core
+counts keep increasing.
+
+Multi-queue also unlocks the standard networking knobs on top of it. In
+particular, once the device exposes multiple TX queues, qdisc/tc can
+steer flows/traffic classes into different queues (via
+skb->queue_mapping), enabling per-flow/per-class scheduling and QoS in a
+familiar way.
+
+This series is a small plumbing step towards that direction:
+
+  1) Introduce a per-queue context object (struct ntb_netdev_queue) and
+     move queue-pair state out of struct ntb_netdev. Probe creates queue
+     pairs in a loop and configures the netdev queue counts to match the
+     number that was successfully created.
+
+  2) Expose ntb_num_queues as a module parameter to request multiple
+     queue pairs at probe time. The value is clamped to 1..64 and kept
+     read-only for now (no runtime reconfiguration).
+
+  3) Report the active queue-pair count via ethtool -l (get_channels),
+     so users can confirm the device configuration from user space.
+
+Compatibility:
+  - Default remains ntb_num_queues=1, so behaviour is unchanged unless
+    the user explicitly requests more queues.
+
+Kernel base:
+  - ntb-next latest:
+    commit 7b3302c687ca ("ntb_hw_amd: Fix incorrect debug message in link
+                          disable path")
+
+Usage (example):
+  - modprobe ntb_netdev ntb_num_queues=<N> # Patch 2 takes care of it
+  - ethtool -l <ifname> # Patch 3 takes care of it
+
+Patch summary:
+  1/3 net: ntb_netdev: Introduce per-queue context
+  2/3 net: ntb_netdev: Make queue pair count configurable
+  3/3 net: ntb_netdev: Expose queue pair count via ethtool -l
+
+Testing / results:
+  Environment / command line:
+    - 2x R-Car S4 Spider boards
+      "Kernel base" (see above) + this series
+    - For TCP load:
+      [RC] $ sudo iperf3 -s
+      [EP] $ sudo iperf3 -Z -c ${SERVER_IP} -l 65480 -w 512M -P 4
+    - For UDP load:
+      [RC] $ sudo iperf3 -s
+      [EP] $ sudo iperf3 -ub0 -c ${SERVER_IP} -l 65480 -w 512M -P 4
+
+  Before (without this series):
+      TCP / UDP : 602 Mbps / 598 Mbps
+
+  Before (ntb_num_queues=1):
+      TCP / UDP : 588 Mbps / 605 Mbps
+
+  After (ntb_num_queues=2):
+      TCP / UDP : 602 Mbps / 598 Mbps
+
+  Notes:
+    In my current test environment, enabling multiple queue pairs does
+    not improve throughput. The receive-side memcpy in ntb_transport is
+    the dominant cost and limits scaling at present.
+
+    Still, this series lays the groundwork for future scaling, for
+    example once a transport backend is introduced that avoids memcpy
+    to/from PCI memory space on both ends (see the superseded RFC
+    series:
+    https://lore.kernel.org/all/20251217151609.3162665-1-den@valinux.co.jp/).
 
 
+Best regards,
+Koichiro
 
-On 2/24/26 6:04 AM, Alok Tiwari wrote:
-> ntb_netdev_tx_handler() calls netdev_priv(ndev) before checking
-> whether ndev is NULL. Although qp_data is expected to always be
-> valid in normal operation, dereferencing the pointer before the
-> NULL check is logically incorrect.
-> 
-> Move netdev_priv() after validating ndev.
-> 
-> No functional change intended.
-> 
-> Signed-off-by: Alok Tiwari <alok.a.tiwari@oracle.com>
+Koichiro Den (3):
+  net: ntb_netdev: Introduce per-queue context
+  net: ntb_netdev: Make queue pair count configurable
+  net: ntb_netdev: Expose queue pair count via ethtool -l
 
-Acked-by: Dave Jiang <dave.jiang@intel.com>
+ drivers/net/ntb_netdev.c | 326 +++++++++++++++++++++++++++------------
+ 1 file changed, 228 insertions(+), 98 deletions(-)
 
-> ---
->  drivers/net/ntb_netdev.c | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/net/ntb_netdev.c b/drivers/net/ntb_netdev.c
-> index fbeae05817e9..6792b3b1f253 100644
-> --- a/drivers/net/ntb_netdev.c
-> +++ b/drivers/net/ntb_netdev.c
-> @@ -177,13 +177,15 @@ static void ntb_netdev_tx_handler(struct ntb_transport_qp *qp, void *qp_data,
->  				  void *data, int len)
->  {
->  	struct net_device *ndev = qp_data;
-> +	struct ntb_netdev *dev;
->  	struct sk_buff *skb;
-> -	struct ntb_netdev *dev = netdev_priv(ndev);
->  
->  	skb = data;
->  	if (!skb || !ndev)
->  		return;
->  
-> +	dev = netdev_priv(ndev);
-> +
->  	if (len > 0) {
->  		ndev->stats.tx_packets++;
->  		ndev->stats.tx_bytes += skb->len;
+-- 
+2.51.0
 
