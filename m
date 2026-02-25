@@ -1,50 +1,50 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.7])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.12])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 242C23D333E
-	for <ntb@lists.linux.dev>; Wed, 25 Feb 2026 16:47:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.7
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 31583392C26
+	for <ntb@lists.linux.dev>; Wed, 25 Feb 2026 16:59:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.12
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772038067; cv=none; b=qO299Hzl15kyNoEA+CXW4jdJgnV3HOnIk0inVlmhCplMUCV8+0CUljO64Y0LdBYsHyXoQIw+hK2/ir/Bpr8x0Vo751vCfT511k0HFY3mgKle9g7OIGYhkjING4rmMR5lUbdMopNAZLcWGSqOtQtapqaQm4U6QmhMXdQgQ6j6iMM=
+	t=1772038792; cv=none; b=MZ20BdrvaKDuFGeP5QOQj/MaPP+sH5fPWMFM1idYizXhZE7h7JWU7IUbSKxKE2ydBDGjJa9Okxsf+HpaPu6VCVyy5dXYjmDMDYcpwhzuH98BMnIp9m6MlTi3iDLjBUhUANsuNHN1NfHzY6Ejud/tTu2nvnfpXlodbnTB8yheqnQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772038067; c=relaxed/simple;
-	bh=Ww7jBXJpFuUjgO2c/UkPWNS73bT08e3YJt0wwVSjjDM=;
+	s=arc-20240116; t=1772038792; c=relaxed/simple;
+	bh=uJ9BWQpmkbs7W1e9uEfwigN/WSI2DmJpcUoXCIWyAts=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=qDGChWx84iMBD26/ApjBZ8GL0/wDFTQYa+2i25Cfw9GeXtzByTXRV4iO67Ldcpg7J2jJW99KltTKFhq9hXc9O3wW3k94xjcrWNyBOynqhFrSY02Yr38fNLkR7aUbqc/2UECXydHjViba7r9gzEI+ukizwr96i4xxu0ImS7U8IzM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=OT/cA+t0; arc=none smtp.client-ip=192.198.163.7
+	 In-Reply-To:Content-Type; b=cV0DbE7pW4XxSDUqUgRg+u5EJjpARQU1ktF1XQM0F95/cFGfyJ7RXN3NYEKuJT0JeIuO+G032MApdc4oNmta2CVsG8D1DW19O/9t8JCL6VH6pmAyCDfrfNJ9vLQ0vcYtr79jLLZProXwY4RTl0aanozYDaqTCfhH7y4C1hX53io=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=ff2ke83R; arc=none smtp.client-ip=192.198.163.12
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="OT/cA+t0"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="ff2ke83R"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1772038065; x=1803574065;
+  t=1772038790; x=1803574790;
   h=message-id:date:mime-version:subject:to:cc:references:
    from:in-reply-to:content-transfer-encoding;
-  bh=Ww7jBXJpFuUjgO2c/UkPWNS73bT08e3YJt0wwVSjjDM=;
-  b=OT/cA+t0CRFyuu26pds2fGEOZFhosYvwQbTOIYpsTVZtJypovBLRZS03
-   UsxYkZStiFvfWrtIGw/E65EhrHRDgiqubaiKFu61N3GggpeoSmMkbJF9S
-   wf7xeQCq5Zln6yIXRiF33hipJnaPhX429rtcjDmibF/Uq4yB4tBJoPxH9
-   DNYWpNZq5YjS+o5UhavALrxQ4NSQZKmnchnnYPJ33dQNNtOHHnQ/VII/h
-   CEaPagrCNCPUR/OpVFXXziF25Ul44XoBXGCLJN7O/N9cS6csHxh2ikYba
-   OcG+0AudUfWoCZwO/TxtuEj2XDLW93HlPGRpBBq+fja0hPubLfQdEe1qj
-   A==;
-X-CSE-ConnectionGUID: G19VmrKVRru2xMTqzdrk7g==
-X-CSE-MsgGUID: sDlrLj7oS7eTd7y5Cegq4w==
-X-IronPort-AV: E=McAfee;i="6800,10657,11712"; a="98552757"
+  bh=uJ9BWQpmkbs7W1e9uEfwigN/WSI2DmJpcUoXCIWyAts=;
+  b=ff2ke83RvV0QPMduzYTtCIhpXlDrf0EgFctLRsAdhV/ApXiRYWpJeJCX
+   VqYUJSazMpwtqnTsNqGgtUrOY3wMJzmxQrYAQXVb+DJhczXeEMSjfBXFr
+   RaUdhGDQwLGaW/xBz5CAfk2KML/SI9/1Izg0eFvstKqyFst4i000YC+XW
+   yIKrUlvpKLzEYq4kfKrRxfUBeayMV78wTdYP+EIrWvGpg7U7k5i7aK/lx
+   58M3C+ESeoxQrgs0iJAsOUVrt+xtl27rld9HXulo283oPcgTG8VwbWuhn
+   etrJlUpxGRW6oWFfxxB723bej+dixIlpJixfsIOcvvYUmRlYBGu/wjG7T
+   g==;
+X-CSE-ConnectionGUID: xUnOJhMgQ/iT6bB7A/RwXw==
+X-CSE-MsgGUID: hYqCyE32TS+tXSOHIJb1lA==
+X-IronPort-AV: E=McAfee;i="6800,10657,11712"; a="76955180"
 X-IronPort-AV: E=Sophos;i="6.21,310,1763452800"; 
-   d="scan'208";a="98552757"
-Received: from orviesa010.jf.intel.com ([10.64.159.150])
-  by fmvoesa101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Feb 2026 08:47:44 -0800
-X-CSE-ConnectionGUID: D4OKonMzS0OuYauDIlGuAA==
-X-CSE-MsgGUID: B1ez37z+RhK0joDrepZ6SQ==
+   d="scan'208";a="76955180"
+Received: from fmviesa002.fm.intel.com ([10.60.135.142])
+  by fmvoesa106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Feb 2026 08:59:48 -0800
+X-CSE-ConnectionGUID: scLKyl7lTUyR102fI3YYcg==
+X-CSE-MsgGUID: 5WBKC6akRWq1oxqDcFcHXA==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.21,310,1763452800"; 
-   d="scan'208";a="215506610"
+   d="scan'208";a="239298566"
 Received: from gabaabhi-mobl2.amr.corp.intel.com (HELO [10.125.111.98]) ([10.125.111.98])
-  by orviesa010-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Feb 2026 08:47:43 -0800
-Message-ID: <8ff7a843-bc0d-4ee0-b1d4-94d31e071fcd@intel.com>
-Date: Wed, 25 Feb 2026 09:47:43 -0700
+  by fmviesa002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Feb 2026 08:59:47 -0800
+Message-ID: <59969b55-8360-4ae7-8e46-69e55c1e74d5@intel.com>
+Date: Wed, 25 Feb 2026 09:59:46 -0700
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -52,8 +52,8 @@ List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 07/10] NTB: epf: Make db_valid_mask cover only real
- doorbell bits
+Subject: Re: [PATCH 08/10] NTB: epf: Report 0-based doorbell vector via
+ ntb_db_event()
 To: Koichiro Den <den@valinux.co.jp>, Frank.Li@nxp.com, kishon@kernel.org,
  jdmason@kudzu.us, mani@kernel.org, allenbh@gmail.com,
  kwilczynski@kernel.org, bhelgaas@google.com, jbrunet@baylibre.com,
@@ -61,50 +61,67 @@ To: Koichiro Den <den@valinux.co.jp>, Frank.Li@nxp.com, kishon@kernel.org,
 Cc: linux-pci@vger.kernel.org, ntb@lists.linux.dev,
  linux-kernel@vger.kernel.org
 References: <20260224133459.1741537-1-den@valinux.co.jp>
- <20260224133459.1741537-8-den@valinux.co.jp>
+ <20260224133459.1741537-9-den@valinux.co.jp>
 Content-Language: en-US
 From: Dave Jiang <dave.jiang@intel.com>
-In-Reply-To: <20260224133459.1741537-8-den@valinux.co.jp>
+In-Reply-To: <20260224133459.1741537-9-den@valinux.co.jp>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
 
 
 On 2/24/26 6:34 AM, Koichiro Den wrote:
-> ndev->db_count includes an unused doorbell slot due to the legacy extra
-> offset in the peer doorbell path. db_valid_mask must cover only the real
-> doorbell bits and exclude the unused slot.
+> ntb_db_event() expects the vector number to be relative to the first
+> doorbell vector starting at 0.
 > 
-> Set db_valid_mask to BIT_ULL(db_count - 1) - 1.
+> Vector 0 is reserved for link events in the EPF driver, so doorbells
+> start at vector 1. However, both supported peers (ntb_hw_epf with
+> pci-epf-ntb, and pci-epf-vntb) have historically skipped vector 1 and
+> started doorbells at vector 2.
+> 
+> Pass (irq_no - 2) to ntb_db_event() so doorbells are reported as 0..N-1.
+> If irq_no == 1 is ever observed, treat it as DB#0 and emit a warning, as
+> this would indicate an unexpected change in the slot layout.
 > 
 > Fixes: 812ce2f8d14e ("NTB: Add support for EPF PCI Non-Transparent Bridge")
 > Signed-off-by: Koichiro Den <den@valinux.co.jp>
 > ---
->  drivers/ntb/hw/epf/ntb_hw_epf.c | 8 +++++++-
->  1 file changed, 7 insertions(+), 1 deletion(-)
+>  drivers/ntb/hw/epf/ntb_hw_epf.c | 11 ++++++++---
+>  1 file changed, 8 insertions(+), 3 deletions(-)
 > 
 > diff --git a/drivers/ntb/hw/epf/ntb_hw_epf.c b/drivers/ntb/hw/epf/ntb_hw_epf.c
-> index bce7130fec39..ee499eaed4f3 100644
+> index ee499eaed4f3..00956ab2fbf5 100644
 > --- a/drivers/ntb/hw/epf/ntb_hw_epf.c
 > +++ b/drivers/ntb/hw/epf/ntb_hw_epf.c
-> @@ -580,7 +580,13 @@ static int ntb_epf_init_dev(struct ntb_epf_dev *ndev)
->  		return ret;
->  	}
+> @@ -333,10 +333,15 @@ static irqreturn_t ntb_epf_vec_isr(int irq, void *dev)
+>  	irq_no = irq - pci_irq_vector(ndev->ntb.pdev, 0);
+>  	ndev->db_val = irq_no + 1;
 >  
-> -	ndev->db_valid_mask = BIT_ULL(ndev->db_count) - 1;
-> +	if (ndev->db_count < NTB_EPF_MIN_DB_COUNT) {
-> +		dev_err(dev, "db_count %u is less than %u\n", ndev->db_count,
-> +			NTB_EPF_MIN_DB_COUNT);
-> +		return -EINVAL;
+> -	if (irq_no == 0)
+> +	if (irq_no == 0) {
+>  		ntb_link_event(&ndev->ntb);
+> -	else
+> -		ntb_db_event(&ndev->ntb, irq_no);
+> +	} else if (irq_no == 1) {
+
+Given that 0 and 1 have specific meanings, maybe create a enum with appropriate naming to make it more clear. Maybe something like this or however you want to name them:
+
+enum EPF_IRQ_SLOT {
+	EPF_IRQ_LINK = 0,
+	EPF_IRQ_RESERVED_DB,
+	EPF_IRQ_DB_START,
+};
+> +		dev_warn_ratelimited(ndev->dev,
+> +				     "Unexpected irq_no 1 received. Treat it as DB#0.\n");
+> +		ntb_db_event(&ndev->ntb, 0);
+> +	} else {
+> +		ntb_db_event(&ndev->ntb, irq_no - 2);
+
+And then here you can do
+ntb_db_event(&ndev->ntb, irq_no - EPF_IRQ_DB_START);
+
 > +	}
-> +
-> +	ndev->db_valid_mask = BIT_ULL(ndev->db_count - 1) - 1;
-
-I would suggest adding a comment in the code for why this is for future readers.
-
-DJ
-
->  	ndev->mw_count = readl(ndev->ctrl_reg + NTB_EPF_MW_COUNT);
->  	ndev->spad_count = readl(ndev->ctrl_reg + NTB_EPF_SPAD_COUNT);
 >  
+>  	return IRQ_HANDLED;
+>  }
 
