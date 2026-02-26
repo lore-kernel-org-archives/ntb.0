@@ -1,169 +1,57 @@
-Received: from TYVP286CU001.outbound.protection.outlook.com (mail-japaneastazon11021107.outbound.protection.outlook.com [52.101.125.107])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 573BD387378
-	for <ntb@lists.linux.dev>; Thu, 26 Feb 2026 03:24:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.125.107
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772076270; cv=fail; b=qiCSCRYo6Tn1VHkGhRlAig06kDxm2tSi1WF7+Ck670H0g7Kk2UCtJDXdIXv8Sxwm7wOX9J3c/1rfq4pHUj+zmpVlmN37epLYDGckWmW6xkhUPmU47rqd9PSCuWBftzcaYCF2Y/acQDdNhNqx4FMWYDZYMMCchKn0FinRRnUaaug=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772076270; c=relaxed/simple;
-	bh=etlNU5Rdhcb0pg0xGhhuRv/+pxV0v0cFYrNPyz8VSos=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
-	 Content-Disposition:In-Reply-To:MIME-Version; b=UbXduHtMF+4oKYXS25jrCxyuj3O6arYulSWm6uZzjABT0C00PIbFskTgVCl6fuRfGLPFK1QgJ/4kYBGJdwSJwqQ4RULoDSBOgi4oARaIbHyKCCfNVEWlcZnMSr/Vr6RJysqumrGcr6NCR6DwO6B/Sga46hS4h/NbkFaYHmOD+lc=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=VJ8LMxwz; arc=fail smtp.client-ip=52.101.125.107
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4545B2C08C4;
+	Thu, 26 Feb 2026 03:50:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1772077806; cv=none; b=SFV1dSJCD6AUzcKTfYrS+tf5iIcLtiBe1+KcIZlPWuN2cBIvVTrRAzLvSWNnbHltOCcH2Emfr+0M47IcXuzv2p53KNszL/G1lxs6gayD1YBvRKU4VITIR/0J9LnZj8tCpBAtvEZBMLcUaVhIWHNC3NLcVCGLrRbmqFEFSiLHuQE=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1772077806; c=relaxed/simple;
+	bh=xxHKk4q36A/mXOTAolHsUTG9EkGS8bqo95HONHTr6K4=;
+	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=gYzXrIvltHa1pN97JGReVW8Ri5+5mL/tr4+AO3ZOTBmDVSw7FLHnHXhxiZGkThFffMbHf75F5w8Z8AP2iKlKym4B+7N6JQoUXzl9fswu5ObFNSo0p2zvlKpoQsP5b3L1w0noh3WaWFk1hwhxJMVUVoPX7bz3faFAG9MdJ+rEwjU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jeRQCogR; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="VJ8LMxwz"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=n+MlfV4EcFO2jjEeF+pNHnaD0db6X8IhBKppD3DLtetXDKiY6V2ZmHSMwZGbGfO3f485jdSazE666w26xUheTyr5e0YBShqaALb/Zh6s58AxYEfPAO96MbtyEIK7k5ofoAfjgaXturveeFnNyP2feYMxiipf/QR0UPdp4ZCrLnYJPmITzh1pmblINButkWae0QOd63w5fVk7ckqATtoHjyKJYfLYEDQ9evjLl7gc04/I8nKdT6EjUjCqM0Y6MbSHwQhD3fh9TuxwxsSlNyxB37hvtz+T6LR2+xIf//xOHSmmf2Qlo9WFjciAgX6eNZoLJWRCf6Ns+Fltr+TTARvA7g==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=0bgmkc5sVO8sP/ePz7Iab+rGlCzpZeUvQZRKdHFXdbQ=;
- b=ZTjngvgiluudV4CvPVzJiMeBAVIGBvbWC18NxPQ5hPw8pwemHq+XZJ9mT6fyUoxz6KcbEVdz5rwR81fjfZVpFBmyaQJ0aYMbqYONFT8iQGK6oHgGg7mss69hDwOn9ANR5N4gJQ6lD0+z9Jiwj6t3oF+Xbai/sT5KznlSrSLuHuXgPf1jN0BjNZjQ6e1snSAfwjBgStQ9d+3BNzZ4tZ4OupElhpwW9PSBCNnxCgRmdiJdKf7wVzUQBg3+klVVyztvk3LMW3Xh7B3IyhO0JbUxViIXBQK6WERCe9LtZv+4Rw2WRtYou9srZ9248jyp15AJq1UKomIvBQtPgEsmzwxWYA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
- header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
- s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=0bgmkc5sVO8sP/ePz7Iab+rGlCzpZeUvQZRKdHFXdbQ=;
- b=VJ8LMxwzU5WzXvCeUfdHCuCoA1EJ0aaAo6oqk2PMc2vjyVcURRlBKPUiPkJJXTuAKoNV/JkkR7hbyhnMTYwKhHGrOOntsI+cKzEutrF2QfJn3dbB0/yV0XfYG8PhwxXcKArDKIINbIddso0FkaYIvdn4FWebw90CkdWhXr5NgS0=
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=valinux.co.jp;
-Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:38f::10)
- by TY3P286MB2934.JPNP286.PROD.OUTLOOK.COM (2603:1096:400:315::8) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9654.13; Thu, 26 Feb
- 2026 03:24:24 +0000
-Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
- ([fe80::2305:327c:28ec:9b32]) by TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
- ([fe80::2305:327c:28ec:9b32%5]) with mapi id 15.20.9632.017; Thu, 26 Feb 2026
- 03:24:23 +0000
-Date: Thu, 26 Feb 2026 12:24:22 +0900
-From: Koichiro Den <den@valinux.co.jp>
-To: Dave Jiang <dave.jiang@intel.com>
-Cc: Frank.Li@nxp.com, kishon@kernel.org, jdmason@kudzu.us, mani@kernel.org, 
-	allenbh@gmail.com, kwilczynski@kernel.org, bhelgaas@google.com, 
-	jbrunet@baylibre.com, lpieralisi@kernel.org, linux-pci@vger.kernel.org, 
-	ntb@lists.linux.dev, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 07/10] NTB: epf: Make db_valid_mask cover only real
- doorbell bits
-Message-ID: <hq5xcvzexffswicrernibubvqa34y2cnoeswuuptgbusxu7hqp@mu5dzsmp3qp3>
-References: <20260224133459.1741537-1-den@valinux.co.jp>
- <20260224133459.1741537-8-den@valinux.co.jp>
- <8ff7a843-bc0d-4ee0-b1d4-94d31e071fcd@intel.com>
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <8ff7a843-bc0d-4ee0-b1d4-94d31e071fcd@intel.com>
-X-ClientProxiedBy: TY1PR01CA0194.jpnprd01.prod.outlook.com (2603:1096:403::24)
- To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:38f::10)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jeRQCogR"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 79D01C116C6;
+	Thu, 26 Feb 2026 03:50:05 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1772077806;
+	bh=xxHKk4q36A/mXOTAolHsUTG9EkGS8bqo95HONHTr6K4=;
+	h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
+	b=jeRQCogRYffBWqKh4OgzlrBJlyTnCOuPaYCdt2oF4B1/Q069D3p3lYcrRyUplT76V
+	 D8ybdk6SR6KcSlHu6DbVHqfGkDr9xvNtHEnQIkaksLPqCoPrz8Uukv0cdg+HnjTB9/
+	 X3eg1Shf8wh3mhqVic8iyz96sT1dbIn0BMOcAWMs+DzXIsAZwJhIr4FjAXZ4rop5qR
+	 wC2oGU7K5RXT2NZf/DRVA53SZOTCqBo7JKGQGdi5oe4YPSBwognG7twhfSUG2qqPq4
+	 WIWCDbKmRhEyEG4bJH3V6oeLfYDguYq6A8nIem6ZVl61JNiyK8bmD0UijiKn3hZEBV
+	 Y/9YGvVId6oIQ==
+Date: Wed, 25 Feb 2026 19:50:04 -0800
+From: Jakub Kicinski <kuba@kernel.org>
+To: Koichiro Den <den@valinux.co.jp>
+Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen
+ Hubbe <allenbh@gmail.com>, Andrew Lunn <andrew+netdev@lunn.ch>, "David S.
+ Miller" <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>, Paolo
+ Abeni <pabeni@redhat.com>, ntb@lists.linux.dev, netdev@vger.kernel.org,
+ linux-kernel@vger.kernel.org
+Subject: Re: [PATCH 0/3] net: ntb_netdev: Add Multi-queue support
+Message-ID: <20260225195004.7e9c8b3a@kernel.org>
+In-Reply-To: <20260224152809.1799199-1-den@valinux.co.jp>
+References: <20260224152809.1799199-1-den@valinux.co.jp>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|TY3P286MB2934:EE_
-X-MS-Office365-Filtering-Correlation-Id: 98a60082-d580-4f1d-36fa-08de74e689d0
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|10070799003|376014|7416014|366016|1800799024;
-X-Microsoft-Antispam-Message-Info:
-	/70rxR1SkThBeTj3+elq1nWr/+mx9cutJGhZpZUzXSx53zvdO2sYpSMfsHGtE2JgxvEWr7zqV5IhDQAvcK+NOh5XwYjpQSvzZ8mPmfDgy5zEYqjLx6osETW8JH8xiZHqpCmm7eyyDiC4MhEBuqQYDZ7zFxP7GA+QwQlJVXamVdkgr01jBPqObt/lEki5L0RN+1c4AFz+zkUR0zzmb8EQGRh4dtvrHnC8E9tGoqHrWbRrozKlX83+pHje3hHs7ndGGinx8gTzqYWv7PNcNfO/mSU619KZhrajia7SiQVKwUm6El2jo8l6uTrZTNTyuNRxL4Ub0cUHk2IXul/HPX0hDIIXhFHbGsMF8bcJMaCszF8YxT9c83LREbdvQdeJG3A1SEr5lxuyTmcF/KOuos+A3/JoQb6rccve1Sg52HFUqvVil/ejF0Wm+WSLvaCspHF+akwvkGRq5zALgPadtMMD+OIUbcBz8qEw9q96HLwJKgzG+Meh0btx27/VtEC/CcVn8LKlMRujT+blasGi3EyMoMbcbu17z5Pa1fbqU6sMwTBBoh4/SPQj0D05Yr8JyybxFhLCs3PMh1cy1DCEKeudPsRq/bS/jqUYMrm8ooCtyWov2ct1Wj2U/EuEwd2IEfsghGrN3wZaCCin0cUNd0G9cF8BmCZjp19CBh0kHS/uGtMonnnhXQIxoqDK/5Pq7kuiLtdoRyPkUKFt673HpiIeTcCd6m/crGSTXLJ018mx8Y8=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(10070799003)(376014)(7416014)(366016)(1800799024);DIR:OUT;SFP:1102;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?ZthCekfCn1cwEvVbY2Q3c+lXAVduULThYfAyWMt6FX+MWhy/29PJjk2NyS27?=
- =?us-ascii?Q?nlCFZWquIaKAF4Y9VaWep+TyIFSuFtyIe8GF/Qar7IWO6wzYjxwr+lTa0IOW?=
- =?us-ascii?Q?qYCE8YuesHFXehTk3XDMT5lPWBFa5kIYdAIjwFy3qEYDSOfjwc39cte0VqlC?=
- =?us-ascii?Q?FQPtjZCLyx5gm2WqYSpHwn/7O467fEdRxULvfzHQq13nI2ZIHKylBKVUU9f5?=
- =?us-ascii?Q?d85eZiMVZNPp84g7Ug/9IjdAVwiRDnewwS0dk5mJDg8epCLVLojsx9qKnYS7?=
- =?us-ascii?Q?RHNJAk6Qt6mlWaQmMbpDwJ31LNtRitAa6z2wX+ZD1ZcbmHVygOtaNHHrApaV?=
- =?us-ascii?Q?LaOCUYZcu0fnMbBEJ3qXXOlqAqJIZ0cHuuALahEZ8Y8EbPPQrNs6RR5h2jj+?=
- =?us-ascii?Q?LfyF7wUwcUtQIfM5z/LTA+SkVrW4auxFEG6MuTt3aHsoWB19/oX8MqXOC8l6?=
- =?us-ascii?Q?L6ChnUgziD1jQb/2I8dlHwyGK6Dc3MFh0OGHob6elYo+5xm5CHhXnMKDClvi?=
- =?us-ascii?Q?k11AhiyUGjYnS/ENgrc783n3skUft01CvuyLlFZu2U1Wa9/Aev6ia+BWhUZU?=
- =?us-ascii?Q?QRGRvGvHwNZzVwTF9TnwgQ1r6jNutkx1ElSX23h654xWzgB+zSmmIXC3P8Fw?=
- =?us-ascii?Q?1Wi64BLz9Z5+QaqT9t3ggk6A7WbhGVZPHHOHq71FINiI8fYYpcbJi2FXl8IQ?=
- =?us-ascii?Q?g5ZZqpA5qL0Wd+m9AkRJMyHnKOhQwAFDgMATRCnaWxBuP6o+PCyRLqYymnvk?=
- =?us-ascii?Q?cWUeLhwcBSIDtaS5bnyc2nrcYePHOT8z90G5/bkmnNC36o1K5pYb7u2o1xBf?=
- =?us-ascii?Q?joEEMPSm6zkDXnkcVoK1HTJECrYJ29ZvMWuZ68RiK63z9unPKGxb9GFXN3uD?=
- =?us-ascii?Q?ve8F3Fb2Ggtv4CPYHl7J7IQ267iAulAR35DYiOYam1lk5nsF1nfHrwI4rf1A?=
- =?us-ascii?Q?JhJUPdntXlxZcJCTS+XKIKYCm/kkOZbcF7BOKHZ2zXmrcjZ+ixM8kl6L+8VS?=
- =?us-ascii?Q?Fir7DuoDzBHn7yDgOUYP1iERxzA8stJq0ZY3hl0J72xm8yi/h1tTD6+wMy+S?=
- =?us-ascii?Q?yxXpLt+H3yBMPqFN/XpqJ5HpDnhYbqoaxejKdemW4eL4jfESX2idxb8Y9xFv?=
- =?us-ascii?Q?M0fm3rS1vgyrhBb/whaQq7VMhBHsJoqqRnmbYepZlrnwiaxjdAXf8bPWDNUv?=
- =?us-ascii?Q?o3GU2+bWcJyId0P5YAG3vlB0/tZAdhp8Ecy49qD/IPwn/GFfkKgp2UhwyDtA?=
- =?us-ascii?Q?oU8ePoZ8c+zVY365ZnQWXxxnKtuNPeluAtD9/aKXOLSQGPprj02HFz6xrvO1?=
- =?us-ascii?Q?uJT0CgnxJNp9okDtR5mqlxnqkmdRrv1ZXt65E1Sq8ymUSwq5xnkcCYVdQfvN?=
- =?us-ascii?Q?g+yOILD6l6/hRdOV/6hen9yMm72Tvwga1pLkhWvJXJUu6kf5MZJfeptUIo7+?=
- =?us-ascii?Q?2js3mSwQK9k48sXn/J2uA2Pgj2gq7i67IoKrywcot35fku9mQUk5zJdFpnDs?=
- =?us-ascii?Q?NlCZfJN9dpWt2UUn7ZO8TDsx9WYTVDCJxzycz4KNYdis1ywG4T+dzJyROXow?=
- =?us-ascii?Q?3n1waUFKkASI2rVF5QqIvjpTQdb3wDVwgoKLBrKSG/anOZ8qsrGET68Sy5uW?=
- =?us-ascii?Q?/hpY80jQ8fUK0usSY/P673LPMXtB31KyRuembEzObwRFcB/YnBBtmhIX+KZy?=
- =?us-ascii?Q?qr49UYp1OTIatdOI76Q2pEwseYwZ4uIeNLn51DamUjysaTA/b/+O8iKyBPE9?=
- =?us-ascii?Q?fh4zlR0W4f7FQVr1hEwSFUFJS6rkdKnYGdHV2MyoO0vvd5UsnuJS?=
-X-OriginatorOrg: valinux.co.jp
-X-MS-Exchange-CrossTenant-Network-Message-Id: 98a60082-d580-4f1d-36fa-08de74e689d0
-X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 26 Feb 2026 03:24:23.7401
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: Cb9KSZKBGEOZXV36dH8Qw5M2FjWTaZ4NkdcKjx/e0UdTqqHcESC3nJx9b113lwDGBz2amIhCPm18rCMCjawiOA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY3P286MB2934
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 
-On Wed, Feb 25, 2026 at 09:47:43AM -0700, Dave Jiang wrote:
-> 
-> 
-> On 2/24/26 6:34 AM, Koichiro Den wrote:
-> > ndev->db_count includes an unused doorbell slot due to the legacy extra
-> > offset in the peer doorbell path. db_valid_mask must cover only the real
-> > doorbell bits and exclude the unused slot.
-> > 
-> > Set db_valid_mask to BIT_ULL(db_count - 1) - 1.
-> > 
-> > Fixes: 812ce2f8d14e ("NTB: Add support for EPF PCI Non-Transparent Bridge")
-> > Signed-off-by: Koichiro Den <den@valinux.co.jp>
-> > ---
-> >  drivers/ntb/hw/epf/ntb_hw_epf.c | 8 +++++++-
-> >  1 file changed, 7 insertions(+), 1 deletion(-)
-> > 
-> > diff --git a/drivers/ntb/hw/epf/ntb_hw_epf.c b/drivers/ntb/hw/epf/ntb_hw_epf.c
-> > index bce7130fec39..ee499eaed4f3 100644
-> > --- a/drivers/ntb/hw/epf/ntb_hw_epf.c
-> > +++ b/drivers/ntb/hw/epf/ntb_hw_epf.c
-> > @@ -580,7 +580,13 @@ static int ntb_epf_init_dev(struct ntb_epf_dev *ndev)
-> >  		return ret;
-> >  	}
-> >  
-> > -	ndev->db_valid_mask = BIT_ULL(ndev->db_count) - 1;
-> > +	if (ndev->db_count < NTB_EPF_MIN_DB_COUNT) {
-> > +		dev_err(dev, "db_count %u is less than %u\n", ndev->db_count,
-> > +			NTB_EPF_MIN_DB_COUNT);
-> > +		return -EINVAL;
-> > +	}
-> > +
-> > +	ndev->db_valid_mask = BIT_ULL(ndev->db_count - 1) - 1;
-> 
-> I would suggest adding a comment in the code for why this is for future readers.
+On Wed, 25 Feb 2026 00:28:06 +0900 Koichiro Den wrote:
+> Usage (example):
+>   - modprobe ntb_netdev ntb_num_queues=<N> # Patch 2 takes care of it
+>   - ethtool -l <ifname> # Patch 3 takes care of it
 
-Will do in v2. Thanks for the suggestion.
-
-Koichiro
-
-> 
-> DJ
-> 
-> >  	ndev->mw_count = readl(ndev->ctrl_reg + NTB_EPF_MW_COUNT);
-> >  	ndev->spad_count = readl(ndev->ctrl_reg + NTB_EPF_SPAD_COUNT);
-> >  
-> 
+Module parameters are not a very user friendly choice for uAPI.
+You use ethtool -l for GET, what's the challenge with implementing SET
+via ethtool -L?
