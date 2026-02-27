@@ -1,47 +1,47 @@
-Received: from OS0P286CU011.outbound.protection.outlook.com (mail-japanwestazon11020097.outbound.protection.outlook.com [52.101.228.97])
+Received: from TYVP286CU001.outbound.protection.outlook.com (mail-japaneastazon11021098.outbound.protection.outlook.com [52.101.125.98])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 88FE13AEF5E
-	for <ntb@lists.linux.dev>; Fri, 27 Feb 2026 08:50:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.228.97
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 66F693B95EF
+	for <ntb@lists.linux.dev>; Fri, 27 Feb 2026 08:50:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.125.98
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772182211; cv=fail; b=c8gEEBej2J2XUWbPhjzK1AfT0rLcetKFZFXubPhhWPQDFvo3mT128fjzEsYLfbP4F5upFahV5kAmIjtCqGujW2Q6LIOnGSzylYrm7YZX4sVOJMMZBB5PLMtRJMRN3kv51c3BeCu/xSih8p4HgrSaAtparMumGVlJJ+uf4igfjvE=
+	t=1772182215; cv=fail; b=URhzB9TkRh0pOLwA+dtS4qGS58UAjCx8V6PyYrWU8RRLv1gGyTrLwYTVQtw4orguluA8VNPOiTdNxSWNeNfunFh18fvM4jBnaVrOPf5/wdTzQQQL/rMW7sYoIDtBa5vygB7hFUKMMxihnkELh/dq/6hHr8bSis1z2NCIm4/Qn6g=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772182211; c=relaxed/simple;
-	bh=DQSLH26ddC1EMtwNntY7VcJBcfPHqAXdvkDaNeYWJsg=;
+	s=arc-20240116; t=1772182215; c=relaxed/simple;
+	bh=vQrX+hPHoVACTDuFEADHMgSw2Ha+DMmirrfI/OVy2SE=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=IYDzMWpogJ33dGGg46PiZ6+/S2tozn0F/r4+rNARDMZPDpTQp5fiSU2qZpo8OZrpVwx3tXVI5ASqKa1cp1sZ7oSFLPBOpN89tSHtCp/gbSRY/vafB2FhhA3zEO6EgVn4JfuOLsFCVxGVo9O8V5q+IOJhqHRPiq75tJNPUqoNGgY=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=gpokTMTP; arc=fail smtp.client-ip=52.101.228.97
+	 Content-Type:MIME-Version; b=Pksrkgwv2cTO591+xPFcEDrFqfiZAwxLFs6oraJgX3eMpCrOBaxGIJl8kUY7mAX6qHlEudZ5oaZsfj4+nUbd9ks7eYu84Vc9DI8VHQUddhJ0e0SCT66xa0xXVxmVomkv/nYbATtOLvWW2BFBXTy0BIiJ7lix38FgQQfNtpfFuBY=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=ZnhLclYw; arc=fail smtp.client-ip=52.101.125.98
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="gpokTMTP"
+	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="ZnhLclYw"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=JhI7p6Q+CVssFGYQSTmhpqhI4Ja2g2qpHdWsmNU+CHf8MW3jZXMQURIz/sE9kOpgfh8Jl4RuYGKEb6hfH6b01Gc8YHPoV/pBST9098iig/3ZE6/kU4WtwjPdNbfRAWcth5aoqV4C2nrFFPL1UzwW6nuY6hn+b7vGWJI8SfEzp0IQoOGMXyGjEtbbFysMpyLygAWUopZRoXrSojTTk2lkm6wQHM7rHncMC2W2ebPprM0OhaEx6d7JWxVxuJ6so32eR5SSbbhzGKdJJorxHXKxqI/11bCLafDuDT7SSLQe+clXrY1Pnb9tXj7YPl13jQW+pZW1Iv4F/P06vWmTbmJYnw==
+ b=OXPnFz1XxYUXMa8wb6UjIB9UPpmVOSmKG/qGhp6+mylDxG+4gOAgDj1VtmMWRnAvXmlyecK8k5KL9B2lb+M53RHLwiY7OEYA45rhe53HA5I5fdsiqiC25kMztUa1dNrEeBs6hRm/GgJCQmmvlKuwcGfcQbr3IBo5w8zNzatZWI0F02Ticrj5XZGlD9MyYha4mJSSedUzyor0KbqW1aNyqt17BcJMlm/7XOTvfZclxw5D9l4DHGYbbOi+mQRDeYUK3exV3KrDakaB/+qPM+JwmsBJfOWI+O+vGCJXppVeZWm/a+NbPkKOICtRRXbW9S0MgZ0cfoevQ19D7bRHZXF5sQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=DwoJ4fD8ofZ+rV5jN+pcWS8DvxinyDUWYKMi2mIwnio=;
- b=kMq/l2RePHrNndX0trh42YtEKi4v9jbBy/Xw/G4KLSbWcXxu0TpEnZW3Aaq4P2MERNpjEZFAtKTIJOkIQw5WDUa0OPlYtm0q1s+KttTQf0bM5VR6EzseN4wrBTF0KtXjPc8JtmmvvyUknZ9AIIquVtoYAxV9jgKv8687xQ0wQarNDGG6xPXoAxcBFbZdvNHIwYF/u8qjWD0i7Y1bzaepkqVX2vJ6EGT6bLibw8Oo6kgSTHDG+85Nsynv0nRIYJDlPGuT0H1K8kGj8MExV+JJ+ya5OQgyDa8oivO3PE1ptw5yHCzNEx4Ie+PDP4pGtFldNGIzF2DXox92akZDXfgBJA==
+ bh=O5LYrye6HVBsqsCtVF4MTnDbMB0uWuo+tdulik9VrxY=;
+ b=rh7mMMiNTpUFC4nSk0G7LhwDdLTzg0W6P2cSlqZTPpNFX7ogLUxFL46k73oZIExETtWAyzfEFuI40n3GgG1WbpUYF6ejZdI6OQeHZiuMoE81HeNSjUVdea0GOSQ+KzAmHsPfRioxXJ/GOrbAsIQ5iY1S+j9yxeeGWmWn0NR9ybiUAWsFy6aDKlTxZovBLeF/4HoDIKX8+2dLKw76OLV9h5gKsSMSxAkwv/YSZ1EOUZvcgKbX+FhHSTlZzaMkcOkxNcf3yuijzm2xF5uYtkR/6Zlyc1j1cXAAKWEAQAjpHg0fl9L5jbBFNSkft/98PksjyNa+8twa7Udof94sUFf0Ig==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
  header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
  s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=DwoJ4fD8ofZ+rV5jN+pcWS8DvxinyDUWYKMi2mIwnio=;
- b=gpokTMTPd8KROFWTMtUDyOBLGhrj8At9zAo4F7uiku+nPEAkaizJo2ORrW7Z90Azv2TfOIZREIV7efWj5Oot0UUNuR79bCLbwTA9Wj+W8jngXmhK4+IeVv0CA+B+7ug2yZN4zOL1uptl0KvRcc8n6kSdPPHepXiIu8/IHWdg8aU=
+ bh=O5LYrye6HVBsqsCtVF4MTnDbMB0uWuo+tdulik9VrxY=;
+ b=ZnhLclYwF9OwEvOb/0j55cI9y0WugEfZBOXLYgMVKx96uo2ybKkM8oQ+bWU6iRlutCkKjDCLcl28HdstAHQdSYG2rddnEX2BSzUyejLTM6lmdIVxCbdvXKtVnYxRrFqdNFdWZHoNOjJUUd0dsgPeBU6ZZ/sF7HBYoq4MxawWxRQ=
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=valinux.co.jp;
 Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:38f::10)
- by OS3P286MB2135.JPNP286.PROD.OUTLOOK.COM (2603:1096:604:196::10) with
+ by OS9P286MB4075.JPNP286.PROD.OUTLOOK.COM (2603:1096:604:2d5::5) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9654.13; Fri, 27 Feb
- 2026 08:50:03 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9611.15; Fri, 27 Feb
+ 2026 08:50:01 +0000
 Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  ([fe80::2305:327c:28ec:9b32]) by TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  ([fe80::2305:327c:28ec:9b32%5]) with mapi id 15.20.9654.013; Fri, 27 Feb 2026
- 08:50:03 +0000
+ 08:50:01 +0000
 From: Koichiro Den <den@valinux.co.jp>
 To: Frank.Li@nxp.com,
 	dave.jiang@intel.com,
@@ -56,16 +56,16 @@ To: Frank.Li@nxp.com,
 Cc: linux-pci@vger.kernel.org,
 	ntb@lists.linux.dev,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH v2 06/10] NTB: epf: Document legacy doorbell slot offset in ntb_epf_peer_db_set()
-Date: Fri, 27 Feb 2026 17:49:51 +0900
-Message-ID: <20260227084955.3184017-7-den@valinux.co.jp>
+Subject: [PATCH v2 04/10] PCI: endpoint: pci-epf-vntb: Exclude reserved slots from db_valid_mask
+Date: Fri, 27 Feb 2026 17:49:49 +0900
+Message-ID: <20260227084955.3184017-5-den@valinux.co.jp>
 X-Mailer: git-send-email 2.51.0
 In-Reply-To: <20260227084955.3184017-1-den@valinux.co.jp>
 References: <20260227084955.3184017-1-den@valinux.co.jp>
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
-X-ClientProxiedBy: TYCP301CA0009.JPNP301.PROD.OUTLOOK.COM
- (2603:1096:400:386::7) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+X-ClientProxiedBy: TYCP301CA0011.JPNP301.PROD.OUTLOOK.COM
+ (2603:1096:400:386::14) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  (2603:1096:405:38f::10)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
@@ -74,117 +74,99 @@ List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|OS3P286MB2135:EE_
-X-MS-Office365-Filtering-Correlation-Id: e77cda72-a1be-4cda-058a-08de75dd329a
+X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|OS9P286MB4075:EE_
+X-MS-Office365-Filtering-Correlation-Id: 7df49075-5374-4e13-5831-08de75dd31a2
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|10070799003|366016|7416014|1800799024|376014|921020|7053199007;
+	BCL:0;ARA:13230040|376014|7416014|10070799003|366016|1800799024|921020|7053199007;
 X-Microsoft-Antispam-Message-Info:
-	EzcVcBdl6/Y4mxrkUie8kb8DfM9CFsGbDVUe0kCMXOMXzoD+jDpFSqE8vIRVtGYYtkFaHyQl48yKdmH9RIseNPks+kpIQU+J+yxi1aJ4ZSxSEmDq7cZoHjLnfzMtfySkQMJHbcl1CvF1OK45EmgS4B2PXRSOfBTCCGmcqGmFqlr8aEJmmA+az7IaLi3Uy/FkSGZUNt+Ho8b4eHjtugZUXXX2UTzk4ps1lR0JNcCNRSvVEBIhItLHyhGp8FKNfbOO0yTwVX691PHMuawP05zwWvvJpIog+40/PTbBRiz8sWSEGNybtZP20uYLqN/WJOOupkKCC+WTB7ukD1fIxmZyOipzNCwE5OB4/g1N5gT+6uXfyAMoYT2gvs9ujyTL7dED42v3iqqA+Rj3+cGpw0XipGFHiaJsWd31fU0wCay0PcY6FzQUWYjL+qcFA5qtRkxQYnSVHkAg4hkhLBebxO1uKBR0ILR8FWsYUkSlZbA8YXVTKLPvuUrXD/oH/15+BCHcivm3IYGopAmvuI87hOarn34SoRfSjcX8UUwRvGIMDecQLYQbqaJRVZObV2LyV9hcb9i0OQ+YLeaCqNesHiuclfbCxcLB3zqauWWf9Y2emgvC5eJhC0GbfC+S8CU2H7uJn0u+qsisupKMXyS+A+s+IZ4Xc6xi9mrpqqvSleC4r8zxpkfHcdUW0ZAyxxbTFISuVrXhZRiNqGF2McuSDAdDIb/7TsKFtURChyRrJ6bNzew63lXn/7ep13lO/B2zrzyTzdHxiQm0CNi8i09EDUNsJA==
+	JneQ7vf9Q7psWJsOaHK/ifcDbv9HF5CtIMX+fRbCv3Jk7VY+5UldOYNjmGs27HjCJ4mityLoNJWtxt/dJ86LSo/6i1MQDiho1Aa8RZh73pufxegji/ZPg8b2YpvbaQPdtu3HgBeNmNfM4q7Aj5AbXXgHLj6R6uYwUMtRrDGT8ZkzxTHGGpMOqEUMHcR5FeivTVOeZ6bn0AwBSpm9VkxibBbviUUT0h8ElBr7Dj46rbddnAZdBjK8yoxPljzCBDOQt2p8LRC/jr361vkBJBrxT48uhaglBKTLMIVh5cTkX00JitRzp/y5lAQ5nSrA1js6OLoDNoUrZIwUR+KzYBTNuOOytsRSNrljZU84xKM+vToMiMc1Q66dosdXb3wJAIgM+JJZDMfpDr0DX3mVHp7W8oMzvlzgfd7NvjZdi7BXQXPBPjEWH/rP7PGVe+Zj5jBlEXiBUDg4WF4ah853fmpSNKJwNq1djvDsz/Sjg0CiI6ZagGjz986CAZwmfRscDRwZXPeldWBSccXJ3ccdbZTtPRITe3YhCe+RQwqZBKvzmdCz3GMi5MgKg0hM9B8QwUUVGHzzk4Y7MrFrFkghNf3ub9Z+OX4awFnhEwzT0e9U+2buHfQZnWozuktACgS+iUeH49gvb4jiwUlCZ92hAqrZjmnU/SyLfSJZDcEKp+F9q4YGrqE1a8O1jmci8pEvwjfNJRqQ6RlGPUpjP2gzxMKLs1teX3WobkLfdnaAy49CAJ9KURL6s1KHdSKh0oh7Lop5B3RF8CTJMd8qusbRPEO83w==
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(10070799003)(366016)(7416014)(1800799024)(376014)(921020)(7053199007);DIR:OUT;SFP:1102;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(376014)(7416014)(10070799003)(366016)(1800799024)(921020)(7053199007);DIR:OUT;SFP:1102;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?GTwFzm6FheUh47+MNlWCuTtz+hbklg01CijPmOI0c1VtERdZeBDOMLc0VvG5?=
- =?us-ascii?Q?FqPutnO6OGCeGw/hMJueyzTxCC6E7kQMnX0eCpAr6bffD3JiYRlUavb417wJ?=
- =?us-ascii?Q?3BCBxfGplQ2r5kudsi1QgGW/eRoXD51ZX+fMrThhAUxjgwPn+CAs+hbrbSKr?=
- =?us-ascii?Q?pRmFDrwhZeq8PUiNurQvW7/RJsD5cqpXGndSKOCcv0ewAr/Udo7Im6gT4tbE?=
- =?us-ascii?Q?AZEv7oSN/UsINHgmOuk4NE1s/Bjxqv4Eh6uHwakT9P7pvKyDhZbbr+8uA14b?=
- =?us-ascii?Q?4Xy/zSoT/T5orwT7qNOtg6XvRO2chTNDZGFeq6lMQkFWizEWG3F48MCwzuLN?=
- =?us-ascii?Q?4i/RQlv6fR19aesYnSPvZ7OZ069JjG7q444gHKMI86uZi3qnqT3cDy9CFsg1?=
- =?us-ascii?Q?TqY+sEVYFZWCiWr4yHsMvCSr8m6aefBSqpQEp4ZSuMIJwWDrQYAa6Z7lO4Id?=
- =?us-ascii?Q?WO5n7fEBTVlBNB4uBZi1+T7Q0MHY7C9dnTN2kxAFfSksENfQlK2/gshXd/c+?=
- =?us-ascii?Q?sLs/V2hKWccml2i168bWzYY5XJPe/TupBjSMwCaDBqBqO0XFwvaQ0kXWEttW?=
- =?us-ascii?Q?kM3y7rwiCSBdGf4o7cohbwf8u0fw0PZtan7VJzOFTFw2gJXe6HB05oapGGK1?=
- =?us-ascii?Q?LL1lruulBkuz4rcxORIyUpDz7ULAznu6RcOKurpKIEu2HFp06ydIsoTANrA6?=
- =?us-ascii?Q?bFZPPvs12SVzhBoz/LiK9QXTWXfnBqOeCnXufw0WYxINaUWtUGDivQyAOq2b?=
- =?us-ascii?Q?7lJe5GIwcYPWcf+CGiSy8ZbQ65x0FUAsmRkh4mF6Rs/DOEAOcaJtfJbUfWE/?=
- =?us-ascii?Q?Bpvjjl1WzQ8ZCLeHYlJlCo8Qs0iqugz4/iKJv+X3qkiHu0mGFIsUACFwAfEk?=
- =?us-ascii?Q?D4dfqrWOAnoolS08l6z+EGbcdPcaucSnz0H6h54jq6PRGjqebwBsHbviIKqr?=
- =?us-ascii?Q?QKaaFrPOpkdc95g4rGclW7tLKEZAYzt5lbRj8nqVt8v6CynVD7oxC9JI09SO?=
- =?us-ascii?Q?uMejevemU0VGBHzDxNCVc8jkId1SeNUi6GnehXI7Ir+YhcGF7yVrBt61aMXW?=
- =?us-ascii?Q?rk3AgRbPDfLfH8unOyNEpUsps8j2FSizvWzMdSubqOf3mneX316B5b2Lr3Mp?=
- =?us-ascii?Q?NegiRL9/WBBH/pYN+JpeRDrnerlBM9WJ6o1oSuG27uADrwEXW7W/CyBAaY+7?=
- =?us-ascii?Q?LFoXooNqjiKsnUnq+LFaWQc7kktQkCbZAWq+fdNKZ0M9EY8UJy4Qgc8JfDX2?=
- =?us-ascii?Q?qy2eI68dl+DEVmX0s+xP1m13ni3lEGq1SPlyrk8H/xQ55RePe3/XEbHeLgND?=
- =?us-ascii?Q?S9OPFEKXQUAyKVWZPcI/fCiWtBapa+4Djd8EQZmiVBIF3R4uTXIp9A+7Suuh?=
- =?us-ascii?Q?FKluQujNF13meXmwxHfz4PG/PZI5qqBHE7VX3H3AU28Npchgs7X6PKvw0EqU?=
- =?us-ascii?Q?HvxV2RDktOZHX2lbrzIS05ai/gf/jbKauWc5P49oyxmTV4GobKWvT5RsSQIB?=
- =?us-ascii?Q?KJqM0b+vCc99Eg+r74j5ekxX7GAdIf7tn5YWGWSGmk2Euqp9GJa+G6TFzOJ8?=
- =?us-ascii?Q?8RGUsMyZwrU9vzd2eBeLSFGqo6gPiLdG7DstEC3sWdLv75diMbGjhbeUpRlN?=
- =?us-ascii?Q?MCqOW+IoEV3oO8xEK4w0OffRcJGmqIkr2A1Un1nXaAzka976CQQ16U77jGMH?=
- =?us-ascii?Q?5CIqJ5/dosKrFlLqWkbtdzgws1oK8wcPZ67Nef3+tuJkjhps02iCcJ+jmGIz?=
- =?us-ascii?Q?ZD8GcWs+2osCifx9VMlsn2qjbhLUgDas+8PDrn7XeHyq+nD3c7xv?=
+	=?us-ascii?Q?kWwZ/bB3Hj/k0kvLd//IwdD/rfGBONGRbTn1xvIw932KhJxf1rw7PQe81dY+?=
+ =?us-ascii?Q?R9T+m3jCXeGQdZL732P8WvpCqhrl8mATss0dFd+OuJjrNd26OHvKL7SaN2a2?=
+ =?us-ascii?Q?4z2mVZl31y+mJ5mQ+mcziSzEFgq0klE0i7tPJYDH4LTekkzmdhALzTqHV1xf?=
+ =?us-ascii?Q?MIg/8J2Y0JrunBUYdS2LINuaPOHB1c2EhmASHsH4taYE1j8TCmfrhChuJJ/W?=
+ =?us-ascii?Q?xYb81nWuOsp4AAoGXRAj0NEx7WFvWRYQqVJQnFonCTI2ARVuXkKfynlIM/nP?=
+ =?us-ascii?Q?cfBu2MUuxhKLd6eLRR6d6JznaqXEVrpZtzcECg88WI8Qe/yrPQEYf1G7rWSN?=
+ =?us-ascii?Q?gwkY5LbrKadEOpdKCyyIoJchUIMU20VAI7jW/MmCONMjvrRm4+yuVHtSjmHt?=
+ =?us-ascii?Q?8ZRZaswnm3gLLUeuuUjHAYkQZtcto6RuKt7cTRf7EHVM0hfhY/p7J0eGQsvc?=
+ =?us-ascii?Q?fn+157aqMf96HAtCkedtR3LcM00P/KlqW1eKOIsJdRz8D27UczRdlpEH3CAe?=
+ =?us-ascii?Q?b0tkBFQeGmlsiOHJlcGSTRHJU79xLrATDtkRm3FvnreXwBe/07YMN0Zx3kTX?=
+ =?us-ascii?Q?gK41XWXU0To/NOVJe3RuXYbCSSgCpTGUfT8vi7PQNOnFvAxl3dAk7RbBTiX4?=
+ =?us-ascii?Q?XWfM5oPbaeIv/XWg10HPc+Jq0PPccLPP1cOCUQRox0VjryRZmoeCSQRxOap7?=
+ =?us-ascii?Q?raaDch31OHo370uSk5+nSafyRicP7ObkoKxmKjUBIop968txRa01KYsUub6m?=
+ =?us-ascii?Q?Q7CDJyY0K0mTKL8URYvcN2zog1RyTs25I/tA1/n7fs7fI4v4JfL6oJtePLQh?=
+ =?us-ascii?Q?g987vFoIXVhwQ6QY/1DeUTonPrc5KHT6kXC38vRGKaJDLKl/IiVlpznjD1Tu?=
+ =?us-ascii?Q?qs+Iav//Wbb/hlGHrGhXt8a860cjxcb9W1vtoqw1OL2TPN3KVEM64xgEZNms?=
+ =?us-ascii?Q?BczwCsOp3FnpTkLsmnuaUyXzztps9Q664x8kfdc27NzNZI0x5kwd7mkmhk61?=
+ =?us-ascii?Q?K9xuWw5itSeBwisAcvDEoXYF1RRRP2dAYjYdt+yoQj2E4uFHC6DZUJ4olWih?=
+ =?us-ascii?Q?ExxHGTFLZ7XasLDDtVTHDwc1YEQK4cbzZ4BhwV0noR6MVM2JJcW1//wKTmpQ?=
+ =?us-ascii?Q?OaOnF+ZYZXHJ8LqpbozVUeYZ9gSQyQZ53ySz2sSL5Rd/r6yHqG9srV5KxxPH?=
+ =?us-ascii?Q?P4HheSxYLXMkHgLRXZ2k1rkzLDlCFX61iqj5+NFfVEcaidsEbdBSw7jSf/U4?=
+ =?us-ascii?Q?dJnbyEvEegWx6HdwnL9CXXSecNPUxZpe8xQtGKoJmDZrw+bxFWcOk4X8ldWR?=
+ =?us-ascii?Q?flclJujDyUiZ0x0Lsjk8VKBwgi/UqnXrs7SgnYTl9uE0K7YUZDPp7fQLJaIV?=
+ =?us-ascii?Q?Jrz2f3lrHKzM6wNKpHqVoj6BQ65hf3nUEGkQ3Jpxgo8oJhuc1KqEkOp7IhWy?=
+ =?us-ascii?Q?KBDjlf/HlCjU98TOJYYz2MoNF4WEtyq4EgZ3Eq23Tiso3mJfxZTIR5QsIVi4?=
+ =?us-ascii?Q?y/+4Kzu7X3xLlp7DnX+M7n7upQgFVumKM+cGeDCImEJzpBndBSS00ZsTJ1RW?=
+ =?us-ascii?Q?4IzUulHdOsd0fmMxAA1PdzWHdYumrP2+icCiMIvNT/MbjkZR8lvWoWkB0jA8?=
+ =?us-ascii?Q?GWq53RiimIcBFgSA+lUXTVEekxh8WwPSp2frPa3WtPrqv8PTJXd0ElS+sRGv?=
+ =?us-ascii?Q?fEf+/gX+rUoxnrJNbJwkvZdn8K5dCEIZ4E8GxIqRRb5uqRzgzCxCw1vNKuKN?=
+ =?us-ascii?Q?cLFnYAafh58FHRIODuVQJiEi494sKS1ND7WgUy1gKji7qhxwOoH1?=
 X-OriginatorOrg: valinux.co.jp
-X-MS-Exchange-CrossTenant-Network-Message-Id: e77cda72-a1be-4cda-058a-08de75dd329a
+X-MS-Exchange-CrossTenant-Network-Message-Id: 7df49075-5374-4e13-5831-08de75dd31a2
 X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 27 Feb 2026 08:50:03.1163
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 27 Feb 2026 08:50:01.4676
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: C8hSwL6ZEttbV7vs1nZZ7FtCWJWAMJH5EhxjxC0EaINHCnw1onWnm0cqMZ9wuJ5TVsrrVWxKek3YN4OSTlLwww==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: OS3P286MB2135
+X-MS-Exchange-CrossTenant-UserPrincipalName: Zfpa38EyVvFv2IH7IxJ0Fhl9ORH0Vl4xuLnu+8d1jI3PYAf05BXl8YZCTR3blgfACuJzd37zzJQi0XkKFoCvjQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: OS9P286MB4075
 
-ntb_epf_peer_db_set() uses ffs(db_bits) to select a doorbell to ring.
-ffs() returns a 1-based bit index (bit 0 -> 1).
+In pci-epf-vntb, db_count represents the total number of doorbell slots
+exposed to the peer, including:
+  - slot #0 reserved for link events, and
+  - slot #1 historically unused (kept for compatibility).
 
-Entry 0 is reserved for link events, so doorbell bit 0 must map to entry
-1. However, since the initial commit 812ce2f8d14e ("NTB: Add support for
-EPF PCI Non-Transparent Bridge"), the implementation has been adding an
-extra +1, ending up using entry 2 for bit 0. Fixing the extra increment
-would break interoperability with peers running older kernels.
+Only the remaining slots correspond to actual doorbell bits. The current
+db_valid_mask() exposes all slots as valid doorbells.
 
-Keep the legacy behavior and document the offset and the resulting slot
-layout to avoid confusion when enabling per-db-vector handling.
+Limit db_valid_mask() to the real doorbell bits by returning
+BIT_ULL(db_count - 2) - 1, and guard against db_count < 2.
 
-Reviewed-by: Dave Jiang <dave.jiang@intel.com>
+Fixes: e35f56bb0330 ("PCI: endpoint: Support NTB transfer between RC and EP")
 Reviewed-by: Frank Li <Frank.Li@nxp.com>
 Signed-off-by: Koichiro Den <den@valinux.co.jp>
 ---
- drivers/ntb/hw/epf/ntb_hw_epf.c | 20 ++++++++++++++++++++
- 1 file changed, 20 insertions(+)
+Changes since v1:
+  - No functional changes.
+  - Use EPF_IRQ_DB_START instead of magic number 2, to be consistent
+    with the change on Patch 8.
 
-diff --git a/drivers/ntb/hw/epf/ntb_hw_epf.c b/drivers/ntb/hw/epf/ntb_hw_epf.c
-index d3ecf25a5162..bce7130fec39 100644
---- a/drivers/ntb/hw/epf/ntb_hw_epf.c
-+++ b/drivers/ntb/hw/epf/ntb_hw_epf.c
-@@ -43,6 +43,18 @@
- #define NTB_EPF_DB_DATA(n)	(0x34 + (n) * 4)
- #define NTB_EPF_DB_OFFSET(n)	(0xB4 + (n) * 4)
+ drivers/pci/endpoint/functions/pci-epf-vntb.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+index b13e0d2db6cd..b94e2e1d3421 100644
+--- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
++++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+@@ -1280,7 +1280,10 @@ static int vntb_epf_peer_mw_count(struct ntb_dev *ntb)
  
-+/*
-+ * Legacy doorbell slot layout when paired with pci-epf-*ntb:
-+ *
-+ *   slot 0 : reserved for link events
-+ *   slot 1 : unused (historical extra offset)
-+ *   slot 2 : DB#0
-+ *   slot 3 : DB#1
-+ *   ...
-+ *
-+ * Thus, NTB_EPF_MIN_DB_COUNT=3 means that we at least create vectors for
-+ * doorbells DB#0 and DB#1.
-+ */
- #define NTB_EPF_MIN_DB_COUNT	3
- #define NTB_EPF_MAX_DB_COUNT	31
- 
-@@ -473,6 +485,14 @@ static int ntb_epf_peer_mw_get_addr(struct ntb_dev *ntb, int idx,
- static int ntb_epf_peer_db_set(struct ntb_dev *ntb, u64 db_bits)
+ static u64 vntb_epf_db_valid_mask(struct ntb_dev *ntb)
  {
- 	struct ntb_epf_dev *ndev = ntb_ndev(ntb);
-+	/*
-+	 * ffs() returns a 1-based bit index (bit 0 -> 1).
-+	 *
-+	 * With slot 0 reserved for link events, DB#0 would naturally map to
-+	 * slot 1. Historically an extra +1 offset was added, so DB#0 maps to
-+	 * slot 2 and slot 1 remains unused. Keep this mapping for
-+	 * backward-compatibility.
-+	 */
- 	u32 interrupt_num = ffs(db_bits) + 1;
- 	struct device *dev = ndev->dev;
- 	u32 db_entry_size;
+-	return BIT_ULL(ntb_ndev(ntb)->db_count) - 1;
++	if (ntb_ndev(ntb)->db_count < EPF_IRQ_DB_START)
++		return 0;
++
++	return BIT_ULL(ntb_ndev(ntb)->db_count - EPF_IRQ_DB_START) - 1;
+ }
+ 
+ static int vntb_epf_db_set_mask(struct ntb_dev *ntb, u64 db_bits)
 -- 
 2.51.0
 
