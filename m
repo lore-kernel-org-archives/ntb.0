@@ -1,125 +1,236 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.11])
+Received: from OS0P286CU011.outbound.protection.outlook.com (mail-japanwestazon11020125.outbound.protection.outlook.com [52.101.228.125])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 13154425CC3
-	for <ntb@lists.linux.dev>; Mon,  2 Mar 2026 16:52:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.11
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772470332; cv=none; b=cz1dhVwpKBasGhsUkkdAsP4Jua15BZVR578vP+QcmSZrXyxSC9fP0+MLZbKmKoYp5nGtoBM7Zk/Nh9jI9XSeWx7Eo+2AfHHq33TsCkidi1cGqgv17+yTOZ3iZ47BLKVOkCWan4KfJ0w24GgQGCZ9o+KLd0qCVgg2OK6SPXGkwYo=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772470332; c=relaxed/simple;
-	bh=C8Dbe5uYyVD+vmGFPFiFLdwjWX5QpoGMFvRHJlgWZ48=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=R3GfdNfmvRUGwLsI68pI+fve7i8nU+8ydw/Of9OknG1iSSVziXGHf/fqqcOU3Vex+3cRzI4qrHNUfggXDM41Zd+oNcYIHDTT+uG6bKigN53ZnVOeC/8JZ+FN/IvbG0PTNjswC4zHvXbMUPAEpe+nZW/sOo28BMdU569p9qMZewM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Hmtk9y0u; arc=none smtp.client-ip=192.198.163.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0EDAF2848BB
+	for <ntb@lists.linux.dev>; Tue,  3 Mar 2026 04:45:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.228.125
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1772513160; cv=fail; b=MolHwd6IxncXbq7FWpwL103fItBxdaWn+VvNYseysVq1EyH3SBmsbRXmQOvFWSk7fHX7Eyt1RWsKd8K+tQTbzgY7z5FZy238uLyc3rkuhPicAE4A8EzQTIMbrRkiE2ZMmv249hv7nHMR1Z5mJl0bz/r07gZBcjFcGiK9uzmEwe8=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1772513160; c=relaxed/simple;
+	bh=W9Cj7SrXBKSlzy80WrZMQU3nb1FfKWx4S1Nw6HOAt2s=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
+	 Content-Disposition:In-Reply-To:MIME-Version; b=gTULcFzuym/iFilZ++pD7eJowW0RdQZ0KOZc0NXXmFBoH+e8g2GpM0XibxwtUOChiqWeC8ggI4+FfVzfGrPJFsym4Gd3IbPtDC4zYY3vZ9ivJr90yUusA9NRQzMaJG3FRKHd+SBtXmQf2lMdvX5h4pPh6GhfZwmqQNdpbKhl0FE=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=UR69s2GT; arc=fail smtp.client-ip=52.101.228.125
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Hmtk9y0u"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1772470331; x=1804006331;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=C8Dbe5uYyVD+vmGFPFiFLdwjWX5QpoGMFvRHJlgWZ48=;
-  b=Hmtk9y0u1dsacW1R/NYY1gSHCL8oVFoCLMApqIjArReMCnmNPTLGlW6K
-   kWMGSFbkPCpcHwAY3Bw6q699IYZ94vrttviUogWTp5EZteLWxROK4EcJ0
-   ZHaFhB2u+T+ME5AC94XVG4xW6TOeR4L6d3g2OZvyxSk34J+iteSU25Wlo
-   NJ/St4W84ChFjKav2QYmBbBuFLh/vMtUvXBouhvEjJODoARdyuvTirEbQ
-   3imfseEtjdbWGO8g0Xsa/a7GoLs5i9bk9tV21uMHdCDHep16z2yFTIRSS
-   ZwKx9gfu7M6Ox6doB2JLoTvRYI6+tn2TxmV4M6AZRLjiTjLITgbZg7X6W
-   g==;
-X-CSE-ConnectionGUID: XSzNa27IRL6voyZ5fy9Tgg==
-X-CSE-MsgGUID: jKVRHQ+URySYLs4PiU5f4Q==
-X-IronPort-AV: E=McAfee;i="6800,10657,11717"; a="84124640"
-X-IronPort-AV: E=Sophos;i="6.21,320,1763452800"; 
-   d="scan'208";a="84124640"
-Received: from fmviesa003.fm.intel.com ([10.60.135.143])
-  by fmvoesa105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Mar 2026 08:52:11 -0800
-X-CSE-ConnectionGUID: PzfMRIKFTlOe2stRhsGxng==
-X-CSE-MsgGUID: 9AodBT6ATb2koycD1NHfPQ==
-X-ExtLoop1: 1
-Received: from sghuge-mobl2.amr.corp.intel.com (HELO [10.125.108.71]) ([10.125.108.71])
-  by fmviesa003-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Mar 2026 08:52:09 -0800
-Message-ID: <3ddba488-6577-4f04-8a50-d64850b7cc5b@intel.com>
-Date: Mon, 2 Mar 2026 09:52:08 -0700
+	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="UR69s2GT"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=r91xvvU4iE83cl9zfW2xhWizRZmY5o6CTBHaPZAYNpUyd8pCc9DmGLSe/Q0BHT8q/r7ziDHlRzrQJd8icQj1IhVNgMlqZH+LuczMzHAzXtyKUNJS8CiCKJ6drzChWDVmlQdFUqaOI7unPlYW5zLTmJiNodr4TH3xYuvTNlavaj554F4pLorwnofi6tTB/e4SK9FH4WVTNBFYyrpUYOQga9rDj8dHbcUrCNkS7D1NO1HWb3MWvd0VZnnuIUcV+AgTmVd9lstQ65p23fB5rr7nt4yVADBM9rI8vmhTKFiqImbcRUduwmtLsEel97HjdH7kVb1LarLi+GJ2Bw0c3DCUug==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=3BHH8YCbqyg4nQFBTSpZpDVrCp1H3GFLV69BF5wvTdY=;
+ b=OQ+BvZVjYmj45iFtisqoOAjmesKOShlHVryf0Y6pEPe1Arvrhfny5oXWkNEo0m17svSn/gz0hRW6LJLGGqgDN8GzU8ocfW0pxzT/w6LRAlOI/Rj5dDH+v7soo0ojrFwUdUR4SueNCgIHTCL7+M/SKtgTfRRQiDiyKu6+kqtFc+C2vXQO84LGZmp0xPtJcn2WYRoyTBqlTr7NhYFcJtI36uL9Lo4bQE029UCaagW1iPB4YlWwFcgRhpWOSrUlp4xuBWK7wjHigc1cL3wk16kDWfL7YjJNC1EYT8t6My5y3ggusSdP/OzRypm7eyS6/I1pSf6LwI3A2M6Yn4g4HnyLHA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
+ header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=3BHH8YCbqyg4nQFBTSpZpDVrCp1H3GFLV69BF5wvTdY=;
+ b=UR69s2GT2YUQepETzwL/D6Tt7KwNH3FYcZlup5ifFPeG/1O79+VkvcEWKroWqnsvXCnMEOhIsw4t/hAUhrYk0ieELwkkrw7mEDFQm3NpREpixbd+sotEVx9/hUNSQG3fb40w7v5Gn+JarAP84k/CQVIRMy0foT3F2eLNNRfJs5Q=
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=valinux.co.jp;
+Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:38f::10)
+ by TYRP286MB5947.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:2f0::7) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9654.21; Tue, 3 Mar
+ 2026 04:45:55 +0000
+Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+ ([fe80::2305:327c:28ec:9b32]) by TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+ ([fe80::2305:327c:28ec:9b32%5]) with mapi id 15.20.9654.015; Tue, 3 Mar 2026
+ 04:45:55 +0000
+Date: Tue, 3 Mar 2026 13:45:53 +0900
+From: Koichiro Den <den@valinux.co.jp>
+To: Manivannan Sadhasivam <mani@kernel.org>
+Cc: Frank Li <Frank.Li@nxp.com>, Jon Mason <jdmason@kudzu.us>, 
+	Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, kwilczynski@kernel.org, 
+	Kishon Vijay Abraham I <kishon@kernel.org>, Bjorn Helgaas <bhelgaas@google.com>, 
+	Geert Uytterhoeven <geert+renesas@glider.be>, Ye Bin <yebin10@huawei.com>, 
+	Lorenzo Pieralisi <lpieralisi@kernel.org>, linux-pci@vger.kernel.org, ntb@lists.linux.dev, 
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v5 4/5] PCI: endpoint: pci-epf-vntb: Switch
+ vpci_scan_bus() to use pci_scan_root_bus()
+Message-ID: <eb7iqd7odcyojhybz2w6uqtbqfh5hayou6qpvyq6wtsokv4b4c@dput6rhnc5vt>
+References: <20260226084142.2226875-1-den@valinux.co.jp>
+ <20260226084142.2226875-5-den@valinux.co.jp>
+ <3tgrcel5fl55ulf3zjya4fkz4t2ms7iwwjif5rnzn2rafsydd6@i4e5etm7uqvz>
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <3tgrcel5fl55ulf3zjya4fkz4t2ms7iwwjif5rnzn2rafsydd6@i4e5etm7uqvz>
+X-ClientProxiedBy: TYCP286CA0315.JPNP286.PROD.OUTLOOK.COM
+ (2603:1096:400:38b::9) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+ (2603:1096:405:38f::10)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 0/2] NTB: Allow drivers to provide DMA mapping device
-To: Koichiro Den <den@valinux.co.jp>, Jon Mason <jdmason@kudzu.us>,
- Allen Hubbe <allenbh@gmail.com>, Frank Li <Frank.Li@nxp.com>
-Cc: Niklas Cassel <cassel@kernel.org>, ntb@lists.linux.dev,
- linux-kernel@vger.kernel.org
-References: <20260302144522.750620-1-den@valinux.co.jp>
-Content-Language: en-US
-From: Dave Jiang <dave.jiang@intel.com>
-In-Reply-To: <20260302144522.750620-1-den@valinux.co.jp>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|TYRP286MB5947:EE_
+X-MS-Office365-Filtering-Correlation-Id: ed294303-c713-4d1b-dcce-08de78dfc153
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|1800799024|10070799003|366016|376014|7416014;
+X-Microsoft-Antispam-Message-Info:
+	sdD50ovWO19xIjIT7n8IyDUC7qu+9cNntajP3c52UCoMhco0huRytya+KtHtt9wKKvIg2UzlEyelGWf4bBHwoT6zOfZF/7VlqEk0TRFTiFK5EFnpZyOGrChFG+14ZMf5AxawEmYi42V0NzU17f5j70/IOzQDbsVGPgYosQxsbgR12NUiR4js6cnkuGyE/1ntG2GRpy1hE/b0BF/Z9juLTUa7o5cCa4Uvm/zqhTJBtoXjgdZDkW0PBujIZ8CZErq9sIQ5TC8xZcW7cJN/hUAICnrL3JKxbEO+rEFbiDk/eV8cVMcKmK7nefjHrmxOzueqCZTVHvyKQhZkgcX1YbVgv5PujZ4ljLH5Svq5HNYx3Fab9hngJR4jubsmnZ/iIFn+wWPZs+6+Yrz20nRP5rBICFJUsiNpfn0ipC1gebr7ikZRDEAwiJm2SSs4e6y765vtnS44c/amGdCrP/IhYoi9JRcKvJPp+hPdIkfNmy09tT1stNGcmOFQGeF6aQNfzuqRfy96psUGB+wV4wlYX+FtXsoOx7KzIs7oulB7JDpHIAF16pLAn4sMx1pScMz+yOli3EQh2JkyeryDCo5llav2cNfVb5FGJYT0n+P/7kdYUTMEptddkv7WdIkL0wfnDZAVeQr5nSSpO5IB4QLHwAVFcwn0yke9UoJqtTTRymsPvnoGOI4zpWm7qHlM5kwCgG61B5+1cYmZmp94+QErg+c6fcH540HrKjDGhFBgiSkjH+s=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(10070799003)(366016)(376014)(7416014);DIR:OUT;SFP:1102;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?utf-8?B?Y3J1VUJEbnR0YmhmazZzTUY3Zmg3eUJERUR5eXAyNzBxTHRJbmQ4cVFaSUZ2?=
+ =?utf-8?B?MU1hWkJQVGltakFUWWIyQjFLeVpISmxobHNlQVVPVVZZeTlUZTFmblFyWFdk?=
+ =?utf-8?B?Y0hlUk9BY01ubUg3dEdpRkU0UTVtSnZCcEhGRGRuRjlNRHp2MTl4VUQ3a2Vm?=
+ =?utf-8?B?bnJQTnhIK3N6WFJyVEVudTlaWTJFaXNvb3F0eUIzUnJhdEN2SHhmbXN5L085?=
+ =?utf-8?B?Mkt3R084eWkxVDV5TDVVNHJiajR6cWJTeFlmd005SHhlSGNyYkFxdlZmY0kw?=
+ =?utf-8?B?WGNIbzlHNlBBY0JnNjVxVWM3K2dVOXREdDdLeVlidnRCMFBiVmY2eFlLU093?=
+ =?utf-8?B?N0RVa3VnZS93M25ZYnlkV202ZkNMSDd1MzVIOCtXbzNSVzNURXhqdnpMWExn?=
+ =?utf-8?B?WEpQcVFnZy9RM1JkZjVXVjZSNWR5OXJDZnVoTEhRNkhsaUtvTWdjTXl5MWFp?=
+ =?utf-8?B?MDJLeGtmZ3JkT1d2ZnIwQWV6VFRsOVRGTUdVdkRqQk9OOXJVSlVsM2x5UXI2?=
+ =?utf-8?B?cGxCUHFvWWpSaTdPMWJyRmIwNlZHOVYzbHlmc0lXZzA1NUtUMjhkZEhCMjdQ?=
+ =?utf-8?B?c3lVUU1iZ3FCd29vMFZsYUwvT1V0TGV0NGtWeVg2eERQNFI1L0xYZThVVExT?=
+ =?utf-8?B?YUNoOEpoYmcrWGZQT3VWaTg4MHVtcHNmZTVOd1llc0hkZVJvc0ZNYWROL3Br?=
+ =?utf-8?B?TlZ0RzNRQ1haenhUT3RBVjRKajZOWk82bFB0c1M3dUtiTU1OMlZmRVRYOEhS?=
+ =?utf-8?B?VXlKYlFCVDhIdjEwQ2JhZkhnanFDT0djTERtSTBkTkpmdk9QYmM2V1I1OUJq?=
+ =?utf-8?B?UUFOWHFneW5kVDNQa3NveFhVdjV0bEc3MlRhK25Ea1hqOTZiLzNIUkhzSWN6?=
+ =?utf-8?B?eFRRdFlsMUgrLzlaUkJMQ3VJNng5Z0hUT2tXTlVqV3lWNUVzT2ROc0tjOEh6?=
+ =?utf-8?B?THhVNGNoMDBXMlh2VnVDQmp4UzBTZWF4WityVHZ5TUNUYVFUWXZJZXdEL2V5?=
+ =?utf-8?B?SzVsdnJCYTQycTZWQ0w2NXZMbkNiTHpUMWkyNDQ3a3ZxQTRmY3ozZXRsUVJa?=
+ =?utf-8?B?S2ZjTGdycWhFUlVSZUt3emZSMmVJVzluVVk1c3ozcGNzM3pZeWt4cGZwYjhQ?=
+ =?utf-8?B?R3d0RWUrTHprN3Z2RStEUUtkdHdWRElOUi9wanAwTFNmNXRneFRvcFdkMk1h?=
+ =?utf-8?B?VmhSbUpNUitzbVdNVnVtbElWL3NzWGlYcG1kOHlXVGtINTJiVEVPYlZ0TFlK?=
+ =?utf-8?B?MGhoaTNxc1AyckJiM1lMb0FibmF2QXBHSm9QSjQ4RWFzTXpjUFcvM0JFT2tn?=
+ =?utf-8?B?bGpuN29KT1E0Wjg4TlRkL01UL3FCS3dOdFZNL1RrdWwzeTlRbWI2eGo4V0VH?=
+ =?utf-8?B?ejNRczEvSW9MSW8rL2tPNXJsWGhSeUh0R1pjSVNiTDhkUTdxeXlpSys0dVFJ?=
+ =?utf-8?B?dUZLWjFUSmVzK204eHlWRlRjN3NkZjcyZ2RzbGJqWkF3TFptTkMxNEVzL0ZD?=
+ =?utf-8?B?UWpwSWZkZVhtL2FUOFJxcG5VdDNOMTdkTTJGTUswK3IwRjIwY1FLSUlPVnhj?=
+ =?utf-8?B?c3JZT1N6YitNRlJ5RE9LRitoSGlEM3dnU29tNG5PWVBseWVleUhtZ2QzYW93?=
+ =?utf-8?B?cVBhTnY4U0JUcDhqNThiU3RMTFhzWDhFTjhnR1lHRHBBVlFqZFNKZFZoayt1?=
+ =?utf-8?B?M2tyOEdHWU55ajFLOEJtT1FIK1EyWTdaK0RwUXBUM1c5bHBTNm1hTDdlNGxi?=
+ =?utf-8?B?aUZ6c2NzdDFUa0tMejd5cG5lamY3Q3NKS0ZUNitXbVF4bUI4b0t1MkxPbGRC?=
+ =?utf-8?B?M3RNaHBpdXgxbmY3eFgyWDcxbDlkWkVVb25wNkdxbTk1QjFlOU9sdEpSVXQ0?=
+ =?utf-8?B?bURiUHlLM1Q3b3B0Y2RBUUxxQ3J2TWtMM3pIR0VuUjZGNEkrOXcxODBMdHg0?=
+ =?utf-8?B?dXF6Z1BiS0JQK1FkcVVzMjJqc3NNQU5RMW9qZEJQbzVreTZMS29ldjdOQzgw?=
+ =?utf-8?B?OS9JSCtNRWdBVG81WGhoS0svd3BPNy9Yalp6MHNIRVZqV0RsY3ZxVXhObDJ1?=
+ =?utf-8?B?N2l0RnFoSkhQZWFKa0huRXl3RzhkQzBObkp3YllXTEJFMGk1dFdPY2hkN1lw?=
+ =?utf-8?B?akxQYmNnUDBocnpJWXFxR2lFT3gwc0JYdlZlMnduMjBBN24rVzlHbWdvdVNq?=
+ =?utf-8?B?YS9SLzJXVTZQajZnSE9yQVY3MlEvRnlzMEVmS0tBZ2FQRUFtdkFIVGhhRzdn?=
+ =?utf-8?B?Zng0b1ZhSHhidUxiTHhCbDNlZ0E0THgwUUloV3dVL1YvWldQM3NmSUlZd3hz?=
+ =?utf-8?B?dm1aL2pTNlJNNHdzTkFEZGd1dktQZ2kzL2dvTlUyT210cVdkNDNWdnM1TUN5?=
+ =?utf-8?Q?OUKxrYSKCZwcDhdcCAoDAtQ7dqC0Ob5ErbCY2?=
+X-OriginatorOrg: valinux.co.jp
+X-MS-Exchange-CrossTenant-Network-Message-Id: ed294303-c713-4d1b-dcce-08de78dfc153
+X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 03 Mar 2026 04:45:55.0731
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: 4TD7iYU1ZALQmujeZYo0p5TSPKkpAp1cXPOCtdlIrJa+qWHXE9/AwvmtvfZ9OfXG+lGMXBNaXvVY1xVJTGnISQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYRP286MB5947
 
+On Mon, Mar 02, 2026 at 09:39:26PM +0530, Manivannan Sadhasivam wrote:
+> On Thu, Feb 26, 2026 at 05:41:41PM +0900, Koichiro Den wrote:
+> > vpci_scan_bus() currently uses pci_scan_bus(), which creates a root bus
+> > without a parent struct device. In a subsequent change we want to tear
+> > down the virtual PCI root bus using pci_remove_root_bus(). For that to
+> > work correctly, the root bus must be associated with a parent device,
+> > similar to what the removed pci_scan_bus_parented() helper used to do.
+> > 
+> > Switch vpci_scan_bus() to use pci_scan_root_bus() and pass
+> > &ndev->epf->epc->dev as the parent. Build the resource list in the same
+> > way as pci_scan_bus(), so the behavior is unchanged except that the
+> > virtual root bus now has a proper parent device. This avoids crashes in
+> > the pci_epf_unbind() -> epf_ntb_unbind() -> pci_remove_root_bus() ->
+> > pci_bus_release_domain_nr() path once we start removing the root bus in
+> > a follow-up patch.
+> > 
+> > Reviewed-by: Frank Li <Frank.Li@nxp.com>
+> > Signed-off-by: Koichiro Den <den@valinux.co.jp>
+> > ---
+> > Changes since v4:
+> >   - Correct the subject prefix
+> >     s/NTB: epf: vntb:/PCI: endpoint: pci-epf-vntb:/
+> > 
+> >  drivers/pci/endpoint/functions/pci-epf-vntb.c | 15 +++++++++++++--
+> >  1 file changed, 13 insertions(+), 2 deletions(-)
+> > 
+> > diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> > index 805353528967..f353e9a57194 100644
+> > --- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> > +++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> > @@ -1220,8 +1220,19 @@ static int vpci_scan_bus(void *sysdata)
+> >  {
+> >  	struct pci_bus *vpci_bus;
+> >  	struct epf_ntb *ndev = sysdata;
+> > -
+> > -	vpci_bus = pci_scan_bus(ndev->vbus_number, &vpci_ops, sysdata);
+> > +	LIST_HEAD(resources);
+> > +	static struct resource busn_res = {
+> > +		.start = 0,
+> > +		.end = 255,
+> > +		.flags = IORESOURCE_BUS,
+> > +	};
+> > +
+> > +	pci_add_resource(&resources, &ioport_resource);
+> > +	pci_add_resource(&resources, &iomem_resource);
+> > +	pci_add_resource(&resources, &busn_res);
+> > +
+> > +	vpci_bus = pci_scan_root_bus(&ndev->epf->epc->dev, ndev->vbus_number,
+> > +				     &vpci_ops, sysdata, &resources);
+> 
+> Don't you need pci_lock_rescan_remove()/pci_unlock_rescan_remove()?
 
+Yes, we do need them. Thanks for pointing this out.
 
-On 3/2/26 7:45 AM, Koichiro Den wrote:
-> Some NTB implementations are backed by a "virtual" PCI device, while the
-> actual DMA mapping context (IOMMU domain) belongs to a different device.
-> 
-> One example is vNTB, where the NTB device is represented as a virtual
-> PCI endpoint function, but DMA operations must be performed against the
-> EPC parent device, which owns the IOMMU context.
-> 
-> Today, ntb_transport implicitly relies on the NTB device's parent device
-> as the DMA mapping device. This works for most PCIe NTB hardware, but
-> breaks implementations where the NTB PCI function is not the correct
-> device to use for DMA API operations.
+This locking was already missing before this series (when vpci_scan_bus() used
+pci_scan_bus()), so I'll add a separate fix patch between Patch 3 and Patch 4,
+likely with:
+Fixes: e35f56bb0330 ("PCI: endpoint: Support NTB transfer between RC and EP").
 
-Actually it doesn't quite work. This resulted in 061a785a114f ("ntb: Force
-physically contiguous allocation of rx ring buffers"). As you can see it
-tries to get around the issue as a temp measure. The main issue is the
-memory window buffer is allocated before the dmaengine devices are allocated.
-So the buffer is mapped against the NTB device rather than the DMA device.
-So I think we may need to come up with a better scheme to clean up this
-issue as some of the current NTBs can utilize this change as well.
+---8<---
+diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+index 805353528967..469b6e2b8d45 100644
+--- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
++++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+@@ -1221,14 +1221,19 @@ static int vpci_scan_bus(void *sysdata)
+        struct pci_bus *vpci_bus;
+        struct epf_ntb *ndev = sysdata;
 
-The per queue DMA device presents an initialization hierarchy challenge with the
-memory window context. I'm open to suggestions.  
++       pci_lock_rescan_remove();
++
+        vpci_bus = pci_scan_bus(ndev->vbus_number, &vpci_ops, sysdata);
+        if (!vpci_bus) {
+                pr_err("create pci bus failed\n");
++               pci_unlock_rescan_remove();
+                return -EINVAL;
+        }
 
-DJ
+        pci_bus_add_devices(vpci_bus);
+
++       pci_unlock_rescan_remove();
++
+        return 0;
+ }
+
+---8<---
+
+Also, while respinning, I'll fix the error path in the pci_scan_root_bus()
+version to free the temporary resource list when pci_scan_root_bus() fails,
+since it doesn't free it on behalf of the caller. I noticed this while
+revisiting the patch.
+
+Best regards,
+Koichiro
 
 > 
-> This small series introduces an optional .get_dma_dev() callback in
-> struct ntb_dev_ops, together with a helper ntb_get_dma_dev(). If the
-> callback is not implemented, the helper falls back to the existing
-> default behavior. Drivers that implement .get_dma_dev() must return a
-> non-NULL struct device.
+> - Mani
 > 
-> - Patch 1/2: Add .get_dma_dev() to struct ntb_dev_ops and provide
->              ntb_get_dma_dev().
-> 
-> - Patch 2/2: Switch ntb_transport coherent allocations and frees to use
->              ntb_get_dma_dev().
-> 
-> No functional changes are intended by this series itself.
-> 
-> A follow-up patch implementing .get_dma_dev() for the vNTB EPF driver
-> (drivers/pci/endpoint/functions/pci-epf-vntb.c) will be submitted
-> separately to the PCI Endpoint subsystem tree. That will enable
-> ntb_transport to work correctly in IOMMU-backed EPC setups.
-> 
-> Best regards,
-> Koichiro
-> 
-> 
-> Koichiro Den (2):
->   NTB: core: Add .get_dma_dev() callback to ntb_dev_ops
->   NTB: ntb_transport: Use ntb_get_dma_dev() for DMA buffers
-> 
->  drivers/ntb/ntb_transport.c | 14 +++++++-------
->  include/linux/ntb.h         | 23 +++++++++++++++++++++++
->  2 files changed, 30 insertions(+), 7 deletions(-)
-> 
-
+> -- 
+> மணிவண்ணன் சதாசிவம்
