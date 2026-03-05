@@ -1,65 +1,66 @@
-Received: from OS0P286CU010.outbound.protection.outlook.com (mail-japanwestazon11021119.outbound.protection.outlook.com [40.107.74.119])
+Received: from TY3P286CU002.outbound.protection.outlook.com (mail-japaneastazon11020110.outbound.protection.outlook.com [52.101.229.110])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 38B02140E5F
-	for <ntb@lists.linux.dev>; Thu,  5 Mar 2026 03:23:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.74.119
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9037030C60E
+	for <ntb@lists.linux.dev>; Thu,  5 Mar 2026 13:47:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.229.110
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772681013; cv=fail; b=s6wmBfZlKMRxtNln06MXnLl/KZh7uqQOmiDheC3WqkZuIsyhRbFndUFcfErhcLTAyld4GCyXBFRvBjoP43nZIee5q5xzYxo7QsYG0ELcxUp37BJ7cC0v6J+3jBAG1nSz4ZoDNHxzPZuz6SWm8wr4S4e8Sw5IoJ2xmP11mFIAbE0=
+	t=1772718460; cv=fail; b=fA67H1+Sld/FXhn47dYMdleGhgxkL4tmwVuQJRiCVRquAfQRALgzI/q8elvSNi+azylyenpyz9jVEMzXi9dbHbinYdvhS9DieCNKQP47e3ZPKqof+TkMmrQYBcpUkFtdWHhfa0h3B8V/+A0hyHhn+SphZINXpZfVs269wy/JCQw=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772681013; c=relaxed/simple;
-	bh=Yghuj33Ebb8xiUr7EjYf59HdHtdimPbflrsEmQQvrtI=;
+	s=arc-20240116; t=1772718460; c=relaxed/simple;
+	bh=Z4Q2fdOXil7r7Rb82ezE33l46Aoz9gtXLOX1bUVw0Ho=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
-	 Content-Disposition:In-Reply-To:MIME-Version; b=j3FeLx/vEVTMAcUyh/la5M7XHzKxXk3St936b/BExD9adYUTu1LTaqrdH0hUcEybHNj5Ud/PlckswJhIUCAmyGrODYDDJ+tA1tpTH8Amk8TySJyX0DW6yiZqVmgin0pCJWGz5/U9D5KN/JtLqyizW2O7ptsozThNoKBppRl0UI0=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=tdT9XiSr; arc=fail smtp.client-ip=40.107.74.119
+	 Content-Disposition:In-Reply-To:MIME-Version; b=LRuiyF0ChzPP+y420cdV/NKoFnLbXf6Db0YBkU0PaHiK9KOemiGKNs0H5Yxvzk7gHp2cAROpyXK/6SaxeuBEx/XLEY+gfeNNJvy9+bUorH05ij+X+WZSBPYSc7SACYTye7BSGa6wk09o6Zvz+V5ZleBclA78tVnh6O9r8TF5X7E=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=goedJVLS; arc=fail smtp.client-ip=52.101.229.110
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="tdT9XiSr"
+	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="goedJVLS"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=UGac0g6wNWZV5HWpbel9vNoal1MdoUmM+DgjKJF88kD0a3JmhflI27Uka6x3EXVdhMZlyjRiYx/DXy5OLSZkHVZjpjigbGId+rLExbVuCFHiJ8Y13dy3qqBHsOA3EmLe96gvfE6qTT3OE4rE0h/gs0r4Ca4obxHJzbJqHWS1QvkIrsqG3/y49wSqVNZ/t86lZTTAgdIP5A7+KQHPWTNmPJmjcT6GiYFVyMknbB9heW1Uc+dVz1jMOAKUOD8EwwHOMRv+dtY5bIkOL19Yjgz7jPS+rAvRG3slxuKy43XRJ3IqvumLs5tpCIktkkCDKAfzrkORMe2dnFjNjmdTZorLPg==
+ b=BTiPvPLjLjP60/lFAX/ybI/348xZzi4R2AyCGPiFn5edmcbfriBwzk+3oAwturN1W2PIHiJ74qljx7ugnh54W74T8KbveicfILecfS++IrinRXcoHsMBeDzlVA5hrZfWB4Iv+fMex7Yo6LgRK5AAsrSZYLEzSeZsJ4vzYD7gXnll0nJNFiEzR6ZAT04AU0BQ+NTcl3DdIviKFWDUiw/yRLFXaXLzb01FOJtDNYwTQKMMe5sg6CEpRwc5FWOk+t8naV28L38p7YEO8y7GdMhMuBnnB1JA8t6XPB6zfUZu4ifPrJRMZZ4XRrtSGAL0fKMVTdsKh5UYnbMz/FKEFwe5fA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=OvZMuZTJdoWVaQWvAuBDEbtvXy6T7fdICfbyloDY90U=;
- b=tDK7hv4tiM7a79VEqKW/IQRg4OTjz9fk5aVw1XGr0i6og0nQWXlHdRIxbOsbOU6AXEQzliukjXxWzJxtYyoekITJWVI/Mfqoz9oTcQS28B5wcFTUYMuP6ru2OGRKMALcxttMOZIsBbUJagS3rcEd+x8B5zh9W+JQdc2O84OE4LyEjM/BhwQhhVN+r0XvBDL35ldk48/+DH7JicY11ApTduzkpPsKx8jXLswioXijzEAW23iLCZdd/SgzMxTvDI4IKgUeNH1nJ/HINSmOXNaTGhBfrPzv71Fs/1sRBprcdpSOyx+Lia69LI8ML4LvXUCsNvBEqRcXJx/GxBLR6e2yOg==
+ bh=DXW0PCmZuZrXr+povreCHbupJlry2hWT0mcpE56rBoY=;
+ b=h2W03U0loB5WeDIigFwD8cVlDtf79uFHff4ragDfV3IK3hkDeTKe0wWbwwKUfihDb3hXvMmRKH5JCMftHBkoe+U6MjxO+V6U4dTAvrjQLd3w+yjSd/j0YehIhR8nt787HJWcHsWChBePCn1a1015fTfCEqV7BvXcAep/wqCMT5gNy7Tamx/hhwOTScwPf6vPM3DQavgt/GmaitXmE08UTPMH2Gs9QLAD+WI/amh+MsdT0GOmMbm6wRpChI50cvDVqTIYMKQCPw8dZooRsXvdEcvLNmT8Qist2pDy2jlZaAcbToiUpFiTi+0P3qVU76W0WqpD5NVce5CL0bZxp3XRhg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
  header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
  s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=OvZMuZTJdoWVaQWvAuBDEbtvXy6T7fdICfbyloDY90U=;
- b=tdT9XiSr0yK0NkWf5y5Iz4XGfgd9rCZnx7Bv2nFZL34PdDcDg6TFcjs10Lx85CEv+uM/cPNAdFZVTloc6ZHs2rtyx6FM/fl3qfFyi3XZFss3hX8ba44R07dPn3fuyKnVtCvicoM5mj5xC2SHUzLlqaImfSmAOPIyAvq0v7t3ntA=
+ bh=DXW0PCmZuZrXr+povreCHbupJlry2hWT0mcpE56rBoY=;
+ b=goedJVLS1jlG8f/0gawLAUNOO4rM4YJc9ab/CsvcalMDSR2vzIUn68Sn80pjlP6RccLNhjmp3iqRl32OXDczA8xXpf9EIfb4R8fQbdtH53rEZguBKLOpPZb2qpGW2sI9N5fAx0CFJPpQygCLs0hpFKuiJG7w2NJiuhUJdPYPHa8=
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=valinux.co.jp;
 Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:38f::10)
- by TYYP286MB4512.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:197::5) with
+ by TYTP286MB3502.JPNP286.PROD.OUTLOOK.COM (2603:1096:400:39b::14) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9654.22; Thu, 5 Mar
- 2026 03:23:29 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9678.18; Thu, 5 Mar
+ 2026 13:47:35 +0000
 Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  ([fe80::2305:327c:28ec:9b32]) by TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  ([fe80::2305:327c:28ec:9b32%5]) with mapi id 15.20.9678.016; Thu, 5 Mar 2026
- 03:23:27 +0000
-Date: Thu, 5 Mar 2026 12:23:25 +0900
+ 13:47:35 +0000
+Date: Thu, 5 Mar 2026 22:47:33 +0900
 From: Koichiro Den <den@valinux.co.jp>
-To: Dave Jiang <dave.jiang@intel.com>, Jon Mason <jdmason@kudzu.us>
-Cc: Allen Hubbe <allenbh@gmail.com>, Frank Li <Frank.Li@nxp.com>, 
-	Niklas Cassel <cassel@kernel.org>, ntb@lists.linux.dev, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 0/2] NTB: Allow drivers to provide DMA mapping device
-Message-ID: <lwayvep2vqwplyc45nr45zcz7rawutxe6q637p6gagw6asmlu3@ohqlnlmoymwl>
-References: <20260302144522.750620-1-den@valinux.co.jp>
- <3ddba488-6577-4f04-8a50-d64850b7cc5b@intel.com>
- <2jb2u6hm2u7dcmexzhi45kaclgfysfhr3nxomvqfnxbp5dlwfx@dt7hraa6u52v>
- <244af3c1-21f4-4023-b465-0ccd85e1eb79@intel.com>
- <lycec7prrdejp3mpzrn5rzh5252vi7c7yypjiggrr74mcutdvq@y7kzzjm332rm>
- <b17c238b-3d0a-49b3-a012-a6e33766b8b0@intel.com>
+To: Jakub Kicinski <kuba@kernel.org>
+Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, 
+	Allen Hubbe <allenbh@gmail.com>, Andrew Lunn <andrew+netdev@lunn.ch>, 
+	"David S. Miller" <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>, 
+	Paolo Abeni <pabeni@redhat.com>, ntb@lists.linux.dev, netdev@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2 4/4] net: ntb_netdev: Support ethtool channels for
+ multi-queue
+Message-ID: <xkamblybtxvujqq537ixw4wury7kxhbcyanemuiuqlmpdpav6k@3aucrdzsktmg>
+References: <20260228145538.3955864-1-den@valinux.co.jp>
+ <20260228145538.3955864-5-den@valinux.co.jp>
+ <20260304171930.5c3625eb@kernel.org>
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <b17c238b-3d0a-49b3-a012-a6e33766b8b0@intel.com>
-X-ClientProxiedBy: TYCP286CA0186.JPNP286.PROD.OUTLOOK.COM
- (2603:1096:400:382::14) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+In-Reply-To: <20260304171930.5c3625eb@kernel.org>
+X-ClientProxiedBy: TYCP286CA0265.JPNP286.PROD.OUTLOOK.COM
+ (2603:1096:400:455::17) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  (2603:1096:405:38f::10)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
@@ -68,190 +69,207 @@ List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|TYYP286MB4512:EE_
-X-MS-Office365-Filtering-Correlation-Id: 14b14df9-c2aa-47d0-20ee-08de7a6690e9
+X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|TYTP286MB3502:EE_
+X-MS-Office365-Filtering-Correlation-Id: f46dd6ec-2777-437b-291f-08de7abdc1e5
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|10070799003|376014|1800799024|366016|27256017;
+	BCL:0;ARA:13230040|366016|10070799003|1800799024|7416014|376014;
 X-Microsoft-Antispam-Message-Info:
-	hjJ2SV/+hM5wN2cYqMN2zM4jrgTUGuHDo3H4NoB7gdVmsU9CW7Y6Gc9N0FWQs/ZOLfPFLWBjOXipLnqGc/7gaQOHwFZN6rlE/gas5A1awgzJcFSUrEvhRJCcMCaeA8Gbd03PjvzY00UjrLTIE+VO4X+Bd1A0aersmQYlDfXcvHyaJameZiKm9tcI5FVd98JjMeuCNZLOqyz+Wri/57JoOUdarVn0u073Cxsmyp0NuxnnGt2Vh0l0I9c+f3iicKUo5u78JpTdy5M4KVEOSDxFTnXbK5Pm4JYeT8FIBQZkKpC/Qmb5kdPizk7dnOeTigbm40IXcF25UiYqfiEKwFy9Su8qwdMwLK7r2FTj+Xd9fl97ayVIcC+cVfVj4Wzj40eeSAPHERrYgDUAS3APmrBykdHqzkQuYRXmpw1pH2S6rmZyeBiubPU65TlNaA9Xht3AgzPou6Tb7kkkbcIvTudBV7pVWwzk0fToYFe/rEhw8LmP5v/3Bi0cO9TYcxIYCbppqIfd0Sci4EGgxTPbPpixjBpw/c0jIZcOxvG0iV6aj5lbXC9w/v8UNyvf7T0sgx1j4xWx192E1L88GzaZeHyVrcda5qtXInfl5ndGLTkdZqzCcqD59qrRgxgBKD1sD3FdAdseTGhcLM3gjqI8tCZjsT6TIM1XH7YKD04DzDwvS00fcGhY7GTLKFQH4m1M3j/JBVNS8y7slk2VxsHQ+3Q+n9jtc1p1vqeRTHrBiL8jBVlcYfUyQhLXx0sZPnYQ4eYLTfwqEW1tlecfUtZSJXEWFMaeyyvZzuyn4eXrl3Uaz9c=
+	89/27u5PlumJ4Hl8dmtjRfjyt80SlTcKW/oxwsbNg2a4kjKwrl6QcwNrAcNTxcXkHVkCg7efqd8MHK5Mbku4qOoEBy93FsrmpRUm87L6QrmFszgAEpY8xNO4/T/lLX2E6kJpnr6FgOU38RMjoxNpw3RYO28ayANqeRjhA2/l4VdnhSk3tnPcfwawyyHkRKS1atsxtASbFf/t66Xrvyy7U3rdAY0TK29Sjj8JmphvMNH+eYNMRBy9uZjLweDL6UwKvo1RuL8lLyPOedPqYIiYvK7Pp2Le8CTtpInxIW6do+w01xK/pP5kzYinQNa5ROTzG9ALl6k4M5uBN4W4bqxPvRza9ly8WEI6R7jo5wMNCTXY0xSrBlsWF87wIwFkI3hOuyZEIusXwrrvsWZTDTjQcsd+aLWbDQNDaGDz6ZRFCC2YCHPJn+svzrVYS8uTSXizVTjfYdKY00g7wdtTMwghZsYnUuM0tGDsy/vBLKhyLec4H4YfZlPk7Xm2KiYNVLN7S5G9OfQuz0y67Qp7NAs7K0pwotzxtNzLl0xhn/9/Z9SVXxqY6wWj4fXSYle3u/t9Aem5WSfUr2oFqm5Fc9ryzxq4ixrbbrfhSlTEQvQi129xn3MG1mKTx/x13KahMzVWMI2PtFWYTZ/I5yx3AdCxPeE0J+V3RZVntS8WDL2oNrUVoZp7ZiYl33yZD2BxtAv5haoGaacvEl5D3R+SDDhbV/tLtJPImnvYiwuF34QKwdw=
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(10070799003)(376014)(1800799024)(366016)(27256017);DIR:OUT;SFP:1102;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(366016)(10070799003)(1800799024)(7416014)(376014);DIR:OUT;SFP:1102;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?VrEQIq/GQY6Ej2oUj1HRNDoLNaPWf4+otZzIxPp+QAGAtgM+O5gfl1ccuwTI?=
- =?us-ascii?Q?9vaxm4UJcCDR0R6pCZSMreQo+N6775jZFeex1UjEOrCvxkYaM8l8hjnCKzpC?=
- =?us-ascii?Q?Ok6ghU/9pQjFzCzwiJQUTF3G7319TL610w/Tw6RkNrBt6XofZa7+9v5ekXSF?=
- =?us-ascii?Q?CCj4H1ZoqbRwQBcvwi9hPhkqImmojHCfROJZ0Y/yOi3DTVzbdLnYYT7KsAUr?=
- =?us-ascii?Q?1pvnPWB06Vnnk3Ou6JG8gzRRQs+NzmWq4gYRq1HgT8q77Nxk7pgxNsdy4Jg4?=
- =?us-ascii?Q?xg/LxNWsmq/Qp9iX3vhWScjimtEpfQdsRuIXacW5HvXCvrByl3xQIXDZ5PHy?=
- =?us-ascii?Q?yASgrRaZJObdv2Iw9fPrQyDQY8p2Gi1BHbuq/g5fep4T0eJarln82o22zeZR?=
- =?us-ascii?Q?X0W0cuoBs70zMR2b4zCPZu+PKZv7nkIiDo8h1byOStaeWhGD2o/iHKgxamXN?=
- =?us-ascii?Q?aDUO2SO/BDSMPEqmtbmXu9cCqREgm7Q2XHUzjeFla3GQ6nVI1sVd81UesF6N?=
- =?us-ascii?Q?VvsXyapTkukd+5776OS1A74dLvJFTx+9Wa0eiPCJttkWcr9R7aOT9ccJyOSa?=
- =?us-ascii?Q?TFF+P42bPpaeP5uEcRuShB0FpPybzpFNQBdkVQ16jdqdxCmoB2B5r2j/pBGG?=
- =?us-ascii?Q?+QgDeKNQPnfG9lf0VR5jiA324zsu1qSfvjRUhOrF2g6dK54qzPIjz5/HAXtL?=
- =?us-ascii?Q?KXCbT5H/wzER1yrkj8VR4QPaLzv6tYU4IuOICyuX2fdYqKa84S7pr73B4hlV?=
- =?us-ascii?Q?uMYMLQ8hw7ldKkOlJ1MNHIfPq/0QbWjUJJaad5Qk4FjiUkfwCDGcmBab3jnr?=
- =?us-ascii?Q?6yv3H1iQc1buzZ6Maig+VRv+Gd/HuP0P/UcpZ2cHBsFLyKXnZxC94fo5FYBJ?=
- =?us-ascii?Q?JLaYn/7kkZrm+fCv7zr98CI5b21yfTzAUCdizPqF/NvAr19RVOMqCIDKBSTB?=
- =?us-ascii?Q?gLWsVGh/79EWq36kRXcEmPPzw2LCEQl3qAgawl0iE9yfTvcDaceEmnoN2smf?=
- =?us-ascii?Q?N/HdVHFPPZe/KJRyCq88hRi4ElRRXcf7YythiQAdFzv5udSO5Aed4jxakN0F?=
- =?us-ascii?Q?77nN62sWYmK2UCguGpmUlHpJFoeR2l/M2XQblGMIJJ6t1Gok5ivEwQazpzMh?=
- =?us-ascii?Q?MMEWCYcCZ+iQ1v4zwJCojemLhky5m5BDtzYdAsix6kkr+/5kYI0GC+8EZX/t?=
- =?us-ascii?Q?bYJBcto2PR8V7/OlYJezJUXnm3JdjKHfsfX7F/4JAULz50nEvZu7QxPuezT9?=
- =?us-ascii?Q?iB0KKjazfgcK7uSmTe1QWQJ5CT58k5wkInQmer16B8XTiBLtMc+R8Rk6hQUD?=
- =?us-ascii?Q?0R73hftYDf1Kzcy/mPE3/suiuCA/x7YwJFw8jwUZZjbH3Ia64r909RTsUGZI?=
- =?us-ascii?Q?V8h/A8O9u4cgFdZnR5b/87eSvsjTx/k9oK2yP46sUv/GKREIiR2XgZy6Mm0Z?=
- =?us-ascii?Q?nLgFin6m6k4x6etXVsQup4kU41nAM+7uCeYa7fIrUs5jMUJgbP7w2K6qjyZ8?=
- =?us-ascii?Q?78PxohMd+K6kuh2iZW8v1r/dV8lLM1VpT/8mODauc9mXmg3OtSiUiIZAVdBZ?=
- =?us-ascii?Q?S5+9u7DjFR6WjukG6s2lYm2XpNIMikkIda6J8TQLweW5T7nk0EzvK8W1HwOd?=
- =?us-ascii?Q?FSNw7hRxR/Nf8IbukO9vkOTmsSNhePsqLoLQon8U4npsTH0BBow73OSN9R/2?=
- =?us-ascii?Q?VS9o+q5Rhw1gyFCXK3X5ILP47zMbCrgCspxRXWrXhaCRAPTLTvWg/WvuGJMq?=
- =?us-ascii?Q?SQhzfdr60cLPZUXEeGrpcLg/RJNSOvNTKJIRTD+jChpWelqMASLW?=
+	=?us-ascii?Q?srpmegziEhoIYDMHMvZ9kS+J0q1usqkdPJq1zUSiFiixwUP0laB3j5udeL+c?=
+ =?us-ascii?Q?b5qW9HEN6211B2BlfPEyHgpBmx2YH+bLAlTpIeysT+U3NzAxiepWXZu55sHN?=
+ =?us-ascii?Q?QKDWumR3WWvoSG+A021CU+uKnzow0ZK8ZyUcl33GnJqNgln+tPYAMeum/l59?=
+ =?us-ascii?Q?6m+5V5sZPuSGMQRKdwGFEefF3kGFk4RJU2wwBtWkNEX2wbL5LOKzRh7WoTGl?=
+ =?us-ascii?Q?ixhl3MmSSlgxh4RLl+07H/TG4Wms51hA3zz0FtplAmp9Rf6CPvrdKfrgeeQz?=
+ =?us-ascii?Q?+qM5LP8Os1Kwkz1Qg5z407T9Wq9xBhGgm6JfIA1w1hxyeaE9Jzy4CG7WLxyE?=
+ =?us-ascii?Q?p4EZqwNHYnmJkRYup0JOKQSJ2XIzyE4uJZvllJF2o/y2obJ39EEjUClNTZ2T?=
+ =?us-ascii?Q?7hk/jcnrvIfX94H1GeYDIvJy3wmkG0Fx0HsSVD53LMcDIp/OHz+fc6QGguE5?=
+ =?us-ascii?Q?oOH61rI0c4GB1QRkB+8jP7we3rz+92zLJMO7Ld1wGQ72/tjJxsFGPe3xptL6?=
+ =?us-ascii?Q?740eNM7HVdOmPMDKJOB/HUV1LJLkDkiURiliUhw/Ju39j1Avp16mv9mteTs1?=
+ =?us-ascii?Q?Od3/gdUybooEOXl0+du77VzmStHDqXd0XehDttMdPvjrP3q51JLAVMi0OkIt?=
+ =?us-ascii?Q?72zYpHFVNElo3P6RRXC1ji0r1Mrnc0wvd+T0xJlSCDCYsmDErJ99Yg66iYjT?=
+ =?us-ascii?Q?mVwa+dNZopQ0mGNRj9QkrbXiEmHJCmeU7hVfEL5bwRutQuZekgaenEaNm+Rf?=
+ =?us-ascii?Q?CZy5xwqr2i9uk5+evSvr2AjU2xD2ZJJIbk+zREOLPunEai8sZjfRg4nvzEJB?=
+ =?us-ascii?Q?aYBRer0fBFbhII3/nyl2ESVO0j/FyDEI8ije+4Wg2ELn14tOhOibSf3omVAs?=
+ =?us-ascii?Q?w2PCJYv0SSRUepOTIdweai5KW612f0iyyK5WCF5k/U9mS/hTP62ztkRKKFMx?=
+ =?us-ascii?Q?YKNErzczDIoUz8YfFpFsp6P4bJ3RM6iYrGgRhBmwd1yBNK4T/6GunrXyZe93?=
+ =?us-ascii?Q?u3jGkXAyJIDPj02zvuEPBq9J2FWACehqj4hQ+vu4qww6o5FlXH0oRdtm/p0z?=
+ =?us-ascii?Q?LlF1Y/YgK2sKxVtVh4RYxoTkyz2uWL3dZCiGJgnJ3QNy5jAsx1OAMCRtjuG2?=
+ =?us-ascii?Q?4JEBnP4BWfoVD/j0ex2PXRFUFXVEokbobK6cBcMb0Wjx18nyj+W9D2Tpl8Cp?=
+ =?us-ascii?Q?zDvdG/7KzOwD0dNvYL2eZVmnN3Qt2e5TdsU3innbRVaIonSjhYpGZEBQO8hS?=
+ =?us-ascii?Q?Kjqrz958dLhRZ01BK4RmH4aG0U7XrED/pLXvnsoO0DI0nUPL4wKHflbBdrul?=
+ =?us-ascii?Q?x09+8ZcQSrLfHcDA3kt0vydAcDy20w3Vi4R09wVWIzoIuNLFMuRZz7TNsMa6?=
+ =?us-ascii?Q?NFJijQAnASUOnRHdF97LrkQ6rpnc4ykTril2qipKIFkzVqd0kbPQDx8WE58p?=
+ =?us-ascii?Q?zriZUouxZV3MTfAQdllGo0uiT5Ws5TU9LGtWYQ2zOXQX3hrWfE26fpLjwY6z?=
+ =?us-ascii?Q?I72PqCqoG8Czao+9EQw+wvM1FI4XYhhWSwvpBGJUeRF4McsRAIiqc+HPHhZj?=
+ =?us-ascii?Q?vmDNfP6o08PINhwj6LlB1b+EYxvQ21meMGgPtY1a9E4r4BqkKufba655aK/q?=
+ =?us-ascii?Q?Z3LCtpUWE2hb64mOddbHH38lM772dJ6oyfITrAw8Ss0sdzfwoQ4JSG2Gm85T?=
+ =?us-ascii?Q?s4R4Qv+3gtO3o8iLZnC4/ExriecF9EyZAoHvHkptl7gB3BmpQSZtpuT+CZir?=
+ =?us-ascii?Q?/H29l6BRtS604SO4GiMNVyMcsHHmBtJ7XYPZveoiOnVF055IMj4F?=
 X-OriginatorOrg: valinux.co.jp
-X-MS-Exchange-CrossTenant-Network-Message-Id: 14b14df9-c2aa-47d0-20ee-08de7a6690e9
+X-MS-Exchange-CrossTenant-Network-Message-Id: f46dd6ec-2777-437b-291f-08de7abdc1e5
 X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 05 Mar 2026 03:23:27.1507
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 05 Mar 2026 13:47:35.4467
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 9dhCYaDRdPl87twbuHMi53iUvlBqFGu7W0V7C/5Ja4H1S9c9nbQxCvrQ3wWbJfd9JgxNzvDnaIhuGd1c3zwAhQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYYP286MB4512
+X-MS-Exchange-CrossTenant-UserPrincipalName: RQqeOANNSihcuBufJ950GEtMYL2HVs4D5GstzheyiQEHSMI43TXZCBRsgOBzNgcpB8up0xiO46Ke7wl+kmUjNQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYTP286MB3502
 
-On Wed, Mar 04, 2026 at 09:53:42AM -0700, Dave Jiang wrote:
+On Wed, Mar 04, 2026 at 05:19:30PM -0800, Jakub Kicinski wrote:
+> On Sat, 28 Feb 2026 23:55:38 +0900 Koichiro Den wrote:
+> > +static const struct ntb_queue_handlers ntb_netdev_handlers;
 > 
+> can we move some code around to avoid this forward declaration?
+
+Sure. I'll do so by placing ntb_netdev_handlers() right after
+ntb_netdev_tx_handler().
+
 > 
-> On 3/4/26 8:56 AM, Koichiro Den wrote:
-> > On Tue, Mar 03, 2026 at 08:42:53AM -0700, Dave Jiang wrote:
-> >>
-> >>
-> >> On 3/2/26 9:56 PM, Koichiro Den wrote:
-> >>> On Mon, Mar 02, 2026 at 09:52:08AM -0700, Dave Jiang wrote:
-> >>>>
-> >>>>
-> >>>> On 3/2/26 7:45 AM, Koichiro Den wrote:
-> >>>>> Some NTB implementations are backed by a "virtual" PCI device, while the
-> >>>>> actual DMA mapping context (IOMMU domain) belongs to a different device.
-> >>>>>
-> >>>>> One example is vNTB, where the NTB device is represented as a virtual
-> >>>>> PCI endpoint function, but DMA operations must be performed against the
-> >>>>> EPC parent device, which owns the IOMMU context.
-> >>>>>
-> >>>>> Today, ntb_transport implicitly relies on the NTB device's parent device
-> >>>>> as the DMA mapping device. This works for most PCIe NTB hardware, but
-> >>>>> breaks implementations where the NTB PCI function is not the correct
-> >>>>> device to use for DMA API operations.
-> >>>>
-> >>>> Actually it doesn't quite work. This resulted in 061a785a114f ("ntb: Force
-> >>>> physically contiguous allocation of rx ring buffers"). As you can see it
-> >>>> tries to get around the issue as a temp measure. The main issue is the
-> >>>> memory window buffer is allocated before the dmaengine devices are allocated.
-> >>>> So the buffer is mapped against the NTB device rather than the DMA device.
-> >>>> So I think we may need to come up with a better scheme to clean up this
-> >>>> issue as some of the current NTBs can utilize this change as well.
-> >>>
-> >>> Thanks for the feedback.
-> >>>
-> >>> I think there are two issues which are related but separable:
-> >>>
-> >>> - 1). Ensuring the correct DMA-mapping device is used for the MW translation
-> >>>       (i.e. inbound accesses from the peer).
-> >>> - 2). RX-side DMA memcpy re-maps the MW source buffer against the dmaengine
-> >>>       device ("double mapping").
-> >>>
-> >>> (1) is what this series is addressing. I think this series does not worsen (2).
-> >>> I agree that (2) should be improved eventually.
-> >>>
-> >>> (Note that in some setups such as vNTB, the device returned by ntb_get_dma_dev()
-> >>> can be the same as chan->device->dev, in that case the double mapping could be
-> >>> optimized away. However, I undersntand that you are talking about a more
-> >>> fundamental improvement.)
-> >>>
-> >>>>
-> >>>> The per queue DMA device presents an initialization hierarchy challenge with the
-> >>>> memory window context. I'm open to suggestions.  
-> >>>
-> >>> In my view, what is written in 061a785a114f looks like the most viable long-term
-> >>> direction:
-> >>>
-> >>>     A potential future solution may be having the DMA mapping API providing a
-> >>>     way to alias an existing IOVA mapping to a new device perhaps.
-> >>>
-> >>> I do not immediately see a more practical alternative. E.g., deferring MW
-> >>> inbound mapping until ntb_transport_create_queue() would require a substantial
-> >>> rework, since dma_chan is determined per-QP at that stage and the mapping would
-> >>> become dynamic per subrange. I doubt it would be worth doing or acceptable.
-> >>> Pre-allocating dma_chans only for this purpose also seems excessive.
-> >>>
-> >>> So I agree that (2) needs a clean-up eventually. However, in my opinion the
-> >>> problem this series tries to solve is independent, and the approach here does
-> >>> not interfere with that direction.
-> >>
-> >> Fair assessment. For the series:
-> >> Reviewed-by: Dave Jiang <dave.jiang@intel.com>
-> > 
-> > Thanks for the review.
-> > 
-> > Once this looks good to Jon as well and gets queued in the NTB tree, I'll submit
-> > a small patch to PCI EP for vNTB (the real user of the interface), something
-> > like the following:
-> > 
-> > 
-> > diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> > index be6c03f4516e..8aeacbae8b77 100644
-> > --- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> > +++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> > @@ -1501,6 +1501,15 @@ static int vntb_epf_link_disable(struct ntb_dev *ntb)
-> >         return 0;
-> >  }
-> > 
-> > +static struct device *vntb_epf_get_dma_dev(struct ntb_dev *ndev)
+> > +static int ntb_set_channels(struct net_device *ndev,
+> > +			    struct ethtool_channels *channels)
 > > +{
-> > +       struct epf_ntb *ntb = ntb_ndev(ndev);
+> > +	struct ntb_netdev *dev = netdev_priv(ndev);
+> > +	unsigned int new = channels->combined_count;
+> > +	unsigned int old = dev->num_queues;
+> > +	bool running = netif_running(ndev);
+> > +	struct ntb_netdev_queue *queue;
+> > +	unsigned int q, created;
+> > +	int rc = 0;
 > > +
-> > +       if (!ntb || !ntb->epf)
-> > +               return NULL;
-> > +       return ntb->epf->epc->dev.parent;
+> > +	if (channels->rx_count || channels->tx_count || channels->other_count)
+> > +		return -EINVAL;
+> 
+> Pretty sure core will protect from this since your get will return 0
+> for corresponding max values
+> 
+> > +	if (!new || new > ndev->num_tx_queues)
+> > +		return -ERANGE;
+> 
+> same, core should protect against this
+
+Right, these are redundant as ethnl_set_channels() does the checks. I'll drop
+them.
+
+> 
+> > +	if (new == old)
+> > +		return 0;
+> > +
+> > +	if (new < old) {
+> > +		if (running)
+> > +			for (q = new; q < old; q++)
+> > +				netif_stop_subqueue(ndev, q);
+> > +
+> > +		rc = netif_set_real_num_queues(ndev, new, new);
+> > +		if (rc)
+> > +			goto out_restore;
+> > +
+> > +		/* Publish new queue count before invalidating QP pointers */
+> > +		dev->num_queues = new;
+> > +
+> > +		for (q = new; q < old; q++) {
+> > +			queue = &dev->queues[q];
+> > +
+> > +			if (running) {
+> > +				ntb_transport_link_down(queue->qp);
+> > +				ntb_netdev_queue_rx_drain(queue);
+> > +				timer_delete_sync(&queue->tx_timer);
+> > +			}
+> > +
+> > +			ntb_transport_free_queue(queue->qp);
+> > +			queue->qp = NULL;
+> > +		}
+> > +
+> > +		goto out_restore;
+> > +	}
+> > +
+> > +	created = old;
+> > +	for (q = old; q < new; q++) {
+> > +		queue = &dev->queues[q];
+> > +
+> > +		queue->ntdev = dev;
+> > +		queue->qid = q;
+> > +		queue->qp = ntb_transport_create_queue(queue, dev->client_dev,
+> > +						       &ntb_netdev_handlers);
+> > +		if (!queue->qp) {
+> > +			rc = -ENOSPC;
+> > +			goto err_new;
+> > +		}
+> > +		created++;
+> > +
+> > +		if (!running)
+> > +			continue;
+> > +
+> > +		timer_setup(&queue->tx_timer, ntb_netdev_tx_timer, 0);
+> > +
+> > +		rc = ntb_netdev_queue_rx_fill(ndev, queue);
+> > +		if (rc)
+> > +			goto err_new;
+> > +
+> > +		/*
+> > +		 * Carrier may already be on due to other QPs. Keep the new
+> > +		 * subqueue stopped until we get a Link Up event for this QP.
+> > +		 */
+> > +		netif_stop_subqueue(ndev, q);
+> > +	}
+> > +
+> > +	rc = netif_set_real_num_queues(ndev, new, new);
+> > +	if (rc)
+> > +		goto err_new;
+> > +
+> > +	dev->num_queues = new;
+> > +
+> > +	if (running)
+> > +		for (q = old; q < new; q++)
+> > +			ntb_transport_link_up(dev->queues[q].qp);
+> > +
+> > +	return 0;
+> > +
+> > +err_new:
+> > +	if (running) {
+> > +		unsigned int rollback = created;
+> > +
+> > +		while (rollback-- > old) {
+> > +			queue = &dev->queues[rollback];
+> > +			ntb_transport_link_down(queue->qp);
+> > +			ntb_netdev_queue_rx_drain(queue);
+> > +			timer_delete_sync(&queue->tx_timer);
+> > +		}
+> > +	}
+> > +
+> > +	while (created-- > old) {
+> > +		queue = &dev->queues[created];
+> > +		ntb_transport_free_queue(queue->qp);
+> > +		queue->qp = NULL;
+> > +	}
+> > +
+> > +out_restore:
+> > +	if (running) {
+> > +		ntb_netdev_sync_subqueues(dev);
+> > +		ntb_netdev_update_carrier(dev);
+> > +	}
+> > +	return rc;
 > > +}
-> > +
-> >  static const struct ntb_dev_ops vntb_epf_ops = {
-> >         .mw_count               = vntb_epf_mw_count,
-> >         .spad_count             = vntb_epf_spad_count,
-> > @@ -1522,6 +1531,7 @@ static const struct ntb_dev_ops vntb_epf_ops = {
-> >         .db_clear_mask          = vntb_epf_db_clear_mask,
-> >         .db_clear               = vntb_epf_db_clear,
-> >         .link_disable           = vntb_epf_link_disable,
-> > +       .get_dma_dev            = vntb_epf_get_dma_dev,
-> >  };
-> > 
-> >  static int pci_vntb_probe(struct pci_dev *pdev, const struct pci_device_id *id)
-> > 
-> > 
 > 
-> Probably should include it with this series if it's small. Having the user with new code is usually preferred.
+> The logic LGTM, but the function is a little long.
+> Would it be possible to split it up?
 
-I thought that, since the vNTB patch wouldn't work until the NTB changes are in,
-asking both the NTB and PCI EP maintainers to coordinate the apply order might
-be a bit awkward.
+Yes, I'll split it up in v3.
 
-That said, if preferable, I can include the vNTB change in this series and
-explicitly ask the PCI EP maintainers not to pick up (new) Patch 3 until the NTB
-maintainers have acked and applied Patch 1-2.
+While doing so, I also noticed that ntb_netdev_sync_subqueues() does more than
+necessary. In particular, re-syncing all remaining subqueues based solely on
+link state is not the right granularity for set_channels(), and can also
+unnecessarily override subqueue stop state unrelated to resizing.
 
-I'd also appreciate any thoughts from Jon or others on this (i.e. keeping
-this series NTB tree-only vs. including the vNTB change as well), as well
-as any feedback on this v1 series itself.
+So in v3, I'd like to drop ntb_netdev_sync_subqueues() entirely and make the
+rollback behavior more explicit and compact.
 
-P.S. I sent a corrected code snippet a few minutes after my original post. The
-original snippet above was wrong, as it would violate the kernel-doc in Patch 1:
-
-  "Drivers that implement .get_dma_dev() must return a non-NULL pointer."
-
-Best regards,
+Thanks for the review,
 Koichiro
-
-> 
