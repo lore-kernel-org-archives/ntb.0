@@ -1,66 +1,70 @@
-Received: from OS0P286CU011.outbound.protection.outlook.com (mail-japanwestazon11020138.outbound.protection.outlook.com [52.101.228.138])
+Received: from OS0P286CU010.outbound.protection.outlook.com (mail-japanwestazon11021094.outbound.protection.outlook.com [40.107.74.94])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7B9B4396B6E
-	for <ntb@lists.linux.dev>; Thu,  5 Mar 2026 13:56:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.228.138
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E802A37C90C
+	for <ntb@lists.linux.dev>; Thu,  5 Mar 2026 15:56:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.74.94
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772719007; cv=fail; b=naEwmube23cqjZaBXLURqXsjH6pW0jKmYU9LUURRchjFiyvj6FwLP6/RXE8xzaLFa2RgXsjaReSm+b5SV2kIQLU7+P4+KTUH2DvtKkjQRot8jYLLqcpG0AVtvFHuaVgzIQ054GMNmNnjkPDs0RHsdvh8FWX2f0NorkcjTw07ncg=
+	t=1772726211; cv=fail; b=Q3amB7tcWgP/J9+gtv+ejmG2lB02GpwRsFj6/Djd9NN9iye89nxMCznwXTB7+UCNDsP0yEFX2F/wI95G0vPiCE4FPci7cSBbQEE2+Q/QzmsTNKoB5RfZVlDgTKyBXP556p6TVW6eoBfUDinrImBSFOKcFRSRTzvFg7UTgtzMyoc=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772719007; c=relaxed/simple;
-	bh=5OkLm/GkSShY1Fq4K0a48TOPYfr0DglHEFopHt5cuYE=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
-	 Content-Disposition:In-Reply-To:MIME-Version; b=mhBzgmpPE/1qbMWvZsWc+/nAaJ5SjNRQm+uYMU4eELJIeRGK2cH/p7UIuXGS3IVVvZ+tLJ272zcdokVspAc+chb5ZsP3X5STw7zKCuTHXU6BDRjjx13s59N+x/TCTIMqcpFNRfNAFEZimgoxFJZGH3wxt4B2DMqIjkdi28VEwB8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=s5bTzk35; arc=fail smtp.client-ip=52.101.228.138
+	s=arc-20240116; t=1772726211; c=relaxed/simple;
+	bh=2SwLOxCcbOcrJlfGSDcWegSZ9mGw3x0lmuxGk5ard68=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=UNESbKxatgUYWj9QW4ZYwckk6DAXZs5Hy7OGh4rY+45Ruv3e+RuAUlchfH4TiCRg0sop7Ex0Er+dkVU8De16inPcdclrm5VP80IYBxySBnXih0Zqdw1DXUYhsDICClrDGvNY2f3A6wdU5e0OC9wIFCjZXHvsE8YnDAeY5igEdac=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=VLAs4tpL; arc=fail smtp.client-ip=40.107.74.94
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="s5bTzk35"
+	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="VLAs4tpL"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=cFOk1QCpuBidNo+X3QkfMVcyJP/RTW53rPQ3YxfwtKKpVOFolNLLPEX00sGYz9FAabdwLH2W5g+TRU5W8pJS+1cRl8WzKxduhcLI8KoVEUMmxOZKJnpnRobwdmqFjsyDcLXurgJOtXpV60JrXtOUFYO5dDJlGiyRk4/GteDWsL1BYLF3U8u4ZvbF8dE7Hqq9eS322S2Y6xlNSU/B5zGRgm+DxpX/mLnrLc/pHkoOKaHkjkFWiu3biVCPfxe8KPd6c1xv6jJXBdZ7D8EF2+XQ2OIK8iLNiG6VVuRQrRWhQsNjlePA4jV7Y+rCI0L1/X9IZlr1z6N3XX06CC4bSZ8Mdg==
+ b=F/8TwtZA09MphEOew+EHi964OyszY7QdCA/CKolaL8TwxhBJyEaOkbKJLRfqclBiLwbDyx69F6Ai45Z5/HMp2MlIsIJDCfMcz9kGx05Z2NlVzS5XcANED1TqpehpWMHu2qt9bJjDuOIfH75L6ipw9v9G9jPbLycCzYOVStl+Adon+ArcDdezhFfKOzWJdHThiFEimCU42GhX1RNLvZspBCCPF4pnNO/t1IWY+mRLgi7NmanpP3/MF0HB3eP3WnxWctGW454Zvq8/L53mY3ulrmK3pIo0CoNiU9U/iFCZFxiq5aylHqQhwWbGpdcxkHoG3BDd1yrRiuyufLfgXIOGtg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=lKANANiiQIhnM612j/SvRR1HTbTMGunzYNbwR0EfKos=;
- b=BdbLuxyaPoLDX8PXksp+ntF+Oy5rJ28RQt1UxuXpfdTEWAThd9Hhq9LYu4MwQNqxc0CLKUnVipXk3K0e6YMPn0cnLkPiNesbRAnTmMuYGddPWkms7kIDgLSR88vmOKsY5shSCacTp/5QMurEmN3eK0uBgXz5yJIjtfi/STRbhnOx6MMv8Bmp7ewh/xPNL+bo9MSQ5bFIQ9BcSJFMdRTlpZRHVJTCRPhcnvIu0P1tH/kydS2GqVtwJysGNghI2U3TTaXUbB6mXRdEAPsSbnvFvn/VhVUdS8Xgp7+k1CEtoUqlwddZmDnxxONYNgfeY94Cqf/VOflw08tBh/zMAS+hTQ==
+ bh=o+LRddvNKZhICXhZVakAF/zDQqryIGwJHp6IE6sTRtM=;
+ b=dxrKegGE0hKYM8jr+4uV6HKjjO+m6YIoipsNwQIz/LBBBQ7Dvd97m/4Sjrfh9lHS2OS9E1grnpasAKhsUw0hJK1dDuCdpYG2fUkXiE4RudM1FnWsvVBszGFctGS++WNCr3eo6mp7H4h2x+SSy2/9BFVPB300in3sk82Hz/YGFEsbhOheRoamXzUETXD4fCTlAjnwcP3rOjMnwwf/dA/6RDVijgL7uAfiqkxPM3GZnkmTnSU5fyOgFAbkhqtkFVV1ITGOyWJ1F8WKBSZIU8CNbFKzi30HEK7Wo5H4oIXyxmdcc4buXbwebkX9Sn157Mz0uNncBrNjDaa6PA6I+X0ERg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
  header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
  s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=lKANANiiQIhnM612j/SvRR1HTbTMGunzYNbwR0EfKos=;
- b=s5bTzk35X6IUoM60UmdddUlRA44cngcZ8PEgglIWWBo0tfaJ7JXmtJ+YAP7Kj2RurdHrmUZG8+/WQ9s4xUCa/RjHftVhyE/cLYrUlBkA5sh0txSJAeGnL2xGMD6euDUxHTDQWx6rg1AZLnJ5Vf73xlSMFpGG5VG12TCCsmQiM7g=
+ bh=o+LRddvNKZhICXhZVakAF/zDQqryIGwJHp6IE6sTRtM=;
+ b=VLAs4tpLR3jrS4OX9mPKmsnCxterrvyByzIBIOgc0mOxm2utvyEvsbhpwU30egzVBH8kDEl5+hIQFvYDZL981Bbfmnp2S+lR9gunkyBGka0ZEHCI49b8TKGjxJDRtLH23xrHtvPlh+4wjE/SziShXvnMpFnzr6Bfep+AlqILeI0=
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=valinux.co.jp;
-Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:38f::10)
- by TYRP286MB5198.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:117::11) with
+Received: from OSOP286MB7730.JPNP286.PROD.OUTLOOK.COM (2603:1096:604:468::22)
+ by TY3P286MB2756.JPNP286.PROD.OUTLOOK.COM (2603:1096:400:23e::7) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9678.18; Thu, 5 Mar
- 2026 13:56:42 +0000
-Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
- ([fe80::2305:327c:28ec:9b32]) by TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
- ([fe80::2305:327c:28ec:9b32%5]) with mapi id 15.20.9678.016; Thu, 5 Mar 2026
- 13:56:42 +0000
-Date: Thu, 5 Mar 2026 22:56:41 +0900
+ 2026 15:56:44 +0000
+Received: from OSOP286MB7730.JPNP286.PROD.OUTLOOK.COM
+ ([fe80::b7ab:6af2:d18e:4a71]) by OSOP286MB7730.JPNP286.PROD.OUTLOOK.COM
+ ([fe80::b7ab:6af2:d18e:4a71%3]) with mapi id 15.20.9678.017; Thu, 5 Mar 2026
+ 15:56:44 +0000
 From: Koichiro Den <den@valinux.co.jp>
-To: Jakub Kicinski <kuba@kernel.org>
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, 
-	Allen Hubbe <allenbh@gmail.com>, Andrew Lunn <andrew+netdev@lunn.ch>, 
-	"David S. Miller" <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>, 
-	Paolo Abeni <pabeni@redhat.com>, ntb@lists.linux.dev, netdev@vger.kernel.org, 
+To: Jon Mason <jdmason@kudzu.us>,
+	Dave Jiang <dave.jiang@intel.com>,
+	Allen Hubbe <allenbh@gmail.com>,
+	Andrew Lunn <andrew+netdev@lunn.ch>,
+	"David S. Miller" <davem@davemloft.net>,
+	Eric Dumazet <edumazet@google.com>,
+	Jakub Kicinski <kuba@kernel.org>,
+	Paolo Abeni <pabeni@redhat.com>
+Cc: ntb@lists.linux.dev,
+	netdev@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2 1/4] net: ntb_netdev: Introduce per-queue context
-Message-ID: <6xykduszznqrgjicryktaiw46izanrzinohtvdn3a3ezt4cv5u@v3fwtdhbh4z2>
-References: <20260228145538.3955864-1-den@valinux.co.jp>
- <20260228145538.3955864-2-den@valinux.co.jp>
- <20260304171337.5bc44eef@kernel.org>
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260304171337.5bc44eef@kernel.org>
-X-ClientProxiedBy: TY4P286CA0026.JPNP286.PROD.OUTLOOK.COM
- (2603:1096:405:2b0::11) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
- (2603:1096:405:38f::10)
+Subject: [PATCH v3 1/4] net: ntb_netdev: Introduce per-queue context
+Date: Fri,  6 Mar 2026 00:56:36 +0900
+Message-ID: <20260305155639.1885517-2-den@valinux.co.jp>
+X-Mailer: git-send-email 2.51.0
+In-Reply-To: <20260305155639.1885517-1-den@valinux.co.jp>
+References: <20260305155639.1885517-1-den@valinux.co.jp>
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: TY4P301CA0091.JPNP301.PROD.OUTLOOK.COM
+ (2603:1096:405:37a::14) To OSOP286MB7730.JPNP286.PROD.OUTLOOK.COM
+ (2603:1096:604:468::22)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -68,164 +72,584 @@ List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|TYRP286MB5198:EE_
-X-MS-Office365-Filtering-Correlation-Id: b4a7b647-d80a-4739-4553-08de7abf07f0
+X-MS-TrafficTypeDiagnostic: OSOP286MB7730:EE_|TY3P286MB2756:EE_
+X-MS-Office365-Filtering-Correlation-Id: b4342f9a-7e89-4751-a75d-08de7acfcc7a
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|1800799024|7416014|376014|366016|10070799003;
+	BCL:0;ARA:13230040|10070799003|376014|7416014|366016|1800799024;
 X-Microsoft-Antispam-Message-Info:
-	gtgV0t7lqY3XLy8CEGAmTmsh2EXT8jO+TD4ilv8yNd8Tj85/A+elrZoUPxZAkL5/PzHrp1esMB8UiGz8+f2F4TDmcPjitalm5Eer0Cufptzk/EfJqL8HcXfwNoICOHT0yTxyjZB3aDw/5LEoprAiAwGsxSfEp02PHfEcRJZaA0cZMbeVORGrN4OkQVZE3aHxiBrSuvDXgVf96Vwd1fWq+zfD9lo/N88dmtFxcAS6kiLO2Zrjn+jvq7eNyflDAqmIrr6p3tqE4qOMQu2IVSKNPbdHn+5AyR9huSrmKw1ZKqn+wAZNdZPYeF1SdcTqUWMl9nEKEp6GWAWnAPEoRY84IHGN6K9TsY3WnbJwIsNACLhcbzDHQ0IqraLzp1flSdXKyrGdgX1k0uKCDvCDpF8dCwXh9MqbP6LxRB4MYLhlsr/rjy9kDrz/xcl3Y7PiU7gh9IFDGRZo21Rio+8tBir3B8yCrKhEflnKP+ePNH1CkMtizY6Gm9KBoxJOez92Q2OYXihipgENOyMG/P6GoNDIX0z06QMV0Inw+CCpzrEpQSN2HadiMul5OByZVhKEnGkOflZNppIlILXc67GbtWtobTTgv7wa7ihpfMPM4+N32j3LkccVxoMbT2Tb/8P2UPBgRvLS9v1Zb+4FafuG4xsVZXEjSv5gvqSFCQEj4ghTK/gJtvb3ltxbZUjW/VYaIufqjd9yOjSKKLjJLnlWE1ChWhGT94Rf5e/lwybAHJPX85w=
+	8XFu/um0jN7N1T3BgizsRbR/pKYyQ12Y2YrHa3X6osknorgHWKyS2dK1oPH8Y8omaGxQTgKRxHqm+Pq9LQkGQKBLN0ujb3PZ0MIR5TCRUXP7O0Rlg4RYw4121ohtf/b47bm8W/s7QAfBpDpNoL1IYr0CP0O9zSk2sOBj6C3bUxJU5NDHwK85yBQecqAD4YtmzC541LRzucQowx84QTPzZvLdEzbje9Pt8F4NaL1asqqScuT3xtB+wOZ0u2xyjMoJhI82NOp+329dWgDfdAyfxvQ1TDOOmk5QM45Ozy/PAFIR+k8ItOmS9fwsXcJcv/xSb3ppZ/vcqRclVSz4NKJlxR5U1rAeUvKcHP5+fDiBDWMRdj6jax/TOpREkgFnkELwAoBZGx4/sLQtwpMQXnkhJoIuaEnYJjlWHZEagpY52q+XzWd6y6a4x254HWY5v31890ECgMwQIYWqqTaiI6P75PkLUAXSxK/4imREKNaCD95Jc62kQlwxWQK1/RvQwo4ZL7VRnapea+b/RWP7WR6gdcNTNc7rcCs08Ub19OnfbmLzOTDVjdKC9NezCNwNi0tiGq3d56VzHZCJhvgP0b6wyBSaUNND2bcKBfM0cKFGzOgc6pl93V57EM92AOjlg7TEF3p/qdIfLm+CQ183IvKpP/N0WvxejSSPGh3prHHp1LXxTkrT2krbHCp/p5KYq9xwqSLvI4GFXwNGVUnQZ4FJlK7J+yuEY16a5D3uJ0DiAHs=
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(7416014)(376014)(366016)(10070799003);DIR:OUT;SFP:1102;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:OSOP286MB7730.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(10070799003)(376014)(7416014)(366016)(1800799024);DIR:OUT;SFP:1102;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?vuVN5di5f33JK8kTeGHCwpsomcMAesG4uqKNeG8ZrillB5tZ56F3IELa33hq?=
- =?us-ascii?Q?5ciIfKVklevwMO/6SfAsiRm+8GIk36HEL8V6spxMcWOPAuFn/bSgrE6KQi2R?=
- =?us-ascii?Q?vJt11vAcnFl+PfwYsHjxRiAqco6/YEGfBhEhjluCXvi5YDt6TDS72+S6g5pV?=
- =?us-ascii?Q?+wo3hna5NelMF1ZbIekYaiGnDs2VyAZyVpWY1PJKrWSvWrVZjQfvlwC+urA1?=
- =?us-ascii?Q?lGQd/xGiGKtT0MbkU1EdaQzHHxO3YvIkbLUNvCIBtsEhjhmDXqaK57UZUxfg?=
- =?us-ascii?Q?d6UnT7zfB+5835hUwJK5/UhXzu4Tx4EsLcYVF8nlq54EX6Dtmh30bIRxR/xs?=
- =?us-ascii?Q?dBSCveX5xK0NIcU8/1WlHaidotbj17aDoNFQzd04fbJ6OMg0ejT78YBi49Rx?=
- =?us-ascii?Q?saw7L3efeFOkIOB5XX1efRlLli4fmDvoV2dMWaRDFRD1+h6dFbYaPPsr+O5C?=
- =?us-ascii?Q?rmCuC3tWsaa4PDTqbVeJBgnm5ZT2m88oEaiDj5MrXFHKkTWJQkQX5UMZo/2A?=
- =?us-ascii?Q?L3CVY9hK65LiO24bt6cAlG/+b6eA1t4RFdyNUTVuwzgND9Xozx3RMTQK0q1C?=
- =?us-ascii?Q?AtWr96Ej92CWW/WvWF/7j+mJV/XIIRuzoOL/N99LRNxvZifrNayKA3Df2hdd?=
- =?us-ascii?Q?TCCU3sKKoNOgh2BzjtJ+CZ9hSzE1AcbLh+JBpJ8FENcvsgfkNApGi5YB1IKQ?=
- =?us-ascii?Q?nO3icSr7UYXcUslIsdK7nbot6hsG74m+uFL0sL1FLmz5ZMeYwVFT2/fD7ny5?=
- =?us-ascii?Q?/HrwZbU7QBAAtpO6LNiPJHaylrzA0vpqyjGNf/Q7oAhsgbVdHuE8cA/ThPoX?=
- =?us-ascii?Q?C/5N+FHwe/28sUJXdNO+KlUzEMbWXX6s9SiXHMgjtWM+aabxv6n5rtzufMkZ?=
- =?us-ascii?Q?mh/7iM+WQ3FTv0oViYvp5MyVXv85+nTejNFPTkBx9nuam0gEbb8L0Yh8/hLr?=
- =?us-ascii?Q?vDkrZxTwiBW/sx9N4jQukGdlevqW/T/USEfg34DKd2aGGjVC+Ee5Csfd3EXE?=
- =?us-ascii?Q?3K8Xq3IMRrSFreeLRkI+h4ow0NnO2/2yJR0tkcd0iA4CmgO2VLRz+MKcKLv6?=
- =?us-ascii?Q?mOrDjQohcmIwkUp8Qrkf4K8p8FtNVTHHy/YSTqxgLwDYdx57JMVxFd/X65WO?=
- =?us-ascii?Q?+AqxzThMEOjw1jvedbPSHK/SRIJDnJi/M+LTRIa4LxnYc6QrK4IhiXJgI4er?=
- =?us-ascii?Q?e9Y31hjp+3ZmlcW+qS/gftO4jZch6ZR8cXwiIFUJKF7BovfPY7DdUeeyRJKd?=
- =?us-ascii?Q?6JIz9lBnK23cxFfQHMacRpUi+jfTelHMYi0bRxMs0NwB3mNTDAyWXZceO3kJ?=
- =?us-ascii?Q?igftZ53iy36by7+wqlrcWUztyJ362ZaEkgJ333ZkJAXf+GbUTGX3eXPtD3Vx?=
- =?us-ascii?Q?NFhjqt6Bm88ejVZ/iPrNa4gKDUQ+2WZjEjcXxOw/t5Rj5QXRQlazN3EiT+iJ?=
- =?us-ascii?Q?WFov48xuEghx/ouPi0YKpO2FXvojzQuJLMD0QCJ47FSa8IxgyK3gWSeDeUTx?=
- =?us-ascii?Q?N35zkgh+ZnyZnyObd4UCjWDkysj9fTK3rZx1W2KiW6cW4wI3jjSppxuEkU24?=
- =?us-ascii?Q?dHG7K5ik7maYRmc1qZT0ZDXR6XplHjwO3RpzR9kWhJu41NhxtF9ee7Qi3fKA?=
- =?us-ascii?Q?uO6V6UTuEaxbqjqopRk96ee9ODLLvLatrPPjFJUVUl2dRN1IJ8AUGXHCxWYr?=
- =?us-ascii?Q?18+Rxt2PwA3SoM+P+q2jAx1F7j8KqUs3D3Yw2m4OJIRQxX7DiSOK6vY/md5w?=
- =?us-ascii?Q?fkeZbwBvZTf5mCtdX4GL+E/yWnGSBCbQD/WGkwWqZUZrk59RjaNE?=
+	=?us-ascii?Q?ASBpR1VF0QszoF6XGJvk06dzp15qCxoQkTqTUrHGkA+SrxztMzzyqL9qLTsX?=
+ =?us-ascii?Q?LbB7Y/7PZ0MoUGUd8btNvXjEW6+1oHE9ZkGLaq3/eXRk/2+7yKRch7b5N/EQ?=
+ =?us-ascii?Q?WWZbYOKtJlfyN4CYmPcRa0k6dwLvAYtWPND1Oov8MTLVnRBvEJr8VpsKfFKj?=
+ =?us-ascii?Q?a+jpeKQmtKFC1M1F7Tz+urlMjdmSt3YmbCB6ODY6lgAzxfEKzQ+jBtCRqG3q?=
+ =?us-ascii?Q?UoQl5wOoNyQAlb3/nXnHX3mpjNbhElwLRd7e6R0pqDr9s7zmZ4jYrZv1U3MR?=
+ =?us-ascii?Q?NfzQTnXs9hciXN/Nihk2K5b2KLy1d+zNCpMRiUcLf9s4dPT3ZFHSXR3pN33h?=
+ =?us-ascii?Q?8jI9yZvIqbAh2ppPqRR0Xev6TVa+2gt1HPkGDHWixAd+CJzYxPClZ2MwH+kd?=
+ =?us-ascii?Q?VwCcFKy/cpJBsjx8vk0AOOHuIfoIOsr8zhbXYXWoyFHloT1PoZd93PJEa4Tm?=
+ =?us-ascii?Q?zoYiCwPZKaDfUsJAzwSB+J8iX/3gMBL13RPhHvP1/G/NuaNUiczV1WBM+tmr?=
+ =?us-ascii?Q?Cgz/GhLsstSWqTYWbsXgt9QvqNbLgUz2z5esbzlZyzD/2nwGG6Btq8wIO1Vj?=
+ =?us-ascii?Q?wbKjsvHim7vdOTM2Jq8aQvFgU1BrBd8SsJr5Rn3qiTd/SITPz8jkqkivGlAT?=
+ =?us-ascii?Q?O9X5TiX0ymEpcVdLf0mx+lNzzsehXHno5DK54+Aod8Qo4Nr+4K3xtuI1tSgb?=
+ =?us-ascii?Q?HQUbN/UtHNzrM6h9Aa5HxKAaMVdTzlYZjk7up0gY+cDmq4w+ZJoJaqnN0f1K?=
+ =?us-ascii?Q?cGe1VVticAhzSvRtiA49hgdefByCQc23PPAs0dyoh+fMcGSoJS7YqEnhHsVJ?=
+ =?us-ascii?Q?vTj4iSnGNPmz8jXnoN4F/asvDuahhcfBD4Y2rAoxGQ8Uq9AJ+HMoiweEovEX?=
+ =?us-ascii?Q?M7m9kCcKKqX8omIraKyMcUc941Pkwe5dp2Q7bhCKIOeQXJS55deIpGwDwq/h?=
+ =?us-ascii?Q?VFxImh1dffPwzEwsPddqCmvF3+99ntuFFgM/UqHijdWMrO3DxmTKoSeCHSW3?=
+ =?us-ascii?Q?eOnhzBtcMSCPuwE6MDwCoX4m4iEOtwTMWQZxEiDdqu2+KXte/YEp47zkicDC?=
+ =?us-ascii?Q?DlU+pEkGhm+R60KLeQ6xBDb+UgOTMQtwgTCGrs0R7NSpO6q2DreZrQhY2jyL?=
+ =?us-ascii?Q?U18WbWT59ViRwqQhq1+danPd8hKkTEiocvtzWdsRUULRJLwwYFHtTFlS3hB6?=
+ =?us-ascii?Q?fdHqEdTn5n22j90Tylxho118CK2UjPlTTum9MU+WB8gDLHeEGonqWdjhP5qX?=
+ =?us-ascii?Q?uThk/PE0gmuuEZU/n+qn9fNa93xWx2kFcYpj7DSDAf76Jh90EUMTvszw9LR/?=
+ =?us-ascii?Q?Ws4L41TW14CHrs36osPd/wBu4SqhxTko4UBCdjPTIdBpT5B/x8MbImu7aG+T?=
+ =?us-ascii?Q?qsC+w49RWOCi1NW5J8IYhl+xlERV2ZqT9KIJSyEZobB+121zt1aJwJpbhlXZ?=
+ =?us-ascii?Q?ucRc9Ewo53eUH41OzSy92Fq+EN78NCNn9hZ09P5g7QCU6PUueJ5gr1DNxr9v?=
+ =?us-ascii?Q?/+ZvV5c26gvs09zx4cj6oWHOC4h06ItkDSn/cNQQouNDl4D0zF7BFe0USHwi?=
+ =?us-ascii?Q?LoeBoaDkD5CRg05KF9DlYPgx39foEE+36RP4nR3QNOqNU6rUOsUjjj3cbqpD?=
+ =?us-ascii?Q?10u7rn3oFXf2hgPvd3YVmCb3/nCkxEcnkGaTW7hUvEYW2nmBX+q4obrTnRcY?=
+ =?us-ascii?Q?gfzZDsSEimksjKO6vNjEtBhfYK54/LjwXSqAYdiSO2IwPgbuAKkGuk1uITiQ?=
+ =?us-ascii?Q?4mVWUub7Ed67c8cZi+/Yx1EhAiHsKWk5+lhiLFNdCtBe/kmaAF8V?=
 X-OriginatorOrg: valinux.co.jp
-X-MS-Exchange-CrossTenant-Network-Message-Id: b4a7b647-d80a-4739-4553-08de7abf07f0
-X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+X-MS-Exchange-CrossTenant-Network-Message-Id: b4342f9a-7e89-4751-a75d-08de7acfcc7a
+X-MS-Exchange-CrossTenant-AuthSource: OSOP286MB7730.JPNP286.PROD.OUTLOOK.COM
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 05 Mar 2026 13:56:42.4372
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 05 Mar 2026 15:56:44.1229
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: n8/pKWnAQ61iLbACOJXBV75PNnzYRomw+v++jsk/NPlRG+fDJwZImfuR0YiniA6/ffHhlFBuEd4vWaHr47Za9A==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYRP286MB5198
+X-MS-Exchange-CrossTenant-UserPrincipalName: p0iZUMx9GrKdxIYfofFRcLR5xqhHspXOBoxNp9tz6IESjuXBDc73GHgau0xNarkWTdidrygB+XpGynPWXqQRmA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY3P286MB2756
 
-On Wed, Mar 04, 2026 at 05:13:37PM -0800, Jakub Kicinski wrote:
-> On Sat, 28 Feb 2026 23:55:35 +0900 Koichiro Den wrote:
-> > @@ -99,7 +114,9 @@ static void ntb_netdev_event_handler(void *data, int link_is_up)
-> >  static void ntb_netdev_rx_handler(struct ntb_transport_qp *qp, void *qp_data,
-> >  				  void *data, int len)
-> >  {
-> > -	struct net_device *ndev = qp_data;
-> > +	struct ntb_netdev_queue *q = qp_data;
-> > +	struct ntb_netdev *dev = q->ntdev;
-> > +	struct net_device *ndev = dev->ndev;
-> >  	struct sk_buff *skb;
-> >  	int rc;
-> >  
-> > @@ -118,6 +135,7 @@ static void ntb_netdev_rx_handler(struct ntb_transport_qp *qp, void *qp_data,
-> >  	skb_put(skb, len);
-> >  	skb->protocol = eth_type_trans(skb, ndev);
-> >  	skb->ip_summed = CHECKSUM_NONE;
-> > +	skb_record_rx_queue(skb, q->qid);
-> >  
-> >  	if (netif_rx(skb) == NET_RX_DROP) {
-> >  		ndev->stats.rx_errors++;
-> > @@ -135,7 +153,8 @@ static void ntb_netdev_rx_handler(struct ntb_transport_qp *qp, void *qp_data,
-> >  	}
-> >  
-> >  enqueue_again:
-> > -	rc = ntb_transport_rx_enqueue(qp, skb, skb->data, ndev->mtu + ETH_HLEN);
-> > +	rc = ntb_transport_rx_enqueue(q->qp, skb, skb->data,
-> 
-> nit: I think in this case you don't have to replace qp qith q->qp ?
-> qp is an argument of ntb_netdev_rx_handler()
-> 
-> > @@ -208,16 +227,26 @@ static netdev_tx_t ntb_netdev_start_xmit(struct sk_buff *skb,
-> >  					 struct net_device *ndev)
-> >  {
-> >  	struct ntb_netdev *dev = netdev_priv(ndev);
-> > +	u16 qid = skb_get_queue_mapping(skb);
-> > +	struct ntb_netdev_queue *q;
-> >  	int rc;
-> >  
-> > -	ntb_netdev_maybe_stop_tx(ndev, dev->qp, tx_stop);
-> > +	if (unlikely(!dev->num_queues))
-> 
-> please avoid such defensive checks, this should never happen
-> 
-> > +		goto err;
-> >  
-> > -	rc = ntb_transport_tx_enqueue(dev->qp, skb, skb->data, skb->len);
-> > +	if (unlikely(qid >= dev->num_queues))
-> 
-> same, the stack should not sent patches for disabled queues
-> 
-> > +		qid = 0;
-> > +
-> 
-> >  static void ntb_netdev_tx_timer(struct timer_list *t)
-> >  {
-> > -	struct ntb_netdev *dev = timer_container_of(dev, t, tx_timer);
-> > +	struct ntb_netdev_queue *q = timer_container_of(q, t, tx_timer);
-> > +	struct ntb_netdev *dev = q->ntdev;
-> >  	struct net_device *ndev = dev->ndev;
-> 
-> nit: if you can't maintain the longest to shortest order because of
-> dependencies the init should be moved out-of-line
-> 
-> >  static int ntb_netdev_open(struct net_device *ndev)
-> >  {
-> >  	struct ntb_netdev *dev = netdev_priv(ndev);
-> > +	struct ntb_netdev_queue *queue;
-> >  	struct sk_buff *skb;
-> > -	int rc, i, len;
-> > +	unsigned int q;
-> > +	int rc = 0, i, len;
-> 
-> nit: sort variable declaration lines longest to shortest (there's at
-> least one more of such issues in this patch)
-> 
-> > @@ -420,6 +485,16 @@ static int ntb_netdev_probe(struct device *client_dev)
-> >  	dev = netdev_priv(ndev);
-> >  	dev->ndev = ndev;
-> >  	dev->pdev = pdev;
-> > +	dev->client_dev = client_dev;
-> > +	dev->num_queues = 0;
-> > +
-> > +	dev->queues = kcalloc(NTB_NETDEV_MAX_QUEUES, sizeof(*dev->queues),
-> > +			      GFP_KERNEL);
-> 
-> I think we may be expected to use kzalloc_objs() now
-> 
-> 
-> > @@ -464,9 +560,14 @@ static void ntb_netdev_remove(struct device *client_dev)
-> >  {
-> >  	struct net_device *ndev = dev_get_drvdata(client_dev);
-> >  	struct ntb_netdev *dev = netdev_priv(ndev);
-> > +	unsigned int q;
-> > +
-> >  
-> 
-> nit double new line
+Prepare ntb_netdev for multi-queue operation by moving queue-pair state
+out of struct ntb_netdev.
 
-Thanks for the review. All you pointed out makes sense. I've addressed these
-locally and re-tested the series. I'll send v3 later.
+Introduce struct ntb_netdev_queue to carry the ntb_transport_qp pointer,
+the per-QP TX timer and queue id. Pass this object as the callback
+context and convert the RX/TX handlers and link event path accordingly.
 
-Best regards,
-Koichiro
+The probe path allocates a fixed upper bound for netdev queues while
+instantiating only a single ntb_transport queue pair, preserving the
+previous behavior. Also store client_dev for future queue pair
+creation/removal via the ntb_transport API.
 
-> -- 
-> pw-bot: cr
+Signed-off-by: Koichiro Den <den@valinux.co.jp>
+---
+Changes in v3:
+  - Drop redundant defensive checks in start_xmit().
+  - Use kzalloc_objs() for the queue array.
+  - Use the local qp argument where applicable.
+  - Make variable declarations follow reverse Christmas tree style.
+  - Remove double blank line.
+
+ drivers/net/ntb_netdev.c | 277 ++++++++++++++++++++++++++-------------
+ 1 file changed, 188 insertions(+), 89 deletions(-)
+
+diff --git a/drivers/net/ntb_netdev.c b/drivers/net/ntb_netdev.c
+index fbeae05817e9..4b65e938d549 100644
+--- a/drivers/net/ntb_netdev.c
++++ b/drivers/net/ntb_netdev.c
+@@ -53,6 +53,7 @@
+ #include <linux/pci.h>
+ #include <linux/ntb.h>
+ #include <linux/ntb_transport.h>
++#include <linux/slab.h>
+ 
+ #define NTB_NETDEV_VER	"0.7"
+ 
+@@ -70,11 +71,24 @@ static unsigned int tx_start = 10;
+ /* Number of descriptors still available before stop upper layer tx */
+ static unsigned int tx_stop = 5;
+ 
+-struct ntb_netdev {
+-	struct pci_dev *pdev;
+-	struct net_device *ndev;
++#define NTB_NETDEV_MAX_QUEUES		64
++#define NTB_NETDEV_DEFAULT_QUEUES	1
++
++struct ntb_netdev;
++
++struct ntb_netdev_queue {
++	struct ntb_netdev *ntdev;
+ 	struct ntb_transport_qp *qp;
+ 	struct timer_list tx_timer;
++	u16 qid;
++};
++
++struct ntb_netdev {
++	struct pci_dev *pdev;
++	struct device *client_dev;
++	struct net_device *ndev;
++	unsigned int num_queues;
++	struct ntb_netdev_queue *queues;
+ };
+ 
+ #define	NTB_TX_TIMEOUT_MS	1000
+@@ -82,14 +96,17 @@ struct ntb_netdev {
+ 
+ static void ntb_netdev_event_handler(void *data, int link_is_up)
+ {
+-	struct net_device *ndev = data;
+-	struct ntb_netdev *dev = netdev_priv(ndev);
++	struct ntb_netdev_queue *q = data;
++	struct ntb_netdev *dev = q->ntdev;
++	struct net_device *ndev;
+ 
+-	netdev_dbg(ndev, "Event %x, Link %x\n", link_is_up,
+-		   ntb_transport_link_query(dev->qp));
++	ndev = dev->ndev;
++
++	netdev_dbg(ndev, "Event %x, Link %x, qp %u\n", link_is_up,
++		   ntb_transport_link_query(q->qp), q->qid);
+ 
+ 	if (link_is_up) {
+-		if (ntb_transport_link_query(dev->qp))
++		if (ntb_transport_link_query(q->qp))
+ 			netif_carrier_on(ndev);
+ 	} else {
+ 		netif_carrier_off(ndev);
+@@ -99,10 +116,13 @@ static void ntb_netdev_event_handler(void *data, int link_is_up)
+ static void ntb_netdev_rx_handler(struct ntb_transport_qp *qp, void *qp_data,
+ 				  void *data, int len)
+ {
+-	struct net_device *ndev = qp_data;
++	struct ntb_netdev_queue *q = qp_data;
++	struct ntb_netdev *dev = q->ntdev;
++	struct net_device *ndev;
+ 	struct sk_buff *skb;
+ 	int rc;
+ 
++	ndev = dev->ndev;
+ 	skb = data;
+ 	if (!skb)
+ 		return;
+@@ -118,6 +138,7 @@ static void ntb_netdev_rx_handler(struct ntb_transport_qp *qp, void *qp_data,
+ 	skb_put(skb, len);
+ 	skb->protocol = eth_type_trans(skb, ndev);
+ 	skb->ip_summed = CHECKSUM_NONE;
++	skb_record_rx_queue(skb, q->qid);
+ 
+ 	if (netif_rx(skb) == NET_RX_DROP) {
+ 		ndev->stats.rx_errors++;
+@@ -144,42 +165,43 @@ static void ntb_netdev_rx_handler(struct ntb_transport_qp *qp, void *qp_data,
+ }
+ 
+ static int __ntb_netdev_maybe_stop_tx(struct net_device *netdev,
+-				      struct ntb_transport_qp *qp, int size)
++				      struct ntb_netdev_queue *q, int size)
+ {
+-	struct ntb_netdev *dev = netdev_priv(netdev);
++	netif_stop_subqueue(netdev, q->qid);
+ 
+-	netif_stop_queue(netdev);
+ 	/* Make sure to see the latest value of ntb_transport_tx_free_entry()
+ 	 * since the queue was last started.
+ 	 */
+ 	smp_mb();
+ 
+-	if (likely(ntb_transport_tx_free_entry(qp) < size)) {
+-		mod_timer(&dev->tx_timer, jiffies + usecs_to_jiffies(tx_time));
++	if (likely(ntb_transport_tx_free_entry(q->qp) < size)) {
++		mod_timer(&q->tx_timer, jiffies + usecs_to_jiffies(tx_time));
+ 		return -EBUSY;
+ 	}
+ 
+-	netif_start_queue(netdev);
++	netif_start_subqueue(netdev, q->qid);
+ 	return 0;
+ }
+ 
+ static int ntb_netdev_maybe_stop_tx(struct net_device *ndev,
+-				    struct ntb_transport_qp *qp, int size)
++				    struct ntb_netdev_queue *q, int size)
+ {
+-	if (netif_queue_stopped(ndev) ||
+-	    (ntb_transport_tx_free_entry(qp) >= size))
++	if (__netif_subqueue_stopped(ndev, q->qid) ||
++	    (ntb_transport_tx_free_entry(q->qp) >= size))
+ 		return 0;
+ 
+-	return __ntb_netdev_maybe_stop_tx(ndev, qp, size);
++	return __ntb_netdev_maybe_stop_tx(ndev, q, size);
+ }
+ 
+ static void ntb_netdev_tx_handler(struct ntb_transport_qp *qp, void *qp_data,
+ 				  void *data, int len)
+ {
+-	struct net_device *ndev = qp_data;
++	struct ntb_netdev_queue *q = qp_data;
++	struct ntb_netdev *dev = q->ntdev;
++	struct net_device *ndev;
+ 	struct sk_buff *skb;
+-	struct ntb_netdev *dev = netdev_priv(ndev);
+ 
++	ndev = dev->ndev;
+ 	skb = data;
+ 	if (!skb || !ndev)
+ 		return;
+@@ -194,13 +216,13 @@ static void ntb_netdev_tx_handler(struct ntb_transport_qp *qp, void *qp_data,
+ 
+ 	dev_kfree_skb_any(skb);
+ 
+-	if (ntb_transport_tx_free_entry(dev->qp) >= tx_start) {
++	if (ntb_transport_tx_free_entry(qp) >= tx_start) {
+ 		/* Make sure anybody stopping the queue after this sees the new
+ 		 * value of ntb_transport_tx_free_entry()
+ 		 */
+ 		smp_mb();
+-		if (netif_queue_stopped(ndev))
+-			netif_wake_queue(ndev);
++		if (__netif_subqueue_stopped(ndev, q->qid))
++			netif_wake_subqueue(ndev, q->qid);
+ 	}
+ }
+ 
+@@ -208,16 +230,20 @@ static netdev_tx_t ntb_netdev_start_xmit(struct sk_buff *skb,
+ 					 struct net_device *ndev)
+ {
+ 	struct ntb_netdev *dev = netdev_priv(ndev);
++	u16 qid = skb_get_queue_mapping(skb);
++	struct ntb_netdev_queue *q;
+ 	int rc;
+ 
+-	ntb_netdev_maybe_stop_tx(ndev, dev->qp, tx_stop);
++	q = &dev->queues[qid];
+ 
+-	rc = ntb_transport_tx_enqueue(dev->qp, skb, skb->data, skb->len);
++	ntb_netdev_maybe_stop_tx(ndev, q, tx_stop);
++
++	rc = ntb_transport_tx_enqueue(q->qp, skb, skb->data, skb->len);
+ 	if (rc)
+ 		goto err;
+ 
+ 	/* check for next submit */
+-	ntb_netdev_maybe_stop_tx(ndev, dev->qp, tx_stop);
++	ntb_netdev_maybe_stop_tx(ndev, q, tx_stop);
+ 
+ 	return NETDEV_TX_OK;
+ 
+@@ -229,80 +255,104 @@ static netdev_tx_t ntb_netdev_start_xmit(struct sk_buff *skb,
+ 
+ static void ntb_netdev_tx_timer(struct timer_list *t)
+ {
+-	struct ntb_netdev *dev = timer_container_of(dev, t, tx_timer);
+-	struct net_device *ndev = dev->ndev;
++	struct ntb_netdev_queue *q = timer_container_of(q, t, tx_timer);
++	struct ntb_netdev *dev = q->ntdev;
++	struct net_device *ndev;
+ 
+-	if (ntb_transport_tx_free_entry(dev->qp) < tx_stop) {
+-		mod_timer(&dev->tx_timer, jiffies + usecs_to_jiffies(tx_time));
++	ndev = dev->ndev;
++
++	if (ntb_transport_tx_free_entry(q->qp) < tx_stop) {
++		mod_timer(&q->tx_timer, jiffies + usecs_to_jiffies(tx_time));
+ 	} else {
+ 		/* Make sure anybody stopping the queue after this sees the new
+ 		 * value of ntb_transport_tx_free_entry()
+ 		 */
+ 		smp_mb();
+-		if (netif_queue_stopped(ndev))
+-			netif_wake_queue(ndev);
++		if (__netif_subqueue_stopped(ndev, q->qid))
++			netif_wake_subqueue(ndev, q->qid);
+ 	}
+ }
+ 
+ static int ntb_netdev_open(struct net_device *ndev)
+ {
+ 	struct ntb_netdev *dev = netdev_priv(ndev);
++	struct ntb_netdev_queue *queue;
+ 	struct sk_buff *skb;
+-	int rc, i, len;
++	int rc = 0, i, len;
++	unsigned int q;
+ 
+-	/* Add some empty rx bufs */
+-	for (i = 0; i < NTB_RXQ_SIZE; i++) {
+-		skb = netdev_alloc_skb(ndev, ndev->mtu + ETH_HLEN);
+-		if (!skb) {
+-			rc = -ENOMEM;
+-			goto err;
+-		}
++	/* Add some empty rx bufs for each queue */
++	for (q = 0; q < dev->num_queues; q++) {
++		queue = &dev->queues[q];
++
++		for (i = 0; i < NTB_RXQ_SIZE; i++) {
++			skb = netdev_alloc_skb(ndev, ndev->mtu + ETH_HLEN);
++			if (!skb) {
++				rc = -ENOMEM;
++				goto err;
++			}
+ 
+-		rc = ntb_transport_rx_enqueue(dev->qp, skb, skb->data,
+-					      ndev->mtu + ETH_HLEN);
+-		if (rc) {
+-			dev_kfree_skb(skb);
+-			goto err;
++			rc = ntb_transport_rx_enqueue(queue->qp, skb, skb->data,
++						      ndev->mtu + ETH_HLEN);
++			if (rc) {
++				dev_kfree_skb(skb);
++				goto err;
++			}
+ 		}
++
++		timer_setup(&queue->tx_timer, ntb_netdev_tx_timer, 0);
+ 	}
+ 
+-	timer_setup(&dev->tx_timer, ntb_netdev_tx_timer, 0);
+-
+ 	netif_carrier_off(ndev);
+-	ntb_transport_link_up(dev->qp);
++
++	for (q = 0; q < dev->num_queues; q++)
++		ntb_transport_link_up(dev->queues[q].qp);
++
+ 	netif_start_queue(ndev);
+ 
+ 	return 0;
+ 
+ err:
+-	while ((skb = ntb_transport_rx_remove(dev->qp, &len)))
+-		dev_kfree_skb(skb);
++	for (q = 0; q < dev->num_queues; q++) {
++		queue = &dev->queues[q];
++
++		while ((skb = ntb_transport_rx_remove(queue->qp, &len)))
++			dev_kfree_skb(skb);
++	}
+ 	return rc;
+ }
+ 
+ static int ntb_netdev_close(struct net_device *ndev)
+ {
+ 	struct ntb_netdev *dev = netdev_priv(ndev);
++	struct ntb_netdev_queue *queue;
+ 	struct sk_buff *skb;
++	unsigned int q;
+ 	int len;
+ 
+-	ntb_transport_link_down(dev->qp);
+ 
+-	while ((skb = ntb_transport_rx_remove(dev->qp, &len)))
+-		dev_kfree_skb(skb);
++	for (q = 0; q < dev->num_queues; q++) {
++		queue = &dev->queues[q];
+ 
+-	timer_delete_sync(&dev->tx_timer);
++		ntb_transport_link_down(queue->qp);
+ 
++		while ((skb = ntb_transport_rx_remove(queue->qp, &len)))
++			dev_kfree_skb(skb);
++
++		timer_delete_sync(&queue->tx_timer);
++	}
+ 	return 0;
+ }
+ 
+ static int ntb_netdev_change_mtu(struct net_device *ndev, int new_mtu)
+ {
+ 	struct ntb_netdev *dev = netdev_priv(ndev);
++	struct ntb_netdev_queue *queue;
+ 	struct sk_buff *skb;
+-	int len, rc;
++	unsigned int q, i;
++	int len, rc = 0;
+ 
+-	if (new_mtu > ntb_transport_max_size(dev->qp) - ETH_HLEN)
++	if (new_mtu > ntb_transport_max_size(dev->queues[0].qp) - ETH_HLEN)
+ 		return -EINVAL;
+ 
+ 	if (!netif_running(ndev)) {
+@@ -311,41 +361,54 @@ static int ntb_netdev_change_mtu(struct net_device *ndev, int new_mtu)
+ 	}
+ 
+ 	/* Bring down the link and dispose of posted rx entries */
+-	ntb_transport_link_down(dev->qp);
++	for (q = 0; q < dev->num_queues; q++)
++		ntb_transport_link_down(dev->queues[q].qp);
+ 
+ 	if (ndev->mtu < new_mtu) {
+-		int i;
++		for (q = 0; q < dev->num_queues; q++) {
++			queue = &dev->queues[q];
+ 
+-		for (i = 0; (skb = ntb_transport_rx_remove(dev->qp, &len)); i++)
+-			dev_kfree_skb(skb);
+-
+-		for (; i; i--) {
+-			skb = netdev_alloc_skb(ndev, new_mtu + ETH_HLEN);
+-			if (!skb) {
+-				rc = -ENOMEM;
+-				goto err;
+-			}
+-
+-			rc = ntb_transport_rx_enqueue(dev->qp, skb, skb->data,
+-						      new_mtu + ETH_HLEN);
+-			if (rc) {
++			for (i = 0;
++			     (skb = ntb_transport_rx_remove(queue->qp, &len));
++			     i++)
+ 				dev_kfree_skb(skb);
+-				goto err;
++
++			for (; i; i--) {
++				skb = netdev_alloc_skb(ndev,
++						       new_mtu + ETH_HLEN);
++				if (!skb) {
++					rc = -ENOMEM;
++					goto err;
++				}
++
++				rc = ntb_transport_rx_enqueue(queue->qp, skb,
++							      skb->data,
++							      new_mtu +
++							      ETH_HLEN);
++				if (rc) {
++					dev_kfree_skb(skb);
++					goto err;
++				}
+ 			}
+ 		}
+ 	}
+ 
+ 	WRITE_ONCE(ndev->mtu, new_mtu);
+ 
+-	ntb_transport_link_up(dev->qp);
++	for (q = 0; q < dev->num_queues; q++)
++		ntb_transport_link_up(dev->queues[q].qp);
+ 
+ 	return 0;
+ 
+ err:
+-	ntb_transport_link_down(dev->qp);
++	for (q = 0; q < dev->num_queues; q++) {
++		struct ntb_netdev_queue *queue = &dev->queues[q];
+ 
+-	while ((skb = ntb_transport_rx_remove(dev->qp, &len)))
+-		dev_kfree_skb(skb);
++		ntb_transport_link_down(queue->qp);
++
++		while ((skb = ntb_transport_rx_remove(queue->qp, &len)))
++			dev_kfree_skb(skb);
++	}
+ 
+ 	netdev_err(ndev, "Error changing MTU, device inoperable\n");
+ 	return rc;
+@@ -404,6 +467,7 @@ static int ntb_netdev_probe(struct device *client_dev)
+ 	struct net_device *ndev;
+ 	struct pci_dev *pdev;
+ 	struct ntb_netdev *dev;
++	unsigned int q;
+ 	int rc;
+ 
+ 	ntb = dev_ntb(client_dev->parent);
+@@ -411,7 +475,7 @@ static int ntb_netdev_probe(struct device *client_dev)
+ 	if (!pdev)
+ 		return -ENODEV;
+ 
+-	ndev = alloc_etherdev(sizeof(*dev));
++	ndev = alloc_etherdev_mq(sizeof(*dev), NTB_NETDEV_MAX_QUEUES);
+ 	if (!ndev)
+ 		return -ENOMEM;
+ 
+@@ -420,6 +484,16 @@ static int ntb_netdev_probe(struct device *client_dev)
+ 	dev = netdev_priv(ndev);
+ 	dev->ndev = ndev;
+ 	dev->pdev = pdev;
++	dev->client_dev = client_dev;
++	dev->num_queues = 0;
++
++	dev->queues = kzalloc_objs(*dev->queues, NTB_NETDEV_MAX_QUEUES,
++				   GFP_KERNEL);
++	if (!dev->queues) {
++		rc = -ENOMEM;
++		goto err_free_netdev;
++	}
++
+ 	ndev->features = NETIF_F_HIGHDMA;
+ 
+ 	ndev->priv_flags |= IFF_LIVE_ADDR_CHANGE;
+@@ -436,26 +510,47 @@ static int ntb_netdev_probe(struct device *client_dev)
+ 	ndev->min_mtu = 0;
+ 	ndev->max_mtu = ETH_MAX_MTU;
+ 
+-	dev->qp = ntb_transport_create_queue(ndev, client_dev,
+-					     &ntb_netdev_handlers);
+-	if (!dev->qp) {
++	for (q = 0; q < NTB_NETDEV_DEFAULT_QUEUES; q++) {
++		struct ntb_netdev_queue *queue = &dev->queues[q];
++
++		queue->ntdev = dev;
++		queue->qid = q;
++		queue->qp = ntb_transport_create_queue(queue, client_dev,
++						       &ntb_netdev_handlers);
++		if (!queue->qp)
++			break;
++
++		dev->num_queues++;
++	}
++
++	if (!dev->num_queues) {
+ 		rc = -EIO;
+-		goto err;
++		goto err_free_queues;
+ 	}
+ 
+-	ndev->mtu = ntb_transport_max_size(dev->qp) - ETH_HLEN;
++	rc = netif_set_real_num_queues(ndev, dev->num_queues, dev->num_queues);
++	if (rc)
++		goto err_free_qps;
++
++	ndev->mtu = ntb_transport_max_size(dev->queues[0].qp) - ETH_HLEN;
+ 
+ 	rc = register_netdev(ndev);
+ 	if (rc)
+-		goto err1;
++		goto err_free_qps;
+ 
+ 	dev_set_drvdata(client_dev, ndev);
+-	dev_info(&pdev->dev, "%s created\n", ndev->name);
++	dev_info(&pdev->dev, "%s created with %u queue pairs\n",
++		 ndev->name, dev->num_queues);
+ 	return 0;
+ 
+-err1:
+-	ntb_transport_free_queue(dev->qp);
+-err:
++err_free_qps:
++	for (q = 0; q < dev->num_queues; q++)
++		ntb_transport_free_queue(dev->queues[q].qp);
++
++err_free_queues:
++	kfree(dev->queues);
++
++err_free_netdev:
+ 	free_netdev(ndev);
+ 	return rc;
+ }
+@@ -464,9 +559,13 @@ static void ntb_netdev_remove(struct device *client_dev)
+ {
+ 	struct net_device *ndev = dev_get_drvdata(client_dev);
+ 	struct ntb_netdev *dev = netdev_priv(ndev);
++	unsigned int q;
+ 
+ 	unregister_netdev(ndev);
+-	ntb_transport_free_queue(dev->qp);
++	for (q = 0; q < dev->num_queues; q++)
++		ntb_transport_free_queue(dev->queues[q].qp);
++
++	kfree(dev->queues);
+ 	free_netdev(ndev);
+ }
+ 
+-- 
+2.51.0
+
