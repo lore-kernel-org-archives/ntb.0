@@ -1,224 +1,101 @@
-Received: from OS0P286CU011.outbound.protection.outlook.com (mail-japanwestazon11020088.outbound.protection.outlook.com [52.101.228.88])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f41.google.com (mail-lf1-f41.google.com [209.85.167.41])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EC7072FE59B
-	for <ntb@lists.linux.dev>; Fri, 13 Mar 2026 08:51:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.228.88
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773391886; cv=fail; b=KQVkNhonfC+e5MhM6Rl2rS0z4EjEBLGAZwj0LNMWpu2TmzrSqQoBjGxdbjudV7JImfSAcWfMG9Jqs8WF86wLkNiW7tulevuZg5eWlmdzRyb73tVV0c1hcF0Zkk3q6z8S0r/Ai/U2S8D7d4LexjrrGQ2QJEk6R564L3/HR5IZ4r8=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773391886; c=relaxed/simple;
-	bh=Y9Ut85F98EEDq+KUocUgmtmiPh947LiNR8k2BTNIlWY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
-	 Content-Disposition:In-Reply-To:MIME-Version; b=TzKdE3rLn1IGFBts1HyW/sUW/Lyx4uUz+brilG1Tscw/TiU1L1p2D+azubd09kJqZDdfKdHeg37sPr0aUFxdZe+mxuRWhIpxHFlB3knIc9NRRIIu3kiF6NDkrJKpugrwo+JQIRbNkMwUSzrSUhI2q0ipazN6rZ2uqOjNRXYTTyg=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=JHkabu9x; arc=fail smtp.client-ip=52.101.228.88
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 456D425DB12
+	for <ntb@lists.linux.dev>; Sun, 15 Mar 2026 20:34:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.41
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1773606847; cv=none; b=IPvEwJAJIir0KJLWf5iwgdMREExAMbGCaGJbg6RJMzIizkJ7febwYrBRQ5QYUDFMWb7G0gDG6M4jfd2WKi0YGTK39kMsoap2Dpqxj/QEGh3b77NAEZYQi9B2j+jRuarmWyH/K4yINX3VhB8uM2XY+5zUjlZC3PRWxhPIjCD98gA=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1773606847; c=relaxed/simple;
+	bh=x4XBVU9NFJfJ98e7T4O3wN4hyNxkuoou/kNYOhtbu9Y=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=qACaXeENVy1CFP5IMU9Ttajj4UknhnTYZNZwf4u6g6wiLWkDXIruNyk6H8K9MsJYhNvPM7AWZjf9ZkQSnpKb0BPkI9xtC6Ln0lpusATkinv8Bz9uPKAukaPVB9ImNX/9ylswo23S/X7+W+NFw2mPbA1v5/5g/igW11WGZ89wegs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Bi8HMNZP; arc=none smtp.client-ip=209.85.167.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="JHkabu9x"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=Kh3BCmdiXCcVyYmtQ5f3JtU5/oIjTyy7LZ+/GAU28BimoTgGwkvXZrs5hQiv9uPfRlQbpZJKsH+lPohIjA6PUTcmAj6tuZUaZqjD8c3sTWmXd7n+H50tq4GfvJQsAGPIUz5KbvSxSpjd+eZAYlunnZBcEzR7UPAaV9GNxSbyH+h58qHUUYMTaJtbZdiyIJrPKBFKGwTynarWO8uAV0nAnPmU6wXa/ECllZdA9Cn0fyOWRF65N8EofauvI6Njc/S1aCke9nSB7azS+HhZCkvxLQpRlifFfr1C00J5EEDBLJ2PY1E3fFuxgC9ERobm9dvBKeROe3oMhNGjxiZFETj4hw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=PbV7LYszR+MfSQGsIg3Yi/MnzzI/1XAe0uT5fGY6eC8=;
- b=ncNDRMzhx3aXVChMhCW5ZFBi2OjTo4Yp0VoH5LR4cf+InHJPIciVtR48oKWOM5aTq4/UTDB1G6tYTUZ/43sMUdotsNbvrNw5f7VzNazlesav32adWgbd1rF06ZrDTQMv12CTjnQBIccmphGW/FPnBxGxYW+qRyUMrvTvvCJvj45dhJi7HhUjxBpoOnAIP+Qiy5MYh7UiaC9XduqFBgz/apHu6oopf4+hNNmrIgTk58VHV9VEScSyYYWZgG4sd3YN3z8cKLRGEOCEFQ2g8VQXiHCBXizd7fwpcENENkgkEgcCsELCjW3SDQr/QEycD4+tVXNcYK2ChuCvVJgx6NlC7g==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
- header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
- s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=PbV7LYszR+MfSQGsIg3Yi/MnzzI/1XAe0uT5fGY6eC8=;
- b=JHkabu9xE3X1XPTpv9DVlkZwwXRs2ZlJAQGd9hLhP5CCaxwqTUZgoJxRKuMpsgNbI8V24xJQvLe3fkHaGH5qol+d+7MFTJdu5gICW74k173yUtxCNdRGKFk6xw1k1cWLqCdvhK4urRU1ezzPeYCzbFfKLfjLNzJdrUEEb9PlnOg=
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=valinux.co.jp;
-Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:38f::10)
- by OS3P286MB2181.JPNP286.PROD.OUTLOOK.COM (2603:1096:604:196::7) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9700.12; Fri, 13 Mar
- 2026 08:51:19 +0000
-Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
- ([fe80::2305:327c:28ec:9b32]) by TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
- ([fe80::2305:327c:28ec:9b32%5]) with mapi id 15.20.9700.013; Fri, 13 Mar 2026
- 08:51:19 +0000
-Date: Fri, 13 Mar 2026 17:51:18 +0900
-From: Koichiro Den <den@valinux.co.jp>
-To: Frank Li <Frank.li@nxp.com>
-Cc: Manivannan Sadhasivam <mani@kernel.org>, 
-	Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kwilczynski@kernel.org>, Kishon Vijay Abraham I <kishon@kernel.org>, 
-	Bjorn Helgaas <bhelgaas@google.com>, Jonathan Corbet <corbet@lwn.net>, 
-	Shuah Khan <skhan@linuxfoundation.org>, Vinod Koul <vkoul@kernel.org>, Frank Li <Frank.Li@kernel.org>, 
-	Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, 
-	Allen Hubbe <allenbh@gmail.com>, Jingoo Han <jingoohan1@gmail.com>, 
-	Lorenzo Pieralisi <lpieralisi@kernel.org>, Rob Herring <robh@kernel.org>, Baruch Siach <baruch@tkos.co.il>, 
-	Jerome Brunet <jbrunet@baylibre.com>, Niklas Cassel <cassel@kernel.org>, linux-pci@vger.kernel.org, 
-	linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, dmaengine@vger.kernel.org, 
-	ntb@lists.linux.dev
-Subject: Re: [PATCH 01/15] dmaengine: dw-edma: Cache DMA channel IDs in
- dw_edma_chip
-Message-ID: <lrrh43qyixskxsbjnl5v4252zcqnbqsngvdfmj62eyjdhmen64@pjdypxohap6m>
-References: <20260312165005.1148676-1-den@valinux.co.jp>
- <20260312165005.1148676-2-den@valinux.co.jp>
- <abMcgQOHDD55Yv0e@lizhi-Precision-Tower-5810>
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <abMcgQOHDD55Yv0e@lizhi-Precision-Tower-5810>
-X-ClientProxiedBy: TYCP286CA0089.JPNP286.PROD.OUTLOOK.COM
- (2603:1096:400:2b3::16) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
- (2603:1096:405:38f::10)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Bi8HMNZP"
+Received: by mail-lf1-f41.google.com with SMTP id 2adb3069b0e04-59dea72099eso3914539e87.0
+        for <ntb@lists.linux.dev>; Sun, 15 Mar 2026 13:34:05 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1773606844; x=1774211644; darn=lists.linux.dev;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=Fas1ofkBzdL1TrT2Z69laHicj7pCtwPGHSuUlDLcpxc=;
+        b=Bi8HMNZPZneRhvdi82uMnXXsYGKslq3P2tOiXWA6kY5KBeLdCP7pnKa1cd+e1h2lNo
+         6qjDRWemj41GvcA8VX5Ttc3FXwmFb3QOyTgOv5Zp9ITdKBYWWkeIoh27nr35h+ao8eeN
+         mEMSDfRxSIUa1TfLSi6EkOTsB82+HvpORM8iyhE5oz81s5MzYiDtFrCVj3fc9+MHlofx
+         rmYyacALLsghiE/EtxYcuYY2nrDaAeTzCBjpbAnsWLLF8GUn3afFbgMfdAGBGAK+OGhQ
+         fdg8myjGiwxCHJs/ewYgQu4Wtpwg+c/hC4FXhE373Nz81YX7GFvZnMBgQ0DZ5+QnUU45
+         5EeQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1773606844; x=1774211644;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Fas1ofkBzdL1TrT2Z69laHicj7pCtwPGHSuUlDLcpxc=;
+        b=mQvoUz4B+GR13QrRbEecbxviS7AS9rFaitsuf8JtNYnqXdzESj52NlKbBzzl9xaKfN
+         Htrq/3TFIu/+STjB0RhL105drM798a959lHZyht2Z+JKqGjlcT+txjFUmnTdQMTft+Av
+         pp8HdsyJsWW3nym/IZQO9QdmqxITWoqrXtm4883NghwKPr/ADOAmbbLPNzuQC36vzWP4
+         RkYEPfybCREUlJNXLmTo5rJp8cjBxivk4tu+nuY3axnkx9r45DYRa7JFFQERIMzeo0xb
+         Ij5qaoEj+2ce5sKB4EfkD1FsadeZGIDbMtRZqQNWFw+8TEtvLeirwVwYIktdhKegVBF2
+         /ZMA==
+X-Forwarded-Encrypted: i=1; AJvYcCVSI8+1L6zx0P+1gzDmBi1DCAEYQmC8ggbRiUg/o0tEgrsX18ocAGsQgTd156GXEVGfW7Q=@lists.linux.dev
+X-Gm-Message-State: AOJu0YxDd6Mv/6GOJFAXMhJFp5QVWq5fdFNvCzZ02C6mrY94jesmepK0
+	e4WGcD6183LfyebuYUS8Ckt1pYnpDAgzMhwi/QB0KUJ8CtZn9/KZKlZA
+X-Gm-Gg: ATEYQzzlzBbTOslTrLHjDxk3wTxkHh4npOcbIV5NX5MJemk9AM9qv32DvvmMFqDPKvK
+	qas/bY+P6KegQyW3lIQVMbgCqIRIq9fqwWFhs851xi/bco1V9d1vjg/MRYq0mzNfpF6KXuSGScw
+	yktUd3NW990AGb66YPf/Ghua4qxQe24Vr5uXYUElnINxPElEQ5QtmTQ/Bjo3XHRTkBAADK4yNfx
+	pSB3A3lgs0sK3bHCSPxAMypXAYPDmc+yjnN3WLl7ivp4BgCpxRe9KtAeLT3wyrxY03EkwLIGiEp
+	5eHCaVboDzl94ayMc/YW90XJ2Nx4oSU81bOmRpinT43m0UgBqz8DZvA86sxsLfae1517Ex72Up4
+	HIudpX7+omv0sL5amnXZkdoXBxtP7CkcaP0zHSfXM0060ZXf9bEPfWGEG6G9R3U7i/I+B/eRK5w
+	3uu41iDINdkdVDyuuIS2ncnWRsOi8cO1KrU8PVuI7Tzgwy3EgbwPtZIotAp1urJi0CnFO/DdGIU
+	A==
+X-Received: by 2002:a05:6512:154b:10b0:5a1:2f9e:ec8f with SMTP id 2adb3069b0e04-5a1627039ecmr2505232e87.10.1773606843664;
+        Sun, 15 Mar 2026 13:34:03 -0700 (PDT)
+Received: from T6NXCV08J99224A.lan (81-237-238-191-no600.tbcn.telia.com. [81.237.238.191])
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-5a15602e18fsm2916297e87.22.2026.03.15.13.34.01
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 15 Mar 2026 13:34:03 -0700 (PDT)
+From: Oskar Ray-Frayssinet <rayfraytech@gmail.com>
+To: jdmason@kudzu.us
+Cc: dave.jiang@intel.com,
+	allenbh@gmail.com,
+	davem@davemloft.net,
+	kuba@kernel.org,
+	ntb@lists.linux.dev,
+	netdev@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Oskar Ray-Frayssinet <rayfraytech@gmail.com>
+Subject: [PATCH] net: ntb_netdev: add SPDX-License-Identifier tag
+Date: Sun, 15 Mar 2026 21:33:45 +0100
+Message-ID: <20260315203345.13657-1-rayfraytech@gmail.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|OS3P286MB2181:EE_
-X-MS-Office365-Filtering-Correlation-Id: e37826d4-82c1-45b9-af16-08de80ddb191
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|10070799003|366016|376014|1800799024|7416014|18002099003|22082099003|56012099003;
-X-Microsoft-Antispam-Message-Info:
-	VAAEs5WNJ/5erlBtdBknMUOYxqW4Qcv4VEOUBHoS7Byqd2gpydLOIYhD/q9uaWOtwhlwOqGKKmIab7Bi1W1Yz5bZ9mBHTv1a+55gI6SX3ZX6nwkgtkL6uliYZhYrQrrniJS55YAzZy8Dera34jCfuaM+O4yg2F0JilWlxgGg6a4HpsQo4tzo7AwrG+r4VizmLx6Rrsd45k/Tpy+2U9XvKllkpcy8cU/IeEF9yLwf69RR9C2s1dlWrOJ3kjKuXegXS9uiCfUfqbqF4pJ7/AmsqgXJ/YNUG+1nHdaBjPyzg3cwiebw076RGP5cVxxm3zArJSxjyFcGnr6AvKcIP67Jh1VlMoBIzEJmYN2Pr75kPddgP7IYLgBMNlUmw7hIjVp0QGPCIyVw8A2NRyoapUoesO6wY0O2oa9lfnF3PuPkCClg8xuv9rWWR0iH031az8ZqgP+EgtwoqlpgivQDz0CvoLr37kF/xPQL1MtGQTzmo2hrrRNXkJBx4p+fkcTzYhnZ87ssuE9cTOObSLdw/zYL3F7TTPtjbXOeV5LQVGXh5RlAGEb4PoS0RAeq/p5HZnTcChH4dyGQKSWEGul1PYzXDW1H2lCDH5RKey0b3CyoWRmWqWniRJ5Kig1Xfmns4+iavjpFQUxkY4wb/h4XZJPdKoT/nN3VMD93bDr1/DyNYE7EADj9jWW1gNCKzjcTqBEvJyZtGvKB3jUksIsI2DQCkjb19d3Hvnr9WWrJgSTDZ8s=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(10070799003)(366016)(376014)(1800799024)(7416014)(18002099003)(22082099003)(56012099003);DIR:OUT;SFP:1102;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?JtLjtbrmGgc/nrKpDl28mZAJU6jPUHGWMjDPOcnZHyKHqJ08r/L/dwjy7M0O?=
- =?us-ascii?Q?xZXtDQ+b70qbKqKELPoMaOkcLnl8evSY/36WLoUrqaw7aebtBsbv2wDzmW6x?=
- =?us-ascii?Q?VMHPvgbfDNg5s6SnWifcpOxsEsaZrpBvNl1qbccF0fwgmFcK8G9udf/fxlFz?=
- =?us-ascii?Q?HFzvUcGUa3vjdiRaF2U733i2AYjVtmF6RRlmh4N6pF2ZikUAQLI8hpUU2aLh?=
- =?us-ascii?Q?RVKhOEZLz82Ro6vJSdxhF3a9K3jV5mixfiWvLxJAS7cpXfyajAWLQLvtdwA0?=
- =?us-ascii?Q?UVbuOa+P4UggWlEiwM+JUa+7MfI09IiBKU0s6QYWTlSIq6+kZgwp5aji3fkY?=
- =?us-ascii?Q?anpk4+8hD++pas5CbvSKMtLrD9YI4j7GaQBw01LhfMfrvb2l5wcYKEhS6Wi1?=
- =?us-ascii?Q?lmBIZNhY1ykSHsToQ6ZrKk1m0VqQzh5oCEjEpprIePwJUyRhXWIIUN90og+k?=
- =?us-ascii?Q?PrDVgcniI0g3B/X1tjbSAVDOg5j2Ogdcs1MMYLEMYh3kMcINjGlW9XwEhhrK?=
- =?us-ascii?Q?MalvrGkUqDP/Sacb7j3EqtDiHbi1cwxaRKdzxfiwmJPexILteIw3Ry6wgbX4?=
- =?us-ascii?Q?eDCnBvGIAjKv1TV/CAS56tz8GuT+pR66HoE2GfBBjF8cbvNhJv0+jj0ygMYA?=
- =?us-ascii?Q?uZbiUG/AtykqG/bxsrS6J5NQcOmrdBBv3Zm4ZUrv1eRpgIvaARTZf1jTYX7Z?=
- =?us-ascii?Q?2769WQj/wTX8PrGsiQY2wXbrSauaY5Jn+JGDxupGEZcA03LzeO5e82BGtvj+?=
- =?us-ascii?Q?Rc8N4J3HIBp5FALBCenSvshYdvrNrhmX+MIYxe8tlEnOplTobwaY6vzKmwlL?=
- =?us-ascii?Q?E6BeYmYzHxi794GGpxxrto5KEpBglHV21M3hoVT1eL/Z0kZssllGvOLnEpIa?=
- =?us-ascii?Q?uWz+6NP7Sm7CfaK2c5aZvB6dwWvrnhYL5znxqfVFEcjtAkrxlxYijo9fvmaf?=
- =?us-ascii?Q?3o1ubN1JNlep/30zjERF1xZo4jZa6bzEg4W/3wBuZn6HwL8sU28FaBg539LH?=
- =?us-ascii?Q?UBblX7ToyIdFlyUqiFV58NyG1wg623EKr2YvLh66LxP2f2Onr2AZZPW6X5kn?=
- =?us-ascii?Q?dpzl6qumOSoKvg+LP6gY/BEEoG3FJgJVOtJL+geFINwHfhJShmLIgg8xrJ9f?=
- =?us-ascii?Q?Q4q+XzmtviGOBRZNtu0tE7gWqKSGzlKo+9QaUdK0ynbsHR9/IS687/AAIy8s?=
- =?us-ascii?Q?VNcX+3GFKAuHELYaixcDVn8uvx7FioZvlK9F0vC4JakU54lHjmnXOyxuR3px?=
- =?us-ascii?Q?zpEKMzqTzelK4it0O6EL8u2txnk5rlLrlRhXUfNuHX3dF494qRW3a0ZLy9re?=
- =?us-ascii?Q?L//3ns6/65/uKwlO+GPDOlUleGV7h2qyjXFCn/LLJ6lELtW4aksXkkGlweCe?=
- =?us-ascii?Q?ED1YfGdiFgUY1UqQE2a7IMDy6EFI/2bIzYT4SD3JxAoMd9IVMPMiKYr7BunC?=
- =?us-ascii?Q?h3mlwGHt4cltSd+hmH5rgl6Vkio8+pK+RAt2Q019itiq6NdgivY2frPFIrWi?=
- =?us-ascii?Q?dH8E8+1L7aJN6vd/orXhQeQ9I1HUCM+ThaLtGRYgCovlUcz+ihsoH18nQua0?=
- =?us-ascii?Q?A4a+AaRx+NQdLyqqWoM/gk78OU6nRSYwGh6s4CyArNd4bPcZQ1MoIT6Se/EH?=
- =?us-ascii?Q?AB8v8vYLleqlPb+cc3yAdOdE/kCV+k8hYmfvgMR6GNkRe0P7CjfnWMAyNvpb?=
- =?us-ascii?Q?u/kezYUON2lfufWOnZ8anYSp+e7C8jvRQrMGT/tchpMWWYLTDj1uOtx50NxP?=
- =?us-ascii?Q?p1Nnz34zxHFzwshzXnHO4XOLNook1IYFv8gYpNg0r9uD6/Qopyfx?=
-X-OriginatorOrg: valinux.co.jp
-X-MS-Exchange-CrossTenant-Network-Message-Id: e37826d4-82c1-45b9-af16-08de80ddb191
-X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 13 Mar 2026 08:51:18.9656
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: /9GxXC6M+jY554quQYlEQzVq8SDv7MnXKF3La3DqLVqrTbH79u/bU941JdkAelm+WsbuUnWudYAvuc69AU9IQg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: OS3P286MB2181
+Content-Transfer-Encoding: 8bit
 
-On Thu, Mar 12, 2026 at 04:05:21PM -0400, Frank Li wrote:
-> On Fri, Mar 13, 2026 at 01:49:51AM +0900, Koichiro Den wrote:
-> > The exported-DMA path needs to describe each exposed descriptor window
-> > with the DMAEngine channel ID that owns it. Those IDs are only assigned
-> > once the channels have been registered.
-> >
-> > Cache the dma_chan IDs in dw_edma_chip after registration so controller
-> > frontends can later publish them as auxiliary-resource metadata without
-> > reaching back into the live channel objects.
-> >
-> > Signed-off-by: Koichiro Den <den@valinux.co.jp>
-> > ---
-> >  drivers/dma/dw-edma/dw-edma-core.c | 18 +++++++++++++++++-
-> >  include/linux/dma/edma.h           |  4 ++++
-> >  2 files changed, 21 insertions(+), 1 deletion(-)
-> >
-> > diff --git a/drivers/dma/dw-edma/dw-edma-core.c b/drivers/dma/dw-edma/dw-edma-core.c
-> > index cd34a3ea602d..a13beacce2e7 100644
-> > --- a/drivers/dma/dw-edma/dw-edma-core.c
-> > +++ b/drivers/dma/dw-edma/dw-edma-core.c
-> > @@ -837,6 +837,7 @@ static int dw_edma_channel_setup(struct dw_edma *dw, u32 wr_alloc, u32 rd_alloc)
-> >  	struct dma_device *dma;
-> >  	u32 i, ch_cnt;
-> >  	u32 pos;
-> > +	int ret;
-> >
-> >  	ch_cnt = dw->wr_ch_cnt + dw->rd_ch_cnt;
-> >  	dma = &dw->dma;
-> > @@ -932,7 +933,22 @@ static int dw_edma_channel_setup(struct dw_edma *dw, u32 wr_alloc, u32 rd_alloc)
-> >  	dma_set_max_seg_size(dma->dev, U32_MAX);
-> >
-> >  	/* Register DMA device */
-> > -	return dma_async_device_register(dma);
-> > +	ret = dma_async_device_register(dma);
-> > +	if (ret)
-> > +		return ret;
-> > +
-> > +	/* Cache dma_chan.id in dw_edma_chip */
-> > +	for (i = 0; i < ch_cnt; i++) {
-> > +		chan = &dw->chan[i];
-> > +
-> > +		if (i < dw->wr_ch_cnt)
-> > +			chip->chan_ids_wr[i] = chan->vc.chan.chan_id;
-> > +		else
-> > +			chip->chan_ids_rd[i - dw->wr_ch_cnt] =
-> > +						chan->vc.chan.chan_id;
-> > +	}
-> 
-> why need cache in dw_edma_chip? you's cache into chan.
+Add missing SPDX-License-Identifier tag to reflect the dual
+GPL-2.0-only/BSD-3-Clause license of this file.
 
-The reason I cached dma_chan::chan_id in dw_edma_chip is that
-dw_pcie_ep_get_aux_resources() later needs to populate
-PCI_EPC_AUX_DMA_CHAN_DESC with a key that can be matched against the struct
-dma_chan instances returned by repeated dma_request_channel().
+Signed-off-by: Oskar Ray-Frayssinet <rayfraytech@gmail.com>
+---
+ drivers/net/ntb_netdev.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-The delegated set returned by repeated dma_request_channel() is not
-guaranteed to correspond to the first N READ channels, since some READ
-channels may already be in use by another local consumer. So I do need some
-explicit matching key.
+diff --git a/drivers/net/ntb_netdev.c b/drivers/net/ntb_netdev.c
+index fbeae05817e9..3890074b26c9 100644
+--- a/drivers/net/ntb_netdev.c
++++ b/drivers/net/ntb_netdev.c
+@@ -1,3 +1,4 @@
++// SPDX-License-Identifier: GPL-2.0-only OR BSD-3-Clause
+ /*
+  * This file is provided under a dual BSD/GPLv2 license.  When using or
+  *   redistributing this file, you may do so under either license.
+-- 
+2.43.0
 
-If you have a cleaner way to correlate a delegated struct dma_chan with the
-corresponding pci_epc_aux_resource, I would be happy to rework it.
-
-(More fundamentally, for sparse channels export I think we will eventually
-need to carry the hardware channel number separately as well.)
-
-Thanks,
-Koichiro
-
-> 
-> Frank
-> > +
-> > +	return 0;
-> >  }
-> >
-> >  static inline void dw_edma_dec_irq_alloc(int *nr_irqs, u32 *alloc, u16 cnt)
-> > diff --git a/include/linux/dma/edma.h b/include/linux/dma/edma.h
-> > index 9da53c75e49b..0b861e8d305e 100644
-> > --- a/include/linux/dma/edma.h
-> > +++ b/include/linux/dma/edma.h
-> > @@ -100,6 +100,10 @@ struct dw_edma_chip {
-> >  	int			db_irq;
-> >  	resource_size_t		db_offset;
-> >
-> > +	/* dma_chan ids */
-> > +	int			chan_ids_wr[EDMA_MAX_WR_CH];
-> > +	int			chan_ids_rd[EDMA_MAX_RD_CH];
-> > +
-> >  	enum dw_edma_map_format	mf;
-> >
-> >  	struct dw_edma		*dw;
-> > --
-> > 2.51.0
-> >
