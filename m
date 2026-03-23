@@ -1,68 +1,69 @@
-Received: from TYVP286CU001.outbound.protection.outlook.com (mail-japaneastazon11021077.outbound.protection.outlook.com [52.101.125.77])
+Received: from OS0P286CU011.outbound.protection.outlook.com (mail-japanwestazon11020086.outbound.protection.outlook.com [52.101.228.86])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D7AD71E7C18
-	for <ntb@lists.linux.dev>; Mon, 23 Mar 2026 01:48:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.125.77
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6887726ADC
+	for <ntb@lists.linux.dev>; Mon, 23 Mar 2026 03:16:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.228.86
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774230514; cv=fail; b=exI1wEPDsG46ru9/tHtYBQ/KLDg5f8xkGiVraQST2j8fTQ59oWZJXTt/y/HIv4gLBBHMxtPrHEbUC+3u7E5K3DfANLE7dXLEKSVscybVUfNZJJfxZrW/j+/FuWR5YHUdakIcS8W9+oxItTEdbUC1neNMZC4kU+wMVCga+Tlyv8Y=
+	t=1774235762; cv=fail; b=rWTavimGlRihPXlcvSJDdCgd3ILpTpcqGzKtwMYxaRqN8oz68aPeeweqv64LM3CF9/YQdWiS1LaWs5Lkyac3FmXDBnTEohk25+3VUH+7YojPrKYT/w3njDpD/fzc7XCtnmaHeD/nrl5Fjd3WnbA0MpCQfy9eAigtOS1rsxspX88=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774230514; c=relaxed/simple;
-	bh=FB13JirE2CV2h4JwX2sOcsuX8CzduqgQalk5qitTOSM=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
-	 Content-Disposition:In-Reply-To:MIME-Version; b=Y66v0PaDTlu0W0czukCEX/AfhH0dpjFHQZVibfGE0yTqe96csLqS+3f9yAcvHXfRk1FF+XXwU0NUcGCYpJVSpxjzKWM3trO4G4oqpHr3RlBQip+bm/P7slJ1B+tJL12d9Fkf20XVeR9lZel7FyvRyiq9g1KbH8E8z5jzOSiWkHY=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=Hw7UxF/Q; arc=fail smtp.client-ip=52.101.125.77
+	s=arc-20240116; t=1774235762; c=relaxed/simple;
+	bh=ha0hthIkrWes04dW69m70Hm3rPHw1BnSHDnj/X7hLlI=;
+	h=From:To:Cc:Subject:Date:Message-ID:Content-Type:MIME-Version; b=J10fn+oUQdbJTVRA3x7gVyxqT3wHbVVnV/cT+pWNkATbj6Ajgm5cYhOxDeiJ8UB/FcbaKfuei8mrWIgWrSUH3WSvw5YD1Frhw7sY3veVz/182NW4JQBeLVBvvfyNtbsxJOGpyqSjoB3kpg/5y9BrBCWDXli677Y3ORbgK72Vg1Y=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=adA6eCaB; arc=fail smtp.client-ip=52.101.228.86
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="Hw7UxF/Q"
+	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="adA6eCaB"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=xzoqn4xJBlfnCupmWExs8OPTq338bRKRYItqTwE3cbGMZz2titfykMoWg0QGtSKV+3McMYiQgoAyx971abR0ctiEnXMjTAtc9wqJ7+C/pV6QMuCn+a3IdD28u9hk6QFKG2kR5wtldTD0VL+RP/EIaqZHawqu5PNq9yOlLuksw1DHizPdax1pF/0lYoOt9hTIdMCeayAjlxc8vO4GHpt8S8uwMl30ZigWJXW+OzonIvnE+w4PHF0UEZw4joX4LwNKxsGCHGvdoYhMUX3c0D8Ka9wKzSHbnMc7r/4MSiW13xptgVnNWvlgtvtZj6CpZOZs7T99KLsPOfJGdyDCi3lV7Q==
+ b=O8AVNTXih4Qq5ks9JxeFL6QBGK3HW1ftTe60h0LsHXDcyND8r2u8UneIabyUalxOrkwamd/SP0vl2emn/FLA4uoyR4FjDC+mw5l8oZitDyqg3AbRZMamEwPTNZzW8s0Ay714qaq9JfJJT7/GZUgwMnqGSn50GpLu6audQZj6rgyjUpGA9b9ROZxwCo13Negp+G+RaY1QCVQNaLUrVccHWCc5mxhjvUQVKJQzIOFGQtgjyb8sV7+ANmY0BRE9MdDNTeT5eVz7AJP1mdKDoiupBivUFh2AX0PfQOX0CUKHZ3dEnMcq/+QpG1kFyhK60Ca8C1mlehl5Koe8CPvl4tcjTQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=YcgROGQWjcExOolSxNsadI92fUSg41ind7/GTMAHUy4=;
- b=MtyFSyBZKT3OkShEvaOYaud0mLfMTRXMr+BNSlxGChz7ONv+GivGAOPbuHWRffm7mjt5KC2bdLmhtmLkZJjUhJcc4yo9icraLJz60Sye8nYFJ2i285RLZwS8eYGzXKp3RSUv/I3fIJz9jiwZ5Ev6T0WBNlzigLiHKBhiMk639DeKS5oRViIuSZ2vN/vzn8Y1x6TJruH8VYI3315a8RThe8q+EaMFr4AG22UyW60PR3xJoXTc7ZQh5jhZDZx02Q85JIzd+hGW1K3P/e1M/xfqvDoprXK++VZIPEQJZL7iFstd4dVJNlKFTN64VJm5aV0DFynxRb0iDO9qruI9usKsxA==
+ bh=Q8qiZjUtKMXnM7Z6Yi1POgu4GOU/PyaxTp9WGzuYNhc=;
+ b=sFQtdLqYOJTxmI48JjiVCSoBCFkzQS+av/j0a/YcfrBvkZN94Ot0BwaMDQVNKayeS+vG1Z99NlfqNeYvtZb/NgaLz6VyThxBdhXyhcFfMbb9kNSn0JnCu+yfYAJ5neetDOuokspwYGpBcjaQYicXJlUSMse/rfMxS4zOiXBiF8LL0zvPOAlZIkhct45Ae73w1Pf46gsEf4y3mutPi28YXViHN608w/FKqtm7k/ZUHHSBvdToD8cZBQTIv1AS2LE2DGgEtNisGjyFHmYq0PWDi1FFZT3NvjoADyPVC6Ff6TM8x2kyaLZDasGzZ5J8CoQBN7I6Oj7zbqw3f58fIIkp8A==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
  header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
  s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=YcgROGQWjcExOolSxNsadI92fUSg41ind7/GTMAHUy4=;
- b=Hw7UxF/QiylfSEuRjDnkMy5n0PnovY8RuzNl1N0R6FsTun06ifnquVuReO7F0MBDQdZ9DXMN2rWumfTYpM4xEtgs9KV2raqFboEzbMrGVMqGw+upaV668r2lJg3ZKxBxuIGTLv6KoywRGzcoz+bg9uxaKnmxZNbbMpThrjc+N0c=
+ bh=Q8qiZjUtKMXnM7Z6Yi1POgu4GOU/PyaxTp9WGzuYNhc=;
+ b=adA6eCaBp0D5EMT32qpxxgOuuNi3H3lro1p0Sa4jxG9i8tlijqqP/J5rMjYIW0WJN0N/CTaYNibRn46eishZRli/UfZ/r7UFH2K5i8FGWxNkppJMiqgmvV3E5DS60LIA6CKyMJHQKm+A+uhGK9IGKOSoiQq5JhDAqDPdIt6Ylnc=
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=valinux.co.jp;
 Received: from OSOP286MB7730.JPNP286.PROD.OUTLOOK.COM (2603:1096:604:468::22)
- by TY4P286MB5730.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:2ba::6) with
+ by TY4P286MB6894.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:33f::12) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9723.31; Mon, 23 Mar
- 2026 01:48:29 +0000
+ 2026 03:15:58 +0000
 Received: from OSOP286MB7730.JPNP286.PROD.OUTLOOK.COM
  ([fe80::b7ab:6af2:d18e:4a71]) by OSOP286MB7730.JPNP286.PROD.OUTLOOK.COM
  ([fe80::b7ab:6af2:d18e:4a71%3]) with mapi id 15.20.9723.022; Mon, 23 Mar 2026
- 01:48:29 +0000
-Date: Mon, 23 Mar 2026 10:48:28 +0900
+ 03:15:57 +0000
 From: Koichiro Den <den@valinux.co.jp>
-To: Manivannan Sadhasivam <mani@kernel.org>
-Cc: Dave Jiang <dave.jiang@intel.com>, Jon Mason <jdmason@kudzu.us>, 
-	Frank.Li@nxp.com, kishon@kernel.org, allenbh@gmail.com, kwilczynski@kernel.org, 
-	bhelgaas@google.com, jbrunet@baylibre.com, lpieralisi@kernel.org, 
-	linux-pci@vger.kernel.org, ntb@lists.linux.dev, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2 00/10] PCI: endpoint: pci-epf-vntb: Document legacy
- MSI doorbell offset
-Message-ID: <ao3e4stqnfhg2mrewqlye557sc6z65ruyphonc6nisgx3ciajg@ughfgyc4htzw>
-References: <20260227084955.3184017-1-den@valinux.co.jp>
- <jne6ovpgukznu36lopk7aydv7rmcp3tl4pstn2fo46r6rt5jom@zxz27fgjom65>
- <e44ccisq4hnmy3lu3lroxc7ou6ssbr25bawbhr4tiud4pztxbw@spzprrgonwq7>
- <rnzsnp5de4qf5w7smebkmqekpuaqckltx73rj6ha3q2nrby5yp@7hsgvdzvjkp6>
- <zpy7kokrwom566chj5oulejwmxkwkp4udoh3qea3j65yzb4qev@zsexhjlm7qnk>
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
+To: Jon Mason <jdmason@kudzu.us>,
+	Dave Jiang <dave.jiang@intel.com>,
+	Allen Hubbe <allenbh@gmail.com>,
+	Manivannan Sadhasivam <mani@kernel.org>,
+	=?UTF-8?q?Krzysztof=20Wilczy=C5=84ski?= <kwilczynski@kernel.org>,
+	Kishon Vijay Abraham I <kishon@kernel.org>,
+	Bjorn Helgaas <bhelgaas@google.com>,
+	Frank Li <Frank.Li@nxp.com>,
+	Jerome Brunet <jbrunet@baylibre.com>,
+	Lorenzo Pieralisi <lpieralisi@kernel.org>,
+	Niklas Cassel <cassel@kernel.org>
+Cc: linux-kernel@vger.kernel.org,
+	linux-pci@vger.kernel.org,
+	ntb@lists.linux.dev
+Subject: [PATCH v3 00/10] PCI: endpoint: pci-epf-vntb / NTB: epf: Enable per-doorbell bit handling
+Date: Mon, 23 Mar 2026 12:15:34 +0900
+Message-ID: <20260323031544.2598111-1-den@valinux.co.jp>
+X-Mailer: git-send-email 2.51.0
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <zpy7kokrwom566chj5oulejwmxkwkp4udoh3qea3j65yzb4qev@zsexhjlm7qnk>
-X-ClientProxiedBy: TY4PR01CA0055.jpnprd01.prod.outlook.com
- (2603:1096:405:372::11) To OSOP286MB7730.JPNP286.PROD.OUTLOOK.COM
+Content-Type: text/plain
+X-ClientProxiedBy: TY4PR01CA0029.jpnprd01.prod.outlook.com
+ (2603:1096:405:2bd::18) To OSOP286MB7730.JPNP286.PROD.OUTLOOK.COM
  (2603:1096:604:468::22)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
@@ -71,227 +72,194 @@ List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: OSOP286MB7730:EE_|TY4P286MB5730:EE_
-X-MS-Office365-Filtering-Correlation-Id: bf4888c0-d42f-4558-895d-08de887e4874
+X-MS-TrafficTypeDiagnostic: OSOP286MB7730:EE_|TY4P286MB6894:EE_
+X-MS-Office365-Filtering-Correlation-Id: 3e0008c5-acba-4c12-6126-08de888a8084
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|10070799003|1800799024|366016|376014|7416014|22082099003|56012099003|18002099003;
+	BCL:0;ARA:13230040|10070799003|366016|1800799024|376014|7416014|921020|18002099003|56012099003;
 X-Microsoft-Antispam-Message-Info:
-	D7FgDQpbuAWRhm/zYXCdGySfA6GvSKABdkWf+PynmpYED3Zf1rDDQ5uSqTFRlNZ0BKqpMDHpn75qxNBYHLbSkcbJD4mhNra926QQ7HPg7ADbaEiYOTTh3hkwQABHjdFugi36DsuJ8F5fQk+nAazcHb1+fJdxBXJZfSq5wBLc5rE5D3S8A8pLFmic1QdAZwWnnvJVI0tSCqGS8HoScWtalb+p7S6WKwT5zfec7hLP/qAbjMpiHgNgETJieLyIGYubwpYy0za+8JOMdPaP2MOlQoH417b1wT7/8rvG1fiEtwpAIBDoiSheSffKQC6gzRvj8lTwxkGDVamPfQ4C8APRsoN1zn84X2M5AR6dtmQBvUMGXi3fARctvOtBs5J+a1010slqd1rN6nm5ZlO/IL6/ghvflP2oGNwg3F3x3u/LXIxeZmabU6+fbWzCsrDE4f24VP6dbh+VB8lpb9KowG1wVSJT6lTtI33pQQ6CkZXzWQoKYN6RMM9wrVDOIIg+Kkn5GT4qHzq5H++6GftdQTpZh1wl6z+VSt/OCxryn2nYBs/x6alvAQUJnXt8h7TGLCl6LBEzsHwXrgRzDvLODr7an5xVfWFvNaod/AVWvff6t0tMBe6IfovNrOc0/hUrYn9SvsUF/lZeSJqgQ28V8SIPOxIhTBgDNtg7ylTbhDS+3uzHxUK4dXqoUsDOEUMfI27zYel+U3xPMgf+pJ/yP0ye6MJItLilYGklTLF1Is31AJE=
+	jljOeZe70Oj5L8fdFKter/bJ3hK4JqL/2PM+8+17x+M2kDPT8qdsDulj6O0rGMFz3NYXNSp8RbVuuUyaISxj+cpANtwXGyF3sS1whxNQMpz4PrWUH0cdhJY//4AJSzqwQCF7tT96mZwqvwk/pRk4O1LXWgfxX/VpWeZYX3Ml2JlMd0XBaIj6mjgJFbW9Q1xuOlRA88+prjmbTyAVOq+rVFb4cNOGwVONBvVH3nJfoHi9zwkGmLTFjaQ06pPwnAXqhA8o9P03z+sNZYp8FbhPlbMm4f3Qujmh5Mzq+65ZQHmYscxrrcE8Awm1paH7XuznDg696YQ7xtrIzmZTj5OZdukQbVb/exqxan0ev9GOQm4RX8NINFomaCk8ZCwTrOmrIp7H9NcP+igRoJW/Z9gIPo5YxkkQCglViL1UHVArzb1Bw2fSWIfUuoDs5k3m0OZ40UU16CIUvEtzC+yT5x4H9nPTRwxBNIYvZGsDHnwklBMB/QQ//w7n71VXngUlAOZtikPJ7shlVZKa7ch6eoGJVJ6mEX4W+KEi9Bkxyqkt2BxWtqnJTTv8Z7ewIuuGiZ8F3ExOhTD6tgUkFutUOPBN3JqlR2HdtxRvm16ypcGkiQZCKc9in8VhdqGUuPiH8vhCiUMnRidiWVy5hbDkiUp/FVkpe+6rgdfL8Pk35cl+IBDklTPRvRnlFbJ8WQh6b/7PgdOKk81SQL2nSekxk5Tch7w1hXqMQImeMe5HVm7Du0Ul8b4gGqFgPGDlbc7yPrsk6mS0s8s+gk42FSQsA337Id9K7upRe+9ZgyRwdsWjKS4=
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:OSOP286MB7730.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(10070799003)(1800799024)(366016)(376014)(7416014)(22082099003)(56012099003)(18002099003);DIR:OUT;SFP:1102;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:OSOP286MB7730.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(10070799003)(366016)(1800799024)(376014)(7416014)(921020)(18002099003)(56012099003);DIR:OUT;SFP:1102;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?ZDdMaUNWZTV5M1d4OHEyWXV4RHRvZWVBLzEzV3U3aWFLSFJkSUlVSlYwdjl4?=
- =?utf-8?B?YkQ2VnZISjdtcU1zUW5pWk5DTHI0UWlLWEhzMGwyVk9NU1gvR3FJcXNQUC9F?=
- =?utf-8?B?NkV6NG05VGVybWF2L1IrOGlhRG5ZYmh6VGdndzY4MzZZTzVzWGxhblJweWtK?=
- =?utf-8?B?Z09LT3pnLzFPUGhRUzBnczViT3BiOGV5VGkwcXNqZXF1U2lqNTZxWXhXV0Ft?=
- =?utf-8?B?Y3lBUmFIRm50TzdUalN2K3ZPOWFVcFFERG9uNjBaY2lUSG4yQlM1U1F4SDlw?=
- =?utf-8?B?eWM0VFhiMm0vekFFMlRJSUppbitwdkdDc2Y4YVFCZ05nY1dmZVBqeWVLNUMz?=
- =?utf-8?B?bnJrWnhhbm90bWdkSHZzWDJQZ2pZR25BVisxNm43M053WjRqaXJpRzlndGEz?=
- =?utf-8?B?OXZHMmxtZmpBT21XQVJxZWc4S0RqQ3BBM0hvdVE3cmNPS2VMcXNRK0ZHcFZQ?=
- =?utf-8?B?bXZBRklQcVNLQjA4dEV2eTVweW9WVGpRZ2NnN3J2MkRsZzkyUEZZSlo4L3pQ?=
- =?utf-8?B?ZXVid1lXYTV4dFhDeU1oU25EY0I4OHY5bXBYRTRTT0FHS09LYkRUclZsMVB0?=
- =?utf-8?B?R2hCVFlqWmJaMFNqUkVXZFo4YWgweVorSUdZc0tUTENobW1iYXhHZnpoQkti?=
- =?utf-8?B?dllodGZCWUhtbEsvcktvN3JHR1RabDJzQnhHMVJLUEdOMUEzWjNMRVA2Q3l0?=
- =?utf-8?B?M25qckpVaVhCWlJDRXQxdjE3YVlIRTk4OVViWFZQOE9pRVlId0cwRjVtQmtZ?=
- =?utf-8?B?QWtsYWZRKzJjMXMwaEV5WWRNdnhiSStMdWpWRDNnOGNqTGp5aUt5Y2dmSVVX?=
- =?utf-8?B?MlZuWm1aTmJtTWFOUko2QUVMeDV4c1pFU24vUlBmVXltREkwVFhud1BNMVMx?=
- =?utf-8?B?dEtQV2V1aURuOXBoOE5iVjNCcmttWnJma29pMnV4WHczYlB1VWdVdG85aUJF?=
- =?utf-8?B?ZzlXQmpjd3lFUS9NaCt4ejkxOU1jWXFjRG1tTUdhS2o4RGtTMzE4MTlIYkcr?=
- =?utf-8?B?cSt4aGozU1A2TVFGaGIyY2dNTjExdEJHZE5oc3k0c0pNWW9lQWhtalN1WFVz?=
- =?utf-8?B?a2NTZXlZMHVTZGFQMWtCcHlWeml5MEovRnB5Y0ZZM0hVUTZLZngweGRZMTFn?=
- =?utf-8?B?MUgwZUxpREFNL21VZFg3VG10WWRnTllvRzNRNmdNZlpveXJvWlNIcnVPK2VN?=
- =?utf-8?B?enNpRkVjV0JjYWVIVmxHMlRnNmlRbHpBRGpHaVV3eDQreUZveUVWeXBuT1Bh?=
- =?utf-8?B?Y0Z3T2JhOS92Qm50czZkRTBybUE0NHBaSjZ5VmVFeWxSd0V6UjBkRlRUUis5?=
- =?utf-8?B?YWI4MXlMbVFuajIwMWc5T1dKMVdpT0k4RzlYeGhEVTFnTWJ4Y0laSFBNZ1ZD?=
- =?utf-8?B?dG92LzRPNmZuYkljSEhVOUxFVTVmR1gwb0dhbXFrZW1MVktLdEw4emUzUURu?=
- =?utf-8?B?NUtiTFBBM3IwTCtBRnlDakdNVE5henJLaWpWRUgvNVdFbklHVGc3RmFqY0d4?=
- =?utf-8?B?aTZ1TFh5SWhLYUQ0VlJUZzZwc1lrNWtJM0xWTFlHNlJmcVMvVDlsODZhUGQ5?=
- =?utf-8?B?S1dBOXFnZE1GdElyRC8zdUxKRDBrS0VhMDExNE5HT0wrWnArbjlGampROE1W?=
- =?utf-8?B?Tm5maXJ1SHB1LzVHTFNUTXhCYmUyb1ZSUG5FZWpLNUpUZkpUamtrYTNVWG9s?=
- =?utf-8?B?SGFySTl0WWlGdUUwWmxpdjVSUUQrNk5XeW9BOE42Q0VqTUYwdktQVWxDUm8x?=
- =?utf-8?B?cWJkMU5ZVG5KaFF1MkZMUWMwbnF5ZlV4eGlGYUVhL2VuNEpRSWRkOTFvS1Z2?=
- =?utf-8?B?bmxHREJJaFJSaDJONkduNG5nSE1tN3dQTmI5NFB3ZVhEYWlPUXlER1o1ZFJB?=
- =?utf-8?B?WWlXeVFDd1ZZQjVZVEF5V3FhMGpSZmwrQ28yMmJ5bkdtTElwMjUwTUJpUnM3?=
- =?utf-8?B?UnArc3lEMk9pZGFuR1p1Ym9XbkxHYkpXVlF2ODBKKzNHdGlCVXVML0pBRFo1?=
- =?utf-8?B?M0F4QWFjZlNUYmRwN1J2TnpYNHVmbitnL1JvSm4zODF1RjF0RXRKemovQlYv?=
- =?utf-8?B?SU5qbGhtQ2hrWXRoc1haaW5wRUVqeVVWN29MZkNzQlBCeEI5THNEQzJEeW9t?=
- =?utf-8?B?TXZ3ZU5oaDVYakFvRTlIdUgwcFpSbHExM1MzQWhTSFlyT0g3bDQ2ZjM2M004?=
- =?utf-8?B?RmRkRXJUTzJBdXBxU2lIblNWVHYxOTlzbEJXTW00TFV6ZFNtVDdIUFZPTjRK?=
- =?utf-8?B?d0pQdEJQRnVnSWkwNUlpcTdDMGJkWGRKYjBud1EzWWxzRnpoUHdlb1gyQXlx?=
- =?utf-8?B?UTVwV3kwRlk4RDBXdjl2QTFWUzdKUWpta1AxL3BVYUJzMnI5aW16MWFLWFVR?=
- =?utf-8?Q?/RzI6/in4I+G9ChFad3gmuPJNIhwKcAPx+waf?=
+	=?us-ascii?Q?7J2chpVSk0m7mdTe0sLYmoo7oG4uOXfOgcfa0jAovsOg3WC9YVt66xTanzm9?=
+ =?us-ascii?Q?uJQWpVdoVSVf1kGXitkA/0nC5zFP8qUuqzvoLszOyvSJfQla6fkeBXLJSSwQ?=
+ =?us-ascii?Q?eN0tQ8oI6LlA6C6SULoN90Hv3E9DPcYP5jrlH7UiGYnxg9Xfj7KrtioSc73j?=
+ =?us-ascii?Q?ZLS3e/+AaIarPdnFC9BlBJ6hlKuI4mkGvsPkH/3+XvECTOtmVUHzgDRZAKAy?=
+ =?us-ascii?Q?I7vlLqIZISNgwyOCrB+N1azMk+90yR7iEF8JCdrM+ZxU6XkDbsls1JzUXzDs?=
+ =?us-ascii?Q?lU6xMldy6OC5tMSYVtE8mv0JnvFJKGPz8OaUKcwta5XGnErBgCmlePJAgJ25?=
+ =?us-ascii?Q?IinQHnrlD8AsO4m28wWyj0hnqb9OV/S8NR2/ZiVBxsVAA1ZCcJgZ3AgY2wFs?=
+ =?us-ascii?Q?18bp536An0shSqwxYOT9jNhA6N+OoicP8oRbd8TgGygsQ/7WQjp4NkFEkHKU?=
+ =?us-ascii?Q?a92L1vGDOu6pLIUfrm+K15654owW10DzHNs3gNIcqKjy0k8pPsxEIVw4NthQ?=
+ =?us-ascii?Q?nIZGNMDF9lDNV7S3hy5M7c/18UJTAP7G/tW5NPNuIyEYM+Fd+r/60yJTJWYF?=
+ =?us-ascii?Q?dzQb+H8dq45WB/r+2i/D0m1LbX9EZMyiJqna6TZFCtTlYamBIMybFTRQWuGh?=
+ =?us-ascii?Q?bPgS7jIzYXquotIu9BQ1ZJELme5Kb0HC7o4LIphFPlXmJqhktu7qpDlTi8u/?=
+ =?us-ascii?Q?BXNp2DH5cPpivbyInPKLUNUlXTa8V+TRdNDikj9qNXOOzAV3l/3tBMIYsVcx?=
+ =?us-ascii?Q?nbinCSabLfJDkb46gyPLkh2l9iILIC1vNLP2UOVY+NXJBCkTMPQDq4Qwc7zM?=
+ =?us-ascii?Q?tr5eF93tEKSj12/0xwykmVhn904PRLaJhsKbTz9v/oj8WZsJcklVd7KBSriq?=
+ =?us-ascii?Q?Cx0RQTlg5tNgDXnbzlgeAG9JgC6VSHgvvUwgPoX/M+6WFtoK0ti/GJJUpOeW?=
+ =?us-ascii?Q?yBgJ9Qnim6SIjvxReNp0d4Xfg6ygZVAmUBySFtYLdtv4Z9tNw2TdsRgjNClJ?=
+ =?us-ascii?Q?9YpyrRrpsXTH2zyR94AEsbArBKi73h+3e7Cgiy/89zUaLQEULbhFciEIw/qO?=
+ =?us-ascii?Q?I3HtyfdJ+yQullzXUFsSTYsUnzKKJYptkCB4bJN1te595Tm9gps2YOm2WLTn?=
+ =?us-ascii?Q?Ffe0/qQobmOsSQpW3wh0s8ik1raLQVpQ/XDekEtlCRLYH6YLcnZfmo+GspzV?=
+ =?us-ascii?Q?g7AwhCX3qgYRy/bAqMr4r+YcnY+oWlmuyphKBu/jx4bhCE6DKuZVLGXKxTF8?=
+ =?us-ascii?Q?O5CxeCGrI56EL9u/4P/CGbb7Ta2y0K6rhm/vobULfhdUeRmBohxjEjkyCVPs?=
+ =?us-ascii?Q?CYihegcz5NUatEaLGiF16lcpIAf6gIC5Y3BaNxEYKKB+jHgAjyqEO6GDlQ75?=
+ =?us-ascii?Q?PbqqI3h2WVVBUaWFuOq64fbXTGWVIvm4ia9nQVW1WKxMS/9UWuidA44V6kXc?=
+ =?us-ascii?Q?61Bj+J61RZv5J9ZW3S24W2hoKri4tgzrh2reKUECNdCse6JS9scfmi66mnmK?=
+ =?us-ascii?Q?vs4ckV3c9g5ngvP+hNTFa6lWoEyyZjU98sKNSnd0kCms41cQkEGCLf+Sv096?=
+ =?us-ascii?Q?KaEQhS1NpSAN24IIsqp01xH4nS61pb8qhZli43gLt48gqtFYv+mIk6uc0uxl?=
+ =?us-ascii?Q?UhY89O1NiIfYnuwUBnd839TCl3EnayS0YYXqZsx019O/d2P66boXcJbRiCMn?=
+ =?us-ascii?Q?EFdPHyOqiYU9EHi7FCX+9xfhaL1vBvGLqwLRJL8j5mFv5fi3tvCFhow+BTuK?=
+ =?us-ascii?Q?1vrm0Jc5Q/1pRC9RTwOFUlf5V2kdIclIUvhbsfj53fmYTpe1OKND?=
 X-OriginatorOrg: valinux.co.jp
-X-MS-Exchange-CrossTenant-Network-Message-Id: bf4888c0-d42f-4558-895d-08de887e4874
+X-MS-Exchange-CrossTenant-Network-Message-Id: 3e0008c5-acba-4c12-6126-08de888a8084
 X-MS-Exchange-CrossTenant-AuthSource: OSOP286MB7730.JPNP286.PROD.OUTLOOK.COM
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 23 Mar 2026 01:48:29.6793
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 23 Mar 2026 03:15:57.7206
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: y/M9Sy6Kf7OoirZ3mSDPvF7UFdOcpFhkZpSXFJlyUhskgJ4gwCk4ui9ZgvH2YxJxmq2HpddOOkx4sHACMk52Mw==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY4P286MB5730
+X-MS-Exchange-CrossTenant-UserPrincipalName: 83RDMUlah5uIgeBfRNqObSn5tWRAdC9aqPG59Epb7J8E+V1ZcI/J8BDaPOg6lDzr49mqxvouCJqKkyDoDQaZ4w==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY4P286MB6894
 
-On Mon, Mar 23, 2026 at 10:29:00AM +0900, Koichiro Den wrote:
-> On Sat, Mar 21, 2026 at 07:08:36PM +0530, Manivannan Sadhasivam wrote:
-> > On Fri, Mar 20, 2026 at 11:55:23PM +0900, Koichiro Den wrote:
-> > > On Fri, Feb 27, 2026 at 05:57:40PM +0900, Koichiro Den wrote:
-> > > > On Fri, Feb 27, 2026 at 05:49:45PM +0900, Koichiro Den wrote:
-> > > > > This series fixes doorbell bit/vector handling for the EPF-based NTB
-> > > > > pair (ntb_hw_epf <-> pci-epf-*ntb). Its primary goal is to enable safe
-> > > > > per-db-vector handling in the NTB core and clients (e.g. ntb_transport),
-> > > > > without changing the on-the-wire doorbell mapping.
-> > > > > 
-> > > > > 
-> > > > > Background / problem
-> > > > > ====================
-> > > > > 
-> > > > > ntb_hw_epf historically applies an extra offset when ringing peer
-> > > > > doorbells: the link event uses the first interrupt slot, and doorbells
-> > > > > start from the third slot (i.e. a second slot is effectively unused).
-> > > > > pci-epf-vntb carries the matching offset on the EP side as well.
-> > > > > 
-> > > > > As long as db_vector_count()/db_vector_mask() are not implemented, this
-> > > > > mismatch is mostly masked. Doorbell events are effectively treated as
-> > > > > "can hit any QP" and the off-by-one vector numbering does not surface
-> > > > > clearly.
-> > > > > 
-> > > > > However, once per-vector handling is enabled, the current state becomes
-> > > > > problematic:
-> > > > > 
-> > > > >   - db_valid_mask exposes bits that do not correspond to real doorbells
-> > > > >     (link/unused slots leak into the mask).
-> > > > >   - ntb_db_event() is fed with 1-based/shifted vectors, while NTB core
-> > > > >     expects a 0-based db_vector for doorbells.
-> > > > >   - On pci-epf-vntb, .peer_db_set() may be called in atomic context, but
-> > > > >     it directly calls pci_epc_raise_irq(), which can sleep.
-> > > > > 
-> > > > > 
-> > > > > Why NOT fix the root offset?
-> > > > > ============================
-> > > > > 
-> > > > > The natural "root" fix would be to remove the historical extra offset in
-> > > > > the peer_db_set() doorbell paths for ntb_hw_epf and pci-epf-vntb.
-> > > > > Unfortunately this would lead to interoperability issues when mixing old
-> > > > > and new kernel versions (old/new peers). A new side would ring a
-> > > > > different interrupt slot than what an old peer expects, leading to
-> > > > > missed or misrouted doorbells, once db_vector_count()/db_vector_mask()
-> > > > > are implemented.
-> > > > > 
-> > > > > Therefore this series intentionally keeps the legacy offset, and instead
-> > > > > fixes the surrounding pieces so the mapping is documented and handled
-> > > > > consistently in masks, vector numbering, and per-vector reporting.
-> > > > > 
-> > > > > 
-> > > > > What this series does
-> > > > > =====================
-> > > > > 
-> > > > > - pci-epf-vntb:
-> > > > > 
-> > > > >   - Document the legacy offset.
-> > > > >   - Defer MSI doorbell raises to process context to avoid sleeping in
-> > > > >     atomic context. This becomes relevant once multiple doorbells are
-> > > > >     raised concurrently at a high rate.
-> > > > >   - Report doorbell vectors as 0-based to ntb_db_event().
-> > > > >   - Fix db_valid_mask and implement db_vector_count()/db_vector_mask().
-> > > > > 
-> > > > > - ntb_hw_epf:
-> > > > > 
-> > > > >   - Document the legacy offset in ntb_epf_peer_db_set().
-> > > > >   - Fix db_valid_mask to cover only real doorbell bits.
-> > > > >   - Report 0-based db_vector to ntb_db_event() (accounting for the
-> > > > >     unused slot).
-> > > > >   - Keep db_val as a bitmask and fix db_read/db_clear semantics
-> > > > >     accordingly.
-> > > > >   - Implement db_vector_count()/db_vector_mask().
-> > > > > 
-> > > > > 
-> > > > > Compatibility
-> > > > > =============
-> > > > > 
-> > > > > By keeping the legacy offset intact, this series aims to remain
-> > > > > compatible across mixed kernel versions. The observable changes are
-> > > > > limited to correct mask/vector reporting and safer execution context
-> > > > > handling.
-> > > > > 
-> > > > > Patches 1-5 (PCI Endpoint) and 6-10 (NTB) are independent and can be
-> > > > > applied separately for each tree. I am sending them together in this
-> > > > > series to provide the full context and to make the cross-subsystem
-> > > > > compatibility constraints explicit. Ideally the whole series would be
-> > > > > applied in a single tree, but each subset is safe to merge on its own.
-> > > > > 
-> > > > > - Patch 1-5 can apply cleanly onto pci/endpoint latest:
-> > > > >   f6797680fe31 ("PCI: epf-mhi: Return 0 on success instead of positive
-> > > > >                  jiffies from pci_epf_mhi_edma_{read/write}")
-> > > > > 
-> > > > > - Patch 6-10 can apply cleanly onto ntb-next latest:
-> > > > >   7b3302c687ca ("ntb_hw_amd: Fix incorrect debug message in link disable
-> > > > >                  path")
-> > > > > 
-> > > > > Note: I don't have a suitable hardware to test ntb_hw_epf + pci-epf-ntb
-> > > > > (not vNTB) bridge scenario, but I believe no changes are needed in
-> > > > > pci-epf-ntb.c.
-> > > > > 
-> > > > > 
-> > > > > Changelog
-> > > > > =========
-> > > > > 
-> > > > > Changes since v1:
-> > > > >   - Addressed feedback from Dave (add a source code comment, introduce
-> > > > >     enum to eliminate magic numbers)
-> > > > >   - Updated source code comment in Patch 2.
-> > > > >   - No functional changes, so retained Reviewed-by tags by Frank and Dave.
-> > > > >     Thank you both for the review.
-> > > > 
-> > > > Sorry, I accidentally used an incorrect series title.
-> > > > The correct subject should be:
-> > > > 
-> > > >   [PATCH v2 00/10] NTB: epf: Enable per-doorbell bit handling while keeping legacy offset
-> > > > 
-> > > > For reference, v1 is:
-> > > > https://lore.kernel.org/linux-pci/20260224133459.1741537-1-den@valinux.co.jp/
-> > > > 
-> > > > Best regards,
-> > > > Koichiro
-> > > 
-> > > Hi Mani (cc: Jon, Dave),
-> > > 
-> > > This series has been sitting for a while, so I'd like to check how to proceed.
-> > > 
-> > > I'm thinking of the following approach:
-> > > 
-> > >   - get the remaining acks from the NTB side
-> > >     (Dave already gave Reviewed-by for Patch 6/10)
-> > >   - then route the whole series via the PCI EP tree
-> > > 
-> > > Does that sound reasonable?
-> > > 
-> > > If so, I can prepare a v3 rebased onto the latest pci/endpoint.
-> > > 
-> > 
-> > Yes please. We have queued a lot of endpoint patches for v7.1, so it makes sense
-> > to route this series as a whole through PCI tree.
-> 
-> Sounds good, I'll send the next revision (v11) with that in mind.
+This series fixes doorbell bit/vector handling for the EPF-based NTB
+pair (ntb_hw_epf <-> pci-epf-*ntb). Its primary goal is to enable safe
+per-db-vector handling in the NTB core and clients (e.g. ntb_transport),
+without changing the on-the-wire doorbell mapping.
 
-Sorry, typo (v11 -> v3).
 
+Background / problem
+====================
+
+ntb_hw_epf historically applies an extra offset when ringing peer
+doorbells: the link event uses the first interrupt slot, and doorbells
+start from the third slot (i.e. a second slot is effectively unused).
+pci-epf-vntb carries the matching offset on the EP side as well.
+
+As long as db_vector_count()/db_vector_mask() are not implemented, this
+mismatch is mostly masked. Doorbell events are effectively treated as
+"can hit any QP" and the off-by-one vector numbering does not surface
+clearly.
+
+However, once per-vector handling is enabled, the current state becomes
+problematic:
+
+  - db_valid_mask exposes bits that do not correspond to real doorbells
+    (link/unused slots leak into the mask).
+  - ntb_db_event() is fed with 1-based/shifted vectors, while NTB core
+    expects a 0-based db_vector for doorbells.
+  - On pci-epf-vntb, .peer_db_set() may be called in atomic context, but
+    it directly calls pci_epc_raise_irq(), which can sleep.
+
+
+Why NOT fix the root offset?
+============================
+
+The natural "root" fix would be to remove the historical extra offset in
+the peer_db_set() doorbell paths for ntb_hw_epf and pci-epf-vntb.
+Unfortunately this would lead to interoperability issues when mixing old
+and new kernel versions (old/new peers). A new side would ring a
+different interrupt slot than what an old peer expects, leading to
+missed or misrouted doorbells, once db_vector_count()/db_vector_mask()
+are implemented.
+
+Therefore this series intentionally keeps the legacy offset, and instead
+fixes the surrounding pieces so the mapping is documented and handled
+consistently in masks, vector numbering, and per-vector reporting.
+
+
+What this series does
+=====================
+
+- pci-epf-vntb:
+
+  - Document the legacy offset.
+  - Defer MSI doorbell raises to process context to avoid sleeping in
+    atomic context. This becomes relevant once multiple doorbells are
+    raised concurrently at a high rate.
+  - Report doorbell vectors as 0-based to ntb_db_event().
+  - Fix db_valid_mask and implement db_vector_count()/db_vector_mask().
+
+- ntb_hw_epf:
+
+  - Document the legacy offset in ntb_epf_peer_db_set().
+  - Fix db_valid_mask to cover only real doorbell bits.
+  - Report 0-based db_vector to ntb_db_event() (accounting for the
+    unused slot).
+  - Keep db_val as a bitmask and fix db_read/db_clear semantics
+    accordingly.
+  - Implement db_vector_count()/db_vector_mask().
+
+
+Compatibility
+=============
+
+By keeping the legacy offset intact, this series aims to remain
+compatible across mixed kernel versions. The observable changes are
+limited to correct mask/vector reporting and safer execution context
+handling.
+
+Patches 1-5 (PCI Endpoint) and 6-10 (NTB) are independent and can be
+applied separately through the respective trees. They are sent together
+in this v3 for convenience.
+
+Once the remaining acks from NTB maintainers are collected, the plan is
+to take the whole series through the PCI EP tree. See:
+https://lore.kernel.org/linux-pci/rnzsnp5de4qf5w7smebkmqekpuaqckltx73rj6ha3q2nrby5yp@7hsgvdzvjkp6/
+
+---
+Changelog
+=========
+
+Changes since v2:
+  - No functional changes.
+  - Rebased onto current pci/endpoint
+    e022f0c72c7f ("selftests: pci_endpoint: Skip reserved BARs").
+    * Patch 2 needed a trivial context-only adjustment while rebasing, due
+      to commit d799984233a5 ("PCI: endpoint: pci-epf-vntb: Stop
+      cmd_handler work in epf_ntb_epc_cleanup").
+  - Picked up additional Reviewed-by tags from Frank.
+  - Fixed the incorrect v2 series title.
+
+Changes since v1:
+  - Addressed feedback from Dave (add a source code comment, introduce
+    enum to eliminate magic numbers)
+  - Updated source code comment in Patch 2.
+  - No functional changes, so retained Reviewed-by tags by Frank and Dave.
+    Thank you both for the review.
+
+v2: https://lore.kernel.org/linux-pci/20260227084955.3184017-1-den@valinux.co.jp/
+v1: https://lore.kernel.org/linux-pci/20260224133459.1741537-1-den@valinux.co.jp/
+
+
+Best regards,
 Koichiro
 
-> 
-> > 
-> > Also as you noted, all the NTB patches need an Ack from Dave.
-> 
-> I'll reach out to Dave once I send v11.
-> 
-> Best regards,
-> Koichiro
-> 
-> > 
-> > - Mani
-> > 
-> > -- 
-> > மணிவண்ணன் சதாசிவம்
+
+Koichiro Den (10):
+  PCI: endpoint: pci-epf-vntb: Document legacy MSI doorbell offset
+  PCI: endpoint: pci-epf-vntb: Defer pci_epc_raise_irq() out of atomic
+    context
+  PCI: endpoint: pci-epf-vntb: Report 0-based doorbell vector via
+    ntb_db_event()
+  PCI: endpoint: pci-epf-vntb: Exclude reserved slots from db_valid_mask
+  PCI: endpoint: pci-epf-vntb: Implement db_vector_count/mask for
+    doorbells
+  NTB: epf: Document legacy doorbell slot offset in
+    ntb_epf_peer_db_set()
+  NTB: epf: Make db_valid_mask cover only real doorbell bits
+  NTB: epf: Report 0-based doorbell vector via ntb_db_event()
+  NTB: epf: Fix doorbell bitmask handling in db_read/db_clear
+  NTB: epf: Implement db_vector_count/mask for doorbells
+
+ drivers/ntb/hw/epf/ntb_hw_epf.c               |  89 ++++++++++-
+ drivers/pci/endpoint/functions/pci-epf-vntb.c | 147 +++++++++++++++---
+ 2 files changed, 210 insertions(+), 26 deletions(-)
+
+-- 
+2.51.0
+
