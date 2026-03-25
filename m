@@ -1,152 +1,133 @@
-Received: from OS0P286CU011.outbound.protection.outlook.com (mail-japanwestazon11020086.outbound.protection.outlook.com [52.101.228.86])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 462B430F7F2
-	for <ntb@lists.linux.dev>; Wed, 25 Mar 2026 08:44:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.228.86
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774428288; cv=fail; b=QPBXVf5/rtMsynCEAXPB7mq7kZV2uz5Vk12aGRgn/i26FfljDnWF6PPikz1cIFGdsTgueNDzvhYfO84r39R4CJDqf8trM0bgp6dkoAT+WQitM9DHabk/Fw2pMAaNR2mh5nIc6KYY2efcKGDpNL9itxt2/4Adijq+gTUD2X0xti8=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774428288; c=relaxed/simple;
-	bh=F4EMJxAsfnrvc1vULDSYK5VR50a1qAXMT4OM4XsbqKw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
-	 Content-Disposition:In-Reply-To:MIME-Version; b=TXqy6d4Jcp6dWw+tGjvlR/Iw/7EY/AnxUs+LAhmKKUz4LBVHaKUzJwd1jF2w07pn5aD1SR9PA4s3SQJozP6A3vqzcDXGOV0R8Z5h57F0F0SWnztJ9heoX+wwaB/Kq/h9+V3ps/XpzGf9JVVYQyaXpV1X5bBhhyVdke9gnwfN7Vc=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=ZfTCxOMb; arc=fail smtp.client-ip=52.101.228.86
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F036D3FBEDA;
+	Wed, 25 Mar 2026 16:56:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1774457804; cv=none; b=fODc8LmC6Soaqkop0de0MtzzutQvAb9UGWt5qG+KtGTL8X7s6YcsHC5xpSChALBw4LvwFdQKht65Wh7B8SWQUm3zkFTDQQkODvq6feC33aLQrp+LiBzwmbQ5ZN0NhA3K0gvymI9TaAlh0dkRfPuXCHJSFsPg8Uz5tzaThFbXnoc=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1774457804; c=relaxed/simple;
+	bh=JgoOmjwSMf7p45qOTC6VwfpLT5QmTeI9THjReYMq7a0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=EllMe8ODMKF5l3mDCUEw/WzK7GR4W6A5ZqL7p2qmXjv6+eXptWiE+whAOBRjn3NqIT9FuNwZuid/0dLe5wSCT/upzqqYnPNHMy1RwDFfd7hl4RXj+JEIoHng7gbjl9m0QtmGSlTJ5JCPAf2hfIO3T9SsCVZBRbRCEdiP0Sknkpw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Jq6m4sqt; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="ZfTCxOMb"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=GlBma/+/vgnNExS/zhI6gbkmBJrNUHrU25/EU9WVtv+Zpce/4T1e62IJttkOymvCoYVlyINQ86SU1t3WHOc/uZmrgxGTcXauylMidNB3Ad0EC1EdIHLJtHQvOOpOQDCm7RcXS+xYMdSxpv3tuainX2YHr2spbN7BfiPV/BxMem8wB388RPcJ/rLhtxaIbXDln6O9fWVSj2SR9ZuliekCuJl79WmjXsaQtVRb1sPCbf/xNk36hcY5bZMYzuR+3/uzbXlvpvY263A4h+XwORAg85fGEfbjrAbWr8rH7LA/EaPFceEWHzD7s+WyDVfQG4kZR0W43YRKROrOIb3VaDjzjQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=ZUJ0icJSVSbeDpSXhYo20gCqF0L9/aCgCyMyAqjv/rE=;
- b=FAhmqPfqGtL7dev23QqQ0THNPZsKtbEm0IYqNCwiQXJCV8Gp4oc/CvypqPH8HQip3akmSxT3APoICJF6gi+Yk4MdlQtYpoSN6oII9BcYwb7ig+qcgyC+YpJXwFJ+vaS8Uv6Sfio4n3djinaNKkGO/xMrjuYKK+Imtu3OxY15DEMLhOKOwXT484x2jGOjuAIqlTq+DesVk6Noi6io+SMvomVClWrp1bnDF+Ir3JaM8GIeUp5VzdAzO3F5ylY9wnstYMcpqM4V4bDjqsCKWf5/qFDfz6hsw+SxJ/OLbjt3sgunDNFwksGjKf4Us+uzRGNmDknFSYrN7Ibu5mga16LacA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
- header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
- s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=ZUJ0icJSVSbeDpSXhYo20gCqF0L9/aCgCyMyAqjv/rE=;
- b=ZfTCxOMbNP2/eiMUM0tF0HdDgKrvkevRDbB1nNl2hUQV7Dk0VGnzTxt9JvDjTxSYCBSzUpdQB1byLDFMcdNLiY4s6AvM+SwRIg7LPpvd070GvSmjUSgs98IImA2VdU5eG2MSMDOqbuh3tl/k45ULtiGu3UAU0TC6J1cQsdWOn1M=
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=valinux.co.jp;
-Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:38f::10)
- by OS7P286MB6382.JPNP286.PROD.OUTLOOK.COM (2603:1096:604:41c::17) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9745.20; Wed, 25 Mar
- 2026 08:44:44 +0000
-Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
- ([fe80::2305:327c:28ec:9b32]) by TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
- ([fe80::2305:327c:28ec:9b32%5]) with mapi id 15.20.9745.019; Wed, 25 Mar 2026
- 08:44:44 +0000
-Date: Wed, 25 Mar 2026 17:44:43 +0900
-From: Koichiro Den <den@valinux.co.jp>
-To: Niklas Cassel <cassel@kernel.org>
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, 
-	Allen Hubbe <allenbh@gmail.com>, Manivannan Sadhasivam <mani@kernel.org>, 
-	Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kwilczynski@kernel.org>, Kishon Vijay Abraham I <kishon@kernel.org>, 
-	Bjorn Helgaas <bhelgaas@google.com>, Frank Li <Frank.Li@nxp.com>, 
-	Jerome Brunet <jbrunet@baylibre.com>, Lorenzo Pieralisi <lpieralisi@kernel.org>, 
-	linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, ntb@lists.linux.dev
-Subject: Re: [PATCH v3 00/10] PCI: endpoint: pci-epf-vntb / NTB: epf: Enable
- per-doorbell bit handling
-Message-ID: <zyt2fx46zvg5i6mfntaslyeyftuishvw6xy4keditk7ftvpvku@yva4ihwas6pg>
-References: <20260323031544.2598111-1-den@valinux.co.jp>
- <7jkibbdz3m3vuq2kq2xxnkt2rjdt5v7itgowc7qormtwgnf6tv@krl5brfjul5y>
- <acN_aZNICP15ybZZ@ryzen>
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <acN_aZNICP15ybZZ@ryzen>
-X-ClientProxiedBy: TYCP286CA0174.JPNP286.PROD.OUTLOOK.COM
- (2603:1096:400:3c6::15) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
- (2603:1096:405:38f::10)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Jq6m4sqt"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7E92BC4CEF7;
+	Wed, 25 Mar 2026 16:56:39 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1774457803;
+	bh=JgoOmjwSMf7p45qOTC6VwfpLT5QmTeI9THjReYMq7a0=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=Jq6m4sqtplI0ehDg5mNtNULNKUWssv25fUZa1R3ZXGyI1CWyFy50ss/DZjgck1IGq
+	 rrQyfqUmUwaABo7hSHfvJsUs6hilVq4ahahMdNTQ/yiWj9v5UFW7jp4PBdejbqBmhP
+	 xAqKE141vWvcuDa+GtAioY2tdcE/bVI7DjXxBhR/IFl8McwQIz5ulnsfUGuZsLoON9
+	 ZznZ6SYsXg43tVDSc84BNYgpn4kP2+TZCn5a7UpfZVvA/gWFPBBvVmQmvDbNO4P/Rg
+	 uYV2L5DVIoTlqF0S8+tJ4o6s4fZ+jeYd7k8NxfKxRwmBP8mQbUcVrYc2VNoY2hdBEy
+	 Mz3NTPRn0ppww==
+Date: Wed, 25 Mar 2026 17:56:36 +0100
+From: Niklas Cassel <cassel@kernel.org>
+To: Koichiro Den <den@valinux.co.jp>
+Cc: Frank Li <Frank.li@nxp.com>, Jingoo Han <jingoohan1@gmail.com>,
+	Manivannan Sadhasivam <mani@kernel.org>,
+	Lorenzo Pieralisi <lpieralisi@kernel.org>,
+	Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kwilczynski@kernel.org>,
+	Rob Herring <robh@kernel.org>, Bjorn Helgaas <bhelgaas@google.com>,
+	Kishon Vijay Abraham I <kishon@kernel.org>,
+	Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>,
+	Allen Hubbe <allenbh@gmail.com>,
+	Bhanu Seshu Kumar Valluri <bhanuseshukumar@gmail.com>,
+	Marco Crivellari <marco.crivellari@suse.com>,
+	Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>,
+	Manikanta Maddireddy <mmaddireddy@nvidia.com>,
+	linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org,
+	ntb@lists.linux.dev, robin.murphy@arm.com
+Subject: Re: [PATCH v10 7/7] PCI: endpoint: pci-ep-msi: Add embedded doorbell
+ fallback
+Message-ID: <acQTxJ75lq4tkszi@ryzen>
+References: <20260302071427.534158-1-den@valinux.co.jp>
+ <20260302071427.534158-8-den@valinux.co.jp>
+ <acGK6rUIyuJP6gF7@lizhi-Precision-Tower-5810>
+ <ksr6hlcwmrkrgrql5jqhtpkaihsugtsztfhxxjbq3au6kz3ksu@mk7hhmwabgsi>
+ <acOJcMt7E8PLHAD6@ryzen>
+ <ec62kljt36zh2autlth5jivdqlojbpdo2gbs43ayob7hobcpre@bpos6hqyuwkv>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|OS7P286MB6382:EE_
-X-MS-Office365-Filtering-Correlation-Id: 0c749240-fcc7-44de-032f-08de8a4ac38a
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|10070799003|1800799024|7416014|376014|366016|18002099003|56012099003|22082099003;
-X-Microsoft-Antispam-Message-Info:
-	k53dhrlOnIYOcABZmnkuvIDszz0XdoGvgeCGNY7yqHd26PYOcjwm9rLhZyzNY+aUKJDc12pRMdX9xKUvGq9KDBKElCVT0SfsXogDVIUlMr1YobVcvHBPIqS5++R7KxFP7M9KHKTBS5SQC0Krg5OJFPJFQIUKHC8J+G9nie8GgV8gG9BJM+8L4ZKgs59tnZE2sBTWLIx0bfyFW0SAse/2muvuN26cSlO0Y8H2Q6VMlm5hLz5MgXkIvdXK8QLJS0Ly7+2vZna6DQGVeF3s4TzI+UORrN0esRd8Il5j0fFsX7DCukJJKh0xlchxeYVo521SKj9PnbMI7z1GqHU392zmXz/EGdfvYtgsVent6WeWWF7ddrYyXeOg42UrLwvkM7Kwy4E7yuM2Nsj0JVDr06H3wSUdXl8gtCV+hTxtQj/8HdYnUVMlM7Nf8lWg4LsPKxrzg82jeWhnfWbsRB+S+4Wq/19bGPi290OW4fTSyCeOnd4CPXgcl3ZBOi3sG53of3Ym2daDdRRH8c7NpAOU4Uv2hjWM7xpD5zesXibSANzezqapp7rXQM1aMX4kHnbYShk59c7GX5YhZD8ywJgHto5LW6Mp8cIVDjDDc8qLQTD+t5UP/4p6s4sXRXQRQbAtUJ6+XEbUlPXagUZz1qXg+UukSlm7jMxaddMmsCaSHPDYBt1C/+gtU8lcP/W3PPj5NAi8DegOmDAXGvAm1D8GOEZ+zzAbicbe3ClxuOGb934/N1U=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(10070799003)(1800799024)(7416014)(376014)(366016)(18002099003)(56012099003)(22082099003);DIR:OUT;SFP:1102;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?tTSrymr+TwoF7tpsPgOgpAcLW7+zvU9b6bnDoCOniX/J4MHvxv/NL2vi9xSb?=
- =?us-ascii?Q?RCgMFMwRVMQvray3MtS7tzaZ22MpH+7JPYm7Eb0Ik+Z0cFIfxls/6eujRILb?=
- =?us-ascii?Q?ko5YFWcwojXO8ldmkw59uObflazMx0wm6DcavaWAKlHKVUheWdiNBkvXFuO6?=
- =?us-ascii?Q?QEv4E8DCr3UChb50z9eHFvFDcYaPGcFsR1t3Mi7HjPr7wGkOJLL6sJElFECP?=
- =?us-ascii?Q?6IDHeRyOPgBM3MwS3WV1PzDF9cXjayeyuz/nWaqdfzNam0FyhGPtf/zDLq25?=
- =?us-ascii?Q?qj0ef8uvlgpmxwuqCpO2LKjwHqRlmbxMXuZquMmCCOTnGMlRCEXzRt8zIMgL?=
- =?us-ascii?Q?GnLcO35b4YS+yHHBcXr5wvviJDuxkEbx+eEjG2UlG8TbU44zyZ6j7JIsOSyb?=
- =?us-ascii?Q?x7Gb0QfUOgOQQrzoridlBfkFdle47BQP0DcOkzWGrOIIU/XxGJu0wr8OqfWS?=
- =?us-ascii?Q?epbfM2jcgr3sGEm8HfgsDU3tu/cJR6oHi+6ogb63XOnk230it5kV96GJiOyK?=
- =?us-ascii?Q?39xbFD93DiIby4V0+VssnG2copX+6fA12Tg7q2F/f04QrQP+SZOgJ58MvRyt?=
- =?us-ascii?Q?JIY0Lv7emlD0yJ98hp3/fXU+lY233FQoNgLgSt14616r9CwfQF57juK4k1Oo?=
- =?us-ascii?Q?X7FFtUw4lZt2EItP+7wfUqnFeaTzbU4BejxVdLxf3YBOrgEAnpaypaXE6an8?=
- =?us-ascii?Q?ujigc/pKDIkSDt548FyZP4OCEsvMKVQ+In3DGaNQE0CR3yx2g3YTYjTihwz3?=
- =?us-ascii?Q?R41xlDnClEf/UERCNcB0se77kgzhxSMK2xtBYlDvzziQdOBdmoYK8j8fee1s?=
- =?us-ascii?Q?+1RFhnRbQlA9DEIIyfQeKbQA5RI4IIxATa4OlXby5VyVbwa0xzqd2d40gUWT?=
- =?us-ascii?Q?TmV3wJ5i3wNSNv46zqYSN4dj1f+077t2e09CmRu3ZnV0BOFAPePw/8VDNkGL?=
- =?us-ascii?Q?Xd/4GKCJyUq3V901bcgiJyrQ/02dGHgJ5fMAx5/TW6GBt7j3nWfFTe626uTz?=
- =?us-ascii?Q?05fbjzvSSTJlMG6/zXBgLnUdDTSHx9PzMR4QhlubHeeCLR2ukpegvBBRjF84?=
- =?us-ascii?Q?OUhZCdJ+dT2+cgVNMGznzfXNo9LuJpLhJ5+cGdVTc23hhxbN3EcNhKszCgAM?=
- =?us-ascii?Q?B5h9/3ldaAdThyhbHW2CsmkKROUblZTXDrhAL4YgbSkUQGK8EqFMvoNXl8bZ?=
- =?us-ascii?Q?MOj5f06m/DQE5/3TWCn/cCEoep4QequWjwdv+aOB+af4GMuaUBM+naUI3W8n?=
- =?us-ascii?Q?SnJdbvTbsH7wQBwc3eWPgzxjC/StmiFIxqm/kvHN/hyPG24KaSs/b0VWhEjc?=
- =?us-ascii?Q?gKVMdhPItjmyex1NRfevbTXFepoY2zf2vhQ5LUNbnM1xC0GWw0EMrXkkSMD3?=
- =?us-ascii?Q?xo7gz7fxdkz8l1WlKbRpGXMW+IYHOzr5/OVhNVVyg4+TFbDsFqTA6h28IzLn?=
- =?us-ascii?Q?fkzySzWcsUFH1lPeM1oXnLsOc8Zo75DR0LhtX6fcefKaklcIB8VUYUQrDcnw?=
- =?us-ascii?Q?pHnaAlOyDSuERKPeFtLPOCUp3EVXDL5dXFWPGfnt+D8fQEDVv/lWiLcTukmh?=
- =?us-ascii?Q?mwFj3twUKcIkwXKTA07MQPxkvVffS0cFL72ekZL6Xc3+lr4t1aMz4quzk2Rj?=
- =?us-ascii?Q?GnkTLGGAJvuQvDpmZcPstI5jdGGU7UQt9k3J40Qgj9m4w1+j2iB96BkP+wf0?=
- =?us-ascii?Q?t5GrMnb2Ck4C7A+jkMdToEC4NZetvhsHbwNs//Xu4PezopPOucngnrilwcgE?=
- =?us-ascii?Q?ChGpkkijZXUgAztLG3mvbPk/cpWuJg6eNkfzCT6P787xYAvtAiu3?=
-X-OriginatorOrg: valinux.co.jp
-X-MS-Exchange-CrossTenant-Network-Message-Id: 0c749240-fcc7-44de-032f-08de8a4ac38a
-X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 25 Mar 2026 08:44:44.6626
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: PHaincK4g12G1E3gOWyPGHnShGz52UszEF3D45Tb9HuCeraml9pXWFxjruC3DLaxfZndEAmVdM5lI1+ZUWTYpg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: OS7P286MB6382
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <ec62kljt36zh2autlth5jivdqlojbpdo2gbs43ayob7hobcpre@bpos6hqyuwkv>
 
-On Wed, Mar 25, 2026 at 07:23:37AM +0100, Niklas Cassel wrote:
-> Hello Koichiro,
-> 
-> On Tue, Mar 24, 2026 at 12:43:53AM +0900, Koichiro Den wrote:
+On Wed, Mar 25, 2026 at 05:43:58PM +0900, Koichiro Den wrote:
+> > > > ...
+> > > > > +	 */
+> > > > > +	if (doorbell->bar == NO_BAR) {
+> > > > > +		phys_base = addr & PAGE_MASK;
+> > > > > +		off = addr - phys_base;
+> > > > > +		map_size = PAGE_ALIGN(off + sizeof(u32));
+> > > > > +
+> > > > > +		iova_base = dma_map_resource(epc->dev.parent, phys_base,
+> > > > > +					     map_size, DMA_FROM_DEVICE, 0);
+> > > > 
+> > > > DB should write. Is it DMA_TO_DEVICE?
+> > > 
+> > > Thanks for reviewing.
+> > > 
+> > > The write is initiated by the peer (RC) and lands in this EP-side doorbell
+> > > target, so from the EP side this is a DMA_FROM_DEVICE mapping.
 > > 
-> > - configfs knobs mutability and bounds checking, including (but not limited to)
-> >   db_count.
-> >   In my opinion, allowing updates after .bind() looks questionable, and
-> >   returning -EBUSY once bound seems more appropriate. I'm leaning toward
-> >   handling this as a separate hardening series.
+> > I don't understand.
+> > 
+> > If the RC side does a PCI TLP write, the iATU on the EP side should translate
+> > that to an AXI write, no?
 > 
-> This is in line with what we did for pci-epf-test, see commit:
-> ffcc4850a161 ("PCI: endpoint: pci-epf-test: Allow overriding default BAR sizes")
+> Yes.
 > 
-> but we return EOPNOTSUPP instead of EBUSY.
+> > 
+> > If the target address (doorbell register in this case) is only mapped as a
+> > DMA_FROM_DEVICE (read), I would have expected that AXI write to result in an
+> > IOMMU fault.
+> 
+> My understanding is that the inbound MWr becomes a local write on the EP side.
+> Here, the EP controller needs write permission to the doorbell target, so
+> DMA_FROM_DEVICE is intentional.
+> 
+> As noted in the cover letter, IOMMU coverage was tested.
+> 
+> > 
+> > Is the IOMMU really running in strict mode and not in passthrough mode on
+> > your platform?
+> > 
+> > Do you get an IOMMU fault if you change this code to DMA_TO_DEVICE ?
+> 
+> Yes, changing it to DMA_TO_DEVICE triggers an IOMMU fault. I've confirmed this
+> experimentally. This also indicates that it's not passthrough for this mapping
+> on my setup.
 
-Yes, I remember you were discussing this with Mani in another thread. For
-consistency, we should use -EOPNOTSUPP here as well. Thanks for the reminder.
+I still think it sounds wrong as per:
+https://docs.kernel.org/core-api/dma-api-howto.html#dma-direction
 
-Best regards,
-Koichiro
+The transaction is a write from
+PCIe bus -> PCIe controller iATU -> internal bus -> IOMMU -> PCIe controller
+(the same controller as initiated the transaction).
 
-> 
-> 
-> Kind regards,
-> Niklas
+But I guess I'm just an idiot :)
+
+
+Would be interesting why this is not working like normal (when using buffers):
+"For Networking drivers, it’s a rather simple affair.
+For transmit packets, map/unmap them with the DMA_TO_DEVICE direction specifier.
+For receive packets, just the opposite, map/unmap them with the DMA_FROM_DEVICE
+direction specifier."
+
+Pehaps it is because it is the same device that does a write, that ends up
+writing to it a self? so source an destination is the same?
+
+
+Kind regards,
+Niklas
