@@ -1,48 +1,48 @@
-Received: from OS0P286CU011.outbound.protection.outlook.com (mail-japanwestazon11020120.outbound.protection.outlook.com [52.101.228.120])
+Received: from TYVP286CU001.outbound.protection.outlook.com (mail-japaneastazon11021096.outbound.protection.outlook.com [52.101.125.96])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B19B93FE34A
-	for <ntb@lists.linux.dev>; Thu, 26 Mar 2026 14:57:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.228.120
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A90014014B5
+	for <ntb@lists.linux.dev>; Thu, 26 Mar 2026 15:11:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.125.96
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774537070; cv=fail; b=E8zxDyH+Ujbq7bJwUw9y+sM0+hv+Fg4KiNbAgcxVSHDDiKbD+wrP/kyvGNBg2eyml6k0M/Npbdg6T+F4ukuytxWLP5zoXKrTIMM+96/nm05ADLaZIygvXXcljFLmDa8lhMzFld5VqJQsufvOImMaT+J/xkcDJS0VeCiMiBcq8MA=
+	t=1774537914; cv=fail; b=iwknhYfDJfkh48kB10IYzXA23WagVOL7jvjkwCfjX/NuTUHruw2pRigdYmygRXRSS2kNsvuPkk5+57GlyT3LXUqecnPjUZcOPlL2jfG/3QnzfqRkCJqKaCaYXxaL4bmQ+5T6cTYFXQipHyEvJrlHuVW/k6qRtQEfgLiL62xJ+FE=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774537070; c=relaxed/simple;
-	bh=1LuGSTMCZkk0Ht9ov9C5uBCO5bFvOx+IbuAvL0NBnzw=;
+	s=arc-20240116; t=1774537914; c=relaxed/simple;
+	bh=Xa11Y57vscgQyUN7x4+YC8qrj+xzWRtLEk2IBWXlfN4=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
-	 Content-Disposition:In-Reply-To:MIME-Version; b=EQ5vRybJ9STDVebxHyP0jpMfvzmgA1OjlIdGynBenBlEuinxNt082Woim+mjihorzOv3lj9FfpF0FHHCUSmvCRRsOTDy2445tXJ2WmOLTLPhnWGl/10s+Ybfi5UP73lJ/RPGgp+0Ef0aSC/L1VGl2d6QgAwYY+CSSlRXacoJ0cU=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=WbLJw1Ua; arc=fail smtp.client-ip=52.101.228.120
+	 Content-Disposition:In-Reply-To:MIME-Version; b=IAdNB7ydh+Y4wv/Fl5kuQSf6hSFhzcfCjFuElsiDmq/FPrB3/cgG9U4DxBcSbiSnPvSWIMy2sBCtovptmYMvmy2iLdu5Z3NpR8vc38niEay66qVKfdUbHT88uJ9QXcbg/sswgxDkxWlTOmxJjQKHV+xl2C+Ibo5wfEMG5eLwdeE=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=p2gMHAeH; arc=fail smtp.client-ip=52.101.125.96
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="WbLJw1Ua"
+	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="p2gMHAeH"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=AhzEqDbNOEN0lyM0QfopXPtGXIbUoB49iP/cE0aWl85ld98Swo2FNreoAfYsFfDUWVbPelDINEIHDU8+uMnoUbwYwgZtgOy6BSPlavvSFJNTAo3EVDaIp1h2ktgwgSwIPWbbcEJU7AquC3jnaD4pi/QEOzpOeXgMRt60bVN3g8aT9CaIhdLeAH0CAX03x4KpooJWGKlzwdNZnA2fVUknkyY3ZrNsczJQJ8AsM7tbpaT5wQfO1ArDX6TCJIKB7kb4uuYL4qMBRscoYr+Q0zwiXAvXir3xCIbmxUex9SnnRPs3fijW/gMmg+9VPLwL+iRGr/D7/Uktt8XqiHO5hSkkzQ==
+ b=JJUUCSzOS5rI0DHmucT15Q6m6iaTRruPWK9YKLuOaJvKdE7DVSecamGLNKOsC23spPMzySnBGEJBASbOCK+hGYg5RN9GVu/8nj4vYnSEbBJKorQ04EkgEgjMHaVyQyR4rm379dNaZoQpHF9yxRoPNSiuKNAyi2Ux6YLeWUX8FTWxsO3HK79P6ENGAdBq0Sx8tupks8EtVKMjmomdAs20NQaoy2g6zKYW37lSLXdN+9jjpauSX7WxcM6XGnhgCuTUApU2GKzZs9dEslp/KnR1LPfkrZ/ir1mS/iaXYE1j0Lunx/GF6Ww82/LU4W0smMvEdCATje6mmpq2vwNrI1MlaQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=B+9sWrUj222FQYE6B9KAoQdvoki3zek7K03ya/Z7nOM=;
- b=GqePOCEpJyiLRKDwbIkEKSFRiaVZ3dGUa3qP+laCBscxrX40Yw0BgLOYuBMxwgwfo56OcG4xDesWh01QxLdxknfX8UGOv2uXkjoN9g6bQcDL+DdhAgL+dmN4eUfvXX2MAuWS67kt1usng7IOyW2U2bD5D5YNjgyLgRxhocckqTfbz44fBUYuNCkRAJKSuoNkzU+xuIJYfoDaLCsvqXDzCOeTdBq/Byj32IeGzRY5rPH0h8yQgb2PV/tEQbJuBozexPDyHRT9dj5UhpH7eCxTGIw2xBicQ2UEUQz3af4haqg7SXYfwMs/2EE+0Anx7h836JQVSEJ2u6RTasEANZBFmg==
+ bh=yvZKnE5KH8afRjzR2nbJ3Zq8n2K0mlWfFV3DAL4UDlU=;
+ b=FaNUGdWxGrY5DatF/GVdAnAjuCUySRFe/TZr/xSJk6mjNG3Jcq7IIjcUkIwuYCQ8ORBMwAZWjqX3Mq0CAhfaHAe4os9gt9+PV/EN0VQ4h4acUh0Fy1incZ9xPy7n7AbNG8XoivtP7egDZHVe2cj1iNlUytAPhCzmIb2eFN0evjQf8JqRkhiDr5yQHgigp/SqrKBd+TC/rh3gNYdkzbhLf+yjU0rNXR1tCKi7FSACZJDl3SOMZk+N9c+yDhEZKi52oFor/gXEUjVd88n2+E2ok3EH99aPaWjD5k8HejsDoRXaKhdqxX1l1mveAqacisDctlf4wUjZVynYNCKuYSdQiA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
  header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
  s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=B+9sWrUj222FQYE6B9KAoQdvoki3zek7K03ya/Z7nOM=;
- b=WbLJw1Ua5+mzPSNr1yaV0lGzPgzmkFMWJ6+BAFey3zz9xbMQz4azGdVVqldon7vctcoy9BaHGcDDa4L4HS6IDgqJ9x32keAhsE2dV5UQqv33JT1nrzY13f06H8t22NpsNM8Pbtji6XYUpqH0b0dAMrB7HT48w2cmRSllyaW7t2c=
+ bh=yvZKnE5KH8afRjzR2nbJ3Zq8n2K0mlWfFV3DAL4UDlU=;
+ b=p2gMHAeH2m+qeW/dZmrCFdXTc6dp2Wujju/ydSy9yX7gAADdLKbH3fFG+4cMP9SJnF5UqGgpXb5f8xQUJymMV1Qoc4WIMIqXzj2mdjMzezS0EJZxyxzqE2d+QnBEVlZHRHXUn11zQvgSv8qo3GKhTWWKhUNf8UgWzlSzG61UBzI=
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=valinux.co.jp;
 Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:38f::10)
- by TY4P286MB6558.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:341::7) with
+ by TYYP286MB5966.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:2df::12) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9745.20; Thu, 26 Mar
- 2026 14:57:43 +0000
+ 2026 15:11:50 +0000
 Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  ([fe80::2305:327c:28ec:9b32]) by TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  ([fe80::2305:327c:28ec:9b32%5]) with mapi id 15.20.9745.019; Thu, 26 Mar 2026
- 14:57:43 +0000
-Date: Thu, 26 Mar 2026 23:57:42 +0900
+ 15:11:50 +0000
+Date: Fri, 27 Mar 2026 00:11:48 +0900
 From: Koichiro Den <den@valinux.co.jp>
 To: Manivannan Sadhasivam <mani@kernel.org>
 Cc: Jingoo Han <jingoohan1@gmail.com>, 
@@ -53,18 +53,18 @@ Cc: Jingoo Han <jingoohan1@gmail.com>,
 	Bhanu Seshu Kumar Valluri <bhanuseshukumar@gmail.com>, Marco Crivellari <marco.crivellari@suse.com>, 
 	Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>, Manikanta Maddireddy <mmaddireddy@nvidia.com>, 
 	linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org, ntb@lists.linux.dev
-Subject: Re: [PATCH v11 1/7] PCI: endpoint: Add auxiliary resource query API
-Message-ID: <f4dm2eh6bqyjwpioowwhr6nist4jdhciiki5fxt7a6xfuarbc5@tpahp2ylqg5l>
+Subject: Re: [PATCH v11 7/7] PCI: endpoint: pci-ep-msi: Add embedded doorbell
+ fallback
+Message-ID: <r3vshsllq35op2dyajq2sr6el7ibxunmlu4r4hsvfs2v2237go@jcwp7xku6not>
 References: <20260324083728.3744734-1-den@valinux.co.jp>
- <20260324083728.3744734-2-den@valinux.co.jp>
- <57ci3l6eyyvqdkscfrz66d53onpiolox5lvtjzn4nufkyqzmk7@6ltweu5hckwk>
+ <20260324083728.3744734-8-den@valinux.co.jp>
+ <lfbv6sjevz4xtjr6zt2hl3wap3bfwkvigqb6fdztqmutxgcvld@3t4x5gstr4nj>
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <57ci3l6eyyvqdkscfrz66d53onpiolox5lvtjzn4nufkyqzmk7@6ltweu5hckwk>
-X-ClientProxiedBy: TY4PR01CA0015.jpnprd01.prod.outlook.com
- (2603:1096:405:2bf::10) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
- (2603:1096:405:38f::10)
+In-Reply-To: <lfbv6sjevz4xtjr6zt2hl3wap3bfwkvigqb6fdztqmutxgcvld@3t4x5gstr4nj>
+X-ClientProxiedBy: TY1PR01CA0203.jpnprd01.prod.outlook.com (2603:1096:403::33)
+ To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:38f::10)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -72,257 +72,188 @@ List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|TY4P286MB6558:EE_
-X-MS-Office365-Filtering-Correlation-Id: f01f11c0-6438-4b65-377e-08de8b4808cb
+X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|TYYP286MB5966:EE_
+X-MS-Office365-Filtering-Correlation-Id: 7dcec189-642b-438d-34c9-08de8b4a014c
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|7416014|376014|10070799003|1800799024|366016|18002099003|56012099003|22082099003;
+	BCL:0;ARA:13230040|1800799024|376014|10070799003|366016|7416014|18002099003|22082099003|56012099003;
 X-Microsoft-Antispam-Message-Info:
-	nB0IDZsrgi6uJSmlcBWh1MWUUcYq7DIHNo3GANM/2NM9YluT69SA4BY2+QgRgoFwBRYtwqUwhuDOPDbgRJhBUnynsLOwnF9BW3oLEFlANuAG+RE8jXbRP174+tlI6atP8Q+oEuJjD8Nv48X30N3P/2+KvFcAM0h0ZCqRoE7ZdNbYE2cemmtYBgpUC3B+gpQ8cdfKAhY7nQn9dWBCuYqbqRYeuwb0hJgY6PZk7gpw8i8IBT4/YN10NCLIdKbaBHYyxegpQP9K4lmEqFwXxfF88t0PWPh1LTARgd9wUofzAY6RjCVCqpABUHdUoBeyfdXzC4bZs/1x1vQGzt3RCn9JHkMzUDIfLwJpG68Y6swIf5jWmEL+6Wjuc8K0x8rZBXB1CnXLelO9qw9fbXbBRC1jVC3MjJJpuq1BhK+JjtDYFiM1PpRNMJyMkoZnzr+IRiWlNmS6eVxJog8X2fhb4l30sNpdNPKmmf5teacgU7TXlF1nP4CfkAFlPm54UTnmJlRNsjfdeB7gDt2aibBcQ3LocjtPR1/cO2L0c34KDiw00059oshmKBf9F+eF9xJfVB7srBoyauJ5d58EzOM4CS0tawzMggQEr+e3EETnJAUEqlMSDK+b/qBAiqi/iPH1Fqq0uqzjqtkt6DsDZubVdSA3i2/gWUNANlftKdQmZioojVwZKPAYpAFgLreb5qVljcUewX+fU20KMeXLA2yvCR1HenO4gu95Sq76JzsIQ4w8pJs=
+	gxCiF9WhnFbEeGkXqPCWe5p26NLa1+5KkD92W/vmexdeu6cWDFSZnqcDv6F7YiTbAoEgF7xy5670/xm+Fm4iiJAU6+ctfHZle9Hft9iAjR/mTAkue1LxJ6LgdfPCQn+6RWBuVJ8k90jewou6dhfwbexqLPtHKdyQIPm1P/TWd7VNHD0qsp6uEaGb/Cd2H5lqjWHKDaBx/y8Mb2lAIBXNFLsL7ncUo7CllSf9eeQBsed/ttq4GJvpFkQnPta0iV1OBFKdVeeCuVQjmvD2AmIMyGpidLp3jr+Kozzu7R2ds84t1dBTsfnWzof45N21DmSKKvx7on9yQEMM+gkN06PC2K5qmS0LAZ5AWzOjQ9LiV6kukmjDDpcKTJST/YGY/VHDsMoIzoa6ApR3qK8CVufjnV7KHXpLmCNGjOUzdUO3yA9rXbSUp7u0OyrU1e+mXN8oFONuFwEImcEzvVOUgKKTX1XRXxD+i/IVVMsqGwl3DRAj4XzSUZ/UC5hPNi5M1OhgFdIeuG7lWarYUZBhu0gS5dGQblGThvi+Pb8Adk+ip+sxS50JkQUPvVVDFJy2kjJIGd5VToSM+KS176I9YplbsbKjXugrAbFmwZHfACNckonlsNA4punW9ymEPbcxE0irEmbXQFG+kQPkslsPmbsCiNs5zrm8iaPXodBWjVxpVjRH7ZBTLgboX9YURiO4bAOfTV4tUvtcZai6j+2to3lfh9zdOtjCT1liCJO26LYZejw=
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(7416014)(376014)(10070799003)(1800799024)(366016)(18002099003)(56012099003)(22082099003);DIR:OUT;SFP:1102;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(376014)(10070799003)(366016)(7416014)(18002099003)(22082099003)(56012099003);DIR:OUT;SFP:1102;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?djgzaDJ0N3pQZll2VTc1YVV1aWpSekxKeDIzQnMvZzArbE5CY3ppZUVjUFBB?=
- =?utf-8?B?cWpYL1hPNDhxbEZnbUFEZjlnaG81Y1I3S3U3a3Mwc1B0dVZqNUlwejNHZVdB?=
- =?utf-8?B?am44MkFYTllUWnVYM28yRENtZzc0Wm8xQzdZYXZuR014QTUyVjVJcXBYMUJr?=
- =?utf-8?B?SUZvbnRTcmo0WGtIUXZKQnAzNXIzeTE0NTRwSldiaEkxQmZLc1UxeGVlK3RO?=
- =?utf-8?B?SityRW5TbG85b3V4YlNCUDZXTWxCWTloL0FzdHNjQUZWTEozbVdHU0QrQ2dh?=
- =?utf-8?B?blpXaGZZQUJGUlc2QytRdXdFWlFBSXJoVlJNZ1NEVG45RGlFSFRPTTJjbWlk?=
- =?utf-8?B?dWNKdGFsOVNCZEdWdmVmVWlpOUxTckJaY2t0aytzQzhoRjBPUHhzSEV1SDhw?=
- =?utf-8?B?WkhLdi9MZUFWYUFickhrb2Vyc1c1cWdLVDdJS1hXdWxnN2laZnU3OElvc2hh?=
- =?utf-8?B?akZieGdCOU1kczUxZ2N2LzZDaEtaOWNYMFhsZWZTOG55R05xYTN1ek1RR3h2?=
- =?utf-8?B?anZFODMwcVpyUUs5MnhZSlNHMEswd1hiYXFKUG9oZmpaUXZxN01WVldWdzdi?=
- =?utf-8?B?UEJtYUdmUDJxMFR2ejdtbEkrNGVNNXBZOE9xWjdSTjJabzN0czBORnV2ek5s?=
- =?utf-8?B?OEJKcjI4NTZNLzNQcHJjcHQwZ2VaeTNJUUZRRExqR1lkQXdwdE1udlNkaW9o?=
- =?utf-8?B?Rk9weGhxZjg5bGRlNE9Za05HQlNDK09KOUFWcnFEKzBHRUJpOUxSK0pScUNT?=
- =?utf-8?B?aXJzT01KWWJ6MnBaQ0hxbXI4SVBrK241ZDEvUE1xUkE0eUlRNUJhcy9oOXpN?=
- =?utf-8?B?NVJuTXJpVjZGQnRmZGJzVkN2NDd2YTB0bEhSYkdWOFJMLzI5K29vWWVxZ2ln?=
- =?utf-8?B?NEoycUpnTElScFVwbFhlc0FkMGsycU96Lzh6ejJSdTJsdit0WHZqYVdVcmxQ?=
- =?utf-8?B?NmFFV1ZhaE5VQm1MSVhGRk55bXUreDJlM2VXWGMvYzFYZmc4SjdDNytpMmQw?=
- =?utf-8?B?YnpxejNQand0bEF3Y053MHY3TUVxZ3NENENqM1RmRlBSR3h4cGFBN2cwaVlS?=
- =?utf-8?B?cGhUYjFTUXVmWTBrbTVDWHE2TjF3UElwU29pNG5WVXpiaDAvaU11WTYrdmor?=
- =?utf-8?B?VmNvUW5CVjlvMHlSNUtMZjJKS2U2V2dqSFVHbjFETkxKR2VoZlZKdGJxbkdF?=
- =?utf-8?B?QkM3ZmtRVzlDTzUyTnRHc2ExSVA2Z09NK0lKclovTyt5QU5mRmY3OVZ0TENx?=
- =?utf-8?B?bjA0ZkNMeHhxL2ZpdXZjSmwwdUM3Z2lCYmkyc1U2LzI3eWRDUFpTOXpEYXZx?=
- =?utf-8?B?cTNZZWRmSzIrWFV3RzNiUWtYL3NacFFTNlJIL2NpY29DRVdMb3RuRUs1RlFQ?=
- =?utf-8?B?R0VTT1BlOTZpN0xDYkU1a2NTajBDaHNIa1M0cFF6UkhaN1MyWVZzT0F2cEZ3?=
- =?utf-8?B?MTlpYjdHNk1XNG1vN3lNZUxLNWpsZHBpdnhQNzZja0ZZaEZpZkxQSkMzQjlO?=
- =?utf-8?B?MVhDL3pCaW9PeDdaallsOHBKbWp0MmtKMzF6ME1HOEs0QXlUanljNTd3OWU5?=
- =?utf-8?B?bmdsTVdsNk5zSktzMkg1dXozTjd2eUtDSmZUUXZteGk2MFhuYktFREs4b2l2?=
- =?utf-8?B?b042Q0pEdzlkTDlNOXY1dVk0UWVhL0hSamZDc0p4RGlEdzVSUkl5VnhTanhI?=
- =?utf-8?B?UkNQNHh5emlCbFl0bHViRkg5Sk5TNWhPcEhhbFNTSFFvOExBVlc1Z0FDeDJT?=
- =?utf-8?B?S3gza0ZVaWU1S0RxeXVIUjg0UjhtZlNPdnl6bWhuRlpoa2UySW8wUktieUg3?=
- =?utf-8?B?MkRVUnZIdXJUQXBaMG5zMGhxMjhaZ0hrdjUxMkY1UFlBenhmSU1wbXh4aUo3?=
- =?utf-8?B?YlpYWXIvcFowQ2plek9yRFBKalZqSzdIQTFPM3VIR2dNbDYyK3h2UVZsOUg4?=
- =?utf-8?B?VGJtaHNodGlmRjZnYjhja1JhdmNlR0lsT0lTQzFVeTlsQmltVnhQUkxFRW83?=
- =?utf-8?B?SEkwMGFJbmg1aVF5WUpudFVXcDNuRnhjK1k5Ym5pR2hRL0ZtcmNPcnpUQ1lB?=
- =?utf-8?B?RU1ER1dtRFNOcGxJR24wMWFXRlFmRTUwc3NWZUhsWEU5MTM1b3VXNE41WXVO?=
- =?utf-8?B?VmR6RHhxcWtmbUdWZmtwbC9HMXRPbW11MDRKbXc0bXloSThCNWxCYWd6NkF0?=
- =?utf-8?B?WXBZamxPdWRqckxCT1gwTlFIcnBNUkxhQWJudk0vUndUT3J6c2M3Q3BiMGpR?=
- =?utf-8?B?am10SnFMN0pCUHNzcmhjM25yMkhvREdDRDFkNjJZVkJDMmcyVzBPUStWK2JZ?=
- =?utf-8?B?dlEvY3Nrc2tra0EvVEpsc2FIdDAzT1BkN29nOXRZTm5wNHdxV09ReUlKTWZQ?=
- =?utf-8?Q?fdeaA3WUnA/vVri1ZM2cPW8RnYbQMaP3p2yK0?=
+	=?utf-8?B?emdIQ3NqdFhIcldBV2ozRnc1NlBTNXFDekhtQTZzSmF6Vkd4MWt5N0I0TDk0?=
+ =?utf-8?B?SFRHejBCeGF3Y1RRYnJUeHRYbmZ5Z29VTXpjclR5dS9YZEY4V3pJZUZ5bmpi?=
+ =?utf-8?B?QU55OWtJQnZJcjhmYmFUdWxZaWNNd3NqMThJb1BQeU56TGQwY3VjVW9IK1Bm?=
+ =?utf-8?B?TVlCS0RkUFp5U29FdmVzUTVGU2xQQlJxZjJKZDhDMllqdlNFdzR1cG1UL3h0?=
+ =?utf-8?B?UnNmNWlPSFg1N0lBMnAyWDlsN1pYdkNBZC9SYTFDcm1nVDIyd3psUnNERVgy?=
+ =?utf-8?B?N29RRWwzMGp1OXVsVHZsVnNEWkxqaDRTUm8zY3J0RzYxeWNkRUUzd2JRbytD?=
+ =?utf-8?B?Z2VxSWZscXNpYVQzNVMvTko2WDYxbGdRLzl1NEsyRHZERFMwY1hGTW9ZRFYw?=
+ =?utf-8?B?Wk1pT2R1d1Jva3gwRVJ2RHJDbEFCYk9IVjdMMFJta2lKNUM4TnhBYWtwSlpr?=
+ =?utf-8?B?U2dSZDBZZmkzN0M5RmhYWWcrZFBLd1JqU2tIbEZTVjd1dGxQeHlqQnVSLzk3?=
+ =?utf-8?B?QTNIdVRoenFZT2plQjVWM3h4SUNWN0ZPdzR0bUxxbWV6ZU9WUnFxS3BWUkJJ?=
+ =?utf-8?B?ZmpmaUpoenY5VGFIYU1SY0txbG94bzRiSUV1SENZVGhWNUhNTndUSlR2YVU4?=
+ =?utf-8?B?STA2WEU2SEpDa2FvREhxaTN0S2V4b1FJbkZ2bWFUV3B1bE5tUjJEYmxNUzJJ?=
+ =?utf-8?B?UVhWQVd4RW1hWmRoRldZc3BUU1VyZXJRd0FhNVVGMHlockJhdlRJQnFjTm1O?=
+ =?utf-8?B?QUNBSGVxNVRRem81Tml6em53cHJHRzNhaUx5RldyaUVoYjIrV01TMkNNckZE?=
+ =?utf-8?B?T3YvZ2FVQVU5YWtaLzZ4akk3dVhQYng5aUt4TFM1dWN6YkJzekJKQXl6bEND?=
+ =?utf-8?B?TEVrcUwvL1B0L3JtUnk5L2lBTEpsUXNwMi9GOGtqdy9PYUx5MGtSbDRBanZC?=
+ =?utf-8?B?ZTNnejVWd2duZ3NmSUhUenR0dUVGSmljU0NLM2NCck0ydy8vM3N1N0xjSTJq?=
+ =?utf-8?B?WTV2UnZHN05KY1VXbGRyZ0hzZlMvcmZXTzlOTUdnUkFyNmFweXh1VGdTR3Rq?=
+ =?utf-8?B?cFBSZ2JjV21oUnVoeGZWbHdrOXhzbmtldHRsOXdmamdTVG0xbnBhTFJma3Zp?=
+ =?utf-8?B?bUJMcnpsbHh5V1hKdDlYdHVsM214WUJaV0JuVHhuK1F4eGdRYkJkYUgzb01U?=
+ =?utf-8?B?cDNaWTZKNWZldENlamZnckM2VE4vNkFRNUxzQ2xSN001dHkzWVdDUEdUU2Qy?=
+ =?utf-8?B?ai9qSEE1YjNaNitYYjVZc2kzeHZ3Y1l4bEFTb0JnWUZmRFg2amdrcFg2UXIx?=
+ =?utf-8?B?c0ZXRkRNOThObVRuNDN4WWZKM2s0RFlhQWh2bjRuVzFxeHA5M0I1NEJHbStK?=
+ =?utf-8?B?cklnWk15b1VKaTVLcTlLVkJrTXRRRnduSGp4V2YyT0VNUFdHTy8wL2J2T1Aw?=
+ =?utf-8?B?QTYrZTRLRlFQb010N0RIeG5SdHJYT0lpa1NZNWVmVUJOMFY4Z2JkSU1QRXFK?=
+ =?utf-8?B?TU40NHpHZ2NFYXJLVHJScGlnMTlNay9XOEMxL25BVTcrY0p5NnJRUWV6Mm81?=
+ =?utf-8?B?d3djYXJpblhuNFRjMnBhdmJHSmNVaS94WGJpbittZkthZ0NKZTY1Nnhuc1Fa?=
+ =?utf-8?B?TEFuait3ZEY4SkZGdTNnbTZ3Z2Fmb1VjNjRIMzU2ZEtYOVl6RXgzV1JwNlBM?=
+ =?utf-8?B?cTIwY2dudlJoMDVJQTZwTmYrL2tucGVFV2VuRndENTMwcDNpZDJyWEZoaFlZ?=
+ =?utf-8?B?MGZ1Ymp0bTFJRG9NeDZ6cDk5MnZyMEt0eUs5aVZwc1UyRlIvekJ4ZytPNUNB?=
+ =?utf-8?B?aWxjS2dWR2lTMFNPM3ppZXJmWlZZeUc4RXZNZUZoM0o2ZGVHUEFXU0F1Tncx?=
+ =?utf-8?B?NmJJS1hvZkFKaTdSMzRsK3ZtTXRqa2s0b0NwQjRQNlpuVTNZR0JVUTNPWDlF?=
+ =?utf-8?B?MTFSS0Rra2h0N09sdG03NjBQRzlLNU1HUnpZNVR5REwvL0pvZVNIVG1ScHVa?=
+ =?utf-8?B?Sm95SWRRTGV4UHJzRXJ5b3dOWFJqUkpBWm1hNWZzRDFiU1NIYUhsQ0gwb3hx?=
+ =?utf-8?B?WUNaeUc5T1NrT0o4Y0trcXNzdVJ4ZWM0eHNYMVMyNmc0aittVkMzZWh4VitW?=
+ =?utf-8?B?cjFkRWdOTmtBWFBrSFVJWVJnTUtCLzJJbFRqOGRtbWhiQjcxRnpCdFNWRkUv?=
+ =?utf-8?B?b0VyY1IzTmM2eFZzdlFjNUVpMktRY2xBUHVoK2FHSFdNVTVuR3d2KzFyL3Ro?=
+ =?utf-8?B?cEE3NmdxN005NzVpTDNuVkRNMzZqNHhMbnFycnZURnZTTllrbEU1Mms1Ry83?=
+ =?utf-8?B?blBTWTNuRVVqaVIzZFZ2cERpWVljbk5yZjVDNUE1Ry9RdjVITGlIZ2RFT1o5?=
+ =?utf-8?Q?V+hSd7+pQhBbAQVvwYhuvqE/DXAaazuaH3bFJ?=
 X-OriginatorOrg: valinux.co.jp
-X-MS-Exchange-CrossTenant-Network-Message-Id: f01f11c0-6438-4b65-377e-08de8b4808cb
+X-MS-Exchange-CrossTenant-Network-Message-Id: 7dcec189-642b-438d-34c9-08de8b4a014c
 X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 26 Mar 2026 14:57:43.5316
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 26 Mar 2026 15:11:49.9773
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 2bjSwJe6PDTt4nO/pbmQ3AD0lI81lX/RhyUL8aXhBrtT9ZvEqI84WMdORiZxunkgO8WKbKUlTqgSTjdwlcAmMw==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY4P286MB6558
+X-MS-Exchange-CrossTenant-UserPrincipalName: KM0fvAWCeVOlMwEjWqWbd3TvHNja7M61DGRo8QA7RlCNAEPr5hD3UhkWlLHJqrLNHMYr2I2sYOCAwyWNjA4NQw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYYP286MB5966
 
-On Thu, Mar 26, 2026 at 05:47:56PM +0530, Manivannan Sadhasivam wrote:
-> On Tue, Mar 24, 2026 at 05:37:22PM +0900, Koichiro Den wrote:
-> > Endpoint controller drivers may integrate auxiliary blocks (e.g. DMA
-> > engines) whose register windows and descriptor memories metadata need to
-> > be exposed to a remote peer. Endpoint function drivers need a generic
-> > way to discover such resources without hard-coding controller-specific
-> > helpers.
+On Thu, Mar 26, 2026 at 06:09:18PM +0530, Manivannan Sadhasivam wrote:
+> On Tue, Mar 24, 2026 at 05:37:28PM +0900, Koichiro Den wrote:
+> > Some endpoint platforms cannot use platform MSI / GIC ITS to implement
+> > EP-side doorbells. In those cases, EPF drivers cannot provide an
+> > interrupt-driven doorbell and often fall back to polling.
 > > 
-> > Add pci_epc_get_aux_resources() and the corresponding pci_epc_ops
-> > get_aux_resources() callback. The API returns a list of resources
-> > described by type, physical address and size, plus type-specific
-> > metadata.
+> > Add an "embedded" doorbell backend that uses a controller-integrated
+> > doorbell target (e.g. DesignWare integrated eDMA interrupt-emulation
+> > doorbell).
 > > 
-> > Passing resources == NULL (or num_resources == 0) returns the required
-> > number of entries.
+> > The backend locates the doorbell register and a corresponding Linux IRQ
+> > via the EPC aux-resource API. If the doorbell register is already
+> > exposed via a fixed BAR mapping, provide BAR+offset. Otherwise provide
+> > the DMA address returned by dma_map_resource() (which may be an IOVA
+> > when an IOMMU is enabled) so EPF drivers can map it into BAR space.
 > > 
+> > When MSI doorbell allocation fails with -ENODEV,
+> > pci_epf_alloc_doorbell() falls back to this embedded backend.
+> > 
+> > Tested-by: Niklas Cassel <cassel@kernel.org>
 > > Signed-off-by: Koichiro Den <den@valinux.co.jp>
 > > ---
-> > Changes in v11:
-> >   - Drop PCI_EPC_AUX_DMA_CTRL_MMIO and PCI_EPC_AUX_DMA_CHAN_DESC from
-> >     the generic aux-resource API for now; keep only the DOORBELL_MMIO
-> >     resource used by this series.
+> >  drivers/pci/endpoint/pci-ep-msi.c | 139 +++++++++++++++++++++++++++++-
+> >  include/linux/pci-epf.h           |   8 ++
+> >  2 files changed, 144 insertions(+), 3 deletions(-)
 > > 
-> >  drivers/pci/endpoint/pci-epc-core.c | 41 ++++++++++++++++++++++++
-> >  include/linux/pci-epc.h             | 48 +++++++++++++++++++++++++++++
-> >  2 files changed, 89 insertions(+)
-> > 
-> > diff --git a/drivers/pci/endpoint/pci-epc-core.c b/drivers/pci/endpoint/pci-epc-core.c
-> > index 6c3c58185fc5..dc6d6ab4ea1e 100644
-> > --- a/drivers/pci/endpoint/pci-epc-core.c
-> > +++ b/drivers/pci/endpoint/pci-epc-core.c
-> > @@ -156,6 +156,47 @@ const struct pci_epc_features *pci_epc_get_features(struct pci_epc *epc,
-> >  }
-> >  EXPORT_SYMBOL_GPL(pci_epc_get_features);
+> > diff --git a/drivers/pci/endpoint/pci-ep-msi.c b/drivers/pci/endpoint/pci-ep-msi.c
+> > index 85fe46103220..331d84a79193 100644
+> > --- a/drivers/pci/endpoint/pci-ep-msi.c
+> > +++ b/drivers/pci/endpoint/pci-ep-msi.c
+> > @@ -6,6 +6,8 @@
+> >   * Author: Frank Li <Frank.Li@nxp.com>
+> >   */
 > >  
-> > +/**
-> > + * pci_epc_get_aux_resources() - query EPC-provided auxiliary resources
-> > + * @epc: EPC device
-> > + * @func_no: function number
-> > + * @vfunc_no: virtual function number
-> > + * @resources: output array (may be NULL to query required count)
-> > + * @num_resources: size of @resources array in entries (0 when querying count)
-> > + *
-> > + * Some EPC backends integrate auxiliary blocks (e.g. DMA engines) whose control
-> > + * registers and/or descriptor memories can be exposed to the host by mapping
-> > + * them into BAR space. This helper queries the backend for such resources.
-> > + *
-> > + * Return:
-> > + *   * >= 0: number of resources returned (or required, if @resources is NULL)
+> > +#include <linux/align.h>
+> > +#include <linux/cleanup.h>
+> >  #include <linux/device.h>
+> >  #include <linux/export.h>
+> >  #include <linux/interrupt.h>
+> > @@ -36,6 +38,117 @@ static void pci_epf_write_msi_msg(struct msi_desc *desc, struct msi_msg *msg)
+> >  	pci_epc_put(epc);
+> >  }
+> >  
+> > +static int pci_epf_alloc_doorbell_embedded(struct pci_epf *epf, u16 num_db)
+> > +{
+> > +	const struct pci_epc_aux_resource *doorbell = NULL;
+> > +	struct pci_epf_doorbell_msg *msg;
+> > +	struct pci_epc *epc = epf->epc;
+> > +	struct device *dev = &epf->dev;
+> > +	size_t map_size = 0, off = 0;
+> > +	dma_addr_t iova_base = 0;
+> > +	phys_addr_t phys_base;
+> > +	int count, ret, i;
+> > +	u64 addr;
+> > +
+> > +	count = pci_epc_get_aux_resources(epc, epf->func_no, epf->vfunc_no,
+> > +					  NULL, 0);
+> > +	if (count == -EOPNOTSUPP || count == 0)
+> > +		return -ENODEV;
+> > +	if (count < 0)
+> > +		return count;
 > 
-> This feels like an awkward API design. This API returns 0 as a failure apart
-> other error nos and wants the callers to do:
+> This should be avoided...
 > 
-> 	if (ret)
-> 		return ret;
-> 	else if (ret == 0)
-> 		return -ENODEV;
+> resource_count API should return 0 for success and errno for failure with a
+> separate argument for resource count.
 > 
-> I think this design comes due to the fact you have a single API doing both
-> resource count and resource get. This also evident in patch 7.
+> And resource_get API should return 0 for success and errno for failure.
 > 
-> You should just split this API into two. One for returning resource count and
-> another for resource get.
+> > +
+> > +	struct pci_epc_aux_resource *res __free(kfree) =
+> > +				kcalloc(count, sizeof(*res), GFP_KERNEL);
+> > +	if (!res)
+> > +		return -ENOMEM;
+> > +
+> > +	ret = pci_epc_get_aux_resources(epc, epf->func_no, epf->vfunc_no,
+> > +					res, count);
+> > +	if (ret == -EOPNOTSUPP || ret == 0)
+> > +		return -ENODEV;
+> > +	if (ret < 0)
+> > +		return ret;
+> 
+> And here, you do the same :/
 
 Thanks for the review.
 
-That makes sense. I'll rework and introduce pci_epc_count_aux_resources().
+I'll update these to use the new pci_epc_count_aux_resources(), as suggested in
+[PATCH v11 1/7].
+
+> 
+> > +
+> > +	count = ret;
+> > +
+> > +	for (i = 0; i < count; i++) {
+> > +		if (res[i].type == PCI_EPC_AUX_DOORBELL_MMIO) {
+> > +			if (doorbell) {
+> > +				dev_warn(dev,
+> > +					 "Duplicate DOORBELL_MMIO resource found\n");
+> 
+> I think technically it makes sense to have more than one doorbell resource per
+> endpoint. You may not warn here, but just ensure that you use the first unused
+> one. This also means, you need to track the allocated resource.
+> 
+> If you want to avoid the hassle, just assume that there will be only one
+> doorbell resource and add a TODO to extend it if needed.
+
+I think I'll go with the latter approach for now.
+
+The only provider added in this series (see [PATCH v11 3/7]) exposes a single
+doorbell resource, so I think it is reasonable to keep that assumption for now
+and extend it later if and when a real multi-doorbell provider appears.
+This helps keep this series compact and reviewable too.
 
 Best regards,
 Koichiro
 
 > 
 > - Mani
-> 
-> > + *   * -EOPNOTSUPP: backend does not support auxiliary resource queries
-> > + *   * other -errno on failure
-> > + */
-> > +int pci_epc_get_aux_resources(struct pci_epc *epc, u8 func_no, u8 vfunc_no,
-> > +			      struct pci_epc_aux_resource *resources,
-> > +			      int num_resources)
-> > +{
-> > +	int ret;
-> > +
-> > +	if (!epc || !epc->ops)
-> > +		return -EINVAL;
-> > +
-> > +	if (func_no >= epc->max_functions)
-> > +		return -EINVAL;
-> > +
-> > +	if (!epc->ops->get_aux_resources)
-> > +		return -EOPNOTSUPP;
-> > +
-> > +	mutex_lock(&epc->lock);
-> > +	ret = epc->ops->get_aux_resources(epc, func_no, vfunc_no, resources,
-> > +					  num_resources);
-> > +	mutex_unlock(&epc->lock);
-> > +
-> > +	return ret;
-> > +}
-> > +EXPORT_SYMBOL_GPL(pci_epc_get_aux_resources);
-> > +
-> >  /**
-> >   * pci_epc_stop() - stop the PCI link
-> >   * @epc: the link of the EPC device that has to be stopped
-> > diff --git a/include/linux/pci-epc.h b/include/linux/pci-epc.h
-> > index 334c2b7578d0..a6131f1636b0 100644
-> > --- a/include/linux/pci-epc.h
-> > +++ b/include/linux/pci-epc.h
-> > @@ -61,6 +61,47 @@ struct pci_epc_map {
-> >  	void __iomem	*virt_addr;
-> >  };
-> >  
-> > +/**
-> > + * enum pci_epc_aux_resource_type - auxiliary resource type identifiers
-> > + * @PCI_EPC_AUX_DOORBELL_MMIO: Doorbell MMIO, that might be outside the DMA
-> > + *                             controller register window
-> > + *
-> > + * EPC backends may expose auxiliary blocks (e.g. DMA engines) by mapping their
-> > + * register windows and descriptor memories into BAR space. This enum
-> > + * identifies the type of each exposable resource.
-> > + */
-> > +enum pci_epc_aux_resource_type {
-> > +	PCI_EPC_AUX_DOORBELL_MMIO,
-> > +};
-> > +
-> > +/**
-> > + * struct pci_epc_aux_resource - a physical auxiliary resource that may be
-> > + *                               exposed for peer use
-> > + * @type:       resource type, see enum pci_epc_aux_resource_type
-> > + * @phys_addr:  physical base address of the resource
-> > + * @size:       size of the resource in bytes
-> > + * @bar:        BAR number where this resource is already exposed to the RC
-> > + *              (NO_BAR if not)
-> > + * @bar_offset: offset within @bar where the resource starts (valid iff
-> > + *              @bar != NO_BAR)
-> > + * @u:          type-specific metadata
-> > + */
-> > +struct pci_epc_aux_resource {
-> > +	enum pci_epc_aux_resource_type type;
-> > +	phys_addr_t phys_addr;
-> > +	resource_size_t size;
-> > +	enum pci_barno bar;
-> > +	resource_size_t bar_offset;
-> > +
-> > +	union {
-> > +		/* PCI_EPC_AUX_DOORBELL_MMIO */
-> > +		struct {
-> > +			int irq; /* IRQ number for the doorbell handler */
-> > +			u32 data; /* write value to ring the doorbell */
-> > +		} db_mmio;
-> > +	} u;
-> > +};
-> > +
-> >  /**
-> >   * struct pci_epc_ops - set of function pointers for performing EPC operations
-> >   * @write_header: ops to populate configuration space header
-> > @@ -84,6 +125,7 @@ struct pci_epc_map {
-> >   * @start: ops to start the PCI link
-> >   * @stop: ops to stop the PCI link
-> >   * @get_features: ops to get the features supported by the EPC
-> > + * @get_aux_resources: ops to retrieve controller-owned auxiliary resources
-> >   * @owner: the module owner containing the ops
-> >   */
-> >  struct pci_epc_ops {
-> > @@ -115,6 +157,9 @@ struct pci_epc_ops {
-> >  	void	(*stop)(struct pci_epc *epc);
-> >  	const struct pci_epc_features* (*get_features)(struct pci_epc *epc,
-> >  						       u8 func_no, u8 vfunc_no);
-> > +	int	(*get_aux_resources)(struct pci_epc *epc, u8 func_no, u8 vfunc_no,
-> > +				     struct pci_epc_aux_resource *resources,
-> > +				     int num_resources);
-> >  	struct module *owner;
-> >  };
-> >  
-> > @@ -339,6 +384,9 @@ int pci_epc_start(struct pci_epc *epc);
-> >  void pci_epc_stop(struct pci_epc *epc);
-> >  const struct pci_epc_features *pci_epc_get_features(struct pci_epc *epc,
-> >  						    u8 func_no, u8 vfunc_no);
-> > +int pci_epc_get_aux_resources(struct pci_epc *epc, u8 func_no, u8 vfunc_no,
-> > +			      struct pci_epc_aux_resource *resources,
-> > +			      int num_resources);
-> >  enum pci_barno
-> >  pci_epc_get_first_free_bar(const struct pci_epc_features *epc_features);
-> >  enum pci_barno pci_epc_get_next_free_bar(const struct pci_epc_features
-> > -- 
-> > 2.51.0
-> > 
 > 
 > -- 
 > மணிவண்ணன் சதாசிவம்
