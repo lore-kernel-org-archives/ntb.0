@@ -1,47 +1,47 @@
-Received: from TY3P286CU002.outbound.protection.outlook.com (mail-japaneastazon11020112.outbound.protection.outlook.com [52.101.229.112])
+Received: from TYVP286CU001.outbound.protection.outlook.com (mail-japaneastazon11021132.outbound.protection.outlook.com [52.101.125.132])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 842C4372ED3
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 31E15374744
 	for <ntb@lists.linux.dev>; Fri, 27 Mar 2026 03:54:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.229.112
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.125.132
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774583679; cv=fail; b=bX+YHl+SVpPXmBaIO738Cy0Ca6Hg7GrVGjg248YJiGaIhVCCMBlWsEViSD2CLRxcevYuPGj+1n+mL7Kc/ReIBtWkGqGuXHmgq83Lbxgej3THTZVDvgi6zqCBOxMnKnXzgNsIN09Ac2CzOd1bRuVLP2keJOh7+bqvbs18immbty8=
+	t=1774583680; cv=fail; b=Ix9uh3Fvn17IziAtUx4DyN4jSp2UCRyg8JElPcFaLpVogPKDcvzBATwzD0K5IAiLT1Wn7WCHkYeLR3NQiJqkZWMUqXvzH3z7/ULps6JPFC9EClRhqcqyqDSadLlmSDq/k9e8lt6bJuGLtRLF8bBL9w2Xx65z9BPj26mFrRVc6bs=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774583679; c=relaxed/simple;
-	bh=sgRjIYZasZJZC6aHGGTqAQ1lBQJuj5jFMHNuey/EsmU=;
+	s=arc-20240116; t=1774583680; c=relaxed/simple;
+	bh=24CtTktMCrTYnhJKM0CPxo89ofgYKr4aiWJjFoL6RkY=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=FQzN6Q17pYz3sCMcvZkR9uUbqkPNZ+D4VviSThTdzpl8DVDuofzM34hYscDYJbIMN2jm6O7h2ON/pgHgcqMuXZ/PnmGWzKLSFmOUR3MVGl7+BpG6FTpS2XZuWchPFDKli/VoeZHaZPTY3W2KreC07/qA3QC+CAzuZWOZN1HYR0I=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=ZK6KhayX; arc=fail smtp.client-ip=52.101.229.112
+	 Content-Type:MIME-Version; b=PZccART8+fixqpHBGtZvtuFwyZIba3pMrXPBRx7gI6XvTEvewg5HtyfhJk6fHov7J1EB6ShDlRr6X721mRhC4pW44jcNQ4BaS3QcRxhrxA9efwCwfCk7RbgAIFBWmIvdbLbC+eVu88ugu/3mmqCpgOzlyVxCibRUwJyCc5xJdVs=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=Tb4reD5u; arc=fail smtp.client-ip=52.101.125.132
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="ZK6KhayX"
+	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="Tb4reD5u"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=uLy6OVYBR2193vzql7+9gLUWGS7jMLSWGqyEpxrS3FzxgPMDi+mg91RrKZ24dUobLsR40YoQwFeUO4ZYtrVi1A+l2nr8WkrI//5Cz7+kH8ACik3m2uCYrdpvajx5xrv9mRUtpHWieMwNP7JK5btZC5nYBlP916KBy1Elw7NMFIJjP3ldwCYHC9DwwkXxlRXTiWdpSKlReYx83lY+SxZ/F0LGnExuziyGFgdSl3/wtkjcuvPtZNqYwvWL7Lz0NFz3R2vpuzGABBAdeTC2rNDpOQf4kcr66QcqL3P99Cuyh4QyVwMyO1w4wnntY53V+uTbfVFGLivf6zaU0pPIJ/A44Q==
+ b=PrbfHwzGtGU9XhGNC2+u9/YACzkg+nxG8YtxwVh1jW3TOZHRdjRMy2b0mHWtv3NaGla2lmgY3HCNO8J4kaZ0RN09jSsiZZj43bHf/Cu6pF4uFI70Bi52tQjEypmOX97GiHy6rIEr4F112fYh7MGRe5+QLH9enbAAsK0B6zwWOlx2iwaaLV9ThHmlEYsrXXMSV0YjCF74jQFQRYDBP+iE8j2je2fY2WpKEWYiWteZnuQvmRXNBUmPM7XcPtio4slceKQrE/UNMsix+x7l4ZSeImOR99DdTStSJue62L9y2MUcTPVueudsKqQew7LhyMIW2r0VOSZOHzcHv86nRA+ocA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=b35G/jLYtQSzKulf5UWuDqd43jYQoJdbINzQbTRfmH4=;
- b=L/s/865EWkBGPNyKR1B/1aQG8uvqLF1XsIrROImp6evlTOr7pMoOvCTl+TuJ012JR1KViSqYVelsez/0cOyM8mxq7ZuTtXRDEFz9HIKM4L5/OffLuGYsdJJsED7nzu9lplmQhVdxq7cnnlkk7eG+XN+GWGMNvIzw25OI9BvYVfRdf2GyNwHtAn+3ZV7dgZu2CPKH/u7s24oojMrBHrPJRPJaZOheCs6BqjeOZfTIiq5vX0iDBfg00X+21d62ryG3Etfs7xfr6gx+Y9RgLWD3tRHPE4T6bgfekEHqU0RQievZSGajJWMA2zsz5G8qksPZePkzQyYetXe3Ox47hqCrAw==
+ bh=r7RiGuw4rdIqME4X0uRgpKq66eSKksk/+mPslKC5zL4=;
+ b=wddAnoiA04d4vwXSzf4LAq9fW7WKq1ceBRUTa3bDCwNYpAi+9B03pzJnjIOv4sgfBo1QoXeCeVpa6gYza60FViW0dGQFlqgbzGjrq5/qsggt3LDAeuMbYwdpNG7J+ZwtY4R1Fd53Ix4De9MOExMRu8KKnpeXSCHJCZ9nTUuDAsSmAVe4QnVyMXA3VstuF7c45YRO/EgXDkSWAI6tV8JcFecwi8kgj+ZofrhniNWqiJpJsfJVf4aOQ6UmQhyk2L0b4qeesKIlaFpYaib9MRj3HnCSfYlyKtx0EtNP484GNPmYZSAIp7813YWDRIXdbJRNEdBzcqvGgkSlkl/Odk8IYg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
  header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
  s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=b35G/jLYtQSzKulf5UWuDqd43jYQoJdbINzQbTRfmH4=;
- b=ZK6KhayXZ69GoXwK9a/7e/OWQRscM1ttJXCUjcI86TPc/d1ufSFEbX9w3LERGNwGdo9DEBr7jIEIHzZX15hBBO3rkyEaPMBIShquG9/OZ2aMyZO5ZuGdy3ZwRj/wHXcRGjIUS/RF6lED+PSyicYw56HjGJiuEE+LgmpGufacTfY=
+ bh=r7RiGuw4rdIqME4X0uRgpKq66eSKksk/+mPslKC5zL4=;
+ b=Tb4reD5uehMZhkPvRf9GUUgi5xIJMTUuf6hEWrHVRC30b3jksR2XtvtWfR7dCXhX7/Q2dIvVoYkQB2GW7D2zr8FsvDDGnB4mOFn/52gtYHWzk3MascrhpTcHHwutyMzSfBWxAbHWFG/Sv2aTxofc4RuK6p9733AhXEeiBRafA/Y=
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=valinux.co.jp;
 Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:38f::10)
  by TY7P286MB7090.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:323::16) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9745.20; Fri, 27 Mar
- 2026 03:54:30 +0000
+ 2026 03:54:29 +0000
 Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  ([fe80::2305:327c:28ec:9b32]) by TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  ([fe80::2305:327c:28ec:9b32%5]) with mapi id 15.20.9745.019; Fri, 27 Mar 2026
- 03:54:30 +0000
+ 03:54:28 +0000
 From: Koichiro Den <den@valinux.co.jp>
 To: Jingoo Han <jingoohan1@gmail.com>,
 	Manivannan Sadhasivam <mani@kernel.org>,
@@ -62,16 +62,16 @@ To: Jingoo Han <jingoohan1@gmail.com>,
 Cc: linux-pci@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
 	ntb@lists.linux.dev
-Subject: [PATCH v12 5/7] PCI: endpoint: pci-epf-vntb: Reuse pre-exposed doorbells and IRQ flags
-Date: Fri, 27 Mar 2026 12:54:20 +0900
-Message-ID: <20260327035422.4020455-6-den@valinux.co.jp>
+Subject: [PATCH v12 4/7] PCI: endpoint: pci-ep-msi: Refactor doorbell allocation for new backends
+Date: Fri, 27 Mar 2026 12:54:19 +0900
+Message-ID: <20260327035422.4020455-5-den@valinux.co.jp>
 X-Mailer: git-send-email 2.51.0
 In-Reply-To: <20260327035422.4020455-1-den@valinux.co.jp>
 References: <20260327035422.4020455-1-den@valinux.co.jp>
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
-X-ClientProxiedBy: TY4P301CA0004.JPNP301.PROD.OUTLOOK.COM
- (2603:1096:405:26f::13) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+X-ClientProxiedBy: TYWP286CA0022.JPNP286.PROD.OUTLOOK.COM
+ (2603:1096:400:262::8) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  (2603:1096:405:38f::10)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
@@ -81,200 +81,220 @@ List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
 X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|TY7P286MB7090:EE_
-X-MS-Office365-Filtering-Correlation-Id: dacf073e-86f4-45ee-9c0c-08de8bb48bfa
+X-MS-Office365-Filtering-Correlation-Id: c1584c2c-1804-4ea4-8d08-08de8bb48b78
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
 	BCL:0;ARA:13230040|366016|1800799024|10070799003|376014|7416014|921020|18002099003|22082099003|56012099003;
 X-Microsoft-Antispam-Message-Info:
-	7PskOe0MMRy+I0zA1uDcwBbhg3eU0IEghUsUnztW+w+k3Y0Dx3g0OAtd2BDCf66Pp6g7stbQ1uOMbg+KzzT35LZz/fBJtHkaSoTJcrQTdPHXBxhXVYUhPOahk0BdmDEVW491pZa+aOvYJjWe5L5loGQtseDKPJl13aSvmizLTyp9W5SUB6eFebFaYyZcYTMq0n7MD5DWNv+VOCUeNI7c+DVmC+RE987jKs40/WkDQhMyYDI86YvenRpeziW9y/8IUxFFy851AYMUlafXdScnCGlznEylSr4YRYIaM9AAACIPLM/j3RPrm74o5RclryffMs+cZimyWBftxSj0w3f3fCo20EU0zcX8CzxmlzYhqOUcXvary1BUPVimf0eMaCfddJdBw5fyGsdVourXj9GmniKBbkcLu/JNJrmuPBzyqUnpr7VH0/4ZtKcdfdcmi5LYukqBQgH995wZHsmurTzP7uiVBGwDqRQIK3EbhS6Kb0X7DiWtlL/uyedhn46U1Y3XAU2mNBTshKEhWOm/hQ3i+mOkl4o4mmzWq28quKTg6GozM/HExeeFZAAnXpCF5v86XgT3VT9g4UP47iSbIMCd6sClCjJ2omPuK6CajCtgdKHoWBk/0lkNF0/o4qNGKf3F4OAS6T+C8GOQeOSmTxWxQ3rayiDRWXrPY89jab5/3HgAyEtOSxcwXSnW/hsKC5r8Ib1SRfHk7APfBqQ//7ZNijR5lrd7dC9iZygqO555U2m+8Tud+XFGZzPklCBmZ1KnM9WF539ta5tF6yosi0BbZA==
+	hk8goOydukjTEYukIP3lJE3OOTeJvZJqPU9uXvx2bMpW1m9J0ILo2UZ26zilp/BPM7vMT/3LH2Tz4X3YfuvXh4/2bT213Z9M+Ar4DDB62uQkMqzbv1ZgKw3k3SwUYabgLBnVWm85WwhY5IeKR+cBjvYRf19x7DD5yr9uycFNC2LGpkKBdf/Y18N1NZiCMX5jIDN68eDwrIFcfK3s5mgSfEQmZCzfQtEsXOeYkVRrQCkzGTpYkFzTSsmOJsFY2bDRCrQUJxvQ0fsREmRJjezSBCmGH5JzZAjQMY5EUm8MCBU9PbSJOrr8JqXO/78ROO+F8yQmieOIYRjVO4DXwd5h1wLIj6NhsTouZN2q+2AyXdYMcgR/j9l73wGFEQhqYcjomZCgw23TPdi91birutKJb7AO61WtYFXK20w233D/ADyhT82491f8HWnPOHmGYAkYTNwb/uYBfchQjUOsHg3NT797fmULnEaBM6uCB/Jh0+uMsHUPQc5HCW74sXYe1SKvrCwYNQx2VVVQUGJjgqZDQ7mrscrjYotUUOLIcVBKT6+oml0c9/6mh5nn9IaEbTK9CF3xLmc9rJomJagFkFwlqeG5sLXhMhYNbmiB3EQLwcdOij8ehjwH7kSjVKiUqqOzhjnxFHgWTPTXkDyUSXWUplIfQeFNaPXJ1YNjUl2aUUVbyWtEZoMgXh36ftCeV5oHsreDgS9jBDnZB0I1DN1qlFDQonWdIAkeHVny7syaMx4eYTflWJgREfWzPw9yUwOD4TF7Q31D9YxpZvww/7g4vw==
 X-Forefront-Antispam-Report:
 	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(10070799003)(376014)(7416014)(921020)(18002099003)(22082099003)(56012099003);DIR:OUT;SFP:1102;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?alJH1FOrzhVxCCUE6x12GtSE94+bTAFLD+HosqegBgyPJrHdOjvquyj5sVkm?=
- =?us-ascii?Q?MiQuZ/0MfAvCLRjl/6ye35DDwFGuypZWKVNxM3utTdatgPy54WFC3CjaL9WH?=
- =?us-ascii?Q?FS2IE9vXcHMsAAQJKPZWlq0sYbkQnoeIIn7nXwK7nkvnH+cMmRIMz2cGOn6y?=
- =?us-ascii?Q?f1rUBwCcoxcfPuFXVOqivwNkq3Lw7s/GWs1mSuBZRfOcFUeNd3UJR1Bmi7X7?=
- =?us-ascii?Q?CC4uldFr1CO6f72LR9thMqeUvXijiZArJAIuOZVOITr/8sDAKvND7N5T0qSg?=
- =?us-ascii?Q?3rhj3JSCl86Sd7Pr4v/it7WeZBI7Wd5r6ZgN89hiDdgafRwxup7teev9JVke?=
- =?us-ascii?Q?KT2DS4kE/Ub6unpEHWy3VTFCmn+O0GSm7WlbV4bJA7OSKk1QMKAe65eF1cpg?=
- =?us-ascii?Q?ryi2oydx3nETyLGBPexLIQRw5dM5r2UXu4KrNPGQ+H1rrOqucuQVZqLGHTsA?=
- =?us-ascii?Q?YRbtSS6gyTkFKmtnndJRO8/qSvq0sgKxVMLs5kKoGuxyktt0z5lD4gH0+hgr?=
- =?us-ascii?Q?R9rzDF8BeW6q1mRqLKVW3KcyVaRlocnFbaytkIe9mf5wDrliJKlIpUKegMVh?=
- =?us-ascii?Q?ZaHdHrsL3zjtJKE8bLWr/59ol14IVjDRda7uaiwA7ZWgX3qPYmlWurARvDeS?=
- =?us-ascii?Q?Rg8jWsyvUoGQ0ubjDM/1iviDzasi1SV1ihMNS5S6YdNmRU2YvwlscasEcc84?=
- =?us-ascii?Q?ZCKOPi8akjSBXwC7HrMDpS2Bfd/F5yefedhMi0RsHneagjaIUfzIfPggROq5?=
- =?us-ascii?Q?k/fhKAaCuMrfgfLpwQ+ci9NBhGUzCo2z5KDxewEOTEmYGoVSjlumfIqEzZeC?=
- =?us-ascii?Q?Qde1+VTaiBXgwz1ANuzsGkYzA6sbLxmM/ppKG1EKpLsm69k5hjk6H8FPEOCO?=
- =?us-ascii?Q?MxkkuWWL2ql0RXRYcIxcf+8LVU1UBOKlrOQUp0g6oOY5ALy4rpBY8c5FuVFn?=
- =?us-ascii?Q?3n/AeZUCSaeadxhm6FDzpZ7PnpJGRt/J1EBPSb7LTci9FF4sJ969nkKMaKvr?=
- =?us-ascii?Q?ktUTIe8mLIfMH429rzbFlt/v55hfSA3qBG7/9eCiNQPv9tA20MYwuQlYwgUT?=
- =?us-ascii?Q?gpridXvtH0XZ1z/QbFqaYCB1NTEOdpE+TiAffR+M/Z3dJy0z3AevqgjFum6s?=
- =?us-ascii?Q?xyoyPkSo5/aZqPc0QvZbAiPAhOkivp49aqMkpCo4NseKJXAR5S75wPj+VOCT?=
- =?us-ascii?Q?l9GvC9IQ+HslhqmCZfvstVqlsgqNmTj3AuO8PPVuyvjuOBsqB9BVSw14JiEU?=
- =?us-ascii?Q?vuhPFOnlMNCKB59VFkIm8ONT+eIIr5wTjGEvc9daqZw0u9zUqoU2flZhsYw1?=
- =?us-ascii?Q?g1jK82brwo4DYMUeDSVhKFexQJTCEj1PFBsO6hqw5BvX8B2kVtDDnN5yvjcA?=
- =?us-ascii?Q?MiWxO9dErxHtA60auMXum0PUoFCjE1Yvou+XbL96x9qeZuK4WauU6Ucw+w63?=
- =?us-ascii?Q?gXzQYNr6Ybjkes2jlpxBiOCT5Ns0zsjDDMiI1ZKCESo6nu92/sqLpN3rdXnX?=
- =?us-ascii?Q?olNo0fv1rkIq1NIWj3jZ96OKO7dblVM/Ts/n20hNZWHm4C/Don5ZDQM+WPK3?=
- =?us-ascii?Q?V6RhoLgQ7vHICctWCpIj65fPJXuMJ3ZPRppr2HQTffzbLr3o5FUrsOjscnhi?=
- =?us-ascii?Q?IJTraELXqrIeyTjza4QI3GGMGHospLyYO8F927IlF+YjTrxQHg3qoax2bkdM?=
- =?us-ascii?Q?GU/n0ptw1z6nxlEQP7VjGPGpm738eQoGC7tHV8yLh0ZZ1By+XCCgg07WGSg3?=
- =?us-ascii?Q?xsNrimr8Wbxi4IIltA6I22zMuTKQ6AQy3qHpLiLocbHKmGl6ULZp?=
+	=?us-ascii?Q?tNxKIpXn015lZvm4ILFwjHd8DhGfdhdqCPM0k1QrraWBKle6cuLtTzgO2wnz?=
+ =?us-ascii?Q?Hqw3aV5Qj7LbXoDagRk98uuPRLEGBzkEjLGywUCiiWnAgVFwQDzYI1KqSb9W?=
+ =?us-ascii?Q?ewZHOn5aMBnbW2L+1dcKZxLU0xwrj9scfERWekB9GlqU2JrHfRDG1d6qbbYX?=
+ =?us-ascii?Q?sxQHRwodB5owSDkRbArHEkZHVn0kF53FJsN352aLAOytG/rFoJgHByAQ7n7Z?=
+ =?us-ascii?Q?Smp0eU5kl66sL1qzVWsRNqaDEjbHoAdAcXL+9rbXxO/XXHgq0LXizMnZP46+?=
+ =?us-ascii?Q?nauOqwdpVRrOihQ50NXU3PImHH+Es9LxYlGm1944MTezzNjAPoTh+dYNblUb?=
+ =?us-ascii?Q?HZs5BI0JDDT3z+z1TSb3jmdZg5C4Irb6AhCRrpJv1u86DcpQcrqJOC9hNEh4?=
+ =?us-ascii?Q?zK2KjAY9c2jlg9Q+c9uF+4QCjppJrKYWfnBb1r2ifzzVpFgRLEOEZCLYbI8C?=
+ =?us-ascii?Q?0pHXuxRa0YjIUXm6at0bqJN+3wvP46aIgozqIv+llp8k3+DcHFXK/TGb6GPq?=
+ =?us-ascii?Q?bijOPQ/nY6lTxK4Wc2z1VOh61mmwGEqaaP64Q52eG2foz8glWNm/FX/KXWaX?=
+ =?us-ascii?Q?3CHyxfo3UL0fbbv+RGXG4VrcbQlY9jp/Nm5Rh9RnQ2oTda5XZ3RTDI5RKd/u?=
+ =?us-ascii?Q?uBwumhByFnTbWz37LhCryI4Fza0sBPwp1/xzGiKnH87L0RmJ9LZ+XrK7yrkQ?=
+ =?us-ascii?Q?H3X+T8iuKvnoBfgirE/0Go/v0Aqw1kCA4qigAAU3M40zAnwKqTsvILHBuEC9?=
+ =?us-ascii?Q?nlUVOj9yYKrZ6gFsSDpA0UcjEvNyDTtgVzJ+iVe29Oo132GVb/wPMHoHnbQn?=
+ =?us-ascii?Q?CiMiflCdn+ILE+m9rJko/34bZorcm84GwDOwp0g2OnB38W5nQsyoRksueyaz?=
+ =?us-ascii?Q?NxufD3SQlW8JIEM5Hm4MXlmnMfju8DR8e3SXLcB5+DeO4fiFOO7yKl7pETwL?=
+ =?us-ascii?Q?MF6wzcCoOxr4kzBHtJTIxN2cPygbKqn10AsQzNWY3Q0nZlk2ALGx325+JX9j?=
+ =?us-ascii?Q?WQMx/q7v8Qir8Zt9pr5kt1cWqBqS6p29CANLOJOme2/sZNSd0CzFTMyFpD7d?=
+ =?us-ascii?Q?g630rXwmaHXuw5NgUYVlENMAKDqNZ8OBKTUl2jaHiJmL7aB6B+aDIN+EOvE7?=
+ =?us-ascii?Q?ZB7P3TwIW5cJYSLDsPhy5f1NvljtjsRrfLDKABZxYv0NncT8eel2hO/8U6XW?=
+ =?us-ascii?Q?tBJ8xSPxOt8J5S67AHIeJ5BTcXuoFnBKylyFlbpm58Lpe1kV+g8WhZrhYmv4?=
+ =?us-ascii?Q?atC0xtniWxmG/uHbFBWDddHNl7S/qPrv9hhHwyKIS9ozX3EzpLyYMLYhOzXv?=
+ =?us-ascii?Q?0hW9RHvP0eiIErhPH4/jkj88Kf0T2n3lxbWGQPH3cNzkmYI0Pgb4XMqlWrHQ?=
+ =?us-ascii?Q?b4ZaVdaBaztivZOn9cXKm/jbCQdGmwIEenNzzyebAps1f+6PA4bfI3JvQjFh?=
+ =?us-ascii?Q?CIZOl856cvOkzk465SK+uVLk9Ei2NkNkufr8ZVXNnujm242ofkfGZOpRZXii?=
+ =?us-ascii?Q?HrRBh/RhyvY79MkPg6/z2bfOJO+fZvAIcanQHu38Uut1i0EHp98CStC4XOEx?=
+ =?us-ascii?Q?b+8aJ2Og1kvGqZm+S86NOHvD/5GNPHEZh3IF9SPWSXQ2zcV6olwoU4382lFE?=
+ =?us-ascii?Q?d4Uet2ppepvhT9BooOLF0NcAr0pbmQ5fPjF/abHHs6pFtOo9TRFUdwUDK9u8?=
+ =?us-ascii?Q?HAbsh1/+bKeZJtYhsuP4ZtAfFI8IuRKHYKnsGG2b/4QG+LTBk1qL09YMXjaN?=
+ =?us-ascii?Q?JidMoGzV81oKEQDu124ZRetoSpTFkLh9+tHnyQZsYl2PtM1cLTv8?=
 X-OriginatorOrg: valinux.co.jp
-X-MS-Exchange-CrossTenant-Network-Message-Id: dacf073e-86f4-45ee-9c0c-08de8bb48bfa
+X-MS-Exchange-CrossTenant-Network-Message-Id: c1584c2c-1804-4ea4-8d08-08de8bb48b78
 X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 27 Mar 2026 03:54:29.2637
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 27 Mar 2026 03:54:28.4052
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: D2zFZnYrcdsVFIu69jPjbsgmDQ+JkIdmYsOs1hcVl9Z5wH+ry9zCBXxYOMA1KquaSAKrLSOANiUmibWRSgEjwQ==
+X-MS-Exchange-CrossTenant-UserPrincipalName: fzWd5laioE1qjy4+BTi3ecyElLgx9Gy8/AXxnSmUAK1orytZT4EiyL+l7FwqmLppLi3VjNkHtGYz7gcnR7rrxQ==
 X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY7P286MB7090
 
-Support doorbell backends where the doorbell target is already exposed
-via a platform-owned fixed BAR mapping and/or where the doorbell IRQ
-must be requested with specific flags.
+Prepare pci-ep-msi for non-MSI doorbell backends.
 
-When pci_epf_alloc_doorbell() provides db_msg[].bar/offset, reuse the
-pre-exposed BAR window and skip programming a new inbound mapping. Also
-honor db_msg[].irq_flags when requesting the doorbell IRQ.
+Factor MSI doorbell allocation into a helper and extend struct
+pci_epf_doorbell_msg with:
 
-Multiple doorbells may share the same Linux IRQ. Avoid duplicate
-request_irq() calls by requesting each unique virq once.
+  - irq_flags: required IRQ request flags (e.g. IRQF_SHARED for some
+    backends)
+  - type: doorbell backend type
+  - bar/offset: pre-exposed doorbell target location, if any
 
-Make pci-epf-vntb work with platform-defined or embedded doorbell
-backends without exposing backend-specific details to the consumer
-layer.
+Initialize these fields for the existing MSI-backed doorbell
+implementation.
 
-Tested-by: Niklas Cassel <cassel@kernel.org>
+Also add PCI_EPF_DOORBELL_EMBEDDED type, which is to be implemented in a
+follow-up patch.
+
+No functional changes.
+
 Reviewed-by: Frank Li <Frank.Li@nxp.com>
+Tested-by: Niklas Cassel <cassel@kernel.org>
 Signed-off-by: Koichiro Den <den@valinux.co.jp>
 ---
- drivers/pci/endpoint/functions/pci-epf-vntb.c | 61 ++++++++++++++++++-
- 1 file changed, 58 insertions(+), 3 deletions(-)
+ drivers/pci/endpoint/pci-ep-msi.c | 54 ++++++++++++++++++++++---------
+ include/linux/pci-epf.h           | 23 +++++++++++--
+ 2 files changed, 60 insertions(+), 17 deletions(-)
 
-diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-index 2256c3062b1a..b493a300da4d 100644
---- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
-+++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-@@ -134,6 +134,11 @@ struct epf_ntb {
- 	u16 vntb_vid;
+diff --git a/drivers/pci/endpoint/pci-ep-msi.c b/drivers/pci/endpoint/pci-ep-msi.c
+index 1395919571f8..85fe46103220 100644
+--- a/drivers/pci/endpoint/pci-ep-msi.c
++++ b/drivers/pci/endpoint/pci-ep-msi.c
+@@ -8,6 +8,7 @@
  
- 	bool linkup;
-+
-+	/*
-+	 * True when doorbells are interrupt-driven (MSI or embedded), false
-+	 * when polled.
-+	 */
- 	bool msi_doorbell;
- 	u32 spad_size;
- 
-@@ -517,6 +522,17 @@ static int epf_ntb_configure_interrupt(struct epf_ntb *ntb)
- 	return 0;
+ #include <linux/device.h>
+ #include <linux/export.h>
++#include <linux/interrupt.h>
+ #include <linux/irqdomain.h>
+ #include <linux/module.h>
+ #include <linux/msi.h>
+@@ -35,23 +36,13 @@ static void pci_epf_write_msi_msg(struct msi_desc *desc, struct msi_msg *msg)
+ 	pci_epc_put(epc);
  }
  
-+static bool epf_ntb_db_irq_is_duplicated(const struct pci_epf *epf, unsigned int idx)
-+{
-+	unsigned int i;
+-int pci_epf_alloc_doorbell(struct pci_epf *epf, u16 num_db)
++static int pci_epf_alloc_doorbell_msi(struct pci_epf *epf, u16 num_db)
+ {
+-	struct pci_epc *epc = epf->epc;
++	struct pci_epf_doorbell_msg *msg;
+ 	struct device *dev = &epf->dev;
++	struct pci_epc *epc = epf->epc;
+ 	struct irq_domain *domain;
+-	void *msg;
+-	int ret;
+-	int i;
+-
+-	/* TODO: Multi-EPF support */
+-	if (list_first_entry_or_null(&epc->pci_epf, struct pci_epf, list) != epf) {
+-		dev_err(dev, "MSI doorbell doesn't support multiple EPF\n");
+-		return -EINVAL;
+-	}
+-
+-	if (epf->db_msg)
+-		return -EBUSY;
++	int ret, i;
+ 
+ 	domain = of_msi_map_get_device_domain(epc->dev.parent, 0,
+ 					      DOMAIN_BUS_PLATFORM_MSI);
+@@ -74,6 +65,12 @@ int pci_epf_alloc_doorbell(struct pci_epf *epf, u16 num_db)
+ 	if (!msg)
+ 		return -ENOMEM;
+ 
++	for (i = 0; i < num_db; i++)
++		msg[i] = (struct pci_epf_doorbell_msg) {
++			.type = PCI_EPF_DOORBELL_MSI,
++			.bar = NO_BAR,
++		};
 +
-+	for (i = 0; i < idx; i++)
-+		if (epf->db_msg[i].virq == epf->db_msg[idx].virq)
-+			return true;
-+
-+	return false;
+ 	epf->num_db = num_db;
+ 	epf->db_msg = msg;
+ 
+@@ -90,13 +87,40 @@ int pci_epf_alloc_doorbell(struct pci_epf *epf, u16 num_db)
+ 	for (i = 0; i < num_db; i++)
+ 		epf->db_msg[i].virq = msi_get_virq(epc->dev.parent, i);
+ 
++	return 0;
 +}
 +
- static int epf_ntb_db_bar_init_msi_doorbell(struct epf_ntb *ntb,
- 					    struct pci_epf_bar *db_bar,
- 					    const struct pci_epc_features *epc_features,
-@@ -533,9 +549,24 @@ static int epf_ntb_db_bar_init_msi_doorbell(struct epf_ntb *ntb,
- 	if (ret)
- 		return ret;
- 
-+	/*
-+	 * The doorbell target may already be exposed by a platform-owned fixed
-+	 * BAR. In that case, we must reuse it and the requested db_bar must
-+	 * match.
-+	 */
-+	if (epf->db_msg[0].bar != NO_BAR && epf->db_msg[0].bar != barno) {
-+		ret = -EINVAL;
-+		goto err_free_doorbell;
++int pci_epf_alloc_doorbell(struct pci_epf *epf, u16 num_db)
++{
++	struct pci_epc *epc = epf->epc;
++	struct device *dev = &epf->dev;
++	int ret;
++
++	/* TODO: Multi-EPF support */
++	if (list_first_entry_or_null(&epc->pci_epf, struct pci_epf, list) != epf) {
++		dev_err(dev, "Doorbell doesn't support multiple EPF\n");
++		return -EINVAL;
 +	}
 +
- 	for (req = 0; req < ntb->db_count; req++) {
-+		/* Avoid requesting duplicate handlers */
-+		if (epf_ntb_db_irq_is_duplicated(epf, req))
-+			continue;
++	if (epf->db_msg)
++		return -EBUSY;
 +
- 		ret = request_irq(epf->db_msg[req].virq, epf_ntb_doorbell_handler,
--				  0, "pci_epf_vntb_db", ntb);
-+				  epf->db_msg[req].irq_flags, "pci_epf_vntb_db",
-+				  ntb);
- 
- 		if (ret) {
- 			dev_err(&epf->dev,
-@@ -545,6 +576,22 @@ static int epf_ntb_db_bar_init_msi_doorbell(struct epf_ntb *ntb,
- 		}
- 	}
- 
-+	if (epf->db_msg[0].bar != NO_BAR) {
-+		for (i = 0; i < ntb->db_count; i++) {
-+			msg = &epf->db_msg[i].msg;
++	ret = pci_epf_alloc_doorbell_msi(epf, num_db);
++	if (!ret)
++		return 0;
 +
-+			if (epf->db_msg[i].bar != barno) {
-+				ret = -EINVAL;
-+				goto err_free_irq;
-+			}
-+
-+			ntb->reg->db_data[i] = msg->data;
-+			ntb->reg->db_offset[i] = epf->db_msg[i].offset;
-+		}
-+		goto out;
-+	}
-+
-+	/* Program inbound mapping for the doorbell */
- 	msg = &epf->db_msg[0].msg;
- 
- 	high = 0;
-@@ -591,6 +638,7 @@ static int epf_ntb_db_bar_init_msi_doorbell(struct epf_ntb *ntb,
- 		ntb->reg->db_offset[i] = offset;
- 	}
- 
-+out:
- 	ntb->reg->db_entry_size = 0;
- 
- 	ntb->msi_doorbell = true;
-@@ -598,9 +646,13 @@ static int epf_ntb_db_bar_init_msi_doorbell(struct epf_ntb *ntb,
- 	return 0;
- 
- err_free_irq:
--	for (req--; req >= 0; req--)
-+	for (req--; req >= 0; req--) {
-+		if (epf_ntb_db_irq_is_duplicated(epf, req))
-+			continue;
- 		free_irq(epf->db_msg[req].virq, ntb);
-+	}
- 
-+err_free_doorbell:
- 	pci_epf_free_doorbell(ntb->epf);
++	dev_err(dev, "Failed to allocate doorbell: %d\n", ret);
  	return ret;
  }
-@@ -666,8 +718,11 @@ static void epf_ntb_db_bar_clear(struct epf_ntb *ntb)
- 	if (ntb->msi_doorbell) {
- 		int i;
+ EXPORT_SYMBOL_GPL(pci_epf_alloc_doorbell);
  
--		for (i = 0; i < ntb->db_count; i++)
-+		for (i = 0; i < ntb->db_count; i++) {
-+			if (epf_ntb_db_irq_is_duplicated(ntb->epf, i))
-+				continue;
- 			free_irq(ntb->epf->db_msg[i].virq, ntb);
-+		}
- 	}
+ void pci_epf_free_doorbell(struct pci_epf *epf)
+ {
+-	platform_device_msi_free_irqs_all(epf->epc->dev.parent);
++	if (!epf->db_msg)
++		return;
++
++	if (epf->db_msg[0].type == PCI_EPF_DOORBELL_MSI)
++		platform_device_msi_free_irqs_all(epf->epc->dev.parent);
  
- 	if (ntb->epf->db_msg)
+ 	kfree(epf->db_msg);
+ 	epf->db_msg = NULL;
+diff --git a/include/linux/pci-epf.h b/include/linux/pci-epf.h
+index 7737a7c03260..cd747447a1ea 100644
+--- a/include/linux/pci-epf.h
++++ b/include/linux/pci-epf.h
+@@ -152,14 +152,33 @@ struct pci_epf_bar {
+ 	struct pci_epf_bar_submap	*submap;
+ };
+ 
++enum pci_epf_doorbell_type {
++	PCI_EPF_DOORBELL_MSI = 0,
++	PCI_EPF_DOORBELL_EMBEDDED,
++};
++
+ /**
+  * struct pci_epf_doorbell_msg - represents doorbell message
+- * @msg: MSI message
+- * @virq: IRQ number of this doorbell MSI message
++ * @msg: Doorbell address/data pair to be mapped into BAR space.
++ *       For MSI-backed doorbells this is the MSI message, while for
++ *       "embedded" doorbells this represents an MMIO write that asserts
++ *       an interrupt on the EP side.
++ * @virq: IRQ number of this doorbell message
++ * @irq_flags: Required flags for request_irq()/request_threaded_irq().
++ *             Callers may OR-in additional flags (e.g. IRQF_ONESHOT).
++ * @type: Doorbell type.
++ * @bar: BAR number where the doorbell target is already exposed to the RC
++ *       (NO_BAR if not)
++ * @offset: offset within @bar for the doorbell target (valid iff
++ *          @bar != NO_BAR)
+  */
+ struct pci_epf_doorbell_msg {
+ 	struct msi_msg msg;
+ 	int virq;
++	unsigned long irq_flags;
++	enum pci_epf_doorbell_type type;
++	enum pci_barno bar;
++	resource_size_t offset;
+ };
+ 
+ /**
 -- 
 2.51.0
 
