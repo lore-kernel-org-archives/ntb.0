@@ -1,153 +1,190 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+Received: from TYVP286CU001.outbound.protection.outlook.com (mail-japaneastazon11021132.outbound.protection.outlook.com [52.101.125.132])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5C1DC34C9AF
-	for <ntb@lists.linux.dev>; Thu, 26 Mar 2026 17:19:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774545559; cv=none; b=byClTvE2baTvovHAKj7WmzC5VqTlQi52nFBOAklheSaNXY6c4GRyWTS/eLbYkYcyccRcB6YWXwIPtQwUDmsIZxzcOGoJ/akzoE6DP050iTFccGK1UCR4lJmjQKipwN1N1VzgWj7Hwodx8gV7rjX4gBR71WzldxU59oeX5kzxXeY=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774545559; c=relaxed/simple;
-	bh=euLHU9LJSjnuVv3KVwXZVLQKkTH5tfAXTjDgcT3R8+U=;
-	h=From:To:Cc:In-Reply-To:References:Subject:Message-Id:Date:
-	 MIME-Version:Content-Type; b=V/xX8dRXmW9PMop8N9YxkrSlGbEJYbeuab8yBH+05LdZ8K2ierYTou7li4mGZSkP/CCreE74aiCutUdagHvA35WscrI/mWbq/cNfBKC/KihE0LPY+xDpQooLTVJRZMeNtVCRgOFtMv7byiNDa0i1FWCk6ByHjV//fN7oAsLFLmo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=h6Vu8yoq; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=ZQrxaou8; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 571A736EA93
+	for <ntb@lists.linux.dev>; Fri, 27 Mar 2026 03:54:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.125.132
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1774583672; cv=fail; b=a8N+WXMfWCVq4z8rYn3mDGvYBiARDVoh0DmX8jM8jUUxx7nHcHHr7lZfemyasMsKBJAJ9sLkA1wapRBVOHEltZymUlk4OGrqlRAuwouWnkQZcJIEREjBg+GYxROYA63yx/aqSQVlTEip94pwLcUegdaiB6oWpiaGUA7M98HdaGg=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1774583672; c=relaxed/simple;
+	bh=7W7EAIrRY8jLga8ADH/lj9w0euD505H+9+XgdpG2QbQ=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=LPoeWjYo7MFBkQLxokM/OdFPxjUjxWVACi31aaASULD/+giG48WO/m+PkwRG5zFAhBjRS2NG7Hx4Qa0inDnS1y8XjILF3gGg8rN+veA2hsZDg3AXQSCLpXrScg8/NTM4HnVzkfhkeu31wIMTIqB26SiD6XfE86eq7Agek2atK1c=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=Kvgu+wLd; arc=fail smtp.client-ip=52.101.125.132
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="h6Vu8yoq";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="ZQrxaou8"
-Received: from pps.filterd (m0279868.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 62QF9h1q2451443
-	for <ntb@lists.linux.dev>; Thu, 26 Mar 2026 17:19:17 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	Ww9RyXfzw3HcfsJFywuqNamT6krJul8stvWokNyJt1U=; b=h6Vu8yoqbBzY3uPy
-	50M/5YiGSx1F4dSdXrMRCDR77IF5jUuhNVp6CE+C4dT3LghVZDN663ByPszboVm9
-	nnXDbFt7wRXl1XNFsOO5h+xPdQ+k/oZloLDpJ1qxvxZu/oILt8GSYMPnBvUDbbpS
-	AKuaFHVHypfIEjxCvnufAKuCtoq/z/bQc+iCKOsSkbLZg03hmJBq/DQp426HP6A4
-	F7fWtb+3OXSKaGeD+Y2hvB3gEnU1qHObnamSkkqTSkCxK0mJ8tWQuczZX0Q0ADWF
-	qqgXI6PkH6S3mfXXbx78yusMFPJbVa5PGrtfXynn4wE8vjBet38Y9rwZMOcu78A5
-	6bVzoQ==
-Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com [209.85.215.198])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4d4q1t3tyb-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <ntb@lists.linux.dev>; Thu, 26 Mar 2026 17:19:17 +0000 (GMT)
-Received: by mail-pg1-f198.google.com with SMTP id 41be03b00d2f7-c6e7f45e2ddso2418947a12.1
-        for <ntb@lists.linux.dev>; Thu, 26 Mar 2026 10:19:17 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1774545556; x=1775150356; darn=lists.linux.dev;
-        h=content-transfer-encoding:mime-version:date:message-id:subject
-         :references:in-reply-to:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Ww9RyXfzw3HcfsJFywuqNamT6krJul8stvWokNyJt1U=;
-        b=ZQrxaou8EM1nAX9PaeAfpVpKug2qY/CRReNhCoJjI+XqD9bsvnM6IDKxtgYTC5vRKA
-         KV2Qd2AsbM0Dfgm1+mJ5Rj+0poGJR3vADyOVwI9HDWE9az/fHQDmMM7L6YV1FlUROvDR
-         d3QvDYAC2HfP/GoOdJXhKPMGeaXJwCYwllBrvVPbFuJYkY2V+E5eHhFvwAbeo+ZFmBfn
-         kUTirspzTXgCC9xYUWAZsLJwkyGQYnIgj0UAad+emSVS4ux41FdZEgRqjt8WpxDL+WV2
-         XjtMqu0ao9vtYX2ArquZopWGDhJ0aoLNuLBbi5cXh4L3PQwBTHM1jEgVtwsmB44kO/cS
-         FDXA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774545556; x=1775150356;
-        h=content-transfer-encoding:mime-version:date:message-id:subject
-         :references:in-reply-to:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=Ww9RyXfzw3HcfsJFywuqNamT6krJul8stvWokNyJt1U=;
-        b=Mc075K1ncEsVffpYOREuWlXAbzOsEkHTc8aAgElsv+JHEiZbqydN1vuJr8u3I/Kq3t
-         kqHBzOkmb5Gi+vPLOx6xPB4XQpF6STD3uMQMrtSHg7QrPy8faGRTBdbUOmL22pyBvKBe
-         orlttOsBZz6AzDS8EqeTCLc/IM7uOmIag8HOo9ZyGCGwtp8qVIoOKNBS28/BFEZyqmZO
-         4rHUbPbuRT+kXyJb49ysrsDgVdumV43pKlzUnj7DE2fppW5aLqrD/Aholqkq0AzOxec6
-         GEXNIajBp4cqTsPejFdndwL1p91ZicIzegcayPX4pvf189o++tJ6zQEkW/ZGkZRWZDnX
-         EdSw==
-X-Gm-Message-State: AOJu0YxkhPj/sRrA1o+qcrekLE8HCo1E7gUXPb2rF0by1miFRkq8rWr/
-	5iiR6EU5+9KXyUeXqFqhwVuWlDFeO1IRCRrEHER8t8DTk4wWIiZIsibR4JcvE4J8+tMUk9pCi3W
-	FdVUIgD++HHhjvYg5qpuEsOpHeY6bEuTZ212tv9n6xcGvz8K8q8bl+9w=
-X-Gm-Gg: ATEYQzxc9Hma54+vwdF3RoAUIebIzgV9MKJQYDUGtSlwt+mRRd6ILO3l7T/NZI2bewO
-	lxP07Em0Pg0PXW75pF4KwjhxaWuJFCLBkFaGg74ezUwn8gkzuSsi1yCv/GACbI544Vt9fYaeHed
-	R6T5cXAgbWwuRceX5qeIe3+sdezIuAczq08DF/kDvvIq3JAnwOK/20GVrg0/8NDCd4kJixEf8q8
-	vHlv+w4ebTWgCMccooXfvr49pIJ07YQjLrVe+PKWekLgMiKUzEoHEMHWshHo3JYf929EpeFJeTN
-	Ut9QGOnI6qvxKqi160kNlfFnI5+SV9EC6xRFGgPJ3C4nMzPH08VzqiIdTGh/kPi26HuABfHo5uw
-	I7JBvE6zgzAqtqRAmEwxg7+c=
-X-Received: by 2002:a05:6a20:2e82:b0:39b:da83:91ab with SMTP id adf61e73a8af0-39c4ae2ea72mr6809517637.63.1774545556300;
-        Thu, 26 Mar 2026 10:19:16 -0700 (PDT)
-X-Received: by 2002:a05:6a20:2e82:b0:39b:da83:91ab with SMTP id adf61e73a8af0-39c4ae2ea72mr6809488637.63.1774545555717;
-        Thu, 26 Mar 2026 10:19:15 -0700 (PDT)
-Received: from [192.168.1.102] ([117.213.101.231])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-c76739334e6sm2661617a12.18.2026.03.26.10.19.11
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 26 Mar 2026 10:19:15 -0700 (PDT)
-From: Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
-X-Google-Original-From: Manivannan Sadhasivam <mani@kernel.org>
-To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>,
-        Allen Hubbe <allenbh@gmail.com>,
-        =?utf-8?q?Krzysztof_Wilczy=C5=84ski?= <kwilczynski@kernel.org>,
-        Kishon Vijay Abraham I <kishon@kernel.org>,
-        Bjorn Helgaas <bhelgaas@google.com>, Frank Li <Frank.Li@nxp.com>,
-        Niklas Cassel <cassel@kernel.org>, Koichiro Den <den@valinux.co.jp>
-Cc: ntb@lists.linux.dev, linux-kernel@vger.kernel.org,
-        linux-pci@vger.kernel.org
-In-Reply-To: <20260306031443.1911860-1-den@valinux.co.jp>
-References: <20260306031443.1911860-1-den@valinux.co.jp>
-Subject: Re: [PATCH v2 0/3] NTB: Allow drivers to provide DMA mapping
- device
-Message-Id: <177454555116.460009.16357964565477922352.b4-ty@b4>
-Date: Thu, 26 Mar 2026 22:49:11 +0530
+	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="Kvgu+wLd"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=teETyLYKLKBI6AiIEalzbmQ3gZ60SlF3JFnJTprJa0HavYuQ6BesCUpX8Ix9iLQaSWFzdDBpK7gZ+6LV5yEbuCyghDf0N6+dhjNKJfJeURsVbG4bewHzWWj4NGyCZMYOJlCceYUtbB1pqVOzZuco2nYEl5TCdXIDC36EHT/u00IRAwZu/YL3ph7j/+eZRHlKqxHRRnXgOslxUuDgTjTFe/AzYQA8x6h1wp3QKWOTqsOrzOYxsUB0PbR8lXOc0kam31fonHCQ6aouC/Eho6dcbJdOMmnC8mcHFxgmmCvzHxhDgVrZhoJ1iXblU+MK9WIwMhDMbWiCu7oApUo24mmV+w==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=EfCIC7CzZdwcLUlJhEa1n8/0yHBVwev+g2VgjAz+QQ8=;
+ b=T5DsGmTIXQUBmcRtOMPhWUTHXCKR5q8eDVfiV/34FzUsbdKX/suN5q/jy/s6CYXDpwLny8AWyuXdp88+xK0BrAqGO3a9B8/YxgZmnzKeSzmQGwDtKobHPjLr+LSbTmiEBnE7nybSB5lNlI95Kr8rtzxqbkfzNrq749EiuphfQFGKqcDlyC2lu70Bzu0OiYM0zQ3UO/4se7rmc22B5cpat3x4/M/KGyGmWAlvYUH6Bz/cRi0GdAvZtA6WUUD3vftJBwnKNOVgXaNoDHIhleyLQJwDLc/mV/C3Va5+uGWlbULGrcEnipb0rW683byjO4M0VBch3J28GZ3bHTyWBvy5Ow==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
+ header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=EfCIC7CzZdwcLUlJhEa1n8/0yHBVwev+g2VgjAz+QQ8=;
+ b=Kvgu+wLdkRyI6qilvvn0IXM1W3V9ftmUfRKHQiWBAnniH98ZwEAurpIVVdNzabDikeJeIrZ8+eA0ZRJTdWm9EXtKhin1r8gCNaJuvu2n6s9ieuo2uUyFI0t20E0j18pv/Y4XcIvDPWYjXDVWLt0zPRtrgWjcZlkd3WhtSRnZyG4=
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=valinux.co.jp;
+Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:38f::10)
+ by TY7P286MB7090.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:323::16) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9745.20; Fri, 27 Mar
+ 2026 03:54:26 +0000
+Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+ ([fe80::2305:327c:28ec:9b32]) by TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+ ([fe80::2305:327c:28ec:9b32%5]) with mapi id 15.20.9745.019; Fri, 27 Mar 2026
+ 03:54:26 +0000
+From: Koichiro Den <den@valinux.co.jp>
+To: Jingoo Han <jingoohan1@gmail.com>,
+	Manivannan Sadhasivam <mani@kernel.org>,
+	Lorenzo Pieralisi <lpieralisi@kernel.org>,
+	=?UTF-8?q?Krzysztof=20Wilczy=C5=84ski?= <kwilczynski@kernel.org>,
+	Rob Herring <robh@kernel.org>,
+	Bjorn Helgaas <bhelgaas@google.com>,
+	Kishon Vijay Abraham I <kishon@kernel.org>,
+	Jon Mason <jdmason@kudzu.us>,
+	Dave Jiang <dave.jiang@intel.com>,
+	Allen Hubbe <allenbh@gmail.com>,
+	Niklas Cassel <cassel@kernel.org>,
+	Frank Li <Frank.Li@nxp.com>,
+	Bhanu Seshu Kumar Valluri <bhanuseshukumar@gmail.com>,
+	Marco Crivellari <marco.crivellari@suse.com>,
+	Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>,
+	Manikanta Maddireddy <mmaddireddy@nvidia.com>
+Cc: linux-pci@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	ntb@lists.linux.dev
+Subject: [PATCH v12 2/7] PCI: dwc: Record integrated eDMA register window
+Date: Fri, 27 Mar 2026 12:54:17 +0900
+Message-ID: <20260327035422.4020455-3-den@valinux.co.jp>
+X-Mailer: git-send-email 2.51.0
+In-Reply-To: <20260327035422.4020455-1-den@valinux.co.jp>
+References: <20260327035422.4020455-1-den@valinux.co.jp>
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: TYWP286CA0019.JPNP286.PROD.OUTLOOK.COM
+ (2603:1096:400:262::6) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+ (2603:1096:405:38f::10)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-X-Mailer: b4 0.15.0
-X-Authority-Analysis: v=2.4 cv=e7cLiKp/ c=1 sm=1 tr=0 ts=69c56a95 cx=c_pps
- a=Qgeoaf8Lrialg5Z894R3/Q==:117 a=pjPfvbXasfe8cMZvnaMi6g==:17
- a=IkcTkHD0fZMA:10 a=Yq5XynenixoA:10 a=s4-Qcg_JpJYA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=ZpdpYltYx_vBUK5n70dp:22
- a=VwQbUJbxAAAA:8 a=l7Ugaa1-BWrJxlqRz38A:9 a=QEXdDO2ut3YA:10
- a=x9snwWr2DeNwDh03kgHS:22
-X-Proofpoint-GUID: -dQgPj3YfkFawxI4oDAR635M5o2W-IJU
-X-Proofpoint-ORIG-GUID: -dQgPj3YfkFawxI4oDAR635M5o2W-IJU
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMzI2MDEyMyBTYWx0ZWRfX4+xyhd8jKyEi
- EkRwmU1zXZAmVON1DF/jqE+Pzs8C/TZHeQefufwuHta+Ob15IKPoPUaOTLm1nO6Tqf4MforupEa
- 6XSIbbCiqFfa5t64U3z3qw5mf3KH/TdyoAX7tx+HiIEgxgjSFC5Gd4lg7MJlOCV7FNOKn/eTIBh
- oh/sC6vXDfpVxQrVFdwN+z1lizP7osUPEsilaEWPebivn4Ntg1PZLj5HIkKOG0CcldPOctR/PeO
- H/CDqDQ7O7eeQM/I5I9dvvPysQzdBrf4iiQbCYAFk17dsLMmxBmOJ5KVQV8aTC682x8HA54eij1
- d0K4S/s+K82xSbbPZhtVhZUT8F7P4T1Q/yJpPu8/CZIV9ERz49lhaXwqokaoijJXa6SJ/+xaKa2
- dhfVM/N5EdDFFnwkh9cN0oINcP1beSQ0VaHz8G3XbT0cuQQQpQL0OYhbt1v3bK4/blvHo5DlNf7
- JuSYSMKwrR8/fMR5yEw==
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
- definitions=2026-03-26_03,2026-03-26_01,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- priorityscore=1501 impostorscore=0 spamscore=0 bulkscore=0 phishscore=0
- suspectscore=0 clxscore=1015 lowpriorityscore=0 malwarescore=0 adultscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2603050001 definitions=main-2603260123
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|TY7P286MB7090:EE_
+X-MS-Office365-Filtering-Correlation-Id: 29f5e902-0219-4e59-c13e-08de8bb48a7a
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|366016|1800799024|10070799003|376014|7416014|921020|18002099003|22082099003|56012099003;
+X-Microsoft-Antispam-Message-Info:
+	s2PWmoHP4pHMo2abkEXldGK+XNPqLmXjta8gBK+cXEEu2QCTkoa4O6UL2U3RQiiQpR13xBZ4RlGQyDXJkxfjhyevXNpAsrytkSEc4N7/hPJwZXFbvpJikEwhivu9csIgFPEwjgU6Id2O3NO12+GYWkxm56HixECb9eW5d4nsM2F5ZfwIHzhB8v2bJOdpboCE0uRXI+Ux1VoDk2SeU0IZi3FHZdOXelCysblg7+Ztr2JFt4UZ7MOy35HtR9bSr6xMYEVyx+8303vAd5zvwwrHOjrpKZm+0cH1kaZsj6pTdbn/td9WfSU3pC2WVoj1Ldq/vZr0AeMKg1vAugveYd7lWX3ZDHg8q2hiO8HXdAzYyRKb9Sj1ukqGdNM1idnLqg5T6LdRU1qr71gWOuIkgBR8HTb8r+wuqUq217YURZfOJ5fZoB6rMRrK8OuJCLyBDErJtE6JgoUtiAP3cfMEMhpu6e3xdG+p8+asADVz0+YuQ2BDCUjtcCKWZ7rwCEx2FGnrHh2hcnxoGdrVjXoxnCXq+w1qWTNobhkDVs4U1pBiWY+KdJaqejDutUQPtOOfM9Qns6ciIvecrp7XqFkC3RVCWfpQLrh53aHjM/WfbvMQ/ulwctu6WtrtUOJoSygB7mi785Tz93x5iNwTC9egP23yYdjkWqBfyKlzHUiwLoTj95d35m1FA7HO2EpWQj9n3DC5XqQNW3vtPwWthChOCIy8tvE56ISKyj3R81M0+k3m1oAH8GHjIU3LFrIbonuCkl1yHMfP1kRSY6Kfv2gIVhPKqQ==
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(10070799003)(376014)(7416014)(921020)(18002099003)(22082099003)(56012099003);DIR:OUT;SFP:1102;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?us-ascii?Q?MGlMqALBgxHs1eEs8Gvr0HQldrT6ByfYHxqJAPRLe66wKEWuksd/iNHax6Hg?=
+ =?us-ascii?Q?EECVz14ZudaPe9ZaI7kwjJFqwAtmZyDhVSiIClEHnrldNeh1Sz5OrkSBYbGl?=
+ =?us-ascii?Q?QzMP2u2QVlY3IjMz69ZMrgqq9VScpyh7xyckFp35IwJYIZA0pB1efru9bO2A?=
+ =?us-ascii?Q?ii4myYEo7Q8hce0CGwn5wSVGIQnV0g5jMB3nrPAZey1GkUPlR8VfApk5uYdv?=
+ =?us-ascii?Q?IcRAsnGGHjTjOeMdwiASE04kPFzi/t0a7woQlhr3b9JRYfBiejJLdQ1a87sa?=
+ =?us-ascii?Q?oVQddv7XGpdLCM3BiHN+ZJ+sV7d4l25DdrlD+5QlU8xPrfKie6SLV9vuFE8v?=
+ =?us-ascii?Q?YWxGIgmaPbgsF8OHV0JCT4xMF5oUNykU1xQRToM9VpJKrqWK5vroUfHILsup?=
+ =?us-ascii?Q?mWOl3L8FFhq34M1ICZdZgf8rKjaAXoC0dHN64qUqcZjb8EcEGOzqsh8o+cZW?=
+ =?us-ascii?Q?ePuSu6SOBWk7dHrYK8mVYWUJ9pvVXwvYz3orsRSzhoq0yI8f8IhXJH0dPudl?=
+ =?us-ascii?Q?yfxAFyOFjplDBO93IXS8eSRlyrgavEUDNF+AtTd5Sj40de1AUSI40GaB6clL?=
+ =?us-ascii?Q?vyP3jY/d2yrLJQpXvxitT3ZHstE/RRzcFxVTVjysgpW87MdSELHw2QAaooOd?=
+ =?us-ascii?Q?YeVEXp0WFMieiSv0kO+WV0Ng9kGFUL6fG2cNzSn+ZKsrnydKVYXJSX0edv06?=
+ =?us-ascii?Q?TiP0Hicy4E33GKIELIoJrhHA9Vj+HFCS+dU35gVy1xzzEKfq/RrWMVkl0tUh?=
+ =?us-ascii?Q?mXBDGp19TwT0AOoNfL1YGPaXi3DWw7gy3pqeU4YNt6KhvPvU7M+8raGyQvLO?=
+ =?us-ascii?Q?20j0m74daj36TcoWmAUN613MsDAyUX4pxSRIT85RreGa56/tp8sKwISjIgE0?=
+ =?us-ascii?Q?8q3UK99w9xEoJWZVY5Ncssqie0OG1j7gGFRORJayLz4Xq6HMvKvaGQumhVfc?=
+ =?us-ascii?Q?l8rbngoNlPIhZh6Ai7GOKufszZXdMyWji18fdh35LHBQLPP4OYkp1RQXykJt?=
+ =?us-ascii?Q?n+yIAqUxQHq9/90R9fWvBzvLcir355anxWJ32oTBMDpQrZjZTYJlemDhHzDD?=
+ =?us-ascii?Q?GBW1Etk100gV94m9RxBp2jciN45tAUNGD6eK75CXsdFWfhFMfVWRnAvKV38Q?=
+ =?us-ascii?Q?cZjw2yn6WyNrfqwSQ4jnDo4VBhuKDh0I6MyTYVt5qnVntJ5rzESCw3LS72O5?=
+ =?us-ascii?Q?rJVHIQiqw9OOHDkaHVZKZvz+/O4rAka91qDKEO264zkxMVPOmH5fZvOUNAO+?=
+ =?us-ascii?Q?iiukOuqTjS8uQUBQf2jV8jbGcOkavrZEQxP4KPLZSiN1HRmmJ2ju91CpQ+N7?=
+ =?us-ascii?Q?a6bw+XdMDZ5wuszZ+WmLwY4IHeWQPKj3B5IxfEpVMH3Ppby2F66n00P6P7Sd?=
+ =?us-ascii?Q?AxsRQNG409XsGHmnrYR6QJJBpSK3m7wQAbeiOX7QEeLPHxkFiDcBRgpHze3b?=
+ =?us-ascii?Q?jJkadvPr1ash40cNr2eY2xG4yjEndwrZ/uua8WZriS3eDnmhD72nuYx055GQ?=
+ =?us-ascii?Q?6n9s4+NRjA/ydHDtt9rNNoqWRCLC6Q2paABbg7EujuEXv/faBCZIBJNHsEHu?=
+ =?us-ascii?Q?XCS0rnn36PpoBUACT/T1ybFudOUwAE7s5BWwiDUcby5WqZDvPMrcCBO/SNZ7?=
+ =?us-ascii?Q?nCQyr2p2rbAHOPw8If6gXiRR8qkmOzYXvE1z78f5CR/mmt6G6EovGpKXncQs?=
+ =?us-ascii?Q?sWQdmkMeAltQQbI0n8fruIsDpk6oIQe/LgcjiiQ+njs5gjgRgxWfMEVX9dZw?=
+ =?us-ascii?Q?MGms5zJL7U7QZgPk/EMZgCtp0vkcRjqLyikEz7YfAy7i0S8Q3wqq?=
+X-OriginatorOrg: valinux.co.jp
+X-MS-Exchange-CrossTenant-Network-Message-Id: 29f5e902-0219-4e59-c13e-08de8bb48a7a
+X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 27 Mar 2026 03:54:26.7476
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: wY/MP4J6njkJIqg6tAfOn9yP/V3oZ8tlSYqa0Ih75vkrE2TY36KqEHYmKKSU9qUxv1ba+jgYaw6ndm0yzIcSUg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY7P286MB7090
 
+Some DesignWare PCIe controllers integrate an eDMA block whose registers
+are located in a dedicated register window.
 
-On Fri, 06 Mar 2026 12:14:40 +0900, Koichiro Den wrote:
-> Some NTB implementations are backed by a "virtual" PCI device, while the
-> actual DMA mapping context (IOMMU domain) belongs to a different device.
-> 
-> One example is vNTB, where the NTB device is represented as a virtual
-> PCI endpoint function, but DMA operations must be performed against the
-> EPC parent device, which owns the IOMMU context.
-> 
-> [...]
+The EP-side aux-resource code exposes an interrupt-emulation doorbell
+register (DOORBELL_MMIO) from that window. Its location is derived from
+the start of the eDMA register window plus the doorbell offset already
+provided by dw-edma, and the window size is used to validate the
+computed register location.
 
-Applied, thanks!
+Record the physical base and size of the integrated eDMA register window
+in struct dw_pcie so the EP-side DesignWare aux-resource provider can
+construct that doorbell resource.
 
-[1/3] NTB: core: Add .get_dma_dev() callback to ntb_dev_ops
-      commit: af43a3a0c0ad524a69a7921efd0a04d50c03090b
-[2/3] NTB: ntb_transport: Use ntb_get_dma_dev() for DMA buffers
-      commit: c2fbbb8b341c58d24c7b114fae4cadd55a4660f1
-[3/3] PCI: endpoint: pci-epf-vntb: Implement .get_dma_dev()
-      commit: 185596ad93f545bcab2fea0dad6420c0c3cb386f
+Reviewed-by: Frank Li <Frank.Li@nxp.com>
+Tested-by: Niklas Cassel <cassel@kernel.org>
+Signed-off-by: Koichiro Den <den@valinux.co.jp>
+---
+ drivers/pci/controller/dwc/pcie-designware.c | 4 ++++
+ drivers/pci/controller/dwc/pcie-designware.h | 2 ++
+ 2 files changed, 6 insertions(+)
 
-Best regards,
+diff --git a/drivers/pci/controller/dwc/pcie-designware.c b/drivers/pci/controller/dwc/pcie-designware.c
+index 5741c09dde7f..f82ed189f6ae 100644
+--- a/drivers/pci/controller/dwc/pcie-designware.c
++++ b/drivers/pci/controller/dwc/pcie-designware.c
+@@ -162,8 +162,12 @@ int dw_pcie_get_resources(struct dw_pcie *pci)
+ 			pci->edma.reg_base = devm_ioremap_resource(pci->dev, res);
+ 			if (IS_ERR(pci->edma.reg_base))
+ 				return PTR_ERR(pci->edma.reg_base);
++			pci->edma_reg_phys = res->start;
++			pci->edma_reg_size = resource_size(res);
+ 		} else if (pci->atu_size >= 2 * DEFAULT_DBI_DMA_OFFSET) {
+ 			pci->edma.reg_base = pci->atu_base + DEFAULT_DBI_DMA_OFFSET;
++			pci->edma_reg_phys = pci->atu_phys_addr + DEFAULT_DBI_DMA_OFFSET;
++			pci->edma_reg_size = pci->atu_size - DEFAULT_DBI_DMA_OFFSET;
+ 		}
+ 	}
+ 
+diff --git a/drivers/pci/controller/dwc/pcie-designware.h b/drivers/pci/controller/dwc/pcie-designware.h
+index ae6389dd9caa..52f26663e8b1 100644
+--- a/drivers/pci/controller/dwc/pcie-designware.h
++++ b/drivers/pci/controller/dwc/pcie-designware.h
+@@ -541,6 +541,8 @@ struct dw_pcie {
+ 	int			max_link_speed;
+ 	u8			n_fts[2];
+ 	struct dw_edma_chip	edma;
++	phys_addr_t		edma_reg_phys;
++	resource_size_t		edma_reg_size;
+ 	bool			l1ss_support;	/* L1 PM Substates support */
+ 	struct clk_bulk_data	app_clks[DW_PCIE_NUM_APP_CLKS];
+ 	struct clk_bulk_data	core_clks[DW_PCIE_NUM_CORE_CLKS];
 -- 
-Manivannan Sadhasivam <mani@kernel.org>
+2.51.0
 
