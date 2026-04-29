@@ -1,35 +1,35 @@
 Received: from mail.m10.be (mail.m10.be [172.233.33.144])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 23563332EA0
-	for <ntb@lists.linux.dev>; Tue, 28 Apr 2026 20:44:17 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B91963B635B
+	for <ntb@lists.linux.dev>; Wed, 29 Apr 2026 08:58:46 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=172.233.33.144
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777409060; cv=none; b=R3pwcPnAJv4i0y09VSfw3whb7kjEjSUWO32Po/u0RFn9JhcGmVj21R5vJah873uu89boswxY4opsRxZ0/PDE9aBy8juavXOb2bmFa+iVpmAlj+viJU0+HyGegDcoocGZu7+qRUJ2QLQQ7okywfVVMEwHLGe9+vTvzq5h9CR+Fdo=
+	t=1777453129; cv=none; b=ZGiDewQ2amNX93PkQf8HF+5CevlQxMjgbUX63E0NTPVQoi1MR69AhvIKYFA7ZAe2tlzYopgik4d4ArsZr2sibIpGP4jNkOG0GF9/TXlsCNiGBpQWNAGGnHjc7poagHciG1oijGegIJGVfAa15B3xK2sSpn9FaScm15Fyc1nSy8s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777409060; c=relaxed/simple;
-	bh=6QESbL1x+8NQQjUUrgQJD8JE8+V45b2yB6ianJDA+E0=;
-	h=From:Content-Type:Mime-Version:Subject:Message-Id:Date:Cc:To; b=BPp/CxdkFptoXhIPH03y+SO0CRCkq3xwe5PY8k26Kso1VBUHb8wd+lANW/PJQrh0VoYiVwdOe/n2y9iHgOFh3BNLZ/DuIOWs5Z1HyvAmFVqSpKdj4cAbIikfGIb9A9NZvYGcUDnOk7JPtmEmo7bdVhd98/5bIm4lnpfYtD+NJt4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=maxboone.com; spf=fail smtp.mailfrom=maxboone.com; dkim=temperror (0-bit key) header.d=maxboone.com header.i=@maxboone.com header.b=f4U+AK3I; arc=none smtp.client-ip=172.233.33.144
+	s=arc-20240116; t=1777453129; c=relaxed/simple;
+	bh=C+h8HgEnNSuCzU3ag2uQxz1V8h02BaXX+aAt2iE5qoI=;
+	h=Content-Type:Mime-Version:Subject:From:In-Reply-To:Date:Cc:
+	 Message-Id:References:To; b=Hs+8PDSv4mq5eapBGR9zKTb7DOXEjitl/g8Mh5qI2wAZh0Cz8hmWoh4fkFJoFNs2RMmCsglHhMsCThv8pQCVKS2cFfKRCweiBpk8y8xEX2N9mZXbGe8ZyjixlI0Rvi2qimnMCYBXiKL87EKr3Bl5nBv3sGlOtriZqsl0LxmKjMA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=maxboone.com; spf=fail smtp.mailfrom=maxboone.com; dkim=temperror (0-bit key) header.d=maxboone.com header.i=@maxboone.com header.b=V5xsm5ho; arc=none smtp.client-ip=172.233.33.144
 Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=maxboone.com
 Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=maxboone.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=temperror (0-bit key) header.d=maxboone.com header.i=@maxboone.com header.b="f4U+AK3I"
-Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id B1F144682C;
-	Tue, 28 Apr 2026 22:36:26 +0200 (CEST)
+	dkim=temperror (0-bit key) header.d=maxboone.com header.i=@maxboone.com header.b="V5xsm5ho"
+Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id 4FADB46877;
+	Wed, 29 Apr 2026 10:58:38 +0200 (CEST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=maxboone.com;
-	s=dkim; t=1777408593;
+	s=dkim; t=1777453124;
 	h=from:subject:date:message-id:to:cc:mime-version:content-type:
-	 content-transfer-encoding; bh=6QESbL1x+8NQQjUUrgQJD8JE8+V45b2yB6ianJDA+E0=;
-	b=f4U+AK3I7NsrGiKpTmeCjun7vbhr39Nz2BQOpYDBBhij7yUYNk5btG3a69ZZa1ZR6jXdyx
-	zdjr27sCQysnqPPWLiBOSbWVrkVdRkAwoPuFkuG9fnflRE2ay+XMh271GD9vuAnNhYqlHQ
-	df1Iyk3wqbBaY2dvKLBpsxYjHohnocsNAhqKVakTshA/m/aXfruGo+zV8cfbb4hxYGE7R6
-	ERiM07trWwUYg9FY6Nq7H1t2b+slVjRkDoJZLNajbfshmdReOYRW0WbH29FGSOXk7Lzz0s
-	X+43OxYGvJoTApAShNV20yD2E1h1kR+lAWUyl8CQONntbomeMuhxrmRWhcuMFw==
-From: Max Boone <contact@maxboone.com>
+	 content-transfer-encoding:in-reply-to:references;
+	bh=qpvwgnlTAQ8g9wVEsK04P0MJezG6PFyvMb+dfNOSRyw=;
+	b=V5xsm5ho/M3/dePidVb4OZQ9BepQt87yTSCK0GQP7HkJp/k91G9d7xC9MYpvES8xC29gWu
+	7SG0kuCWN60d65IJRnXmxeKKOpLd4saxRNXmKOFUPdg0xp+siHKtptSaVRKig8nJkEGJHb
+	pk8zqQ1XFc3xAzTEjO3YqxCoEfTOt96DyAIEDz/IGKNTjTZ7EBe4mt7RiE+9S5eT1lWxuX
+	esN5diONHHpioUmVh69ajdmxgtUl/FDgUrebA6VfUJGLh+oKrmJM4zV8LPoPfqfPnhERKl
+	eVh8dCMoBkHgPbJrs44XQzHRtmzZKF5HNwKN3ohDFSvseMy6T3fP0mgGgueMSQ==
 Content-Type: text/plain;
 	charset=utf-8
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -38,44 +38,53 @@ List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3826.700.81.1.4\))
 Subject: Re: [PATCH v14 4/7] PCI: endpoint: pci-ep-msi: Refactor doorbell
  allocation for new backends
-Message-Id: <2F694A6C-23BA-4025-ACD7-2751595982CB@maxboone.com>
-Date: Tue, 28 Apr 2026 22:36:15 +0200
-Cc: Frank.Li@nxp.com,
- allenbh@gmail.com,
- bhanuseshukumar@gmail.com,
- bhelgaas@google.com,
- cassel@kernel.org,
- dave.jiang@intel.com,
- jdmason@kudzu.us,
- jingoohan1@gmail.com,
- kishon@kernel.org,
- kwilczynski@kernel.org,
- linux-kernel@vger.kernel.org,
+From: Max Boone <contact@maxboone.com>
+In-Reply-To: <20260414141514.1341429-5-den@valinux.co.jp>
+Date: Wed, 29 Apr 2026 10:58:28 +0200
+Cc: Jingoo Han <jingoohan1@gmail.com>,
+ Manivannan Sadhasivam <mani@kernel.org>,
+ Lorenzo Pieralisi <lpieralisi@kernel.org>,
+ =?utf-8?Q?Krzysztof_Wilczy=C5=84ski?= <kwilczynski@kernel.org>,
+ Rob Herring <robh@kernel.org>,
+ Bjorn Helgaas <bhelgaas@google.com>,
+ Kishon Vijay Abraham I <kishon@kernel.org>,
+ Jon Mason <jdmason@kudzu.us>,
+ Dave Jiang <dave.jiang@intel.com>,
+ Allen Hubbe <allenbh@gmail.com>,
+ Niklas Cassel <cassel@kernel.org>,
+ Frank Li <Frank.Li@nxp.com>,
+ Bhanu Seshu Kumar Valluri <bhanuseshukumar@gmail.com>,
+ Marco Crivellari <marco.crivellari@suse.com>,
+ Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>,
+ Manikanta Maddireddy <mmaddireddy@nvidia.com>,
  linux-pci@vger.kernel.org,
- lpieralisi@kernel.org,
- mani@kernel.org,
- marco.crivellari@suse.com,
- mmaddireddy@nvidia.com,
+ linux-kernel@vger.kernel.org,
  ntb@lists.linux.dev,
- robh@kernel.org,
- shinichiro.kawasaki@wdc.com,
  mboone@akamai.com
-To: den@valinux.co.jp,
+Content-Transfer-Encoding: quoted-printable
+Message-Id: <E2F607BF-6225-4799-A708-F908C7869DE3@maxboone.com>
+References: <20260414141514.1341429-1-den@valinux.co.jp>
+ <20260414141514.1341429-5-den@valinux.co.jp>
+To: Koichiro Den <den@valinux.co.jp>,
  mani@kernel.org,
- frank.li@nxp.com
+ Frank Li <Frank.Li@nxp.com>
 X-Mailer: Apple Mail (2.3826.700.81.1.4)
 X-Last-TLS-Session-Version: TLSv1.2
 
-On Tue, 14 Apr 2026 23:15:11 +0900, Koichiro Den wrote:
+
+
+> On Apr 14, 2026, at 4:15=E2=80=AFPM, Koichiro Den <den@valinux.co.jp> =
+wrote:
+>=20
 > Prepare pci-ep-msi for non-MSI doorbell backends.
 >=20
 > Factor MSI doorbell allocation into a helper and extend struct
 > pci_epf_doorbell_msg with:
 >=20
-> - irq_flags: required IRQ request flags (e.g. IRQF_SHARED for some
-> backends)
-> - type: doorbell backend type
-> - bar/offset: pre-exposed doorbell target location, if any
+>  - irq_flags: required IRQ request flags (e.g. IRQF_SHARED for some
+>    backends)
+>  - type: doorbell backend type
+>  - bar/offset: pre-exposed doorbell target location, if any
 >=20
 > Initialize these fields for the existing MSI-backed doorbell
 > implementation.
@@ -83,8 +92,6 @@ On Tue, 14 Apr 2026 23:15:11 +0900, Koichiro Den wrote:
 > Also add PCI_EPF_DOORBELL_EMBEDDED type, which is to be implemented in =
 a
 > follow-up patch.
->=20
-> No functional changes.
 
 I=E2=80=99m not very fond of keeping this implementation in the =
 pci-ep-msi file,
@@ -126,12 +133,14 @@ any other activity in the space. Having an implementation-agnostic
 doorbell API in the EPF/EPC core would be very helpful to me.
 
 >=20
+> No functional changes.
+>=20
 > Reviewed-by: Frank Li <Frank.Li@nxp.com>
 > Tested-by: Niklas Cassel <cassel@kernel.org>
 > Signed-off-by: Koichiro Den <den@valinux.co.jp>
 > ---
 > drivers/pci/endpoint/pci-ep-msi.c | 54 ++++++++++++++++++++++---------
-> include/linux/pci-epf.h | 23 +++++++++++--
+> include/linux/pci-epf.h           | 23 +++++++++++--
 > 2 files changed, 60 insertions(+), 17 deletions(-)
 >=20
 > diff --git a/drivers/pci/endpoint/pci-ep-msi.c =
@@ -177,7 +186,7 @@ num_db)
 > + int ret, i;
 >=20
 > domain =3D of_msi_map_get_device_domain(epc->dev.parent, 0,
-> DOMAIN_BUS_PLATFORM_MSI);
+>      DOMAIN_BUS_PLATFORM_MSI);
 > @@ -74,6 +65,12 @@ int pci_epf_alloc_doorbell(struct pci_epf *epf, u16 =
 num_db)
 > if (!msg)
@@ -250,24 +259,26 @@ u16 num_db)
 > +};
 > +
 > /**
-> * struct pci_epf_doorbell_msg - represents doorbell message
+>  * struct pci_epf_doorbell_msg - represents doorbell message
 > - * @msg: MSI message
 > - * @virq: IRQ number of this doorbell MSI message
 > + * @msg: Doorbell address/data pair to be mapped into BAR space.
-> + * For MSI-backed doorbells this is the MSI message, while for
-> + * "embedded" doorbells this represents an MMIO write that asserts
-> + * an interrupt on the EP side.
+> + *       For MSI-backed doorbells this is the MSI message, while for
+> + *       "embedded" doorbells this represents an MMIO write that =
+asserts
+> + *       an interrupt on the EP side.
 > + * @virq: IRQ number of this doorbell message
 > + * @irq_flags: Required flags for =
 request_irq()/request_threaded_irq().
-> + * Callers may OR-in additional flags (e.g. IRQF_ONESHOT).
+> + *             Callers may OR-in additional flags (e.g. =
+IRQF_ONESHOT).
 > + * @type: Doorbell type.
 > + * @bar: BAR number where the doorbell target is already exposed to =
 the RC
-> + * (NO_BAR if not)
+> + *       (NO_BAR if not)
 > + * @offset: offset within @bar for the doorbell target (valid iff
-> + * @bar !=3D NO_BAR)
-> */
+> + *          @bar !=3D NO_BAR)
+>  */
 > struct pci_epf_doorbell_msg {
 > struct msi_msg msg;
 > int virq;
@@ -280,3 +291,10 @@ the RC
 > /**
 > --=20
 > 2.51.0
+>=20
+>=20
+--
+Max
+
+P.P.S. Sorry for the duplicate mail, the mailto link from lore didn=E2=80=99=
+t work properly, at least this should put it in-thread.
