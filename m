@@ -1,141 +1,116 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.13])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2571A2E6CB3;
-	Fri,  1 May 2026 16:29:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F3392C21E8;
+	Fri,  1 May 2026 17:00:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.13
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777652993; cv=none; b=pT6FblGfnzTSEB9fJR9Cj0PCfxpuEsbCMpl589uY9eG8V4vozObsXVtEkcOML1CyutWFQ4r/17bYGgU+6lk0uZgNh6R4NcvA3ESmvkJ4EXtHoKBTXiFDZ0DYMwZ7rH8dEp0yeT6FJZDIgAUfJMuZ1ZdBo+/xTw2fBFXujVP8m00=
+	t=1777654817; cv=none; b=iapeebo9bJW74B3M7QgjMaEWBIfO3/EzzASVNUlq5HH+PsDc5o7UYHiaBbdz9ACZPfZUCls1tCiHyBZhX+fsYFykoyq/vv+MDCpuw07xtfUHp6U3za2KAglRg0CFrmC0U2KyP4CMDETJIQWrkpLh9MvVDoqI1eTaF64sOqxbZsc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777652993; c=relaxed/simple;
-	bh=cT57DQJwEZ9wXBMt1SuLsrsTBfq6hlX25JO8vLFm27Q=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=P01WKuv5NZUxTuTydpGcz+KdQhUZFwJ4C6TLK8WyL+5ur+2qs95Ho3/WW3gB7IRjrgxqWytQ1eyIDplbt7C88ZTwj5c/EOi688U2o3rpNnokU49QmeEKkTTEYua9zWG+1lvbKyiIaqo7tc7WlRRP7qskLW5IBNPSjCEuV3VPPek=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=pLy28P8Q; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1777654817; c=relaxed/simple;
+	bh=OZpWVWgUv13wUUslHjkIt8bXofzxYiuFHlvNYiVxw0s=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=RGnBp9zdJbG1DY6wBV1U1QZnINEUi24uYT6tEJ0BrFXnm+YfwaS3LYe0uijX1k+43Xt4DvezVr5t0EsWAh2ocVRqHYnLu/5rENbkpYXy0Cxnaw2FjFRGi1MKSUFcLbdQRdm+LW0syzEm6n9RoU0DtZf6qJQJeqotpp77fm1n+G8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=YbGxJjDh; arc=none smtp.client-ip=192.198.163.13
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="pLy28P8Q"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BD851C2BCB4;
-	Fri,  1 May 2026 16:29:46 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1777652990;
-	bh=cT57DQJwEZ9wXBMt1SuLsrsTBfq6hlX25JO8vLFm27Q=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=pLy28P8QoKPlLWSXhV0UL6Evl41iNIdwCNdUnoJP9Ajw/NJfrQCZ5Jk/+OZ17HBDb
-	 m7CpMHGfoA6t6DubFJEpJpjegYBYr5vNUd4sql/hDInj/NOF9S+t5uYeZLi29lTr+I
-	 UxsfJP1BqYgG94HrVshdeqYA/Ul04j8cGZpSPZIRjEcxHOPCLqCKEfvddSRT9qH4oR
-	 A0P6m0Gt15QE1vVU0Bc9rVUSW/MNebD/pI+/nYwHqrEBl2TsjA1ie1azPxUgtSebxm
-	 XF1Kouy1MUj8KVMXk2kSf0/hsKmVbLuN8qljnu3qHONus0Qv1chodNOd6Javk5YNNh
-	 IDUS5JpvJCbmA==
-Date: Fri, 1 May 2026 21:59:42 +0530
-From: Manivannan Sadhasivam <mani@kernel.org>
-To: Koichiro Den <den@valinux.co.jp>
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, 
-	Allen Hubbe <allenbh@gmail.com>, Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kwilczynski@kernel.org>, 
-	Kishon Vijay Abraham I <kishon@kernel.org>, Bjorn Helgaas <bhelgaas@google.com>, Frank Li <Frank.Li@nxp.com>, 
-	Jerome Brunet <jbrunet@baylibre.com>, Lorenzo Pieralisi <lpieralisi@kernel.org>, 
-	Niklas Cassel <cassel@kernel.org>, linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, 
-	ntb@lists.linux.dev
-Subject: Re: [PATCH v3 09/10] NTB: epf: Fix doorbell bitmask handling in
- db_read/db_clear
-Message-ID: <557gikafd5b5gryyosswktl7knexnu5gzhtd5ybgxkvdb56ftu@6ytkbxd5j57h>
-References: <20260323031544.2598111-1-den@valinux.co.jp>
- <20260323031544.2598111-10-den@valinux.co.jp>
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="YbGxJjDh"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1777654813; x=1809190813;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=OZpWVWgUv13wUUslHjkIt8bXofzxYiuFHlvNYiVxw0s=;
+  b=YbGxJjDha775rCsqyxe8SzkgsWwy7kXihRW/pVrtyHHaF4FUku40Ehju
+   FQZtozfwvVfAEmj9lClwtiXezdK5a5cLQ+4hFV3fSmMqm3g9dQ7L4asvC
+   s7AijFoNoPBDa6aVzFOmpKugvbCkqrC+BO5tB14utX3tGO9dL9PSnbQNw
+   dmJTNBMWkeCA3HFoGGP3+/0uYIBRQi86wtVUF1omSkuz5lYzMpN/xo1VX
+   1KiCjZJfBrB8sPyppq1l+5yNfym8YfyddP2FbWtAEppo+i1tHZ55jiKWm
+   yGiCmfkGWKPM2oHvHEYCMzaDUHMLjz1gq+nXtqKGUDpEvq1t6ybGhVLQA
+   g==;
+X-CSE-ConnectionGUID: 5X0mDrlOQxmXUhnHmdElPA==
+X-CSE-MsgGUID: NN5HY25uQBCjmbxBRPMjEA==
+X-IronPort-AV: E=McAfee;i="6800,10657,11773"; a="81186431"
+X-IronPort-AV: E=Sophos;i="6.23,210,1770624000"; 
+   d="scan'208";a="81186431"
+Received: from orviesa004.jf.intel.com ([10.64.159.144])
+  by fmvoesa107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 May 2026 10:00:12 -0700
+X-CSE-ConnectionGUID: 7A3HsXT2Tfev2XZbzbd0hQ==
+X-CSE-MsgGUID: +M+JkCD0SYmxKwG7ZXVOEg==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.23,210,1770624000"; 
+   d="scan'208";a="239233439"
+Received: from aduenasd-mobl5.amr.corp.intel.com (HELO [10.125.109.150]) ([10.125.109.150])
+  by orviesa004-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 May 2026 10:00:11 -0700
+Message-ID: <8f751a3e-0fd8-4a61-8955-027213a7bd1e@intel.com>
+Date: Fri, 1 May 2026 10:00:10 -0700
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20260323031544.2598111-10-den@valinux.co.jp>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 1/6] ntb: Store original DMA address for future release
+To: Leon Romanovsky <leon@kernel.org>,
+ Marek Szyprowski <m.szyprowski@samsung.com>,
+ Robin Murphy <robin.murphy@arm.com>, Jon Mason <jdmason@kudzu.us>,
+ Allen Hubbe <allenbh@gmail.com>
+Cc: iommu@lists.linux.dev, linux-kernel@vger.kernel.org, ntb@lists.linux.dev
+References: <20260501-dma-attrs-debug-v2-0-8dbac75cd501@nvidia.com>
+ <20260501-dma-attrs-debug-v2-1-8dbac75cd501@nvidia.com>
+Content-Language: en-US
+From: Dave Jiang <dave.jiang@intel.com>
+In-Reply-To: <20260501-dma-attrs-debug-v2-1-8dbac75cd501@nvidia.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Mon, Mar 23, 2026 at 12:15:43PM +0900, Koichiro Den wrote:
-> The EPF driver currently stores the incoming doorbell as a vector number
-> (irq_no + 1) in db_val and db_clear() clears all bits unconditionally.
-> This breaks db_read()/db_clear() semantics when multiple doorbells are
-> used.
+
+
+On 4/30/26 11:35 PM, Leon Romanovsky wrote:
+> From: Leon Romanovsky <leonro@nvidia.com>
 > 
-> Store doorbells as a bitmask (BIT_ULL(vector)) and make
-> db_clear(db_bits) clear only the specified bits. Use atomic64 operations
-> as db_val is updated from interrupt context.
+> The DMA API requires that dma_free_attrs receive the exact dma_handle
+> originally returned by the allocation function. Do not modify it.
 > 
-> Fixes: 812ce2f8d14e ("NTB: Add support for EPF PCI Non-Transparent Bridge")
-> Reviewed-by: Frank Li <Frank.Li@nxp.com>
-> Suggested-by: Dave Jiang <dave.jiang@intel.com>
-> Signed-off-by: Koichiro Den <den@valinux.co.jp>
+> Fixes: fc5d1829f9bf ("NTB: transport: Try harder to alloc an aligned MW buffer")
+> Signed-off-by: Leon Romanovsky <leonro@nvidia.com>
 
-On this patch too, but some pre-existing issues as well:
-
-https://sashiko.dev/#/patchset/20260323031544.2598111-1-den%40valinux.co.jp?part=9
-
-- Mani
+Reviewed-by: Dave Jiang <dave.jiang@intel.com>
 
 > ---
->  drivers/ntb/hw/epf/ntb_hw_epf.c | 10 ++++++----
->  1 file changed, 6 insertions(+), 4 deletions(-)
+>  drivers/ntb/ntb_transport.c | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
 > 
-> diff --git a/drivers/ntb/hw/epf/ntb_hw_epf.c b/drivers/ntb/hw/epf/ntb_hw_epf.c
-> index 67cdc5d729d5..741d30821390 100644
-> --- a/drivers/ntb/hw/epf/ntb_hw_epf.c
-> +++ b/drivers/ntb/hw/epf/ntb_hw_epf.c
-> @@ -6,6 +6,7 @@
->   * Author: Kishon Vijay Abraham I <kishon@ti.com>
->   */
->  
-> +#include <linux/atomic.h>
->  #include <linux/delay.h>
->  #include <linux/module.h>
->  #include <linux/pci.h>
-> @@ -108,7 +109,7 @@ struct ntb_epf_dev {
->  	unsigned int self_spad;
->  	unsigned int peer_spad;
->  
-> -	int db_val;
-> +	atomic64_t db_val;
->  	u64 db_valid_mask;
+> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+> index 7cabc82305d6b..771eb7d9f4356 100644
+> --- a/drivers/ntb/ntb_transport.c
+> +++ b/drivers/ntb/ntb_transport.c
+> @@ -223,6 +223,7 @@ struct ntb_transport_mw {
+>  	void *alloc_addr;
+>  	void *virt_addr;
+>  	dma_addr_t dma_addr;
+> +	dma_addr_t original_dma_addr;
 >  };
 >  
-> @@ -337,15 +338,16 @@ static irqreturn_t ntb_epf_vec_isr(int irq, void *dev)
->  	int irq_no;
+>  struct ntb_transport_client_dev {
+> @@ -766,7 +767,7 @@ static void ntb_free_mw(struct ntb_transport_ctx *nt, int num_mw)
 >  
->  	irq_no = irq - pci_irq_vector(ndev->ntb.pdev, 0);
-> -	ndev->db_val = irq_no + 1;
->  
->  	if (irq_no == EPF_IRQ_LINK) {
->  		ntb_link_event(&ndev->ntb);
->  	} else if (irq_no == EPF_IRQ_RESERVED_DB) {
->  		dev_warn_ratelimited(ndev->dev,
->  				     "Unexpected irq_no 1 received. Treat it as DB#0.\n");
-> +		atomic64_or(BIT_ULL(0), &ndev->db_val);
->  		ntb_db_event(&ndev->ntb, 0);
->  	} else {
-> +		atomic64_or(BIT_ULL(irq_no - EPF_IRQ_DB_START), &ndev->db_val);
->  		ntb_db_event(&ndev->ntb, irq_no - EPF_IRQ_DB_START);
+>  	ntb_mw_clear_trans(nt->ndev, PIDX, num_mw);
+>  	dma_free_coherent(dma_dev, mw->alloc_size,
+> -			  mw->alloc_addr, mw->dma_addr);
+> +			  mw->alloc_addr, mw->original_dma_addr);
+>  	mw->xlat_size = 0;
+>  	mw->buff_size = 0;
+>  	mw->alloc_size = 0;
+> @@ -802,6 +803,7 @@ static int ntb_alloc_mw_buffer(struct ntb_transport_mw *mw,
+>  		return -ENOMEM;
 >  	}
+>  	virt_addr = alloc_addr;
+> +	mw->original_dma_addr = dma_addr;
 >  
-> @@ -530,7 +532,7 @@ static u64 ntb_epf_db_read(struct ntb_dev *ntb)
->  {
->  	struct ntb_epf_dev *ndev = ntb_ndev(ntb);
->  
-> -	return ndev->db_val;
-> +	return atomic64_read(&ndev->db_val);
->  }
->  
->  static int ntb_epf_db_clear_mask(struct ntb_dev *ntb, u64 db_bits)
-> @@ -542,7 +544,7 @@ static int ntb_epf_db_clear(struct ntb_dev *ntb, u64 db_bits)
->  {
->  	struct ntb_epf_dev *ndev = ntb_ndev(ntb);
->  
-> -	ndev->db_val = 0;
-> +	atomic64_and(~db_bits, &ndev->db_val);
->  
->  	return 0;
->  }
-> -- 
-> 2.51.0
+>  	/*
+>  	 * we must ensure that the memory address allocated is BAR size
 > 
 
--- 
-மணிவண்ணன் சதாசிவம்
