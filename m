@@ -1,75 +1,75 @@
-Received: from mail-pl1-f177.google.com (mail-pl1-f177.google.com [209.85.214.177])
+Received: from mail-pl1-f169.google.com (mail-pl1-f169.google.com [209.85.214.169])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C1AD74A2E01
-	for <ntb@lists.linux.dev>; Wed,  6 May 2026 18:06:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.177
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 49B9A4C0406
+	for <ntb@lists.linux.dev>; Wed,  6 May 2026 18:16:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778090813; cv=none; b=iw/BOo7kZSMRKvF42efAlPcXH6IIRHlPaf3fgJKuCIi5hDZteweauOK/BkqqYisqVb4/iOqemDlVQVgk23WA15PMZYSvqTLc3VVqyel6G4JbAeNDHdOLIupVbf4KiE9PWzhbp4NQIIFm9i99eUKu75tc3I4G41kcpCzdaH+owP0=
+	t=1778091400; cv=none; b=almb53H9OAo2IoaQQycf0gzyUae3p8MDKMWfnx1h7WXjpjGj1R02qI/J0ZhJdbko5SCN4dzMNiw9Wzzuwx6yLsRF7Gjl65747S9hdmisWNvfW3R5z6hb9e3twMs/0H2qwiGO+SeADzChumVCgjsh5hFD2+abJ4HDwmLHK45Z4oU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778090813; c=relaxed/simple;
-	bh=XMUkfGBqGHRl2Qmuvo2NWgJYpIC+bwtX8lQsG8v6MwE=;
+	s=arc-20240116; t=1778091400; c=relaxed/simple;
+	bh=S9mvrWt8MHwjrniC+5hfqEcZPJwFH1boXGZmNPTls+Y=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=YX7OASQ18Jsodqh3H+QXd1X73+4YaH36OljLJ6K5rz02/qpBeGNuoqknihShCbYvkDeDicXgz965rYaRi+2fTfQuZrt4Q9tymZ6hrmC4mQVq0oeF6TR7XL5/7D7MoV8W8NPMnb8/n+PPe47dnVT6xr/2eAZth/DMIYGLkI7Q1Os=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=niogFOoG; arc=none smtp.client-ip=209.85.214.177
+	 Content-Type:Content-Disposition:In-Reply-To; b=IRdiT4KskenYlVB9plFNnvIpspMdUMfn1F6zE3KWQRYrRoqArCn1dWKNiMeluLoxGv/hgKJQy/HEcgr094ZQQB80wX27jDFv/DktJFivWGstp/Cmiy8aevGepIb7AU4zS10M2TdsHVIT4+jN2MgjylEQLeRNjFGllif8V2Cxukg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=T5668+1i; arc=none smtp.client-ip=209.85.214.169
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="niogFOoG"
-Received: by mail-pl1-f177.google.com with SMTP id d9443c01a7336-2b2e8b95bdbso15165ad.0
-        for <ntb@lists.linux.dev>; Wed, 06 May 2026 11:06:50 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="T5668+1i"
+Received: by mail-pl1-f169.google.com with SMTP id d9443c01a7336-2ba3b9bcf69so17655ad.0
+        for <ntb@lists.linux.dev>; Wed, 06 May 2026 11:16:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20251104; t=1778090810; x=1778695610; darn=lists.linux.dev;
+        d=google.com; s=20251104; t=1778091391; x=1778696191; darn=lists.linux.dev;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=1SCkx6Yh6YZ1BPi+tG3iQfCUha6CFKOYQ/X+Py4gHbo=;
-        b=niogFOoGu7/06Mfb44FLhb4KF+IPL42ZIGo+6FWvguVFcSo7j1fKcVwCy98jCR/Bll
-         o1mrphXB8r2CjmGiCiB5lbBE9ujgdcZKUq4paIZSpvi6rs8nVBcgDvbGj/XVkMV443bu
-         4gcnJYY2q/uTJZskCrk7iFVS6DiopxKsWflmJwzkdkpPFSQhKT34lKRFxp9UDHv5CxSx
-         POysC8TOAGehHUYTh5tARn2wxjOKce5vhBOG+6dW8xvlFL0lfsxq/GtnhKSkpc4Qq3PP
-         YPsaSXgpkdW0xgew3n0ne6VX6o5/XUZXV66QStyVe1k/aocU8tmV1a2KCbp+39twt2ex
-         +WnQ==
+        bh=e7Y9JqHzZKULv50XrRzWAnOBKFiT4J2l9mPMNIlCT3Y=;
+        b=T5668+1irnqfVlnAadlu/zg+zXkWSFN2jGfoaRfWAwSKAWVImzBpVtuOoujQYKg1nD
+         h5OK6cpd3YTSLnwqsNcbHfhhxjag8a94puCbL1xt/x73ZpRBVm+iuefKqLG4N0Uomd6n
+         ZtbFaQm31gRwTrhYOox6314NX+u6ViTAZCfZJBlli1sIeA3Ru1PmqzwSmbfvRtofFXn4
+         5l3fxkSVXDBvi9oVxDK1yFtL+1fIHWpRnflnl0Lzj1vmv1+v5AXCIbnpx/Aa8R9UShst
+         4gyawgCKMxhoRgCVb/sSGSUdUTQKihcVzV233HsKYyNFGR/j4BV5sEFjgJIO2GjYGYvB
+         vs0Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778090810; x=1778695610;
+        d=1e100.net; s=20251104; t=1778091391; x=1778696191;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=1SCkx6Yh6YZ1BPi+tG3iQfCUha6CFKOYQ/X+Py4gHbo=;
-        b=Y29OQWYpt2nO2vbc0GxxGVU4dL7/P4JAmTlA83uEBBZ8zttXFtsf7BJ1P98YwfSPsi
-         CYsm8OIJGT+85XeKR5eEEQncEvOGjmI6QZe6fm0wRjOUzShHTjRhyxMqVD3uzRFci8oH
-         cOhQMIDi46I834b61LS/2lKV1NE/1txmg1Y508MryxOXP/s/ydhtgI87pxTH7IGZV8z5
-         hVBe8++u6wF7q0RQ5OKe1khV9uWQqnEYZmOThnv7+X1fqyG9gajWPUlJwwghQavcSLA3
-         g4zyAJWKBH4aFbIXgY1AOZXtD/DGRHxbDwolV/kzfzXTn9/ds34CaHpWV6pPUlvzXwBR
-         6zuw==
-X-Forwarded-Encrypted: i=1; AFNElJ/gAkgwKWNmwgPzrjlyQR4JnKR8G8Zc+TZSy4BPcV669knKZwPaiaLxhezPe2YSd3Mm/js=@lists.linux.dev
-X-Gm-Message-State: AOJu0YzcR3FL4KE1h6oxuVOb0BTRJHiArXr1e/bvo7hOnvUXvsF+Pyq7
-	6m2+5NDmoAQJBDaVtu307IG+bnPXSYNwRfAwyERIaeGkzG5J+1rsActlJJxCn9QSpQ==
-X-Gm-Gg: AeBDieuibPlrb+HysfLQPo4Do/pYhrVUPa4bSVMMV64wcy+7pA8+s0Rr+kegoXOgKAw
-	8OQGRbrBhUPRQNvFdQDw4x1+IdyFq6VcFrhYNPj1+Xhh8y1eIO3yejerQyxLqzEBFNr3kX89TDK
-	hkN/ELS191gEn9F2+bD96u01bc13yXaEvdh0AM2/yR8ByHaknTpVE5jKco7APPcKiRuj/emjfHs
-	b5Js7JuxyeQbO3B0Yg+1U3XabP6GXWqhEW3REJwqBsp8uJIdpZSnHXgkmzavnc3C+n4Ws01Qpk8
-	mno8930srdYuUl90q3ca84Q01BDN8xSRG/fFMGVDIF/1vdtGxtRX30hJdzMJcCL/SoLc0jXcf0M
-	zmBxzWOkqRiZjrPv6Pl4VsHMWRg0KkXW/pbloq7jcyim2l4wFgRRnB5HuQSOmIABKRWhOUAq1S2
-	BISXa4IJfjgUMtaq6+zbhWtPoMp5gN2ywgNyvyQsQEA7WK3B5dGFEROBfkvWe1YVwAI0r5La63s
-	UsjowXT
-X-Received: by 2002:a17:903:124b:b0:2b9:a39a:e5db with SMTP id d9443c01a7336-2bab63fdaeemr399045ad.7.1778090809148;
-        Wed, 06 May 2026 11:06:49 -0700 (PDT)
+        bh=e7Y9JqHzZKULv50XrRzWAnOBKFiT4J2l9mPMNIlCT3Y=;
+        b=pNasUZIuz4ulStLi/1rDLlvI0fjanjbdWmL+9TneVk9s33mKyBOJc3DsI3rwZ94SGK
+         J7HzQexFd3iQVl26ynnbxktTK6j2U23HJ/A24xELvovv+2LTXUQiRwjbpg/nAzRZPcF0
+         H8puPzxkTsWGaYvFuInZKh+lQPcBb8wBix4hVWpr1KvWn+/hagWHRCw4xLou5RhpH2AU
+         lCKueaXoTsl210M8DU3M/cZpIdvWwTY4w4/bXbqlLthvUk5JyyqV90XjKHufzmCL1/GV
+         veFIXtZBpHCKQgtt6yBJLtEoSlDM4y9XF0zEH1Bz+bSIdEYNN81p4SUqHTgQ0jeY7AlG
+         tC6A==
+X-Forwarded-Encrypted: i=1; AFNElJ9Aw+jyGRnjXTEaZ45hBC6+T/1VJcKWzfko0a46shFc+K9ZHh8FDp7NWx4y9VnQ2s31g00=@lists.linux.dev
+X-Gm-Message-State: AOJu0YxyFjdAYBrMi+dJHC2V+B1llJZtWvVYOvhgcCrEunocO9GesHEl
+	fPANgH/7uvB7s5W2spQ0dxY2/M9FHYYEzDW/oQPksPKFafigXXwpE6UmSt0VoDjR5A==
+X-Gm-Gg: AeBDieuACiKAqqgZYi5arc8J1IOcvJK3V4XjFZAGk/09VhHJ12i2ZbDCF1r5cSXdc+O
+	/34A1j92euHpBFBCF0V+dH88A4+zH4dUiEvCqI4WgTrHCN/grEj/1zUrAxEzoM+DCP3I8zEgMYw
+	UQY3T/7V1K4NPZCypR2riTh1TAlED5WVdst46g/kj0qFoGgasZuUyXOe+EMDyK9SjEIsA/CHpR2
+	LHigYdU8IT+QeZSNQ1i+wvEk+tkSEjT6cTFO7rOeOOiCOU8ndMFS/PRHlHNRr7OtCTZHoniUDp4
+	t8bGt0FofMbQQfEh7qiJ7MtiWDeu6ZWjmYK5alG9LYwNSP7cEr9AmYNQrseHYOAUVD6V3nRSt0W
+	08I6aJ+U99FJDmzN4MIq+oEXq4iEmp4weyTDYiEMV3nhixJDegScL9KUpmRtC+32kkSpddnss9+
+	P9iHi+lubyWXfCCR7kcbCiXYyuFX6Ds/5/nig/HqvxqnmIz21X4JFI78Y4DsxUXTAakq2jEO3TH
+	pLolQO4
+X-Received: by 2002:a17:903:3887:b0:2b7:b03d:9847 with SMTP id d9443c01a7336-2ba7cecf689mr4399065ad.7.1778091390466;
+        Wed, 06 May 2026 11:16:30 -0700 (PDT)
 Received: from google.com (153.46.83.34.bc.googleusercontent.com. [34.83.46.153])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2ba7c9e1af7sm32405505ad.46.2026.05.06.11.06.48
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-365b4c196ecsm3120637a91.6.2026.05.06.11.16.30
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 06 May 2026 11:06:48 -0700 (PDT)
-Date: Wed, 6 May 2026 18:06:45 +0000
+        Wed, 06 May 2026 11:16:30 -0700 (PDT)
+Date: Wed, 6 May 2026 18:16:27 +0000
 From: Samiullah Khawaja <skhawaja@google.com>
 To: Leon Romanovsky <leon@kernel.org>
 Cc: Marek Szyprowski <m.szyprowski@samsung.com>, 
 	Robin Murphy <robin.murphy@arm.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, 
 	Allen Hubbe <allenbh@gmail.com>, iommu@lists.linux.dev, linux-kernel@vger.kernel.org, 
 	ntb@lists.linux.dev
-Subject: Re: [PATCH v2 5/6] dma-debug: Feed DMA attribute for unmapping flows
- too
-Message-ID: <afuDLtR6Q1W2_VO5@google.com>
+Subject: Re: [PATCH v2 6/6] dma-debug: Ensure mappings are created and
+ released with matching attributes
+Message-ID: <afuFcwO8hHqWZWuc@google.com>
 References: <20260501-dma-attrs-debug-v2-0-8dbac75cd501@nvidia.com>
- <20260501-dma-attrs-debug-v2-5-8dbac75cd501@nvidia.com>
+ <20260501-dma-attrs-debug-v2-6-8dbac75cd501@nvidia.com>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -78,183 +78,53 @@ List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii; format=flowed
 Content-Disposition: inline
-In-Reply-To: <20260501-dma-attrs-debug-v2-5-8dbac75cd501@nvidia.com>
+In-Reply-To: <20260501-dma-attrs-debug-v2-6-8dbac75cd501@nvidia.com>
 
-On Fri, May 01, 2026 at 09:35:09AM +0300, Leon Romanovsky wrote:
+On Fri, May 01, 2026 at 09:35:10AM +0300, Leon Romanovsky wrote:
 >From: Leon Romanovsky <leonro@nvidia.com>
 >
->There are multiple unmapping flows which didn't provide DMA attributes,
->which limited DMA debug code to compare the mapping and unmapping
->attributes. Let's fix it.
+>The DMA API expects that callers use the same attributes when mapping
+>and unmapping. Add tracking to verify this and catch mismatches.
 >
 >Signed-off-by: Leon Romanovsky <leonro@nvidia.com>
 >---
-> kernel/dma/debug.c   | 13 ++++++++-----
-> kernel/dma/debug.h   | 19 +++++++++++--------
-> kernel/dma/mapping.c |  8 ++++----
-> 3 files changed, 23 insertions(+), 17 deletions(-)
+> kernel/dma/debug.c | 23 +++++++++++++++++++++++
+> 1 file changed, 23 insertions(+)
 >
 >diff --git a/kernel/dma/debug.c b/kernel/dma/debug.c
->index f07e6a1e9fbab..3dfed51c3d9aa 100644
+>index 3dfed51c3d9aa..c38efc1ac8d6c 100644
 >--- a/kernel/dma/debug.c
 >+++ b/kernel/dma/debug.c
->@@ -1307,8 +1307,8 @@ void debug_dma_mapping_error(struct device *dev, dma_addr_t dma_addr)
-> }
-> EXPORT_SYMBOL(debug_dma_mapping_error);
+>@@ -1074,6 +1074,29 @@ static void check_unmap(struct dma_debug_entry *ref)
+> 			   type2name[entry->type]);
+> 	}
 >
->-void debug_dma_unmap_phys(struct device *dev, dma_addr_t dma_addr,
->-			  size_t size, int direction)
->+void debug_dma_unmap_phys(struct device *dev, dma_addr_t dma_addr, size_t size,
->+			  int direction, unsigned long attrs)
-> {
-> 	struct dma_debug_entry ref = {
-> 		.type           = dma_debug_phy,
->@@ -1316,6 +1316,7 @@ void debug_dma_unmap_phys(struct device *dev, dma_addr_t dma_addr,
-> 		.dev_addr       = dma_addr,
-> 		.size           = size,
-> 		.direction      = direction,
->+		.attrs          = attrs,
-> 	};
+>+	/*
+>+	 * This may be no bug in reality - but DMA API still expects
+>+	 * that entry is unmapped with same attributes as it was mapped.
+>+	 *
+>+	 * DMA_ATTR_UNMAP_VALID lists the attributes that must be identical
+>+	 * between map and unmap. Any attribute outside this set (e.g.
+>+	 * DMA_ATTR_NO_WARN, DMA_ATTR_SKIP_CPU_SYNC) is allowed to differ.
+>+	 */
+>+#define DMA_ATTR_UNMAP_VALID                                               \
+>+	(DMA_ATTR_NO_KERNEL_MAPPING | DMA_ATTR_FORCE_CONTIGUOUS |          \
+>+	 DMA_ATTR_MMIO | DMA_ATTR_REQUIRE_COHERENT | DMA_ATTR_PRIVILEGED | \
+>+	 DMA_ATTR_CC_SHARED)
+>+	if ((ref->attrs & DMA_ATTR_UNMAP_VALID) !=
+>+	    (entry->attrs & DMA_ATTR_UNMAP_VALID)) {
+>+		err_printk(ref->dev, entry,
+>+			   "device driver frees "
+>+			   "DMA memory with different attributes "
+>+			   "[device address=0x%016llx] [size=%llu bytes] "
+>+			   "[mapped with 0x%lx] [unmapped with 0x%lx]\n",
+>+			   ref->dev_addr, ref->size, entry->attrs, ref->attrs);
+>+	}
+>+#undef DMA_ATTR_UNMAP_VALID
+>+
+> 	hash_bucket_del(entry);
+> 	put_hash_bucket(bucket, flags);
 >
-> 	if (unlikely(dma_debug_disabled()))
->@@ -1381,7 +1382,7 @@ static int get_nr_mapped_entries(struct device *dev,
-> }
->
-> void debug_dma_unmap_sg(struct device *dev, struct scatterlist *sglist,
->-			int nelems, int dir)
->+			int nelems, int dir, unsigned long attrs)
-> {
-> 	struct scatterlist *s;
-> 	int mapped_ents = 0, i;
->@@ -1399,6 +1400,7 @@ void debug_dma_unmap_sg(struct device *dev, struct scatterlist *sglist,
-> 			.size           = sg_dma_len(s),
-> 			.direction      = dir,
-> 			.sg_call_ents   = nelems,
->+			.attrs          = attrs,
-> 		};
->
-> 		if (mapped_ents && i >= mapped_ents)
->@@ -1454,8 +1456,8 @@ void debug_dma_alloc_coherent(struct device *dev, size_t size,
-> 	add_dma_entry(entry);
-> }
->
->-void debug_dma_free_coherent(struct device *dev, size_t size,
->-			 void *virt, dma_addr_t dma_addr)
->+void debug_dma_free_coherent(struct device *dev, size_t size, void *virt,
->+			     dma_addr_t dma_addr, unsigned long attrs)
-> {
-> 	struct dma_debug_entry ref = {
-> 		.type           = dma_debug_coherent,
->@@ -1463,6 +1465,7 @@ void debug_dma_free_coherent(struct device *dev, size_t size,
-> 		.dev_addr       = dma_addr,
-> 		.size           = size,
-> 		.direction      = DMA_BIDIRECTIONAL,
->+		.attrs          = attrs,
-> 	};
->
-> 	/* handle vmalloc and linear addresses */
->diff --git a/kernel/dma/debug.h b/kernel/dma/debug.h
->index 24b8610850fbd..13e384633c32a 100644
->--- a/kernel/dma/debug.h
->+++ b/kernel/dma/debug.h
->@@ -14,21 +14,22 @@ extern void debug_dma_map_phys(struct device *dev, phys_addr_t phys,
-> 			       unsigned long attrs);
->
-> extern void debug_dma_unmap_phys(struct device *dev, dma_addr_t addr,
->-				 size_t size, int direction);
->+				 size_t size, int direction,
->+				 unsigned long attrs);
->
-> extern void debug_dma_map_sg(struct device *dev, struct scatterlist *sg,
-> 			     int nents, int mapped_ents, int direction,
-> 			     unsigned long attrs);
->
-> extern void debug_dma_unmap_sg(struct device *dev, struct scatterlist *sglist,
->-			       int nelems, int dir);
->+			       int nelems, int dir, unsigned long attrs);
->
-> extern void debug_dma_alloc_coherent(struct device *dev, size_t size,
-> 				     dma_addr_t dma_addr, void *virt,
-> 				     unsigned long attrs);
->
->-extern void debug_dma_free_coherent(struct device *dev, size_t size,
->-				    void *virt, dma_addr_t addr);
->+extern void debug_dma_free_coherent(struct device *dev, size_t size, void *virt,
->+				    dma_addr_t addr, unsigned long attrs);
->
-> extern void debug_dma_sync_single_for_cpu(struct device *dev,
-> 					  dma_addr_t dma_handle, size_t size,
->@@ -59,7 +60,8 @@ static inline void debug_dma_map_phys(struct device *dev, phys_addr_t phys,
-> }
->
-> static inline void debug_dma_unmap_phys(struct device *dev, dma_addr_t addr,
->-					size_t size, int direction)
->+					size_t size, int direction,
->+					unsigned long attrs)
-> {
-> }
->
->@@ -70,8 +72,8 @@ static inline void debug_dma_map_sg(struct device *dev, struct scatterlist *sg,
-> }
->
-> static inline void debug_dma_unmap_sg(struct device *dev,
->-				      struct scatterlist *sglist,
->-				      int nelems, int dir)
->+				      struct scatterlist *sglist, int nelems,
->+				      int dir, unsigned long attrs)
-> {
-> }
->
->@@ -82,7 +84,8 @@ static inline void debug_dma_alloc_coherent(struct device *dev, size_t size,
-> }
->
-> static inline void debug_dma_free_coherent(struct device *dev, size_t size,
->-					   void *virt, dma_addr_t addr)
->+					   void *virt, dma_addr_t addr,
->+					   unsigned long attrs)
-> {
-> }
->
->diff --git a/kernel/dma/mapping.c b/kernel/dma/mapping.c
->index 6cbefbd4158c8..f010b3cc0ece4 100644
->--- a/kernel/dma/mapping.c
->+++ b/kernel/dma/mapping.c
->@@ -225,7 +225,7 @@ void dma_unmap_phys(struct device *dev, dma_addr_t addr, size_t size,
-> 	else if (ops->unmap_phys)
-> 		ops->unmap_phys(dev, addr, size, dir, attrs);
-> 	trace_dma_unmap_phys(dev, addr, size, dir, attrs);
->-	debug_dma_unmap_phys(dev, addr, size, dir);
->+	debug_dma_unmap_phys(dev, addr, size, dir, attrs);
-> }
-> EXPORT_SYMBOL_GPL(dma_unmap_phys);
->
->@@ -351,7 +351,7 @@ void dma_unmap_sg_attrs(struct device *dev, struct scatterlist *sg,
->
-> 	BUG_ON(!valid_dma_direction(dir));
-> 	trace_dma_unmap_sg(dev, sg, nents, dir, attrs);
->-	debug_dma_unmap_sg(dev, sg, nents, dir);
->+	debug_dma_unmap_sg(dev, sg, nents, dir, attrs);
-> 	if (dma_map_direct(dev, ops) ||
-> 	    arch_dma_unmap_sg_direct(dev, sg, nents))
-> 		dma_direct_unmap_sg(dev, sg, nents, dir, attrs);
->@@ -693,7 +693,7 @@ void dma_free_attrs(struct device *dev, size_t size, void *cpu_addr,
-> 	if (!cpu_addr)
-> 		return;
->
->-	debug_dma_free_coherent(dev, size, cpu_addr, dma_handle);
->+	debug_dma_free_coherent(dev, size, cpu_addr, dma_handle, attrs);
-> 	if (dma_alloc_direct(dev, ops) || arch_dma_free_direct(dev, dma_handle))
-> 		dma_direct_free(dev, size, cpu_addr, dma_handle, attrs);
-> 	else if (use_dma_iommu(dev))
->@@ -840,7 +840,7 @@ void dma_free_noncontiguous(struct device *dev, size_t size,
-> 		struct sg_table *sgt, enum dma_data_direction dir)
-> {
-> 	trace_dma_free_sgt(dev, sgt, size, dir);
->-	debug_dma_unmap_sg(dev, sgt->sgl, sgt->orig_nents, dir);
->+	debug_dma_unmap_sg(dev, sgt->sgl, sgt->orig_nents, dir, 0);
->
-> 	if (use_dma_iommu(dev))
-> 		iommu_dma_free_noncontiguous(dev, size, sgt, dir);
 >
 >-- 
 >2.53.0
