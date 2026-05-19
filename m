@@ -1,66 +1,83 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.8])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2326E4DC54E;
-	Tue, 19 May 2026 14:42:44 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 726642147F9
+	for <ntb@lists.linux.dev>; Tue, 19 May 2026 21:29:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.8
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779201764; cv=none; b=C5vTDZlD/Rd4Izpb+aJOUrTA6V44zdaCw5pSHNkO7TLDh14exUyRaZq3Izt69h6VCKtj3vl/F5z3/0I8E3ORJBRu1dM/8PR9+vN1KJzZ5KJ4xtzMF6rXiZvRJQ8y6Inlkw/i4WZbiYEgCF09VG1SXOAOgVMHtJjbydPkfEL7ONE=
+	t=1779226196; cv=none; b=BIK33utT9IpyZsCDGxfb4AbrLRYWfgH8ckOR6z4L3TMQW7dUs+R69EwreaV4qeQXMsZgWKS07dmPNAm792xvbdLpSyg8aoZ9IUIjlAH5xL9XS57iu9XCH9+sNgd7veFmfmS+mUF+VKh53Wcr8MxKCSJ2LBFcqfatdPBFMxGCaig=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779201764; c=relaxed/simple;
-	bh=3by7tsMtE5mlLR1lDJXcjuT2oErfAqM4zBtzp6szNKo=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ffwGGavBMW9g2Nc8bVXdTLNWfEca7tkf7xcj6DtRkJEurW7ifo1mBCMmnEE2OYrJaymLJ4TZ9C31AoH1OPeaQ5badmyBD1MPfape/EDq9WGIZL2EpibkQbW//V4GtM8SaCIyg36oguGyvC7gW/WDCyaw2lcX8pxRi1qJv3picb0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=RzAQhNMV; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1779226196; c=relaxed/simple;
+	bh=idx5TFh2gbc82uL88dkgG4Y3BBDS6tGJUMca/3UZ558=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=Sjo6W4u0pNbQpe1FicehbVvf3fmad6mtvcHHVhJkiNqJrzaXaE954N9FwXSqJ2xOisgYfT2VcW9r3+l/CE5u120q+e/ClvFYq9vhHhuJGbybn62pNjKjYkOhkXltTKJ2NQBivWX5jHJc4eWdi/Ck58krbre1gHapkKlj5lVViEs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Njsuc1r5; arc=none smtp.client-ip=192.198.163.8
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="RzAQhNMV"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0766DC2BCB8;
-	Tue, 19 May 2026 14:42:38 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1779201763;
-	bh=3by7tsMtE5mlLR1lDJXcjuT2oErfAqM4zBtzp6szNKo=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=RzAQhNMVPHi/p43jprg3Z4QCcdk3+CD2s+iWaCNeBQaWfR9nrURqS/W6BfXJ3u/+B
-	 iz2feG1FHmqwZeBevT2KLQrSAgUUkf8M8ZuRjceQnzwu1AD3b4PlaCr6yLNmwWwxvq
-	 GwLu+Zgi+8xxEDoIKd0F/F8gW6zpphJnTPC0HDErum6Scv+0N4n+wwrl/bzxn6t8N6
-	 Bi3SfvVNNBP0YVAPzQBhMxuMRJSeTx5fg2zXHV/QYSoyjfCL6JxvLiInwFbrhl4ra5
-	 uDhANbn6fW3T/cGg3H1V7J6D3vbKrRpMjSmTL7cSs3JDSiC7ZXMvS1sxHjsH6QNFVp
-	 bIo+hPcFJIxMA==
-Date: Tue, 19 May 2026 20:12:32 +0530
-From: Manivannan Sadhasivam <mani@kernel.org>
-To: Koichiro Den <den@valinux.co.jp>
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, 
-	Allen Hubbe <allenbh@gmail.com>, Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kwilczynski@kernel.org>, 
-	Kishon Vijay Abraham I <kishon@kernel.org>, Bjorn Helgaas <bhelgaas@google.com>, Frank Li <Frank.Li@nxp.com>, 
-	Jerome Brunet <jbrunet@baylibre.com>, Lorenzo Pieralisi <lpieralisi@kernel.org>, 
-	Niklas Cassel <cassel@kernel.org>, linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, 
-	ntb@lists.linux.dev
-Subject: Re: [PATCH v4 00/12] PCI: endpoint: pci-epf-vntb / NTB: epf: Enable
- per-doorbell bit handling
-Message-ID: <2qr6myr6cxjtayy2j3yhf3uymoduehnmoxiq5i5qnrr6lpqjjb@npmsomiimjtp>
-References: <20260513024923.451765-1-den@valinux.co.jp>
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Njsuc1r5"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1779226195; x=1810762195;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=idx5TFh2gbc82uL88dkgG4Y3BBDS6tGJUMca/3UZ558=;
+  b=Njsuc1r5NItVMz+gIPgnNqEl9NPum6Pnobt3bVWxxcu4esOUu8pH16Ad
+   lTQuPNO0egj3sMOogPF6O6PGbTk94+nLRqU9EHDDehjiphTbiLpCS9tMt
+   4gJzTFXfIOaivqbyLt2J5eDfoy43Kky0GcvGgtTCUPeNp6StY233lTq4e
+   K7cQjYSH5jqNoi3LqgrhQZoqET7JgJzxyMsdkQU7BYzz1Zl5+x2Bm5Er8
+   JHDQfKyzC4ZA0X8dLW+Ujc01zKNH5+uL3xbF1m5EEfrfaERnpLQkm0d5M
+   LKzIV733NT3HJRRZSHFx+2KFugdhkypcsFa7I4ZqQCJZow6uYXSfUsH+T
+   Q==;
+X-CSE-ConnectionGUID: /BKkrcKyROadECaM3a5hbA==
+X-CSE-MsgGUID: ZcW1MWJuQkyhmGluoLx3pA==
+X-IronPort-AV: E=McAfee;i="6800,10657,11791"; a="97687144"
+X-IronPort-AV: E=Sophos;i="6.23,243,1770624000"; 
+   d="scan'208";a="97687144"
+Received: from fmviesa002.fm.intel.com ([10.60.135.142])
+  by fmvoesa102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 May 2026 14:29:54 -0700
+X-CSE-ConnectionGUID: NsMjg9Z0SjmnCtkiqgz8kw==
+X-CSE-MsgGUID: sYedAtJfQGeMwurOhBFGgw==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.23,243,1770624000"; 
+   d="scan'208";a="263406167"
+Received: from aduenasd-mobl5.amr.corp.intel.com (HELO [10.125.109.143]) ([10.125.109.143])
+  by fmviesa002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 May 2026 14:29:53 -0700
+Message-ID: <923e522c-c288-4ab1-8206-9b7654ec9919@intel.com>
+Date: Tue, 19 May 2026 14:29:51 -0700
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v4 00/12] PCI: endpoint: pci-epf-vntb / NTB: epf: Enable
+ per-doorbell bit handling
+To: Koichiro Den <den@valinux.co.jp>, Jon Mason <jdmason@kudzu.us>,
+ Allen Hubbe <allenbh@gmail.com>, Manivannan Sadhasivam <mani@kernel.org>,
+ =?UTF-8?Q?Krzysztof_Wilczy=C5=84ski?= <kwilczynski@kernel.org>,
+ Kishon Vijay Abraham I <kishon@kernel.org>,
+ Bjorn Helgaas <bhelgaas@google.com>, Frank Li <Frank.Li@nxp.com>,
+ Jerome Brunet <jbrunet@baylibre.com>,
+ Lorenzo Pieralisi <lpieralisi@kernel.org>, Niklas Cassel <cassel@kernel.org>
+Cc: linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org,
+ ntb@lists.linux.dev
+References: <20260513024923.451765-1-den@valinux.co.jp>
+Content-Language: en-US
+From: Dave Jiang <dave.jiang@intel.com>
 In-Reply-To: <20260513024923.451765-1-den@valinux.co.jp>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Wed, May 13, 2026 at 11:49:11AM +0900, Koichiro Den wrote:
+
+
+On 5/12/26 7:49 PM, Koichiro Den wrote:
 > This series fixes doorbell bit/vector handling for the EPF-based NTB
 > pair (ntb_hw_epf <-> pci-epf-*ntb). Its primary goal is to enable safe
 > per-db-vector handling in the NTB core and clients (e.g. ntb_transport),
 > without changing the on-the-wire doorbell mapping.
 > 
-
-FYI, I'm waiting for Acks from NTB maintainers for all the NTB patches.
-
-- Mani
-
 > 
 > Background / problem
 > ====================
@@ -108,6 +125,11 @@ FYI, I'm waiting for Acks from NTB maintainers for all the NTB patches.
 > This v4 is prepared on top of the current pci/endpoint:
 > commit f5aa97125491 ("misc: pci_endpoint_test: remove dead BAR read before
 >                       doorbell trigger")
+
+I can't seem to apply the patch set via 'b4 shazam' on top of f5aa97125491. Trying to set it up for review.
+
+DJ
+
 > 
 > plus these patches as contextual prerequisites:
 > 
@@ -265,9 +287,4 @@ FYI, I'm waiting for Acks from NTB maintainers for all the NTB patches.
 >  drivers/pci/endpoint/functions/pci-epf-vntb.c | 210 ++++++++++++++++--
 >  2 files changed, 296 insertions(+), 47 deletions(-)
 > 
-> -- 
-> 2.51.0
-> 
 
--- 
-மணிவண்ணன் சதாசிவம்
