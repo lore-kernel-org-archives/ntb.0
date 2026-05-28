@@ -1,177 +1,251 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+Received: from out203-205-221-239.mail.qq.com (out203-205-221-239.mail.qq.com [203.205.221.239])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 82E99396573
-	for <ntb@lists.linux.dev>; Wed, 27 May 2026 09:09:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1397F2EA172
+	for <ntb@lists.linux.dev>; Thu, 28 May 2026 03:11:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.205.221.239
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779872950; cv=none; b=QhgGvSWPYLrzNsFmBtp0ZdErenjv+KenRurzvVshz02HPPLROV7uzQMeOn4EoGhawCEVRNZAe0bfttAo9NADA9ye8SHWHLgcPxQ88qKmg2yrjQdDxHOxo3TABeNcBCQIGgMpZaWsOxdMES+jMNTYILXpFWIv4NZiY5MjCYrqY90=
+	t=1779937883; cv=none; b=smL5LQZF3+w1Bb6+gGlbm53xhCgarAM6juooNh9W4L2UmhvCHYccO5hdBj9IoUl23z44YpSA+GoZbD1PUmdnNDVcksi9Zq250u5mqr0NSii1lb+/2ePBOnZVtRP0ZjSX03/WpXgAF2yBp9UO5xtTxaDukNxF2301o1Xl65hVYlo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779872950; c=relaxed/simple;
-	bh=uk+Y9McimyRzOsd0YhEs83MD/E5PV+dINoRYf5IqMR8=;
-	h=From:To:Cc:In-Reply-To:References:Subject:Message-Id:Date:
-	 MIME-Version:Content-Type; b=QByKGQ/dWjjocP4pahmKuc6Ectd2EyS6HjSKeHBeS1w66qA0MYDYbMYedN/rAzusnf+9foncUVboqsL9FUZBWbwSoz0klMDxpM3DNt//9v99yareuMdpNXUHH4/LKwJ7XI0Qq0TITAUYWzCRzBLyDjB4e43erwxeq70XYSxQaeA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=JK9OuhMD; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=QcQbaGTN; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	s=arc-20240116; t=1779937883; c=relaxed/simple;
+	bh=V9a16BbvXJarY4TZF6RaqyKPeOkW0EcHZ2wUNDYOAxw=;
+	h=Message-ID:From:To:Cc:Subject:Date:MIME-Version; b=tmGDQLtPJrk74iVCotyoLyGQsdB9NU3f1tr40S62AXsOFvAJBj2n4r3lMQ2bSxvgQc5TrAx3xHuIxCfft3WE5LCEOx55IfEdvssz2RpH1c4rIy8VSMi9DAZRu/WGiI8PW1dWrBSk9NOhvY0BMh8GppYXcqbh0/rQuuB3RyTBIEA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=qq.com; spf=pass smtp.mailfrom=qq.com; dkim=pass (1024-bit key) header.d=qq.com header.i=@qq.com header.b=YkA2WGpB; arc=none smtp.client-ip=203.205.221.239
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=qq.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qq.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="JK9OuhMD";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="QcQbaGTN"
-Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 64R8mS7G973111
-	for <ntb@lists.linux.dev>; Wed, 27 May 2026 09:09:09 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	pqmIsOoLyRuRIFaNUnIrGpypfnkG8bRGf2nm6VpOocU=; b=JK9OuhMDf1owPTVW
-	rjFYWFnUlb0QxBTrdBd0pqcAwMBJYT+PDjkBVUp9H4Ua3bDzFCBvyzNW1NzXR4YU
-	6i9PZ2XSNIDo3SpHtd1RC2qitRp1Mkt6Y5W1y93gpY4aYKujjZSHA060wt9FrcqI
-	qHbrP+gtasUGC6gNPyd8DQdZZy371Mo0nLobYww0mEyQS8j3KlZJpDQA1tnQWy96
-	692odr1gNiTTBNoH7NJEBFLg8TlmJthdh73cZ/HUFnAo+qSevQXNn1iFIBtBGDHX
-	Pv97r6fIIAEnswhVQadGuu9SmIN8vwAeZVK7GGDAkozUkKF7cQp5fUbyEc0U2X0w
-	w3J4zw==
-Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com [209.85.160.197])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4edeff3cvu-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <ntb@lists.linux.dev>; Wed, 27 May 2026 09:09:08 +0000 (GMT)
-Received: by mail-qt1-f197.google.com with SMTP id d75a77b69052e-5104b861649so23724561cf.1
-        for <ntb@lists.linux.dev>; Wed, 27 May 2026 02:09:08 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1779872948; x=1780477748; darn=lists.linux.dev;
-        h=content-transfer-encoding:mime-version:date:message-id:subject
-         :references:in-reply-to:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=pqmIsOoLyRuRIFaNUnIrGpypfnkG8bRGf2nm6VpOocU=;
-        b=QcQbaGTN7+V1EvunnQU9T8UCGh7MrpvxHAnZhDwTRc/zoIZBIivltxKI4M+e+FEJr9
-         w80SL3EzMyfNld8wnkGTEpXQ9ltMQkBssn6fmKIhtVR3x6V6RrlnvVpaQh1EmuEzeisl
-         qQ5DLbIjGJ/Qnz3th5qqZkNUSkzs2wzGFyWocUZrFWhb7kQmLtFj65JGrGQe1WiQFjps
-         zOwTXU4on0yf3JQ4nmMAUNhrYDsScVtmlyCybpDQN4+dXxrmrlQhyDL6z9kOSQk38Aqw
-         C7xeRNO2QLam57OWwa1HgNJzcxECPCh786c0Wnpm8zkmVaYwc5fkd18DBIIzBnsVJwug
-         qIVw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1779872948; x=1780477748;
-        h=content-transfer-encoding:mime-version:date:message-id:subject
-         :references:in-reply-to:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=pqmIsOoLyRuRIFaNUnIrGpypfnkG8bRGf2nm6VpOocU=;
-        b=EyPUqFHIkNoztMCLOUqwufVKMQVKYPWxpU2CcTPAMzbmRlYfhTP4Ow1x1ynCp9qRTe
-         QJ1YvSxhdL41mKJYDo3AEP/ZMNg3oIYVrcGDfXTiyRm/yiPtP/U8PGEFqZiksRAE5SW6
-         j/1v9WuXcR1GalGnhDma9Xtmz2fZxxbqR0ixQS3druxXTcvhemO8sc2cfR0g/Awh3bn1
-         mQwSj8s0tPJhEOA35beWmrOYh0k4TPrnUoS+Iu9AOGq4Gmdf3Jn2r4HilhVs6XYT2OEt
-         IFEksZ7VCeW2WLvMfUYpg7C4dg/nRGc5WKdZNTVy5Jk1a06pkzdyk8lWagFPw2qStPoP
-         Zw0g==
-X-Forwarded-Encrypted: i=1; AFNElJ/DXmUBRTZlQU2CG8w/TXKqlkWHbAXPP9HOgxCqHF+pNgxjijsRzUl7ehnBRzGLV7nTEww=@lists.linux.dev
-X-Gm-Message-State: AOJu0YyvH5wUBWF5f1V97Yi+6TG+TCDYq29EVpcf+bZWdaIVrZh6GuPJ
-	wOSSvvKnbMbZLiByTcOpI4I1e48o197je7OeZ+1MmBG7/ZTp2Iekl0AhQxiihhZCZV0AF353tr6
-	rqcx9wLxoBNZlCN4DCEge9V26AhTG53UrWIjARhte4E0ZDi8GWlBBdu0=
-X-Gm-Gg: Acq92OHmweJbNVom23y7EAYGx3VeDMCad54DpSdC6Mug+rYm2JqNMJmy1ksGwh8+tVS
-	FlUmBgiLgz+nOtJD+5K5c4F77zOXuiMz8uBZuJdzf/f9TcPYLA82KMpKa4Ikjq6hNjw0PUShUGP
-	rQK5bLysTegxDcGg5jMJSEK+OTNyo7hamlQwFAEJr+57vyUwpjXjQl3D94b/0ZorsEqZZ+fssoc
-	QWrCVQH77GCPywj6xVnqv3KTVHWrvO7EzOs1f09FOFzgXca/hPG36oRf3wgkpnlYaBc5Iw/Nqci
-	NHhDior9V6ooJ8HoksXEofgHhwpCK7GNEPuDqdGlpLUTAGP+WyGMPVaJGnqFzUjAus8rhdnKDD1
-	PMXEMPKrWsOe6ayCob1MTb7brfdihqA9TDQQ7FM5UeNiWPT+58cSiIUxF
-X-Received: by 2002:a05:622a:2445:b0:516:dfc9:8449 with SMTP id d75a77b69052e-516dfc99abamr269163021cf.59.1779872947753;
-        Wed, 27 May 2026 02:09:07 -0700 (PDT)
-X-Received: by 2002:a05:622a:2445:b0:516:dfc9:8449 with SMTP id d75a77b69052e-516dfc99abamr269162621cf.59.1779872947099;
-        Wed, 27 May 2026 02:09:07 -0700 (PDT)
-Received: from work.wifi.ville-nice.fr (62-193-63-110.as16211.net. [62.193.63.110])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-45edb5a2908sm4525082f8f.18.2026.05.27.02.09.05
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 27 May 2026 02:09:06 -0700 (PDT)
-From: Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
-X-Google-Original-From: Manivannan Sadhasivam <mani@kernel.org>
-To: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>,
-        Allen Hubbe <allenbh@gmail.com>,
-        =?utf-8?q?Krzysztof_Wilczy=C5=84ski?= <kwilczynski@kernel.org>,
-        Kishon Vijay Abraham I <kishon@kernel.org>,
-        Bjorn Helgaas <bhelgaas@google.com>, Frank Li <Frank.Li@nxp.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Lorenzo Pieralisi <lpieralisi@kernel.org>,
-        Niklas Cassel <cassel@kernel.org>, Koichiro Den <den@valinux.co.jp>
-Cc: linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org,
-        ntb@lists.linux.dev
-In-Reply-To: <20260513024923.451765-1-den@valinux.co.jp>
-References: <20260513024923.451765-1-den@valinux.co.jp>
-Subject: Re: [PATCH v4 00/12] PCI: endpoint: pci-epf-vntb / NTB: epf:
- Enable per-doorbell bit handling
-Message-Id: <177987294527.16042.10832046004394503042.b4-ty@b4>
-Date: Wed, 27 May 2026 11:09:05 +0200
+	dkim=pass (1024-bit key) header.d=qq.com header.i=@qq.com header.b="YkA2WGpB"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qq.com; s=s201512;
+	t=1779937859; bh=sv/GIMG6xhB0X65kL7r24iAqg31ymP+0eCjcmcrAGvM=;
+	h=From:To:Cc:Subject:Date;
+	b=YkA2WGpB1WomrOPh1ehMmSi2YYgy+FVBD1iL4VBAu/9AWX17XIvxwFV67t6lGZCag
+	 zyrhtCHUpb7/O2u7/HUGE3NEcduNZ1ZQ7JbV1ZVIzq3KYhuYpT6RV6EbHEUzJJ4+VO
+	 Mg8ZT9ZgANYZ7K4JSJZF8tIAx+jRwmtMjw/Uz6Yo=
+Received: from NTT-kernel-dev ([60.247.85.88])
+	by newxmesmtplogicsvrsza63-0.qq.com (NewEsmtp) with SMTP
+	id 265A0CDE; Thu, 28 May 2026 11:09:37 +0800
+X-QQ-mid: xmsmtpt1779937777t17iiwvdo
+Message-ID: <tencent_2CCEB7347C9C631F1181F2C768D4B3AA6307@qq.com>
+X-QQ-XMAILINFO: MRMtjO3A6C9XtOiblvciSp9yaWC90YPowWReMT9cVp9UJYXDtWRK2/j/rmxxst
+	 zlSuY3Y4bSEjYOqPBiXubiAQBlIa+jefYh1fJuypTtk6sm2Fxev4/HTh7yYaONIbmZMtyVGjdP8L
+	 IuD5AiKLOo/wgdWYL1ISrOjM8hY0wiq69nvd6JyXJP493I3N39gA7alVds9PHE7ZbLMcAzAzCIg1
+	 y5Ais9Ppaeu9XrMIpzEKBFdN/FMz6Kn/ogkdFIQv7bQEs33005fU1T2HqJDaCmdvGy8cjC/AQsN8
+	 L8nX7fVX8GSzDja8KQhTshD1o9oYzE4BmmmrRYKGT/y9Nqi+cpInsGiNE5t39w8eTT1iZIuo7ipG
+	 bN82yVWGr9fCXftk87UbQBbatIb9hDAIqZViP+RaFjVvdQ8oX0Mv8h56adFMuWjfcpgCOgYj05Hy
+	 X4Dos9ZPWYYVoYYOISxhWewMhQVfaWqNKlCnQmV7msKW0tWBifhhTIFYS3Op2rwpWCIJuOS/fGVz
+	 q/qAWHmL0+y08IlyRoS5kumDZKmLo1x7Q9yKaWYCv5RbqoHQS4Fz4VjTjKVE2HNakKc7wFr93QrA
+	 xkF0n3as2uyyhevQGx0j9by9NEGZNkVvzlfJCzinQm6a3R0UDdYOEHXBMeGL/FM7BNuczWpktWvn
+	 /R6Q9VKIW2FjTneJKsfAPJMqlPzwGErIaY7EYEcz2n5LmpM/rQD75N/hwYfmAiHifX5LgQXTZcOC
+	 Xtagcuy49a9RzNONJPXNlihAh6s+No1bvzL3leOoInBRct1bkBAq+BDQIrwJh9cKGxMRfyYykfOm
+	 tyQO8G0XKw7gGcqPqSzM565lAraBFF+REPsssh+Rnj5Uy+P8QeucsKU447D3t92wONpx8h83npV1
+	 MSSebsl1n8ZxZ42IISef2ykuVrVCFtGpi83oDGWEEDhcqVTYaQDErQ2Str5mYx8gG1YRwcSPq7XG
+	 9rYJs8BFV4luObcOOKGF5+ifJaVMlpaphfYDIJZhWj4HqdPRh6z0PgG2G8V99T+afo+4ccnkr+P5
+	 ODT6vaXg==
+X-QQ-XMRINFO: M/715EihBoGS47X28/vv4NpnfpeBLnr4Qg==
+From: Fang Wang <32840572@qq.com>
+To: torvalds@linux-foundation.org
+Cc: tglx@linutronix.de,
+	mingo@redhat.com,
+	bp@alien8.de,
+	dave.hansen@linux.intel.com,
+	x86@kernel.org,
+	hpa@zytor.com,
+	dennis.dalessandro@cornelisnetworks.com,
+	jgg@ziepe.ca,
+	leon@kernel.org,
+	jdmason@kudzu.us,
+	dave.jiang@intel.com,
+	allenbh@gmail.com,
+	jpoimboe@kernel.org,
+	peterz@infradead.org,
+	linux-rdma@vger.kernel.org,
+	ntb@lists.linux.dev
+Subject: [PATCH 6.6.y] x86-64: rename misleadingly named '__copy_user_nocache()' function
+Date: Thu, 28 May 2026 11:09:37 +0800
+X-OQ-MSGID: <20260528030937.923133-1-32840572@qq.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-X-Mailer: b4 0.15.0
-X-Authority-Analysis: v=2.4 cv=ONEXGyaB c=1 sm=1 tr=0 ts=6a16b4b4 cx=c_pps
- a=EVbN6Ke/fEF3bsl7X48z0g==:117 a=xizqlaZpAqmNt8UN1ov9oQ==:17
- a=IkcTkHD0fZMA:10 a=NGcC8JguVDcA:10 a=s4-Qcg_JpJYA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=eoimf2acIAo5FJnRuUoq:22
- a=VwQbUJbxAAAA:8 a=F3aNAmEVrqB_ix-ASpUA:9 a=QEXdDO2ut3YA:10
- a=a_PwQJl-kcHnX1M80qC6:22
-X-Proofpoint-ORIG-GUID: ffxL6w6lLH9LnMni1ffMWVmuQWPdEvYr
-X-Proofpoint-GUID: ffxL6w6lLH9LnMni1ffMWVmuQWPdEvYr
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNTI3MDA4NyBTYWx0ZWRfX0JqIArQF0VpV
- 8IsNUR9icQZKpBDz65mO470OTadORxWTD3RHVWnBpY0q9wxYdLdZxEFlQd4hUAbFZhMCTiFDJ4B
- 0GHAY3odPnZa9hMUw2xtTEFzwQdlplsQse4DJ/uQLjzT3gy8e5ohWY8mYzPoQOCTwAjyIiK/N9I
- xM0g34tS5Js3elePM7VHJu+M7jootkuqtkiIZzCCUmE3HGk6azuMJYK1SGVg6byZ4zZ8K6K39i7
- 4dPdGT0axNnlSw9ldNhnrTKcBBFxmA5pzwMxuTM+sU+6fu1YOcpIDDfJOLQMi1janUxNFkQ0i80
- YCq9UJvRsg4Fz/0Uu1lECdur7XSmSn5568WwDlNzp2kAbk1YxQY7mqsJeYvx9rs0Bmi20Mv0mIc
- onL+wyALYIueBAXjXfH3P7TfUfc6OQqFVpxu/6fpt/BM6ISeR5PqGfa1ukYQ3USav97k9QgdWkx
- w0va00yjS0EeWosYAzg==
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.125,FMLib:17.12.100.49
- definitions=2026-05-27_01,2026-05-26_03,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- phishscore=0 spamscore=0 suspectscore=0 impostorscore=0 adultscore=0
- priorityscore=1501 malwarescore=0 lowpriorityscore=0 clxscore=1015
- bulkscore=0 classifier=typeunknown authscore=0 authtc= authcc= route=outbound
- adjust=0 reason=mlx scancount=1 engine=8.22.0-2605130000
- definitions=main-2605270087
+Content-Transfer-Encoding: 8bit
 
+From: Linus Torvalds <torvalds@linux-foundation.org>
 
-On Wed, 13 May 2026 11:49:11 +0900, Koichiro Den wrote:
-> This series fixes doorbell bit/vector handling for the EPF-based NTB
-> pair (ntb_hw_epf <-> pci-epf-*ntb). Its primary goal is to enable safe
-> per-db-vector handling in the NTB core and clients (e.g. ntb_transport),
-> without changing the on-the-wire doorbell mapping.
-> 
-> 
-> Background / problem
-> ====================
-> 
-> [...]
+[ Upstream commit d187a86de793f84766ea40b9ade7ac60aabbb4fe ]
 
-Applied, thanks!
+This function was a masterclass in bad naming, for various historical
+reasons.
 
-[01/12] PCI: endpoint: pci-epf-vntb: Document legacy MSI doorbell offset
-        commit: 683f8a747ab35886cc9bef96025712011309eae5
-[02/12] PCI: endpoint: pci-epf-vntb: Defer pci_epc_raise_irq() out of atomic context
-        commit: 84dd5950df2f540e52bd6cbcb5682cb4dff5f2a5
-[03/12] PCI: endpoint: pci-epf-vntb: Report 0-based doorbell vector via ntb_db_event()
-        commit: 7c54a7152588e8892a7f7f2c69117f00c1bf24f4
-[04/12] PCI: endpoint: pci-epf-vntb: Reject unusable doorbell counts
-        commit: 86b48f07a5a398ce1cd88e2f06ddab52c2181df0
-[05/12] PCI: endpoint: pci-epf-vntb: Guard configfs writes after EPC attach
-        commit: 9da8fecbe9173cc1d48667b2b821e4d1f383edbb
-[06/12] PCI: endpoint: pci-epf-vntb: Exclude reserved slots from db_valid_mask
-        commit: 12f666206720cb462ac4eaeb61a03e492737e1ef
-[07/12] PCI: endpoint: pci-epf-vntb: Implement db_vector_count/mask for doorbells
-        commit: d7eacad42e2d812872fc7da83466657b7759dde1
-[08/12] NTB: epf: Document legacy doorbell slot offset in ntb_epf_peer_db_set()
-        commit: d3de5eb64ecd836160afad84aa3ff639acb489cb
-[09/12] NTB: epf: Make db_valid_mask cover only real doorbell bits
-        commit: 615dc10082a96423743d3a7b8b90eed80580916d
-[10/12] NTB: epf: Report 0-based doorbell vector via ntb_db_event()
-        commit: c8220ccb30e8c092db9b6fa7dcb06dfd5340457d
-[11/12] NTB: epf: Fix doorbell bitmask and IRQ vector handling
-        commit: 1c981bf355e8ab78c45717fbd322bd67fafa8082
-[12/12] NTB: epf: Implement db_vector_count/mask for doorbells
-        commit: e6ff30150738af5c7aa20fad08b74cbf9b86d3a2
+It claimed to be a non-cached user copy.  It is literally _neither_ of
+those things.  It's a specialty memory copy routine that uses
+non-temporal stores for the destination (but not the source), and that
+does exception handling for both source and destination accesses.
 
-Best regards,
+Also note that while it works for unaligned targets, any unaligned parts
+(whether at beginning or end) will not use non-temporal stores, since
+only words and quadwords can be non-temporal on x86.
+
+The exception handling means that it _can_ be used for user space
+accesses, but not on its own - it needs all the normal "start user space
+access" logic around it.
+
+But typically the user space access would be the source, not the
+non-temporal destination.  That was the original intention of this,
+where the destination was some fragile persistent memory target that
+needed non-temporal stores in order to catch machine check exceptions
+synchronously and deal with them gracefully.
+
+Thus that non-descriptive name: one use case was to copy from user space
+into a non-cached kernel buffer.  However, the existing users are a mix
+of that intended use-case, and a couple of random drivers that just did
+this as a performance tweak.
+
+Some of those random drivers then actively misused the user copying
+version (with STAC/CLAC and all) to do kernel copies without ever even
+caring about the exception handling, _just_ for the non-temporal
+destination.
+
+Rename it as a first small step to actually make it halfway sane, and
+change the prototype to be more normal: it doesn't take a user pointer
+unless the caller has done the proper conversion, and the argument size
+is the full size_t (it still won't actually copy more than 4GB in one
+go, but there's also no reason to silently truncate the size argument in
+the caller).
+
+Finally, use this now sanely named function in the NTB code, which
+mis-used a user copy version (with STAC/CLAC and all) of this interface
+despite it not actually being a user copy at all.
+
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Fang Wang <32840572@qq.com>
+---
+ arch/x86/include/asm/uaccess_64.h    | 5 +++--
+ arch/x86/lib/copy_user_uncached_64.S | 6 +++---
+ arch/x86/lib/usercopy_64.c           | 4 ++--
+ drivers/infiniband/sw/rdmavt/qp.c    | 8 +++-----
+ drivers/ntb/ntb_transport.c          | 7 ++++---
+ tools/objtool/check.c                | 2 +-
+ 6 files changed, 16 insertions(+), 16 deletions(-)
+
+diff --git a/arch/x86/include/asm/uaccess_64.h b/arch/x86/include/asm/uaccess_64.h
+index f2c02e4469cc..68417f5db5dc 100644
+--- a/arch/x86/include/asm/uaccess_64.h
++++ b/arch/x86/include/asm/uaccess_64.h
+@@ -133,7 +133,8 @@ raw_copy_to_user(void __user *dst, const void *src, unsigned long size)
+ 	return copy_user_generic((__force void *)dst, src, size);
+ }
+ 
+-extern long __copy_user_nocache(void *dst, const void __user *src, unsigned size);
++#define copy_to_nontemporal copy_to_nontemporal
++extern size_t copy_to_nontemporal(void *dst, const void *src, size_t size);
+ extern long __copy_user_flushcache(void *dst, const void __user *src, unsigned size);
+ 
+ static inline int
+@@ -143,7 +144,7 @@ __copy_from_user_inatomic_nocache(void *dst, const void __user *src,
+ 	long ret;
+ 	kasan_check_write(dst, size);
+ 	stac();
+-	ret = __copy_user_nocache(dst, src, size);
++	ret = copy_to_nontemporal(dst, (__force const void *)src, size);
+ 	clac();
+ 	return ret;
+ }
+diff --git a/arch/x86/lib/copy_user_uncached_64.S b/arch/x86/lib/copy_user_uncached_64.S
+index 5c5f38d32672..b37a6f084c4c 100644
+--- a/arch/x86/lib/copy_user_uncached_64.S
++++ b/arch/x86/lib/copy_user_uncached_64.S
+@@ -26,7 +26,7 @@
+  * Output:
+  * rax uncopied bytes or 0 if successful.
+  */
+-SYM_FUNC_START(__copy_user_nocache)
++SYM_FUNC_START(copy_to_nontemporal)
+ 	/* If destination is not 7-byte aligned, we'll have to align it */
+ 	testb $7,%dil
+ 	jne .Lalign
+@@ -238,5 +238,5 @@ _ASM_EXTABLE_UA(95b, .Ldone)
+ _ASM_EXTABLE_UA(52b, .Ldone0)
+ _ASM_EXTABLE_UA(53b, .Ldone0)
+ 
+-SYM_FUNC_END(__copy_user_nocache)
+-EXPORT_SYMBOL(__copy_user_nocache)
++SYM_FUNC_END(copy_to_nontemporal)
++EXPORT_SYMBOL(copy_to_nontemporal)
+diff --git a/arch/x86/lib/usercopy_64.c b/arch/x86/lib/usercopy_64.c
+index e9251b89a9e9..1f1fb2ab1496 100644
+--- a/arch/x86/lib/usercopy_64.c
++++ b/arch/x86/lib/usercopy_64.c
+@@ -49,11 +49,11 @@ long __copy_user_flushcache(void *dst, const void __user *src, unsigned size)
+ 	long rc;
+ 
+ 	stac();
+-	rc = __copy_user_nocache(dst, src, size);
++	rc = copy_to_nontemporal(dst, (__force const void *)src, size);
+ 	clac();
+ 
+ 	/*
+-	 * __copy_user_nocache() uses non-temporal stores for the bulk
++	 * copy_to_nontemporal() uses non-temporal stores for the bulk
+ 	 * of the transfer, but we need to manually flush if the
+ 	 * transfer is unaligned. A cached memory copy is used when
+ 	 * destination or size is not naturally aligned. That is:
+diff --git a/drivers/infiniband/sw/rdmavt/qp.c b/drivers/infiniband/sw/rdmavt/qp.c
+index dc83d0ac6a38..d77ada17e9db 100644
+--- a/drivers/infiniband/sw/rdmavt/qp.c
++++ b/drivers/infiniband/sw/rdmavt/qp.c
+@@ -92,12 +92,10 @@ static int rvt_wss_llc_size(void)
+ static void cacheless_memcpy(void *dst, void *src, size_t n)
+ {
+ 	/*
+-	 * Use the only available X64 cacheless copy.  Add a __user cast
+-	 * to quiet sparse.  The src agument is already in the kernel so
+-	 * there are no security issues.  The extra fault recovery machinery
+-	 * is not invoked.
++	 * Use the only available X64 cacheless copy.
++	 * The extra fault recovery machinery is not invoked.
+ 	 */
+-	__copy_user_nocache(dst, (void __user *)src, n);
++	copy_to_nontemporal(dst, src, n);
+ }
+ 
+ void rvt_wss_exit(struct rvt_dev_info *rdi)
+diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+index 0087c23655c7..03631c702c0c 100644
+--- a/drivers/ntb/ntb_transport.c
++++ b/drivers/ntb/ntb_transport.c
+@@ -1800,12 +1800,13 @@ static void ntb_tx_copy_callback(void *data,
+ 
+ static void ntb_memcpy_tx(struct ntb_queue_entry *entry, void __iomem *offset)
+ {
+-#ifdef ARCH_HAS_NOCACHE_UACCESS
++#ifdef copy_to_nontemporal
+ 	/*
+ 	 * Using non-temporal mov to improve performance on non-cached
+-	 * writes, even though we aren't actually copying from user space.
++	 * writes. This only works if __iomem is strictly memory-like,
++	 * but that is the case on x86-64
+ 	 */
+-	__copy_from_user_inatomic_nocache(offset, entry->buf, entry->len);
++	copy_to_nontemporal(offset, entry->buf, entry->len);
+ #else
+ 	memcpy_toio(offset, entry->buf, entry->len);
+ #endif
+diff --git a/tools/objtool/check.c b/tools/objtool/check.c
+index 2c7b09c8415f..c54d531f73d9 100644
+--- a/tools/objtool/check.c
++++ b/tools/objtool/check.c
+@@ -1236,7 +1236,7 @@ static const char *uaccess_safe_builtin[] = {
+ 	"copy_mc_enhanced_fast_string",
+ 	"rep_stos_alternative",
+ 	"rep_movs_alternative",
+-	"__copy_user_nocache",
++	"copy_to_nontemporal",
+ 	NULL
+ };
+ 
 -- 
-Manivannan Sadhasivam <mani@kernel.org>
+2.34.1
 
