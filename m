@@ -1,251 +1,199 @@
-Received: from out203-205-221-239.mail.qq.com (out203-205-221-239.mail.qq.com [203.205.221.239])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1397F2EA172
-	for <ntb@lists.linux.dev>; Thu, 28 May 2026 03:11:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.205.221.239
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2B3C8381AE2
+	for <ntb@lists.linux.dev>; Fri, 29 May 2026 19:05:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779937883; cv=none; b=smL5LQZF3+w1Bb6+gGlbm53xhCgarAM6juooNh9W4L2UmhvCHYccO5hdBj9IoUl23z44YpSA+GoZbD1PUmdnNDVcksi9Zq250u5mqr0NSii1lb+/2ePBOnZVtRP0ZjSX03/WpXgAF2yBp9UO5xtTxaDukNxF2301o1Xl65hVYlo=
+	t=1780081548; cv=none; b=UKsPU8JSBnn/LHc3mh/IVOwkqLwDi56EjeXvtSkdjLxUYShHteKQBQ/Ibhn07FwuBZQ2LJ+ZNK4g6XE8l/u/G1wea8+0t+1+3DvDV+ZVblvlz5oHZqr1+pVtgXP+wRuS/1F0wzlFhc373tZRIZqgJxPZoalbS1BVm+w4oVkT1ks=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779937883; c=relaxed/simple;
-	bh=V9a16BbvXJarY4TZF6RaqyKPeOkW0EcHZ2wUNDYOAxw=;
-	h=Message-ID:From:To:Cc:Subject:Date:MIME-Version; b=tmGDQLtPJrk74iVCotyoLyGQsdB9NU3f1tr40S62AXsOFvAJBj2n4r3lMQ2bSxvgQc5TrAx3xHuIxCfft3WE5LCEOx55IfEdvssz2RpH1c4rIy8VSMi9DAZRu/WGiI8PW1dWrBSk9NOhvY0BMh8GppYXcqbh0/rQuuB3RyTBIEA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=qq.com; spf=pass smtp.mailfrom=qq.com; dkim=pass (1024-bit key) header.d=qq.com header.i=@qq.com header.b=YkA2WGpB; arc=none smtp.client-ip=203.205.221.239
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=qq.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qq.com
+	s=arc-20240116; t=1780081548; c=relaxed/simple;
+	bh=N9md+k5QMa0liFuDLoMTt7NFhaKuT6fJuI4IVVmzTxw=;
+	h=From:Subject:To:Cc:In-Reply-To:References:Content-Type:Date:
+	 Message-Id; b=g9n9BKXTtKMTJPfpoPg/hZUUj57zxY1/bqZOUTIEVrIFdQCSHydqT3y+X+FhVLbfTt0gF6x+17D/5+9y+OR7RYyK8RVw5yh4t+cOWxzEkL+L9RjejvwxN8zUtghU33syD6hxJI5nxEoh6S3d7GAQte7KhJDTFtT1wh3mRHM2nEk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dyekDe8B; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=qq.com header.i=@qq.com header.b="YkA2WGpB"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qq.com; s=s201512;
-	t=1779937859; bh=sv/GIMG6xhB0X65kL7r24iAqg31ymP+0eCjcmcrAGvM=;
-	h=From:To:Cc:Subject:Date;
-	b=YkA2WGpB1WomrOPh1ehMmSi2YYgy+FVBD1iL4VBAu/9AWX17XIvxwFV67t6lGZCag
-	 zyrhtCHUpb7/O2u7/HUGE3NEcduNZ1ZQ7JbV1ZVIzq3KYhuYpT6RV6EbHEUzJJ4+VO
-	 Mg8ZT9ZgANYZ7K4JSJZF8tIAx+jRwmtMjw/Uz6Yo=
-Received: from NTT-kernel-dev ([60.247.85.88])
-	by newxmesmtplogicsvrsza63-0.qq.com (NewEsmtp) with SMTP
-	id 265A0CDE; Thu, 28 May 2026 11:09:37 +0800
-X-QQ-mid: xmsmtpt1779937777t17iiwvdo
-Message-ID: <tencent_2CCEB7347C9C631F1181F2C768D4B3AA6307@qq.com>
-X-QQ-XMAILINFO: MRMtjO3A6C9XtOiblvciSp9yaWC90YPowWReMT9cVp9UJYXDtWRK2/j/rmxxst
-	 zlSuY3Y4bSEjYOqPBiXubiAQBlIa+jefYh1fJuypTtk6sm2Fxev4/HTh7yYaONIbmZMtyVGjdP8L
-	 IuD5AiKLOo/wgdWYL1ISrOjM8hY0wiq69nvd6JyXJP493I3N39gA7alVds9PHE7ZbLMcAzAzCIg1
-	 y5Ais9Ppaeu9XrMIpzEKBFdN/FMz6Kn/ogkdFIQv7bQEs33005fU1T2HqJDaCmdvGy8cjC/AQsN8
-	 L8nX7fVX8GSzDja8KQhTshD1o9oYzE4BmmmrRYKGT/y9Nqi+cpInsGiNE5t39w8eTT1iZIuo7ipG
-	 bN82yVWGr9fCXftk87UbQBbatIb9hDAIqZViP+RaFjVvdQ8oX0Mv8h56adFMuWjfcpgCOgYj05Hy
-	 X4Dos9ZPWYYVoYYOISxhWewMhQVfaWqNKlCnQmV7msKW0tWBifhhTIFYS3Op2rwpWCIJuOS/fGVz
-	 q/qAWHmL0+y08IlyRoS5kumDZKmLo1x7Q9yKaWYCv5RbqoHQS4Fz4VjTjKVE2HNakKc7wFr93QrA
-	 xkF0n3as2uyyhevQGx0j9by9NEGZNkVvzlfJCzinQm6a3R0UDdYOEHXBMeGL/FM7BNuczWpktWvn
-	 /R6Q9VKIW2FjTneJKsfAPJMqlPzwGErIaY7EYEcz2n5LmpM/rQD75N/hwYfmAiHifX5LgQXTZcOC
-	 Xtagcuy49a9RzNONJPXNlihAh6s+No1bvzL3leOoInBRct1bkBAq+BDQIrwJh9cKGxMRfyYykfOm
-	 tyQO8G0XKw7gGcqPqSzM565lAraBFF+REPsssh+Rnj5Uy+P8QeucsKU447D3t92wONpx8h83npV1
-	 MSSebsl1n8ZxZ42IISef2ykuVrVCFtGpi83oDGWEEDhcqVTYaQDErQ2Str5mYx8gG1YRwcSPq7XG
-	 9rYJs8BFV4luObcOOKGF5+ifJaVMlpaphfYDIJZhWj4HqdPRh6z0PgG2G8V99T+afo+4ccnkr+P5
-	 ODT6vaXg==
-X-QQ-XMRINFO: M/715EihBoGS47X28/vv4NpnfpeBLnr4Qg==
-From: Fang Wang <32840572@qq.com>
-To: torvalds@linux-foundation.org
-Cc: tglx@linutronix.de,
-	mingo@redhat.com,
-	bp@alien8.de,
-	dave.hansen@linux.intel.com,
-	x86@kernel.org,
-	hpa@zytor.com,
-	dennis.dalessandro@cornelisnetworks.com,
-	jgg@ziepe.ca,
-	leon@kernel.org,
-	jdmason@kudzu.us,
-	dave.jiang@intel.com,
-	allenbh@gmail.com,
-	jpoimboe@kernel.org,
-	peterz@infradead.org,
-	linux-rdma@vger.kernel.org,
-	ntb@lists.linux.dev
-Subject: [PATCH 6.6.y] x86-64: rename misleadingly named '__copy_user_nocache()' function
-Date: Thu, 28 May 2026 11:09:37 +0800
-X-OQ-MSGID: <20260528030937.923133-1-32840572@qq.com>
-X-Mailer: git-send-email 2.34.1
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dyekDe8B"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E71581F00893;
+	Fri, 29 May 2026 19:05:46 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1780081547;
+	bh=BesGDrDxKKOAaCjurwtTT5iaD7ZeBkFjE3/1gva2cbM=;
+	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
+	b=dyekDe8BbPl3ziJ11eDBG2/mQgUzGaZGT05gyW8wYjMeR0PuSWySKh+4yoP+TsJYB
+	 Pr1vYHAE/64ffObXkQkb/UwWj9uyLPco5q2peWVQEJwa8koSq32MbhuXLeNc5r5Tgl
+	 Xr5DyhlR1mXXlbjBP1HJt2StKSLq49+G7Zcj/HsUvjaiOmp6AehD8zFp+iWvz9qAHq
+	 30USZidjyku3g863KIXQrtcIlv9LHtSJFMUewjpOm4zAaCdm2zdMkyFlW8l4qwYksz
+	 3B1x+5mVdiMmk8OmM1DE+C1qwnFvszcie9/TPOfyM5vI9NmuXCUHs6NMxmB353v5Vc
+	 ifBIi/oPQfbWw==
+From: sashiko-bot@kernel.org
+Subject: Re: [PATCH] NTB: epf: log teardown command failures with error code
+Reply-To: sashiko-reviews@lists.linux.dev
+To: "Alok Tiwari" <alok.a.tiwari@oracle.com>
+Cc: ntb@lists.linux.dev
+In-Reply-To: <20260408055002.436349-1-alok.a.tiwari@oracle.com>
+References: <20260408055002.436349-1-alok.a.tiwari@oracle.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Date: Fri, 29 May 2026 19:05:46 +0000
+Message-Id: <20260529190546.E71581F00893@smtp.kernel.org>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
 
-From: Linus Torvalds <torvalds@linux-foundation.org>
+Thank you for your contribution! Sashiko AI review found 5 potential issue(=
+s) to consider:
 
-[ Upstream commit d187a86de793f84766ea40b9ade7ac60aabbb4fe ]
+Pre-existing issues:
+- [Critical] ntb_free_mw() ignores the return value of ntb_mw_clear_trans()=
+ before freeing DMA memory, risking memory corruption if hardware teardown =
+fails.
+- [High] ntb_epf_mw_set_trans() completely ignores the return value of ntb_=
+epf_send_command(), leading to silent failures during memory window configu=
+ration.
+- [High] Missing cleanup of previously requested IRQs in the error path of =
+ntb_epf_init_isr(), causing a use-after-free crash on subsequent interrupts.
+- [High] The host-to-EPF command protocol cannot recover from a timeout, pe=
+rmanently desynchronizing the command state machine.
+- [High] Doorbell bitmask and integer indexing mismatch in ntb_epf_vec_isr(=
+) and ntb_epf_db_read(), violating the NTB framework protocol.
+--
 
-This function was a masterclass in bad naming, for various historical
-reasons.
+commit a6cd16ced6f6513467ba1eb8d60eb48cc645ec44
+Author: Alok Tiwari <alok.a.tiwari@oracle.com>
 
-It claimed to be a non-cached user copy.  It is literally _neither_ of
-those things.  It's a specialty memory copy routine that uses
-non-temporal stores for the destination (but not the source), and that
-does exception handling for both source and destination accesses.
+NTB: epf: log teardown command failures with error code
 
-Also note that while it works for unaligned targets, any unaligned parts
-(whether at beginning or end) will not use non-temporal stores, since
-only words and quadwords can be non-temporal on x86.
+This commit updates ntb_epf_mw_clear_trans() to capture the return value
+from ntb_epf_send_command(). It logs the error code and returns it to the
+caller if the teardown command fails.
 
-The exception handling means that it _can_ be used for user space
-accesses, but not on its own - it needs all the normal "start user space
-access" logic around it.
+> diff --git a/drivers/ntb/hw/epf/ntb_hw_epf.c b/drivers/ntb/hw/epf/ntb_hw_=
+epf.c
+> index d3ecf25a51625..0c8fc459eb7a6 100644
+> --- a/drivers/ntb/hw/epf/ntb_hw_epf.c
+> +++ b/drivers/ntb/hw/epf/ntb_hw_epf.c
+> @@ -438,11 +438,11 @@ static int ntb_epf_mw_clear_trans(struct ntb_dev *n=
+tb, int pidx, int idx)
+>  {
+>  	struct ntb_epf_dev *ndev =3D ntb_ndev(ntb);
+>  	struct device *dev =3D ndev->dev;
+> -	int ret =3D 0;
+> +	int ret;
+> =20
+> -	ntb_epf_send_command(ndev, CMD_TEARDOWN_MW, idx);
+> +	ret =3D ntb_epf_send_command(ndev, CMD_TEARDOWN_MW, idx);
 
-But typically the user space access would be the source, not the
-non-temporal destination.  That was the original intention of this,
-where the destination was some fragile persistent memory target that
-needed non-temporal stores in order to catch machine check exceptions
-synchronously and deal with them gracefully.
+[Severity: Critical]
+This isn't a bug introduced by this patch, but now that this function corre=
+ctly
+returns the teardown error, does the caller ntb_free_mw() need an update to
+handle it safely?
 
-Thus that non-descriptive name: one use case was to copy from user space
-into a non-cached kernel buffer.  However, the existing users are a mix
-of that intended use-case, and a couple of random drivers that just did
-this as a performance tweak.
+drivers/ntb/ntb_transport.c:ntb_free_mw() {
+    ...
+    ntb_mw_clear_trans(nt->ndev, PIDX, num_mw);
+    dma_free_attrs(dma_dev, mw->alloc_size, mw->alloc_addr,
+                   mw->original_dma_addr, DMA_ATTR_FORCE_CONTIGUOUS);
+    ...
+}
 
-Some of those random drivers then actively misused the user copying
-version (with STAC/CLAC and all) to do kernel copies without ever even
-caring about the exception handling, _just_ for the non-temporal
-destination.
+Could this risk memory corruption if the hardware teardown fails? If the
+teardown command times out and the hardware window remains active, the remo=
+te
+peer might write into physical pages that have already been returned to the
+allocator.
 
-Rename it as a first small step to actually make it halfway sane, and
-change the prototype to be more normal: it doesn't take a user pointer
-unless the caller has done the proper conversion, and the argument size
-is the full size_t (it still won't actually copy more than 4GB in one
-go, but there's also no reason to silently truncate the size argument in
-the caller).
+>  	if (ret)
+> -		dev_err(dev, "Failed to teardown memory window\n");
+> +		dev_err(dev, "Failed to teardown memory window %d err %d\n", idx, ret);
+> =20
+>  	return ret;
+>  }
 
-Finally, use this now sanely named function in the NTB code, which
-mis-used a user copy version (with STAC/CLAC and all) of this interface
-despite it not actually being a user copy at all.
+[Severity: High]
+This is a pre-existing issue, but I noticed ntb_epf_mw_set_trans() complete=
+ly
+ignores the return value of ntb_epf_send_command():
 
-Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
-Signed-off-by: Fang Wang <32840572@qq.com>
----
- arch/x86/include/asm/uaccess_64.h    | 5 +++--
- arch/x86/lib/copy_user_uncached_64.S | 6 +++---
- arch/x86/lib/usercopy_64.c           | 4 ++--
- drivers/infiniband/sw/rdmavt/qp.c    | 8 +++-----
- drivers/ntb/ntb_transport.c          | 7 ++++---
- tools/objtool/check.c                | 2 +-
- 6 files changed, 16 insertions(+), 16 deletions(-)
+drivers/ntb/hw/epf/ntb_hw_epf.c:ntb_epf_mw_set_trans() {
+    ...
+    ntb_epf_send_command(ndev, CMD_CONFIGURE_MW, idx);
 
-diff --git a/arch/x86/include/asm/uaccess_64.h b/arch/x86/include/asm/uaccess_64.h
-index f2c02e4469cc..68417f5db5dc 100644
---- a/arch/x86/include/asm/uaccess_64.h
-+++ b/arch/x86/include/asm/uaccess_64.h
-@@ -133,7 +133,8 @@ raw_copy_to_user(void __user *dst, const void *src, unsigned long size)
- 	return copy_user_generic((__force void *)dst, src, size);
- }
- 
--extern long __copy_user_nocache(void *dst, const void __user *src, unsigned size);
-+#define copy_to_nontemporal copy_to_nontemporal
-+extern size_t copy_to_nontemporal(void *dst, const void *src, size_t size);
- extern long __copy_user_flushcache(void *dst, const void __user *src, unsigned size);
- 
- static inline int
-@@ -143,7 +144,7 @@ __copy_from_user_inatomic_nocache(void *dst, const void __user *src,
- 	long ret;
- 	kasan_check_write(dst, size);
- 	stac();
--	ret = __copy_user_nocache(dst, src, size);
-+	ret = copy_to_nontemporal(dst, (__force const void *)src, size);
- 	clac();
- 	return ret;
- }
-diff --git a/arch/x86/lib/copy_user_uncached_64.S b/arch/x86/lib/copy_user_uncached_64.S
-index 5c5f38d32672..b37a6f084c4c 100644
---- a/arch/x86/lib/copy_user_uncached_64.S
-+++ b/arch/x86/lib/copy_user_uncached_64.S
-@@ -26,7 +26,7 @@
-  * Output:
-  * rax uncopied bytes or 0 if successful.
-  */
--SYM_FUNC_START(__copy_user_nocache)
-+SYM_FUNC_START(copy_to_nontemporal)
- 	/* If destination is not 7-byte aligned, we'll have to align it */
- 	testb $7,%dil
- 	jne .Lalign
-@@ -238,5 +238,5 @@ _ASM_EXTABLE_UA(95b, .Ldone)
- _ASM_EXTABLE_UA(52b, .Ldone0)
- _ASM_EXTABLE_UA(53b, .Ldone0)
- 
--SYM_FUNC_END(__copy_user_nocache)
--EXPORT_SYMBOL(__copy_user_nocache)
-+SYM_FUNC_END(copy_to_nontemporal)
-+EXPORT_SYMBOL(copy_to_nontemporal)
-diff --git a/arch/x86/lib/usercopy_64.c b/arch/x86/lib/usercopy_64.c
-index e9251b89a9e9..1f1fb2ab1496 100644
---- a/arch/x86/lib/usercopy_64.c
-+++ b/arch/x86/lib/usercopy_64.c
-@@ -49,11 +49,11 @@ long __copy_user_flushcache(void *dst, const void __user *src, unsigned size)
- 	long rc;
- 
- 	stac();
--	rc = __copy_user_nocache(dst, src, size);
-+	rc = copy_to_nontemporal(dst, (__force const void *)src, size);
- 	clac();
- 
- 	/*
--	 * __copy_user_nocache() uses non-temporal stores for the bulk
-+	 * copy_to_nontemporal() uses non-temporal stores for the bulk
- 	 * of the transfer, but we need to manually flush if the
- 	 * transfer is unaligned. A cached memory copy is used when
- 	 * destination or size is not naturally aligned. That is:
-diff --git a/drivers/infiniband/sw/rdmavt/qp.c b/drivers/infiniband/sw/rdmavt/qp.c
-index dc83d0ac6a38..d77ada17e9db 100644
---- a/drivers/infiniband/sw/rdmavt/qp.c
-+++ b/drivers/infiniband/sw/rdmavt/qp.c
-@@ -92,12 +92,10 @@ static int rvt_wss_llc_size(void)
- static void cacheless_memcpy(void *dst, void *src, size_t n)
- {
- 	/*
--	 * Use the only available X64 cacheless copy.  Add a __user cast
--	 * to quiet sparse.  The src agument is already in the kernel so
--	 * there are no security issues.  The extra fault recovery machinery
--	 * is not invoked.
-+	 * Use the only available X64 cacheless copy.
-+	 * The extra fault recovery machinery is not invoked.
- 	 */
--	__copy_user_nocache(dst, (void __user *)src, n);
-+	copy_to_nontemporal(dst, src, n);
- }
- 
- void rvt_wss_exit(struct rvt_dev_info *rdi)
-diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 0087c23655c7..03631c702c0c 100644
---- a/drivers/ntb/ntb_transport.c
-+++ b/drivers/ntb/ntb_transport.c
-@@ -1800,12 +1800,13 @@ static void ntb_tx_copy_callback(void *data,
- 
- static void ntb_memcpy_tx(struct ntb_queue_entry *entry, void __iomem *offset)
- {
--#ifdef ARCH_HAS_NOCACHE_UACCESS
-+#ifdef copy_to_nontemporal
- 	/*
- 	 * Using non-temporal mov to improve performance on non-cached
--	 * writes, even though we aren't actually copying from user space.
-+	 * writes. This only works if __iomem is strictly memory-like,
-+	 * but that is the case on x86-64
- 	 */
--	__copy_from_user_inatomic_nocache(offset, entry->buf, entry->len);
-+	copy_to_nontemporal(offset, entry->buf, entry->len);
- #else
- 	memcpy_toio(offset, entry->buf, entry->len);
- #endif
-diff --git a/tools/objtool/check.c b/tools/objtool/check.c
-index 2c7b09c8415f..c54d531f73d9 100644
---- a/tools/objtool/check.c
-+++ b/tools/objtool/check.c
-@@ -1236,7 +1236,7 @@ static const char *uaccess_safe_builtin[] = {
- 	"copy_mc_enhanced_fast_string",
- 	"rep_stos_alternative",
- 	"rep_movs_alternative",
--	"__copy_user_nocache",
-+	"copy_to_nontemporal",
- 	NULL
- };
- 
--- 
-2.34.1
+    return 0;
+}
 
+Could this lead to silent failures during memory window configuration? If
+ntb_epf_send_command() fails due to a hardware timeout, returning 0 might
+cause the framework to assume the memory window is ready and initiate DMA
+operations over an unconfigured window.
+
+[Severity: High]
+This is a pre-existing issue, but is there a missing cleanup of previously
+requested IRQs in the error path of ntb_epf_init_isr()?
+
+drivers/ntb/hw/epf/ntb_hw_epf.c:ntb_epf_init_isr() {
+    ...
+err_request_irq:
+    pci_free_irq_vectors(pdev);
+
+    return ret;
+}
+
+Does this leave dangling IRQ handlers? If request_irq() fails during the lo=
+op,
+merely calling pci_free_irq_vectors() without calling free_irq() for the
+already registered handlers could result in a use-after-free crash on
+subsequent interrupts, since the ndev structure will be freed.
+
+[Severity: High]
+This isn't a bug introduced by this patch, but does the host-to-EPF command
+protocol permanently desynchronize on timeout?
+
+drivers/ntb/hw/epf/ntb_hw_epf.c:ntb_epf_send_command() {
+    ...
+    if (WARN_ON(timedout)) {
+        ret =3D -ETIMEDOUT;
+        break;
+    }
+    ...
+}
+
+If a command times out and the host clears the status register without abor=
+ting
+the state machine, might the endpoint firmware still be processing it? When=
+ the
+firmware eventually completes, it could write COMMAND_STATUS_OK to the stat=
+us
+register, causing the next command sent by the host to instantly read this
+stale status.
+
+[Severity: High]
+This is a pre-existing issue, but does the doorbell implementation violate
+the NTB framework protocol by returning an integer index instead of a bitma=
+sk?
+
+drivers/ntb/hw/epf/ntb_hw_epf.c:ntb_epf_vec_isr() {
+    ...
+    irq_no =3D irq - pci_irq_vector(ndev->ntb.pdev, 0);
+    ndev->db_val =3D irq_no + 1;
+    ...
+}
+
+drivers/ntb/hw/epf/ntb_hw_epf.c:ntb_epf_db_read() {
+    ...
+    return ndev->db_val;
+}
+
+Does the framework expect a bitmask of triggered doorbells here? Setting
+ndev->db_val =3D irq_no + 1 means a trigger on doorbell 2 results in a value
+of 3, which the framework might misinterpret as doorbells 0 and 1. Also, do=
+es
+this direct assignment clobber previously pending doorbells instead of
+atomically OR-ing them together?
+
+--=20
+Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20260408055002.4363=
+49-1-alok.a.tiwari@oracle.com?part=3D1
