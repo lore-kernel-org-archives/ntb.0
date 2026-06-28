@@ -1,161 +1,125 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qv1-f41.google.com (mail-qv1-f41.google.com [209.85.219.41])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 968FD305057
-	for <ntb@lists.linux.dev>; Sun, 28 Jun 2026 08:44:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 80537137923
+	for <ntb@lists.linux.dev>; Sun, 28 Jun 2026 13:51:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782636241; cv=none; b=Q9b5MHciFGiA/nG9vkNVs0V5sqlxhLeU9LmwvmJKh2PBHJbVn8Fx3IbUEj+mr6hqdKXzwxmI9Bpz6A4VZbIGn7Mpoaikb4KHh5K7PykOI+eY0MGm8k4MzuJkKYv4rWX/XH4aJDlo3Tzts+ih0gNJky3gEbhUaEP1mV3t2WN+8UQ=
+	t=1782654720; cv=none; b=hmfkDslzQiSJkgzMVh+Wry7U3zzoihJZxKrLOkx3eiYHSSZbfVhT9563jPDfbXiaLwLcF4kn1z6LY5BfTlPHZnUxdyUnj3cmqwZiBozAocvE21Cex/olbeV1Sgmqh64c50B7RdvC+nzwDgMocDFnMYjd3cyhgiynijTu+oAfLJA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782636241; c=relaxed/simple;
-	bh=N0RXrkIAVmGoW23XHEHCHbp2nVbFXkAG/2Voac+kDEI=;
-	h=From:Subject:To:Cc:In-Reply-To:References:Content-Type:Date:
-	 Message-Id; b=BDmZbmREqHAoCdkAE+uaWbOVRbtF0Ls6JafrM9PZckzMbRi8cN7ldvedKG8J6VipvmAvossea27BcrC6xNesVc2vua3eWjp6/fid57OviL33VGHMv/G7peoFgyZ2laZLaA8QM1d8shZ8U5xQFiTGm0cqoRDZbPA0hoYD1ttcA4I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=amVucJdQ; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1782654720; c=relaxed/simple;
+	bh=jLJDN5zBYfT3337H+rOSyCP60vu5635TrWl1qvjuOhM=;
+	h=From:Date:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition; b=W0fdH5pIQoTIpJXdcz8/m50j1G+a6qN13Gf7/y75CctVmkP6X3Uwj1odEKQLOk1rthv0llW2Qmqrtm9p6Sqj7y4ZyhSj9lfrE2ipRpwGHFgu/ACuBNwIVl3bCofpsPVC0EXX5cLtwTLBqRThSVRN+Vs62vVT6Z9vmMah0H7fhDM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kudzu.us; spf=none smtp.mailfrom=kudzu.us; dkim=pass (2048-bit key) header.d=kudzu-us.20251104.gappssmtp.com header.i=@kudzu-us.20251104.gappssmtp.com header.b=mH80V4ER; arc=none smtp.client-ip=209.85.219.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kudzu.us
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=kudzu.us
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="amVucJdQ"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 095991F000E9;
-	Sun, 28 Jun 2026 08:43:59 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1782636240;
-	bh=tOI3GxEH7EB7pmn60ufrDKggiONJ62csPDv5FxllteU=;
-	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=amVucJdQ0StVQCu/x/nz/WSx1thswSxFMaX1PPCdelyBOtHfG5lFxQ92zE9tFOgJ4
-	 ivIPlOIcID4yb1RWQf3c4ktKP2Q5XpS5hmpXfkcr2JNgwiy339hC/4vdUSgnBNu7Lo
-	 KGgjpUP06FVNkE7XitYKiOXdidwd/f6p1hTLshaAbAhle+LK3sYkOoE78JBZlTls11
-	 1n38bbOY8zTd60Vofk9RthdcD5ZhU7ivvttWxtNK71/u5/Cjr9JvajiRwLTP1tdbeD
-	 k6RJw36H55LItrvX86qZNXasHWwyTEq79zKOjAkB7URWJRZA+hxWqM0tIlcuGDjdHC
-	 pNpmxsos8UwOQ==
-From: sashiko-bot@kernel.org
-Subject: Re: [PATCH v2] ntb: fix tx descriptor leak on dmaengine_submit
- failure
-Reply-To: sashiko-reviews@lists.linux.dev
-To: "WenTao Liang" <vulab@iscas.ac.cn>
-Cc: ntb@lists.linux.dev
-In-Reply-To: <20260628083301.9781-1-vulab@iscas.ac.cn>
-References: <20260628083301.9781-1-vulab@iscas.ac.cn>
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-Date: Sun, 28 Jun 2026 08:43:59 +0000
-Message-Id: <20260628084400.095991F000E9@smtp.kernel.org>
+	dkim=pass (2048-bit key) header.d=kudzu-us.20251104.gappssmtp.com header.i=@kudzu-us.20251104.gappssmtp.com header.b="mH80V4ER"
+Received: by mail-qv1-f41.google.com with SMTP id 6a1803df08f44-8ea70ca4fc8so15138516d6.1
+        for <ntb@lists.linux.dev>; Sun, 28 Jun 2026 06:51:57 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=kudzu-us.20251104.gappssmtp.com; s=20251104; t=1782654716; x=1783259516; darn=lists.linux.dev;
+        h=content-transfer-encoding:content-disposition:mime-version
+         :message-id:subject:cc:to:date:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=y5jFnyaA1Tu5xl9Ikj52bRRy5PbISu7y67WctS3fbyQ=;
+        b=mH80V4ERzX0BPhw4MP7519Nu15zdoH+5AwSpbSx0H6PsUkH861DKlE1J5bbn9vGXBf
+         bqnNc7vbJy7ZJ9b1MbilQdKNb1fhjPuXKQ9qC12mmEITmwhT4aK7PbAtr0psImbgvkP0
+         6hIKFVYj0ORAA2O6cK0YHl6mTTISHKYCE0d4ZUiggpxprVxTsTaXLemCRXz4p+GPiYXv
+         4QsyXyTwwTVrybBRV0Geszzo0h645El+eNVWBz7OPnUuwDPMxQGHLR10umJIwTtQHPFm
+         SgJRdjAJHxMLFPodluqzFeTXQH8ZhwuVWro47LrJ7RFzaqAjxofWPsx+kc8lCi3oK4DF
+         44Eg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1782654716; x=1783259516;
+        h=content-transfer-encoding:content-disposition:mime-version
+         :message-id:subject:cc:to:date:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=y5jFnyaA1Tu5xl9Ikj52bRRy5PbISu7y67WctS3fbyQ=;
+        b=mlih41u2sBaIBZJtpTIdO8GOS8a6tl9tVLlqzO0aAj5DVnkgD2stIqzNdW3Mqe5T+e
+         ZVg4kggflgRsyvlEX+4yk8Jg1ICCzodqUB3iA69TO/P95QwbKfdlWLSrvNUMrYxKDjMf
+         YtMrDvA7C/+FcRj0fF+9xYYtX2arXGSMmtvmgUbl7Dp8r4cPY5z7Ic4HT0Is8eR23gP7
+         XL3mN/NIcv+1JJZr43e/NWejCZ9KwDf1rBubLOZmKKM4IqPA86ea8nYFZ2byhETTePv1
+         t2NBRukrBwlx06VLrmKu5A0OQfubodGQPjzYe8mMx9F8oq89MWQ16h6vt/olS7KPydoH
+         v6VA==
+X-Forwarded-Encrypted: i=1; AHgh+RplLa4AmN86oOzglGN/KJ3HCRgqYJCyx2UROu/jViEWylXkq7qn1P2c4wFVMOwZgdKc3fs=@lists.linux.dev
+X-Gm-Message-State: AOJu0YzU6jgB7E+1EWYIjw4S++WmNKpYgsinojGyPruGEeOnreekZ1DP
+	2L/ddG0agahpYlks5HNqwM7DeETb1FQxKUdGR3ncH6/Kcc2VuWSHBRtua+v35qfWjw==
+X-Gm-Gg: AfdE7ckTAy8+Ak0/V2VrXBn4gbGEX16AvqgNiY3/m8E/4fjiJo7NNBvwvTdXUB5sWZE
+	HHbT0VdAKexBEGDACXh7CiBrx947gih+aRQdpOPOFg58T3moV1QwN6zvcM8wLgF3bbmx0k+daib
+	XuhhHq6xWqz6qOPzKIygEBJlxliBZSruUblr1OVPS+IZPUZU3+kWQNMMjyxn+fjehszHJ7+Efhr
+	KUobnCusZZbVc0iB7btiNGol/KmnTRglJRYsg1h/z19mqvD4ZRCetnrhg/tnhy+f+YUKE4uc0gv
+	Zt4x38VbaX8XUYa3rye7tyGMAHJKBmDHMOh3g8581+kChQmiuiNE+SU/oIVylFQEq32bngEIDgu
+	2zXu8yFkv/PE2O4YpLlWmA/0RaMOXLMwowflei6gN0fSwxpXz+PAmc8o5snze3px5rO2MVpLi8J
+	VElA==
+X-Received: by 2002:a05:6214:130d:b0:8e3:9df3:f4c2 with SMTP id 6a1803df08f44-8e3b6c22c51mr357185296d6.24.1782654716418;
+        Sun, 28 Jun 2026 06:51:56 -0700 (PDT)
+Received: from localhost ([136.56.27.188])
+        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-8e98a3209d2sm68989076d6.14.2026.06.28.06.51.55
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 28 Jun 2026 06:51:55 -0700 (PDT)
+From: Jon Mason <jdmason@kudzu.us>
+X-Google-Original-From: Jon Mason <jdm@athena.kudzu.us>
+Date: Sun, 28 Jun 2026 09:51:52 -0400
+To: torvalds@linux-foundation.org
+Cc: linux-kernel@vger.kernel.org, ntb@lists.linux.dev
+Subject: [GIT PULL] NTB bug fixes for 7.2
+Message-ID: <akEm-BhGQDImHcmQ@athena.kudzu.us>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
 
-Thank you for your contribution! Sashiko AI review found 3 potential issue(=
-s) to consider:
+Hello Linus,
 
-New issues:
-- [Critical] The patch introduces a call to a non-existent function `dmaeng=
-ine_desc_put()`, which breaks the build, based on a flawed understanding of=
- the original code's fallthrough behavior.
+Please consider pulling this tag for v7.2.
 
-Pre-existing issues:
-- [High] The original error path for a failed `dmaengine_submit()` successf=
-ully frees the `unmap` object via fallthrough but leaves a dangling pointer=
- in the DMA descriptor, risking a double-free or use-after-free.
-- [High] The DMA abort fallback in `ntb_rx_copy_callback` uses the globally=
- advancing `qp->rx_index` instead of the entry-specific index, causing data=
- corruption.
---
+This is a small collection of NTB fixes that have been around for a
+while. Most are documentation and cleanup changes, while the primary
+functional fix addresses an EPF teardown path that could trigger an
+invalid unmap warning when BARs are shared.
 
-commit eef44bc86f40d9c6ef1b2ad54cbff8007792501a
-Author: WenTao Liang <vulab@iscas.ac.cn>
-
-ntb: fix tx descriptor leak on dmaengine_submit failure
-
-This commit attempts to fix a perceived kref leak in the ntb transport
-when dmaengine_submit fails. It replaces a call to dmaengine_unmap_put
-with dmaengine_desc_put in both the rx and tx error handling paths.
-
-Suggested-by: Greg KH <gregkh@linuxfoundation.org>
-Fixes: 282a2feeb9bf ("NTB: Use DMA Engine to Transmit and Receive")
-Cc: stable@vger.kernel.org
-Signed-off-by: WenTao Liang <vulab@iscas.ac.cn>
-
-> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-> --- a/drivers/ntb/ntb_transport.c
-> +++ b/drivers/ntb/ntb_transport.c
-> @@ -1572,7 +1572,7 @@ static int ntb_async_rx_submit(struct ntb_queue_ent=
-ry *entry, void *offset)
->  	return 0;
-> =20
->  err_set_unmap:
-> -	dmaengine_unmap_put(unmap);
-> +	dmaengine_desc_put(txd);
-
-[Severity: Critical]
-Does this function exist in the dma engine api? I am unable to locate
-dmaengine_desc_put in the tree, which might cause a compilation failure.
-
-[Severity: High]
-This is a pre-existing issue, but the original fallthrough behavior properly
-balanced the unmap kref.
-
-If dmaengine_submit fails, execution drops into err_set_unmap. In the origi=
-nal
-code, the fallthrough correctly freed the unmap object, but it left txd->un=
-map
-pointing to the freed memory. If the dma provider later reclaims the
-unsubmitted descriptor and calls dma_descriptor_unmap on it, wouldn't it
-dereference and double-free the dangling pointer?
-
->  err_get_unmap:
->  	dmaengine_unmap_put(unmap);
->  err:
-
-[ ... ]
-
-> @@ -1896,7 +1896,7 @@ static int ntb_async_tx_submit(struct ntb_transport=
-_qp *qp,
-> =20
->  	return 0;
->  err_set_unmap:
-> -	dmaengine_unmap_put(unmap);
-> +	dmaengine_desc_put(txd);
-
-[Severity: Critical]
-Similar to the rx path, is dmaengine_desc_put available to be called here?
-
-[Severity: High]
-This is a pre-existing issue, but the tx path shares the same dangling poin=
-ter
-risk as the rx path. When dmaengine_submit fails, the unmap object is freed
-via fallthrough, but the descriptor still retains the pointer. Could this a=
-lso
-lead to a use-after-free or double-free if the dma provider cleans up the
-descriptor?
-
->  err_get_unmap:
->  	dmaengine_unmap_put(unmap);
->  err:
+Thanks,
+Jon
 
 
-While reviewing this file, I noticed a separate issue in the rx abort path:
 
-[Severity: High]
-This is a pre-existing issue, but does ntb_rx_copy_callback use the correct
-index when a dma transfer aborts and falls back to a cpu copy?
+The following changes since commit 8cd9520d35a6c38db6567e97dd93b1f11f185dc6:
 
-In ntb_rx_copy_callback:
+  Linux 7.1 (2026-06-14 15:58:38 +0100)
 
-ntb_rx_copy_callback() {
-    ...
-    void *offset =3D qp->rx_buff + qp->rx_max_frame * qp->rx_index;
-    ...
-}
+are available in the Git repository at:
 
-Because qp->rx_index is globally shared and increments immediately after
-packets are submitted, it might advance significantly before the asynchrono=
-us
-abort callback executes. Doesn't this cause the fallback copy to write data
-into the wrong packet frame, potentially corrupting the payload?
+  https://github.com/jonmason/ntb tags/ntb-7.2
 
-Could this calculation use the constant, packet-specific entry->rx_index
-instead?
+for you to fetch changes up to d1c3d45f87e89e5c1fa0769a72a48d1ad99106fc:
 
---=20
-Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20260628083301.9781=
--1-vulab@iscas.ac.cn?part=3D1
+  ntb: amd: Use named initializer for pci_device_id::driver_data (2026-06-26 22:18:34 -0400)
+
+----------------------------------------------------------------
+NTB updates include an EPF bug fix to prevent an invalid unmap during
+device removal, along with documentation fixes and minor AMD driver
+cleanups.
+
+----------------------------------------------------------------
+Alok Tiwari (1):
+      ntb_hw_amd: Fix incorrect debug message in link disable path
+
+Koichiro Den (1):
+      NTB: epf: Avoid pci_iounmap() with offset when PEER_SPAD and CONFIG share BAR
+
+Randy Dunlap (1):
+      NTB: fix kernel-doc warnings in ntb.h
+
+Uwe Kleine-König (The Capable Hub) (1):
+      ntb: amd: Use named initializer for pci_device_id::driver_data
+
+ drivers/ntb/hw/amd/ntb_hw_amd.c | 20 ++++++++++----------
+ drivers/ntb/hw/epf/ntb_hw_epf.c |  3 ++-
+ include/linux/ntb.h             |  4 ++--
+ 3 files changed, 14 insertions(+), 13 deletions(-)
