@@ -1,152 +1,181 @@
-Received: from OS0P286CU010.outbound.protection.outlook.com (mail-japanwestazon11021126.outbound.protection.outlook.com [40.107.74.126])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 338C538C40B
-	for <ntb@lists.linux.dev>; Fri, 17 Jul 2026 06:12:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.74.126
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784268756; cv=fail; b=m+wnFJUbSscti2SsJkasHMoXl+AYa+nEqipOFXjZgoMj0dD8Bl/2N7/HV8epNk3BB2+6nGjN8ZdgRZFIzHgjaroA1TNvs17PL8OHVzzJRClyzbvZAvQVnFQgi95Z016mSXep3ZbOZLyfCmGa9uPyHzQ6ifmsDE/Kroc/s5F/PW8=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784268756; c=relaxed/simple;
-	bh=LGOBn8lSHbZrOVYcIjPGUHZUD+nxEmXJGWzVZe+32SU=;
-	h=From:To:Cc:Subject:Date:Message-ID:Content-Type:MIME-Version; b=JKgUHlh/GgUSS/Vq8AlP4G2CMUoCWQMp1gAwfWYh6v60Ui5yPB+6tXDXiYHS4ac8wIHpMJYxik2INtsi+wrNkefES7Fp1C31AykpoH9hyQ8wKN3fa32jbBqtVPEyi8uxr2wCehLilrV+09kK6sHVyLWO7Vs+2atZZ4CKTugxjP8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=qpt7jEBd; arc=fail smtp.client-ip=40.107.74.126
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0BE653B4EAB
+	for <ntb@lists.linux.dev>; Fri, 17 Jul 2026 06:30:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1784269835; cv=none; b=BoaQ1fR7DXVH2lJyW5iQfdw+uCKWV4lKewBTXdfwW3HeKryjcWGz2U8kHHUt37gceOt4vTtUC3VcHFxy97sAHbd0v14DO72L0LG8YyiKcZHADWGAd7AE9KQWqa+FKowcsVx/WM53teyqNgIKTlxM1VKwf0wlxkidd3KuB9CaJQ8=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1784269835; c=relaxed/simple;
+	bh=VJYP8mbk07SYv0KWL9sTfo7vGz+XkGQasD/kIpeozMA=;
+	h=From:Subject:To:Cc:In-Reply-To:References:Content-Type:Date:
+	 Message-Id; b=nfhNX6WA+TTn67LO77YChfOE5dV11qhoAgHDazXeEsC4uVxEmYw19ucDkertZS291zVNBZT2FvLA2BWN2cBG9ZBD1cgv+3ZP9a8HLBlJTv04xvdn3YJ0CqIBzly2OKJozRo34a5dx/f4Y/zgKM69CUkcgKloOo81O1G+bHMRdv8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OayTHdmy; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="qpt7jEBd"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=sPIfHeimP6PLOA9QeJ3SmqrzIysMWz+2IVbXJGkgNQDtBMoEF5PUYcQ4vyNJh4wgW6i5AvLBTDq1wwdGQBUeJe7t9/Zwn9TTQI1uI9fZYT1HZRBTx79rQbU1MjLvSjJUDHQPmufsVJRu0i2YLKatbO5BewgmG/NJz9vbigdsMSu/yH7kv1pRmaCCI9+XZyAEsjXUGG+6mnM/3wT4Ez66JT6ZnO6Ek61tnFSR5Gfa9tKZEQ+VABJuC7dU8PHaM73TgJ6FH9LPVNaqPyyQKgB0PhrR0uJT0aQ530e4bITiFQaGWlGrJHdCJPePehBs4QSiMJWoVRa71IVlZLdpH2rXkg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=/yS0D97dDq+J2eHnCa2Ns7TuFY1HDFTWJqRpSz11W0s=;
- b=vGx9WthuY7fKCEQHGGwMWylQ6JOwtJb15dhneJsfzWkhIGA+p8Tb3rEEe3ubO87FyEA7W+EVkDwA4jQiIotf4QmGCrcIy7BtIn3sQn8bwXh76/WwjHzKbps9B+V6+FNmFaQcqAQhbWhGRazsmc8G0rNLGiAP6MzWsoNOpkh6UEcAlt/v+9IYFK7dhv2d8R6slxTxQq2fFLsBjNmKMdgYqj9VzMlVm8rf2laoJpFMLZFizb4XprmRLM9aJEeZFtC36xtgZRF8jee6Ey8Tgj2PZ/I6c2iw0KKUAAim5j7JNIZcN0pXeqBOtor506JgltYJGQjY7q/9HTbq5SLDoyKypg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
- header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
- s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=/yS0D97dDq+J2eHnCa2Ns7TuFY1HDFTWJqRpSz11W0s=;
- b=qpt7jEBdCKz9q6CnszgkKeWRVSBHgruc/i4392jcbDIuDXKC+kNG46ipfLwTIZAw/N7heBebullCDos0gRqwuk7B/sOOEhOpA+lUwICsa12dgIeDd7OsyM1i9aiFF2U4bgqlj9nzU2I0g+zTp1rQvhjdX4NAgb8ceDP+h2l6geU=
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=valinux.co.jp;
-Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:38f::10)
- by TYWP286MB2543.JPNP286.PROD.OUTLOOK.COM (2603:1096:400:225::14) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.223.12; Fri, 17 Jul
- 2026 06:12:31 +0000
-Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
- ([fe80::2305:327c:28ec:9b32]) by TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
- ([fe80::2305:327c:28ec:9b32%3]) with mapi id 15.21.0223.008; Fri, 17 Jul 2026
- 06:12:30 +0000
-From: Koichiro Den <den@valinux.co.jp>
-To: Jon Mason <jdmason@kudzu.us>,
-	Dave Jiang <dave.jiang@intel.com>,
-	Allen Hubbe <allenbh@gmail.com>
-Cc: ntb@lists.linux.dev,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH] NTB: ntb_transport: Mark the transport link down on cleanup
-Date: Fri, 17 Jul 2026 15:12:23 +0900
-Message-ID: <20260717061223.2203863-1-den@valinux.co.jp>
-X-Mailer: git-send-email 2.51.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: TYCPR01CA0152.jpnprd01.prod.outlook.com
- (2603:1096:400:2b1::6) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
- (2603:1096:405:38f::10)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OayTHdmy"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D9E001F000E9;
+	Fri, 17 Jul 2026 06:30:27 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1784269828;
+	bh=4URFLgEXikMZgQ+2ibikQH7UYDtJjNiDsjFt3jv14RI=;
+	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
+	b=OayTHdmyjfH2c4oCDMzYKnLRB27G5u5Ym4wRfIWST/ZXMH0ODVU09ini8oPI9ekoD
+	 lNt/uvQDA5D4lf/bEtp12fuiAcUP86DUVU5eHZzJmuFS3Zq/WrmomZvYmiccwIV7Rm
+	 yAT0GwmYrhGnlpLKqIQcxZRHfb/ntpXo33Ea1B3q48r5E+af9GNPU1rGcmoFHsTFz9
+	 Py+i1EheqQTWPJOs0DhNe6EdUyNK+2kNFevdaTVatZMxP1jkX/MjQeX/3o5Sns28zN
+	 uv2MXGKK9yOLBxQRnhgw+32GIouzbu144noHaxGypnSoI+BSTAcJUSbHrJqOeaKYjX
+	 blikC5qEDa4yg==
+From: sashiko-bot@kernel.org
+Subject: Re: [PATCH] NTB: ntb_transport: Mark the transport link down on
+ cleanup
+Reply-To: sashiko-reviews@lists.linux.dev
+To: "Koichiro Den" <den@valinux.co.jp>
+Cc: ntb@lists.linux.dev
+In-Reply-To: <20260717061223.2203863-1-den@valinux.co.jp>
+References: <20260717061223.2203863-1-den@valinux.co.jp>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Date: Fri, 17 Jul 2026 06:30:27 +0000
+Message-Id: <20260717063027.D9E001F000E9@smtp.kernel.org>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
-MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|TYWP286MB2543:EE_
-X-MS-Office365-Filtering-Correlation-Id: ce6bffd9-8d0f-4999-453b-08dee3ca623d
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|10070799003|376014|366016|1800799024|23010399003|56012099006|10067099003|18002099003;
-X-Microsoft-Antispam-Message-Info:
-	9M7msurdK4kl0xD2VgwBCT9RIviaED92RYddfWQLACgkYbx8ObtNfkHN9M7pX2KDVuMqUhWulZP8qRVXaJOtD05PSpsJYjYhdqc/JB/3wwgdg8K/6Rrpma72mK/8YgeLPEZ+o2Un+xslnp7DpL80iJ2PUo6itSbLm2xqb2PO3Gft0afwrv/brEDAbqnxjFksZ17lLz3d0WsRHobNfSvECNwL+F7SQRQOC2w5ZgJp9DyU+ILLVKDjKVrnsD0qRqUoZPZZLsA0sc5b6njf2vN4+XxNmCP0kV1uaxwOq1fB0sK2MfBwmFDjJl03B88uPwzsiYYQpYnRwqkx5fEuJ+A9hzVIvCssZGRe448BH+Xvd/EJrxT7/wNR5U/+JRB/0XQ6rh/ghOMXHrMpH82wKcCbF7Up3h7XJm+qCw6NOx0xxkBansWsKrDlp7jas6/UW9C8YulH/gj2Er1Qssx2oy8jAfTZ5zacI1k7NvvoYH09flRuLdSwzn9bWSw5u9hcWeQctdH/lvAe/ZUAVPwjdOT/T15eI99yd6jpGedGK76pi57k6qGMcKTCKivQt+HIfq877yJm6QS079/lMLN6xMvnukvsB1YDFSuO+Ata0Sl/YtAv2wFmgeVLJh4ybAhnOa/KuM4Ps13Ks0IPfh4HwL1OkG+BwdAj9YRAuPd9lJrLOjQ=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(10070799003)(376014)(366016)(1800799024)(23010399003)(56012099006)(10067099003)(18002099003);DIR:OUT;SFP:1102;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?mtKSjQUvfHQriB94HTTn9rBNM04DQ/42F3mtjaAk43OX6nDU0RpB7O46XQm1?=
- =?us-ascii?Q?Sgic23FQirzyeElciuHcmDnriJEcBbEx0INjQbdGdc1h9HR4JmbKvgqOZDFk?=
- =?us-ascii?Q?JHrUVzGZtHLxvO7qsNwFvcAVoTyOeVIPasXpG/jmVIsofa1dgFdyZlTRqAKP?=
- =?us-ascii?Q?L8UHnrxR0B4yTHhnm8NeuNMGbjoCJCZcKeu0gA2ZgIb5J5/2XKXJALonfdUT?=
- =?us-ascii?Q?r3gfS1nnh5sdg+Gmjl26Q8naZGmyiFpnkHQu7LLW7L8SJcBtYVA31L57JBcp?=
- =?us-ascii?Q?AokY8X9nOCDxgI39Q7pqxotqXztQoPXru4gt6SfCOA2SfsPP1EsbI4gQSTIY?=
- =?us-ascii?Q?/IF/DYfMqJG8MIP1sb1eJBIATOBDc5YFIEjhX7o9mynAuFCxJrHxYabY+cXo?=
- =?us-ascii?Q?UvKvFU5xwyqHMx18LOU2Rag3hBiR1P7gb03MDKD5L/ZvZQsG93xQJh3YvrHQ?=
- =?us-ascii?Q?L594rNi+6DMCnwfTziKOWjdEAxW6kXcNXE353h5uedoGn+f5xa9FSVvEomgW?=
- =?us-ascii?Q?sK9xM8+O2TiBx2y9sRZLh+0VpoYZZsM2WpP+tL0i2memkLLqne2In4xz9qt+?=
- =?us-ascii?Q?Kkxs1Qg1ZVumA2I32MeKo4c/T+lCRibPDUUOsYoz+lalfw+FmZPgmRFLtGaX?=
- =?us-ascii?Q?di4+FMCDfkjx03rpgIdCY9ZY93UfBmCUlxQIAHq3kPZCrIRqwY8ZYGn/HyVp?=
- =?us-ascii?Q?o/Z9OB1kU+Raz8Yy4oZCAEHbO3/7Yo5SclU7Hp4jsTfIEt27n7A4NnaHexfx?=
- =?us-ascii?Q?b/SIfl/CIYkl3heaBzK1HKuM1VxkbiK3XT//0cnnkFS+HqQOy+PlDM0T2kaG?=
- =?us-ascii?Q?+x0kQip8nAXYTlqVTj9tvJPegw1OEYAjwWHCQKlalMm3q1LOzAD1HOhdFWX/?=
- =?us-ascii?Q?sALjOug6RmqACTs/7r52P/90+IAoLKWbLBE77XsiY9oOJB8J/EIaX9+gkqCQ?=
- =?us-ascii?Q?ZICMaJ4zkKbnTs5XXxiSXWEympgez2v4TyzqzMbglMClMCXTL1CPjPBbCKp6?=
- =?us-ascii?Q?YHoV26VU/WhiL6HkGlcBm3/zccR0B/tKXFINN2KljOsZANMH6D8bagTFWIOz?=
- =?us-ascii?Q?mxkaEhctS1naUMDNPD/Zg7n/lhTNObEWMBppJKSfTRLcE04tBAtfdJfAGH0A?=
- =?us-ascii?Q?+A7epEVhSAtuWmr/dlatcbOJz0MAOgJayfOwD7xC+8U4/CVU090QcRNX0/Qf?=
- =?us-ascii?Q?LxzyQYR4kFEREP7Wd3cYB+LsXpYob46BfV6dgSSoNqrN51vc5o2NxMSet4Rk?=
- =?us-ascii?Q?7+jbjzrl+bq04+s4Xf52fOfxpu+F7O+WAzYdnzBXjKg3xeS8wzqrnGsgSDIB?=
- =?us-ascii?Q?APC7rbOMdJfS6YsTbS97FkSFrxjM/A0gCNypWi6KatGE0hHjY5tOUg3QKQ2J?=
- =?us-ascii?Q?Orx33F/8iVPGtas4pEwatTlbLcJH5/I+kB9kTB3FdlFz/28LpqLaHgbciZUW?=
- =?us-ascii?Q?eQ/zpARpvy66NOiksiavAUhWzkZdzPIiE8bh2X+PlqRl+4FaQkOZAbqdU4MY?=
- =?us-ascii?Q?/xq4ZerunVkKROtC23+uZ/I/FtRKGp/zTnblAYalVQy+2yaLivSKAemIslFx?=
- =?us-ascii?Q?Z2kAmvOSU9QuNQgP0XAI4hNiSgaWizrmXYcxWZlJnJ/6dxmwrLeypIodV10d?=
- =?us-ascii?Q?PX6eiKBpMZ6mnxkYtHIwXCbIxo18cVDE6GTCYupETtuowA6/I+P0I0aS/lv5?=
- =?us-ascii?Q?uyaaKZeWKx7hiQzFN2zjRnzCkqZf6TX8HVABiWS0OTytxkMOAQR7ReTgs3um?=
- =?us-ascii?Q?zlxdLfchhY7v0I176eBQgwYqpgoqn0F4vTAFEdoE2hFUm2OgVe67?=
-X-OriginatorOrg: valinux.co.jp
-X-MS-Exchange-CrossTenant-Network-Message-Id: ce6bffd9-8d0f-4999-453b-08dee3ca623d
-X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 17 Jul 2026 06:12:30.6098
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: v0QFNbkZj/c5cxeoAJsT4P4mXFazeijoIrDQPB+zRgF59i0zjL7Z9+r0Pl0DefkRB1lDwdBMeGLVe86FgNlgZw==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYWP286MB2543
 
-Before the NTB hardware and transport drivers were split,
-ntb_transport_link_cleanup() changed the transport link state to down on
-the first cleanup and cancelled pending link work on repeated cleanup.
+Thank you for your contribution! Sashiko AI review found 6 potential issue(=
+s) to consider:
 
-The conversion to struct ntb_transport_ctx retained the repeated-cleanup
-branch but dropped the state transition. Once a link has come up,
-nt->link_is_up consequently remains true across link-down cleanup, allowing
-QP cleanup workers to retry the handshake against a peer that is down.
+New issues:
+- [High] Calling cancel_delayed_work_sync(&nt->link_work) while holding the=
+ nt->link_event_lock mutex causes an AB-BA deadlock.
+- [Medium] Leaving nt->link_work pending when transitioning nt->link_is_up =
+to false allows a race condition that incorrectly re-establishes the link.
 
-Restore the missing transition.
+Pre-existing issues:
+- [Critical] qp->rx_buff is accessed by the rxc_db_work tasklet after the u=
+nderlying memory window is freed.
+- [High] Race condition in ntb_transport_free() allows concurrent double fr=
+ee of DMA memory windows.
+- [High] Incorrect teardown ordering in ntb_transport_free() allows backgro=
+und works to be rescheduled after cancellation.
+- [High] Silent packet drops in ntb_transport_tx_enqueue() return a false s=
+uccess, leaking client buffers like sk_buff.
+--
 
-Fixes: e26a5843f7f5 ("NTB: Split ntb_hw_intel and ntb_transport drivers")
-Signed-off-by: Koichiro Den <den@valinux.co.jp>
----
- drivers/ntb/ntb_transport.c | 2 ++
- 1 file changed, 2 insertions(+)
+--- Patch [1]: [PATCH] NTB: ntb_transport: Mark the transport link down on =
+cleanup ---
+commit bd7368d1b1384a2ec346e8cb7ab08bf47c5b276c
+Author: Koichiro Den <den@valinux.co.jp>
+Subject: NTB: ntb_transport: Mark the transport link down on cleanup
 
-diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index f59f926d4bfa..5b9fccd1383d 100644
---- a/drivers/ntb/ntb_transport.c
-+++ b/drivers/ntb/ntb_transport.c
-@@ -974,6 +974,8 @@ static void ntb_transport_link_cleanup(struct ntb_transport_ctx *nt)
- 
- 	if (!nt->link_is_up)
- 		cancel_delayed_work_sync(&nt->link_work);
-+	else
-+		nt->link_is_up = false;
- 
- 	for (i = 0; i < nt->mw_count; i++)
- 		ntb_free_mw(nt, i);
--- 
-2.51.0
+This commit restores a missing state transition in the NTB transport driver.
+It ensures the transport link state is marked as down during link cleanup,
+preventing queue pair cleanup workers from retrying handshakes against a
+down peer.
 
+> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+> index f59f926d4bfaa..5b9fccd1383dd 100644
+> --- a/drivers/ntb/ntb_transport.c
+> +++ b/drivers/ntb/ntb_transport.c
+> @@ -974,6 +974,8 @@ static void ntb_transport_link_cleanup(struct ntb_tra=
+nsport_ctx *nt)
+> =20
+>  	if (!nt->link_is_up)
+>  		cancel_delayed_work_sync(&nt->link_work);
+
+[Severity: High]
+Can this synchronous cancellation cause a deadlock with the link work?
+
+If ntb_transport_link_cleanup() is called from
+ntb_transport_link_cleanup_work() which holds nt->link_event_lock:
+
+ntb_transport_link_cleanup_work() {
+    guard(mutex)(&nt->link_event_lock);
+    ntb_transport_link_cleanup(nt);
+}
+
+And ntb_transport_link_work() attempts to acquire the same mutex as its
+first operation:
+
+ntb_transport_link_work() {
+    guard(mutex)(&nt->link_event_lock);
+}
+
+Could this block indefinitely waiting for the mutex while the cleanup worker
+waits for the work to finish? By resetting nt->link_is_up to false in the
+new branch below, subsequent cleanups seem guaranteed to hit this path.
+
+> +	else
+> +		nt->link_is_up =3D false;
+
+[Severity: Medium]
+When setting the link down here, should we also cancel the delayed work?
+
+If nt->link_work is already pending in the workqueue, could it execute after
+this cleanup completes? If the remote peer hasn't processed its own link
+down event yet, the work might read valid SPAD values and mistakenly set
+nt->link_is_up back to true.
+
+> =20
+>  	for (i =3D 0; i < nt->mw_count; i++)
+>  		ntb_free_mw(nt, i);
+
+[Severity: Critical]
+This isn't a bug introduced by this patch, but is it safe to free the memory
+windows while the rxc_db_work tasklet might still be running?
+
+If a doorbell interrupt fires asynchronously, the tasklet executes
+ntb_process_rxc() and accesses qp->rx_buff (a pointer into the freed memory
+window) before the qp->active flag is checked.
+
+Does this need to synchronize with or disable the tasklet before calling
+ntb_free_mw()?
+
+
+[Severity: High]
+This is a pre-existing issue, but is there a race condition protecting these
+memory windows during module removal?
+
+ntb_transport_free() calls ntb_transport_link_cleanup() directly without
+holding the nt->link_event_lock mutex. If a link event concurrently schedul=
+es
+ntb_transport_link_cleanup_work() (which does take the lock), could both
+paths simultaneously enter ntb_free_mw() and trigger a double free when
+calling dma_free_attrs()?
+
+
+[Severity: High]
+This is also a pre-existing issue, but does ntb_transport_free() cancel
+background works in the correct order?
+
+It calls cancel_delayed_work_sync() for the link works before calling
+ntb_link_disable(ndev). If a hardware link interrupt fires in the interim,
+ntb_transport_event_callback() will requeue the work items.
+
+After the context is freed, could the newly queued works execute and access
+freed memory?
+
+
+[Severity: High]
+This isn't a bug introduced by this patch, but does
+ntb_transport_tx_enqueue() silently drop packets and leak client buffers?
+
+When qp->link_is_up is false, it returns 0 (success) immediately:
+
+ntb_transport_tx_enqueue() {
+    if (!qp->link_is_up)
+        return 0;
+}
+
+Callers like ntb_netdev_start_xmit() expect a non-zero return code on
+failure. Since 0 is returned, the caller assumes the transport layer took
+ownership of the buffer.
+
+Because the packet is dropped and no callback will be fired, does this leak
+the buffer?
+
+--=20
+Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20260717061223.2203=
+863-1-den@valinux.co.jp?part=3D1
