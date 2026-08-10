@@ -1,46 +1,47 @@
 Received: from TY3P286CU002.outbound.protection.outlook.com (mail-japaneastazon11020079.outbound.protection.outlook.com [52.101.229.79])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0BE3542CB12
-	for <ntb@lists.linux.dev>; Mon, 10 Aug 2026 16:51:47 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8AFEC42D751
+	for <ntb@lists.linux.dev>; Mon, 10 Aug 2026 16:51:50 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.229.79
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786380710; cv=fail; b=mZPuax/ARJl90AF3epAoX5S6xsWvjok+QlJE+lpcSm0rCU96JzQJLazoH/jnDCzNQZpJLuT/hle17YHGKQScri1nmgkDqrLaKFEubiEzSKHyqJy9Bgvl1NYTcdtVSVRnarij2lzblDL+eZ88U7yTUu6GfXE15FMWhwdRkWaZZ/E=
+	t=1786380712; cv=fail; b=A3LnWvnsNfKqIwf1DzXHRBF1T6rzowYVbxUJzvs2K2GLj4Gkv0NZOUeI8HA4TnowVswVV7jTNjaSA2pmujBFS8hnhE82jM0Asa3M7g6eEHkWwMJsH84e/KWSqTUftWPRSviMNfXfPqQIzt63NSxgW/VjbulnkStz30YwT2CfExg=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786380710; c=relaxed/simple;
-	bh=HlXcuUGEJ478lRxvAmyTxmGhcKF4Gi8SgT90jbnSs3E=;
-	h=From:To:Cc:Subject:Date:Message-ID:Content-Type:MIME-Version; b=PohRJFQKive8cU76t6Z3TLFkJdEsNPRdIoWjXtOZPU1u9r0lOw6gxKISL+s5SQyV0qnDGkJgjboF0fod6L9V12CmZTASywMk+jpT/AxIy5ATWIUqal2wF9Jj+QrjJW+GqFiIhBN6bHSbba2Fjxo2sV1vyjFd+jw0c0wwZj+3/DQ=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=g5UK5kMg; arc=fail smtp.client-ip=52.101.229.79
+	s=arc-20240116; t=1786380712; c=relaxed/simple;
+	bh=QwNLuMDgrOcmLir2IstgapNc3zOhHMQoHkDAFDv3m0s=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=IE+pyrfouTI6dljBOEk+yrBwbd496LmotDhmbzXrGij+6SQCBdDNc5HN6Y8J+H4nTNISLV4hyaa3dKS027uzzgZmV8PuT9+F+aukURw2B/jL23hXY6sYQPJP3vidEUVOzixLMkeLHbD1PFBQZPOoq/RYO+8MSzz9kO8X/ZFv+8I=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=XZZuwAnY; arc=fail smtp.client-ip=52.101.229.79
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="g5UK5kMg"
+	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="XZZuwAnY"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=cx4/IxzsM+ej+pYJ0J7UCEfBl3eU+/l5dZL4FxfsIJUgk35ycZ3S4KCchcMXjhIrYBsjX9oy5RQYXTt8zFouwgFWkxLO+UF6YaX1UiCvHZgObdeIYUTIGQ10Bh9qkY5OIWED6hunuCz+k7RQrRomuklWmFTkcpJ+GV4WEGReXDV+z5bqn0R5ciR1stmCJV8JBTedcFHVQLpB5ITmBWsdihV3zVkzgYqMWEO3Z7i/uZK0OhHxh67j4iWBoP5LeKvzeVJEarXxA1xS4hMedzLfuctv4BdNIUP3mD5hc32a6M+02i7JLamChYOtliWZp/mTYU7psguHczpMLThWEKgsYw==
+ b=YZ5U0WOrUcTuqYtWV6nJqdI6skAvbrEsbntqgtv8e3sXcgpS3dTNHfmFrNMo8BMuuImqq9XE1Cw8ZDmxsgdWYlBxjU/5xK3aFJv7QS0OCUSHxFrDYmI0b/XyAxxcbBFN+0lwJFNY/HTgJol40cDytKgZRmFWt6y5ksiNjMy1g0tXBLO8umI1wlS/iCgrFVBKU9YeDqsmMrEzHiKVwyoguWLbmr6rase+zZbUfPXjj/UlU7Tu9tGMjC9nB8or81sUMt9FvbbXvjmfnjYmzaJbWaD+HyBSNIT9JRHnfgzI4mV7EDOmFpvsnAEIjPwRYLpLAOh/e4gE5nkZW8i82VbpKg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=5ymARv5I12rgiqXW+nuFZDbTjjU4TsyqOISrRMde+C4=;
- b=kmWbMFqfCli/DRkptFQ0cCVBWGBEqW4n10nyuOBiNGvWHHpYb2MKc/2wYiHqlbnUyHM857Yk4nLbJwT/65PT5cqy529eHBcNqY+iGXFEDZMRfXb/Aji09GrOAvw3LH5HUGeAiRbdindOmhZ3Tsc7ZHNHRDPA/pkWgC1AawhNEZ+M4h/TNrzzPMPEXKqTvnH7EXhEnIsJsAZMo5/xu6J9CpocxA7NTC378BKSHXWS601p6JX1i4vjnY/ouvfoySNCRfav5hTj16jWGKkUBFGkfRb7xVmgsY5wdAiSk8OeC7PfY5q8/phMckj7HbxL0TISH4+xqMbQHeCzixXIyZRAxA==
+ bh=lLTFMsq27TeF6RbZZc8F8bfAa4toJlXXkInnb9Jmr7A=;
+ b=aBAi4U3od9y9aguw8CL1ckUHK4bc3hFoGZjyEfljZ6kWMSJJBTVqtl+QnwqoIuEzoJAhCH5onnPpp67LQtQE4C2yQfAfgkjZ9X2jPilVzvySFQmnNa3d8eXEROv9y/QOeRUeoRCuYEun6oMhPDdxuJrUZ9PBDLFFPFbgr+EZawVOyEc2lcgbjAJq9XXfIl6ekijLhugDlewMw/RkFSHvZox7SEdqfBh+Tum1ZRdXb+Bp3Xiode2JumzEO5aOMzmDfMN1vfoNeqKFqaR4FhhKMZkv9d4BrRKr8NzeeFMcMMCMZmoLfZv/uUR1G5WT/a0AxNAWeY3Qi/QksdPFAPunVw==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
  header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
  s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=5ymARv5I12rgiqXW+nuFZDbTjjU4TsyqOISrRMde+C4=;
- b=g5UK5kMgXpRmUfTY6bwo9bmF3e07AlHnevOxUsQylZRPeiquADv081sUrPzUIpBGhbJjppHv6MTJ2QF/FtmhdtR5XRMEVLSbZ6uEPDpuffzwoCkjJN3KP1ee9a6nAxlVWD9asHABLf3IlTYI0fwHV/r/IiFVQAY1MwFV3Wr4XPs=
+ bh=lLTFMsq27TeF6RbZZc8F8bfAa4toJlXXkInnb9Jmr7A=;
+ b=XZZuwAnYm2E68S7ThY2I0sSNPDjndzyNWzxSGNRE6bazJFJ64I2GenGiTR7DY2/HeVOX1pA1Lht3osbHtNAiA9TcA8OK0lWVbSUTglNv9Q+ez+Z4zB50c1TT0tlfyOiGfyIqGT9B8mQ87NAzJEqXtXKKPaG4z+F8WORTHEtGriU=
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=valinux.co.jp;
 Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:38f::10)
  by OS7P286MB6729.JPNP286.PROD.OUTLOOK.COM (2603:1096:604:42d::10) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.292.25; Mon, 10 Aug
- 2026 16:51:43 +0000
+ 2026 16:51:44 +0000
 Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  ([fe80::2305:327c:28ec:9b32]) by TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  ([fe80::2305:327c:28ec:9b32%3]) with mapi id 15.21.0292.024; Mon, 10 Aug 2026
- 16:51:43 +0000
+ 16:51:44 +0000
 From: Koichiro Den <den@valinux.co.jp>
 To: Jon Mason <jdmason@kudzu.us>,
 	Dave Jiang <dave.jiang@intel.com>,
@@ -52,14 +53,16 @@ To: Jon Mason <jdmason@kudzu.us>,
 Cc: ntb@lists.linux.dev,
 	netdev@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH 00/16] NTB: Add direct TX/RX using PCI endpoint DMA
-Date: Tue, 11 Aug 2026 01:51:19 +0900
-Message-ID: <20260810165136.2292436-1-den@valinux.co.jp>
+Subject: [PATCH 01/16] NTB: ntb_transport: Abort link setup on QP MW allocation failure
+Date: Tue, 11 Aug 2026 01:51:20 +0900
+Message-ID: <20260810165136.2292436-2-den@valinux.co.jp>
 X-Mailer: git-send-email 2.51.0
+In-Reply-To: <20260810165136.2292436-1-den@valinux.co.jp>
+References: <20260810165136.2292436-1-den@valinux.co.jp>
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
-X-ClientProxiedBy: TY4PR01CA0092.jpnprd01.prod.outlook.com
- (2603:1096:405:37d::17) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+X-ClientProxiedBy: TYWPR01CA0031.jpnprd01.prod.outlook.com
+ (2603:1096:400:aa::18) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  (2603:1096:405:38f::10)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
@@ -69,242 +72,116 @@ List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
 X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|OS7P286MB6729:EE_
-X-MS-Office365-Filtering-Correlation-Id: a74ff241-54ca-4434-c7d0-08def6ffa86a
+X-MS-Office365-Filtering-Correlation-Id: 3c36d5d3-11f0-4f4c-09dc-08def6ffa8ea
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|10070799003|7416014|23010399003|376014|1800799024|366016|6133799003|3023799007|56012099006|10067099003|18002099003;
+	BCL:0;ARA:13230040|10070799003|7416014|23010399003|376014|1800799024|366016|56012099006|10067099003|18002099003|22082099003;
 X-Microsoft-Antispam-Message-Info:
-	pjyDFEj8dKAMxgQJZc7sQVv608svxP5zGSe69aIdtw3Z1asbJGeNfxzdI92+KGThXpEgg5mCRwcUMxzeDvOAWtw7+QY5aQpEPMdBceBXZeuE3i53CcBXnDJ+ltoTTRL26OKaZ2tSLXPWmzCkn6Wp2AlNr0GwbemMLz7X/u+LUBpoI8QycEFrTA4BnFc03jLpGra4B0BCqcadPwukPPPSAsrTYZls4aBJm8CJMH4BKIPrUGzgDKvlBWLP3xrepHJlQX2uzuwYRvhpRb4SeYz+WhYmGhp9LeDkLtCi151DFyDBv6vo0yWyzsmOp2a6zckBCXqYBxqn5PK5waoJ33jSFXXy1woOrVGgCRh+fIk2pGlMRuGn/WC7gEDSKgN6bdBJcyN5C5zDwatrJOWtcKRP8rY9jDLkA6cclOyPKKWKTNCCIARCeHvsbCEc5VPJkEs0xAY1MOHY85hCEknFFs4xGIsERjhWsOjyeHJ6UuDEKo7RNKqXva6Z6bYcV9cqyCqfdkINoMF+SJB/J4xeULDdKoietXzet80hUsKDUblc3fmflo8RUCsyc1+FvwK0eT8u+byWSYUQJ1SP3rdePkY3hvYIHJNwgG7b6jQT/r6fI2RzZCdCHxfU+UdWj2N4c5uV5mf7zXEnXoYrib5p5shPU5TAwptGJPdTyyBzf3D7tZM=
+	iexGuIG686+6CqoKMbfDlZVwc6KkXad6mKoYoi2C8diwEO6MhxccZV9Ve85f+0wvPOlVktCUAXGv8YXZbl/abg8DW2OGJ/7nUPrEFo6LwJiiCnBSPPK3oSOxdTzHqyp/V6U3l3PWImdsB/j8kOiAcEKaDJ2gBK8s8R/pUAPB9vaW689deYLi5Kr4X8j4idPlbQC4YgQar3Ov9ziDm+tkD2uRZL9hh39XembM6sOs3Sv0GbQ/UHxrVzwOQpo7hKtCy0OBNgPTwAIbsKDGxIEWcg/05Z/FdpM/NT/t7TC8P1rXUzOk/GB2MAOYwKoXM+fspO6gXgI/6/26EAaEy8+3tvmTHxGz2uc3ubIULOM+dXsGkfpCwxhK/FArb0z8vnum4bW8RoGvTcsNv5T7S07PpA0oUWNMRFz/btU4EVaGzHFENMOuvxLU3ScqxQT3TQhGtRWgK1aLce/5RyACWfe7h23KI9i/vfwua0eD2Wityf16Tt6MoyAsQyHDvJPUQsG6hdLCUtpeZVme1cE0diZ3+axN/d1+U0rmuH3xxWPGlpqMlnkuooxw6+EcLnTqY/jOdqLW6E0i6k6IQkCVqeF04vOiv8z8ExyCbcjOZT82nGzBDDDmESR+L0eaLwWo5SbOWRm1yjBa4fpVgq92v3XNG+S+vodICs8pSE8c79PcOOc=
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(10070799003)(7416014)(23010399003)(376014)(1800799024)(366016)(6133799003)(3023799007)(56012099006)(10067099003)(18002099003);DIR:OUT;SFP:1102;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(10070799003)(7416014)(23010399003)(376014)(1800799024)(366016)(56012099006)(10067099003)(18002099003)(22082099003);DIR:OUT;SFP:1102;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?GzDD1cTnTQUhDG3WLzfe/Um06MgfiWTf0hTQ/wpEa0EZuDdPaLrSkNc2ang5?=
- =?us-ascii?Q?NvIDwlBj1BcKwipnKgThXBG4ijCYa5bCT/+6JIU5MWldYYx6RkN6GGzxDHk8?=
- =?us-ascii?Q?Jb/sZqEEjKgDStcWduwwejSBbpdkrxIGxvjB6timpHsWoDDmP17WMVv6n4g7?=
- =?us-ascii?Q?Yb/hnGJr5i/HihsHiDX/0q11JgU64L48auysth9FpdFibvAGsv0r0VrWv52m?=
- =?us-ascii?Q?fdyCeysQFxHvRV56xisjEhSz+S26I0x/LZFXft7UHjWp+UV0v+Wj2QkHMLc4?=
- =?us-ascii?Q?WtGMmrgwJGzEW1AwApdpFiG5H+lB6jAUxnR7ZfbNF5bWp3dluFZkeobNl/Bc?=
- =?us-ascii?Q?6+/1vHXOpZLbiwfJ0ay9qruMCqDDQfBrWiYSut+pkS+xAP9I0HsPJSjxY8pM?=
- =?us-ascii?Q?ftcThDgoszHvUCecx2BNBL3h1NizPtQa0XgVfw85TOcjxiFNC/1nWwkTWyNJ?=
- =?us-ascii?Q?e5GPxnMKIz9UyT8RoZVVWcMK2cmuo4T0pyzL5tzylgPfIkjidJCop5OgLAm+?=
- =?us-ascii?Q?3BeJh1hS1Z6Wdi6CTaixHsrDKvVy+m/DPizYCJ+dSW2nqzU0j75x1D1xdA7X?=
- =?us-ascii?Q?OuOQu9Pivedviu+Fe30Ua6u92WpTF3GlaRjWzbYrwu82UtfOEl1DZ12Occi2?=
- =?us-ascii?Q?kmhPRIuczZZxAI3BY6XrsrM//3EFl6PKY38LidHM+WXc9NRK0FyV/Y1WC3uF?=
- =?us-ascii?Q?w2vcB5gLhArJ0LqYg4p97pVjv2wOKoNI4kfsZ3jcqP92cK3O0S6tQAg4GTtf?=
- =?us-ascii?Q?16+22fhjaasFW6sd66mxI/mBY6QCdMR9jDOjOMXKjTMCi5b60jqLF6lCABV/?=
- =?us-ascii?Q?scGmDZqQduoHWKF1HE6i7b7QHoEPCJgX/k8UM+jzHwSEAlZW+ATfsN8DYY9r?=
- =?us-ascii?Q?un6VP5VYgC5Yc6YEJtOXUeBiQdTsQwjsX4rjzuD/4twSettiOM/9Qiz/Fghj?=
- =?us-ascii?Q?PBnDXuUReacYtkb34jqXhLauymTqRgBIemgi1+wWEY898jgWEk6llUike/1l?=
- =?us-ascii?Q?shPnyy7j+qO3mLVpRagM3kMknHi3eVf1DTBZQK8cgq+CZPOZtVf30HcEB7+J?=
- =?us-ascii?Q?iXDjkSdmRM9o0NmYA8wPmpMf/5BWUsQnaH+hbp4O3PBUcPohsjXW9iYtTV96?=
- =?us-ascii?Q?oUUpVgAuEQA65ioLAzhjo1Hgvr5CNfIZemAoA/kLPuACex42nzEXhHDV9Twq?=
- =?us-ascii?Q?RX5kWz4k0Gf1XPbjH3sBbzgAFmiwzIqOO1GgdUZYETnnH2DWxymWIezXlTSN?=
- =?us-ascii?Q?tQ8NkGwIS+/zXhpiuMNDlLyq+z71AanoqtQeJ29iS734/TTO7MxKxJggEDZ5?=
- =?us-ascii?Q?V6eriEMHLpaLc1Stvw0ciHZWmz2FLUyqxHiVuh08AOj+oa2kQEcgAE1P5ZmN?=
- =?us-ascii?Q?OqG261v6AswOZEjFBs9FshSSqvk3P4Gw1Qlx98ViHbuVUKEWqNQgdjlnOZi4?=
- =?us-ascii?Q?Nd8n8SPKV87jsA8XquO3DNuL8P3k+RLCItFQzTkNOU64Y+LlKevbsDUBan9z?=
- =?us-ascii?Q?c+M9fEofc7J2LereogbqCwQmP4pkOU685pHO1Fb8Vc0W326aBoNBIjNRcsi3?=
- =?us-ascii?Q?rk4fngc93GhNNJYeQEnHXoaihTXGoCWqVJjBrxRmrA0601KxX2J+/lqZ8JrI?=
- =?us-ascii?Q?ZugFT+kh2JEo79RPbXEw10fda5bsfHoJJqqmne7atTazl/D68sAaiZ4f355L?=
- =?us-ascii?Q?fI1zr7lHHuENVnD+EU/Z+WX5b8pknQbQpc56cImVimauS3pza9nUTBy1F9lW?=
- =?us-ascii?Q?+nGvtuHaLOnsEBpwWQWjK9GPtoEUH7LIrBrAWwVGq05L33FcUqW6?=
+	=?us-ascii?Q?F1PPSjtuviAouIi4jhVyFq/IhhhkfEiaMqQuSEFDNKbU5ExA2Jc7Pv7lvdxT?=
+ =?us-ascii?Q?zzfdybh+AvA/Lk3RBSm2wqRRKX0/57D9lUkq3O9Tpahm0xkadAApH4QNFsXL?=
+ =?us-ascii?Q?J6+23+PegCtqC5UnD0+h4y9EnPX0IwljvVFkUHvsuCk4+fmWUtvBmN8aXTdc?=
+ =?us-ascii?Q?2so0XpwQMsS2AD84X+qESJEGPfYMXOW2CIEqadtCUFiSE1RcYwveI05/aDB4?=
+ =?us-ascii?Q?Gp5NyI1EPSGsjm+MKBK4hFHot4d4WsGUeVQMOCIaE9ghoyhYrGRXdfhZWZAg?=
+ =?us-ascii?Q?CBrk8lqu+kW94mdR8x9thA0Zn1x3rr9JAtNnDyvgQQ5RtXoM1sHdykBOWKDE?=
+ =?us-ascii?Q?E032sPFqKetWWBYav4RbvLtVYy03ac/PwhpBsMDvEDJ0NQPU1GVfSzHrGDxn?=
+ =?us-ascii?Q?+qWnYgDNO11z1NDx6y4zUFLPKZli/Rs0eR6DfaQejMK7a0PjJR2ZRgf5v0vL?=
+ =?us-ascii?Q?Nld7dNqAbHSb8Q0yie8hJVDx75gQIPxzGJieKwOylYjyMA3K5oxsStkEC8uK?=
+ =?us-ascii?Q?FOwrCZhlr5LzVzXnorFB+nxsRXoh0QvAyRyRZkhv1M/xG4NdA6N7yKEjDCza?=
+ =?us-ascii?Q?crL8lJWlkNZ8/mk0mPth7gfmfeS6mXwIlOQiVz9fr0joA58vNLVAJndGo1y/?=
+ =?us-ascii?Q?j/5B/wbQrkzz1AWLTAv1a01Nnq+Hk3tzR4nBtO/HvAo/N82fgL9JcQPLTeUE?=
+ =?us-ascii?Q?InzpxmUmbVwVkiLnmwu7tgqujN2yhviXHM1MRMxZM321XoxN+Jjo/qiUhKyZ?=
+ =?us-ascii?Q?5SHSaFTr5/ueFs15b/b8j/3r8p4zffm7lS50SZX5zX1jjell5X9liGAIeiAQ?=
+ =?us-ascii?Q?SQ8LHzQZpxZBTEiPGyBDtZsAEL9u+ZAR8aL6gQ/snhIU/4WnRpFT15uTPOcE?=
+ =?us-ascii?Q?2xb73/sHtXdOugQqMzC1exxze9eGSkUmDtF8mQmEpzm8zodk5gJoX/Pnw/1t?=
+ =?us-ascii?Q?ISJbxRNjRxwSeCKhxx8OZ9cEHoysffN+6H0AnMBNlXSfwWhHpz8qQZ6ZmjZP?=
+ =?us-ascii?Q?MilVjQHyu6JsnwH+HNrZaIZ0Bj3KSAxRB/QgxkwATABaQ804UUgjb/svKoN8?=
+ =?us-ascii?Q?/vBHmogG1XKjU82hdFpqqTwfbmI/M0F/VCbSi/pqua1hwTuFncdcM3D8u4rQ?=
+ =?us-ascii?Q?JnKFvzu1A/C5HXSk2oPZtFtS6bKC8oPUcHs74MrFxhwOM3Ew0v6EBxeRwmC9?=
+ =?us-ascii?Q?cZ6ZPy86CDqSQnhrppMy+sKTA7MchsEEk81hsRxrfnsl7VmwH3MLY1YY2Wjh?=
+ =?us-ascii?Q?kmoGdXTgFHF8wLctz47oL8tABETH82bKfH/c7IOMmERm1kf4UFOciV/2SsJE?=
+ =?us-ascii?Q?nCE9yckaP4k6auFW+ZZt5SiuVL0q7pX346QniAaCbCg72uvCnZsy/A2sYBFJ?=
+ =?us-ascii?Q?GPemduU1LifvKoGvYc50bAO5TQxWYypTdOfkjmTDpzbotqMGxjIBi4jMEhR0?=
+ =?us-ascii?Q?f1AvQ8euozowYAh/uKaTYw6sqpKK5FOd4unlAMiESRhnzYjuMkSndFIZy0Q6?=
+ =?us-ascii?Q?FzfX1zHg0Q4LgXf7hE5gEleTGyqwZXZNHG4Uw+1YSracf11vAimdWe+hBicY?=
+ =?us-ascii?Q?lK9kOppJ4r9qXLRHO9qODiq6bRZCR03eip3fgdCN1ClXhXBLwZlFKNa7bQdm?=
+ =?us-ascii?Q?o5S8MPOm6m8onmWIvirqUqv7xSQzimMTb07euPja9PdXyqN8wFXAbZeKRD+e?=
+ =?us-ascii?Q?yWYo37oGPoyGV5bESb8W5BoUP6Rd3dga1m8Wz03YnKbZ2sDQEDgE2/TGArzg?=
+ =?us-ascii?Q?k3l8mI3TVNG+gMu9zs6CKQ5MDn74food//O1st2KW13ioJfQlbn9?=
 X-OriginatorOrg: valinux.co.jp
-X-MS-Exchange-CrossTenant-Network-Message-Id: a74ff241-54ca-4434-c7d0-08def6ffa86a
+X-MS-Exchange-CrossTenant-Network-Message-Id: 3c36d5d3-11f0-4f4c-09dc-08def6ffa8ea
 X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Aug 2026 16:51:43.6599
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Aug 2026 16:51:44.4898
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: AuOBY9LkR/UkT/whjNv9x0HSocjDe/yBLwQWwHdJ9+iLLKPuhOodCDdmy9LzcbhpKlbdhYaxYaHkQvQIw6eqTA==
+X-MS-Exchange-CrossTenant-UserPrincipalName: gcmOjklNbabQ9YpeuOM33bYHMmczGhQLTOezGxZ0pm3D8KEJI7iOc3j3A0Z2fJwUHFmWIb55JhkOPxiXdp/ERA==
 X-MS-Exchange-Transport-CrossTenantHeadersStamped: OS7P286MB6729
 
-Hi,
+ntb_transport_setup_qp_mw() can fail while growing a QP's RX entry pool,
+but the link worker ignores that error. The worker can then publish a QP
+whose memory-window state is only partly initialized, and later work can
+use stale or incomplete pointers.
 
-This series lets ntb_transport transfer packets directly from client TX
-buffers to peer RX buffers using PCI endpoint DMA, avoiding the
-memory-window copy path. It raises throughput significantly.
+Set up every QP memory window before publishing the transport link. On
+failure, clear the QP pointers before releasing its MW backing and leave
+the link down.
 
-My previous attempt at the same goal was:
+Fixes: a754a8fcaf38 ("NTB: allocate number transport entries depending on size of ring size")
+Signed-off-by: Koichiro Den <den@valinux.co.jp>
+---
+ drivers/ntb/ntb_transport.c | 20 ++++++++++++++++----
+ 1 file changed, 16 insertions(+), 4 deletions(-)
 
-  [RFC PATCH v4 00/38] NTB transport backed by PCI EP embedded DMA
-  https://lore.kernel.org/r/20260118135440.1958279-1-den@valinux.co.jp/
-
-Since that RFC, prerequisite work has entered mainline in a different
-form. Unlike that RFC, this series extends ntb_transport itself and can
-fall back to the existing memory-window copy path at runtime.
-
-Some work needed to run this series on my R-Car S4 testbed is still under
-review; see Dependencies below.
-
-The series contains:
-
-  * Patches 1-5   : small fixes and prerequisites
-  * Patches 6-14  : the main implementation for direct TX/RX
-  * Patches 15-16 : optional features
-
-
-Summary
-=======
-
-ntb_transport currently copies each packet through a fixed slot in a
-memory window. This series adds an optional path where the receiver
-publishes client-buffer DMA addresses and the sender's DMA writes
-packets directly to them. The existing copy path remains available, and
-direct RX and TX are negotiated independently.
-
-Bidirectional direct TX/RX requires a multi-function PCI endpoint. vNTB
-uses one function, while the PCI DMA EPF on another exposes the endpoint
-DMA controller to the host. Each sender needs an ordered channel that can
-transfer from mapped system memory to peer-published DMA addresses. The
-tested setup used dw-edma with the PCI DMA EPF on PF0 and vNTB on PF1.
-
-
-Design
-======
-
-Session
--------
-
-ntb_transport automatically reconnects a logical QP while the physical
-NTB link and its shared MW remain up. One peer may therefore start the
-next direct-DMA "session" while the other is still finishing the
-previous teardown. A fresh session ID distinguishes the two instances,
-and direct DMA remains disabled until both peers have acknowledged it.
-Otherwise, stale RX addresses from the previous instance could be reused
-after their mappings have been released.
-
-Resetting the physical NTB link on every QP close would avoid this
-overlap, but would also tear down all QPs for ordinary operations such
-as ntb_netdev close/open, MTU changes, or queue reconfiguration. This
-series keeps the existing automatic QP reconnect behavior instead.
-
-Quiesce
--------
-
-A published RX address must stay mapped until the sender can no longer
-write to it. Closing the local QP alone does not prove this. During
-teardown, each QP publishes its final issued TX boundary, then writes a
-quiesce marker to tell the peer that this boundary is final and no more
-TX will be issued for the session. The CPU-written marker can arrive
-before earlier DMA writes when the two paths use different PCIe ordering
-domains. The peer therefore waits until it has consumed completion words
-through that boundary before acknowledging quiesce and releasing the RX
-mappings. Local TX mappings remain owned until DMA completes or the
-channel has been stopped and synchronized.
-
-Completion ordering
--------------------
-
-The payload and its completion word are submitted to the same ordered
-DMA channel. A separate CPU MMIO completion would not provide that
-ordering: its posted write could pass an earlier DMA write. The MSI or
-doorbell sent after the DMA callback can still reach the peer before the
-completion word is visible. A read-back from the completion destination
-would close that window, but would add a non-posted PCIe round trip to
-every packet. It hurt throughput in testing. Notifications are therefore
-hints, while the completion word decides when an RX buffer can be
-reused. Optional polling lets the receiver find a completion that
-arrives after its notification.
-
-Per-direction negotiation
--------------------------
-
-A side may be able to map direct RX buffers even when it cannot reserve
-all TX DMA channels. RX and TX are therefore negotiated separately,
-allowing direct DMA in one direction while the other keeps using the
-copy path.
-
-Protocol compatibility
-----------------------
-
-The extension keeps protocol version 4 and the original QP layout for
-peers that do not advertise direct DMA. Version 4 has been in use for
-about 11 years.
-
-
-Dependencies
-============
-
-The multi-function endpoint setup described above requires:
-
-  1. [PATCH v6 0/6] PCI: endpoint: Expose endpoint DMA resources (part 2/3)
-     (https://lore.kernel.org/r/20260804033855.2115817-1-den@valinux.co.jp/)
-
-  2. [PATCH v5 0/3] PCI: endpoint: Add PCI DMA endpoint function (part 3/3)
-     (https://lore.kernel.org/r/20260717050953.2145851-1-den@valinux.co.jp/)
-
-  3. [PATCH 0/3] PCI: endpoint: Support vNTB as a non-first EPF
-     (https://lore.kernel.org/r/20260728172306.2751813-1-den@valinux.co.jp/)
-
-Series 1 and 2 will be combined in the next revision after the part 2
-review settles, per Frank's feedback.
-
-
-Performance improvement
-=======================
-
-The test used two R-Car S4 Spider boards connected with an OCuLink cable,
-one as EP and the other as RC. The link was PCIe Gen4 x2 with DWC PCIe
-controller IP v5.20 and eDMA (not HDMA). The workloads were:
-
-- UDP: sudo iperf3 -ub0 -c $peer -l 65507 -w 512M -P 4 -t 10
-- TCP: sudo iperf3 -Z -c $peer -l 65507 -P 8 -t 10
-
-The results were:
-
-  (unit: Gbps) (UL=EP->RC, DL=RC->EP)
-
-          UL UDP  DL UDP   UL TCP  DL TCP
-  ------- ------  -------  ------  ------
-  Before  ~0.6     ~0.6     ~0.6     ~0.6
-  After   ~19.5    ~17.3    ~12.3    ~10.8
-
-Reaching the above throughput on R-Car S4 also requires:
-
-- [PATCH 00/11] PCI/NTB: endpoint: packed vNTB memory windows
-  (https://lore.kernel.org/r/20260803180439.1963864-1-den@valinux.co.jp/)
-- [PATCH v4 00/24] dmaengine: dw-edma: Support dynamic LL appends
-  (https://lore.kernel.org/r/20260729143036.3087722-1-den@valinux.co.jp/)
-
-The test setup also used two unsubmitted platform changes: adding the PCIe
-controller to the IPMMU allowlist and capping the EP DMA MRRS at 128 bytes.
-
-The "After" result used:
-- packed_mws=4 and `ethtool -L eth0 combined 4`
-- `modprobe ntb_transport use_direct_dma=1 direct_dma_func=0 \
-    direct_dma_ring_entries=256 direct_dma_poll=1`
-
-Best regards,
-Koichiro
-
-
-Koichiro Den (16):
-  NTB: ntb_transport: Abort link setup on QP MW allocation failure
-  NTB: ntb_transport: Reject oversized TX buffers
-  NTB: ntb_transport: Start TX offload thread after queue setup
-  NTB: ntb_transport: Stop QP work before freeing a queue
-  NTB: ntb_transport: Run RX processing on system workqueue
-  NTB: ntb_transport: Define direct-DMA shared state
-  NTB: ntb_transport: Negotiate direct-DMA queue layout
-  NTB: ntb_transport: Add opt-in direct-DMA channel reservation
-  NTB: ntb_transport: Allocate direct-DMA queue state
-  NTB: ntb_transport: Implement direct-DMA QP session handshake
-  NTB: ntb_transport: Implement direct-DMA RX buffer publication
-  NTB: ntb_transport: Implement direct-DMA TX submission
-  NTB: ntb_transport: Implement safe direct-DMA teardown
-  NTB: ntb_transport: Enable direct-DMA queues
-  NTB: ntb_transport: Report the direct-DMA payload limit
-  NTB: ntb_transport: Add optional polling for direct-DMA RX
-
- drivers/net/ntb_netdev.c      |    4 +-
- drivers/ntb/ntb_transport.c   | 1523 +++++++++++++++++++++++++++++++--
- include/linux/ntb_transport.h |    1 +
- 3 files changed, 1456 insertions(+), 72 deletions(-)
-
+diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+index f59f926d4bfa..3efc50955253 100644
+--- a/drivers/ntb/ntb_transport.c
++++ b/drivers/ntb/ntb_transport.c
+@@ -1084,14 +1084,19 @@ static void ntb_transport_link_work(struct work_struct *work)
+ 			goto out1;
+ 	}
+ 
+-	nt->link_is_up = true;
++	nt->link_is_up = false;
++	for (i = 0; i < nt->qp_count; i++) {
++		rc = ntb_transport_setup_qp_mw(nt, i);
++		if (rc)
++			goto out1;
++		ntb_transport_setup_qp_peer_msi(nt, i);
++	}
+ 
++	/* Publish the link only after every QP has been set up. */
++	nt->link_is_up = true;
+ 	for (i = 0; i < nt->qp_count; i++) {
+ 		struct ntb_transport_qp *qp = &nt->qp_vec[i];
+ 
+-		ntb_transport_setup_qp_mw(nt, i);
+-		ntb_transport_setup_qp_peer_msi(nt, i);
+-
+ 		if (qp->client_ready)
+ 			schedule_delayed_work(&qp->link_work, 0);
+ 	}
+@@ -1099,6 +1104,13 @@ static void ntb_transport_link_work(struct work_struct *work)
+ 	return;
+ 
+ out1:
++	for (i = 0; i < nt->qp_count; i++) {
++		struct ntb_transport_qp *qp = &nt->qp_vec[i];
++
++		qp->rx_buff = NULL;
++		qp->remote_rx_info = NULL;
++	}
++
+ 	for (i = 0; i < nt->mw_count; i++)
+ 		ntb_free_mw(nt, i);
+ 
 -- 
 2.51.0
 
