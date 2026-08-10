@@ -1,47 +1,47 @@
-Received: from TYVP286CU001.outbound.protection.outlook.com (mail-japaneastazon11021111.outbound.protection.outlook.com [52.101.125.111])
+Received: from TY3P286CU002.outbound.protection.outlook.com (mail-japaneastazon11020079.outbound.protection.outlook.com [52.101.229.79])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A822F42CB09
-	for <ntb@lists.linux.dev>; Mon, 10 Aug 2026 16:51:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.125.111
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CFFF0431A30
+	for <ntb@lists.linux.dev>; Mon, 10 Aug 2026 16:52:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.229.79
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786380722; cv=fail; b=tXwFAMY1tKfpP8ZYIgjfIwM/N9NZ8esxOJroMQTSW/jZdAX01s6EEFvLFv/3BFCtRtMupdVX9L3YTJPZ7Zoi/hprTHvMNPCwlu48WnHyJDmoruv+9NV5RU852qsXYCIeDKs0CgnSRUxhdYA55s/3A1//Et1Pus36ueybLBFYYRc=
+	t=1786380724; cv=fail; b=i6NxBeDmOR2AxE0U97v+Ka+qPP+Ho9F70hszhOqgKVwyT3mN0QBFZUAgrKix5Hoo4ZmLf3q3WznqKOBarVaBNb+QFENQPAxEFty5RkB7b9V7hsvQGu7LUvCAHLyw8VtlRxyVixm4+FefkLzkr6e/S6FDrkNX+eMXHEY31/f5jDQ=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786380722; c=relaxed/simple;
-	bh=0CrQv01CmptK0tXHhyjzoZ2LXem1si2q+3iArIzCef4=;
+	s=arc-20240116; t=1786380724; c=relaxed/simple;
+	bh=CpCcjDftLHkR8gXRi+qjKOwVWnFPrHnj+m7fLqiXSpY=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=aaig/h43bHzTtLVjIAT01lTu3tPueYPxiTTTwLcBrtPIMLgB80ZsBARrCgxMAc8Z8TNzATkf6Kd6mpSINRFP8lttpOtyuCku9A2CpyrfRnXHi0gpTUQ/opP/nc2ybSoKtAjuqMgjVWhvDm/X+R8NvcpoF2iJXnN/Cq55mYmqlwg=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=f3HXxnRF; arc=fail smtp.client-ip=52.101.125.111
+	 Content-Type:MIME-Version; b=jT2RKwGgb8WohM76ULFp+5873RMjXd8anMS03i0Qg4+i+ilEQJqX7SyMje3VDGyIT3tjskVSADWfOrfew3JNJtmhe3t2N2LoGkS7rxb/g4nzYcGOLQE7jOmgKKCjY3cvEyV4EcDI3HrCuxOrDM9TXjS4cD49yizU1CQYXgLb+8A=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=h/wVIh4a; arc=fail smtp.client-ip=52.101.229.79
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="f3HXxnRF"
+	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="h/wVIh4a"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=syZIhblXLirA2TOEZ7T9bt7c+eulHvR1uIxk5WvuO/qbCc+yBaCLps8h+E7HciD4myjj3z1MmE1DDR7RarO2jgl/OFGNl/Yh6ln3nIozahD4hxEQ/X13/cv1oe2oyue7/BYL8GKKlIBlWAEcA7GWAhUUt4fth/eanzDXHBhaX8mFmC6ICybL1eJ0rPA6zVEiHnPPOBYltO6zqS36sHWhFNv7N8bMT2WnM1i9hRa4Ryj/TbCooR3WsJTo1JUCRrJ0KZOVIJNKt788TdWmpOrzsXBiwRJ4w9ME8nZctkY/LaLptePyqAE6XqUAWmf+2QIjtw21JvlyF0H2hHFsoIjmmg==
+ b=nnxA6KmnR6mceidGVVEBh14gfMLptaq/Xb9iVVO1tqBDM/q0RNk9eaI7refInz3n8dheClnIoHn2eenQ0sgtbpaRra1Al5m6cGeeKS+iJflurAdCqFmp9sNTk3zCxU/EinCf3nekt5PDmmXfPeNBddPIuxy0veeVieT22Kqs9pZiyZI0ZiN3mKXxRK7rdJ6fU9fPmK/6LVqkmT1+Hr6weAOq4YPGtC/8hkzKh17cuIOgBTSBppgpIThYm/fOdPGzlY3zV1Xa5G9XaX+yUJplyzuytPeXnu2m54F8L3aJ4MZf1ue94bYK6X7qaFScoLyud6SwU6q5QaiFoXuGCOa/3g==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=Lp6ioj2wPWXkqFLJOwgadldjUN4GHwIp4dBLeY3eXNQ=;
- b=bu2bI3DZjBekAt7cN4dHudOoFxfBeXyDPEhxT0PE1CLotE5Dkkdozk0f6n6vr53pLUhki608TAXW4Kb3/ePiU7OmccxBBT2l86LpJ6NomDBjt/DTolpc1ezRCYeYEEas+tZfQb02YOnWE5yUkfihVmNlVvbaAjfue4M91jubCykwHH+RyYZqqg+ksepgi87WnJy9A1pKR5AZcoRx2fC21XgJ9kpFtcePFK+a5MEUuqApRSJ69mSult9FzllXnBZM8pl/oqGMAQ/ZnslTYhxv/UZq9kr5Doale5nt2Yo91JoRr7JuTprLZWjWgXOImIa5dRI/11yo61VL5KoAJuWqXQ==
+ bh=z8TX90sxUjbm0Kx5QSsr+OwW+ZNXGgEXP8nr98PWgVo=;
+ b=GNC3fjen38vlRqsplAB/puJddU8TvY19IfTYUlhGTVYbPeGtDC4qjhLEy1lzH27FtYau06AjKcAkdXIgF3hDNEuLxKIoFxHZGwAGa2Ie8DeTAbfprwrFpYjDtU1pvKuHjGGBssun8wfBSmaIZZyEH2MdCwo37FZHdAVxemeOnRHuyLtQswekeB7kFmV+U1BMkXpeBmREyU0kY/JWO3W7GUfIpDO48O1OiCooiWqv//VuWx2Zo32e6skTfivBiKMctgwNhXgTosgATLWPLCMp56zntxOaacVfmUk1ptgMpgWcxvw1ySA9cevP3ZZCcRsyVyt6PqDgxeYTXL9zyXTFfg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
  header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
  s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=Lp6ioj2wPWXkqFLJOwgadldjUN4GHwIp4dBLeY3eXNQ=;
- b=f3HXxnRFILzQbnMr1pCG5G0AjvwF0O4OyZjlEibxFuRoEAkAF+gcy1pCqgvElDHg3i+Oi1KhaVMaVmADaEQF0bKwwOo3i43rj6HjmTkx364lHEQIuCa2WPcv3TNSx+Xqg7vwLXLPVBDWaT9CtBQcL8IBByOJXsbwUehQ19rahm4=
+ bh=z8TX90sxUjbm0Kx5QSsr+OwW+ZNXGgEXP8nr98PWgVo=;
+ b=h/wVIh4aMyLSSMhg/N/awQyKuodcWVMxl891ocU4/H6/ze2lYmtRuLh/V0dLV9QADMhYGfoRUbsRgCskONkEuzDMTIxJHu1cLLojrsrveYAlI35X/VlLN6c6CuVd9SuOgE4KyLUJpMnhGdQfFAIQ6G34aQw/n98JCTYzLEOKuzE=
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=valinux.co.jp;
 Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:38f::10)
  by OS7P286MB6729.JPNP286.PROD.OUTLOOK.COM (2603:1096:604:42d::10) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.292.25; Mon, 10 Aug
- 2026 16:51:49 +0000
+ 2026 16:51:51 +0000
 Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  ([fe80::2305:327c:28ec:9b32]) by TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  ([fe80::2305:327c:28ec:9b32%3]) with mapi id 15.21.0292.024; Mon, 10 Aug 2026
- 16:51:49 +0000
+ 16:51:51 +0000
 From: Koichiro Den <den@valinux.co.jp>
 To: Jon Mason <jdmason@kudzu.us>,
 	Dave Jiang <dave.jiang@intel.com>,
@@ -53,16 +53,16 @@ To: Jon Mason <jdmason@kudzu.us>,
 Cc: ntb@lists.linux.dev,
 	netdev@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH 07/16] NTB: ntb_transport: Negotiate direct-DMA queue layout
-Date: Tue, 11 Aug 2026 01:51:26 +0900
-Message-ID: <20260810165136.2292436-8-den@valinux.co.jp>
+Subject: [PATCH 10/16] NTB: ntb_transport: Implement direct-DMA QP session handshake
+Date: Tue, 11 Aug 2026 01:51:29 +0900
+Message-ID: <20260810165136.2292436-11-den@valinux.co.jp>
 X-Mailer: git-send-email 2.51.0
 In-Reply-To: <20260810165136.2292436-1-den@valinux.co.jp>
 References: <20260810165136.2292436-1-den@valinux.co.jp>
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
-X-ClientProxiedBy: TYCP286CA0210.JPNP286.PROD.OUTLOOK.COM
- (2603:1096:400:385::19) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+X-ClientProxiedBy: TY4P286CA0030.JPNP286.PROD.OUTLOOK.COM
+ (2603:1096:405:2b2::8) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  (2603:1096:405:38f::10)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
@@ -72,372 +72,484 @@ List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
 X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|OS7P286MB6729:EE_
-X-MS-Office365-Filtering-Correlation-Id: 4f6af79f-9a57-48b5-f3b9-08def6ffabe3
+X-MS-Office365-Filtering-Correlation-Id: b2476440-5e33-4d7c-9a8a-08def6ffad3c
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|10070799003|7416014|23010399003|376014|1800799024|366016|6133799003|3023799007|56012099006|10067099003|18002099003|22082099003;
+	BCL:0;ARA:13230040|10070799003|7416014|23010399003|376014|1800799024|366016|6133799003|5023799004|56012099006|10067099003|18002099003|22082099003;
 X-Microsoft-Antispam-Message-Info:
-	iuZ+kQ3WrozGF9mzXw7WjfT0Pp6LUyP8TX0h+A6Uu8yzEx1CUN28OPE3D5KY//c/nmbtqwBQxw6X348SztKzEPF8qz5Z95qOi43nq5rNNQArcFmFd2cx8GG5nAYVWKTemRwrOnE1AyGUCTIzIWQdaSs9pOUzf+qyvKXpYNteoRo6qFHMS27qrIDPR4G4XlJYhi6sgQKWyM/EffX82tHDHqVIuKrrYnYB07ItZsxCkLySlBETr8enVvhyaJ2GCC/RXt1xcX1EJrFxLxNb1EafFcR+3i2MJ5AmJTJ69sBb64hX0fgPj9w9vJHUM0bD5jcUNMw6rRmnqvSvRX0FXpJ4G8AZGiwyLBsURp8HV7kB0ZMTx4yFl7tliib3If6jH3cXUBXFpdJtFibpbTl/FPqrOuYSdXj6VgINZJFEL9gp9Qv5DgGGM0sGVbdYi/CPdJX6wCym0NZOFX+jeBSD/NsAfLcipshta5MibKbjXO2xpIVGyO2BUqZCmVUr4VD76Ay/uB3uwxnctapvTbIet0OboPeOGFow4OLNmCli5f14kwmJWt5CNX2fihbr4ZiD+iPpxJvjdRMX+8sdjkzjNYkRjvwGTvazWMLM1SSG2yz4hzl3L7EbpNSrIkx/E19ETtvYhBTEbV11pUiHi2B0CUKttLIEUrrgZ71TEaN6XLaoSdg=
+	iwG/k8faGffEbrBcHtzdBYJdHC7b2G74cj0caoCKwpqa7DuZoSlTL10CeygyeS0rBZD0CwwPKbK9JMOsDSik++i1hEHUcWz8Be+IZFssC6RDCzgHjynDJxPAsLfLgjWxTzlbUQIkzG7yRY8jKWgQHQPODOLZ6uJXpi80nenaUc52kAz7hjqG2FbUHwNQeDXyWtpoK7DXmnAQ5tlBBuuOkODRM9mJsSsbxzEXlrOpiOx1WuJAE42c72LSJ1W7TPZ7S+Wp6VCEPpAd2t87DN8J0CCU2JFeUatUJtBPhWTBgndc0zCcFf3algE8FAwwVbOk5gD+7Wh9LjXwjK/GULdEt87JK0OSoiswz/mNhjJuhsP4lZDYcq+t+RRkJhH77lUNmZoiOc3v7PhRvZi2qBOpx3aowlnD+G1Dwl+LF18Aak+qILadAaskrPg0+0uSzZQuJbP+M623NEBrAM+66Im+zXfaslxODhRGvhexFul2BDFBO9hSiRdqk/KjtOqBxHoX/e9ZOYkZovXArMelUoAIjsYVvZrftI+WQrzTUWhPtJpsYoRkAZtMEz3qKICPZLDG0LLqJfBlgx6jPLP/+iJSoBHlg94HigRjKTOqyN+hxNxM6P0l+TFIhrw3acbdWW/DfhmdABQMxAumA5bOthTRpv9beLG+ZOwjj3Esya1Kh3U=
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(10070799003)(7416014)(23010399003)(376014)(1800799024)(366016)(6133799003)(3023799007)(56012099006)(10067099003)(18002099003)(22082099003);DIR:OUT;SFP:1102;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(10070799003)(7416014)(23010399003)(376014)(1800799024)(366016)(6133799003)(5023799004)(56012099006)(10067099003)(18002099003)(22082099003);DIR:OUT;SFP:1102;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?5yCGaYg2fGBMqI/SFCAYWUs4zJhaegLYB6AVUgLtsMp3O2DAcnel8RuXwaXw?=
- =?us-ascii?Q?6zC8Uhw+G4l2QE93PEJ6bQ3wwTf5+ME9F+TA0vF1ts4rBU3OKBEACj08hWJI?=
- =?us-ascii?Q?1qD12sOjb39mM5ZyiprlzRsdw5oM92r2fbyQpfuYOKmQXg7gQczCIYCs1YNq?=
- =?us-ascii?Q?VbA7RmxL8sO6cwHgVbRsD/7VI5IQEUPiqV8GH/zS7s5AUqJ0Uexml+EVPBby?=
- =?us-ascii?Q?/xO0G8sL1ThHKTBkZ2BIOUyPH8rP8wnXy2OAc/wGIeb6Uhh5NBSPcD/1u6DX?=
- =?us-ascii?Q?oGennel7SLuWth0qS4lYVsp7+JW7Xa7IxoV5UFUua7YjrAfjwT8GIk7sU1Yb?=
- =?us-ascii?Q?MVC8vgNi3ibR5hu7GUOX8SV0HYMLvMBOzPALmPR6Q1GhqBqIpxuN8Wm4pN6t?=
- =?us-ascii?Q?JsgzNmJOREsZaopNG8LXiXgr6NetH4wLEtQPsFFMyoNWbC2GS74HxN3lAwhA?=
- =?us-ascii?Q?2Sxrs12rIcfCHG1i/Utvpe3lQSRj+lHTFYZev5IZ2DmpO/2L7qFsD6EUUlZq?=
- =?us-ascii?Q?X1JwnVIOFRKPP7k2EEkbCatQph1YwmOAhfGW/W5wBgDWtK3QWiX+V2Ag44Q2?=
- =?us-ascii?Q?d1jOx5bAz3EEFS73lM4nEnfG7sWxUwb4H2PmN6EkppTP/mMBoRv0zOG95g1y?=
- =?us-ascii?Q?eXXUYYXlsOD7VBx7jg7nfscS+JbnEDbthnmzAvA345IRAk+oOwacTrawoFKX?=
- =?us-ascii?Q?F2P+as9TczGG1AC5jJleJPXPB1P4EUHviGrFgwbVApm68dphWr+usOv7OSJV?=
- =?us-ascii?Q?RaGhqlUHIU9jrJUcryaUpMVwqBqFRMsGm4ow29j6jtCWxtC81lZdj/jubxka?=
- =?us-ascii?Q?js0pwHzZueJb+7+DyjmT9Q2wjNc/qt562R5IFouPwhMfrc1bTXskuIi30Aoc?=
- =?us-ascii?Q?CV7f4SK+s4aE8HGna4rP9NNwoMtElUcDhb64SmT6A0ljQGRAQD3ix2ZZ3njg?=
- =?us-ascii?Q?Bno+Pl74hECWxA2nJHQrqasJxt0BThHJIUREObVRmORXyxfV30il34v22Bsb?=
- =?us-ascii?Q?LxAw3dYfxCmk72yga/4Y8DrV3lUQ76ALW9OBBSWq9+ygi0q4cr/5STE+afYt?=
- =?us-ascii?Q?unDLDy+xwbPwwv9ffEGc0QpwXtOT7gGerNfKzx4O0e7bq+h36XZoMG+2lIJv?=
- =?us-ascii?Q?LjmUT5yJ2pOk7hFJgp3AFQEkASpsMgE1Z9s1mNJ59QbPYfLfbGZHroqpBYfV?=
- =?us-ascii?Q?8r5JhlFnxe7dRaDctka4pFcNzQCw50901FpfXRWSeqglK2sNgs89T6YHJ2gb?=
- =?us-ascii?Q?SSRscaJUubegs/m3ZaalPdw9oZxfudZix2W7wHtT4BKaWRTBju43lvoGVbHj?=
- =?us-ascii?Q?/oZbo+0nVA7Ux5vX6lZ4HN/dis4Ean/A+Y5ZM3jT5kW2b6u0GLo5iplqAEIf?=
- =?us-ascii?Q?0MGCJwqLKfceMNb7mklhmimn/U5BNlG6rOX07hRZWX0pExfXrwZTD7b4XA35?=
- =?us-ascii?Q?jnts/7ejLObRPAUtgWCBNvKwU4XwFCYY5zkzzKqs4oOoHaE8RURvyhsSILoR?=
- =?us-ascii?Q?wPunW5CwBbO99y+ujQJH1ChuzQe8cLZqAcTfZN/YDQBlpTpJkqOEUloytxEv?=
- =?us-ascii?Q?+R7QUq5FJ7elc56kl7XSw3TlPLa6u2hwlHEMhXN8lOYaoeogFAwFqOQMnrjy?=
- =?us-ascii?Q?DlEHCB6KOcNK4BGxkT+ofCinb9525rMYz2miZ1Chus6SOy1Gftg+WHzFk/oM?=
- =?us-ascii?Q?KNmump7qc+H2xUM10jTcNOpy8XRRzyPdiyLTGqTimj+uA6VVEexr/NBHjsZO?=
- =?us-ascii?Q?miboEmuaigjCg9Lit23fWEl41WMt599tp/NHz+8thiTP7/zw1VFU?=
+	=?us-ascii?Q?SgpkLKwtnChAHZ8dyPPJGnc0+XSdqkpq48uwVY+z33mok29s1bjsJOT5ln5j?=
+ =?us-ascii?Q?UqtXkAolSZkC8XXc2s494PqHxWiPxUGXGNHkqpswdISBFM+nBTN52Gex4B0a?=
+ =?us-ascii?Q?9LVrWjkZvPcrvRkIeXXZz5QylZRPxCiwVlYimH6pe6R0zOU/9gsOD4BMuEIA?=
+ =?us-ascii?Q?gpG1RkgOEn3XdDz+9rpKygxfYylbnnk27vj8mg2/ReJw1xrT+z7cZWJvvW7g?=
+ =?us-ascii?Q?kkJtaxdzCaruofoH9leQj18mtjH9K3gH7IpQ3YU3vdqS9isBkR5kcy1C5faA?=
+ =?us-ascii?Q?8urN0T2gNIe7yEHUUgr30/epk9kQhg0pMlsX9kPqwqsdWZ2OAJCK+1lcmL0D?=
+ =?us-ascii?Q?X8KkbePxbWPhum2hh++EmqY+zDo0PMr0opxprxo5rp8D3tbK+scPWrgWJ65+?=
+ =?us-ascii?Q?YcouZd7fdIPubxubi4prVL+/y11lqJHPTBvQEjQCdzZpvdOhm3ra+ASrvSsE?=
+ =?us-ascii?Q?j9WRZaxVhEnvV3R1gYLFZFA7Un5KBfO98eNF/GeJRD3IismCBQnA37LCdRgZ?=
+ =?us-ascii?Q?B3CvWAFBpcIme74orGDmcp7oLil5dbSvaKXjsQTLds7/j0/Z35iJCTMUwc4I?=
+ =?us-ascii?Q?D8XUBQgS4iBF8jxxLXQ9WGgoGrNK1mCEDOYn4FXHvBvSkl1jje36D8z5BdDR?=
+ =?us-ascii?Q?b9J5QrLQCWE9ctbG/nFI53FQ2DyP0Rfp+q44EtEFenKf07XP4AGKi0WVr3kS?=
+ =?us-ascii?Q?w6jL7p4k9F4d6D/VeBnr/RkuzIDCq4oaPYLmzgTiK3WCrrEW06hdChzZORcE?=
+ =?us-ascii?Q?c/rofWI2LVDKNVVp93TWWcQF40wQx1NL6PjOzcEIxSK+GJpn5BEW2LpgpsII?=
+ =?us-ascii?Q?Ehr9eaSxRL2Kc36MeDN8PPr/OMX7zS5fWj2J9C0CKi0WIfZj6OWYc4hnXW6I?=
+ =?us-ascii?Q?bZLldW+j7u6l4jPG/nmHcb+HUjHGy2ZctTh/LSsfQ5wlUbcJYLl5cf1IuY8h?=
+ =?us-ascii?Q?5A6B/Dzf3zPicVeeCvzriE6yQI7GA6H3miuB5CjRaNWoW4l2diFi/wlciISj?=
+ =?us-ascii?Q?JP1oQQjxPVVq6B/ZFSxoh2DIL72mAdEXQBscKIX2LsgKEAKx/phrdzTVq73O?=
+ =?us-ascii?Q?wFqcoWQJSLK1ovc0JnETFGysuZV7Uk+i7SwyGqvj4P3KApQ4ws6AuRUg6Jmv?=
+ =?us-ascii?Q?vdkM0wJTvAgKaUohRioVJ5T2tJq/s6l2QjV70IQi5eMVP/ysLjpYcwYJMoTh?=
+ =?us-ascii?Q?yj8950PmZK8iO+7rMBYP5Mbvmo0rDI4f40YN9vd1gIm7sm9iaReQSHWTPLES?=
+ =?us-ascii?Q?JeyhLLRGCRfB+j6ZP+wAoaFR37uHCWtiZGyLbT04AAVGjWcAmf5P0Du/1PUf?=
+ =?us-ascii?Q?aFB4lDd2GBqYoieMPotvQrV5QDPD0oSOAlPEaTjx99oog9jesN6auUsZOEsF?=
+ =?us-ascii?Q?Pm7dltl4XWcyBKy9KaVMtQhPPlq/MYhsyimgFswfRpXbpOfIZlzlclyhHBfW?=
+ =?us-ascii?Q?whS8doh5n76isdRZlNJl9txK6cVkeecpQ7+YdeK9kQRXqv9j58LULIoW40nM?=
+ =?us-ascii?Q?zNYaFfvj82Qnd+yGMFWXF0zEcNMsGleYlyPTXSULGNJbBBDx/sYX2sOEQ42L?=
+ =?us-ascii?Q?N+pjUI1pdmjsUj12pzu2VNpctZuLYYnGLSsdzazBDyVk3wpA0/2LJwRCTbjH?=
+ =?us-ascii?Q?lCMXWgKHDBC2PhowY6+uA5qmNqduZ9fSSSPdtC7dd0yEadKBNG/RU9RSYHJw?=
+ =?us-ascii?Q?PXOXKlIgTNsBPBR9Ae0fmzxAtVwtH+yTgCake1svc42lhPOhgyU/iDtu3Xg4?=
+ =?us-ascii?Q?5nD9YAR1iSbD+Vm8VA0wpr1qCZpNEKukU9jyFD+fMdEAYr+9IjkO?=
 X-OriginatorOrg: valinux.co.jp
-X-MS-Exchange-CrossTenant-Network-Message-Id: 4f6af79f-9a57-48b5-f3b9-08def6ffabe3
+X-MS-Exchange-CrossTenant-Network-Message-Id: b2476440-5e33-4d7c-9a8a-08def6ffad3c
 X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Aug 2026 16:51:49.4565
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Aug 2026 16:51:51.7159
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: rLsqIFpbNpXWZE2oYeeo8+a+HEVoag0UegNBOyXgYQaddtWidQ58vHx5feYvzYYrmM4NW4UbXe4nc6kJsRQimQ==
+X-MS-Exchange-CrossTenant-UserPrincipalName: akhPinwiiUfObwQ0zoYQFdKKxABSGViow8Ai31qmMZhOVkgH0WC5q0g7Wkz0Y+YjuGJvfhroMgLBN25W8cT4Zg==
 X-MS-Exchange-Transport-CrossTenantHeadersStamped: OS7P286MB6729
 
-The direct-DMA shared area occupies part of each QP memory-window slice,
-so both peers must agree on its size and placement. Exchange direct-DMA
-capabilities and ring depth in spare scratchpads, and reserve the area
-only when both peers advertise compatible settings. Otherwise retain the
-protocol v4 copy layout.
+A logical QP can be reused while its shared memory still contains RX
+addresses and completions from the previous instance. Without a session
+ID, the new QP could accept that stale state.
+
+Give each QP instance a fresh session ID and enable direct DMA only
+after both peers acknowledge it. Teardown also exchanges the final
+issued boundary so RX mappings remain valid until all outstanding
+transfers have completed.
 
 Signed-off-by: Koichiro Den <den@valinux.co.jp>
 ---
- drivers/ntb/ntb_transport.c | 170 ++++++++++++++++++++++++++++++++++--
- 1 file changed, 161 insertions(+), 9 deletions(-)
+ drivers/ntb/ntb_transport.c | 275 ++++++++++++++++++++++++++++++++++--
+ 1 file changed, 267 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 44957c11d1c8..f873eacd532b 100644
+index 67044d0ea0ff..ca08cb690311 100644
 --- a/drivers/ntb/ntb_transport.c
 +++ b/drivers/ntb/ntb_transport.c
-@@ -98,6 +98,11 @@ static bool use_dma;
- module_param(use_dma, bool, 0644);
- MODULE_PARM_DESC(use_dma, "Use DMA engine to perform large data copy");
+@@ -58,6 +58,7 @@
+ #include <linux/limits.h>
+ #include <linux/module.h>
+ #include <linux/pci.h>
++#include <linux/random.h>
+ #include <linux/slab.h>
+ #include <linux/seq_file.h>
+ #include <linux/types.h>
+@@ -153,6 +154,14 @@ struct ntb_rx_info {
+ 	unsigned int entry;
+ };
  
-+static unsigned int direct_dma_ring_entries = 64;
-+module_param(direct_dma_ring_entries, uint, 0644);
-+MODULE_PARM_DESC(direct_dma_ring_entries,
-+		 "Number of entries in each direct-DMA queue");
++enum ntb_direct_state {
++	NTB_DIRECT_DOWN,
++	NTB_DIRECT_HANDSHAKE,
++	NTB_DIRECT_ACTIVE,
++	NTB_DIRECT_QUIESCING,
++	NTB_DIRECT_QUIESCED,
++};
 +
- static bool use_msi;
- #ifdef CONFIG_NTB_MSI
- module_param(use_msi, bool, 0644);
-@@ -174,6 +179,15 @@ struct ntb_transport_qp {
- 	struct list_head rx_free_q;
- 	/* ntb_rx_q_lock: synchronize access to rx_XXXX_q */
- 	spinlock_t ntb_rx_q_lock;
-+	struct ntb_direct_shared *direct_shared;
-+	struct ntb_direct_shared __iomem *peer_direct_shared;
-+	unsigned int direct_ring_entries;
-+	u32 *direct_tx_cpl;
-+	dma_addr_t direct_tx_cpl_dma;
-+	u32 direct_rx_prod;
-+	u32 direct_rx_cons;
-+	u32 direct_tx_issue;
-+	u32 direct_tx_cons;
+ struct ntb_transport_qp {
+ 	struct ntb_transport_ctx *transport;
+ 	struct ntb_dev *ndev;
+@@ -195,6 +204,8 @@ struct ntb_transport_qp {
+ 	struct ntb_direct_shared *direct_shared;
+ 	struct ntb_direct_shared __iomem *peer_direct_shared;
+ 	unsigned int direct_ring_entries;
++	/* Serialize direct session, TX ring, and RX publication state. */
++	spinlock_t direct_lock;
+ 	u32 *direct_rx_cpl;
+ 	dma_addr_t direct_rx_cpl_dma;
+ 	u32 *direct_tx_cpl;
+@@ -203,6 +214,9 @@ struct ntb_transport_qp {
+ 	u32 direct_rx_cons;
+ 	u32 direct_tx_issue;
+ 	u32 direct_tx_cons;
++	u32 direct_session;
++	u32 direct_peer_session;
++	enum ntb_direct_state direct_state;
  	void *rx_buff;
  	unsigned int rx_index;
  	unsigned int rx_max_entry;
-@@ -255,6 +269,9 @@ struct ntb_transport_ctx {
- 	struct work_struct link_cleanup;
- 
- 	struct dentry *debugfs_node_dir;
-+	u32 direct_features;
-+	u32 peer_direct_features;
-+	unsigned int direct_ring_entries;
- 
- 	/* Make sure workq of link event be executed serially */
- 	struct mutex link_event_lock;
-@@ -315,11 +332,26 @@ struct ntb_direct_shared {
- /* Zero is pending, U32_MAX is an error, and other values are lengths. */
- #define NTB_DIRECT_CPL_ERROR		U32_MAX
- 
-+enum {
-+	NTB_DIRECT_FEAT_RX = BIT(0),
-+	NTB_DIRECT_FEAT_TX = BIT(1),
-+};
+@@ -509,6 +523,228 @@ static bool ntb_direct_layout(struct ntb_transport_ctx *nt)
+ #define QP_TO_MW(nt, qp)	((qp) % nt->mw_count)
+ #define NTB_QP_DEF_NUM_ENTRIES	100
+ #define NTB_LINK_DOWN_TIMEOUT	10
++#define NTB_DIRECT_TEARDOWN_RETRY_INTERVAL_MS	10
 +
- static inline size_t ntb_direct_shared_size(unsigned int entries)
- {
- 	return struct_size_t(struct ntb_direct_shared, pub, entries);
- }
- 
-+static inline u32 ntb_direct_ring_idx(struct ntb_transport_qp *qp, u32 val)
++static bool ntb_direct_rx_mode(struct ntb_transport_qp *qp)
 +{
-+	return val & (qp->direct_ring_entries - 1);
++	struct ntb_transport_ctx *nt = qp->transport;
++
++	return (nt->direct_features & NTB_DIRECT_FEAT_RX) &&
++	       (nt->peer_direct_features & NTB_DIRECT_FEAT_TX);
 +}
 +
-+static inline u32 ntb_direct_ring_used(u32 head, u32 tail)
++static bool ntb_direct_tx_mode(struct ntb_transport_qp *qp)
 +{
-+	return head - tail;
++	struct ntb_transport_ctx *nt = qp->transport;
++
++	return (nt->direct_features & NTB_DIRECT_FEAT_TX) &&
++	       (nt->peer_direct_features & NTB_DIRECT_FEAT_RX);
 +}
 +
- struct ntb_payload_header {
- 	unsigned int ver;
- 	unsigned int len;
-@@ -335,6 +367,32 @@ enum {
- 	MW0_SZ_LOW,
- };
- 
-+enum {
-+	DIRECT_SPAD_FEATURES,
-+	DIRECT_SPAD_RING_ENTRIES,
-+	DIRECT_SPAD_COUNT,
-+};
-+
-+static unsigned int ntb_direct_spad_offset(struct ntb_transport_ctx *nt)
++static bool ntb_direct_link_capable(struct ntb_transport_qp *qp)
 +{
-+	/* Skip two SPADs per QP reserved for optional v4 MSI descriptors. */
-+	return nt->msi_spad_offset + nt->qp_count * 2;
++	return ntb_direct_rx_mode(qp) || ntb_direct_tx_mode(qp);
 +}
 +
-+static bool ntb_direct_spads_available(struct ntb_transport_ctx *nt)
++static void ntb_transport_notify_peer(struct ntb_transport_qp *qp)
 +{
-+	return ntb_direct_spad_offset(nt) + DIRECT_SPAD_COUNT <=
-+		ntb_spad_count(nt->ndev);
++	if (qp->use_msi)
++		ntb_msi_peer_trigger(qp->ndev, PIDX, &qp->peer_msi_desc);
++	else
++		ntb_peer_db_set(qp->ndev, BIT_ULL(qp->qp_num));
 +}
 +
-+static bool ntb_direct_layout(struct ntb_transport_ctx *nt)
++static bool ntb_direct_tx_idle(struct ntb_transport_qp *qp)
 +{
-+	return ((nt->direct_features & NTB_DIRECT_FEAT_RX) &&
-+		(nt->peer_direct_features & NTB_DIRECT_FEAT_TX)) ||
-+	       ((nt->direct_features & NTB_DIRECT_FEAT_TX) &&
-+		(nt->peer_direct_features & NTB_DIRECT_FEAT_RX));
++	return qp->direct_tx_issue == qp->direct_tx_cons;
 +}
 +
- #define dev_client_dev(__dev) \
- 	container_of((__dev), struct ntb_transport_client_dev, dev)
- 
-@@ -635,6 +693,38 @@ static struct ntb_queue_entry *ntb_list_mv(spinlock_t *lock,
- 	return entry;
- }
- 
++static bool ntb_direct_rx_drained(struct ntb_transport_qp *qp)
++{
++	struct ntb_direct_shared *shared = qp->direct_shared;
++	u32 session = qp->direct_session;
++
++	if (!shared || !session || READ_ONCE(shared->quiesce) != session)
++		return false;
++
++	/* quiesce is written after its final issue boundary. */
++	dma_rmb();
++	return READ_ONCE(qp->direct_rx_cons) ==
++	       READ_ONCE(shared->quiesce_issue);
++}
++
++static bool ntb_direct_tx_acked(struct ntb_transport_qp *qp)
++{
++	struct ntb_direct_shared *shared = qp->direct_shared;
++	u32 session = qp->direct_session;
++
++	return shared && session &&
++	       READ_ONCE(shared->quiesce_ack) == session;
++}
++
++static bool ntb_direct_control_pending(struct ntb_transport_qp *qp)
++{
++	struct ntb_direct_shared *shared = qp->direct_shared;
++	enum ntb_direct_state state = READ_ONCE(qp->direct_state);
++	u32 peer_session = READ_ONCE(qp->direct_peer_session);
++	u32 session = READ_ONCE(qp->direct_session);
++
++	if (!shared)
++		return false;
++	if (state == NTB_DIRECT_HANDSHAKE)
++		return READ_ONCE(shared->session) != peer_session ||
++		       READ_ONCE(shared->session_ack) == session;
++	if (state != NTB_DIRECT_ACTIVE)
++		return false;
++
++	return READ_ONCE(shared->session) != peer_session ||
++	       READ_ONCE(shared->quiesce) == session;
++}
++
++static void ntb_direct_control_publish_locked(struct ntb_transport_qp *qp)
++{
++	struct ntb_direct_shared __iomem *peer = qp->peer_direct_shared;
++	u32 peer_session = qp->direct_peer_session;
++
++	lockdep_assert_held(&qp->direct_lock);
++
++	/* Publish the completion array address before its session. */
++	iowrite32(lower_32_bits(qp->direct_rx_cpl_dma), &peer->cpl_addr_lo);
++	iowrite32(upper_32_bits(qp->direct_rx_cpl_dma), &peer->cpl_addr_hi);
++
++	iowrite32(qp->direct_session, &peer->session);
++	if (!peer_session)
++		return;
++
++	iowrite32(peer_session, &peer->session_ack);
++	if (qp->direct_state == NTB_DIRECT_QUIESCING) {
++		/* Publish the final exclusive TX boundary before its marker. */
++		iowrite32(qp->direct_tx_issue, &peer->quiesce_issue);
++		iowrite32(peer_session, &peer->quiesce);
++	}
++	if (ntb_direct_rx_drained(qp))
++		iowrite32(peer_session, &peer->quiesce_ack);
++}
++
 +/*
-+ * Protocol v4 uses the whole area before rx_info for copy slots. Reserve the
-+ * tail for direct state only when both peers negotiated a direct direction.
++ * Accept the peer session during HANDSHAKE. In ACTIVE or QUIESCING, a
++ * replacement peer session or quiesce request enters the local teardown path.
 + */
-+static int ntb_transport_setup_qp_tx_layout(struct ntb_transport_qp *qp)
++static bool ntb_direct_control_progress(struct ntb_transport_qp *qp)
 +{
-+	unsigned int tx_size = qp->tx_mw_size;
-+	size_t direct_size = 0;
++	struct ntb_direct_shared *shared = qp->direct_shared;
++	u32 peer_session, session_ack, quiesce;
++	bool published = false;
++	bool cleanup = false;
++	bool ready = false;
 +
-+	if (ntb_direct_layout(qp->transport))
-+		direct_size = ntb_direct_shared_size(qp->direct_ring_entries);
-+	if (direct_size &&
-+	    tx_size < direct_size + sizeof(struct ntb_rx_info) +
-+		      2 * sizeof(struct ntb_payload_header))
-+		return -ENOSPC;
++	if (!qp->transport->link_is_up || !shared ||
++	    !qp->peer_direct_shared ||
++	    !ntb_direct_link_capable(qp) ||
++	    ntb_link_is_up(qp->ndev, NULL, NULL) != 1)
++		return true;
 +
-+	qp->rx_info = qp->tx_mw + tx_size - sizeof(struct ntb_rx_info);
-+	tx_size -= sizeof(struct ntb_rx_info);
-+	if (direct_size) {
-+		tx_size -= direct_size;
-+		qp->peer_direct_shared = qp->tx_mw + tx_size;
-+	} else {
-+		qp->peer_direct_shared = NULL;
++	peer_session = READ_ONCE(shared->session);
++	session_ack = READ_ONCE(shared->session_ack);
++	quiesce = READ_ONCE(shared->quiesce);
++
++	scoped_guard(spinlock_bh, &qp->direct_lock) {
++		if (!qp->direct_session)
++			goto out;
++
++		if (qp->direct_state == NTB_DIRECT_HANDSHAKE && peer_session) {
++			qp->direct_peer_session = peer_session;
++		} else if (qp->direct_state == NTB_DIRECT_ACTIVE && peer_session &&
++			   peer_session != qp->direct_peer_session) {
++			qp->direct_state = NTB_DIRECT_QUIESCING;
++		}
++
++		if (quiesce == qp->direct_session &&
++		    (qp->direct_state == NTB_DIRECT_HANDSHAKE ||
++		     qp->direct_state == NTB_DIRECT_ACTIVE)) {
++			qp->direct_state = NTB_DIRECT_QUIESCING;
++			cleanup = qp->client_ready;
++		}
++
++		ntb_direct_control_publish_locked(qp);
++		published = true;
++		if (qp->direct_state == NTB_DIRECT_HANDSHAKE &&
++		    qp->direct_peer_session &&
++		    session_ack == qp->direct_session)
++			qp->direct_state = NTB_DIRECT_ACTIVE;
++		ready = qp->direct_state == NTB_DIRECT_ACTIVE;
 +	}
 +
-+	/* Ring housekeeping requires at least two buffers. */
-+	qp->tx_max_frame = min(transport_mtu, tx_size / 2);
-+	qp->tx_max_entry = tx_size / qp->tx_max_frame;
++out:
++	if (published)
++		ntb_transport_notify_peer(qp);
++	if (cleanup)
++		schedule_work(&qp->link_cleanup);
 +
-+	return 0;
++	return ready;
 +}
 +
- static int ntb_transport_setup_qp_mw(struct ntb_transport_ctx *nt,
- 				     unsigned int qp_num)
- {
-@@ -644,6 +734,8 @@ static int ntb_transport_setup_qp_mw(struct ntb_transport_ctx *nt,
- 	struct ntb_queue_entry *entry;
- 	unsigned int rx_size, num_qps_mw;
- 	unsigned int mw_num, mw_count, qp_count;
-+	size_t direct_size = 0;
-+	void *rx_base;
- 	unsigned int i;
- 	int node;
- 
-@@ -662,10 +754,24 @@ static int ntb_transport_setup_qp_mw(struct ntb_transport_ctx *nt,
- 		num_qps_mw = qp_count / mw_count;
- 
- 	rx_size = (unsigned int)mw->xlat_size / num_qps_mw;
--	qp->rx_buff = mw->virt_addr + rx_size * (qp_num / mw_count);
-+	rx_base = mw->virt_addr + rx_size * (qp_num / mw_count);
-+	if (ntb_direct_layout(nt))
-+		direct_size = ntb_direct_shared_size(qp->direct_ring_entries);
-+	if (direct_size &&
-+	    rx_size < direct_size + sizeof(struct ntb_rx_info) +
-+		      2 * sizeof(struct ntb_payload_header))
-+		return -ENOSPC;
++static void ntb_direct_session_start(struct ntb_transport_qp *qp)
++{
++	u32 session;
 +
-+	qp->rx_buff = rx_base;
- 	rx_size -= sizeof(struct ntb_rx_info);
--
- 	qp->remote_rx_info = qp->rx_buff + rx_size;
-+	if (direct_size) {
-+		rx_size -= direct_size;
-+		qp->direct_shared = qp->rx_buff + rx_size;
-+		memset(qp->direct_shared, 0, direct_size);
-+	} else {
-+		qp->direct_shared = NULL;
-+	}
- 
- 	/* Due to housekeeping, there must be atleast 2 buffs */
- 	qp->rx_max_frame = min(transport_mtu, rx_size / 2);
-@@ -1070,6 +1176,7 @@ static void ntb_transport_link_work(struct work_struct *work)
- 	struct ntb_dev *ndev = nt->ndev;
- 	struct pci_dev *pdev = ndev->pdev;
- 	resource_size_t size;
-+	unsigned int direct_spad;
- 	u32 val;
- 	int rc = 0, i, spad;
- 
-@@ -1106,6 +1213,15 @@ static void ntb_transport_link_work(struct work_struct *work)
- 	ntb_peer_spad_write(ndev, PIDX, NUM_MWS, nt->mw_count);
- 
- 	ntb_peer_spad_write(ndev, PIDX, NUM_QPS, nt->qp_count);
-+	if (ntb_direct_spads_available(nt)) {
-+		direct_spad = ntb_direct_spad_offset(nt);
-+		ntb_peer_spad_write(ndev, PIDX,
-+				    direct_spad + DIRECT_SPAD_FEATURES,
-+				    nt->direct_features);
-+		ntb_peer_spad_write(ndev, PIDX,
-+				    direct_spad + DIRECT_SPAD_RING_ENTRIES,
-+				    nt->direct_ring_entries);
-+	}
- 
- 	ntb_peer_spad_write(ndev, PIDX, VERSION, NTB_TRANSPORT_VERSION);
- 
-@@ -1125,6 +1241,26 @@ static void ntb_transport_link_work(struct work_struct *work)
- 	if (val != nt->mw_count)
- 		goto out;
- 
-+	nt->peer_direct_features = 0;
-+	if (ntb_direct_spads_available(nt)) {
-+		direct_spad = ntb_direct_spad_offset(nt);
-+		val = ntb_spad_read(ndev,
-+				    direct_spad + DIRECT_SPAD_FEATURES);
-+		val &= NTB_DIRECT_FEAT_RX | NTB_DIRECT_FEAT_TX;
-+		if (val) {
-+			u32 entries;
++	if (!ntb_direct_link_capable(qp) || !qp->direct_shared)
++		return;
 +
-+			entries = ntb_spad_read(ndev,
-+						direct_spad +
-+						DIRECT_SPAD_RING_ENTRIES);
-+			dev_dbg(&pdev->dev,
-+				"Remote direct DMA features = %#x, ring entries = %u\n",
-+				val, entries);
-+			if (entries == nt->direct_ring_entries)
-+				nt->peer_direct_features = val;
++	session = get_random_u32_above(0);
++
++	memset(qp->direct_shared, 0, sizeof(*qp->direct_shared));
++	/* Complete local shared-state reset before publishing the new session. */
++	dma_wmb();
++
++	guard(spinlock_bh)(&qp->direct_lock);
++	qp->direct_session = session;
++	qp->direct_peer_session = 0;
++	qp->direct_state = NTB_DIRECT_HANDSHAKE;
++}
++
++static void ntb_direct_quiesce(struct ntb_transport_qp *qp)
++{
++	bool done;
++
++	if (!ntb_direct_link_capable(qp))
++		return;
++
++	scoped_guard(spinlock_bh, &qp->direct_lock) {
++		if (qp->direct_state == NTB_DIRECT_DOWN ||
++		    qp->direct_state == NTB_DIRECT_QUIESCED)
++			return;
++		if (!qp->direct_peer_session) {
++			/*
++			 * No peer session means RX publication and TX
++			 * submission never became active.
++			 */
++			qp->direct_state = NTB_DIRECT_QUIESCED;
++			return;
 +		}
++		qp->direct_state = NTB_DIRECT_QUIESCING;
 +	}
 +
- 	for (i = 0; i < nt->mw_count; i++) {
- 		u64 val64;
++	/*
++	 * Keep the mappings until the peer acknowledges the final boundaries,
++	 * or until the link is down or the peer starts a new session.
++	 */
++	for (;;) {
++		ntb_direct_control_progress(qp);
++
++		scoped_guard(spinlock_bh, &qp->direct_lock)
++			done = ntb_direct_tx_idle(qp) &&
++			       ntb_direct_tx_acked(qp) &&
++			       ntb_direct_rx_drained(qp);
++		if (done || ntb_link_is_up(qp->ndev, NULL, NULL) != 1)
++			break;
++
++		msleep(NTB_DIRECT_TEARDOWN_RETRY_INTERVAL_MS);
++	}
++
++	guard(spinlock_bh)(&qp->direct_lock);
++	qp->direct_state = NTB_DIRECT_QUIESCED;
++}
  
-@@ -1143,6 +1279,9 @@ static void ntb_transport_link_work(struct work_struct *work)
+ /**
+  * ntb_transport_rx_queue_size - Query the RX queue depth
+@@ -1204,6 +1440,9 @@ static void ntb_qp_link_context_reset(struct ntb_transport_qp *qp)
+ 	qp->direct_rx_cons = 0;
+ 	qp->direct_tx_issue = 0;
+ 	qp->direct_tx_cons = 0;
++	qp->direct_session = 0;
++	qp->direct_peer_session = 0;
++	qp->direct_state = NTB_DIRECT_DOWN;
+ }
  
- 	nt->link_is_up = false;
- 	for (i = 0; i < nt->qp_count; i++) {
-+		rc = ntb_transport_setup_qp_tx_layout(&nt->qp_vec[i]);
-+		if (rc)
-+			goto out1;
- 		rc = ntb_transport_setup_qp_mw(nt, i);
- 		if (rc)
- 			goto out1;
-@@ -1164,6 +1303,8 @@ static void ntb_transport_link_work(struct work_struct *work)
- 	for (i = 0; i < nt->qp_count; i++) {
- 		struct ntb_transport_qp *qp = &nt->qp_vec[i];
+ static void ntb_qp_link_down_reset(struct ntb_transport_qp *qp)
+@@ -1221,6 +1460,7 @@ static void ntb_qp_link_cleanup(struct ntb_transport_qp *qp)
+ 	dev_info(&pdev->dev, "qp %d: Link Cleanup\n", qp->qp_num);
  
-+		qp->direct_shared = NULL;
-+		qp->peer_direct_shared = NULL;
- 		qp->rx_buff = NULL;
- 		qp->remote_rx_info = NULL;
+ 	cancel_delayed_work_sync(&qp->link_work);
++	ntb_direct_quiesce(qp);
+ 	ntb_qp_link_down_reset(qp);
+ 
+ 	if (qp->event_handler)
+@@ -1457,6 +1697,7 @@ static void ntb_qp_link_work(struct work_struct *work)
+ 						   link_work.work);
+ 	struct pci_dev *pdev = qp->ndev->pdev;
+ 	struct ntb_transport_ctx *nt = qp->transport;
++	bool direct_ready;
+ 	int val;
+ 
+ 	if (!qp->client_ready)
+@@ -1466,13 +1707,17 @@ static void ntb_qp_link_work(struct work_struct *work)
+ 
+ 	val = ntb_spad_read(nt->ndev, QP_LINKS);
+ 
++	if (qp->direct_state == NTB_DIRECT_DOWN)
++		ntb_direct_session_start(qp);
++
+ 	ntb_peer_spad_write(nt->ndev, PIDX, QP_LINKS, val | BIT(qp->qp_num));
++	direct_ready = ntb_direct_control_progress(qp);
+ 
+ 	/* query remote spad for qp ready bits */
+ 	dev_dbg_ratelimited(&pdev->dev, "Remote QP link status = %x\n", val);
+ 
+ 	/* See if the remote side is up */
+-	if (val & BIT(qp->qp_num)) {
++	if ((val & BIT(qp->qp_num)) && direct_ready) {
+ 		dev_info(&pdev->dev, "qp %d: Link Up\n", qp->qp_num);
+ 		qp->link_is_up = true;
+ 		qp->active = true;
+@@ -1559,6 +1804,7 @@ static int ntb_transport_init_queue(struct ntb_transport_ctx *nt,
+ 	spin_lock_init(&qp->ntb_rx_q_lock);
+ 	spin_lock_init(&qp->ntb_tx_free_q_lock);
+ 	spin_lock_init(&qp->ntb_tx_offl_q_lock);
++	spin_lock_init(&qp->direct_lock);
+ 
+ 	INIT_LIST_HEAD(&qp->rx_post_q);
+ 	INIT_LIST_HEAD(&qp->rx_pend_q);
+@@ -2054,6 +2300,11 @@ static void ntb_transport_rxc_db(struct work_struct *work)
+ 	dev_dbg(&qp->ndev->pdev->dev, "%s: doorbell %d received\n",
+ 		__func__, qp->qp_num);
+ 
++	if (ntb_direct_control_pending(qp))
++		ntb_direct_control_progress(qp);
++	if (!qp->active)
++		goto clear_db;
++
+ 	/* Limit the number of packets processed in a single interrupt to
+ 	 * provide fairness to others
+ 	 */
+@@ -2070,7 +2321,11 @@ static void ntb_transport_rxc_db(struct work_struct *work)
+ 		/* there is more work to do */
+ 		if (qp->active)
+ 			queue_work(system_dfl_wq, &qp->rxc_db_work);
+-	} else if (ntb_db_read(qp->ndev) & BIT_ULL(qp->qp_num)) {
++		return;
++	}
++
++clear_db:
++	if (ntb_db_read(qp->ndev) & BIT_ULL(qp->qp_num)) {
+ 		/* the doorbell bit is set: clear it */
+ 		ntb_db_clear(qp->ndev, BIT_ULL(qp->qp_num));
+ 		/* ntb_db_read ensures ntb_db_clear write is committed */
+@@ -2080,7 +2335,9 @@ static void ntb_transport_rxc_db(struct work_struct *work)
+ 		 * ntb_process_rxc and clearing the doorbell bit:
+ 		 * there might be some more work to do.
+ 		 */
+-		if (qp->active)
++		if (qp->active ||
++		    (qp->client_ready &&
++		     READ_ONCE(qp->direct_state) == NTB_DIRECT_HANDSHAKE))
+ 			queue_work(system_dfl_wq, &qp->rxc_db_work);
  	}
-@@ -1254,22 +1395,20 @@ static int ntb_transport_init_queue(struct ntb_transport_ctx *nt,
+ }
+@@ -2128,10 +2385,7 @@ static void ntb_tx_copy_callback(void *data,
+ 	dma_mb();
+ 	ioread32(&hdr->flags);
  
- 	tx_size = (unsigned int)mw_size / num_qps_mw;
- 	qp_offset = tx_size * (qp_num / mw_count);
-+	mw_base += qp_offset;
+-	if (qp->use_msi)
+-		ntb_msi_peer_trigger(qp->ndev, PIDX, &qp->peer_msi_desc);
+-	else
+-		ntb_peer_db_set(qp->ndev, BIT_ULL(qp->qp_num));
++	ntb_transport_notify_peer(qp);
  
-+	qp->direct_ring_entries = nt->direct_ring_entries;
- 	qp->tx_mw_size = tx_size;
- 	qp->tx_mw = nt->mw_vec[mw_num].vbase + qp_offset;
- 	if (!qp->tx_mw)
- 		return -EINVAL;
+ 	/* The entry length can only be zero if the packet is intended to be a
+ 	 * "link down" or similar.  Since no payload is being sent in these
+@@ -2586,6 +2840,7 @@ void ntb_transport_free_queue(struct ntb_transport_qp *qp)
  
--	qp->tx_mw_phys = mw_base + qp_offset;
-+	qp->tx_mw_phys = mw_base;
- 	if (!qp->tx_mw_phys)
- 		return -EINVAL;
+ 	cancel_work_sync(&qp->link_cleanup);
+ 	cancel_delayed_work_sync(&qp->link_work);
++	ntb_direct_quiesce(qp);
+ 	qp->active = false;
  
--	tx_size -= sizeof(struct ntb_rx_info);
--	qp->rx_info = qp->tx_mw + tx_size;
--
--	/* Due to housekeeping, there must be atleast 2 buffs */
--	qp->tx_max_frame = min(transport_mtu, tx_size / 2);
--	qp->tx_max_entry = tx_size / qp->tx_max_frame;
-+	if (ntb_transport_setup_qp_tx_layout(qp))
-+		return -ENOSPC;
+ 	if (qp->tx_offload_thread) {
+@@ -2636,6 +2891,7 @@ void ntb_transport_free_queue(struct ntb_transport_qp *qp)
+ 	/* Catch cleanup queued while draining RX processing. */
+ 	cancel_work_sync(&qp->link_cleanup);
+ 	cancel_delayed_work_sync(&qp->link_work);
++	ntb_qp_link_context_reset(qp);
  
- 	if (nt->debugfs_node_dir) {
- 		char debugfs_name[8];
-@@ -1337,6 +1476,7 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
- 		return -ENOMEM;
+ 	qp->cb_data = NULL;
+ 	qp->rx_handler = NULL;
+@@ -2822,6 +3078,7 @@ void ntb_transport_link_down(struct ntb_transport_qp *qp)
+ 		return;
  
- 	nt->ndev = ndev;
-+	nt->direct_ring_entries = direct_dma_ring_entries;
+ 	qp->client_ready = false;
++	ntb_direct_quiesce(qp);
  
- 	/*
- 	 * If we are using MSI, and have at least one extra memory window,
-@@ -1412,6 +1552,18 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
- 	nt->qp_bitmap = qp_bitmap;
- 	nt->qp_bitmap_free = qp_bitmap;
+ 	val = ntb_spad_read(qp->ndev, QP_LINKS);
  
-+	if (ntb_direct_spads_available(nt)) {
-+		unsigned int spad = ntb_direct_spad_offset(nt);
-+
-+		/* Old v4 peers do not overwrite stale extension SPADs. */
-+		rc = ntb_spad_write(ndev, spad + DIRECT_SPAD_FEATURES, 0);
-+		if (rc)
-+			goto err1;
-+		rc = ntb_spad_write(ndev, spad + DIRECT_SPAD_RING_ENTRIES, 0);
-+		if (rc)
-+			goto err1;
-+	}
-+
- 	nt->qp_vec = kcalloc_node(qp_count, sizeof(*nt->qp_vec),
- 				  GFP_KERNEL, node);
- 	if (!nt->qp_vec) {
+@@ -2927,7 +3184,9 @@ static void ntb_transport_doorbell_callback(void *data, int vector)
+ 		qp_num = __ffs(db_bits);
+ 		qp = &nt->qp_vec[qp_num];
+ 
+-		if (qp->active)
++		if (qp->active ||
++		    (qp->client_ready &&
++		     READ_ONCE(qp->direct_state) == NTB_DIRECT_HANDSHAKE))
+ 			queue_work(system_dfl_wq, &qp->rxc_db_work);
+ 
+ 		db_bits &= ~BIT_ULL(qp_num);
 -- 
 2.51.0
 
