@@ -1,144 +1,116 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9889A6BB5B
-	for <ntb@lists.linux.dev>; Sat, 15 Aug 2026 03:29:32 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5A7931EE7B7
+	for <ntb@lists.linux.dev>; Sat, 15 Aug 2026 03:29:33 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786764574; cv=none; b=e/LFfDtkU0YWSf1gRvqumtB7SspKMSxo/thcfqvDr+zL5zG/LcEBMAWveT/+9MJsSz3teMC/CpdI+83MP/Q7dBV9t1lujfIFs9Q7D1y/yZ1v/8kfpPz4iiRO4FsujLBic9RObKPH85Mv+ZHSjZM2pMeMbJZkssjRt4Rz4Yl/w2g=
+	t=1786764574; cv=none; b=mhI24hSHZ5OhEwiuD+F7ezSGXIrTWz2X+FUJhS7brsziwzoq93SpENZR3q65asQW3kklLtTHr8TyUB+eWNEW+vyfkAYXU2d+OYcaNGrvnG8D2eBveoFbGV/W9kH31N7vwJ1ZskyIfjw+kO73c/eCRz5SHXpvj+9G2R2Zje2YrBc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1786764574; c=relaxed/simple;
-	bh=NMd4lk7sRLzeUn0fi/SetwNZEDYcIiKwbcvfMtiyMGA=;
+	bh=sFTqbajX142ladAasqrSNRDEPRzcGeE3AFaTokLdYnA=;
 	h=From:Subject:To:Cc:In-Reply-To:References:Content-Type:Date:
-	 Message-Id; b=IqZCjYc2VfIOXC9c3yxVjK487RJNJcevddum+rk+7H0PWXH+LXpS7XDm0IyePWN6yZc0YnbVmHLQTS90+RykEJaTzht6+0b09Dx+m05PSoGL/LBkQUrAYQIQIpWHdsR9Vy3KX1+U9xsAo0t03ni4H+7wYRON/dVsCp/TIlQq8ow=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=khV+tvq0; arc=none smtp.client-ip=100.103.45.18
+	 Message-Id; b=glqJ75w2kHI1FHeaF75OULnfBYhIgHt41OpRVOJqikaE6jYZKcSWmURpurfUvGFsdxlgDmi1q/P0Ik+7dinJyP5ANstm6qexhkj+ut0Li+qEl5msUZVhv00e0BO9ooDHUMSDnjHM8SElFOjxfGlm4PEra+yTe4DCMQDJWlNd3so=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=QIwfjODk; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="khV+tvq0"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 151F11F000E9;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="QIwfjODk"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C06B91F00A3A;
 	Sat, 15 Aug 2026 03:29:32 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1786764572;
-	bh=zQoeZoNbMZmF0r1+2arq7wsMpOZK1f7oeXzJq75FXXI=;
+	s=k20260515; t=1786764573;
+	bh=OffKB2estcxg8x9iLCKf6gBJ4f4vN3CmS9K0hqWTgCY=;
 	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=khV+tvq0y2Ol/Z4qz+nfId4vRX3A4HV/zk4i2K0h6PcbfVFizhKmzIPgBxH2mwz2w
-	 2gLDKHCPgu3yssk1DU2tjWzRq2OY5FIm7bBoxkoIYtY3WAaed5LEz0MR+NUZmpI4Dg
-	 T2irWnK1fkWN9f+MnwLng36H6F+6j4XP3Ws1CpbDK2DqCemRSJ5lXFfiL7KhkYtaUh
-	 T6MWyiWcWmlguP0ezUBHLXtbXS2+0NaLYSdohWp7k0D1/UidIjtdLTAwkarQv/LU0I
-	 sGx6HMDS3YbIJLBzrGkXz3YzQeszLJq771ZFNj9zSufCxDSwgO9kEwcsBxj52sjgip
-	 MpK6MRYBAZ6WQ==
+	b=QIwfjODkZjYuUWqQehASSvqAO8WD/KZTFX0rC2SpbxV2FTb+z7GLMv4m/AcVuodNp
+	 ZQFVSidRS4jhmFmZutCbdiYlKAuy8ZhwpHag0nCG/NpZg74XpxM2B+IqoktleM8ljn
+	 ls+hgjYT5IBOwvSqzvUbybbCLFFZTS+mltC5R9xRMegRrQ2mldVtUCxNVy5oTxqtWZ
+	 p1/SGU8noXqjaXRoTq3obhVsOAhf8oHDU+qFsRSG5QttWzRyVaID5vmbjCplEl455L
+	 s+HLp4w9wHXFr7m2xMH2Meab2Vq4ExIUj3cpfQPSoGhqHybR6Ms2JdGowQbYm6Jgxf
+	 /bOwOUj/vF4jg==
 From: sashiko-bot@kernel.org
-Subject: Re: [PATCH net-next 1/2] NTB: ntb_transport: Add per-payload client
- metadata
+Subject: Re: [PATCH net-next 2/2] net: ntb_netdev: Preserve CHECKSUM_PARTIAL
+ across NTB
 Reply-To: sashiko-reviews@lists.linux.dev
 To: "Koichiro Den" <den@valinux.co.jp>
 Cc: ntb@lists.linux.dev
-In-Reply-To: <20260814032913.3558500-2-den@valinux.co.jp>
+In-Reply-To: <20260814032913.3558500-3-den@valinux.co.jp>
 References: <20260814032913.3558500-1-den@valinux.co.jp>
- <20260814032913.3558500-2-den@valinux.co.jp>
+ <20260814032913.3558500-3-den@valinux.co.jp>
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
-Date: Sat, 15 Aug 2026 03:29:31 +0000
-Message-Id: <20260815032932.151F11F000E9@smtp.kernel.org>
+Date: Sat, 15 Aug 2026 03:29:32 +0000
+Message-Id: <20260815032932.C06B91F00A3A@smtp.kernel.org>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 
-Thank you for your contribution! Sashiko AI review found 3 potential issue(=
+Thank you for your contribution! Sashiko AI review found 1 potential issue(=
 s) to consider:
-
-Pre-existing issues:
-- [High] Oversized packets trigger a memory leak by passing NULL to the tx_=
-handler, failing to free the SKB.
-- [High] The RX descriptor polling path lacks a dma_rmb() barrier between c=
-hecking the completion flag and reading the descriptor data.
-- [High] The driver writes hardware descriptor fields using little-endian I=
-/O accessors but reads them as native integers, breaking functionality on b=
-ig-endian architectures.
+- [High] Race condition during link teardown leaves `peer_csum` flag incorr=
+ectly enabled for subsequent connections, leading to dropped packets.
 --
 
---- Patch [1]: [PATCH net-next 1/2] NTB: ntb_transport: Add per-payload cli=
-ent metadata ---
-commit 581d6bed46f9b62bccae9a18ddae3275987b5c5b
+--- Patch [2]: [PATCH net-next 2/2] net: ntb_netdev: Preserve CHECKSUM_PART=
+IAL across NTB ---
+commit 361f3725205633c095fdcdcc524204c1da6ec87e
 Author: Koichiro Den <den@valinux.co.jp>
+Subject: net: ntb_netdev: Preserve CHECKSUM_PARTIAL across NTB
 
-NTB: ntb_transport: Add per-payload client metadata
+This commit introduces CHECKSUM_PARTIAL metadata across the NTB link to
+improve throughput and reduce CPU usage on trusted PCIe fabrics. It
+advertises checksum support in every frame and falls back to software
+checksumming until the peer capability is observed. TX and RX checksum
+features remain disabled by default.
 
-This patch adds support for 24-bit per-payload client metadata in the NTB
-transport payload header. It updates the transport enqueue and receive
-handlers to pass this metadata without bumping the protocol version.
-
-> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-> index f59f926d4bfaa..ea97460c118ad 100644
-> --- a/drivers/ntb/ntb_transport.c
-> +++ b/drivers/ntb/ntb_transport.c
-
+> diff --git a/drivers/net/ntb_netdev.c b/drivers/net/ntb_netdev.c
+> index 5c7fe6883cb93..b9a78ff695c87 100644
+> --- a/drivers/net/ntb_netdev.c
+> +++ b/drivers/net/ntb_netdev.c
 [ ... ]
-
-> @@ -1647,6 +1653,7 @@ static int ntb_process_rxc(struct ntb_transport_qp =
-*qp)
+> @@ -108,6 +125,8 @@ static void ntb_netdev_event_handler(void *data, int =
+link_is_up)
+>  	struct net_device *ndev;
 > =20
->  	entry->rx_hdr =3D hdr;
->  	entry->rx_index =3D qp->rx_index;
-> +	entry->flags =3D hdr->flags & DESC_META_MASK;
+>  	ndev =3D dev->ndev;
+> +	if (!link_is_up)
+> +		WRITE_ONCE(dev->peer_csum, false);
 > =20
->  	if (hdr->len > entry->len) {
->  		dev_dbg(&qp->ndev->pdev->dev,
-
-[Severity: High]
-This is a pre-existing issue, but I noticed there may be a missing memory
-barrier in ntb_process_rxc() when reading the descriptor.
-
-The hardware writes the payload and the descriptor to host memory. The CPU
-polls hdr->flags for DESC_DONE_FLAG, and then immediately reads fields like
-hdr->ver and hdr->len.
-
-Without a dma_rmb() after checking the flag, could weakly-ordered CPUs
-speculatively fetch the descriptor fields or payload before the DMA transfer
-actually commits to memory?
-
-[Severity: High]
-This isn't a bug introduced by this patch, but there appears to be an
-endianness mismatch when reading these descriptor fields.
-
-On the TX side, descriptor fields seem to be written using iowrite32(),
-which implicitly performs a little-endian byte swap on big-endian CPUs.
-
-However, in ntb_process_rxc(), they are accessed directly as native
-integers (e.g., hdr->len). Won't this evaluate the little-endian bytes
-incorrectly on big-endian architectures, causing version mismatches and
-incorrect lengths?
-
+>  	netdev_dbg(ndev, "Event %x, Link %x, qp %u\n", link_is_up,
+>  		   ntb_transport_link_query(q->qp), q->qid);
 [ ... ]
-
-> @@ -2361,7 +2369,7 @@ int ntb_transport_tx_enqueue(struct ntb_transport_q=
-p *qp, void *cb, void *data,
->  	entry->cb_data =3D cb;
->  	entry->buf =3D data;
->  	entry->len =3D len;
-> -	entry->flags =3D 0;
-> +	entry->flags =3D meta << DESC_META_SHIFT;
->  	entry->errors =3D 0;
->  	entry->tx_index =3D 0;
+> @@ -151,8 +170,21 @@ static void ntb_netdev_rx_handler(struct ntb_transpo=
+rt_qp *qp, void *qp_data,
+>  	}
 > =20
+>  	skb_put(skb, len);
+> +	if (meta & NTB_NETDEV_META_CAP_CSUM)
+> +		WRITE_ONCE(dev->peer_csum, true);
 
 [Severity: High]
-This is a pre-existing issue, but I noticed a potential memory leak during
-TX when an oversized packet is enqueued.
+Could a race condition occur during link teardown that leaves peer_csum
+incorrectly enabled?
 
-If ntb_process_tx() detects a length overflow, it aborts transmission and
-calls the transmit handler. However, it passes NULL instead of the original
-buffer context to the handler:
+If the NTB link goes down, ntb_netdev_event_handler() clears dev->peer_csum.
+However, if the RX tasklet is concurrently processing a straggler packet
+sent before the link went down, ntb_netdev_rx_handler() will execute and
+unconditionally set dev->peer_csum to true when it sees the capability bit.
 
-ntb_process_tx()
-    if (qp->tx_handler)
-        qp->tx_handler(qp, qp->cb_data, NULL, -EIO);
+When a new connection is established, dev->peer_csum would not be reset. If
+the new peer is an older driver that does not support checksum offload, the
+local driver might incorrectly skip software checksumming and send packets
+with CHECKSUM_PARTIAL. Would this cause the older peer's networking stack to
+see invalid checksums and silently drop the packets?
 
-Since ntb_netdev_tx_handler() explicitly checks if the skb is NULL and
-returns immediately without freeing it, won't this leak the SKB if the
-MTU check is bypassed or misconfigured?
+> +
+> +	if (meta & NTB_NETDEV_META_CSUM) {
+> +		u16 csum_start =3D (meta >> NTB_NETDEV_META_CSUM_START_SHIFT) & U16_MA=
+X;
+> +		u16 csum_offset =3D meta & NTB_NETDEV_META_CSUM_OFFSET_MASK;
+> +
+> +		if (!skb_partial_csum_set(skb, csum_start, csum_offset))
+> +			goto rx_drop;
 
 --=20
 Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20260814032913.3558=
-500-1-den@valinux.co.jp?part=3D1
+500-1-den@valinux.co.jp?part=3D2
