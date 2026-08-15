@@ -1,177 +1,144 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.17])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 456031B4223;
-	Sat, 15 Aug 2026 02:05:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.17
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9889A6BB5B
+	for <ntb@lists.linux.dev>; Sat, 15 Aug 2026 03:29:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786759530; cv=none; b=jfOJwbz/ILF4gxZccoEaboPxMsy9auUHNLTH/xBFzEs/DXHmcc3LQ2IiPMrUPOQP1YqJqPXHa2l3H/xvcBOPtp+BMDxnUZhK1Jen6JdjV/yb2NgFmpxP1vXLHuHRGdzF7O0npRd6v4lw1Tr0+rthShXj2np92zldydRQvKJS4+Y=
+	t=1786764574; cv=none; b=e/LFfDtkU0YWSf1gRvqumtB7SspKMSxo/thcfqvDr+zL5zG/LcEBMAWveT/+9MJsSz3teMC/CpdI+83MP/Q7dBV9t1lujfIFs9Q7D1y/yZ1v/8kfpPz4iiRO4FsujLBic9RObKPH85Mv+ZHSjZM2pMeMbJZkssjRt4Rz4Yl/w2g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786759530; c=relaxed/simple;
-	bh=kLmJB92xFKW+OhFvVXJXuOrb0RhwX9dprJzz7vdNb0g=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=pw52YJjrk+xmE8In6HizqzXc/2B4Mz6p4UOS9OJzSS5D6E8nrvr+O04PZozlwLQbW409W/3G46sj8qKcPiMLjTpKFUWElSIA+axyWooTG7mrWde6JHyvDB37P9dvU4ioM4K/3iq+wRbY6T2F+kdW6hjkfLRuAyh3n2v9m48OTaw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=gmx2FEQX; arc=none smtp.client-ip=192.198.163.17
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1786764574; c=relaxed/simple;
+	bh=NMd4lk7sRLzeUn0fi/SetwNZEDYcIiKwbcvfMtiyMGA=;
+	h=From:Subject:To:Cc:In-Reply-To:References:Content-Type:Date:
+	 Message-Id; b=IqZCjYc2VfIOXC9c3yxVjK487RJNJcevddum+rk+7H0PWXH+LXpS7XDm0IyePWN6yZc0YnbVmHLQTS90+RykEJaTzht6+0b09Dx+m05PSoGL/LBkQUrAYQIQIpWHdsR9Vy3KX1+U9xsAo0t03ni4H+7wYRON/dVsCp/TIlQq8ow=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=khV+tvq0; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="gmx2FEQX"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1786759527; x=1818295527;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=kLmJB92xFKW+OhFvVXJXuOrb0RhwX9dprJzz7vdNb0g=;
-  b=gmx2FEQXGaXAaiR/w3D1V0bJ0nKiPIeM7ffx1W2VbB1J1nIR+7Hfwqzx
-   9i2mgI8FeDHB8ozUzUWmplFbg5rfQu1kdsjZHAQ9t2u/vsZ93/Vh7uLFF
-   vt25MK7JSuLYqqSgy8w9g6gs8NLd15NIoFjvStb6oLbCnwdIjAiO+wpXM
-   dQAeEidPS93O8NYORo4/Qwwf16bVQZBtapshoddG34tgYfHgj2rqMhrcC
-   LQPxEjEvprrGvoV9cPkNt3+03hESTk4ROGMsWpVZPqZ7Gevrz2+7L3dEf
-   d5jOGGnEj/kjpqDVKXib+kx2B+ZkcM99cMOjwmQF+hPrK/NRCl++KRdia
-   g==;
-X-CSE-ConnectionGUID: nZgIFj57TS65TEtbwgKh0A==
-X-CSE-MsgGUID: y70hpxw+S7a6mRYXipVtnA==
-X-IronPort-AV: E=McAfee;i="6800,10657,11875"; a="87215833"
-X-IronPort-AV: E=Sophos;i="6.25,224,1779174000"; 
-   d="scan'208";a="87215833"
-Received: from orviesa002.jf.intel.com ([10.64.159.142])
-  by fmvoesa111.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Aug 2026 19:05:26 -0700
-X-CSE-ConnectionGUID: iBVYgiMpQhCvp8uP5GPK6A==
-X-CSE-MsgGUID: c0s07dDGR26sJN5hXDkU4Q==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.25,224,1779174000"; 
-   d="scan'208";a="294297479"
-Received: from lkp-server01.sh.intel.com (HELO 6eda058d650d) ([10.239.97.150])
-  by orviesa002.jf.intel.com with ESMTP; 14 Aug 2026 19:05:24 -0700
-Received: from kbuild by 6eda058d650d with local (Exim 4.98.2)
-	(envelope-from <lkp@intel.com>)
-	id 1wv3lx-00000000apK-2BR0;
-	Sat, 15 Aug 2026 02:05:21 +0000
-Date: Sat, 15 Aug 2026 10:05:11 +0800
-From: kernel test robot <lkp@intel.com>
-To: WenTao Liang <vulab@iscas.ac.cn>, ntb@lists.linux.dev
-Cc: oe-kbuild-all@lists.linux.dev, jdmason@kudzu.us, dave.jiang@intel.com,
-	allenbh@gmail.com, linux-kernel@vger.kernel.org,
-	stable@vger.kernel.org, WenTao Liang <vulab@iscas.ac.cn>,
-	Greg KH <greg@kroah.com>
-Subject: Re: [PATCH v2] ntb: fix tx descriptor leak on dmaengine_submit
- failure
-Message-ID: <202608150920.Q3iV5WrW-lkp@intel.com>
-References: <20260628083301.9781-1-vulab@iscas.ac.cn>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="khV+tvq0"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 151F11F000E9;
+	Sat, 15 Aug 2026 03:29:32 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1786764572;
+	bh=zQoeZoNbMZmF0r1+2arq7wsMpOZK1f7oeXzJq75FXXI=;
+	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
+	b=khV+tvq0y2Ol/Z4qz+nfId4vRX3A4HV/zk4i2K0h6PcbfVFizhKmzIPgBxH2mwz2w
+	 2gLDKHCPgu3yssk1DU2tjWzRq2OY5FIm7bBoxkoIYtY3WAaed5LEz0MR+NUZmpI4Dg
+	 T2irWnK1fkWN9f+MnwLng36H6F+6j4XP3Ws1CpbDK2DqCemRSJ5lXFfiL7KhkYtaUh
+	 T6MWyiWcWmlguP0ezUBHLXtbXS2+0NaLYSdohWp7k0D1/UidIjtdLTAwkarQv/LU0I
+	 sGx6HMDS3YbIJLBzrGkXz3YzQeszLJq771ZFNj9zSufCxDSwgO9kEwcsBxj52sjgip
+	 MpK6MRYBAZ6WQ==
+From: sashiko-bot@kernel.org
+Subject: Re: [PATCH net-next 1/2] NTB: ntb_transport: Add per-payload client
+ metadata
+Reply-To: sashiko-reviews@lists.linux.dev
+To: "Koichiro Den" <den@valinux.co.jp>
+Cc: ntb@lists.linux.dev
+In-Reply-To: <20260814032913.3558500-2-den@valinux.co.jp>
+References: <20260814032913.3558500-1-den@valinux.co.jp>
+ <20260814032913.3558500-2-den@valinux.co.jp>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Date: Sat, 15 Aug 2026 03:29:31 +0000
+Message-Id: <20260815032932.151F11F000E9@smtp.kernel.org>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260628083301.9781-1-vulab@iscas.ac.cn>
 
-Hi WenTao,
+Thank you for your contribution! Sashiko AI review found 3 potential issue(=
+s) to consider:
 
-kernel test robot noticed the following build errors:
-
-[auto build test ERROR on jonmason-ntb/ntb-next]
-[also build test ERROR on linus/master v7.2-rc7 next-20260813]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
-
-url:    https://github.com/intel-lab-lkp/linux/commits/WenTao-Liang/ntb-fix-tx-descriptor-leak-on-dmaengine_submit-failure/20260815-061001
-base:   https://github.com/jonmason/ntb ntb-next
-patch link:    https://lore.kernel.org/r/20260628083301.9781-1-vulab%40iscas.ac.cn
-patch subject: [PATCH v2] ntb: fix tx descriptor leak on dmaengine_submit failure
-config: alpha-allmodconfig (https://download.01.org/0day-ci/archive/20260815/202608150920.Q3iV5WrW-lkp@intel.com/config)
-compiler: alpha-linux-gcc (GCC) 16.1.0
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20260815/202608150920.Q3iV5WrW-lkp@intel.com/reproduce)
-
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202608150920.Q3iV5WrW-lkp@intel.com/
-
-All errors (new ones prefixed by >>):
-
-   drivers/ntb/ntb_transport.c: In function 'ntb_async_rx_submit':
->> drivers/ntb/ntb_transport.c:1577:9: error: implicit declaration of function 'dmaengine_desc_put'; did you mean 'dmaengine_desc_free'? [-Wimplicit-function-declaration]
-    1577 |         dmaengine_desc_put(txd);
-         |         ^~~~~~~~~~~~~~~~~~
-         |         dmaengine_desc_free
-
-
-vim +1577 drivers/ntb/ntb_transport.c
-
-  1515	
-  1516	static int ntb_async_rx_submit(struct ntb_queue_entry *entry, void *offset)
-  1517	{
-  1518		struct dma_async_tx_descriptor *txd;
-  1519		struct ntb_transport_qp *qp = entry->qp;
-  1520		struct dma_chan *chan = qp->rx_dma_chan;
-  1521		struct dma_device *device;
-  1522		size_t pay_off, buff_off, len;
-  1523		struct dmaengine_unmap_data *unmap;
-  1524		dma_cookie_t cookie;
-  1525		void *buf = entry->buf;
-  1526	
-  1527		len = entry->len;
-  1528		device = chan->device;
-  1529		pay_off = (size_t)offset & ~PAGE_MASK;
-  1530		buff_off = (size_t)buf & ~PAGE_MASK;
-  1531	
-  1532		if (!is_dma_copy_aligned(device, pay_off, buff_off, len))
-  1533			goto err;
-  1534	
-  1535		unmap = dmaengine_get_unmap_data(device->dev, 2, GFP_NOWAIT);
-  1536		if (!unmap)
-  1537			goto err;
-  1538	
-  1539		unmap->len = len;
-  1540		unmap->addr[0] = dma_map_phys(device->dev, virt_to_phys(offset),
-  1541					      len, DMA_TO_DEVICE, 0);
-  1542		if (dma_mapping_error(device->dev, unmap->addr[0]))
-  1543			goto err_get_unmap;
-  1544	
-  1545		unmap->to_cnt = 1;
-  1546	
-  1547		unmap->addr[1] = dma_map_phys(device->dev, virt_to_phys(buf),
-  1548					      len, DMA_FROM_DEVICE, 0);
-  1549		if (dma_mapping_error(device->dev, unmap->addr[1]))
-  1550			goto err_get_unmap;
-  1551	
-  1552		unmap->from_cnt = 1;
-  1553	
-  1554		txd = device->device_prep_dma_memcpy(chan, unmap->addr[1],
-  1555						     unmap->addr[0], len,
-  1556						     DMA_PREP_INTERRUPT);
-  1557		if (!txd)
-  1558			goto err_get_unmap;
-  1559	
-  1560		txd->callback_result = ntb_rx_copy_callback;
-  1561		txd->callback_param = entry;
-  1562		dma_set_unmap(txd, unmap);
-  1563	
-  1564		cookie = dmaengine_submit(txd);
-  1565		if (dma_submit_error(cookie))
-  1566			goto err_set_unmap;
-  1567	
-  1568		dmaengine_unmap_put(unmap);
-  1569	
-  1570		qp->last_cookie = cookie;
-  1571	
-  1572		qp->rx_async++;
-  1573	
-  1574		return 0;
-  1575	
-  1576	err_set_unmap:
-> 1577		dmaengine_desc_put(txd);
-  1578	err_get_unmap:
-  1579		dmaengine_unmap_put(unmap);
-  1580	err:
-  1581		return -ENXIO;
-  1582	}
-  1583	
-
+Pre-existing issues:
+- [High] Oversized packets trigger a memory leak by passing NULL to the tx_=
+handler, failing to free the SKB.
+- [High] The RX descriptor polling path lacks a dma_rmb() barrier between c=
+hecking the completion flag and reading the descriptor data.
+- [High] The driver writes hardware descriptor fields using little-endian I=
+/O accessors but reads them as native integers, breaking functionality on b=
+ig-endian architectures.
 --
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+
+--- Patch [1]: [PATCH net-next 1/2] NTB: ntb_transport: Add per-payload cli=
+ent metadata ---
+commit 581d6bed46f9b62bccae9a18ddae3275987b5c5b
+Author: Koichiro Den <den@valinux.co.jp>
+
+NTB: ntb_transport: Add per-payload client metadata
+
+This patch adds support for 24-bit per-payload client metadata in the NTB
+transport payload header. It updates the transport enqueue and receive
+handlers to pass this metadata without bumping the protocol version.
+
+> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+> index f59f926d4bfaa..ea97460c118ad 100644
+> --- a/drivers/ntb/ntb_transport.c
+> +++ b/drivers/ntb/ntb_transport.c
+
+[ ... ]
+
+> @@ -1647,6 +1653,7 @@ static int ntb_process_rxc(struct ntb_transport_qp =
+*qp)
+> =20
+>  	entry->rx_hdr =3D hdr;
+>  	entry->rx_index =3D qp->rx_index;
+> +	entry->flags =3D hdr->flags & DESC_META_MASK;
+> =20
+>  	if (hdr->len > entry->len) {
+>  		dev_dbg(&qp->ndev->pdev->dev,
+
+[Severity: High]
+This is a pre-existing issue, but I noticed there may be a missing memory
+barrier in ntb_process_rxc() when reading the descriptor.
+
+The hardware writes the payload and the descriptor to host memory. The CPU
+polls hdr->flags for DESC_DONE_FLAG, and then immediately reads fields like
+hdr->ver and hdr->len.
+
+Without a dma_rmb() after checking the flag, could weakly-ordered CPUs
+speculatively fetch the descriptor fields or payload before the DMA transfer
+actually commits to memory?
+
+[Severity: High]
+This isn't a bug introduced by this patch, but there appears to be an
+endianness mismatch when reading these descriptor fields.
+
+On the TX side, descriptor fields seem to be written using iowrite32(),
+which implicitly performs a little-endian byte swap on big-endian CPUs.
+
+However, in ntb_process_rxc(), they are accessed directly as native
+integers (e.g., hdr->len). Won't this evaluate the little-endian bytes
+incorrectly on big-endian architectures, causing version mismatches and
+incorrect lengths?
+
+[ ... ]
+
+> @@ -2361,7 +2369,7 @@ int ntb_transport_tx_enqueue(struct ntb_transport_q=
+p *qp, void *cb, void *data,
+>  	entry->cb_data =3D cb;
+>  	entry->buf =3D data;
+>  	entry->len =3D len;
+> -	entry->flags =3D 0;
+> +	entry->flags =3D meta << DESC_META_SHIFT;
+>  	entry->errors =3D 0;
+>  	entry->tx_index =3D 0;
+> =20
+
+[Severity: High]
+This is a pre-existing issue, but I noticed a potential memory leak during
+TX when an oversized packet is enqueued.
+
+If ntb_process_tx() detects a length overflow, it aborts transmission and
+calls the transmit handler. However, it passes NULL instead of the original
+buffer context to the handler:
+
+ntb_process_tx()
+    if (qp->tx_handler)
+        qp->tx_handler(qp, qp->cb_data, NULL, -EIO);
+
+Since ntb_netdev_tx_handler() explicitly checks if the skb is NULL and
+returns immediately without freeing it, won't this leak the SKB if the
+MTU check is bypassed or misconfigured?
+
+--=20
+Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20260814032913.3558=
+500-1-den@valinux.co.jp?part=3D1
