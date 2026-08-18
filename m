@@ -1,169 +1,140 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E0079342CB0
-	for <ntb@lists.linux.dev>; Tue, 18 Aug 2026 06:49:52 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 271AE3446A6
+	for <ntb@lists.linux.dev>; Tue, 18 Aug 2026 06:49:53 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787035794; cv=none; b=Sv5M83ZvTatP89vd1hESB+kECwqlqIwHinkcQrP6jmAsFgmARCVYlZPVMBnLXORNaw50SoAFxfZTLC7IlqN07e8LiaHG1yh5xuze8ICPu/IDV4/VKQsv75OQg1mIRIvzpZYHubz0oe7Ei2L/YiUF+pXOUMx015JYBoG98DF0yng=
+	t=1787035794; cv=none; b=NjP8kMOQWzoFIJyh8x3ci7oMG9w495R7j9bLy8d/QVLsrcIAWY63FmaaMJW9MzJ9/dkk1GcPMO7UDHnqURua6cEN4QCMQxoTzjLwfHLnorHpxVvryM/WZ0E/S0ETICWru3EOAQPsr++EWYhQIMApwMOaQE9zUhqwnwWMQ8DzeSA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1787035794; c=relaxed/simple;
-	bh=NOxeg0VA/Ehima/wvWUL93VNTy0HK370BfNlcWxK0ME=;
+	bh=mN0ODw1MRMrRFUYmzLEnqXVDdoDTQ40O6iCvet6+Ws4=;
 	h=From:Subject:To:Cc:In-Reply-To:References:Content-Type:Date:
-	 Message-Id; b=jrhcWzbikbksjhurHdcg3rdde5SExMgS1t7F07LKIZ2HxArcnU9IsgKbylkQxk6ic9AY0+0OEnsdQXmMCEeJKwQDbSUizR4OaeaTST9VqP43vDTXLhf3NavjYbUF4JToY4ejYf2puTdVDWlsyddzxzmsHMoIdDKEH4sazmTi+W0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=AZhBitr0; arc=none smtp.client-ip=100.103.45.18
+	 Message-Id; b=HT3Vof3NkawpAG1X6A8VSnfjm5C5E4uOrYTEcCFYbqpBnsf/NNZBlxh5h2plGfGVeZr8cVF2lCnVfN51lK35iqNXd0NhUaYJki4Hdkdpz8BTqHxp7aNjjCvpMtvqeuYUls+MwlSDqrihchwZmDWdCMoGuWJPizmW58EiEwjQNXY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=D+hd9BD+; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="AZhBitr0"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1A92D1F00A3D;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="D+hd9BD+"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A489D1F00A3E;
 	Tue, 18 Aug 2026 06:49:52 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
 	s=k20260515; t=1787035792;
-	bh=NOxeg0VA/Ehima/wvWUL93VNTy0HK370BfNlcWxK0ME=;
+	bh=bCthYxbGJ2Mh+Sz2zq79oRgUpW2Zbf7LDe8N6LsB23g=;
 	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=AZhBitr0uKa4eKVbmZLS99WQ+gQ4lCV8XKL5s+rFA27kOyjhhaQOH2b6BQ9owG7xS
-	 S2x+RIYCsJEzSN0n1XNNZQGOREqzqGEX96hDGHLkj2chg+JUN1bkmNgeAdHEgE2PtM
-	 CqsAr0r2A7fXwbhZ6plXaoi+Tkra6gfPTJbkrLs1/HDolpXfMOUB5nREBcTiJn8B+B
-	 zbGq12MjXMY3clXVWL7+WJK36UOyh8Fx/CoYoWwubbD5yCK8zofAJlQGpxq9wGmKaY
-	 mVbslc7MjviBnpRHeLhZsxAzq1qyMf8NHkXl0JGJl7R6xVD21xFyJaSBxnwDtAvRPR
-	 D8IRqFkjT/UBA==
+	b=D+hd9BD+hJrCIlTRwWEcIJlWAgz5m5CiHIUhhxys9GbUUcsmdcRfh1a/HbK5qA88j
+	 jB9sRGw/1pCTSmmVxU26pw+vUSqaqvHZAfyS7xRqTjla3oJaWxP6tfLuPji0g/hcNk
+	 3o3oTVGSAdefmrjlHeuj9m9/edUNg0faXfC3pHMtPw/VQVNwLUcGQ28ftHCrKgdyzf
+	 OLA2B69Z3WEeWEeb75mSYVrt2xbSf6/crkHdVwgAJ2LG3JX2p/I4LuZNOBD9bq5qwP
+	 8qhEIDckwoVDqdvhyuBw1fBM8G9K9YrdCCVrlC+NaV+3+2D0bmuwiChoqJuNytPFbB
+	 tgV68WkrTY29w==
 From: sashiko-bot@kernel.org
-Subject: Re: [PATCH net-next v2 1/4] NTB: ntb_transport: Order RX descriptor
- reads after completion
+Subject: Re: [PATCH net-next v2 4/4] net: ntb_netdev: Preserve
+ CHECKSUM_PARTIAL across NTB
 Reply-To: sashiko-reviews@lists.linux.dev
 To: "Koichiro Den" <den@valinux.co.jp>
 Cc: ntb@lists.linux.dev
-In-Reply-To: <20260817064916.13278-2-den@valinux.co.jp>
+In-Reply-To: <20260817064916.13278-5-den@valinux.co.jp>
 References: <20260817064916.13278-1-den@valinux.co.jp>
- <20260817064916.13278-2-den@valinux.co.jp>
+ <20260817064916.13278-5-den@valinux.co.jp>
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
-Date: Tue, 18 Aug 2026 06:49:51 +0000
-Message-Id: <20260818064952.1A92D1F00A3D@smtp.kernel.org>
+Date: Tue, 18 Aug 2026 06:49:52 +0000
+Message-Id: <20260818064952.A489D1F00A3E@smtp.kernel.org>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 
-Thank you for your contribution! Sashiko AI review found 7 potential issue(=
+Thank you for your contribution! Sashiko AI review found 1 potential issue(=
 s) to consider:
 
 Pre-existing issues:
-- [Critical] Double-fetch vulnerability (TOCTOU) on `hdr->len` allowing ker=
-nel heap buffer overflow.
-- [Critical] Use-After-Free of memory windows during link teardown due to m=
-issing tasklet and DMA synchronization.
-- [Critical] Invalid use of `virt_to_phys()` on DMA coherent memory corrupt=
-s DMA mappings.
-- [High] Missing endianness conversion on memory-mapped payload headers bre=
-aks big-endian systems.
-- [High] RX DMA abort fallback copies data from the wrong ring index, causi=
-ng data corruption.
-- [High] Concurrent modification of `qp->rx_index` causes ring state corrup=
-tion.
-- [High] Missing bounds validation of `hdr->len` against frame size causes =
-out-of-bounds read and information leak.
+- [High] Pre-existing memory leak of `skb` when transmitting while the NTB =
+link is down.
 --
 
---- Patch [1]: [PATCH net-next v2 1/4] NTB: ntb_transport: Order RX descrip=
-tor reads after completion ---
-(Note: The format of this report has been altered due to recitation
-restrictions. The original patch diff is not quoted, and findings are
-provided as a free-form summary.)
-
-Commit: 27d90886c93f5cd8fe8f9c93d5acf5cd83c90d55
+--- Patch [4]: [PATCH net-next v2 4/4] net: ntb_netdev: Preserve CHECKSUM_P=
+ARTIAL across NTB ---
+commit 52574632d1af60a032a3fbef27bc73eb5ad8f90c
 Author: Koichiro Den <den@valinux.co.jp>
-Subject: NTB: ntb_transport: Order RX descriptor reads after completion
 
-This commit addresses an ordering issue on weakly ordered CPUs where the
-descriptor and payload could be consumed before DESC_DONE_FLAG is fully
-observed. It ensures the completion word is read once, followed by a
-dma_rmb(), and uses the saved word for subsequent checks.
+net: ntb_netdev: Preserve CHECKSUM_PARTIAL across NTB
 
-Link: https://lore.kernel.org/r/20260815032932.151F11F000E9@smtp.kernel.org/
+This commit carries CHECKSUM_PARTIAL with csum_start and csum_offset across
+the NTB link to offload checksum calculations to the peer. It advertises
+support in every frame and falls back to software until the peer capability
+is seen.
 
-[Severity: Critical]
-This is a pre-existing issue, but in ntb_process_rxc(), could the double
-fetch of hdr->len lead to a TOCTOU vulnerability?
+> diff --git a/drivers/net/ntb_netdev.c b/drivers/net/ntb_netdev.c
+> index 5c7fe6883cb93..9cfb463e472c3 100644
+> --- a/drivers/net/ntb_netdev.c
+> +++ b/drivers/net/ntb_netdev.c
 
-The code reads hdr->len to validate it against entry->len. After this check,
-operations like qp->rx_bytes +=3D hdr->len and entry->len =3D hdr->len read=
- the
-length directly from DMA-coherent memory again.
+[ ... ]
 
-Could a malicious peer concurrently swap a valid small length with a huge
-value after the bounds check passes, causing the fallback CPU memcpy to
-copy out-of-bounds into the local kernel buffer?
+> @@ -249,6 +288,7 @@ static const struct ntb_queue_handlers ntb_netdev_han=
+dlers =3D {
+>  static netdev_tx_t ntb_netdev_start_xmit(struct sk_buff *skb,
+>  					 struct net_device *ndev)
+>  {
+> +	unsigned int meta =3D NTB_NETDEV_META_CAP_CSUM;
 
-[Severity: High]
-This isn't a bug introduced by this patch, but does the lack of endianness
-conversion on memory-mapped payload headers break big-endian systems?
+[ ... ]
 
-The TX side writes header fields using iowrite32(), which implicitly conver=
-ts
-to little-endian. However, the RX side in ntb_process_rxc() reads the
-memory directly via READ_ONCE(hdr->flags) and evaluates flags against
-DESC_DONE_FLAG without using le32_to_cpu().
-
-Would this cause the receiver on big-endian hosts to misinterpret the bytes
-and drop all received packets?
-
-[Severity: Critical]
-This is a pre-existing issue, but does ntb_transport_link_cleanup() safely
-free memory windows if tasklets or DMA engines are still active?
-
-When the link drops, it calls ntb_free_mw(), invoking dma_free_attrs().
-However, it does not call tasklet_kill(&qp->rxc_db_work) or
-dmaengine_terminate_all().
-
-If the RX tasklet is actively processing doorbells or the DMA engine is
-transferring data, will this result in a use-after-free or IOMMU DMA fault?
+> -	rc =3D ntb_transport_tx_enqueue(q->qp, skb, skb->data, skb->len, 0);
+> +	if (skb->ip_summed =3D=3D CHECKSUM_PARTIAL) {
+> +		if (READ_ONCE(dev->peer_csum))
+> +			meta |=3D NTB_NETDEV_META_CSUM |
+> +				(skb_checksum_start_offset(skb) <<
+> +				 NTB_NETDEV_META_CSUM_START_SHIFT) |
+> +				skb->csum_offset;
+> +		else if (skb_checksum_help(skb))
+> +			goto drop;
+> +	}
+> +
+> +	rc =3D ntb_transport_tx_enqueue(q->qp, skb, skb->data, skb->len, meta);
 
 [Severity: High]
-This isn't a bug introduced by this patch, but does ntb_rx_copy_callback()
-use the correct index when falling back to a CPU copy?
+This is a pre-existing issue, but does this code leak the skb when the NTB
+link is down?
 
-If a DMA transaction aborts, it calculates the offset using the shared
-qp->rx_index via qp->rx_buff + qp->rx_max_frame * qp->rx_index. Because the
-callback is asynchronous, the tasklet may have already advanced
-qp->rx_index.
+Looking at ntb_transport_tx_enqueue() in drivers/ntb/ntb_transport.c, if the
+link is down, it returns 0 without taking ownership of the buffer:
 
-Should it use the saved entry->rx_index instead to avoid copying data from
-the wrong ring slot and corrupting the stream?
+drivers/ntb/ntb_transport.c:ntb_transport_tx_enqueue() {
+    ...
+    /* If the qp link is down already, just ignore. */
+    if (!qp->link_is_up)
+        return 0;
+    ...
+}
 
-[Severity: High]
-This is a pre-existing issue, but can ntb_qp_link_down_reset() safely reset
-indices while traffic is flowing?
+Since ntb_netdev_start_xmit() sees a return code of 0, it assumes successful
+queuing and returns NETDEV_TX_OK without freeing the skb. Because the driver
+accepts packets from the networking stack regardless of the physical link
+state, sending packets while the link is disconnected appears to cause an
+unbounded memory leak.
 
-It forcefully zeroes qp->rx_index and qp->tx_index from a workqueue without
-synchronizing with the rxc_db_work tasklet.
-
-If the tasklet is running concurrently in ntb_process_rxc(), could the
-unsynchronized writes corrupt the ring buffer state?
-
-[Severity: High]
-This isn't a bug introduced by this patch, but does ntb_process_rxc()
-adequately validate hdr->len against the physical frame size?
-
-The code verifies hdr->len against entry->len (the client buffer size) but
-never against qp->rx_max_frame (the hardware memory window slice size).
-
-If a client configures a large buffer, could a malicious remote peer set
-hdr->len to a value exceeding the frame size, allowing an out-of-bounds
-read that leaks adjacent kernel memory?
-
-[Severity: Critical]
-This is a pre-existing issue, but is it valid to use virt_to_phys() on
-DMA coherent memory in ntb_async_rx_submit()?
-
-The offset pointer is derived from qp->rx_buff, which is allocated via
-dma_alloc_attrs(). On architectures where this returns a non-linear virtual
-address in the vmalloc area, virt_to_phys() will return an incorrect
-physical address.
-
-Will this cause the DMA engine to write received data to arbitrary physical
-memory locations, leading to silent memory corruption?
+>  	if (rc)
+>  		goto err;
+> =20
+> @@ -267,12 +317,29 @@ static netdev_tx_t ntb_netdev_start_xmit(struct sk_=
+buff *skb,
+> =20
+>  	return NETDEV_TX_OK;
+> =20
+> +drop:
+> +	dev_kfree_skb_any(skb);
+> +	ndev->stats.tx_dropped++;
+> +	ndev->stats.tx_errors++;
+> +	return NETDEV_TX_OK;
+> +
+>  err:
+>  	ndev->stats.tx_dropped++;
+>  	ndev->stats.tx_errors++;
+>  	return NETDEV_TX_BUSY;
+>  }
 
 --=20
 Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20260817064916.1327=
-8-1-den@valinux.co.jp?part=3D1
+8-1-den@valinux.co.jp?part=3D4
