@@ -1,129 +1,132 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.10])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4ABF63EC699
-	for <ntb@lists.linux.dev>; Wed, 19 Aug 2026 23:47:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.10
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 18C3847F2FF
+	for <ntb@lists.linux.dev>; Thu, 20 Aug 2026 17:25:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787183275; cv=none; b=sili6m/N30G6PlDUkrDJW59koLpRtg70HLZZsUSNlB3wOA2zB7Qbxg/U8XkB404+NafuNAp33Bz5VzNvIu+h+7gv0orJew6KC3IfpNxjB9+aAmWyHZAGjlDcvpxRVxP2/rTIsZtlWmiz2swSmls9jqZc/O3fio6AsBKjGsJFYyU=
+	t=1787246755; cv=none; b=Rxc1rsVEnSB59gIRaPWC+JW5EH0FoaPBFIqm9vlycMkwOk3fLQb/YpAgEirihBKFGmUawgVpJaypf9u4CElfs9nC98fNn53Krkiw2NZHHJJMo+kCWPk+FYiFyix4qeeycyQln1DhgF+9Du4VqbkmIgNPcSvEqQ+Q+YAMlnUSWs4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787183275; c=relaxed/simple;
-	bh=4tMDkGPYNi52mkKDE1yfVghndM3yCKfKaln+ytFgDnk=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=R08fUP6WP3S3qU+CRTIzDhtSn1ARBD13RjyNRES1xY6KWczkn9m5hj+v4ze+QS3bBWwsLEyOS1J55rtcWWDhEUXvpzlzxnhVneYTQwdSE56ICWFa0KxehLvqqJdJt2pjaKeUGi8coIqlWPkKALeKge9em25YaPEmjk/Q8Pi1jik=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=FaomZ+Aj; arc=none smtp.client-ip=198.175.65.10
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1787246755; c=relaxed/simple;
+	bh=RqZ39wZl3cbunuEqTk1HwpgkK7Qtelj+phVXCM33oYk=;
+	h=From:Subject:To:Cc:In-Reply-To:References:Content-Type:Date:
+	 Message-Id; b=iOzfIwrUcH87xyxtIOb3bSoruCTSVpWutwA85WWLKepKIYbARLxwwDI+LfPyGtRI4Fg8wmluwoX4gwkxKA3WbkT12VHLKckEZEneEKalEvlM4JjNthHQHsovMlpEQOnl3sZKn7BwKpesebqfiHNiQ35HwLXyiww7dlJU/fz4bRE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Me+NO8hm; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="FaomZ+Aj"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1787183273; x=1818719273;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=4tMDkGPYNi52mkKDE1yfVghndM3yCKfKaln+ytFgDnk=;
-  b=FaomZ+AjfPWm1tuaZMDu/XEAxwQgcGq1ggO2YqJpICc31zsOzNxBcTze
-   SoOtEFtQWsxmND5TfJbJJ4HhByH3bdzkhg9oTNLRz92SGAKrVsnsWB/cR
-   8cw+8e/yjcgDojqJyBKUcYFrAMn64JrtJpM1RYZnYKK0HcUZjJLrVfeO/
-   PO2A2yO9k5Rxwys+CDrJ5XpfL1N6WXYOkAYsU28vR6hY5Xk4A930Yv8gn
-   D6e6N2MQ6xzyBG8WbtYHog0sUpMFx/WPRdecwAwK/QSlGtw9a5I2NfCDh
-   nYkxnrlQXcSxQq7XOBVgeXm2s/HnOaxTCMAm64iB/wCo0j97G32vlJDKM
-   g==;
-X-CSE-ConnectionGUID: 3bPev4qYSjGzgE5D8v7hjQ==
-X-CSE-MsgGUID: SdWlYORxSeuSB8MQBOFRTQ==
-X-IronPort-AV: E=McAfee;i="6800,10657,11880"; a="105094484"
-X-IronPort-AV: E=Sophos;i="6.25,232,1779174000"; 
-   d="scan'208";a="105094484"
-Received: from fmviesa007.fm.intel.com ([10.60.135.147])
-  by orvoesa102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Aug 2026 16:47:52 -0700
-X-CSE-ConnectionGUID: zildpLGlR0C6V35H3pIq/g==
-X-CSE-MsgGUID: hmYD/LK/Qzm1k0uN88GUJQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.25,232,1779174000"; 
-   d="scan'208";a="262449133"
-Received: from aschende-mobl.amr.corp.intel.com (HELO [10.125.108.13]) ([10.125.108.13])
-  by fmviesa007-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Aug 2026 16:47:50 -0700
-Message-ID: <274faae6-fe48-4310-8deb-4b57c5c01f7c@intel.com>
-Date: Wed, 19 Aug 2026 16:47:48 -0700
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Me+NO8hm"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7009F1F000E9;
+	Thu, 20 Aug 2026 17:25:53 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1787246753;
+	bh=hMt2g8/QiR+kfJ7ZK1TBW0BBY+6TIrPI8MRMjfeC63k=;
+	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
+	b=Me+NO8hmQwwiWvBXPthmVMK3JynPI4Ay2GMJPSBCGHQw5ryAuucJMlYM9Cr7Jrkx7
+	 ykC6o5Ts7Nm6IzK9PN186vRjlMKY1E9HxKvMlPHAZxgkCiaVZb9Y9iOxbXk5ZTWJ7r
+	 hr7H2xwGrIqthqJttdxIQsMlqgutLRq+X5M7Xr32rVRffMM8aKOHiOa9yW+QT6cwfl
+	 2xAb9CYSEeYgg278Ur1VHVVPrfKO6jjoCdK4CXXXLwXataJJ3Up2zPvWRLqlP959Lp
+	 zyJG+g/OxA9bSNGuQbqfrg4KDCj2jCdqQBigXpQW1CWpVcYZFtc1zNmYYd6ApwFEum
+	 iQPE1o3It03cQ==
+From: sashiko-bot@kernel.org
+Subject: Re: [PATCH net 1/2] net: ntb_netdev: Avoid double-accounting
+ netif_rx() drops
+Reply-To: sashiko-reviews@lists.linux.dev
+To: "Koichiro Den" <den@valinux.co.jp>
+Cc: ntb@lists.linux.dev
+In-Reply-To: <20260819172539.1450821-2-den@valinux.co.jp>
+References: <20260819172539.1450821-1-den@valinux.co.jp>
+ <20260819172539.1450821-2-den@valinux.co.jp>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Date: Thu, 20 Aug 2026 17:25:52 +0000
+Message-Id: <20260820172553.7009F1F000E9@smtp.kernel.org>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
-MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH net 4/4] NTB: ntb_transport: Reject oversized TX buffers
-To: Koichiro Den <den@valinux.co.jp>, Jon Mason <jdmason@kudzu.us>,
- Allen Hubbe <allenbh@gmail.com>, Andrew Lunn <andrew+netdev@lunn.ch>,
- "David S. Miller" <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>,
- Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>
-Cc: ntb@lists.linux.dev, netdev@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <20260817053519.4135287-1-den@valinux.co.jp>
- <20260817053519.4135287-5-den@valinux.co.jp>
-From: Dave Jiang <dave.jiang@intel.com>
-Content-Language: en-US
-In-Reply-To: <20260817053519.4135287-5-den@valinux.co.jp>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
 
+Thank you for your contribution! Sashiko AI review found 1 potential issue(=
+s) to consider:
 
+Pre-existing issues:
+- [Critical] Time-of-Check to Time-of-Use (TOCTOU) vulnerability in NTB rec=
+eive processing allows a malicious remote peer to cause a massive kernel he=
+ap buffer overflow.
+--
 
-On 8/16/26 10:35 PM, Koichiro Den wrote:
-> ntb_process_tx() handles an oversized buffer by calling tx_handler()
-> with a NULL data pointer and returning success. ntb_netdev therefore
-> neither frees the skb in its completion callback nor takes its enqueue
-> error path, leaking it.
-> 
-> Reject oversized buffers in ntb_transport_tx_enqueue() before acquiring
-> a queue entry and return -EMSGSIZE. The caller retains ownership of the
-> buffer, and the preceding netdev patch frees the skb when enqueue
-> returns this permanent error.
-> 
-> Fixes: fce8a7bb5b4b ("PCI-Express Non-Transparent Bridge Support")
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Koichiro Den <den@valinux.co.jp>
+--- Patch [1]: [PATCH net 1/2] net: ntb_netdev: Avoid double-accounting net=
+if_rx() drops ---
+commit 002045303db9fc237bf287acbb8f01a9873c837d
+Author: Koichiro Den <den@valinux.co.jp>
 
-Reviewed-by: Dave Jiang <dave.jiang@intel.com>
+net: ntb_netdev: Avoid double-accounting netif_rx() drops
 
-> ---
-> Previously posted at:
-> https://lore.kernel.org/r/20260810165136.2292436-3-den@valinux.co.jp/
-> 
-> I moved the fix here because it addresses a pre-existing issue
-> independently of that feature series. I also moved the size check before
-> the tx_free_q lookup so -EBUSY cannot mask -EMSGSIZE.
-> ---
->  drivers/ntb/ntb_transport.c | 12 +++---------
->  1 file changed, 3 insertions(+), 9 deletions(-)
-> 
-> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-> index 4bdd81edcb87..f9caa1a653c5 100644
-> --- a/drivers/ntb/ntb_transport.c
-> +++ b/drivers/ntb/ntb_transport.c
-> @@ -1955,15 +1955,6 @@ static int ntb_process_tx(struct ntb_transport_qp *qp,
->  		return -EAGAIN;
->  	}
->  
-> -	if (entry->len > qp->tx_max_frame - sizeof(struct ntb_payload_header)) {
-> -		if (qp->tx_handler)
-> -			qp->tx_handler(qp, qp->cb_data, NULL, -EIO);
-> -
-> -		ntb_list_add(&qp->ntb_tx_free_q_lock, &entry->entry,
-> -			     &qp->tx_free_q);
-> -		return 0;
+netif_rx() already accounts packets it drops in the core rx_dropped
+counter. ntb_netdev counts them again as both errors and drops.
+Leave netif_rx() drops to the core. Count the packet and bytes
+unconditionally since it was received successfully by the driver.
+
+> diff --git a/drivers/net/ntb_netdev.c b/drivers/net/ntb_netdev.c
+> index 029a4a532a104..4e53b00f016b0 100644
+> --- a/drivers/net/ntb_netdev.c
+> +++ b/drivers/net/ntb_netdev.c
+> @@ -155,13 +155,9 @@ static void ntb_netdev_rx_handler(struct ntb_transpo=
+rt_qp *qp, void *qp_data,
+>  	skb->ip_summed =3D CHECKSUM_NONE;
+>  	skb_record_rx_queue(skb, q->qid);
+> =20
+> -	if (netif_rx(skb) =3D=3D NET_RX_DROP) {
+> -		ndev->stats.rx_errors++;
+> -		ndev->stats.rx_dropped++;
+> -	} else {
+> -		ndev->stats.rx_packets++;
+> -		ndev->stats.rx_bytes +=3D len;
 > -	}
-> -
->  	ntb_async_tx(qp, entry);
->  
->  	qp->tx_pkts++;
-> @@ -2356,6 +2347,9 @@ int ntb_transport_tx_enqueue(struct ntb_transport_qp *qp, void *cb, void *data,
->  	if (!qp->link_is_up)
->  		return -ENOLINK;
->  
-> +	if (len > qp->tx_max_frame - sizeof(struct ntb_payload_header))
-> +		return -EMSGSIZE;
-> +
->  	entry = ntb_list_rm(&qp->ntb_tx_free_q_lock, &qp->tx_free_q);
->  	if (!entry) {
->  		qp->tx_err_no_buf++;
+> +	netif_rx(skb);
+> +	ndev->stats.rx_packets++;
+> +	ndev->stats.rx_bytes +=3D len;
 
+[Severity: Critical]
+This is a pre-existing issue, but does this expose a time-of-check to
+time-of-use issue during ntb receive processing?
+
+Looking at ntb_process_rxc() in drivers/ntb/ntb_transport.c, hdr directly
+accesses the shared memory window which the remote peer can write to via
+pcie. A bounds check is performed, but then hdr->len is re-read directly
+from the shared memory:
+
+drivers/ntb/ntb_transport.c:ntb_process_rxc() {
+	if (hdr->len > entry->len) {
+		...
+	} else {
+		...
+		entry->len =3D hdr->len;
+
+		ntb_async_rx(entry, offset);
+	}
+}
+
+Can the remote peer modify hdr->len to a massive value after the bounds
+check passes but before the second read?
+
+If so, this bypassed length is then passed to ntb_async_rx() and
+subsequently to ntb_memcpy_rx():
+
+drivers/ntb/ntb_transport.c:ntb_memcpy_rx() {
+	void *buf =3D entry->buf;
+	size_t len =3D entry->len;
+
+	memcpy(buf, offset, len);
+}
+
+Could this cause memcpy() to overflow the skb data buffer? Should the
+payload header values be copied to local variables using READ_ONCE() before
+validation to prevent this?
+
+> =20
+>  	skb =3D new_skb;
+>
+
+--=20
+Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20260819172539.1450=
+821-1-den@valinux.co.jp?part=3D1
