@@ -1,132 +1,280 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.20])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 18C3847F2FF
-	for <ntb@lists.linux.dev>; Thu, 20 Aug 2026 17:25:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 862602BEC4E
+	for <ntb@lists.linux.dev>; Thu, 20 Aug 2026 20:03:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.20
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787246755; cv=none; b=Rxc1rsVEnSB59gIRaPWC+JW5EH0FoaPBFIqm9vlycMkwOk3fLQb/YpAgEirihBKFGmUawgVpJaypf9u4CElfs9nC98fNn53Krkiw2NZHHJJMo+kCWPk+FYiFyix4qeeycyQln1DhgF+9Du4VqbkmIgNPcSvEqQ+Q+YAMlnUSWs4=
+	t=1787256230; cv=none; b=fuSVmrrL9dirJki+Tq/+x8cqyhqCb3IZDILTBlDS0whnyaMh7jOi8WzIsBEBU3BqKv6fRDLWX5Y5KPwqkhSIdsaFHTtqrWNrt+rTq15nyhkZLZZIuHIzvz/d03kfe6o2/6yKHgwL4CJhQ/TreQh/vnIKF1KOiwnQ4gOkZoNN74w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787246755; c=relaxed/simple;
-	bh=RqZ39wZl3cbunuEqTk1HwpgkK7Qtelj+phVXCM33oYk=;
-	h=From:Subject:To:Cc:In-Reply-To:References:Content-Type:Date:
-	 Message-Id; b=iOzfIwrUcH87xyxtIOb3bSoruCTSVpWutwA85WWLKepKIYbARLxwwDI+LfPyGtRI4Fg8wmluwoX4gwkxKA3WbkT12VHLKckEZEneEKalEvlM4JjNthHQHsovMlpEQOnl3sZKn7BwKpesebqfiHNiQ35HwLXyiww7dlJU/fz4bRE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Me+NO8hm; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1787256230; c=relaxed/simple;
+	bh=JDI/5RPnjEHlzYWVfQF06rFoQRgLrkZ+cdgQghuuhZI=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=WkitrFNwQnXBzrkxJ3jjcqzy+zhl6iZLLShJoHLYm8i0cULGu1hkD6LYvVOj2oBaq/cos0JGa4CfXB+jWdJxdKXDWE3iKMZ6tpAOxflwnEWVYr59rjmhsx1774kFnznnd7cxurQGeXqfg3lpzv4OUE1+yvTFP1VJ44AD5vsizyg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=U6jSqkgQ; arc=none smtp.client-ip=198.175.65.20
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Me+NO8hm"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7009F1F000E9;
-	Thu, 20 Aug 2026 17:25:53 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1787246753;
-	bh=hMt2g8/QiR+kfJ7ZK1TBW0BBY+6TIrPI8MRMjfeC63k=;
-	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=Me+NO8hmQwwiWvBXPthmVMK3JynPI4Ay2GMJPSBCGHQw5ryAuucJMlYM9Cr7Jrkx7
-	 ykC6o5Ts7Nm6IzK9PN186vRjlMKY1E9HxKvMlPHAZxgkCiaVZb9Y9iOxbXk5ZTWJ7r
-	 hr7H2xwGrIqthqJttdxIQsMlqgutLRq+X5M7Xr32rVRffMM8aKOHiOa9yW+QT6cwfl
-	 2xAb9CYSEeYgg278Ur1VHVVPrfKO6jjoCdK4CXXXLwXataJJ3Up2zPvWRLqlP959Lp
-	 zyJG+g/OxA9bSNGuQbqfrg4KDCj2jCdqQBigXpQW1CWpVcYZFtc1zNmYYd6ApwFEum
-	 iQPE1o3It03cQ==
-From: sashiko-bot@kernel.org
-Subject: Re: [PATCH net 1/2] net: ntb_netdev: Avoid double-accounting
- netif_rx() drops
-Reply-To: sashiko-reviews@lists.linux.dev
-To: "Koichiro Den" <den@valinux.co.jp>
-Cc: ntb@lists.linux.dev
-In-Reply-To: <20260819172539.1450821-2-den@valinux.co.jp>
-References: <20260819172539.1450821-1-den@valinux.co.jp>
- <20260819172539.1450821-2-den@valinux.co.jp>
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-Date: Thu, 20 Aug 2026 17:25:52 +0000
-Message-Id: <20260820172553.7009F1F000E9@smtp.kernel.org>
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="U6jSqkgQ"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1787256228; x=1818792228;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=JDI/5RPnjEHlzYWVfQF06rFoQRgLrkZ+cdgQghuuhZI=;
+  b=U6jSqkgQfJ4F4t3wpwMuLGnHGaFfPZrFi4hVjPELChTNT/UxaaFvWCnT
+   thoeDJ5zre+Bzv0FjK3Nofm72YjsOJaaxIbuY6yftn/G2pOzyPq5FUNyW
+   AEyyzVbDny7DSIg9JIBr6Kfe+XIqXaCCL/9QeuWJP1J5d6w9AJqT00/Ec
+   WUNU7UG3p9CsL+U67reJK6NB3stBXaa/9HLFZse/crlJWqhAD92QvYZBM
+   VkSkxTxOzMeSSatALl9tmm7sgF+1zyd8ziqZF0BgtaRFmO92W9ETWv4Sk
+   aGUR8h6aCJc+OAf5p5LW22U8KsvGEGSgZDGmBvL7UXY5WzSkxypcm2SkZ
+   w==;
+X-CSE-ConnectionGUID: 7Zm+mXwzTt6032m7QT7ZgQ==
+X-CSE-MsgGUID: wfehfNWHS+Wjib9XqaGapw==
+X-IronPort-AV: E=McAfee;i="6800,10657,11881"; a="87567730"
+X-IronPort-AV: E=Sophos;i="6.25,233,1779174000"; 
+   d="scan'208";a="87567730"
+Received: from orviesa002.jf.intel.com ([10.64.159.142])
+  by orvoesa112.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Aug 2026 13:03:48 -0700
+X-CSE-ConnectionGUID: Paz7+YKkTq2/4ynv96Bpfg==
+X-CSE-MsgGUID: f4grEtbTSiGrLigFeBgE2Q==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.25,233,1779174000"; 
+   d="scan'208";a="296060084"
+Received: from bradocaj-mobl.ger.corp.intel.com (HELO [10.125.108.63]) ([10.125.108.63])
+  by orviesa002-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Aug 2026 13:03:46 -0700
+Message-ID: <60af3a30-dabd-4013-8324-f950d8add1fb@intel.com>
+Date: Thu, 20 Aug 2026 13:03:45 -0700
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 08/16] NTB: ntb_transport: Add opt-in direct-DMA channel
+ reservation
+To: Koichiro Den <den@valinux.co.jp>, Jon Mason <jdmason@kudzu.us>,
+ Frank Li <Frank.Li@kernel.org>, Allen Hubbe <allenbh@gmail.com>,
+ Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+ Niklas Cassel <cassel@kernel.org>, Nicholas Bellinger <nab@linux-iscsi.org>
+Cc: ntb@lists.linux.dev, netdev@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <20260810165136.2292436-1-den@valinux.co.jp>
+ <20260810165136.2292436-9-den@valinux.co.jp>
+From: Dave Jiang <dave.jiang@intel.com>
+Content-Language: en-US
+In-Reply-To: <20260810165136.2292436-9-den@valinux.co.jp>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-Thank you for your contribution! Sashiko AI review found 1 potential issue(=
-s) to consider:
 
-Pre-existing issues:
-- [Critical] Time-of-Check to Time-of-Use (TOCTOU) vulnerability in NTB rec=
-eive processing allows a malicious remote peer to cause a massive kernel he=
-ap buffer overflow.
---
 
---- Patch [1]: [PATCH net 1/2] net: ntb_netdev: Avoid double-accounting net=
-if_rx() drops ---
-commit 002045303db9fc237bf287acbb8f01a9873c837d
-Author: Koichiro Den <den@valinux.co.jp>
+On 8/10/26 9:51 AM, Koichiro Den wrote:
+> Direct DMA is opt-in. Add 'use_direct_dma' module parameter to request
+> it. Some endpoint integrations expose NTB and DMA through sibling PCI
+> functions, so add direct_dma_func to select the DMA function when the
+> NTB device cannot return the DMA device directly.
+> 
+> When use_direct_dma is set and negotiation scratchpads are available,
+> locate the DMA device and reserve one suitable channel for every QP
+> before registering clients. This avoids negotiating direct TX before a
+> later-created QP discovers that no channel is available. If the full set
+> is unavailable, leave direct TX disabled. Note that direct RX does not
+> require these channels.
+> 
+> Signed-off-by: Koichiro Den <den@valinux.co.jp>
+> ---
+>  drivers/ntb/ntb_transport.c | 120 ++++++++++++++++++++++++++++++++++++
+>  1 file changed, 120 insertions(+)
+> 
+> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+> index f873eacd532b..6051d8abfc0d 100644
+> --- a/drivers/ntb/ntb_transport.c
+> +++ b/drivers/ntb/ntb_transport.c
+> @@ -98,6 +98,16 @@ static bool use_dma;
+>  module_param(use_dma, bool, 0644);
+>  MODULE_PARM_DESC(use_dma, "Use DMA engine to perform large data copy");
+>  
+> +static bool use_direct_dma;
+> +module_param(use_direct_dma, bool, 0644);
+> +MODULE_PARM_DESC(use_direct_dma,
+> +		 "Use PCI endpoint DMA to transfer directly to peer RX buffers");
+> +
+> +static unsigned int direct_dma_func;
+> +module_param(direct_dma_func, uint, 0644);
+> +MODULE_PARM_DESC(direct_dma_func,
+> +		 "PCI function number of a sibling endpoint DMA function");
 
-net: ntb_netdev: Avoid double-accounting netif_rx() drops
+This feel like very adhoc way of determining which DMA device to use. Is there a better way to do some sort of auto discovery without required user input?
 
-netif_rx() already accounts packets it drops in the core rx_dropped
-counter. ntb_netdev counts them again as both errors and drops.
-Leave netif_rx() drops to the core. Count the packet and bytes
-unconditionally since it was received successfully by the driver.
 
-> diff --git a/drivers/net/ntb_netdev.c b/drivers/net/ntb_netdev.c
-> index 029a4a532a104..4e53b00f016b0 100644
-> --- a/drivers/net/ntb_netdev.c
-> +++ b/drivers/net/ntb_netdev.c
-> @@ -155,13 +155,9 @@ static void ntb_netdev_rx_handler(struct ntb_transpo=
-rt_qp *qp, void *qp_data,
->  	skb->ip_summed =3D CHECKSUM_NONE;
->  	skb_record_rx_queue(skb, q->qid);
-> =20
-> -	if (netif_rx(skb) =3D=3D NET_RX_DROP) {
-> -		ndev->stats.rx_errors++;
-> -		ndev->stats.rx_dropped++;
-> -	} else {
-> -		ndev->stats.rx_packets++;
-> -		ndev->stats.rx_bytes +=3D len;
-> -	}
-> +	netif_rx(skb);
-> +	ndev->stats.rx_packets++;
-> +	ndev->stats.rx_bytes +=3D len;
+> +
+>  static unsigned int direct_dma_ring_entries = 64;
+>  module_param(direct_dma_ring_entries, uint, 0644);
+>  MODULE_PARM_DESC(direct_dma_ring_entries,
+> @@ -147,6 +157,7 @@ struct ntb_transport_qp {
+>  	void *cb_data;
+>  	struct dma_chan *tx_dma_chan;
+>  	struct dma_chan *rx_dma_chan;
+> +	struct dma_chan *direct_dma_chan;
+>  
+>  	bool client_ready;
+>  	bool link_is_up;
+> @@ -269,6 +280,7 @@ struct ntb_transport_ctx {
+>  	struct work_struct link_cleanup;
+>  
+>  	struct dentry *debugfs_node_dir;
+> +	struct device *direct_dma_dev;
+>  	u32 direct_features;
+>  	u32 peer_direct_features;
+>  	unsigned int direct_ring_entries;
+> @@ -352,6 +364,97 @@ static inline u32 ntb_direct_ring_used(u32 head, u32 tail)
+>  	return head - tail;
+>  }
+>  
+> +static bool ntb_direct_dma_filter_fn(struct dma_chan *chan, void *data)
+> +{
+> +	struct dma_slave_caps caps;
+> +
+> +	if (chan->device->dev != data || dma_get_slave_caps(chan, &caps))
+> +		return false;
+> +
+> +	/* Payload and completion descriptors must complete in order. */
+> +	return caps.cmd_terminate &&
+> +	       !dma_has_cap(DMA_COMPLETION_NO_ORDER, chan->device->cap_mask) &&
+> +	       (caps.directions & BIT(DMA_MEM_TO_DEV));
+> +}
+> +
+> +static struct device *ntb_direct_get_dma_dev(struct ntb_dev *ndev)
+> +{
+> +	struct pci_dev *pdev = ndev->pdev;
+> +	struct pci_dev *dma_pdev;
+> +	struct device *dev;
+> +
+> +	if (ndev->ops->get_dma_dev) {
+> +		dev = ntb_get_dma_dev(ndev);
+> +		return dev ? get_device(dev) : ERR_PTR(-ENODEV);
+> +	}
+> +
+> +	if (!pdev || !pdev->bus || direct_dma_func > 7)
+> +		return ERR_PTR(-ENODEV);
+> +
+> +	dma_pdev = pci_get_domain_bus_and_slot(pci_domain_nr(pdev->bus),
+> +					       pdev->bus->number,
+> +					       PCI_DEVFN(PCI_SLOT(pdev->devfn),
+> +							 direct_dma_func));
+> +	if (!dma_pdev)
+> +		return ERR_PTR(-ENODEV);
+> +
+> +	return &dma_pdev->dev;
+> +}
+> +
+> +static void ntb_direct_dma_release_channels(struct ntb_transport_ctx *nt)
+> +{
+> +	unsigned int i;
+> +
+> +	for (i = 0; i < nt->qp_count; i++) {
+> +		if (!nt->qp_vec[i].direct_dma_chan)
+> +			continue;
+> +
+> +		dma_release_channel(nt->qp_vec[i].direct_dma_chan);
+> +		nt->qp_vec[i].direct_dma_chan = NULL;
+> +	}
+> +}
+> +
+> +static void ntb_direct_dma_release(struct ntb_transport_ctx *nt)
+> +{
+> +	ntb_direct_dma_release_channels(nt);
+> +	if (nt->direct_dma_dev) {
+> +		put_device(nt->direct_dma_dev);
+> +		nt->direct_dma_dev = NULL;
+> +	}
+> +}
+> +
+> +static void ntb_direct_dma_init(struct ntb_transport_ctx *nt)
+> +{
+> +	dma_cap_mask_t mask;
+> +	unsigned int i;
+> +
+> +	if (!use_direct_dma)
+> +		return;
+> +
+> +	nt->direct_dma_dev = ntb_direct_get_dma_dev(nt->ndev);
+> +	if (IS_ERR(nt->direct_dma_dev)) {
+> +		dev_info(&nt->ndev->dev, "direct DMA device unavailable: %pe\n",
+> +			 nt->direct_dma_dev);
+> +		nt->direct_dma_dev = NULL;
+> +		return;
+> +	}
+> +
+> +	dma_cap_zero(mask);
+> +	dma_cap_set(DMA_SLAVE, mask);
 
-[Severity: Critical]
-This is a pre-existing issue, but does this expose a time-of-check to
-time-of-use issue during ntb receive processing?
+Are only slave DMA usable in this case? Is it not possible to do DMA with host DMA engines?
 
-Looking at ntb_process_rxc() in drivers/ntb/ntb_transport.c, hdr directly
-accesses the shared memory window which the remote peer can write to via
-pcie. A bounds check is performed, but then hdr->len is re-read directly
-from the shared memory:
+My main concern in all of this is looking for a way to make this usable for all ntb_transport users if possible and not niche the generic code to a specific hardware vendor.
 
-drivers/ntb/ntb_transport.c:ntb_process_rxc() {
-	if (hdr->len > entry->len) {
-		...
-	} else {
-		...
-		entry->len =3D hdr->len;
+DJ
+> +
+> +	for (i = 0; i < nt->qp_count; i++) {
+> +		nt->qp_vec[i].direct_dma_chan =
+> +			dma_request_channel(mask, ntb_direct_dma_filter_fn,
+> +					    nt->direct_dma_dev);
+> +		if (!nt->qp_vec[i].direct_dma_chan) {
+> +			dev_info(&nt->ndev->dev,
+> +				 "not enough direct DMA channels for all QPs\n");
+> +			ntb_direct_dma_release_channels(nt);
+> +			return;
+> +		}
+> +	}
+> +}
+> +
+>  struct ntb_payload_header {
+>  	unsigned int ver;
+>  	unsigned int len;
+> @@ -1476,6 +1579,16 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
+>  		return -ENOMEM;
+>  
+>  	nt->ndev = ndev;
+> +	if (use_direct_dma &&
+> +	    (direct_dma_ring_entries < 2 ||
+> +	     direct_dma_ring_entries > NTB_DIRECT_MAX_RING_ENTRIES ||
+> +	     !is_power_of_2(direct_dma_ring_entries))) {
+> +		dev_err(&ndev->dev,
+> +			"direct DMA ring entries must be a power of two between 2 and %u\n",
+> +			NTB_DIRECT_MAX_RING_ENTRIES);
+> +		rc = -EINVAL;
+> +		goto err;
+> +	}
+>  	nt->direct_ring_entries = direct_dma_ring_entries;
+>  
+>  	/*
+> @@ -1582,6 +1695,11 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
+>  		if (rc)
+>  			goto err2;
+>  	}
+> +	if (ntb_direct_spads_available(nt))
+> +		ntb_direct_dma_init(nt);
+> +	else if (use_direct_dma)
+> +		dev_info(&ndev->dev,
+> +			 "not enough scratchpads for direct DMA negotiation\n");
+>  
+>  	mutex_init(&nt->link_event_lock);
+>  	INIT_DELAYED_WORK(&nt->link_work, ntb_transport_link_work);
+> @@ -1605,6 +1723,7 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
+>  err3:
+>  	ntb_clear_ctx(ndev);
+>  err2:
+> +	ntb_direct_dma_release(nt);
+>  	kfree(nt->qp_vec);
+>  err1:
+>  	while (i--) {
+> @@ -1648,6 +1767,7 @@ static void ntb_transport_free(struct ntb_client *self, struct ntb_dev *ndev)
+>  		iounmap(nt->mw_vec[i].vbase);
+>  	}
+>  
+> +	ntb_direct_dma_release(nt);
+>  	kfree(nt->qp_vec);
+>  	kfree(nt->mw_vec);
+>  	kfree(nt);
 
-		ntb_async_rx(entry, offset);
-	}
-}
-
-Can the remote peer modify hdr->len to a massive value after the bounds
-check passes but before the second read?
-
-If so, this bypassed length is then passed to ntb_async_rx() and
-subsequently to ntb_memcpy_rx():
-
-drivers/ntb/ntb_transport.c:ntb_memcpy_rx() {
-	void *buf =3D entry->buf;
-	size_t len =3D entry->len;
-
-	memcpy(buf, offset, len);
-}
-
-Could this cause memcpy() to overflow the skb data buffer? Should the
-payload header values be copied to local variables using READ_ONCE() before
-validation to prevent this?
-
-> =20
->  	skb =3D new_skb;
->
-
---=20
-Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20260819172539.1450=
-821-1-den@valinux.co.jp?part=3D1
