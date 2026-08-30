@@ -1,208 +1,143 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qk1-f173.google.com (mail-qk1-f173.google.com [209.85.222.173])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 433C02BD11;
-	Sun, 30 Aug 2026 15:36:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788104174; cv=none; b=ek7xg2HdspnpxOqqrZLROsrH/TgD/6KJNZp0dKyLsQYRIaujo5ozoso/KfhhtO2LDecPA9B5qD0fHUhchz8BOUB4i6MJtkkkz2T4U9ZWn7gCKB23L04Vvkcke6f7LVKfYuoRmlqGL+MItsV7AEHXS8m2N+AOoMhKtNZ+0zfK1sI=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788104174; c=relaxed/simple;
-	bh=mQ0L375f+DUM1DHfoOWTE3TdY4bn6nt4Smv6BMX/9n0=;
-	h=From:Subject:To:Cc:In-Reply-To:References:Content-Type:Date:
-	 Message-Id; b=QwJManv3ktafmy9YLRAybydu1Wix+wEww1SCtM6bW1u7hNqGpjbLAIIjh/U4JgiXwiDbOs6sfDjYSKwezWPiYNvCZfo73MU5ZipAfHvnEPwbWKCToE6V30O3IouYhWRl4t3ENIqxsCSa1rHvoSz3dA4I0QhpusviSiJi9Udcy7k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=HVCaCgeJ; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB0B73F105B
+	for <ntb@lists.linux.dev>; Sun, 30 Aug 2026 18:14:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.222.173
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1788113649; cv=pass; b=a9pzGj+77XTGpONBuLe3V/9ZwiAJRtyuqGQNLTZAJEVuNcJhPadZ9jSDSCPVzdBgLvYfWCxDyr/29CGN2nCXq10iZeD3Ozt1FAqlFkYPnc+bqzVBWsioQuNDvn65xnmq/lSEpnfkP+3MeGuOONIVhQUmC/l53y+lany9Mfvgp3U=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1788113649; c=relaxed/simple;
+	bh=HdzWhpqTNOBl+oorJBrdklXOW54bPXg89ysssBhka1U=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=mmtF2/u+lwLCRlhVSUUimV801tHI6hmyRtndYgQgZMwR9u9TJ+hAXgPVz3/7mIAO8LnzTn5I0lBvd9S7VPk9DYthtBmolQ+W0Rqx19xVzdsfFjEzh58pF23WwNue0r95PFUH67cdgMtdfDhBlGG1ffPW2cOhbkK2HoYzA8wrYc0=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=U+t80gb3; arc=pass smtp.client-ip=209.85.222.173
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="HVCaCgeJ"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 943A41F000E9;
-	Sun, 30 Aug 2026 15:36:12 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788104172;
-	bh=I8tzyErQTgkfDz0nuCnDiYdDENzkJKuPU6Oep0j7Oqk=;
-	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=HVCaCgeJ5kHAlA/rBOHE/aLqMDYWCsKUDaZ/YVFpEZX6NiC7CcQ1t22TBLxpDJ+xk
-	 TGP8KKKjGudrZ3wOPb1Nu8C/u0NdVVLoP5V6dzX59Oo5Z01QiOOEHSVjFrWTvVGiZ3
-	 XLvsk8j9RkB+tSvZt909dpW9lyd6Y67w1h2dTrXjgIHc5b6fsUMVIrPndOMhovwZrD
-	 Zjj/5oZjuRAxcDiZMSrwphMpfJZxX0bM3S0me9CREnb+U7plzKgVgKgk+a4RLDmlj8
-	 Q2CqoSLlJRBCxbPAX6/5XMA4H6DosXsCgjjhN+4s1dTcYz/Cdoe4wdJm6vifS/XVHT
-	 Oo8ljgtKwIhag==
-From: sashiko-bot@kernel.org
-Subject: Re: [PATCH v2 3/3] PCI: endpoint: pci-epf-vntb: Honor MSI-X
- selection
-Reply-To: sashiko-reviews@lists.linux.dev
-To: "Koichiro Den" <den@valinux.co.jp>
-Cc: ntb@lists.linux.dev, linux-pci@vger.kernel.org
-In-Reply-To: <20260830151948.3547577-4-den@valinux.co.jp>
-References: <20260830151948.3547577-1-den@valinux.co.jp>
- <20260830151948.3547577-4-den@valinux.co.jp>
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-Date: Sun, 30 Aug 2026 15:36:12 +0000
-Message-Id: <20260830153612.943A41F000E9@smtp.kernel.org>
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="U+t80gb3"
+Received: by mail-qk1-f173.google.com with SMTP id af79cd13be357-936e8bd9caaso223530885a.2
+        for <ntb@lists.linux.dev>; Sun, 30 Aug 2026 11:14:07 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1788113647; cv=none;
+        d=google.com; s=arc-20260327;
+        b=FapkQUkgoYXQ2xBCDnxj3rns2zAhFRFN015m/9vTvzENW1Lcd23W5Drane8Jw2Pnk5
+         oL0VdTLWEwNz0rWZ3hysl3vfLW61S64SvmZ3Lqb+Js9kiojmrGL5zGiYHEU6hdjw6n7R
+         ibd5rjKVP7XWKMTstseNCwl8/PeFH/atNnOJB5Wk+DWKY1FZhqqq9GmXQbvdwHgwaHL7
+         Vff2J5UUbjNp0UNOoZW5djtJe864v1HRNtguz84wK7AFrXfEpSDwznkmnFq8sF0QWIMT
+         mjtNES2OOfz7V9v9oFxEBg06yjclwga9qIw4JqEYhMKKkoCxwjgAvWu8l7GpEGhp1RD9
+         hH6Q==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=sAmNPF/JjH9F41LuxYyTcqwhseN26JSfCU5penkd+pY=;
+        fh=fjv0jZ2pSe14i4IqUIRdQ61/Q5lbJ/Kh+YBR2kgSuuQ=;
+        b=lBWtzvzXF+ZNizPWfParA0rKQ2bhbAP+QwAMdlIuA8GOqzDm8UafGtPh/BWcjN2k+i
+         LQx8YIQxfaVTIbYSfFr7tIWw26/Wxo2t6KSb/CWUXX5Vd7sxeg74JaHUJIHvdASE27Q4
+         8Kst7RS74fFcr1mb1QeZVWvhV4ppTsQcBtfYONegWL23RsK+XPkk/qlGoQix1BFn1t7h
+         UzWMttyQwUrYwUPkCzbTgrsI88IpfwBWdH59H3tzA8fZgegNTY1Xc7e0WF+hgiIOZhps
+         DdE01QVfKlZLoUoL4aCWfrFQFC1FzjUqokoRZgiq3nkfk5ahZgerXHAPLrq3YbPgqpTL
+         LVwQ==;
+        darn=lists.linux.dev
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20251104; t=1788113647; x=1788718447; darn=lists.linux.dev;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=sAmNPF/JjH9F41LuxYyTcqwhseN26JSfCU5penkd+pY=;
+        b=U+t80gb3GuEnJTb969kFQ8JyfoqHv5cZov24AqdGuBXXKnQronn4/adw5HLLeq/OGt
+         rQDsMA7ZDSmlHZz0Divky+7yq4LKGkU/NXSUb8FXEh6EAtT0x3YAj2pKm2FboXAKyD5K
+         Y5JlJmsR+EadL0KigubBDAs1q7F2PcbZ5TzrvkAcECEsGJrMgogYLeVucyq3cM6NzXNQ
+         8hzvF5MVJBrlGqglFu81tlihfpEXpruS47/ZnL9gxMwIjnPUwIcyu6D6ebUq2c7V5sFN
+         wSOLaEJ6WjwJVa2ntl9mgSu8+jsmu8bMBnCkQNRM9P5n/l2dLzRj82w8Z2RZSWhzD50F
+         i3yw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1788113647; x=1788718447;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=sAmNPF/JjH9F41LuxYyTcqwhseN26JSfCU5penkd+pY=;
+        b=DObCMxcIeEUakrkwKHRSoKVa9IoUC30hY3dDYTpjJpjHzPqIbrNYVMzqELk8e/NOw4
+         bMdtrAeVz3fYL06LQmQRoCkcrCRJAQGGqL+rt+8d81+6SF7QYNzQ9WMM6tzf0Zb0pkmo
+         NvmF1YY6PPTgsc0+XjT2f8WjufSeJRO/kTkDiO1J/ahFMl0mIcAlNdOwBP4np9vOGNSv
+         oFXDeuj56k6r8Ylw+35mAddQYWdvHgUu0l86XdX0tQyD0x3CSm59Y9fj1j5kKA4aCaqB
+         JaijkRRxvebpZYzxcS5VEt1V1Ert8c6cSZHIV3az4H2J9YHDPjgQeQT0LWFKz2MWAMG2
+         If9Q==
+X-Forwarded-Encrypted: i=1; AHgh+RqQ+44LQXxudgaN/FGObhL1ujmHGuDJ7ebvvars6aVSAVyvG5p0yCiEg5kKhDfl71h4cNw=@lists.linux.dev
+X-Gm-Message-State: AFuF++mxhcb4JauE15T5eZd9WIMszkjV7/o31+LfSZH+W5cufh/20H71
+	YlFT7kX8ce1BkFGdDmHKD1FKcQlEgpwGmER0bw+fp15ESWjI+qXpn3AoCNwDe5e8W+8Lcy+2Ih9
+	nyLtOcfom/9FOidpoHvWFYszmz/COERH80MjVMQiG
+X-Gm-Gg: AR+sD11IDxmHIBn8pff5WuBIi0ttsojdX85pwkoMXgb7L7R6gCFfFN1Cf51EGcRMDhC
+	4ZSMe3HIV2uA6PrXZ7WYHSARSA5z9NzUd2Bc+eE1xuOCo3lk2xgTopqIOn5XozurRjxUg9rkIHZ
+	cS+offGabP9GMWDjSZxUpVB/9i0Zh4epMGghEie838OutETS27TPYbV5dC944XKUTSmv0W/pvtd
+	2HGoI2lPKFH/S9FoosPTXyMalp3OHHLQtM/ROxB7T76iaL03hFDI7SsD+xpVoJSKP7cFxTuQ/YS
+	VZoL2ifTA1SnTT3r1Xo/Y3wIQwTFIII5dfuGTvlihLFRCGAcG8Ot/jn58Wb2H+lPCagBPcTOalz
+	lebTzrYk0JZzRnNmTYIDHNsWcER1jIhXAsfXKEBsnylfkW71tbulyZJ9tbaQ=
+X-Received: by 2002:a05:620a:4553:b0:934:970a:beb2 with SMTP id
+ af79cd13be357-93913904111mr2296320885a.26.1788113641282; Sun, 30 Aug 2026
+ 11:14:01 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+References: <20260830151617.3546585-1-den@valinux.co.jp>
+In-Reply-To: <20260830151617.3546585-1-den@valinux.co.jp>
+From: Eric Dumazet <edumazet@google.com>
+Date: Sun, 30 Aug 2026 20:13:49 +0200
+X-Gm-Features: AcwNN1V16jcKxWw-kvVgE7bYpkcZejTegRvsFb9cvbrFA76wK31yO_UJFO7y4ic
+Message-ID: <CANn89iLWSa-4_Agcpmt61FEV=X7YY42nLzW9OLv8=aWycF01-w@mail.gmail.com>
+Subject: Re: [PATCH net v3] net: ntb_netdev: Fix statistics races
+To: Koichiro Den <den@valinux.co.jp>
+Cc: Jakub Kicinski <kuba@kernel.org>, Simon Horman <horms@kernel.org>, Jon Mason <jdmason@kudzu.us>, 
+	Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, 
+	Andrew Lunn <andrew+netdev@lunn.ch>, "David S. Miller" <davem@davemloft.net>, 
+	Paolo Abeni <pabeni@redhat.com>, netdev@vger.kernel.org, ntb@lists.linux.dev, 
+	linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Thank you for your contribution! Sashiko AI review found 4 potential issue(=
-s) to consider:
+On Sun, Aug 30, 2026 at 5:16=E2=80=AFPM Koichiro Den <den@valinux.co.jp> wr=
+ote:
+>
+> ntb_netdev updates shared net_device stats from per-QP RX and TX
+> callbacks. Once multiple queues are enabled, concurrent updates can be
+> lost.
+>
+> Use per-CPU tstats for packet and byte counters and DEV_STATS_INC() for
+> less frequent drop and error counters. Callbacks can run synchronously
+> in the xmit path or asynchronously from a tasklet or the memcpy kthread.
+> Pin TX updates against migration in the kthread path. Use the IRQ-safe
+> u64_stats helpers because netpoll can invoke the synchronous path with
+> IRQs disabled.
+>
+> Let the core manage tstats while keeping transport teardown after
+> unregister_netdev(), outside RTNL. RCU lets unregister wait for TX
+> completions already updating stats, while later completions only consume
+> the skb and skip accounting and queue wake.
+>
+> Fixes: 24d9e73c7e00 ("net: ntb_netdev: Support ethtool channels for multi=
+-queue")
+> Cc: stable@vger.kernel.org
+> Suggested-by: Jakub Kicinski <kuba@kernel.org>
+> Signed-off-by: Koichiro Den <den@valinux.co.jp>
+> ---
+> Changes in v3:
+>   - Use core-managed tstats and gate TX callback work under RCU (Jakub)
+>   - Fix reverse xmas tree ordering overlooked in v2
+>
+> Changes in v2:
+>   - Make packet and byte updates IRQ-safe in netpoll context (Simon, Sash=
+iko)
+>   - Use device-managed tstats and restore the original teardown order
+>
+> @Eric, thanks for reviewing v2. v3 moves tstats management back to the
+> core and adds RCU protection following Jakub's suggestion, so I did not
+> carry your R-b tag. Would appreciate another look when you have cycles.
 
-New issues:
-- [Critical] Missing validation of MSI-X capability before honoring peer ho=
-st's MSI-X configuration command.
-- [High] TOCTOU race in doorbell processing leading to IOMMU faults on the =
-Root Complex.
+SGTM, but at some point we probably want to make dev_isalive()
+available instead of copy/pasting it.
 
-Pre-existing issues:
-- [High] The driver allows raising MSI interrupt numbers that exceed the ha=
-rdcoded requested amount.
-- [High] Integer overflow in `spad_size` calculation leads to out-of-bounds=
- kernel memory accesses.
---
-
-commit 1b7eaae5c163696a2f15c6766f5254a75b259ab0
-Author: Koichiro Den <den@valinux.co.jp>
-Subject: PCI: endpoint: pci-epf-vntb: Honor MSI-X selection
-
-ntb_hw_epf tries MSI-X first and falls back to MSI. It reports the
-result in COMMAND_CONFIGURE_DOORBELL. pci-epf-vntb ignores MSIX_ENABLE,
-configures only MSI, and always raises peer doorbells with PCI_IRQ_MSI.
-When MSI-X is selected, the host does not program MSI, so raising it can
-issue a write to an invalid address. This was observed with an IOMMU
-enabled on the RC.
-
-> diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/=
-endpoint/functions/pci-epf-vntb.c
-> index c3caec927d748..d9622a5d47102 100644
-> --- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> +++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-[ ... ]
-> @@ -303,6 +305,7 @@ static void epf_ntb_cmd_handler(struct work_struct *w=
-ork)
-> =20
->  	switch (command) {
->  	case COMMAND_CONFIGURE_DOORBELL:
-> +		WRITE_ONCE(ntb->peer_msix, argument & MSIX_ENABLE);
-
-[Severity: Critical]
-Is it safe to unconditionally set ntb->peer_msix based on the host's request
-without verifying if the endpoint actually supports MSI-X?
-
-If the host requests MSI-X but the endpoint doesn't support it
-(epc_features->msix_capable is false), could this cause vntb_epf_peer_db_wo=
-rk()
-to call pci_epc_raise_irq() with PCI_IRQ_MSIX, potentially triggering a NULL
-pointer dereference if the EPC driver hasn't initialized MSI-X structures?
-
->  		ctrl->command_status =3D COMMAND_STATUS_OK;
->  		break;
->  	case COMMAND_TEARDOWN_DOORBELL:
-[ ... ]
-> @@ -454,7 +457,7 @@ static int epf_ntb_config_spad_bar_alloc(struct epf_n=
-tb *ntb)
->  	struct device *dev =3D &epf->dev;
->  	u32 spad_count;
->  	void *base;
-> -	int i;
-> +	int i, ret;
->  	const struct pci_epc_features *epc_features =3D pci_epc_get_features(ep=
-f->epc,
->  								epf->func_no,
->  								epf->vfunc_no);
-> @@ -462,6 +465,29 @@ static int epf_ntb_config_spad_bar_alloc(struct epf_=
-ntb *ntb)
->  	spad_count =3D ntb->spad_count;
-> =20
->  	ctrl_size =3D ALIGN(sizeof(struct epf_ntb_ctrl), sizeof(u32));
-[ ... ]
->  	spad_size =3D 2 * spad_count * sizeof(u32);
-> =20
->  	base =3D pci_epf_alloc_space(epf, ctrl_size + spad_size,
-
-[Severity: High]
-This is a pre-existing issue, but does the spad_size calculation have an in=
-teger
-overflow risk?
-
-Since spad_count is populated from configfs without bounds checking, could a
-large value cause the 64-bit result of 2 * spad_count * sizeof(u32) to be
-truncated when assigned to the 32-bit spad_size variable?
-
-This could lead to a small memory allocation from pci_epf_alloc_space(). La=
-ter,
-when vntb_epf_spad_write() calculates offsets using the un-wrapped spad_cou=
-nt,
-could this write out of bounds and corrupt kernel memory?
-
->  				   barno, epc_features, 0);
->  	if (!base) {
->  		dev_err(dev, "Config/Status/SPAD alloc region fail\n");
-[ ... ]
-> @@ -521,16 +548,22 @@ static int epf_ntb_configure_interrupt(struct epf_n=
-tb *ntb)
->  	}
-> =20
->  	if (epc_features->msi_capable) {
-> -		ret =3D pci_epc_set_msi(ntb->epf->epc,
-> -				      ntb->epf->func_no,
-> -				      ntb->epf->vfunc_no,
-> -				      16);
-> +		ret =3D pci_epc_set_msi(epf->epc, epf->func_no, epf->vfunc_no, 16);
-
-[Severity: High]
-This is a pre-existing issue, but I noticed that 16 MSI interrupts are
-statically requested regardless of ntb->db_count.
-
-If a user configures db_count to a value greater than 16 (up to MAX_DB_COUN=
-T),
-could vntb_epf_peer_db_work() compute an interrupt_num that exceeds the 16
-requested vectors? Could raising an out-of-bounds MSI interrupt cause spuri=
-ous
-interrupts or issues on the Root Complex?
-
->  		if (ret) {
->  			dev_err(dev, "MSI configuration failed\n");
->  			return ret;
->  		}
->  	}
-[ ... ]
-> @@ -1523,6 +1557,7 @@ static void vntb_epf_peer_db_work(struct work_struc=
-t *work)
-> =20
->  	func_no =3D epf->func_no;
->  	vfunc_no =3D epf->vfunc_no;
-> +	irq_type =3D READ_ONCE(ntb->peer_msix) ? PCI_IRQ_MSIX : PCI_IRQ_MSI;
-> =20
->  	/*
->  	 * Drain doorbells from peer_db_pending in snapshots (atomic64_xchg()).
-> @@ -1536,16 +1571,16 @@ static void vntb_epf_peer_db_work(struct work_str=
-uct *work)
-> =20
->  		while (db_bits) {
-[ ... ]
->  			db_bits &=3D ~BIT_ULL(db_bit);
-> =20
->  			ret =3D pci_epc_raise_irq(epf->epc, func_no, vfunc_no,
-> -						PCI_IRQ_MSI, interrupt_num);
-> +						irq_type, interrupt_num);
-
-[Severity: High]
-Since irq_type is read and cached outside the budget loop, what happens if =
-the
-host concurrently sends COMMAND_CONFIGURE_DOORBELL to switch from MSI to MS=
-I-X
-during a doorbell storm?
-
-Could the workqueue loop process new doorbells using the stale, cached irq_=
-type,
-causing the endpoint to raise MSI instead of the expected MSI-X, which might
-lead to an IOMMU fault on the Root Complex?
-
->  			if (ret)
->  				dev_err(&ntb->ntb.dev,
->  					"Failed to raise IRQ for interrupt_num %u: %d\n",
-
---=20
-Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20260830151948.3547=
-577-1-den@valinux.co.jp?part=3D3
+Reviewed-by: Eric Dumazet <edumazet@google.com>
