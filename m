@@ -1,56 +1,64 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A8E0238F24B;
-	Mon, 31 Aug 2026 20:23:00 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF7543806AF;
+	Mon, 31 Aug 2026 20:34:18 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788207782; cv=none; b=dpsGfG7zKnhSpsd7K7vr9FtKnRjT85RJ+zfBpsnuavgX+ikRs4+ZiQLSSJlpZCUrg9DnPwUu+6a2pgbwiJjFNLZ4UhJAYBtgourWC1x761fHPL4824IcEbb8hYRRKUjJaHdAXfUSfWiZXwmf7+XBASQYdbFoNp570RqRg1A6dhw=
+	t=1788208460; cv=none; b=b0vQxbh4uvQXCtTQsVxqYFe1WcPcWG1bZAaFbGrIfdJdk2OsmwvNx4qVR5OsQq6RlYI62bors3gEOiGlaQWXuhHFx2MMKgsKV/kEP1vXn+GflAbf+dB/T5zzFys96twmbTmRPCQUMth6YfUTGT/lSy1CSB3oeUsyxqCERk/l5T8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788207782; c=relaxed/simple;
-	bh=WKkY0cEhjc4QXxYUnMJVLPH4yRsmyftuFa3NsyidTZg=;
+	s=arc-20240116; t=1788208460; c=relaxed/simple;
+	bh=yjqHghsN7BoaJeovVjB0fA0dFrDSZDFn9q9fb1uJ9Xk=;
 	h=From:Subject:To:Cc:In-Reply-To:References:Content-Type:Date:
-	 Message-Id; b=TL/xq46dVsMuh703vHZu/spuRfhFXFEJnjI4FdHkjdWp++XKepLtGe9wyJjXMs4NrOeWqaR4P3dISy9OaRpJ6BSYQ4Vmgre1NTnqlWoq/v40RUVLiBfkQfb512GTNSTvil8rY/xgtMUk1YtJ9Gq+P/QzmHT0eElcVeHoaT70nIE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hLkP5vs9; arc=none smtp.client-ip=100.103.45.18
+	 Message-Id; b=nq0lf/QhlPwQN9wLWSImsK4vJFyfzt4WcH/K19UyJQyQqgLyxj3CKUuyh8PZdIidS8lj+D3kYJmxi3w9+leoH+zfDB0bud1pqPLuAtiYMURZVtzSe34MBTRSxvLsuaiJ8kQEO+kI5R59rpedYtigDvnmoB7x7zEBtLMVO6SnlFk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Xr9CDHlt; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hLkP5vs9"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5BB851F000E9;
-	Mon, 31 Aug 2026 20:23:00 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Xr9CDHlt"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4F1E21F000E9;
+	Mon, 31 Aug 2026 20:34:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788207780;
-	bh=WKkY0cEhjc4QXxYUnMJVLPH4yRsmyftuFa3NsyidTZg=;
+	s=k20260515; t=1788208458;
+	bh=yjqHghsN7BoaJeovVjB0fA0dFrDSZDFn9q9fb1uJ9Xk=;
 	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=hLkP5vs9y3/spH2Ik8LIwpoS/n+Yl6icFMRHP3OKfJX/3PbODmilfb79pEmNcbLBC
-	 pUwH2voPVHVOTJPJOsllWBoXXdlsCsUndt5WDGu5VAIc85HEq2L9DoZ3QNgSvuhcVi
-	 bf42km22e8Rrm4L15pq4O19JuEkoVyBnbSJIwGOvn6SSZw2xgqtSduwaQN0DWDCB6N
-	 Rrk6ZoZ51SxKnwwkRSG4+Qkb84ZwmF0TWXDMzatIcxYstLBNZaFKJ5d2Wo+0too3F5
-	 Z3RFBvFeMIS4UAvRaKsoSZSOqUzn63Hn5DoF/sQSL6YGTMgAEeWUdZwIW/AWadBAHs
-	 jLcAdMcktBw0A==
+	b=Xr9CDHltSWbVKyKr2sVHq83JEI8oTgnfrgkVEpLxAnoT9Yh4cFldNqKExS01O+0xU
+	 3Qk0d10atZBYcQUxiMkPGvad7sp/h6aydLLN12NbEtNN9EyIsB8U/eE93MSWTilYTH
+	 6wMgCQVLtr+967ut5FyaURR7NBoxpphBbvOAjS6uh+YF4SwHAydd/rJiBtO6BmeZXb
+	 wIErQjDzpuf1Cov9vWY3p8m9bpvTEL3SSh0DaMNRvqDKZCwMf7Gg6XnlCd/PU79fUY
+	 Bue1nkBOj1dMMtZjdeZS5McTiFz3dcZZqZpylj2MAO4fWS5CS01beUqepb+f5Dh/gp
+	 nmFEuHDWrD/ZQ==
 From: sashiko-bot@kernel.org
-Subject: Re: [PATCH v3 1/7] PCI: endpoint: Add DMA auxiliary resource
- metadata
+Subject: Re: [PATCH v3 2/7] PCI: dwc: Expose endpoint DMA resources
 Reply-To: sashiko-reviews@lists.linux.dev
 To: "Koichiro Den" <den@valinux.co.jp>
 Cc: ntb@lists.linux.dev, linux-pci@vger.kernel.org
-In-Reply-To: <20260831182657.329614-2-den@valinux.co.jp>
+In-Reply-To: <20260831182657.329614-3-den@valinux.co.jp>
 References: <20260831182657.329614-1-den@valinux.co.jp>
- <20260831182657.329614-2-den@valinux.co.jp>
+ <20260831182657.329614-3-den@valinux.co.jp>
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
-Date: Mon, 31 Aug 2026 20:22:59 +0000
-Message-Id: <20260831202300.5BB851F000E9@smtp.kernel.org>
+Date: Mon, 31 Aug 2026 20:34:17 +0000
+Message-Id: <20260831203418.4F1E21F000E9@smtp.kernel.org>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 
-> Endpoint functions that export controller-local DMA channels need the
-> controller register and descriptor-memory layout.
+> Expose the endpoint-integrated eDMA register window and linked-list memory
+> through the EPC auxiliary resource API. Endpoint functions can then choose
+> which channels to export and map the required windows.
 >=20
-> Add DMA control and descriptor-memory resource types. The control resource
-> carries the register layout and channel counts. Each descriptor region is
-> associated with the static channel ID assigned by the local DMA driver.
+> Associate each linked-list region with the direction-flattened static
+> channel ID used by the local dw-edma device. Report these resources only
+> after that device is registered and only for channels with linked-list
+> memory.
+>=20
+> When the register window is already part of a reserved BAR, report its BAR
+> and offset. Otherwise report its CPU physical address.
+>=20
+> While at it, harden the existing doorbell resource query. Report it
+> only after the local dw-edma device is registered, and reject VF
+> queries because DWC cannot assign DMA/HDMA registers to VFs.
 >=20
 > Reviewed-by: Frank Li <Frank.Li@nxp.com>
 > Signed-off-by: Koichiro Den <den@valinux.co.jp>
@@ -59,5 +67,5 @@ Sashiko has reviewed this patch and found no issues. It looks great!
 
 --=20
 Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20260831182657.3296=
-14-1-den@valinux.co.jp?part=3D1
+14-1-den@valinux.co.jp?part=3D2
 
