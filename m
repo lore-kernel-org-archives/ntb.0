@@ -1,143 +1,137 @@
-Received: from mail-qk1-f173.google.com (mail-qk1-f173.google.com [209.85.222.173])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB0B73F105B
-	for <ntb@lists.linux.dev>; Sun, 30 Aug 2026 18:14:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.222.173
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788113649; cv=pass; b=a9pzGj+77XTGpONBuLe3V/9ZwiAJRtyuqGQNLTZAJEVuNcJhPadZ9jSDSCPVzdBgLvYfWCxDyr/29CGN2nCXq10iZeD3Ozt1FAqlFkYPnc+bqzVBWsioQuNDvn65xnmq/lSEpnfkP+3MeGuOONIVhQUmC/l53y+lany9Mfvgp3U=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788113649; c=relaxed/simple;
-	bh=HdzWhpqTNOBl+oorJBrdklXOW54bPXg89ysssBhka1U=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=mmtF2/u+lwLCRlhVSUUimV801tHI6hmyRtndYgQgZMwR9u9TJ+hAXgPVz3/7mIAO8LnzTn5I0lBvd9S7VPk9DYthtBmolQ+W0Rqx19xVzdsfFjEzh58pF23WwNue0r95PFUH67cdgMtdfDhBlGG1ffPW2cOhbkK2HoYzA8wrYc0=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=U+t80gb3; arc=pass smtp.client-ip=209.85.222.173
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=google.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA5A63DB64D;
+	Mon, 31 Aug 2026 10:25:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1788171906; cv=none; b=NMOAbeP0OztqoEwoy9eVaSurq1hfRgCr4uEG5fuqJWhqwOdK7c2mFdl41HfmbP9HYgeAsolpJqq0HtgYbxwCliornGtr9j+yG4zHLMqhpE6QPmGoaAM2BNruWlMRi8JtNy1vf7oQgq4ufzlQagqa4ZdaJYcvfcxFVfU7Yc6CsVw=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1788171906; c=relaxed/simple;
+	bh=+e/t8V5CHYveliNBxUuHao6IVDZv7eObUKDHnlxpyRk=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=ufgsR5/4g+ks5UWF35KPw1wqj1mKDDrx2/C/7ace/crdqAKqdxRmzfnO6sfLRKZG8sPd/ATFUjMmHWeXoNr5LVyAosZJCWEYwEo5q871/09mFOrVbBvvznbMTdYB17WHOWxizc5C4WhV2+/U10FJuF+UjH/Q3n8BTDjIz1NRAH4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=JwlEeD1A; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="U+t80gb3"
-Received: by mail-qk1-f173.google.com with SMTP id af79cd13be357-936e8bd9caaso223530885a.2
-        for <ntb@lists.linux.dev>; Sun, 30 Aug 2026 11:14:07 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1788113647; cv=none;
-        d=google.com; s=arc-20260327;
-        b=FapkQUkgoYXQ2xBCDnxj3rns2zAhFRFN015m/9vTvzENW1Lcd23W5Drane8Jw2Pnk5
-         oL0VdTLWEwNz0rWZ3hysl3vfLW61S64SvmZ3Lqb+Js9kiojmrGL5zGiYHEU6hdjw6n7R
-         ibd5rjKVP7XWKMTstseNCwl8/PeFH/atNnOJB5Wk+DWKY1FZhqqq9GmXQbvdwHgwaHL7
-         Vff2J5UUbjNp0UNOoZW5djtJe864v1HRNtguz84wK7AFrXfEpSDwznkmnFq8sF0QWIMT
-         mjtNES2OOfz7V9v9oFxEBg06yjclwga9qIw4JqEYhMKKkoCxwjgAvWu8l7GpEGhp1RD9
-         hH6Q==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=sAmNPF/JjH9F41LuxYyTcqwhseN26JSfCU5penkd+pY=;
-        fh=fjv0jZ2pSe14i4IqUIRdQ61/Q5lbJ/Kh+YBR2kgSuuQ=;
-        b=lBWtzvzXF+ZNizPWfParA0rKQ2bhbAP+QwAMdlIuA8GOqzDm8UafGtPh/BWcjN2k+i
-         LQx8YIQxfaVTIbYSfFr7tIWw26/Wxo2t6KSb/CWUXX5Vd7sxeg74JaHUJIHvdASE27Q4
-         8Kst7RS74fFcr1mb1QeZVWvhV4ppTsQcBtfYONegWL23RsK+XPkk/qlGoQix1BFn1t7h
-         UzWMttyQwUrYwUPkCzbTgrsI88IpfwBWdH59H3tzA8fZgegNTY1Xc7e0WF+hgiIOZhps
-         DdE01QVfKlZLoUoL4aCWfrFQFC1FzjUqokoRZgiq3nkfk5ahZgerXHAPLrq3YbPgqpTL
-         LVwQ==;
-        darn=lists.linux.dev
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20251104; t=1788113647; x=1788718447; darn=lists.linux.dev;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=sAmNPF/JjH9F41LuxYyTcqwhseN26JSfCU5penkd+pY=;
-        b=U+t80gb3GuEnJTb969kFQ8JyfoqHv5cZov24AqdGuBXXKnQronn4/adw5HLLeq/OGt
-         rQDsMA7ZDSmlHZz0Divky+7yq4LKGkU/NXSUb8FXEh6EAtT0x3YAj2pKm2FboXAKyD5K
-         Y5JlJmsR+EadL0KigubBDAs1q7F2PcbZ5TzrvkAcECEsGJrMgogYLeVucyq3cM6NzXNQ
-         8hzvF5MVJBrlGqglFu81tlihfpEXpruS47/ZnL9gxMwIjnPUwIcyu6D6ebUq2c7V5sFN
-         wSOLaEJ6WjwJVa2ntl9mgSu8+jsmu8bMBnCkQNRM9P5n/l2dLzRj82w8Z2RZSWhzD50F
-         i3yw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1788113647; x=1788718447;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=sAmNPF/JjH9F41LuxYyTcqwhseN26JSfCU5penkd+pY=;
-        b=DObCMxcIeEUakrkwKHRSoKVa9IoUC30hY3dDYTpjJpjHzPqIbrNYVMzqELk8e/NOw4
-         bMdtrAeVz3fYL06LQmQRoCkcrCRJAQGGqL+rt+8d81+6SF7QYNzQ9WMM6tzf0Zb0pkmo
-         NvmF1YY6PPTgsc0+XjT2f8WjufSeJRO/kTkDiO1J/ahFMl0mIcAlNdOwBP4np9vOGNSv
-         oFXDeuj56k6r8Ylw+35mAddQYWdvHgUu0l86XdX0tQyD0x3CSm59Y9fj1j5kKA4aCaqB
-         JaijkRRxvebpZYzxcS5VEt1V1Ert8c6cSZHIV3az4H2J9YHDPjgQeQT0LWFKz2MWAMG2
-         If9Q==
-X-Forwarded-Encrypted: i=1; AHgh+RqQ+44LQXxudgaN/FGObhL1ujmHGuDJ7ebvvars6aVSAVyvG5p0yCiEg5kKhDfl71h4cNw=@lists.linux.dev
-X-Gm-Message-State: AFuF++mxhcb4JauE15T5eZd9WIMszkjV7/o31+LfSZH+W5cufh/20H71
-	YlFT7kX8ce1BkFGdDmHKD1FKcQlEgpwGmER0bw+fp15ESWjI+qXpn3AoCNwDe5e8W+8Lcy+2Ih9
-	nyLtOcfom/9FOidpoHvWFYszmz/COERH80MjVMQiG
-X-Gm-Gg: AR+sD11IDxmHIBn8pff5WuBIi0ttsojdX85pwkoMXgb7L7R6gCFfFN1Cf51EGcRMDhC
-	4ZSMe3HIV2uA6PrXZ7WYHSARSA5z9NzUd2Bc+eE1xuOCo3lk2xgTopqIOn5XozurRjxUg9rkIHZ
-	cS+offGabP9GMWDjSZxUpVB/9i0Zh4epMGghEie838OutETS27TPYbV5dC944XKUTSmv0W/pvtd
-	2HGoI2lPKFH/S9FoosPTXyMalp3OHHLQtM/ROxB7T76iaL03hFDI7SsD+xpVoJSKP7cFxTuQ/YS
-	VZoL2ifTA1SnTT3r1Xo/Y3wIQwTFIII5dfuGTvlihLFRCGAcG8Ot/jn58Wb2H+lPCagBPcTOalz
-	lebTzrYk0JZzRnNmTYIDHNsWcER1jIhXAsfXKEBsnylfkW71tbulyZJ9tbaQ=
-X-Received: by 2002:a05:620a:4553:b0:934:970a:beb2 with SMTP id
- af79cd13be357-93913904111mr2296320885a.26.1788113641282; Sun, 30 Aug 2026
- 11:14:01 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="JwlEeD1A"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1F52C1F000E9;
+	Mon, 31 Aug 2026 10:24:57 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1788171903;
+	bh=zaseKfBKearPYw7Wuabe86eyjpL9spqzKr085aFFM3M=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=JwlEeD1AYQjwcUAv68IL1iO2pIcPdLTkGHHVGdpXZpuMdmTjBJhc2u8Z6i04N/LDX
+	 qmDHN67KZvrQqQUz0P1hN3v4pm0coO4+caT2+mPVHnrZWokDN/aLxDlHEKYfyuvhtH
+	 3dWCDefqAMUIGIWySelqyQiMhaTIzzJIhuVcuZJXFsC8cpmQXJjhA4bFf0O5PhJKWF
+	 DILbrSEIX0djfXkoeAUuW/dNd8iiRunMYv08yFvK0Gb5byNnHmwBknZLT9a8W6h62S
+	 QpQ75f/dgPQ6ImlDr7kl6PJB9gFi2m5n5HAgq2qgMwteKBqDZdbmIp+yj8ydPULnNt
+	 6/amISV3gHSCw==
+Date: Mon, 31 Aug 2026 12:24:55 +0200
+From: Niklas Cassel <cassel@kernel.org>
+To: Koichiro Den <den@valinux.co.jp>
+Cc: Manivannan Sadhasivam <mani@kernel.org>,
+	Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kwilczynski@kernel.org>,
+	Kishon Vijay Abraham I <kishon@kernel.org>,
+	Frank Li <Frank.Li@kernel.org>, Bjorn Helgaas <bhelgaas@google.com>,
+	Jingoo Han <jingoohan1@gmail.com>,
+	Lorenzo Pieralisi <lpieralisi@kernel.org>,
+	Rob Herring <robh@kernel.org>, Aksh Garg <a-garg7@ti.com>,
+	Christoph Hellwig <hch@lst.de>, Sagi Grimberg <sagi@grimberg.me>,
+	Chaitanya Kulkarni <kch@nvidia.com>, Jon Mason <jdmason@kudzu.us>,
+	Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>,
+	Heiko Stuebner <heiko@sntech.de>,
+	Shawn Lin <shawn.lin@rock-chips.com>,
+	Manikanta Maddireddy <mmaddireddy@nvidia.com>,
+	Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>,
+	linux-pci@vger.kernel.org, linux-nvme@lists.infradead.org,
+	ntb@lists.linux.dev, linux-rockchip@lists.infradead.org,
+	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2 0/3] PCI: endpoint: Support hardware-owned MSI-X table
+ and PBA
+Message-ID: <apVWd1u9JjTKQczu@ryzen>
+References: <20260830151948.3547577-1-den@valinux.co.jp>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-References: <20260830151617.3546585-1-den@valinux.co.jp>
-In-Reply-To: <20260830151617.3546585-1-den@valinux.co.jp>
-From: Eric Dumazet <edumazet@google.com>
-Date: Sun, 30 Aug 2026 20:13:49 +0200
-X-Gm-Features: AcwNN1V16jcKxWw-kvVgE7bYpkcZejTegRvsFb9cvbrFA76wK31yO_UJFO7y4ic
-Message-ID: <CANn89iLWSa-4_Agcpmt61FEV=X7YY42nLzW9OLv8=aWycF01-w@mail.gmail.com>
-Subject: Re: [PATCH net v3] net: ntb_netdev: Fix statistics races
-To: Koichiro Den <den@valinux.co.jp>
-Cc: Jakub Kicinski <kuba@kernel.org>, Simon Horman <horms@kernel.org>, Jon Mason <jdmason@kudzu.us>, 
-	Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>, 
-	Andrew Lunn <andrew+netdev@lunn.ch>, "David S. Miller" <davem@davemloft.net>, 
-	Paolo Abeni <pabeni@redhat.com>, netdev@vger.kernel.org, ntb@lists.linux.dev, 
-	linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260830151948.3547577-1-den@valinux.co.jp>
 
-On Sun, Aug 30, 2026 at 5:16=E2=80=AFPM Koichiro Den <den@valinux.co.jp> wr=
-ote:
->
-> ntb_netdev updates shared net_device stats from per-QP RX and TX
-> callbacks. Once multiple queues are enabled, concurrent updates can be
-> lost.
->
-> Use per-CPU tstats for packet and byte counters and DEV_STATS_INC() for
-> less frequent drop and error counters. Callbacks can run synchronously
-> in the xmit path or asynchronously from a tasklet or the memcpy kthread.
-> Pin TX updates against migration in the kthread path. Use the IRQ-safe
-> u64_stats helpers because netpoll can invoke the synchronous path with
-> IRQs disabled.
->
-> Let the core manage tstats while keeping transport teardown after
-> unregister_netdev(), outside RTNL. RCU lets unregister wait for TX
-> completions already updating stats, while later completions only consume
-> the skb and skip accounting and queue wake.
->
-> Fixes: 24d9e73c7e00 ("net: ntb_netdev: Support ethtool channels for multi=
--queue")
-> Cc: stable@vger.kernel.org
-> Suggested-by: Jakub Kicinski <kuba@kernel.org>
-> Signed-off-by: Koichiro Den <den@valinux.co.jp>
-> ---
-> Changes in v3:
->   - Use core-managed tstats and gate TX callback work under RCU (Jakub)
->   - Fix reverse xmas tree ordering overlooked in v2
->
-> Changes in v2:
->   - Make packet and byte updates IRQ-safe in netpoll context (Simon, Sash=
-iko)
->   - Use device-managed tstats and restore the original teardown order
->
-> @Eric, thanks for reviewing v2. v3 moves tstats management back to the
-> core and adds RCU protection following Jakub's suggestion, so I did not
-> carry your R-b tag. Would appreciate another look when you have cycles.
+Hello Koichiro,
 
-SGTM, but at some point we probably want to make dev_isalive()
-available instead of copy/pasting it.
+On Mon, Aug 31, 2026 at 12:19:45AM +0900, Koichiro Den wrote:
+> Hi,
+> 
+> Some DWC endpoint controllers keep the MSI-X Table and PBA at fixed
+> locations in a reserved BAR. On RK3588, the MSI-X doorbell uses this
+> hardware-owned layout, as discussed in e.g. [1].
+> 
+> The reserved-region types for the Table and PBA were added with the
+> Tegra194 description. The MSI-X setup API, however, still takes only the
+> Table BAR and offset and assumes that the PBA immediately follows it in
+> the same BAR.
+> 
+> This series passes the complete layout to pci_epc_set_msix() and adds
+> pci_epc_get_hw_msix_layout() to expose a hardware-owned layout. The core
+> does not select it automatically. The choice stays with the EPF.
+> 
+> A hardware-owned layout is not a direct replacement for every caller.
+> pci-epf-ntb, for example, reads host-programmed Table entries from its
+> own BAR to set up peer outbound mappings.
+> 
+> The series also fixes an interrupt-type mismatch in vNTB. ntb_hw_epf can
+> select MSI-X, while pci-epf-vntb currently configures and raises only
+> MSI. On RK3588, selecting the fixed BAR4 layout also selects the DWC
+> MSI-X doorbell. EPF-owned layouts continue to use the regular path.
+> 
+> In short:
+> 
+> - pci-epf-vntb gains MSI-X support and uses the hardware-owned layout
+>   when available.
+> - pci-epf-test, pci-epf-ntb, and the NVMe PCI EPF keep their EPF-owned
+>   layouts. This avoids unnecessary changes and reduces regression risk.
+>   They can use a hardware-owned layout later if/when needed.
+> 
+> [1] https://lore.kernel.org/r/aY2q80zeRKSRO21H@fedora
 
-Reviewed-by: Eric Dumazet <edumazet@google.com>
+
+Perhaps you could improve the cover letter to more clearly state why you
+are doing this change.
+
+Some guesses:
+- Better performance. We avoid the need to map + unmap the MSI target
+  address using an iATU each time we raise an MSI-X. We also avoid the
+  need to flush posted write before unmap.
+  Is there any performance difference? If so, it would be nice with some
+  numbers.
+- Allows more concurrent I/Os. By not using an iATU when raising an MSI-X,
+  we have one more iATU available, so we can have one more outstanding I/O.
+- Less waste of BAR space. (Since the MSI-X table and PBA already
+  always takes up space in one of the BARs, it is wasteful to have
+  the EPF drive duplicate it in another BAR.)
+
+
+
+Personally, I don't see why we should only change pci-epf-vntb to use
+the hardware-owned layout when available. I don't see why we would not
+want to change pci-epf-test, pci-epf-ntb, and nvmet-pci-epf as well.
+(If the EPC defines a HW defined MSI-X table + PBA, why not always
+use that? If there is no HW defined MSI-X table + PBA, let the EPF
+put the MSI-X table in any BAR it likes.)
+
+
+I understand that you introduce dw_pcie_ep_msix_layout_is_hw_owned()
+because you want an EPF driver optionally use the HW defined table.
+But if all EPF drivers always use the HW defined table if available, I think
+you can avoid introducing this helper, and let rockchip_pcie_raise_irq()
+unconditionally call dw_pcie_ep_raise_msix_irq_doorbell() for case PCI_IRQ_MSIX.
+
+See e.g. drivers/pci/controller/dwc/pci-layerscape-ep.c which already calls
+dw_pcie_ep_raise_msix_irq_doorbell() unconditionally for case PCI_IRQ_MSIX.
+
+
+Kind regards,
+Niklas
