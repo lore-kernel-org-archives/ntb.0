@@ -1,58 +1,81 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4730C39C00F;
-	Mon, 31 Aug 2026 21:21:10 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C54A62F7EF3;
+	Tue,  1 Sep 2026 03:31:03 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788211272; cv=none; b=IMqjU485s/Ji8fmrOlLoA5p0eZiXjKfBLXCuOLitp2Xwb9CApel1KExqcvhAK31JvGb5HmxSujP9SCnlJ3jr0pQLL2OURnZ/hMKsJqSHskYIwks1GLLl7nRyEyly+DDNk4tYkLyPfS7XGr6y0fAGD5aYnmeZakDS+/JDq6nW+DQ=
+	t=1788233464; cv=none; b=UVMQFAJ5WtP8iVQDk7p6rtRap2ruLLK6wX4HU+yqNoRdJbsEz/SaXkPrHByU3GDdqClPAPzoeE+7jiqmNKbFhv5PF20ZkqbRiqi1itVKt45XnPkv7B5JynOH45S1uCxa19QWa/XbDEduePs2X87cXWZTsit15ohi9mWf4KQbLS4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788211272; c=relaxed/simple;
-	bh=3lFF+50xOQtVEFBvv/mpT10KWYPriQtvi/aqggN6hZc=;
-	h=From:Subject:To:Cc:In-Reply-To:References:Content-Type:Date:
-	 Message-Id; b=eKLHJwbuzoQIqCwL+WZidzI6KFTHfLoVciQ2g6BQczdLrE6twb6JL9Pj1zIRwDo7WHehV8PE+LVL41/Zkeo1U1tiBR0jqBl9w8826pMaKg4d/EkybwuCv7c5dhl+ptG6hddA5ffRYhMZaX9YsBo8fBqr5DgwTRNGk+0CkdXeRdI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ZOwAm3Wv; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1788233464; c=relaxed/simple;
+	bh=6PKWgRn85c0GODN7zwDMX5YBhDWUg+88APfKgiR5is4=;
+	h=Content-Type:MIME-Version:Subject:From:Message-Id:Date:References:
+	 In-Reply-To:To:Cc; b=JFtQTP0dYIQIgv7dmLFvca/qsxZW0KSvJNwXTt0jvSpcMzUohrbkA+e0lMxiXiKKZMSMLt2gRzJkLiuZ4ZJBlPSKEv0fnxsBZ4Qv6GC3heWHWhmCSteSEbB3009iEHLc2tSerLYdi4m+8aAlF47U15lhs1hM6ewd60b/2e1dPFM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=czcJjxKS; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ZOwAm3Wv"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8F3F01F000E9;
-	Mon, 31 Aug 2026 21:21:10 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="czcJjxKS"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4D27C1F000E9;
+	Tue,  1 Sep 2026 03:31:03 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788211270;
-	bh=3lFF+50xOQtVEFBvv/mpT10KWYPriQtvi/aqggN6hZc=;
-	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=ZOwAm3WvDgwrxh+/k9yoqSB7BWPnnZ7gh5mErXU0C2Gd+YVpkO0pMHGmAcwMyxV1v
-	 jLNSFZPJHFbkfA7Y3DKK3QLW6q8llYsJKJD6dlEGi1q3dEUYlP3rCf7SDwwdxRGns/
-	 06QIU21bIs+N5h2na0X48w6najnHMYZB9jlUo5X1Vfo9rMEZ1tvkiMb7G7WUSKyVTM
-	 BT50WZYLS9u0qP6cPS4KLln7AgEuiUcLXNkYrT/HD0xUy5hP1mISEswQGzjgEJshHK
-	 jM50zPxGoS5vz6UuL3y6HIhhR5L9VRYhSAM5GD2oYBajxXZhaMsiRAGnhR5R4MHgaQ
-	 b3WpxTUcQkMhw==
-From: sashiko-bot@kernel.org
-Subject: Re: [PATCH v3 7/7] Documentation: PCI: endpoint: Document vNTB DMA
- export
-Reply-To: sashiko-reviews@lists.linux.dev
-To: "Koichiro Den" <den@valinux.co.jp>
-Cc: ntb@lists.linux.dev, linux-pci@vger.kernel.org
-In-Reply-To: <20260831182657.329614-8-den@valinux.co.jp>
-References: <20260831182657.329614-1-den@valinux.co.jp>
- <20260831182657.329614-8-den@valinux.co.jp>
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-Date: Mon, 31 Aug 2026 21:21:10 +0000
-Message-Id: <20260831212110.8F3F01F000E9@smtp.kernel.org>
+	s=k20260515; t=1788233463;
+	bh=x2oi/fCxUN/JYQPvef49dsCZ0Qe9lM3pDNXCUyjk+ZU=;
+	h=Subject:From:Date:References:In-Reply-To:To:Cc;
+	b=czcJjxKSE9aIqGmCVIVCEXTuylpy+nuj0st6ML9n0T9MZC1E67b4tQcuw8zUqUGVC
+	 cI7tD+7wZZCo068hRv1ERXig8+DMmG8f7RA5iQkbsETzArZfvBiaNkbZSrfC0VOFx6
+	 Vwo4PMF4FQvoRATRmVGUDtuA6qTqg162bnjJzEvMG3ZONAPqCqszB5zBK9gcMEqYn8
+	 VOJJoHi6s4tuWqzemXDkMZTAFBAkE04PVmv106VUdxUVcyDoXnuLOp33KErapTYZ1t
+	 I5XeM4PkV23PKejrhDCmmaGJ/M/gobdVFIdx5VJMXotHfUpuD1nGLlWToV1VTgLkt3
+	 MZdvLVRO6LKXQ==
+Received: from [10.30.226.235] (localhost [IPv6:::1])
+	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id 5690D3924A51;
+	Tue,  1 Sep 2026 03:30:07 +0000 (UTC)
+Content-Type: text/plain; charset="utf-8"
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Subject: Re: [PATCH net v3] net: ntb_netdev: Fix statistics races
+From: patchwork-bot+netdevbpf@kernel.org
+Message-Id: 
+ <178823340616.918931.14132728018779970969.git-patchwork-notify@kernel.org>
+Date: Tue, 01 Sep 2026 03:30:06 +0000
+References: <20260830151617.3546585-1-den@valinux.co.jp>
+In-Reply-To: <20260830151617.3546585-1-den@valinux.co.jp>
+To: Koichiro Den <den@valinux.co.jp>
+Cc: kuba@kernel.org, edumazet@google.com, horms@kernel.org, jdmason@kudzu.us,
+ dave.jiang@intel.com, allenbh@gmail.com, andrew+netdev@lunn.ch,
+ davem@davemloft.net, pabeni@redhat.com, netdev@vger.kernel.org,
+ ntb@lists.linux.dev, linux-kernel@vger.kernel.org
 
-> Document the dma_bar attribute and the requirements for exporting endpoint
-> DMA channels. Also document how the selected BAR may be shared with an MW.
->=20
-> Signed-off-by: Koichiro Den <den@valinux.co.jp>
+Hello:
 
-Sashiko has reviewed this patch and found no issues. It looks great!
+This patch was applied to netdev/net.git (main)
+by Jakub Kicinski <kuba@kernel.org>:
 
---=20
-Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20260831182657.3296=
-14-1-den@valinux.co.jp?part=3D7
+On Mon, 31 Aug 2026 00:16:17 +0900 you wrote:
+> ntb_netdev updates shared net_device stats from per-QP RX and TX
+> callbacks. Once multiple queues are enabled, concurrent updates can be
+> lost.
+> 
+> Use per-CPU tstats for packet and byte counters and DEV_STATS_INC() for
+> less frequent drop and error counters. Callbacks can run synchronously
+> in the xmit path or asynchronously from a tasklet or the memcpy kthread.
+> Pin TX updates against migration in the kthread path. Use the IRQ-safe
+> u64_stats helpers because netpoll can invoke the synchronous path with
+> IRQs disabled.
+> 
+> [...]
+
+Here is the summary with links:
+  - [net,v3] net: ntb_netdev: Fix statistics races
+    https://git.kernel.org/netdev/net/c/545b63503c69
+
+You are awesome, thank you!
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/patchwork/pwbot.html
+
 
