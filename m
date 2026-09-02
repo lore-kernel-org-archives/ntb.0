@@ -1,68 +1,75 @@
-Received: from AM0PR83CU005.outbound.protection.outlook.com (mail-westeuropeazon11010035.outbound.protection.outlook.com [52.101.69.35])
+Received: from OS0P286CU011.outbound.protection.outlook.com (mail-japanwestazon11020079.outbound.protection.outlook.com [52.101.228.79])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3FB4F49F13E
-	for <ntb@lists.linux.dev>; Tue,  1 Sep 2026 19:05:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.69.35
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 346F23164C5
+	for <ntb@lists.linux.dev>; Wed,  2 Sep 2026 02:14:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.228.79
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788289532; cv=fail; b=NxyStvB70q4M8qMQuS0SISjowtLaXBLgyCDcpl+RBVsNiDm7YLpttCmsE6NNN7yvFzkt8TQndpx1MWx1J3qb7kR8SI01PUJb9C1FGSJ2DjkVuA2P9DgvO7yxKRb7gJb5Cz/iSLy7SGLjvaXjLNgWipn+b+Lsc1YK+YjSUAWZwBI=
+	t=1788315250; cv=fail; b=ddVLDyXUWLCz5DgbTdNYvFMI0iamM6BnazUKc+4w3lMQpkzDK1Zdg0YppbitK1VxpKGOqgR51R0+6oy3clznwLifHN06ux/VZ0GJLxwQ/OcRrJzZ+vy7lXRocLvnkRfvxvl2K7fmiHxPh537Zw/e6YHDUCuyULWXchJV3nAzhXU=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788289532; c=relaxed/simple;
-	bh=uzlpymp1rk/hmSj3hQv94a5fOLFq7Y6qfheoPb8/OE8=;
+	s=arc-20240116; t=1788315250; c=relaxed/simple;
+	bh=1NhakVeJMSHU+dmSvOo0frI3lx9v7UU+yxXBFwek4GE=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
-	 Content-Disposition:In-Reply-To:MIME-Version; b=DSrSy0yhMBNDNUyPff9FksE4q3x3tKh9OU5bmODlkYvQVs/eA3I3JUIPB3tu/2xyOcTeopqLnOGKiSH1UU2psPJejVHpv5D/emwA/oFYrd2WjqgT1mHOEgUrd6lbaKzVG9Xirw/WHmmEoTRZWsL+RSnNjGloecxeuiFZsmZKWhc=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.nxp.com; spf=pass smtp.mailfrom=oss.nxp.com; dkim=pass (2048-bit key) header.d=NXP1.onmicrosoft.com header.i=@NXP1.onmicrosoft.com header.b=juEId7dI; arc=fail smtp.client-ip=52.101.69.35
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.nxp.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.nxp.com
+	 Content-Disposition:In-Reply-To:MIME-Version; b=Pl3OY3uw4ae6kTgGEK5F/60JlYcYUcI1gnAot90fecEgg10TTZXZVp76ioC1PWMWLj4e2wqSoNqwzPWOMIosKfScOhx/KL1L01VAdDzv9niIipQbH1KD6O0RBYcdgMO+5l+JBWYdKaeKHhdNkjsSo3MZA9GT9U/JHXzdD+8NVK4=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=KhX+JLQD; arc=fail smtp.client-ip=52.101.228.79
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=NXP1.onmicrosoft.com header.i=@NXP1.onmicrosoft.com header.b="juEId7dI"
+	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="KhX+JLQD"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=sdf+tdL00xWTxg2942RuuT9rhB0zi78N2pKaItcg2Q8PhJ/vXFnSalrAxJJwTadsPKQ2v0iymqowuNhl6GnZaIiF445AMEvv43a0ef1VBjYloM2Fg2oZ2miGbdla2Fg+emGu9HkoImPbSIwtu2XTaF+V7xnWtjK+6Anu/K5iVMADz1NHmxS80wwAGAYxkd2n24ijyEN0ooh9YBp882AqUeY/v/ycURcXiqigk7F5LPFTdFUts70HNE1+pcA96CDAZ11qwy5tg7dmz6rfFTLkCBROBgEPGS7PxvSlFzO0b4bcp+306yObErfS4Mm3Pyu0O+3lMUJLOhHvNCQHir4iFQ==
+ b=NE9oiQtXK/4n8Qopjpc8xHeZeee3/uDWmdMadzxRpJZgfLOg2vVtIxmunmKxPmlwlmPyZ4ujIo3EN9a4JLmQLiisLZ92pHBrDqJOWomKgCJNrhgu9Tdjp3a1HIZWJnqXLJ31YcV7CjI2jJ3eTZ7l2/wQJv/ro9WcplRCdW2kYOUS90t9jk4M2gy+EMkHUHnvCkeOxxkyTrj2yqzEpveQZPmzTye+2QjIhJMMrFG2KCCyozZPXpaOKkghPnnDGnNavLB+MAL8VKQHR8cOcRNGaDKvEM8eLcUq5xYY4cbKIYF9b0kspdwZx6Yjf0dVrlKu9go6dF7VwPB7zq+kIV0UlQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=wNA7++2csiCKfuLpaxQ4i2RWjtRFn41EPFxfywTZiec=;
- b=SnpNHrQJ3xbThmFjRxT4Tou8oGYj7R/88Ml8sqvY/Wr0W8+h8iC7OEp+2XXSuPwiceGgeL8B49fcYM7hLoHC3qjm9diNr5tbsrm7prttOOpcnCJaxao3l7GpowfJmwC2uHpAiAuRXxWIQ1zYHJOmfg3SFmGxfQf0xbShRGDuMSqAenq7OLvkc/tQoWGFzMzORkXSbi7QK6jZ6zkW3DM/OR+EQA+WSmsI2ql5vmfNA5yQZBB6aH7JLlBd1YZihGqnevSkI5AiK1RUzk3aXUwj295xkW3JLgnDx/QvbJsbDwfXI1UY9E1q48GitxWjgY1POCaRepJpzBlh4B8GPOnd0Q==
+ bh=yuJfd/AHXAEt+yEGlnUS3imaLMOXGbBnlCHdm9yJGhw=;
+ b=GyFQ6txMgwEYiwQKHuUerv9axyHWk3uWyuiqgbOQPEI0TDg1onf1m0asmZwgmAHk4kn3HKDL4Us3uQyyU2tbWtAOn4tPr4fSWb71B/2rlA21R2SHrQmaqczoPRb/VkiO4OzJqes5meN76eOc/Bsy8WDPLnSioQfrU3t7wO2tpPTniPsTkCvMloJzQwGf/eji77WgmiPdlF7hYIvFmOKtYPbpvVl33ZUOXGGYw92vxCu9UJKlOrSQSrkgKnlwT19OJPTdKd2YiBsUOqlvSk8Rm9tbciIMywnB9ZgPjXGZxgMA+6xNdggeQsR8DnR8/ll4r+Mii7Ca3NppiLyG0lR3xg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oss.nxp.com; dmarc=pass action=none header.from=oss.nxp.com;
- dkim=pass header.d=oss.nxp.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=NXP1.onmicrosoft.com;
- s=selector1-NXP1-onmicrosoft-com;
+ smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
+ header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
+ s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=wNA7++2csiCKfuLpaxQ4i2RWjtRFn41EPFxfywTZiec=;
- b=juEId7dI1Y5m5Dt40XmUUi7xRB0Jqi5y/Nd/VaYV3DgG2UeTmiHIzs4+ySjtoy860n2LObiq6d5dNeDX9EF9K4Ga6nnWuIrN060CaRMY38ZCTVMfvX/d7l9tvhKUgJwwRz2x9giRFziJ5RPnOwQbkPdpqkdy94BI1BvH0SGp604e0DavIoOsJ8hYZESmuo3IM9SwO6ut1055ARXK/JHtdQYxinDtRp0kAYFeJTGQEMeL/ORP4YO4R+IUGhFo6C9jiFowQ1KvZZBUBSNnw9EDXLvrNGOgugL1C2f+Jn5BBGOL1VDT80ss5CVyWKdDQ51OsBCNMZKlql/ZIGJkBvnyfQ==
+ bh=yuJfd/AHXAEt+yEGlnUS3imaLMOXGbBnlCHdm9yJGhw=;
+ b=KhX+JLQD/qX2/6okIci3jiN+ove5PujTqXiogQ/nf5kzf44zS9L1/aeBdDXz3T8SGlTopTbwWHOfQ0EONdiIr9miFZnINTmRnM0S2CNNtYVbuwOnwBJHtH8fjTRxz+MD8rdmVJjq3/9lOhw0xl0IoEjlK6JegB9YVgmj0AKuIG8=
 Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=oss.nxp.com;
-Received: from GV2PR04MB11799.eurprd04.prod.outlook.com (2603:10a6:150:2cf::9)
- by AM7PR04MB6919.eurprd04.prod.outlook.com (2603:10a6:20b:10e::20) with
+ header.d=none;dmarc=none action=none header.from=valinux.co.jp;
+Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:38f::10)
+ by OS3P286MB2567.JPNP286.PROD.OUTLOOK.COM (2603:1096:604:1fa::5) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.360.13; Tue, 1 Sep
- 2026 19:05:24 +0000
-Received: from GV2PR04MB11799.eurprd04.prod.outlook.com
- ([fe80::2146:83a2:5329:b7c]) by GV2PR04MB11799.eurprd04.prod.outlook.com
- ([fe80::2146:83a2:5329:b7c%7]) with mapi id 15.21.0360.008; Tue, 1 Sep 2026
- 19:05:24 +0000
-Date: Tue, 1 Sep 2026 14:05:14 -0500
-From: Frank Li <Frank.li@oss.nxp.com>
-To: Koichiro Den <den@valinux.co.jp>
-Cc: Manivannan Sadhasivam <mani@kernel.org>, Frank Li <Frank.Li@kernel.org>,
-	Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>,
-	Allen Hubbe <allenbh@gmail.com>,
-	Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kwilczynski@kernel.org>,
-	Kishon Vijay Abraham I <kishon@kernel.org>,
-	Bjorn Helgaas <bhelgaas@google.com>, ntb@lists.linux.dev,
-	linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v6 2/2] PCI: endpoint: pci-epf-vntb: Manage virtual NTB
- and PCI bus lifetime
-Message-ID: <apch6kP9Xdvo43O6@SMW015318>
-References: <20260901063238.631166-1-den@valinux.co.jp>
- <20260901063238.631166-3-den@valinux.co.jp>
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.360.13; Wed, 2 Sep
+ 2026 02:14:02 +0000
+Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+ ([fe80::2305:327c:28ec:9b32]) by TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+ ([fe80::2305:327c:28ec:9b32%4]) with mapi id 15.21.0360.008; Wed, 2 Sep 2026
+ 02:14:02 +0000
+Date: Wed, 2 Sep 2026 11:14:00 +0900
+From: Koichiro Den <den@valinux.co.jp>
+To: Niklas Cassel <cassel@kernel.org>
+Cc: Manivannan Sadhasivam <mani@kernel.org>, 
+	Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kwilczynski@kernel.org>, Kishon Vijay Abraham I <kishon@kernel.org>, 
+	Frank Li <Frank.Li@kernel.org>, Bjorn Helgaas <bhelgaas@google.com>, 
+	Jingoo Han <jingoohan1@gmail.com>, Lorenzo Pieralisi <lpieralisi@kernel.org>, 
+	Rob Herring <robh@kernel.org>, Aksh Garg <a-garg7@ti.com>, Christoph Hellwig <hch@lst.de>, 
+	Sagi Grimberg <sagi@grimberg.me>, Chaitanya Kulkarni <kch@nvidia.com>, 
+	Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, 
+	Allen Hubbe <allenbh@gmail.com>, Heiko Stuebner <heiko@sntech.de>, 
+	Shawn Lin <shawn.lin@rock-chips.com>, Manikanta Maddireddy <mmaddireddy@nvidia.com>, 
+	Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>, linux-pci@vger.kernel.org, linux-nvme@lists.infradead.org, 
+	ntb@lists.linux.dev, linux-rockchip@lists.infradead.org, 
+	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2 0/3] PCI: endpoint: Support hardware-owned MSI-X table
+ and PBA
+Message-ID: <sor2mm4jzgeprhn3fjw4jmcaowwkhhuus6exi4k5kum6frqvug@gatkk7r4qyxd>
+References: <20260830151948.3547577-1-den@valinux.co.jp>
+ <apVWd1u9JjTKQczu@ryzen>
+ <pj5vpwwd5tr5tuvhdq3bcpefnq27r6ljvwoysguz2o4tglcqx5@l7zmb6wjnhla>
+ <apXdm2I33edo8kpZ@ryzen>
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260901063238.631166-3-den@valinux.co.jp>
-X-ClientProxiedBy: PH7PR17CA0019.namprd17.prod.outlook.com
- (2603:10b6:510:324::16) To GV2PR04MB11799.eurprd04.prod.outlook.com
- (2603:10a6:150:2cf::9)
+In-Reply-To: <apXdm2I33edo8kpZ@ryzen>
+X-ClientProxiedBy: TY4PR01CA0125.jpnprd01.prod.outlook.com
+ (2603:1096:405:379::7) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+ (2603:1096:405:38f::10)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -70,302 +77,203 @@ List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: GV2PR04MB11799:EE_|AM7PR04MB6919:EE_
-X-MS-Office365-Filtering-Correlation-Id: 1492c469-c16c-4a11-5228-08df085bf9ed
+X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|OS3P286MB2567:EE_
+X-MS-Office365-Filtering-Correlation-Id: 27b115b9-873e-4d7a-6fd0-08df0897db48
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|1800799024|366016|19092799006|23010399003|7416014|376014|6133799003|18002099003|22082099003|56012099006|10067099003|11063799006|4143699003;
+	BCL:0;ARA:13230040|376014|7416014|23010399003|1800799024|10070799003|366016|6133799003|10067099003|5023799004|4143699003|56012099006|22082099003|18002099003;
 X-Microsoft-Antispam-Message-Info:
-	x/oZ5tM4R44weVDwURINamoIVr9cphQsIXA+7xhmmLymC+i1CVeGzPQh1QJwhKvAFia0li+vj2QlJ2Rl7mfKjexGO2Dj/A0i5UfjrxhhRTPBJ82DVkrpdD1W2Hm0sGE5Vqu2wiIWGO/+ki85kd4UBDE+qHt06GrEuDcMeCYdszs4rUyP3CbeMscmpKzG6zaK1s7HvNoJ/Bxp7ujtmYzMVydSYGMiHdjjGoJTn8boylYB7p8dDp25Rg5h01PJJXRaMFhILNapa1eb7hRgvj7h0iWuWaA0nwM31gH4NM9vQYUp/eNQ2/ut0bvG3v7qYH/AsCgwo5nP1Hdib/dpJ5blv97BWBn4XJb3Av8buR82joHwVlOXTqnxlS/fSVWeRrln1X4w2X5ZTizbXfvFJB1IzgXPqRpg+6xwvFDYwL4atoqFOn6hEphJ3DNiuxQ9MDz7Cxotg5ycMSclHW0KB+TGVrPIQ3TPY8NjqIVq59vB3V4y+o9nzKMiO6Ed3VaKGYYNsIk80+ZbRLZk1uMeeP2qAePkuibe9PGAUGAf4fged3I2Zcm8DsT2YXFcQ8zrOa3ZAcvtkOBSUdCmWGUTQ8CaYntPepjZJFDGMIgjHfIZ0BQdmY6n6AtS/dmzRq/UrtK2
+	0HW/uwv9xu881hY6b5vuz32lI8eyot8LbqIXTuWRd+mQB6ysQQA8oGiF+viuzwloAQZnmXUB4RQfxDMXYcYE2NdlAYvqjNPTUC/hsz3ccGywJvunBv54FARAwxZCvLztQU8CRSNSuUl2TXCzF9vdM/mYM4IRi+EPJ1IftUlO2XeFnHCrCa+W5AzrUpnkNoXrOvP+TeRXh6tbOCRKubrMm5pXITGepxd8JnaZWg02QnWrMgvd7ZQOxDgtm6xtu3zLE1oBOiFXJJCw+xOJqLMxSJOj12XUR4A0NA2+SZLByb/XIPcj3DxcebnayiUTroY6ymOzlhD6ErnBg8IwtWhq2ge9mfKERv3RUMgyFyuMNcxEfwibwq1ovHgk2BOe95tU4KBrwUsmY1Vyov9V+v/KXzDYtGu6uW8GdcWl9p2RobdKeSkJfcslBz/0YFFascdl6Mo5aHMH9FqaiI6Sg1qBrwFXXLaObKAYap8x94bDBKFewjW9k9p1uRRKRJtAtBho1D+uOB4TSV1vZgJVRzPZBo4s6UgnWCKqMHRM0PoKPn9e7DTjVKkOV9kpEEnJGbYz6Lxp2abaHVY7h2ateySRYdEsa0YaQQZZT6iTvHfkvDROh+OZjml4wT8JK8PjjaKstHx+gsQSnYlYlpg1uMPs3Nnq3Z9XUmNcZrpQRlFjZuQ=
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:GV2PR04MB11799.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(19092799006)(23010399003)(7416014)(376014)(6133799003)(18002099003)(22082099003)(56012099006)(10067099003)(11063799006)(4143699003);DIR:OUT;SFP:1101;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(376014)(7416014)(23010399003)(1800799024)(10070799003)(366016)(6133799003)(10067099003)(5023799004)(4143699003)(56012099006)(22082099003)(18002099003);DIR:OUT;SFP:1102;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?HbqC5osnJN2j2i2yZFGAOv4VRFgo1qLmuIDmWhhfwIia51R8JDOlBTa92ndk?=
- =?us-ascii?Q?+lLLEij0CCH61Q6qnEAnPr1kTSdzM6IZQUfWGoHl4NQ1UbEzqFIDKFF7PvqM?=
- =?us-ascii?Q?JH7JvYNIHLedWmOWpYiD/fKJ4wyf42RXiC5ZWqIuRHbTihT2x/VlEnPBGx34?=
- =?us-ascii?Q?3G2AFGx6VEL1pwtp2dbX54Lzmyx5Sl8zU1FYGlqcJnEZmV3NN7jx2UkYyVdJ?=
- =?us-ascii?Q?9ihja032L6ptWzTS0iLChPJ2DqZEQebtasnKQGXxbwxrCWPI0vZEE1kxZORk?=
- =?us-ascii?Q?WSHuhA0TH2qtq/+yitIbT/iGDtrKKkrMiM01zyD2AsxHQI1TsmWGS749ipIa?=
- =?us-ascii?Q?qDQDwBAuVGNhUIDod4HoCfF4/7dGkKtnc1tuxbVzMAIOzfYeqgYS5aPswlex?=
- =?us-ascii?Q?vOFae9ihK1EFLzCdaOkxy8jBWs8PU0H+7mmqnvvx/mN7G0QHEpiDhaqhOgdo?=
- =?us-ascii?Q?USeLLbJHATCt9h9gM37zg4kvKg31AEaa1LO20CIemKjb+lyM60dGOef93dip?=
- =?us-ascii?Q?f/P4JuIgL6gwcXy5WONAzI8qmwbvmzF6aMQnrowLaSn8eCn+0oBq8mIDmNKY?=
- =?us-ascii?Q?Hb7Mm4dba441ALaZ3J29WMPJkx93oFbi4yhxw94UGaKKIFhdogoxLk98BOqR?=
- =?us-ascii?Q?gbI+UpYi8hYkX7tkaBResyTWNL+05cv7pRvq9gIyaA3cbLZlRSAvuK/GHG8T?=
- =?us-ascii?Q?YhKnDxT4MS05Pa9ksJWhBMTo062UnqnY46HEs/CYcFjUoo0whqY5PRjBYKKr?=
- =?us-ascii?Q?SoSGKOYOAWI33WgvmCJDpbc/HjLSD8VtIPA8XVV7MhikY8fApJS5RUgGFJcx?=
- =?us-ascii?Q?2YouYnXZvoOuPgn0AoBZYj38+0tibe4sGawIn7Ft0KM55JfFQ2N+7Uv5lFVB?=
- =?us-ascii?Q?BiQqZvJacTHtr3VbuZAICASh7hw/yqCj7NOl3RH00/yR9V0HmQSsB03/oqTy?=
- =?us-ascii?Q?rnhyc9EyTBUTzW/BEuW6aWp9mhyTf/lGLN81QYgAfnX6WXg9qcN1vNXCHVoG?=
- =?us-ascii?Q?tmW2+51oSkaUvaJIGIt9pS5/cQLkqLu1J9l4sbEf7nDB9ahdMDQm5Lq7Je6S?=
- =?us-ascii?Q?IqnIgVXV03ERVYCmK5PVk5kpMAgCDTq2fmEGRZj8RMz6jmQtaPPSANd3E317?=
- =?us-ascii?Q?JquMJOEDTyh/Ipdj46vmsw5nNbFaDmfHKEWPT3LldzSutI+AYhtTFmkwzyAU?=
- =?us-ascii?Q?K6c/+o7yK8O5r7lWGlc1Jcspa5V9y6fZzpXQuZqq8xdSif5qjBw223vxFY0Q?=
- =?us-ascii?Q?Ju54mUmf5NniVrYdwIKc6B2WCjNAv7iw3IMYQQXRLSbOVjQHpxmrgtmySlNa?=
- =?us-ascii?Q?wtc07oPqyOTKY/eZXhjBeaxkpP58aAICzdbyhMRlris3QHdG57LLxN7auFuq?=
- =?us-ascii?Q?6Kk0R4Kqh4WbcEvv4hCRsoxz5evhCnI73wvJ+/TxbQQbE8WXr9fsFOzbzW88?=
- =?us-ascii?Q?oeXbC8/XRpheSWG5Qvw0jrr5ZSHWtPhppUvRVvM85ZfD4Lpq8Ji5ghzqSSyi?=
- =?us-ascii?Q?h6/ALIzId6nJm4nxAThChARIbUxaQf/6dmK6U+RBJEcK6ph5qG2e9c8n7tdv?=
- =?us-ascii?Q?96XLHMcPYEuxanGrhOUWTQHlE+qiup1kz0ON/s/tfJVS5J+wcXRjRDk82ppd?=
- =?us-ascii?Q?7JsM8zjoWBjuJ2Nms/PRtUV+h3VggvYC/I2JOh3pH6eJ+a3AM0Z86lMHdYFa?=
- =?us-ascii?Q?Ro5hFG3GokyNdHfBBt9Kv6PaYinK4tzob0nyV10RAP16tA14oC5sbwGmvtG0?=
- =?us-ascii?Q?SnoWSMftKoDn//xP8pdlAJmjRzl/02ikDovSllgURUZgbr5TvSiJ?=
-X-OriginatorOrg: oss.nxp.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 1492c469-c16c-4a11-5228-08df085bf9ed
-X-MS-Exchange-CrossTenant-AuthSource: GV2PR04MB11799.eurprd04.prod.outlook.com
+	=?us-ascii?Q?H5Df1WgN6NxNdJQMzqTrEGO76/aDUBtDum/FVnjqKVSlT4TtM0s2fYxpgakt?=
+ =?us-ascii?Q?w3SoiToprjvN6wlZQfzFBHCrbOvOegz8oX+18f8qevFpNWWATtpLvkFyBPxR?=
+ =?us-ascii?Q?lqnDuhJjtVG3sYGXGAmTM8wVIl+WH3+CoHjqYJ4ElpL8RdKyNlbDPyKZCpjB?=
+ =?us-ascii?Q?+0PKPxtpBE031kp75cydEe2aEpH0VjVd+7pm3Cbg4CZV3sM0aFtX+41HqKnS?=
+ =?us-ascii?Q?sCkBv+CwI05AaWfI4w74thdJmOvHcbNM5UVQrIn4+f7qx1OzjftV1e/vlGT7?=
+ =?us-ascii?Q?vkTW/U7W/J9sWcWl6rfFjuOhB4cPzJRL1qJNvBX9Y6i5LCqHsI6dsxamH7zt?=
+ =?us-ascii?Q?tJQJisnXEYURUZZHZoOP7KcmGqdgEbNzH8zKSlocsqDeXIHSx+i8NQRcBKhJ?=
+ =?us-ascii?Q?OZPcU1w38TTGJMycDCKbCq9c+CxO9p73MOLIaAD/pFrFyM2WIRyjfb+MRU4A?=
+ =?us-ascii?Q?zHxfDZlNZ5LzrC8YD8ZjHA1tIckZAfWhCGGvwuWxd3bA3NMLpUMR7etshd9L?=
+ =?us-ascii?Q?FZ3u98e9Zg7zdSIU5IINIP/qZdAUPLpvpLsHE5yPhu2Ru8EYGq6y0Z+mmS35?=
+ =?us-ascii?Q?euNF5y3dTd9xVBRxUWLPHQlEezr8wAnbXaXbslSyIYdWUQpnSLQYKBftmPJR?=
+ =?us-ascii?Q?4Po/2OS3IHPB2cmkAo7IlPfOkrZ6agVlWxacmroFzStdlMZXmGmGkLK2OdzM?=
+ =?us-ascii?Q?i28VAf0/xi6tK4vpssVBOT76R82/1Ivf2hI9H8mHB8uH6ShukU1lxCndjGPy?=
+ =?us-ascii?Q?47wdtHKkHTSsXpH+MGstJYAB2uOa60uv+RhlbO0EkQvm7rNKekWzGDx3JAGt?=
+ =?us-ascii?Q?3eT+7VhnvicjHo/JD2ytDPAqPhtGgSi8KNT9lpBFw/WUl2Q0DXV9IY0BQsqm?=
+ =?us-ascii?Q?8oDGqinh4qNDKmwF8jZnTf+pJHJiVM7PVwDYAaJfLYEBAXR1ppSqv21l61Kj?=
+ =?us-ascii?Q?SUJLeeaL0PFf3cVVWt/pujmaK81G9L08NFIQsJjhB5e/yqsUJM6bs9iFRNIJ?=
+ =?us-ascii?Q?qulGQ/XdcH2FPIy2BGlzssztpAQrGqnNjrKsz+1MAZ6aRYUs2+aHLkCmBIPP?=
+ =?us-ascii?Q?Me+gE9YxQNNUBwVE04WfbJXLr4cj59b1oMqENJDfFlX1cCBZDXbHWIitLFcz?=
+ =?us-ascii?Q?P/vabjfXWI7l4WRCby7tWuUVYBhpWLeUfui9i9bUW2bJRJpoVkWeAg3QuRzk?=
+ =?us-ascii?Q?WrrOjajzL0anc31KfLARMjgLzy7ncmI+Xq3DMyEm674L/WFf4pi8wn0p68tb?=
+ =?us-ascii?Q?8ZMUsPiQolvdDXHoSRoy9Q7v1Sn/bunBQlf8J0E4pT7gHOXUaj+DQzcbX/c8?=
+ =?us-ascii?Q?dGO1eO5EmN6ZE+rdq9f15ttdlLSzqMOPTAtfu72Gl/cgcgrWo9P3ugRT1KqO?=
+ =?us-ascii?Q?6uB1Q5JOeQHcWE/3EON3vX9Mr0smU942gEHARgBq7YPsczgsWOAoCIdJklkf?=
+ =?us-ascii?Q?5rJNbXlvqc3hgG3QFJ1blQKhzrsEGJcao9qKv2i3fSgXteXc5df/BSFl5B2n?=
+ =?us-ascii?Q?99GlXt8beat0WcM57PQUzK1xt3Qyyw9xKmd3oGczYgmTswGLWY28xhqmdk0t?=
+ =?us-ascii?Q?qdJHIarYjzZDU9WUHLb2phFHB4FTkxZhJje9zbIMAK9iKN1Ygk5uhilHkrRI?=
+ =?us-ascii?Q?dwSZYkaaN3h8rC5vgRcO0mcbwWD/U+XoGSbm52Nj2uzaOrLC3qvrB2zKXYFI?=
+ =?us-ascii?Q?OCyuU8x/GbkSqfjqiyLbhdWg0oCnp7HNJkHkEzs8HKbGM2n21T0nRMoCwTC9?=
+ =?us-ascii?Q?cy34X6H1FGeTLz2zTuD+bCRv75K85Q/Xq9xLafKPaFdlYEfL+GH0?=
+X-OriginatorOrg: valinux.co.jp
+X-MS-Exchange-CrossTenant-Network-Message-Id: 27b115b9-873e-4d7a-6fd0-08df0897db48
+X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 01 Sep 2026 19:05:24.0954
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 02 Sep 2026 02:14:02.3209
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 18hMP1zbYD0q2VyU3wIBTCLZEEgmRztk3MShVYhYcmZNCEWjnEk5/sRf9Sdo54o3jMdVZDgLxFa/HfjqLw5pOf6CDtTE97+YTNA0TGo6QfdwkHELjDdsqZOgdpqpIRlj
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: AM7PR04MB6919
+X-MS-Exchange-CrossTenant-UserPrincipalName: USLp0emGf6a9PJE7usGvwyc2i6Yc9fDesSyErp+vtZDwo9K7zhZxuHeJHzKB4F45iNVEvN9rld56FB+Z6XZYtQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: OS3P286MB2567
 
-On Tue, Sep 01, 2026 at 03:32:38PM +0900, Koichiro Den wrote:
-> The virtual PCI driver registers an ntb_dev but has no remove callback.
-> Unbinding the endpoint function can therefore free BARs while the NTB
-> device and its client still use them. It also leaves the virtual PCI
-> devices and root bus allocated.
->
-> Allocate an ntb_dev for each virtual PCI probe and unregister it from the
-> matching remove callback. Start command processing only after registration.
-> Publish the device for doorbell IRQs at the same point. During remove, stop
-> the command work and drain IRQ handlers before unregistering the device.
->
-> Retain the root bus returned by pci_scan_bus() so it can be removed on
-> unbind. Unregister the virtual PCI driver before releasing endpoint
-> resources. Stop and remove the root bus under the PCI rescan/remove lock,
-> then release its host bridge.
->
-> Fixes: e35f56bb0330 ("PCI: endpoint: Support NTB transfer between RC and EP")
-> Cc: stable@vger.kernel.org # 6.0+
-> Signed-off-by: Koichiro Den <den@valinux.co.jp>
-> ---
+On Mon, Aug 31, 2026 at 10:01:31PM +0200, Niklas Cassel wrote:
+> Hello Koichiro,
+> 
+> On Tue, Sep 01, 2026 at 01:11:09AM +0900, Koichiro Den wrote:
+> > This is not driven by a performance target, so I do not have numbers. The
+> > immediate issue is correctness. ntb_hw_epf can select MSI-X, but pci-epf-vntb
+> > currently configures and raises MSI. I want that MSI-X path to work on RK3588
+> > with the controller doorbell. I will make it clear in the next cover letter
+> > that, with this series, a doorbell sent from ntb_tool on the pci-epf-vntb side
+> > of RK3588 reaches ntb_tool on the ntb_hw_epf host side when MSI-X is selected.
+> > I believe that is the simplest E2E test showing what this series fixes.
+> 
+> Okay, if the main issue is that pci-epf-vntb does not raise MSI-X, even when
+> ntb_hw_epf host side has requested MSI-X, then I think that the first patch
+> in the series should fix this, so that the fix can easily be backported.
+> 
+> (Right now you fix this in patch 3/3, and the fix in patch 3/3 depends on
+> both patches 1/3 and 2/3.)
+> 
+> I think that pci-epf-vntb actually respecting the configured IRQ type by the
+> host is a separate logical change from adding support for HW defined layout.
 
-Reviewed-by: Frank Li <Frank.Li@nxp.com>
+Sure. It can be a separate patch, first making pci-epf-vntb use an EPF-owned
+MSI-X Table/PBA like the other in-tree EPF drivers with MSI-X support.
 
-> Changes in v6:
->   - Rework v5 patch 5 on v7.3-rc1.
->   - Publish ntb_dev only after registration, and tie command work and
->     doorbell delivery to its lifetime.
->   - Retain and remove the virtual root bus, then release its host bridge.
->   - Drop v5 patch 4; f7245901de89 ("PCI: Check parent for NULL in
->     of_pci_bus_release_domain_nr()") fixed the bug it worked around.
->     v5: https://lore.kernel.org/r/20260226084142.2226875-6-den@valinux.co.jp/
->
-> @Frank, the code changed substantially since v5, so I did not carry your
-> R-b tag. I would appreciate another look.
->
->  drivers/pci/endpoint/functions/pci-epf-vntb.c | 85 +++++++++++++++----
->  1 file changed, 70 insertions(+), 15 deletions(-)
->
-> diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> index 412e8cc6fb1d..992f5e7f8d4a 100644
-> --- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> +++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> @@ -132,7 +132,7 @@ struct epf_ntb_ctrl {
->  } __packed;
->
->  struct epf_ntb {
-> -	struct ntb_dev ntb;
-> +	struct ntb_dev *ntb;
->  	struct pci_epf *epf;
->  	struct config_group group;
->
-> @@ -166,10 +166,15 @@ struct epf_ntb {
->  	void __iomem *vpci_mw_addr[MAX_MW];
->
->  	struct delayed_work cmd_handler;
-> +	struct pci_bus *vpci_bus;
->  };
->
->  #define to_epf_ntb(epf_group) container_of((epf_group), struct epf_ntb, group)
-> -#define ntb_ndev(__ntb) container_of(__ntb, struct epf_ntb, ntb)
-> +
-> +static struct epf_ntb *ntb_ndev(struct ntb_dev *ntb)
-> +{
-> +	return ntb->pdev->sysdata;
-> +}
->
->  static struct pci_epf_header epf_ntb_header = {
->  	.vendorid	= PCI_ANY_ID,
-> @@ -195,7 +200,7 @@ static int epf_ntb_link_up(struct epf_ntb *ntb, bool link_up)
->  	else
->  		ntb->reg->link_status &= ~LINK_STATUS_UP;
->
-> -	ntb_link_event(&ntb->ntb);
-> +	ntb_link_event(ntb->ntb);
->  	return 0;
->  }
->
-> @@ -284,7 +289,7 @@ static void epf_ntb_cmd_handler(struct work_struct *work)
->  	     i++) {
->  		if (ntb->epf_db[i]) {
->  			atomic64_or(1 << (i - EPF_IRQ_DB_START), &ntb->db);
-> -			ntb_db_event(&ntb->ntb, i - EPF_IRQ_DB_START);
-> +			ntb_db_event(ntb->ntb, i - EPF_IRQ_DB_START);
->  			ntb->epf_db[i] = 0;
->  		}
->  	}
-> @@ -348,12 +353,18 @@ static void epf_ntb_cmd_handler(struct work_struct *work)
->  static irqreturn_t epf_ntb_doorbell_handler(int irq, void *data)
->  {
->  	struct epf_ntb *ntb = data;
-> +	struct ntb_dev *ndev;
->  	int i;
->
-> +	/* Pair with smp_store_release() in pci_vntb_probe(). */
-> +	ndev = smp_load_acquire(&ntb->ntb);
-> +	if (!ndev)
-> +		return IRQ_HANDLED;
-> +
->  	for (i = EPF_IRQ_DB_START; i < ntb->db_count; i++)
->  		if (irq == ntb->epf->db_msg[i].virq) {
->  			atomic64_or(1 << (i - EPF_IRQ_DB_START), &ntb->db);
-> -			ntb_db_event(&ntb->ntb, i - EPF_IRQ_DB_START);
-> +			ntb_db_event(ndev, i - EPF_IRQ_DB_START);
->  		}
->
->  	return IRQ_HANDLED;
-> @@ -985,7 +996,6 @@ static int epf_ntb_epc_init(struct epf_ntb *ntb)
->  	}
->
->  	INIT_DELAYED_WORK(&ntb->cmd_handler, epf_ntb_cmd_handler);
-> -	queue_work(kpcintb_workqueue, &ntb->cmd_handler.work);
->
->  	atomic64_set(&ntb->peer_db_pending, 0);
->  	enable_work(&ntb->peer_db_work);
-> @@ -1340,6 +1350,7 @@ static int vpci_scan_bus(void *sysdata)
->  		pci_unlock_rescan_remove();
->  		return -EINVAL;
->  	}
-> +	ndev->vpci_bus = vpci_bus;
->
->  	pci_bus_add_devices(vpci_bus);
->
-> @@ -1425,7 +1436,7 @@ static int vntb_epf_mw_set_trans(struct ntb_dev *ndev, int pidx, int idx,
->  	int ret;
->  	struct device *dev;
->
-> -	dev = &ntb->ntb.dev;
-> +	dev = &ndev->dev;
->  	barno = ntb->epf_ntb_bar[BAR_MW1 + idx];
->  	epf_bar = &ntb->epf->bar[barno];
->  	epf_bar->phys_addr = addr;
-> @@ -1563,7 +1574,7 @@ static void vntb_epf_peer_db_work(struct work_struct *work)
->  			ret = pci_epc_raise_irq(epf->epc, func_no, vfunc_no,
->  						PCI_IRQ_MSI, interrupt_num);
->  			if (ret)
-> -				dev_err(&ntb->ntb.dev,
-> +				dev_err(&epf->dev,
->  					"Failed to raise IRQ for interrupt_num %u: %d\n",
->  					interrupt_num, ret);
->  		}
-> @@ -1681,13 +1692,18 @@ static const struct ntb_dev_ops vntb_epf_ops = {
->
->  static int pci_vntb_probe(struct pci_dev *pdev, const struct pci_device_id *id)
->  {
-> -	int ret;
->  	struct epf_ntb *ndev = (struct epf_ntb *)pdev->sysdata;
->  	struct device *dev = &pdev->dev;
-> +	struct ntb_dev *ntb;
-> +	int ret;
-> +
-> +	ntb = devm_kzalloc(dev, sizeof(*ntb), GFP_KERNEL);
-> +	if (!ntb)
-> +		return -ENOMEM;
->
-> -	ndev->ntb.pdev = pdev;
-> -	ndev->ntb.topo = NTB_TOPO_NONE;
-> -	ndev->ntb.ops =  &vntb_epf_ops;
-> +	ntb->pdev = pdev;
-> +	ntb->topo = NTB_TOPO_NONE;
-> +	ntb->ops = &vntb_epf_ops;
->
->  	ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(32));
->  	if (ret) {
-> @@ -1695,16 +1711,41 @@ static int pci_vntb_probe(struct pci_dev *pdev, const struct pci_device_id *id)
->  		return ret;
->  	}
->
-> -	ret = ntb_register_device(&ndev->ntb);
-> +	ret = ntb_register_device(ntb);
->  	if (ret) {
->  		dev_err(dev, "Failed to register NTB device\n");
->  		return ret;
->  	}
->
-> +	/* Publish after ntb_register_device() succeeds. */
-> +	smp_store_release(&ndev->ntb, ntb);
-> +	queue_delayed_work(kpcintb_workqueue, &ndev->cmd_handler, 0);
-> +
->  	dev_dbg(dev, "PCI Virtual NTB driver loaded\n");
->  	return 0;
->  }
->
-> +static void pci_vntb_remove(struct pci_dev *pdev)
-> +{
-> +	struct epf_ntb *ndev = pdev->sysdata;
-> +	struct ntb_dev *ntb;
-> +	unsigned int i;
-> +
-> +	/* Stop the work reader, then close and drain the IRQ gate. */
-> +	cancel_delayed_work_sync(&ndev->cmd_handler);
-> +
-> +	ntb = xchg(&ndev->ntb, NULL);
-> +
-> +	if (ndev->msi_doorbell)
-> +		for (i = 0; i < ndev->db_count; i++) {
-> +			if (epf_ntb_db_irq_is_duplicated(ndev->epf, i))
-> +				continue;
-> +			synchronize_irq(ndev->epf->db_msg[i].virq);
-> +		}
-> +
-> +	ntb_unregister_device(ntb);
-> +}
-> +
->  static struct pci_device_id pci_vntb_table[] = {
->  	{
->  		PCI_DEVICE(0xffff, 0xffff),
-> @@ -1716,6 +1757,7 @@ static struct pci_driver vntb_pci_driver = {
->  	.name           = "pci-vntb",
->  	.id_table       = pci_vntb_table,
->  	.probe          = pci_vntb_probe,
-> +	.remove         = pci_vntb_remove,
->  };
->
->  /* ============ PCIe EPF Driver Bind ====================*/
-> @@ -1796,12 +1838,25 @@ static int epf_ntb_bind(struct pci_epf *epf)
->   */
->  static void epf_ntb_unbind(struct pci_epf *epf)
->  {
-> +	struct pci_host_bridge *bridge;
->  	struct epf_ntb *ntb = epf_get_drvdata(epf);
->
-> +	pci_unregister_driver(&vntb_pci_driver);
-> +
-> +	if (ntb->vpci_bus) {
-> +		bridge = to_pci_host_bridge(ntb->vpci_bus->bridge);
-> +
-> +		pci_lock_rescan_remove();
-> +		pci_stop_root_bus(ntb->vpci_bus);
-> +		pci_remove_root_bus(ntb->vpci_bus);
-> +		ntb->vpci_bus = NULL;
-> +		pci_unlock_rescan_remove();
-> +
-> +		pci_free_host_bridge(bridge);
-> +	}
-> +
->  	epf_ntb_epc_cleanup(ntb);
->  	epf_ntb_config_spad_bar_free(ntb);
-> -
-> -	pci_unregister_driver(&vntb_pci_driver);
->  }
->
->  // EPF driver probe
-> --
-> 2.51.0
->
+> 
+> 
+> > I initially considered making the hardware-owned layout automatic for every EPF.
+> > pci-epf-ntb (not vNTB!) is the reason I did not. It currently reads
+> > host-programmed MSI-X entries through epf_bar[] backing and uses them to set up
+> > peer outbound mappings. A hardware-owned Table has no such backing, and the
+> > current EPC API has no generic way to read those entries. I suspect that
+> > supporting it there would require a broader design change. Also, I do not have
+> > hardware for the pci-epf-ntb bridge configuration.
+> > 
+> > pci-epf-test and nvmet-pci-epf should be easier to convert. However, converting
+> > only those would not remove the per-layout handling while pci-epf-ntb still uses
+> > an EPF-owned Table. I would prefer to handle those separately when they can be
+> > properly tested. This is what I meant by this part of the cover letter:
+> > 
+> >      [...]
+> > 
+> >      layouts. This avoids unnecessary changes and reduces regression risk.
+> >      They can use a hardware-owned layout later if/when needed.
+> 
+> Okay, if pci-epf-ntb is special, perhaps we should add a comment in
+> pci-epf-ntb which explains why it cannot support HW defined layout.
+> 
+> But for consistency, if we modify pci-epf-vntb, I think it would make sense
+> to also modify pci-epf-test and nvmet-pci-epf as well in the same series.
+> 
+> pci-epf-test should be easy to test, just run the pci endpoint selftest.
+> 
+> nvmet-pci-epf should be quite easy to test too, just run the normal fio based
+> testing that we usually run, and unless you see worse performance, I think we
+> are good. (If we see worse performance, that could be an indication that one
+> of the MSI-X for the different completion queues are not being correctly
+> triggered. By default, the host side nvme driver creates one completion queue
+> (and one submission queue) per host CPU.
+
+Fair enough. As an experiment, I converted nvmet-pci-epf and tries to test it. I
+could not get as far as running fio because host-side NVMe initialization timed
+out.
+
+I found that on RK3588, host writes through BAR4 to the Message Address field
+(the first 8 bytes) of entry #0 do not seem to show up in the internal iMSIX-TX
+Table RAM. The rest of entry #0 and the entries from entry #1 onward that I
+tested seem fine. The same two DWORDs can be written through direct DBI Table
+RAM access, and the doorbell for entry #0 then works.
+
+I'm not sure but one thing I wondered is whether this could be related to the
+boundary between the BAR4-mapped unrolled iATU registers and the MSI-X Table. On
+RK3588, the iATU register window starts at 0x2000 and the MSI-X Table
+immediately follows at 0x4000. If there somehow is an address decoding issue at
+that boundary, with the first part of the Table being taken as an iATU access, I
+would like to know.
+
+This still sounds really odd, and it does not obviously explain why both DWORDs
+at 0x4000 and 0x4004 are affected. I may be missing something important. If
+anything similar involving iMSIX-TX Table RAM entry #0 has been discussed
+before, please point me to the relevant thread.
+
+(Also, I can share my current WIP v3 series, which makes pci-epf-test and
+nvmet-pci-epf use the hardware-owned layout when available, while leaving
+pci-epf-ntb with its EPF-owned layout. If you have any setup where you could
+test it, please let me know.)
+
+> 
+> 
+> What I suggest that you instead do something like:
+> Patch 1/7: pci-epf-vntb: Fix to actually use MSI-X when requested.
+>            This probably includes adding the code that is inside the
+> 	   if (ret == -ENOENT) { }.
+> Patch 2/7: PCI: endpoint: Support hardware-owned MSI-X table and PBA
+> Patch 3/7: PCI: dw-rockchip: Support fixed MSI-X table and PBA on RK3588
+> Patch 4/7: pci-epf-vntb: Add code that calls pci_epc_get_hw_msix_layout()
+>            and uses that layout, if the function returned success.
+> Patch 5/7: pci-epf-test: Add code that calls pci_epc_get_hw_msix_layout()
+>            and uses that layout, if the function returned success.
+> Patch 6/7: nvmet-pci-epf: Add code that calls pci_epc_get_hw_msix_layout()
+>            and uses that layout, if the function returned success.
+> Patch 7/7: pci-epf-ntb: Add comment that explains why it cannot call
+>            pci_epc_get_hw_msix_layout() like all other EPF drivers that
+> 	   support MSI-X.
+> 
+> 
+> This way, patch 1/7 can be backported, and will help all users vNTB users,
+> even the users that do not use RK3588 as an EPC.
+
+That split makes sense. However, given the issue I described above, perhaps I
+should send patch 1/7 as a standalone fix and hold off on the rest until the
+issue is understood and resolved.
+
+Testing vNTB alone (ie. this v2 way) did not expose it because its first data
+doorbell uses MSI-X Table entry #2. I only found the issue because your
+suggestion led me to convert and test nvmet-pci-epf, thank you!
+
+> 
+> 
+> > > I understand that you introduce dw_pcie_ep_msix_layout_is_hw_owned()
+> > > because you want an EPF driver optionally use the HW defined table.
+> > > But if all EPF drivers always use the HW defined table if available, I think
+> > > you can avoid introducing this helper, and let rockchip_pcie_raise_irq()
+> > > unconditionally call dw_pcie_ep_raise_msix_irq_doorbell() for case PCI_IRQ_MSIX.
+> > 
+> > Yes, under that assumption I agree. With the current mix, however, the Rockchip
+> > callback still has to choose the helper according to the selected layout. That
+> > is why the DWC code records which layout was selected.
+> > 
+> > I will update the cover letter to state the motivation and this boundary more
+> > directly. Does keeping the layout choice with each EPF for this reason sound
+> > reasonable?
+> 
+> Yes, since pci-epf-ntb apparently is special, I can see why you need
+> both ep_func->msix_hw_owned and dw_pcie_ep_msix_layout_is_hw_owned().
+
+Sounds good.
+Thanks for taking a look!
+
+Best regards,
+Koichiro
+
+> 
+> 
+> Kind regards,
+> Niklas
