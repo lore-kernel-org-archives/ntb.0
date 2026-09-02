@@ -1,74 +1,63 @@
-Received: from OS0P286CU011.outbound.protection.outlook.com (mail-japanwestazon11020079.outbound.protection.outlook.com [52.101.228.79])
+Received: from OS0P286CU010.outbound.protection.outlook.com (mail-japanwestazon11021126.outbound.protection.outlook.com [40.107.74.126])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 346F23164C5
-	for <ntb@lists.linux.dev>; Wed,  2 Sep 2026 02:14:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.228.79
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ACB537080D;
+	Wed,  2 Sep 2026 02:40:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.74.126
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788315250; cv=fail; b=ddVLDyXUWLCz5DgbTdNYvFMI0iamM6BnazUKc+4w3lMQpkzDK1Zdg0YppbitK1VxpKGOqgR51R0+6oy3clznwLifHN06ux/VZ0GJLxwQ/OcRrJzZ+vy7lXRocLvnkRfvxvl2K7fmiHxPh537Zw/e6YHDUCuyULWXchJV3nAzhXU=
+	t=1788316810; cv=fail; b=BSXEEmD2tjtVxWhS/x5AjOoJj/Mk7+9aAYoM4v/Mz/ZwlA+sL6t/BTLlcguiV+FvdvFnjc15+8KWoUdraB61m8seM+ZScLJfTihStETyh3AeuU0fEbGwEiucVQotxnUB+PrDgt6NK34Z9GmrLN+gacBq6V9J4kXlqWW/H7yzz5k=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788315250; c=relaxed/simple;
-	bh=1NhakVeJMSHU+dmSvOo0frI3lx9v7UU+yxXBFwek4GE=;
+	s=arc-20240116; t=1788316810; c=relaxed/simple;
+	bh=eka2Mi3qvJNGHmKetbJJ7Pdgs7AzFOfIv6MTirfdy0Y=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
-	 Content-Disposition:In-Reply-To:MIME-Version; b=Pl3OY3uw4ae6kTgGEK5F/60JlYcYUcI1gnAot90fecEgg10TTZXZVp76ioC1PWMWLj4e2wqSoNqwzPWOMIosKfScOhx/KL1L01VAdDzv9niIipQbH1KD6O0RBYcdgMO+5l+JBWYdKaeKHhdNkjsSo3MZA9GT9U/JHXzdD+8NVK4=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=KhX+JLQD; arc=fail smtp.client-ip=52.101.228.79
+	 Content-Disposition:In-Reply-To:MIME-Version; b=X6tBGomPtioRgpU2p1/4DxzPc7bmh+NonE+xXgjGNjhyVsZ7+6YTUhGdVqSpbMuCH5KqzvXfxdy0BViXQQfdREqMPGx0lqm7LCq+e1NZRLFRnetPo/Q8xlGv5zJiPxwRsDFQtSJ2iuiSxqt+yNiifvlI4ZOTQKOi2UZcbRReOxQ=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=fail (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=uc79COum reason="signature verification failed"; arc=fail smtp.client-ip=40.107.74.126
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="KhX+JLQD"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="uc79COum"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=NE9oiQtXK/4n8Qopjpc8xHeZeee3/uDWmdMadzxRpJZgfLOg2vVtIxmunmKxPmlwlmPyZ4ujIo3EN9a4JLmQLiisLZ92pHBrDqJOWomKgCJNrhgu9Tdjp3a1HIZWJnqXLJ31YcV7CjI2jJ3eTZ7l2/wQJv/ro9WcplRCdW2kYOUS90t9jk4M2gy+EMkHUHnvCkeOxxkyTrj2yqzEpveQZPmzTye+2QjIhJMMrFG2KCCyozZPXpaOKkghPnnDGnNavLB+MAL8VKQHR8cOcRNGaDKvEM8eLcUq5xYY4cbKIYF9b0kspdwZx6Yjf0dVrlKu9go6dF7VwPB7zq+kIV0UlQ==
+ b=rnTJPN6jHsTaH+JapvBZDG9OrjVWkGpqKGbFxj4Do9TH4I1HwnjOXC+S2dGSxZ6G67sfoEctLPfiHNj957WW7Y93XaGLv6EgmVqw2/2NU1MMezEjL4IILdmxCt7j4DHDQ7J6YjRG+bZzcpRffsIgh31/ZKSG7K6p7m/Qef0fNilLSIAK7xTGmd63O1pp+WUvyOHOlyr2jGGVy8ANet5WsQW+T408atRQNyJGULvbw8xHDNUKNUJUqKrNiyDp44/bnwe0czjaV5dcYYgfosH++2ACvAXSaUZlDDe7s9OViMe8zzMV7fJtjBtj7OMNX40oslIKuXEcjV8TbRw/lf4ZXA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=yuJfd/AHXAEt+yEGlnUS3imaLMOXGbBnlCHdm9yJGhw=;
- b=GyFQ6txMgwEYiwQKHuUerv9axyHWk3uWyuiqgbOQPEI0TDg1onf1m0asmZwgmAHk4kn3HKDL4Us3uQyyU2tbWtAOn4tPr4fSWb71B/2rlA21R2SHrQmaqczoPRb/VkiO4OzJqes5meN76eOc/Bsy8WDPLnSioQfrU3t7wO2tpPTniPsTkCvMloJzQwGf/eji77WgmiPdlF7hYIvFmOKtYPbpvVl33ZUOXGGYw92vxCu9UJKlOrSQSrkgKnlwT19OJPTdKd2YiBsUOqlvSk8Rm9tbciIMywnB9ZgPjXGZxgMA+6xNdggeQsR8DnR8/ll4r+Mii7Ca3NppiLyG0lR3xg==
+ bh=WSvaniITY8VlXe2egqeg9fCNofbQnaVnojVhv3u/aOg=;
+ b=Nbss7zduG9BoXe84WK0zEdJJQYgnmGtLpWUlIXdpEUsJedRjzzUuEr+e3norpzppxgRNJwut4A8FMl59caDhq4KFg5lVcqezc6h5IMGKuIpUA0fLNc5oPhcQVSGB8P0xflqxbWbrG/x/OnKGSE9wJFaF9gmk0p2YrBH/ZKorx1ti0MKJRmiYBAP/MY3EyjkOED1o3JjD0qpKPdyMKE/sXFT/kqO5cvGtt6CD5IjB6NzA9YM5iMTHQ8xnHTZ9WlKSiYESOMQ8BVxDVLBA0fySt/FjZD6pUSsXG1fbPD+fLamjKYyebA/BlhiINgwQA8/WTU2p1I512cx+lpp7g+Z6XA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
  header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
  s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=yuJfd/AHXAEt+yEGlnUS3imaLMOXGbBnlCHdm9yJGhw=;
- b=KhX+JLQD/qX2/6okIci3jiN+ove5PujTqXiogQ/nf5kzf44zS9L1/aeBdDXz3T8SGlTopTbwWHOfQ0EONdiIr9miFZnINTmRnM0S2CNNtYVbuwOnwBJHtH8fjTRxz+MD8rdmVJjq3/9lOhw0xl0IoEjlK6JegB9YVgmj0AKuIG8=
+ bh=WSvaniITY8VlXe2egqeg9fCNofbQnaVnojVhv3u/aOg=;
+ b=uc79COumgLqzZsorL3eRxNW0TSLzvk0zSx1DC0e7rlzKKdgglrNzVSmQmbjMVilowLjOISV09mvF9M/sqGyzzCMbTyJifYeOkc1R+Kxw6vXqMsSR5RQ4JAelL4RZ+wtU/oTtgY2Eb17eASjc0daxAmSoJuXk3gzzRyzJuqRmMWQ=
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=valinux.co.jp;
 Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:38f::10)
- by OS3P286MB2567.JPNP286.PROD.OUTLOOK.COM (2603:1096:604:1fa::5) with
+ by TY4P286MB6927.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:340::8) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.360.13; Wed, 2 Sep
- 2026 02:14:02 +0000
+ 2026 02:40:03 +0000
 Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  ([fe80::2305:327c:28ec:9b32]) by TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  ([fe80::2305:327c:28ec:9b32%4]) with mapi id 15.21.0360.008; Wed, 2 Sep 2026
- 02:14:02 +0000
-Date: Wed, 2 Sep 2026 11:14:00 +0900
+ 02:40:03 +0000
+Date: Wed, 2 Sep 2026 11:40:02 +0900
 From: Koichiro Den <den@valinux.co.jp>
-To: Niklas Cassel <cassel@kernel.org>
-Cc: Manivannan Sadhasivam <mani@kernel.org>, 
-	Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kwilczynski@kernel.org>, Kishon Vijay Abraham I <kishon@kernel.org>, 
-	Frank Li <Frank.Li@kernel.org>, Bjorn Helgaas <bhelgaas@google.com>, 
-	Jingoo Han <jingoohan1@gmail.com>, Lorenzo Pieralisi <lpieralisi@kernel.org>, 
-	Rob Herring <robh@kernel.org>, Aksh Garg <a-garg7@ti.com>, Christoph Hellwig <hch@lst.de>, 
-	Sagi Grimberg <sagi@grimberg.me>, Chaitanya Kulkarni <kch@nvidia.com>, 
-	Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, 
-	Allen Hubbe <allenbh@gmail.com>, Heiko Stuebner <heiko@sntech.de>, 
-	Shawn Lin <shawn.lin@rock-chips.com>, Manikanta Maddireddy <mmaddireddy@nvidia.com>, 
-	Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>, linux-pci@vger.kernel.org, linux-nvme@lists.infradead.org, 
-	ntb@lists.linux.dev, linux-rockchip@lists.infradead.org, 
-	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2 0/3] PCI: endpoint: Support hardware-owned MSI-X table
- and PBA
-Message-ID: <sor2mm4jzgeprhn3fjw4jmcaowwkhhuus6exi4k5kum6frqvug@gatkk7r4qyxd>
-References: <20260830151948.3547577-1-den@valinux.co.jp>
- <apVWd1u9JjTKQczu@ryzen>
- <pj5vpwwd5tr5tuvhdq3bcpefnq27r6ljvwoysguz2o4tglcqx5@l7zmb6wjnhla>
- <apXdm2I33edo8kpZ@ryzen>
-Content-Type: text/plain; charset=us-ascii
+To: sashiko-reviews@lists.linux.dev
+Cc: ntb@lists.linux.dev, linux-pci@vger.kernel.org
+Subject: Re: [PATCH v3 5/7] PCI: endpoint: pci-epf-vntb: Allow DMA and MW to
+ share a BAR
+Message-ID: <5zkxmgcxmzubimiftjdwpjuggphwn3ygc5dv45llnn2w6g57cj@7a6vzluyjws3>
+References: <20260831182657.329614-1-den@valinux.co.jp>
+ <20260831182657.329614-6-den@valinux.co.jp>
+ <20260831210549.30AC31F000E9@smtp.kernel.org>
+Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
-In-Reply-To: <apXdm2I33edo8kpZ@ryzen>
-X-ClientProxiedBy: TY4PR01CA0125.jpnprd01.prod.outlook.com
- (2603:1096:405:379::7) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20260831210549.30AC31F000E9@smtp.kernel.org>
+X-ClientProxiedBy: TYCP286CA0047.JPNP286.PROD.OUTLOOK.COM
+ (2603:1096:400:2b5::18) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  (2603:1096:405:38f::10)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
@@ -77,203 +66,199 @@ List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|OS3P286MB2567:EE_
-X-MS-Office365-Filtering-Correlation-Id: 27b115b9-873e-4d7a-6fd0-08df0897db48
+X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|TY4P286MB6927:EE_
+X-MS-Office365-Filtering-Correlation-Id: 08866936-4d0f-44de-9b18-08df089b7dea
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|376014|7416014|23010399003|1800799024|10070799003|366016|6133799003|10067099003|5023799004|4143699003|56012099006|22082099003|18002099003;
+	BCL:0;ARA:13230040|1800799024|376014|366016|23010399003|10070799003|3023799007|6133799003|4143699003|22082099003|18002099003|56012099006|10067099003;
 X-Microsoft-Antispam-Message-Info:
-	0HW/uwv9xu881hY6b5vuz32lI8eyot8LbqIXTuWRd+mQB6ysQQA8oGiF+viuzwloAQZnmXUB4RQfxDMXYcYE2NdlAYvqjNPTUC/hsz3ccGywJvunBv54FARAwxZCvLztQU8CRSNSuUl2TXCzF9vdM/mYM4IRi+EPJ1IftUlO2XeFnHCrCa+W5AzrUpnkNoXrOvP+TeRXh6tbOCRKubrMm5pXITGepxd8JnaZWg02QnWrMgvd7ZQOxDgtm6xtu3zLE1oBOiFXJJCw+xOJqLMxSJOj12XUR4A0NA2+SZLByb/XIPcj3DxcebnayiUTroY6ymOzlhD6ErnBg8IwtWhq2ge9mfKERv3RUMgyFyuMNcxEfwibwq1ovHgk2BOe95tU4KBrwUsmY1Vyov9V+v/KXzDYtGu6uW8GdcWl9p2RobdKeSkJfcslBz/0YFFascdl6Mo5aHMH9FqaiI6Sg1qBrwFXXLaObKAYap8x94bDBKFewjW9k9p1uRRKRJtAtBho1D+uOB4TSV1vZgJVRzPZBo4s6UgnWCKqMHRM0PoKPn9e7DTjVKkOV9kpEEnJGbYz6Lxp2abaHVY7h2ateySRYdEsa0YaQQZZT6iTvHfkvDROh+OZjml4wT8JK8PjjaKstHx+gsQSnYlYlpg1uMPs3Nnq3Z9XUmNcZrpQRlFjZuQ=
+	mD/NEY4OnIRxFE2+YhhGD1Ypd1SXTz6v+uSNJDxIb8kr7+RXBqlnzgYx13ota8zWWAt9rEl8ysQ4j3NwJ3AviAUa6fgp1UmAuMbnixdUf2nBXnp7Mhg9c+MrJd1FDe9rRoq/c8yhwhBhY3lqiVqAZNOiEFgO5VznNYzoexeBQS6muKeVwhMWYMXG5VA+7lTb6d5YHjdeWvPhpb2YoQeDRcsJFNgAtz/LtnO0FIVJPMT8dKJ2UMucbXFthAm8EktDSbWMTTkA5U1kD3g/BoC+xglbFOrPAu9+JYVzNiFrcniwDLcAX3KCsl8z7Jw54n2N6Hwmb/cK3VujYKzcxNeKDMkjZ0cqI//lw7Q4ioaU2tzKqQ0MbNDStoShelopvtyAV0/PTk8SYETnyVsj9Ma5tyAX2X+byXhd3xs4PGh+I1fkZIMRET+GkStF58jlFsv54pOGPnJ7jZk+7ZcvF7cpom1cZOHxm+AvC31O5PhENEKEEX9ItdFwI0e8zYGiCyDmhh1M+JOp/udWGNIb/5zj98+MQzoGJemU8RDyxxpq+2a7vSVnJM87IglkPZCti0vc748osDp2EjnJhmmLERwhJRMGwSutWlbsEYxMJwq5PHI=
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(376014)(7416014)(23010399003)(1800799024)(10070799003)(366016)(6133799003)(10067099003)(5023799004)(4143699003)(56012099006)(22082099003)(18002099003);DIR:OUT;SFP:1102;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(376014)(366016)(23010399003)(10070799003)(3023799007)(6133799003)(4143699003)(22082099003)(18002099003)(56012099006)(10067099003);DIR:OUT;SFP:1102;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?H5Df1WgN6NxNdJQMzqTrEGO76/aDUBtDum/FVnjqKVSlT4TtM0s2fYxpgakt?=
- =?us-ascii?Q?w3SoiToprjvN6wlZQfzFBHCrbOvOegz8oX+18f8qevFpNWWATtpLvkFyBPxR?=
- =?us-ascii?Q?lqnDuhJjtVG3sYGXGAmTM8wVIl+WH3+CoHjqYJ4ElpL8RdKyNlbDPyKZCpjB?=
- =?us-ascii?Q?+0PKPxtpBE031kp75cydEe2aEpH0VjVd+7pm3Cbg4CZV3sM0aFtX+41HqKnS?=
- =?us-ascii?Q?sCkBv+CwI05AaWfI4w74thdJmOvHcbNM5UVQrIn4+f7qx1OzjftV1e/vlGT7?=
- =?us-ascii?Q?vkTW/U7W/J9sWcWl6rfFjuOhB4cPzJRL1qJNvBX9Y6i5LCqHsI6dsxamH7zt?=
- =?us-ascii?Q?tJQJisnXEYURUZZHZoOP7KcmGqdgEbNzH8zKSlocsqDeXIHSx+i8NQRcBKhJ?=
- =?us-ascii?Q?OZPcU1w38TTGJMycDCKbCq9c+CxO9p73MOLIaAD/pFrFyM2WIRyjfb+MRU4A?=
- =?us-ascii?Q?zHxfDZlNZ5LzrC8YD8ZjHA1tIckZAfWhCGGvwuWxd3bA3NMLpUMR7etshd9L?=
- =?us-ascii?Q?FZ3u98e9Zg7zdSIU5IINIP/qZdAUPLpvpLsHE5yPhu2Ru8EYGq6y0Z+mmS35?=
- =?us-ascii?Q?euNF5y3dTd9xVBRxUWLPHQlEezr8wAnbXaXbslSyIYdWUQpnSLQYKBftmPJR?=
- =?us-ascii?Q?4Po/2OS3IHPB2cmkAo7IlPfOkrZ6agVlWxacmroFzStdlMZXmGmGkLK2OdzM?=
- =?us-ascii?Q?i28VAf0/xi6tK4vpssVBOT76R82/1Ivf2hI9H8mHB8uH6ShukU1lxCndjGPy?=
- =?us-ascii?Q?47wdtHKkHTSsXpH+MGstJYAB2uOa60uv+RhlbO0EkQvm7rNKekWzGDx3JAGt?=
- =?us-ascii?Q?3eT+7VhnvicjHo/JD2ytDPAqPhtGgSi8KNT9lpBFw/WUl2Q0DXV9IY0BQsqm?=
- =?us-ascii?Q?8oDGqinh4qNDKmwF8jZnTf+pJHJiVM7PVwDYAaJfLYEBAXR1ppSqv21l61Kj?=
- =?us-ascii?Q?SUJLeeaL0PFf3cVVWt/pujmaK81G9L08NFIQsJjhB5e/yqsUJM6bs9iFRNIJ?=
- =?us-ascii?Q?qulGQ/XdcH2FPIy2BGlzssztpAQrGqnNjrKsz+1MAZ6aRYUs2+aHLkCmBIPP?=
- =?us-ascii?Q?Me+gE9YxQNNUBwVE04WfbJXLr4cj59b1oMqENJDfFlX1cCBZDXbHWIitLFcz?=
- =?us-ascii?Q?P/vabjfXWI7l4WRCby7tWuUVYBhpWLeUfui9i9bUW2bJRJpoVkWeAg3QuRzk?=
- =?us-ascii?Q?WrrOjajzL0anc31KfLARMjgLzy7ncmI+Xq3DMyEm674L/WFf4pi8wn0p68tb?=
- =?us-ascii?Q?8ZMUsPiQolvdDXHoSRoy9Q7v1Sn/bunBQlf8J0E4pT7gHOXUaj+DQzcbX/c8?=
- =?us-ascii?Q?dGO1eO5EmN6ZE+rdq9f15ttdlLSzqMOPTAtfu72Gl/cgcgrWo9P3ugRT1KqO?=
- =?us-ascii?Q?6uB1Q5JOeQHcWE/3EON3vX9Mr0smU942gEHARgBq7YPsczgsWOAoCIdJklkf?=
- =?us-ascii?Q?5rJNbXlvqc3hgG3QFJ1blQKhzrsEGJcao9qKv2i3fSgXteXc5df/BSFl5B2n?=
- =?us-ascii?Q?99GlXt8beat0WcM57PQUzK1xt3Qyyw9xKmd3oGczYgmTswGLWY28xhqmdk0t?=
- =?us-ascii?Q?qdJHIarYjzZDU9WUHLb2phFHB4FTkxZhJje9zbIMAK9iKN1Ygk5uhilHkrRI?=
- =?us-ascii?Q?dwSZYkaaN3h8rC5vgRcO0mcbwWD/U+XoGSbm52Nj2uzaOrLC3qvrB2zKXYFI?=
- =?us-ascii?Q?OCyuU8x/GbkSqfjqiyLbhdWg0oCnp7HNJkHkEzs8HKbGM2n21T0nRMoCwTC9?=
- =?us-ascii?Q?cy34X6H1FGeTLz2zTuD+bCRv75K85Q/Xq9xLafKPaFdlYEfL+GH0?=
+	=?iso-8859-1?Q?TvJQ2ZaRR0aS9Dt56+kX983vC0yBfqRtWD37CLNELa+fIH/RYxfmroNWXT?=
+ =?iso-8859-1?Q?nUP/Ns5LaltalUAo1inD7GYhfT+InKS8PvPl8kOyz5JREGLYWoZLKYoUQ7?=
+ =?iso-8859-1?Q?RijvGAwvcmE8gsk6VsEr7uGgLagxK4K2yn06B4u0r459ezTolTXSKlyaAY?=
+ =?iso-8859-1?Q?oMZ3DiGIJ4OVDFvPtrSOyLQyY9zhzbKwGRbqO3wQz6Nhkok4elC+xIlbHZ?=
+ =?iso-8859-1?Q?Mq+B5MM5PT8Fm8YMSCkN5BKqjIe4jBt15gWxRPlmPY6gIcxrHfnqtXCYGO?=
+ =?iso-8859-1?Q?W12BSuOwyuX4H5voB3NGtr7VHbZ3I7YrcYSYFarl3l+N2dWqpcbD4Y2kNS?=
+ =?iso-8859-1?Q?JY60K11eN+5ciZK8pVoujlCsv9kI5UWXmM6sdBCav+QwN3dOjcGpPWU3Ck?=
+ =?iso-8859-1?Q?o999gEWZeAn0Y6r9noDUvxV22obybvjVdqQXnwRJJlLPVbbI92DcuLS3jN?=
+ =?iso-8859-1?Q?GX7vlQndC4X1cG+/Y5YkV/jV2fRcxSkPRICodeYX3U791q9NKpt73Nt/XR?=
+ =?iso-8859-1?Q?ZSUEXsacU+A1sf3BDuUYHzWuyd00B9cXpI944u51W+fA0y9lE9a58LTzJ1?=
+ =?iso-8859-1?Q?jsfqEvSvdINua7sc7ZVLmP78+7bljko++aFOwBvx4un9c3Jpfx+diigP7U?=
+ =?iso-8859-1?Q?r56eOJJi/7G8vnDqyxV2A7v25KUL9ODlr1Ux0E/X7eeICKmtYTe3BrcF3P?=
+ =?iso-8859-1?Q?XLKX/NFgdVwCEyYsnUXjFzyMy7SBshAeTN9/jq53pzH2EoRG1cbosDFEc9?=
+ =?iso-8859-1?Q?VkxfNs9JTSEx6Mt2stnokwGdaSVVBkKLgVPHm1/mPlcaLSp7tT1oW81sb4?=
+ =?iso-8859-1?Q?Zd+SwcYUrG24a9HbCQmLMNzfpU3S7AD6VGhNHbRJhjg10DRvghFABX8SE4?=
+ =?iso-8859-1?Q?2N0mB9jeKz6vDPqSMiXXOmYSk0GqEIgxdhU1EB7GB7hAqVBe+XmxDLVRAw?=
+ =?iso-8859-1?Q?nDISfKQ3FaW8MUHFaZepwN/cDEvTFPYEArEo3Swkz2BpZsaENgUelBRyLW?=
+ =?iso-8859-1?Q?9iLMTI9AP55eiSdJGLEvHatJK1sQQOCnYO5xctgK1vGQYoOlhQ1AH4nWf2?=
+ =?iso-8859-1?Q?+xHSwqPx28ZWsUX8UqLwo2fEigGwevXgWJySgh1YaMVOHGs59qffrf9AFX?=
+ =?iso-8859-1?Q?fmdMRhaLHKXvvKQrSIEH2nOImdoqCPBt+86br+Bcimf4/uycrEkGOWamaM?=
+ =?iso-8859-1?Q?cHxBH6sKlxHrfhKfMAgi0fhl2U3V1d5d3704JHo5hccDYsVs5QYDKzf+fB?=
+ =?iso-8859-1?Q?uaxbAhIagzy2hSV1xysECZbGdS8XfRwhJZ3l9G+hPAPhLvKdU3jXZUcHox?=
+ =?iso-8859-1?Q?hC1Je0f8VVr5E8Z6we/dahIDxNw8MxHYyMtjilkWdwOtJ7YEYOJdnbSjSC?=
+ =?iso-8859-1?Q?1kvKFybJ3ZcXOMWhdX6hTySqKEIAcY1a8xzHP9s8g4TLd2AjLYbRpWwfJN?=
+ =?iso-8859-1?Q?u9JXv5wi6Bmk80df5gLabCzZkkF356hyOTjxs/j2V7lsrbYgMphXLB0P2w?=
+ =?iso-8859-1?Q?OLYwEGsCMxstAauIYPP/JiyW3rdZ9jAKtVpt/CamqylVpUdBamHbJfakvu?=
+ =?iso-8859-1?Q?LvkBQOcIHDXCzB3KACwkJqosbbzrdgzinyBMtNk7LyBG8nBAqeVHeAur7F?=
+ =?iso-8859-1?Q?oLKefZ9YaYzwExz26T9/wQV3N27lRck1aCunle2yjnCwww3HZv8g3K4f6N?=
+ =?iso-8859-1?Q?mNgulKdTPTpFTLdwlfc3vC+sov7/5GYVNXI3pgtPISEM/KklHzezcCp0Aq?=
+ =?iso-8859-1?Q?leh7tCSl4e8SnVhkI6iaE1/CCWYQJujVOss76OXROucHeCsf3+ZsI+fw4y?=
+ =?iso-8859-1?Q?x1HhupbvxbV7V5r+JIJnmS5glq1G0/Jbjpx/l7Pv/GTCDNtky77g?=
 X-OriginatorOrg: valinux.co.jp
-X-MS-Exchange-CrossTenant-Network-Message-Id: 27b115b9-873e-4d7a-6fd0-08df0897db48
+X-MS-Exchange-CrossTenant-Network-Message-Id: 08866936-4d0f-44de-9b18-08df089b7dea
 X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 02 Sep 2026 02:14:02.3209
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 02 Sep 2026 02:40:03.6453
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: USLp0emGf6a9PJE7usGvwyc2i6Yc9fDesSyErp+vtZDwo9K7zhZxuHeJHzKB4F45iNVEvN9rld56FB+Z6XZYtQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: OS3P286MB2567
+X-MS-Exchange-CrossTenant-UserPrincipalName: WbPqFHX9m4m1dc7Zpz64ECPqGDj6G80ZiJYjLDw/zHZm9C1qWecV41y1IMoZ1hESbQenJjjHfxCZGSLxV+X0gQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY4P286MB6927
 
-On Mon, Aug 31, 2026 at 10:01:31PM +0200, Niklas Cassel wrote:
-> Hello Koichiro,
+On Mon, Aug 31, 2026 at 09:05:48PM +0000, sashiko-bot@kernel.org wrote:
+> Thank you for your contribution! Sashiko AI review found 3 potential issue(s) to consider:
 > 
-> On Tue, Sep 01, 2026 at 01:11:09AM +0900, Koichiro Den wrote:
-> > This is not driven by a performance target, so I do not have numbers. The
-> > immediate issue is correctness. ntb_hw_epf can select MSI-X, but pci-epf-vntb
-> > currently configures and raises MSI. I want that MSI-X path to work on RK3588
-> > with the controller doorbell. I will make it clear in the next cover letter
-> > that, with this series, a doorbell sent from ntb_tool on the pci-epf-vntb side
-> > of RK3588 reaches ntb_tool on the ntb_hw_epf host side when MSI-X is selected.
-> > I believe that is the simplest E2E test showing what this series fixes.
-> 
-> Okay, if the main issue is that pci-epf-vntb does not raise MSI-X, even when
-> ntb_hw_epf host side has requested MSI-X, then I think that the first patch
-> in the series should fix this, so that the fix can easily be backported.
-> 
-> (Right now you fix this in patch 3/3, and the fix in patch 3/3 depends on
-> both patches 1/3 and 2/3.)
-> 
-> I think that pci-epf-vntb actually respecting the configured IRQ type by the
-> host is a separate logical change from adding support for HW defined layout.
+> New issues:
+> - [Critical] Deactivating a shared DMA BAR unconditionally clears all submaps, breaking the active Memory Window (MW) mapping and causing severe memory corruption.
+> - [High] The `ntb->dma` structure is freed in `epf_ntb_unbind()` before the driver is unregistered, allowing concurrent NTB subsystem operations to use a freed pointer and its lock.
 
-Sure. It can be a separate patch, first making pci-epf-vntb use an EPF-owned
-MSI-X Table/PBA like the other in-tree EPF drivers with MSI-X support.
+Both are valid, thanks for the catch.
 
-> 
-> 
-> > I initially considered making the hardware-owned layout automatic for every EPF.
-> > pci-epf-ntb (not vNTB!) is the reason I did not. It currently reads
-> > host-programmed MSI-X entries through epf_bar[] backing and uses them to set up
-> > peer outbound mappings. A hardware-owned Table has no such backing, and the
-> > current EPC API has no generic way to read those entries. I suspect that
-> > supporting it there would require a broader design change. Also, I do not have
-> > hardware for the pci-epf-ntb bridge configuration.
-> > 
-> > pci-epf-test and nvmet-pci-epf should be easier to convert. However, converting
-> > only those would not remove the per-layout handling while pci-epf-ntb still uses
-> > an EPF-owned Table. I would prefer to handle those separately when they can be
-> > properly tested. This is what I meant by this part of the cover letter:
-> > 
-> >      [...]
-> > 
-> >      layouts. This avoids unnecessary changes and reduces regression risk.
-> >      They can use a hardware-owned layout later if/when needed.
-> 
-> Okay, if pci-epf-ntb is special, perhaps we should add a comment in
-> pci-epf-ntb which explains why it cannot support HW defined layout.
-> 
-> But for consistency, if we modify pci-epf-vntb, I think it would make sense
-> to also modify pci-epf-test and nvmet-pci-epf as well in the same series.
-> 
-> pci-epf-test should be easy to test, just run the pci endpoint selftest.
-> 
-> nvmet-pci-epf should be quite easy to test too, just run the normal fio based
-> testing that we usually run, and unless you see worse performance, I think we
-> are good. (If we see worse performance, that could be an indication that one
-> of the MSI-X for the different completion queues are not being correctly
-> triggered. By default, the host side nvme driver creates one completion queue
-> (and one submission queue) per host CPU.
+The second issue comes directly from the pre-existing vNTB lifetime handling. I
+posted the prerequisite fix series here:
 
-Fair enough. As an experiment, I converted nvmet-pci-epf and tries to test it. I
-could not get as far as running fio because host-side NVMe initialization timed
-out.
+  https://lore.kernel.org/r/20260901063238.631166-1-den@valinux.co.jp/
 
-I found that on RK3588, host writes through BAR4 to the Message Address field
-(the first 8 bytes) of entry #0 do not seem to show up in the internal iMSIX-TX
-Table RAM. The rest of entry #0 and the entries from entry #1 onward that I
-tested seem fine. The same two DWORDs can be written through direct DBI Table
-RAM access, and the doorbell for entry #0 then works.
-
-I'm not sure but one thing I wondered is whether this could be related to the
-boundary between the BAR4-mapped unrolled iATU registers and the MSI-X Table. On
-RK3588, the iATU register window starts at 0x2000 and the MSI-X Table
-immediately follows at 0x4000. If there somehow is an address decoding issue at
-that boundary, with the first part of the Table being taken as an iATU access, I
-would like to know.
-
-This still sounds really odd, and it does not obviously explain why both DWORDs
-at 0x4000 and 0x4004 are affected. I may be missing something important. If
-anything similar involving iMSIX-TX Table RAM entry #0 has been discussed
-before, please point me to the relevant thread.
-
-(Also, I can share my current WIP v3 series, which makes pci-epf-test and
-nvmet-pci-epf use the hardware-owned layout when available, while leaving
-pci-epf-ntb with its EPF-owned layout. If you have any setup where you could
-test it, please let me know.)
-
-> 
-> 
-> What I suggest that you instead do something like:
-> Patch 1/7: pci-epf-vntb: Fix to actually use MSI-X when requested.
->            This probably includes adding the code that is inside the
-> 	   if (ret == -ENOENT) { }.
-> Patch 2/7: PCI: endpoint: Support hardware-owned MSI-X table and PBA
-> Patch 3/7: PCI: dw-rockchip: Support fixed MSI-X table and PBA on RK3588
-> Patch 4/7: pci-epf-vntb: Add code that calls pci_epc_get_hw_msix_layout()
->            and uses that layout, if the function returned success.
-> Patch 5/7: pci-epf-test: Add code that calls pci_epc_get_hw_msix_layout()
->            and uses that layout, if the function returned success.
-> Patch 6/7: nvmet-pci-epf: Add code that calls pci_epc_get_hw_msix_layout()
->            and uses that layout, if the function returned success.
-> Patch 7/7: pci-epf-ntb: Add comment that explains why it cannot call
->            pci_epc_get_hw_msix_layout() like all other EPF drivers that
-> 	   support MSI-X.
-> 
-> 
-> This way, patch 1/7 can be backported, and will help all users vNTB users,
-> even the users that do not use RK3588 as an EPC.
-
-That split makes sense. However, given the issue I described above, perhaps I
-should send patch 1/7 as a standalone fix and hold off on the rest until the
-issue is understood and resolved.
-
-Testing vNTB alone (ie. this v2 way) did not expose it because its first data
-doorbell uses MSI-X Table entry #2. I only found the issue because your
-suggestion led me to convert and test nvmet-pci-epf, thank you!
-
-> 
-> 
-> > > I understand that you introduce dw_pcie_ep_msix_layout_is_hw_owned()
-> > > because you want an EPF driver optionally use the HW defined table.
-> > > But if all EPF drivers always use the HW defined table if available, I think
-> > > you can avoid introducing this helper, and let rockchip_pcie_raise_irq()
-> > > unconditionally call dw_pcie_ep_raise_msix_irq_doorbell() for case PCI_IRQ_MSIX.
-> > 
-> > Yes, under that assumption I agree. With the current mix, however, the Rockchip
-> > callback still has to choose the helper according to the selected layout. That
-> > is why the DWC code records which layout was selected.
-> > 
-> > I will update the cover letter to state the motivation and this boundary more
-> > directly. Does keeping the layout choice with each EPF for this reason sound
-> > reasonable?
-> 
-> Yes, since pci-epf-ntb apparently is special, I can see why you need
-> both ep_func->msix_hw_owned and dw_pcie_ep_msix_layout_is_hw_owned().
-
-Sounds good.
-Thanks for taking a look!
+That fix also gives the DMA BAR mapping a clear lifetime. The EP owns the DMA
+resources and their BAR submaps for the whole EPF bind lifetime, so a
+host-driven TEARDOWN_DMA is unnecessary and, for a shared BAR, unsafe. I will
+drop it and rename CONFIGURE_DMA to SETUP_DMA_BAR in the next revision.
+(The CONFIGURE_DMA naming was misleading even in this v3. Unlike CONFIGURE_MW
+and TEARDOWN_MW, it installs an EP-side inbound mapping rather than managing an
+outbound mapping.)
 
 Best regards,
 Koichiro
 
 > 
+> Pre-existing issues:
+> - [High] The virtual PCI driver `vntb_pci_driver` lacks a `.remove` callback, causing the NTB device and virtual PCI bus devices to leak and potentially use freed memory.
+> --
 > 
-> Kind regards,
-> Niklas
+> commit 4680cfd6b651b64bf9225e9233e1d66310c8b0da
+> Author: Koichiro Den <den@valinux.co.jp>
+> 
+> PCI: endpoint: pci-epf-vntb: Allow DMA and MW to share a BAR
+> 
+> This patch modifies the PCI endpoint vNTB function to allow a DMA BAR to
+> select an MW BAR and place DMA ranges after it. This enables configurations
+> that have no spare BAR for DMA resources to share one.
+> 
+> > diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> > index 1842493c33b02..aa659ec62d931 100644
+> > --- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> > +++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> [ ... ]
+> > @@ -621,17 +648,25 @@ static void epf_ntb_dma_release(struct epf_ntb *ntb, bool quiesce)
+> >  	ntb->dma = NULL;
+> >  }
+> >  
+> > -static int epf_ntb_dma_set_bar(struct epf_ntb *ntb, bool active)
+> > +static int epf_ntb_dma_set_bar_locked(struct epf_ntb *ntb, bool active,
+> > +				      const dma_addr_t *mw_addr)
+> >  {
+> >  	struct pci_epf_bar_submap *old_submap;
+> >  	struct epf_ntb_dma *dma = ntb->dma;
+> >  	struct pci_epf_bar *bar;
+> >  	unsigned int old_num_submap;
+> > +	dma_addr_t old_mw_addr;
+> >  	int restore, ret;
+> >  
+> > +	lockdep_assert_held(&dma->lock);
+> > +
+> >  	bar = &ntb->epf->bar[ntb->epf_ntb_bar[BAR_DMA]];
+> >  	old_submap = bar->submap;
+> >  	old_num_submap = bar->num_submap;
+> > +	if (mw_addr) {
+> > +		old_mw_addr = dma->submap[0].phys_addr;
+> > +		dma->submap[0].phys_addr = *mw_addr;
+> > +	}
+> > -	bar->submap = active ? dma->submap : NULL;
+> > -	bar->num_submap = active ? dma->num_submap : 0;
+> > +	bar->submap = active ? dma->submap : NULL;
+> > +	bar->num_submap = active ? dma->num_submap : 0;
+> 
+> [Severity: Critical]
+> If the host sends a COMMAND_TEARDOWN_DMA while a Memory Window is still
+> active, epf_ntb_dma_set_active() will call this function with active set to
+> false.
+> 
+> Does this unconditionally clear all submaps on the BAR, including submap[0]
+> which covers the MW prefix? 
+> 
+> Since pci_epf_assign_bar_space() used address 0 as the fallback base physical
+> address, clearing the submap would cause pci_epc_set_bar() to map the entire
+> BAR to CPU physical address 0 on the endpoint. Could this corrupt memory when
+> the host subsequently accesses the MW?
+> 
+> >  
+> >  	ret = pci_epc_set_bar(ntb->epf->epc, ntb->epf->func_no,
+> >  			      ntb->epf->vfunc_no, bar);
+> [ ... ]
+> > @@ -1974,6 +2019,16 @@ static int vntb_epf_mw_set_trans(struct ntb_dev *ndev, int pidx, int idx,
+> >  	dev = &ntb->ntb.dev;
+> >  	barno = ntb->epf_ntb_bar[BAR_MW1 + idx];
+> >  	epf_bar = &ntb->epf->bar[barno];
+> > +	if (epf_ntb_dma_shares_bar(ntb, barno)) {
+> > +		/* DMA submaps follow this MW, so its extent cannot be changed. */
+> > +		if (size != ntb->mws_size[idx])
+> > +			return -EINVAL;
+> > +
+> > +		guard(mutex)(&ntb->dma->lock);
+> 
+> [Severity: High]
+> Can this lock be accessed after ntb->dma has been freed?
+> 
+> In epf_ntb_unbind(), epf_ntb_dma_release() is called, which frees ntb->dma
+> via kfree(). However, pci_unregister_driver(&vntb_pci_driver) is called
+> after this.
+> 
+> If a host MW configuration command runs concurrently with unbind, could
+> vntb_epf_mw_set_trans() check epf_ntb_dma_shares_bar() and then attempt to
+> acquire this mutex on the freed ntb->dma pointer?
+> 
+> > +
+> > +		return epf_ntb_dma_set_bar_locked(ntb, true, &addr);
+> > +	}
+> > +
+> >  	epf_bar->phys_addr = addr;
+> >  	epf_bar->barno = barno;
+> >  	epf_bar->size = size;
+> 
+> [Severity: High]
+> This is a pre-existing issue, but I noticed that vntb_pci_driver lacks a
+> remove callback:
+> 
+> static struct pci_driver vntb_pci_driver = {
+> 	.name           = "pci-vntb",
+> 	.id_table       = pci_vntb_table,
+> 	.probe          = pci_vntb_probe,
+> };
+> 
+> When epf_ntb_unbind() calls pci_unregister_driver(), it unbinds the driver
+> but ntb_unregister_device() is never called because there is no cleanup
+> function. 
+> 
+> Since the struct epf_ntb instance is allocated via devm_kzalloc() tied to
+> the EPF device, it gets freed when the EPF device is removed. Does this
+> cause the NTB device and virtual PCI bus devices to leak, leading to a
+> use-after-free if the NTB subsystem makes subsequent calls?
+> 
+> -- 
+> Sashiko AI review · https://sashiko.dev/#/patchset/20260831182657.329614-1-den@valinux.co.jp?part=5
