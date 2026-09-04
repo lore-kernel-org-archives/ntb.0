@@ -1,46 +1,47 @@
 Received: from OS0P286CU010.outbound.protection.outlook.com (mail-japanwestazon11021128.outbound.protection.outlook.com [40.107.74.128])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C8C393DAAC8
-	for <ntb@lists.linux.dev>; Fri,  4 Sep 2026 05:21:40 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 68539415F23
+	for <ntb@lists.linux.dev>; Fri,  4 Sep 2026 05:21:42 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.74.128
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788499302; cv=fail; b=caZzFcXJ8d0GBevtGEmMOZpq1zHfrR/nWqFlEEm3TtHYmfYpNZ1Sew2Dp72PKiTmjc86m2AhhK+nR8xmPp38zWjGjxKfIU7PlXdFltOHNzaYmmiJdgf+0spK1OA5xdWAWGdSk70FZV8MxBLyK0QAIVbJjEmLCc13b8t6+HFnA7M=
+	t=1788499304; cv=fail; b=V0bSZXHL7hfH+4TaWU09B3RfFL27+LVWostaadFKdkuSNhkm7p7EMbSe2+8KG02A+AZ5J6+Pu8nKNQqz2+yK+DTjpEMOZ8QcU/LnkhVLGhSfWZNqfSOKB/m9OfGy6PGERj8zwGpeq4qc6KYBc7ruExEYTVoQtXIK1s9ZZPpTfG8=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788499302; c=relaxed/simple;
-	bh=CAnnx0gQ8p1CCBqYR2VvnMJa1Qn4qOYRL6mvuiEbTX0=;
-	h=From:To:Cc:Subject:Date:Message-ID:Content-Type:MIME-Version; b=mbIqO8OtmWRYkSVCcrzXe95H5UzoldSD/gtrYYgVLsmjYtatH76Qei+nv+jObjxRYaPfTvTT67bALFL+/tTCeeyFLADeu0ha9iaazFg/0HQPFCvpjROsa1tu/pLd9fMaiogDUv76gGCxrploR/CE8hZij+/M7q3CKPIH/BIX8ZU=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=NbmYvYau; arc=fail smtp.client-ip=40.107.74.128
+	s=arc-20240116; t=1788499304; c=relaxed/simple;
+	bh=cdbl5Y3nfDGF+oK/i9KjOGbFK6M2/iIm4Y4F/yFrZCc=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=HpFgPEaAsABKfEZ6rqqOTSB/yIpnkZZUrUyK5zETB1BQpCk94M5PX5XSe4ugVPNDZ3T6Q6yv+n096ADPyfMEgy/JEvXAWHuCe7NiroIuEcVnvN9T5SpwhVl8LOG8TRLy+ImD4m+6M6KuoABYUhmFmzeNdgQQ8JtkzC7oiSfQCgE=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=FRExhgoW; arc=fail smtp.client-ip=40.107.74.128
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="NbmYvYau"
+	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="FRExhgoW"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=NlQMGODTjtDTvtu7MzYtf0jWWBOD5Gi4ngwtTGq2dXxEiDU6pmBGw8ieNhFzaYszewoYroVhRNlXqRorA/sT6DUR9UHdRyLMeLMtXwramJEsbOi5jQPpOoJhYZ7G4Qgb+s2dghlMBsJUhPa/XOCwM0gMSCCauEBhrH8tRMChaOVy1mtQCYGjD7FKfG1UekRkhmUiPx/o78t0kw3taQCwpDzN9QWIippAJxSAKZgXupYzc+u4wiMR0m3BN5PAyrR6UtbjalJ3dmDpudFm1eKW1vYvyl91NH1eINa7quEtEOoGqVfbleYUh6P6Z82ucs7MownDouF00EFtjdwZ9P4KpA==
+ b=ksvYiil9sArvZlWKmdrjtmaEgbcZAwYgILacisezKTt6TBNX9S9PLM6JY3JHJCi3cFhFXDFS6XVGfBFINqOepMhdcbqSfLD0nG8RFNx97kaxibLgbGR5SqTGlHAzJgbxft/z5/Yc2YY3YxBHjJN4URzlsZIbVAXP8Y7ugLxbCM+xYyOzX2ul22Bz0jR9lqsg29gulcG+mIz2z9jxVq6uCCmTMXC12AF7CM32JJ3GbqvaPkOFPIqNkvkeEI7yRCgNAJmZzI1f2MKdvU94xzyVqOXD3Lq7B2gC6f7UiNRdIMQnGd/L8JaIJMWCVknNnv5yKNSWaIeSGmqug0szdc7kug==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=DEOHyM7cwyH5okfUE8Ymyiwe1chmMDYnSNWil/EBg3A=;
- b=HOiwXDvAmyJsu/CLkG3qYlbI0JROKuHnJVJJuDHvoQykjezleYIILsQfSx5kvsNRJOkpBviNVSR/1Rm5ypUG0JI3cNz5UimTVbqIXHPK+2g7uxEb3EAzhQh3XfBk25nLnRpeYjsgXQxEczwd0z7cPNbF/9vullGn5N0OOe7oHXyIT+AX79tPU6J1umnGFOilJfLI87g9mqlICOp9JDlj6v5g85GJvzsuhnu8oE4dxEWfJC0AfpSqNpzOIk7ERvjkyjZwu+/zhHSYofN061Gf/vKdqCnDvgS79Yw4d+luAbQCamaRgn3Ph5s6XWwxEBAoyb7lklGew96n9LXPAgycOA==
+ bh=sHwUt1o0grqB2iFrdvyHAd9gD3sUMw226msh5VDt7kQ=;
+ b=pMiqe0by0u7hEg77zBLqliMk89XeXZs8t2A/r7VPlsRv+VluEvOV7mco5YJ+WqkqUN38ahjA0iexlTgwgxYNCrJUA7SFZWthxQOtexJXNgjYBJds1vB40Udat92XL1O8aeuROTvJoHmObkL6JYlOA22uq3dF+tz/xZywv+JgxSfXtv6wwVky61jIaCkTCcPtBuMwB9nj0/pl2CcrKekWDYb8nngs/+9GSGATe8zv26XnIGjkrcmpN/ooHFimQzQl4rou/9WdeIPbe9TVZAf4m4IMPCdYjGhb9bnOkONi2vPXcoAlB+I/REuOIItvBZ9+IgTgnyhZp3H17wl3ZrP6nQ==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
  header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
  s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=DEOHyM7cwyH5okfUE8Ymyiwe1chmMDYnSNWil/EBg3A=;
- b=NbmYvYauywe0Lrk09/wwM4eAGIe3+jIqsFqcdYUSeZLasls/xUd40XJXuU9b7pyF1YgyIiRSLnstilMqaYhTRLyJV9O46nFMNRKWnMROAToDS/iKjW/WKhgVOeArteNoe7JxEhwYaVQru+G3iUepwUMJdutQFOl5XbqjNSyeus0=
+ bh=sHwUt1o0grqB2iFrdvyHAd9gD3sUMw226msh5VDt7kQ=;
+ b=FRExhgoWB6EaM4q+e7cup3sLNfaMqw7FwB/J9uK+8tzvBiDrQPFEn1qneTP8sBbvKtU6Pgm2pdPp5KNMHiMWXRx5OS027RX9yPj5JDNSy7J3EPat18l/w6uybkDNC1xOUYCbxuhWde+xbPju2sL9CG6RB5dUa7Om3H1wPVkZGYQ=
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=valinux.co.jp;
 Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:38f::10)
  by TY4P286MB6378.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:339::8) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.360.13; Fri, 4 Sep
- 2026 05:21:36 +0000
+ 2026 05:21:37 +0000
 Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  ([fe80::2305:327c:28ec:9b32]) by TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  ([fe80::2305:327c:28ec:9b32%4]) with mapi id 15.21.0360.008; Fri, 4 Sep 2026
- 05:21:36 +0000
+ 05:21:37 +0000
 From: Koichiro Den <den@valinux.co.jp>
 To: Jakub Kicinski <kuba@kernel.org>,
 	Jon Mason <jdmason@kudzu.us>,
@@ -53,14 +54,16 @@ To: Jakub Kicinski <kuba@kernel.org>,
 Cc: ntb@lists.linux.dev,
 	netdev@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH net-next v3 0/4] net: ntb_netdev: Preserve checksum offload across NTB
-Date: Fri,  4 Sep 2026 14:21:30 +0900
-Message-ID: <20260904052134.2970111-1-den@valinux.co.jp>
+Subject: [PATCH net-next v3 1/4] NTB: ntb_transport: Order RX descriptor reads after completion
+Date: Fri,  4 Sep 2026 14:21:31 +0900
+Message-ID: <20260904052134.2970111-2-den@valinux.co.jp>
 X-Mailer: git-send-email 2.51.0
+In-Reply-To: <20260904052134.2970111-1-den@valinux.co.jp>
+References: <20260904052134.2970111-1-den@valinux.co.jp>
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
-X-ClientProxiedBy: TYCP286CA0110.JPNP286.PROD.OUTLOOK.COM
- (2603:1096:400:29c::17) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+X-ClientProxiedBy: TY4P286CA0026.JPNP286.PROD.OUTLOOK.COM
+ (2603:1096:405:2b0::11) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  (2603:1096:405:38f::10)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
@@ -70,107 +73,114 @@ List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
 X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|TY4P286MB6378:EE_
-X-MS-Office365-Filtering-Correlation-Id: 3be03561-0668-4779-1ba4-08df0a4463e7
+X-MS-Office365-Filtering-Correlation-Id: b69059be-78eb-44e8-adbf-08df0a44647a
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|366016|1800799024|23010399003|10070799003|7416014|376014|10067099003|56012099006|18002099003;
+	BCL:0;ARA:13230040|366016|1800799024|23010399003|10070799003|7416014|376014|10067099003|56012099006|22082099003|18002099003;
 X-Microsoft-Antispam-Message-Info:
-	y/Y1KubKH1xEbE62/H+SHYoR9sHhtAqtOuG+D21rXwpTEH0nDTySzaXn5I4RaYcgjJMDI1BjwY6xH85tsN/6yD7b6JRv9jYuVwvlefRpwnc8x9WlESGtqjlLOZMQBcMmbeA2zqJIhsvuQmnVUgvJ6WweOZM3iIZInACR7zuFaVV139HKOT84ZapvoyFEkGe95xZkaha3XQdlnRvTBxqK2byKRGRz36+Rh0R6mtjyDAemJ/EHowtKRT3wQ5tXwu8gzbe1u/jRFxlikpinv1nawPAucNTXWd3X67UAGpnaT/TBNbdcmDM9jMskca6Qdhnsglo0YK227TY6bi+e0e6+vZmboUWEoC2v4P2XDxBEd4mODqtBUVspge0q0tFa1T88hC1lMMUls6NNzxy1YadtG+OSa733uKshgzMiEFHiakvHOgUEnz4H22p7PuPmqw7jWX/F3Rol8hvcNBJXlg8WuYmPNF8gR0PuoNrDqJq96Jit27UxCsOVjd56OHebjNI2Fbdn2NlBBrmEgBWxF2vMRy6YdKwzMxK5KHqzT01uJhGnnNzvutVAfVKG+rPhs2olP7vMd10wUAxpFiEgGgHm7uZQGnnSrJP83B1gX1+2AkC3IeD3ztUJNVvDgZNJtDcx
+	FIqtjjYuJc3Vk3O2jTrwzNXPi5HmdGP+B0C4aYn59+qlG9uUeAwlHYqFwk0Jy8u2J7loDNtJOhasudexpNo9b3g6LDbDjykN09AzXcZM1wzS4ic8h5hktF30MAf+1MQRUxJM2aL40L5OSRsT6JUuUHerqz6+8iknwuqCFXhdgyDV/kLu7F8v2Fz/2Jtzu13ew4ghdpffOs4k0etKoblf9kP00b7hjyx9O3WF9hMSD7Jp3Tkl/LH6CB7MoLyyhVzblsvJvFZRRHkkqrFmT0UXoR9daB6/plR7DSm2RSmOGz2JsLiSpEY2wuN/BMisvFyoedKDgbjrUAO3zZwWwiJojr0aEzaKgO/iS3rzjcbxnUy2Hs3AzUM8TAc+I+PxiEYCzUDWAKGTWuBX045hmNSzsLIM2e6gYx/q6FlbRQs6ekZyQvZyf4ZaJegMquZbXoGqGR37bMTgk+nMkLaQNZmyuLIa3h7r+NByCeUGDme+PmC7YKPu48oDivEXZg6uJwnG2TWSZ8tZwlPWV8kHkl5p4p9N8tRYTEFaiklklUu4cLZsW5n1Z5qGqPsOs3v6tflWYZkyViLGkHIyLmc9Z81fJcEl5c6SMiOLLlD1eSl8Xtb8Kd5sbEBdZiaOfPUZir0H
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(23010399003)(10070799003)(7416014)(376014)(10067099003)(56012099006)(18002099003);DIR:OUT;SFP:1102;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(23010399003)(10070799003)(7416014)(376014)(10067099003)(56012099006)(22082099003)(18002099003);DIR:OUT;SFP:1102;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?rq/4iM/xcSyrKfSaYPfELwI6dNM85bg3w7tLJHYUL6Og2UoYaLfecWerHKpM?=
- =?us-ascii?Q?Sg/HewK2ho/0/C6Crv+mBKY0Yy6XyOvosdm90tJ8BYaM+rPsA352ajVtBFjZ?=
- =?us-ascii?Q?RdKt/xNAbpwFeSXg6xJV565Qp4NyBaKn2v/uV5mke44HhSDkmFsjM21uyR00?=
- =?us-ascii?Q?NDuAYGFFc1LwZTP/XOhO2lmQ4EJS1au+R3V4B7VGaVbJpUv6WqH9PlyNN9fX?=
- =?us-ascii?Q?mBaB5yg00nBKAbB/PjqeqELQHMJdugcm0ELZRnH2dIsyD2DXPpdN8lDNvpUz?=
- =?us-ascii?Q?unzBo6hRt5mhGDNrqgFyOFdSBA+jCIhiTUupCrf3NPbF+ihnOvrpbNGb2Ao7?=
- =?us-ascii?Q?7eRkzkqBDWojU3r4pf42m6++cLWJD4hc87+KF6bGQkJ+abBWnQzrrydqVxv1?=
- =?us-ascii?Q?EwodA1XRstKc3XhoZcPGI264aGjEWKkWdXTuDlZxxC5Aolg2c/zYAnYO/a0P?=
- =?us-ascii?Q?4fN7AX9BFFrlMZ81VW412E6SmxY/XzPqsicyWh9TnfUnKSMB2RW7+Tp0DZ72?=
- =?us-ascii?Q?YH1kRET8qmmyv4h08zUFiUf/sem8yzFVHiSARpKLg/G7/uZhce8sSagI9YVo?=
- =?us-ascii?Q?t5dHo6WHn/h9xvo0ELl53bf/DQi+3tiLRYpJGM71xR536hkxietcA8bGZqqs?=
- =?us-ascii?Q?bJt4xkpJgKaP62lzHIrW0Vrug0/tU4AKxhl/AAb/yIpALxSsH6MVvo3ttnI7?=
- =?us-ascii?Q?4zVTKBA/6yBurTrKCWuexTZZVPZGdZV81geLgRgTWxQRWb4fwNpxQGhIEGBM?=
- =?us-ascii?Q?64+5C4wEgV/e9k75qPagM6lszrIS7jhQn/rJtXVenFlHVqSQAC5Of/AkhIdZ?=
- =?us-ascii?Q?xRNgalf3xvYKbSSdR/JcuzD9oc7Lapg/KuBCv5zyoRfDIN8c/1SZacz8qHcM?=
- =?us-ascii?Q?nPTdhbhhwj0eeVPJXLxvfmCb91SL9t69JdFYSonG6KTMZ0iw9mXe8HJQsnf8?=
- =?us-ascii?Q?ibfFTsrMFDOHEdDjuXRch8r1Yl9e9n0JW+KiYtHnpZdO2qSrhNk7wWJWGulq?=
- =?us-ascii?Q?1o7i0TBXXjMQ0chjeuCEOu1FWyDUfxKtoTiYpsS04rWh/LaGVjd5Dv5QAPso?=
- =?us-ascii?Q?tYKZPvKwiuWAw2UD1sigJR3Jrk/Y0/uI/k1GLIqjT4ZNzLSXDPps1+Ulm1PX?=
- =?us-ascii?Q?SkBlQqrcp9sDVeWeWG3EF9SDNtjDJAOJy+eTYl2RgUaHQ03PukVSTZASGP+D?=
- =?us-ascii?Q?r9Wfufvw06gIuUiIgUORURhTX7IP+3F5ksb8Ql+sQZYLfaUMpvgPUOr30p5E?=
- =?us-ascii?Q?nSpsykt/zHGW7tpko/+BawQUydBZDL7wIrfAIouY3e3PEH/dyWOlhdExDVIN?=
- =?us-ascii?Q?8yEnC5FF5qMNiN6s9gkSwBJLEe+Tdt5AyuLsGfaNcfLMNm6/izXmdILL0az1?=
- =?us-ascii?Q?k5IlyhTeDgzL2xsCU+Y1tC6CR6lnu1G2/kCr8za1MnBlrPyndK3gmxMKbOPZ?=
- =?us-ascii?Q?H71BDRyOyTGVN/+ZM0uHCQ+DF0/gaHZRS7SdYjS/9qoELIH/qJv3HVaou95A?=
- =?us-ascii?Q?D4U4A+AuEpCq14T/IAQPCqMatmFD+tezVb+oIGlsDbbA0NShMvID+KQLV9xl?=
- =?us-ascii?Q?Sf5xuswqE5WztbWXgsAkpu7hr2uFootnQF8DJeSzPvFsp35lo9s52S883Pgg?=
- =?us-ascii?Q?/t6B4RzpEvD3J3KNd4YPkHNa+vFf+KNXRCh0YFtk871SDqRBDmD5Jfm6A8nE?=
- =?us-ascii?Q?gHdOv0poIr0j5K2Pp7go5HWgfisYBDhYpnaoTE+EwhzHH7WJrMem0qFpApPK?=
- =?us-ascii?Q?WW83mIFRm8KGd/eLvkAfdJ22m03X23B1cumuvhcFsSha1UIw/YqL?=
+	=?us-ascii?Q?Sep307ruW2NP+Dth7ZxWDGXGuMxKik+bmRzabjDvU9RqK7xwuD7NHIxtD1bP?=
+ =?us-ascii?Q?yY0iYFjLDVkqxm4bKbtydAmU+g6zcubi4AMc9EzOJDoeXN7k7CPPikFZLE1r?=
+ =?us-ascii?Q?Nt0FMUv5Z8bq2NSyjyMArgOkcgoKkPiCXh+ehQcmwwzd0SCzj9lCx2regLrM?=
+ =?us-ascii?Q?wEpyGvYTZPNpoClKZeVUbGUgxLo3+ECNf+MaTd5TPpycmw746ytNUrRkVUac?=
+ =?us-ascii?Q?u1QsNx9OAnnXCy8IyYQMIsC268g19Mi2pS10uOkLfElSYT9ksmZBDGNYRYCw?=
+ =?us-ascii?Q?ntrXf57KmqpdCbLOSPPZlsoEaHHa3a5NhPB75niMvs7ck9HedOJH9XDVMoh6?=
+ =?us-ascii?Q?M1lKlQKlqAUQt1w+PcFJLIICzk1L/wCUaW5ETvtRJR8sVnTKP+zsapXTowUA?=
+ =?us-ascii?Q?ZzJsZ9sAz7x3HTOlJj0lQnR7tQBwroE7b15UHwE0H+EXR9P6xQjebufMwZku?=
+ =?us-ascii?Q?klIykMcFeq3nMDrqAhySKBQ5Yj6hg/rCt8zfqnnjj0truX3mPUw5wvPuYk3H?=
+ =?us-ascii?Q?lpHxWneZ5hcPyXxgZwWcYEfXHI69P1J8As9CPkIPOMVFpxPQtv/y+gx7iN7T?=
+ =?us-ascii?Q?CT/3DM9pzqg1FQLYoVEZCwz69nw+71XknuYolUXdARAndI5lFlrbhRvr91lA?=
+ =?us-ascii?Q?tnNwAggBomHSm/K7S9iTb6J70I0HMjzk3ihZTTMufZdpzqCjQlBWTxoClVmr?=
+ =?us-ascii?Q?px2vfG9rbKFjwM7uF7QuHw1CPgwO2KUTXkZYhcSZ0loyK4JnshjchN4OESm0?=
+ =?us-ascii?Q?51VvJPG4/LklNiZlROUSiQoWHafoYNwBTdgjHos2nD3jE866DIEhlsAHpMb9?=
+ =?us-ascii?Q?VQiW5DdD121uZMqfQVFIJNFjWBLZJhpZrwCTet45R3MHhXBuvC9cq/jj1DXI?=
+ =?us-ascii?Q?hQMRUKV73TgeViMFOu70leA2bIPYT72/SG/MrJo+ymov8yCzcTwctDiCZx8q?=
+ =?us-ascii?Q?jpJ24BChO6CbEuCok3vT2NruRheWk2t6CFQzVDKO+EOdj+F9L6uXNvaFWRm+?=
+ =?us-ascii?Q?fKsW+cvB96dVqZtovIzKUEwgU1uj8EHUwHvM3wjE1cE6Cc42yatuQh+ueamh?=
+ =?us-ascii?Q?7MHvipKVFE7W0LPOx76YfXJ0xmSqFm3xysg55ftEXmNvt0oLkV1ISx4CLPUv?=
+ =?us-ascii?Q?pfC+to23+rwrrA1aUmslEdNlJaNNym7zHJZzZwfyJLKbgVGTe7t3hLfqmerB?=
+ =?us-ascii?Q?Re9gwR/gdp3LY5m6Dg5t4EnJ3iImUgJe8IZTEtWhErCT5xSSiUTr/88Gj66Y?=
+ =?us-ascii?Q?/E/2N08a7n5gqniP0iXxgz52J7/zY9wtj5GvVQfBmnkuqWpKMCjLlTrV6ifP?=
+ =?us-ascii?Q?dI7S8IyRMAK+WC4pcOdrSjOZX97aUDQQlolCbIUT7e3IHw39HsNgKnq6gXsY?=
+ =?us-ascii?Q?c94r5irefGOl1q0nUq+a2z795QHXJtq0Bj89GabMGPFzXBIkyFAtnGbsrkJy?=
+ =?us-ascii?Q?ZGc9dCln5RHIJ0HHHjUTc7Z3UvbaSV9kQfXla4q1ku8xbvxnayYeYUBX6UFR?=
+ =?us-ascii?Q?ZWJ/cuPjx/U6BIjRYxxiSMWsfcI6e1ZLmmsGBiwP3K+bw4YPg25+Loy0bv0k?=
+ =?us-ascii?Q?g6sIdrHc49HQXAy3u58nM0JepZ1vsCHlJDPdbEg+3nGIm8Y5SbrelnjQtP+r?=
+ =?us-ascii?Q?VwjXnMld5ztjYJ/YgqG4pzXxcehi0EY1yOe7Z11WhalOO0RVlA4ool4ti5/M?=
+ =?us-ascii?Q?8Y5uBd8UXYAsIy4BeERf/c1HVj+OVxe0Y/PtvzYXvUKU2ktV84fSlzadWzsu?=
+ =?us-ascii?Q?EGxpRYskJV/w0XYTg/tA1gDlMxCM+QVdrSPMsHa9/JiPLCmhWGVm?=
 X-OriginatorOrg: valinux.co.jp
-X-MS-Exchange-CrossTenant-Network-Message-Id: 3be03561-0668-4779-1ba4-08df0a4463e7
+X-MS-Exchange-CrossTenant-Network-Message-Id: b69059be-78eb-44e8-adbf-08df0a44647a
 X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 04 Sep 2026 05:21:36.1075
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 04 Sep 2026 05:21:37.0443
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: K3FSoEFh66lRx4XSpd7mWlRV4CNMyFKIU8wlFQR3jqaPDqpUPUseIoNj6g8UTJvjznUyCqQMxeg/XEvjSZLfTg==
+X-MS-Exchange-CrossTenant-UserPrincipalName: DfXUdyJ0WLoTPXr3dr4LTOVTD/CivjWZsdOGMQGF1hvKSdb4TGMB8LmEknlBjMwGN/ILwo2cLsAv5o1Uc2r/nQ==
 X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY4P286MB6378
 
-Hi,
+The peer writes payloads and descriptors into a DMA-coherent memory
+window. ntb_process_rxc() checks DESC_DONE_FLAG before consuming the
+descriptor and payload, but coherent memory alone does not order those
+reads on weakly ordered CPUs.
 
-ntb_netdev may be used on embedded systems, where CPU resources are
-often limited. L4 checksum calculation can therefore become a bottleneck
-even when traffic stays within a trusted PCIe fabric.
+Read the completion word once and issue dma_rmb() after DONE is observed.
+Use the saved word for subsequent transport flag checks.
 
-This series carries CHECKSUM_PARTIAL across the NTB link using opaque
-per-payload metadata in ntb_transport. Peers without metadata support
-continue to use software checksumming. The feature remains disabled by
-default and must be enabled explicitly on trusted links.
-
-Note: the first two fixes came from Sashiko's review of v1. They touch
-the same ntb_transport path as the metadata patch, so keeping them here
-avoids a cross-tree dependency. With review from the NTB side, I hope
-the whole series can go through net-next.
-
-Best regards,
-Koichiro
+Fixes: fce8a7bb5b4b ("PCI-Express Non-Transparent Bridge Support")
+Reported-by: Sashiko <sashiko-bot@kernel.org>
+Link: https://lore.kernel.org/r/20260815032932.151F11F000E9@smtp.kernel.org/
+Reviewed-by: Dave Jiang <dave.jiang@intel.com>
+Signed-off-by: Koichiro Den <den@valinux.co.jp>
 ---
 Changes in v3:
-  - Rebase after the related ntb_netdev/ntb_transport fixes landed in
-    net-next
-  - Avoid counting RX checksum failures as both errors and drops (Jakub)
-  - Reject csum_start below ETH_HLEN on RX and fall back to software on
-    TX (Jakub)
-  - Use READ_ONCE() for hdr->ver and hdr->len (Sashiko)
+  - Add Dave's Reviewed-by tag.
 
-Changes in v2:
-  - Reset peer checksum capability on every link event (Sashiko)
-  - Add prerequisite fixes for RX ordering and shared field endianness
-    (Sashiko)
+ drivers/ntb/ntb_transport.c | 14 +++++++++-----
+ 1 file changed, 9 insertions(+), 5 deletions(-)
 
-v2: https://lore.kernel.org/r/20260817064916.13278-1-den@valinux.co.jp/
-v1: https://lore.kernel.org/r/20260814032913.3558500-1-den@valinux.co.jp/
-
-
-Koichiro Den (4):
-  NTB: ntb_transport: Order RX descriptor reads after completion
-  NTB: ntb_transport: Use little-endian shared fields
-  NTB: ntb_transport: Add per-payload client metadata
-  net: ntb_netdev: Preserve CHECKSUM_PARTIAL across NTB
-
- drivers/net/ntb_netdev.c      | 95 ++++++++++++++++++++++++++++++-----
- drivers/ntb/ntb_transport.c   | 73 +++++++++++++++++----------
- include/linux/ntb_transport.h |  6 ++-
- 3 files changed, 133 insertions(+), 41 deletions(-)
-
-base-commit: 6ebcf5074cff0402730c6981d2397139fee6322d
+diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+index f9caa1a653c5..74f4f8c1c7be 100644
+--- a/drivers/ntb/ntb_transport.c
++++ b/drivers/ntb/ntb_transport.c
+@@ -1609,21 +1609,25 @@ static int ntb_process_rxc(struct ntb_transport_qp *qp)
+ {
+ 	struct ntb_payload_header *hdr;
+ 	struct ntb_queue_entry *entry;
++	unsigned int flags;
+ 	void *offset;
+ 
+ 	offset = qp->rx_buff + qp->rx_max_frame * qp->rx_index;
+ 	hdr = offset + qp->rx_max_frame - sizeof(struct ntb_payload_header);
+ 
+-	dev_dbg(&qp->ndev->pdev->dev, "qp %d: RX ver %u len %d flags %x\n",
+-		qp->qp_num, hdr->ver, hdr->len, hdr->flags);
+-
+-	if (!(hdr->flags & DESC_DONE_FLAG)) {
++	flags = READ_ONCE(hdr->flags);
++	if (!(flags & DESC_DONE_FLAG)) {
+ 		dev_dbg(&qp->ndev->pdev->dev, "done flag not set\n");
+ 		qp->rx_ring_empty++;
+ 		return -EAGAIN;
+ 	}
+ 
+-	if (hdr->flags & LINK_DOWN_FLAG) {
++	dma_rmb();
++
++	dev_dbg(&qp->ndev->pdev->dev, "qp %d: RX ver %u len %d flags %x\n",
++		qp->qp_num, hdr->ver, hdr->len, flags);
++
++	if (flags & LINK_DOWN_FLAG) {
+ 		dev_dbg(&qp->ndev->pdev->dev, "link down flag set\n");
+ 		ntb_qp_link_down(qp);
+ 		hdr->flags = 0;
 -- 
 2.51.0
 
