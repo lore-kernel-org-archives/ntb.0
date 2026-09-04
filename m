@@ -1,69 +1,66 @@
-Received: from OS0P286CU010.outbound.protection.outlook.com (mail-japanwestazon11021128.outbound.protection.outlook.com [40.107.74.128])
+Received: from OS0P286CU011.outbound.protection.outlook.com (mail-japanwestazon11020112.outbound.protection.outlook.com [52.101.228.112])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CE4A1415F28
-	for <ntb@lists.linux.dev>; Fri,  4 Sep 2026 05:21:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.74.128
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4B15D41DE19
+	for <ntb@lists.linux.dev>; Fri,  4 Sep 2026 06:53:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.228.112
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788499310; cv=fail; b=DoMDxSBZRtcR6PlpSru/4lRCMizXQMF3ApzEm+cFHYYCFCwl2BbgQ5RZcNFMP/mJYN3znqaEWI+QES019uOWpQmV8ForZz+lZl+MOk+/UzfhlQqNrHiLrAoAVk4izxrNpEIwc6IK2Yi+ctijtjt5aJemdADVm4A8JxVq/2+W8Gg=
+	t=1788504827; cv=fail; b=sQzAYW5wkXph606/3z8Le1QSkD9fKRLAKToM5E1l0tlfX9ZbOQJf/S/hlKsZLvVLOGdafUvnpbHuNKM3b/6gOXuroz526dk3yCfewflUkHgLWvA0vvs1cGPJjTShwnLFUZzKolcDwECGC+kQED6M+F3Q7Jbos/rChjdjf/AmmIs=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788499310; c=relaxed/simple;
-	bh=xv/EQtOAeTGC15KjitTvrdY6ZsKXvNdkMuVxAvDtd8A=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=l7LyyjovZbY25CINPn6/OYpp48Xd2Vg2IkOr/gheP13jV0OmRczZiLw4OJU0TZyR5Kb48w1sBbJ2VTK0eyUbNf3b+B6e/mGrOyfnDyGetqNeR+9kgCD6+pGZYzXn31X/xrb3bAqL3jK4ujLutHk9QH2CPO0AkWJhOF9UIX8a5cs=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=qI73+Wud; arc=fail smtp.client-ip=40.107.74.128
+	s=arc-20240116; t=1788504827; c=relaxed/simple;
+	bh=28CFsvh6CmoPDpWj7skEDOmktGSRfBM5ggnlSK1JWso=;
+	h=From:To:Cc:Subject:Date:Message-ID:Content-Type:MIME-Version; b=KUxqHz5wEwGbiSZ63yI8GaZl0SnXuBPyhqerpzWZr3ldDFp97c2Mk3WGUy+5rRYQGFITDRAvJ07Ij2lPjxNLNmlHdcd7AA+cRl1J9db8QewTWJgJkCeMDDLOzo5Ya9ONi528f3Fg+yRobsasCwboZ3rhp1QEIm071s+yXoeE8e0=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=aUrpVUlT; arc=fail smtp.client-ip=52.101.228.112
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="qI73+Wud"
+	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="aUrpVUlT"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=Ivheb0hQ9xWruDKp7To13sKt/QVEWBAZCN6B2hEEdwuNz52gieUel8oolembhPGsfLu4Pk3NIlZIUORd8prRrx3+tWDy5OXKv5/CeJxfesQFGEj1Dj8ccfZpWRsY07gg/f0flLJ4OJs4e6T6b7bXJ6Yo25L7TuEMD+qQ0pbB2tMdUtxIMORtdzZjDN68Obr6Z3illnHQymRm7lDb7WmbDyJqNFYV5Ga9Dq1U+Hn/+dKvwqxcuUey7vn87H6Zp6cxewNfj6pA9ZjbzoRd56F85pWrG5viNj+db3vSxfI9OTu9bMhEmB5i8hFGbaJiM0aHh++oLx5pInrym/e0cIF2Pw==
+ b=Rg8zzbM1TIyY+WNDzvBiRRPQFbqxb5aLOHi4ti7lYn/++wlH6lxsv6Z5tvxL3425TP+Y8X///3EQLPutwN2yOMqCp2x0uN7PcBpk0K2QnXmfoJstUXBjNrV2B2r8Gt6chTxzwy/hoXv99giQHAthza/tRpoGBK+totvHpLb1ReLWaXDI6C5gy+6/ccPOqyOIelwmglVnBnQMYEp2oblDtwr6Q3U2rjhdwfEpzOahRFj/U6zbVgU2PCCkg2iVwsGzE4v04WVwmmWkjOJnY8HaWtZOA/VoyhyJvgAwcXKZcY9cpYUooWw8f2t37bthhpYrD3P6mfebAcuaj2TptoOi5Q==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=8F9a6OZYu5Saf2GomBaWcXaI5E1WvAvx79TyNXdpE80=;
- b=tidLsdP4eKGmR+GK4SPj6W/D1MrTMesHZXlrlMnYPOR0vwd/aUmziN4nwVUZg6paQoNpcUrsMEmCMnWXm3FQFCgXulk++ZLLyv7qjj2tIBm35oOahlOfgJVtHidejoLVMWDabWN14Q+Kfqxi75lfyRe1zB7ftbPLU/ZYXBX2x7CLF0w0xvc4Ed7P//W+iqO4MfQQFiMYb7nlwIz1TQpFrUu71ZeAAOo39dH+t4lrBz1+p4d6RD8ypn4O0QhBGa6TkoppeYZk2vP5Z5LxHQVhsbrcbPj1vSHZ6c2H72MVUjJKL7Plx9BHcSwOQ9btxUqx34ZI/n7cMuXgxcKLiXwAyQ==
+ bh=7IV/Iu48lj2BOah7RWjUfGtWQza0eFtSp9+NnkwLNCI=;
+ b=l7jzEIEKTqFWbRLpww80YGmw6RGGOLsvN54Pfk6kuasaEOUeKB8K3OYvpuz0E5qRct7X5oyqPyiudWUxr7u8lf6MtuCQ1dPlUuVL4hQH+DbZMOguT+oxmr5/Dke5JJqtE+VgHravMr3g0SqigmbB+3jA2ON/B1U7KuOGx1DDhL9URCPYYRj0hQMTCx4sUpg6IGa/RrnmAo7O8fsVkjgg7sn8/4iUbSu+1RR8E/3etlhwHCwFpPq9h4C6fpewOwY1Az0Z4q7mmKWanh/wS930GI8JxwOJqJOzc0C2lFBkhFK6bfOwKsNYYMN/6CNvYMNh3S7dA5hrkxAoyvRyHGdSgA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
  header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
  s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=8F9a6OZYu5Saf2GomBaWcXaI5E1WvAvx79TyNXdpE80=;
- b=qI73+WudklRLFOEZituefOJH8z601ro+1HvxG2WAiMePvkZXwubUsZ74qfHjl5a6kVDkKqdj63BCGeXrGj5fbQM2B17rTvqFoL7oMxgr4+A3wEz2qUbYbh3e2NUHbgEL2Tb5pvNxTTmUFFVzDB2o6hmxlwI+dKtrxBgDH0GdA+c=
+ bh=7IV/Iu48lj2BOah7RWjUfGtWQza0eFtSp9+NnkwLNCI=;
+ b=aUrpVUlTfiYHMACY91cx6Gfpn5cvm3iY0HBczUXtyOic51zw+T8lxHECQ1d/ELRoK3NMn7G7L440DqY6OZ//SaP4FSXRt2HjxNJatk7YJyRrjCkt0fgmQYlKSraFQjlQ5iiColQhpZ9y6HSUYLbwboWJB9tjf6w/WD3j785CJns=
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=valinux.co.jp;
 Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:38f::10)
- by TY4P286MB6378.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:339::8) with
+ by OS9P286MB4205.JPNP286.PROD.OUTLOOK.COM (2603:1096:604:2cb::6) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.360.13; Fri, 4 Sep
- 2026 05:21:39 +0000
+ 2026 06:53:40 +0000
 Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  ([fe80::2305:327c:28ec:9b32]) by TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  ([fe80::2305:327c:28ec:9b32%4]) with mapi id 15.21.0360.008; Fri, 4 Sep 2026
- 05:21:39 +0000
+ 06:53:40 +0000
 From: Koichiro Den <den@valinux.co.jp>
-To: Jakub Kicinski <kuba@kernel.org>,
+To: Manivannan Sadhasivam <mani@kernel.org>,
+	Frank Li <Frank.Li@kernel.org>,
 	Jon Mason <jdmason@kudzu.us>,
-	Dave Jiang <dave.jiang@intel.com>,
-	Allen Hubbe <allenbh@gmail.com>,
-	Andrew Lunn <andrew+netdev@lunn.ch>,
-	"David S. Miller" <davem@davemloft.net>,
-	Eric Dumazet <edumazet@google.com>,
-	Paolo Abeni <pabeni@redhat.com>
-Cc: ntb@lists.linux.dev,
-	netdev@vger.kernel.org,
+	Dave Jiang <dave.jiang@intel.com>
+Cc: Allen Hubbe <allenbh@gmail.com>,
+	=?UTF-8?q?Krzysztof=20Wilczy=C5=84ski?= <kwilczynski@kernel.org>,
+	Kishon Vijay Abraham I <kishon@kernel.org>,
+	Bjorn Helgaas <bhelgaas@google.com>,
+	ntb@lists.linux.dev,
+	linux-pci@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH net-next v3 4/4] net: ntb_netdev: Preserve CHECKSUM_PARTIAL across NTB
-Date: Fri,  4 Sep 2026 14:21:34 +0900
-Message-ID: <20260904052134.2970111-5-den@valinux.co.jp>
+Subject: [PATCH] PCI: endpoint: pci-epf-vntb: Track link state from both sides
+Date: Fri,  4 Sep 2026 15:53:35 +0900
+Message-ID: <20260904065335.3059625-1-den@valinux.co.jp>
 X-Mailer: git-send-email 2.51.0
-In-Reply-To: <20260904052134.2970111-1-den@valinux.co.jp>
-References: <20260904052134.2970111-1-den@valinux.co.jp>
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
-X-ClientProxiedBy: TYCP286CA0125.JPNP286.PROD.OUTLOOK.COM
- (2603:1096:400:2b6::7) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+X-ClientProxiedBy: TY4P286CA0071.JPNP286.PROD.OUTLOOK.COM
+ (2603:1096:405:36d::7) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  (2603:1096:405:38f::10)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
@@ -72,279 +69,273 @@ List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|TY4P286MB6378:EE_
-X-MS-Office365-Filtering-Correlation-Id: b6ff861d-25ef-46b3-1739-08df0a446608
+X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|OS9P286MB4205:EE_
+X-MS-Office365-Filtering-Correlation-Id: bc67af66-3fe8-42ec-dcc8-08df0a5140d4
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|366016|1800799024|23010399003|10070799003|7416014|376014|10067099003|3023799007|56012099006|22082099003|18002099003;
+	BCL:0;ARA:13230040|7416014|366016|23010399003|1800799024|376014|10070799003|5023799004|10067099003|6133799003|18002099003|56012099006|3023799007;
 X-Microsoft-Antispam-Message-Info:
-	y3+i/i2H4FJY8L3BWUYjedALJaVLotzs+/FFxuhzIlD8dZXtx2nokd5fOTJAI59T/anNYtctRlJ0spKlzR+WWPc2KlJBAyxYx7XFEa50kdsWhY/tqvzM9Tud+Bbr3voPpVwgmR0Mdyd/73iYA1IDCWS7K8Rvkv2GeROgJXrBpzWqmGh5oPRAwnE5C0qXhRMxNxDiXCtQfxJonvgkobqwjdmzthZw1Fg8l33cdLTuz2jxGpRt8n2bS3zqfTHeSiS5oR389XdJQZRDg5lHrlEKgqirA5fJxbguBoPkbhsG1tgHq/X1iu5VqrvFgcXrvVzX/KRvyujMj41wJHooLbyHAETzMrT40zHyXaqnsVmPg/sY4TfdDYxaJIlHzWyrg0kjQf2UWACy30iZiiUvQITI4S5s4oxt1TOYg42aMCu2Q2rg1m4/3dZQy02MQsaTIA52kod+m5/LfAmG/N+8FnYznD5M9NTJ33gEs69+dXRUf5j/mACPVaHjQ87eXK0uQkVvxfQRzxikXLULaVgkygVRSNRHOslCxuQXEBrk8Bv9hiJw3Po275YK7ocwWi5bb7msfsUVrBwtK89C6x9+kr8PVDgP3HKzi66BjSGdvE9Ahvk1a3f5H7pk7yllT310U0ZB7ibXvp2Dak7gWesqBR4zSox5Rcz5tcj7G6yZLn/P6Fk=
+	25VrEv2fOz/dKRbqDyFV7nV0PsTVAMFUkAABJ+P9W+AoK2tudlm9riEN40xHHZWleqrqbvn+ADZWr2RGLrw4s4U2UkGTc8G5EH6N/McEi74i9WI4eDzCa8rCBKm8cWUWfG6Fc0RgNFI55ROvvmL4pyQxQ2mWpXer+bh6scA7Y1kOQC3ZkKTjt2Pmct8QAPMzxyIJ2XRFdx1THHlUK8gecSh534RTPk5vytqjMoZJVBvW8hJhafNMuTAI9D+FzMZdH+1bp/3BiV3HjqBRlS0XfgE2ex5lIjU7PvTRxXYsyl1tf2QxUGrVnXFLYGznjyWjFaLmMhj82mvPRSrMFVsVTE9PFSQFPaCgrG5iWWFxWhGDa4LIkKdqX5S6PwybkfCxhVJKKpynCVd3+5JvMLtVKJP9ooDgca5q5x5JY/Ldgn3MZ3CAhdtp7pdaci4nBgE8QfEkxKcfq7tlH+7fHWWxOmAVurlueCL74/7tDMkxA5qb7oJCAbOYs0umV6tdxNADESGSyLvX2cwFXE+rstcNPnZVuOsN2QxmrQJdysjUuJui/uROUCTKmXndFsMs94MRkc2jhXP3C4lO2z2IXJ3cSQwVVILxvbcsuUGr8mpRqTD1ntHILyDYDyXrJv5tAHGa
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(23010399003)(10070799003)(7416014)(376014)(10067099003)(3023799007)(56012099006)(22082099003)(18002099003);DIR:OUT;SFP:1102;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(7416014)(366016)(23010399003)(1800799024)(376014)(10070799003)(5023799004)(10067099003)(6133799003)(18002099003)(56012099006)(3023799007);DIR:OUT;SFP:1102;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?+6Q3kiM+bIhPHBOG5/mNcBei1EbXuZSBXzWKct4pv+VNO4i8UkQywEsTuKdu?=
- =?us-ascii?Q?pjwpdM6T/IkjSyZcXcAeolC161IAwYGtEqPsxqifLNkIx87G2Jybl1i7/vPO?=
- =?us-ascii?Q?ZhM8GhDkOrCbZo2uFQjW7/Qq6Au5beHjLRuIRe4HtuHv073NmI8RWHSG38Mc?=
- =?us-ascii?Q?5SFDI63/QLg+etkWIA02QFxGJHuCVefmtpRy+gGGcT+Oh5updJn+wp9JPcmQ?=
- =?us-ascii?Q?KxbpfyeCyEiipC+j7Nr54Z2Vd610m2dVWu5w5gsthyYJHzlGo9tzSH4cO7Zw?=
- =?us-ascii?Q?++gyuVcYZdZdN/WLMGqbwwMKO2UVp6wV+wC7HQUgUqphXDFDlkxmyTwR6KQg?=
- =?us-ascii?Q?pEB/UvzrtrqvO7r3u0v1E1cEfgZfBwJYc7eDgf5ZwLW+L3F4jCmZNX1cJQWU?=
- =?us-ascii?Q?wcXYlWUctNIyI26ZqxiSCiX8l5nzCp+DgX+ZHSDubLXe4DQGBC6tb9i3tNss?=
- =?us-ascii?Q?sKgnURWhWurcxfRtF694izr9OpBwD25z2XZm8HzYic3K6BLO0UFYloJTz/5Q?=
- =?us-ascii?Q?g4lls8GnmBnaPUmtO/I0WR2MNaJXTMArS+Oe6L6mw77ObGabhhCr14IE6c3w?=
- =?us-ascii?Q?IMR/hIF+UzsmC5GfvU3qpexNUol7a/LVE4Ep9qlo8GVM4LQnowVGUXWig6OO?=
- =?us-ascii?Q?mYR2BNW8G/fLkfsInVTogbhIfM+byn1ctWL4ZhRYSYQS7HR6Gp5/zMXE74sJ?=
- =?us-ascii?Q?dCy82k2lzIg9o0kU9kjrS5PeJbIAwaR+8i3p0qokHRBvWNso39ExMaL4S3Pr?=
- =?us-ascii?Q?xr6o1JdHCRiZF52Q04Lp3iRx6on5pq6W5AWouHdEfBuzLRp0H6NMfDbvP3zA?=
- =?us-ascii?Q?+vknZUhHvJg97Z94rigiOi+OVmMHusH5o9PNycnsYdq4aH45Ni2oV7NUSfqa?=
- =?us-ascii?Q?IA0fHtb8S4zeE7o/5B9fNVoM0DnHbLuV2lxbzhJ7WtiAbPoKbFCtS9ZRD6Bw?=
- =?us-ascii?Q?dHxiQORdkAzMoHBHD9JVD7zc5ZgCikhBBEr1INhpRt4EJr94Fub054hqCO/Y?=
- =?us-ascii?Q?bGj1MjhcqyDgz+neQtKPRDwIyYMjNtiqfpdgN3Qb+NXGVnZkrryvIR+93/m4?=
- =?us-ascii?Q?BavM0iwtqIhFEPC/ANyY3W2ABZtQE677jxNlUhqCKLyQh318g1IC3HR7zO7k?=
- =?us-ascii?Q?56HSX5rloyMdQ+EdZGeFQfX+WiXpMNhinxc5Usp8zg0Bg+HDcSfCRVmGUwRl?=
- =?us-ascii?Q?q+yMYmFrQfk8aAK1sfIRJoFVPn3jk/1iFiOMdzrrExMRdX+bnLHMR97j3VcV?=
- =?us-ascii?Q?Atg0PFZxUXS3JYXR9O196TKlWJI8RQbctWUlj1lXJe62l63+I872XIbap9tJ?=
- =?us-ascii?Q?PPPwhxJfpM+gFZUf+0Gp2Tg0MdI66VbFH7AFNQdE9yDCNeEvepQj7kxNTX2V?=
- =?us-ascii?Q?W3+DnuErnpfulHYInpJK2jH6IySHVLzFKOW+G5SdwyPGoc7mcnnfdGyzbi1U?=
- =?us-ascii?Q?ATIyXBVIv+f9np2Krx8puPmcgXphUIpIyH/0//NX84vat9mtK2gM0Lq9GPN4?=
- =?us-ascii?Q?b2Y60tuQbDQ6vychL6uEAuqxy+CqutIWelmljtK4nZaidHlNOL7e9dM7dwCV?=
- =?us-ascii?Q?zmRnx7ZZtZW73aC0pieB+r80iI+dBq2DzzrVuO9kTbjbZ+6xvUqDMTjPE6DA?=
- =?us-ascii?Q?Qka+41P+uVWsZSnkEkxM1UdjFjmWn9UFNQ1JIQyLngLVPbXsWxQfEWzSI7md?=
- =?us-ascii?Q?0hKQwoN+ZKRC2yoS5z2xbSCCzYHsFNNuQ9qSMantJuVxj9BW2FLbUvqpjhdB?=
- =?us-ascii?Q?PGk7hvE6K9QoOWIDjf6m/9UDyqvw59Y3HusqKyfufjIzarsVrp5a?=
+	=?us-ascii?Q?YyddI9wTi+bVjPTUPWrb4rIKiVBHL5D1aJQxZuOdUCbjOSKuugjPwCBhpA2m?=
+ =?us-ascii?Q?5S/EAjbFHHe8QLZT4gsE35YROGwZ0R4MQ2oyOMZJOuzf+WsKJldPXFxxAQq8?=
+ =?us-ascii?Q?o9Gcln7L1mgCzFDA/HcjxpPSs3dCWrB1erRtmfrjV27RbXAkILcBelAz9Csi?=
+ =?us-ascii?Q?M7FIJtwUc4YjcH58pbWXfbnykV2LkmcF7/vW93NVavtQSXt5ZW0+RWjcecsi?=
+ =?us-ascii?Q?h1L4SgKX+NDeal/oNR6mjjTXMhAAvU9snKI8qDEngjepZXP7K5au1FtaoKEq?=
+ =?us-ascii?Q?z2a0y3r3Emq1ilozlz+KKurQ0lHqG+MnaoyVU5BqarIwlqsTuiuQEizSr6e7?=
+ =?us-ascii?Q?5YfP6suos3Gw6jgby7sAlHpUiW360yIhxKT3FB2YDe9DiunqYvwpZI+GstDS?=
+ =?us-ascii?Q?z5On8RahBCBvnTlfJbCGEn9RCx5OSNjFW/RdBjnsPBpvsOuZ8HkuJJJtlP3H?=
+ =?us-ascii?Q?+pOONVSIf644/cZgpP0z0z57maomD6DWzNfLavrtYZV8uZ3qy/0W75ov3dzj?=
+ =?us-ascii?Q?UKBf2L/aBB6xmLd8ruL90ZbPJ3jq13dl1+6BvxResaJklvRyUjCDP25LHyl5?=
+ =?us-ascii?Q?q6Ute+1EANQKUJgbjyOc401rrPWMntlH6yDwhCyFaTYDmDeqt1hPj2cE3Lif?=
+ =?us-ascii?Q?1AK8EHKGEKxc4ZGJqsaYp+FBdG/rGJRySCm64nxe70G3MMvU11+7w2cZPVhf?=
+ =?us-ascii?Q?DVYW266NlhcUDcCpsR8APxZKtLyVX99PPKwmazahvHRc3hG3zb8ov5xqj27k?=
+ =?us-ascii?Q?FtrQCtS9gIc5miihSUX8PyPd94qBdm2c1ACMPM1mUhFZkbaMDVkJLCGCVX99?=
+ =?us-ascii?Q?pm+fcTQWz8LpuvVmB5Wqcx4Tlg1y/FpFa3O5X1ueY/PcaqWFtDybffdJaQVL?=
+ =?us-ascii?Q?tEkWt4P8mjqkqv6xRNbemex+dROIuIYYuZFykHDK97H7NdgKfr0XQqekdrbk?=
+ =?us-ascii?Q?jxqf1aPSPAKVPCkMUGdXibHFfpPEXI3iL/dA+/4Z6ZsZohYQK3olTvvOcWxM?=
+ =?us-ascii?Q?+dOiwfnucE/TCXMyoAtHVvgYRjh441fPewed+0rEJQyMMiHB5RXYFNuWKRIU?=
+ =?us-ascii?Q?FbnaF1IxHN/zOk+F2mWjfT47rvDdSgcUVTcG6khzUsprZD3dndXMF1Smhpyh?=
+ =?us-ascii?Q?yU/Su0h9cr16lDUOuOabzHUusAgmYA9ts13cwx6RdTKEK93Vlj4YH0WIAL/F?=
+ =?us-ascii?Q?LNcbbcx9aMuHG/Py/wOM0HkVazpRXQJrSbOI88XFTE8CSFHZyUnRZldxywNX?=
+ =?us-ascii?Q?YdF5KdpZtd5XnHWUVjyJmpIdsZde7r7PDCXgKT3zCZimcmIFlVzG2tmO0g/n?=
+ =?us-ascii?Q?LppTpB6bGxHqud3tiN8SIZNLoQChrozuXJyBtwqcP8bcplb+7npFl9VGlVz3?=
+ =?us-ascii?Q?OofzpWWmA/Iip5TQSgKZH3yimRtKY4m3CaztVw1ykb00afF36+7KTBvrPqgx?=
+ =?us-ascii?Q?z1EVNeJDxgQzk6w7O0uARcMGJaf+rkAoIBzYQNYrWWzwSnJKGSATj9hdx1WL?=
+ =?us-ascii?Q?LdBzH++ymZp7FkmPhRnRD1bTsEiwwVKpn1c/qguCBSwX3bcQJVNRfVWoYC5O?=
+ =?us-ascii?Q?fKmNYozzNNTQJQdGb/jlzov/HnUvdmAmmIwSpYUcb033O3j3S6Dy2Bl4Wfez?=
+ =?us-ascii?Q?TUSXr3Up+IJm6BN+2zBqL5/dbsXqh0bx269ZW3B1IRKpOxZFNkp0HAeQWG18?=
+ =?us-ascii?Q?PNtVuYJ4J4ecjvHQCX5PhIsk8OEKP8/qiU4AFotYr7UGAReanhsGAe/g/eKJ?=
+ =?us-ascii?Q?PqdWRi9iNwfXGaprx5DrN/A/8eDICx2eonngY7HVMt9c1GdaEAd0?=
 X-OriginatorOrg: valinux.co.jp
-X-MS-Exchange-CrossTenant-Network-Message-Id: b6ff861d-25ef-46b3-1739-08df0a446608
+X-MS-Exchange-CrossTenant-Network-Message-Id: bc67af66-3fe8-42ec-dcc8-08df0a5140d4
 X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 04 Sep 2026 05:21:39.6335
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 04 Sep 2026 06:53:40.7059
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: tIEs14e96wrSGahMMLypgu55/jMOwafhVjUv81Be65alke01t5DcL2nN4Q3M89t5pcAngXoITFzwwo8fRbqVYg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY4P286MB6378
+X-MS-Exchange-CrossTenant-UserPrincipalName: iSsHX3CfHz51KLuolkPyeufRK5zBd2Won7CaxZt2W+6Tz+z+IjHXk8h/Uom+1PUsUhGynhQxz66k8rT0T8LX7w==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: OS9P286MB4205
 
-Calculating L4 checksums can limit ntb_netdev throughput especially on
-embedded systems, where CPU resources are often limited. A trusted PCIe
-fabric can avoid that work.
+The control-region link status is currently updated only by
+COMMAND_LINK_UP and COMMAND_LINK_DOWN from the HOST. The virtual
+NTB link callbacks are empty. Consequently, the HOST can see the link as
+up before the VHOST has enabled it, and ntb_link_disable() on the VHOST
+leaves LINK_STATUS_UP set without notifying the HOST.
 
-Carry CHECKSUM_PARTIAL with csum_start and csum_offset across the NTB link.
-Advertise support in every frame and fall back to software until the peer
-capability is seen. This preserves netdev checksum semantics and
-interoperability with existing transport version 4 peers.
+ntb_netdev can hide this device-level state bug because ntb_transport uses
+a separate per-QP LINK_DOWN_FLAG message. Use ntb_tool to observe the
+device link state directly:
 
-Leave the TX and RX checksum features disabled by default. Users can
-just enable them explicitly for links they trust for lower CPU usage
-and/or higher throughput.
+After bringing both sides up, start this waiter on the HOST:
 
+  echo N > /sys/kernel/debug/ntb_tool/<H-device>/peer0/link_event
+
+While it is blocked, disable the link on the VHOST:
+
+  echo N > /sys/kernel/debug/ntb_tool/<V-device>/link
+
+Without this patch, the second command succeeds, but peer0/link on the
+HOST remains Y and the waiter does not return.
+
+Track HOST and VHOST enablement separately and report the effective link
+as up only when both sides have enabled it, as pci-epf-ntb does for its
+two physical hosts. Notify the other side only when this effective state
+changes. Serialize the two paths because HOST commands run from delayed
+work while the VHOST callbacks may run concurrently.
+
+With this patch, peer0/link on the HOST changes to N and the waiter
+returns.
+
+Fixes: e35f56bb0330 ("PCI: endpoint: Support NTB transfer between RC and EP")
 Signed-off-by: Koichiro Den <den@valinux.co.jp>
 ---
-Changes in v3:
-  - Count RX checksum failures as errors only (Jakub)
-  - Reject csum_start below ETH_HLEN on RX and fall back to software on
-    TX (Jakub, Sashiko)
+Note: This is a standalone fix, but it conflicts with the following
+series:
 
- drivers/net/ntb_netdev.c | 93 +++++++++++++++++++++++++++++++++++-----
- 1 file changed, 82 insertions(+), 11 deletions(-)
+  [PATCH v2 0/3] PCI: endpoint: Support hardware-owned MSI-X table and PBA
+  https://lore.kernel.org/r/20260830151948.3547577-1-den@valinux.co.jp/
 
-diff --git a/drivers/net/ntb_netdev.c b/drivers/net/ntb_netdev.c
-index d03cbda1637d..de8c4f320614 100644
---- a/drivers/net/ntb_netdev.c
-+++ b/drivers/net/ntb_netdev.c
-@@ -4,6 +4,7 @@
-  */
- #include <linux/etherdevice.h>
- #include <linux/ethtool.h>
-+#include <linux/if_vlan.h>
+That series still has pending issues and will need more work. I will base
+v3 on this fix and make the new link-event IRQ honor the MSI/MSI-X
+selection made by the HOST.
+---
+ drivers/pci/endpoint/functions/pci-epf-vntb.c | 82 +++++++++++++++----
+ 1 file changed, 65 insertions(+), 17 deletions(-)
+
+diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+index fba65abfb6b2..51200223f53c 100644
+--- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
++++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+@@ -41,6 +41,7 @@
+ #include <linux/delay.h>
+ #include <linux/io.h>
  #include <linux/module.h>
- #include <linux/pci.h>
- #include <linux/ntb.h>
-@@ -29,6 +30,21 @@ static unsigned int tx_stop = 5;
- #define NTB_NETDEV_MAX_QUEUES		64
- #define NTB_NETDEV_DEFAULT_QUEUES	1
++#include <linux/mutex.h>
+ #include <linux/slab.h>
  
-+/*
-+ * Checksum metadata layout:
-+ *   bit 23     capability, advertised on every packet
-+ *   bit 22     per-packet CHECKSUM_PARTIAL flag
-+ *   bit 21..6  skb_checksum_start_offset() (16 bits)
-+ *   bit 5..0   skb->csum_offset (6 bits)
-+ *
-+ * Until the capability is observed, complete partial checksums in software.
-+ * Six offset bits cover TCP/UDP. Larger offsets use software checksumming.
-+ */
-+#define NTB_NETDEV_META_CAP_CSUM		BIT(23)
-+#define NTB_NETDEV_META_CSUM			BIT(22)
-+#define NTB_NETDEV_META_CSUM_START_SHIFT	6
-+#define NTB_NETDEV_META_CSUM_OFFSET_MASK	GENMASK(5, 0)
-+
- struct ntb_netdev;
+ #include <linux/pci-ep-msi.h>
+@@ -147,7 +148,10 @@ struct epf_ntb {
+ 	u16 vntb_pid;
+ 	u16 vntb_vid;
  
- struct ntb_netdev_queue {
-@@ -44,6 +60,7 @@ struct ntb_netdev {
- 	struct net_device *ndev;
- 	unsigned int num_queues;
- 	struct ntb_netdev_queue *queues;
-+	bool peer_csum;
+-	bool linkup;
++	/* Serialize HOST and VHOST link state changes. */
++	struct mutex link_lock;
++	bool host_linkup;
++	bool vhost_linkup;
+ 
+ 	/*
+ 	 * True when doorbells are interrupt-driven (MSI or embedded), false
+@@ -178,24 +182,42 @@ static struct pci_epf_header epf_ntb_header = {
+ 	.interrupt_pin	= PCI_INTERRUPT_INTA,
  };
  
- #define	NTB_TX_TIMEOUT_MS	1000
-@@ -108,6 +125,7 @@ static void ntb_netdev_event_handler(void *data, int link_is_up)
- 	struct net_device *ndev;
- 
- 	ndev = dev->ndev;
-+	WRITE_ONCE(dev->peer_csum, false);
- 
- 	netdev_dbg(ndev, "Event %x, Link %x, qp %u\n", link_is_up,
- 		   ntb_transport_link_query(q->qp), q->qid);
-@@ -122,15 +140,25 @@ static void ntb_netdev_event_handler(void *data, int link_is_up)
- 	ntb_netdev_update_carrier(dev);
- }
- 
-+static void ntb_netdev_rx_stats_add(struct net_device *ndev,
-+				    unsigned int len)
++static void epf_ntb_update_link(struct epf_ntb *ntb)
 +{
-+	struct pcpu_sw_netstats *tstats = this_cpu_ptr(ndev->tstats);
-+	unsigned long flags;
++	u16 link_status = READ_ONCE(ntb->reg->link_status);
 +
-+	flags = u64_stats_update_begin_irqsave(&tstats->syncp);
-+	u64_stats_inc(&tstats->rx_packets);
-+	u64_stats_add(&tstats->rx_bytes, len);
-+	u64_stats_update_end_irqrestore(&tstats->syncp, flags);
++	/* The link is usable only after both sides have enabled it. */
++	if (ntb->host_linkup && ntb->vhost_linkup)
++		link_status |= LINK_STATUS_UP;
++	else
++		link_status &= ~LINK_STATUS_UP;
++
++	WRITE_ONCE(ntb->reg->link_status, link_status);
 +}
 +
- static void ntb_netdev_rx_handler(struct ntb_transport_qp *qp, void *qp_data,
- 				  void *data, int len, unsigned int meta)
+ /**
+- * epf_ntb_link_up() - Raise link_up interrupt to Virtual Host (VHOST)
++ * epf_ntb_link_up() - Update the HOST link state
+  * @ntb: NTB device that facilitates communication between HOST and VHOST
+- * @link_up: true or false indicating Link is UP or Down
++ * @link_up: true when the HOST has enabled the link
+  *
+- * Once NTB function in HOST invoke ntb_link_enable(),
+- * this NTB function driver will trigger a link event to VHOST.
+- *
+- * Returns: Zero for success, or an error code in case of failure
++ * Returns: Zero for success
+  */
+ static int epf_ntb_link_up(struct epf_ntb *ntb, bool link_up)
  {
- 	struct ntb_netdev_queue *q = qp_data;
- 	struct ntb_netdev *dev = q->ntdev;
--	struct pcpu_sw_netstats *tstats;
- 	struct sk_buff *skb, *new_skb;
- 	struct net_device *ndev;
--	unsigned long flags;
- 	int rc;
- 
- 	ndev = dev->ndev;
-@@ -146,21 +174,32 @@ static void ntb_netdev_rx_handler(struct ntb_transport_qp *qp, void *qp_data,
- 		goto enqueue_again;
- 	}
- 
--	tstats = this_cpu_ptr(ndev->tstats);
--	flags = u64_stats_update_begin_irqsave(&tstats->syncp);
--	u64_stats_inc(&tstats->rx_packets);
--	u64_stats_add(&tstats->rx_bytes, len);
--	u64_stats_update_end_irqrestore(&tstats->syncp, flags);
--
- 	new_skb = netdev_alloc_skb(ndev, ndev->mtu + ETH_HLEN);
- 	if (!new_skb) {
-+		ntb_netdev_rx_stats_add(ndev, len);
- 		DEV_STATS_INC(ndev, rx_dropped);
- 		goto enqueue_again;
- 	}
- 
- 	skb_put(skb, len);
-+	if (meta & NTB_NETDEV_META_CAP_CSUM)
-+		WRITE_ONCE(dev->peer_csum, true);
+-	if (link_up)
+-		ntb->reg->link_status |= LINK_STATUS_UP;
+-	else
+-		ntb->reg->link_status &= ~LINK_STATUS_UP;
++	bool notify;
 +
-+	if (meta & NTB_NETDEV_META_CSUM) {
-+		u16 csum_start = (meta >> NTB_NETDEV_META_CSUM_START_SHIFT) & U16_MAX;
-+		u16 csum_offset = meta & NTB_NETDEV_META_CSUM_OFFSET_MASK;
-+
-+		if (csum_start < ETH_HLEN ||
-+		    !skb_partial_csum_set(skb, csum_start, csum_offset))
-+			goto rx_drop;
-+
-+		if (!(ndev->features & NETIF_F_RXCSUM) &&
-+		    skb_checksum_help(skb))
-+			goto rx_drop;
++	scoped_guard(mutex, &ntb->link_lock) {
++		notify = ntb->host_linkup != link_up && ntb->vhost_linkup;
++		ntb->host_linkup = link_up;
++		epf_ntb_update_link(ntb);
 +	}
 +
-+	ntb_netdev_rx_stats_add(ndev, len);
- 	skb->protocol = eth_type_trans(skb, ndev);
--	skb->ip_summed = CHECKSUM_NONE;
- 	skb_record_rx_queue(skb, q->qid);
- 
- 	netif_rx(skb);
-@@ -174,6 +213,13 @@ static void ntb_netdev_rx_handler(struct ntb_transport_qp *qp, void *qp_data,
- 		DEV_STATS_INC(ndev, rx_errors);
- 		DEV_STATS_INC(ndev, rx_fifo_errors);
- 	}
-+	return;
-+
-+rx_drop:
-+	DEV_STATS_INC(ndev, rx_errors);
-+	dev_kfree_skb_any(skb);
-+	skb = new_skb;
-+	goto enqueue_again;
- }
- 
- static int __ntb_netdev_maybe_stop_tx(struct net_device *netdev,
-@@ -268,6 +314,7 @@ static const struct ntb_queue_handlers ntb_netdev_handlers = {
- static netdev_tx_t ntb_netdev_start_xmit(struct sk_buff *skb,
- 					 struct net_device *ndev)
- {
-+	unsigned int meta = NTB_NETDEV_META_CAP_CSUM;
- 	struct ntb_netdev *dev = netdev_priv(ndev);
- 	u16 qid = skb_get_queue_mapping(skb);
- 	struct ntb_netdev_queue *q;
-@@ -278,7 +325,17 @@ static netdev_tx_t ntb_netdev_start_xmit(struct sk_buff *skb,
- 	if (unlikely(ntb_netdev_maybe_stop_tx(ndev, q, tx_stop)))
- 		return NETDEV_TX_BUSY;
- 
--	rc = ntb_transport_tx_enqueue(q->qp, skb, skb->data, skb->len, 0);
-+	if (skb->ip_summed == CHECKSUM_PARTIAL) {
-+		if (READ_ONCE(dev->peer_csum))
-+			meta |= NTB_NETDEV_META_CSUM |
-+				(skb_checksum_start_offset(skb) <<
-+				 NTB_NETDEV_META_CSUM_START_SHIFT) |
-+				skb->csum_offset;
-+		else if (skb_checksum_help(skb))
-+			goto drop;
++	if (notify) {
++		/* Publish link status before completing the HOST command. */
++		dma_wmb();
++		ntb_link_event(&ntb->ntb);
 +	}
-+
-+	rc = ntb_transport_tx_enqueue(q->qp, skb, skb->data, skb->len, meta);
- 	if (rc) {
- 		if (rc == -EAGAIN || rc == -EBUSY) {
- 			netif_stop_subqueue(ndev, q->qid);
-@@ -301,6 +358,18 @@ static netdev_tx_t ntb_netdev_start_xmit(struct sk_buff *skb,
- 	return NETDEV_TX_OK;
+ 
+-	ntb_link_event(&ntb->ntb);
+ 	return 0;
  }
  
-+static netdev_features_t ntb_netdev_features_check(struct sk_buff *skb,
-+						   struct net_device *ndev,
-+						   netdev_features_t features)
+@@ -320,7 +342,6 @@ static void epf_ntb_cmd_handler(struct work_struct *work)
+ 		ctrl->command_status = COMMAND_STATUS_OK;
+ 		break;
+ 	case COMMAND_LINK_UP:
+-		ntb->linkup = true;
+ 		ret = epf_ntb_link_up(ntb, true);
+ 		if (ret < 0)
+ 			ctrl->command_status = COMMAND_STATUS_ERROR;
+@@ -328,7 +349,6 @@ static void epf_ntb_cmd_handler(struct work_struct *work)
+ 			ctrl->command_status = COMMAND_STATUS_OK;
+ 		goto reset_handler;
+ 	case COMMAND_LINK_DOWN:
+-		ntb->linkup = false;
+ 		ret = epf_ntb_link_up(ntb, false);
+ 		if (ret < 0)
+ 			ctrl->command_status = COMMAND_STATUS_ERROR;
+@@ -1456,11 +1476,34 @@ static int vntb_epf_peer_mw_get_addr(struct ntb_dev *ndev, int idx,
+ 	return 0;
+ }
+ 
++static int vntb_epf_set_link(struct epf_ntb *ntb, bool link_up)
 +{
-+	if (skb->ip_summed == CHECKSUM_PARTIAL &&
-+	    (skb_checksum_start_offset(skb) < ETH_HLEN ||
-+	     skb->csum_offset > NTB_NETDEV_META_CSUM_OFFSET_MASK))
-+		features &= ~NETIF_F_CSUM_MASK;
++	struct pci_epf *epf = ntb->epf;
++	bool notify;
++	int ret;
 +
-+	return vlan_features_check(skb, features);
++	scoped_guard(mutex, &ntb->link_lock) {
++		notify = ntb->vhost_linkup != link_up && ntb->host_linkup;
++		ntb->vhost_linkup = link_up;
++		epf_ntb_update_link(ntb);
++	}
++
++	if (!notify)
++		return 0;
++
++	ret = pci_epc_raise_irq(epf->epc, epf->func_no, epf->vfunc_no,
++				PCI_IRQ_MSI, EPF_IRQ_LINK + 1);
++	if (ret)
++		dev_err(&epf->dev, "Failed to raise link event IRQ: %d\n", ret);
++
++	return ret;
 +}
 +
- static void ntb_netdev_tx_timer(struct timer_list *t)
+ static int vntb_epf_link_enable(struct ntb_dev *ntb,
+ 			enum ntb_speed max_speed,
+ 			enum ntb_width max_width)
  {
- 	struct ntb_netdev_queue *q = timer_container_of(q, t, tx_timer);
-@@ -451,6 +520,7 @@ static const struct net_device_ops ntb_netdev_ops = {
- 	.ndo_open = ntb_netdev_open,
- 	.ndo_stop = ntb_netdev_close,
- 	.ndo_start_xmit = ntb_netdev_start_xmit,
-+	.ndo_features_check = ntb_netdev_features_check,
- 	.ndo_change_mtu = ntb_netdev_change_mtu,
- 	.ndo_set_mac_address = eth_mac_addr,
- };
-@@ -671,7 +741,8 @@ static int ntb_netdev_probe(struct device *client_dev)
+-	return 0;
++	return vntb_epf_set_link(ntb_ndev(ntb), true);
+ }
  
- 	ndev->priv_flags |= IFF_LIVE_ADDR_CHANGE;
+ static u32 vntb_epf_spad_read(struct ntb_dev *ndev, int idx)
+@@ -1620,7 +1663,7 @@ static u64 vntb_epf_link_is_up(struct ntb_dev *ndev,
+ {
+ 	struct epf_ntb *ntb = ntb_ndev(ndev);
  
--	ndev->hw_features = ndev->features;
-+	/* Checksum bypass assumes a trusted NTB link, so keep it opt-in. */
-+	ndev->hw_features = ndev->features | NETIF_F_HW_CSUM | NETIF_F_RXCSUM;
- 	ndev->watchdog_timeo = msecs_to_jiffies(NTB_TX_TIMEOUT_MS);
+-	return ntb->reg->link_status;
++	return READ_ONCE(ntb->reg->link_status);
+ }
  
- 	eth_random_addr(ndev->perm_addr);
+ static int vntb_epf_db_clear_mask(struct ntb_dev *ndev, u64 db_bits)
+@@ -1638,7 +1681,7 @@ static int vntb_epf_db_clear(struct ntb_dev *ndev, u64 db_bits)
+ 
+ static int vntb_epf_link_disable(struct ntb_dev *ntb)
+ {
+-	return 0;
++	return vntb_epf_set_link(ntb_ndev(ntb), false);
+ }
+ 
+ static struct device *vntb_epf_get_dma_dev(struct ntb_dev *ndev)
+@@ -1750,6 +1793,10 @@ static int epf_ntb_bind(struct pci_epf *epf)
+ 		goto err_bar_alloc;
+ 	}
+ 
++	ntb->host_linkup = false;
++	ntb->vhost_linkup = false;
++	ntb->reg->link_status = 0;
++
+ 	ret = epf_ntb_epc_init(ntb);
+ 	if (ret) {
+ 		dev_err(dev, "Failed to initialize EPC\n");
+@@ -1833,6 +1880,7 @@ static int epf_ntb_probe(struct pci_epf *epf,
+ 	epf->header = &epf_ntb_header;
+ 	ntb->epf = epf;
+ 	ntb->vbus_number = 0xff;
++	mutex_init(&ntb->link_lock);
+ 
+ 	INIT_WORK(&ntb->peer_db_work, vntb_epf_peer_db_work);
+ 	disable_work(&ntb->peer_db_work);
 -- 
 2.51.0
 
