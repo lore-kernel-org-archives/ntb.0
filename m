@@ -1,261 +1,196 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4CA9A246781
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F1A37314B63
 	for <ntb@lists.linux.dev>; Sat,  5 Sep 2026 05:22:01 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788585722; cv=none; b=KeTMxRUT3zSXsOdM6wTdGdby83OKaJNouuJ/bcqSCLRzOut4MFTWD0ntsQ8nc3bWWu4QQ0GoZMe4v10Fl3+8U+SWmJad1Un8s/ybiTgkFsKH54gzo1CQ7721PNB07MpY9EG3InVNfDZ//8+x4z+H1eU2GhJ9rVO7d0H0oJF8e4Q=
+	t=1788585723; cv=none; b=peRR5jYpUpgj5kMAZhU68/VpMC+zp7W3fs9RddiMz+bdesEOES7P7qaiX6WJ9r3J1Ihn+1xSGCobisSC9SE+ltk+7ruxvbemr6QtDZew9dTk0Tv7qC4lrePbOQPwSl7OukwBFfOR155+z9eCGzsP1F+5wxRS9gnoSCSVRL9dCk0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788585722; c=relaxed/simple;
-	bh=UELAbrHXWpB6aWa2KFMMgBzIb+A54c7uJIXpJAtlsFc=;
+	s=arc-20240116; t=1788585723; c=relaxed/simple;
+	bh=8u2Y4yEprtwYj3XqWHaFK+lWAY/q3lDRs6vnreXpJoM=;
 	h=From:Subject:To:Cc:In-Reply-To:References:Content-Type:Date:
-	 Message-Id; b=pw6swwihvj4g4LLYdGJ6/NkKtCdcPOOyCEe2x/AJNY6zgRouUaYiW6VUXo3NwemturpqhjjaovH+QlGeHVqkspRNdIb6IAkTeJTf5DOpTNhlviLtp0l6nEGci2EkqnFqqhsP/B8yPzWL4jn2Lhf39kAu7xkFJNAjsCP0Z5vz3KY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cfBSmC6H; arc=none smtp.client-ip=100.103.45.18
+	 Message-Id; b=lGraZaDPiw41NLB8UFJmnifFb2yKTk0JUvohp1pJFpVRodpd6cYwHTdAHFnvJpQfOmImMsnjuirdX1MnlCR5x9Rt9fGaQos0oaqTJLa5J/aQKNWGYs48PEH96l9NVWILOBUKeQbwLOZ3RPuKk1VmUtohN5RwV5a+/IYD55R+E3Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=a5aToWPv; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cfBSmC6H"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D6C231F00A3D;
-	Sat,  5 Sep 2026 05:22:00 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="a5aToWPv"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8B54B1F00A3E;
+	Sat,  5 Sep 2026 05:22:01 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
 	s=k20260515; t=1788585721;
-	bh=tlQCqN0ghK5RjNHJXzb/jafyfCJM1XeHyXxmMo94Ew8=;
+	bh=ArEKm+4uJ0WrCts7BdQjgyyvqTVAomKDyLxitT/T0Ks=;
 	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=cfBSmC6H0/Qh2w0g04YF9wSNSI6kr/WJkDrhp9rRDXv+iTtfmP+qVRKBU5ZRhssbs
-	 Crnfx69Eru3EGKRXMb4CN5Uia802rhIwu8YHo1BK+ZB6IDOHmnMg2G1TcniEg6M122
-	 y1fTmw4bZof1G7LlIWLOsXbdOxNtpeVEv4ZwPk8kO0poaIAF75ekL5Kv+DJTPYyEsm
-	 ymdosyOx8ZAWCdbQPI6uBQISI+r0YA+zPVgFxVFauEk2rue5jead3KRI8q+/RkOKvB
-	 JouQ4QSKRf3X29S55b9iQvFO+4KlAQkaz1fy7i7c4IuUzQsL/th+3wMs+WtK47cbk0
-	 ACqSgzGHaqeHg==
+	b=a5aToWPv++w0EI18MSegOBroFmOJhVLd4LtHta14njCUmIH/dQOpgGeqZLE28tWAa
+	 wVgcOSFTGyLdKdl81NzPRktNIHLWHljroS/jt2LTm8E6pYw4+lrMPK0oG7r/T6Qvw2
+	 N3eh2y00X+lAVxTaDvYohuuVJX+gN0NKg04oYsj9GOLJgLuO7oFfYpevt0rarbgOwq
+	 RwFhK/p5DW+No3/u/UxCdNQYRijYzJOVrGOvA4j76e1eRPANIDLABbF7v/zoIKKk4o
+	 6N4XATy6qJlTkcYJwR0H5/pcZxcxgM/PeRSeXemptVfqtKGXh5VljI+tgd0ByPNG3N
+	 gO+2uSUBWZvfw==
 From: sashiko-bot@kernel.org
-Subject: Re: [PATCH net-next v3 1/4] NTB: ntb_transport: Order RX descriptor
- reads after completion
+Subject: Re: [PATCH net-next v3 2/4] NTB: ntb_transport: Use little-endian
+ shared fields
 Reply-To: sashiko-reviews@lists.linux.dev
 To: "Koichiro Den" <den@valinux.co.jp>
 Cc: ntb@lists.linux.dev
-In-Reply-To: <20260904052134.2970111-2-den@valinux.co.jp>
+In-Reply-To: <20260904052134.2970111-3-den@valinux.co.jp>
 References: <20260904052134.2970111-1-den@valinux.co.jp>
- <20260904052134.2970111-2-den@valinux.co.jp>
+ <20260904052134.2970111-3-den@valinux.co.jp>
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
-Date: Sat, 05 Sep 2026 05:22:00 +0000
-Message-Id: <20260905052200.D6C231F00A3D@smtp.kernel.org>
+Date: Sat, 05 Sep 2026 05:22:01 +0000
+Message-Id: <20260905052201.8B54B1F00A3E@smtp.kernel.org>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 
-Thank you for your contribution! Sashiko AI review found 8 potential issue(=
+Thank you for your contribution! Sashiko AI review found 3 potential issue(=
 s) to consider:
 
 Pre-existing issues:
-- [Critical] Inbound memory windows are freed during link down cleanup with=
-out synchronizing with the receive tasklet or terminating in-flight DMA ope=
-rations.
-- [High] In-flight DMA transactions are not terminated on link down, causin=
-g stale DMA completions to corrupt the queue state of the subsequent link s=
-ession.
-- [High] An unhandled version mismatch in `ntb_process_rxc` causes a perman=
-ent stall of the receive queue.
-- [High] In-flight DMA descriptors and their associated `ntb_queue_entry` s=
-tructures are permanently leaked during QP teardown.
-- [High] Broken DMA channel synchronization causes false timeouts and aband=
-oned TX transactions during teardown.
-- [High] Client data buffers (SKBs) are silently leaked when `tx_offl_q` an=
-d `rx_post_q` entries are freed during teardown.
-- [High] DMA abort fallback copies the wrong memory payload due to improper=
- index tracking.
-- [Medium] Lockless modification of `entry->len` and `entry->flags` lacks m=
-emory barriers, potentially hiding overflow errors from the client.
+- [High] Permanent RX queue stall on version mismatch error.
+- [High] Missing bounds check against `rx_max_frame` allows an attacker-con=
+trolled peer to trigger an out-of-bounds read of kernel memory.
+- [Medium] The queue size calculations do not guarantee that `rx_size` and =
+`tx_size` are appropriately aligned, leading to unaligned MMIO writes and c=
+oherent memory accesses.
 --
 
-commit 3308bb067cf3d0b798b94e6f70b47a7f9378fbae
+commit 8632f1194f420fac4999a48cdd0e2e9e59e54697
 Author: Koichiro Den <den@valinux.co.jp>
-NTB: ntb_transport: Order RX descriptor reads after completion
 
-This commit introduces a memory barrier after observing the DESC_DONE_FLAG =
-in
-ntb_process_rxc() to ensure that the descriptor and payload reads are prope=
-rly
-ordered on weakly ordered CPUs. It reads the completion word once and uses =
-the
-saved value for subsequent transport flag checks.
+NTB: ntb_transport: Use little-endian shared fields
+
+ntb_transport writes payload headers and the RX ring tail with
+iowrite32(), but reads peer-written copies from coherent memory as native
+integers. The values are therefore byte-swapped when read on a big-endian
+system.
+
+Mark the shared fields as __le32 and convert coherent-memory accesses
+accordingly. Read hdr->ver and hdr->len once so their checks and later
+uses see the same values.
 
 Link: https://lore.kernel.org/r/20260815032932.151F11F000E9@smtp.kernel.org/
+Link: https://lore.kernel.org/r/20260818064951.7EA231F000E9@smtp.kernel.org/
 
 > diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-> index f9caa1a653c5b..74f4f8c1c7be8 100644
+> index 74f4f8c1c7be8..3f497a62673fd 100644
 > --- a/drivers/ntb/ntb_transport.c
 > +++ b/drivers/ntb/ntb_transport.c
-> @@ -1609,21 +1609,25 @@ static int ntb_process_rxc(struct ntb_transport_q=
+
+[ ... ]
+
+> @@ -633,7 +634,7 @@ static int ntb_transport_setup_qp_mw(struct ntb_trans=
+port_ctx *nt,
+>  		qp->rx_alloc_entry++;
+>  	}
+> =20
+> -	qp->remote_rx_info->entry =3D qp->rx_max_entry - 1;
+> +	qp->remote_rx_info->entry =3D cpu_to_le32(qp->rx_max_entry - 1);
+
+[Severity: Medium]
+This isn't a bug introduced by this patch, but the local receive buffer sli=
+ce
+size rx_size is calculated earlier in ntb_transport_setup_qp_mw() as:
+=20
+	rx_size =3D (unsigned int)mw->xlat_size / num_qps_mw;
+=20
+If num_qps_mw does not cleanly divide the window size, the resulting rx_size
+can be unaligned.
+=20
+Does this misalign the qp->remote_rx_info pointer which resides at the end
+of this buffer, as well as the frame boundaries qp->rx_max_frame? If so, on
+strict architectures, could the unaligned READ_ONCE() and iowrite32()
+accesses to the payload headers and shared fields trigger an alignment faul=
+t?
+
+> =20
+>  	/* setup the hdr offsets with 0's */
+>  	for (i =3D 0; i < qp->rx_max_entry; i++) {
+
+[ ... ]
+
+> @@ -1623,21 +1626,23 @@ static int ntb_process_rxc(struct ntb_transport_q=
 p *qp)
->  {
->  	struct ntb_payload_header *hdr;
->  	struct ntb_queue_entry *entry;
-> +	unsigned int flags;
->  	void *offset;
+>  	}
 > =20
->  	offset =3D qp->rx_buff + qp->rx_max_frame * qp->rx_index;
->  	hdr =3D offset + qp->rx_max_frame - sizeof(struct ntb_payload_header);
+>  	dma_rmb();
+> +	ver =3D le32_to_cpu(READ_ONCE(hdr->ver));
+> +	len =3D le32_to_cpu(READ_ONCE(hdr->len));
 > =20
-> -	dev_dbg(&qp->ndev->pdev->dev, "qp %d: RX ver %u len %d flags %x\n",
-> -		qp->qp_num, hdr->ver, hdr->len, hdr->flags);
-> -
-> -	if (!(hdr->flags & DESC_DONE_FLAG)) {
-> +	flags =3D READ_ONCE(hdr->flags);
-> +	if (!(flags & DESC_DONE_FLAG)) {
->  		dev_dbg(&qp->ndev->pdev->dev, "done flag not set\n");
->  		qp->rx_ring_empty++;
+>  	dev_dbg(&qp->ndev->pdev->dev, "qp %d: RX ver %u len %d flags %x\n",
+> -		qp->qp_num, hdr->ver, hdr->len, flags);
+> +		qp->qp_num, ver, len, flags);
+> =20
+>  	if (flags & LINK_DOWN_FLAG) {
+>  		dev_dbg(&qp->ndev->pdev->dev, "link down flag set\n");
+>  		ntb_qp_link_down(qp);
+> -		hdr->flags =3D 0;
+> +		hdr->flags =3D cpu_to_le32(0);
 >  		return -EAGAIN;
 >  	}
 > =20
-> -	if (hdr->flags & LINK_DOWN_FLAG) {
-> +	dma_rmb();
-> +
-> +	dev_dbg(&qp->ndev->pdev->dev, "qp %d: RX ver %u len %d flags %x\n",
-> +		qp->qp_num, hdr->ver, hdr->len, flags);
-> +
-> +	if (flags & LINK_DOWN_FLAG) {
->  		dev_dbg(&qp->ndev->pdev->dev, "link down flag set\n");
->  		ntb_qp_link_down(qp);
->  		hdr->flags =3D 0;
+> -	if (hdr->ver !=3D (u32)qp->rx_pkts) {
+> +	if (ver !=3D (u32)qp->rx_pkts) {
+>  		dev_dbg(&qp->ndev->pdev->dev,
+>  			"version mismatch, expected %llu - got %u\n",
+> -			qp->rx_pkts, hdr->ver);
+> +			qp->rx_pkts, ver);
+>  		qp->rx_err_ver++;
+>  		return -EIO;
+>  	}
 
 [Severity: High]
-This isn't a bug introduced by this patch, but does an unhandled version
-mismatch in ntb_process_rxc() cause a permanent stall?
+This is a pre-existing issue, but if the received payload header version do=
+es
+not match the expected qp->rx_pkts in ntb_process_rxc(), the function
+increments the error counter and returns -EIO without clearing the
+DESC_DONE_FLAG or advancing qp->rx_index.
 
-In ntb_process_rxc():
-	if (ver !=3D (u32)qp->rx_pkts) {
-		dev_dbg(&qp->ndev->pdev->dev,
-			"version mismatch, expected %llu - got %u\n",
-			qp->rx_pkts, ver);
-		qp->rx_err_ver++;
-		return -EIO;
-	}
+Since the caller aborts processing upon the error, the next time the queue =
+is
+processed, it will attempt to process the same packet at the same index, fa=
+il
+the version check again, and return -EIO.
 
-If this check fails, the function returns -EIO and the caller breaks out
-of its loop without advancing qp->rx_index or clearing DESC_DONE_FLAG.
-Will the next tasklet execution evaluate the exact same descriptor,
-encounter the same error, and loop indefinitely?
+Can this lead to a permanent stall of the RX queue until the link is
+physically reset?
 
-[Severity: Medium]
-This is a pre-existing issue, but do the lockless modifications of
-entry->len and flags in ntb_process_rxc() require a memory barrier?
-
-In ntb_process_rxc() during a buffer overflow event:
-		entry->len =3D -EIO;
-		entry->flags |=3D DESC_DONE_FLAG;
-
-		ntb_complete_rxc(qp);
-
-These fields are set locklessly on an entry that is already publicly
-accessible in rx_post_q. Without an smp_wmb(), could a concurrent
-execution of ntb_complete_rxc() observe the DESC_DONE_FLAG but read a
-stale entry->len, falsely reporting a successful transfer to the client?
+> @@ -1652,10 +1657,10 @@ static int ntb_process_rxc(struct ntb_transport_q=
+p *qp)
+>  	entry->rx_hdr =3D hdr;
+>  	entry->rx_index =3D qp->rx_index;
+> =20
+> -	if (hdr->len > entry->len) {
+> +	if (len > entry->len) {
 
 [Severity: High]
-This is a pre-existing issue, but does ntb_qp_link_cleanup() fail to
-terminate in-flight DMA operations during a link reset?
+This isn't a bug introduced by this patch, but this bounds check in
+ntb_process_rxc() only validates that the received length len fits within t=
+he
+client-provided buffer (entry->len).
 
-In ntb_qp_link_cleanup():
-	cancel_delayed_work_sync(&qp->link_work);
-	ntb_qp_link_down_reset(qp);
+Because entry->len is derived from the local memory window size
+(tx_max_frame), it can be larger than the receive frame size (rx_max_frame)
+negotiated by the peer.
 
-	if (qp->event_handler)
+If a malicious peer provides a large length that is greater than the
+negotiated rx_max_frame but still less than entry->len, could this bypass t=
+he
+check and cause ntb_memcpy_rx() or ntb_async_rx() below to copy memory
+out-of-bounds from the qp->rx_buff DMA region, leaking adjacent kernel memo=
+ry
+to the network stack?
 
-If a pending DMA transaction completes asynchronously after this reset, it
-triggers the callback, appending to qp->rx_post_q and calling
-ntb_complete_rxc():
-
-	entry->rx_hdr->flags =3D cpu_to_le32(0);
-	iowrite32(entry->rx_index, &qp->rx_info->entry);
-
-Could this stale DMA completion overwrite the reset state with an old
-index, corrupting the peer's calculation of available free space and
-permanently halting communication?
-
-[Severity: High]
-This isn't a bug introduced by this patch, but are in-flight DMA descriptors
-and their ntb_queue_entry structures permanently leaked during QP teardown?
-
-In ntb_transport_free_queue():
-		dma_sync_wait(chan, qp->last_cookie);
-		dmaengine_terminate_all(chan);
-
-When dmaengine_terminate_all() aborts pending transfers, the associated
-callbacks are not executed. Since entries are removed from qp->tx_free_q
-during submission and only restored by the callback, do these active queue
-entries leak permanently?
-
-[Severity: High]
-This is a pre-existing issue, but does the TX channel teardown wait on the
-wrong DMA cookie?
-
-In ntb_transport_free_queue(), the code synchronizes on the TX channel:
-		dma_sync_wait(chan, qp->last_cookie);
-
-However, qp->last_cookie is exclusively updated in ntb_async_rx_submit():
-	qp->last_cookie =3D cookie;
-
-If the RX cookie exceeds the TX channel's highest cookie, will
-dma_sync_wait() erroneously timeout and forcefully abort healthy TX
-transactions?
-
-[Severity: High]
-This isn't a bug introduced by this patch, but does ntb_transport_free_queu=
-e()
-silently leak client data buffers (like SKBs) when freeing entries?
-
-	while ((entry =3D ntb_list_rm(&qp->ntb_rx_q_lock, &qp->rx_post_q))) {
-		dev_warn(&pdev->dev, "Freeing item from non-empty rx_post_q\n");
-		kfree(entry);
-	}
-
-And similarly for TX offload:
-	while ((entry =3D ntb_list_rm(&qp->ntb_tx_offl_q_lock, &qp->tx_offl_q)))
-		kfree(entry);
-
-Since the driver nullifies the handlers before this loop, and freeing the
-entry doesn't reclaim entry->cb_data, are these client buffers permanently
-leaked?
-
-[Severity: High]
-This is a pre-existing issue, but does the CPU fallback copy the wrong
-memory payload during a DMA abort?
-
-In ntb_rx_copy_callback():
-			void *offset =3D qp->rx_buff + qp->rx_max_frame *
-					qp->rx_index;
-
-This computes the source offset using the globally advanced qp->rx_index.
-Because qp->rx_index is advanced globally in ntb_process_rxc() right
-after DMA submission, won't it point to a future, unrelated slot by the
-time an error callback fires? Should this use the saved entry->rx_index
-instead?
-
-[Severity: Critical]
-This isn't a bug introduced by this patch, but are inbound memory windows
-freed without synchronizing with the receive tasklet or terminating DMA?
-
-In ntb_transport_link_cleanup():
-	for (i =3D 0; i < nt->mw_count; i++)
-		ntb_free_mw(nt, i);
-
-This unmaps and frees the DMA coherent memory windows, but leaves the
-receive tasklet active.
-
-In ntb_transport_rxc_db():
-	for (i =3D 0; i < qp->rx_max_entry; i++) {
-		rc =3D ntb_process_rxc(qp);
-		if (rc)
-			break;
-	}
-
-This loop executes unconditionally, proceeding to dereference qp->rx_buff
-in ntb_process_rxc() before checking qp->active. Can this cause a
-Use-After-Free memory access or IOMMU faults if the link goes down while
-tasklets or DMA are active?
+>  		dev_dbg(&qp->ndev->pdev->dev,
+>  			"receive buffer overflow! Wanted %d got %d\n",
+> -			hdr->len, entry->len);
+> +			len, entry->len);
+>  		qp->rx_err_oflow++;
+> =20
+>  		entry->len =3D -EIO;
 
 --=20
 Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20260904052134.2970=
-111-1-den@valinux.co.jp?part=3D1
+111-1-den@valinux.co.jp?part=3D2
