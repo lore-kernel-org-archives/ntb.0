@@ -1,212 +1,151 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AA5884CA790
-	for <ntb@lists.linux.dev>; Mon,  7 Sep 2026 14:38:01 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F218B4C0424
+	for <ntb@lists.linux.dev>; Mon,  7 Sep 2026 14:38:26 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788791885; cv=none; b=JZOV2wnynW32Es4IlP9+H4mojcG2r+qD2tVU+DHKjK5gjagsv6dKWEZeYDcM+eBdnr0Cw3eHz3MvJ8sMWWQFDV0SSS/ryFMPTuwA8Nn7OFrGPOBEGDPeQbEAoU0b8al00crSdvHZZP12C9Gad0z9FaNivZGDm3gtFd/wYRGFIyE=
+	t=1788791910; cv=none; b=iLTh9Wd+b/uGJVmqQvl7EVAD7IP/vV2J+FkhXu4YLz0uLbRBiQx+IwKSkOQMqft82X6jIszE/Xg24ISjpSUSwhlki+7R4GcC1QD3NAsWlD6g1dLByBiAzSTWvA1Kc+4op6Fvu0GFXjyFzqgl18OTNCrL73bsVPGkCrvQTqRgRCA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788791885; c=relaxed/simple;
-	bh=R5bJPQsa8YenBnLJcDET230Hb5u2w/9VbxyvOeYjkeg=;
+	s=arc-20240116; t=1788791910; c=relaxed/simple;
+	bh=73CYl4FUijO8qllRUFR3MjVs8bP05y9EQpwVI9nYtrc=;
 	h=From:Subject:To:Cc:In-Reply-To:References:Content-Type:Date:
-	 Message-Id; b=POirEOw8VLUtIsk7XoypTi1rHBaTDaEUfJYuTk7YH4xglnz0AbCaz8jp+j3A9le+WcJ/sDEWInRuLKtGSbPUtee3lmADpFfI0dk2E7ptGHemH+mRi7QQRqqMjEpWNCGEJo3771pTdxxXx6pdDsyOQ+6hu6wkb8iqvoKv51w7K8U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Wfapts66; arc=none smtp.client-ip=100.103.45.18
+	 Message-Id; b=lmg8OTuCA3dhMI73VGjNQctSYec0ZI9e1RiQdMNobLypxA4ftga6NXCRBcqAXk1daGaMKT1+xM6To3bv908M31+KsfGn0IXnyQYMNCBEdNLsqtoW6cP9BIJthJggRnXgaEZmJyQfgdkMsLV0mVkJY5xIZtTYrJoevJpYN+XHUuY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XwgSPO2/; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Wfapts66"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 16AF41F00A3A;
-	Mon,  7 Sep 2026 14:37:59 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XwgSPO2/"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DFDE91F00A3A;
+	Mon,  7 Sep 2026 14:38:24 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788791879;
-	bh=vklcMcnTvBTWS2PwFDPR0DtnSSNb9EbheCL94nYza3A=;
+	s=k20260515; t=1788791905;
+	bh=ju1GapmFGaN7F8XEJHdX6Yh6FG4hBuJXa1NIGEw00gI=;
 	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=Wfapts66/AoV5dOQMy3hU5jovo7guducsT2D22jZjCHghIUDtvgCJxEYQhTabcjpM
-	 9R4PxH21YD5sxsRv29/Z4h4O7mpbYvSVyddHtWRrWU7AlsPkr5/Lzbrvyjl6d/W8ks
-	 P4szit+By40uRJfmEFxHIVb/ocvwYb1nV+/7X2aDxXGGam70qCa80R77F3HM63WGIl
-	 vYWgyhv3/G4MfYwUO+4uoh+ch7Hw5zOfYUGdk+xfzHKrR8nrMxVz/dFUOV8Bffp1po
-	 AJ8MapFnMDtDxA/rjvfTLTOXFv2X+AKD/wFpcWXYzrEaCqbtBXvKRVi29rtOm+Azvk
-	 FSRPjFAsML00w==
+	b=XwgSPO2/2SsZmTzrwe7t7kcxTjcfw/GXAdx01IC/Xi9zvNT9HGSGCgDrRz8Wm+D1v
+	 +/oJQG7Zu1nCyNuRrpDeb6d2Mq8edpx74nUx5wCvQBSXtPin7MXIu7mhjNGiGq3BWt
+	 MnhuRvF+DBSdChHjLvhbyuOu1ZzkzbyJA2OoqIeh4z3ftKNoTbTZ23YYQVy9Pqn6bJ
+	 HNpv4Facu9cpCB6XuxuB4p/1hRM6wBXZWewlQwiwGY08YPd5AGSUZq5kwcwICStMgW
+	 6/+Xtq1DyW4o9Je9Ht3HY43qWqqBjBccYi81ujuvHgJiMkrp+lv36RDJuO229jpPuT
+	 LSOUjScvBIdiQ==
 From: sashiko-bot@kernel.org
-Subject: Re: [PATCH 02/11] NTB: ntb_transport: Start TX offload thread after
- queue setup
+Subject: Re: [PATCH 03/11] NTB: ntb_transport: Prepare remote RX info
+ accesses for MW teardown
 Reply-To: sashiko-reviews@lists.linux.dev
 To: "Koichiro Den" <den@valinux.co.jp>
 Cc: ntb@lists.linux.dev
-In-Reply-To: <20260907142429.951930-3-den@valinux.co.jp>
+In-Reply-To: <20260907142429.951930-4-den@valinux.co.jp>
 References: <20260907142429.951930-1-den@valinux.co.jp>
- <20260907142429.951930-3-den@valinux.co.jp>
+ <20260907142429.951930-4-den@valinux.co.jp>
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
-Date: Mon, 07 Sep 2026 14:37:58 +0000
-Message-Id: <20260907143759.16AF41F00A3A@smtp.kernel.org>
+Date: Mon, 07 Sep 2026 14:38:24 +0000
+Message-Id: <20260907143824.DFDE91F00A3A@smtp.kernel.org>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 
-Thank you for your contribution! Sashiko AI review found 4 potential issue(=
+Thank you for your contribution! Sashiko AI review found 1 potential issue(=
 s) to consider:
 
 Pre-existing issues:
-- [High] Potential DMA mapping leak on the error path because DMA address 0=
- is treated as invalid.
-- [High] Concurrent accesses to `nt->qp_bitmap_free` are not synchronized, =
-which can lead to QP assignment corruption.
-- [High] Leaked queue entries and dangling pointer usage when stopping TX o=
-ffload thread in ntb_transport_free_queue.
-- [Medium] Unprotected modification of qp->tx_bytes and other statistics.
+- [High] Lockless NULL check of `qp->remote_rx_info` is insufficient to pro=
+tect against concurrent memory window teardown, leading to Time-of-Check to=
+ Time-of-Use (TOCTOU) UAF/WAF vulnerabilities.
 --
 
-commit 7bd9e932183752e71eddb3f2bc51cf46a03b501b
+commit af53bb9020271a62d936b961c8c9d17ee66f2b23
 Author: Koichiro Den <den@valinux.co.jp>
-Date:   Mon Sep 7 14:24:20 2026 +0000
+NTB: ntb_transport: Prepare remote RX info accesses for MW teardown
 
-    NTB: ntb_transport: Start TX offload thread after queue setup
-   =20
-    ntb_transport_create_queue() starts the per-QP TX offload thread before
-    DMA mappings and queue entries are allocated. If later setup fails, the
-    error path returns the QP to the free bitmap without stopping the
-    thread. A retry can then reinitialize its waitqueue while the old thread
-    is still waiting on it.
-   =20
-    Start the thread after queue setup.
-   =20
-    Fixes: 322617a06c97 ("NTB: ntb_transport: Add 'tx_memcpy_offload' modul=
-e option")
-    Signed-off-by: Koichiro Den <den@valinux.co.jp>
+This commit attempts to protect against concurrent memory window teardown
+by adding lockless READ_ONCE()/WRITE_ONCE() and NULL checks for
+qp->remote_rx_info during debugfs reads, link down resets, and TX free
+entry calculations.
 
 > diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-> index 3389d6ca9ebd2..55a20ae9a85e6 100644
+> index 55a20ae9a85e6..944d38c7efd3f 100644
 > --- a/drivers/ntb/ntb_transport.c
 > +++ b/drivers/ntb/ntb_transport.c
-> @@ -2055,20 +2055,6 @@ ntb_transport_create_queue(void *data, struct devi=
-ce *client_dev,
+[ ... ]
+> @@ -514,7 +515,9 @@ static int ntb_qp_debugfs_stats_show(struct seq_file =
+*s, void *v)
+>  	seq_printf(s, "tx_err_no_buf - %llu\n", qp->tx_err_no_buf);
+>  	seq_printf(s, "tx_mw - \t0x%p\n", qp->tx_mw);
+>  	seq_printf(s, "tx_index (H) - \t%u\n", qp->tx_index);
+> -	seq_printf(s, "RRI (T) - \t%u\n", qp->remote_rx_info->entry);
+> +	remote_rx_info =3D READ_ONCE(qp->remote_rx_info);
+> +	if (remote_rx_info)
+> +		seq_printf(s, "RRI (T) - \t%u\n", remote_rx_info->entry);
 
 [Severity: High]
-This isn't a bug introduced by this patch, but does this function have a ra=
-ce
-condition when modifying the shared bitmap?
+This isn't a bug introduced by this patch, but does this lockless NULL check
+fully protect against use-after-free here?
 
-If multiple client drivers invoke ntb_transport_create_queue() concurrently,
-they might observe the same free_queue bit:
+If a thread executing ntb_qp_debugfs_stats_show() reads qp->remote_rx_info
+and passes the NULL check, but is then preempted before dereferencing it:
 
-drivers/ntb/ntb_transport.c:ntb_transport_create_queue() {
-    ...
-    free_queue =3D ffs(nt->qp_bitmap_free);
-    if (!free_queue)
-        goto err;
-    ...
-    free_queue--;
-    qp =3D &nt->qp_vec[free_queue];
-    qp_bit =3D BIT_ULL(qp->qp_num);
-    nt->qp_bitmap_free &=3D ~qp_bit;
-    ...
-}
+Thread 1
+ntb_qp_debugfs_stats_show()
+    remote_rx_info =3D READ_ONCE(qp->remote_rx_info);
+    if (remote_rx_info)
 
-Because these modifications to nt->qp_bitmap_free are done without holding =
-any
-locks, can this lead to assigning the same queue pair to multiple clients?
+Thread 2
+ntb_qp_link_cleanup()
+    ntb_free_mw() clears pointer and frees backing DMA memory
 
-[Severity: High]
-This is a pre-existing issue, but does the error path in this function leak
-the DMA mapping?
+Could Thread 1 then resume and dereference the locally cached pointer,
+accessing freed memory?
 
-If dma_map_resource() succeeds but returns 0 (which is a valid DMA address =
-on
-some architectures), and a subsequent setup step fails, the error path does
-this:
-
-drivers/ntb/ntb_transport.c:ntb_transport_create_queue() {
-    ...
-err1:
-    ...
-    if (qp->tx_mw_dma_addr)
-        dma_unmap_resource(qp->tx_dma_chan->device->dev,
-                           qp->tx_mw_dma_addr, qp->tx_mw_size,
-                           DMA_FROM_DEVICE, 0);
-    ...
-}
-
-Since 0 evaluates to false, the mapping is skipped and leaked. Should this
-check against DMA_MAPPING_ERROR or use a dedicated boolean flag instead?
-
->  	qp->tx_handler =3D handlers->tx_handler;
->  	qp->event_handler =3D handlers->event_handler;
+[ ... ]
+> @@ -917,9 +920,12 @@ static void ntb_qp_link_context_reset(struct ntb_tra=
+nsport_qp *qp)
 > =20
-[ ... ]
->  	dma_cap_zero(dma_mask);
->  	dma_cap_set(DMA_MEMCPY, dma_mask);
-> =20
-[ ... ]
-> @@ -2129,6 +2115,20 @@ ntb_transport_create_queue(void *data, struct devi=
-ce *client_dev,
-[ ... ]
-> +	init_waitqueue_head(&qp->tx_offload_wq);
-> +	qp->tx_offload_thread =3D NULL;
-> +	if (tx_memcpy_offload) {
-> +		qp->tx_offload_thread =3D kthread_run(ntb_tx_memcpy_kthread, qp,
-> +						    "ntb-txcpy/%s/%u",
-> +						    pci_name(ndev->pdev), qp->qp_num);
-> +		if (IS_ERR(qp->tx_offload_thread)) {
-> +			dev_warn(&nt->ndev->dev,
-> +				 "tx memcpy offload thread creation failed: %ld; falling back to inl=
-ine copy\n",
-> +				 PTR_ERR(qp->tx_offload_thread));
-> +			qp->tx_offload_thread =3D NULL;
-> +		}
-> +	}
+>  static void ntb_qp_link_down_reset(struct ntb_transport_qp *qp)
+>  {
+> +	struct ntb_rx_info *remote_rx_info;
 > +
->  	ntb_db_clear(qp->ndev, qp_bit);
->  	ntb_db_clear_mask(qp->ndev, qp_bit);
+>  	ntb_qp_link_context_reset(qp);
+> -	if (qp->remote_rx_info)
+> -		qp->remote_rx_info->entry =3D qp->rx_max_entry - 1;
+> +	remote_rx_info =3D READ_ONCE(qp->remote_rx_info);
+> +	if (remote_rx_info)
+> +		remote_rx_info->entry =3D qp->rx_max_entry - 1;
 
 [Severity: High]
-This isn't a bug introduced by this patch, but does the offload thread clea=
-nup
-in ntb_transport_free_queue() leave a dangling pointer?
+This is a pre-existing issue, but does this write expose a similar window
+for a write-after-free?
 
-When the thread is stopped, the pointer is set to NULL after the thread exi=
-ts:
+If remote_rx_info is checked for NULL, but the backing memory is freed by
+ntb_free_mw() before the assignment to remote_rx_info->entry, could this
+corrupt reallocated memory?
 
-drivers/ntb/ntb_transport.c:ntb_transport_free_queue() {
-    ...
-    kthread_stop(qp->tx_offload_thread);
-    qp->tx_offload_thread =3D NULL;
-    ...
-}
+[ ... ]
+> @@ -2487,8 +2493,14 @@ EXPORT_SYMBOL_GPL(ntb_transport_max_size);
+> =20
+>  unsigned int ntb_transport_tx_free_entry(struct ntb_transport_qp *qp)
+>  {
+> +	struct ntb_rx_info *remote_rx_info =3D READ_ONCE(qp->remote_rx_info);
+>  	unsigned int head =3D qp->tx_index;
+> -	unsigned int tail =3D qp->remote_rx_info->entry;
+> +	unsigned int tail;
+> +
+> +	if (!remote_rx_info)
+> +		return 0;
+> +
+> +	tail =3D remote_rx_info->entry;
 
-If a concurrent DMA transaction aborts before the DMA engine is fully
-terminated, ntb_tx_copy_callback() might evaluate ntb_tx_offload_enabled():
+[Severity: High]
+This is a pre-existing issue, but is the lockless NULL check in
+ntb_transport_tx_free_entry() sufficient to prevent a use-after-free
+read during network TX?
 
-drivers/ntb/ntb_transport.c:ntb_tx_offload_enabled() {
-    return tx_memcpy_offload && qp && qp->tx_offload_thread;
-}
-
-Because the pointer is still non-NULL until kthread_stop() returns, the ent=
-ry
-is added to tx_offl_q.
-
-Since the thread is dead, it will never process the queue, and the underlyi=
-ng
-client data buffers (like network socket buffers) will be permanently leaked
-when tx_offl_q entries are subsequently cleaned up.
-
-[Severity: Medium]
-This is a pre-existing issue, but does ntb_tx_copy_callback() have unprotec=
-ted
-modifications to statistics?
-
-drivers/ntb/ntb_transport.c:ntb_tx_copy_callback() {
-    ...
-    qp->tx_bytes +=3D len;
-    ...
-}
-
-When a high volume of traffic triggers concurrent increments from multiple
-contexts (e.g., DMA callbacks and the Tx offload kthread), can this 64-bit
-statistic suffer from data races or torn updates on 32-bit platforms without
-locking or u64_stats_sync protection?
+Similar to the debugfs read, if this is called from the network fast path
+(for example, ndo_start_xmit() calling ntb_transport_tx_enqueue()) and the
+pointer is cached locally, could a concurrent link state change that frees
+the DMA memory cause the subsequent dereference at remote_rx_info->entry
+to access freed memory?
 
 --=20
 Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20260907142429.9519=
-30-1-den@valinux.co.jp?part=3D2
+30-1-den@valinux.co.jp?part=3D3
