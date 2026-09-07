@@ -1,196 +1,123 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1EF4A4EC646
-	for <ntb@lists.linux.dev>; Mon,  7 Sep 2026 14:47:01 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 484C03BB124
+	for <ntb@lists.linux.dev>; Mon,  7 Sep 2026 14:50:44 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788792423; cv=none; b=KtT1ZtVFI7u2gthOy89o7yMkIQT1FV6WQLZx6rrDKJvoKWJ6DC/v07Lk0m/9sXW3GCQ9ZUST4IHb/fheE5l+3zuwXbPbmUuMynzhsZuxj+uqm60DxtQsqqs41dpFca/qDeHFMkgoEOdKfyXqnVOFvtZZE05fbeBNbglH8aeFvlU=
+	t=1788792648; cv=none; b=pjVhE/nKLZbf5IbL+crhS7GQyav5uoiyMsO2DXeMwKLyRzyOS2owcd4w3m3/D0nWdaTl5umlZyTsYYSAAO0tXX8YxnlBDeV6+v1fxn7UDUrs1QiTJAEKOFYHPQkoSQ/o1j+avpNSNw/gKddVbwPUWALdF2GlT24Q7IyqwS+V/b0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788792423; c=relaxed/simple;
-	bh=OSIfhh/GOlFzAgWvAcBwjyf9UhLgUSPOnlu7ch26ouU=;
+	s=arc-20240116; t=1788792648; c=relaxed/simple;
+	bh=v3ery34BxqPD62rsnoJj18JHtB7GTPQLPxayMfio9Ew=;
 	h=From:Subject:To:Cc:In-Reply-To:References:Content-Type:Date:
-	 Message-Id; b=KeBY0ytAhugzR94CalUoSogvK9VK/6ogQQp3jFsqnQuijZ8Vua7tqvildyzBB19URpjHn6HCNYcsWBBrVln7XF9lNsbX1Ras5EfPK5gEPyxfWugkBscDQXAfm4RSwcJaOCoXRF0+b9UyjpOR7MpTX+UUij7GmSdbpJA2w4G29Pk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dkcEcjN9; arc=none smtp.client-ip=100.103.45.18
+	 Message-Id; b=tL6zv3cM6fZ/XoxpeZvsj3PJc+yg0x7rTPDBt/EqP+NkNuCrb0py9VU9GNgBSe3+77gzwUgAtS5bqsXQ4+6+Swvb4sPM0bSrSRwzflJ1cCotegJG/b7vv1bSJlNlDdF6gh2/DutdUvsubh5O19/a1ZfwpEuUi9gUV3NtamAsn4Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=N4BlrLFC; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dkcEcjN9"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 702E41F00A3A;
-	Mon,  7 Sep 2026 14:47:01 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="N4BlrLFC"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 762E71F00A3A;
+	Mon,  7 Sep 2026 14:50:43 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788792421;
-	bh=XzGfxqkQsFJiUjlefX1kezoTW/np8RGVEkBhg6HwwHI=;
+	s=k20260515; t=1788792643;
+	bh=3f5XSnx5BqR1Tz2h82nJCD0TMtdNGeKPar4ohy0r0DA=;
 	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=dkcEcjN9mWFC6O4G65Fc84SMGftflLEmaWyfnbfVSJjbdUzN/uniIsPWOEBpvhqBw
-	 ZkGBJmfoL7uDWT45NPXOLUkbI4OSt9eQeKzVbDAjwZ0aVY5FJUrxMjGBY9y7Lk/g6u
-	 zFa31HJC9i+xr2ygbS0DNv5KS/gz8l8BLgn47D1l2CKC/P4NsYa+8FGsGhY12vi+fk
-	 dDTsoNZpKQoN0XKWzOIKtiO65Vkuh83wj4acBCxwE5TsRLUWqbkkf5fzW4e99+o0XN
-	 M2dPWl+3GdR+jVtiRrDlIVh8OiteRP+5F+kjGCyY85eH4wPLUIJuHRpSy72D7Fwyz/
-	 SQ5OgEVU89ihw==
+	b=N4BlrLFCIqqBlQDWEtIIYnYw106OAF1NOpGhn453O/jkKzoGxJvXbaP0E5rgSbA2W
+	 Wu+5k9aUP3AQZtjvVBUM7dLehtJjvpfNl4dPAloI4ILdUSnCLRBa/caoWD0TsQnnYm
+	 fEZm7D3MVe69I0ELbPLbwnSWoyg3YZOS4HpdaiaC2NNRpVSMf8ciKbOX1XZwKvHhzw
+	 EgRvyQ2Hi0o3ameN8X28lpvxQyB+LDn+XciyocO+ZfIeu3mrPfNQduPcMlbEiwniGE
+	 QHiC0iV24k+/LqE3j3Ia9BtoIvAhrSIoqCZBqoSQJeJN6DCygpyE7ScdMxb6H/NcCP
+	 zNeeDky2AGa6A==
 From: sashiko-bot@kernel.org
-Subject: Re: [PATCH 06/11] NTB: ntb_transport: Publish link state after QP
- setup
+Subject: Re: [PATCH 11/11] NTB: ntb_transport: Drain RX tasklets during link
+ cleanup
 Reply-To: sashiko-reviews@lists.linux.dev
 To: "Koichiro Den" <den@valinux.co.jp>
 Cc: ntb@lists.linux.dev
-In-Reply-To: <20260907142429.951930-7-den@valinux.co.jp>
+In-Reply-To: <20260907142429.951930-12-den@valinux.co.jp>
 References: <20260907142429.951930-1-den@valinux.co.jp>
- <20260907142429.951930-7-den@valinux.co.jp>
+ <20260907142429.951930-12-den@valinux.co.jp>
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
-Date: Mon, 07 Sep 2026 14:47:00 +0000
-Message-Id: <20260907144701.702E41F00A3A@smtp.kernel.org>
+Date: Mon, 07 Sep 2026 14:50:42 +0000
+Message-Id: <20260907145043.762E71F00A3A@smtp.kernel.org>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 
-Thank you for your contribution! Sashiko AI review found 3 potential issue(=
+Thank you for your contribution! Sashiko AI review found 1 potential issue(=
 s) to consider:
 
-New issues:
-- [High] Store-Load memory ordering race between `nt->link_is_up` and `qp->=
-client_ready` allows both threads to miss link scheduling, potentially dead=
-locking link establishment.
-
 Pre-existing issues:
-- [High] Workqueue teardown race leading to Use-After-Free during `ntb_tran=
-sport_free()`.
-- [High] Missing minimum size validation for memory windows causes an integ=
-er underflow when calculating tx_size and rx_size, leading to massive out-o=
-f-bounds MMIO writes and kernel heap memory corruption.
+- [High] In-flight RX DMA transfers are not drained during link cleanup bef=
+ore freeing Memory Window (MW) buffers, leading to DMA Use-After-Free, Read=
+-After-Free, and potential information leaks.
 --
 
-commit 07de6dd89d3b67c6e867804f1d8d493ce3b736ff
+commit 0ffb444fbfb867ed6e5c68ad186229e763417ba5
 Author: Koichiro Den <den@valinux.co.jp>
+NTB: ntb_transport: Drain RX tasklets during link cleanup
 
-NTB: ntb_transport: Publish link state after QP setup
-
-This commit delays publishing the transport link state until all QPs' MW and
-peer MSI states are set up. It uses a release store for link state publicat=
-ion
-and acquire loads before queuing QP link work to avoid premature execution.
-
-Link: https://lore.kernel.org/r/anyKbq3mpLG4y7rb@SMW015318
+This commit modifies the queue pair link cleanup process to explicitly drain
+and kill the receive tasklet. It temporarily disables the queue pair link
+work to prevent concurrent reactivations while resetting the queue pair.
 
 > diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-> index c8e7fc774b4fd..411017873a83b 100644
 > --- a/drivers/ntb/ntb_transport.c
 > +++ b/drivers/ntb/ntb_transport.c
-
-[ ... ]
-
-> @@ -1102,16 +1109,19 @@ static void ntb_transport_link_work(struct work_s=
-truct *work)
->  			goto out1;
->  	}
+> @@ -969,11 +969,16 @@ static void ntb_qp_link_cleanup(struct ntb_transpor=
+t_qp *qp)
 > =20
->  	for (i =3D 0; i < nt->qp_count; i++) {
->  		ntb_transport_setup_qp_mw(nt, i);
->  		ntb_transport_setup_qp_peer_msi(nt, i);
-> +	}
-> +
-> +	/* Publish the link only after every QP has been set up. */
-> +	smp_store_release(&nt->link_is_up, true);
-> +
-> +	for (i =3D 0; i < nt->qp_count; i++) {
-> +		struct ntb_transport_qp *qp =3D &nt->qp_vec[i];
+>  	dev_info(&pdev->dev, "qp %d: Link Cleanup\n", qp->qp_num);
 > =20
->  		if (qp->client_ready)
-> -			schedule_delayed_work(&qp->link_work, 0);
-> +			ntb_transport_schedule_qp_link(qp, 0);
+> -	cancel_delayed_work_sync(&qp->link_work);
+> +	disable_delayed_work_sync(&qp->link_work);
+> +	ntb_transport_set_qp_active(qp, false);
+> +	tasklet_kill(&qp->rxc_db_work);
 
 [Severity: High]
-Does this code have a Store-Load memory ordering race that could lead to a
-deadlock?
+This isn't a bug introduced by this patch, but while we are draining the
+tasklet here, does this code still leave in-flight RX DMA transfers active
+when the memory window is subsequently freed?
 
-In this thread, ntb_transport_link_work() performs a release store to
-nt->link_is_up, followed by a plain load of qp->client_ready.
-
-Meanwhile, ntb_transport_link_up() performs a plain store to qp->client_rea=
-dy,
-followed by an acquire load of nt->link_is_up via
-ntb_transport_schedule_qp_link():
-
-drivers/ntb/ntb_transport.c:ntb_transport_link_up() {
-    ...
-    qp->client_ready =3D true;
-    ntb_transport_schedule_qp_link(qp, 0);
-    ...
-}
-
-Since neither smp_store_release() nor smp_load_acquire() provides a full
-memory barrier (Store-Load ordering), is it possible for both threads to de=
-lay
-their stores in the CPU store buffer? If this happens, both threads could r=
-ead
-false and miss the wakeup, leaving the link permanently inactive.
-
-[ ... ]
-
-[Severity: High]
-This is a pre-existing issue, but is there a use-after-free race during
-workqueue teardown?
-
-Looking at ntb_transport_free(), the delayed work is canceled before the
-hardware events are neutralized:
-
-drivers/ntb/ntb_transport.c:ntb_transport_free() {
-    ...
-    ntb_transport_link_cleanup(nt);
-    cancel_work_sync(&nt->link_cleanup);
-    cancel_delayed_work_sync(&nt->link_work);
-
-    qp_bitmap_alloc =3D nt->qp_bitmap & ~nt->qp_bitmap_free;
-
-    /* verify that all the qp's are freed */
-    for (i =3D 0; i < nt->qp_count; i++) {
-        qp =3D &nt->qp_vec[i];
-        if (qp_bitmap_alloc & BIT_ULL(i))
-            ntb_transport_free_queue(qp);
-    }
-
-    ntb_link_disable(ndev);
-    ntb_clear_ctx(ndev);
-    ...
-}
-
-If a hardware link event fires between cancel_delayed_work_sync() and
-ntb_clear_ctx(), the interrupt handler could requeue the work item. After
-ntb_transport_free() finishes freeing the context, couldn't the requeued wo=
-rk
-execute and dereference the freed memory?
-
-[Severity: High]
-This is a pre-existing issue, but does this code lack minimum size validati=
+When a link down event occurs, ntb_transport_link_cleanup() calls
+ntb_qp_link_cleanup(), which now successfully kills the rxc_db_work tasklet.
+However, it does not appear to wait for or terminate pending DMA transfers =
 on
-for memory windows, leading to a potential integer underflow?
+qp->rx_dma_chan. After this function returns, ntb_transport_link_cleanup()
+proceeds to call ntb_free_mw(), which returns the physical memory to the
+system via dma_free_attrs().
 
-In ntb_transport_init_queue(), the tx_size calculation unconditionally subt=
-racts
-the size of the struct:
+If the hardware DMA engine is executing asynchronously, couldn't it
+continue reading from or writing to this freed physical memory, potentially
+causing a DMA use-after-free or data leak?
 
-drivers/ntb/ntb_transport.c:ntb_transport_init_queue() {
-    ...
-    tx_size -=3D sizeof(struct ntb_rx_info);
-    ...
+Furthermore, when the DMA asynchronous transfer completes, the
+ntb_rx_copy_callback() function could be invoked:
+
+ntb_rx_copy_callback() {
+	...
+	offset =3D qp->rx_buff + qp->rx_max_frame * qp->rx_index;
+	...
 }
 
-Similarly, in ntb_transport_setup_qp_mw():
+Since ntb_free_mw() sets qp->rx_buff to NULL, could this result in a NULL
+pointer dereference? Additionally, on success, ntb_complete_rxc() attempts
+to write to entry->rx_hdr, which points into the now-freed memory window,
+which could cause a software use-after-free.
 
-drivers/ntb/ntb_transport.c:ntb_transport_setup_qp_mw() {
-    ...
-    rx_size -=3D sizeof(struct ntb_rx_info);
-    ...
-}
+Is it possible we also need to drain or explicitly terminate the DMA channel
+transfers before resetting the link context and returning?
 
-If tx_size or rx_size is less than 4 bytes, this will underflow. For tx_siz=
-e,
-setting the max_mw_size module parameter to a small value could trigger an
-underflow. For rx_size, if a remote peer advertises a window size that
-truncates to 0, could it underflow and lead to out-of-bounds MMIO writes
-or memory corruption?
+> +
+>  	ntb_qp_link_down_reset(qp);
+> =20
+>  	if (qp->event_handler)
+>  		qp->event_handler(qp->cb_data, qp->link_is_up);
+> +
+> +	enable_delayed_work(&qp->link_work);
+>  }
 
 --=20
 Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20260907142429.9519=
-30-1-den@valinux.co.jp?part=3D6
+30-1-den@valinux.co.jp?part=3D11
