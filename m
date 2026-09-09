@@ -1,222 +1,144 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5DA593DD87F
-	for <ntb@lists.linux.dev>; Wed,  9 Sep 2026 15:11:29 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B77B4569F14;
+	Wed,  9 Sep 2026 16:09:51 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788966691; cv=none; b=Gxifa4d3rXUn31zM9WdpiNewEcg2jZI7o5D/ZUpamklB0ANM9GWXYBORH1QYADU01TBXnMb5LtJW7l8K2V3McaY6SCJiY0gJ4l2W3/Bmpy0zG5m8jMWjJqJgLAabCOAkXmI205/SDXCYcP7ofumiSf1bfFjgS1L3aWDwRdJ4Tvk=
+	t=1788970193; cv=none; b=nXgVhnFpXP2GKwl6isXD+9iMeWQ7XNURVqZdZORjnJHkktoy2Pp8qg1i+8e1iWMDgrRV+M2UpveOEmWt/IzmN0JtGYr1xdkb1ehUGkWtAD+5ZgAlymHq130JaQATZTVypWHn0q7vec6snKilsyhytlEidv8/Ml3ARlXcgnSwxdI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788966691; c=relaxed/simple;
-	bh=PKamnqAUFVh4pPE1s3usuRTUmbgs3EuUo1qW230OBnk=;
-	h=From:Subject:To:Cc:In-Reply-To:References:Content-Type:Date:
-	 Message-Id; b=hoxWv0O4mP+bN8a+ZlSubIvLGsqz/yyNio7ZcaqmtKduROJMfcnIJ05ahH6QKHiNkH+KfqlNZZmbYu+nxWJVaRXFLf7vLj6yJMchigigREI4/p1gMxBKdHv/fes9trQaOMGpPwNztR9GyphGJeXJDPZy9G5Kos8Omma9b8Mu4cc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=SiXl97Io; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1788970193; c=relaxed/simple;
+	bh=DuSqGtr4ac4x/SYdfjrPWImbLKom++9KwKXchZw9Jyg=;
+	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition:In-Reply-To; b=JEhysQ2pw+6jHJVH3taTkk7qf9R0Pa+0DrrJd2KdP6Amwnf8SPJXwIy5AEUE8am539pZZhftfToJB8jfQ6JW6kKFxXBLMLuNS/cx0HcDX3jSqWOhOPFmN+smAsycpBOgIU09InTUQ/+BFOvIL3r6Iqi+/mofY0z0rwaom6i6ySI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=FwbQO67O; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="SiXl97Io"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BD3E71F00A3A;
-	Wed,  9 Sep 2026 15:11:28 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="FwbQO67O"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 33CAE1F00A3D;
+	Wed,  9 Sep 2026 16:09:51 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788966688;
-	bh=Mcc0tAHTZos39RcbxQJxHsMmtFM3no6oC/Qn4w5OyP4=;
-	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=SiXl97Ion7esqBLRpCVTeRA0MBadYXV40lvPzJ0ayD9vUKRsvNuGLUW+JOaDHhNSM
-	 dMRxfPniIEF9JdtxksWOXoHQUBt3WgzJ7R+3uOynW8RGhKeXJw5MQGH/qgWcJN93Nt
-	 EcAwWqjj+QiUkzRzMhMYTxA0tsLzrvHp1kI9Bau3TjEfuGjm8kGgLQ3+FLDK8Ygcsp
-	 D5TVAaFjRsw2HFynvmoU0CLlR0N3sz33UsPTGZO9JAFcV+w1kESnresbaXP1BkDlNP
-	 IY3xrrOP2Kueo3VfFQlfNT2wI9z+Oqp4EaiJTiNuwTgC/E/rmtM9d+3ghJrgzrTmLT
-	 QGCjPn6TvTHsg==
-From: sashiko-bot@kernel.org
-Subject: Re: [PATCH] NTB: ntb_msi_test: Cancel setup work on remove
-Reply-To: sashiko-reviews@lists.linux.dev
-To: "Fan Wu" <fanwu01@zju.edu.cn>
-Cc: ntb@lists.linux.dev
-In-Reply-To: <20260909145554.704036-1-fanwu01@zju.edu.cn>
-References: <20260909145554.704036-1-fanwu01@zju.edu.cn>
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-Date: Wed, 09 Sep 2026 15:11:28 +0000
-Message-Id: <20260909151128.BD3E71F00A3A@smtp.kernel.org>
+	s=k20260515; t=1788970191;
+	bh=k7U7NlQUuGTnB1mNS12xNiflYBCMFQmx5qYIiQYXvfQ=;
+	h=Date:From:To:Cc:Subject:In-Reply-To;
+	b=FwbQO67O9tonJyOuoS+/VXiNUY8LxWCyXIQEKXWncjnoCvuaqWprI3yUqpiThorVC
+	 4XIdQY2LfJKE/I0k10SX4U3rNGWsofvjTypV9LdPpEv4t61dbxcwdodg40xITNxuX9
+	 ENKWwffvvKFFyoMb5qmX+qP4LP1M2Bpu6muFs3viqMzIE+SJEinhgoc9vnEbXqYGjq
+	 QVRtnznTbM20wJdOD9hOG8ckbvGjgknMHF3XsS/ZImNr7OpaR08DxBw6WNH+4MC8Y9
+	 T5g733+Do2gugpBDIhSY3B9AvkGiFmctb3WVw1nGhNWlK/AjOm/lYDsRnZFM/Y6DeL
+	 CFclf3+5u7WOA==
+Date: Wed, 9 Sep 2026 11:09:49 -0500
+From: Bjorn Helgaas <helgaas@kernel.org>
+To: Koichiro Den <den@valinux.co.jp>
+Cc: Manivannan Sadhasivam <mani@kernel.org>, Frank Li <Frank.Li@nxp.com>,
+	Niklas Cassel <cassel@kernel.org>,
+	Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kwilczynski@kernel.org>,
+	Kishon Vijay Abraham I <kishon@kernel.org>,
+	Bjorn Helgaas <bhelgaas@google.com>, Jon Mason <jdmason@kudzu.us>,
+	Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>,
+	linux-pci@vger.kernel.org, ntb@lists.linux.dev,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH 1/3] PCI: endpoint: pci-epf-vntb: Pass PF/VF number when
+ BAR programming
+Message-ID: <20260909160949.GA216221@bhelgaas>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <rmso2szdpfjy4qoqalhhpf3zxzn2te25m573qmwmpmoilk5jz2@arvvr4hdzbbj>
 
-Thank you for your contribution! Sashiko AI review found 6 potential issue(=
-s) to consider:
+On Wed, Sep 09, 2026 at 01:53:53PM +0900, Koichiro Den wrote:
+> On Tue, Sep 08, 2026 at 09:23:11PM -0500, Bjorn Helgaas wrote:
+> > On Wed, Sep 09, 2026 at 11:01:48AM +0900, Koichiro Den wrote:
+> > > On Tue, Sep 08, 2026 at 11:53:15AM -0500, Bjorn Helgaas wrote:
+> > > > On Wed, Jul 29, 2026 at 02:23:04AM +0900, Koichiro Den wrote:
+> > > > > vntb_epf_mw_set_trans() programs the memory-window BAR through
+> > > > > pci_epc_set_bar() with hardcoded function numbers (0, 0), so the BAR
+> > > > > lands on the wrong function whenever the vNTB EPF is bound to anything
+> > > > > but PF0. The other BAR programming sites in the vNTB driver already pass
+> > > > > the EPF's own numbers.
+> > > > > 
+> > > > > Pass the EPF's own func_no/vfunc_no here as well.
+> > > > 
+> > > > We're referring to these as "PF" and "VF" in the subject and "physical
+> > > > endpoint function" and "virtual endpoint function" in the
+> > > > pci_epc_set_bar() kernel-doc, but I don't think these have anything to
+> > > > do with the SR-IOV PF and VF concepts, do they?
+> > > 
+> > > Not in the specific case that motivated this series. But AFAICT, the EPC API
+> > > uses the same (func_no, vfunc_no) pair to cover both ordinary functions and
+> > > SR-IOV PFs/VFs scenarios. With vfunc_no == 0, func_no can identify either an
+> > > ordinary function or an SR-IOV PF. A non-zero vfunc_no identifies a VF
+> > > associated with the PF selected by func_no.
+> > 
+> > Now I'm even more confused :)
+> > 
+> > Are you saying that a non-zero vfunc_no always identifies an SR-IOV
+> > VF?  And there's some dependency on that?  I don't any mention of
+> > "iov" in drivers/pci/endpoint/.
+> 
+> Yes, that is my understanding of the current in-tree implementation. You're
+> right that drivers/pci/endpoint/ itself contains no explicit reference to
+> SR-IOV. E.g. pci_epf_add_vepf() just calls it a "virtual EP function".
+> So my saying was kind of assumptive, but I still think the same because:
+> 
+> - The support was introduced for SR-IOV:
+>   https://lore.kernel.org/r/20210819123343.1951-1-kishon@ti.com/
+> 
+> - The core rejects a non-zero vfunc_no unless the EPC provides max_vfs, and
+>   Cadence is the only in-tree EPC driver I found that does so. For example,
+>   cdns_pcie_ep_set_bar() calls cdns_pcie_get_fn_from_vfn(), which uses the
+>   SR-IOV First VF Offset and VF Stride for a non-zero vfn.
 
-New issues:
-- [High] Interrupt Storm / Hardware State Machine Violation due to incorrec=
-t teardown ordering
+Thanks, that's helpful.  I still have to work hard to change my point
+of view from host-side drivers to endpoint drivers operating on the
+other end of the link.  The fact that there are several interfaces
+that need (func_no, vfunc_no) suggests that callers really do need to
+understand what's going on, and maybe we should try to connect the
+kernel-doc and abbreviations more closely with PCIe spec terms.
 
-Pre-existing issues:
-- [High] Use-After-Free of `msi_desc` due to late removal of debugfs files
-- [High] Data Race / Use-After-Free in `ntb_msit_db_event()` and `ntb_msit_=
-dbgfs_trigger()`
-- [High] Out-of-Bounds Memory Access in `ntb_msit_db_event()`
-- [High] Buffer Overflow via Mutable `num_irqs` Module Parameter
-- [High] NULL Pointer Dereference in `ntb_msit_desc_changed()` / `ntb_msi_w=
-rite_msg()`
---
+E.g., if "physical EP function" and "virtual EP function" refer to
+SR-IOV PF and VF, maybe we should word them as "endpoint PF" or
+"endpoint VF" (or "EP PF", "EP VF" for short).  If
+"pci_epf_add_vepf()" adds an SR-IOV VF, maybe "pci_epf_add_vf()" would
+be descriptive enough.  We already know we're on the endpoint because
+of "epf", so we probably don't need another hint in "vepf", which
+includes a "pf" that doesn't mean SR-IOV PF.
 
-commit 2afad66772e5fa9c2078f36f9787cff1b0e7d42e
-Author: Fan Wu <fanwu01@zju.edu.cn>
-
-NTB: ntb_msi_test: Cancel setup work on remove
-
-The MSI test client queues setup_work from the link event callback, but
-ntb_msit_remove() never cancels it. This commit quiesces the callbacks and
-drains the work in ntb_msit_remove() before tearing down the resources to
-prevent a use-after-free.
-
-> diff --git a/drivers/ntb/test/ntb_msi_test.c b/drivers/ntb/test/ntb_msi_t=
-est.c
-> index f52d409ba6d29..72695d5601957 100644
-> --- a/drivers/ntb/test/ntb_msi_test.c
-> +++ b/drivers/ntb/test/ntb_msi_test.c
-> @@ -391,13 +391,15 @@ static void ntb_msit_remove(struct ntb_client *clie=
-nt, struct ntb_dev *ntb)
->  	int i;
-> =20
->  	ntb_link_disable(ntb);
-> +	ntb_clear_ctx(ntb);
-> +	cancel_work_sync(&nm->setup_work);
-> +
->  	ntb_db_set_mask(ntb, ntb_db_valid_mask(ntb));
-
-[Severity: High]
-Does moving ntb_clear_ctx() before ntb_db_set_mask() create a race window
-where context callbacks are removed, but hardware doorbell interrupts are
-still unmasked and can fire?
-
-If a doorbell interrupt occurs from the peer NTB device right after
-ntb_clear_ctx() but before ntb_db_set_mask(), the core NTB interrupt handler
-will ignore it because ntb->ctx_ops is NULL.
-
-Since the doorbell callback is never executed, the hardware doorbell bits a=
-re
-not cleared. Because the interrupt is often level-triggered, could this res=
-ult
-in the unhandled hardware interrupt continuously firing and causing an
-interrupt storm?
-
->  	ntb_msi_clear_mws(ntb);
-> =20
->  	for (i =3D 0; i < ntb_peer_port_count(ntb); i++)
->  		kfree(nm->peers[i].msi_desc);
-> =20
-> -	ntb_clear_ctx(ntb);
->  	ntb_msit_remove_dbgfs(nm);
-
-[Severity: High]
-This is a pre-existing issue, but does freeing the msi_desc array before
-removing the debugfs files expose a use-after-free?
-
-Because the debugfs files are created with debugfs_create_file_unsafe(), the
-VFS does not protect concurrent file operations against debugfs removal.
-
-If user-space reads or writes to the debugfs trigger file concurrently with
-module removal, could ntb_msit_dbgfs_trigger() dereference the freed msi_de=
-sc
-array?
-
-[Severity: High]
-This is a pre-existing issue, but is there a data race and use-after-free
-between ntb_msit_db_event() and ntb_msit_dbgfs_trigger()?
-
-ntb_msit_dbgfs_trigger() locklessly dereferences peer->msi_desc. Concurrent=
-ly,
-ntb_msit_db_event() can be invoked in interrupt or work context and blindly
-re-allocates nm->peers[peer].msi_desc:
-
-drivers/ntb/test/ntb_msi_test.c:ntb_msit_db_event() {
-    ...
-		kfree(nm->peers[peer].msi_desc);
-		nm->peers[peer].msi_desc =3D desc;
-    ...
-}
-
-Because there is zero locking protecting this shared array across these
-functions, can this cause kernel memory corruption?
-
-[Severity: High]
-This is a pre-existing issue, but does ntb_msit_db_event() have an
-out-of-bounds memory access when handling physical port numbers?
-
-ntb_msit_db_event() directly uses the set bit index in peer_mask as the arr=
-ay
-index (peer) for nm->peers[peer]:
-
-drivers/ntb/test/ntb_msi_test.c:ntb_msit_db_event() {
-    ...
-	for (peer =3D 0; peer < sizeof(peer_mask) * 8; peer++) {
-		if (!(peer_mask & BIT(peer)))
-			continue;
-        ...
-		kfree(nm->peers[peer].msi_desc);
-		nm->peers[peer].msi_desc =3D desc;
-		nm->peers[peer].num_irqs =3D irq_count;
-    ...
-}
-
-The nm->peers array is sized strictly to ntb_peer_port_count(ntb), which is
-typically 1 in a 2-port topology. If the bit index (which is the sender's
-physical port number) is 1, does accessing nm->peers[1] result in reading
-out-of-bounds memory and subsequently calling kfree() on a junk pointer?
-
-[Severity: High]
-This is a pre-existing issue, but does ntb_msit_setup_work() have a buffer
-overflow vulnerability due to the mutable num_irqs module parameter?
-
-The global num_irqs module parameter is defined with 0644 permissions,
-allowing runtime modification. The nm->isr_ctx buffer is allocated once
-during probe using the initial num_irqs value.=20
-
-drivers/ntb/test/ntb_msi_test.c:ntb_msit_setup_work() {
-    ...
-	for (i =3D 0; i < num_irqs; i++) {
-		nm->isr_ctx[i].irq_idx =3D i;
-    ...
-}
-
-If a privileged user increases num_irqs at runtime, and a link up event
-triggers ntb_msit_setup_work(), could it dynamically iterate over the array
-up to the new global num_irqs and write far past the bounds of nm->isr_ctx?
-
-[Severity: High]
-This is a pre-existing issue, but is there a NULL pointer dereference in
-ntb_msi_write_msg() and ntb_msit_desc_changed()?
-
-In ntb_msi_write_msg(), dr->ntb->ctx is read locklessly and passed directly=
- to
-the desc_changed callback:
-
-drivers/ntb/msi.c:ntb_msi_write_msg() {
-    ...
-	if (dr->ntb->msi->desc_changed)
-		dr->ntb->msi->desc_changed(dr->ntb->ctx);
-    ...
-}
-
-ntb_msit_remove() invokes ntb_clear_ctx(), setting ntb->ctx =3D NULL. The I=
-RQ
-descriptors remain active because devres cleanup happens much later in the
-device teardown cycle.=20
-
-drivers/ntb/test/ntb_msi_test.c:ntb_msit_desc_changed() {
-	struct ntb_msit_ctx *nm =3D ctx;
-	int i;
-
-	dev_dbg(&nm->ntb->dev, "MSI Descriptors Changed\n");
-    ...
-}
-
-If a concurrent MSI write event happens simultaneously with device removal,
-could ntb_msit_desc_changed() receive a NULL context pointer and
-unconditionally dereference it?
->  }
-
---=20
-Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20260909145554.7040=
-36-1-fanwu01@zju.edu.cn?part=3D1
+> > > > I don't have a better naming suggestion, but this is slightly
+> > > > confusing.
+> > > 
+> > > Perhaps a better subject might be:
+> > > 
+> > >   PCI: endpoint: pci-epf-vntb: Pass (func_no, vfunc_no) when programming BARs
+> > > 
+> > > Best regards,
+> > > Koichiro
+> > > 
+> > > > 
+> > > > > Fixes: e35f56bb0330 ("PCI: endpoint: Support NTB transfer between RC and EP")
+> > > > > Signed-off-by: Koichiro Den <den@valinux.co.jp>
+> > > > > ---
+> > > > >  drivers/pci/endpoint/functions/pci-epf-vntb.c | 3 ++-
+> > > > >  1 file changed, 2 insertions(+), 1 deletion(-)
+> > > > > 
+> > > > > diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> > > > > index c3caec927d74..fba65abfb6b2 100644
+> > > > > --- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> > > > > +++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> > > > > @@ -1427,7 +1427,8 @@ static int vntb_epf_mw_set_trans(struct ntb_dev *ndev, int pidx, int idx,
+> > > > >  	epf_bar->barno = barno;
+> > > > >  	epf_bar->size = size;
+> > > > >  
+> > > > > -	ret = pci_epc_set_bar(ntb->epf->epc, 0, 0, epf_bar);
+> > > > > +	ret = pci_epc_set_bar(ntb->epf->epc, ntb->epf->func_no,
+> > > > > +			      ntb->epf->vfunc_no, epf_bar);
+> > > > >  	if (ret) {
+> > > > >  		dev_err(dev, "failure set mw trans\n");
+> > > > >  		return ret;
+> > > > > -- 
+> > > > > 2.51.0
+> > > > > 
