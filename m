@@ -1,115 +1,222 @@
-Received: from azure-sdnproxy.icoremail.net (azure-sdnproxy.icoremail.net [52.187.6.220])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 006E656C63E
-	for <ntb@lists.linux.dev>; Wed,  9 Sep 2026 14:57:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=52.187.6.220
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5DA593DD87F
+	for <ntb@lists.linux.dev>; Wed,  9 Sep 2026 15:11:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788965827; cv=none; b=IUKCJZwM4SyBgpigliJUX3EXPvYXNplt4NBQXysL0qFS4WXMc3fa4nxbFSKCjYR20L4ZHgSUmCUwRuHFBHSxcaszrfZOayHQutPIKZckWEh7nXJ5LWfKGtLT2kddlsdxs1A4qtldwDNB/ylVi0Zb9aryHZGJBfe/19LdmqWGu2A=
+	t=1788966691; cv=none; b=Gxifa4d3rXUn31zM9WdpiNewEcg2jZI7o5D/ZUpamklB0ANM9GWXYBORH1QYADU01TBXnMb5LtJW7l8K2V3McaY6SCJiY0gJ4l2W3/Bmpy0zG5m8jMWjJqJgLAabCOAkXmI205/SDXCYcP7ofumiSf1bfFjgS1L3aWDwRdJ4Tvk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788965827; c=relaxed/simple;
-	bh=h96uvAJIcFvW/gvc9/E2ZoaxXrEGFbZ0wNVkmbqJy2E=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=DeOiTlIlCiCTj5QAQw94YW6YhwXvWQnSfEkY6FREO0Az+S9yN3dUfue2Y/8ift2PQbX1O6fzUVyYCXtScfZf+c0/aj7AAiKeOetjUFm/oqBWj9TYi7aucLKIqzz/jLzNl4V98vz5cb/A9FHEn3D/ba3E+x8RZLcmU/LnW/mtD+c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=zju.edu.cn; spf=pass smtp.mailfrom=zju.edu.cn; arc=none smtp.client-ip=52.187.6.220
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=zju.edu.cn
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=zju.edu.cn
-Received: from zju.edu.cn (unknown [10.98.66.117])
-	by mtasvr (Coremail) with SMTP id _____wAn0zy0c6FqOpEDAQ--.3218S3;
-	Wed, 09 Sep 2026 22:56:53 +0800 (CST)
-Received: from localhost.localdomain (unknown [10.98.66.117])
-	by mail-app3 (Coremail) with SMTP id zS_KCgBnMXW0c6Fq1tELBQ--.36455S2;
-	Wed, 09 Sep 2026 22:56:52 +0800 (CST)
-From: Fan Wu <fanwu01@zju.edu.cn>
-To: jdmason@kudzu.us,
-	dave.jiang@intel.com,
-	allenbh@gmail.com
-Cc: logang@deltatee.com,
-	ntb@lists.linux.dev,
-	linux-kernel@vger.kernel.org,
-	stable@vger.kernel.org,
-	Fan Wu <fanwu01@zju.edu.cn>
-Subject: [PATCH] NTB: ntb_msi_test: Cancel setup work on remove
-Date: Wed,  9 Sep 2026 14:55:54 +0000
-Message-Id: <20260909145554.704036-1-fanwu01@zju.edu.cn>
-X-Mailer: git-send-email 2.34.1
+	s=arc-20240116; t=1788966691; c=relaxed/simple;
+	bh=PKamnqAUFVh4pPE1s3usuRTUmbgs3EuUo1qW230OBnk=;
+	h=From:Subject:To:Cc:In-Reply-To:References:Content-Type:Date:
+	 Message-Id; b=hoxWv0O4mP+bN8a+ZlSubIvLGsqz/yyNio7ZcaqmtKduROJMfcnIJ05ahH6QKHiNkH+KfqlNZZmbYu+nxWJVaRXFLf7vLj6yJMchigigREI4/p1gMxBKdHv/fes9trQaOMGpPwNztR9GyphGJeXJDPZy9G5Kos8Omma9b8Mu4cc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=SiXl97Io; arc=none smtp.client-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="SiXl97Io"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BD3E71F00A3A;
+	Wed,  9 Sep 2026 15:11:28 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1788966688;
+	bh=Mcc0tAHTZos39RcbxQJxHsMmtFM3no6oC/Qn4w5OyP4=;
+	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
+	b=SiXl97Ion7esqBLRpCVTeRA0MBadYXV40lvPzJ0ayD9vUKRsvNuGLUW+JOaDHhNSM
+	 dMRxfPniIEF9JdtxksWOXoHQUBt3WgzJ7R+3uOynW8RGhKeXJw5MQGH/qgWcJN93Nt
+	 EcAwWqjj+QiUkzRzMhMYTxA0tsLzrvHp1kI9Bau3TjEfuGjm8kGgLQ3+FLDK8Ygcsp
+	 D5TVAaFjRsw2HFynvmoU0CLlR0N3sz33UsPTGZO9JAFcV+w1kESnresbaXP1BkDlNP
+	 IY3xrrOP2Kueo3VfFQlfNT2wI9z+Oqp4EaiJTiNuwTgC/E/rmtM9d+3ghJrgzrTmLT
+	 QGCjPn6TvTHsg==
+From: sashiko-bot@kernel.org
+Subject: Re: [PATCH] NTB: ntb_msi_test: Cancel setup work on remove
+Reply-To: sashiko-reviews@lists.linux.dev
+To: "Fan Wu" <fanwu01@zju.edu.cn>
+Cc: ntb@lists.linux.dev
+In-Reply-To: <20260909145554.704036-1-fanwu01@zju.edu.cn>
+References: <20260909145554.704036-1-fanwu01@zju.edu.cn>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Date: Wed, 09 Sep 2026 15:11:28 +0000
+Message-Id: <20260909151128.BD3E71F00A3A@smtp.kernel.org>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:zS_KCgBnMXW0c6Fq1tELBQ--.36455S2
-X-CM-SenderInfo: qrstjiaswqq6lmxovvfxof0/
-X-CM-DELIVERINFO: =?B?EAMcSAXKKxbFmtjJiESix3B1w3vZ3A9ovKVTomAyoQazvoRs/NHSP8GI2EvgeEEW7R
-	sfnZPoDCNGYdHSfuFmYJL54WMlFP4rfsrrQsG96E5DvaxSA7dPZChY0xT5almqjCaBI1yD
-	kB8etoL/Q+m8BNffQ+ep9E6mavGmQbzmcFsnzP86
-X-Coremail-Antispam: 1Uk129KBj93XoW7WF17Gry8Ww45ZrWfCryDJwc_yoW8uFy3pr
-	15ZryY9ayktanrAanrXayjv3WFyws3AFWxGryfGwnrZF15AFyUKa43tayayr48JrW8ZFn3
-	Aw4Uta18Za98CFgCm3ZEXasCq-sJn29KB7ZKAUJUUUUU529EdanIXcx71UUUUU7KY7ZEXa
-	sCq-sGcSsGvfJ3Ic02F40EFcxC0VAKzVAqx4xG6I80ebIjqfuFe4nvWSU5nxnvy29KBjDU
-	0xBIdaVrnRJUUU9Kb4IE77IF4wAFF20E14v26r4j6ryUM7CY07I20VC2zVCF04k26cxKx2
-	IYs7xG6rWj6s0DM7CIcVAFz4kK6r1j6r18M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48v
-	e4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_tr0E3s1l84ACjcxK6xIIjxv20xvEc7CjxVAFwI
-	0_Gr1j6F4UJwA2z4x0Y4vEx4A2jsIE14v26rxl6s0DM28EF7xvwVC2z280aVCY1x0267AK
-	xVW0oVCq3wAac4AC62xK8xCEY4vEwIxC4wAS0I0E0xvYzxvE52x082IY62kv0487Mc804V
-	CY07AIYIkI8VC2zVCFFI0UMc02F40EFcxC0VAKzVAqx4xG6I80ewAv7VC0I7IYx2IY67AK
-	xVWUJVWUGwAv7VC2z280aVAFwI0_Gr0_Cr1lOx8S6xCaFVCjc4AY6r1j6r4UM4x0Y48Icx
-	kI7VAKI48JM4x0Y48IcxkI7VAKI48G6xCjnVAKz4kxMxAIw28IcxkI7VAKI48JMxC20s02
-	6xCaFVCjc4AY6r1j6r4UMI8I3I0E5I8CrVAFwI0_Jr0_Jr4lx2IqxVCjr7xvwVAFwI0_Jr
-	I_JrWlx4CE17CEb7AF67AKxVWUtVW8ZwCIc40Y0x0EwIxGrwCI42IY6xIIjxv20xvE14v2
-	6r1j6r1xMIIF0xvE2Ix0cI8IcVCY1x0267AKxVWUJVW8JwCI42IY6xAIw20EY4v20xvaj4
-	0_Jr0_JF4lIxAIcVC2z280aVAFwI0_Cr0_Gr1UMIIF0xvEx4A2jsIEc7CjxVAFwI0_Gr1j
-	6F4UJbIYCTnIWIevJa73UjIFyTuYvjxU2EoXUUUUU
 
-The MSI test client queues setup_work from the link event callback
-ntb_msit_link_event(), which the NTB core dispatches whenever the link
-comes up. The work handler ntb_msit_setup_work() recovers the client
-context with container_of() and programs memory windows, scratchpad
-registers and MSI interrupts through it.
+Thank you for your contribution! Sashiko AI review found 6 potential issue(=
+s) to consider:
 
-ntb_msit_remove() never cancels the work. ntb_clear_ctx() stops new
-link event callbacks from being dispatched, but it does not drain a
-setup_work that was already queued. After the remove callback returns,
-the NTB device's devm eventually releases the context, and a
-still-pending setup work can then run and dereference freed memory.
+New issues:
+- [High] Interrupt Storm / Hardware State Machine Violation due to incorrec=
+t teardown ordering
 
-Quiesce the callbacks and drain the work before tearing down the
-resources the work programs. Cancel the work after ntb_clear_ctx(),
-which guarantees no new instance can be queued: link events are
-dispatched under the same ctx_lock that ntb_clear_ctx() holds. Do this
-before ntb_msi_clear_mws(), so a late setup work cannot re-program
-memory windows that remove() has already cleared.
+Pre-existing issues:
+- [High] Use-After-Free of `msi_desc` due to late removal of debugfs files
+- [High] Data Race / Use-After-Free in `ntb_msit_db_event()` and `ntb_msit_=
+dbgfs_trigger()`
+- [High] Out-of-Bounds Memory Access in `ntb_msit_db_event()`
+- [High] Buffer Overflow via Mutable `num_irqs` Module Parameter
+- [High] NULL Pointer Dereference in `ntb_msit_desc_changed()` / `ntb_msi_w=
+rite_msg()`
+--
 
-This issue was found by an in-house static analysis tool.
+commit 2afad66772e5fa9c2078f36f9787cff1b0e7d42e
+Author: Fan Wu <fanwu01@zju.edu.cn>
 
-Fixes: a6bed7a54165 ("NTB: Introduce NTB MSI Test Client")
-Cc: stable@vger.kernel.org
-Assisted-by: Codex:gpt-5.6
-Co-developed-by: Song Li <songl@zju.edu.cn>
-Signed-off-by: Song Li <songl@zju.edu.cn>
-Signed-off-by: Fan Wu <fanwu01@zju.edu.cn>
----
- drivers/ntb/test/ntb_msi_test.c | 3 +++
- 1 file changed, 3 insertions(+), 1 deletion(-)
+NTB: ntb_msi_test: Cancel setup work on remove
 
-diff --git a/drivers/ntb/test/ntb_msi_test.c b/drivers/ntb/test/ntb_msi_test.c
-index 4e18e08..290c2b3 100644
---- a/drivers/ntb/test/ntb_msi_test.c
-+++ b/drivers/ntb/test/ntb_msi_test.c
-@@ -391,13 +391,15 @@ static void ntb_msit_remove(struct ntb_client *client, struct ntb_dev *ntb)
- 	int i;
- 
- 	ntb_link_disable(ntb);
-+	ntb_clear_ctx(ntb);
-+	cancel_work_sync(&nm->setup_work);
-+
- 	ntb_db_set_mask(ntb, ntb_db_valid_mask(ntb));
- 	ntb_msi_clear_mws(ntb);
- 
- 	for (i = 0; i < ntb_peer_port_count(ntb); i++)
- 		kfree(nm->peers[i].msi_desc);
- 
--	ntb_clear_ctx(ntb);
- 	ntb_msit_remove_dbgfs(nm);
- }
- 
+The MSI test client queues setup_work from the link event callback, but
+ntb_msit_remove() never cancels it. This commit quiesces the callbacks and
+drains the work in ntb_msit_remove() before tearing down the resources to
+prevent a use-after-free.
 
+> diff --git a/drivers/ntb/test/ntb_msi_test.c b/drivers/ntb/test/ntb_msi_t=
+est.c
+> index f52d409ba6d29..72695d5601957 100644
+> --- a/drivers/ntb/test/ntb_msi_test.c
+> +++ b/drivers/ntb/test/ntb_msi_test.c
+> @@ -391,13 +391,15 @@ static void ntb_msit_remove(struct ntb_client *clie=
+nt, struct ntb_dev *ntb)
+>  	int i;
+> =20
+>  	ntb_link_disable(ntb);
+> +	ntb_clear_ctx(ntb);
+> +	cancel_work_sync(&nm->setup_work);
+> +
+>  	ntb_db_set_mask(ntb, ntb_db_valid_mask(ntb));
+
+[Severity: High]
+Does moving ntb_clear_ctx() before ntb_db_set_mask() create a race window
+where context callbacks are removed, but hardware doorbell interrupts are
+still unmasked and can fire?
+
+If a doorbell interrupt occurs from the peer NTB device right after
+ntb_clear_ctx() but before ntb_db_set_mask(), the core NTB interrupt handler
+will ignore it because ntb->ctx_ops is NULL.
+
+Since the doorbell callback is never executed, the hardware doorbell bits a=
+re
+not cleared. Because the interrupt is often level-triggered, could this res=
+ult
+in the unhandled hardware interrupt continuously firing and causing an
+interrupt storm?
+
+>  	ntb_msi_clear_mws(ntb);
+> =20
+>  	for (i =3D 0; i < ntb_peer_port_count(ntb); i++)
+>  		kfree(nm->peers[i].msi_desc);
+> =20
+> -	ntb_clear_ctx(ntb);
+>  	ntb_msit_remove_dbgfs(nm);
+
+[Severity: High]
+This is a pre-existing issue, but does freeing the msi_desc array before
+removing the debugfs files expose a use-after-free?
+
+Because the debugfs files are created with debugfs_create_file_unsafe(), the
+VFS does not protect concurrent file operations against debugfs removal.
+
+If user-space reads or writes to the debugfs trigger file concurrently with
+module removal, could ntb_msit_dbgfs_trigger() dereference the freed msi_de=
+sc
+array?
+
+[Severity: High]
+This is a pre-existing issue, but is there a data race and use-after-free
+between ntb_msit_db_event() and ntb_msit_dbgfs_trigger()?
+
+ntb_msit_dbgfs_trigger() locklessly dereferences peer->msi_desc. Concurrent=
+ly,
+ntb_msit_db_event() can be invoked in interrupt or work context and blindly
+re-allocates nm->peers[peer].msi_desc:
+
+drivers/ntb/test/ntb_msi_test.c:ntb_msit_db_event() {
+    ...
+		kfree(nm->peers[peer].msi_desc);
+		nm->peers[peer].msi_desc =3D desc;
+    ...
+}
+
+Because there is zero locking protecting this shared array across these
+functions, can this cause kernel memory corruption?
+
+[Severity: High]
+This is a pre-existing issue, but does ntb_msit_db_event() have an
+out-of-bounds memory access when handling physical port numbers?
+
+ntb_msit_db_event() directly uses the set bit index in peer_mask as the arr=
+ay
+index (peer) for nm->peers[peer]:
+
+drivers/ntb/test/ntb_msi_test.c:ntb_msit_db_event() {
+    ...
+	for (peer =3D 0; peer < sizeof(peer_mask) * 8; peer++) {
+		if (!(peer_mask & BIT(peer)))
+			continue;
+        ...
+		kfree(nm->peers[peer].msi_desc);
+		nm->peers[peer].msi_desc =3D desc;
+		nm->peers[peer].num_irqs =3D irq_count;
+    ...
+}
+
+The nm->peers array is sized strictly to ntb_peer_port_count(ntb), which is
+typically 1 in a 2-port topology. If the bit index (which is the sender's
+physical port number) is 1, does accessing nm->peers[1] result in reading
+out-of-bounds memory and subsequently calling kfree() on a junk pointer?
+
+[Severity: High]
+This is a pre-existing issue, but does ntb_msit_setup_work() have a buffer
+overflow vulnerability due to the mutable num_irqs module parameter?
+
+The global num_irqs module parameter is defined with 0644 permissions,
+allowing runtime modification. The nm->isr_ctx buffer is allocated once
+during probe using the initial num_irqs value.=20
+
+drivers/ntb/test/ntb_msi_test.c:ntb_msit_setup_work() {
+    ...
+	for (i =3D 0; i < num_irqs; i++) {
+		nm->isr_ctx[i].irq_idx =3D i;
+    ...
+}
+
+If a privileged user increases num_irqs at runtime, and a link up event
+triggers ntb_msit_setup_work(), could it dynamically iterate over the array
+up to the new global num_irqs and write far past the bounds of nm->isr_ctx?
+
+[Severity: High]
+This is a pre-existing issue, but is there a NULL pointer dereference in
+ntb_msi_write_msg() and ntb_msit_desc_changed()?
+
+In ntb_msi_write_msg(), dr->ntb->ctx is read locklessly and passed directly=
+ to
+the desc_changed callback:
+
+drivers/ntb/msi.c:ntb_msi_write_msg() {
+    ...
+	if (dr->ntb->msi->desc_changed)
+		dr->ntb->msi->desc_changed(dr->ntb->ctx);
+    ...
+}
+
+ntb_msit_remove() invokes ntb_clear_ctx(), setting ntb->ctx =3D NULL. The I=
+RQ
+descriptors remain active because devres cleanup happens much later in the
+device teardown cycle.=20
+
+drivers/ntb/test/ntb_msi_test.c:ntb_msit_desc_changed() {
+	struct ntb_msit_ctx *nm =3D ctx;
+	int i;
+
+	dev_dbg(&nm->ntb->dev, "MSI Descriptors Changed\n");
+    ...
+}
+
+If a concurrent MSI write event happens simultaneously with device removal,
+could ntb_msit_desc_changed() receive a NULL context pointer and
+unconditionally dereference it?
+>  }
+
+--=20
+Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20260909145554.7040=
+36-1-fanwu01@zju.edu.cn?part=3D1
