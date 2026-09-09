@@ -1,63 +1,63 @@
-Received: from OS0P286CU011.outbound.protection.outlook.com (mail-japanwestazon11020102.outbound.protection.outlook.com [52.101.228.102])
+Received: from OS0P286CU010.outbound.protection.outlook.com (mail-japanwestazon11021143.outbound.protection.outlook.com [40.107.74.143])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 944D3324B32;
-	Wed,  9 Sep 2026 04:42:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.228.102
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 01E972836A6;
+	Wed,  9 Sep 2026 04:47:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.74.143
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788928959; cv=fail; b=dqKCdydmgGq5zphIHg9yCQVGGzuJU/gDexzMSt0EJ70KAGg8/IelaIu2I6tkeWdrFWs9u0ptKaS6ksolN+AB0dkzQO3RtFjS+/l0KYlpT6GrR/aH8lJRWaqHH8xcm9+FWQoTlCSv2l1LqFW5ewVw6kgdX/Bbekt4dE8QkWJcXGc=
+	t=1788929274; cv=fail; b=ngqDvMMDMPO2zKNX8H+KMwBmtEbnTlBHphBlnbLkX6Q+Muc/GmFOGenBubaTAqBCX04M0tVir59/XTUagVn+lHCBaMfSLZMdkCnAwuu5xG78/K9VBUFE8da5sxXF2agQC3zl1fhx6vyVkcJ9ATtpSNI774RsEnTmnRtVyeD3X7Q=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788928959; c=relaxed/simple;
-	bh=8FM54roZANxQU5muWjd+FotMA5KVJ0PSd/42dsSong4=;
+	s=arc-20240116; t=1788929274; c=relaxed/simple;
+	bh=3XA2zggVN4WMv4bdj13WMIAguA7mFXLDroDE8ycIhrg=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
-	 Content-Disposition:In-Reply-To:MIME-Version; b=VAgxj8meQ+gujR3dVSYi1zbpRdcMOm0v932xsP8TyK/QU67CyOiesfVtTloAjVLID4VxFIaZfCgM8MMRThy6b5LAoqZWD862WtN7D6sl8itZq0ZXK/5wcrK0DbLAxrYgiRUNqN/0wglC1pl0AuPnXcJZnkztzEGHcPO5zlyfotc=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=fail (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=nXLZi243 reason="signature verification failed"; arc=fail smtp.client-ip=52.101.228.102
+	 Content-Disposition:In-Reply-To:MIME-Version; b=Q2gV0CU4C9uqyYvWwhu4XdnAXbo5D3W4CQRCY8H0zMVOrmwdf6KcIySg2llBU2nQJ1FkDyOQM//U1idPiesdcjFTZuh3S48yVIlMvXSuqnt/P4eNOaiORUkulHmkU9sTjtKckgz5WWbD5+L30+VLs/z26pzu9MngINzliZZwqOA=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=fail (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=ljrfKOzS reason="signature verification failed"; arc=fail smtp.client-ip=40.107.74.143
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="nXLZi243"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="ljrfKOzS"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=B5mr4Ide/QDTFnj5reTgen6LhFcUz3yvcdcodtkVFCvbP59Nl5rR/SXlgzfpKVlWkOjb/eGC02LtY9EvntD+KJ4if+VFdejyXWWFLE1QHSmQoccXMNNueIGRQihhFrPgiqu3vp5U7aTejaTk40BKjjBATJEizdoWS0ORC5wgSvwL7VzP62S6XprVRoVIaAjmEABVgJqpM74ExXn99YY/inZO1X2qxyRyeO/Y9NglXSnFdsotSChmcHyc8NRV3RNCMzcrNV/wifkpcbXi9BiwLtis535/5fPqj4LnQ42xK6Nd/NKsTT5w+zLPa2eaTdUzF3V/VWIX3rB9G5YAyONWmQ==
+ b=WW5JrfJ+vSAHQlDodPGPF83SEW3nD8TGIOktvPefRgiv0nsGxZxntYr0TI4SeIpMxoSWOE5tQdG2dvnmpoLkLhR+Lqy15NwHTsf7msLrIXY5p5+/BqhzyyOEFJChgek8q9mkD2Ae3ufUZEYyGKsEojjvDzofFxjAzzWMrP6HxZxKJaTFehg8dTQQmBP9gPWHCq4sz2poeOvbng3jDmBoLKxqd1nSUiH+vi02i/66xaVjzaEFvMYfaWjSuftHyr/H9nAzpVmW6Izy7YPjj/lL73LHLGGSPjKbub8rek78BA87DVYfmBcQ8J/f+z5ISf0HzYkMHz6mWtLiWMWe4qz4/Q==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=xy3MeZw4jxNujW13c+M/5hK65tNm+G88y/wSebjYBVY=;
- b=o4SjRmP0AEScp8gP5KLP/d/UFt6NhFEH2VJdqsFhQ0zNNmekwAltzzbx8EQE5hJX4jVxHP4PbN7nd7d+pOYnhlKP9LqWlTKIJ95iUXAa2agZFK2AJNNUcEwQqcKlqGA8XkUWT9ouvvHdVaz8rOgqlP9mU8Z+3oP1V4FLmsqp4JFRZCAm7JhQ/0fwpoax1oQTyf+jSE6pn2UGr6OHk7bJ/mqig3svoaChb8K3+c4dgTszSvMjcvXvvQ9cUPjqbdyaqbM2UxG4DyR8egvdhlxeMe+9jH+at5TJP17YAq5kc3Zk7A29rlXqJz0ws3m7WNt17ibEIJ08FCPyw68hdgaqyQ==
+ bh=PYYKuNkVm7tztKd+VZ3UlFmsVpxIkHgZ+I/8X+rH7Pg=;
+ b=Ldlm1f9gge3RtzuyY6A/FktHSNm0YehH/H4kBrqI3FWTYc1JgjbL3+fQ6prrM1BlxXtRf42x9/8Dscdz/TiAMV7pYN0tBGpi3sN1CE8tVsuncIZ24qL/6zI+QC/MbINuNDQMTq+Fpidu/XecwbXtnSE7CIZUR7ku5t/Fn/C+uti9oqDXES/8rPQdPg//gssKJT4CZ/9VTsrVfQNNqkzTTCDVnzVPtmJptzI7SOR1JDxHQHaqqqXbI+Roa/FEOlj+DvBhrGvsWHBEDfBm66QGavleWbrIyZYPN2t1ro+AbUZcHSB4BK3MHWDwy4V3i8jKD5lavULZACchThND8Qseww==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
  header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
  s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=xy3MeZw4jxNujW13c+M/5hK65tNm+G88y/wSebjYBVY=;
- b=nXLZi2434wfRe2e5hb4CaCmTROpIhGiZw7ydS8t4K3eFfQbVTTP2dzwhYOqbKDueeukAeWM0j3H4P5IJQcOnnBXHUMjdeDloREgU7lkq2+qVvyO2bY0zrBOQGOuzWt6t/tpZ15UGR9bZvHDegyZX6zLjCHgODqRli5c4/a1io0U=
+ bh=PYYKuNkVm7tztKd+VZ3UlFmsVpxIkHgZ+I/8X+rH7Pg=;
+ b=ljrfKOzSodNDsIbxVUYRHSVMH9oxabteY1qiJeS9j1uIzBxeES2/BxZxxjOena2c2eUb6XIVjdomH+j5wTfQAtKmyKUOzoA7yBrFUxLCW/htm2t+7do2N1CY6/SNn+WV281vCsXF89ENK0kL8LnwOZHd1w+K5Tue8GTNur/ohsY=
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=valinux.co.jp;
 Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:38f::10)
- by OSCP286MB5274.JPNP286.PROD.OUTLOOK.COM (2603:1096:604:34f::12) with
+ by TY3P286MB3515.JPNP286.PROD.OUTLOOK.COM (2603:1096:400:3af::9) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.406.7; Wed, 9 Sep 2026
- 04:42:31 +0000
+ 04:47:47 +0000
 Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  ([fe80::2305:327c:28ec:9b32]) by TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  ([fe80::2305:327c:28ec:9b32%4]) with mapi id 15.21.0406.005; Wed, 9 Sep 2026
- 04:42:31 +0000
-Date: Wed, 9 Sep 2026 13:42:29 +0900
+ 04:47:47 +0000
+Date: Wed, 9 Sep 2026 13:47:46 +0900
 From: Koichiro Den <den@valinux.co.jp>
 To: sashiko-reviews@lists.linux.dev
 Cc: ntb@lists.linux.dev
-Subject: Re: [PATCH 06/11] NTB: ntb_transport: Publish link state after QP
- setup
-Message-ID: <776xeoitf37k33pveq3lswmtfldsrrx2sef3o4pzvw6d7pnywl@s2xfijenfkjr>
+Subject: Re: [PATCH 07/11] NTB: ntb_transport: Clear link state before QP
+ cleanup
+Message-ID: <kueeh2eiyp5xecmb3vlgglb7pkznzjosamlzuctc3mfvbo5wrg@qzihetaj6te3>
 References: <20260907142429.951930-1-den@valinux.co.jp>
- <20260907142429.951930-7-den@valinux.co.jp>
- <20260907144701.702E41F00A3A@smtp.kernel.org>
+ <20260907142429.951930-8-den@valinux.co.jp>
+ <20260907144303.3D25A1F00A3A@smtp.kernel.org>
 Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <20260907144701.702E41F00A3A@smtp.kernel.org>
-X-ClientProxiedBy: TY6P286CA0013.JPNP286.PROD.OUTLOOK.COM
- (2603:1096:405:3b8::14) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+In-Reply-To: <20260907144303.3D25A1F00A3A@smtp.kernel.org>
+X-ClientProxiedBy: TYCP286CA0285.JPNP286.PROD.OUTLOOK.COM
+ (2603:1096:400:3c9::20) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
  (2603:1096:405:38f::10)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
@@ -66,119 +66,238 @@ List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|OSCP286MB5274:EE_
-X-MS-Office365-Filtering-Correlation-Id: 2cd4028f-9c98-4908-6b57-08df0e2cc260
+X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|TY3P286MB3515:EE_
+X-MS-Office365-Filtering-Correlation-Id: 00f887ef-052f-41d8-c601-08df0e2d7ec1
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|366016|376014|23010399003|1800799024|10070799003|6133799003|22082099003|18002099003|4143699003|56012099006|10067099003;
+	BCL:0;ARA:13230040|1800799024|376014|23010399003|10070799003|366016|10067099003|4143699003|5023799004|56012099006|6133799003|22082099003|18002099003;
 X-Microsoft-Antispam-Message-Info:
-	H4+DTTKg0s+BotBlAcqzdKlUtdv5Co5hL4CssPm+HhCcaxPWGlnBZbEuYhlywQZwFr63vX9UyOfsjRfbNXyxZHnIrMJXbtwm6p+ATCC5JawHteIDI81/a9hSfLTCTGYqe/prf59bkZJvLawgORIZjc3Ps/bK+SMW2O9Fk/8FTLLoFWMTfFZtUxzRlgKZHqq8KJm7LHhMKfb01IDPskzxLGZc1vByHbvI65yYukgTUfdfHCXpD4HiTxwEWTVxbQyQVhquti+CaxUv5boSglmkAiDnKcOgLUQkqcoFNPCbwvEWEEoLNIWWXsYiqR0SXvMMtPdKURPKC4gaqfsSEmrCwxn+/lJw2E8zRfQngPLUJ3ECcFu0X/MY0gwbEkNgAXuTMk2s7hsT3XBp0oK1gelmCRziG9+YPQfM07AfkowUFNew4pbozFyt47Bx+8DRx2xlv+cMAhJwombfiavqM4dEjCB/ST5F7LlcXEY902Chw+J1Yq7i0bAJADEJLKXprgYn/DY1Q7lR6226oggkq5l+UC6aTr7OGUskAXJbDVwFdhTxycgQgWZi5OXFYj80bclLrjGEHgahiDJFV0fEcZA6iBjw5zjvQp/NM8ItecuqahQ=
+	LBzwFER7IaYn3qV0L+ZYT8cB3P1A2Q/GvPaFAaAbD1KYRhAMw7Hz/CJIWH6MU0764Ogyedom+ZZQ4T8Fe4Or82Wzyj5vIqUl5wpwX+9e2YV8XvSEvmJQPZ6fyle3UpFivlQ9tH9at8ua1+sNPzMU6LPiTDVuI77RjV548qxgpsg+ttNhygCe+Mja6fXLlf6kpCsIDt36Zo2YcwbjUYV3S4b29q3VkPSkQS32ygH/qTgg3HORVPKFScJhWbQHPAuDy5O9k3/WTf0YHhel3A17M7/lwB3f6U8dG/smATLQRYiIhpzLj461Q3j2QaCOMvDG0btFy/2n7KCpTW6xDEtPOc5UvUj4jLyIlXJlRvdnazKXrilPutYjDIFqPBYn1TwXcuyR4wLGRLtr+LXGUSD8/MKfasWhee8UKowYxAjT0jTSWcKXio8uv3xpbslSrFCNA2eTFmwzo3h3X7GQCKCJlRrb/6oONBEn9eLJVJNFIZMDnSUAzlUMIePiMYeJZJ4Tu01k3hFCjz5xuVSvwfSkXE7/zvQ8UslFhN2wJXAqCFElF3OCo5FVrN52mwkWD5E2Oe0g+44JNeVmOu3x37hdze2qMteCki5h0zQMbAjv4HE=
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(366016)(376014)(23010399003)(1800799024)(10070799003)(6133799003)(22082099003)(18002099003)(4143699003)(56012099006)(10067099003);DIR:OUT;SFP:1102;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(376014)(23010399003)(10070799003)(366016)(10067099003)(4143699003)(5023799004)(56012099006)(6133799003)(22082099003)(18002099003);DIR:OUT;SFP:1102;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?iso-8859-1?Q?5RKLV1rUmazWFZFVvpJ8G/cBCJlzjExQ8Vg2HGZJsPhDWocpQovdniHizQ?=
- =?iso-8859-1?Q?pt5gJlJ3+KcLVUkrRIlG7rMIh9HhaN2neUXB/gWKpa9ytT+9a4Uvt9y1Yu?=
- =?iso-8859-1?Q?t+Bzjyls4sdDkbYM6HxR0twyC5ynuXp0QP948UZOmccoCowClsexTdPz5D?=
- =?iso-8859-1?Q?pYy8gFgFwA8tJ17q2EqM5lb28f1nItJYO28yCCHAGumjcR+kxsTMNbVcyT?=
- =?iso-8859-1?Q?z5gELSR55WcglY9hO76SKpke0lZRCyAhlmC4HW0XULuk9ZJ96bpiIS+i3m?=
- =?iso-8859-1?Q?KIPG18O32QMrOrDbYhvHz0qsDkkmbUUz3L1CfkLIMi1uHyj7keVCxekaiP?=
- =?iso-8859-1?Q?o/RXc5eLZNG6Sz8ZDq/xVdJVqQDdotEGTCWs/KR2c4P6IohP6usAUsmj0j?=
- =?iso-8859-1?Q?+Cnj0mX9GTsvNwFr4xcWRIuwv/q8io7/38lSiPKIB51m8HqeVXjjyf2rFp?=
- =?iso-8859-1?Q?d85MJmccQR+uopTO2yX9swbXM+S8/AQQ1fPlsCtc9XMJtGdz8bF565AyeZ?=
- =?iso-8859-1?Q?j5SalqgRtYXyebKVparr2GA1DxwRU+DSBurQyEscqH2ereGdEK3F4b01I6?=
- =?iso-8859-1?Q?2HW1CKNDf9JVKwqlidUWjjMbNHk8UCc2ybrv4OKDgcSq4atJf3i9MKP8JL?=
- =?iso-8859-1?Q?EdC0VOjJL078GSuZ4It7OGD9CaJbbZQaU9VGTF2CglrvwifeRCzmzL8Cn0?=
- =?iso-8859-1?Q?EFuhu27Y72y1vt16dh+HvNT3DPgM6iQqRUT8DN58VoUefUtpu23CmzE9La?=
- =?iso-8859-1?Q?KnqGmYJa6n5ckXMXUwiz5C+eP2fUrHWLuCKxyKTkNHZULPHiSaoug6Utbs?=
- =?iso-8859-1?Q?VLz3URPrv+rdmF6FndWllybaM+glZ5Igj7bTsVf/rJCCIr6eF4agwSSOfQ?=
- =?iso-8859-1?Q?iTZneVEcDn7yOl1E7DuguIVDBvFB5JbxyjcdHbDP9PkCmFQx9CTuM7SoVi?=
- =?iso-8859-1?Q?RhwQn/Fj8ccjg8Mz4yqQr9aTJR1OPgAfTTlbiCvsr5pWNu0Q8WBNoshwYH?=
- =?iso-8859-1?Q?VFsn2h+y5z8/03biy6zeuUBEX7j6DLgnwwI3RoJn0lwSCm74+rKqdwCUZL?=
- =?iso-8859-1?Q?1zdVBi7nJsw43AGVQT8XmJGmeQy50tHJfIzuhtD2E9mxgWa+724ei0YJie?=
- =?iso-8859-1?Q?UoTRpDwVJFXMu742T4B7SannWMJao6LuiJf+ZccX6LmGzIq4URvAA3Np+x?=
- =?iso-8859-1?Q?37e5Pg9f+700dXdzPx3SBJLz9/J0JBqONcvGiDNDIegvrS9g6R9eZTMbc7?=
- =?iso-8859-1?Q?J0IX1fXC3XwXxGzvKE3++RzA8b9jB7ts/oUa54b5OqwNSifL7jtepn+60+?=
- =?iso-8859-1?Q?dXH9InAmuteT4wOb/nhpS4yaZxfSzBPUk6/UpDu919bjZhhptbHTof9v1v?=
- =?iso-8859-1?Q?QnLbwD9ujKfWEjvXtmyEkXCjJrM0eslxt7iHmjAz/eb2Nk5KYYZV/H/nbb?=
- =?iso-8859-1?Q?/QKmoHeAM+l0yciROjt+8WPSrCq/Dbx5g4P8yyWHeW2276FXAywl+IDk+M?=
- =?iso-8859-1?Q?hUYOXKY/odllE1TSCm80AWxkxiaen5youqRFcHfOMI+oM8/AA+ErSZmYus?=
- =?iso-8859-1?Q?q7klqoYK5wBO9w/O5Cg87X3bfgl0s1N0AT8dpqu8+ePw+euFPxKSXgRyTq?=
- =?iso-8859-1?Q?oS6EBJa/7wyyejyUIzwA1q5QzlTt3dWj1KK20TcP4Pt9SzdUWy5wjdi0vU?=
- =?iso-8859-1?Q?ModHVXw7uwbgj31p5WbOjZ3bMzX9uwB269Q9yWAfXX3W3kbhJEkP19GLvb?=
- =?iso-8859-1?Q?bD1OdaT2wyv0VZ2sOOfUp9M3Hy+pEZ8wC/w/G+9CKEl10kRCNGUJpILwze?=
- =?iso-8859-1?Q?PE6kLyBkVG319cvg0pQeWfNT0zctAVcT6jxpSOTvsNPTNsg3sysI?=
+	=?iso-8859-1?Q?Qk2QPv0o8F0WHN4ASvNN7GsnR4Ys/dA0tSvxEAV0eBT0ocQCewM8BvBXHx?=
+ =?iso-8859-1?Q?EFinPjsONBREGfHjqAqAzHjXyq5NhjLKrWBXLlYsYQY40Wn/MU9bH8JA5h?=
+ =?iso-8859-1?Q?ItPUtcj4pXHBMrnqqPhIlusdeCHwVuQno79N4AuDzkr6CmW0JQKNMfqHyX?=
+ =?iso-8859-1?Q?Pby3wYMaYbCwASh/Db8e/Srl1Ht/4GBupC2KvLc9ECEe2cHyikHMfccgs9?=
+ =?iso-8859-1?Q?iu3mXIFd0lvuyPIxEn3MJ54Ve+ZMTvcddQb9kY/xeVo5Eb12DWlgn5JJk8?=
+ =?iso-8859-1?Q?Up776JfjunN/ynQwqw54RE/EUsTdwNopFpcNlS4mCXrzLWEJM/Ey3bB4VR?=
+ =?iso-8859-1?Q?UXokeearv4GYzgVmrQzXZgj8Eve3SjSmyYl0FwMCisQYtn4l+kmBdEt1tK?=
+ =?iso-8859-1?Q?aWHnhi30j+ncqu9RUTZvdbu7adL+CGFLql6vG0XERTWyI8kHbIgVWcOBPT?=
+ =?iso-8859-1?Q?8zJBMb7ggt0sa15R5Vg/GP5+oFs7Tw/IlaH+8aHmas8jAAJr6WHFDbsw+0?=
+ =?iso-8859-1?Q?NB7+/ESIixWkxSihkTfezEMSEXbz51fwlw1sCrI5mly8AukR6g0si0fRv4?=
+ =?iso-8859-1?Q?DkfP1F+/5KPBgru8aWU/d1w8DamON6CXN+gWDNdb5yp81Nm0fdHZyTIng7?=
+ =?iso-8859-1?Q?MavbThhMIQmQ/zmzgcQfaGmhHr9yDGI5Lxca4VrPWtrKke5ukIyoBDCnlW?=
+ =?iso-8859-1?Q?3ORobTGWmkzJU46ff3zE5IB7iTK36sUZnQn8ckFoIAS9LRwHdfY/3YBWSm?=
+ =?iso-8859-1?Q?8A5mcbteerot/o/q5aFmRPdpM4rc7UoQGzqHUAiksSC7UxL3vMUbEfh2PA?=
+ =?iso-8859-1?Q?2COPf8PvRScW7zqJtwHubMJxogb/+DzcvaDYvrufn0OCMNmsDR8xh2w5a+?=
+ =?iso-8859-1?Q?EUSzakW/Q7mxkTtzMhBiduf1lsF6BtSfux6qWlY81fKl8wfleoGhRNf5Lm?=
+ =?iso-8859-1?Q?ac1pE0H34Ps9YVS2i478ZF4jYbaOGEg/EV3NE3OTwtwDYwERZI7hKwZdos?=
+ =?iso-8859-1?Q?uCMUSWpOKC4CnCar6VtRiwvfSzwSOiaMwO/Kc9mXKcUMiyONVhwBbTSP1n?=
+ =?iso-8859-1?Q?2xTHaQVcYRds3oU6NYU+rTiE5TxvMteEnWv6XNfk3FoLdb1ZFlMpZFId0n?=
+ =?iso-8859-1?Q?YgGz0hbr3EudLknUSSTt5CZD8d67vu0XnX2vjd/MVj2bVEOOfPXicfpvah?=
+ =?iso-8859-1?Q?7mVaOKshZKC90dJJAhC5zVFrh4Sv0djB9xFTlchtkB09sLvsHsQlDZJbuw?=
+ =?iso-8859-1?Q?jvky4F+Wdu449f7+aOg7NWxtC/eWa5PB/BEOTd+kY4nCcAGXCgCA3//sRr?=
+ =?iso-8859-1?Q?CwtYxEgSTGeTaggoVYvbSLOa8DlXDeFNvga+vdUpDrDb2J6P58H5Qh1LyK?=
+ =?iso-8859-1?Q?RziCtAFir5M5PFMUmwOgU0fVDhuL2xF3Kvc7pZdiagRf3NF/x8ZqKWY94P?=
+ =?iso-8859-1?Q?Mplz+Yj1R5SNrjRa9Zszsi14M02Gp+T6hOQZm/cArYAAZYjQw3Kp/SUVxP?=
+ =?iso-8859-1?Q?7qcd9TQFov7J1oJ46jclckbFGbafK3LSqBIg7ReHshj7IzN2Y61ZMMn0dq?=
+ =?iso-8859-1?Q?OQNdRsevUKSy7DhzJm0W2B1pyziI1yddZumNM6pk2O56s3XWU+pnyLJUkb?=
+ =?iso-8859-1?Q?hfJ/YaZOO5ng4L3xaA8G5vD9Gx1YPaM7wQWSGUeHt2N0z4vHBTf3/l3lbg?=
+ =?iso-8859-1?Q?AF8QKEKFZVMzCMC77e29pj0F2aqnjgmAuhTRZbghAKTaFiH912SFEspk4H?=
+ =?iso-8859-1?Q?0hrldL2t51mNJMX7y8P/VTaP8R0JYqTgyzBoN9b5+7JDhmaJF6Ex8YcrZI?=
+ =?iso-8859-1?Q?S8NPxR0lbZlr2O8+b1AkNBvqztxtIScY21T1gDQo5TNkcgVXz8Q1?=
 X-OriginatorOrg: valinux.co.jp
-X-MS-Exchange-CrossTenant-Network-Message-Id: 2cd4028f-9c98-4908-6b57-08df0e2cc260
+X-MS-Exchange-CrossTenant-Network-Message-Id: 00f887ef-052f-41d8-c601-08df0e2d7ec1
 X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 09 Sep 2026 04:42:31.3430
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 09 Sep 2026 04:47:47.3902
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 03B83ZKIG+pk/T0HjFf+4Eg3JEWU4Epoxl+3eRYnWN0ifnlvf6aC0Fs6FoyBMT/Y3KAyvXr9p1T+E2Y3URLbSg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: OSCP286MB5274
+X-MS-Exchange-CrossTenant-UserPrincipalName: 9cRIDFNltlAsXfDwOe+Rwcux9lJ1MfyxZIcG0rNmrggsFhjEAaZru/ZNvam/WY4mX2XglfyGKPvDX5GaDxDG9A==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY3P286MB3515
 
-On Mon, Sep 07, 2026 at 02:47:00PM +0000, sashiko-bot@kernel.org wrote:
-> Thank you for your contribution! Sashiko AI review found 3 potential issue(s) to consider:
+On Mon, Sep 07, 2026 at 02:43:02PM +0000, sashiko-bot@kernel.org wrote:
+> Thank you for your contribution! Sashiko AI review found 6 potential issue(s) to consider:
 > 
 > New issues:
-> - [High] Store-Load memory ordering race between `nt->link_is_up` and `qp->client_ready` allows both threads to miss link scheduling, potentially deadlocking link establishment.
+> - [Medium] Coding Pattern Violation: Mixing guard() and goto-based cleanup
+
+I think this is a pre-existing issue, ie. this patch does not introduce any
+regression around this. Correct me if I'm wrong.
+
+Best regards,
+Koichiro
+
 > 
 > Pre-existing issues:
-> - [High] Workqueue teardown race leading to Use-After-Free during `ntb_transport_free()`.
-> - [High] Missing minimum size validation for memory windows causes an integer underflow when calculating tx_size and rx_size, leading to massive out-of-bounds MMIO writes and kernel heap memory corruption.
+> - [High] Memory Ordering Race leading to lost wakeups
+> - [High] Data Race in ntb_qp_link_cleanup allowing concurrent execution
+> - [High] DMA Memory Corruption due to unterminated transactions
+> - [High] Missing read memory barrier (dma_rmb) when reading payload after checking DESC_DONE_FLAG
+> - [High] Stale Data Transmission due to missing flush on link down
 > --
 > 
-> commit 07de6dd89d3b67c6e867804f1d8d493ce3b736ff
+> commit 3aa5fe6a4883f5e1056224f4eb903786b4edfe5a
 > Author: Koichiro Den <den@valinux.co.jp>
 > 
-> NTB: ntb_transport: Publish link state after QP setup
+>     NTB: ntb_transport: Clear link state before QP cleanup
 > 
-> This commit delays publishing the transport link state until all QPs' MW and
-> peer MSI states are set up. It uses a release store for link state publication
-> and acquire loads before queuing QP link work to avoid premature execution.
-> 
-> Link: https://lore.kernel.org/r/anyKbq3mpLG4y7rb@SMW015318
+>     Cleanup leaves the transport link marked up after releasing its MWs, allowing
+>     client link-up requests to start QP link work prematurely. Clear link_is_up
+>     before cancelling QP work and releasing MWs. Additionally, ensure QP link
+>     work returns if the transport went down after it was queued.
 > 
 > > diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-> > index c8e7fc774b4fd..411017873a83b 100644
+> > index 411017873a83b..4c0a29693ac23 100644
 > > --- a/drivers/ntb/ntb_transport.c
 > > +++ b/drivers/ntb/ntb_transport.c
+> > @@ -990,6 +990,8 @@ static void ntb_transport_link_cleanup(struct ntb_transport_ctx *nt)
+> >  
+> >  	guard(mutex)(&nt->link_event_lock);
+> >  
+> > +	WRITE_ONCE(nt->link_is_up, false);
+> > +
+> >  	qp_bitmap_alloc = nt->qp_bitmap & ~nt->qp_bitmap_free;
+> >  
+> >  	/* Pass along the info to any clients */
+> 
+> [Severity: High]
+> This is a pre-existing issue, but does this cleanup routine allow concurrent
+> execution?
+> 
+> Looking at ntb_transport_link_cleanup(), it calls ntb_qp_link_cleanup() on all
+> active QPs, and then synchronizes cancellation using cancel_work_sync():
+> 
+> drivers/ntb/ntb_transport.c:ntb_transport_link_cleanup() {
+>     ...
+>     for (i = 0; i < nt->qp_count; i++)
+>         if (nt->qp_bitmap_alloc & BIT_ULL(i)) {
+>             struct ntb_transport_qp *qp = &nt->qp_vec[i];
+>             ntb_qp_link_cleanup(qp);
+>             cancel_work_sync(&qp->link_cleanup);
+>         }
+>     ...
+> }
+> 
+> If the ntb_qp_link_cleanup_work() worker is concurrently executing, it will
+> also invoke ntb_qp_link_cleanup(). Since no lock synchronizes
+> ntb_qp_link_cleanup(), it can execute concurrently across threads. This could
+> lead to data races when resetting QP indices and cause duplicate concurrent
+> calls to the client's event_handler, potentially corrupting the client driver
+> state.
+> 
+> [Severity: High]
+> This is a pre-existing issue, but is it possible for active DMA transactions to
+> corrupt freed memory here?
+> 
+> Later in ntb_transport_link_cleanup(), it frees the backing DMA memory:
+> 
+> drivers/ntb/ntb_transport.c:ntb_transport_link_cleanup() {
+>     ...
+>     for (i = 0; i < nt->mw_count; i++)
+>         ntb_free_mw(nt, i);
+>     ...
+> }
+> 
+> ntb_free_mw() calls dma_free_attrs() without ensuring the DMA channel is
+> stopped. Prior to this, ntb_qp_link_cleanup() kills the RX tasklet with
+> tasklet_kill(&qp->rxc_db_work), but does not terminate active DMA engine
+> transactions (e.g., via dmaengine_terminate_all()).
+> 
+> If a DMA transfer was previously submitted, could it continue asynchronously in
+> hardware, writing into the freed memory pages and leading to IOMMU faults or
+> memory corruption?
+> 
+> [Severity: High]
+> This is a pre-existing issue, but does resetting the link context leave stale
+> data in the transmit queues?
+> 
+> When the link goes down, ntb_qp_link_down_reset() is called:
+> 
+> drivers/ntb/ntb_transport.c:ntb_qp_link_down_reset() {
+>     ...
+>     ntb_qp_link_context_reset(qp);
+>     remote_rx_info = READ_ONCE(qp->remote_rx_info);
+>     ...
+> }
+> 
+> The QP context and indices (like qp->tx_index) are reset to 0, but pending
+> entries in qp->tx_offl_q or other transmit queues are not flushed. These
+> pending entries already have their entry->tx_index populated with old index
+> values from before the link dropped.
+> 
+> When the tx_offload_thread processes them, could it write the data to the
+> old, stale index locations instead of starting correctly at index 0, causing
+> the remote receiver to hang or receive out-of-sequence packets?
 > 
 > [ ... ]
 > 
-> > @@ -1102,16 +1109,19 @@ static void ntb_transport_link_work(struct work_struct *work)
-> >  			goto out1;
-> >  	}
+> [Severity: Medium]
+> Does ntb_transport_link_work() mix scope-based guard macros with legacy
+> goto-based error cleanup?
+> 
+> The cleanup.md documentation explicitly mandates that usage of "goto" and
+> cleanup helpers must never be mixed in the same function.
+> 
+> drivers/ntb/ntb_transport.c:ntb_transport_link_work() {
+>     ...
+>     guard(mutex)(&nt->link_event_lock);
+>     ...
+>         rc = ntb_set_mw(nt, i, val64);
+>         if (rc)
+>             goto out1;
+>     ...
+> out1:
+>     for (i = 0; i < nt->mw_count; i++)
+>         ntb_free_mw(nt, i);
+>     ...
+> }
+> 
+> This function uses guard(mutex)(&nt->link_event_lock) at the beginning, but
+> continues to use goto out1; and goto out; for error handling and legacy cleanup
+> paths. Does this violate the established architectural cleanup pattern?
+> 
+> [ ... ]
+> 
+> > @@ -1149,7 +1151,9 @@ static void ntb_qp_link_work(struct work_struct *work)
+> >  	struct ntb_transport_ctx *nt = qp->transport;
+> >  	int val;
 > >  
-> >  	for (i = 0; i < nt->qp_count; i++) {
-> >  		ntb_transport_setup_qp_mw(nt, i);
-> >  		ntb_transport_setup_qp_peer_msi(nt, i);
-> > +	}
-> > +
-> > +	/* Publish the link only after every QP has been set up. */
-> > +	smp_store_release(&nt->link_is_up, true);
-> > +
-> > +	for (i = 0; i < nt->qp_count; i++) {
-> > +		struct ntb_transport_qp *qp = &nt->qp_vec[i];
+> > -	WARN_ON(!nt->link_is_up);
+> > +	/* Pair with the link publication in ntb_transport_link_work(). */
+> > +	if (!smp_load_acquire(&nt->link_is_up))
+> > +		return;
 > >  
-> >  		if (qp->client_ready)
-> > -			schedule_delayed_work(&qp->link_work, 0);
-> > +			ntb_transport_schedule_qp_link(qp, 0);
+> >  	val = ntb_spad_read(nt->ndev, QP_LINKS);
+> >  
 > 
 > [Severity: High]
-> Does this code have a Store-Load memory ordering race that could lead to a
-> deadlock?
+> This is a pre-existing issue, but does this Dekker's algorithm pattern lack a
+> full memory barrier, potentially leading to lost wakeups?
 > 
-> In this thread, ntb_transport_link_work() performs a release store to
-> nt->link_is_up, followed by a plain load of qp->client_ready.
+> In ntb_transport_link_work(), nt->link_is_up is stored and qp->client_ready is
+> read:
 > 
-> Meanwhile, ntb_transport_link_up() performs a plain store to qp->client_ready,
-> followed by an acquire load of nt->link_is_up via
-> ntb_transport_schedule_qp_link():
+> drivers/ntb/ntb_transport.c:ntb_transport_link_work() {
+>     ...
+>     smp_store_release(&nt->link_is_up, true);
+> 
+>     for (i = 0; i < nt->qp_count; i++) {
+>         struct ntb_transport_qp *qp = &nt->qp_vec[i];
+> 
+>         if (qp->client_ready)
+>             ntb_transport_schedule_qp_link(qp, 0);
+>     }
+>     ...
+> }
+> 
+> Concurrently, ntb_transport_link_up() stores qp->client_ready and reads
+> nt->link_is_up:
 > 
 > drivers/ntb/ntb_transport.c:ntb_transport_link_up() {
 >     ...
@@ -187,79 +306,37 @@ On Mon, Sep 07, 2026 at 02:47:00PM +0000, sashiko-bot@kernel.org wrote:
 >     ...
 > }
 > 
-> Since neither smp_store_release() nor smp_load_acquire() provides a full
-> memory barrier (Store-Load ordering), is it possible for both threads to delay
-> their stores in the CPU store buffer? If this happens, both threads could read
-> false and miss the wakeup, leaving the link permanently inactive.
-
-This store-buffering pattern does seem possible (with ntb_netdev), although the
-race window is very narrow. A small patch can make this robust, so let me add
-one patch in v2.
-
-Best regards,
-Koichiro
-
+> Inside ntb_transport_schedule_qp_link(), it checks
+> smp_load_acquire(&nt->link_is_up). Because smp_store_release() allows
+> subsequent loads to be reordered before the store, and smp_load_acquire()
+> allows preceding stores to be reordered after the load, both threads can read
+> false for the counterpart flag.
+> 
+> Could this result in a lost wakeup where the QP link fails to initialize?
 > 
 > [ ... ]
 > 
 > [Severity: High]
-> This is a pre-existing issue, but is there a use-after-free race during
-> workqueue teardown?
+> This is a pre-existing issue, but is a read memory barrier required after
+> checking the DESC_DONE_FLAG?
 > 
-> Looking at ntb_transport_free(), the delayed work is canceled before the
-> hardware events are neutralized:
+> In ntb_process_rxc(), the descriptor's done flag is read from the DMA-mapped
+> memory to verify packet completion:
 > 
-> drivers/ntb/ntb_transport.c:ntb_transport_free() {
+> drivers/ntb/ntb_transport.c:ntb_process_rxc() {
 >     ...
->     ntb_transport_link_cleanup(nt);
->     cancel_work_sync(&nt->link_cleanup);
->     cancel_delayed_work_sync(&nt->link_work);
-> 
->     qp_bitmap_alloc = nt->qp_bitmap & ~nt->qp_bitmap_free;
-> 
->     /* verify that all the qp's are freed */
->     for (i = 0; i < nt->qp_count; i++) {
->         qp = &nt->qp_vec[i];
->         if (qp_bitmap_alloc & BIT_ULL(i))
->             ntb_transport_free_queue(qp);
+>     if (!(hdr->flags & DESC_DONE_FLAG)) {
+>         dev_dbg(&qp->ndev->pdev->dev, "done flag not set\n");
+>         qp->rx_ring_empty++;
+>         return -EAGAIN;
 >     }
-> 
->     ntb_link_disable(ndev);
->     ntb_clear_ctx(ndev);
 >     ...
 > }
 > 
-> If a hardware link event fires between cancel_delayed_work_sync() and
-> ntb_clear_ctx(), the interrupt handler could requeue the work item. After
-> ntb_transport_free() finishes freeing the context, couldn't the requeued work
-> execute and dereference the freed memory?
-> 
-> [Severity: High]
-> This is a pre-existing issue, but does this code lack minimum size validation
-> for memory windows, leading to a potential integer underflow?
-> 
-> In ntb_transport_init_queue(), the tx_size calculation unconditionally subtracts
-> the size of the struct:
-> 
-> drivers/ntb/ntb_transport.c:ntb_transport_init_queue() {
->     ...
->     tx_size -= sizeof(struct ntb_rx_info);
->     ...
-> }
-> 
-> Similarly, in ntb_transport_setup_qp_mw():
-> 
-> drivers/ntb/ntb_transport.c:ntb_transport_setup_qp_mw() {
->     ...
->     rx_size -= sizeof(struct ntb_rx_info);
->     ...
-> }
-> 
-> If tx_size or rx_size is less than 4 bytes, this will underflow. For tx_size,
-> setting the max_mw_size module parameter to a small value could trigger an
-> underflow. For rx_size, if a remote peer advertises a window size that
-> truncates to 0, could it underflow and lead to out-of-bounds MMIO writes
-> or memory corruption?
+> However, there is no dma_rmb() issued after observing the flag. Could this
+> allow the CPU to speculatively read the subsequent header fields (e.g.,
+> hdr->ver, hdr->len) and the payload buffer before the done flag read
+> completes, resulting in stale data being processed?
 > 
 > -- 
-> Sashiko AI review · https://sashiko.dev/#/patchset/20260907142429.951930-1-den@valinux.co.jp?part=6
+> Sashiko AI review · https://sashiko.dev/#/patchset/20260907142429.951930-1-den@valinux.co.jp?part=7
