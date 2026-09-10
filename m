@@ -1,321 +1,175 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from OS0P286CU011.outbound.protection.outlook.com (mail-japanwestazon11020135.outbound.protection.outlook.com [52.101.228.135])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5455A3D5244;
-	Wed,  9 Sep 2026 20:24:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788985495; cv=none; b=JWBNFzBoBTLvKr1A/Kk8N16xVOOHMFQErG0ZowCjwuBZ/F/IIaYRWiDqOZxaBLAUwMmznb2ZXE4VRSK6Smrr70GOb6XQV118Euo6PfofAnoCzBEXzkTNLYolKoG878sG96FvTX+jvNDAXUPIvinySiob9mal5XrNg1sw5yg1HOg=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788985495; c=relaxed/simple;
-	bh=HMD89yzhz9VRWfYoWdBhNKT4isY2wX0oNZEJxpHBF0s=;
-	h=Subject:From:To:Cc:Date:Message-ID:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=XKfc9nnanHkTTG7KmMCUiSiYE6BfUlCMY0OHSn+l8DB3M8kOeT24aq5BewaEmYHIsdGjdnYJo9DOkS3ie7KOqmesyvwU0YWOwEFrgzudz4H0ZebHhLGf5cI1kEdSAS5TJ6PMtO6MJutdyqHqvaHu4McsYSXKYTGgKADlVM0Sn3M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=GJM294Kk; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0899D395254
+	for <ntb@lists.linux.dev>; Thu, 10 Sep 2026 04:08:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.228.135
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1789013331; cv=fail; b=HYP8OXcwb7xwhhK30jgTovTESKOAKHNkte2CKHMrwFSSvc7eqW2Evvm+848Mm/bJoNXxYQoOzUAWYZXEUZn7+Y+tsDA+WD5I/ZxXcxgIemfq2vNaxTo5+iNthBFrhS8FEPWP8tzX0riwoUyCn2Ofv2EOmLPvVX+PNuAGjdkRRTk=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1789013331; c=relaxed/simple;
+	bh=qDLMKC2AQkYkauqJetbwTuw6sc5Y6wruGuBv8ok8E8c=;
+	h=From:To:Cc:Subject:Date:Message-ID:Content-Type:MIME-Version; b=dJouHfCbLpTlYiFkSumnk6c7c5AL62xXSaqihp0bfCfNO65TBvssHFgYPmzdHFWll9bBTE+hD0M2zAiiNkboZccAxkmblh2BJMrcsV+oXkIg7ooPHkaeyPGg5h1Qn3YHva4VefE+Z82CFGDgtFb/7VatI+WhUja4MP2sKODn0LE=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=c8JPPqL/; arc=fail smtp.client-ip=52.101.228.135
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="GJM294Kk"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 390F41F00893;
-	Wed,  9 Sep 2026 20:24:49 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1788985489;
-	bh=QfMNELUrrswP6e2qeeqqC6pvQsk1MNlYVOXS2w7NmAA=;
-	h=Subject:From:To:Cc:Date:In-Reply-To:References;
-	b=GJM294KkBQhFm0jxpwLGwN0LrKWn/mOFcnHbkSrhK4U95OS1NuusLhKYTtLrlnQ4y
-	 M0KRbtjLS+XjLM76+GST44ekWa/AQ+i+ELDeV2H4Qu7dVBxcfNvzTyZUcIYjYtCAj3
-	 b8GvFYQhYh9K3siDtYCxSq0oNvGyMX6FNNjbWtnSUYF37LDwOA0CikdRnlRGquHBFP
-	 ke/Y3g7mEkRjsrRtdNt2dtswoSUQOi+/8fRx8KEZTOoQ4pe4T0FB8khtEXuRr9zDoP
-	 R3vVDLD2ZLHKq0CbXRWpxD72mSWo2Me8h0H0k4iHl68vgvmfMJQ4nXaUxS+9JSaZ/R
-	 ymfIsN8SUuMlQ==
-Subject: Re: [PATCH net-next v3 4/4] net: ntb_netdev: Preserve
- CHECKSUM_PARTIAL across NTB
-From: netdev-bot+sashiko@kernel.org
-To: den@valinux.co.jp
-Cc: kuba@kernel.org, jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com,
- andrew+netdev@lunn.ch, davem@davemloft.net, edumazet@google.com,
- pabeni@redhat.com, ntb@lists.linux.dev, netdev@vger.kernel.org,
- linux-kernel@vger.kernel.org
-Date: Wed, 09 Sep 2026 20:24:48 +0000
-Message-ID: <178898548878.219967.14452142614850430350@kernel.org>
-In-Reply-To: <20260904052134.2970111-5-den@valinux.co.jp>
-References: <20260904052134.2970111-5-den@valinux.co.jp>
-X-sashiko-severity: High
-Content-Type: text/plain; charset="utf-8"
+	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="c8JPPqL/"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=U1Cy4Z+4i7sYc/6qF13NCz4NAol+qPDzYIIeN3szLBYjtjrZjGvbG19j40w3yOTCx9t8m399Pi+NwDaVV9YOwcg1loiIcC8NHOIHSdF+LNMTo08ChIW0y9/X+uzWHZVJZXsfuOuBAMh7TD+GBYR5hmSwlJHLvwQ4VgN3Fykv8BZ+wE5WhruuQgM9OqAkdVq8HUZExGpq44L91J/SJfo6tRAML0d3CEQ86+Wb5rbgutgd6//kyouZuV7PwnTjQMfUjQreWZRCOMq0qQI3sJozD5YmcysNiwDx5MAHb0tVFlKKpnWWd0GHV2qJIqcW9cjAUDE+l8FbD4jfwOo0Ro6GYw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=7JA3GPqoDscpdgKmTiyJGVFN+YLUZSIcu52F83+6/Hs=;
+ b=ovv0nw0h4c+BRRA5DbGo+T6R9T2F/S4ZEM3eP3DHdKf9ZrDgKkx6E0uMKnhZemC2rSvcyPS0mM/dpHIEFAAh3sauMh+Ic1Mk6rlZaUQlyeARyn7XZCw/pFjfosFmQF3xYb63SqcdFQg6/T3IT8MY04SzZh4P1AG1NbMWTjutY7uHKwGuEPatCHOn/s6M+3QbNC55gvglu39/Y4czxQmb9kwlcVh60OG6R1E3OlTBN4fOiguF9El07NK8qCKFVG/0QnD7ba09TyWeClMB0rmwIsQ2r6gyDm2lyLwlTAh9HIAXgojz6/9i0X7yJlq7keoBaDq97hzCPEfKC+hSCXf1Vg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
+ header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=7JA3GPqoDscpdgKmTiyJGVFN+YLUZSIcu52F83+6/Hs=;
+ b=c8JPPqL//H85Oi5skiZkzrb5CCmms41WlTqnSfnZY9kv8EWBgR1hnzQ0RLlU+aruu8CWvhUaU2/8VGnclmxV/h5/vku2Wq2A6qEm1Esrb9Iottfj8W3LeGjo+JId9qHZYjbqlT4kFiNXGNqdO+0qOcMBSAalZ1P1tUQINRV0S1k=
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=valinux.co.jp;
+Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:38f::10)
+ by TYWP286MB2220.JPNP286.PROD.OUTLOOK.COM (2603:1096:400:13f::5) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.382.10; Thu, 10 Sep
+ 2026 04:08:41 +0000
+Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+ ([fe80::2305:327c:28ec:9b32]) by TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+ ([fe80::2305:327c:28ec:9b32%4]) with mapi id 15.21.0406.007; Thu, 10 Sep 2026
+ 04:08:41 +0000
+From: Koichiro Den <den@valinux.co.jp>
+To: Jon Mason <jdmason@kudzu.us>,
+	Dave Jiang <dave.jiang@intel.com>,
+	Allen Hubbe <allenbh@gmail.com>
+Cc: Frank Li <Frank.Li@kernel.org>,
+	Logan Gunthorpe <logang@deltatee.com>,
+	fuyuanli <fuyuanli0722@gmail.com>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	Nicholas Bellinger <nab@linux-iscsi.org>,
+	Joey Zhang <joey.zhang@microchip.com>,
+	ntb@lists.linux.dev,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v2 00/14] NTB: ntb_transport: Miscellaneous fixes
+Date: Thu, 10 Sep 2026 13:08:22 +0900
+Message-ID: <20260910040836.3792333-1-den@valinux.co.jp>
+X-Mailer: git-send-email 2.51.0
 Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: TYCP286CA0198.JPNP286.PROD.OUTLOOK.COM
+ (2603:1096:400:385::13) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+ (2603:1096:405:38f::10)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|TYWP286MB2220:EE_
+X-MS-Office365-Filtering-Correlation-Id: c1de203b-1e8a-4de4-d615-08df0ef132d4
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|23010399003|376014|1800799024|7416014|366016|10070799003|18002099003|10067099003|56012099006;
+X-Microsoft-Antispam-Message-Info:
+	XFUlnQS/S5+xx2CxGGWwRUmJNmyr/YabW1QZoHeeai2zEo/iW0UW/mmaMIzwHnt5tDirtlQq+dYnXYxYPwMd4V/2ODneiR4iXjySzgmp1ATEqDlcjy6I37wCHXFjis53SBD7sa4LW/90cYgdX2Ihcpeutg3vUGNBXZEpb+7VhLf6Rmq9Ig799kp/SbgTQG1OzgQAQ2sIEC6MzgCIcx+Dz9j7gAl5/nGHa5ZGkVgQ4e3U6zyPEss4BiouVAck/Z3U+TCh3XbCzlMUdnyOMpfg9JZWr5w6QjJDPBx/ITb7hMhFAbG4kdnGLNEHuPn317I2ZwscoGjOjoN4gugPBFGXTJMimxUB/UQP8ymFxtpP3dS1sTRGwcWU3G9P8MJKkC85qv8rusdwRQ8l1Jc4WiCRt4yOJ+DK0T5P9Ft5Mnee7ebAhaasdxyvVEfJrgzPo++vpyiwdll6cCpHZfhFUeo8nwwyLwZ/Kz8R/Ih+Kd2aSIet4kQZ+oU1+Hxahi5YhEyNMtimm7E6aww95QQ3jUmqz9oW9QIDEksOQFzqmUMFd4p8lMgg8ZOQwxjLw3rgb0s/EJrWEQfihfETmr8u4tXNTKP+5f/N0hvYnmmm/vfxneM6qK58gQ/EQU84TRH9tJK8
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(23010399003)(376014)(1800799024)(7416014)(366016)(10070799003)(18002099003)(10067099003)(56012099006);DIR:OUT;SFP:1102;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?us-ascii?Q?LgnoFliyLmI+3yyr/sjR6imVmqeyao7gpNPblUvWM8XI1vJ/deE7+KmReYKz?=
+ =?us-ascii?Q?lZO4xQD3qNh6O/ow9Ix/hcLuN7C8n1j6X1J39LIgvtBI7Ce0lVtIc6DQh9Yc?=
+ =?us-ascii?Q?JyvrmDspYKS9FM/pny8OIBNwvM2GIXGgXnFD4KticXVX40y5aNGj2UewfLmJ?=
+ =?us-ascii?Q?AuTa9yFVm3FPUIQ/e+bH2mY0iqWDll9Mmtkdu2LIGhT0VKy5vBw/xfMG/XQh?=
+ =?us-ascii?Q?UKMzH5Z7SMyDABYJywu+MdLUbowtui2PEy9Ru03wy3aZARlQpVzt2ojPAzDZ?=
+ =?us-ascii?Q?Mb3FNkwlUsnjJfGd4cbu3awZSKZz8ZQB4tGw4v6iXaq05d+6oWBE6gERaifP?=
+ =?us-ascii?Q?yCVyEz1ZGNEzs2tcgM7VtlW0GOutoe6aCgqETl2mYo/dhj9xoS3S6uCSSn30?=
+ =?us-ascii?Q?UvOh5E49f+yCweH8rJsP9WX6H/tl+1PLaobd+nc1mMHPUNP7Epw9h9Ouwa7U?=
+ =?us-ascii?Q?KNZV5eAtPwsoP9WL9lDfxxVsMU4iT1q/3ougAliqlgEwwDBU8itSaIyBiCOq?=
+ =?us-ascii?Q?VMK30x8IdokPM3dW12JwtcRrWvDxPy4YWi8Wn/u+EpiSDzs01CX+SgoJXEfF?=
+ =?us-ascii?Q?sitKI5cs0HlZ6Cu//KtJlgc2ifYZfbJSXXxF+sZcj8tvslcDG3HmsxeMLQ/e?=
+ =?us-ascii?Q?gkbvg2Npz4js1hxaDRBAd7fPqBu31QGR04DVrHrDc/R3gYhapLf4+SoOQg5z?=
+ =?us-ascii?Q?DQFw+J4tqj7R7Qqz7C1x242rmJj1gSJFg030fEp5MoouqFoNK4Ysm+ySXIx+?=
+ =?us-ascii?Q?qz3T2bJFW8/kPQ5jRE+YHnhS6+7sILfKze4lFqiYv/rs4abD5UPwVs+RmOOY?=
+ =?us-ascii?Q?nrCUMC6QTKlZd4VANbIrjhfjf9UJkqGWvjwZ+9bCYLUAuYd1NslehuKUwqhM?=
+ =?us-ascii?Q?lBQH6aPemJwPk2sOkqX8zFi2m/Ornl0lOpUq+9B4nzxP3AHimczSCrmPyG8t?=
+ =?us-ascii?Q?52JZUi/vcIWulXe+zrKDi4QNhrfQ52AR8DMebe6M9/D4K5c+YR4kdL+0BnZU?=
+ =?us-ascii?Q?GR5PVTfkntXbNu3uWRYEa6klgfb+KjoGmvkX0OCGFlUhTNEcutxitnq6nqlK?=
+ =?us-ascii?Q?mC1frf0t0Ah0UdWY6U6OeT7ChliqmTVxV23SgGviacN4yiCOOqtJpRPch6/Y?=
+ =?us-ascii?Q?Df6ZhUAVUsXAUDDXca2RQejnul+vCHZtkpFfi/JuwopQ1ij5SttoEWGtnLDN?=
+ =?us-ascii?Q?7cFMCZ0RGc6FCgxCIt0lzXnvB/t5USfIoTmPdcg8K6J3IIXp7g0ED5MxKVlZ?=
+ =?us-ascii?Q?u7FmAxS4/ZTvFut53j14QWeuNsQ3ALs0VUw2XoYJkfnCOwnsNBACC7KQF63X?=
+ =?us-ascii?Q?Ek0xKwA+fWDMOibDVnNbgVbX8b9q4dHGrXnA0dWj1MYWeZrA9vdifFoWCEWY?=
+ =?us-ascii?Q?KE81JH7zXypoXFwBHUqxwNSjCxsaknzs7gu1cbZ7hKCrlNbqhWQ1g2jaxL1Q?=
+ =?us-ascii?Q?tIyUcYWBCcunElrsA2TmfJUtW6+PtaIVx3ymKob1GfiErju6ysGYbxifcR9v?=
+ =?us-ascii?Q?/zCRQBwxpVkIFPVqFwc7nWe3LpYk7EBpkbYRHRva0Ky0rGgPLvpLFHeF5tcW?=
+ =?us-ascii?Q?8BFFHAjsDXd0x/IoPRyVpwPwvlK0HwHBswnJaRodFnTmlytvkmE0/xiJ+iMl?=
+ =?us-ascii?Q?GJhaAexzymeSmZJB3ZEyxPg/RHxM8GXzeF1m/v+Ymfkt88LwmLBnZpuo0JII?=
+ =?us-ascii?Q?05hP3WIhKq4LhQv0JpHRWVZvVcZf6rf8t+6QobiEPgACokorkkVVZCrCLZRo?=
+ =?us-ascii?Q?AaYp55RqI++7UAdzGvT5O9nBeHSQ5Yen94VuXthNHR5pCFbUhdSJ?=
+X-OriginatorOrg: valinux.co.jp
+X-MS-Exchange-CrossTenant-Network-Message-Id: c1de203b-1e8a-4de4-d615-08df0ef132d4
+X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Sep 2026 04:08:41.3911
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: pJhr7Ldd4mH7J4PCYRfAACh66OSh0Q8mbcIVaYsfiZdg6gsi8KMgDwGhwIRnXUKMUhzEBddP957uHyeDhHcVgg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYWP286MB2220
 
-Thank you for your contribution! Sashiko AI review found 3 potential
-issue(s) to consider:
+Hi,
 
-Critical: 0 · High: 1 · Medium: 1 · Low: 1
+This series attempts to fix miscellaneous issues in ntb_transport. Some
+of these were split from the direct TX/RX series v1 [1], as they stand
+on their own. Based on v7.3-rc2.
 
-- [High] ntb_netdev_start_xmit() unconditionally seeds `meta =
-  NTB_NETDEV_META_CAP_CSUM` (drivers/net/ntb_netdev.c:317), so the…
-- [Medium] dev->peer_csum is a device-wide lockless bool written from two
-  unsynchronised contexts: ntb_netdev_event_handler() clears it…
-- [Low] ntb_netdev_rx_handler() performs an unconditional
-  `WRITE_ONCE(dev->peer_csum, true)` for every received frame carrying…
+Dave, could you please review this series and ack if it looks good to
+you?
 
---
+[1] https://lore.kernel.org/r/20260810165136.2292436-1-den@valinux.co.jp/
+    (The v2 of [1] will be based off of this series to avoid conflicts.)
 
-net: ntb_netdev: Preserve CHECKSUM_PARTIAL across NTB
+Best regards,
+Koichiro
+---
+Changes in v2:
+  - Address Sashiko feedback, including regressions introduced by v1,
+    with new patches 5 and 10.
+    Note that to keep the series manageable, this revision does not
+    attempt to fix all the reported pre-existing issues.
+  - Add a fix for client removal ordering (patch 14).
+  - Reorder patches, moving v1 patch 4 after the fixes it depends on.
+  - Add missing Cc: stable@vger.kernel.org.
 
-This carries CHECKSUM_PARTIAL, csum_start and csum_offset across the NTB
-link in the transport meta field, advertising the capability on every frame
-and falling back to software checksumming until the peer capability is
-observed.  TX and RX checksum offload are added to hw_features but left
-disabled by default.
+v1: https://lore.kernel.org/r/20260907142429.951930-1-den@valinux.co.jp/
 
-> diff --git a/drivers/net/ntb_netdev.c b/drivers/net/ntb_netdev.c
-> index d03cbda1637d9..de8c4f320614d 100644
-> --- a/drivers/net/ntb_netdev.c
-> +++ b/drivers/net/ntb_netdev.c
 
-[ ... ]
+Koichiro Den (14):
+  NTB: ntb_transport: Remove the device debugfs directory
+  NTB: ntb_transport: Start TX offload thread after queue setup
+  NTB: ntb_transport: Avoid deadlock when cancelling link work
+  NTB: ntb_transport: Publish link state after QP setup
+  NTB: ntb_transport: Avoid losing QP link-up requests
+  NTB: ntb_transport: Clear link state before QP cleanup
+  NTB: ntb_transport: Stop QP work before freeing a queue
+  NTB: ntb_transport: Stop RX tasklet scheduling before freeing a queue
+  NTB: ntb_transport: Drain RX tasklets during link cleanup
+  NTB: ntb_transport: Wait for RX completions before resetting a QP
+  NTB: ntb_transport: Prepare remote RX info accesses for MW teardown
+  NTB: ntb_transport: Clear QP pointers when freeing an MW
+  NTB: ntb_transport: Abort link setup on QP MW allocation failure
+  NTB: ntb_transport: Remove clients before freeing transport resources
 
-> @@ -29,6 +30,21 @@ static unsigned int tx_stop = 5;
->  #define NTB_NETDEV_MAX_QUEUES		64
->  #define NTB_NETDEV_DEFAULT_QUEUES	1
->  
-> +/*
-> + * Checksum metadata layout:
-> + *   bit 23     capability, advertised on every packet
-> + *   bit 22     per-packet CHECKSUM_PARTIAL flag
-> + *   bit 21..6  skb_checksum_start_offset() (16 bits)
-> + *   bit 5..0   skb->csum_offset (6 bits)
-> + *
-> + * Until the capability is observed, complete partial checksums in software.
-> + * Six offset bits cover TCP/UDP. Larger offsets use software checksumming.
-> + */
-> +#define NTB_NETDEV_META_CAP_CSUM		BIT(23)
-> +#define NTB_NETDEV_META_CSUM			BIT(22)
-> +#define NTB_NETDEV_META_CSUM_START_SHIFT	6
-> +#define NTB_NETDEV_META_CSUM_OFFSET_MASK	GENMASK(5, 0)
-> +
->  struct ntb_netdev;
->  
->  struct ntb_netdev_queue {
-> @@ -44,6 +60,7 @@ struct ntb_netdev {
->  	struct net_device *ndev;
->  	unsigned int num_queues;
->  	struct ntb_netdev_queue *queues;
-> +	bool peer_csum;
->  };
->  
->  #define	NTB_TX_TIMEOUT_MS	1000
-> @@ -108,6 +125,7 @@ static void ntb_netdev_event_handler(void *data, int link_is_up)
->  	struct net_device *ndev;
->  
->  	ndev = dev->ndev;
-> +	WRITE_ONCE(dev->peer_csum, false);
+ drivers/ntb/ntb_transport.c | 232 +++++++++++++++++++++++++-----------
+ 1 file changed, 163 insertions(+), 69 deletions(-)
 
-[Severity: Medium]
-Can this clear of peer_csum be lost?  ntb_netdev_event_handler() runs in
-workqueue/process context out of the transport, while
-ntb_netdev_rx_handler() sets the same field from the qp rxc_db tasklet or
-from an RX DMA completion (ntb_rx_copy_callback() -> ntb_complete_rxc()).
-
-Looking at ntb_qp_link_cleanup() in drivers/ntb/ntb_transport.c, the
-event handler is invoked without stopping the rxc_db tasklet or draining
-outstanding RX DMA completions:
-
-	cancel_delayed_work_sync(&qp->link_work);
-	ntb_qp_link_down_reset(qp);
-
-	if (qp->event_handler)
-		qp->event_handler(qp->cb_data, qp->link_is_up);
-
-and ntb_complete_rxc() still calls into the driver because transport link
-loss does not clear client_ready:
-
-		if (qp->rx_handler && qp->client_ready)
-			qp->rx_handler(qp, qp->cb_data, cb_data, len, meta);
-
-So a completion belonging to the previous link generation can run
-WRITE_ONCE(dev->peer_csum, true) after the link-down clear, and after the
-following link-up clear too.  If the peer that comes back does not
-implement the capability (for example it rebooted into a pre-patch
-kernel), ntb_netdev_start_xmit() then sees peer_csum == true, sets
-NTB_NETDEV_META_CSUM and skips skb_checksum_help(), and the old peer marks
-those frames CHECKSUM_NONE with only the pseudo-header sum in place.
-Wouldn't that silently break TCP/UDP over the link until it is bounced
-again?  READ_ONCE()/WRITE_ONCE() only prevent torn access here.
-
-A related question: peer_csum is device-wide while the event handler is
-per-queue, and multi-queue is reachable through the driver's ethtool
-set_channels.  Should one queue's link event clobber capability state
-learned on the other queues that are still up?
-
->  
->  	netdev_dbg(ndev, "Event %x, Link %x, qp %u\n", link_is_up,
->  		   ntb_transport_link_query(q->qp), q->qid);
-
-[ ... ]
-
-> @@ -146,21 +174,32 @@ static void ntb_netdev_rx_handler(struct ntb_transport_qp *qp, void *qp_data,
->  		goto enqueue_again;
->  	}
->  
-> -	tstats = this_cpu_ptr(ndev->tstats);
-> -	flags = u64_stats_update_begin_irqsave(&tstats->syncp);
-> -	u64_stats_inc(&tstats->rx_packets);
-> -	u64_stats_add(&tstats->rx_bytes, len);
-> -	u64_stats_update_end_irqrestore(&tstats->syncp, flags);
-> -
->  	new_skb = netdev_alloc_skb(ndev, ndev->mtu + ETH_HLEN);
->  	if (!new_skb) {
-> +		ntb_netdev_rx_stats_add(ndev, len);
->  		DEV_STATS_INC(ndev, rx_dropped);
->  		goto enqueue_again;
->  	}
->  
->  	skb_put(skb, len);
-> +	if (meta & NTB_NETDEV_META_CAP_CSUM)
-> +		WRITE_ONCE(dev->peer_csum, true);
-
-[Severity: Low]
-This isn't a bug, but does this need to store on every frame?  peer_csum
-only ever goes false -> true within a link session, and it sits in the
-shared struct ntb_netdev next to ndev/num_queues/queues, which
-ntb_netdev_start_xmit() reads once per transmitted packet:
-
-	q = &dev->queues[qid];
-	...
-		if (READ_ONCE(dev->peer_csum))
-
-Every received frame therefore dirties a cacheline that each TX queue
-reads per packet, possibly from another CPU (more so with multiple queues
-via set_channels).  Would a test before the store, or per-queue state,
-avoid that?
-
-	if (!READ_ONCE(dev->peer_csum))
-		WRITE_ONCE(dev->peer_csum, true);
-
-> +
-> +	if (meta & NTB_NETDEV_META_CSUM) {
-> +		u16 csum_start = (meta >> NTB_NETDEV_META_CSUM_START_SHIFT) & U16_MAX;
-> +		u16 csum_offset = meta & NTB_NETDEV_META_CSUM_OFFSET_MASK;
-> +
-> +		if (csum_start < ETH_HLEN ||
-> +		    !skb_partial_csum_set(skb, csum_start, csum_offset))
-> +			goto rx_drop;
-> +
-> +		if (!(ndev->features & NETIF_F_RXCSUM) &&
-> +		    skb_checksum_help(skb))
-> +			goto rx_drop;
-> +	}
-
-[Severity: High]
-With rx-checksumming off, does this path still end up trusting the peer?
-
-The frame is not rejected: skb_partial_csum_set() applies the
-peer-supplied csum_start/csum_offset, then skb_checksum_help() in
-net/core/dev.c computes the sum over the bytes that were just received and
-writes it into the packet:
-
-	offset = skb_checksum_start_offset(skb);
-	...
-	csum = skb_checksum(skb, offset, skb->len - offset, 0);
-
-	offset += skb->csum_offset;
-	...
-	*(__sum16 *)(skb->data + offset) = csum_fold(csum) ?: CSUM_MANGLED_0;
-out_set_summed:
-	skb->ip_summed = CHECKSUM_NONE;
-
-So the L4 checksum the stack later validates is one the receiver itself
-generated.  Doesn't that mean corruption introduced anywhere on the NTB
-path (bad DMA or memcpy, a misbehaving peer, a wrong csum_start) is turned
-into an apparently valid checksum, in both feature states?  In the RXCSUM
-on case skb_csum_unnecessary() treats CHECKSUM_PARTIAL with a valid
-csum_start as needing no verification, and in the off case the sum is
-recomputed locally, so the knob appears to select who spends the CPU
-rather than whether the frame is trusted.
-
-Together with the unconditional advertisement in ntb_netdev_start_xmit():
-
-	unsigned int meta = NTB_NETDEV_META_CAP_CSUM;
-
-the capability bit is sent on every frame with no reference to the local
-ndev->features & NETIF_F_RXCSUM, and the peer latches it above.  The only
-place peer_csum is cleared is a qp link event in
-ntb_netdev_event_handler(), so once a peer has latched it there is no
-negative advertisement, timeout or renegotiation short of bouncing the
-link.
-
-The commit message says:
-
-    Leave the TX and RX checksum features disabled by default. Users can
-    just enable them explicitly for links they trust for lower CPU usage
-    and/or higher throughput.
-
-Is that accurate for the receive direction, given the receive-side
-decision is made entirely by the transmitting peer?  Would gating
-NTB_NETDEV_META_CAP_CSUM on the local NETIF_F_RXCSUM state, and dropping
-plus counting META_CSUM frames that arrive while RXCSUM is off instead of
-repairing them, match the described behaviour better?
-
-Also, in the off case a full software checksum over every payload now runs
-in the RX tasklet at the remote peer's discretion, which is the opposite
-of the CPU saving the change is aiming for.
-
-> +
-> +	ntb_netdev_rx_stats_add(ndev, len);
->  	skb->protocol = eth_type_trans(skb, ndev);
-> -	skb->ip_summed = CHECKSUM_NONE;
->  	skb_record_rx_queue(skb, q->qid);
->  
->  	netif_rx(skb);
-
-[ ... ]
-
-> @@ -268,6 +314,7 @@ static const struct ntb_queue_handlers ntb_netdev_handlers = {
->  static netdev_tx_t ntb_netdev_start_xmit(struct sk_buff *skb,
->  					 struct net_device *ndev)
->  {
-> +	unsigned int meta = NTB_NETDEV_META_CAP_CSUM;
->  	struct ntb_netdev *dev = netdev_priv(ndev);
->  	u16 qid = skb_get_queue_mapping(skb);
->  	struct ntb_netdev_queue *q;
-> @@ -278,7 +325,17 @@ static netdev_tx_t ntb_netdev_start_xmit(struct sk_buff *skb,
->  	if (unlikely(ntb_netdev_maybe_stop_tx(ndev, q, tx_stop)))
->  		return NETDEV_TX_BUSY;
->  
-> -	rc = ntb_transport_tx_enqueue(q->qp, skb, skb->data, skb->len, 0);
-> +	if (skb->ip_summed == CHECKSUM_PARTIAL) {
-> +		if (READ_ONCE(dev->peer_csum))
-> +			meta |= NTB_NETDEV_META_CSUM |
-> +				(skb_checksum_start_offset(skb) <<
-> +				 NTB_NETDEV_META_CSUM_START_SHIFT) |
-> +				skb->csum_offset;
-> +		else if (skb_checksum_help(skb))
-> +			goto drop;
-> +	}
-> +
-> +	rc = ntb_transport_tx_enqueue(q->qp, skb, skb->data, skb->len, meta);
-
-[ ... ]
-
-> @@ -671,7 +741,8 @@ static int ntb_netdev_probe(struct device *client_dev)
->  
->  	ndev->priv_flags |= IFF_LIVE_ADDR_CHANGE;
->  
-> -	ndev->hw_features = ndev->features;
-> +	/* Checksum bypass assumes a trusted NTB link, so keep it opt-in. */
-> +	ndev->hw_features = ndev->features | NETIF_F_HW_CSUM | NETIF_F_RXCSUM;
-
-This is where NETIF_F_RXCSUM becomes a user-visible knob, and the comment
-states the bypass is opt-in.  Given the receive path above accepts and
-repairs offloaded frames when the bit is clear, does turning
-rx-checksumming off actually keep the bypass out of the picture?
-
->  	ndev->watchdog_timeo = msecs_to_jiffies(NTB_TX_TIMEOUT_MS);
->  
->  	eth_random_addr(ndev->perm_addr);
-
+base-commit: df2908090cda368b01ff43709f51890076c56157
 -- 
-Sashiko AI review · https://netdev-ai.bots.linux.dev/sashiko/#/patchset/20260904052134.2970111-1-den%40valinux.co.jp
+2.51.0
+
