@@ -1,199 +1,142 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 75557396B76
-	for <ntb@lists.linux.dev>; Thu, 10 Sep 2026 04:23:07 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F1DD0396B76
+	for <ntb@lists.linux.dev>; Thu, 10 Sep 2026 04:23:32 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789014188; cv=none; b=MbZeOWIgbvy08jeOnQnuyrhvyYQ/aFCEe8ivQxt8ea7PXWMmEqHWoFhGyzVP/+fdVO+GbeHA0KPPI0irFJy/vDFRuqB7smavKtHuJJdgthdEpR6n6EN1KCnwfrusQn3D56wglPF+ZyDagVW69Uo72cNSklW9jIK8j+q5rGZAdog=
+	t=1789014214; cv=none; b=F7mBjAO+KFtIf23HeKbwzR7TKcK5lGsrQ74ypAMiDlnFXXB4UAIE6dQ1mYmVtiX5ZvSCLhhooRB3GB4TrVIGqVNhbDsmtwP/jVjKB35Z/t1NAKaHIF16vDXyd6DvyhgTWZuTlodnbgJWfHSWI8AmFD+asMRs7K8ntLHIsbJ/dWA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789014188; c=relaxed/simple;
-	bh=mTJt5YGpvketP/dpJFeiS2qsdLqIdTn6Z1QmVH6Gx54=;
+	s=arc-20240116; t=1789014214; c=relaxed/simple;
+	bh=39Dld4HNK+BXpcw5xEpCmSX9PUidcdlVAvE87xa+F3A=;
 	h=From:Subject:To:Cc:In-Reply-To:References:Content-Type:Date:
-	 Message-Id; b=qLWR17lFZaviVfFmvD2QrZ/Oiv/DyIWdi1tssGoHWwUY2uIIqssSakPyuceC8wykhR/LXrp/lk1UrPwwuBbLoW8Drry+nq67958ZuhI0ZJ48xjUq/kIAVz4z5xU3fGPhK+fh6etGAixh3prclr8o8PVTK4ZQUgimu4VF/TaXsAY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OyD1k8vv; arc=none smtp.client-ip=100.103.45.18
+	 Message-Id; b=ur1xI4mrhcqT+djsFhe+HvrqXAC/zERTAg3MqeoGpjJe4L7pAXY+gwLuaXeGIVCs+Hg1W/EH6v/UkkTZpQBPX1vT+L7sWx5INNjxnVhfe5/FD7QUiEKnwbXGDdDMxxKcrsK04NgUqvvWQHag5myAJc31kfhYuToEEagnjHEF85U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OiGx877M; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OyD1k8vv"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CECB01F00893;
-	Thu, 10 Sep 2026 04:23:06 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OiGx877M"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 892FA1F00893;
+	Thu, 10 Sep 2026 04:23:32 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789014187;
-	bh=fGefCZhNbuvGF7XAC2q0grUGcY4LVYlxySVCdCjB0U0=;
+	s=k20260515; t=1789014212;
+	bh=yIuJSzIIjH8dO8A7XqCzWARW4IoqQoWJL6a6T5VbnBs=;
 	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=OyD1k8vv5xfoRTCbmvN9QLeqdlXKQhtANmG3AtKBGA8NOLa/7OzFxTauDKFu4BP3S
-	 V5kPj6+74lzaIa7/2wpWZNDEDDiegUj1z04Fq6iM6oJY2ssvZaH61TBV4C5oXdm5vQ
-	 S5TrH1rcppLIQndgcMO58b+PtnZotUZPA9drp+EEmHaS0p6IxIbpQcPoBNOxrzmKoC
-	 j2oKVEu9kZ8MLoIU26Dn91gn2Np1BGHt7NeXRU/7ggZErsnhQsmzH8wKGOpwFxX9Zg
-	 GH87orsMtuCJEVrMrdQKqtMbuJ1fLLriuBHcNyiXV+69qBJQFXZ/nHLOxShvZh9B4R
-	 jL6HCNz6FZLTA==
+	b=OiGx877MX5RWnhyluvJNq6tfeUH8VquMiaAHTnGcESuESupI+eFKCj7wMg3AGW6Wn
+	 ARnzriLV6yUXybbWXoeN6tVGpHrCub/N+AIa861PQyrRlSRPOXHFMV/WXJc1hk3cUO
+	 F7ZkhKQ4m1nbHiwLKN4RN3ouDmGwNPrI0WiBc2xZ7CAiTUksPY4YaYNA4z99ptL5M+
+	 2k1TS9tJ6TIv7YSCvlaCj/Le9OGdaRqNWaj3tFdm6+hrer+McxvW1sjIpfkHe8r6Ai
+	 oMjh9rDL/v9McFPiMKJsgHu1lC3W0ZK/ULQ36V0ITosKshMtUZPCxCC2KepHIhvlAi
+	 4NnkxaM8iT+EQ==
 From: sashiko-bot@kernel.org
-Subject: Re: [PATCH v2 07/14] NTB: ntb_transport: Stop QP work before
- freeing a queue
+Subject: Re: [PATCH v2 03/14] NTB: ntb_transport: Avoid deadlock when
+ cancelling link work
 Reply-To: sashiko-reviews@lists.linux.dev
 To: "Koichiro Den" <den@valinux.co.jp>
 Cc: ntb@lists.linux.dev
-In-Reply-To: <20260910040836.3792333-8-den@valinux.co.jp>
+In-Reply-To: <20260910040836.3792333-4-den@valinux.co.jp>
 References: <20260910040836.3792333-1-den@valinux.co.jp>
- <20260910040836.3792333-8-den@valinux.co.jp>
+ <20260910040836.3792333-4-den@valinux.co.jp>
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
-Date: Thu, 10 Sep 2026 04:23:06 +0000
-Message-Id: <20260910042306.CECB01F00893@smtp.kernel.org>
+Date: Thu, 10 Sep 2026 04:23:32 +0000
+Message-Id: <20260910042332.892FA1F00893@smtp.kernel.org>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 
-Thank you for your contribution! Sashiko AI review found 5 potential issue(=
+Thank you for your contribution! Sashiko AI review found 2 potential issue(=
 s) to consider:
 
 New issues:
-- [Low] Data race on `qp->client_ready` due to missing `WRITE_ONCE()` barri=
-er.
+- [High] Dropping `link_event_lock` around `cancel_delayed_work_sync()` int=
+roduces a race condition that can permanently tear down a successfully esta=
+blished link.
 
 Pre-existing issues:
-- [High] Concurrent execution of global link cleanup and queue freeing caus=
-es a TOCTOU NULL pointer dereference or UAF of the client event handler.
-- [High] Missing `dmaengine_terminate_sync()` causes potential Use-After-Fr=
-ee of `ntb_queue_entry` by pending DMA callbacks.
-- [High] Lockless read-modify-write of `nt->qp_bitmap_free` allows concurre=
-nt queue allocations to race and corrupt state.
-- [Medium] DMA mapping is leaked on error paths if the mapped address is ex=
-actly 0.
+- [High] Separate work items for link-up and link-down events can execute o=
+ut of order, leading to a permanent link failure.
 --
 
-commit 5792da2527dba6f7348b49cf7d71537d78957df9
+commit d67dbc659b034b7a703fc35d72b81082c61a2ecd
 Author: Koichiro Den <den@valinux.co.jp>
-Date:   Thu Sep 10 04:08:29 2026 +0000
 
-    NTB: ntb_transport: Stop QP work before freeing a queue
+NTB: ntb_transport: Avoid deadlock when cancelling link work
 
-This patch disables and waits for qp->link_cleanup and qp->link_work to
-finish before freeing queue resources in ntb_transport_free_queue(). It also
-delays enabling these works until queue creation succeeds to prevent tasks
-from running concurrently with teardown or setup.
+This commit changes ntb_transport_link_cleanup() to cancel the link_work
+delayed work item outside of the link_event_lock. This avoids a deadlock
+where a retry in link_work blocks on the lock held by the cleanup function.
 
 > diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-> index 8dd1770aaaf15..e5599c7ca93f2 100644
+> index 55a20ae9a85e6..c77b173dca01f 100644
 > --- a/drivers/ntb/ntb_transport.c
 > +++ b/drivers/ntb/ntb_transport.c
-[ ... ]
-> @@ -2155,6 +2157,9 @@ ntb_transport_create_queue(void *data, struct devic=
-e *client_dev,
->  		}
->  	}
-> =20
-> +	enable_work(&qp->link_cleanup);
-> +	enable_delayed_work(&qp->link_work);
+> @@ -960,6 +960,15 @@ static void ntb_transport_link_cleanup(struct ntb_tr=
+ansport_ctx *nt)
+>  	struct ntb_transport_qp *qp;
+>  	u64 qp_bitmap_alloc;
+>  	unsigned int i, count;
+> +	bool cancel_link_work;
 > +
->  	ntb_db_clear(qp->ndev, qp_bit);
->  	ntb_db_clear_mask(qp->ndev, qp_bit);
+> +	scoped_guard(mutex, &nt->link_event_lock)
+> +		cancel_link_work =3D !nt->link_is_up;
+> +
+> +	if (cancel_link_work)
+> +		cancel_delayed_work_sync(&nt->link_work);
+> +
+> +	guard(mutex)(&nt->link_event_lock);
 
 [Severity: High]
-This is a pre-existing issue, but earlier in ntb_transport_create_queue(),
-does the lockless allocation of transport queues allow concurrency issues?
+Does dropping the link_event_lock around cancel_delayed_work_sync() create a
+race condition that could permanently tear down the link?
 
-    free_queue =3D ffs(nt->qp_bitmap_free);
-    if (!free_queue)
-        goto err;
-    free_queue--;
-    qp =3D &nt->qp_vec[free_queue];
-    qp_bit =3D BIT_ULL(qp->qp_num);
-    nt->qp_bitmap_free &=3D ~qp_bit;
+If a hardware link flap occurs, ntb_transport_event_callback() can queue bo=
+th
+link_work and link_cleanup. If link_cleanup executes, it evaluates
+!nt->link_is_up under the scoped_guard, drops the lock, and calls
+cancel_delayed_work_sync().
 
-Could multiple concurrent clients probe and hijack the same transport queue
-index, corrupting the bitmap?
+During this unlocked window, a pending link_work can acquire the lock,
+successfully establish the NTB link, set nt->link_is_up =3D true, and compl=
+ete.
 
-[Severity: Medium]
-This is a pre-existing issue, but does the error path in this function leak
-the DMA mapping if the mapped address is 0?
+When link_cleanup reacquires the lock, it unconditionally destroys the QPs
+and MWs that were just successfully established, without re-evaluating the
+link state.
 
-In ntb_transport_create_queue(), the cleanup code checks:
-
-    if (qp->tx_mw_dma_addr)
-        dma_unmap_resource(qp->tx_dma_chan->device->dev, ...);
-
-Since 0 can be a valid DMA address on some architectures, and
-dma_map_resource() returns DMA_MAPPING_ERROR on failure rather than 0,
-would treating 0 as invalid bypass unmapping and permanently leak it?
+Can we re-check the link state after reacquiring the lock to prevent this
+permanent link failure?
 
 [ ... ]
-> @@ -2200,6 +2205,10 @@ void ntb_transport_free_queue(struct ntb_transport=
-_qp *qp)
-> =20
->  	pdev =3D qp->ndev->pdev;
-> =20
-> +	qp->client_ready =3D false;
 
-[Severity: Low]
-Is there a data race on qp->client_ready?
+As an additional observation regarding the event handling:
 
-Since ntb_transport_link_work() concurrently reads this flag using
-READ_ONCE(), should this plain store be updated to use WRITE_ONCE() to
-prevent compiler caching or tearing?
-
-> +	disable_work_sync(&qp->link_cleanup);
-> +	disable_delayed_work_sync(&qp->link_work);
-> +	qp->link_is_up =3D false;
->  	qp->active =3D false;
-
-[Severity: High]
-This is a pre-existing issue, but does queue teardown safely wait for
-in-flight DMA callbacks to finish?
-
-Further down in ntb_transport_free_queue(), the code calls:
-
-    dmaengine_terminate_all(chan);
-
-This stops new DMA but doesn't synchronously wait. If a callback like
-ntb_rx_copy_callback() is executing concurrently:
-
-drivers/ntb/ntb_transport.c:ntb_rx_copy_callback() {
-    ...
-    entry->flags |=3D DESC_DONE_FLAG;
-    ntb_complete_rxc(entry->qp);
+drivers/ntb/ntb_transport.c:ntb_transport_event_callback() {
+...
+	if (ntb_link_is_up(nt->ndev, NULL, NULL) =3D=3D 1)
+		schedule_delayed_work(&nt->link_work, 0);
+	else
+		schedule_work(&nt->link_cleanup);
+...
 }
 
-Could it access the entry after the queue teardown loops free it via kfree(=
-),
-causing a use-after-free? Should this use dmaengine_terminate_sync() instea=
-d?
-
-[ ... ]
-> @@ -2247,8 +2256,6 @@ void ntb_transport_free_queue(struct ntb_transport_=
-qp *qp)
->  	ntb_db_set_mask(qp->ndev, qp_bit);
->  	tasklet_kill(&qp->rxc_db_work);
-> =20
-> -	cancel_delayed_work_sync(&qp->link_work);
-> -
->  	qp->cb_data =3D NULL;
->  	qp->rx_handler =3D NULL;
->  	qp->tx_handler =3D NULL;
-
 [Severity: High]
-This is a pre-existing issue, but is there a race condition between clearing
-these handler pointers and ntb_qp_link_cleanup()?
+This isn't a bug introduced by this patch, but does using separate work ite=
+ms
+for link-up and link-down events allow them to execute out of order?
 
-When ntb_transport_free_queue() clears qp->event_handler (immediately below
-this snippet):
+Since link_work and link_cleanup are queued to the global workqueue as
+distinct work items, rapid hardware flapping (DOWN then UP) can queue both
+simultaneously.
 
-    qp->event_handler =3D NULL;
+If they execute out of order, or if link_cleanup executes last and cancels =
+an
+un-run link_work, the software state could be torn down permanently even
+though the physical hardware state is UP.
 
-ntb_qp_link_cleanup() can execute concurrently on a workqueue from a hardwa=
-re
-link down event:
-
-drivers/ntb/ntb_transport.c:ntb_qp_link_cleanup() {
-    ...
-    if (qp->event_handler)
-        qp->event_handler(qp->cb_data, qp->link_is_up);
-}
-
-If the handler is cleared between the check and the call, could this result
-in a NULL pointer dereference?
+Could a single work item or a state machine handle both events to enforce
+ordering?
 
 --=20
 Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20260910040836.3792=
-333-1-den@valinux.co.jp?part=3D7
+333-1-den@valinux.co.jp?part=3D3
