@@ -1,148 +1,130 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D8CE73AEB2D
-	for <ntb@lists.linux.dev>; Thu, 10 Sep 2026 04:31:52 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D36C33AAF57
+	for <ntb@lists.linux.dev>; Thu, 10 Sep 2026 04:32:33 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789014714; cv=none; b=X2ZEzadA+HAlLlQ48/kla+aai2fryGJkqmqE800Q04/OstanfIvooZX6WKwcdpLE9QCNWUwrOIJRI6g81poBDuMXUHsv94S4jPudo8kAI/nSTO0slFZSjgH7E7y4eBy+HHqqg459awYSP12JGAiIxIGWLFt+kAZQJ6sgiLcknP4=
+	t=1789014755; cv=none; b=O74fgH0R5idCmtlKtxzTXemdNhtVWYoQINkql70X6GZAg1kZ8R0zPJ7VDMD4nyvtdvBUdHNJXDbGG8XY95IshO1eRi562xtf7H8rJfAxIcygGDLLblddhHNnqbjAXvvummazpUmmFGxrUO3/YUEYl1TmyXlVeJmbA4iYa1xgKus=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789014714; c=relaxed/simple;
-	bh=uhynkTXG66uWX7nyNHCc9n9THZcxcJIMkwEeh2vthq0=;
+	s=arc-20240116; t=1789014755; c=relaxed/simple;
+	bh=Zi7DPzpdf2TDwfbHa+bZsMy38ip9olQU/6r3w9pZRuo=;
 	h=From:Subject:To:Cc:In-Reply-To:References:Content-Type:Date:
-	 Message-Id; b=FdV7Ezj1sbd6nf/7L8rntl1XfqamLLc5uTDHtRo4DUatTci6aiE2Cf0OOUSkEbeFKqea1wm03k9J9JUWVB2+hdBrB8OKqx976fwv/1w+fPF3EkEA5/JNPo7EycD4qPxADd2qdGSdcOssL4RnIZYNDbWijzoC841JsdHkUW6J6No=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=eRdglYcs; arc=none smtp.client-ip=100.103.45.18
+	 Message-Id; b=mqTco/aDLj55yhNnEueTfsDnuUnPY7rqbF/X3GfFh6IUvRDju3AmqTiecJtDUebxka29jrOUxl2kRBZju2BTTWvR/k0gwifcWLcMYkMbeHDzaHnDKWxGdMR2Es0dnxrUClsRp1zlmr5QQhv9l/6/up6Vq1LxgoK5Ye/5WVrHrUQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=R6pvNdyU; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="eRdglYcs"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9C2EE1F000FF;
-	Thu, 10 Sep 2026 04:31:52 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="R6pvNdyU"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 57D091F000FF;
+	Thu, 10 Sep 2026 04:32:33 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789014712;
-	bh=EZMXKNOXRUbP+9F5pBT75R/vchbJEj7uoolupsjawzI=;
+	s=k20260515; t=1789014753;
+	bh=dKIOklzjEwmMgLWdtw0m3FnYbsVzOE+vsOnp39/b4UQ=;
 	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=eRdglYcs+JkcOOMFVEVlpOQ1W0EOCEY8fteiZ140x6TUnEhHMUOz2jU3+YBoL+GUZ
-	 zOQItAJslsksUw/HYLKZ1pr9Dc3LTJROok/ZhrQ/j+FO+7RlpMYaqO/zLnnKOQsMkx
-	 oZjcQBzObc3LaC6GTfOaAX6TMJ+Fc9Z/YeM1xQkI4DIRN34Ib81mnmUxqN5wCkcpDL
-	 7thrZ23xfRIyH2B7NwI5MT7WHz2hEYFiLgVHI5My9P5onoXZ2Z0Lso7AAY3aF6Utgl
-	 H/sxwqpCYnlI8V+9Pjv35Ls2cIaRSgkvrAPhRwu128wHMlcrhdJ/KE8yTymbxu+zA1
-	 foJrnP9mhrtzg==
+	b=R6pvNdyUCRM8OYOZNTHCWNEW43+8z9PWomz/lUPWfluivrnmQN9vHZEY23uNq2plJ
+	 /YnLY0meW+hAG1IwHmP/dG+vzMrk+Pt0z+JMDxdaZM5wP0Xa0ogXnQkjOivl7lgFeQ
+	 e8zHfX4eWewQVHBuckTfQophr5lXdwZ5nQnr4FCC+F3JrcG/DutemUtGx6gqJ7DEw3
+	 oFdnCHsFDlSIvxQC72UGiUIKut0b6+tTz3eB5o1x4iYEmIJjhcsz+A6lNVHRFxWhHJ
+	 Vb8QgX7VZq9lTSl/2kXx6qY6jYtBLsDOZUQRWk6tz3RXdH8euIQlS45a39yZBOZdyB
+	 8/uD6ojlQp9sQ==
 From: sashiko-bot@kernel.org
-Subject: Re: [PATCH v2 11/14] NTB: ntb_transport: Prepare remote RX info
- accesses for MW teardown
+Subject: Re: [PATCH v2 12/14] NTB: ntb_transport: Clear QP pointers when
+ freeing an MW
 Reply-To: sashiko-reviews@lists.linux.dev
 To: "Koichiro Den" <den@valinux.co.jp>
 Cc: ntb@lists.linux.dev
-In-Reply-To: <20260910040836.3792333-12-den@valinux.co.jp>
+In-Reply-To: <20260910040836.3792333-13-den@valinux.co.jp>
 References: <20260910040836.3792333-1-den@valinux.co.jp>
- <20260910040836.3792333-12-den@valinux.co.jp>
+ <20260910040836.3792333-13-den@valinux.co.jp>
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
-Date: Thu, 10 Sep 2026 04:31:52 +0000
-Message-Id: <20260910043152.9C2EE1F000FF@smtp.kernel.org>
+Date: Thu, 10 Sep 2026 04:32:32 +0000
+Message-Id: <20260910043233.57D091F000FF@smtp.kernel.org>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 
-Thank you for your contribution! Sashiko AI review found 2 potential issue(=
+Thank you for your contribution! Sashiko AI review found 1 potential issue(=
 s) to consider:
 
-New issues:
-- [Medium] Returning 0 from `ntb_transport_tx_free_entry()` when `remote_rx=
-_info` is NULL can trigger a spurious `WARN_ON_ONCE` in `ntb_async_tx()`.
-
 Pre-existing issues:
-- [High] Lockless Time-of-Check to Time-of-Use (TOCTOU) race leading to a U=
-se-After-Free on `remote_rx_info` during Memory Window (MW) teardown.
+- [High] The patch addresses a serial Use-After-Free but leaves a concurren=
+t TOCTOU (Time-Of-Check to Time-Of-Use) Use-After-Free unmitigated, as `WRI=
+TE_ONCE()` does not protect concurrent readers from accessing freed memory.
 --
 
-commit 82666f622eff311c2e1a37c138e32f49823001fc
+commit 83701cf77653ce575ecc537dc3582d73e7b2ebcf
 Author: Koichiro Den <den@valinux.co.jp>
 
-NTB: ntb_transport: Prepare remote RX info accesses for MW teardown
+NTB: ntb_transport: Clear QP pointers when freeing an MW
 
-The commit uses READ_ONCE() and WRITE_ONCE() for remote_rx_info to handle
-lockless accesses during link cleanup and MW freeing. It also adds a NULL
-check before dereferencing the pointer.
-
-Cc: stable@vger.kernel.org
+This commit clears the rx_buff and remote_rx_info pointers for all QPs using
+an MW when the MW is freed. This addresses a serial use-after-free where a
+link-down event could cause ntb_qp_link_down_reset() to write to previously
+freed MW memory.
 
 > diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-> index 7ccba2c04f548..b949f36a4f2d9 100644
+> index b949f36a4f2d9..096be87e5ede9 100644
 > --- a/drivers/ntb/ntb_transport.c
 > +++ b/drivers/ntb/ntb_transport.c
-> @@ -489,6 +489,7 @@ EXPORT_SYMBOL_GPL(ntb_transport_unregister_client);
->  static int ntb_qp_debugfs_stats_show(struct seq_file *s, void *v)
+> @@ -781,10 +781,17 @@ static void ntb_free_mw(struct ntb_transport_ctx *n=
+t, int num_mw)
 >  {
->  	struct ntb_transport_qp *qp =3D s->private;
-> +	struct ntb_rx_info *remote_rx_info;
+>  	struct ntb_transport_mw *mw =3D &nt->mw_vec[num_mw];
+>  	struct device *dma_dev =3D ntb_get_dma_dev(nt->ndev);
+> +	unsigned int i;
 > =20
->  	if (!qp || !qp->link_is_up)
->  		return 0;
-> @@ -516,7 +517,9 @@ static int ntb_qp_debugfs_stats_show(struct seq_file =
-*s, void *v)
->  	seq_printf(s, "tx_err_no_buf - %llu\n", qp->tx_err_no_buf);
->  	seq_printf(s, "tx_mw - \t0x%p\n", qp->tx_mw);
->  	seq_printf(s, "tx_index (H) - \t%u\n", qp->tx_index);
-> -	seq_printf(s, "RRI (T) - \t%u\n", qp->remote_rx_info->entry);
-> +	remote_rx_info =3D READ_ONCE(qp->remote_rx_info);
-> +	if (remote_rx_info)
-> +		seq_printf(s, "RRI (T) - \t%u\n", remote_rx_info->entry);
+>  	if (!mw->virt_addr)
+>  		return;
+> =20
+> +	/* Drop references from every QP using this MW. */
+> +	for (i =3D num_mw; i < nt->qp_count; i +=3D nt->mw_count) {
+> +		nt->qp_vec[i].rx_buff =3D NULL;
+> +		WRITE_ONCE(nt->qp_vec[i].remote_rx_info, NULL);
+> +	}
+> +
 
 [Severity: High]
-This is a pre-existing issue, but does checking the pointer for NULL
-actually prevent a use-after-free here?
+This is a pre-existing issue, but does this clearing mechanism leave a
+concurrent Time-Of-Check to Time-Of-Use (TOCTOU) regression unmitigated?
 
-If a reader thread reads a non-NULL pointer and gets preempted, a concurrent
-link-down event could trigger ntb_free_mw(), synchronously unmapping and
-freeing the DMA memory.
+While this patch addresses a serial use-after-free, WRITE_ONCE() does not
+protect concurrent readers from accessing freed memory. If a client drops t=
+he
+link concurrently with a hardware link-down event triggering
+ntb_transport_link_cleanup(), the client thread can fetch the remote_rx_info
+pointer locklessly:
 
-When the reader resumes, wouldn't dereferencing its local remote_rx_info
-pointer result in a use-after-free on kernel DMA memory since the underlying
-Memory Window (MW) is no longer valid?
+drivers/ntb/ntb_transport.c:ntb_qp_link_down_reset() {
+	...
+	remote_rx_info =3D READ_ONCE(qp->remote_rx_info);
+	if (remote_rx_info)
+		remote_rx_info->entry =3D qp->rx_max_entry - 1;
+	...
+}
 
-[ ... ]
+If the client thread is preempted after reading the pointer, and the cleanup
+thread proceeds to free the memory in ntb_free_mw():
 
-> @@ -2558,8 +2564,14 @@ EXPORT_SYMBOL_GPL(ntb_transport_max_size);
-> =20
->  unsigned int ntb_transport_tx_free_entry(struct ntb_transport_qp *qp)
->  {
-> +	struct ntb_rx_info *remote_rx_info =3D READ_ONCE(qp->remote_rx_info);
->  	unsigned int head =3D qp->tx_index;
-> -	unsigned int tail =3D qp->remote_rx_info->entry;
-> +	unsigned int tail;
-> +
-> +	if (!remote_rx_info)
-> +		return 0;
+drivers/ntb/ntb_transport.c:ntb_free_mw() {
+	...
+	ntb_mw_clear_trans(nt->ndev, PIDX, num_mw);
+	dma_free_attrs(dma_dev, mw->alloc_size, mw->alloc_addr,
+		       mw->original_dma_addr, DMA_ATTR_FORCE_CONTIGUOUS);
+	...
+}
 
-[Severity: Medium]
-Could this new return path trigger a spurious WARN_ON_ONCE in ntb_async_tx(=
-)?
+When the client thread resumes, wouldn't it write to the freed DMA memory?
 
-In ntb_process_tx(), the code verifies ntb_transport_tx_free_entry() space
-before executing ntb_async_tx(). If a concurrent MW teardown sets
-qp->remote_rx_info to NULL right at this moment, the secondary check inside
-ntb_async_tx() would hit this new return 0 path.
+This same lockless TOCTOU vulnerability appears to be reachable on the
+transmit hot-path in ntb_transport_tx_free_entry() and via debugfs in
+ntb_qp_debugfs_stats_show().
 
-Since it evaluates to zero unexpectedly, would this trip the WARN_ON_ONCE
-even though there was no actual queue exhaustion or invalid usage?
-
-> +
-> +	tail =3D remote_rx_info->entry;
-
-[Severity: High]
-This is a pre-existing issue, but is it possible for a time-of-check to
-time-of-use (TOCTOU) race to occur here during Memory Window (MW) teardown?
-
-Just like in ntb_qp_debugfs_stats_show(), if a concurrent link-down event
-frees the MW after the NULL check but before this dereference, wouldn't
-this lead to a use-after-free?
-
-> =20
->  	return tail >=3D head ? tail - head : qp->tx_max_entry + tail - head;
->  }
+>  	ntb_mw_clear_trans(nt->ndev, PIDX, num_mw);
+>  	dma_free_attrs(dma_dev, mw->alloc_size, mw->alloc_addr,
+>  		       mw->original_dma_addr, DMA_ATTR_FORCE_CONTIGUOUS);
 
 --=20
 Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20260910040836.3792=
-333-1-den@valinux.co.jp?part=3D11
+333-1-den@valinux.co.jp?part=3D12
