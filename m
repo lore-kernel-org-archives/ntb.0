@@ -1,44 +1,44 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EE0F0395254
-	for <ntb@lists.linux.dev>; Thu, 10 Sep 2026 04:24:13 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 31BEB3AB262
+	for <ntb@lists.linux.dev>; Thu, 10 Sep 2026 04:26:45 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789014255; cv=none; b=ts1dIEkRMp/hv6ESV93cxI5+Pfi4wzKMccx0z7E0ZNP62gf68WQwfo+2nJCrHIRWRWaTjDM7VfFn3Px2lFeUISnB/YDkIhcFxKgxJ9LGKrDL+4JVVK4ouzgwvDumtTjmOthUzEh8rLMHoulqEt8QtTiIqIx3uHK7mAJ+YZJy40Y=
+	t=1789014408; cv=none; b=pL+bIl1ftS76YlUf4lr6ykeZb8hxnRL1dLx6/XkQLLtZaN449wLcDhEIC7qdbVvMqphHs8+GGTDdbqVmxqFrJdZKbmh7JqE/eH2LTuD1hGUKgjF8KJHcveOUeYJ5PgxkEhEY5j+Py9WEcYxzkvcS4HkX7hQEWPjd9+X+YIZPqCE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789014255; c=relaxed/simple;
-	bh=WQ8+PXZWUwMOPg04a9zPfVpJp8/DoCZikVO+DBLf+JA=;
+	s=arc-20240116; t=1789014408; c=relaxed/simple;
+	bh=TlCILghAJfRprldy7naj6/P73bEwtqpHjEkVm/LiF70=;
 	h=From:Subject:To:Cc:In-Reply-To:References:Content-Type:Date:
-	 Message-Id; b=atgdIiXl7hXz8zWHfMVx3nMoLCRq9Hg62DW//br5zqrxv6G3U5BLYiERJvj8r/KCgi0x8qyqaZUWS5uz99OQzNkMxsUheXQO1KnD0QJcHItIbE8tTCBIUa+CsJAsi9dWg/bNXVKCV3AG61GF3ZpkbecLvOAIO0y8UNaA6h4BGds=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mSlsCl6a; arc=none smtp.client-ip=100.103.45.18
+	 Message-Id; b=HkJXbdX86bgRMZuXG443+oU7EHiYU8qzGuZKgs2wpetA/l+RC8vNSUel6avzVCi+1stqJi9iNm+lleN9aikW24AfgA0ud2nMRjibq8qc9NPRJevknDsbxQpL7e+7V1xVB9+oXtELsj4eROkPox0zZ7d4PP6b52JWn519aW/O45A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=A69FkA6C; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mSlsCl6a"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5026B1F000FF;
-	Thu, 10 Sep 2026 04:24:13 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="A69FkA6C"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7B4711F000FF;
+	Thu, 10 Sep 2026 04:26:45 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789014253;
-	bh=5+VkGlVN7r284N/BQlT2lBORoQQDWJYKnaaJbQS7+Hw=;
+	s=k20260515; t=1789014405;
+	bh=PmgonTyQxbXN++l6WUMTowR7GWKr1mGsWUPcgYOFSDA=;
 	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=mSlsCl6atjf7IVkkvl/l2LWtwuC8TzyWzIF+OdSXHF2EQduBetkwqpvm9Yn2ppl7j
-	 PzDsFzTN4E99swxf8c+dPzYt1XsYSx6GPygUWIhT5L12l5pjFYY+XAgS0E0cEpOXy7
-	 JOWaDeiZW2rJrJrsktWDqGPS2mtjyY1AG5wA2/cqucqKgY/Nf3CY0mBE5CpXGHH7IZ
-	 k784h2tOITe82NCKDgCVQvNNvxCh87Ow8KtH4DN9yVTIZoHr6ZAh3EKQo9BFEyMhri
-	 p94mZl2VQrG/cpzj0FO5GOqqNLVn7t+D9dJDt/VZhCec8rZfAma0Op8h05XcPFa9bP
-	 X7yUEOLhMr6DQ==
+	b=A69FkA6C8pDr/S781pG+0lDBLeiD5VYHs/ViOKExQKlhu0awMoXb4Jgy1/rR9xF5q
+	 nbsekcGUQFzsE9ZyHr4ffy4HLmpyx+85biCe1EoXptkjjkYAt4ABrnHErDWQBNDWTR
+	 D7F0t3mcnnnhU9wBjUlVoUHByUGggk6ibD3iwqN8XNT9nCZ8vVgXq6yFOBZtDsAyyx
+	 b7MWNXGP9s14RQYijm43yxeE12Z7YxvCUbKQGgnDAs6u+rjSrRHK0VmHePzTS4Uyf8
+	 DrMrKT6jWZeofjPDwlsOy3UztTkspW8Osjh6KmvmXcPToKFLDSFUuDjzWHedZDj/UF
+	 qovdXapYITT8Q==
 From: sashiko-bot@kernel.org
-Subject: Re: [PATCH v2 10/14] NTB: ntb_transport: Wait for RX completions
- before resetting a QP
+Subject: Re: [PATCH v2 05/14] NTB: ntb_transport: Avoid losing QP link-up
+ requests
 Reply-To: sashiko-reviews@lists.linux.dev
 To: "Koichiro Den" <den@valinux.co.jp>
 Cc: ntb@lists.linux.dev
-In-Reply-To: <20260910040836.3792333-11-den@valinux.co.jp>
+In-Reply-To: <20260910040836.3792333-6-den@valinux.co.jp>
 References: <20260910040836.3792333-1-den@valinux.co.jp>
- <20260910040836.3792333-11-den@valinux.co.jp>
+ <20260910040836.3792333-6-den@valinux.co.jp>
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
-Date: Thu, 10 Sep 2026 04:24:12 +0000
-Message-Id: <20260910042413.5026B1F000FF@smtp.kernel.org>
+Date: Thu, 10 Sep 2026 04:26:44 +0000
+Message-Id: <20260910042645.7B4711F000FF@smtp.kernel.org>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -49,99 +49,118 @@ Thank you for your contribution! Sashiko AI review found 2 potential issue(=
 s) to consider:
 
 Pre-existing issues:
-- [High] Data corruption during fallback RX memory copy.
-- [High] Use-After-Free of `ntb_queue_entry` elements during transport queu=
-e teardown.
+- [High] Race condition between `ntb_qp_link_work` and `ntb_transport_link_=
+down` causes spurious link-up and breaks queue teardown synchronization.
+- [High] Missing `dma_rmb()` after checking `DESC_DONE_FLAG` allows specula=
+tive reading of stale DMA data.
 --
 
-commit a2b0eba80182f98f6886cb72c908b76469b3615d
+commit 99af086b145ca7c747420cbf914a391c3b3216f2
 Author: Koichiro Den <den@valinux.co.jp>
 
-NTB: ntb_transport: Wait for RX completions before resetting a QP
+NTB: ntb_transport: Avoid losing QP link-up requests
 
-This commit fixes a race condition where transport link cleanup can free a
-memory window still in use by RX DMA. It adds a wait loop for the RX post
-queue to become idle before resetting the QP.
+ntb_netdev_open() can call ntb_transport_link_up() while the transport
+worker is completing setup on another CPU. Concurrent transport setup
+and a client link-up request can both read the other's flag as false and
+leave QP link work unqueued. The QP then stays down until another link
+event or client link-up request.
 
-Link: https://lore.kernel.org/r/20260907144257.767281F00A3A@smtp.kernel.org/
+Link: https://lore.kernel.org/r/20260907144701.702E41F00A3A@smtp.kernel.org/
 
 > diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-> index 36797ea3ff45c..7ccba2c04f548 100644
+> index 75d4a2e021f4e..1332d53bcfe7d 100644
 > --- a/drivers/ntb/ntb_transport.c
 > +++ b/drivers/ntb/ntb_transport.c
+> @@ -1104,10 +1104,16 @@ static void ntb_transport_link_work(struct work_s=
+truct *work)
+>  	/* Publish the link only after every QP has been set up. */
+>  	smp_store_release(&nt->link_is_up, true);
+> =20
+> +	/*
+> +	 * Prevent both sides from missing each other's flag. Pairs with
+> +	 * the barrier in ntb_transport_link_up().
+> +	 */
+> +	smp_mb();
+> +
+>  	for (i =3D 0; i < nt->qp_count; i++) {
+>  		struct ntb_transport_qp *qp =3D &nt->qp_vec[i];
+> =20
+> -		if (qp->client_ready)
+> +		if (READ_ONCE(qp->client_ready))
+>  			ntb_transport_schedule_qp_link(qp, 0);
+>  	}
+
+[Severity: High]
+This isn't a bug introduced by this patch, but does the check for
+qp->client_ready in ntb_qp_link_work() safely prevent a spurious link-up if
+the client simultaneously tears down the link?
+
+If CPU 1 calls ntb_transport_link_down(), clearing qp->client_ready and
+calling cancel_delayed_work_sync(&qp->link_work):
+
+drivers/ntb/ntb_transport.c:ntb_transport_link_down() {
+	...
+	if (qp->link_is_up)
+		ntb_send_link_down(qp);
+	else
+		cancel_delayed_work_sync(&qp->link_work);
+}
+
+Could CPU 0, executing ntb_qp_link_work() concurrently, fail to see
+qp->client_ready as false before writing to the remote SPAD and firing the
+link-up event handler?
+
+drivers/ntb/ntb_transport.c:ntb_qp_link_work() {
+	...
+	if (val & BIT(qp->qp_num)) {
+		dev_info(&pdev->dev, "qp %d: Link Up\n", qp->qp_num);
+		qp->link_is_up =3D true;
+	...
+}
+
+This sequence bypasses the client's teardown intent, and forcing the link
+back up after teardown may lead to use-after-free or data corruption.
 
 [ ... ]
 
-> @@ -959,6 +966,17 @@ static void ntb_qp_link_cleanup(struct ntb_transport=
-_qp *qp)
->  	disable_delayed_work_sync(&qp->link_work);
->  	ntb_transport_set_qp_active(qp, false);
->  	tasklet_kill(&qp->rxc_db_work);
-> +	/*
-> +	 * Some DMA engines lack terminate/synchronize ops (e.g. IOAT), and
-> +	 * DMA_COMPLETION_NO_ORDER rules out cookie-based waits.
-> +	 *
-> +	 * Waiting for rx_post_q to empty suffices: ntb_complete_rxc() finishes
-> +	 * its MW accesses before removing each entry under ntb_rx_q_lock.
-> +	 * qp->active is false and rxc_db_work is stopped, so no new RX DMA
-> +	 * can be submitted.
-> +	 */
-> +	while (!ntb_transport_rx_idle(qp))
-> +		fsleep(1000);
+> @@ -2401,7 +2407,10 @@ void ntb_transport_link_up(struct ntb_transport_qp=
+ *qp)
+>  	if (!qp)
+>  		return;
 > =20
->  	ntb_qp_link_down_reset(qp);
+> -	qp->client_ready =3D true;
+> +	WRITE_ONCE(qp->client_ready, true);
+> +
+> +	/* Pairs with the barrier in ntb_transport_link_work(). */
+> +	smp_mb();
+> =20
+>  	ntb_transport_schedule_qp_link(qp, 0);
+>  }
 
 [Severity: High]
-This is a pre-existing issue, but does ntb_transport_free_queue() also need
-this same wait loop to prevent a use-after-free?
+This is a pre-existing issue, but does ntb_process_rxc() need a dma_rmb()
+barrier after checking DESC_DONE_FLAG?
 
-When tearing down a queue, ntb_transport_free_queue() calls
-dmaengine_terminate_all() and dma_release_channel(). However, as noted in t=
-he
-patch comment here, some DMA engines lack terminate/synchronize ops. The
-cleanup routine then immediately frees the rx_post_q entries:
+When processing received packets, the done flag is checked:
 
-drivers/ntb/ntb_transport.c:ntb_transport_free_queue() {
-    ...
-	while ((entry =3D ntb_list_rm(&qp->ntb_rx_q_lock, &qp->rx_post_q))) {
-		dev_warn(&pdev->dev, "Freeing item from non-empty rx_post_q\n");
-		kfree(entry);
+drivers/ntb/ntb_transport.c:ntb_process_rxc() {
+	...
+	if (!(hdr->flags & DESC_DONE_FLAG)) {
+		dev_dbg(&qp->ndev->pdev->dev, "done flag not set\n");
+		qp->rx_ring_empty++;
+		return -EAGAIN;
 	}
-    ...
+
+	if (hdr->flags & LINK_DOWN_FLAG) {
+	...
 }
 
-If a DMA callback is pending or executing asynchronously while the queue is
-being torn down, won't it dereference the freed entry pointer after
-kfree(entry) is called?
-
-[Severity: High]
-This is another pre-existing issue, but can the fallback copy corrupt data
-during a DMA error?
-
-If a DMA transfer fails and ntb_rx_copy_callback() falls back to a software
-copy, it calculates the offset using the globally incremented qp->rx_index:
-
-drivers/ntb/ntb_transport.c:ntb_rx_copy_callback() {
-    ...
-		case DMA_TRANS_ABORTED:
-		{
-			struct ntb_transport_qp *qp =3D entry->qp;
-			void *offset =3D qp->rx_buff + qp->rx_max_frame *
-					qp->rx_index;
-
-			ntb_memcpy_rx(entry, offset);
-			qp->rx_memcpy++;
-			return;
-		}
-    ...
-}
-
-Because qp->rx_index was already advanced to the next available ring buffer
-frame when the transaction was originally submitted in ntb_process_rxc(),
-won't this offset calculation point to the wrong frame and copy the wrong
-payload? Should this calculation use the entry-specific index
-(entry->rx_index) instead?
+Without a dma_rmb() here, can weak memory architectures (like ARM64 or
+PowerPC) speculatively fetch subsequent header fields and payload data
+(such as hdr->ver or hdr->len) before the flag check completes, leading to
+processing stale DMA data?
 
 --=20
 Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20260910040836.3792=
-333-1-den@valinux.co.jp?part=3D10
+333-1-den@valinux.co.jp?part=3D5
