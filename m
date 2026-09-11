@@ -1,32 +1,32 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9E30A1A682A;
-	Fri, 11 Sep 2026 00:18:57 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B45BF2264CA;
+	Fri, 11 Sep 2026 00:20:50 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789085938; cv=none; b=lcbLUz8GfC8h9ZxizwMVerI+DpKnckMBDSLSZsblPU+fcHbnbr+2iDRnD8+GhD9iD9EFwwH4cA5IA8q6B1byEqs9caqutnoNVV3VAFIuFukXhwUh3F+f85Oc+jZCrH9WYOVkopnj/X+HL09F1PozALUdyaPElcGLkpIrsJgNvQE=
+	t=1789086052; cv=none; b=PGQpH+/JmRxriGdKEtrMrz7R0ZHCiel+tlfQwfDVE9koX6aldqBLRp/irdxyM5orSrMxdji+zE9BHYsZuJ9D23l6oFCOdyadOK8ygTBOjL7/NhU7gWXkIz4EVPoFm92OKTHrFKFjz4ZScn8jYfYBCH6yI2HLPMQkE3bMEajjvO0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789085938; c=relaxed/simple;
-	bh=n4+Y57pHoMZxug9xVevg0q4F1+iMOn5yLGrcAUCn6Tc=;
+	s=arc-20240116; t=1789086052; c=relaxed/simple;
+	bh=fVe5wHeKVo+lXZ7TSwSHKuaV2ucQjtCmE1dtDR+ueIQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=lXCB0cX9fmuah0XqOQSO+rKBnUi+O8cqCkTLllhQieTAXPe9rxG+fQj/nm4Y71LdWPOcPuMPIx/ZQUtArjNoDvOb8ymWNPSbiCQ12WMW/t4vvpaE+WB8lij55HnV2Jt5r/we39p1svVDB/lP/c/4a6VNWStN0bKvuCWwcMFUSo4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=FEFNFHjW; arc=none smtp.client-ip=100.103.45.18
+	 MIME-Version:Content-Type; b=n3mhusghLvy1AYZHOyRZFl2Ur0WIzv2vC/7pCVYAvrvJd0i7qLynBINlvyAoFwwimg9Ov/oApQ/lCX83gkbkzWEbeA2aCpFefbIHVjieoBq3fQhQYWXEOARm38yHK298tW1XF2pgc/fsI+U5dU3WTwBpqPRu4jebYPGpofmM2sQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=SZnJN6wR; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="FEFNFHjW"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C84501F000FF;
-	Fri, 11 Sep 2026 00:18:56 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="SZnJN6wR"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 756161F000FF;
+	Fri, 11 Sep 2026 00:20:48 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789085937;
-	bh=+MIc9uIZIBa/ez6VNHWj6uN8xj7Wa1rLAWgxbNI8Pkg=;
+	s=k20260515; t=1789086048;
+	bh=GX2T0EKR6xCoEgvcA8PLeQklBZSiTzTr3RFvmA2OzfE=;
 	h=Date:From:To:Cc:Subject:In-Reply-To:References;
-	b=FEFNFHjWBzoeIqzCLYLmE1BrKvFLJVFzhPQwvYxjFrwbzaym9FSysKEl7gI9dbofJ
-	 OwJOE4L39S82DfkgJ7tzPc9aEcdjcoGSce/rmK9p17RDt2F00+P7OV0s2pRozCDee2
-	 uM5LQL2hQHBnfBlKWiNLoAG64jofnWW0H/eWmM6bNRWxXoY6ISPciZxCSzdIGRYJ2Z
-	 9Hdz3/p92rMqBTLDcjNy5rFQGXtc2r+/RQBo8STdkX710XXJJIVbTymXUOm/7rU9fv
-	 sAPUM4F49HSxMVVZAVjPJ1PoQvI6ZrNF+nd2PGHummldLvv4OLzmpBxXR4LtVFE97e
-	 ywsE0WdsdPYLg==
-Date: Thu, 10 Sep 2026 17:18:56 -0700
+	b=SZnJN6wRftf2+DTFNotAQsT4CLDsZIU7vncgYgglFMGeZIt2/qhaOHqGfCHZ2v2gb
+	 mb39TZ00eyiuHh+GZ2T+aKZLIWwoNdyixHPnCwBlaGAR4JhB+ExQb/IhGAz1khBHOw
+	 ba5IExradTcx9R46OHzDCrGVLMsDIkwRqTsCE7o1UhgkyZyuhcAzm9uQN/yTyM+Qqp
+	 uSZeFCIdLQgsgsWDjiX+d62F3qYH7QfvmSno2EQLIUsBjjW0rH1F5YkjzOvNbwAj0y
+	 F2JSkNT/6Sra5qGqrwshc2aQpEZ7R30EgcvHFSzZsReIUdIZOe5WR57TjF4pCi79S+
+	 H2KQOUBEVfrEg==
+Date: Thu, 10 Sep 2026 17:20:47 -0700
 From: Jakub Kicinski <kuba@kernel.org>
 To: Koichiro Den <den@valinux.co.jp>
 Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen
@@ -34,12 +34,12 @@ Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, Allen
  Miller" <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>, Paolo
  Abeni <pabeni@redhat.com>, ntb@lists.linux.dev, netdev@vger.kernel.org,
  linux-kernel@vger.kernel.org
-Subject: Re: [PATCH net-next v3 3/4] NTB: ntb_transport: Add per-payload
- client metadata
-Message-ID: <20260910171856.251c90d3@kernel.org>
-In-Reply-To: <20260904052134.2970111-4-den@valinux.co.jp>
+Subject: Re: [PATCH net-next v3 4/4] net: ntb_netdev: Preserve
+ CHECKSUM_PARTIAL across NTB
+Message-ID: <20260910172047.167225eb@kernel.org>
+In-Reply-To: <20260904052134.2970111-5-den@valinux.co.jp>
 References: <20260904052134.2970111-1-den@valinux.co.jp>
-	<20260904052134.2970111-4-den@valinux.co.jp>
+	<20260904052134.2970111-5-den@valinux.co.jp>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -49,10 +49,10 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 
-On Fri,  4 Sep 2026 14:21:33 +0900 Koichiro Den wrote:
-> +/* Reserve the low byte for transport flags. */
-> +#define DESC_META_SHIFT		8
-> +#define DESC_META_MASK		(~0U << DESC_META_SHIFT)
+On Fri,  4 Sep 2026 14:21:34 +0900 Koichiro Den wrote:
+> Calculating L4 checksums can limit ntb_netdev throughput especially on
+> embedded systems, where CPU resources are often limited. A trusted PCIe
+> fabric can avoid that work.
 
-IMHO the code would be more readable if you defined this with 
-one GENMASK and then used FILED_GET() / _PREP() / _MAX() on it
+Would it make more sense to prepend something like a virtio_net_hdr
+to the data so you can cheaply express more offloads?
