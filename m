@@ -1,231 +1,295 @@
-Received: from TY3P286CU002.outbound.protection.outlook.com (mail-japaneastazon11020102.outbound.protection.outlook.com [52.101.229.102])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8B7654A6CDF
-	for <ntb@lists.linux.dev>; Fri, 11 Sep 2026 18:21:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.229.102
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789150879; cv=fail; b=Dd8oZEgGA4NeXHjcJcDAtmpo6uzIkOB95mSslFjwq+68XEMw/U0yHXw8vcEIGARRuqsiMQ0YGXGbONUiF8gRNmqak9f64/MbxLawFn3U5zlZzK9qnM4qAKJA6S47IRpHmWuqO/4YfzEGhL1UG2S4xYWkM/rVbR/Z3kjMHsaWizk=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789150879; c=relaxed/simple;
-	bh=2kV8URj9QCBE69jBkeD3yFQHAAchokcJztrVNLxorAY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
-	 Content-Disposition:In-Reply-To:MIME-Version; b=bocqxi2QjJ60ha5kqFTdPcUYDrO9y5twOGp/MyqbIOouZootFI6d9j5+dthNDuD8ie9o47eSNAzIbJah/YN54tZXK5CwIGu1czHTM+kjJGq0N7alj2XgU/aGsSkkbyMyrtFG1X9gn4AHgg1GbR+zxmUGBim4mV1t85P8uKnBJoA=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=iQuZKJq+; arc=fail smtp.client-ip=52.101.229.102
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 39B3C470EB5;
+	Fri, 11 Sep 2026 21:45:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1789163110; cv=none; b=r4GSG4Isx02BL0vCRA8xQ/3xCkyRlp2C2hOiLA5lXRbq1/92jRM2ZyKkkabaet+y33P4l6tEfW/A987v8Hc7VlGpCTyra6GTkP5fgRTURf3aiK7z2kgXpfNQWMNwC85zqJ4/3aepaxxqA4/13zt01PiqZCbgROnr3jBVJ38I7AI=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1789163110; c=relaxed/simple;
+	bh=XR7WX+1I4Qa8NKpz57XIbSye0B7ZlJcCBbh/8m0OVx8=;
+	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition:In-Reply-To; b=BWDqqSdFSVi2iAi+pv7hBY0xlpwgpImjB5wYBnzTmt6V0Tb4wPFaT9QEpH/36AmLSbJ6p77dp3TG1be7vFRCcyVRNZDSM4EZBdq6h9qtTwVXjI7tuncrtF3UJ8isaxlf02Rorr3sEhzJfuiguZ+/6dC+Txrgx70MjDlIl61WeW4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MVsSCJ6O; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="iQuZKJq+"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=AlRxZRzBvwgIbKpvk5QJkdiunEjNjXSjAwXKWg83abaYQGNPH5grfRifiI1ONt8xnwlv4ArnYvDqncuPEF+Rqs4hGMM+GKWRtNT15FXKU2GFa7oloLqB1YhGxL2/lZwmupKFhRl22CaenhnSKCLbWQDZ8VohsERj2EyQFVxFSpG0UcZYvH9mD+w1JJlzdqJuqqCpiXLFCti4QZ4FKM90jl3Gjlp/do2XJxlnqyyC0baBfs1X4l+ruvb+c5Eec5yy0WfEZU1iTJNXQfjwkHhOOT5KJxE0YUUBGcXLe8CGVHJ6I47zkZmPEz7v4F/zBErMDm9MvLvxWlQISV3xkVpLEA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=F5+6APPXwEF1cc7bN56iKBXxtVI5ObeXACn3R7LKsxI=;
- b=Dub6RuJKJWonn9v7kZQMW5Po4z2EdPMKXWJU/YxEF7vmwDlUBcMkj8mAxwnggphEu1DiZ+utzyTr15llqRkfYYvs2/hlWDY/EeIvNEONaKtwqcLpTe4DZIDSBsOpsxrgm7Ox9PpXVlN6FJ3xVl8uLlpmuTgO8Huuta61W1uAuov3mRhePUcowXnHtZvM7zo3Gn14tIBodoAfwG7I3mMXEGZoiFLYxh3oaANPD0JflhpTlazoiUjrGmeQoj/6zmxC6glbxjwRMBMzYwMEjoWoCN4f44GDccilkyQ2nWom6V/tbpQyKUkno3W3nG3EwnZgMpPgYtPGf24U5tnYLmxWpQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
- header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
- s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=F5+6APPXwEF1cc7bN56iKBXxtVI5ObeXACn3R7LKsxI=;
- b=iQuZKJq+x0+IYuL92cMCq2ZgA3FKYnONzY0YYwYY4HTl96aqvNFfFxrsF+rse7TvKpyvQQCY82aaO7kAipaEEB9t26tLUvFToHfhmu1FokKkDbwlrQOU+gOaw5riSgfWqdFv1Rh4tIMUSGRe8tvfx0zsTntnWv0eOpGbxIZIUzE=
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=valinux.co.jp;
-Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:38f::10)
- by TYYP286MB4715.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:193::10) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.406.9; Fri, 11 Sep
- 2026 18:21:10 +0000
-Received: from TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
- ([fe80::2305:327c:28ec:9b32]) by TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
- ([fe80::2305:327c:28ec:9b32%4]) with mapi id 15.21.0406.007; Fri, 11 Sep 2026
- 18:21:10 +0000
-Date: Sat, 12 Sep 2026 03:21:08 +0900
-From: Koichiro Den <den@valinux.co.jp>
-To: Frank Li <Frank.li@oss.nxp.com>
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, 
-	Allen Hubbe <allenbh@gmail.com>, Frank Li <Frank.Li@kernel.org>, 
-	Logan Gunthorpe <logang@deltatee.com>, fuyuanli <fuyuanli0722@gmail.com>, 
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Nicholas Bellinger <nab@linux-iscsi.org>, 
-	Joey Zhang <joey.zhang@microchip.com>, ntb@lists.linux.dev, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2 05/14] NTB: ntb_transport: Avoid losing QP link-up
- requests
-Message-ID: <l5xf2iuwxgfa4xmtm2l3wn6nce5onfjxxkzfsj627k5xp3snmp@er6fkwlb3sgs>
-References: <20260910040836.3792333-1-den@valinux.co.jp>
- <20260910040836.3792333-6-den@valinux.co.jp>
- <aqQyEbLbABhhvFTO@SMW015318>
- <ciucjqvb7qbendlxqdya2wigyivgj4bvqbxtc4cidulr4knq6j@xbwucjdsiayy>
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ciucjqvb7qbendlxqdya2wigyivgj4bvqbxtc4cidulr4knq6j@xbwucjdsiayy>
-X-ClientProxiedBy: TYCP286CA0165.JPNP286.PROD.OUTLOOK.COM
- (2603:1096:400:383::11) To TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
- (2603:1096:405:38f::10)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MVsSCJ6O"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6663C1F000FF;
+	Fri, 11 Sep 2026 21:45:08 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1789163108;
+	bh=p53Rp6J0AXK78MBfUyw1lAHpyXwJ7o0RR05tJbr3i3o=;
+	h=Date:From:To:Cc:Subject:In-Reply-To;
+	b=MVsSCJ6OkXjvKudIW7k3VHTHH4ni4zUYvWI5wMiDtnA+kGjDfTR13e+AUE3jCU8f0
+	 fycEDxvTUKUdiB/huYlWV0KmujqOrAoTntb9KtWmkmy/qY0JypyMsbwI8ksphVQDkt
+	 RSETsodXnSsJKqfp/jFpRWgELdtcFwp5SkIMFN/PDJm/2JNqVc5uUG2MpBPurIkKLn
+	 7vmaapLJH69yNZ19fDkiJAF1iIx0OjICkCnsEg+ecMUAHP71i8P5sKmIlAo+z/Jg+2
+	 UTRxIYavYVCs2EV1BghMrod2Rgfi6KUgU9luhDLAaaUXt5EwcIwy3ubJ8aclzY88Ht
+	 EWciKm/9rXbGg==
+Date: Fri, 11 Sep 2026 16:45:07 -0500
+From: Bjorn Helgaas <helgaas@kernel.org>
+To: Koichiro Den <den@valinux.co.jp>
+Cc: Manivannan Sadhasivam <mani@kernel.org>, Frank Li <Frank.Li@kernel.org>,
+	Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>,
+	Allen Hubbe <allenbh@gmail.com>,
+	Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kwilczynski@kernel.org>,
+	Kishon Vijay Abraham I <kishon@kernel.org>,
+	Bjorn Helgaas <bhelgaas@google.com>, ntb@lists.linux.dev,
+	linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v6 2/2] PCI: endpoint: pci-epf-vntb: Manage virtual NTB
+ and PCI bus lifetime
+Message-ID: <20260911214507.GA582865@bhelgaas>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: TY7P286MB7722:EE_|TYYP286MB4715:EE_
-X-MS-Office365-Filtering-Correlation-Id: 7f195c1d-8353-43e0-4c16-08df1031747c
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|1800799024|23010399003|376014|7416014|366016|10070799003|10067099003|4143699003|56012099006|6133799003|22082099003|18002099003;
-X-Microsoft-Antispam-Message-Info:
-	tsIdtCcm7LSjv4X7tViJmXsNrE00WNVEGk1m0ci22U3zcpwDEPZPql0O3/QPduqY+v6n6CmMQVwWN5L8YdS5/szLOqEMQsHULLUb3W5/PKDrAHUjUQd6s8L4hY1h7j0BmDV2VhLh0a5CiBnFN94+C/E4GOfjiCRh/lkD67APW2liLlK6uVbOIcw1M7p716XEI4PjuudDR4yYs49HGYwQMmiELq1XzFvXIYyEKnVEZr4NrKXxtV44xl4e2qJdqzy+BpFrD3EkglkyA4TJukAb0ola8CLPFjsaJQgM/KKHzS2lFufzeKre1Gjl3FAz99j66uRHSLqzKVgbUuQGqJuN3zLMuT9v8hQ/+CzniMb4PPP4Onj2bCjzhietULTm2udJmrIAe7Q5HgzX5J1X7dwYcNLtT/WNlGan4AVUkBkTSGlu5F5k76oYlCV27HBlrDGK8pOFAmVbzcrNyuEsty72TH1/AbBMIAaSbCNB1s3rZB5QTNWdRxG8k/DEoxNFDG1Wm48vX5ZzD0SW40lbkzGf3PAzOYJdRJB+RtfujQzXd6UQAt3ErtVHdNGx8lOOMdkqEbiC8tKhfqxQlMWlOlZpLOvo7y6XW98gLvD8Dfbeh+5B/h/7YhVlHVisJxXE36TL
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(23010399003)(376014)(7416014)(366016)(10070799003)(10067099003)(4143699003)(56012099006)(6133799003)(22082099003)(18002099003);DIR:OUT;SFP:1102;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?O5EQ0i66eBjd4ZPnNtqtF9sH3u/VKJLSmHnQt+E1h0rtAa8Rw0eMyw3OuD93?=
- =?us-ascii?Q?1FPySBdRwqo2fOvDguvLS2BNkxAT4YSDvW/0bhS+sCeo85svhbKZPE5WYu/6?=
- =?us-ascii?Q?D2Bbo2epMmbu10aaB95s3+qbYdb0MHrmF/njom1W35t7KYWi9vzlWG9au+5X?=
- =?us-ascii?Q?BzJ5Wovk25EyADtGc4z98lZYVZtFEOXPZULvFG3MehqUwTUl6ev/Bsq/C1Iw?=
- =?us-ascii?Q?wCY+5wmutxwxhJN8tibHwnrfhDUY2s44X9ElS04F/o/oLRbTMAz+l84ncHb5?=
- =?us-ascii?Q?HCWEecq0F0kTY8l1+gAXaKcXKxC/ePu4znf7BUaEb3V6ktnVNnHwg4O88FOV?=
- =?us-ascii?Q?rBphyPgQjvINkWV0tLD3WNXkSc5sCRp+pr7KahDsJSYPF4/VDmjr2CMn2H00?=
- =?us-ascii?Q?2M7cdZxfQ1r6wfZqlUT4mpx26YFXPH0agOM3mpg5C3ffxProoHBk532TLRx5?=
- =?us-ascii?Q?BnSkywadnc2qxEGvOhEl6mKeNmcSMrTaB8zqNf3+fkm45rGBG8UWj/CERO68?=
- =?us-ascii?Q?EG4R3nzgYQDdtQMLMYPcQdmOo46B6O1FKv8O43D1szA0cMuU46/co5tgR9nF?=
- =?us-ascii?Q?7tLIKRm7hawhWU3PxAqSw5iBjki0YBzWoGTqFHK3yCb7Mgt8dWTWgDjyCYYN?=
- =?us-ascii?Q?UpIRvsWWCWVAmTxf1hbGVsBdsaqftQCE7jnppxuz0son3T8abo8ClDKmrXfL?=
- =?us-ascii?Q?27Z9G0scc8RhAM5uAAh6UopmT6FHRNgdiQPwzYPBbC6lCDEu+ssvUVK+ed9k?=
- =?us-ascii?Q?WCxiizuOTUf1ZXbCFmtoxQUWt11wsBeYv0CEh4bY680XF0W0z+q/14VR4mYD?=
- =?us-ascii?Q?4Zl16uqwI1/IxAXpEIJ/JiHAOo7PJ3k7Ak1+jXTmmctn0mSluaOtRU6FC/vH?=
- =?us-ascii?Q?pjShLg2BKzKywMt6alJLejYzW+CHoPnjtsx6GDsvcGmiI9JC65tat6HlB50F?=
- =?us-ascii?Q?EZIlP+Pd88JIEtfv2KDbQO8jfCnznZcYdnqgNHEBOqYERDWquFVGVUEaNx2V?=
- =?us-ascii?Q?vLXAKgrJkGJ3fyUOwoaWMn494U6agHpCwYuk1Y7dmpxZb44iKtbsTqAEIP2A?=
- =?us-ascii?Q?49vRrMQKTip20EYnby7fOGKeVn4970z7qhLGWk8RTZyAAmSYYXNLpUwmplZI?=
- =?us-ascii?Q?EJVo3gLYz08uVaXNzGd7tT7oM2RUNot17iEVEZA32fMq+oGOjtk0En2ep3kF?=
- =?us-ascii?Q?nUGwcFDrol2J+caajkmOjJJ9hPNhHqmcg8cPuIQKnv91pCSLvpV55rZTdn+D?=
- =?us-ascii?Q?mGd1C+WEkGOxS/ruOi07K97OnrI4PQnpwGW/h7YwuZ3Zy3VrWAYxrSKCyA+e?=
- =?us-ascii?Q?n9Xt/O1iIKV2bt+zAfZL+AUHXtShnqfOeQOaRLVimrkO9NFa5JMMVIZf8VSj?=
- =?us-ascii?Q?CiVt2QNLb33QocTrgBVshDDg/FZ8UEjSQNQaAMKxXro+6I7WKs5wBJyzjkqa?=
- =?us-ascii?Q?A75T9WkqvYZNC2l9ipA/WKK9UHXFUuAb0dZC6hA4tPIwhnlM5SBgj6Bw0lR1?=
- =?us-ascii?Q?l5xdHkoM2ycezFBTJvl36uE8/gLNOzPqeU8gxcTyzjHF1A0JtgCj5gUWDxyi?=
- =?us-ascii?Q?GNcAYLyA+XW7KeprYwCtcN/8vv5NE3w3W7GpwEYWqiTdiPYux9CjgwsLHfGZ?=
- =?us-ascii?Q?VG26ezyJTv3dTWbvVfwZ07/vKBwQCo1zNwl6zfEsBWPNq1M3RPSc67QqkbGT?=
- =?us-ascii?Q?0aSuoN5tMBZWkiMxd8F/FMFHQNz1ptUr0scW2Qc/fi2cq75Z/RbY3NW7xapN?=
- =?us-ascii?Q?1H+BGLL1y5ROwLEozBxA75caJG5eK92j7WEgHsvuI5bPoASGexrY?=
-X-OriginatorOrg: valinux.co.jp
-X-MS-Exchange-CrossTenant-Network-Message-Id: 7f195c1d-8353-43e0-4c16-08df1031747c
-X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB7722.JPNP286.PROD.OUTLOOK.COM
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 11 Sep 2026 18:21:10.4140
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: v+18Y/7vuokjHm3Kr93EF6EhDoMHnGR2mOOH3MeBPggip9QtdY34iFOlJAoEeunWDO7+iDjj3VS2gYQF5KwVEQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYYP286MB4715
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260901063238.631166-3-den@valinux.co.jp>
 
-On Sat, Sep 12, 2026 at 03:04:21AM +0900, Koichiro Den wrote:
-> On Fri, Sep 11, 2026 at 11:53:37AM -0500, Frank Li wrote:
-> > On Thu, Sep 10, 2026 at 01:08:27PM +0900, Koichiro Den wrote:
-> > > ntb_netdev_open() can call ntb_transport_link_up() while the transport
-> > > worker is completing setup on another CPU. Concurrent transport setup
-> > > and a client link-up request can both read the other's flag as false and
-> > > leave QP link work unqueued. The QP then stays down until another link
-> > > event or client link-up request.
-> > >
-> > > This is the store-buffering pattern described in
-> > > tools/memory-model/Documentation/recipes.txt ("Store buffering").
-> > >
-> > > Add a full barrier between the store and load on each side, and
-> > > mark the client_ready accesses with READ_ONCE()/WRITE_ONCE().
-> > >
-> > > Fixes: fce8a7bb5b4b ("PCI-Express Non-Transparent Bridge Support")
-> > > Cc: stable@vger.kernel.org
-> > > Reported-by: Sashiko <sashiko-bot@kernel.org>
-> > > Link: https://lore.kernel.org/r/20260907144701.702E41F00A3A@smtp.kernel.org/
-> > > Signed-off-by: Koichiro Den <den@valinux.co.jp>
-> > > ---
-> > > Changes in v2:
-> > >   - New patch (Sashiko)
-> > >
-> > >  drivers/ntb/ntb_transport.c | 13 +++++++++++--
-> > >  1 file changed, 11 insertions(+), 2 deletions(-)
-> > >
-> > > diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-> > > index 75d4a2e021f4..1332d53bcfe7 100644
-> > > --- a/drivers/ntb/ntb_transport.c
-> > > +++ b/drivers/ntb/ntb_transport.c
-> > > @@ -1104,10 +1104,16 @@ static void ntb_transport_link_work(struct work_struct *work)
-> > >  	/* Publish the link only after every QP has been set up. */
-> > >  	smp_store_release(&nt->link_is_up, true);
-> > >
-> > > +	/*
-> > > +	 * Prevent both sides from missing each other's flag. Pairs with
-> > > +	 * the barrier in ntb_transport_link_up().
-> > > +	 */
-> > > +	smp_mb();
-> > > +
-> > >  	for (i = 0; i < nt->qp_count; i++) {
-> > >  		struct ntb_transport_qp *qp = &nt->qp_vec[i];
-> > >
-> > > -		if (qp->client_ready)
-> > > +		if (READ_ONCE(qp->client_ready))
-> > 
-> > I think it'd better change to use atomic variable for client_ready to avoid
-> > manual handle smp sync.
+On Tue, Sep 01, 2026 at 03:32:38PM +0900, Koichiro Den wrote:
+> The virtual PCI driver registers an ntb_dev but has no remove callback.
+> Unbinding the endpoint function can therefore free BARs while the NTB
+> device and its client still use them. It also leaves the virtual PCI
+> devices and root bus allocated.
 > 
-> AFAICT converting client_ready to atomic_t and using atomic_set()/atomic_read()
-> instead of WRITE_ONCE()/READ_ONCE() would not free us from the smp sync, as
-> those operations are unordered.
-> So to illustrate this in litmus test like form:
+> Allocate an ntb_dev for each virtual PCI probe and unregister it from the
+> matching remove callback. Start command processing only after registration.
+> Publish the device for doorbell IRQs at the same point. During remove, stop
+> the command work and drain IRQ handlers before unregistering the device.
 > 
->    # L = nt->link_is_up
->    # R = qp->client_ready
->    # Both initially false
+> Retain the root bus returned by pci_scan_bus() so it can be removed on
+> unbind. Unregister the virtual PCI driver before releasing endpoint
+> resources. Stop and remove the root bus under the PCI rescan/remove lock,
+> then release its host bridge.
 > 
->    Transport setup                  Client link-up
->    ---------------                  --------------
->     smp_store_release(&L, true);     WRITE_ONCE(R, true);
->     smp_mb(); /* added */            smp_mb(); /* added */
->     r0 = READ_ONCE(R);               r1 = smp_load_acquire(&L);
+> Fixes: e35f56bb0330 ("PCI: endpoint: Support NTB transfer between RC and EP")
+> Cc: stable@vger.kernel.org # 6.0+
+> Signed-off-by: Koichiro Den <den@valinux.co.jp>
+> ---
+> Changes in v6:
+>   - Rework v5 patch 5 on v7.3-rc1.
+>   - Publish ntb_dev only after registration, and tie command work and
+>     doorbell delivery to its lifetime.
+>   - Retain and remove the virtual root bus, then release its host bridge.
+>   - Drop v5 patch 4; f7245901de89 ("PCI: Check parent for NULL in
+>     of_pci_bus_release_domain_nr()") fixed the bug it worked around.
+>     v5: https://lore.kernel.org/r/20260226084142.2226875-6-den@valinux.co.jp/
 > 
->    Both reads return false?
->     Before: allowed
->     After:  forbidden
+> @Frank, the code changed substantially since v5, so I did not carry your
+> R-b tag. I would appreciate another look.
 > 
-> I might be misunderstanding your suggestion though. If you have something
-> different in mind, please let me know.
+>  drivers/pci/endpoint/functions/pci-epf-vntb.c | 85 +++++++++++++++----
+>  1 file changed, 70 insertions(+), 15 deletions(-)
+> 
+> diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> index 412e8cc6fb1d..992f5e7f8d4a 100644
+> --- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> +++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
+> @@ -132,7 +132,7 @@ struct epf_ntb_ctrl {
+>  } __packed;
+>  
+>  struct epf_ntb {
+> -	struct ntb_dev ntb;
+> +	struct ntb_dev *ntb;
+>  	struct pci_epf *epf;
+>  	struct config_group group;
+>  
+> @@ -166,10 +166,15 @@ struct epf_ntb {
+>  	void __iomem *vpci_mw_addr[MAX_MW];
+>  
+>  	struct delayed_work cmd_handler;
+> +	struct pci_bus *vpci_bus;
+>  };
+>  
+>  #define to_epf_ntb(epf_group) container_of((epf_group), struct epf_ntb, group)
+> -#define ntb_ndev(__ntb) container_of(__ntb, struct epf_ntb, ntb)
+> +
+> +static struct epf_ntb *ntb_ndev(struct ntb_dev *ntb)
+> +{
+> +	return ntb->pdev->sysdata;
+> +}
+>  
+>  static struct pci_epf_header epf_ntb_header = {
+>  	.vendorid	= PCI_ANY_ID,
+> @@ -195,7 +200,7 @@ static int epf_ntb_link_up(struct epf_ntb *ntb, bool link_up)
+>  	else
+>  		ntb->reg->link_status &= ~LINK_STATUS_UP;
+>  
+> -	ntb_link_event(&ntb->ntb);
+> +	ntb_link_event(ntb->ntb);
+>  	return 0;
+>  }
+>  
+> @@ -284,7 +289,7 @@ static void epf_ntb_cmd_handler(struct work_struct *work)
+>  	     i++) {
+>  		if (ntb->epf_db[i]) {
+>  			atomic64_or(1 << (i - EPF_IRQ_DB_START), &ntb->db);
+> -			ntb_db_event(&ntb->ntb, i - EPF_IRQ_DB_START);
+> +			ntb_db_event(ntb->ntb, i - EPF_IRQ_DB_START);
+>  			ntb->epf_db[i] = 0;
+>  		}
+>  	}
+> @@ -348,12 +353,18 @@ static void epf_ntb_cmd_handler(struct work_struct *work)
+>  static irqreturn_t epf_ntb_doorbell_handler(int irq, void *data)
+>  {
+>  	struct epf_ntb *ntb = data;
+> +	struct ntb_dev *ndev;
+>  	int i;
+>  
+> +	/* Pair with smp_store_release() in pci_vntb_probe(). */
+> +	ndev = smp_load_acquire(&ntb->ntb);
+> +	if (!ndev)
+> +		return IRQ_HANDLED;
+> +
+>  	for (i = EPF_IRQ_DB_START; i < ntb->db_count; i++)
+>  		if (irq == ntb->epf->db_msg[i].virq) {
+>  			atomic64_or(1 << (i - EPF_IRQ_DB_START), &ntb->db);
+> -			ntb_db_event(&ntb->ntb, i - EPF_IRQ_DB_START);
+> +			ntb_db_event(ndev, i - EPF_IRQ_DB_START);
+>  		}
+>  
+>  	return IRQ_HANDLED;
+> @@ -985,7 +996,6 @@ static int epf_ntb_epc_init(struct epf_ntb *ntb)
+>  	}
+>  
+>  	INIT_DELAYED_WORK(&ntb->cmd_handler, epf_ntb_cmd_handler);
+> -	queue_work(kpcintb_workqueue, &ntb->cmd_handler.work);
+>  
+>  	atomic64_set(&ntb->peer_db_pending, 0);
+>  	enable_work(&ntb->peer_db_work);
+> @@ -1340,6 +1350,7 @@ static int vpci_scan_bus(void *sysdata)
+>  		pci_unlock_rescan_remove();
+>  		return -EINVAL;
+>  	}
+> +	ndev->vpci_bus = vpci_bus;
+>  
+>  	pci_bus_add_devices(vpci_bus);
+>  
+> @@ -1425,7 +1436,7 @@ static int vntb_epf_mw_set_trans(struct ntb_dev *ndev, int pidx, int idx,
+>  	int ret;
+>  	struct device *dev;
+>  
+> -	dev = &ntb->ntb.dev;
+> +	dev = &ndev->dev;
+>  	barno = ntb->epf_ntb_bar[BAR_MW1 + idx];
+>  	epf_bar = &ntb->epf->bar[barno];
+>  	epf_bar->phys_addr = addr;
+> @@ -1563,7 +1574,7 @@ static void vntb_epf_peer_db_work(struct work_struct *work)
+>  			ret = pci_epc_raise_irq(epf->epc, func_no, vfunc_no,
+>  						PCI_IRQ_MSI, interrupt_num);
+>  			if (ret)
+> -				dev_err(&ntb->ntb.dev,
+> +				dev_err(&epf->dev,
+>  					"Failed to raise IRQ for interrupt_num %u: %d\n",
+>  					interrupt_num, ret);
+>  		}
+> @@ -1681,13 +1692,18 @@ static const struct ntb_dev_ops vntb_epf_ops = {
+>  
+>  static int pci_vntb_probe(struct pci_dev *pdev, const struct pci_device_id *id)
+>  {
+> -	int ret;
+>  	struct epf_ntb *ndev = (struct epf_ntb *)pdev->sysdata;
+>  	struct device *dev = &pdev->dev;
+> +	struct ntb_dev *ntb;
+> +	int ret;
+> +
+> +	ntb = devm_kzalloc(dev, sizeof(*ntb), GFP_KERNEL);
+> +	if (!ntb)
+> +		return -ENOMEM;
+>  
+> -	ndev->ntb.pdev = pdev;
+> -	ndev->ntb.topo = NTB_TOPO_NONE;
+> -	ndev->ntb.ops =  &vntb_epf_ops;
+> +	ntb->pdev = pdev;
+> +	ntb->topo = NTB_TOPO_NONE;
+> +	ntb->ops = &vntb_epf_ops;
+>  
+>  	ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(32));
+>  	if (ret) {
+> @@ -1695,16 +1711,41 @@ static int pci_vntb_probe(struct pci_dev *pdev, const struct pci_device_id *id)
+>  		return ret;
+>  	}
+>  
+> -	ret = ntb_register_device(&ndev->ntb);
+> +	ret = ntb_register_device(ntb);
+>  	if (ret) {
+>  		dev_err(dev, "Failed to register NTB device\n");
+>  		return ret;
+>  	}
+>  
+> +	/* Publish after ntb_register_device() succeeds. */
+> +	smp_store_release(&ndev->ntb, ntb);
+> +	queue_delayed_work(kpcintb_workqueue, &ndev->cmd_handler, 0);
+> +
+>  	dev_dbg(dev, "PCI Virtual NTB driver loaded\n");
+>  	return 0;
+>  }
+>  
+> +static void pci_vntb_remove(struct pci_dev *pdev)
+> +{
+> +	struct epf_ntb *ndev = pdev->sysdata;
+> +	struct ntb_dev *ntb;
+> +	unsigned int i;
+> +
+> +	/* Stop the work reader, then close and drain the IRQ gate. */
+> +	cancel_delayed_work_sync(&ndev->cmd_handler);
+> +
+> +	ntb = xchg(&ndev->ntb, NULL);
+> +
+> +	if (ndev->msi_doorbell)
+> +		for (i = 0; i < ndev->db_count; i++) {
+> +			if (epf_ntb_db_irq_is_duplicated(ndev->epf, i))
+> +				continue;
+> +			synchronize_irq(ndev->epf->db_msg[i].virq);
+> +		}
+> +
+> +	ntb_unregister_device(ntb);
+> +}
+> +
+>  static struct pci_device_id pci_vntb_table[] = {
+>  	{
+>  		PCI_DEVICE(0xffff, 0xffff),
+> @@ -1716,6 +1757,7 @@ static struct pci_driver vntb_pci_driver = {
+>  	.name           = "pci-vntb",
+>  	.id_table       = pci_vntb_table,
+>  	.probe          = pci_vntb_probe,
+> +	.remove         = pci_vntb_remove,
+>  };
+>  
+>  /* ============ PCIe EPF Driver Bind ====================*/
+> @@ -1796,12 +1838,25 @@ static int epf_ntb_bind(struct pci_epf *epf)
+>   */
+>  static void epf_ntb_unbind(struct pci_epf *epf)
+>  {
+> +	struct pci_host_bridge *bridge;
+>  	struct epf_ntb *ntb = epf_get_drvdata(epf);
+>  
+> +	pci_unregister_driver(&vntb_pci_driver);
+> +
+> +	if (ntb->vpci_bus) {
+> +		bridge = to_pci_host_bridge(ntb->vpci_bus->bridge);
 
-Just for the record, smp_store_release/smp_load_acquire depicted above, instead
-of WRITE_ONCE()/READ_ONCE(), is intentional. They are for MP ordering to publish
-the QP setup, which is needed by an earlier patch:
-https://lore.kernel.org/r/20260910040836.3792333-5-den@valinux.co.jp/
+Where was this host bridge allocated?
 
-Best regards,
-Koichiro
-
+> +		pci_lock_rescan_remove();
+> +		pci_stop_root_bus(ntb->vpci_bus);
+> +		pci_remove_root_bus(ntb->vpci_bus);
+> +		ntb->vpci_bus = NULL;
+> +		pci_unlock_rescan_remove();
+> +
+> +		pci_free_host_bridge(bridge);
+> +	}
+> +
+>  	epf_ntb_epc_cleanup(ntb);
+>  	epf_ntb_config_spad_bar_free(ntb);
+> -
+> -	pci_unregister_driver(&vntb_pci_driver);
+>  }
+>  
+>  // EPF driver probe
+> -- 
+> 2.51.0
 > 
-> Thanks for the review.
-> Koichiro
-> 
-> > 
-> > Frank
-> > 
-> > >  			ntb_transport_schedule_qp_link(qp, 0);
-> > >  	}
-> > >
-> > > @@ -2401,7 +2407,10 @@ void ntb_transport_link_up(struct ntb_transport_qp *qp)
-> > >  	if (!qp)
-> > >  		return;
-> > >
-> > > -	qp->client_ready = true;
-> > > +	WRITE_ONCE(qp->client_ready, true);
-> > > +
-> > > +	/* Pairs with the barrier in ntb_transport_link_work(). */
-> > > +	smp_mb();
-> > >
-> > >  	ntb_transport_schedule_qp_link(qp, 0);
-> > >  }
-> > > --
-> > > 2.51.0
-> > >
