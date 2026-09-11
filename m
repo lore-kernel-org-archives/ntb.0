@@ -1,73 +1,50 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.14])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EAC0D3C4555
-	for <ntb@lists.linux.dev>; Fri, 11 Sep 2026 09:47:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E85E3495053;
+	Fri, 11 Sep 2026 15:49:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.14
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789120079; cv=none; b=o6yZ/sbI5sJS2YEsoGvzKpcm8ulVjMPgoMafUKSuEQyPymdfKf0LKJuLnl1r4ljMLic5IwQv0wk7zGUTo/jGqY8PlKivwGyHyl8EjZBVI4Je06SrZzEOdInpiuLXMnjrAtfAzxMzfUi9mcbHURKDDcbTggXJtI7s8xueeuXtCzc=
+	t=1789141785; cv=none; b=UFvBd7xFerv7ACIYHT8iKveEJSXrl6ML/vupOt8U866yUwro8fGjzKmhCp5bItvwLhQfjIhsYPJ18Lxy0cM6ubzzDzIe4r0iXN8jpeSCsR6kmqyT+e33jItMHsLB3VVMV/Kws/qXguK6hpZNTzNIxPEznejk+E1Oma6V2k6Dh8M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789120079; c=relaxed/simple;
-	bh=EFFfHYsrmwIYMEV6RQH7YCLFN9Vsj9EpQRZAIMPblLA=;
+	s=arc-20240116; t=1789141785; c=relaxed/simple;
+	bh=MHKkUlW2OaWTaH5xgFMNTTb00L7hJk1isvmXc5kFhCg=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=pRx7YDO3XozQe71f23CwRYleXLSNjeSV9lHgPasukc8g9Mi5W/QVf2vEBPY1SYgJhYz100n31OOD/R8UuVWTZRTmnvhye7H6suHtPZQRic8lGN7fWy10pfDEtTCCXjHG42mOu/US6Hl32OYCKlYmwKntXlkzySYrwpzAsa9PPQU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Ren2KgEx; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 In-Reply-To:Content-Type; b=uiHb0sGL3cbGcuIkVtknNQCNYscRDgZiYi6a3o1wMKri+q8igsPIQ2dUX0DaZToIYb2wre4MGglLBHnaVgJyv8hwRv1nt4gg6H4yTWuQTA4xOtdGNqGPdXK9cl6qKl3e1wf0Ya9Uem0ElaQ3K1pf5gypRbLgbIgYstWQzYUvTUI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=lokvYm4r; arc=none smtp.client-ip=198.175.65.14
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Ren2KgEx"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1789120076;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=45A6Zdox+gTv7MNeziUH9YCoinVqVVTAj3654cxY4Zc=;
-	b=Ren2KgExQ6wWGupqCBahqlII4Vui3vpmhtw3HW4A33fJItBAUMle6jedrjEJzzcRn2aptn
-	lgHjsz6GQIb/NqhBoCNy3KgVwkSa3iCjEq9JgcQGV2dx4ICA/W9EPj139WEfbHfU+PlNnc
-	TFnO+7Moy/00I5eA3CSFHkmozjEPfPw=
-Received: from mail-wm1-f71.google.com (mail-wm1-f71.google.com
- [209.85.128.71]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-435-5vE-uFe7MQa28anhqmmWRA-1; Fri, 11 Sep 2026 05:47:55 -0400
-X-MC-Unique: 5vE-uFe7MQa28anhqmmWRA-1
-X-Mimecast-MFC-AGG-ID: 5vE-uFe7MQa28anhqmmWRA_1789120074
-Received: by mail-wm1-f71.google.com with SMTP id 5b1f17b1804b1-49564d4b849so2312335e9.3
-        for <ntb@lists.linux.dev>; Fri, 11 Sep 2026 02:47:55 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1789120074; x=1789724874;
-        h=content-transfer-encoding:content-type:in-reply-to:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=45A6Zdox+gTv7MNeziUH9YCoinVqVVTAj3654cxY4Zc=;
-        b=Qcc8AJKbETA6kOccTV9s5p9BG56eJNBWajsUwngejEl8iAxmTIxb8rAe+PZ1pwGjqO
-         491Hu1F5ssTUpBY4RF581JA/7eHYFI+cOrwPw6wp80gezG9DIxa4Rl6cUBIUwMnVZ/mZ
-         3/keYAjRYemW4oazAnjPlyOotIhuUWtLpXA9xsd1RlwfAETgkvA94DrqtqqtJgw3pyqG
-         7fjmQHZXOF30MJ0zQL0QyRHCPz4nNAppYxgUurU2UWLuykIfGd3MGr6xoKQbMhfEuQUm
-         Hb8uDO2fQFEMjWp70Y921xj21jl00DVvRz8yEYE61ioTUnqAkzqTsUuJwusIZGVatC8j
-         0zUw==
-X-Forwarded-Encrypted: i=1; AKwUvBz0WcuLZkG6dhQAUzaW9aEYtY+/9hr2gK4WzrE/4lQKtXgU2j3txhejh5XfQ2RQFZIDUWs=@lists.linux.dev
-X-Gm-Message-State: AFuF++kLClIlCotBGm+lj3MK17fwA8mKE/VmnqpZje/JoW6sm4UJyr6t
-	SZ2KEFIV+0Z+ilNcAajSczu5RrE3vis+yC/fNQJ8eNaiHmQtCZkasuZqd3lTzDG+c0rN+6jd9A5
-	idkLNCJPCvNIx2yozLMRtLliEQeFHAt3Hjp+KxpCk/SVx2jjP/dVusQ==
-X-Gm-Gg: AYBFou3mHs6XszsUe7s0FP3A/BhO75/nOGr1PzfON8/6LxIPsefYMcgWlziR/SZc/cE
-	2SRy/JbsldOHwFhGz3GJliqVt8743nyjL1KFRofcPUCZMNjrBx9nnHN2iQUq0Rh9x6Jo5URFavt
-	iOA5+8XkSqpXLTnlyKSEX0pO99xrMKbtxWF26A4rxY4hANA9vMuVsCkFDZLoQvWwfvjbyL5g2oR
-	laQowRDB+rROOnsCY0OsWQ4tSBKu+j6vgC1hC6IFgZVs8IpQT+ROLhoJfu4u+2xIABqlYGRHiJW
-	e1DAbTibeVCtRITewLQZ7k/kKC2RNlQSm9ejPDjjdQkde/iIBXZ3R4XC3ZPl3/D3pi3P/LdVAD5
-	dZkMzHIsb7A/McOCMOZCNf5BQcw0VwfuFlHCbF9zO7ZhIIGHZwOcKvpz6jCkN/Quxw8eC9f1gJw
-	==
-X-Received: by 2002:a05:600c:6296:b0:49d:191b:88be with SMTP id 5b1f17b1804b1-49e6164a26dmr36765765e9.0.1789120074360;
-        Fri, 11 Sep 2026 02:47:54 -0700 (PDT)
-X-Received: by 2002:a05:600c:6296:b0:49d:191b:88be with SMTP id 5b1f17b1804b1-49e6164a26dmr36765335e9.0.1789120073956;
-        Fri, 11 Sep 2026 02:47:53 -0700 (PDT)
-Received: from [192.168.188.218] (ip232-47-231-195.pool-bba.aruba.it. [195.231.47.232])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-486eb32e6f1sm4703455f8f.6.2026.09.11.02.47.52
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 11 Sep 2026 02:47:53 -0700 (PDT)
-Message-ID: <9ba2c3d5-825d-4494-a0c6-d5c0ac699189@redhat.com>
-Date: Fri, 11 Sep 2026 11:47:52 +0200
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="lokvYm4r"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1789141783; x=1820677783;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=MHKkUlW2OaWTaH5xgFMNTTb00L7hJk1isvmXc5kFhCg=;
+  b=lokvYm4ramMRqN8esSZbbYAbV4L2FDO8MDonXIKH4IvOuL+MmnAhdKPC
+   1gn7zJXqHobJKX+VBO9r5zs9ExCEW3ye4ric5OmIOSS9spJwNIkWkVgJi
+   n5lzhwF5JGnVlWVNevUItaPVRXpFHfMpizqoS5jUVV1yeTmOEt/Q6ya3f
+   49DTFXiAvITeggowfDJMfa/kd5T0IIhkUCOy6Mbr6jNzuDKOoxbUcy5pn
+   n4QjYnsKhLlqnhMdhwkMxm3fOnPSJwHNsL4RHsSAW2l+keTJXKMzVPPbe
+   iNesZpj2tpEhbtNOXf9YMYifcehU2Xqfvifcmb3XlHKoTP1riUKEvRFqg
+   g==;
+X-CSE-ConnectionGUID: wG0Fmv6zTT23/XZ9vlNuug==
+X-CSE-MsgGUID: +HNlzn+lQSeXWHcjhXCt3w==
+X-IronPort-AV: E=McAfee;i="6800,10657,11902"; a="93475359"
+X-IronPort-AV: E=Sophos;i="6.27,97,1787036400"; 
+   d="scan'208";a="93475359"
+Received: from fmviesa013.fm.intel.com ([10.60.135.153])
+  by orvoesa106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Sep 2026 08:49:42 -0700
+X-CSE-ConnectionGUID: mdOGYDETRjePvPQhYei0bQ==
+X-CSE-MsgGUID: 16B0teyqQ5OfyJi51sB4aw==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.27,97,1787036400"; 
+   d="scan'208";a="330852"
+Received: from schen9-mobl4.amr.corp.intel.com (HELO [10.125.108.42]) ([10.125.108.42])
+  by smtpauth.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Sep 2026 08:49:42 -0700
+Message-ID: <b90a302d-8ad4-480f-9794-2b62e273a6be@intel.com>
+Date: Fri, 11 Sep 2026 08:49:40 -0700
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -75,41 +52,173 @@ List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH net-next v3 4/4] net: ntb_netdev: Preserve
- CHECKSUM_PARTIAL across NTB
-To: Jakub Kicinski <kuba@kernel.org>, Koichiro Den <den@valinux.co.jp>
-Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>,
- Allen Hubbe <allenbh@gmail.com>, Andrew Lunn <andrew+netdev@lunn.ch>,
- "David S. Miller" <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>,
- ntb@lists.linux.dev, netdev@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <20260904052134.2970111-1-den@valinux.co.jp>
- <20260904052134.2970111-5-den@valinux.co.jp>
- <20260910172047.167225eb@kernel.org>
-From: Paolo Abeni <pabeni@redhat.com>
-In-Reply-To: <20260910172047.167225eb@kernel.org>
-X-Mimecast-Spam-Score: 0
-X-Mimecast-MFC-PROC-ID: EbWp9RdDpZ1ci0fjqV1OrBzwyRjuer1s77s-noq9t2g_1789120074
-X-Mimecast-Originator: redhat.com
+Subject: Re: [PATCH v2 14/14] NTB: ntb_transport: Remove clients before
+ freeing transport resources
+To: Koichiro Den <den@valinux.co.jp>, sashiko-reviews@lists.linux.dev
+Cc: ntb@lists.linux.dev
+References: <20260910040836.3792333-1-den@valinux.co.jp>
+ <20260910040836.3792333-15-den@valinux.co.jp>
+ <20260910043613.CE8FD1F000FF@smtp.kernel.org>
+ <pao67m2xtpetoj2mpqzuvftzdojoj65kqpbg6alqsdqrwozm2t@hdojuk4dsh5k>
+From: Dave Jiang <dave.jiang@intel.com>
 Content-Language: en-US
+In-Reply-To: <pao67m2xtpetoj2mpqzuvftzdojoj65kqpbg6alqsdqrwozm2t@hdojuk4dsh5k>
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On 9/11/26 2:20 AM, Jakub Kicinski wrote:
-> On Fri,  4 Sep 2026 14:21:34 +0900 Koichiro Den wrote:
->> Calculating L4 checksums can limit ntb_netdev throughput especially on
->> embedded systems, where CPU resources are often limited. A trusted PCIe
->> fabric can avoid that work.
+
+
+On 9/10/26 1:48 AM, Koichiro Den wrote:
+> On Thu, Sep 10, 2026 at 04:36:13AM +0000, sashiko-bot@kernel.org wrote:
+>> Thank you for your contribution! Sashiko AI review found 3 potential issue(s) to consider:
+>>
+>> New issues:
+>> - [Critical] Skipping ntb_qp_link_cleanup() during transport teardown fails to drain rx_post_q, causing freed memory to be accessed by in-flight IOAT DMA.
 > 
-> Would it make more sense to prepend something like a virtio_net_hdr
-> to the data so you can cheaply express more offloads?
+> I believe this is a false positive. See my inline comment below.
+> 
+>>
+>> Pre-existing issues:
+>> - [Critical] Double-fetch of `hdr->len` from shared memory allows buffer overflow via TOCTOU race.
+>> - [High] Racy read-modify-write of `qp_bitmap_free` bitmask allows queue state corruption.
+>> --
+>>
+>> commit 68ca6cad9a88600dd4607f3c4ccd6bd32385b0e7
+>> Author: Koichiro Den <den@valinux.co.jp>
+>> Subject: NTB: ntb_transport: Remove clients before freeing transport resources
+>>
+>> Unbinding ntb_transport can call ntb_transport_free() while ntb_netdev
+>> is still bound. This patch reorders the teardown process to unregister
+>> clients before freeing resources, intending to fix unsafe memory accesses
+>> during intensive TX loads.
+>>
+>>> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+>>> index c1e3a077c45ec..f24555b38d1b5 100644
+>>> --- a/drivers/ntb/ntb_transport.c
+>>> +++ b/drivers/ntb/ntb_transport.c
+>>> @@ -1487,9 +1487,11 @@ static void ntb_transport_free(struct ntb_client *self, struct ntb_dev *ndev)
+>>>  
+>>>  	debugfs_remove_recursive(nt->debugfs_node_dir);
+>>>  
+>>> -	ntb_transport_link_cleanup(nt);
+>>> -	cancel_work_sync(&nt->link_cleanup);
+>>> -	cancel_delayed_work_sync(&nt->link_work);
+>>> +	/* Stop transport work before clients release their QPs. */
+>>> +	disable_delayed_work_sync(&nt->link_work);
+>>> +	disable_work_sync(&nt->link_cleanup);
+>>> +
+>>> +	ntb_bus_remove(nt);
+>>
+>> [Severity: Critical]
+>> By moving ntb_bus_remove() before ntb_transport_link_cleanup(), does this
+>> introduce a DMA use-after-free regression?
+>>
+>> Calling ntb_bus_remove() first prompts client drivers to free their QPs via
+>> ntb_transport_free_queue(), which blindly frees all entries in rx_post_q
+>> without polling:
+>>
+>> drivers/ntb/ntb_transport.c:ntb_transport_free_queue() {
+>>     ...
+>> 	while ((entry = ntb_list_rm(&qp->ntb_rx_q_lock, &qp->rx_post_q))) {
+>> 		dev_warn(&pdev->dev, "Freeing item from non-empty rx_post_q\n");
+>> 		kfree(entry);
+>> 	}
+>>     ...
+>> }
+> 
+> Yes, but ntb_transport_free_queue() calls dma_release_channel() before freeing
+> those entries. For IOAT, this goes through ioat_free_chan_resources(), which
+> calls ioat_stop() and ioat_reset_hw() to synchronize callbacks and stop the DMA
+> channel.
 
-FTR, I think it makes sense to consolidate similar code, with one possible
-caveat: virtio_net is not spectacularly flexible in term of supporting
-"new" stuff: if this use-case would need some special behavior, it could
-be problematic.
+The refute looks reasonable to me for ioat. Any concerns for other host DMA engines? 
 
-AFAICS the intended usage is quite basic, so no big surprise expected, and
-also I guess that only a serious attempt could tell...
+DJ
 
-/P
+> 
+> I believe Jon and Dave know IOAT well too, so I'd appreciate any comments from
+> them. I guess the mention on IOAT in an earlier patch in this series prompted
+> Sashiko to focus on it here.
+> 
+> Best regards,
+> Koichiro
+> 
+>>
+>> Because IOAT DMA engines could still be actively copying into those buffers,
+>> freeing them allows the hardware DMA engine to write to freed kernel memory.
+>> Furthermore, the DMA drain wait in ntb_qp_link_cleanup() is subsequently
+>> skipped entirely because qp_bitmap_alloc evaluates to 0 during the later
+>> call to ntb_transport_link_cleanup().
+>>
+>> [ ... ]
+>>
+>>> @@ -1736,17 +1736,17 @@ static void ntb_process_rxc(struct ntb_transport_qp *qp)
+>>>  
+>>>  	if (hdr->len > entry->len) {
+>>>  		dev_dbg(&qp->ndev->pdev->dev,
+>>>  			"receive buffer overflow! Wanted %d got %d\n",
+>>>  			hdr->len, entry->len);
+>>>  		qp->rx_err_oflow++;
+>>>  
+>>>  		entry->len = -EIO;
+>>>  		entry->flags |= DESC_DONE_FLAG;
+>>>  
+>>>  		ntb_complete_rxc(qp);
+>>>  	} else {
+>>>  		dev_dbg(&qp->ndev->pdev->dev,
+>>>  			"RX OK index %u ver %u size %d into buf size %d\n",
+>>>  			qp->rx_index, hdr->ver, hdr->len, entry->len);
+>>>  
+>>>  		qp->rx_bytes += hdr->len;
+>>>  		qp->rx_pkts++;
+>>>  
+>>>  		entry->len = hdr->len;
+>>
+>> [Severity: Critical]
+>> This is a pre-existing issue, but is there a time-of-check to time-of-use
+>> race condition in this bounds check on hdr->len?
+>>
+>> Since hdr points to a payload header located inside a memory window writable
+>> by the remote NTB peer (shared memory), hdr->len is read directly from
+>> shared memory twice (once for the bounds check, once for the assignment).
+>>
+>> Can a remote peer swap hdr->len to a much larger value immediately after
+>> the bounds check but before the assignment, bypassing the bounds check and
+>> causing a buffer overflow when copied?
+>>
+>> [ ... ]
+>>
+>>> @@ -2130,7 +2130,7 @@ struct ntb_transport_qp *
+>>>  ntb_transport_create_queue(void *data, struct device *client_dev,
+>>>  			   const struct ntb_queue_handlers *handlers)
+>>>  {
+>> [ ... ]
+>>>  	free_queue--;
+>>>  
+>>>  	qp = &nt->qp_vec[free_queue];
+>>>  	qp_bit = BIT_ULL(qp->qp_num);
+>>>  
+>>>  	nt->qp_bitmap_free &= ~qp_bit;
+>>
+>> [Severity: High]
+>> This isn't a bug introduced by this patch, but could this read-modify-write
+>> of nt->qp_bitmap_free lead to queue state corruption?
+>>
+>> The qp_bitmap_free bitmask is modified here using non-atomic bitwise
+>> operations without holding any lock. It is also modified concurrently during
+>> driver unbind:
+>>
+>> drivers/ntb/ntb_transport.c:ntb_transport_free_queue() {
+>>     ...
+>> 	qp->transport->qp_bitmap_free |= qp_bit;
+>>     ...
+>> }
+>>
+>> Since these are exported functions called by NTB client drivers, could
+>> concurrent probe and remove operations race and lose bit updates, leading
+>> to a leaked queue or two clients being assigned the same queue?
+>>
+>> -- 
+>> Sashiko AI review · https://sashiko.dev/#/patchset/20260910040836.3792333-1-den@valinux.co.jp?part=14
+> 
 
