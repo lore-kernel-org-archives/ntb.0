@@ -1,371 +1,304 @@
-Received: from AS8PR04CU009.outbound.protection.outlook.com (mail-westeuropeazon11011032.outbound.protection.outlook.com [52.101.70.32])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C1791448B87
-	for <ntb@lists.linux.dev>; Mon, 14 Sep 2026 15:44:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.70.32
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789400701; cv=fail; b=KrqGGABy8IWMmrGlekECe1H+43LWONn1ffIjWIONyt9WERrh6T9E1yhop9NCmwWDWOQcQM0qg5MqYpXv+Hv/zLtl3hBr1O8QBFPTUrAhSET2px2n0sPabWu8oWmGpKxXj6MnlCUSMMuTdrAsM7qcXO+INhWTiWP2y+ect6ynQQw=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789400701; c=relaxed/simple;
-	bh=uzlpymp1rk/hmSj3hQv94a5fOLFq7Y6qfheoPb8/OE8=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
-	 Content-Disposition:In-Reply-To:MIME-Version; b=rHi4pZ6LVEj4R5GZh1HV3lu8oSadzOcVSVwwjitvvZmVEFCEe4QL3sh7TTV5W1MmDVBhzg0tBTqaGQ3khoSwo4d9nrb+okYSJdwxWx0uO2VHvPZ/WgVQx6Gp10MFJvFDbiS2qqLemof91/DBZ0nYoM5uPLGezcGGikYEPNvF9BU=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.nxp.com; spf=pass smtp.mailfrom=oss.nxp.com; dkim=pass (2048-bit key) header.d=NXP1.onmicrosoft.com header.i=@NXP1.onmicrosoft.com header.b=gFXqpHT4; arc=fail smtp.client-ip=52.101.70.32
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.nxp.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.nxp.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C9D2430E0CC;
+	Mon, 14 Sep 2026 21:02:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.19
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1789419729; cv=none; b=eDZZjnZsw/iKPhRHFcHY2MKm4J/4nLreXVz3jm6j3AqRiVb3OTxHbpKsxAkCsMknqoyoF7k9qeGFVhS9BbbFhPJy1um5z7OFuyIQduFHY4WNCkiJLgwrsUFBf0kQl+RxrWVfnPdOSFFzxh/KqSKto3OJowaCMKUWb8vwNOVMu0E=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1789419729; c=relaxed/simple;
+	bh=egdzo9uNW3hNfsYyj8fl2Xj/jnkdVilx41VTt2cHLb0=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=qFwEmcbw00kGs3TOR0N9W7LXdVRtxLEmBZ9I9U0emGS4grxzrfJ+LupO/Il0WJ23Aa6oZ+5UGAxx/UFMWTFV38Rc+wlAtwMW78Ha0enrT773EoIGWnQggCOplgKbm1oFTQyAEnEAYdkQYXsSJtrSydvpVXRx/Leg8gVpfcyAVYQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=PcEFGz5z; arc=none smtp.client-ip=192.198.163.19
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=NXP1.onmicrosoft.com header.i=@NXP1.onmicrosoft.com header.b="gFXqpHT4"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=FpXxHCori2o2+7PQ1H3ofl5pdA25Txidz/nMJKis39fSYOFBAIEJXbEP6KYZ/wzFg67QGqrXp0gKxam99WfzZtTlvppCzF16WTXNjhl2rRAYCJBNaTwR+ESrd7aPxkUqCNHjbknnl41aMUCGuRYxE4ZqzK3FByC+xDgdK+1HdNnRW70ipJz1GKFsd2cLV3ATBnQPmO73SwUmoUR+TjzZVAzKjZ3N/DNNlN9m2NR/xYOw0bqG2GZnnYc7cXUH9TOvOnXTU5ZvxR67fGaiQ+2tZNwqw+k83L3pF2Jkw5O6t0FvDMzEN5SYtgci5GvTUCwoLX+iJC0T2w3m0elEqg/8nA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=wNA7++2csiCKfuLpaxQ4i2RWjtRFn41EPFxfywTZiec=;
- b=lQqu+LBCkzWyFEmI4wjW429/8JNHndQmk996tU+/JG70sG3DFLVj/Ng2HtSXynNc4FalndZnC470kCUbMxSeBCOl6RvNxvm1cznXrMDgI/VYriwg6GoNPbuJgy7RkOiRAJd2Y7f4fSrEHbig2O0vsgiCiXpK3crjsH1SIL/Dz4JGpyOYgwtutRyZGX4mgt0x1t7MTDY38EHFk/GwiPdEcD6L6Ii6IdP/O8V40iqcEmVkWIFElQWJWmhKgOXUjbwi25XjbE/H53uJ3AaeTCtjgERsfd4X6U9iCHjupM057RjMWfe1NUL3RAx4ffAVqA8oFvfxb8DI+IYpo3oubCyn0g==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oss.nxp.com; dmarc=pass action=none header.from=oss.nxp.com;
- dkim=pass header.d=oss.nxp.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=NXP1.onmicrosoft.com;
- s=selector1-NXP1-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=wNA7++2csiCKfuLpaxQ4i2RWjtRFn41EPFxfywTZiec=;
- b=gFXqpHT4RfO5YCpnlfdDEsWLMyHbCjy2oVt4LheBnDz7n59B5s/7BPi/tIAmH9KX/xpci6bCL5e+YM6CEWr7wIM3ve2Vi7tvB1n2r7RsMbFVLuFR6K1OiFIr2Wo8tLswv2SnjnehzStwyt7r3DVoWoKBc37lAkUiYh34Uft6e/P/IF1s2lU+yl5WRtGQUtGHRreD+AY+UoxRf1XzfmcZYNddEdp8chjUHuNut7jQEjkI4g2PYk7W8x0Tllu4T6bcQULn8L4z/SKAHFxi24q0ZpYm1LCn1mEyiYfRB6FOxXz0NLOVAF+xMCBrw+h7kHmcUtqWQ5rXhWPNJSbGBk0ASw==
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=oss.nxp.com;
-Received: from GV2PR04MB11799.eurprd04.prod.outlook.com (2603:10a6:150:2cf::9)
- by VI2PR04MB11276.eurprd04.prod.outlook.com (2603:10a6:800:296::7) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.406.12; Mon, 14 Sep
- 2026 15:44:53 +0000
-Received: from GV2PR04MB11799.eurprd04.prod.outlook.com
- ([fe80::2146:83a2:5329:b7c]) by GV2PR04MB11799.eurprd04.prod.outlook.com
- ([fe80::2146:83a2:5329:b7c%7]) with mapi id 15.21.0406.007; Mon, 14 Sep 2026
- 15:44:53 +0000
-Date: Mon, 14 Sep 2026 10:44:42 -0500
-From: Frank Li <Frank.li@oss.nxp.com>
-To: Koichiro Den <den@valinux.co.jp>
-Cc: Manivannan Sadhasivam <mani@kernel.org>, Frank Li <Frank.Li@kernel.org>,
-	Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>,
-	Allen Hubbe <allenbh@gmail.com>,
-	Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kwilczynski@kernel.org>,
-	Kishon Vijay Abraham I <kishon@kernel.org>,
-	Bjorn Helgaas <bhelgaas@google.com>, ntb@lists.linux.dev,
-	linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v6 2/2] PCI: endpoint: pci-epf-vntb: Manage virtual NTB
- and PCI bus lifetime
-Message-ID: <aqgWaib3sTchhmaS@SMW015318>
-References: <20260901063238.631166-1-den@valinux.co.jp>
- <20260901063238.631166-3-den@valinux.co.jp>
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260901063238.631166-3-den@valinux.co.jp>
-X-ClientProxiedBy: PH2PEPF00003848.namprd17.prod.outlook.com
- (2603:10b6:518:1::65) To GV2PR04MB11799.eurprd04.prod.outlook.com
- (2603:10a6:150:2cf::9)
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="PcEFGz5z"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1789419727; x=1820955727;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=egdzo9uNW3hNfsYyj8fl2Xj/jnkdVilx41VTt2cHLb0=;
+  b=PcEFGz5zH4h07jDttAleXCCvpGHh/huiZnHh6R8odIqwGz6kzFhnhZyE
+   wFGJ+SFmEJsLZ3rcCcUOUiycwiC6sI2m+2fkzFCbEI3YmzReR1NUOR/se
+   255OodVTZ65Zv4pbT877nUjn7t+vivwsGBn8eVCqFKnzbE48kt0iPHY03
+   kxAVdqUm3Rvs2qdzQJJGOVCdqEdn1uQF3VDKup75KDBnBrHzzvuFwSHXb
+   HqDJPAX2rGMFeUGEDewGfQtTqT41+JDpZslN4n6grFLhcqGE2kpV1QXvf
+   W6KwvLqNUXR6QkPGD1S7yQzjC64bs25mVsx2n2INaTp85l/eD5YtXRCOV
+   Q==;
+X-CSE-ConnectionGUID: p459ZJ+nQMKhjPJmFHa8tg==
+X-CSE-MsgGUID: ycKAvCKVTHSuy4dD9+tcXQ==
+X-IronPort-AV: E=McAfee;i="6800,10657,11905"; a="88717984"
+X-IronPort-AV: E=Sophos;i="6.27,103,1787036400"; 
+   d="scan'208";a="88717984"
+Received: from orviesa009.jf.intel.com ([10.64.159.149])
+  by fmvoesa113.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Sep 2026 14:02:07 -0700
+X-CSE-ConnectionGUID: 5+v6vEWKTNaVO5+uZOXqzA==
+X-CSE-MsgGUID: TncgcYxqQ4aiGh4X4Ix9ZQ==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.27,103,1787036400"; 
+   d="scan'208";a="273267739"
+Received: from rchatre-mobl4.amr.corp.intel.com (HELO [10.125.108.142]) ([10.125.108.142])
+  by orviesa009-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Sep 2026 14:02:07 -0700
+Message-ID: <016c0065-04de-41ab-b098-fac2bceb2d24@intel.com>
+Date: Mon, 14 Sep 2026 14:02:05 -0700
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: GV2PR04MB11799:EE_|VI2PR04MB11276:EE_
-X-MS-Office365-Filtering-Correlation-Id: 5b79d427-08ea-4b14-0f93-08df12771e2a
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|1800799024|7416014|376014|366016|19092799006|23010399003|6133799003|22082099003|18002099003|11063799006|4143699003|10067099003|56012099006;
-X-Microsoft-Antispam-Message-Info:
-	qngCOrkMNuqoFf9GLCAUSwNs2XC3YYyXMwc3vwYtMk9lgyFZmZoZ7G0yj+X0dkM4TvP1ct4OZ11czll9YID8jmxVJc9vUyusrUIfFzSVStvdeKL/ka522oQjq0t9TlQiLeGxKFI+F2vUkq6GO+nl7/JbIwjOh3Y0i9/uu5S84DMQAdFC/LKMtmpVpZVUUr8qnQ9+S72kaLYQkmkBTVOYVGqRtuWTo9etyf1ZZWF23Y9wXJW+/g1K7jQdFF3RmCfiFiSBwP2ITFn9y5OVVbUQYC9u4GFTufwu3e24zhSEPwNjYu+JewToxd3BY+Xg7+tclc7EnbzN9Q4WTfo41egiQUinwNmIiuGGzxmBht74tEDwmb6lijApuFZQazwryMjrfoRhi+Ac0rgHHN68AUF29RM+QGBfBKVS1y8hc5AJkc7BbZ79RMMFA+gC4IH+7bdXgGvTGntUWJzidlT/CuMqf0dfrCLVPbk+SInVsu8RrjFjdVkK7Qeb5jdKaqL7Ia08ziWwrO6DbdDd68V1Wqc8Y4he2Kc/RvoCo/x2mX1M39tEHV0iEfkn/tJXzWtygTJxrLs4HZ84aESagJIjYlyo3XPeWvMhNqu0XpZQ0QackRCLMSheLMBTNToazJhuI3OQ
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:GV2PR04MB11799.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(7416014)(376014)(366016)(19092799006)(23010399003)(6133799003)(22082099003)(18002099003)(11063799006)(4143699003)(10067099003)(56012099006);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?JY354EM6udm4uZI7nzS1p1I8KA4wk9aq7LliUnG5cpx1c0asQNbSqKWRkFaI?=
- =?us-ascii?Q?zqu2bWbjnvii03oITHqjHZgEezbVakDdsVAD3KEy2uyWCPydvqujtSoWvQsM?=
- =?us-ascii?Q?yp8QAgi2gzkul1FAV/u6HUfml3Kl3anRvO4i0ZZcaprdsAOmMaWEt6u9cH0w?=
- =?us-ascii?Q?EtyOhsDmm0eXKzifjXkffMArI1s1J6N2Is9vsoB/vrMtOfeXA3SSzjrdp/3v?=
- =?us-ascii?Q?76ZPM4JNp5mx5uO0aO3EtDaHCVElNRwVK9aER/6zcHMTOjIEQBdl6/Sadhz0?=
- =?us-ascii?Q?1dombl4tDa1417JKi1EIj1YGEKAPEmyjKYDVbgfNs7uC6hjOvpFbwYTyJBKh?=
- =?us-ascii?Q?ILdqT7TwsHXTtpZDDoHc37OF0I2dOj4wHey12jACbJEUhoQ/2RcEETEHKoh4?=
- =?us-ascii?Q?7rwGFuWfl7h/xRLxpmJw93W//lSU3fFShzX9dgs5zIXIShN2B1HOaKeOk6CB?=
- =?us-ascii?Q?B2yroLAh6nfwiz7sN8WQCNoUk2Du0Wt7UGE6HvQFG1YR5SQXrIbddTvFL43O?=
- =?us-ascii?Q?4whgowQuz3gBBdi1kJfx8NZbzxWYKJZXxjSuekg49B/9Oc0JzCLZBOhcO88W?=
- =?us-ascii?Q?us8Y8v2CfSj2yxw1u53Gd9QSx4YUGuXPX9TPSrmlhmBXsDwAVKw4v8H55XiU?=
- =?us-ascii?Q?YRZmoSkBte7A2JmJ8IoIrGEvtfsN6wbM66GF4CwOd9Bffk6Y90MRw7qmjx76?=
- =?us-ascii?Q?HOVXiHXZJLreBdCF4lXGdXqGNiJ5jAQXOMyWnx62LPME6IYZ+9u+u/XJkfJt?=
- =?us-ascii?Q?hXZLDKUVQ1s4mw0/4TQyxI/VKaQfVO6hL87sf9YSVgUF8p/2NhmLEVpUzDbT?=
- =?us-ascii?Q?MD+ynyM07KSZN5SCijOO1OFw7pbqOO+Hp5re+aSCggLmsBtYmT+DU4xTdepv?=
- =?us-ascii?Q?zR+Uz5CofZpA4sVvpZaOtMCzZe+NyXTq1mXe7wV9Z5+HQba89evVUO0mEiXC?=
- =?us-ascii?Q?a5giiDlCUGEljgH6E+5WlqlZ+FRyRnYmHjBB6mRnLZYNkZqPDmMoFkdllHAe?=
- =?us-ascii?Q?yqlnh6cmOOuLzM3qO6EC4GEBo3xwG8nH2sxeY0GOJZ0w4nqjz0FMcC02/J0M?=
- =?us-ascii?Q?nrQ6kAYRrlYZwf1XYiV/t8a+i2eGO1QE1URtwo0yhEINwU83TP+MDxH51/Cm?=
- =?us-ascii?Q?OxCAa5Dv/ONPmYpaPTTFwz0JpW4AB8BdWBES/bSflTXy+RJ157RkiswJ5FZO?=
- =?us-ascii?Q?NNX36751tyduNeP7wXLAXMoKlPhSKrjh/NPvCxN19yXPw+kHWmYyVVePEnxL?=
- =?us-ascii?Q?LeawDVy8e1Gjh3lmYAsHaiHltRFtWTkUxZThUYt+YMwk033KJCOZU4wITvMs?=
- =?us-ascii?Q?YaXLWU1PFrM2O+OG0tvb4aVFZhk0kJKenRUOilKJcXy7SsRB0yQobjm5oULk?=
- =?us-ascii?Q?X8f+uQwHxt62XekD6QuWxcpIZDaZc+zyozkFyNYFs2asyz2OT5Lu1iutydF+?=
- =?us-ascii?Q?76sfdTQ1bXWX8fP+YEH4q4qHnR4h1yVXkVqedjMbdzy5vUGb2fYAX9xQOGpk?=
- =?us-ascii?Q?Gg3lC0CGvRRenQ9snHDJuTlE/z1bzkzAaI2klc31GBxpNdb0c2xzYVJGd27h?=
- =?us-ascii?Q?E/ovpyVjgwLPhiIsYd1XDzLLCC65wxX1sSdWmpjlh2UZFJCDes6/kV4zJjWD?=
- =?us-ascii?Q?c+RB+oDF21E3K8WH1Xp4+4iNGJYgmicuR1dsfrkMN0iXDkzMAss4jVVK4u8e?=
- =?us-ascii?Q?didn8naRqEdIAMgNJUy3j5QGIvh8OrhZk/IInFRJBUvn1zHtHmkG9WRuQoMI?=
- =?us-ascii?Q?XXG0A09VA8Noln1gvCMB1eZ9F99YB9YDkCYa/GJbQkKhHNDQhfqy?=
-X-OriginatorOrg: oss.nxp.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 5b79d427-08ea-4b14-0f93-08df12771e2a
-X-MS-Exchange-CrossTenant-AuthSource: GV2PR04MB11799.eurprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 14 Sep 2026 15:44:52.9967
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: YEspMHMz4ZVA1b/2zIKhFIXdgum4ZGbQD9Jdm/IvUvn8j2cxuxq0ZtqjrG6DzDCyOguzktJznX9Uts81295SUpJotpgCXJZwbAB91J455Yg8GEskc4EXNW8OZ2tdQ5Va
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: VI2PR04MB11276
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 14/14] NTB: ntb_transport: Remove clients before
+ freeing transport resources
+To: Koichiro Den <den@valinux.co.jp>
+Cc: sashiko-reviews@lists.linux.dev, ntb@lists.linux.dev
+References: <20260910040836.3792333-1-den@valinux.co.jp>
+ <20260910040836.3792333-15-den@valinux.co.jp>
+ <20260910043613.CE8FD1F000FF@smtp.kernel.org>
+ <pao67m2xtpetoj2mpqzuvftzdojoj65kqpbg6alqsdqrwozm2t@hdojuk4dsh5k>
+ <b90a302d-8ad4-480f-9794-2b62e273a6be@intel.com>
+ <rtc2lb2iic42wuqtcjxqqvvyxcl535x4iv7uxhvkk55o3q5ire@lq7eukkl4aaj>
+From: Dave Jiang <dave.jiang@intel.com>
+Content-Language: en-US
+In-Reply-To: <rtc2lb2iic42wuqtcjxqqvvyxcl535x4iv7uxhvkk55o3q5ire@lq7eukkl4aaj>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-On Tue, Sep 01, 2026 at 03:32:38PM +0900, Koichiro Den wrote:
-> The virtual PCI driver registers an ntb_dev but has no remove callback.
-> Unbinding the endpoint function can therefore free BARs while the NTB
-> device and its client still use them. It also leaves the virtual PCI
-> devices and root bus allocated.
->
-> Allocate an ntb_dev for each virtual PCI probe and unregister it from the
-> matching remove callback. Start command processing only after registration.
-> Publish the device for doorbell IRQs at the same point. During remove, stop
-> the command work and drain IRQ handlers before unregistering the device.
->
-> Retain the root bus returned by pci_scan_bus() so it can be removed on
-> unbind. Unregister the virtual PCI driver before releasing endpoint
-> resources. Stop and remove the root bus under the PCI rescan/remove lock,
-> then release its host bridge.
->
-> Fixes: e35f56bb0330 ("PCI: endpoint: Support NTB transfer between RC and EP")
-> Cc: stable@vger.kernel.org # 6.0+
-> Signed-off-by: Koichiro Den <den@valinux.co.jp>
-> ---
 
-Reviewed-by: Frank Li <Frank.Li@nxp.com>
 
-> Changes in v6:
->   - Rework v5 patch 5 on v7.3-rc1.
->   - Publish ntb_dev only after registration, and tie command work and
->     doorbell delivery to its lifetime.
->   - Retain and remove the virtual root bus, then release its host bridge.
->   - Drop v5 patch 4; f7245901de89 ("PCI: Check parent for NULL in
->     of_pci_bus_release_domain_nr()") fixed the bug it worked around.
->     v5: https://lore.kernel.org/r/20260226084142.2226875-6-den@valinux.co.jp/
->
-> @Frank, the code changed substantially since v5, so I did not carry your
-> R-b tag. I would appreciate another look.
->
->  drivers/pci/endpoint/functions/pci-epf-vntb.c | 85 +++++++++++++++----
->  1 file changed, 70 insertions(+), 15 deletions(-)
->
-> diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> index 412e8cc6fb1d..992f5e7f8d4a 100644
-> --- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> +++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> @@ -132,7 +132,7 @@ struct epf_ntb_ctrl {
->  } __packed;
->
->  struct epf_ntb {
-> -	struct ntb_dev ntb;
-> +	struct ntb_dev *ntb;
->  	struct pci_epf *epf;
->  	struct config_group group;
->
-> @@ -166,10 +166,15 @@ struct epf_ntb {
->  	void __iomem *vpci_mw_addr[MAX_MW];
->
->  	struct delayed_work cmd_handler;
-> +	struct pci_bus *vpci_bus;
->  };
->
->  #define to_epf_ntb(epf_group) container_of((epf_group), struct epf_ntb, group)
-> -#define ntb_ndev(__ntb) container_of(__ntb, struct epf_ntb, ntb)
-> +
-> +static struct epf_ntb *ntb_ndev(struct ntb_dev *ntb)
-> +{
-> +	return ntb->pdev->sysdata;
-> +}
->
->  static struct pci_epf_header epf_ntb_header = {
->  	.vendorid	= PCI_ANY_ID,
-> @@ -195,7 +200,7 @@ static int epf_ntb_link_up(struct epf_ntb *ntb, bool link_up)
->  	else
->  		ntb->reg->link_status &= ~LINK_STATUS_UP;
->
-> -	ntb_link_event(&ntb->ntb);
-> +	ntb_link_event(ntb->ntb);
->  	return 0;
->  }
->
-> @@ -284,7 +289,7 @@ static void epf_ntb_cmd_handler(struct work_struct *work)
->  	     i++) {
->  		if (ntb->epf_db[i]) {
->  			atomic64_or(1 << (i - EPF_IRQ_DB_START), &ntb->db);
-> -			ntb_db_event(&ntb->ntb, i - EPF_IRQ_DB_START);
-> +			ntb_db_event(ntb->ntb, i - EPF_IRQ_DB_START);
->  			ntb->epf_db[i] = 0;
->  		}
->  	}
-> @@ -348,12 +353,18 @@ static void epf_ntb_cmd_handler(struct work_struct *work)
->  static irqreturn_t epf_ntb_doorbell_handler(int irq, void *data)
->  {
->  	struct epf_ntb *ntb = data;
-> +	struct ntb_dev *ndev;
->  	int i;
->
-> +	/* Pair with smp_store_release() in pci_vntb_probe(). */
-> +	ndev = smp_load_acquire(&ntb->ntb);
-> +	if (!ndev)
-> +		return IRQ_HANDLED;
-> +
->  	for (i = EPF_IRQ_DB_START; i < ntb->db_count; i++)
->  		if (irq == ntb->epf->db_msg[i].virq) {
->  			atomic64_or(1 << (i - EPF_IRQ_DB_START), &ntb->db);
-> -			ntb_db_event(&ntb->ntb, i - EPF_IRQ_DB_START);
-> +			ntb_db_event(ndev, i - EPF_IRQ_DB_START);
->  		}
->
->  	return IRQ_HANDLED;
-> @@ -985,7 +996,6 @@ static int epf_ntb_epc_init(struct epf_ntb *ntb)
->  	}
->
->  	INIT_DELAYED_WORK(&ntb->cmd_handler, epf_ntb_cmd_handler);
-> -	queue_work(kpcintb_workqueue, &ntb->cmd_handler.work);
->
->  	atomic64_set(&ntb->peer_db_pending, 0);
->  	enable_work(&ntb->peer_db_work);
-> @@ -1340,6 +1350,7 @@ static int vpci_scan_bus(void *sysdata)
->  		pci_unlock_rescan_remove();
->  		return -EINVAL;
->  	}
-> +	ndev->vpci_bus = vpci_bus;
->
->  	pci_bus_add_devices(vpci_bus);
->
-> @@ -1425,7 +1436,7 @@ static int vntb_epf_mw_set_trans(struct ntb_dev *ndev, int pidx, int idx,
->  	int ret;
->  	struct device *dev;
->
-> -	dev = &ntb->ntb.dev;
-> +	dev = &ndev->dev;
->  	barno = ntb->epf_ntb_bar[BAR_MW1 + idx];
->  	epf_bar = &ntb->epf->bar[barno];
->  	epf_bar->phys_addr = addr;
-> @@ -1563,7 +1574,7 @@ static void vntb_epf_peer_db_work(struct work_struct *work)
->  			ret = pci_epc_raise_irq(epf->epc, func_no, vfunc_no,
->  						PCI_IRQ_MSI, interrupt_num);
->  			if (ret)
-> -				dev_err(&ntb->ntb.dev,
-> +				dev_err(&epf->dev,
->  					"Failed to raise IRQ for interrupt_num %u: %d\n",
->  					interrupt_num, ret);
->  		}
-> @@ -1681,13 +1692,18 @@ static const struct ntb_dev_ops vntb_epf_ops = {
->
->  static int pci_vntb_probe(struct pci_dev *pdev, const struct pci_device_id *id)
->  {
-> -	int ret;
->  	struct epf_ntb *ndev = (struct epf_ntb *)pdev->sysdata;
->  	struct device *dev = &pdev->dev;
-> +	struct ntb_dev *ntb;
-> +	int ret;
-> +
-> +	ntb = devm_kzalloc(dev, sizeof(*ntb), GFP_KERNEL);
-> +	if (!ntb)
-> +		return -ENOMEM;
->
-> -	ndev->ntb.pdev = pdev;
-> -	ndev->ntb.topo = NTB_TOPO_NONE;
-> -	ndev->ntb.ops =  &vntb_epf_ops;
-> +	ntb->pdev = pdev;
-> +	ntb->topo = NTB_TOPO_NONE;
-> +	ntb->ops = &vntb_epf_ops;
->
->  	ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(32));
->  	if (ret) {
-> @@ -1695,16 +1711,41 @@ static int pci_vntb_probe(struct pci_dev *pdev, const struct pci_device_id *id)
->  		return ret;
->  	}
->
-> -	ret = ntb_register_device(&ndev->ntb);
-> +	ret = ntb_register_device(ntb);
->  	if (ret) {
->  		dev_err(dev, "Failed to register NTB device\n");
->  		return ret;
->  	}
->
-> +	/* Publish after ntb_register_device() succeeds. */
-> +	smp_store_release(&ndev->ntb, ntb);
-> +	queue_delayed_work(kpcintb_workqueue, &ndev->cmd_handler, 0);
-> +
->  	dev_dbg(dev, "PCI Virtual NTB driver loaded\n");
->  	return 0;
->  }
->
-> +static void pci_vntb_remove(struct pci_dev *pdev)
-> +{
-> +	struct epf_ntb *ndev = pdev->sysdata;
-> +	struct ntb_dev *ntb;
-> +	unsigned int i;
-> +
-> +	/* Stop the work reader, then close and drain the IRQ gate. */
-> +	cancel_delayed_work_sync(&ndev->cmd_handler);
-> +
-> +	ntb = xchg(&ndev->ntb, NULL);
-> +
-> +	if (ndev->msi_doorbell)
-> +		for (i = 0; i < ndev->db_count; i++) {
-> +			if (epf_ntb_db_irq_is_duplicated(ndev->epf, i))
-> +				continue;
-> +			synchronize_irq(ndev->epf->db_msg[i].virq);
-> +		}
-> +
-> +	ntb_unregister_device(ntb);
-> +}
-> +
->  static struct pci_device_id pci_vntb_table[] = {
->  	{
->  		PCI_DEVICE(0xffff, 0xffff),
-> @@ -1716,6 +1757,7 @@ static struct pci_driver vntb_pci_driver = {
->  	.name           = "pci-vntb",
->  	.id_table       = pci_vntb_table,
->  	.probe          = pci_vntb_probe,
-> +	.remove         = pci_vntb_remove,
->  };
->
->  /* ============ PCIe EPF Driver Bind ====================*/
-> @@ -1796,12 +1838,25 @@ static int epf_ntb_bind(struct pci_epf *epf)
->   */
->  static void epf_ntb_unbind(struct pci_epf *epf)
->  {
-> +	struct pci_host_bridge *bridge;
->  	struct epf_ntb *ntb = epf_get_drvdata(epf);
->
-> +	pci_unregister_driver(&vntb_pci_driver);
-> +
-> +	if (ntb->vpci_bus) {
-> +		bridge = to_pci_host_bridge(ntb->vpci_bus->bridge);
-> +
-> +		pci_lock_rescan_remove();
-> +		pci_stop_root_bus(ntb->vpci_bus);
-> +		pci_remove_root_bus(ntb->vpci_bus);
-> +		ntb->vpci_bus = NULL;
-> +		pci_unlock_rescan_remove();
-> +
-> +		pci_free_host_bridge(bridge);
-> +	}
-> +
->  	epf_ntb_epc_cleanup(ntb);
->  	epf_ntb_config_spad_bar_free(ntb);
-> -
-> -	pci_unregister_driver(&vntb_pci_driver);
->  }
->
->  // EPF driver probe
-> --
-> 2.51.0
->
+On 9/13/26 9:27 PM, Koichiro Den wrote:
+> On Fri, Sep 11, 2026 at 08:49:40AM -0700, Dave Jiang wrote:
+>>
+>>
+>> On 9/10/26 1:48 AM, Koichiro Den wrote:
+>>> On Thu, Sep 10, 2026 at 04:36:13AM +0000, sashiko-bot@kernel.org wrote:
+>>>> Thank you for your contribution! Sashiko AI review found 3 potential issue(s) to consider:
+>>>>
+>>>> New issues:
+>>>> - [Critical] Skipping ntb_qp_link_cleanup() during transport teardown fails to drain rx_post_q, causing freed memory to be accessed by in-flight IOAT DMA.
+>>>
+>>> I believe this is a false positive. See my inline comment below.
+>>>
+>>>>
+>>>> Pre-existing issues:
+>>>> - [Critical] Double-fetch of `hdr->len` from shared memory allows buffer overflow via TOCTOU race.
+>>>> - [High] Racy read-modify-write of `qp_bitmap_free` bitmask allows queue state corruption.
+>>>> --
+>>>>
+>>>> commit 68ca6cad9a88600dd4607f3c4ccd6bd32385b0e7
+>>>> Author: Koichiro Den <den@valinux.co.jp>
+>>>> Subject: NTB: ntb_transport: Remove clients before freeing transport resources
+>>>>
+>>>> Unbinding ntb_transport can call ntb_transport_free() while ntb_netdev
+>>>> is still bound. This patch reorders the teardown process to unregister
+>>>> clients before freeing resources, intending to fix unsafe memory accesses
+>>>> during intensive TX loads.
+>>>>
+>>>>> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+>>>>> index c1e3a077c45ec..f24555b38d1b5 100644
+>>>>> --- a/drivers/ntb/ntb_transport.c
+>>>>> +++ b/drivers/ntb/ntb_transport.c
+>>>>> @@ -1487,9 +1487,11 @@ static void ntb_transport_free(struct ntb_client *self, struct ntb_dev *ndev)
+>>>>>  
+>>>>>  	debugfs_remove_recursive(nt->debugfs_node_dir);
+>>>>>  
+>>>>> -	ntb_transport_link_cleanup(nt);
+>>>>> -	cancel_work_sync(&nt->link_cleanup);
+>>>>> -	cancel_delayed_work_sync(&nt->link_work);
+>>>>> +	/* Stop transport work before clients release their QPs. */
+>>>>> +	disable_delayed_work_sync(&nt->link_work);
+>>>>> +	disable_work_sync(&nt->link_cleanup);
+>>>>> +
+>>>>> +	ntb_bus_remove(nt);
+>>>>
+>>>> [Severity: Critical]
+>>>> By moving ntb_bus_remove() before ntb_transport_link_cleanup(), does this
+>>>> introduce a DMA use-after-free regression?
+>>>>
+>>>> Calling ntb_bus_remove() first prompts client drivers to free their QPs via
+>>>> ntb_transport_free_queue(), which blindly frees all entries in rx_post_q
+>>>> without polling:
+>>>>
+>>>> drivers/ntb/ntb_transport.c:ntb_transport_free_queue() {
+>>>>     ...
+>>>> 	while ((entry = ntb_list_rm(&qp->ntb_rx_q_lock, &qp->rx_post_q))) {
+>>>> 		dev_warn(&pdev->dev, "Freeing item from non-empty rx_post_q\n");
+>>>> 		kfree(entry);
+>>>> 	}
+>>>>     ...
+>>>> }
+>>>
+>>> Yes, but ntb_transport_free_queue() calls dma_release_channel() before freeing
+>>> those entries. For IOAT, this goes through ioat_free_chan_resources(), which
+>>> calls ioat_stop() and ioat_reset_hw() to synchronize callbacks and stop the DMA
+>>> channel.
+>>
+>> The refute looks reasonable to me for ioat. Any concerns for other host DMA engines? 
+> 
+> Sorry for the late reply. I've been looking into the other engines and
+> scratching my head a bit.. and
+> 
+> Yes, I found some concerns.
+> 
+> AFAICT:
+> - IDXD: device_synchronize() does not fully synchronize callbacks.
+> - AMD PTDMA/AE4DMA: device_synchronize() does not wait for their actual
+>   callback paths.
+> - DesignWare DMAC (not dw-edma): device_synchronize() is missing.
+
+Given that different DMA drivers have different implementations, this becomes a difficult issue. Either there needs to be a standard expectation and documented in dmaengine API (which would also including fixing up every DMA driver and seems kind of unrealistic). Or we document and fix it on the NTB side in a uniform way. Thoughts?
+
+DJ
+
+> 
+> These appear to be existing driver issues, but Patch 14 could expose them in
+> transport teardown. Leaving the patch out does not fix the original crash
+> described in its commit message either.
+> 
+> For now, I would drop this patch 14(/14) from this series and work on:
+> (a) Seeing whether an NTB-side rework can fix the original issue without
+>     depending on the missing callback synchronization.
+> (b) Fixing callback synchronization in the DMA drivers.
+> 
+> I'm not very familiar with these engines and don't have hardware to verify this
+> though, so please take this with a pinch of salt. Just my source-level
+> assessment.
+> 
+> A few details:
+> 
+> - IDXD
+> 
+>   idxd_dma_synchronize() drains the hardware WQ, but idxd_wq_thread() can
+>   already have moved a completed descriptor to its local flist. It invokes
+>   the client callback after dropping list_lock.
+> 
+>   The WQ drain does not wait for that callback to finish, contrary to [1].
+>   idxd_dma_free_chan_resources() does not provide a compensating wait either,
+>   unlike IOAT's channel teardown.
+> 
+> - AMD PTDMA / AE4DMA
+> 
+>   pt_synchronize() only calls vchan_synchronize(), but these drivers invoke
+>   callbacks outside the virt-dma tasklet: through status processing in PTDMA and
+>   ae4_pending_work in AE4DMA. pt_free_chan_resources() does not wait for those
+>   callbacks either.
+> 
+>   Synchronization needs to cover those actual callback paths.
+>   ldma_synchronize() might be an example of waiting for driver-specific work as
+>   well as the virt-dma tasklet, though the details would differ here. The
+>   ordering of descriptor freeing would also need checking.
+> 
+> - DesignWare DMAC
+> 
+>   The legacy DW driver still lacks device_synchronize(), although its tasklet
+>   can drop the channel lock before invoking the client callback.  Channel
+>   resource release does not wait for that tasklet either.
+> 
+>   Adding callback synchronization might be a right direction here. This looks
+>   like the kind of race the termination synchronization API was introduced to
+>   address:
+>   https://lore.kernel.org/r/1445334391-12272-1-git-send-email-lars@metafoo.de/
+> 
+> [1] Documentation/driver-api/dmaengine/provider.rst, device_synchronize:
+>     > Must make sure that all complete callbacks for previously
+>     > submitted descriptors have finished running and none are
+>     > scheduled to run.
+> 
+> Best regards,
+> Koichiro
+> 
+>>
+>> DJ
+>>
+>>>
+>>> I believe Jon and Dave know IOAT well too, so I'd appreciate any comments from
+>>> them. I guess the mention on IOAT in an earlier patch in this series prompted
+>>> Sashiko to focus on it here.
+>>>
+>>> Best regards,
+>>> Koichiro
+>>>
+>>>>
+>>>> Because IOAT DMA engines could still be actively copying into those buffers,
+>>>> freeing them allows the hardware DMA engine to write to freed kernel memory.
+>>>> Furthermore, the DMA drain wait in ntb_qp_link_cleanup() is subsequently
+>>>> skipped entirely because qp_bitmap_alloc evaluates to 0 during the later
+>>>> call to ntb_transport_link_cleanup().
+>>>>
+>>>> [ ... ]
+>>>>
+>>>>> @@ -1736,17 +1736,17 @@ static void ntb_process_rxc(struct ntb_transport_qp *qp)
+>>>>>  
+>>>>>  	if (hdr->len > entry->len) {
+>>>>>  		dev_dbg(&qp->ndev->pdev->dev,
+>>>>>  			"receive buffer overflow! Wanted %d got %d\n",
+>>>>>  			hdr->len, entry->len);
+>>>>>  		qp->rx_err_oflow++;
+>>>>>  
+>>>>>  		entry->len = -EIO;
+>>>>>  		entry->flags |= DESC_DONE_FLAG;
+>>>>>  
+>>>>>  		ntb_complete_rxc(qp);
+>>>>>  	} else {
+>>>>>  		dev_dbg(&qp->ndev->pdev->dev,
+>>>>>  			"RX OK index %u ver %u size %d into buf size %d\n",
+>>>>>  			qp->rx_index, hdr->ver, hdr->len, entry->len);
+>>>>>  
+>>>>>  		qp->rx_bytes += hdr->len;
+>>>>>  		qp->rx_pkts++;
+>>>>>  
+>>>>>  		entry->len = hdr->len;
+>>>>
+>>>> [Severity: Critical]
+>>>> This is a pre-existing issue, but is there a time-of-check to time-of-use
+>>>> race condition in this bounds check on hdr->len?
+>>>>
+>>>> Since hdr points to a payload header located inside a memory window writable
+>>>> by the remote NTB peer (shared memory), hdr->len is read directly from
+>>>> shared memory twice (once for the bounds check, once for the assignment).
+>>>>
+>>>> Can a remote peer swap hdr->len to a much larger value immediately after
+>>>> the bounds check but before the assignment, bypassing the bounds check and
+>>>> causing a buffer overflow when copied?
+>>>>
+>>>> [ ... ]
+>>>>
+>>>>> @@ -2130,7 +2130,7 @@ struct ntb_transport_qp *
+>>>>>  ntb_transport_create_queue(void *data, struct device *client_dev,
+>>>>>  			   const struct ntb_queue_handlers *handlers)
+>>>>>  {
+>>>> [ ... ]
+>>>>>  	free_queue--;
+>>>>>  
+>>>>>  	qp = &nt->qp_vec[free_queue];
+>>>>>  	qp_bit = BIT_ULL(qp->qp_num);
+>>>>>  
+>>>>>  	nt->qp_bitmap_free &= ~qp_bit;
+>>>>
+>>>> [Severity: High]
+>>>> This isn't a bug introduced by this patch, but could this read-modify-write
+>>>> of nt->qp_bitmap_free lead to queue state corruption?
+>>>>
+>>>> The qp_bitmap_free bitmask is modified here using non-atomic bitwise
+>>>> operations without holding any lock. It is also modified concurrently during
+>>>> driver unbind:
+>>>>
+>>>> drivers/ntb/ntb_transport.c:ntb_transport_free_queue() {
+>>>>     ...
+>>>> 	qp->transport->qp_bitmap_free |= qp_bit;
+>>>>     ...
+>>>> }
+>>>>
+>>>> Since these are exported functions called by NTB client drivers, could
+>>>> concurrent probe and remove operations race and lose bit updates, leading
+>>>> to a leaked queue or two clients being assigned the same queue?
+>>>>
+>>>> -- 
+>>>> Sashiko AI review · https://sashiko.dev/#/patchset/20260910040836.3792333-1-den@valinux.co.jp?part=14
+>>>
+>>
+
