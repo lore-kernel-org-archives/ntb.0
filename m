@@ -1,44 +1,44 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 262303FF1A5;
-	Thu, 17 Sep 2026 20:49:47 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C8E233DEFF0;
+	Thu, 17 Sep 2026 20:49:49 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789678189; cv=none; b=FBXAbzmaTKEE0WaBuCqUReoK8tnKi3snAriPjC+E0EawlwFSelnreFZxf3OLR/Vg6v3K37PaSPh0wwyzH3zQ4PO7w9PEk1pAMFici19VIfj8qfWL6OpRLYo1boBM8efZH6cyLQL7p56M14wrL2n/q5+8/xXcJkCuUj/gmicEnHY=
+	t=1789678191; cv=none; b=d23TnzeicK0X76Djqe2U/8tWp13j2eS2q1qAi+IpKtGbk9b4hzWNYI454TKG9gjmilUAlB3zI9pCxC6bpuHZVTTGXzV9T6X+uJ82MwNUGvi0Y9xTfu3gczThdmAb4wwNkOsZuOcCLB9joavTIOtJaHNNQ6X0oUZI9dYmzsKOa+Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789678189; c=relaxed/simple;
-	bh=zsDmhwWHYvoIt/HxpaReoniAaJqVMhzM2NHBm9bMwuk=;
+	s=arc-20240116; t=1789678191; c=relaxed/simple;
+	bh=/BJ0QS5jlH64br0ka2MQOyDMVdBvi8GnvwVYD4v0/zg=;
 	h=Subject:From:To:Cc:Date:Message-ID:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=JnqQQvKTZoaHUuLvDiG+6Ea++MVVOM6W3Lpldnwpo2x1xgdt2iEtHNOrFYodIlMd+XmO1qVHDdLDdTEQXQtcBKd0jRMt6/rXddS/w7EwVdSbnW7c6Cl9KPJCfM8bqLCyuBJVuMmuinBxoyU1VLU+mq1E7VdCwc4KmmeffiPnFro=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Fsh/tguD; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:MIME-Version; b=QA+YRbV3lA8/L0XfY8tcCS00BYW+n5lMVaZumsfGz2FlLJD+vNzqEUNOCI84s8CDYJ6MggvrU8VkFLzsKHd/9iha83hx359ezhZcj35XwShOPXP+fIZQoXEswzXmtRyXMZjVO+zdgT3viJXzttZuaO357Aog2TD/YE+pM3AAb0I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=c8LlTWb0; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Fsh/tguD"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 251441F000FF;
-	Thu, 17 Sep 2026 20:49:47 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="c8LlTWb0"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 66D7A1F00898;
+	Thu, 17 Sep 2026 20:49:48 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789678187;
-	bh=fxSxCTj0CbggTJuh7xoFnDD6RMIDSPTLnDM5wEcmZpQ=;
+	s=k20260515; t=1789678189;
+	bh=N+YmeDxsn8Mjt3AEO6Az/HUP0aZMhX+SK+CkWg2Ez6Q=;
 	h=Subject:From:To:Cc:Date:In-Reply-To:References;
-	b=Fsh/tguDtDbwVNx5sHNJ6d+KllIVWkBdznKYEJPFssDkdnyU2wlpo/RAq1jpdf8oK
-	 9Bsvpoj8jVfWEVd/VKlDFCTk1dXYYkA/T5Y4u7am07YRhuMsHFGdCiy4PzXCgjjeEa
-	 G8C9h4lUJZUzR/ClcjiEKdlOxQntwtCM5ATBpKWqN+jM7GE1bD3yC8APX6BLSpMA8n
-	 p93DDjN7zDMrRNB9vGj4Mxo5T3Ma92jJSvAnC1m1OzuHCnUpnq9SnX9DoxAqziXUDA
-	 f+s+4AOwvG58K6s3SRIgwleNxVGFdBQRKLddmVj6m9p485ZSZ4RDMNjtA0EManAcqi
-	 bHqXyLjcV+ZSA==
-Subject: Re: [PATCH net-next v4 09/10] net: ntb_netdev: Introduce an optional
- packet header, ntb_netdev_hdr
+	b=c8LlTWb0Sw79WSnfAaTdgvydXjRPIvLZD8Vqesx2Y9cOfUoQ3pprFbxRJ7MolF2mI
+	 t77ia+eMVKChkzWQfJxQwftmswCrPODHLYCIGXpk9aL26aPw/Rqs2omENycTaHKCTW
+	 MamtOe9ZBwY+a9Sa+sghTkoZQGBce9O6mXI0R9HJcly+4rYULnZn+QrR19gGzSPTVg
+	 WZtLMQZUkvWBgOZuyKF+ZGmrLdoukaotfrV//o630CQAQ+SLdAGS4VasvK4KleSJQR
+	 3NVn48EQkSV2H9t+8R/EEqEFyiYATVaf8rLsqmbf3eBwmK1oixkHTmBEl5U8Kfr+z7
+	 LNab3Y/rihbkQ==
+Subject: Re: [PATCH net-next v4 10/10] net: ntb_netdev: Preserve
+ CHECKSUM_PARTIAL across NTB
 From: netdev-bot+sashiko@kernel.org
 To: den@valinux.co.jp
 Cc: jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com,
  andrew+netdev@lunn.ch, davem@davemloft.net, edumazet@google.com,
  kuba@kernel.org, pabeni@redhat.com, ntb@lists.linux.dev,
  netdev@vger.kernel.org, linux-kernel@vger.kernel.org
-Date: Thu, 17 Sep 2026 20:49:46 +0000
-Message-ID: <178967818671.22033.983923987727607954@kernel.org>
-In-Reply-To: <20260914084838.2158249-10-den@valinux.co.jp>
-References: <20260914084838.2158249-10-den@valinux.co.jp>
-X-sashiko-severity: Low
+Date: Thu, 17 Sep 2026 20:49:47 +0000
+Message-ID: <178967818794.22033.14565840392924332606@kernel.org>
+In-Reply-To: <20260914084838.2158249-11-den@valinux.co.jp>
+References: <20260914084838.2158249-11-den@valinux.co.jp>
+X-sashiko-severity: Medium
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
@@ -48,262 +48,274 @@ List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 
-Thank you for your contribution! Sashiko AI review found 2 potential
+Thank you for your contribution! Sashiko AI review found 4 potential
 issue(s) to consider:
 
-Critical: 0 · High: 0 (1) · Medium: 0 · Low: 2
+Critical: 0 · High: 0 · Medium: 1 · Low: 3
 
-- [Low] RX buffers are now posted with size = ndev->mtu + ETH_HLEN +
-  sizeof(struct ntb_netdev_hdr) (drivers/net/ntb_netdev.c:97 and :158),…
-- [Low] In ntb_netdev_rx_handler() the replacement-skb allocation
-  (drivers/net/ntb_netdev.c:183) is attempted before hdr->flags is…
-
-Pre-existing issues:
-- [High] RX completion handler re-posts an already-allocated skb using a
-  receive length recomputed from an unsynchronized read of ndev->mtu.
+- [Medium] When TX checksum offload is negotiated (skb->ip_summed ==
+  CHECKSUM_PARTIAL and READ_ONCE(q->peer_csum) true),…
+- [Low] Growing `struct ntb_netdev_hdr` from 4 to 8 bytes silently
+  shrinks the usable MTU by 4 bytes for every user, including users who…
+- [Low] ntb_netdev advertises NETIF_F_HW_CSUM in `ndev->hw_features` and
+  installs an `ndo_features_check` that calls `vlan_features_check()`,…
+- [Low] ntb_netdev_close() flips NETIF_F_RXCSUM (via
+  netdev_update_features()) while the NTB transport RX callback…
 
 --
 
-net: ntb_netdev: Introduce an optional packet header, ntb_netdev_hdr
+net: ntb_netdev: Preserve CHECKSUM_PARTIAL across NTB
 
-This adds an optional 4-byte ntb_netdev_hdr in front of the packet, marked
-by a new client metadata bit, and accounts for it in the TX headroom, the
-MTU and the RX buffer sizes. The flags field must be zero for now, with
-checksum metadata coming in the next patch.
+This adds an optional ntb_netdev header that carries csum_start and
+csum_offset so CHECKSUM_PARTIAL survives the NTB hop, with receive support
+exchanged at QP link-up and a software fallback when the peer does not
+advertise it.  Both the TX and RX checksum features stay off by default and
+NETIF_F_RXCSUM is frozen while the interface is up.
 
-A few questions on the RX path below.
+A few questions below.
 
 > diff --git a/drivers/net/ntb_netdev.c b/drivers/net/ntb_netdev.c
-> index cddfe8d63fc18..67cfe0f1a49a2 100644
+> index 67cfe0f1a49a2..d889c8538be0c 100644
 > --- a/drivers/net/ntb_netdev.c
 > +++ b/drivers/net/ntb_netdev.c
-> @@ -29,6 +29,14 @@ static unsigned int tx_stop = 5;
+
+[ ... ]
+
+> @@ -29,12 +30,19 @@ static unsigned int tx_stop = 5;
 >  #define NTB_NETDEV_MAX_QUEUES		64
 >  #define NTB_NETDEV_DEFAULT_QUEUES	1
 >  
-> +/* An ntb_netdev_hdr precedes the packet. */
-> +#define NTB_NETDEV_META_HDR		BIT(0)
+> +#define NTB_NETDEV_CAP_CSUM		BIT(0)
 > +
-> +struct ntb_netdev_hdr {
-> +	__le16 len;		/* Header length in bytes, a multiple of 2. */
-> +	__le16 flags;
-> +};
+>  /* An ntb_netdev_hdr precedes the packet. */
+>  #define NTB_NETDEV_META_HDR		BIT(0)
+>  
+> +#define NTB_NETDEV_HDR_F_CSUM		BIT(0)
 > +
->  struct ntb_netdev;
+>  struct ntb_netdev_hdr {
+>  	__le16 len;		/* Header length in bytes, a multiple of 2. */
+>  	__le16 flags;
+> +	/* From the packet start, excluding this header. */
+> +	__le16 csum_start;
+> +	__le16 csum_offset;
+>  };
+
+[Severity: Low]
+Does growing struct ntb_netdev_hdr from 4 to 8 bytes shrink the usable MTU
+for everyone, including users who never enable the new opt-in features?
+
+Both the default MTU and the MTU ceiling are derived from sizeof(struct
+ntb_netdev_hdr).  In ntb_netdev_probe():
+
+	ndev->mtu = ntb_transport_max_size(dev->queues[0].qp) - ETH_HLEN -
+		    sizeof(struct ntb_netdev_hdr);
+
+and in ntb_netdev_change_mtu():
+
+	size = new_mtu + ETH_HLEN + sizeof(struct ntb_netdev_hdr);
+	if (size > ntb_transport_max_size(dev->queues[0].qp))
+		return -EINVAL;
+
+With the default transport_mtu of 0x10000, max_size is 65524, so the
+default and maximum MTU move from 65506 to 65502.  Would an existing
+"ip link set ntb0 mtu 65506" now fail with -EINVAL?  The RX buffer size and
+ndev->needed_headroom also grow by 4 bytes unconditionally.
+
+Could the commit message mention this, given it describes the change as
+opt-in?
+
+> @@ -189,16 +199,29 @@ static void ntb_netdev_rx_handler(struct ntb_transport_qp *qp, void *qp_data,
 >  
->  struct ntb_netdev_queue {
-> @@ -83,15 +91,16 @@ static int ntb_netdev_queue_rx_fill(struct net_device *ndev,
->  				    struct ntb_netdev_queue *queue)
->  {
->  	struct sk_buff *skb;
-> +	unsigned int size;
->  	int rc, i;
+>  	skb_put(skb, len + hdr_len);
+>  	if (hdr) {
+> +		u16 offset = le16_to_cpu(hdr->csum_offset);
+> +		u16 start = le16_to_cpu(hdr->csum_start);
+>  		u16 flags = le16_to_cpu(hdr->flags);
 >  
-> +	size = ndev->mtu + ETH_HLEN + sizeof(struct ntb_netdev_hdr);
->  	for (i = 0; i < NTB_RXQ_SIZE; i++) {
-> -		skb = netdev_alloc_skb(ndev, ndev->mtu + ETH_HLEN);
-> +		skb = netdev_alloc_skb(ndev, size);
->  		if (!skb)
->  			return -ENOMEM;
->  
-> -		rc = ntb_transport_rx_enqueue(queue->qp, skb, skb->data,
-> -					      ndev->mtu + ETH_HLEN);
-> +		rc = ntb_transport_rx_enqueue(queue->qp, skb, skb->data, size);
->  		if (rc) {
->  			dev_kfree_skb(skb);
->  			return rc;
-> @@ -137,34 +146,57 @@ static void ntb_netdev_rx_stats_add(struct net_device *ndev,
->  static void ntb_netdev_rx_handler(struct ntb_transport_qp *qp, void *qp_data,
->  				  void *data, int len, unsigned int meta)
->  {
-> +	const struct ntb_netdev_hdr *hdr = NULL;
->  	struct ntb_netdev_queue *q = qp_data;
->  	struct ntb_netdev *dev = q->ntdev;
-> +	unsigned int size, hdr_len = 0;
->  	struct sk_buff *skb, *new_skb;
->  	struct net_device *ndev;
->  	int rc;
->  
->  	ndev = dev->ndev;
-> +	size = ndev->mtu + ETH_HLEN + sizeof(*hdr);
->  	skb = data;
->  	if (!skb)
->  		return;
->  
->  	netdev_dbg(ndev, "%s: %d byte payload received\n", __func__, len);
->  
-> +	/* Validate the frame and optional header lengths. */
->  	if (len < ETH_HLEN) {
->  		DEV_STATS_INC(ndev, rx_errors);
->  		DEV_STATS_INC(ndev, rx_length_errors);
->  		goto enqueue_again;
->  	}
-> +	if (meta & NTB_NETDEV_META_HDR) {
-> +		hdr = (void *)skb->data;
-> +		hdr_len = le16_to_cpu(hdr->len);
-> +		if (hdr_len < sizeof(*hdr) || !IS_ALIGNED(hdr_len, 2) ||
-> +		    hdr_len > len - ETH_HLEN) {
-> +			DEV_STATS_INC(ndev, rx_errors);
-> +			DEV_STATS_INC(ndev, rx_length_errors);
-> +			goto enqueue_again;
+>  		skb_pull(skb, hdr_len);
+> -		if (flags)
+> +		if (flags & ~NTB_NETDEV_HDR_F_CSUM)
+>  			goto rx_drop;
+> +
+> +		if (flags & NTB_NETDEV_HDR_F_CSUM) {
+> +			if (!(ndev->features & NETIF_F_RXCSUM)) {
+> +				ntb_netdev_rx_stats_add(ndev, len);
+> +				DEV_STATS_INC(ndev, rx_dropped);
+> +				goto rx_free;
+> +			}
+> +
+> +			if (start < ETH_HLEN ||
+> +			    !skb_partial_csum_set(skb, start, offset))
+> +				goto rx_drop;
 > +		}
-> +		len -= hdr_len;
-> +	}
-
-[Severity: Low]
-Now that ntb_netdev_queue_rx_fill() and ntb_netdev_rx_handler() post
-buffers of ndev->mtu + ETH_HLEN + sizeof(struct ntb_netdev_hdr), and the
-only length gate in ntb_netdev_rx_handler() is the len < ETH_HLEN test,
-what rejects an over-MTU frame when the peer does not set
-NTB_NETDEV_META_HDR?
-
-Before this change the posted buffer was exactly mtu + ETH_HLEN, so
-ntb_process_rxc() dropped such a frame:
-
-	if (len > entry->len) {
-
-and the driver counted rx_length_errors. With the extra reservation, a
-frame of up to mtu + ETH_HLEN + sizeof(struct ntb_netdev_hdr) now fits the
-buffer, so it is skb_put() and handed to netif_rx() as a good packet, i.e.
-4 bytes over the configured MTU here and 8 bytes by the end of the series.
-The len -= hdr_len subtraction that would re-bound the payload never runs
-in that case.
-
-The two sides of the link are configured independently, so a peer with a
-larger MTU reaches this. Still present at the end of the series
-(a68dfbeaf017).
-
->  
-> -	ntb_netdev_rx_stats_add(ndev, len);
-> -
-> -	new_skb = netdev_alloc_skb(ndev, ndev->mtu + ETH_HLEN);
-> +	new_skb = netdev_alloc_skb(ndev, size);
->  	if (!new_skb) {
-> +		ntb_netdev_rx_stats_add(ndev, len);
->  		DEV_STATS_INC(ndev, rx_dropped);
->  		goto enqueue_again;
 >  	}
-
-[Severity: Low]
-The replacement skb is allocated before hdr->flags is checked. When
-netdev_alloc_skb() fails, is a frame carrying a non-zero flags value
-counted as a successfully received packet?
-
-This path calls ntb_netdev_rx_stats_add(ndev, len) plus rx_dropped and goes
-straight to enqueue_again, skipping the validation added just below:
-
-	if (hdr) {
-		u16 flags = le16_to_cpu(hdr->flags);
-
-		skb_pull(skb, hdr_len);
-		if (flags)
-			goto rx_drop;
-	}
-
-So whether a malformed frame ends up in rx_errors depends on whether the
-atomic allocation happened to succeed. Would moving the flags check ahead
-of the allocation keep the classification consistent? The same ordering
-also bypasses the checksum metadata validation added later in the series
-(a68dfbeaf017).
-
->  
-> -	skb_put(skb, len);
-> +	skb_put(skb, len + hdr_len);
-> +	if (hdr) {
-> +		u16 flags = le16_to_cpu(hdr->flags);
-> +
-> +		skb_pull(skb, hdr_len);
-> +		if (flags)
-> +			goto rx_drop;
-> +	}
-> +
-> +	ntb_netdev_rx_stats_add(ndev, len);
->  	skb->protocol = eth_type_trans(skb, ndev);
->  	skb->ip_summed = CHECKSUM_NONE;
->  	skb_record_rx_queue(skb, q->qid);
-> @@ -174,12 +206,19 @@ static void ntb_netdev_rx_handler(struct ntb_transport_qp *qp, void *qp_data,
->  	skb = new_skb;
->  
->  enqueue_again:
-> -	rc = ntb_transport_rx_enqueue(qp, skb, skb->data, ndev->mtu + ETH_HLEN);
-> +	rc = ntb_transport_rx_enqueue(qp, skb, skb->data, size);
->  	if (rc) {
->  		dev_kfree_skb_any(skb);
->  		DEV_STATS_INC(ndev, rx_errors);
->  		DEV_STATS_INC(ndev, rx_fifo_errors);
->  	}
-> +	return;
-> +
-> +rx_drop:
-> +	DEV_STATS_INC(ndev, rx_errors);
-> +	dev_kfree_skb_any(skb);
-> +	skb = new_skb;
-> +	goto enqueue_again;
->  }
-
-[Severity: High]
-This isn't a bug introduced by this patch, since the baseline already
-re-posted the original skb with a length derived from ndev->mtu, but the
-patch touches these lines and adds new peer-triggerable ways to reach
-enqueue_again with the original buffer (bad hdr_len, and the flags path).
-
-Can the size computed at the top of ntb_netdev_rx_handler():
-
-	size = ndev->mtu + ETH_HLEN + sizeof(*hdr);
-
-describe a buffer larger than the skb actually being re-posted here?
-
-ntb_netdev_change_mtu() drains only rx_pend_q through
-ntb_transport_rx_remove():
-
-	entry = ntb_list_rm(&qp->ntb_rx_q_lock, &qp->rx_pend_q);
-
-while an entry whose copy is already in progress has been moved to
-rx_post_q by ntb_process_rxc(), and ntb_complete_rxc() drops the RX queue
-lock before invoking the client callback:
-
-	spin_unlock_irqrestore(&qp->ntb_rx_q_lock, irqflags);
-
-	if (qp->rx_handler && qp->client_ready)
-		qp->rx_handler(qp, qp->cb_data, cb_data, len, meta);
-
-So after an MTU increase, a handler still holding an skb allocated for the
-old, smaller MTU reads the new, larger ndev->mtu into size, and on any
-enqueue_again path re-posts that small buffer while declaring the new
-capacity. The transport bounds the next incoming frame only against the
-declared entry->len in ntb_process_rxc():
-
-	if (len > entry->len) {
-
-Can a following frame then be copied past the end of that undersized skb,
-and can skb_put(skb, len + hdr_len) in the handler push skb->tail beyond
-skb->end?
-
-The mirror case, an MTU decrease, declares a smaller length than the
-buffer really provides and just drops otherwise valid frames.
-
-Would it be better to take the re-post length from the skb itself
-(skb_tailroom(), or a length recorded when the buffer was allocated) and
-serialize the resize against RX callbacks? A plain READ_ONCE() of
-ndev->mtu would not close this. Still present at the end of the series
-(a68dfbeaf017).
-
-> diff --git a/drivers/net/ntb_netdev.c b/drivers/net/ntb_netdev.c
-> @@ -390,9 +429,11 @@ static int ntb_netdev_change_mtu(struct net_device *ndev, int new_mtu)
->  	struct ntb_netdev_queue *queue;
->  	struct sk_buff *skb;
->  	unsigned int q, i;
-> +	unsigned int size;
->  	int len, rc = 0;
->  
-> -	if (new_mtu > ntb_transport_max_size(dev->queues[0].qp) - ETH_HLEN)
-> +	size = new_mtu + ETH_HLEN + sizeof(struct ntb_netdev_hdr);
-> +	if (size > ntb_transport_max_size(dev->queues[0].qp))
->  		return -EINVAL;
->  
->  	if (!netif_running(ndev)) {
 
 [ ... ]
+
+> @@ -316,6 +340,8 @@ static netdev_tx_t ntb_netdev_start_xmit(struct sk_buff *skb,
+>  	struct ntb_netdev *dev = netdev_priv(ndev);
+>  	u16 qid = skb_get_queue_mapping(skb);
+>  	struct ntb_netdev_queue *q;
+> +	unsigned int hdr_len = 0;
+> +	unsigned int meta = 0;
+>  	int rc;
+>  
+>  	q = &dev->queues[qid];
+> @@ -323,7 +349,29 @@ static netdev_tx_t ntb_netdev_start_xmit(struct sk_buff *skb,
+>  	if (unlikely(ntb_netdev_maybe_stop_tx(ndev, q, tx_stop)))
+>  		return NETDEV_TX_BUSY;
+>  
+> -	rc = ntb_transport_tx_enqueue(q->qp, skb, skb->data, skb->len, 0);
+> +	if (skb->ip_summed == CHECKSUM_PARTIAL) {
+> +		if (READ_ONCE(q->peer_csum)) {
+> +			struct ntb_netdev_hdr hdr = {
+> +				.len = cpu_to_le16(sizeof(hdr)),
+> +				.flags = cpu_to_le16(NTB_NETDEV_HDR_F_CSUM),
+> +			};
+> +
+> +			if (skb_cow_head(skb, sizeof(hdr)))
+> +				goto drop;
+> +
+> +			hdr.csum_start = cpu_to_le16(skb_checksum_start_offset(skb));
+> +			hdr.csum_offset = cpu_to_le16(skb->csum_offset);
+> +			hdr_len = sizeof(hdr);
+> +			/* Keep skb->len unchanged for retries and byte accounting. */
+> +			memcpy(skb->data - hdr_len, &hdr, hdr_len);
+> +			meta = NTB_NETDEV_META_HDR;
+> +		} else if (skb_checksum_help(skb)) {
+> +			goto drop;
+> +		}
+> +	}
+> +
+> +	rc = ntb_transport_tx_enqueue(q->qp, skb, skb->data - hdr_len,
+> +				      skb->len + hdr_len, meta);
+
+[Severity: Medium]
+Should the header only be prepended when skb->len + sizeof(hdr) still fits
+the transport frame?
+
+The MTU accounting reserves exactly 8 bytes on top of MTU + ETH_HLEN, so the
+on-wire budget equals ntb_transport_max_size() and the default MTU already
+sits at that maximum.  If skb->len is larger than ndev->mtu + ETH_HLEN, the
+enqueue is rejected in ntb_transport_tx_enqueue():
+
+	if (len > qp->tx_max_frame - sizeof(struct ntb_payload_header))
+		return -EMSGSIZE;
+
+-EMSGSIZE is neither -EAGAIN nor -EBUSY, so it lands in the drop path:
+
+drop:
+	dev_kfree_skb_any(skb);
+	DEV_STATS_INC(ndev, tx_dropped);
+	return NETDEV_TX_OK;
+
+Frames slightly over MTU + ETH_HLEN do reach ndo_start_xmit with
+CHECKSUM_PARTIAL: __is_skb_forwardable() allows dev->mtu +
+dev->hard_header_len + VLAN_HLEN for bridged traffic, and packet_snd()
+allows len <= dev->mtu + reserve + VLAN_HLEN while virtio_net_hdr_to_skb()
+marks the skb CHECKSUM_PARTIAL.  ntb_netdev_features_check() only clears
+NETIF_F_CSUM_MASK for csum_start < ETH_HLEN, so those frames keep
+CHECKSUM_PARTIAL and take the header path.
+
+Before this patch such a frame was transmitted with a software checksum;
+now it is freed and counted as tx_dropped.  Would falling back to
+skb_checksum_help() when the header does not fit preserve the old
+behaviour?
+
+> @@ -346,6 +394,28 @@ static netdev_tx_t ntb_netdev_start_xmit(struct sk_buff *skb,
+>  	return NETDEV_TX_OK;
+>  }
+>  
+> +static netdev_features_t ntb_netdev_features_check(struct sk_buff *skb,
+> +						   struct net_device *ndev,
+> +						   netdev_features_t features)
+> +{
+> +	if (skb->ip_summed == CHECKSUM_PARTIAL &&
+> +	    skb_checksum_start_offset(skb) < ETH_HLEN)
+> +		features &= ~NETIF_F_CSUM_MASK;
+> +
+> +	return vlan_features_check(skb, features);
+> +}
+
+[Severity: Low]
+Can vlan_features_check() do anything useful here while ndev->vlan_features
+stays at 0?
+
+netif_skb_features() has already masked the features for any tagged skb
+before ndo_features_check runs:
+
+net/core/dev.c:netif_skb_features() {
+	...
+	if (skb_vlan_tagged(skb))
+		features = netdev_intersect_features(features,
+						     dev->vlan_features |
+						     NETIF_F_HW_VLAN_CTAG_TX |
+						     NETIF_F_HW_VLAN_STAG_TX);
+	...
+}
+
+ntb_netdev_probe() only sets ndev->features and ndev->hw_features, so
+NETIF_F_HW_CSUM is not in vlan_features and cannot be intersected back in.
+vlan_dev_fix_features() derives the VLAN upper device features from
+real_dev->vlan_features as well.
+
+Does that mean VLAN traffic (on a VLAN upper device or as tagged frames on
+ntb0) always takes the skb_checksum_help() path and never uses the new
+header?  Should NETIF_F_HW_CSUM be added to ndev->vlan_features?
+
+[ ... ]
+
+> @@ -420,6 +500,9 @@ static int ntb_netdev_close(struct net_device *ndev)
+>  		timer_delete_sync(&queue->tx_timer);
+>  	}
+>  
+> +	/* Apply RX checksum changes deferred while the interface was up. */
+> +	netdev_update_features(ndev);
+> +
+>  	return 0;
+>  }
+
+[Severity: Low]
+Is ndev->features stable here with respect to the transport RX callback?
+
+netdev_update_features() mutates NETIF_F_RXCSUM while
+ntb_netdev_rx_handler() may be reading the same flag from the tasklet:
+
+		if (flags & NTB_NETDEV_HDR_F_CSUM) {
+			if (!(ndev->features & NETIF_F_RXCSUM)) {
+
+Nothing in the close path appears to quiesce that tasklet.
+ntb_transport_link_down() only clears client_ready, withdraws the QP
+readiness bit and sends the link-down descriptor:
+
+drivers/ntb/ntb_transport.c:ntb_transport_link_down() {
+	...
+	qp->client_ready = false;
+	...
+	ntb_qp_up_request(qp, false);
+
+	if (qp->link_is_up)
+		ntb_send_link_down(qp);
+}
+
+tasklet_kill(&qp->rxc_db_work) only appears in ntb_transport_free_queue(),
+and the doorbell is not masked, so ntb_transport_rxc_db() ->
+ntb_process_rxc() -> qp->rx_handler can still run while
+ntb_netdev_close() flips the feature bit.  Frames in flight would then
+either get an extra rx_dropped or be pushed to the stack with
+CHECKSUM_PARTIAL after RXCSUM was cleared.
+
+Would using the per-QP capability negotiated with the peer instead of the
+device-global ndev->features in the RX path avoid this?
+
+> @@ -716,7 +801,8 @@ static int ntb_netdev_probe(struct device *client_dev)
+>  
+>  	ndev->priv_flags |= IFF_LIVE_ADDR_CHANGE;
+>  
+> -	ndev->hw_features = ndev->features;
+> +	/* Checksum bypass assumes a trusted NTB link, so keep it opt-in. */
+> +	ndev->hw_features = ndev->features | NETIF_F_HW_CSUM | NETIF_F_RXCSUM;
+>  	ndev->watchdog_timeo = msecs_to_jiffies(NTB_TX_TIMEOUT_MS);
 
 -- 
 Sashiko AI review · https://netdev-ai.bots.linux.dev/sashiko/#/patchset/20260914084838.2158249-1-den%40valinux.co.jp
