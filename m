@@ -1,44 +1,44 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD8203B42F8;
-	Thu, 17 Sep 2026 20:49:46 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 262303FF1A5;
+	Thu, 17 Sep 2026 20:49:47 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789678188; cv=none; b=ULRLdWtbdGrE688cXiczrExmyBN+Il+xBt5hp6cNoQYbnlYEQWg7J1utYUP7yBMoDN/UBlOmMLzOlgnEFNoZesFwk9lY+SMQvYtW6WHOV4GjhOwdSd6njbXkD+M8LoA7xaazt/5JXhRNfT4NSJIVetSPGXSGxeKZNmb1PteApcM=
+	t=1789678189; cv=none; b=FBXAbzmaTKEE0WaBuCqUReoK8tnKi3snAriPjC+E0EawlwFSelnreFZxf3OLR/Vg6v3K37PaSPh0wwyzH3zQ4PO7w9PEk1pAMFici19VIfj8qfWL6OpRLYo1boBM8efZH6cyLQL7p56M14wrL2n/q5+8/xXcJkCuUj/gmicEnHY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789678188; c=relaxed/simple;
-	bh=tTFIVzo3wniIu8Z2wpv6DmbN/8jvS/hm+B/9SFZ3KZk=;
+	s=arc-20240116; t=1789678189; c=relaxed/simple;
+	bh=zsDmhwWHYvoIt/HxpaReoniAaJqVMhzM2NHBm9bMwuk=;
 	h=Subject:From:To:Cc:Date:Message-ID:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=runxV9bFPNx1r6iEfecsjphV4WgAbppLA4d8XSNv8k7WKpK0ZU3k0A1faZ7eTfLdmbJDzwgQiVTRDIoiwvjfk9DlX/CYvFcBolTXtDtcyYJF9FOvBwxrw6UCrTUwa+dn04W4LQZYgZUosVN8mg8mDIZdMvYiUd6F/BegveBNllA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ETVsHVeV; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:MIME-Version; b=JnqQQvKTZoaHUuLvDiG+6Ea++MVVOM6W3Lpldnwpo2x1xgdt2iEtHNOrFYodIlMd+XmO1qVHDdLDdTEQXQtcBKd0jRMt6/rXddS/w7EwVdSbnW7c6Cl9KPJCfM8bqLCyuBJVuMmuinBxoyU1VLU+mq1E7VdCwc4KmmeffiPnFro=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Fsh/tguD; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ETVsHVeV"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DE4711F00893;
-	Thu, 17 Sep 2026 20:49:45 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Fsh/tguD"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 251441F000FF;
+	Thu, 17 Sep 2026 20:49:47 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1789678186;
-	bh=wtuwf62d42eJbjJWtM8cCglfuBrbo9skp+wiejo0grU=;
+	s=k20260515; t=1789678187;
+	bh=fxSxCTj0CbggTJuh7xoFnDD6RMIDSPTLnDM5wEcmZpQ=;
 	h=Subject:From:To:Cc:Date:In-Reply-To:References;
-	b=ETVsHVeVFyponBNgnONTiTW1MDnEuEHmAeUVtjAukMllq6phoJvAXYL8Aya3V39ZV
-	 kV/Nm1c1fjE1J5xg2PYGLjDW8yW/PJ+dUcSpV6SwfUS/fUX4an+LO13GbJKt8njapr
-	 H3O6DNYWpvB2fWj4qY3FU2gqiqx8bImXDcGM5Rh5uc3WWmvLRhoPlq8NhE1r5TF+or
-	 s2m9XwHQYB5LkDkXDN1voyCXW//oxA76vzxUnxAbYsEiUwFKelKN9mrLyoBfUDq/7j
-	 +QAIwpm2umOlMTT7ViRyNbbNdrjOV7ckerPaGkuMLiwmpq0iMIktRR7UhWuQFPfvw5
-	 rvNQrRuTYXlrA==
-Subject: Re: [PATCH net-next v4 05/10] NTB: ntb_transport: Exchange client
- capabilities at link-up
+	b=Fsh/tguDtDbwVNx5sHNJ6d+KllIVWkBdznKYEJPFssDkdnyU2wlpo/RAq1jpdf8oK
+	 9Bsvpoj8jVfWEVd/VKlDFCTk1dXYYkA/T5Y4u7am07YRhuMsHFGdCiy4PzXCgjjeEa
+	 G8C9h4lUJZUzR/ClcjiEKdlOxQntwtCM5ATBpKWqN+jM7GE1bD3yC8APX6BLSpMA8n
+	 p93DDjN7zDMrRNB9vGj4Mxo5T3Ma92jJSvAnC1m1OzuHCnUpnq9SnX9DoxAqziXUDA
+	 f+s+4AOwvG58K6s3SRIgwleNxVGFdBQRKLddmVj6m9p485ZSZ4RDMNjtA0EManAcqi
+	 bHqXyLjcV+ZSA==
+Subject: Re: [PATCH net-next v4 09/10] net: ntb_netdev: Introduce an optional
+ packet header, ntb_netdev_hdr
 From: netdev-bot+sashiko@kernel.org
 To: den@valinux.co.jp
 Cc: jdmason@kudzu.us, dave.jiang@intel.com, allenbh@gmail.com,
  andrew+netdev@lunn.ch, davem@davemloft.net, edumazet@google.com,
  kuba@kernel.org, pabeni@redhat.com, ntb@lists.linux.dev,
  netdev@vger.kernel.org, linux-kernel@vger.kernel.org
-Date: Thu, 17 Sep 2026 20:49:45 +0000
-Message-ID: <178967818546.22033.425184334690767326@kernel.org>
-In-Reply-To: <20260914084838.2158249-6-den@valinux.co.jp>
-References: <20260914084838.2158249-6-den@valinux.co.jp>
-X-sashiko-severity: Medium
+Date: Thu, 17 Sep 2026 20:49:46 +0000
+Message-ID: <178967818671.22033.983923987727607954@kernel.org>
+In-Reply-To: <20260914084838.2158249-10-den@valinux.co.jp>
+References: <20260914084838.2158249-10-den@valinux.co.jp>
+X-sashiko-severity: Low
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
@@ -51,301 +51,259 @@ MIME-Version: 1.0
 Thank you for your contribution! Sashiko AI review found 2 potential
 issue(s) to consider:
 
-Critical: 0 · High: 0 (1) · Medium: 2 (1) · Low: 0
+Critical: 0 · High: 0 (1) · Medium: 0 · Low: 2
 
-- [Medium] ntb_transport_link_down() withdraws the per-QP capability word
-  *before* it withdraws the QP readiness bit, which is the inverse of…
-- [Medium] ntb_transport_link_down() can be raced by a queued/running
-  ntb_qp_link_work() that re-publishes exactly what link_down just…
+- [Low] RX buffers are now posted with size = ndev->mtu + ETH_HLEN +
+  sizeof(struct ntb_netdev_hdr) (drivers/net/ntb_netdev.c:97 and :158),…
+- [Low] In ntb_netdev_rx_handler() the replacement-skb allocation
+  (drivers/net/ntb_netdev.c:183) is attempted before hdr->flags is…
 
 Pre-existing issues:
-- [High] ntb_transport_free_queue() never synchronously cancels
-  qp->link_cleanup, so that work — or the qp->link_work it re-arms — can…
-- [Medium] Store-buffering race between ntb_transport_link_up() and
-  ntb_transport_link_work() can leave qp->link_work permanently…
+- [High] RX completion handler re-posts an already-allocated skb using a
+  receive length recomputed from an unsynchronized read of ndev->mtu.
 
 --
 
-NTB: ntb_transport: Exchange client capabilities at link-up
+net: ntb_netdev: Introduce an optional packet header, ntb_netdev_hdr
 
-The patch adds an opaque 31-bit per-QP capability word that is exchanged
-through one spare scratchpad per QP during QP link setup, with bit 31 used
-as a validity marker.  The capability value is handed to the client with
-the link-up event, and ntb_transport_link_up() grows a local_caps argument
-which ntb_netdev passes as zero for now.
+This adds an optional 4-byte ntb_netdev_hdr in front of the packet, marked
+by a new client metadata bit, and accounts for it in the TX headroom, the
+MTU and the RX buffer sizes. The flags field must be zero for now, with
+checksum metadata coming in the next patch.
 
-A few questions below about the withdrawal ordering and about
-synchronization against ntb_qp_link_work().
+A few questions on the RX path below.
 
-> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-> index 0b47285ef48b6..ea89eb336472a 100644
-> --- a/drivers/ntb/ntb_transport.c
-> +++ b/drivers/ntb/ntb_transport.c
-
-[ ... ]
-
-> @@ -937,7 +942,7 @@ static void ntb_qp_link_cleanup(struct ntb_transport_qp *qp)
->  	ntb_qp_link_down_reset(qp);
+> diff --git a/drivers/net/ntb_netdev.c b/drivers/net/ntb_netdev.c
+> index cddfe8d63fc18..67cfe0f1a49a2 100644
+> --- a/drivers/net/ntb_netdev.c
+> +++ b/drivers/net/ntb_netdev.c
+> @@ -29,6 +29,14 @@ static unsigned int tx_stop = 5;
+>  #define NTB_NETDEV_MAX_QUEUES		64
+>  #define NTB_NETDEV_DEFAULT_QUEUES	1
 >  
->  	if (qp->event_handler)
-> -		qp->event_handler(qp->cb_data, qp->link_is_up);
-> +		qp->event_handler(qp->cb_data, qp->link_is_up, 0);
->  }
->  
->  static void ntb_qp_link_cleanup_work(struct work_struct *work)
-
-[Severity: High]
-
-This isn't a bug introduced by this patch, but while reading the
-qp->link_cleanup path: can this work item outlive the QP?
-
-ntb_qp_link_down(), called from ntb_process_rxc() on LINK_DOWN_FLAG in the
-rx tasklet, only queues it:
-
-static void ntb_qp_link_down(struct ntb_transport_qp *qp)
-{
-	schedule_work(&qp->link_cleanup);
-}
-
-ntb_transport_free_queue() then does tasklet_kill(&qp->rxc_db_work) and
-cancel_delayed_work_sync(&qp->link_work), but no
-cancel_work_sync(&qp->link_cleanup), and marks the QP free:
-
-	qp->transport->qp_bitmap_free |= qp_bit;
-
-A link_cleanup queued just before the tasklet was killed can then run
-ntb_qp_link_cleanup_work() after free_queue() returned and re-arm
-qp->link_work:
-
-	if (nt->link_is_up)
-		schedule_delayed_work(&qp->link_work,
-				      msecs_to_jiffies(NTB_LINK_DOWN_TIMEOUT));
-
-On transport teardown, ntb_transport_link_cleanup() only cancels per-QP
-work for QPs still marked allocated:
-
-	for (i = 0; i < nt->qp_count; i++)
-		if (qp_bitmap_alloc & BIT_ULL(i)) {
-			qp = &nt->qp_vec[i];
-			ntb_qp_link_cleanup(qp);
-			cancel_work_sync(&qp->link_cleanup);
-			cancel_delayed_work_sync(&qp->link_work);
-		}
-
-so the released QP is skipped, and ntb_transport_free() then does
-kfree(nt->qp_vec) with that work still pending.  Does this let the
-pending link_cleanup/link_work dereference freed memory (the work_struct
-list pointers, qp->transport, qp->ndev)?  Would adding
-cancel_work_sync(&qp->link_cleanup) to ntb_transport_free_queue() close
-this?
-
-> @@ -1141,10 +1146,19 @@ static void ntb_qp_link_work(struct work_struct *work)
->  						   link_work.work);
->  	struct pci_dev *pdev = qp->ndev->pdev;
->  	struct ntb_transport_ctx *nt = qp->transport;
-> +	u32 peer_caps = 0;
->  	int val;
->  
->  	WARN_ON(!nt->link_is_up);
->  
-> +	/* Pair with the release store in ntb_transport_link_up(). */
-> +	if (!smp_load_acquire(&qp->client_ready))
-> +		return;
+> +/* An ntb_netdev_hdr precedes the packet. */
+> +#define NTB_NETDEV_META_HDR		BIT(0)
 > +
-> +	/* Publish capabilities before QP readiness. */
-> +	if (qp->caps_spad)
-> +		ntb_peer_spad_write(nt->ndev, PIDX, qp->caps_spad,
-> +				    READ_ONCE(qp->local_caps) | QP_CAPS_VALID);
->  	val = ntb_spad_read(nt->ndev, QP_LINKS);
->  
->  	ntb_qp_up_request(qp, true);
-> @@ -1154,12 +1168,26 @@ static void ntb_qp_link_work(struct work_struct *work)
->  
->  	/* See if the remote side is up */
->  	if (val & BIT(qp->qp_num)) {
-> +		if (qp->caps_spad) {
-> +			u32 caps;
+> +struct ntb_netdev_hdr {
+> +	__le16 len;		/* Header length in bytes, a multiple of 2. */
+> +	__le16 flags;
+> +};
 > +
-> +			/*
-> +			 * Order the readiness read before the capability read
-> +			 * for memory-backed SPADs.
-> +			 */
-> +			dma_rmb();
-> +			caps = ntb_spad_read(nt->ndev, qp->caps_spad);
-> +
-> +			if (caps & QP_CAPS_VALID)
-> +				peer_caps = caps & ~QP_CAPS_VALID;
-> +		}
-> +
->  		dev_info(&pdev->dev, "qp %d: Link Up\n", qp->qp_num);
->  		qp->link_is_up = true;
->  		qp->active = true;
+>  struct ntb_netdev;
 >  
->  		if (qp->event_handler)
-> -			qp->event_handler(qp->cb_data, qp->link_is_up);
-> +			qp->event_handler(qp->cb_data, qp->link_is_up, peer_caps);
->  
->  		if (qp->active)
->  			tasklet_schedule(&qp->rxc_db_work);
-
-[ ... ]
-
-> @@ -2409,15 +2443,22 @@ EXPORT_SYMBOL_GPL(ntb_transport_tx_enqueue);
->  /**
->   * ntb_transport_link_up - Notify NTB transport of client readiness to use queue
->   * @qp: NTB transport layer queue to be enabled
-> + * @local_caps: Opaque client capabilities in bits 0..30, unchanged until
-> + *              ntb_transport_link_down()
->   *
->   * Notify NTB transport layer of client readiness to use queue
-> + *
-> + * Exchange capabilities before reporting link-up through event_handler.
-> + * Report zero peer capabilities for legacy peers or insufficient scratchpads.
->   */
-> -void ntb_transport_link_up(struct ntb_transport_qp *qp)
-> +void ntb_transport_link_up(struct ntb_transport_qp *qp, u32 local_caps)
+>  struct ntb_netdev_queue {
+> @@ -83,15 +91,16 @@ static int ntb_netdev_queue_rx_fill(struct net_device *ndev,
+>  				    struct ntb_netdev_queue *queue)
 >  {
->  	if (!qp)
+>  	struct sk_buff *skb;
+> +	unsigned int size;
+>  	int rc, i;
+>  
+> +	size = ndev->mtu + ETH_HLEN + sizeof(struct ntb_netdev_hdr);
+>  	for (i = 0; i < NTB_RXQ_SIZE; i++) {
+> -		skb = netdev_alloc_skb(ndev, ndev->mtu + ETH_HLEN);
+> +		skb = netdev_alloc_skb(ndev, size);
+>  		if (!skb)
+>  			return -ENOMEM;
+>  
+> -		rc = ntb_transport_rx_enqueue(queue->qp, skb, skb->data,
+> -					      ndev->mtu + ETH_HLEN);
+> +		rc = ntb_transport_rx_enqueue(queue->qp, skb, skb->data, size);
+>  		if (rc) {
+>  			dev_kfree_skb(skb);
+>  			return rc;
+> @@ -137,34 +146,57 @@ static void ntb_netdev_rx_stats_add(struct net_device *ndev,
+>  static void ntb_netdev_rx_handler(struct ntb_transport_qp *qp, void *qp_data,
+>  				  void *data, int len, unsigned int meta)
+>  {
+> +	const struct ntb_netdev_hdr *hdr = NULL;
+>  	struct ntb_netdev_queue *q = qp_data;
+>  	struct ntb_netdev *dev = q->ntdev;
+> +	unsigned int size, hdr_len = 0;
+>  	struct sk_buff *skb, *new_skb;
+>  	struct net_device *ndev;
+>  	int rc;
+>  
+>  	ndev = dev->ndev;
+> +	size = ndev->mtu + ETH_HLEN + sizeof(*hdr);
+>  	skb = data;
+>  	if (!skb)
 >  		return;
 >  
-> -	qp->client_ready = true;
-> +	WRITE_ONCE(qp->local_caps, local_caps & ~QP_CAPS_VALID);
-> +	/* Publish local_caps before QP link work sees client_ready. */
-> +	smp_store_release(&qp->client_ready, true);
+>  	netdev_dbg(ndev, "%s: %d byte payload received\n", __func__, len);
 >  
->  	if (qp->transport->link_is_up)
->  		schedule_delayed_work(&qp->link_work, 0);
+> +	/* Validate the frame and optional header lengths. */
+>  	if (len < ETH_HLEN) {
+>  		DEV_STATS_INC(ndev, rx_errors);
+>  		DEV_STATS_INC(ndev, rx_length_errors);
+>  		goto enqueue_again;
+>  	}
+> +	if (meta & NTB_NETDEV_META_HDR) {
+> +		hdr = (void *)skb->data;
+> +		hdr_len = le16_to_cpu(hdr->len);
+> +		if (hdr_len < sizeof(*hdr) || !IS_ALIGNED(hdr_len, 2) ||
+> +		    hdr_len > len - ETH_HLEN) {
+> +			DEV_STATS_INC(ndev, rx_errors);
+> +			DEV_STATS_INC(ndev, rx_length_errors);
+> +			goto enqueue_again;
+> +		}
+> +		len -= hdr_len;
+> +	}
 
-[Severity: Medium]
+[Severity: Low]
+Now that ntb_netdev_queue_rx_fill() and ntb_netdev_rx_handler() post
+buffers of ndev->mtu + ETH_HLEN + sizeof(struct ntb_netdev_hdr), and the
+only length gate in ntb_netdev_rx_handler() is the len < ETH_HLEN test,
+what rejects an over-MTU frame when the peer does not set
+NTB_NETDEV_META_HDR?
 
-This is a pre-existing issue, but since the ordering on these exact lines
-is now being reasoned about: can qp->link_work end up never being
-scheduled?
+Before this change the posted buffer was exactly mtu + ETH_HLEN, so
+ntb_process_rxc() dropped such a frame:
 
-Here the store to client_ready is followed by a load of
-qp->transport->link_is_up, and ntb_transport_link_work() has the mirrored
-order:
+	if (len > entry->len) {
 
-	nt->link_is_up = true;
+and the driver counted rx_length_errors. With the extra reservation, a
+frame of up to mtu + ETH_HLEN + sizeof(struct ntb_netdev_hdr) now fits the
+buffer, so it is skb_put() and handed to netif_rx() as a good packet, i.e.
+4 bytes over the configured MTU here and 8 bytes by the end of the series.
+The len -= hdr_len subtraction that would re-bound the payload never runs
+in that case.
 
-	for (i = 0; i < nt->qp_count; i++) {
-		...
-		if (qp->client_ready)
-			schedule_delayed_work(&qp->link_work, 0);
+The two sides of the link are configured independently, so a peer with a
+larger MTU reaches this. Still present at the end of the series
+(a68dfbeaf017).
+
+>  
+> -	ntb_netdev_rx_stats_add(ndev, len);
+> -
+> -	new_skb = netdev_alloc_skb(ndev, ndev->mtu + ETH_HLEN);
+> +	new_skb = netdev_alloc_skb(ndev, size);
+>  	if (!new_skb) {
+> +		ntb_netdev_rx_stats_add(ndev, len);
+>  		DEV_STATS_INC(ndev, rx_dropped);
+>  		goto enqueue_again;
+>  	}
+
+[Severity: Low]
+The replacement skb is allocated before hdr->flags is checked. When
+netdev_alloc_skb() fails, is a frame carrying a non-zero flags value
+counted as a successfully received packet?
+
+This path calls ntb_netdev_rx_stats_add(ndev, len) plus rx_dropped and goes
+straight to enqueue_again, skipping the validation added just below:
+
+	if (hdr) {
+		u16 flags = le16_to_cpu(hdr->flags);
+
+		skb_pull(skb, hdr_len);
+		if (flags)
+			goto rx_drop;
 	}
 
-Both sides are store-then-load with no full barrier and no common lock
-(nt->link_work holds nt->link_event_lock, which ntb_transport_link_up()
-does not take), so both loads can return the stale value: the client sees
-the transport link down and does not schedule, the transport worker sees
-client_ready as false and does not schedule either.
-ntb_transport_link_work() does not reschedule itself on that path, so the
-QP stays down until an unrelated NTB link event.
+So whether a malformed frame ends up in rx_errors depends on whether the
+atomic allocation happened to succeed. Would moving the flags check ahead
+of the allocation keep the classification consistent? The same ordering
+also bypasses the checksum metadata validation added later in the series
+(a68dfbeaf017).
 
-The smp_store_release() added here only orders the local_caps store ahead
-of the client_ready store and gives no store-to-load ordering.  Would an
-smp_mb() on both sides, or taking a common lock around the flag and the
-link_is_up test, be needed to close this?
-
-> @@ -2439,12 +2480,17 @@ void ntb_transport_link_down(struct ntb_transport_qp *qp)
 >  
->  	qp->client_ready = false;
->  
-> +	if (!qp->link_is_up)
-> +		cancel_delayed_work_sync(&qp->link_work);
+> -	skb_put(skb, len);
+> +	skb_put(skb, len + hdr_len);
+> +	if (hdr) {
+> +		u16 flags = le16_to_cpu(hdr->flags);
 > +
-> +	/* Stop advertising capabilities before withdrawing QP readiness. */
-> +	if (qp->caps_spad)
-> +		ntb_peer_spad_write(qp->ndev, PIDX, qp->caps_spad, 0);
+> +		skb_pull(skb, hdr_len);
+> +		if (flags)
+> +			goto rx_drop;
+> +	}
 > +
->  	ntb_qp_up_request(qp, false);
+> +	ntb_netdev_rx_stats_add(ndev, len);
+>  	skb->protocol = eth_type_trans(skb, ndev);
+>  	skb->ip_summed = CHECKSUM_NONE;
+>  	skb_record_rx_queue(skb, q->qid);
+> @@ -174,12 +206,19 @@ static void ntb_netdev_rx_handler(struct ntb_transport_qp *qp, void *qp_data,
+>  	skb = new_skb;
 >  
->  	if (qp->link_is_up)
->  		ntb_send_link_down(qp);
-> -	else
-> -		cancel_delayed_work_sync(&qp->link_work);
+>  enqueue_again:
+> -	rc = ntb_transport_rx_enqueue(qp, skb, skb->data, ndev->mtu + ETH_HLEN);
+> +	rc = ntb_transport_rx_enqueue(qp, skb, skb->data, size);
+>  	if (rc) {
+>  		dev_kfree_skb_any(skb);
+>  		DEV_STATS_INC(ndev, rx_errors);
+>  		DEV_STATS_INC(ndev, rx_fifo_errors);
+>  	}
+> +	return;
+> +
+> +rx_drop:
+> +	DEV_STATS_INC(ndev, rx_errors);
+> +	dev_kfree_skb_any(skb);
+> +	skb = new_skb;
+> +	goto enqueue_again;
 >  }
->  EXPORT_SYMBOL_GPL(ntb_transport_link_down);
 
-[Severity: Medium]
+[Severity: High]
+This isn't a bug introduced by this patch, since the baseline already
+re-posted the original skb with a length derived from ndev->mtu, but the
+patch touches these lines and adds new peer-triggerable ways to reach
+enqueue_again with the original buffer (bad hdr_len, and the flags path).
 
-Is this the safe withdrawal order?  The up path in ntb_qp_link_work()
-establishes "readiness implies a valid capability word" by writing the
-capability word first and the QP_LINKS bit second, while here the
-capability word is cleared before the readiness bit.
+Can the size computed at the top of ntb_netdev_rx_handler():
 
-If the peer's ntb_qp_link_work() polls in that window:
+	size = ndev->mtu + ETH_HLEN + sizeof(*hdr);
 
-peer ntb_qp_link_work()
-	val = ntb_spad_read(nt->ndev, QP_LINKS);	/* our bit still set */
-	...
-	if (val & BIT(qp->qp_num)) {
-		caps = ntb_spad_read(nt->ndev, qp->caps_spad);	/* already 0 */
-		if (caps & QP_CAPS_VALID)			/* false */
-			peer_caps = caps & ~QP_CAPS_VALID;
-		...
-		qp->link_is_up = true;
-		qp->event_handler(qp->cb_data, qp->link_is_up, peer_caps);
+describe a buffer larger than the skb actually being re-posted here?
 
-the peer latches peer_caps as zero, sets qp->link_is_up and stops
-rescheduling qp->link_work, so it never re-reads the capability slot and a
-later re-advertisement is not observed.
+ntb_netdev_change_mtu() drains only rx_pend_q through
+ntb_transport_rx_remove():
 
-In the common case where our qp->link_is_up was still false (we advertised
-but the peer had not become ready yet), ntb_send_link_down() is not called
-either, so nothing knocks the peer out of that state and peer_caps stays
-zero for the rest of the session.
+	entry = ntb_list_rm(&qp->ntb_rx_q_lock, &qp->rx_pend_q);
 
-Would clearing readiness first and zeroing the capability word afterwards
-avoid this, since the peer would then just retry?  The comment and the
-commit message text "Write capabilities to the peer before advertising QP
-readiness" plus "Withdraw advertisements on link-down" read as if the
-withdrawal order here were the safe one.
+while an entry whose copy is already in progress has been moved to
+rx_post_q by ntb_process_rxc(), and ntb_complete_rxc() drops the RX queue
+lock before invoking the client callback:
 
-[Severity: Medium]
+	spin_unlock_irqrestore(&qp->ntb_rx_q_lock, irqflags);
 
-Two questions about the synchronization against ntb_qp_link_work() in this
-function.
+	if (qp->rx_handler && qp->client_ready)
+		qp->rx_handler(qp, qp->cb_data, cb_data, len, meta);
 
-The cancel now runs only when qp->link_is_up is false, but link_work can
-be queued while qp->link_is_up is already true.  ntb_transport_link_work()
-has no "already up" test:
+So after an MTU increase, a handler still holding an skb allocated for the
+old, smaller MTU reads the new, larger ndev->mtu into size, and on any
+enqueue_again path re-posts that small buffer while declaring the new
+capacity. The transport bounds the next incoming frame only against the
+declared entry->len in ntb_process_rxc():
 
-	nt->link_is_up = true;
+	if (len > entry->len) {
 
-	for (i = 0; i < nt->qp_count; i++) {
-		...
-		if (qp->client_ready)
-			schedule_delayed_work(&qp->link_work, 0);
-	}
+Can a following frame then be copied past the end of that undersized skb,
+and can skb_put(skb, len + hdr_len) in the handler push skb->tail beyond
+skb->end?
 
-and ntb_qp_link_cleanup_work() re-arms it too.  Can that worker then undo
-what this function just did?
+The mirror case, an MTU decrease, declares a smaller length than the
+buffer really provides and just drops otherwise valid frames.
 
-CPU0 ntb_transport_link_down()
-	qp->client_ready = false;		/* plain store */
-	/* cancel skipped: qp->link_is_up == true */
-	ntb_peer_spad_write(qp->ndev, PIDX, qp->caps_spad, 0);
-	ntb_qp_up_request(qp, false);
+Would it be better to take the re-post length from the skb itself
+(skb_tailroom(), or a length recorded when the buffer was allocated) and
+serialize the resize against RX callbacks? A plain READ_ONCE() of
+ndev->mtu would not close this. Still present at the end of the series
+(a68dfbeaf017).
 
-CPU1 ntb_qp_link_work()		/* already past its client_ready check */
-	ntb_peer_spad_write(nt->ndev, PIDX, qp->caps_spad,
-			    READ_ONCE(qp->local_caps) | QP_CAPS_VALID);
-	...
-	ntb_qp_up_request(qp, true);
-	...
-	qp->link_is_up = true;
-	qp->event_handler(qp->cb_data, qp->link_is_up, peer_caps);
+> diff --git a/drivers/net/ntb_netdev.c b/drivers/net/ntb_netdev.c
+> @@ -390,9 +429,11 @@ static int ntb_netdev_change_mtu(struct net_device *ndev, int new_mtu)
+>  	struct ntb_netdev_queue *queue;
+>  	struct sk_buff *skb;
+>  	unsigned int q, i;
+> +	unsigned int size;
+>  	int len, rc = 0;
+>  
+> -	if (new_mtu > ntb_transport_max_size(dev->queues[0].qp) - ETH_HLEN)
+> +	size = new_mtu + ETH_HLEN + sizeof(struct ntb_netdev_hdr);
+> +	if (size > ntb_transport_max_size(dev->queues[0].qp))
+>  		return -EINVAL;
+>  
+>  	if (!netif_running(ndev)) {
 
-After ntb_transport_link_down() returns, the peer would still see a ready
-QP with a valid capability word, and the client receives a link-up event
-after having asked for link-down (in ntb_netdev that re-wakes the subqueue
-in the middle of an MTU change).
-
-Second, qp->client_ready is cleared here with a plain store while
-ntb_qp_link_work() now reads it with smp_load_acquire().  Should the clear
-be a WRITE_ONCE() or smp_store_release() so the two accesses are paired,
-and should the cancel be unconditional?
+[ ... ]
 
 -- 
 Sashiko AI review · https://netdev-ai.bots.linux.dev/sashiko/#/patchset/20260914084838.2158249-1-den%40valinux.co.jp
