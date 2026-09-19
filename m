@@ -1,65 +1,65 @@
-Received: from mail-pj2-f43.google.com (mail-pj2-f43.google.com [74.125.227.171])
+Received: from mail-pj2-f12.google.com (mail-pj2-f12.google.com [74.125.227.140])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B50373537C7
-	for <ntb@lists.linux.dev>; Sat, 19 Sep 2026 01:10:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.227.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 183D635C1A0
+	for <ntb@lists.linux.dev>; Sat, 19 Sep 2026 01:14:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.227.140
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789780246; cv=none; b=bCvnKGpJQJFv5d7Kj3PfHTXbJVCk81kRlKc0gGz/PdgoQDqNZ9CdAZ/DLVYw5p4pbjcPwAk2l7oU9jZWYRfHm+0mf4VjjdsAZOw8QzLPiB+JSrvIZKBJ6zTbOdF0k9h+2L9c6yrboNzQoRVxdK5auB027hsi6MkrcsHvWn7o+2s=
+	t=1789780494; cv=none; b=TrfUJstcilzjh9PdBYJA0KJuk/ybaEHkJe9C0sWXSgoOu03FAQxRw+vXsKeP8REUYpd2RuR79yP4L2nchCiqpbEI61Bp7BK41rILEOe5zn6Peuut5eQS39cA701un/SjEpKo9ewy7ydEYbotrfLLsHFlsbusFhKvUg2dNbCvVCA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789780246; c=relaxed/simple;
-	bh=PD17Y3XeERkph6rr6sHZAKy4DsdPrdxQEx/QDmuRqzo=;
+	s=arc-20240116; t=1789780494; c=relaxed/simple;
+	bh=tVD6I32X9o09LnLSiCTDoJRb9N9XzkPtf1rrJepbfPs=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=TLoSed2GwcHMGYq4lI26Hyf6qtX7DmYIAPKjKBxelpH1IaqAL+XVsT3HebUYwj2feRGzAgxaJCLfFtz8ZVNelkpZu1IZPGGhS8FcOFz9bpxFTyzDV1gj2qj8exiWxDLhXdEF2mJPpc08MGJ6KVOzcGBXYWp/QTqgkCAuw5URoEs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dama.to; spf=none smtp.mailfrom=dama.to; dkim=pass (2048-bit key) header.d=dama-to.20251104.gappssmtp.com header.i=@dama-to.20251104.gappssmtp.com header.b=ul/JGRnu; arc=none smtp.client-ip=74.125.227.171
+	 Content-Type:Content-Disposition:In-Reply-To; b=mDFDNuuo6wp1b6PjfDZFlEw7zkOCxUwBwLseWP9OIwg0ue2ixLYvaaqJ7sMEUIIdXYpqZKzNVoQ9+w2H4PwsZiUicz//kATi/NSm8luC4/M79wm47O9k/2yNjrTs79N8OObPPOBaGHtzxfRHJqOj0kKtwK4TUuPQjbQn3N6L8aU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dama.to; spf=none smtp.mailfrom=dama.to; dkim=pass (2048-bit key) header.d=dama-to.20251104.gappssmtp.com header.i=@dama-to.20251104.gappssmtp.com header.b=pmiwLbGz; arc=none smtp.client-ip=74.125.227.140
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=dama.to
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=dama.to
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dama-to.20251104.gappssmtp.com header.i=@dama-to.20251104.gappssmtp.com header.b="ul/JGRnu"
-Received: by mail-pj2-f43.google.com with SMTP id d9443c01a7336-2d747ec6188so8613435ad.3
-        for <ntb@lists.linux.dev>; Fri, 18 Sep 2026 18:10:42 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dama-to.20251104.gappssmtp.com header.i=@dama-to.20251104.gappssmtp.com header.b="pmiwLbGz"
+Received: by mail-pj2-f12.google.com with SMTP id 98e67ed59e1d1-39b9184fa80so1323273a91.2
+        for <ntb@lists.linux.dev>; Fri, 18 Sep 2026 18:14:43 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dama-to.20251104.gappssmtp.com; s=20251104; t=1789780241; x=1790385041; darn=lists.linux.dev;
+        d=dama-to.20251104.gappssmtp.com; s=20251104; t=1789780477; x=1790385277; darn=lists.linux.dev;
         h=in-reply-to:content-disposition:content-type:mime-version
          :references:mail-followup-to:message-id:subject:cc:to:from:date:from
          :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=a49yaJ/GGjwIg6ibC7aTwVaBRLcdBDhKbI1sakT8d8k=;
-        b=ul/JGRnuQOkfqRBOKBIFxNEQTngUO0pMyN042YZfFZcplChZa/tgnx/A0U1exyEGZR
-         sqywCW4OAsJ2iRz1MmNYyQjExXgg1nbHATOwl0ZicyrOefshyfwG7oEfg888RB/eDcRe
-         jxJEUeXlApmBsYEbpo0I4zb2Am8heR7jNcgcYQCd62gsXf50wevJNKXAOb3hYJXP4R2R
-         6RkOjIw3e7DmqcjOJ98V2GnfV1Z5CmzBqdQfOpfwn+OrD9vIHsj8aX0Wqh/bExDo9HNd
-         Pi7bdht0K6SLiM5hMSFvPMgW5TYTpnWVJrMqBwCeqOr2z0D+Pz9jNS65uEUDrRroLIvq
-         jCZQ==
+        bh=ICHHulJUCBRD5f9GaFqjX1G74LjOBZZCUQAyH59jdAQ=;
+        b=pmiwLbGz0EivcoZRx2qhBS7T8G8pG4bINUy3qXb+VyJ1DkzWEuaLqaF7AFS6nzZQco
+         Dxlyb5jBdgTeP4TPooNWAH1FcNBb978LrUr4SnQ0l37lz1oG3vYl5y0m1F5JqEyVq93K
+         3YeakuW8WwAWDpUKbs35xDQnHWFXMoxbfqjWJq1fICcvyZfqkYwnGNmWUqYkXeJ1trwo
+         v9kyQ0fVBvsLvNjfrbplLxEWhDANj/i5wr3k7KjdwuqIy8OXgSlYTOsaeoEv3lrbtHRZ
+         gkHf9LGBGTuKsrwSmSDNLs+8g49xMFEaqWCCAlkeMu+AR++Zap5yINssznBWa22teCAe
+         Z2PQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1789780241; x=1790385041;
+        d=1e100.net; s=20260707; t=1789780477; x=1790385277;
         h=in-reply-to:content-disposition:content-type:mime-version
          :references:mail-followup-to:message-id:subject:cc:to:from:date
          :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to:content-type;
-        bh=a49yaJ/GGjwIg6ibC7aTwVaBRLcdBDhKbI1sakT8d8k=;
-        b=aPm1UIWw3mAl6Kjm6lPXPjluRhCtIeO9sYRDRCSwYT+ht/LJsWzbAvQ5NsMXHGEiHJ
-         PoIyPOhYvzETK4VEkUBCmTOBLFOQEz6n4ToufLzn9SFKu74OrX94IlT7sWMgXFvVQRyB
-         i/CEqUBLKexTs4Ob7ymdQ4yVsdZlABtVe63lKQ4cgW9N6ivP/Zod/8zTV+zPL90tWHsj
-         B1vJWW+Gb1lpEONRJoF7fzDJQFk2txy1dQwpjQGUGbHt8OJ/n7VCSxG/auTfKQ+7sTwR
-         co8eNKRU3AFjFK/iauKEkCHcSuXrWRdn9TucDo9zVvuYdem+39Utweg27csDzpq2Pztn
-         SwXw==
-X-Forwarded-Encrypted: i=1; AKwUvByvhLsl6N+PqIfSvhY0qAV+veoKYpLULZnFolIbUWHXLyptPGejsxJdc/FJPWPCVWJ2KEY=@lists.linux.dev
-X-Gm-Message-State: AFuF++lzKFbFNcsmdJXllF9Hou7sEom1z2f7AmmMkiapdNqOhH0muOPs
-	dw7L61r3rU1kHHe3yul7EReUtibOUNH8Gq55lfKI62Y605tzze0jd4mvDRlxZ/1dnXY=
-X-Gm-Gg: AYBFou2Q6+wHm8QGPlepf8Fdsx92dnf+OZ+Vpz5JoNsKWnC5qV8cHc7Nc9ua4I53+t2
-	ziUpqzh9LTwc9txGT0iCRBWV+fR8caQ/CFPlCURRIbvRT4BHyIrGJu2d8klyw5w5UqzTDIGPQiR
-	P65YUYeFCj+6ir1l2EjBPudlPKpx8BvTputibNUIp7gyBL0Zd2mpVdIXLbYehF26BEHwqyUrYY+
-	QF4O5XVYVAPspxr03O4jWVilj090zLChOjiwN8tM7BOUY9Ik2ViGzqn/J8CFNLe7nAfqDQcJybs
-	CvpMkJNq0Z+60mYXEXfFeugms0EPXc9BbPtPdWQjhtVHYDm8BXfz94B2xIyyIX7sQccuq+gGL4N
-	tKpxFNIHNSap5J/ePe+VI26UoOgGDU5Y7LYCJKQT7heOQ4RrJCCk5oEOoDjUHr47kK+m6yiSdMK
-	G3wP8R+LBxtMOzmOq+VzA0+T9B1pDTNnVm+Jh3yCgORgeu+wTPc6r2
-X-Received: by 2002:a17:90b:57d0:b0:39e:6c69:f470 with SMTP id 98e67ed59e1d1-39e6c69f4d2mr1917003a91.47.1789780240973;
-        Fri, 18 Sep 2026 18:10:40 -0700 (PDT)
-Received: from localhost ([2a03:2880:2ff:40::])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-39e6c6dd585sm1680612a91.0.2026.09.18.18.10.40
+        bh=ICHHulJUCBRD5f9GaFqjX1G74LjOBZZCUQAyH59jdAQ=;
+        b=mrDO+Jh7inRTrbn+O9r6gLwOjxSh8TYElOgFcPWGQYZwzMqvdLYROsiGSzHeWt+R18
+         pHDoWPpSeVY8ZNMM2RzpHw+lU4EiHO60DiXbdKwhoYZ7T67t+v2/u1p7dpOHojO7V+sy
+         xO+XeX4b0eGfwOqa9XyghplZ4+DFq4t8zKa2hgNKPqVRAYiGAEGbSk/9OMUEUPKwicRg
+         rZYsD8hHvrLtXZKUNdamlS0beCkq55CRs/l6hC1vO8G8IsCGGnQY1lyxOiUSrxKxVJGe
+         V1n4/a13yrrxCy1ihS3gWIqd+WZ2rgebvRfqmV97a8ZoK3++QCTx9RdD/j53KPqOW9m8
+         2bLQ==
+X-Forwarded-Encrypted: i=1; AKwUvBzlunD8Bs7xZDW9ZFMJOqhLJhI1Iea9/Ol0QgGx2s88NY9iG9YfAr2VaupddqMZ5PQwlKU=@lists.linux.dev
+X-Gm-Message-State: AFuF++lrZBjpFHZwUsyYEVD7IGKC92qCTxM2R0CNV2qgHuMtC/sI3yPA
+	Tw23sLS11bgluqqD60Xl95G3qQTVuyyOuoEeGF+q3VheM0wJ+AMMRyDamup/zTwL9Bg=
+X-Gm-Gg: AYBFou1BNjzL5m7EZlDYpK0nn6mui+iUsyu23eSv0+F5oNRPgG56qVGTuQNPoYhn0O9
+	51NuaJY9YNhEVaWXx3D1lql9EiOFbvD9m/OvZZG92YkI14ET56881u2U8d5YlUIaUo/5v0H++Nj
+	En5RLkySZ2XI3GErK//TtirM48xKFmBegCO4JwZoTVZ/4eKnig2eJ7vZNP6qlGO+nzHuoOV63vw
+	3YIk91BC2AXVyfR5+7gnd+/+vhwE6XWbwruZQLTKxb/QNVPRWY80qgDkBUcX9kAMufEw6NG9cCO
+	mDqHqfBaF+WwUgE4w/YS9nByXjOdOlz0jQI632dVRHFuA8z20xYikjgDkwLf/E89pPxmLIxf3IH
+	U/oyiaUPQgkkimUrdThFehMZSM8uibN9JdW8rqh+mfx9OwmHJ8w+GP+NxcCcDKlhpVLs+NDDIRu
+	2wr1EAA0i/2h5cv8d2h+s6MyTahjLojZxSCFYZ/9UD9LtAt9FkONA+
+X-Received: by 2002:a17:90b:2dc3:b0:39d:e9b6:cec9 with SMTP id 98e67ed59e1d1-39e54d36756mr14388646a91.7.1789780476843;
+        Fri, 18 Sep 2026 18:14:36 -0700 (PDT)
+Received: from localhost ([2a03:2880:2ff:58::])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-39e55f124d5sm2722789a91.4.2026.09.18.18.14.34
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 18 Sep 2026 18:10:40 -0700 (PDT)
-Date: Fri, 18 Sep 2026 18:10:39 -0700
+        Fri, 18 Sep 2026 18:14:36 -0700 (PDT)
+Date: Fri, 18 Sep 2026 18:14:34 -0700
 From: Joe Damato <joe@dama.to>
 To: Koichiro Den <den@valinux.co.jp>
 Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>,
@@ -70,9 +70,8 @@ Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>,
 	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
 	ntb@lists.linux.dev, netdev@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH net-next v4 03/10] NTB: ntb_transport: Order RX entry
- completion
-Message-ID: <aq3hD4D+VfMUd7vq@devvm20253.cco0.facebook.com>
+Subject: Re: [PATCH net-next v4 07/10] net: ntb_netdev: Reject short RX frames
+Message-ID: <aq3h+iaPkvy7n4Wg@devvm20253.cco0.facebook.com>
 Mail-Followup-To: Joe Damato <joe@dama.to>,
 	Koichiro Den <den@valinux.co.jp>, Jon Mason <jdmason@kudzu.us>,
 	Dave Jiang <dave.jiang@intel.com>, Allen Hubbe <allenbh@gmail.com>,
@@ -83,7 +82,7 @@ Mail-Followup-To: Joe Damato <joe@dama.to>,
 	ntb@lists.linux.dev, netdev@vger.kernel.org,
 	linux-kernel@vger.kernel.org
 References: <20260914084838.2158249-1-den@valinux.co.jp>
- <20260914084838.2158249-4-den@valinux.co.jp>
+ <20260914084838.2158249-8-den@valinux.co.jp>
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -92,54 +91,23 @@ List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260914084838.2158249-4-den@valinux.co.jp>
+In-Reply-To: <20260914084838.2158249-8-den@valinux.co.jp>
 
-On Mon, Sep 14, 2026 at 05:48:31PM +0900, Koichiro Den wrote:
-> RX entries are added to rx_post_q before their fields are filled in.
-> The overflow path sets DONE without a write barrier, and
-> ntb_complete_rxc() has no read barrier after checking DONE. A concurrent
-> completion can therefore consume stale entry fields.
+On Mon, Sep 14, 2026 at 05:48:35PM +0900, Koichiro Den wrote:
+> ntb_netdev passes RX frames shorter than ETH_HLEN to eth_type_trans(),
+> which expects a complete Ethernet header.
 > 
-> Publish DONE with release ordering and check it with acquire ordering in
-> ntb_complete_rxc(). Use the same publication rule in the copy callback.
+> Reject them as length errors.
 > 
-> Fixes: da2e5ae56164 ("NTB: Fix ntb_transport out-of-order RX update")
-> Cc: stable@vger.kernel.org
-> Reported-by: Sashiko <sashiko-bot@kernel.org>
-> Link: https://netdev-ai.bots.linux.dev/sashiko/#/patchset/20260904052134.2970111-1-den%40valinux.co.jp?part=3
+> Fixes: 548c237c0a99 ("net: Add support for NTB virtual ethernet device")
 > Signed-off-by: Koichiro Den <den@valinux.co.jp>
 > ---
 > Changes in v4:
->   - New patch (Sashiko)
+>   - New patch. Included here to fix the existing RX length check before
+>     adding checks for ntb_netdev_hdr later in the series.
 > 
->  drivers/ntb/ntb_transport.c | 9 ++++++---
->  1 file changed, 6 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-> index 3f497a62673f..b69e8ac8047d 100644
-> --- a/drivers/ntb/ntb_transport.c
-> +++ b/drivers/ntb/ntb_transport.c
+>  drivers/net/ntb_netdev.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
 
-[...]
-
-> -	entry->flags |= DESC_DONE_FLAG;
-> +	/* Pair with the acquire load in ntb_complete_rxc(). */
-> +	smp_store_release(&entry->flags, entry->flags | DESC_DONE_FLAG);
-                                          ^^^^^^^^^^^
-
-
->  
->  	ntb_complete_rxc(entry->qp);
->  }
-> @@ -1664,7 +1666,8 @@ static int ntb_process_rxc(struct ntb_transport_qp *qp)
->  		qp->rx_err_oflow++;
->  
->  		entry->len = -EIO;
-> -		entry->flags |= DESC_DONE_FLAG;
-> +		/* Pair with the acquire load in ntb_complete_rxc(). */
-> +		smp_store_release(&entry->flags, entry->flags | DESC_DONE_FLAG);
-                                                 ^^^^^^^^^^^^
-
-are these two smp_store_release lines right? i am asking because it looks like
-they do a load ? i honestly have no idea if there is a race here but it looks
-sus to me
+Reviewed-by: Joe Damato <joe@dama.to>
