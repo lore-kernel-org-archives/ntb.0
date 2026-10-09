@@ -1,58 +1,63 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 489353DA7E3;
-	Fri,  9 Oct 2026 05:01:42 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 75D2E1C84DC;
+	Fri,  9 Oct 2026 05:03:24 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791522103; cv=none; b=WIFPcyEQpTtCNEvM+o5HzbZSP1W5GsRUy6D2ICYcsbHO+wRzV7HoVEagC728mEDDOd+i8rbG0aL3oH7Xm6TcRqdD0VnpEmJ8vcAfbdSDxFPVTA9/1asZAX97M+dF7hTkH8CKobYwn9lHkbG68axpjvCLuE9nOWCvxUFd97QO+OQ=
+	t=1791522205; cv=none; b=DmEHKYOpxsOnTThhMefn7Jbm5ftaHVnHeiS5hwH0nRF2J/DWdv9DArvuxezKGKiZf1gYQt7RQqcjWvUTjw/MRiA/WrBmWC++tgTu/7jZLz83s7Zh01kkWBV5UATRr1TSGfRBucrxEjvnGMpDpPwx1A/sknE2+yzE7PTLpkF4iTc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791522103; c=relaxed/simple;
-	bh=qDR18W/67HY/2iWirn3jnaIQnUfp8Mzb0wsaVwWsE2c=;
+	s=arc-20240116; t=1791522205; c=relaxed/simple;
+	bh=N7jGmzWNicgquS70Odu1ng8pPs2eUPAzmHI1qdFo5jU=;
 	h=Message-ID:From:Subject:To:Cc:In-Reply-To:References:Content-Type:
-	 Date; b=AKAVhBWvsu8ld4PROQjdTINk0a4YTt/f/Y61TRtcI2oXgzGF7vluIIR08F+zmsNPpX+j9R2s+0LjHdoKXCulVZl4JAHeKLXQFFPpVnhbSPrX1TsA/dWhzc7h7mCuioLvFOy+cs/Z5O1gdxf/QTDN5wDU3PnmoQzqqAKWlKT2Ov0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ImVqtgF8; arc=none smtp.client-ip=100.103.45.18
+	 Date; b=q6heSYhes8BrTyGnH8IMUAxvVgNZzUiPLzlLRU+YnsnkJBF9zHaoalO6l1m4LHWhg6//T3mQluJg/vlgtsEel2aJEs3Kg/nt+nRlgHCDVVEww110li641V5Ij0fSZ7DYbuFv0NGTvW4HGKCt6GStOR09EshbnKn44np5o5PibXE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=gEN9I7Cw; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ImVqtgF8"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B06BF1F000FF;
-	Fri,  9 Oct 2026 05:01:41 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="gEN9I7Cw"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E78241F000FF;
+	Fri,  9 Oct 2026 05:03:23 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1791522101;
-	bh=qDR18W/67HY/2iWirn3jnaIQnUfp8Mzb0wsaVwWsE2c=;
+	s=k20260515; t=1791522204;
+	bh=N7jGmzWNicgquS70Odu1ng8pPs2eUPAzmHI1qdFo5jU=;
 	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=ImVqtgF88tBCau9KzJByTp82CM+U4uskR+uie/NTIZaUYaoU5qTRxa2v4NhOWF13c
-	 x6f05pPryggN4+rv6SlqQSh1jRQcQjGLh7Vk9Sdtc5EAPVym6KmqhsTvB52UUPh5qN
-	 PzNNXNc4jFjFVRsZg7N8UQluUXiPTiztRkYcZUfTX0bILeYydW+tkleRBkwaT7Et95
-	 7NB3V5BWT5NlINyTW9E9ENXdu3utmINlDl64DpQYsPvzqkHYn7AS1102GJoERY64F/
-	 sB9cmStrqCJdr/RLlSdLCHPyX12/8/iymTTu1+gqjDsjg2nng/mHhU05PTTyE62k7z
-	 RrNMKV/4f6c/w==
-Message-ID: <sashiko-outbox-164862@kernel.org>
+	b=gEN9I7CwhKdku1+DYY565egKv4ZQ5v0xD0W0QobiQK4wuqCb3vXojFU6pESD+wLet
+	 S8zbvERvjPVjVCJ1ROeiz+vtRn6+BWc+VptO1nmq5KytOAReHb96c1FoDJvEW3Bu0X
+	 FujKS5MTpqQfyaNFz/2w62ClVzU4Qe00Iab9I8D9Wui5E+FgCFHbUwKokrWyMcjM0x
+	 1KHbr5yAw/e6T2Ii3gteJEonzWWpN7LkcjiPkJsOLLKYHSFE8YMUPxy2NP4fpgbq8m
+	 HJPB84El5bZPhIRtRnU2fnQNZTNA7kC2f42vWd3IsVzv8Tg2Vaj/YD4x8lv/ByjG/+
+	 um56APsqKPD1Q==
+Message-ID: <sashiko-outbox-164866@kernel.org>
 From: sashiko-bot@kernel.org
-Subject: Re: [PATCH v5 7/7] Documentation: PCI: endpoint: Document vNTB DMA
- export
+Subject: Re: [PATCH v5 1/7] PCI: endpoint: Add DMA auxiliary resource
+ metadata
 Reply-To: sashiko-reviews@lists.linux.dev
 To: "Koichiro Den" <den@valinux.co.jp>
-Cc: ntb@lists.linux.dev, linux-pci@vger.kernel.org
-In-Reply-To: <20261009045949.1109871-8-den@valinux.co.jp>
+Cc: linux-pci@vger.kernel.org, ntb@lists.linux.dev
+In-Reply-To: <20261009045949.1109871-2-den@valinux.co.jp>
 References: <20261009045949.1109871-1-den@valinux.co.jp>
- <20261009045949.1109871-8-den@valinux.co.jp>
+ <20261009045949.1109871-2-den@valinux.co.jp>
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
-Date: Fri, 09 Oct 2026 05:01:41 +0000
+Date: Fri, 09 Oct 2026 05:03:23 +0000
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 
-> Document the dma_bar attribute and the requirements for exporting endpoint
-> DMA channels. Also document how the selected BAR may be shared with an MW.
+> Endpoint functions that export controller-local DMA channels need the
+> controller register and descriptor-memory layout.
 >=20
+> Add DMA control and descriptor-memory resource types. The control resource
+> carries the register layout and channel counts. Each descriptor region is
+> associated with the static channel ID assigned by the local DMA driver.
+>=20
+> Reviewed-by: Frank Li <Frank.Li@nxp.com>
 > Signed-off-by: Koichiro Den <den@valinux.co.jp>
 
 Sashiko has reviewed this patch and found no issues. It looks great!
 
 --=20
 Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20261009045949.1109=
-871-1-den@valinux.co.jp?part=3D7
+871-1-den@valinux.co.jp?part=3D1
 
