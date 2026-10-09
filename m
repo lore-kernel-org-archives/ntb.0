@@ -1,50 +1,50 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.21])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.9])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 35635397338;
-	Fri,  9 Oct 2026 23:06:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.21
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3865F397338
+	for <ntb@lists.linux.dev>; Fri,  9 Oct 2026 23:08:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.9
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791587203; cv=none; b=pe+TmzW6hm3zvVywyzQMPv1Ld/ZGZ/Aa11bTKuUYH9iqPffoQOviCKxBm6zZ3fKX9mmfD9o5K0l84U8x7H1fiGjAm6osStBGzamHjnrJ8gDXZB9icGAcHizV5AFSxz/V7WiflbN8/2IrxHkutmjy1RezwN74Qrhl1Us8PCEWaPI=
+	t=1791587301; cv=none; b=dnDJs2zX2fkDY//CQnNYOom/qbNwT+HKXiBuNpUq18/5HeSrsJUizzn2EYtY5wS0UtVDbGnFsPwl92PR/mI8apf8mHLJBgPPh7TJfnUffSq3M1egXT7Fru4gEuLciF1j67BTwxXEPj5CMdpBsFn+4nG/wEOPkI9et+YgWbsliXQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791587203; c=relaxed/simple;
-	bh=uTKaAhre+h+714f57a5ptCMXQK1uVjxd7BGGrgoLev8=;
+	s=arc-20240116; t=1791587301; c=relaxed/simple;
+	bh=V/2y3VB2FEYliAb3VGyTxwIjRFjrMSfnZvrSfU0mwPc=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=cxUs8uTbKDn1imD5PYOzPaz9wRyt31Jn8bkFF9kbpC8f1MLUi7VI2fyABaJxm/Lf4ve7YnUSpI92nFIDAjlI+NmacuSF6XlMwNUZ/XPLnXpG5oG2JQlB7nUfl4LXYuLvAfrdHzv19rgdm2jQZzX13rYhU6kUgZI8dIIpz7cdMWE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=aAic0nc6; arc=none smtp.client-ip=198.175.65.21
+	 In-Reply-To:Content-Type; b=NQtT0su0AeGr56Hps1jaiTEhVUKIlOcbvdYFsLwVi8j7ng/mTfTRGzhORCCyvRQzLREjdGU9UVXYt2CFq6q7iKcietK27mbycINLOtTwkAXaPE5XU4LY3AEn5LozIYGMMleXPUZI8heiyZ9n7PW6gQYbEj6BBGt63oQbWpYz6eI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=M946hMoC; arc=none smtp.client-ip=192.198.163.9
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="aAic0nc6"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="M946hMoC"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1791587201; x=1823123201;
+  t=1791587300; x=1823123300;
   h=message-id:date:mime-version:subject:to:cc:references:
    from:in-reply-to:content-transfer-encoding;
-  bh=uTKaAhre+h+714f57a5ptCMXQK1uVjxd7BGGrgoLev8=;
-  b=aAic0nc6rzg/cIa8jUt+ZqkwQ0X6bW/ibP0/4KUyDMTQNePWjNtbzsV8
-   e9tF44LYtjbhJY60V5w2aIvdHC4pjGwUSmlUqFHE+CrZFiM7bmgOtsytF
-   fbsklqJpnVIwsKTm0Hvb00XMRvOGnsRtOnXxbC7MlRvNZ29fY4aex00Wk
-   TGjX3CdfHzg46kc8swFvI+VEg4fgFc6EsYTxxzaXWaxCSrBu/tCMQte7q
-   2cBnvYDhmHZNqAqHGC0FbOJpMNeDWiDqHo2g0DDgNM26W2Y4dEBlbMxgv
-   FWvJEhALfcJoi59bSQMKfYq4ePnb/DG6Zjnv10X8oJyeE3C353fb7HhVe
-   g==;
-X-CSE-ConnectionGUID: 76/G8LbkTBmA0qJUf6CTHQ==
-X-CSE-MsgGUID: JGOcgOQ5RmqX/RuS0alKTw==
-X-IronPort-AV: E=McAfee;i="6800,10657,11930"; a="488600"
+  bh=V/2y3VB2FEYliAb3VGyTxwIjRFjrMSfnZvrSfU0mwPc=;
+  b=M946hMoC9oThmag0udropMCd6CXjY0DK21LbLJZNkjzRdnO4kRTo0E3g
+   zE1eIJneB+9CsxlkqZq30qdlIMEQMgq+VZ7F1xfs6E+VMiF/Zcn4qoSi1
+   +3rVvy2bzCapXzEIPj+ng4I9iLmwI6NZUPuV+Sabgf+mJOk7aVXS9HTuo
+   2FCYXAnt72DSxsN4UTB45w2PS9hBp7ddj50MB2c1dts2zDP0bllUCSQwQ
+   jj7R3TyyqWimmWtxHDx8KGxI05rWEYGHG7LOMQCW3B0wZ9r3ytJ94rCtM
+   uCIA677uF9IcnmfjHrSA7hZnEU+EzMf0LTDZ2yukRakbvHYo4OLbjJrLk
+   Q==;
+X-CSE-ConnectionGUID: AlmKYK3MQFa/Aq6EHqRbsQ==
+X-CSE-MsgGUID: 4Gy4QcFwT++GgEWQDHKBoQ==
+X-IronPort-AV: E=McAfee;i="6800,10657,11930"; a="293413"
 X-IronPort-AV: E=Sophos;i="6.27,149,1787036400"; 
-   d="scan'208";a="488600"
-Received: from orviesa008.jf.intel.com ([10.64.159.148])
-  by orvoesa113.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Oct 2026 16:06:40 -0700
-X-CSE-ConnectionGUID: n4P8RrsxR6aa5kfwEkAmww==
-X-CSE-MsgGUID: LYrnRV7hRty7C3yaBeE6rw==
+   d="scan'208";a="293413"
+Received: from fmviesa011.fm.intel.com ([10.60.135.151])
+  by fmvoesa103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Oct 2026 16:08:19 -0700
+X-CSE-ConnectionGUID: BKunYbAtTKmzcnpyVJ/AaQ==
+X-CSE-MsgGUID: QVW7ikjGShqDi/sb6+zsaw==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.27,149,1787036400"; 
-   d="scan'208";a="355088"
+   d="scan'208";a="2258159"
 Received: from ssimmeri-mobl2.amr.corp.intel.com (HELO [10.125.109.123]) ([10.125.109.123])
-  by smtpauth.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Oct 2026 16:06:39 -0700
-Message-ID: <1c913faa-06da-4b02-bd47-c74da54df0de@intel.com>
-Date: Fri, 9 Oct 2026 16:06:37 -0700
+  by smtpauth.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Oct 2026 16:08:18 -0700
+Message-ID: <3b225456-30e9-4da6-bb1c-96cd17f65b17@intel.com>
+Date: Fri, 9 Oct 2026 16:08:17 -0700
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -52,76 +52,185 @@ List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 1/1] dmaengine: change dmaengine_get_unmap_data() first
- arg to dma_chan
-To: Frank Li <Frank.li@oss.nxp.com>
-Cc: Vinod Koul <vkoul@kernel.org>, Dan Williams <djbw@kernel.org>,
- Herbert Xu <herbert@gondor.apana.org.au>,
- "David S. Miller" <davem@davemloft.net>, Frank Li <Frank.Li@kernel.org>,
- Jon Mason <jdmason@kudzu.us>, Allen Hubbe <allenbh@gmail.com>,
- Ard Biesheuvel <ardb@kernel.org>, Andrew Morton <akpm@linux-foundation.org>,
- Eric Biggers <ebiggers@kernel.org>,
- "open list:CRYPTO API" <linux-crypto@vger.kernel.org>,
- open list <linux-kernel@vger.kernel.org>,
- "open list:DMA GENERIC OFFLOAD ENGINE SUBSYSTEM"
- <dmaengine@vger.kernel.org>, "open list:NTB DRIVER CORE"
- <ntb@lists.linux.dev>, imx@lists.linux.dev, Frank Li <Frank.Li@nxp.com>
-References: <20260922184527.2414043-1-Frank.Li@oss.nxp.com>
- <b40fa0d7-fbd0-4ee8-b99c-781d08c18838@intel.com> <asi3R24SY-Y2wJQx@parshuram>
- <67081b4f-56a8-4ead-a912-645d5f742fd8@intel.com> <ask6Ud7ps9A1Gkc1@SMW015318>
+Subject: Re: [PATCH v3 03/15] NTB: ntb_transport: Make link setup flags atomic
+To: Koichiro Den <den@valinux.co.jp>, Jon Mason <jdmason@kudzu.us>,
+ Allen Hubbe <allenbh@gmail.com>, Frank Li <Frank.Li@kernel.org>,
+ Logan Gunthorpe <logang@deltatee.com>
+Cc: fuyuanli <fuyuanli0722@gmail.com>,
+ Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+ Nicholas Bellinger <nab@linux-iscsi.org>,
+ Joey Zhang <joey.zhang@microchip.com>, ntb@lists.linux.dev,
+ linux-kernel@vger.kernel.org, stable@vger.kernel.org
+References: <20260928152550.3354675-1-den@valinux.co.jp>
+ <20260928152550.3354675-4-den@valinux.co.jp>
 From: Dave Jiang <dave.jiang@intel.com>
 Content-Language: en-US
-In-Reply-To: <ask6Ud7ps9A1Gkc1@SMW015318>
+In-Reply-To: <20260928152550.3354675-4-den@valinux.co.jp>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
 
 
-On 10/9/26 12:02 PM, Frank Li wrote:
-> On Fri, Oct 09, 2026 at 09:19:43AM -0700, Dave Jiang wrote:
->>
->>
->> On 10/9/26 2:43 AM, Vinod Koul wrote:
->>> On 22-09-26, 16:09, Dave Jiang wrote:
->>>>
->>>>
->>>> On 9/22/26 11:45 AM, Frank.Li@oss.nxp.com wrote:
->>>>> From: Frank Li <Frank.Li@nxp.com>
->>>>>
->>>>> Replace the struct device *dev argument with struct dma_chan *chan so
->>>>> callers do not need to reach into the dma_device internals to obtain
->>>>> the device pointer.  The implementation now derives the device via
->>>>> dmaengine_get_dma_device(chan), which correctly handles the per-channel
->>>>> IOMMU mapping case.
->>>>>
->>>>> Prepare to make dma_device private and make dmaengine API consistent.
->>>>>
->>>>> Signed-off-by: Frank Li <Frank.Li@nxp.com>
->>>>
->>>> For the NTB bits:
->>>> Acked-by: Dave Jiang <dave.jiang@intel.com>
->>>>
->>>>
->>>>> ---
->>>>>  crypto/async_tx/async_memcpy.c      | 4 ++--
->>>>>  crypto/async_tx/async_pq.c          | 4 ++--
->>>>>  crypto/async_tx/async_raid6_recov.c | 4 ++--
->>>>>  crypto/async_tx/async_xor.c         | 8 ++++----
->>>>
->>>> Maybe one day Dan's wishes will become true and someone will finally deprecate async_tx....
->>>
->>> Does Intel still have use it. I am looking at fixing the names and we
->>> can drop async_tx completely...?
->>>
->> I don't think so. Not since ioatdma days. Dan has talked about wanting to remove async_tx for quite a few years now. No idea if there are ARM dma devices that still use that or not.
+On 9/28/26 8:25 AM, Koichiro Den wrote:
+> Convert nt->link_is_up and qp->client_ready to atomic_t and use atomic
+> accessors throughout. This prepares for the unlocked cleanup check and
+> the link-up ordering fixes that follow.
 > 
-> Maybe we can create patch to skip build it firstly, let's see if there are
-> really user.
-
-There is a way to mark something going towards deprecation in KCONFIG right?
-
-DJ
-
+> Leave control flow and locking unchanged.
 > 
-> Frank
+> Cc: stable@vger.kernel.org
+> Suggested-by: Frank Li <Frank.Li@kernel.org>
+> Signed-off-by: Koichiro Den <den@valinux.co.jp>
+
+Reviewed-by: Dave Jiang <dave.jiang@intel.com>
+
+> ---
+> Changes in v3:
+>   - New patch. (Frank)
+>     https://lore.kernel.org/r/i3b4kyeuwyjssav2kne5uhxmltwl2bmug2weyfaujxtrwlkuox@ms6ozb55tmz5/
+> 
+>  drivers/ntb/ntb_transport.c | 31 ++++++++++++++++---------------
+>  1 file changed, 16 insertions(+), 15 deletions(-)
+> 
+> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+> index 55a20ae9a85e..5d2ec484c3df 100644
+> --- a/drivers/ntb/ntb_transport.c
+> +++ b/drivers/ntb/ntb_transport.c
+> @@ -47,6 +47,7 @@
+>   * Contact Information:
+>   * Jon Mason <jon.mason@intel.com>
+>   */
+> +#include <linux/atomic.h>
+>  #include <linux/debugfs.h>
+>  #include <linux/delay.h>
+>  #include <linux/dmaengine.h>
+> @@ -142,7 +143,7 @@ struct ntb_transport_qp {
+>  	struct dma_chan *tx_dma_chan;
+>  	struct dma_chan *rx_dma_chan;
+>  
+> -	bool client_ready;
+> +	atomic_t client_ready;
+>  	bool link_is_up;
+>  	bool active;
+>  
+> @@ -249,7 +250,7 @@ struct ntb_transport_ctx {
+>  	unsigned int msi_spad_offset;
+>  	u64 msi_db_mask;
+>  
+> -	bool link_is_up;
+> +	atomic_t link_is_up;
+>  	struct delayed_work link_work;
+>  	struct work_struct link_cleanup;
+>  
+> @@ -945,7 +946,7 @@ static void ntb_qp_link_cleanup_work(struct work_struct *work)
+>  
+>  	ntb_qp_link_cleanup(qp);
+>  
+> -	if (nt->link_is_up)
+> +	if (atomic_read(&nt->link_is_up))
+>  		schedule_delayed_work(&qp->link_work,
+>  				      msecs_to_jiffies(NTB_LINK_DOWN_TIMEOUT));
+>  }
+> @@ -972,7 +973,7 @@ static void ntb_transport_link_cleanup(struct ntb_transport_ctx *nt)
+>  			cancel_delayed_work_sync(&qp->link_work);
+>  		}
+>  
+> -	if (!nt->link_is_up)
+> +	if (!atomic_read(&nt->link_is_up))
+>  		cancel_delayed_work_sync(&nt->link_work);
+>  
+>  	for (i = 0; i < nt->mw_count; i++)
+> @@ -1084,7 +1085,7 @@ static void ntb_transport_link_work(struct work_struct *work)
+>  			goto out1;
+>  	}
+>  
+> -	nt->link_is_up = true;
+> +	atomic_set(&nt->link_is_up, true);
+>  
+>  	for (i = 0; i < nt->qp_count; i++) {
+>  		struct ntb_transport_qp *qp = &nt->qp_vec[i];
+> @@ -1092,7 +1093,7 @@ static void ntb_transport_link_work(struct work_struct *work)
+>  		ntb_transport_setup_qp_mw(nt, i);
+>  		ntb_transport_setup_qp_peer_msi(nt, i);
+>  
+> -		if (qp->client_ready)
+> +		if (atomic_read(&qp->client_ready))
+>  			schedule_delayed_work(&qp->link_work, 0);
+>  	}
+>  
+> @@ -1121,7 +1122,7 @@ static void ntb_qp_link_work(struct work_struct *work)
+>  	struct ntb_transport_ctx *nt = qp->transport;
+>  	int val;
+>  
+> -	WARN_ON(!nt->link_is_up);
+> +	WARN_ON(!atomic_read(&nt->link_is_up));
+>  
+>  	val = ntb_spad_read(nt->ndev, QP_LINKS);
+>  
+> @@ -1141,7 +1142,7 @@ static void ntb_qp_link_work(struct work_struct *work)
+>  
+>  		if (qp->active)
+>  			tasklet_schedule(&qp->rxc_db_work);
+> -	} else if (nt->link_is_up)
+> +	} else if (atomic_read(&nt->link_is_up))
+>  		schedule_delayed_work(&qp->link_work,
+>  				      msecs_to_jiffies(NTB_LINK_DOWN_TIMEOUT));
+>  }
+> @@ -1165,7 +1166,7 @@ static int ntb_transport_init_queue(struct ntb_transport_ctx *nt,
+>  	qp->qp_num = qp_num;
+>  	qp->transport = nt;
+>  	qp->ndev = nt->ndev;
+> -	qp->client_ready = false;
+> +	atomic_set(&qp->client_ready, false);
+>  	qp->event_handler = NULL;
+>  	ntb_qp_link_context_reset(qp);
+>  
+> @@ -1373,7 +1374,7 @@ static int ntb_transport_probe(struct ntb_client *self, struct ntb_dev *ndev)
+>  	if (rc)
+>  		goto err3;
+>  
+> -	nt->link_is_up = false;
+> +	atomic_set(&nt->link_is_up, false);
+>  	ntb_link_enable(ndev, NTB_SPEED_AUTO, NTB_WIDTH_AUTO);
+>  	ntb_link_event(ndev);
+>  
+> @@ -1457,7 +1458,7 @@ static void ntb_complete_rxc(struct ntb_transport_qp *qp)
+>  
+>  		spin_unlock_irqrestore(&qp->ntb_rx_q_lock, irqflags);
+>  
+> -		if (qp->rx_handler && qp->client_ready)
+> +		if (qp->rx_handler && atomic_read(&qp->client_ready))
+>  			qp->rx_handler(qp, qp->cb_data, cb_data, len);
+>  
+>  		spin_lock_irqsave(&qp->ntb_rx_q_lock, irqflags);
+> @@ -2268,7 +2269,7 @@ void *ntb_transport_rx_remove(struct ntb_transport_qp *qp, unsigned int *len)
+>  	struct ntb_queue_entry *entry;
+>  	void *buf;
+>  
+> -	if (!qp || qp->client_ready)
+> +	if (!qp || atomic_read(&qp->client_ready))
+>  		return NULL;
+>  
+>  	entry = ntb_list_rm(&qp->ntb_rx_q_lock, &qp->rx_pend_q);
+> @@ -2385,9 +2386,9 @@ void ntb_transport_link_up(struct ntb_transport_qp *qp)
+>  	if (!qp)
+>  		return;
+>  
+> -	qp->client_ready = true;
+> +	atomic_set(&qp->client_ready, true);
+>  
+> -	if (qp->transport->link_is_up)
+> +	if (atomic_read(&qp->transport->link_is_up))
+>  		schedule_delayed_work(&qp->link_work, 0);
+>  }
+>  EXPORT_SYMBOL_GPL(ntb_transport_link_up);
+> @@ -2407,7 +2408,7 @@ void ntb_transport_link_down(struct ntb_transport_qp *qp)
+>  	if (!qp)
+>  		return;
+>  
+> -	qp->client_ready = false;
+> +	atomic_set(&qp->client_ready, false);
+>  
+>  	val = ntb_spad_read(qp->ndev, QP_LINKS);
+>  
 
