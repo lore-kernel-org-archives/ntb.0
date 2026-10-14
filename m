@@ -1,67 +1,73 @@
-Received: from TYVP286CU001.outbound.protection.outlook.com (mail-japaneastazon11021101.outbound.protection.outlook.com [52.101.125.101])
+Received: from PA4PR04CU001.outbound.protection.outlook.com (mail-francecentralazon11013006.outbound.protection.outlook.com [40.107.162.6])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4D153560AAA
-	for <ntb@lists.linux.dev>; Wed, 14 Oct 2026 16:39:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.125.101
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 55EDE3B8405;
+	Wed, 14 Oct 2026 19:03:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.162.6
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1791995953; cv=fail; b=Zl17zQc68C9SNfpJ3dg76Hd6TxghYBveSqUejyL7HDubI9ONyZjeAg6zKK38MSeDzwj3aLRTpnUi94JJ6LhjL7vdTMtAx0G5Mf4O3+RNXGwUpHrv3YFYoMQmcO5X1dr8NTqTEdxbPIOyO6FTdig5HoDoaKkSA96hqcRMT1axstU=
+	t=1792004632; cv=fail; b=DHCdtXHFEqST7zYQH9feTF/K50pQ+tTH/r4FYykCAx9hnQUhmDzexvU6f+7xhmw7ERe273whk1AQIVELMVaMDQNuzsASeM123uqbik4VpRCgPJlvLFRdwh88ttZR4YwpoHKdj7prQWb8MVt2klDtS8xam7KR91g88Wh//NI59bM=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1791995953; c=relaxed/simple;
-	bh=7tsJ0p2SOap0szsIJsB4jSxeDvOBJHjQ8d+TAG3QehY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
-	 Content-Disposition:In-Reply-To:MIME-Version; b=MLGhqDiKiRTAWcA2Hir16rZOPZs1Anm4vTWvziNqs70YRZway/7in6R5FCpERAvBgOZ36r0lttbzfzGjOtD7LUBcBeX4cQ/artCve399nVJzOEzVd45jOxaYKbjIhq556tkGHYuGsuUaZE1XodmxqqgYbevKsZTdyptBmwNppRo=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp; spf=pass smtp.mailfrom=valinux.co.jp; dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b=JDa8Hk3l; arc=fail smtp.client-ip=52.101.125.101
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
+	s=arc-20240116; t=1792004632; c=relaxed/simple;
+	bh=GGFSU3faEEg65D68Ku4NlJe+PqS7CWvw94rfp3iYRAk=;
+	h=From:To:Cc:Subject:Date:Message-ID:Content-Type:MIME-Version; b=W3OTan38XvwfWpZdTZl4aah69d8n4vf/zq5Eh802/rl3RUBPeSDZmjmAg1/crVNZkupoiZpVjBZ170wqIsd/d0ZJmTc4xxUJMdnuPgNTCa6Px6mEWbF91MdW+I3mlVioSmiqgOqVC5pCc04ln1vL5jWbCBgndIZnF28TevlcX7U=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.nxp.com; spf=pass smtp.mailfrom=oss.nxp.com; dkim=pass (2048-bit key) header.d=NXP1.onmicrosoft.com header.i=@NXP1.onmicrosoft.com header.b=I62izhux; arc=fail smtp.client-ip=40.107.162.6
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.nxp.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.nxp.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=valinux.co.jp header.i=@valinux.co.jp header.b="JDa8Hk3l"
+	dkim=pass (2048-bit key) header.d=NXP1.onmicrosoft.com header.i=@NXP1.onmicrosoft.com header.b="I62izhux"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=KwA4qZe88eg+UrNU3nPQ1Gg+ODRzARJZOSmtn/q0OmldWWtMqMGdCoOffq25ooDl2RtLY1FshvhwvB1J5+vHr/Regi21uozHDdjAnsa+ntk29AspE7JL/5kdGZGDcRvS2xgErynWw7CA+lNp0CiKRw2wNXj3A/bBvgwmWO4Rr+7Mz1W1t6+AQruqmuj0S13Qdt7cCPsWyLg0sbIo1Ja6rUOigS7N6BnEcIWhpU6ge+zClR46jIdtzuP66mzbbiOrNFmEfUKg5+JavMpE7V7r/scoNkLnWoHTfGvertCdqF+knOc7ryoB41lHEd3rgXAHi3OuX675iDXWxDcaPWQOjg==
+ b=a8Ep+zUoE3snmgkBXrGi6EkRr8lQmGNvNQSBICprXxWOblMAMPAZ76wstVscV8Xxa846VK1uNRjsPa53px/hxazQdGFcCtVug1TY1hM/dT044k+91OAb+/axil+oxobb/320ax6apBQkqJNtIE87YY4TsHjcMxjvJQmNQm5i830SKfAfQ0HIWXrYY3i6DJzeUWb5RnK8ZNFBYvb9oJuoQuW0g1Sm1KzmswO5oIuaoUZ5hY8yY9egKHDjfPUZvEnztzKGFj+R5L5gi8p9SU5BJzhnyO4wStkEbadyUvpwOX2IcjKTi+hesRfMI8vHhZlqJ66061WgZm74SdX2plnh3g==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=tms0iA7tRX5JCZcRWTsyZZBJuYeyObfyOijevwHRGCo=;
- b=mksGPrzvMLNeQlnoFKkz7a5d8eiFDNyx7MEZwI9O3DUOABXs6dcPS1U5U/i5T0G4jSKzJ9bDtdlXVhIN0acRrNK3tW5MjKBpS8yccm/GqK+PzMlHgKFxcFBirkKwI5220GE4r7ViDg2//24YBwpQw5U4vL3lFVlB0ldlxsxeukbp6Y9w1edLa9VtljpL5qeQorVTkH2PzFAIJn+Kpe3yPWvE0yi5mPxOFplravfeF+5PzskujfCvBIxu8VJCEKmoRjOMBT/Kgee8KM/CxPfRAjdim6y0Qz0l9Zx6V8MclnheKD14D9rGVh9wYgEoenEDBDDD3z/a7xfYzOQPa1gNpQ==
+ bh=G0zN63vbOmDx5ET2iHdtl7Bw1EF9pF0okqQc+kGba3I=;
+ b=fzjMk5LO/p9CB50YLSnYsLLKg6Dw9CUb3Hqwi98rKFb1WQJ9DNXfuqeMqQ97H7NAU7oX3+bg2zmdoJwYQ2RJ1WyZYL/URmD9I3CtBuJoZKVqOmdyttKJTfWKvfLiToCfIBHuayWGVmSXso7+G/F5K/oM6lgkC6OxsrZyBusSDD/dDhvPOGN+qo0HOSPK6xXMJlTWchqz6aouhzH20bl6TCgVLhx6rhGLrLes1EcEQ5sSta26C5u9rNwOJwHyT6xG9Xtv7PDx5sdq3xjgG3UfwrUphs3Ue3i4/ZgbVtn0FnmcXmmgXvtS1hlqRwfASayP+UyiVCDO0qLdoi6VN8pwww==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
- header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
- s=selector1;
+ smtp.mailfrom=oss.nxp.com; dmarc=pass action=none header.from=oss.nxp.com;
+ dkim=pass header.d=oss.nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=NXP1.onmicrosoft.com;
+ s=selector1-NXP1-onmicrosoft-com;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=tms0iA7tRX5JCZcRWTsyZZBJuYeyObfyOijevwHRGCo=;
- b=JDa8Hk3l+1lifUrzrifGGMnso2oUWr1IHqGMhQh6MiYD9Q6egUgqW2aykYu023mVu5E7Xp2k64eGzFB/U+k/sdHsB5RDnR04rRzFwHeYUeyW/mPSzs3ntF7vtVLN24vs7mE9xTi1D6ZVycJOm3PQpZ8fBIvgHtbk/KBPWMTJoWg=
+ bh=G0zN63vbOmDx5ET2iHdtl7Bw1EF9pF0okqQc+kGba3I=;
+ b=I62izhux5g0uAouzufQiEaDtaLJwV5hqoYpO2wvBp68mb/XQlIpAfHuReQHfyvUzNNT1vsqbJTy3eEXwDW2Bw+yKxJdlKsEARIgDdDcRbU48cm1FEuvdJEd4vueATw4AxiCEQy/tncbtB4Q8sw5ggQ1Oj4QJ1kPKRFjRzpAzFRuz6xq2nhpRN8USFaYq2UvOm3wyqf0Zjv907IdIHLhwu3NbJR0ZcfoiZDWk/jP9oE2VA7IEOOqiB4P3zDozADOqlEV9tuM4DU5f43iKz8JDRi0GVth77rCDkb6WGbuU9N4FvFHsUiqL7KeZo9JTm2yruuObNjT1BD3BXeq3y6e6wA==
 Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=valinux.co.jp;
-Received: from TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:325::11)
- by TYYP286MB4406.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:110::14) with
+ header.d=none;dmarc=none action=none header.from=oss.nxp.com;
+Received: from GV2PR04MB11799.eurprd04.prod.outlook.com (2603:10a6:150:2cf::9)
+ by VI2PR04MB10764.eurprd04.prod.outlook.com (2603:10a6:800:271::15) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.522.13; Wed, 14 Oct
- 2026 16:39:06 +0000
-Received: from TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM
- ([fe80::cce5:2aa8:53f9:dba9]) by TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM
- ([fe80::cce5:2aa8:53f9:dba9%5]) with mapi id 15.21.0522.012; Wed, 14 Oct 2026
- 16:39:06 +0000
-Date: Thu, 15 Oct 2026 01:39:05 +0900
-From: Koichiro Den <den@valinux.co.jp>
-To: Frank Li <Frank.li@oss.nxp.com>, 
-	Manivannan Sadhasivam <mani@kernel.org>
-Cc: Frank Li <Frank.Li@kernel.org>, Niklas Cassel <cassel@kernel.org>, 
-	Bjorn Helgaas <bhelgaas@google.com>, Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, 
-	Allen Hubbe <allenbh@gmail.com>, Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kwilczynski@kernel.org>, 
-	Kishon Vijay Abraham I <kishon@kernel.org>, ntb@lists.linux.dev, linux-pci@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v4] PCI: endpoint: pci-epf-vntb: Honor MSI-X selection
-Message-ID: <j43nhj3wyu5tocjiots2xm4v2yxtngsxoaafkvxtputxxttw7j@snrzxkr66vkp>
-References: <20261014053256.2378817-1-den@valinux.co.jp>
- <as-UJX1jD8ZFiBxk@SMW015318>
- <x53diijgm6cqfjc5rlihi5q2q54nxdbgvs5u3cfxg5zfdo5w4z@hayq2svzwfes>
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <x53diijgm6cqfjc5rlihi5q2q54nxdbgvs5u3cfxg5zfdo5w4z@hayq2svzwfes>
-X-ClientProxiedBy: TY4P286CA0048.JPNP286.PROD.OUTLOOK.COM
- (2603:1096:405:36e::9) To TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM
- (2603:1096:405:325::11)
+ 2026 19:03:45 +0000
+Received: from GV2PR04MB11799.eurprd04.prod.outlook.com
+ ([fe80::2146:83a2:5329:b7c]) by GV2PR04MB11799.eurprd04.prod.outlook.com
+ ([fe80::2146:83a2:5329:b7c%7]) with mapi id 15.21.0522.012; Wed, 14 Oct 2026
+ 19:03:45 +0000
+From: Frank.Li@oss.nxp.com
+To: Dan Williams <djbw@kernel.org>,
+	Herbert Xu <herbert@gondor.apana.org.au>,
+	"David S. Miller" <davem@davemloft.net>,
+	Vinod Koul <vkoul@kernel.org>,
+	Frank Li <Frank.Li@kernel.org>,
+	Jon Mason <jdmason@kudzu.us>,
+	Dave Jiang <dave.jiang@intel.com>,
+	Allen Hubbe <allenbh@gmail.com>,
+	Andrew Morton <akpm@linux-foundation.org>,
+	Ard Biesheuvel <ardb@kernel.org>,
+	Eric Biggers <ebiggers@kernel.org>,
+	linux-crypto@vger.kernel.org (open list:CRYPTO API),
+	linux-kernel@vger.kernel.org (open list),
+	dmaengine@vger.kernel.org (open list:DMA GENERIC OFFLOAD ENGINE SUBSYSTEM),
+	ntb@lists.linux.dev (open list:NTB DRIVER CORE)
+Cc: imx@lists.linux.dev,
+	Frank Li <Frank.Li@nxp.com>
+Subject: [PATCH v3 1/2] dmaengine: change dmaengine_get_unmap_data() first arg to dma_chan
+Date: Wed, 14 Oct 2026 15:03:24 -0400
+Message-ID: <20261014190337.1718622-1-Frank.Li@oss.nxp.com>
+X-Mailer: git-send-email 2.43.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: SJ0PR13CA0147.namprd13.prod.outlook.com
+ (2603:10b6:a03:2c6::32) To GV2PR04MB11799.eurprd04.prod.outlook.com
+ (2603:10a6:150:2cf::9)
 Precedence: bulk
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -69,306 +75,298 @@ List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: TY7P286MB6866:EE_|TYYP286MB4406:EE_
-X-MS-Office365-Filtering-Correlation-Id: 359e0e4b-34cd-440c-6850-08df2a11a9e6
+X-MS-TrafficTypeDiagnostic: GV2PR04MB11799:EE_|VI2PR04MB10764:EE_
+X-MS-Office365-Filtering-Correlation-Id: 7f77133c-797a-49d2-2b27-08df2a25deb9
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|10070799003|366016|1800799024|7416014|376014|23010399003|56012099006|5023799004|4143699003|261009223027099003|22082099003|10067099003|18002099003|6133799003;
+	BCL:0;ARA:13230040|23010399003|19092799006|366016|1800799024|376014|7416014|18002099003|10067099003|921020|11063799006|261009223027099003|56012099006;
 X-Microsoft-Antispam-Message-Info:
-	TJHaIjKyUAFO/pgHNKrJyjjbn9xqC4Cck+AwCSbIi88IeMAcJle9a3qqHoxQqYjv4Q90TMxVDSgwRpb6mGFP4S5qB5mMa8LQfuFcH1EUgJeNTh5Z89yqQh9FdOE+aVTGQmhWxfu/mSNCdacBqQGgsmIlOpWRaVWOp/EJxsIb0k56B6BFJc2THdAiGnzhiVEGa+qKVOI0fDWRwEwRf5gAueHAIKiPNy7EaGfmZh+U+/qAmKEvDvGpMXl3KA5m1rBHsx+HXNTJPuIpdBYX6MeCU3Y69D6KxtfO/RzSdbSBclKS65osAAcRZQKfjygKNl/0UEoKTBxCpIOedFPXubppihydSiXzk5G+U8Kkk+ZZ3V4dSXiqmXT57FueR4CGeFPJZRvJFbBkvlBwlR/Y3h+vRF6bFOJl+b5Q18SxRft29/iM//haPMJYIhYkB4dbjD27VGCG1HPT/Wry9g/HLejPWqKQbbHpokRk/p9VW7RStFNVeXzL7z9MkEcT4EaI8mPiWgZqEnTUynLrDMx90z1+zM4bRwQ6ual0bictk5St97QUoxJ9bnXL6OpH6wxayPimhVo8Z7piWuN+6+XD/Pk/vCUgiD9YwivMmrehyfF0WhJkCgYhRo3w5VijxMR6Ekv1
+	vi0vZWKljCcg6OHgmPICk2Lrg/x5TrEBujmSSMQ9qHpJ2080yYDn7zqZNDiu+ltwNP6xwfpzfgY0wgKBh8eHOHOfXY83GwFWXOjFu5Es44P/zRORVc1DODUw/wqplyF9OYazpiL0rRi5QcVtZ+iYMsNcM+NDcO90Quctpszb3LuYBCFxjSgygqiO8YXerESUJ9khCYNAIfk8N4Z/flnN42A5VYG3SW+b4hTMEfVVyfiLckdaYJPk54mVXDswYF2IC46kF19Z+BDu6IRssRKUfeEMpDpL0bbjhBpOmB31h+3X7j1N8Ihw0/gLl2xkcbtSjEqLPmfiaoJUH8iUifCI9MvnBS9zQPsq8424KvXZjrJ3L+qIylKY4z7kxHrRWYiSvL+gUtc6sFk5sVaaJ28PnOSLiAJ/gWTjhlBDCx4Wkr9wqg7b6Wv6bN+OCVI/hHOZGjWg+MxggaLRgU6/DQdd+28WbDyvDm0YSIz8ZiquR7tVHS48LTjdx/T+LHevlnh5HDDHCQLoaD+HUCeckWhg4mYbtpd3K4k47wSO5dHPE5+8FYbrtShNub/WgJgQVIRIIBCPi/0uW44cpSnqKoYqi9WyJGrCRYjKsgKF51s2WMPqryDMCaSja7FXVRtRQCYgOuv44SwfzzRoOl8FQc+rjOYXnJVIAMhK/PTima/XQ7o=
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(10070799003)(366016)(1800799024)(7416014)(376014)(23010399003)(56012099006)(5023799004)(4143699003)(261009223027099003)(22082099003)(10067099003)(18002099003)(6133799003);DIR:OUT;SFP:1102;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:GV2PR04MB11799.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(23010399003)(19092799006)(366016)(1800799024)(376014)(7416014)(18002099003)(10067099003)(921020)(11063799006)(261009223027099003)(56012099006);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?qriuPfrwDH2zRPpqceKpsHnOMhccdvoTR2RvRir28GEaywIYTPpOY5Eaq50X?=
- =?us-ascii?Q?GlMLXFdnkl60dF3z23MOfS9opIGXHzEM8ixZ1CPKTeMpAFlmPsvID5JOeiHp?=
- =?us-ascii?Q?BwISuU2vYHCwqVunjIxJtFQxFqFhFuFwOydozN8CRqS7YKf//9wOIiiggGkv?=
- =?us-ascii?Q?fjjTugHHAkk63KnFkMZ4mwb3U7J1OhETPUYe1gCBW00SiVDyMgh9eVY96NOu?=
- =?us-ascii?Q?yQ5/0AsT3786fkv0WCnhc3YEgeGWqigCGt1+kccTlCgLmyb8xerO/YqoK6dY?=
- =?us-ascii?Q?W+Oy3/7HDutDQ1l3kTZUF/ptuM16yzYpGAHGeicgCd1g+LnzPKDaHDNz2Oiq?=
- =?us-ascii?Q?1YYWK4mHw/SCjHYvDkwlWgLhjAcO5aUpIFAqdSI50+D4n/wtWW1WjTbKiBY6?=
- =?us-ascii?Q?hPSf/HcK/tOWyEg0QVwirJShumrbrMyk5aks75rG578M1G47UfQLajpxCBne?=
- =?us-ascii?Q?QVj+GIaOu9wbVvRLJnXl+lP5ni1JH2SjPzoEEolfpvA2DLW2fXWHv98INEEQ?=
- =?us-ascii?Q?PGT6GPGrW+zub2QGHbcZLR1vsARFTPG1Uq/Z8NgPSpHZNsmLphiM3WzCQWD8?=
- =?us-ascii?Q?mostHC1Oihme9uVOsrwTmQ74JnNGdIjyMkoy1nhJlNdYSE+SGQtpKOiZKp/S?=
- =?us-ascii?Q?T/kmDbsVSxmkWrzE6u+dnfgzTgC0qqGacIpuV2xnfO5n7onU8q3rs1rLXS8y?=
- =?us-ascii?Q?TOvfWTxYXRSagHC6yZxSOUMHGubxy9UPUXH1VXtgLNzO5HmY4vTTvut7esLC?=
- =?us-ascii?Q?J4qTP6qeORU4BrvJI5hMfvi/1cEePKf+Olbr6hEFIl4FRJL7k/xVmMvnphN0?=
- =?us-ascii?Q?yGhWlIlhEiaOOqWVx5tH5NiZVxOBmzvor+ds0uIhhX5o9hvHYfzlhlKZsch3?=
- =?us-ascii?Q?qQWZYxnOnUmLkl2l0jtnx6/zG0/KgFJD55fl0aIuIcQLfj0mMe+eyznZGo9G?=
- =?us-ascii?Q?GV72EI6362vs6JmMgp4DZgmI26Fn8lIWMSiQb2+sKGPRc+SfiE3Tk6bKFmDr?=
- =?us-ascii?Q?8tGEVvl9CrMy54KRFQo0k7j0118Ce+TLxm3iuYExbD47uX19z3TIk+jiB/FX?=
- =?us-ascii?Q?zU4ZA8XqJoKJLaftiYL6VpciZBP037fGvIfOeAKoQt03T2WlHYcc41HeCkrL?=
- =?us-ascii?Q?YKOGHoDIIqiXlzCh5uscdbAsTeSWUqibYJho34XXMZAqIE9QaA27SV+Wrb4+?=
- =?us-ascii?Q?/ui/CUEa/yo/1YxQWgUJOwNqFeaPaGwR4p3nhvxQ8nGcWnPKPqmQjjYvyVYn?=
- =?us-ascii?Q?odp1hHV5ZXEaCYtVt8s2t72zX+XeE2WOJAUIuadfHhB48PoQ7Lh8gyHhkJQo?=
- =?us-ascii?Q?ccbiYXV+Vc2Cij4p1Eq6ETRTZKBibNl30fF0pkDuAZ950PrF44JvIZWlCJZH?=
- =?us-ascii?Q?h4f7MOLngbsoM+6DrqFoe3PdYDL7GVXM2w6E/gWu6lgl1KpWiahlKBgQwhWJ?=
- =?us-ascii?Q?EX2HI0WdHHrlKSXPaMw1Xoev3yJYHkOnZvW2d3NTL4mngyF+QhFmfYBM6W7O?=
- =?us-ascii?Q?UgNi0xE0Jo2J/ZMqEowSqrWBzgAMv+GTKQhbpKCuGAuDg+gc0mifiglqzj5f?=
- =?us-ascii?Q?TZ4ZoAsP07XqPFVnbNjGw9ZEOMXa3zGe7rNSFJkqmJAXIjfJ+RzY5P7ufE8j?=
- =?us-ascii?Q?KDTODL3MCaDOGXOpWeOpTe/hzCE+FyjmVYtIdD1guqZACQ+wSXVjmzYU/ti8?=
- =?us-ascii?Q?yhJBoQGkjF/myscjd9hWhi47KUtLTQX13vpiCMCVxdezk3pSdl38cm4XlaDg?=
- =?us-ascii?Q?SdsR7MQr07UXTlypo8exrfnrqcyTesvUfrZhZPsDzKGtQi0qWZk2?=
-X-OriginatorOrg: valinux.co.jp
-X-MS-Exchange-CrossTenant-Network-Message-Id: 359e0e4b-34cd-440c-6850-08df2a11a9e6
-X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM
+	=?us-ascii?Q?DOql8M2y099eGhlH4XrT6JLjjNqlHfxivVDX5KTszy0zzun4lCTOu6przF2r?=
+ =?us-ascii?Q?kjQyi4iLPJ07BCaWl26fdaRLpahVbHTKZW1a+HVuHssjZVOf65fjMnfhOiyq?=
+ =?us-ascii?Q?fB5J2mkJ6niMvcpQfE20IW8RQKgSzehP6VsbBh0LIz1newmpijG1i58hFVAU?=
+ =?us-ascii?Q?HMYKeiNrCOaqbbv4uAwW3XIAWoxw62T+h1f+SZLqD9axG1xFaK0/+4jvkBuP?=
+ =?us-ascii?Q?fYKD2IaIso4FN4L5k+iSAQIlDNWtUqtLy4K2T1FEr/CS04lWZhAiC+LTkaY1?=
+ =?us-ascii?Q?SB8rFTAk6KYJqNRH1e7TYJfCdW9kfcdXYyRHHgvwf43vRMhNVzLee7ImmNyY?=
+ =?us-ascii?Q?0FOtG88VXQ+OAnXSXUjrHYGiRgpsMwqRBKpxmFK0U8vipnFz7/F7lZDFEnL4?=
+ =?us-ascii?Q?lHRtfADeZCuevnhHW/Ehlcr7QpRW0fuVS5qfleLZg+1420s2hRiJuLntiLKP?=
+ =?us-ascii?Q?pj3AkvHemQQqdI/mTLfvJ5dFzeIWwNCuHvLgtNvuw5bcmU8GwZ1VdUpfoEPb?=
+ =?us-ascii?Q?wy6hxv80AQRZ8EYA2Mo7FKndv7RqGklhSxyT0cOskUEB91Bt1H/2tV915tAi?=
+ =?us-ascii?Q?p3wH4zrywn+pkOBawx/0ucpmfn6qR4op+cR9u0wZ1F2O7+RrdELHxQio2vsB?=
+ =?us-ascii?Q?p3U7x/+BUATe2AppQ9kmrlpJi2TypkU2S2EBkybrDvUlpY4Vb+Od++9K92RY?=
+ =?us-ascii?Q?yhxm30RKJ3qbWjrvoNgMgIZ5zbjQawEDhc0uoKk9nQuIr7JK2wnfnn+T/Xcn?=
+ =?us-ascii?Q?Rvzy/pBqzwYlo0TekwkzPVkrmesh5+z56V0WiyMQieIOqD139xkWUUOC4foW?=
+ =?us-ascii?Q?Vm+jm02fwjBISj4eujvVPORir6lPgaIjqdEh77Jd7D46J5TsqJReaeleyBCO?=
+ =?us-ascii?Q?huv1Sig6Z/l8iINpB32Off4B3qsaeQKyL6Z43Xi5IlPqnA/51YT7VkfimQ/b?=
+ =?us-ascii?Q?BQUmXBWufnBlzSJPg0M2R/p3n5j3c/ZgoW0jsUvU1x8ikRoqurqj4yBM1bP1?=
+ =?us-ascii?Q?HW8skuMwS8Y2Qyp+uRUskVWoWZIkau6rlUhYSNjEkteYvlslTuqTubi81Pmx?=
+ =?us-ascii?Q?PKpfUk98QvwQP24SRi0likfPHgse/VnZHQxq5D67SXfvVpK9h/Tg3tni9F9M?=
+ =?us-ascii?Q?gWFtjmNxJcQGXFeLBZTNJfmms2xjniUr/P5gMdxs7ZKZ1xvq4y8rD873iqsH?=
+ =?us-ascii?Q?66/xwmF2QtYpVRCWMvVEGPozWNRH367ucsBqITet3owTbW2xp0T39FmMlxBg?=
+ =?us-ascii?Q?bsTUDCW1GiFtCx3efUMyPynEtxSBUwLP2VQtRHkMAbYv8HsU2sWR1RpI/P74?=
+ =?us-ascii?Q?/cRr0z9vaP5OHmP226/qKStcvp8gsoJNvoF6VsrY81TPtaBlnqZxn1PKSpNf?=
+ =?us-ascii?Q?1j9X7/F70nYvbL6ZRBCgxd17xSX6QT1QqIA7fedkLLE/j9sQMWKDloT7xESW?=
+ =?us-ascii?Q?4HvP/ebzte/6BpYkQ9ovGnWE9M0BOPpaKAtrwfadcbTQFjxY9IM5aJTd1nGl?=
+ =?us-ascii?Q?wSkbob/wXwC1JwMSPEySQXVL9AFFcqPDcJ3K9fzx4Nt86roS8sP4f/wpf6KA?=
+ =?us-ascii?Q?noDnYar0rIqoJZU/lgouyVRf35ZHg8Pj2qkkQzVlwzbHZrqcs+0byL6ftM4N?=
+ =?us-ascii?Q?ryOY92GpSTk7SE/iZjx6HebsxUt/J/6HAAydh4hc5hC//2SvdbymP+DTFwOf?=
+ =?us-ascii?Q?26Tt8WLTbGqAyzzw6R2W7OnquznMK407k3l9t+bL1JPTH5mKFey4g5mSD+Bv?=
+ =?us-ascii?Q?p5xcvBr+FDCgdz7ZXgNG8tIMN+XNwhj3oX2Pg7FzmW5Tyx6rLaxN?=
+X-OriginatorOrg: oss.nxp.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 7f77133c-797a-49d2-2b27-08df2a25deb9
+X-MS-Exchange-CrossTenant-AuthSource: GV2PR04MB11799.eurprd04.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 14 Oct 2026 16:39:06.4387
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 14 Oct 2026 19:03:45.0195
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
+X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 8KMjIyXHZTfso+Bfmk9W9yuzEOKyRQTlrwLZZbxnP+KNFMQ2xLCmUjL+iBQRAGX0QaDJ4SS4yFJtjfgSWIoDAg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYYP286MB4406
+X-MS-Exchange-CrossTenant-UserPrincipalName: /tC+2qwbvrOElWU5Bu2ULgj5fWIuxlnLLqnnM4+Dfz4kQAblUckQX1lIZn+Ithi15wctgRqUbGo2rnBB3tdu4epld9pcTV2vMtaB090ihgQnxceLm/VD1ZCsDG5gheWW
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: VI2PR04MB10764
 
-On Thu, Oct 15, 2026 at 12:06:34AM +0900, Koichiro Den wrote:
-> On Wed, Oct 14, 2026 at 09:39:33AM -0500, Frank Li wrote:
-> > On Wed, Oct 14, 2026 at 02:32:56PM +0900, Koichiro Den wrote:
-> > > ntb_hw_epf tries MSI-X first and falls back to MSI. It reports the
-> > > result in COMMAND_CONFIGURE_DOORBELL. pci-epf-vntb ignores MSIX_ENABLE,
-> > > configures only MSI, and always raises peer doorbells with PCI_IRQ_MSI.
-> > > When MSI-X is selected, the host does not program MSI, so raising it can
-> > > issue a write to an invalid address. This was observed as IOMMU faults
-> > > on the RC, with no doorbell interrupts delivered.
-> > >
-> > > Configure MSI-X when supported and use the selected type for peer
-> > > doorbells. Allocate the MSI-X Table and PBA in the config BAR and
-> > > configure db_count entries. Use this EPF-owned layout even if the EPC
-> > > has fixed, hardware-owned Table/PBA regions, as pci-epf-test and
-> > > nvmet-pci-epf already do.
-> > >
-> > > Fixes: e35f56bb0330 ("PCI: endpoint: Support NTB transfer between RC and EP")
-> > > Signed-off-by: Koichiro Den <den@valinux.co.jp>
-> > > ---
-> > > Changes since v3:
-> > >   - Reject MSI/MSI-X requests unsupported by the EPC. (Sashiko)
-> > >   - Link to v3: https://lore.kernel.org/r/20260919172021.1055451-1-den@valinux.co.jp/
-> > >
-> > > Changes in v3:
-> > >   - Split out the vNTB MSI-X fix and use an EPF-owned layout. (Niklas)
-> > >     Niklas and I both hit an issue with hardware-owned MSI-X on RK3588:
-> > >     https://lore.kernel.org/r/mmcripxdekhktnn73ikylthajkdnincwu7p2nelcpcqzexpf22@rrmmzr6hfvzf/
-> > >   - Link to v2: https://lore.kernel.org/r/20260830151948.3547577-4-den@valinux.co.jp/
-> > >
-> > >  drivers/pci/endpoint/functions/pci-epf-vntb.c | 63 ++++++++++++++-----
-> > >  1 file changed, 47 insertions(+), 16 deletions(-)
-> > >
-> > > diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> > > index 07ba338732d4..c30a73c537a0 100644
-> > > --- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> > > +++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> > > @@ -148,6 +148,7 @@ struct epf_ntb {
-> > >  	u16 vntb_vid;
-> > >
-> > >  	bool linkup;
-> > > +	bool peer_msix;
-> > >
-> > >  	/*
-> > >  	 * True when doorbells are interrupt-driven (MSI or embedded), false
-> > > @@ -155,6 +156,7 @@ struct epf_ntb {
-> > >  	 */
-> > >  	bool msi_doorbell;
-> > >  	u32 spad_size;
-> > > +	u32 msix_table_offset;
-> > >
-> > >  	enum pci_barno epf_ntb_bar[VNTB_BAR_NUM];
-> > >
-> > > @@ -276,6 +278,7 @@ static void epf_ntb_teardown_mw(struct epf_ntb *ntb, u32 mw)
-> > >   */
-> > >  static void epf_ntb_cmd_handler(struct work_struct *work)
-> > >  {
-> > > +	const struct pci_epc_features *epc_features;
-> > >  	struct epf_ntb_ctrl *ctrl;
-> > >  	u32 command, argument;
-> > >  	struct epf_ntb *ntb;
-> > > @@ -308,6 +311,15 @@ static void epf_ntb_cmd_handler(struct work_struct *work)
-> > >
-> > >  	switch (command) {
-> > >  	case COMMAND_CONFIGURE_DOORBELL:
-> > > +		epc_features = pci_epc_get_features(ntb->epf->epc,
-> > > +						    ntb->epf->func_no,
-> > > +						    ntb->epf->vfunc_no);
-> > > +		if (((argument & MSIX_ENABLE) && !epc_features->msix_capable) ||
-> > > +		    (!(argument & MSIX_ENABLE) && !epc_features->msi_capable)) {
-> > > +			ctrl->command_status = COMMAND_STATUS_ERROR;
-> > > +			break;
-> > > +		}
-> > > +		ntb->peer_msix = argument & MSIX_ENABLE;
-> > >  		ctrl->command_status = COMMAND_STATUS_OK;
-> > >  		break;
-> > >  	case COMMAND_TEARDOWN_DOORBELL:
-> > > @@ -451,8 +463,9 @@ static void epf_ntb_config_spad_bar_free(struct epf_ntb *ntb)
-> > >   * @ntb: NTB device that facilitates communication between HOST and VHOST
-> > >   *
-> > >   * Allocate the Local Memory mentioned in the above diagram. The size of
-> > > - * CONFIG REGION is sizeof(struct epf_ntb_ctrl) and size of SCRATCHPAD REGION
-> > > - * is obtained from "spad-count" configfs entry.
-> > > + * CONFIG REGION is sizeof(struct epf_ntb_ctrl), plus space for the MSI-X
-> > > + * Table and PBA if supported. The size of SCRATCHPAD REGION is obtained
-> > > + * from "spad-count" configfs entry.
-> > >   *
-> > >   * Returns: Zero for success, or an error code in case of failure
-> > >   */
-> > > @@ -473,6 +486,12 @@ static int epf_ntb_config_spad_bar_alloc(struct epf_ntb *ntb)
-> > >  	spad_count = ntb->spad_count;
-> > >
-> > >  	ctrl_size = ALIGN(sizeof(struct epf_ntb_ctrl), sizeof(u32));
-> > > +	if (epc_features->msix_capable) {
-> > > +		ntb->msix_table_offset = ALIGN(ctrl_size, 8);
-> > > +		ctrl_size = ntb->msix_table_offset +
-> > > +			    ntb->db_count * PCI_MSIX_ENTRY_SIZE +
-> > > +			    BITS_TO_U64(ntb->db_count) * sizeof(u64);
-> > > +	}
-> > >  	spad_size = 2 * spad_count * sizeof(u32);
-> > >
-> > >  	base = pci_epf_alloc_space(epf, ctrl_size + spad_size,
-> > > @@ -513,12 +532,14 @@ static int epf_ntb_config_spad_bar_alloc(struct epf_ntb *ntb)
-> > >  static int epf_ntb_configure_interrupt(struct epf_ntb *ntb)
-> > >  {
-> > >  	const struct pci_epc_features *epc_features;
-> > > +	struct pci_epf *epf = ntb->epf;
-> > >  	struct device *dev;
-> > >  	int ret;
-> > >
-> > > -	dev = &ntb->epf->dev;
-> > > +	dev = &epf->dev;
-> > >
-> > > -	epc_features = pci_epc_get_features(ntb->epf->epc, ntb->epf->func_no, ntb->epf->vfunc_no);
-> > > +	epc_features = pci_epc_get_features(epf->epc, epf->func_no,
-> > > +					    epf->vfunc_no);
-> > >
-> > >  	if (!(epc_features->msix_capable || epc_features->msi_capable)) {
-> > >  		dev_err(dev, "MSI or MSI-X is required for doorbell\n");
-> > > @@ -532,16 +553,24 @@ static int epf_ntb_configure_interrupt(struct epf_ntb *ntb)
-> > >  	}
-> > >
-> > >  	if (epc_features->msi_capable) {
-> > > -		ret = pci_epc_set_msi(ntb->epf->epc,
-> > > -				      ntb->epf->func_no,
-> > > -				      ntb->epf->vfunc_no,
-> > > -				      16);
-> > > +		ret = pci_epc_set_msi(epf->epc, epf->func_no, epf->vfunc_no, 16);
-> > >  		if (ret) {
-> > >  			dev_err(dev, "MSI configuration failed\n");
-> > >  			return ret;
-> > >  		}
-> > >  	}
-> > 
-> > This part belong code cleanup by local variable epf. Can you move this
-> > part to prepare patch? Or pci_epc_set_msix() use ntb->epf->epc, then
-> > replace all after this patch.
-> 
-> I remember Bjorn mentioning this clean-up somewhere, and I thought this patch
-> was a good chance to do that. But yeah, it makes sense to split out the
-> clean-up.
-> 
-> > 
-> > >
-> > > +	if (epc_features->msix_capable) {
-> > > +		ret = pci_epc_set_msix(epf->epc, epf->func_no, epf->vfunc_no,
-> > > +				       ntb->db_count,
-> > > +				       ntb->epf_ntb_bar[BAR_CONFIG],
-> > > +				       ntb->msix_table_offset);
-> > > +		if (ret) {
-> > > +			dev_err(dev, "MSI-X configuration failed\n");
-> > > +			return ret;
-> > > +		}
-> > > +	}
-> > > +
-> > >  	return 0;
-> > >  }
-> > >
-> > > @@ -1529,6 +1558,7 @@ static void vntb_epf_peer_db_work(struct work_struct *work)
-> > >  	struct epf_ntb *ntb = container_of(work, struct epf_ntb, peer_db_work);
-> > >  	struct pci_epf *epf = ntb->epf;
-> > >  	unsigned int budget = VNTB_PEER_DB_WORK_BUDGET;
-> > > +	unsigned int irq_type;
-> > >  	u8 func_no, vfunc_no;
-> > >  	unsigned int db_bit;
-> > >  	u32 interrupt_num;
-> > > @@ -1540,6 +1570,7 @@ static void vntb_epf_peer_db_work(struct work_struct *work)
-> > >
-> > >  	func_no = epf->func_no;
-> > >  	vfunc_no = epf->vfunc_no;
-> > > +	irq_type = ntb->peer_msix ? PCI_IRQ_MSIX : PCI_IRQ_MSI;
-> > >
-> > >  	/*
-> > >  	 * Drain doorbells from peer_db_pending in snapshots (atomic64_xchg()).
-> > > @@ -1553,16 +1584,16 @@ static void vntb_epf_peer_db_work(struct work_struct *work)
-> > >
-> > >  		while (db_bits) {
-> > >  			/*
-> > > -			 * pci_epc_raise_irq() for MSI expects a 1-based
-> > > -			 * interrupt number. The first usable doorbell starts
-> > > -			 * at EPF_IRQ_DB_START in the legacy slot layout.
-> > > +			 * pci_epc_raise_irq() expects a 1-based interrupt
-> > > +			 * number for MSI and MSI-X. The first usable doorbell
-> > > +			 * starts at EPF_IRQ_DB_START in the legacy slot layout.
-> > >  			 *
-> > >  			 * Legacy mapping (kept for compatibility):
-> > >  			 *
-> > > -			 *   MSI #1 : link event (reserved)
-> > > -			 *   MSI #2 : unused (historical offset)
-> > > -			 *   MSI #3 : doorbell bit 0 (DB#0)
-> > > -			 *   MSI #4 : doorbell bit 1 (DB#1)
-> > > +			 *   IRQ #1 : link event (reserved)
-> > > +			 *   IRQ #2 : unused (historical offset)
-> > > +			 *   IRQ #3 : doorbell bit 0 (DB#0)
-> > > +			 *   IRQ #4 : doorbell bit 1 (DB#1)
-> > >  			 *   ...
-> > 
-> > Needn't update these comments,  the key information is #n, there are not
-> > big difference between MSI and IRQ.
-> 
-> I guess your point is to keep the diff small. Otherwise, I would also be fine
-> with s/MSI/MSI(-X)/. I don't have a strong opinion here, so I'll leave the
-> labels unchanged. I'll send v5.
+From: Frank Li <Frank.Li@nxp.com>
 
-(+To: Mani)
+Replace the struct device *dev argument with struct dma_chan *chan so
+callers do not need to reach into the dma_device internals to obtain
+the device pointer.  The implementation now derives the device via
+dmaengine_get_dma_device(chan), which correctly handles the per-channel
+IOMMU mapping case.
 
-BTW, I'm thinking of basing the next revision on [1] (thanks for the review
-there too). This MSI-X fix conflicts with it, and it's not just a textual
-conflict; the new link-event notification also needs to care about the MSI vs
-MSI-X selection.
+Prepare to make dma_device private and make dmaengine API consistent.
 
-Since [1] already has your Reviewed-by, I expect it to land in pci/endpoint
-first. Please let me know if you have any objections to adding [1] as a
-dependency.
+Acked-by: Dave Jiang <dave.jiang@intel.com>
+Signed-off-by: Frank Li <Frank.Li@nxp.com>
+---
+V3 split from origianl thread
+https://lore.kernel.org/dmaengine/20260923-dmaengine_prep_dma_pq-v2-0-32ed65b8a9b4@nxp.com/
+V2 change collect Dave Jiang ack tags
+v1 version at
+https://lore.kernel.org/imx/b40fa0d7-fbd0-4ee8-b99c-781d08c18838@intel.com/T/#t
+---
+ crypto/async_tx/async_memcpy.c      | 4 ++--
+ crypto/async_tx/async_pq.c          | 8 ++++----
+ crypto/async_tx/async_raid6_recov.c | 8 ++++----
+ crypto/async_tx/async_xor.c         | 8 ++++----
+ drivers/dma/dmaengine.c             | 4 ++--
+ drivers/dma/dmatest.c               | 2 +-
+ drivers/dma/mv_xor.c                | 4 ++--
+ drivers/ntb/ntb_transport.c         | 4 ++--
+ drivers/ntb/test/ntb_perf.c         | 2 +-
+ include/linux/dmaengine.h           | 4 ++--
+ 10 files changed, 24 insertions(+), 24 deletions(-)
 
-(vNTB-DMA series [2] also conflicts with these small fixes, so I'm hesitating to
-send its next revision too.)
+diff --git a/crypto/async_tx/async_memcpy.c b/crypto/async_tx/async_memcpy.c
+index c538e30e99094..893e7e17f1f61 100644
+--- a/crypto/async_tx/async_memcpy.c
++++ b/crypto/async_tx/async_memcpy.c
+@@ -39,8 +39,8 @@ async_memcpy(struct page *dest, struct page *src, unsigned int dest_offset,
+ 	struct dma_async_tx_descriptor *tx = NULL;
+ 	struct dmaengine_unmap_data *unmap = NULL;
+ 
+-	if (device)
+-		unmap = dmaengine_get_unmap_data(device->dev, 2, GFP_NOWAIT);
++	if (chan)
++		unmap = dmaengine_get_unmap_data(chan, 2, GFP_NOWAIT);
+ 
+ 	if (unmap && is_dma_copy_aligned(device, src_offset, dest_offset, len)) {
+ 		unsigned long dma_prep_flags = 0;
+diff --git a/crypto/async_tx/async_pq.c b/crypto/async_tx/async_pq.c
+index 27f99349e310b..733af24a2762b 100644
+--- a/crypto/async_tx/async_pq.c
++++ b/crypto/async_tx/async_pq.c
+@@ -187,8 +187,8 @@ async_gen_syndrome(struct page **blocks, unsigned int *offsets, int disks,
+ 
+ 	BUG_ON(disks > MAX_DISKS || !(P(blocks, disks) || Q(blocks, disks)));
+ 
+-	if (device)
+-		unmap = dmaengine_get_unmap_data(device->dev, disks, GFP_NOWAIT);
++	if (chan)
++		unmap = dmaengine_get_unmap_data(chan, disks, GFP_NOWAIT);
+ 
+ 	/* XORing P/Q is only implemented in software */
+ 	if (unmap && !(submit->flags & ASYNC_TX_PQ_XOR_DST) &&
+@@ -309,8 +309,8 @@ async_syndrome_val(struct page **blocks, unsigned int *offsets, int disks,
+ 
+ 	BUG_ON(disks < 4 || disks > MAX_DISKS);
+ 
+-	if (device)
+-		unmap = dmaengine_get_unmap_data(device->dev, disks, GFP_NOWAIT);
++	if (chan)
++		unmap = dmaengine_get_unmap_data(chan, disks, GFP_NOWAIT);
+ 
+ 	if (unmap && disks <= dma_maxpq(device, 0) &&
+ 	    is_dma_pq_aligned_offs(device, offsets, disks, len)) {
+diff --git a/crypto/async_tx/async_raid6_recov.c b/crypto/async_tx/async_raid6_recov.c
+index e53870d84bc55..306448c47aa00 100644
+--- a/crypto/async_tx/async_raid6_recov.c
++++ b/crypto/async_tx/async_raid6_recov.c
+@@ -28,8 +28,8 @@ async_sum_product(struct page *dest, unsigned int d_off,
+ 	u8 ax, bx;
+ 	u8 *a, *b, *c;
+ 
+-	if (dma)
+-		unmap = dmaengine_get_unmap_data(dma->dev, 3, GFP_NOWAIT);
++	if (chan)
++		unmap = dmaengine_get_unmap_data(chan, 3, GFP_NOWAIT);
+ 
+ 	if (unmap) {
+ 		struct device *dev = dma->dev;
+@@ -96,8 +96,8 @@ async_mult(struct page *dest, unsigned int d_off, struct page *src,
+ 	const u8 *qmul; /* Q multiplier table */
+ 	u8 *d, *s;
+ 
+-	if (dma)
+-		unmap = dmaengine_get_unmap_data(dma->dev, 3, GFP_NOWAIT);
++	if (chan)
++		unmap = dmaengine_get_unmap_data(chan, 3, GFP_NOWAIT);
+ 
+ 	if (unmap) {
+ 		dma_addr_t dma_dest[2];
+diff --git a/crypto/async_tx/async_xor.c b/crypto/async_tx/async_xor.c
+index 84458375b202b..40caee262a4ab 100644
+--- a/crypto/async_tx/async_xor.c
++++ b/crypto/async_tx/async_xor.c
+@@ -178,8 +178,8 @@ async_xor_offs(struct page *dest, unsigned int offset,
+ 
+ 	BUG_ON(src_cnt <= 1);
+ 
+-	if (device)
+-		unmap = dmaengine_get_unmap_data(device->dev, src_cnt+1, GFP_NOWAIT);
++	if (chan)
++		unmap = dmaengine_get_unmap_data(chan, src_cnt + 1, GFP_NOWAIT);
+ 
+ 	if (unmap && dma_xor_aligned_offsets(device, offset,
+ 				src_offs, src_cnt, len)) {
+@@ -310,8 +310,8 @@ async_xor_val_offs(struct page *dest, unsigned int offset,
+ 
+ 	BUG_ON(src_cnt <= 1);
+ 
+-	if (device)
+-		unmap = dmaengine_get_unmap_data(device->dev, src_cnt, GFP_NOWAIT);
++	if (chan)
++		unmap = dmaengine_get_unmap_data(chan, src_cnt, GFP_NOWAIT);
+ 
+ 	if (unmap && src_cnt <= device->max_xor &&
+ 	    dma_xor_aligned_offsets(device, offset, src_offs, src_cnt, len)) {
+diff --git a/drivers/dma/dmaengine.c b/drivers/dma/dmaengine.c
+index 34be53487a21d..52e7dcc4e5822 100644
+--- a/drivers/dma/dmaengine.c
++++ b/drivers/dma/dmaengine.c
+@@ -1477,7 +1477,7 @@ static int __init dmaengine_init_unmap_pool(void)
+ }
+ 
+ struct dmaengine_unmap_data *
+-dmaengine_get_unmap_data(struct device *dev, int nr, gfp_t flags)
++dmaengine_get_unmap_data(struct dma_chan *chan, int nr, gfp_t flags)
+ {
+ 	struct dmaengine_unmap_data *unmap;
+ 
+@@ -1487,7 +1487,7 @@ dmaengine_get_unmap_data(struct device *dev, int nr, gfp_t flags)
+ 
+ 	memset(unmap, 0, sizeof(*unmap));
+ 	kref_init(&unmap->kref);
+-	unmap->dev = dev;
++	unmap->dev = dmaengine_get_dma_device(chan);
+ 	unmap->map_cnt = nr;
+ 
+ 	return unmap;
+diff --git a/drivers/dma/dmatest.c b/drivers/dma/dmatest.c
+index 2ae3469397f37..043bb065dd68a 100644
+--- a/drivers/dma/dmatest.c
++++ b/drivers/dma/dmatest.c
+@@ -748,7 +748,7 @@ static int dmatest_func(void *data)
+ 			filltime = ktime_add(filltime, diff);
+ 		}
+ 
+-		um = dmaengine_get_unmap_data(dma_dev, src->cnt + dst->cnt,
++		um = dmaengine_get_unmap_data(chan, src->cnt + dst->cnt,
+ 					      GFP_KERNEL);
+ 		if (!um) {
+ 			failed_tests++;
+diff --git a/drivers/dma/mv_xor.c b/drivers/dma/mv_xor.c
+index c4e0dce3ca64e..dec01b6264d7a 100644
+--- a/drivers/dma/mv_xor.c
++++ b/drivers/dma/mv_xor.c
+@@ -794,7 +794,7 @@ static int mv_chan_memcpy_self_test(struct mv_xor_chan *mv_chan)
+ 		goto out;
+ 	}
+ 
+-	unmap = dmaengine_get_unmap_data(dma_chan->device->dev, 2, GFP_KERNEL);
++	unmap = dmaengine_get_unmap_data(dma_chan, 2, GFP_KERNEL);
+ 	if (!unmap) {
+ 		err = -ENOMEM;
+ 		goto free_resources;
+@@ -927,7 +927,7 @@ mv_chan_xor_self_test(struct mv_xor_chan *mv_chan)
+ 		goto out;
+ 	}
+ 
+-	unmap = dmaengine_get_unmap_data(dma_chan->device->dev, src_count + 1,
++	unmap = dmaengine_get_unmap_data(dma_chan, src_count + 1,
+ 					 GFP_KERNEL);
+ 	if (!unmap) {
+ 		err = -ENOMEM;
+diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+index f9caa1a653c5b..e1cb55890d72b 100644
+--- a/drivers/ntb/ntb_transport.c
++++ b/drivers/ntb/ntb_transport.c
+@@ -1532,7 +1532,7 @@ static int ntb_async_rx_submit(struct ntb_queue_entry *entry, void *offset)
+ 	if (!is_dma_copy_aligned(device, pay_off, buff_off, len))
+ 		goto err;
+ 
+-	unmap = dmaengine_get_unmap_data(device->dev, 2, GFP_NOWAIT);
++	unmap = dmaengine_get_unmap_data(chan, 2, GFP_NOWAIT);
+ 	if (!unmap)
+ 		goto err;
+ 
+@@ -1872,7 +1872,7 @@ static int ntb_async_tx_submit(struct ntb_transport_qp *qp,
+ 	if (!is_dma_copy_aligned(device, buff_off, dest_off, len))
+ 		goto err;
+ 
+-	unmap = dmaengine_get_unmap_data(device->dev, 1, GFP_NOWAIT);
++	unmap = dmaengine_get_unmap_data(chan, 1, GFP_NOWAIT);
+ 	if (!unmap)
+ 		goto err;
+ 
+diff --git a/drivers/ntb/test/ntb_perf.c b/drivers/ntb/test/ntb_perf.c
+index dfd175f79e8f0..5fea36432ba92 100644
+--- a/drivers/ntb/test/ntb_perf.c
++++ b/drivers/ntb/test/ntb_perf.c
+@@ -809,7 +809,7 @@ static int perf_copy_chunk(struct perf_thread *pthr,
+ 	dst_vaddr = dst;
+ 	dst_dma_addr = peer->dma_dst_addr + (dst_vaddr - vbase);
+ 
+-	unmap = dmaengine_get_unmap_data(dma_dev, 1, GFP_NOWAIT);
++	unmap = dmaengine_get_unmap_data(pthr->dma_chan, 1, GFP_NOWAIT);
+ 	if (!unmap)
+ 		return -ENOMEM;
+ 
+diff --git a/include/linux/dmaengine.h b/include/linux/dmaengine.h
+index 805668fbe4376..6d918ccf852f9 100644
+--- a/include/linux/dmaengine.h
++++ b/include/linux/dmaengine.h
+@@ -676,7 +676,7 @@ static inline void dma_set_unmap(struct dma_async_tx_descriptor *tx,
+ }
+ 
+ struct dmaengine_unmap_data *
+-dmaengine_get_unmap_data(struct device *dev, int nr, gfp_t flags);
++dmaengine_get_unmap_data(struct dma_chan *chan, int nr, gfp_t flags);
+ void dmaengine_unmap_put(struct dmaengine_unmap_data *unmap);
+ #else
+ static inline void dma_set_unmap(struct dma_async_tx_descriptor *tx,
+@@ -684,7 +684,7 @@ static inline void dma_set_unmap(struct dma_async_tx_descriptor *tx,
+ {
+ }
+ static inline struct dmaengine_unmap_data *
+-dmaengine_get_unmap_data(struct device *dev, int nr, gfp_t flags)
++dmaengine_get_unmap_data(struct dma_chan *chan, int nr, gfp_t flags)
+ {
+ 	return NULL;
+ }
+-- 
+2.43.0
 
-[1] https://lore.kernel.org/r/20261014071448.2473208-1-den@valinux.co.jp/
-[2] https://lore.kernel.org/r/20261009045949.1109871-1-den@valinux.co.jp/
-
-Best regards,
-Koichiro Den
-
-> 
-> Thanks for the review!
-> 
-> Best regards,
-> Koichiro Den
-> 
-> > 
-> > Frank
-> > 
-> > >  			 *
-> > >  			 * Do not change this mapping to avoid breaking
-> > > @@ -1573,7 +1604,7 @@ static void vntb_epf_peer_db_work(struct work_struct *work)
-> > >  			db_bits &= ~BIT_ULL(db_bit);
-> > >
-> > >  			ret = pci_epc_raise_irq(epf->epc, func_no, vfunc_no,
-> > > -						PCI_IRQ_MSI, interrupt_num);
-> > > +						irq_type, interrupt_num);
-> > >  			if (ret)
-> > >  				dev_err(&epf->dev,
-> > >  					"Failed to raise IRQ for interrupt_num %u: %d\n",
-> > >
-> > > base-commit: 5cdbd6d3a3a147fa9975e35f2602cbec9a72a932
-> > > --
-> > > 2.54.0
-> > >
-> 
