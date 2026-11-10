@@ -1,56 +1,56 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794300614;
-	b=FLCq+rQO7IMRd1gRscN8i/5pnZ17q5qkDjy7a7bvej+G7kM45gBpWbJ2FAHM1jrEVdmO
-	 zkqYCd3p/mqVRprHzRyVQnSwigen1tpOyLSnaINfPQ/V7Y5Gog9Ngo0SBrcBjM3hwTbw2
-	 cxQ7KOA4bSm/VSr7XOnpDKJ6Ci/189Rhfs8X3E0ZvfQODENuftX2Ln2qiI4TbuTJbYoZs
-	 KlIDvR7E4GvrOfSR3PJrP8PsvHEecp+71VJW46qH9o1qJsBevaR7g+n6fz8w1mrP0SI1J
-	 iuA0Q5JfsTTNeYkORx9GwpDzHXNdAkBJ5Nx9xPfPoqDm0DUiutuWle2HHKi3H2PBhcA==
+	t=1794301126;
+	b=njAFnJjQN62xTjAvHlpUk1Nh9FhExEN7YL2fGaP3mMJx8espmAc8sKdk9eV0AkFOUOL9
+	 xqLDAB0xdjMwlac8dE5k0+JFPJT4ai9CPu38ZGJT0RH6Qhk3yCrmDpRnuxxs8AxxuGzcE
+	 SksVNQYLUp5NqtyNmB5d3d4BdD8YkyNNGu+NF9fjnJ8s68GRMz5RT88CdzILpvjT/STRf
+	 nZrpG35bH/X30me96cKXZFhzt7GBKctO35uScoaVcsq+gi6xlyqfeW1wh5muStSwQbUN9
+	 0B1PvNPEgQppfSONGhkebGONQ3HoQDGQ6zzSGKZkXI7hGfoLzeb7rO7tVh4UFzmWs+Q==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794300614;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794301126;
 	h=Received:DKIM-Signature:Message-ID:From:Subject:Reply-To:To:Cc:
 	 In-Reply-To:References:Content-Type:Content-Transfer-Encoding:Date;
-	bh=26zipfpBS1u5Nu9qSXM7UeBDEHx6TRH3cfFvihN2SS0=;
-	b=b2lwdcOmLxrLuiOiIyunss8oIdVEkl3NlhsU6Z0cGG/nojRqST1agRqagoOZRGCwrA1o
-	 ctjyE42nN7KWg6QSUEXpUG0PmknS/quREyID6GBPzsMmm7soTRHu/1LHVY/EHfnJd0Qq3
-	 9yrd2HiCQe/dr2GSuT5awqApD7TTlKm9t5X0g6urGjVJPUDJ7PqDbAqwkxENaoDZheIir
-	 S6iHt0VgLZsJXyNevg4NRlt6Du6gCCotp6KcZGUgnPM5i0VUO2PPH08KU8YpO5KB09fR5
-	 6KAaP/9Kpn4QttlYDp2d/6UbmIH9AJT8Hcg70FtSoFLcxcgmEGFK988QVCjoux/Gcgg==
+	bh=xhVWndVR0o6SKTuadyxAZL9oN674X8yuA97DrjcZg2U=;
+	b=gr3Yi33KQmP9P5/f3312InAfNv9S2LJFUYrjQz8PgMABM4wkMfz8mqLJnScz8ZpzcNFs
+	 DDnjsHjQnh5Rt66jg114Sh/3j6ua0UZAsVBnxahQLs9zMOEaGI4fngjEZ4syhd+OyuQ4o
+	 jScXyehzb7zYFgAZI9VlrYT7vTIiPnMBEP1OnwJpkMbPar59SNEae0IMwQHRduPOSVdOM
+	 jUubp3h9lchgrnBDV9WKdxIadEOGcbkeGpLCUR6479KlhA/L803t2GGu7/5tx8iCmZI/0
+	 ao9RY6I5v2vB1a1bKY+74RBAdYVRevS4/+dDjI5Qy7M+vsowO1bbAY5IFdrI5+LisDw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=CQCOVZ6O;
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=IyFZ8v5T;
 	arc=none smtp.remote-ip=100.103.45.18
 Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4A414606A31C;
-	Tue, 10 Nov 2026 08:50:13 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B8CE260A2628;
+	Tue, 10 Nov 2026 08:58:45 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=CQCOVZ6O
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4DA711F0089F;
-	Tue, 10 Nov 2026 08:50:13 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=IyFZ8v5T
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6AC311F008BF;
+	Tue, 10 Nov 2026 08:58:45 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1794300613;
-	bh=26zipfpBS1u5Nu9qSXM7UeBDEHx6TRH3cfFvihN2SS0=;
+	s=k20260515; t=1794301125;
+	bh=xhVWndVR0o6SKTuadyxAZL9oN674X8yuA97DrjcZg2U=;
 	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
-	b=CQCOVZ6OlXrnIG6CjO7mpIwpw6Co6f02D/YaUk3I9M7QhRtYXUta3yJr/Icj8hEQJ
-	 aK9nWudt58NFtlgQcxKhj1UVfZ+3V0OdP2dlmTkI40Kp9EEULEnPnfL6yp1uT1q2fX
-	 cS5A3BQPOvsN2QS1vRzzfOK6UL2zdZnnBKiXOHFdLv8TJ2oDxJZhjyKbr1LXofBEDB
-	 Xb+hE9is1P/nNy/70Ul3xOjrEg6OeJoPV11KD2AJRc2jcIZR8wvEg8wOGllMHr06C6
-	 y3ow11bDDrP+P9dMBMQygPLHhVzDSANnL3kkUilwEHiJqjAk2O9KqVLmf43XW3SfsI
-	 hT1uKl5cDXjHg==
-Message-ID: <sashiko-outbox-206666@kernel.org>
+	b=IyFZ8v5TTlePo0Hh6D34oCUkZXHkZ+RStYOGMjLX/lhAydKK0ImkZpbPY63VaEM3X
+	 CzRFuMGnfo7toJncmsXEra2YY1kkz9Q3wMo+dPTboBrk5bVLx5EaFPBB/HAMJboH4W
+	 YWvwB8M5eckqkHS8IXhqgpFoVNuSRNjnnk1R9fxZLSussCl2qc2e01pJPuysgai8WB
+	 YdImJniSPcQCI5iESIwCpV2Z64cf1aiaaFXnMuLrKVKwJ+MNzLB+CjkbVZVf8/sgG1
+	 HQv4Q1lmB30nvU6w+S9Rmojz3sOKacWMvohK/M960IRdKbI20mGZOEe6y/m0737r0F
+	 b1CIc+RvKDj/w==
+Message-ID: <sashiko-outbox-206684@kernel.org>
 From: sashiko-bot@kernel.org
-Subject: Re: [PATCH v9 02/10] PCI: dwc: Expose endpoint DMA resources
+Subject: Re: [PATCH v9 09/10] NTB: ntb_hw_epf: Discover vNTB-embedded DMA
 Reply-To: sashiko-reviews@lists.linux.dev
 To: "Koichiro Den" <den@valinux.co.jp>
 Cc: linux-pci@vger.kernel.org, ntb@lists.linux.dev
-In-Reply-To: <20261110082459.1798763-3-den@valinux.co.jp>
+In-Reply-To: <20261110082459.1798763-10-den@valinux.co.jp>
 References: <20261110082459.1798763-1-den@valinux.co.jp>
- <20261110082459.1798763-3-den@valinux.co.jp>
+ <20261110082459.1798763-10-den@valinux.co.jp>
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
-Date: Tue, 10 Nov 2026 08:50:12 +0000
+Date: Tue, 10 Nov 2026 08:58:45 +0000
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Post: <mailto:ntb@lists.linux.dev>
@@ -62,74 +62,110 @@ Precedence: list
 
 Thank you for your contribution! Sashiko AI review found 1 potential
 issue to consider:
-- [Medium] PCI: dwc: stale edma->dw in dw_pcie_ep_get_aux_resources()
-  after eDMA removal
+- [Medium] NTB: ntb_hw_epf: DMA IRQ reservation conflicts with vNTB tail
+  doorbell vector
 --
 
-commit 2170b2570701b4b321fbbb9a308f0eed9f7a8dda
+commit f7a63c5c0603979fdb93290006c7e19909b1a6bf
 Author: Koichiro Den <den@valinux.co.jp>
 
-PCI: dwc: Expose endpoint DMA resources
+NTB: ntb_hw_epf: Discover vNTB-embedded DMA
 
-This commit exposes the endpoint-integrated eDMA register window and
-linked-list memory through the EPC auxiliary resource API, gated on the
-local dw-edma device being registered.
+This commit decodes the vNTB endpoint-local DMA extension in ntb_hw_epf
+and registers advertised DW eDMA channels before registering the NTB
+device.
 
-> diff --git a/drivers/pci/controller/dwc/pcie-designware-ep.c b/drivers/pc=
-i/controller/dwc/pcie-designware-ep.c
-> index 630ba172280c2..7166ec7f212bd 100644
-> --- a/drivers/pci/controller/dwc/pcie-designware-ep.c
-> +++ b/drivers/pci/controller/dwc/pcie-designware-ep.c
-> @@ -858,6 +858,15 @@ dw_pcie_ep_find_bar_rsvd_region(struct dw_pcie_ep *e=
-p,
->  	return NULL;
->  }
+> diff --git a/drivers/ntb/hw/epf/ntb_hw_epf.c b/drivers/ntb/hw/epf/ntb_hw_=
+epf.c
+> index ff92c2a61ce7d..e0016128b95c0 100644
+> --- a/drivers/ntb/hw/epf/ntb_hw_epf.c
+> +++ b/drivers/ntb/hw/epf/ntb_hw_epf.c
+
+[ ... ]
+
+> @@ -347,16 +581,20 @@ static int ntb_epf_init_isr(struct ntb_epf_dev *nde=
+v, int msi_min, int msi_max)
+>  {
+>  	struct pci_dev *pdev =3D ndev->ntb.pdev;
+>  	struct device *dev =3D ndev->dev;
+> +	unsigned int dma_max =3D ndev->dma.nr_irqs;
+> +	unsigned int dma_min;
+>  	u32 argument =3D EPF_NTB_MSIX_ENABLE;
+> +	unsigned int ntb_irqs;
+>  	int irq;
+>  	int ret;
+>  	int i;
 > =20
-> +static int dw_pcie_ep_check_edma_vfunc(u8 vfunc_no)
-> +{
-> +	/*
-> +	 * The DWC endpoint databook says it is not possible to assign the
-> +	 * DMA/HDMA registers to any Virtual Function.
-> +	 */
-> +	return vfunc_no ? -EOPNOTSUPP : 0;
-> +}
-> +
->  static int
->  dw_pcie_ep_get_aux_resources_count(struct pci_epc *epc, u8 func_no,
->  				   u8 vfunc_no)
-> @@ -865,14 +874,30 @@ dw_pcie_ep_get_aux_resources_count(struct pci_epc *=
-epc, u8 func_no,
->  	struct dw_pcie_ep *ep =3D epc_get_drvdata(epc);
->  	struct dw_pcie *pci =3D to_dw_pcie_from_ep(ep);
->  	struct dw_edma_chip *edma =3D &pci->edma;
-> +	u16 ll_wr_cnt, ll_rd_cnt;
-> +	int count =3D 0;
-> +	int ret;
+> -	irq =3D pci_alloc_irq_vectors(pdev, msi_min, msi_max, PCI_IRQ_MSIX);
+> +	irq =3D pci_alloc_irq_vectors(pdev, msi_min,
+> +				    msi_max + dma_max, PCI_IRQ_MSIX);
+>  	if (irq < 0) {
+>  		dev_dbg(dev, "Failed to get MSIX interrupts\n");
+> -		irq =3D pci_alloc_irq_vectors(pdev, msi_min, msi_max,
+> -					    PCI_IRQ_MSI);
+> +		irq =3D pci_alloc_irq_vectors(pdev, msi_min,
+> +					    msi_max + dma_max, PCI_IRQ_MSI);
+>  		if (irq < 0) {
+>  			dev_err(dev, "Failed to get MSI interrupts\n");
+>  			return irq;
+> @@ -364,8 +602,17 @@ static int ntb_epf_init_isr(struct ntb_epf_dev *ndev=
+, int msi_min, int msi_max)
+>  		argument &=3D ~EPF_NTB_MSIX_ENABLE;
+>  	}
 > =20
->  	if (!pci->edma_reg_size)
->  		return 0;
+> -	ndev->db_count =3D irq - 1;
+> -	for (i =3D 0; i < irq; i++) {
+> +	dma_min =3D dma_max && irq > msi_min;
+> +	/* Reserve one shared DMA IRQ when available, then give the rest to NTB=
+. */
+> +	ntb_irqs =3D min_t(unsigned int, irq - dma_min, msi_max);
+> +	ndev->dma.nr_irqs =3D irq - ntb_irqs;
+> +	if (dma_max && !ndev->dma.nr_irqs) {
+> +		dev_warn(dev,
+> +			 "No IRQ available for endpoint DMA, continuing without DMA\n");
+> +		ndev->dma.type =3D 0;
+> +	}
+> +	ndev->db_count =3D ntb_irqs - 1;
+> +	for (i =3D 0; i < ntb_irqs; i++) {
+>  		ndev->irq_ctx[i].ndev =3D ndev;
+>  		ndev->irq_ctx[i].irq_no =3D i;
+>  		ret =3D request_irq(pci_irq_vector(pdev, i), ntb_epf_vec_isr,
+> @@ -377,7 +624,7 @@ static int ntb_epf_init_isr(struct ntb_epf_dev *ndev,=
+ int msi_min, int msi_max)
+>  	}
 > =20
-> -	if (edma->db_offset =3D=3D ~0)
-> +	ret =3D dw_pcie_ep_check_edma_vfunc(vfunc_no);
-> +	if (ret)
-> +		return ret;
-> +
-> +	if (!edma->dw)
->  		return 0;
+>  	ret =3D ntb_epf_send_command(ndev, EPF_NTB_COMMAND_CONFIGURE_DOORBELL,
+> -				   argument | irq);
+> +				   argument | ntb_irqs);
 
 [Severity: Medium]
-Can edma->dw remain a non-NULL stale pointer here (and in
-dw_pcie_ep_get_aux_resources()) after the local dw-edma device is removed?
+Does reserving tail vectors for DMA here conflict with the endpoint's
+last doorbell vector?
 
-dw_edma_probe() sets chip->dw =3D dw, but when the device is torn down via
-dw_pcie_edma_remove() -> dw_edma_remove() (for example, on the
-err_remove_edma error path in dw_pcie_ep_init_registers() or during a
-PERST# reset in dw_pcie_ep_cleanup()), neither function clears chip->dw.
-While dw_edma_emul_irq_free() resets db_offset to ~0, the
-PCI_EPC_AUX_DMA_CTRL_MMIO and PCI_EPC_AUX_DMA_DESC_MEM resources only check
-!edma->dw and !edma->cfg_non_ll, so callers will still receive DMA control
-and linked-list resources for an unregistered dw-edma device.
+In MSI-X mode, pci-epf-vntb sets the MSI-X table size to ntb->db_count
+(at most 32), so pci_alloc_irq_vectors() returns irq =3D ntb->db_count <=3D
+msi_max.  When irq > msi_min, dma_min is 1, which sets ntb_irqs =3D
+ntb->db_count - 1 and assigns 0-based vector ntb->db_count - 1 to
+dw_edma via ntb_epf_dw_edma_irq_vector().  However, pci-epf-vntb ignores
+the vector count in argument:
+
+drivers/pci/endpoint/functions/pci-epf-vntb.c:epf_ntb_cmd_handler() {
+	case EPF_NTB_COMMAND_CONFIGURE_DOORBELL:
+		...
+		ntb->peer_msix =3D argument & EPF_NTB_MSIX_ENABLE;
+		ctrl->command_status =3D EPF_NTB_COMMAND_STATUS_OK;
+		break;
+}
+
+Because vntb_epf_db_valid_mask() still exposes all ntb->db_count - 2
+doorbells on the endpoint, ringing doorbell bit ntb->db_count - 3 raises
+vector ntb->db_count - 1 on the host, routing the doorbell interrupt to
+dw_edma instead of ntb_epf_vec_isr().  The mismatched
+ntb_db_valid_mask() between host and endpoint also causes
+ntb_transport_probe() to compute a different qp_count on each side when
+mw_count >=3D ntb->db_count - 3, preventing the transport link from coming
+up.
 
 --=20
 Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20261110082459.1798=
-763-1-den@valinux.co.jp?part=3D2
+763-1-den@valinux.co.jp?part=3D9
