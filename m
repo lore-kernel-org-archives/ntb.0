@@ -1,13 +1,13 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.125.94
-ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1794284763;
-	b=fwpSRT0VQjFGH9N1MzFOAHVxuxBEoktpaM+VrQA1tLWC+fbaU/FLp/QU7hu9YTUJXvqv
-	 S5K8GXLvNV/3gTm6qEAcGT16Ik1OE/AFk+CVUsvdkXTX1/nTcUVFS3p+EtY0Dh3eOYx/r
-	 UIfTfT+BOomKlECUmUFNtDdrrONMi8nGycndar207VbZJggjX/FCTogtRc3n7JhGarr7D
-	 fhG9WzghK1VNxhuUdRA8ZDI/+3pHLKcSzj2RQAkvS6ZTFzJQzzcH8xH58IScPeIpgSqEI
-	 HhgA+2514fDUslO4VfBlBOJbCSEzrBzGhrBLOQTlx8PopUJ7SD8FdDyvkR6DCDAyrzg==
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.remote-ip=40.107.74.81
+ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=fail;
+	t=1794285587;
+	b=gTM3TcGKgeLT4vgq0OxNO/trwGhEzGWLdfKM0vW00MBSdWgWf9j0jbzh4szf9zmzrFwo
+	 KKzhe/xQf9myzIk4zq9nJ4SA9Vqu/88B0uyQIBSYy7NwC9VMzTreVBWcp2/4LQ9TLBvN0
+	 NozucS2/N2wStPJ1lAAurQKBQyoCCXfylONqE+QEkSDFG0mrZb0DJvM/VOX10P1ZFMSnx
+	 Y5N6iGVnc+MjImD+VVP2Va/aQ/F2OXQ+/Oim9CtiuqAX85fiKN77nATpkp5mkJB8H2Y+k
+	 7gmlmrJcMQvwH/uZj0C0D8zr6Smd2Q37RcT+bG7q7EPlc5ckesz+LI2YCCcFFqfmZxA==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794284763;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794285587;
 	h=DMARC-Filter:DKIM-Signature:Received:Received:Date:From:To:Cc:
 	 Subject:Message-ID:References:Content-Type:Content-Disposition:
 	 Content-Transfer-Encoding:In-Reply-To:X-ClientProxiedBy:MIME-Version:
@@ -24,71 +24,69 @@ ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
 	 X-MS-Exchange-CrossTenant-Id:X-MS-Exchange-CrossTenant-MailboxType:
 	 X-MS-Exchange-CrossTenant-UserPrincipalName:
 	 X-MS-Exchange-Transport-CrossTenantHeadersStamped;
-	bh=uCD4obxJig8e0BbOjtjv8vzGZR/0jPTZRUh13BrCcrM=;
-	b=sUqXjm2HHY+hzdl0xWJbVaqKqXXB/R02gaY/lSY/QhsaOjj13Ye3BObRmqjpLuS35Seq
-	 20DdMKaL6ewX7nD68UJYPRTzs4MBzcw5ODjk/Cms0xNTyZMA3iPg7A8sNVszQ0UijVDkJ
-	 5CotfDbgrXeU6k0Ns9nPnZO4UMR7GhFhuF5HRkx2RYI7pxnztvcQ6BLnaFtfu0WQLNZ39
-	 7kS2d77dGe570yVSiH/G+c6+VJyjvDb4KRioB2ig13axf4Wl2g/gB0rZOGsZZzrlJkWNd
-	 YD6DyKEXR38EPUKPV8zt1sTTclD5w6ajhcYCbSnBLnB4PcFVmFDL3DrQkAQVIoU/+Tw==
+	bh=ANnG2vDn9typgM+nx/ChI4yxnDb+1iRzRuA5XP+xrrc=;
+	b=Wx30ttNxohUWZcMwSAbQ1/C0X42Dh2DJQlBflpKB6/ecKs/lO2spELtOameCQ8WyO+gl
+	 AZxIeyMwR9L2mLXu7NgFHdnDHuI5hEkNecLr/uutUz0zqFEncplyfQQ1lFuw0tQYeTKMW
+	 F3Cyu5PhFxCd1P1cSA16nieMkhh9pETu/1hNqKWO2anf7r7zfki3j7FUKZ8uCuVIwJyH2
+	 vfJ/Y6D4DL5U701o34+HGVc7YmU7h8VrSOm1oa9/Z5fXUuupSKKTxkVe3k3N8v8ZMJOYT
+	 mJBXRAWWlfj70q7eU/SbPO4nd/U6uZVkKMNOba+RTkN7GGqSUZxD7W/B9ScWO02RJoA==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=valinux.co.jp;
 	spf=pass smtp.mailfrom=valinux.co.jp;
-	dkim=pass header.d=valinux.co.jp header.i=@valinux.co.jp header.a=rsa-sha256 header.s=selector1 header.b=KIaf3uwk;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.125.94
-Received: from TYVP286CU001.outbound.protection.outlook.com (mail-japaneastazon11021094.outbound.protection.outlook.com [52.101.125.94])
+	dkim=fail reason="signature verification failed" header.d=valinux.co.jp header.i=@valinux.co.jp header.a=rsa-sha256 header.s=selector1 header.b="c6vKp2A/";
+	arc=fail smtp.remote-ip=40.107.74.81
+Received: from OS0P286CU010.outbound.protection.outlook.com (mail-japanwestazon11021081.outbound.protection.outlook.com [40.107.74.81])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange ECDHE (secp384r1) server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F3803606A32A;
-	Tue, 10 Nov 2026 04:26:01 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org F3803606A32A
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2F269606A325;
+	Tue, 10 Nov 2026 04:39:45 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 2F269606A325
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=valinux.co.jp header.i=@valinux.co.jp header.a=rsa-sha256 header.s=selector1 header.b=KIaf3uwk
+	dkim=fail reason="signature verification failed" (1024-bit key, unprotected) header.d=valinux.co.jp header.i=@valinux.co.jp header.a=rsa-sha256 header.s=selector1 header.b=c6vKp2A/
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=tdo9kZ4r6eMyVx5qhDqaKe+lfYBwWRGuopUJE+IrvE6AUAD0O+la3HhVM+0OUP4N2pvbq7RFs8DcU/hSbe+HEzEOslue+eNMRL+Rwk3QmrDxpScE7QdAbSzVLrB0GIT1bwHVwOhO4064SbYe2Rti5z7KLmxZqiXaiNExrN6iSewL990DKMhkIhapgEHGjMKfvDhr5jqv8qsC/oP+VCgF4Clx0n6zFpXrvnYWl9st3LLdHsD4wV3em3KdR4BL+lMQy00Nibs1uHd5Uz24e1/EKH0d3kxrdgtYj6f7qyYC4yW9PhKYqSyU+jGPZWPsij+7bNoyiUI8YeFTTjhHhZtwbg==
+ b=brgVfPZOIHamHcvKQzdZKGHLRzO0GalQPZrigHS626uMp58aKy6IZ7APMqnnibT7ZjFGuHr2DQjsn6690tIKrB2KRXHLYuxTgKxZxmHO/hJeTp8fSx3agXijs351CD1lqJ6ohXhGOqIjw6e0Z73RXCMSyJBDSEBgi4CeF93kFD4CDiY5ehO9HZAbUFOexgFx2XHYckTKCdVlxO6DuI0u1Jmu6kT6dEq91IXwfYtWgjmD2+zSGLR6ah3qRSrKECmtfNQrPtbZhYstEDmr9h2RHlPc9e8R4vLVHzRKZcGqKX0A72unTsoxzN78IGd/0VlyfFYCz6/w+TWg5pJt8wa39w==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=uCD4obxJig8e0BbOjtjv8vzGZR/0jPTZRUh13BrCcrM=;
- b=wD1iQG7qX4CIQI+fc6YxgUAUnUfK0eyos2UIw7he4EA5Yf0OoZn5qdtVzouJx8aeEx02e3XfpSmM0EhUJkqw/n0H93H49PtzYLOBe9TnL0qjgvqzPtmIcVZfMwWzKS9gMwjq2EQ4e/sj3W70UN8idpwgITpq5LVKupohvxw0JKNFKmtSKa7fBKN9YRSDVZlG4he3etmvZdojIvaYjFj2Bk6xixImoeHBVAm3Mw5ZxZ1rKPHVf9JE+9KuonmXK8M1m/ZFzG19HPhPZRTmhM1T+gY+tHibvXNzJ6F+C8IM7JiLGngTM7m+xqYvBjBoz68Lv8eZ4L5wu8m6q0DQCJj4kQ==
+ bh=WsQgIvOaaQVuZ/EexQJOgp8BBcbP1A/qctMN/ej6+Rc=;
+ b=Lgd9HcRgFJpxCve5JnTQsBxFxZXu8f62MAi1QosJkEEqm7p7ioM/89swIudpInXLXg7xj6pd+v7fqGGbB0UbRSF0sGHFeWsFc5Dx8HTM/HFIrqdcZYrgzmahjTHEztVwQCtoUfcN7BbNoOI5r6P0OxmER0uEeSGbcCuwO/k6UAKn2YmFXv0kg8uOO4AbatXDiUy6XCyqwPlc5oicsjB7IDN+U6p/asAhEofSlnHOGqGhk/CaNWsyDf6n5AJDygEXT6dpm/jLYRSNhwuH8ruEkPvtkj6bawfTggHMgcCv/w5K+VeI85jVka08jrKP5ztxA68H5EcbjI4VhhDm2BLNqA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
  header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
  s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=uCD4obxJig8e0BbOjtjv8vzGZR/0jPTZRUh13BrCcrM=;
- b=KIaf3uwklQkiT+XMp1UrlzbfRZEomTU+2kbSBsWl2hKZ0A70A+0iRxBfP8nHIN1XlShYozP8cdK9/whlUvKjMFuhGkTm/6b2y788poTNVBfWQGRSXx/GIUrI0STQ/Mef6PoxdDvZAL9oBCDTfbMYO2gK6TwqO7dGkCgrXPBIX08=
+ bh=WsQgIvOaaQVuZ/EexQJOgp8BBcbP1A/qctMN/ej6+Rc=;
+ b=c6vKp2A/dFroYUeX0oaZTZeWXIO8y/DrQR4bW0Fs0bu9knbGhLT5HGZo0Lv8bTRfPBbuRKPeoP0ac4Nna1lxy27Exdl3WBUcSuzqkeCMzXZUCkNsRlAMS7gem8GbYxou9ahnWEpx5WZNDDFd1Rca0sKhzxwcNBfKHXBwpT6GDC4=
 Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=valinux.co.jp;
 Received: from TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:325::11)
- by TYCP286MB8040.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:3ed::11) with
+ by TYCP286MB2366.JPNP286.PROD.OUTLOOK.COM (2603:1096:400:18c::12) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.592.13; Tue, 10 Nov
- 2026 04:25:58 +0000
+ 2026 04:39:42 +0000
 Received: from TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM
  ([fe80::cce5:2aa8:53f9:dba9]) by TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM
  ([fe80::cce5:2aa8:53f9:dba9%5]) with mapi id 15.21.0592.012; Tue, 10 Nov 2026
- 04:25:58 +0000
-Date: Tue, 10 Nov 2026 13:25:56 +0900
+ 04:39:41 +0000
+Date: Tue, 10 Nov 2026 13:39:40 +0900
 From: Koichiro Den <den@valinux.co.jp>
 To: sashiko-reviews@lists.linux.dev
-Cc: Frank Li <Frank.Li@kernel.org>, 
-	Manivannan Sadhasivam <mani@kernel.org>, linux-pci@vger.kernel.org, ntb@lists.linux.dev
-Subject: Re: [PATCH v8 06/10] PCI: endpoint: pci-epf-vntb: Allow DMA and MW
- to share a BAR
-Message-ID: <jbypqoshfm4lc7anbe7dxhmdk6o7sdkjlkmmuwuicl6e66ekai@ytzbt63rahwn>
+Cc: linux-pci@vger.kernel.org, ntb@lists.linux.dev
+Subject: Re: [PATCH v8 02/10] PCI: dwc: Expose endpoint DMA resources
+Message-ID: <uvq3ukrznnilb5jl5utfvezi25xnmtto3ucormlhrns4rkbdto@t2xvccuuhc76>
 References: <20261022082230.3164834-1-den@valinux.co.jp>
- <20261022082230.3164834-7-den@valinux.co.jp>
- <sashiko-outbox-181205@kernel.org>
-Content-Type: text/plain; charset=utf-8
+ <20261022082230.3164834-3-den@valinux.co.jp>
+ <sashiko-outbox-181198@kernel.org>
+Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <sashiko-outbox-181205@kernel.org>
-X-ClientProxiedBy: TY6P301CA0012.JPNP301.PROD.OUTLOOK.COM
- (2603:1096:405:3be::13) To TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM
+In-Reply-To: <sashiko-outbox-181198@kernel.org>
+X-ClientProxiedBy: TYCPR01CA0137.jpnprd01.prod.outlook.com
+ (2603:1096:400:2b7::13) To TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM
  (2603:1096:405:325::11)
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -100,518 +98,213 @@ List-Owner: <mailto:ntb+owner@lists.linux.dev>
 Precedence: list
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: TY7P286MB6866:EE_|TYCP286MB8040:EE_
-X-MS-Office365-Filtering-Correlation-Id: 2d067144-f6fc-4ba8-dd61-08df3ee2b7f8
+X-MS-TrafficTypeDiagnostic: TY7P286MB6866:EE_|TYCP286MB2366:EE_
+X-MS-Office365-Filtering-Correlation-Id: dd0684c7-6555-4fbf-511f-08df3ee4a2ad
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|376014|23010399003|10070799003|1800799024|366016|261026135527099003|4143699003|5023799004|56012099006|261021121427099003|261022105027099003|261022075727099003|261009223027099003|261026140227099003|261026121527099003|261102123227099003|261028144727099003|10067099003|22082099003|18002099003|6133799003|3023799007;
+	BCL:0;ARA:13230040|376014|366016|10070799003|23010399003|1800799024|22082099003|18002099003|6133799003|3023799007|4143699003|56012099006|10067099003|261028144727099003|261102130727099003|261009223027099003|261102123227099003|261026121527099003|261026135527099003|261022075727099003|261021123027099003|261021121427099003|261022105027099003|261026140227099003;
 X-Microsoft-Antispam-Message-Info:
-	dxdNrB+rsoBzdgmtz4n6Ol32qcrLpioS10l8VvCmQ0/JnIifXCPizYatIaGs8owqXbWri2SNFVm7QaTEPSwxRX46DtRfpSG+1JpPYiYPC8hBHxu3XBp5QYzGTrpsBswqu35I3hZrsxrBdjCY6UIneHgMGE8N+hKYgd6BK+CT7EYRlVmmuhb5/J5VCr481maZ3wB1avL5x3wgTNiH0gpLPsAVw8x9R0gI4lrjLYVC/KqTKDFhfjNUNXKwfhjKFQKfYj4apNqIOigJpZAHs0SdK0EwB+XlKsn0nIcsFg4sGEVLHQCT4Zo0VNHnuhx3vn8GGZiRrHSh6gd8APPzY/xs+UeijdUt++Yi5yMq0ARXXpEa9wXoHzJzPei1Hmz7A6qjEiT5ekNpP7hBEqxUkYT8shqBVAIhx0QkfTJp5QhgbBNUeSsObAn9K/3OySWCymhL6Znl19w5MTJc1GiyOTZ25G+/If1AfsKYDzLIs6Ly+muNoc4Fv1W+87N1IR2jn6PmgZjf9zKR/J/O7kWeK2moHmLPXZ6pSQX3OoWW+4b9JUvsURJdKnOya1OznaglnP4goGaKLv5S0wjAdqGHA29hdrwXrXcoSEURqLR2x97ppOQ=
+	gkW6Z9+AjfLLJeybVJwuV03DN6g8Gxzo8JMb4u5vZvTaWXRUoTsOJnNNgtfIL0HwBWzcJEV6n7av97Py9Ti4x0mBUiaT6udvIBk+4jZU8zF2v+mldTNoSLeeZh+/WaqJc6r3VbMnfM4hCMaCVExqEuBeKgseIaoP2W6D/+7cbb8NzJ33qB85b6+hEOarvICGfIpxBtOdYVxnU1Y/LMQ1DJe3LTkPms3PLlwvMVU8BSdYh2C73DhouPLFzj7e/v43zq+zrh0CBh3UdRrpXVvrdjPqh84JNTq8NJuBWwG3c7u5Ge5qfWvZTNpeT4K4vPQE0bKHNiKwZnrRi1nypS9/SR4Qnw881fuaLyU60lXWy98a1KYZTAoaFFdBv/FlBU0okfUXa6M4kqedmIYTU9sV5Nu511zpzcp2vB9lU9EGvUHrXJIuyrxsd1zovZoThu4Cf/+rQZejozq7nMGHUgWDa2L5JcRJyH4SCyZZsmCIn3jBCJC1AYk7hp+xdkPh4OULF3UmEndpbENNCbrHy5W8fS1Ehai2YWvhCrBTHD/A+nGoP8SnlZyBL4FEoPg+awZr0WS8YcG+LWz9q3OUuvK5tlTcQ9gVgPfDrPR1E3tL4dA=
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(376014)(23010399003)(10070799003)(1800799024)(366016)(261026135527099003)(4143699003)(5023799004)(56012099006)(261021121427099003)(261022105027099003)(261022075727099003)(261009223027099003)(261026140227099003)(261026121527099003)(261102123227099003)(261028144727099003)(10067099003)(22082099003)(18002099003)(6133799003)(3023799007);DIR:OUT;SFP:1102;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(376014)(366016)(10070799003)(23010399003)(1800799024)(22082099003)(18002099003)(6133799003)(3023799007)(4143699003)(56012099006)(10067099003)(261028144727099003)(261102130727099003)(261009223027099003)(261102123227099003)(261026121527099003)(261026135527099003)(261022075727099003)(261021123027099003)(261021121427099003)(261022105027099003)(261026140227099003);DIR:OUT;SFP:1102;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?SkxaOTlpS0szdEpQUU5wYXk4a3pLYmp4VlJmQUlCaklNL0RyQVVRdkVFc2s3?=
- =?utf-8?B?SStLMjhIWEpCTnhJUFM5TEIrVW9wSkxUWi9JTUFhS1lvWGhtSFBSN0VuK2dZ?=
- =?utf-8?B?dk9vRVFlSFBGNExXcWNvQVRsb2hIZG10ZWM3ZG11Y1FoNVQyR2E1N1FyaWZF?=
- =?utf-8?B?WjR3K0hLZjNDVVlpQW9waUZ1YS80NlQyb3hPeVg1NWR1VkNHWHU1bmdqeE5r?=
- =?utf-8?B?OEFldEdKdmF0ZEtnQ3NnWWp0NklQYmJCQU4xanZ3OGt0RjF0QlZJZ0xUV2lG?=
- =?utf-8?B?bXpQTytoVS9HaXZGQWJjcVZLd0hCcVpZNFpmNHozVktEL2FGNUk0dm53Nnh2?=
- =?utf-8?B?ZHBGQ3poNWNXdXlsdlhhUWpnN0FlUTBHOWIyaHlwT1hRclB5WUxFL3luOEcy?=
- =?utf-8?B?NkE0bE1nVE9ZYWxtVnFPUVFnQWZFMUVuODRsSEVsQzdYVE8xSVV4T0cvaUZV?=
- =?utf-8?B?blhTb1Bxd08wWmlsWFNtWjF4bHkwQ2Z0MHAzTDExK1RjeU9MRi9yTUlvLzZ3?=
- =?utf-8?B?b2luNWU1T0t6NFQ5YkJROCtSSVJPeVhzNFk3cDNiczdvNHl6b3FHdVhxWG9J?=
- =?utf-8?B?TTJYZ3diT1pVWkViTFFsamJVZStlcU5tN0xZMXA1TWpOUDN2U3Vxd1RXTkhj?=
- =?utf-8?B?T3pkMDVxRlEybm5RQllRZ2pjR25UZ2ZDRm5hRFRjeER1KzZTV3JxaFQrbCtT?=
- =?utf-8?B?UWZhWThHcU5tZXBWeGZIY1Fia2NTYXgxVURFbDVkbndSZ2VjN1Z2OWJXT0N2?=
- =?utf-8?B?RU1BKzdQN2pidU5zN1cyWmh4TGNLSmdubFBJdVBCZXVZVjN6dVhtNUN5UnNL?=
- =?utf-8?B?TTFBOGdrb3E5TGNKQzV3by9xOElIM1FzZEZ2WkM1ODEyQ1JqTGxMSnhKTVBG?=
- =?utf-8?B?NElOWWdQaHk4SDVGWlB0RzRTWUVhTG0vZ2RpNjZtcHlNSVFoajVMd1g1THp5?=
- =?utf-8?B?MndOM1R0YjBzZXNDL2V0VlN1MElwVGk2SitkbnNDUVN1T3pLRjZTUU9abnI5?=
- =?utf-8?B?aTcxcE14RTVFYkhmbWQ4cEx1ZjdUM0YwOHhrcXMyY2FCdTlMam1UZWZ6Vmdo?=
- =?utf-8?B?YUIxTXZFTVUyaVVlZmRDRzNNU0N3M0QxU1NJUHVZZkx6UHhBRXBBNFNzYUdJ?=
- =?utf-8?B?R1lldnJMWkNpVVdIRzZwVEdpMVBIc1YwVTIyNVNSdnF5Z3l0aXBRVExMelJw?=
- =?utf-8?B?aUZuMWZZMmRJbThYWDRaNjZXb05NcXI3TUsvWHRkZ204MjdwLzhBOE92ZzNp?=
- =?utf-8?B?dEZkTVd4REE0UXozMzhOMVVXZWk0ZjIvNW55WVFoRldqZmtzaDFHcVgrRXBN?=
- =?utf-8?B?Z3l3SmFMNkQ0bmZua25MTjlualNtb2dkM0lKYit1RDhxVlhIajdqekRUZWFh?=
- =?utf-8?B?T1JOM2JUM2JMYmxDa1lDZUhiaE9CZWJEOTdiS1dCbklzYlVvM1NHSDZNQ0hT?=
- =?utf-8?B?bkpKS2FiUXluM1dzUXAvaUUyc2FsalhVT0JmWWtnV0RKNXNkSkZGZkpaOEQ3?=
- =?utf-8?B?dDBIWFVwMmZiS3pySGlacEFiN0JkTndZalJaNHpsK29wWjZranhDM2IxK2Va?=
- =?utf-8?B?aHdITFdaSFROdFh1YWtzdElXM0VwcjZoVGxhQ0EyT3JHRkp6VmZpbGIrUGUz?=
- =?utf-8?B?cEY1SFVOM3BEOUJ5QVFodzRqUjl2WlRIZjBSbmNmaUo1V0doS2g3MWlsMlJj?=
- =?utf-8?B?VDdBb3NVMldwdWJBKzBIWlJJSjBGU0VhM2syNHBPNEtBaUJDa1Z6TXhtSjNI?=
- =?utf-8?B?OStlaG1mT1BDdElvTDk4YjMvTWN6Mk1GUTFjYkxmRmpZUWZFaFZMMjluRmFX?=
- =?utf-8?B?TDNza09sVk9reDBPb1lHSmFUUXlkK2k5T25FTnlYeEE5YzZQb1V0NXJZT2pH?=
- =?utf-8?B?bTdvWXpCNzZHZ1ZZNlJmTngyRnBQYzBKMDdydUxkVEtCR3dXRVh0VjRlQlNF?=
- =?utf-8?B?S3NqemNSSkV6NVdZTUZpeW0vUWxhRFdOUnFpUm0xZmh0VTNhWENCY00wKzdR?=
- =?utf-8?B?US91MDlIdDB0UW9OT0pUUk9EQXZiVUpKSGhVR29od085MW1iSWRzVnhERU1Q?=
- =?utf-8?B?aDdBWHN6UDVGOEpVWFZ1QjBRNVlmb0YrVS8xQVN6Znc3NUc2SjdlalhPSVRa?=
- =?utf-8?B?ZzFFMzZRNCtZeVVqTFU0L2RUdnhWdDRhY2xOK0JEekxqRmw5N29TT2RJdW44?=
- =?utf-8?B?eFRLOHZwdUN3K2Fnekk0em8xRm42S3UzVUk2clhKeGpCd3duR1l4dU9xTU9o?=
- =?utf-8?B?VjFITnFndjlCeDVTTHBpSVFRcXIwNmkveUgrZG5Td3hjcFlKcFR4RG9Ga3c0?=
- =?utf-8?B?bEg3NFlyTGNCY1J3emtQeVlQYlM4U3NZN0p2bm5ROFA0S0U0cXdLMWxWQlV4?=
- =?utf-8?Q?8Zuf73p0bJXto3tTXY3y6+LL/eU1XAoefrZQ8?=
+	=?iso-8859-1?Q?ODTKhoVEPtrcaKeOFunZCDlrc8YaiSHza1derFz+B+Psl+jytj+GQnOMZ3?=
+ =?iso-8859-1?Q?rz+ZolKHuvo9ALSVW8nkbReaaQTay8q6QmDOs/+6gGma69Z+4wqSvEdD3G?=
+ =?iso-8859-1?Q?YCMAzklHDlP5Y66gBZqJxVUdzVhr9APUGmBVKK9oFfIU04XhIFK0JeqcF6?=
+ =?iso-8859-1?Q?5gTvWFlY/6hYgYWHQF0wbCRvdFY3PYC5UyBIQi+FblyRmale9MGP1fzbAQ?=
+ =?iso-8859-1?Q?le9zDIt5va175OzVQ1PkMsq5Y0MTw1c7/dSfNIIpj2Ys30IWjgX1ac7G4T?=
+ =?iso-8859-1?Q?gg0xWfuKG1qpxVKC9wejmQY1V7Ot2T8u41GRMa2WwSxiKFN9Zv0PHOM3Dx?=
+ =?iso-8859-1?Q?E202aus2BqFhuB81yG5vebfNrBGbjOclPlQhrjZwk6elaZyxFFXqitRlrb?=
+ =?iso-8859-1?Q?l4thJoQ9FJoM9ePnq5R2p4xFAtjBtQq7bOLubRUACmFrSDc7hKbbTLkp0N?=
+ =?iso-8859-1?Q?RyPz55z9Sr5ohOl3zO3ouCjfx3MU2HBQ5i2yI/zHAcX8Dof23MjgYHOU0E?=
+ =?iso-8859-1?Q?gbD4tn3fQ/s4po2S6DnOCMTlYn9WMovR3xLY02lUM0mmfPjFKVox2dbXuP?=
+ =?iso-8859-1?Q?3LxTWURh6uujGZLqflXYTGhZ+4GQRdz1PGaxTiEmhpFYJhIPjv6VlpvqT5?=
+ =?iso-8859-1?Q?t9GuL87VXsI96hZxwy8O27zN2Hoeohi7LDnc0JPn8d4qHDjmFL013/dyKS?=
+ =?iso-8859-1?Q?f5ooLckOeSE296eKiMYh3BrlHuTJgIbPBEIlL1ClX0nthC17YtQc3OJAIl?=
+ =?iso-8859-1?Q?9i3KSxYpvF3UrIsoewz3fGociUcZttoLAgM/mP9v4dOR3MTK/KhCuA84Lg?=
+ =?iso-8859-1?Q?i9UtKQfz9y/PXEyk9rzw/CR/9/iXg1H0aqGS1LoF09kkaFPgfrA28QzqQ+?=
+ =?iso-8859-1?Q?jGP4jYLWhi5D7KRWfYPoOcyCSr/fbO/w2JLJIeBlRv57JZ+V+VoyGo+JX+?=
+ =?iso-8859-1?Q?w9vP29cALeQOklVZyWjhwOFJn9OUtcUHiL6KkHDa8n1JR+6+x8OwYbmhYu?=
+ =?iso-8859-1?Q?eCSPpzb29taq4cETtiBhYEhYTp856MP/w98Z3bpbC58LHPuFObU+4IT8E/?=
+ =?iso-8859-1?Q?egbkzmCzIoMFp5E9r0qaeebBMTPmrmg2IpGvU0RJoNTH378Lgp+HFEa7r9?=
+ =?iso-8859-1?Q?Qku+QgMYeLEA0PdtMw/Zxr3VkdSgBzDBijzoSoRWmjUHcmoeHsezY9o0Eu?=
+ =?iso-8859-1?Q?z9K2+9OMp/8RBlSaw0fNTF4VBXmQ+DptN5Ge3BFKmQmuAUJVudyaTgltlP?=
+ =?iso-8859-1?Q?/PmfmNoASp8UxKnEEgEwNHvCNMGixQpa/nJwAi5Ov2T4hZxD3PvRltTjBw?=
+ =?iso-8859-1?Q?CHzlhpfgl3J/pnVUZ5i6PxWRRulCsLwVAnaYGxZEI9NyoJiX4Q1skF9Rjm?=
+ =?iso-8859-1?Q?cazvy7vgafCCDTEJ0qDI83nmpa6z37oRc0HYTKYXdY0xhB2MpfRZfih6xZ?=
+ =?iso-8859-1?Q?ZeT+n5nJEyHi78x/q0NahL8jfB/3NbDRy2P0mXp2kSRGRSSAGxO+nrVPwa?=
+ =?iso-8859-1?Q?jh4dkHj4UaraNLt1WLZ31qISW13XLxGPVMDiz1S7NgteByTFfCqB7FSfjK?=
+ =?iso-8859-1?Q?aExzZD+y8UnH1Mp3y8BFn7XHi63rd9hMnG7xLHAxRDGvXgOAUxhknJ4Pt8?=
+ =?iso-8859-1?Q?CiKRaBB7CVxV1ZX2u+RYdTJpvfBw71DVyeyKDVyjg9nleL1m0OJhyhx2kK?=
+ =?iso-8859-1?Q?71+ov8CtLGaJ9qsCGspMb/g+nEjrC6B+IH/9EHUhoE66k1BhbG1x+8J6Ht?=
+ =?iso-8859-1?Q?GDMG2OZxiP5ETE6pEoAYUqPy2PzhfrS/6f1OgFTefAKelcfUEiu2Bv1EOy?=
+ =?iso-8859-1?Q?9fQw16oU7NIH0T/f5R3CZY9ZJm7HwwGFIFr3c5cc3V3j/hRqJtw+?=
 X-OriginatorOrg: valinux.co.jp
-X-MS-Exchange-CrossTenant-Network-Message-Id: 2d067144-f6fc-4ba8-dd61-08df3ee2b7f8
+X-MS-Exchange-CrossTenant-Network-Message-Id: dd0684c7-6555-4fbf-511f-08df3ee4a2ad
 X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Nov 2026 04:25:58.1810
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Nov 2026 04:39:41.4979
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: GjdbURH1MmaoagUQTytEBbqAdfN+wWcI8QhpN+JoJ5k7eBDrLgXnFWAdL/nfgP8Dw0bDWH7MVI55tgEAyNQ6Ig==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYCP286MB8040
+X-MS-Exchange-CrossTenant-UserPrincipalName: LviDowiHqtYCn9EUGh7217U5IPdOfFdxfd9OJNrQ8jbOOKbgIJf7JJU9V3g9Yuv/VPAOVZq+0+EHVgGACMzGMw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYCP286MB2366
 
-On Thu, Oct 22, 2026 at 08:50:27AM +0000, sashiko-bot@kernel.org wrote:
-> Thank you for your contribution! Sashiko AI review found 3 potential issue(s) to consider:
-> - [High] PCI: endpoint: pci-epf-vntb: broken BAR state transitions in mw_fallback mode
-> - [High] PCI: endpoint: pci-epf-vntb: invalid MW size and alignment on shared DMA BAR
-> - [Medium] PCI: endpoint: pci-epf-vntb: missing align and BAR checks in dw_edma_collect()
+On Thu, Oct 22, 2026 at 08:42:57AM +0000, sashiko-bot@kernel.org wrote:
+> Thank you for your contribution! Sashiko AI review found 1 potential issue(s) to consider:
+> - [Medium] PCI: dwc: stale edma->dw in dw_pcie_ep_get_aux_resources() after eDMA removal
 > --
-
-Somehow I had mostly been focusing on human reviews here (almost all from Frank,
-thanks Frank!), but looking closely at these, a couple of points definitely make
-sense to address. I've prepared fixes for v9 (the diff from v8 will be small,
-roughly 20 lines). Once testing is done, I'll send it out. Comments inline below.
-
 > 
-> commit 4d1b8b7b5e0ea9addaa11899a4e93158d8021399
+> commit 9475ea2f70e5c9c7b09a2bc537c0f97a6e428f7f
 > Author: Koichiro Den <den@valinux.co.jp>
 > 
-> PCI: endpoint: pci-epf-vntb: Allow DMA and MW to share a BAR
+> PCI: dwc: Expose endpoint DMA resources
 > 
-> This commit allows the DMA BAR in pci-epf-vntb to share a BAR with a memory
-> window by placing DMA subrange mappings after the configured MW prefix. It
-> also adds a fallback mode for older hosts that do not advertise MW/DMA
-> boundary support on link up, exposing the whole shared BAR as an MW.
+> This commit exposes the endpoint-integrated eDMA register window and
+> linked-list memory regions via the EPC auxiliary resource API. It also
+> checks that the local dw-edma device is registered and rejects virtual
+> function queries.
 > 
-> > diff --git a/drivers/pci/endpoint/functions/pci-epf-vntb.c b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> > index ac83af54122f7..2f41a37a2e9d9 100644
-> > --- a/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> > +++ b/drivers/pci/endpoint/functions/pci-epf-vntb.c
-> 
+> > diff --git a/drivers/pci/controller/dwc/pcie-designware-ep.c b/drivers/pci/controller/dwc/pcie-designware-ep.c
+> > index 630ba172280c2..7166ec7f212bd 100644
+> > --- a/drivers/pci/controller/dwc/pcie-designware-ep.c
+> > +++ b/drivers/pci/controller/dwc/pcie-designware-ep.c
 > [ ... ]
-> 
-> > @@ -371,10 +390,31 @@ static int epf_ntb_dw_edma_collect(struct epf_ntb *ntb,
-> >  	if (!is_power_of_2(align))
-> >  		return -EINVAL;
+> > @@ -865,14 +874,30 @@ dw_pcie_ep_get_aux_resources_count(struct pci_epc *epc, u8 func_no,
+> >  	struct dw_pcie_ep *ep = epc_get_drvdata(epc);
+> >  	struct dw_pcie *pci = to_dw_pcie_from_ep(ep);
+> >  	struct dw_edma_chip *edma = &pci->edma;
+> > +	u16 ll_wr_cnt, ll_rd_cnt;
+> > +	int count = 0;
+> > +	int ret;
 > >  
-> > -	if (epf_ntb_is_bar_used(ntb, barno) ||
-> > -	    pci_epc_get_next_free_bar(features, barno) != barno)
-> > +	if (barno == ntb->epf_ntb_bar[BAR_CONFIG] ||
-> > +	    barno == ntb->epf_ntb_bar[BAR_DB])
-> >  		return -EINVAL;
-> >  
-> > +	offset = epf_ntb_dma_bar_offset(ntb, barno);
-> > +	if (!offset &&
-> > +	    (epf_ntb_is_bar_used(ntb, barno) ||
-> > +	     pci_epc_get_next_free_bar(features, barno) != barno))
-> > +		return -EINVAL;
-> > +	if (offset > U32_MAX)
-> > +		return -EOVERFLOW;
-> > +	if (offset && !is_power_of_2(offset))
-> > +		return -EINVAL;
-> > +	dma->ctrl.submap.offset = offset;
-> > +	next = offset;
-> > +	if (next) {
-> > +		/*
-> > +		 * submap[0] covers the MW prefix. Keep its temporary
-> > +		 * target at address 0 until the MW translation is
-> > +		 * installed.
-> > +		 */
-> > +		dma->submap[0].size = next;
-> > +		dma->num_submap = 1;
-> > +	}
-> 
-> [Severity: Medium]
-> In drivers/pci/endpoint/functions/pci-epf-vntb.c, could
-> epf_ntb_dw_edma_collect() accept a shared BAR configuration that later fails
-> at runtime or uses a reserved EPC BAR?
-> 
-> First, when offset is non-zero, offset is checked with is_power_of_2(offset),
-> but it is not checked with IS_ALIGNED(offset, align) where align is
-> features->align ?: 1. If the configured MW size is a power of two smaller
-> than features->align (for example, 4 KB on a DesignWare EPC with a 64 KB
-> region_align), epf_ntb_bind() succeeds because epf_ntb_dma_bar_init() sets up
-> the BAR with num_submap == 0. However, when epf_ntb_dma_set_bar() or
-> vntb_epf_mw_set_trans() later installs the submaps, dma->submap[0].size and
-> all subsequent submap offsets are unaligned to align, so
-> dw_pcie_ep_validate_submap() rejects the update:
-> 
-> drivers/pci/controller/dwc/pcie-designware-ep.c:dw_pcie_ep_validate_submap() {
-> 	...
-> 		if (!IS_ALIGNED(size, align) || !IS_ALIGNED(off, align))
-> 			return -EINVAL;
-> 	...
-> }
-
-Agreed, better to fail early at bind time rather than failing host probe later
-during setup. Will add the IS_ALIGNED(offset, align) check.
-
-> 
-> Second, because epf_ntb_find_bar() skips BAR numbers that were explicitly
-> assigned through configfs, sharing a BAR between an MW and BAR_DMA requires
-> configuring both in configfs. Gating pci_epc_get_next_free_bar(features,
-> barno) != barno behind !offset here (while epf_ntb_mw_bar_init() also skips
-> pci_epc_set_bar() when shared is true) means pci_epc_get_next_free_bar() is
-> never checked when offset != 0, allowing BAR_RESERVED, BAR_DISABLED, or the
-> upper half of a 64-bit BAR to bypass validation here.
-> 
-> Should pci_epc_get_next_free_bar(features, barno) != barno be checked
-> unconditionally, and should offset be checked with IS_ALIGNED(offset, align)?
-
-Agreed, better to reject an invalid configfs BAR selection at EPF bind time here
-too. I'll make the pci_epc_get_next_free_bar() check unconditional as suggested.
-
-This also got me thinking about the checks in set_bar(). dw_pcie_ep_set_bar()
-already rejects BAR_RESERVED and BAR_DISABLED.
-(Note that for a shared BAR, epf_ntb_mw_bar_init() defers the call, but
-epf_ntb_dma_bar_init() eventually calls set_bar(), so both are rejected.)
-
-It does not check for the upper half of a 64-bit BAR, though. For example, it
-can try to program BAR3 as a separate 32-bit BAR when BAR2 is 64-bit. IMO that
-deserves a small, separate fix.
-
-> 
-> [ ... ]
-> 
-> > @@ -607,23 +649,29 @@ static void epf_ntb_dma_bar_clear(struct epf_ntb *ntb)
-> >  	memset(bar, 0, sizeof(*bar));
-> >  }
-> >  
-> > -static int epf_ntb_dma_set_bar(struct epf_ntb *ntb)
-> > +static int epf_ntb_dma_set_bar_locked(struct epf_ntb *ntb, bool use_submap,
-> > +				      const dma_addr_t *mw_addr)
-> >  {
-> > -	struct pci_epf_bar_submap *old_submap;
-> >  	struct epf_ntb_dma *dma = ntb->dma;
-> > -	unsigned int old_num_submap;
-> > -	struct pci_epf_bar *bar;
-> > +	struct pci_epf_bar *bar, old_bar;
-> > +	dma_addr_t old_mw_addr;
-> >  	int restore, ret;
-> >  
-> > -	if (!dma)
-> > -		return 0;
-> > +	lockdep_assert_held(&dma->lock);
-> >  
-> >  	bar = &ntb->epf->bar[ntb->epf_ntb_bar[BAR_DMA]];
-> > -
-> > -	old_submap = bar->submap;
-> > -	old_num_submap = bar->num_submap;
-> > -	bar->submap = dma->submap;
-> > -	bar->num_submap = dma->num_submap;
-> > +	old_bar = *bar;
-> > +	old_mw_addr = dma->submap[0].phys_addr;
-> > +	if (use_submap) {
-> > +		if (mw_addr)
-> > +			dma->submap[0].phys_addr = *mw_addr;
-> > +		bar->submap = dma->submap;
-> > +		bar->num_submap = dma->num_submap;
-> > +	} else {
-> > +		bar->submap = NULL;
-> > +		bar->num_submap = 0;
-> > +		bar->phys_addr = mw_addr ? *mw_addr : 0;
-> > +	}
-> >  
-> >  	ret = pci_epc_set_bar(ntb->epf->epc, ntb->epf->func_no,
-> >  			      ntb->epf->vfunc_no, bar);
-> > @@ -631,8 +679,8 @@ static int epf_ntb_dma_set_bar(struct epf_ntb *ntb)
+> >  	if (!pci->edma_reg_size)
 > >  		return 0;
 > >  
-> >  	/* A failed dynamic update may have already removed the old mapping. */
-> > -	bar->submap = old_submap;
-> > -	bar->num_submap = old_num_submap;
-> > +	dma->submap[0].phys_addr = old_mw_addr;
-> > +	*bar = old_bar;
-> >  	restore = pci_epc_set_bar(ntb->epf->epc, ntb->epf->func_no,
-> >  				  ntb->epf->vfunc_no, bar);
-> >  	if (restore)
-> > @@ -642,6 +690,51 @@ static int epf_ntb_dma_set_bar(struct epf_ntb *ntb)
-> >  	return ret;
+> > -	if (edma->db_offset == ~0)
+> > +	ret = dw_pcie_ep_check_edma_vfunc(vfunc_no);
+> > +	if (ret)
+> > +		return ret;
+> > +
+> > +	if (!edma->dw)
+> >  		return 0;
+> >  
+> > -	return 1;
+> > +	ll_wr_cnt = edma->ll_wr_cnt;
+> > +	ll_rd_cnt = edma->ll_rd_cnt;
+> > +
+> > +	if (!edma->cfg_non_ll)
+> > +		count += 1 + ll_wr_cnt + ll_rd_cnt;
+> > +
+> > +	if (edma->db_offset != ~0)
+> > +		count++;
+> > +
+> > +	return count;
 > >  }
 > >  
-> > +static int epf_ntb_dma_set_bar(struct epf_ntb *ntb)
-> > +{
-> > +	struct epf_ntb_dma *dma = ntb->dma;
-> > +
-> > +	if (!dma)
+> >  static int
+> > @@ -885,14 +910,32 @@ dw_pcie_ep_get_aux_resources(struct pci_epc *epc, u8 func_no, u8 vfunc_no,
+> >  	const struct pci_epc_bar_rsvd_region *rsvd;
+> >  	struct dw_edma_chip *edma = &pci->edma;
+> >  	enum pci_barno dma_ctrl_bar = NO_BAR;
+> > -	resource_size_t db_offset = edma->db_offset;
+> > +	resource_size_t db_offset;
+> >  	resource_size_t dma_ctrl_bar_offset = 0;
+> >  	resource_size_t dma_reg_size;
+> > -	int count;
+> > +	u16 ll_wr_cnt, ll_rd_cnt;
+> > +	bool has_ll;
+> > +	unsigned int i;
+> > +	int count, ret;
+> >  
+> > -	count = dw_pcie_ep_get_aux_resources_count(epc, func_no, vfunc_no);
+> > -	if (count < 0)
+> > -		return count;
+> > +	if (!pci->edma_reg_size)
 > > +		return 0;
 > > +
-> > +	guard(mutex)(&dma->lock);
+> > +	ret = dw_pcie_ep_check_edma_vfunc(vfunc_no);
+> > +	if (ret)
+> > +		return ret;
 > > +
-> > +	return epf_ntb_dma_set_bar_locked(ntb, true, NULL);
-> > +}
-> > +
-> > +static int epf_ntb_dma_link_up(struct epf_ntb *ntb, u32 argument)
-> > +{
-> > +	struct epf_ntb_dma *dma = ntb->dma;
-> > +	struct pci_epf_bar *bar;
-> > +	bool fallback;
-> > +	int ret;
-> > +
-> > +	if (!dma || !dma->ctrl.submap.offset)
+> > +	if (!edma->dw)
 > > +		return 0;
 > > +
-> > +	fallback = !(argument & EPF_NTB_LINK_UP_DMA_MW_SUPPORTED);
+> > +	ll_wr_cnt = edma->ll_wr_cnt;
+> > +	ll_rd_cnt = edma->ll_rd_cnt;
+> > +	db_offset = edma->db_offset;
+> > +	has_ll = !edma->cfg_non_ll;
 > > +
-> > +	guard(mutex)(&dma->lock);
-> > +
-> > +	if (fallback == dma->mw_fallback)
-> > +		return 0;
-> > +
-> > +	if (fallback) {
-> > +		dev_warn(&ntb->epf->dev,
-> > +			 "Host does not support MW/DMA BAR sharing, exposing the whole BAR as an MW\n");
-> > +		/* Replace installed DMA submaps until the MW is set up. */
-> > +		bar = &ntb->epf->bar[ntb->epf_ntb_bar[BAR_DMA]];
-> > +		if (bar->num_submap) {
-> > +			ret = epf_ntb_dma_set_bar_locked(ntb, false, NULL);
-> > +			if (ret)
-> > +				return ret;
-> > +		}
-> > +	}
-> > +	dma->mw_fallback = fallback;
-> > +
-> > +	return 0;
-> > +}
+> > +	count = db_offset != ~0;
+> > +	if (has_ll)
+> > +		count += 1 + ll_wr_cnt + ll_rd_cnt;
 > 
-> [Severity: High]
-> How do epf_ntb_dma_set_bar_locked(), epf_ntb_dma_set_bar(),
-> epf_ntb_dma_link_up(), and vntb_epf_mw_set_trans() keep the BAR state and MW
-> translation address synchronized across mw_fallback transitions?
+> [Severity: Medium]
+> Can edma->dw remain a non-NULL stale pointer here after the local dw-edma
+> device has been unregistered?
 > 
-> In epf_ntb_dma_set_bar_locked(), the MW translation address is stored in two
-> different places depending on use_submap: when use_submap is true, *mw_addr
-> updates dma->submap[0].phys_addr, whereas when use_submap is false, *mw_addr
-> updates bar->phys_addr (and resets bar->phys_addr to 0 when mw_addr is NULL).
+> Both dw_pcie_ep_get_aux_resources_count() and dw_pcie_ep_get_aux_resources()
+> check edma->dw to verify that the local dw-edma device is registered before
+> exposing PCI_EPC_AUX_DMA_CTRL_MMIO and PCI_EPC_AUX_DMA_DESC_MEM resources.
 > 
-> This appears to cause several state regressions across command orderings:
+> However, when the eDMA device is torn down via dw_pcie_edma_remove() ->
+> dw_edma_remove(), either on the err_remove_edma error path in
+> dw_pcie_ep_init_registers():
 > 
-> 1. If vntb_epf_mw_set_trans() configures the MW before an older host sends
-> EPF_NTB_COMMAND_LINK_UP (while dma->mw_fallback is still false), it calls
-> epf_ntb_dma_set_bar_locked(ntb, true, &addr), storing the MW address in
-> dma->submap[0].phys_addr while bar->phys_addr remains 0. When the older host
-> then sends EPF_NTB_COMMAND_LINK_UP without EPF_NTB_LINK_UP_DMA_MW_SUPPORTED,
-> epf_ntb_dma_link_up() calls:
-> 
-> 	ret = epf_ntb_dma_set_bar_locked(ntb, false, NULL);
-> 
-> which sets bar->phys_addr = 0 and wipes out the already configured MW
-> translation.
-
-For the initial setup with in-tree clients, this is a false positive.
-
-The clients naturally call ntb_mw_get_align() before configuring an MW through
-ntb_mw_set_trans(). If the link is down, ntb_mw_get_align() returns -ENOTCONN,
-and the clients do not proceed to ntb_mw_set_trans().
-
-On the EP side, epf_ntb_dma_link_up() runs before epf_ntb_set_link_enabled(), so
-the fallback decision is made before the link comes up.
-
-The initial setup therefore follows this order:
-
-    fallback decision -> link-up -> MW configuration
-
-There is no existing MW translation for that first fallback decision to
-overwrite.
-
-> 
-> 2. In epf_ntb_dma_set_bar() (handling EPF_NTB_COMMAND_SETUP_DMA_BAR),
-> epf_ntb_dma_set_bar_locked(ntb, true, NULL) is called unconditionally without
-> checking or updating dma->mw_fallback. If dma->mw_fallback became true during
-> an earlier link-up and the host later re-runs EPF_NTB_COMMAND_SETUP_DMA_BAR
-> followed by EPF_NTB_COMMAND_LINK_UP with fallback == true,
-> epf_ntb_dma_set_bar() reinstalls bar->submap while leaving dma->mw_fallback
-> set to true. When epf_ntb_dma_link_up() then runs:
-> 
-> 	if (fallback == dma->mw_fallback)
-> 		return 0;
-> 
-> it returns early without removing the reinstalled DMA submaps. Similarly, if
-> EPF_NTB_COMMAND_SETUP_DMA_BAR arrives while dma->mw_fallback is true after
-> vntb_epf_mw_set_trans() configured bar->phys_addr, epf_ntb_dma_set_bar()
-> overwrites the BAR mapping with dma->submap where dma->submap[0].phys_addr is
-> 0 or stale.
-=======================================================================================================================================
-This does not happen with an unchanged host driver.
-
-An old host never sends SETUP_DMA_BAR. A new host always advertises
-EPF_NTB_LINK_UP_DMA_MW_SUPPORTED at LINK_UP, even if it does not use DMA.
-
-> 
-> 3. Conversely, when transitioning from dma->mw_fallback == true back to
-> fallback == false, if vntb_epf_mw_set_trans() ran while dma->mw_fallback was
-> true, it called epf_ntb_dma_set_bar_locked(ntb, false, &addr) which cleared
-> bar->submap and stored addr only in bar->phys_addr. When
-> epf_ntb_dma_link_up() then sees fallback == false, it only sets
-> dma->mw_fallback = false without reinstalling dma->submap or migrating
-> bar->phys_addr into dma->submap[0].phys_addr.
-
-Same here. The capability bit stays the same across link down/up.
-
-Changing the host driver with the EPF still bound is different. If client
-clean-up finishes before the change and the MWs are set up again before traffic
-resumes, we don't need to keep the old translation.
-
-A restart that leaves the EP's old link/MW state intact, such as kexec without
-LINK_DOWN, appears to require separate recovery handling, though. I would keep
-that work separate from this series. I'm not sure vNTB/ntb_hw_epf pair supports
-such a restart today.
-
-> 
-> [ ... ]
-> 
-> > @@ -1936,6 +2037,21 @@ static int vntb_epf_mw_set_trans(struct ntb_dev *ndev, int pidx, int idx,
-> >  	dev = &ndev->dev;
-> >  	barno = ntb->epf_ntb_bar[BAR_MW1 + idx];
-> >  	epf_bar = &ntb->epf->bar[barno];
-> > +	if (epf_ntb_dma_shares_bar(ntb, barno)) {
-> > +		guard(mutex)(&ntb->dma->lock);
-> > +
-> > +		if (ntb->dma->mw_fallback) {
-> > +			if (size > epf_bar->size)
-> > +				return -EINVAL;
-> > +		} else if (size != ntb->mws_size[idx]) {
-> > +			/* DMA submaps start after the configured MW size. */
-> > +			return -EINVAL;
-> > +		}
-> > +
-> > +		return epf_ntb_dma_set_bar_locked(ntb, !ntb->dma->mw_fallback,
-> > +						  &addr);
-> > +	}
-> > +
-> >  	epf_bar->phys_addr = addr;
-> >  	epf_bar->barno = barno;
-> >  	epf_bar->size = size;
-> > @@ -2134,15 +2250,29 @@ static int vntb_epf_mw_get_align(struct ntb_dev *ndev, int pidx, int idx,
-> >  			resource_size_t *size_max)
-> >  {
-> >  	struct epf_ntb *ntb = ntb_ndev(ndev);
-> > +	enum pci_barno barno = ntb->epf_ntb_bar[BAR_MW1 + idx];
-> > +	resource_size_t salign = 1;
-> > +	u64 size = ntb->mws_size[idx];
-> > +
-> > +	if (epf_ntb_dma_shares_bar(ntb, barno)) {
-> > +		if (ntb->dma->mw_fallback)
-> > +			size = ntb->epf->bar[barno].size;
-> > +		else
-> > +			/*
-> > +			 * DMA submaps start after the configured MW size.
-> > +			 * Use size_align to require a full-size MW translation.
-> > +			 */
-> > +			salign = size;
-> > +	}
-> >  
-> >  	if (addr_align)
-> >  		*addr_align = SZ_4K;
-> >  
-> >  	if (size_align)
-> > -		*size_align = 1;
-> > +		*size_align = salign;
-> >  
-> >  	if (size_max)
-> > -		*size_max = ntb->mws_size[idx];
-> > +		*size_max = size;
-> >  
-> >  	return 0;
-> >  }
-> 
-> [Severity: High]
-> What happens in vntb_epf_mw_get_align() and vntb_epf_mw_set_trans() when an
-> NTB client allocates a memory window buffer smaller than the BAR or MW size
-> on a shared BAR?
-> 
-> 1. In mw_fallback mode (ntb->dma->mw_fallback == true),
-> vntb_epf_mw_get_align() leaves salign = 1 and *addr_align = SZ_4K, while
-> vntb_epf_mw_set_trans() accepts any size <= epf_bar->size and calls
-> epf_ntb_dma_set_bar_locked(ntb, false, &addr). Unlike the non-shared path
-> (which updates epf_bar->size = size), epf_ntb_dma_set_bar_locked() keeps
-> bar->size at the full enumerated BAR size in BAR Match Mode (num_submap = 0).
-> 
-> In the DesignWare EPC driver, BAR Match Mode validates and maps the full
-> epf_bar->size:
-> 
-> drivers/pci/controller/dwc/pcie-designware.c:dw_pcie_prog_ep_inbound_atu() {
+> drivers/pci/controller/dwc/pcie-designware-ep.c:dw_pcie_ep_init_registers() {
 > 	...
-> 	if (!IS_ALIGNED(parent_bus_addr, pci->region_align) ||
-> 	    !IS_ALIGNED(parent_bus_addr, size))
-> 		return -EINVAL;
-> 	...
+> err_remove_edma:
+> 	dw_pcie_edma_remove(pci);
+> 
+> 	return ret;
 > }
 > 
-> When an NTB client (such as ntb_tool, ntb_msi, ntb_perf, or ntb_transport
-> with max_mw_size) allocates a buffer with size < epf_bar->size, the DMA
-> address is only aligned to the smaller buffer size or SZ_4K, causing
-> pci_epc_set_bar() to fail with -EINVAL. If the buffer address happens to be
-> aligned to epf_bar->size, BAR Match Mode maps the full epf_bar->size window
-> over the smaller allocation, exposing adjacent unallocated endpoint memory to
-> the host.
-
-You're right about the alignment. In fallback mode, I'll raise addr_align to
-max(SZ_4K, bar_size).
-
-OTOH, the risk of exposing unallocated memory is a separate, pre-existing
-limitation of ordinary vNTB MWs on DWC. Although vntb_epf_mw_set_trans()
-overwrites epf_bar->size, dynamic DWC set_bar() does not change the hardware BAR
-size (unlike Cadence, IIUC). In BAR Match Mode, the size argument is used for
-alignment validation, not to limit the mapping. For example, a 2 MiB BAR can
-already map beyond a 64 KiB allocation whose address happens to be
-2 MiB-aligned, even without this series. Fallback mode (ie. new EP <-> old host
-pair) inherits that limitation. The addr_align change does not guarantee a
-BAR-sized allocation for every client. I plan to address this in a separate
-follow-up covering both ordinary MWs and fallback.
-
+> or during fundamental reset in dw_pcie_ep_cleanup():
 > 
-> 2. In normal shared-BAR mode (ntb->dma->mw_fallback == false),
-> vntb_epf_mw_get_align() sets *size_align = ntb->mws_size[idx] while leaving
-> *addr_align = SZ_4K. In drivers/ntb/ntb_transport.c:ntb_set_mw():
+> drivers/pci/controller/dwc/pcie-designware-ep.c:dw_pcie_ep_cleanup() {
+> 	...
+> 	dwc_pcie_debugfs_deinit(pci);
+> 	dw_pcie_edma_remove(pci);
+> }
 > 
-> 	rc = ntb_mw_get_align(nt->ndev, PIDX, num_mw, &xlat_align,
-> 			      &xlat_align_size, NULL);
-> 	if (rc)
-> 		return rc;
+> dw_edma_remove() in drivers/dma/dw-edma/dw-edma-core.c unregisters the DMA
+> device (and resets chip->db_offset = ~0 via dw_edma_emul_irq_free()), but
+> neither dw_edma_remove() nor dw_pcie_edma_remove() clears chip->dw:
 > 
-> 	xlat_size = round_up(size, xlat_align_size);
-> 	buff_size = round_up(size, xlat_align);
+> drivers/dma/dw-edma/dw-edma-core.c:dw_edma_remove() {
+> 	...
+> 	/* Deregister eDMA device */
+> 	dma_async_device_unregister(&dw->dma);
+> 	list_for_each_entry_safe(chan, _chan, &dw->dma.channels,
+> 				 vc.chan.device_node) {
+> 		tasklet_kill(&chan->vc.task);
+> 		list_del(&chan->vc.chan.device_node);
+> 	}
 > 
-> If the requested size is smaller than ntb->mws_size[idx], ntb_set_mw()
-> allocates only buff_size (rounded to SZ_4K) but passes xlat_size (rounded up
-> to ntb->mws_size[idx]) to ntb_mw_set_trans(), mapping the full submap[0].size
-> over the smaller buff_size allocation. Also, if features->align > SZ_4K,
-> reporting *addr_align = SZ_4K allows clients to allocate DMA buffers that are
-> not aligned to features->align, which dw_pcie_ep_validate_submap() rejects
-> with -EINVAL.
-
-Agreed. Will fix by setting size_align back to 1. Rather than trying to enforce
-a full-size MW through size_align (which can make ntb_transport map more memory
-than it allocates), I realize that we can just rely on the existing check in
-vntb_epf_mw_set_trans() to reject requests that don't match the configured MW
-size. That way, for example, a 64 KiB request for a 1 MiB MW is cleanly rejected
-instead of mapping beyond the allocation.
-
-Supporting smaller shared MWs would require a scratch-backed dummy submap to
-fill the gap before the DMA ranges. If there is real demand for 'max_mw_size'
-with a shared BAR, that can be added as a follow-up, but IMO rejecting smaller
-MW requests for now makes sense.
-
-The hard-coded SZ_4K addr_align can also understate the EPC's alignment
-requirement. Seems that this has been there since commit e35f56bb0330 ("PCI:
-endpoint: Support NTB transfer between RC and EP") and also affects shared MWs
-with DMA enabled. I'd address that separately if preferred.
-
+> 	return err;
+> }
 > 
-> титься
+> If an endpoint function driver subsequently queries
+> pci_epc_get_aux_resources_count() and pci_epc_get_aux_resources() while the
+> eDMA device is unregistered, wouldn't the !edma->dw check pass and expose
+> DMA control MMIO and linked-list descriptor resources for a removed eDMA
+> instance?
 
-!!
+You're right, but I think it should/can be fixed separately in the dmaengine
+core.
 
-> 
-> -- 
-> Sashiko AI review · https://sashiko.dev/#/patchset/20261022082230.3164834-1-den@valinux.co.jp?part=6
-
-Thanks for the review.
+The vNTB path still needs to acquire the channels via dma_request_channel(),
+which should fail once unregistration has completed. Returning stale metadata
+alone therefore does not let vNTB export those DMA resources.
+I don't think this needs to block this series.
+I'll prepare a small patch for dmaengine tree.
 
 Best regards,
 Koichiro Den
+
+> 
+> -- 
+> Sashiko AI review � https://sashiko.dev/#/patchset/20261022082230.3164834-1-den@valinux.co.jp?part=2
