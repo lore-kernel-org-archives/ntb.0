@@ -1,92 +1,96 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=40.107.74.86
-ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1795584984;
-	b=eDBdotolmOjDxVSc1VI7ATxLBGLr/NHmSDn6bIKLPqik21o81LvCPe6YU2OIb3VX8iSc
-	 hplcCX0E3SNp0XQjP6A6ggVBHxcEjami/akt9VIDVLswoxIcdoN7FnD3+JDnw1PFu/SR/
-	 CbKVQzYn4AAj3HklpmWPBFpeoGHv35dQa3wgBc1e9EpBM/FNYMeq+Ggdb2Tmueh39JBtk
-	 7mLrpI4o8K4BY4svaVI7CiiX5TU12B5L6n0GNRJaf/ZrpfEghVvCKnwbVct0suVrY80M8
-	 p3QOFSYsR8+BwQ2S0D9FQnlZLu1wSk4O91JzAjX9kum4S5CWd1noMCtlnnVRkzNUKWg==
-ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795584984;
-	h=DMARC-Filter:DKIM-Signature:Received:Received:Date:From:To:Cc:
-	 Subject:Message-ID:References:Content-Type:Content-Disposition:
-	 In-Reply-To:X-ClientProxiedBy:MIME-Version:X-MS-PublicTrafficType:
-	 X-MS-TrafficTypeDiagnostic:X-MS-Office365-Filtering-Correlation-Id:
-	 X-MS-Exchange-SenderADCheck:X-MS-Exchange-AntiSpam-Relay:
-	 X-Microsoft-Antispam:X-Microsoft-Antispam-Message-Info:
-	 X-Forefront-Antispam-Report:
-	 X-MS-Exchange-AntiSpam-MessageData-ChunkCount:
-	 X-MS-Exchange-AntiSpam-MessageData-0:X-OriginatorOrg:
-	 X-MS-Exchange-CrossTenant-Network-Message-Id:
-	 X-MS-Exchange-CrossTenant-AuthSource:X-MS-Exchange-CrossTenant-AuthAs:
-	 X-MS-Exchange-CrossTenant-OriginalArrivalTime:
-	 X-MS-Exchange-CrossTenant-FromEntityHeader:
-	 X-MS-Exchange-CrossTenant-Id:X-MS-Exchange-CrossTenant-MailboxType:
-	 X-MS-Exchange-CrossTenant-UserPrincipalName:
-	 X-MS-Exchange-Transport-CrossTenantHeadersStamped;
-	bh=H66yj5a4FsHPSlTvmZkm29hDQuAhLg6o0jY2d5x868Y=;
-	b=QAeiNmcY5RAKV7TkY8cAulR8qIbyjJyqW6JttDG2v62Y0hYTY/QjWEGCkFkw6ecSuSzo
-	 zvHT7I274krFLZZSOrnGkJ4HkAjCpW/LvH/PvNxumkvUvOZ0rHZEY8CO9Lz34G8RTgH3M
-	 2IOIxqMCvLRMFb/OFgT3e1LOUrCTv776w2M/9KbKCkxGza3sE8BJ8FMb7KydzfE9mevCJ
-	 DACrf4fhrbF69dhjOLlIldKcUvaghxJ7Sg9zx2RgAmOt2ii9jHsnop2wO96QswtGNu6gr
-	 mWZlCRPEpD6x0MsAVbR6Ii48gN9YBjL2LfQK14fB4VRgCZgGaCT7FUPwXjQ60lzUDGQ==
-ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=valinux.co.jp;
-	spf=pass smtp.mailfrom=valinux.co.jp;
-	dkim=pass header.d=valinux.co.jp header.i=@valinux.co.jp header.a=rsa-sha256 header.s=selector1 header.b=aowB80y8;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=40.107.74.86
-Received: from OS0P286CU010.outbound.protection.outlook.com (mail-japanwestazon11021086.outbound.protection.outlook.com [40.107.74.86])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange ECDHE (secp384r1) server-signature ECDSA (prime256v1) server-digest SHA256)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.54
+ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
+	t=1795662922;
+	b=Q0dDm5fZIuGDIErkkQdRxTeirNJgs77YWo3rZdWkRoxBjJplefs/atNUSl6wMVtQQ+kT
+	 eBiUWmp+hlaBlgSWDYUB1hX4QWfx+83UHY7iDmEkJp6FpSr3PMHDboJWG7u5/AToj8UOn
+	 9gMPdAGFEsLaAsBZMpvgAwKgMmwI5Z613oD0dZGe/fAm4oc5tjFWFrRmHclUuhBTHeDPF
+	 /X80IWgT+B4H9LLXRS3h+5dKA3j/w6NEPQRV2jUuf664N9GZYayziNabuX5FXcHu9GJ5Z
+	 GU7duwZkV5jys/vCxrXfz4k5oeklk/oyWzStTJ9ESspMm/MvIp+TfnY0lT1CyqbxSPA==
+ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795662922;
+	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
+	 X-Gm-Message-State:X-Gm-Gg:X-Received:Received:From:To:Cc:Subject:
+	 Date:Message-Id:X-Mailer:MIME-Version:Content-Transfer-Encoding;
+	bh=sNzRYBNLRKkf0Y/gp9OREoymKpw7SvFmjDC5u9+y2bU=;
+	b=32dQBA9U/5sEpGBnNb7iDKzclzup4FF2bWjWd17/v+ps/eZVoRD2Fkt3mDZWi3Hzm1uF
+	 FsHxTyifJP/4GsS2JbN36zBDUfLFVpsPuaISAhwa76zFbCryljINm+1q5aZW2xTlMaKqF
+	 +VbVPHbxww/vfpJP2w87XUhqGzKXI+gXVjACPuAhqSsOLyJE96W/K0skUwF0cWB86KSHn
+	 e1z/IsYQeVE60faA35aS2SVzxPu+1Ak6HMXXAlksHncwDXtAeIxaDsjqGKNPIQCg87LT9
+	 zhkzGot/4B6xL9mfeM9PknvlY8OXaIuMn9UsKKUZaXmMhiQ9wRo0bfqsPa78I4HV1cQ==
+ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
+	dmarc=pass header.from=gmail.com;
+	spf=pass smtp.mailfrom=gmail.com;
+	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b="ZGP8/z3/";
+	arc=none smtp.remote-ip=209.85.128.54
+Received: from mail-wm1-f54.google.com (mail-wm1-f54.google.com [209.85.128.54])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 73624606A323
-	for <ntb@lists.linux.dev>; Wed, 25 Nov 2026 05:36:24 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 73624606A323
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4158C606A32A
+	for <ntb@lists.linux.dev>; Thu, 26 Nov 2026 03:15:21 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 4158C606A32A
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=valinux.co.jp header.i=@valinux.co.jp header.a=rsa-sha256 header.s=selector1 header.b=aowB80y8
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=YIRZYZOWlxmfeU1yjWDZZXq8x3WS+RHo+QZ7cZMKbi98ZR/co0EOqN7E/2tofVn0TUROHJsE8+TNUGI7uM18TRQv8kgjmr+00v+5jbTpZAEz0+I0UGnodyz2Uz1m5s8gSe37cn/wL/UpwmlwGL/jeZLgNMRxXltLjcLKF+dgdHVK4RaWaP1Jp69SooMmklWDhKkTEpfGr1lGpcRl4dK36SzaQ/8nTM8hP09qtr510Egw0u19vQNohAMI7dGI0RDz94f09a1YU9LpvVBUNNjqX6sGW0Jgart320fqa4/vv9zjpyNzxRAPDfbkCeaTSJrxZbrgWaEJwweTYk9hhoW7xQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=H66yj5a4FsHPSlTvmZkm29hDQuAhLg6o0jY2d5x868Y=;
- b=utF4+LQKVvwPyLGVO4Lsw9KP/ca/tMKHtrJK7hr4FAExgS7FTdiFPbzjCBboaVfxy5UV58EBeoRAy9q/hewCEoYEua/xFZUqNmhPorn6GBr/rVzFiyr0uCH3NJhiktNWMxZF6I2uIvtp9gP0DfUQLS3uPnZ+P9eGRyFk6FlkIhrjj0bsl7n+NgQ328pOBE+5j8t5Z8nMWSLnQjWW5smP/x4salQfLTRQgQ/F4g+lBtH1DkOzGE9UUExekKsOuftBt+1PRrfocFEW4XJCbzNlqv7orN+C6sTWyhMlMOyfFDR4LgrX/dt76Ir+I2egG09trVNMgMIBVtmpL88IvCe6wA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
- header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
- s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=H66yj5a4FsHPSlTvmZkm29hDQuAhLg6o0jY2d5x868Y=;
- b=aowB80y8WwXHBjMCJGJWTh5DM7oPUwI16qdROLM4VPHCKJv+mExTSr5xHQGPMfwXgAGdOnbqmAyztFIcxn8Ry7l8/q7e89GSY0rIYBb/FvvhAkE2B71SUo/ETHZIZ6LsmVF9eFgCLgcegfY6Z3U1yXkBdWlWRAX+g7TI6ztUyRw=
-Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=valinux.co.jp;
-Received: from TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:325::11)
- by OS9P286MB5949.JPNP286.PROD.OUTLOOK.COM (2603:1096:604:3f5::9) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.662.4; Wed, 25 Nov
- 2026 05:36:20 +0000
-Received: from TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM
- ([fe80::cce5:2aa8:53f9:dba9]) by TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM
- ([fe80::cce5:2aa8:53f9:dba9%5]) with mapi id 15.21.0662.004; Wed, 25 Nov 2026
- 05:36:20 +0000
-Date: Wed, 25 Nov 2026 14:36:18 +0900
-From: Koichiro Den <den@valinux.co.jp>
-To: zhangjiao2 <zhangjiao2@cmss.chinamobile.com>
-Cc: ntb@lists.linux.dev, linux@treblig.org, jdmason@kudzu.us, 
-	linux-kernel@vger.kernel.org, trivial@kernel.org
-Subject: Re: [PATCH] NTB/msi: fix error cleanup mw index in
- ntb_msi_setup_mws()
-Message-ID: <awZzH9bcH4SGYskT@z790sl>
-References: <20261120084039.1954-1-zhangjiao2@cmss.chinamobile.com>
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20261120084039.1954-1-zhangjiao2@cmss.chinamobile.com>
-X-ClientProxiedBy: TY4PR01CA0092.jpnprd01.prod.outlook.com
- (2603:1096:405:37d::17) To TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM
- (2603:1096:405:325::11)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=ZGP8/z3/
+Received: by mail-wm1-f54.google.com with SMTP id 5b1f17b1804b1-4bb64ef5a00so52230235e9.3
+        for <ntb@lists.linux.dev>; Wed, 25 Nov 2026 19:15:21 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20260707; t=1795662919; x=1796267719; darn=lists.linux.dev;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=sNzRYBNLRKkf0Y/gp9OREoymKpw7SvFmjDC5u9+y2bU=;
+        b=ZGP8/z3/1no8K2E1WDpOoxojklCXFEj794LFuMmofOrKl36q817A0ytH1Gr2HWeCed
+         ehJJ5c4K2xiMXdALHaSDjAZkEBSNeGS3hf0Q0NwPx9FDi4vuCFfgSPr9QG1nX/XCrEem
+         ZPj4rWSKLHybXVrjIiiuTuEqH72IO08BgUJtEQd5l5QI3+vZpevTjKzBlb6bOQSzckd5
+         avMtjKkcEnsVMoESIgQgrrYf4dzJt42hhZeXrUXDDMkLk0YwrJjgIzwgLJyAmvJhnQG/
+         thLaWasWT1L8bCBIhKzPZDyoVCKbUE73lcYVJ67LdGt9zvU0WjelnKAjx+lZNHU7gkVt
+         hRhg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20260707; t=1795662919; x=1796267719;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=sNzRYBNLRKkf0Y/gp9OREoymKpw7SvFmjDC5u9+y2bU=;
+        b=RyNuc59Ruj5DQFwNCixz3aRvWpohDxBznEFDg2T77gWND93ZJBAuMmr8OxfJHevtjN
+         hBo25nAn6gzwDKktXo52qjfat0WeyijUkwKEg0gBHInLtu6ddvB3Yvfmi0bxRYYG7TKC
+         tY3pkZOrFu/Exn3FqYVPXG2bdauactTW8x/eEj1MibBVQCzKmpzYNYK2UsF3Gi74bnPO
+         zw3khvkZVhF9DxmW30DY0awbNajvFPXqdFgEPpbJyGpXqGA+13hEtP+8RcEiNrNa/ymA
+         DjM3A8oZDCSoReNWdFG4/kr0xV3H4vg1NgDiZ5dlZuPjY3B/jWnUZ2Wn1y+GaleC6mlp
+         nLcQ==
+X-Gm-Message-State: APuU4Z+ChRLYt5ZjLL8NwocceiohgZB6Bp3Q4Rfadmh4NYV80syJK7wr
+	B3TuGhjHPcxtpFWu+7VCYlL5ih7IzYvNT0Isk8+zC1ARYmeESaKL+2qv
+X-Gm-Gg: AZFdTZcsmbvMh9GjFMLGXUyjNIVSU8nPEYX/KZ9lPun9gLfcTFWTQ0tG4PfFeo3zbTL
+	yqk+49YPaJV3eAKv9xSgBAG6WYm3CmcdQasWFgpt0rKixnFZSjzK2UwZVDrwa7FslAemdy6lWYU
+	jyhSbDxyWeMzY+hUDG+I3NMsS8WLIXeqNjfqQ//g5w0koEdH3bM0aDzIRQFLdigMjKOkqyBqevP
+	Zd89O4ldxXYD8pYkYF7pNR69EIHMGZk6lQFwgkyGySUFrsV+2EzrWJHzURNprUwu+3lK+PpzkEX
+	5yAu7BJzSGvjmFOwabOIWuLHGQ29nq8KSR5V4ff7Gj7kRxLg9ksxlOkkGMebjHbJm6OixjccR5C
+	EekmqT5J2Nlif7FdNG0cVknBmY2wdH6RyS3fAouC++q3X9QtoG8q3QDSOKUDwaWgQtaeOVsL0Fn
+	gIEdbGjjyecn+T4Tazt0fF4sGZZu1eG6Dbk0LulF6qgkVI66JkdK4sM9XQUjtZvf04c/Vze2jK4
+	+ZpBOmhFJErcRSFjG3jxg7erYhndD1aM6ovmgcZDb7htjnZMjV2B0vNtpLynqta4uQvzU066Ulf
+	6OOVGJVem+dM6XyqLCn54ySKhzj9KZaT6MJXqSGkq08NF2sMLKSUixOjLZMphO9ZTF9yckAf8JG
+	d+SfpyQeRyWjZbzWc87kVr4AKMuwND4bNoLxpIIJiyJX8VK6aoVxAdH66WhR81yonDjXXaBUIel
+	+6okRTIlibmmHtyWERTS43Rj29okw+ZUvJ8g==
+X-Received: by 2002:a05:600c:3b98:b0:4bb:7033:c92f with SMTP id 5b1f17b1804b1-4bb88826810mr384054565e9.11.1795662919396;
+        Wed, 25 Nov 2026 19:15:19 -0800 (PST)
+Received: from localhost.localdomain ([31.223.101.75])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4ab6baa3882sm37189290f8f.49.2026.11.25.19.15.17
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 25 Nov 2026 19:15:19 -0800 (PST)
+From: Oguzhan KAYNAK <kaynak.oguzhan0@gmail.com>
+To: Jon Mason <jdmason@kudzu.us>,
+	Dave Jiang <dave.jiang@intel.com>,
+	Allen Hubbe <allenbh@gmail.com>
+Cc: ntb@lists.linux.dev,
+	linux-kernel@vger.kernel.org,
+	Oguzhan KAYNAK <kaynak.oguzhan0@gmail.com>,
+	stable@vger.kernel.org,
+	regressions@lists.linux.dev,
+	yangqixiao <yangqixiao@inspur.com>
+Subject: [PATCH] ntb: ntb_tool: accept hexadecimal addresses in peer_mw_trans again
+Date: Thu, 26 Nov 2026 06:15:06 +0300
+Message-Id: <20261126031506.165973-1-kaynak.oguzhan0@gmail.com>
+X-Mailer: git-send-email 2.34.1
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Post: <mailto:ntb@lists.linux.dev>
@@ -96,104 +100,65 @@ List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 List-Owner: <mailto:ntb+owner@lists.linux.dev>
 Precedence: list
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: TY7P286MB6866:EE_|OS9P286MB5949:EE_
-X-MS-Office365-Filtering-Correlation-Id: 9812cefd-b2be-41d5-f66c-08df4ab608c4
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|1800799024|10070799003|23010399003|376014|366016|22082099003|18002099003|56012099006|261028144727099003|261022105027099003|261021121427099003|261102123227099003|261022075727099003|261021123027099003|261026121527099003|261026140227099003|10067099003;
-X-Microsoft-Antispam-Message-Info:
-	B++xG8zQ3l40fBpiZ6ICDvu3SLOuuRqAmA3PiQv/Eqpp3VslS1EdL+bHB9PAFpHJuTzkrZAU5wqkPKT1SMhYxjcvzoBFDPgLUkHYHNTEzhSQNac853S6ov8s6mL8gEUJRGwiyxTHKzPuKuJhpxdhbHBjlTnMUCOibmARslkvgeZC7Dy8jFLKRyze908KM4ope9MWH0EAndicAx6v9EHIIDTTKrOiCJAEdXKgJfSbYGJ9mO+i201XLArH2TCLdf0mFRkOK0bYqB/FSYnpqS6iMrF5khug2TvFdIRfzF4+d0qdpSC8n8LNo/gn/kb1V/0JUpkGElehy9Zv22SHd4Nzh1WxeMRyni4BY0DMflLS3KpiDm8W+3U6/4gUsAN+uqNrKv9SQ6xdTEvEf7PO3YeLy7u1RFbNHKsdHMF9ebuM6QbP5UlrMsJtyM5i7bPFQVmkQXN/I3DyYy4tPvSZHvhbBeQ9U9k0xzUGs5jvqF10a6CjrTAuJtU5gWHzxFLJIP3bcaacEYG1cuVcKz9Jkmhe77qXWofVgiIS3hvYwDv2j5PJWbUtq9KW3vo3ww4UWudmfaZ2FEjBm6OWvOy+z2pi6x3MORUloU5jq6UTznvIgV2X6RXOxs12IySXtBK9mSJZZo1TU+CiSxyCWw0cVAYI9itIKpZhZmpBKfWILa4kO3U=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(10070799003)(23010399003)(376014)(366016)(22082099003)(18002099003)(56012099006)(261028144727099003)(261022105027099003)(261021121427099003)(261102123227099003)(261022075727099003)(261021123027099003)(261026121527099003)(261026140227099003)(10067099003);DIR:OUT;SFP:1102;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?lHRxp3xLQtvoXvB3pbwcvGI57CUdr+Jpgh/1EQvG0c/e4EedrTRdQCLQcc18?=
- =?us-ascii?Q?C/3QP2sR2XKPYLEz70gIfiUzSxFgicjVJIGaKP9OuYpPx9WOeigKW+wD9kTL?=
- =?us-ascii?Q?KmtNAzKtGrHyWt5xVmBcDofM32MrzPDsZI10hFcrlBQ+XFV4v1YilYOa4V8/?=
- =?us-ascii?Q?S5f5X+M/3v0SE8mlzC4qwO14DNLh4Vh9M+1bBIzuxN2hGIuRRwIBhwCv6Njd?=
- =?us-ascii?Q?kyu2h6wFyMJhedd3jRHDnGWCjS9JhCIvDvLUQHuvQlf6DjWdZNDTd+fWbBQs?=
- =?us-ascii?Q?j8EvBwz9YaLDxCFpF8yXoTsM+x3vvIzLR9bRvtyvbPamRCNHPvUszAP/JTmD?=
- =?us-ascii?Q?cca/sKsjcbvajq3NaPrvvE2ELRNAgNGMfC5PhzMzPdM5UlRupwpvmGWOZ9We?=
- =?us-ascii?Q?IErD1hnkxmdS1TgZ9xRE4OeGAdEzTRwJZDa20jbsNZsf1ZsGXewCx3FvbC5/?=
- =?us-ascii?Q?YN9ZF3/qPfEjiB6rspeaoG1golSgFIUu5DxbHybdMEhE0TBpAS9HuKOsxOau?=
- =?us-ascii?Q?YFEnZl4VzxT2Ezf8gMr+2/lcCZUDB8+icLn5PAYzXC20Qqx0qsWrPb2KXJkg?=
- =?us-ascii?Q?ju6DVZY1ZmLLIasicWE33jREW+jPpP7ljMIX3dTiRP18RGQXDY9f51o/G2OL?=
- =?us-ascii?Q?3DDDuWZrGZbmlKwxOxdwlVEgrWMXiynWZtDYMKlZWC1YVDm/vHTqUYtT8SrL?=
- =?us-ascii?Q?IeOVTjnIluubA/8Doic2XA8y6EOMlSufxttnji7U/vnb+fMOz9U+V4fO/+n2?=
- =?us-ascii?Q?BYofgbOqYaqHXtsR1QFlyIRw62yj5Xvw4uxHyzxcgh29c5jnkVLAr7ICqFQf?=
- =?us-ascii?Q?uSBzpkwi0pEN0YldOZiWil760HmvlG0nyy9qA9LAY6xmmpWAFJyRhZmhKjBn?=
- =?us-ascii?Q?J4qvWkXelGjEK5ck/Fxuw4d0NhXJu33VdBThpXmsBVSlZA1e4oiKJSakQ3gv?=
- =?us-ascii?Q?sEDs12dwFnGppzGuqsWs5HajhIEUgVrxOjAlJwML111rq79xsACdRYBW13y7?=
- =?us-ascii?Q?XxqMlh9oEU3Hi4h9pZbvyAmhrAOBRvrB9D4CCN+KHbmMRK+z5FgzeNAENctK?=
- =?us-ascii?Q?xsA0OVfO2eFuzkjYlASwcRDgWizX78cb9v6cu+av1zm5i6sC3ZZZWbPygvHs?=
- =?us-ascii?Q?RPpa4JlVWaiCbqzn1Z4dDFPIRteAG6e6zHZ7eQpKQXrDCuY5Az+f8KeVQkfo?=
- =?us-ascii?Q?gDSbOkU2hXelevtwb4LKYu8XY30mr/N9Wo9MNEpJTWPFuNkQa1xD9+9oLPph?=
- =?us-ascii?Q?RnVuuYhnsJGU6/P9vG6Ht1FrqAM0e97C8W+GmoLxy0EV1c5gDEBGbk4V8ex1?=
- =?us-ascii?Q?1Cwqqvi8nzAL5Ko1GAHtyaNyEnwuDl6JfG84meHAxBj9aDetI1fWAPG7O62x?=
- =?us-ascii?Q?oQ7fBkOdr7xeUdrIyjAUWHdHhVGbWoKer5idNOZeg4eLQWGsAYDYAao33ieC?=
- =?us-ascii?Q?3FZqdPerEC2ECahdL+wtpMYdYTGTtnWxk6c6YUZdkVEXXdpzsVdYX15TofzJ?=
- =?us-ascii?Q?OEOvvZGenpcmNlHBbWQR+brL3FSBAXeL23upKJQ3AWb3XoQWlpJtg03wAskL?=
- =?us-ascii?Q?4X9MyMFw6uGc3RIm2iPEsqKVRMj5BWxeenp3wRu1BYJQB27UrvgwfEbT04dw?=
- =?us-ascii?Q?d9VOiJbAceMLNrw9Os8ikCToYNoDWOMbBMwhkz3u5GAq5pVPMIu+7AsRGySi?=
- =?us-ascii?Q?d6q24vkvOQIoy+FkM0qyUYLMXODNtqIlcBMLwymtHeBamQCuNDibCWvOGDBS?=
- =?us-ascii?Q?OQ8NujoxT7Jr/DSpgVokhqgY9Nf1uABcoSYkMGrE5DtIW1Hqf6ny?=
-X-OriginatorOrg: valinux.co.jp
-X-MS-Exchange-CrossTenant-Network-Message-Id: 9812cefd-b2be-41d5-f66c-08df4ab608c4
-X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 25 Nov 2026 05:36:20.3941
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: VZjHaGlhCvpp16Eh+E0ZCLGeBx40G55MMMESKrUhTgZEaNH2YmPguv5iTQm58COsM2l6uv8rlKOOd21sw3fwBA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: OS9P286MB5949
+Content-Transfer-Encoding: 8bit
 
-On Fri, Nov 20, 2026 at 04:40:39PM +0800, zhangjiao2 wrote:
-> From: zhang jiao <zhangjiao2@cmss.chinamobile.com>
-> 
-> In the error_out cleanup path of ntb_msi_setup_mws(), the loop
-> iterates over the peers configured so far using the loop variable
-> 'i', but ntb_peer_highest_mw_idx() is incorrectly passed 'peer'
-> (the index of the peer whose setup just failed) instead of 'i'.
-> As a result every iteration looks up the highest memory window of
-> the failing peer, so ntb_mw_clear_trans() clears the wrong window
-> index for each configured peer and the intended translations are
-> left enabled.
-> 
-> Fix it by passing the correct loop index 'i'.
-> 
-> Signed-off-by: zhang jiao <zhangjiao2@cmss.chinamobile.com>
+Commit 21fbdc4d0b1e ("ntb/ntb_tool: correct sscanf format for u64 and
+size_t in tool_peer_mw_trans_write") changed the format of the
+peer_mw_trans parser from "%lli:%zi" to "%llu:%zu". Unlike %lli, the
+kernel's vsscanf() parses %llu in base 10 only, so an address written in
+hexadecimal is read as 0, the ':' in the format no longer matches, and
+the write fails with -EINVAL.
 
-I suppose the Fixes tag should be added, shouldn't it?
+This breaks the usage documented at the top of ntb_tool.c
+("echo 0xADD0BA5E:16384 > $DBG_DIR/peer0/peer_mw_trans0") and the NTB
+selftest. tools/testing/selftests/ntb/ntb_test.sh writes back the "DMA
+Address" that mw_trans<N> prints with %pad, i.e. in hexadecimal. As the
+address format comes from ntb_tool itself, the first memory window test
+fails this way independent of the NTB hardware driver:
 
-  Fixes: 26b3a37b9284 ("NTB: Introduce MSI library")
+  Running mw0 tests on: 0000:00:04.0 /  0000:00:05.0
+  ntb_test.sh: line 117: echo: write error: Invalid argument
 
-Otherwise, LGTM.
+Parse the address with %lli again, which accepts any base, as before
+that commit. To keep the format and the argument type matching, which
+was the point of that commit, store it in a long long; it is passed on
+as u64 as before. A negative address is accepted and converted to u64,
+as it was before that commit. Keep %zu for the size.
 
-Reviewed-by: Koichiro Den <den@valinux.co.jp>
+Found by running the NTB selftest against a virtual NTB device in
+QEMU; the fix was tested the same way (the unmodified selftest passes,
+and hexadecimal writes to peer_mw_trans0 succeed 10 out of 10 times).
 
-> ---
->  drivers/ntb/msi.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/ntb/msi.c b/drivers/ntb/msi.c
-> index 6817d504c12a..13e9f52ec8cc 100644
-> --- a/drivers/ntb/msi.c
-> +++ b/drivers/ntb/msi.c
-> @@ -154,7 +154,7 @@ int ntb_msi_setup_mws(struct ntb_dev *ntb)
->  
->  error_out:
->  	for (i = 0; i < peer; i++) {
-> -		peer_widx = ntb_peer_highest_mw_idx(ntb, peer);
-> +		peer_widx = ntb_peer_highest_mw_idx(ntb, i);
->  		if (peer_widx < 0)
->  			continue;
->  
-> -- 
-> 2.33.0
-> 
-> 
-> 
+Fixes: 21fbdc4d0b1e ("ntb/ntb_tool: correct sscanf format for u64 and size_t in tool_peer_mw_trans_write")
+Cc: stable@vger.kernel.org
+Cc: regressions@lists.linux.dev
+Cc: yangqixiao <yangqixiao@inspur.com>
+Assisted-by: LLM
+Signed-off-by: Oguzhan KAYNAK <kaynak.oguzhan0@gmail.com>
+---
+ drivers/ntb/test/ntb_tool.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+--- a/drivers/ntb/test/ntb_tool.c
++++ b/drivers/ntb/test/ntb_tool.c
+@@ -928,7 +928,7 @@ static ssize_t tool_peer_mw_trans_write(
+ 	size_t buf_size, wsize;
+ 	char buf[TOOL_BUF_LEN];
+ 	int ret, n;
+-	u64 addr;
++	long long addr;
+ 
+ 	buf_size = min(size, (sizeof(buf) - 1));
+ 	if (copy_from_user(buf, ubuf, buf_size))
+@@ -936,7 +936,7 @@ static ssize_t tool_peer_mw_trans_write(
+ 
+ 	buf[buf_size] = '\0';
+ 
+-	n = sscanf(buf, "%llu:%zu", &addr, &wsize);
++	n = sscanf(buf, "%lli:%zu", &addr, &wsize);
+ 	if (n != 2)
+ 		return -EINVAL;
+ 
+-- 
+2.34.1
+
