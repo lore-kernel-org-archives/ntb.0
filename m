@@ -1,94 +1,99 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.42
-ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795663207;
-	b=AV9EhKIa28SnZJ3jvBgfrLGfDCVRcDoRV+ba+aB/oaxtbTPvmCPtKFztzZbqCoLyc/Er
-	 O6FdvYRDxhGPO6mkvpLGpVjyDQ6fOxep+TDCyCT0a7CYJgau3MgkHULF0t0M6vJl+90Bq
-	 ZW32Cqo69lA2Jlmmyo+S5LYjctNiw0TKPVyPl83dSi0OcA/O4ss9VDsFQPZ17yo2NPnMc
-	 Zcjm35kMFxNNbXGEgMtLpn90q3qvnJfNLHT9afvItyhwzlIT07gJgLA0E+kwo6teK+/bw
-	 Qr+7ng+6ABOS3WPqlIjjPKwVKlczGxELZoa5DJFvVTrn1OsPsf3IG9LT9UK9uAnqvUA==
-ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795663207;
-	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Gm-Message-State:X-Gm-Gg:X-Received:Received:From:To:Cc:Subject:
-	 Date:Message-Id:X-Mailer:MIME-Version:Content-Transfer-Encoding;
-	bh=ddFS5afo7Q+Q+cm9cTOpxmimaZ1i0Ia2B8XMfOPwFsk=;
-	b=cduVkplMSFk7XlaMpGK05uq8OhtNZHR4J38oESs+lTpk3csfBd2xoe7s5SLLS9+KRdBp
-	 XWX1VCjjEN1muYyYlcvQb0aCKjw8qxJnue4lHyPCEKLq8F9QV75CiMU1k/ZBbJ2ikFK5U
-	 P/Mj8A9ieWsujbkcDAx6dkVUX1fnBUP5GvZAne+G6TmIGn1GnQN7QkJIc0VZZpdB8gqFT
-	 rF0lLXNeEvDSH+RTUd91jYrvkpwfHcYA1ncnFuBKo6Q6lWbWky+VADwxqwBlXSNlp9BO7
-	 ipIAP/JsaBJL9lV8wgN0IuhFDvn0JW0yfwlFREqKCD9HGa9eV103XE0l+knw/CftTyg==
-ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=gmail.com;
-	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b="lu3CX/Pw";
-	arc=none smtp.remote-ip=209.85.128.42
-Received: from mail-wm1-f42.google.com (mail-wm1-f42.google.com [209.85.128.42])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.229.92
+ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
+	t=1795745151;
+	b=XIVK0Kf1AvI9qsY2Ww06Kq/moH6bLdkcThgt1Ldm823ny5Kp7FMEQbvrzdQpLDduv91M
+	 eTxu7Gs1UGOd58DC7LD/ZrjQb2K40IbSi0Mw/GVvs/iOrRZkEpmJ2vbwr46jLnfaSpHbJ
+	 Y54Nb0U+vL3cW82ArMR4Du/1LM4KMo5tMJNPTcTi9CDaboAR2q5bgcB955InFR/Z0AQ3d
+	 cFelFLfKZTgCU6r+AM9dvb9GT5d/aTRKzKkOTw0W6uZXX5Bnv/0BN7GbMdZgJKLcb9h1y
+	 XC2AwDTndp7KpjXLDB4kPhqNhH1K9xllccKXza0Zf6ZZ39cbaeCZnvQKSp0YOgDAtgg==
+ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795745151;
+	h=DMARC-Filter:DKIM-Signature:Received:Received:From:To:Cc:Subject:
+	 Date:Message-ID:X-Mailer:Content-Transfer-Encoding:Content-Type:
+	 X-ClientProxiedBy:MIME-Version:X-MS-PublicTrafficType:
+	 X-MS-TrafficTypeDiagnostic:X-MS-Office365-Filtering-Correlation-Id:
+	 X-MS-Exchange-SenderADCheck:X-MS-Exchange-AntiSpam-Relay:
+	 X-Microsoft-Antispam:X-Microsoft-Antispam-Message-Info:
+	 X-Forefront-Antispam-Report:
+	 X-MS-Exchange-AntiSpam-MessageData-ChunkCount:
+	 X-MS-Exchange-AntiSpam-MessageData-0:X-OriginatorOrg:
+	 X-MS-Exchange-CrossTenant-Network-Message-Id:
+	 X-MS-Exchange-CrossTenant-AuthSource:X-MS-Exchange-CrossTenant-AuthAs:
+	 X-MS-Exchange-CrossTenant-OriginalArrivalTime:
+	 X-MS-Exchange-CrossTenant-FromEntityHeader:
+	 X-MS-Exchange-CrossTenant-Id:X-MS-Exchange-CrossTenant-MailboxType:
+	 X-MS-Exchange-CrossTenant-UserPrincipalName:
+	 X-MS-Exchange-Transport-CrossTenantHeadersStamped;
+	bh=j7lU1Qz7hecT+S6oBoMfrbblZcB/CWLWhMyfnyC6Nt8=;
+	b=S86FVCkZBkmZG2dal0fUxyhB6SEtrakz5XQQaJByCjoK9NQr7E1W4RYfjUgr+jBNf2r0
+	 VsBVVHlgQkVqF9LMkV7iUFX57t/JLbgK9OzQFpzaFK8SMKg/z723SxrMBa1+Ay2+2qTBK
+	 /lzRq5Toi8tF3CZPlmR0OrovaxqgJh+aTjP4WI04vab4sVSr4G9mRW5D6HROfscJE2roM
+	 IIIhAoATEqJLnXPPMDs4fyWjUPEnt84KyC6dErNigstARfmIzU67K8PfdkwxCXDjQ43nz
+	 w4rZ0LIww95N5XpVl1gdgMdAgwQ+v04VvnPE944L4O4fyH3xPy7XUIt6SOfV/As2pWg==
+ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
+	dmarc=pass header.from=valinux.co.jp;
+	spf=pass smtp.mailfrom=valinux.co.jp;
+	dkim=pass header.d=valinux.co.jp header.i=@valinux.co.jp header.a=rsa-sha256 header.s=selector1 header.b=p0uj+Jho;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.229.92
+Received: from TY3P286CU002.outbound.protection.outlook.com (mail-japaneastazon11020092.outbound.protection.outlook.com [52.101.229.92])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange ECDHE (secp384r1) server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6C317606A321
-	for <ntb@lists.linux.dev>; Thu, 26 Nov 2026 03:20:07 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 6C317606A321
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E2942606A327
+	for <ntb@lists.linux.dev>; Fri, 27 Nov 2026 02:05:50 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org E2942606A327
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20260707 header.b=lu3CX/Pw
-Received: by mail-wm1-f42.google.com with SMTP id 5b1f17b1804b1-4a207b02a2cso46348665e9.1
-        for <ntb@lists.linux.dev>; Wed, 25 Nov 2026 19:20:07 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20260707; t=1795663206; x=1796268006; darn=lists.linux.dev;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=ddFS5afo7Q+Q+cm9cTOpxmimaZ1i0Ia2B8XMfOPwFsk=;
-        b=lu3CX/Pw6K4nr1KZwe+y7H8vNLSRP5cxGSWuvVCV68QcQy+8tqhcqd4RLqBtAGKw+j
-         EhQHpVJEYh546EmKOVfEyb4cvvk2RlPdWJ4JvFeYO2TUKBQnHWJ6+9YADCVxf3NLtarA
-         mgnjJNiMVm2cy2OPslhxds6DrD6BtSCVoGigPNGHPP6Mfh65fxtLRe59e0ameYb/6zZn
-         oO5iXL3J4y6B5sTy2W51LWRVY2+WUbRcZCb8tZqR7LZCml6ub3i115g3JOoETAiD/V1/
-         bLUeFY21aLWOjn0Il4dAkNz0SoloaC+jFbdc/0uRIlb8K5nZv9XxWund9O07baVcs4+E
-         XOFQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1795663206; x=1796268006;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=ddFS5afo7Q+Q+cm9cTOpxmimaZ1i0Ia2B8XMfOPwFsk=;
-        b=J6v823AqfrcSJvVTVNApNYNk7uDqVg438gfYMXL30myZTrvJlIFnFQVWHS9fXhP/3Y
-         rrzPAvaO4cwGPRem5VapIVlcjhX31HjwexfkXEjFdET51x6SRMAyr7X5AXm/OK5gWdt9
-         gIqj+q1UJzD8PnA5/XzLZkQ3aZeCEErl4N7I2qQI7sw457RIqagzC8uZSOSli58fjs1O
-         e9wd5gap2F6t1jYh1BZ613g4SQlXMAMxSIaAKMvW/qoY/x7eQ/CoQ3frxlJUtQnQBlol
-         3jbOSDjuwardV1CIWrskkX4u31g9I31XvwnAZCfpDlwcUit0TlCmHmgoJDy/Vsg69NVe
-         +mYg==
-X-Gm-Message-State: APuU4Z9d987LxvsAZ6rFnAA8jGkVuFP3J7jQ+f95Qba/jhanGAN8vhgO
-	dvIxsZcJSsxoY2GUwRIJKObigwbN5r91wCdwRRU0za7Ej4OYwMNqUMVy
-X-Gm-Gg: AZFdTZc4h9AexkFAOx1TBABmDA5+5CcSFog1wEwdq3kr1+4XGPOXtnMNy34uWNNSTuL
-	61cHCzn/6whMMMwnGh8tkHTh2TbOkjzdLx4t6/ccDoFFVXoRbvBxm4ugwj/GPE2F3XiyGSGlw4n
-	UopEc84FRmJVam6K3V+bXG80XWpxwgwO46PUyo0LYxtwu0mBRrn5wprqhOHcbAoogeO0HtwnCHK
-	l+t1puPGexLaRr/RWWtjy6PKqHv7hIUyBEiZBSKQ48ul+9uthCR07Eq3hb3/lYFA8kA1+VhTubT
-	8Tou1dAkUZeCpXq22Zphd+Lt+doDtrLvbwU6PVeMbW+NgnJnTeB7EDBb7767yJNwSLOEM/B58rp
-	jOAwhqsO2Vdl4+JhtTX8Mz+o0OCUfo2ab+h4irI1vVpNwrfujpzqLGHHktdVoB+gKzjXFGIWzIr
-	wQRKxLynMeAI6iDgqZ/iYN3KZe0vOrexcZzq4NV/gVzOBxHB18cYNowM+C/3PGFvPK/u6FSydPe
-	Wi+n7/so265lSUBVa6F0LlJP810z/XKPhyrGnpMC6J8KKhZiPLvfyAsfHGTi3ufkJ2hkUzzvivc
-	ARBGCuRyBbuYW9NbKwJyYbGBduiiK17wyExLQ2ixDLDu9ClaHKvP/GzW0EvmZFJliojHKNQucnr
-	NHQJGWgQoEdDJUKh4UuP3ZnVl7KK3yQrGLPf2wiAuIvBg+iq5pbLa4YcvXoeN/rXaT9pLKeqcvB
-	2t25Np07G3JmXYsB/XJ7UQMgkYd9oNSbEDDQ==
-X-Received: by 2002:a05:600c:a085:b0:4a2:526b:d410 with SMTP id 5b1f17b1804b1-4bb8881092bmr401946965e9.13.1795663205742;
-        Wed, 25 Nov 2026 19:20:05 -0800 (PST)
-Received: from localhost.localdomain ([31.223.101.75])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4bb8849e598sm537902925e9.8.2026.11.25.19.20.04
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 25 Nov 2026 19:20:05 -0800 (PST)
-From: Oguzhan KAYNAK <kaynak.oguzhan0@gmail.com>
+	dkim=pass (1024-bit key, unprotected) header.d=valinux.co.jp header.i=@valinux.co.jp header.a=rsa-sha256 header.s=selector1 header.b=p0uj+Jho
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=m0TgOg08cTL7S0op2f77nc2Y0a1flE0M8FqPBtTj5V3ErQZY/yTqZc5lE04oCihjxcYz8c3JNt7ac8Yb8OMwqd0RofQtn+k1hUYpVi1PWnym4ntF5YJ6vo7LtDWhzmzig4wOgjtOtBtfWYyLmmkf5e3vl+dW46lXFajv8diIujwYN2j9imbzBWwhgFf1H05E7fLtTU7iD5M+glFrKDZ1rUtRk0s/f85sMVuX3c+sQvct+y/APgAK1q0cAsyjfH85r1wb6pyPr+KG0HtvJY1p2Z6gQHpcprvSschSbbRElJnAbMhDDGq96xKDMcIy7xvlKFtrLd/N+Jw7Ysp2wzENeA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=j7lU1Qz7hecT+S6oBoMfrbblZcB/CWLWhMyfnyC6Nt8=;
+ b=yziuF5uxgxXSzNKDtn1s6VnGAdwnOsAWkM1f9+bSN/mmjPKcN1/7OsaiOhL9vjLx2NMK3OZhQbCxM8LRsWhYU1dGrJist6OkqRwK4sRGozdJMtdYUFewj7Km0TVSuq8DoGhtJ0Ku/s+tqDe83FS0ylOdHZtkhsRFW5RBKoDv4HZ+40UCYzCyxzmlMROLbwm1e+78s+pLDoCn+t+Y7aw4hsTst8HoJ9JXNMztM+wbomr/raMOeDJH8ln642tJS0okszxVCBgjQWbAYZ0MjW+hGEW15pBZNt5Rlg4k//0NhLEv7VpWltjfnnI5nYM8NyB94Sx10C6B6zSFvClZNbyUCg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
+ header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=j7lU1Qz7hecT+S6oBoMfrbblZcB/CWLWhMyfnyC6Nt8=;
+ b=p0uj+JhoHmkCOoaq8LPQF4dnIxXxzSZMzwPFtmwIhUcGx5ogulYRrK9VSMeeVpZmp1zUYQvcYqudUz7g75h6Xx3qY31FwXCw8bbpwqGER5ckexwOb35mbRbwh+VWosHw++L8B4v2JTly3tzEemZugk8xay0CFiXoAhVnKzE0D+g=
+Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=valinux.co.jp;
+Received: from TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:325::11)
+ by OS9P286MB6901.JPNP286.PROD.OUTLOOK.COM (2603:1096:604:416::20) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.662.9; Fri, 27 Nov
+ 2026 02:05:46 +0000
+Received: from TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM
+ ([fe80::cce5:2aa8:53f9:dba9]) by TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM
+ ([fe80::cce5:2aa8:53f9:dba9%5]) with mapi id 15.21.0662.007; Fri, 27 Nov 2026
+ 02:05:46 +0000
+From: Koichiro Den <den@valinux.co.jp>
 To: Jon Mason <jdmason@kudzu.us>,
 	Dave Jiang <dave.jiang@intel.com>,
-	Allen Hubbe <allenbh@gmail.com>
-Cc: ntb@lists.linux.dev,
+	Allen Hubbe <allenbh@gmail.com>,
+	Frank Li <Frank.Li@kernel.org>,
+	Logan Gunthorpe <logang@deltatee.com>
+Cc: fuyuanli <fuyuanli0722@gmail.com>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	Nicholas Bellinger <nab@linux-iscsi.org>,
+	Joey Zhang <joey.zhang@microchip.com>,
+	ntb@lists.linux.dev,
 	linux-kernel@vger.kernel.org,
-	Oguzhan KAYNAK <kaynak.oguzhan0@gmail.com>,
 	stable@vger.kernel.org
-Subject: [PATCH] ntb: ntb_tool: fix use-after-free of memory window debugfs files on remove
-Date: Thu, 26 Nov 2026 06:19:54 +0300
-Message-Id: <20261126031954.168544-1-kaynak.oguzhan0@gmail.com>
-X-Mailer: git-send-email 2.34.1
+Subject: [PATCH v4 00/15] NTB: ntb_transport: Miscellaneous fixes
+Date: Fri, 27 Nov 2026 11:05:18 +0900
+Message-ID: <20261127020533.2481725-1-den@valinux.co.jp>
+X-Mailer: git-send-email 2.54.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: TY4PR01CA0088.jpnprd01.prod.outlook.com
+ (2603:1096:405:37d::9) To TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM
+ (2603:1096:405:325::11)
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Post: <mailto:ntb@lists.linux.dev>
@@ -98,78 +103,118 @@ List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 List-Owner: <mailto:ntb+owner@lists.linux.dev>
 Precedence: list
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: TY7P286MB6866:EE_|OS9P286MB6901:EE_
+X-MS-Office365-Filtering-Correlation-Id: 8df3d597-aa43-4d21-389f-08df4c2af343
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|366016|1800799024|376014|7416014|10070799003|23010399003|10067099003|56012099006|261026135527099003|261026121527099003|261026140227099003|261028144727099003|261022075727099003|261022105027099003|261021121427099003|261021123027099003|261102123227099003|261009223027099003|18002099003;
+X-Microsoft-Antispam-Message-Info:
+	Z6NE1JaXNYV134Vx/a1viT552jO0OQCKxyQVQ0trXmAz9TEmfYJCGz86fcGAy499PbNgrymHEYnucB8YQVa/Tc3KY2GVZR+N6fm2ZA8ZCDKeBmbHoeyOHgWXsJJfXHylsgKSQICmmGR7SvNczmcNYovOdrMhIl3ss5rO6tfFL5UN8ZtUWSv1nvCmN+r0yYGlWJXMw16PJT2vvCJxz28EVSK64Z48mEl8EFJgTxVRNfBoI/71F9ZpTgUgr6vEvl71zdGzsDJtJc0ivcxzOrk/A/vYcTKK1hK1Sa2OIAfrSco89/WiIeqWNYVRwkyVsgoAHVsfAjy9Zm4XqkeejNE7fOp/kCvt399HoXcZzwPb98N9zh6G989tH/yZQAOLVWOeqFIUZJ9zW2ddmrv4fUn4M6FP6c0gbRjJ9x1+/WchWXIxTOg+wC9opH7X13DofJ0Ba6o4Fj3PHUm+rvIF4K1GYQ/WnGN61QUNjFfyWcmvfAGsESfbebT0HqZpGVj64prckTsmEKohdhzTgsg1Oo6+rrKDRTUttPmzG/7G7ATJuzdTxqXUur4l5o2e1jO+mx3P6TjtRA/fnRg/l3tNtukW+6YkY2M82Gb6VlxcpwRZ1HGvm6lgiKL1U4hkQT+BgO+o
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(376014)(7416014)(10070799003)(23010399003)(10067099003)(56012099006)(261026135527099003)(261026121527099003)(261026140227099003)(261028144727099003)(261022075727099003)(261022105027099003)(261021121427099003)(261021123027099003)(261102123227099003)(261009223027099003)(18002099003);DIR:OUT;SFP:1102;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?us-ascii?Q?EkjXYdqRU3ZDKBEmRAO+xzzlbmg4I/7AqFJDrEteBGlzraMUeQcI8et1qsqh?=
+ =?us-ascii?Q?+d6HOvx990TrwNO0EppetHui4j2+RGhbDjFcN/ubXCInOpb8bJ4sH3Fsw7al?=
+ =?us-ascii?Q?AYIvDPCJdKzYHxU6Ql1T95k1c7ekNrId/blLrvW6tt8vhy/0eGPJP9dxZ5/0?=
+ =?us-ascii?Q?jwUT2kegnYXC8AEQpcqFExaWuaZXk9nJRW2ou/U55qX0NXt5HR8YJL5OgiEm?=
+ =?us-ascii?Q?mSPgdSl7belM+jD6m+Uxao8qafKfqnhcLypgk/zjPuIcGkrNmxNR0/kXlzyn?=
+ =?us-ascii?Q?PRUKVybpgu4Nck05VoW/x5qRv0C+7hVV3Mgmuo9tRyIWI8mhzu8NhLosqWwH?=
+ =?us-ascii?Q?qrWf/JiADDOozBFu3lB00hx0roXKrInITU5k7F9yLyF2PDBwhjC4PSaBLw7L?=
+ =?us-ascii?Q?tUHyidEu+qsOOhe5EV+8/bTnjYYv6+CatgziGrNh10DbMQjyHzucu2q6yb32?=
+ =?us-ascii?Q?yNanFkFz7+Aye7lCaq3pc6dbmIACW/SRd/4AYOGN3h8e/Z0L6KF5mAp/+e09?=
+ =?us-ascii?Q?fT9vP7ruqmAMDuKNrOxLDlT+i2VsrHjJ6t7vQbGGBcg0RrwHhZfN0fZNLbqW?=
+ =?us-ascii?Q?+P170i3FRA3iYDGLjJr7yerElWb3bay7GsG4XWRwPt1el+ui54dDJi16p2fV?=
+ =?us-ascii?Q?Y7eIluYjJnT9SS6mDE94mLNLDQZhcrAFoVxzcsFLkHR+QdTYL59xZz7Jg0Jd?=
+ =?us-ascii?Q?V1+W1Kgz6IJ/M/FDSW4tuvvFeVXFgtX2iokGPi8s16qyq2IzPHUJGXvt45op?=
+ =?us-ascii?Q?aNqQhget6MQ+/1rjJRAe2QJqiiAIGUf6FIemTGYa7lbfXxvW5jVjKdw93n4E?=
+ =?us-ascii?Q?r3blkGyaut18HW3FI1HicyIm4kucxc5gmEyKiXoG1oANBHG5/JlENSzKBQk2?=
+ =?us-ascii?Q?fj3SX9dXq+uJHo2QamvFzM3DtmWxracVlR8XhdRqpB6o3Fqq/V9lIbj5UOfa?=
+ =?us-ascii?Q?gwmfSdQyd2/fI+l9X3++PMZc036kww0YyUokG4E/4hXzoQhejBP9Y67q+5if?=
+ =?us-ascii?Q?kvO0MQIgTPKxuxKL6qqKCjNkJy4/wBpAg+F0T/rDmTZRNK1uSdZ8bci0vF2g?=
+ =?us-ascii?Q?MFoC1jOqLrlOXFONt9ralnLmkfvbAQnD3Fk+rOpfLOValHsYLEuj6iiNf2QZ?=
+ =?us-ascii?Q?NjOfJ1pznnDx9Qf0ldQXp7khmqcLhe3oLLuIr3ssDoY1CNTyJxWM3kEgMkMb?=
+ =?us-ascii?Q?2Hh3YGnXuygaYsaKuwbWjaRJun0MjyLSJrj2hdn7wFh5bjWslAepXbl1uQe7?=
+ =?us-ascii?Q?puBKDbsTaj2CHpjow5WXjHUBT2Lrxl5nQerNvAznqZBrYZoZInoFiz7ADWbb?=
+ =?us-ascii?Q?V5dKgPf+i3XF/F0oQSEN9b7x7UZP6i6S6P4GCuMf5E+dRuM/D+vXIzP+3ZTZ?=
+ =?us-ascii?Q?ZNVZoge6QHIy8vvuIKrsGb+/n7VUJtXM2cI/w/Oew0+NtVFmZV2uxUrfxS5b?=
+ =?us-ascii?Q?kz2WMyKa/zUBjrJ3KOIo+vV9nlneh8icfUWrM8GmEnjNgWc5Mo7uAiYp8vpQ?=
+ =?us-ascii?Q?p8mA0NKsTH6C2Ggvig8enU68MTT6nymcfnMRdspn3U1U5HKqVp2SE0vi6h2r?=
+ =?us-ascii?Q?tin7vBECMP7bdAQsgSBUm+jeyv9WbVo3ECAqlYakQtidIinrgO/tK2AzyPoj?=
+ =?us-ascii?Q?dOcVo9cvQdL1uj6IECOtcXLbl9jtMMMO7L5lSGGM/gwwFkv/pEgqxERp73mL?=
+ =?us-ascii?Q?j4lxJJTnufmGVapMuFzNg+mtXebS1YjJVaRsQNsCVcKtscUglqKIQin6f2OR?=
+ =?us-ascii?Q?anvNKgxrb4HmK9AQ1FooETXAcXAeoueklZrq8dMrmsWFx0OgQiKd?=
+X-OriginatorOrg: valinux.co.jp
+X-MS-Exchange-CrossTenant-Network-Message-Id: 8df3d597-aa43-4d21-389f-08df4c2af343
+X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 27 Nov 2026 02:05:46.5625
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: XHvcY4cjr1CUaHbgBgKjT4dx8XEV73Yo/SWvHiB5oT4EoxpWFJ5IJ9cTBTlgnx5UXScaY6nr8nfOloqjWVFCvw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: OS9P286MB6901
 
-tool_remove() removes the device's whole debugfs directory with
-debugfs_remove_recursive() before tool_clear_mws() frees the memory
-windows. The per-window files peer<N>/mw<M> and peer<N>/peer_mw<M> are
-created in that directory, so they are already gone when
-tool_free_mw() and tool_free_peer_mw() pass their stored dentries to
-debugfs_remove() again. Those dentries have been killed (d_inode is
-NULL) and are freed after an RCU grace period.
+This series attempts to fix miscellaneous issues in ntb_transport.
 
-Removing ntb_tool, or unbinding it from the device, while a memory
-window is set up therefore crashes. With lockdep on x86-64:
+Jon, ntb-next has moved forward, so I've rebased this series onto its
+latest tip. The rebase was conflict-free and needed no code changes.
+I've also updated a comment in patch 6 as Logan suggested.
 
-  BUG: kernel NULL pointer dereference, address: 0000000000000140
-  ...
-  Call Trace:
-   down_write_nested
-   __simple_recursive_removal
-   debugfs_remove
-   tool_free_peer_mw [ntb_tool]
-   tool_clear_mws [ntb_tool]
-   tool_remove [ntb_tool]
-   ntb_remove [ntb]
+Please consider picking this up for ntb-next.
 
-(0x140 is offsetof(struct inode, i_rwsem) + offsetof(struct
-rw_semaphore, dep_map) read through the NULL d_inode.) With KASAN the
-same access is reported as "null-ptr-deref in range
-[0x0000000000000140-0x0000000000000147]". If an RCU grace period has
-passed by then, the dentries themselves are already freed.
-
-Found and tested on a virtual NTB device in QEMU: removing ntb_tool
-with an inbound window, an outbound window, or both set up crashed every
-time (tool_free_mw() or tool_free_peer_mw() in the trace); with this
-patch it unloads cleanly on lockdep and KASAN kernels.
-
-Forget the window files once the directory has been removed, so that the
-free functions only release the windows themselves. Removing debugfs
-first is kept: it ends all user space access to the files before the
-windows go away.
-
-Fixes: 7f46c8b3a552 ("NTB: ntb_tool: Add full multi-port NTB API support")
-Cc: stable@vger.kernel.org
-Assisted-by: LLM
-Signed-off-by: Oguzhan KAYNAK <kaynak.oguzhan0@gmail.com>
+Best regards,
+Koichiro
 ---
- drivers/ntb/test/ntb_tool.c | 15 +++++++++++++++
- 1 file changed, 15 insertions(+)
+Changes in v4:
+  - Rebase onto the current ntb-next.
+  - Clarify the memory-barrier comment in patch 6. (Logan)
+  - Collect Reviewed-by tags from v3. Thanks for reviewing!
 
---- a/drivers/ntb/test/ntb_tool.c
-+++ b/drivers/ntb/test/ntb_tool.c
-@@ -1599,7 +1599,22 @@ static void tool_setup_dbgfs(struct tool
- 
- static void tool_clear_dbgfs(struct tool_ctx *tc)
- {
-+	int pidx, widx;
-+
- 	debugfs_remove_recursive(tc->dbgfs_dir);
-+	tc->dbgfs_dir = NULL;
-+
-+	/*
-+	 * The memory window files lived in tc->dbgfs_dir and are gone now.
-+	 * Forget their dentries so that tool_clear_mws() doesn't remove
-+	 * them a second time.
-+	 */
-+	for (widx = 0; widx < tc->outmw_cnt; widx++)
-+		tc->outmws[widx].dbgfs_file = NULL;
-+
-+	for (pidx = 0; pidx < tc->peer_cnt; pidx++)
-+		for (widx = 0; widx < tc->peers[pidx].inmw_cnt; widx++)
-+			tc->peers[pidx].inmws[widx].dbgfs_file = NULL;
- }
- 
- static int tool_probe(struct ntb_client *self, struct ntb_dev *ntb)
+Changes in v3:
+  - Convert flags to atomic_t in a new prep patch. (Frank)
+  - Drop the redundant TX credit assertion. (Sashiko)
+  - Collect Reviewed-by tags. Thanks to Frank, Logan and Dave.
+
+Changes in v2:
+  - Address Sashiko feedback, including regressions introduced by v1,
+    with new patches 5 and 10.
+    Note that to keep the series manageable, this revision does not
+    attempt to fix all the reported pre-existing issues.
+  - Add a fix for client removal ordering (patch 14).
+  - Reorder patches, moving v1 patch 4 after the fixes it depends on.
+  - Add missing Cc: stable@vger.kernel.org.
+
+v3: https://lore.kernel.org/r/20260928152550.3354675-1-den@valinux.co.jp/
+v2: https://lore.kernel.org/r/20260910040836.3792333-1-den@valinux.co.jp/
+v1: https://lore.kernel.org/r/20260907142429.951930-1-den@valinux.co.jp/
+
+
+Koichiro Den (15):
+  NTB: ntb_transport: Remove the device debugfs directory
+  NTB: ntb_transport: Start TX offload thread after queue setup
+  NTB: ntb_transport: Make link setup flags atomic
+  NTB: ntb_transport: Avoid deadlock when cancelling link work
+  NTB: ntb_transport: Publish link state after QP setup
+  NTB: ntb_transport: Avoid losing QP link-up requests
+  NTB: ntb_transport: Clear link state before QP cleanup
+  NTB: ntb_transport: Stop QP work before freeing a queue
+  NTB: ntb_transport: Stop RX tasklet scheduling before freeing a queue
+  NTB: ntb_transport: Drain RX tasklets during link cleanup
+  NTB: ntb_transport: Wait for RX completions before resetting a QP
+  NTB: ntb_transport: Prepare remote RX info accesses for MW teardown
+  NTB: ntb_transport: Clear QP pointers when freeing an MW
+  NTB: ntb_transport: Abort link setup on QP MW allocation failure
+  NTB: ntb_transport: Remove clients before freeing transport resources
+
+ drivers/ntb/ntb_transport.c | 245 ++++++++++++++++++++++++------------
+ 1 file changed, 168 insertions(+), 77 deletions(-)
+
+
+base-commit: 0aa2e6bc39f17e1199345aaf21278e3ea25e6036
 -- 
-2.34.1
+2.54.0
+
