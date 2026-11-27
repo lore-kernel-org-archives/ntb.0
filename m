@@ -1,13 +1,13 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.229.111
+Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.228.134
 ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1795761025;
-	b=RpkGHlwlzRtZ8wEKr/0LASe5SyDpcAqkin9I7G9KgAWLyXrf1Cy+9YqLf3Ioi2jskPOb
-	 5B7+iGY47i55fiq6Q+Fp91NmVIvP42ltY4y19e1qW8aIFnKZuNKlJS6XLYHcIhCeTd3om
-	 BpJC5JZLpJ5XeKvrVaFOc6A+vpkWpJ00Bh/mKhb5N6jUsrogDEw+Nt8IXTSHztag478P6
-	 7hjNSHU3ZaufEkdW4gaWol60mD/PuLrPp4Mnt+1lQKl116IGn9E0vtoOiIGm2/KNK2scK
-	 B/Kq3DVknsrayqXN9/Rf1O0RydUEi7ZC1Ucko2fnsao+nBu3PuxXZ4tz5HuU+atNSHg==
+	t=1795766519;
+	b=mPCID5jrBtQsJ/SczG39CrGW5VaJY3VQpPGKaaxurQXUNz5t7tpx7uIdfbp3AFUu3XK1
+	 5m/AhGLew8BGQrYxqyF69xG+s+BUf7Xwa18klEhYtATilpukiMKejn0FYXGrtANtB1v9s
+	 n2Ju4pkdJXgfgryh/hJ9uTxcejrbW+3lfgKa5GhVnRjDcwYWxN0Ws9O0CATXBe0TgPK80
+	 F6/+zAJsJBj7sqVHz6U36CcZk893gF9/awYD/4IoQtsqABHs+0nA0keRdAGdVF2c5dlcU
+	 fQWXE3F6HbzdyAqQpgYLyJdTrfePbUhS//Pnq3r1L0oGwvKwAE8HLwxqCB8EzMDfKug==
 ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795761025;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795766519;
 	h=DMARC-Filter:DKIM-Signature:Received:Received:Date:From:To:Cc:
 	 Subject:Message-ID:References:Content-Type:Content-Disposition:
 	 In-Reply-To:X-ClientProxiedBy:MIME-Version:X-MS-PublicTrafficType:
@@ -24,69 +24,69 @@ ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
 	 X-MS-Exchange-CrossTenant-Id:X-MS-Exchange-CrossTenant-MailboxType:
 	 X-MS-Exchange-CrossTenant-UserPrincipalName:
 	 X-MS-Exchange-Transport-CrossTenantHeadersStamped;
-	bh=W+dT6AaBwXfX7XlEhpjtGmIjCkIrjvsrIWMkDm4Zia0=;
-	b=1eEtZ64wZH+UIIgQWWOavij61W7jEsyWdRPRz6f6UhSklXhu1ViLUKjf4XPqXgZ0HBsh
-	 k42HR6h33HnZZTb9ozeosCQcK51tRz3dxnaZ/tYoYhSIqyuNkaAnhcoUMX3KktAnjWseL
-	 jSyXKRXhypMxTpYNwmE890B6U3Et2iWBUUrFM7SwgJRohueGiSP+5vPh7xhoudqjg0cNd
-	 nZGfMXwGhRbdpmypTN6ggrTig1jftnxthrO1PakPs0F4z84fBVSM92UrAVczVXCw2Hojc
-	 qBoD39RPo7cex7LkmVvTLCNOPNUDNhy0tvFAIivPRt9On9MW+vsdRDKYxriZGmDzWpw==
+	bh=NabU33ou25vRtlCirCsNBQ2ftHhWhbDaCuP/EbnJjXQ=;
+	b=z8Yq+qYGGjx2ac4vmGJK6nPezsub/8UZ1I4GOz0fZIRzpNdJSZjC6IGAf8rjKJQzAov7
+	 c2TYFLe3K/D4Ak8lsjlgHRWqFtm5hNZo6At89b7ZRqBTibeuKKWgAVZPgheGUUWCvpJtc
+	 q+g26D2YIXZygQd/5kzAmfwSCmta23W1mTzCFz7/AzOVIIxOQXy8CDdvF061r7DwImh5t
+	 v8V7HVXoP0u88KjUoQ5j7ZkJA5xZxJU97zfDR2V+5R8al4z1TxfsYfdIbyn6IgUzXh7yy
+	 mls4H5NAG2j4L3bNo2MU1h9vRNDdIs2bRGO27i2NX6Y3OgQsnQXtyv7+qNPtc30Gyag==
 ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=valinux.co.jp;
 	spf=pass smtp.mailfrom=valinux.co.jp;
-	dkim=pass header.d=valinux.co.jp header.i=@valinux.co.jp header.a=rsa-sha256 header.s=selector1 header.b=pdXJwP0g;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.229.111
-Received: from TY3P286CU002.outbound.protection.outlook.com (mail-japaneastazon11020111.outbound.protection.outlook.com [52.101.229.111])
+	dkim=pass header.d=valinux.co.jp header.i=@valinux.co.jp header.a=rsa-sha256 header.s=selector1 header.b=noGbgx9c;
+	arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.228.134
+Received: from OS0P286CU011.outbound.protection.outlook.com (mail-japanwestazon11020134.outbound.protection.outlook.com [52.101.228.134])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange ECDHE (secp384r1) server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 00AE9606A329
-	for <ntb@lists.linux.dev>; Fri, 27 Nov 2026 06:30:24 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 00AE9606A329
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F3560606A31E;
+	Fri, 27 Nov 2026 08:01:58 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org F3560606A31E
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=valinux.co.jp header.i=@valinux.co.jp header.a=rsa-sha256 header.s=selector1 header.b=pdXJwP0g
+	dkim=pass (1024-bit key, unprotected) header.d=valinux.co.jp header.i=@valinux.co.jp header.a=rsa-sha256 header.s=selector1 header.b=noGbgx9c
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=otKc9Wl6QlVC1/GN+lOj3qmTl7xXCvKuUKnXU9wudjFa1GcdJampZOzTdgYXnuhid+cwBTrYuUggkI7NonIyvYBku5orv/49Q+1pTy1w1xCPRTCDcfHm/gGeRKrVZSVuZv8ImbLJP6CSBx6ROfOErc4rseKLLfaGCIjGf4Cmo+HAura5nJupE0ygn7oKYggRdttNzH0C/UxB0vOYB6nOGX6kyPwVYGY6ie0xZYSXe7myZDaGlS1ccnWI4HCmuFtaMpkQhfJNu72LlNDOV4GbSfCkP/oaxKbqht+KkhHjBmKZkKjA8A49p0PeKt4hYMW/iAPAIr207o2aBTu/1cvOtA==
+ b=uY0LOxzZvmFcFb7clt5eHJpXBhZzJ3JggznNbFiWL6/X6Giwi/YugZTrSRiGVw2HYmNr2seMC1ZuHUsPZ12l74lerTI4obyYetOD+6goq/Y/KXr02/h0lHaSJosty2B0/XiO+AhB0jUpOnXmHzP+3Npl0AvqZlSYfBt+7B3Ql4Suspg0b1X0jsIyieGPHB2fAVcB5s3NkPUwHt5N2fKP9Ej86AXHrPdMeG3ZLlFb+eq/k5+N6AGmSJ94vTxEjHAtn+uIH375Upq25aqV8WYh9nUSKdu6CaBzn2TJAxGT3rikrlCO+hTioYIT1iCtjlWXmFlhcS+a14p/WCK6e7hKLA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=W+dT6AaBwXfX7XlEhpjtGmIjCkIrjvsrIWMkDm4Zia0=;
- b=unfonzdkruM7TWWtP6uzEF0R2u0ohoruc3MF96SWjNoskMzAm11QfNlhjAuX57kZtHaCOKkkxXSZZvHhvKzyPRME2YMUiUmo+oUPs8zldh6lZxRTvXsppXjJgq4mT2fP8CfDht0DQnOKOX0/qHGUfSOWRpbjYhXuLex2aB82dVOdP8uXqVuuMSpW5cv3ZEUN3u9EfVu54mViYntCp2EfUM6G0w6hFNY8gfJt2q8uR/CWF+Kr1dQllowm9UOhfBHoVqeYXgeGAHvaBymXJ1200ho62y6mquRIMJo40CR1UARUD2EUQW2FkJPM3iJXyBfUXO9U8dI+Q0pcPbH66ysR6w==
+ bh=NabU33ou25vRtlCirCsNBQ2ftHhWhbDaCuP/EbnJjXQ=;
+ b=PRg1eJbmyW3tcU6EYHkqhPS2Z1GucqyMjj2QywNzOWFFcz4t30UgjVcsgh2sCEK+Rq47eJjjj8Yy4ycfejFQ3KWo2D9Y9jonJy/aW6ixsiRT8YW0/4pgPET9V/tel1kS5vV1xd81rB16uqgGVLa/NVI+1ylrOt+zctcOd+Asoe2ZQ4GyXiFbtsRkhopZBVeWvcuqkwF/KQCJ1mUj+MsKXa1C96hYGTqF8h1mbRbconN0C03QGoyOZ/TFlmLWmNveI/AHWAnKAvwOb10fpGFWNEUBofTmKkGhBnWRLr67y2ZAx8RDE3C2PgoMAnrz712le0eevVzhbmtHMjFDmKuizQ==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
  header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
  s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=W+dT6AaBwXfX7XlEhpjtGmIjCkIrjvsrIWMkDm4Zia0=;
- b=pdXJwP0g4l4ba8rulcUkytjRdGNRJt1tI9YT7JSvX5QCV7n8WfFYdKUuIAPBv6AqGyVGM6pPpMRI/wd+JVKo/XkVBc22BYvErEfF+fD0SqAFSuXuHGJNQ8YQURdXsknEyhf6gvu63n9zcl6mZDIYeSu5DuUP/5I+6hU6cLsZOsc=
+ bh=NabU33ou25vRtlCirCsNBQ2ftHhWhbDaCuP/EbnJjXQ=;
+ b=noGbgx9clRwbc/j0zXOryEuNA9w6w9FMxzoP8oUfOxKmrBlUMchq6u+0/YeTu2CudR3R68k389/KBlPqJKZyFCCo0o39n4BT2hyFTM2EPLRbDPI3BHPl7tB1OXPF3AuxBRHPMDNw9EOebRPpUN3g+Pl2HkZZ+nAwPHyi+Vp12m4=
 Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=valinux.co.jp;
 Received: from TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:325::11)
- by TY7P286MB6833.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:31f::6) with
+ by OSCP286MB5188.JPNP286.PROD.OUTLOOK.COM (2603:1096:604:351::9) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.662.7; Fri, 27 Nov
- 2026 06:30:21 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.662.9; Fri, 27 Nov
+ 2026 08:01:54 +0000
 Received: from TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM
  ([fe80::cce5:2aa8:53f9:dba9]) by TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM
  ([fe80::cce5:2aa8:53f9:dba9%5]) with mapi id 15.21.0662.007; Fri, 27 Nov 2026
- 06:30:21 +0000
-Date: Fri, 27 Nov 2026 15:30:19 +0900
+ 08:01:54 +0000
+Date: Fri, 27 Nov 2026 17:01:52 +0900
 From: Koichiro Den <den@valinux.co.jp>
 To: Oguzhan KAYNAK <kaynak.oguzhan0@gmail.com>
 Cc: Jon Mason <jdmason@kudzu.us>, Dave Jiang <dave.jiang@intel.com>, 
 	Allen Hubbe <allenbh@gmail.com>, ntb@lists.linux.dev, linux-kernel@vger.kernel.org, 
-	stable@vger.kernel.org
-Subject: Re: [PATCH] ntb: ntb_tool: fix use-after-free of memory window
- debugfs files on remove
-Message-ID: <awke343ZVpkOIDfg@z790sl>
-References: <20261126031954.168544-1-kaynak.oguzhan0@gmail.com>
+	stable@vger.kernel.org, regressions@lists.linux.dev, yangqixiao <yangqixiao@inspur.com>
+Subject: Re: [PATCH] ntb: ntb_tool: accept hexadecimal addresses in
+ peer_mw_trans again
+Message-ID: <awkzEjrVEz2jB1Ma@z790sl>
+References: <20261126031506.165973-1-kaynak.oguzhan0@gmail.com>
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20261126031954.168544-1-kaynak.oguzhan0@gmail.com>
-X-ClientProxiedBy: TYCPR01CA0196.jpnprd01.prod.outlook.com
- (2603:1096:405:7a::20) To TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM
+In-Reply-To: <20261126031506.165973-1-kaynak.oguzhan0@gmail.com>
+X-ClientProxiedBy: TYCP286CA0323.JPNP286.PROD.OUTLOOK.COM
+ (2603:1096:400:3b7::15) To TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM
  (2603:1096:405:325::11)
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
@@ -98,135 +98,138 @@ List-Owner: <mailto:ntb+owner@lists.linux.dev>
 Precedence: list
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: TY7P286MB6866:EE_|TY7P286MB6833:EE_
-X-MS-Office365-Filtering-Correlation-Id: e69da4fb-4816-42f0-28b6-08df4c4fe932
+X-MS-TrafficTypeDiagnostic: TY7P286MB6866:EE_|OSCP286MB5188:EE_
+X-MS-Office365-Filtering-Correlation-Id: 0402aa95-2b79-4579-3d0b-08df4c5cb366
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|376014|1800799024|366016|23010399003|10070799003|261102123227099003|56012099006|10067099003|261022105027099003|261021121427099003|261028144727099003|261026140227099003|261026121527099003|261009223027099003|18002099003|22082099003|6133799003;
+	BCL:0;ARA:13230040|376014|10070799003|1800799024|23010399003|366016|6133799003|261009223027099003|18002099003|22082099003|10067099003|56012099006|261102123227099003|261028144727099003|261026121527099003|261026140227099003|261021121427099003|261021123027099003|261021135927099003|261022105027099003;
 X-Microsoft-Antispam-Message-Info:
-	6YKJxXPp4Wjo+EDElaaXCd+/WxgH2x0akL+wn5b9yAJwFlNMMqLu20NBepcvE+RnSRG4IIyIflC5wxng012ZP4VvYGpoAbdp07As2kyaAJBmGHEkDvhuBWJWdIUC9EOI7ehWjDbmE13uKP8c3+pKdkzUiqfFhfD1QW/1RvS7CFiht2wI5OIOnITwX70WoCms3NwfDIcn9Pe/L0EQx1IxaRcbHflJVDePqUWY1BWszbZuilLR7qqylrqzdqT1VVesB0J08lAs2aNOAiAWAxX28CC1cvn+ri10YlVQWi36/msCQLhpFC/FOPG5wMhsWS3yBj0cr0RV6OjgjzmPvhVcW/G2GomgLo50Mw0pYGHk4d6TzKslZxlEzmJf5GUzviA4SZHM3Jmrm5HiqWbl8km9Z0RRIL+J4ftgD5vbALFAM7jts5aAj0kqjoIJU2vjcivGpqhIK6G+jjmIILxG8Iolw5i+W/BeTkCu+bZ51YikaMfqqwPpgB50OLrvIOaKcyWq3ps01cmTCG/YuglL7XqocKB/Nm4DTJmMfivtjd+QLr1dfmPrbQd++pA5kmCZCDzV6ZO4vQ0Sj2nAvU63QnaLaHwz0kQih/B9j3hSHtPMkj9DI/M+Ig74ItTv+1GKuXRrGKO1kkAmkSvv/TZi603jOUtSuD1hr67QjnYimVJnbco=
+	i/Vl/GRtfs3DvDGw3XxracGPy6gM0PwR8YfDyChRCP3fOx8qp5Q6zZERoPZV7/+fowrGbUFYDfMe14X+dNxKIx8xLjG3mi2jOz0764bsuel0yZbjF4N+7Nu2SAHJVq5hrWoLZKvyzuRHsGfa3DAMqaPFznLaM/015m31nb51HOnVHMQy4X0FAMO+GoYi3oxO9IWVThwBWSSyJJ+7RYZjPpk1Bgc5iKo+J6+qO826brd85VrLOI+QlHDxjzgTPyp8KBNZu2uTpf9SdVKQsVTEHVy82IaMhxEKe9m2kIzS4PHQn9rwVCbhvTGfcKbk8h9j4tp2BzcQ0UnEHY9uZrK0Khh5FcZgxMBDeG8ReXYx5JwyOP8sMMPSTRTbTt58WT96X6j54fsci9xZMpVRkcQMpO7+ileMmJnGwITr1LdRLhy4GZljki8MCloWoSl7qTWPNI4z8Ske5OPjH0AC5WKlGF/Gc+SkTv8sP6qrs+Yp56Ao3GkYACQLq8Ayj6HywmUROlXtLsZmBowd5Evo/2XTDPkdD2ReoZGmgNBeMChID3R3txSwWeKvWPQ2YKl0m99eHqSfi7zESwlT6oHCDDvDOlNDHq2HNMmvhreHfaZajXD73tkRhB9ZI7LNAbwrUJLPF7vAhiSOGNZ7OVZQMRhxdfQ2NCHXVMCQNszyRg/6X3Y=
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(376014)(1800799024)(366016)(23010399003)(10070799003)(261102123227099003)(56012099006)(10067099003)(261022105027099003)(261021121427099003)(261028144727099003)(261026140227099003)(261026121527099003)(261009223027099003)(18002099003)(22082099003)(6133799003);DIR:OUT;SFP:1102;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(376014)(10070799003)(1800799024)(23010399003)(366016)(6133799003)(261009223027099003)(18002099003)(22082099003)(10067099003)(56012099006)(261102123227099003)(261028144727099003)(261026121527099003)(261026140227099003)(261021121427099003)(261021123027099003)(261021135927099003)(261022105027099003);DIR:OUT;SFP:1102;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?sGrQtn4CdryQMIIAqTl8G4SgoxdiUd4g+ZGVdXeBCTT6sNySu9ss2/zMbuW/?=
- =?us-ascii?Q?f115hDkS3XFNw3ANYY5fJ8wofQIwh0bjn3wAo1Gr9UTfJYYZ0uwth1HlpuGd?=
- =?us-ascii?Q?d7Vmeoq47xz87NZr2AwdL/qnVnHff3ushLTDr7fpLy1cy6NLKqZRQ0KeZFZ9?=
- =?us-ascii?Q?TuVbS4uye1I6cE3NHkKW7KHEpsATofZcvlb3Y8Gr51hZoKaX29egIwZTI3O2?=
- =?us-ascii?Q?LYSfP7Dq04vqJX/q0rWJqkZQ7OyevUuiW84TFnrUQbLUnpkbtvM6Wa9JiH/t?=
- =?us-ascii?Q?NU5KcEzQIODWfa+fCulHhI1xYFesfIDt6hDCAtUUUfIol5kIN/FISzEcfMLy?=
- =?us-ascii?Q?0+dXWVnEm2D/eK7N4B1jC2wz+yxMDEimeEK4y76Nak/yMefNC1SkXdJXg8/a?=
- =?us-ascii?Q?sixpbUbcUPt/NitUNuHuNTnxnyjednkjZHUT5gSuwSO7qJSWHhBdH6qbIzV/?=
- =?us-ascii?Q?oKGWqKwDGM8TT2V+a4S0zDA36J47F5crEg8v5TXV5vYzGKUT8e7k3EO5VBYQ?=
- =?us-ascii?Q?wcetXYmzvrahuPJ7kdJ42lVvBMJYR4/A7D/knGCLyeiMYl3ztzcLv/3xekRW?=
- =?us-ascii?Q?phY6pPh+9tpPxII+bB6P2waswAZWWJthylU/a83d9OuM0jFZ46dczybPs/mI?=
- =?us-ascii?Q?kzJb3QSiqwUJTCwuWDUkVr/dPV1cvr2QgBlOdQ66yOEoH6T/0PfeVudvOjB0?=
- =?us-ascii?Q?2s5+/UhQ+iZ+4N1TzFqS0myUmyOcmzPGqjuoh9uVvxDJXU00muiAgj6MHvg/?=
- =?us-ascii?Q?yxVPYZybbLxYiLRYGp4AsNuyMdiTmYaW3fWGYI8f2xgHiu1U6A4u0Ui1KLYD?=
- =?us-ascii?Q?u8C/vrF/3sqfCfg1r0oFqcM0g5b+qqRkEDbs+NGDz/TmbNVaGaOLNwMzXxFv?=
- =?us-ascii?Q?ETS6ZXdnXZ5bdsXnFRTbN4B9U/QecIwDobMG8mwb+AqES2mKOUNh7neRwJ/K?=
- =?us-ascii?Q?8pCJ2vLFbS6tDR3quFn5ckKhlZhXXF+GAPe7gYso4QXz1YQWkqUZvJ8Pz8vz?=
- =?us-ascii?Q?+R/iZVLCiyeLpbVSR413/K05NaF/BAM6PPzgioME/yyPJEqquGtM1nqMJ/Rd?=
- =?us-ascii?Q?ZG5rMCKtppDAa5Stx+NQd26gmw+ZglyH8pCzwvuhnxG4/aFacMBlMl9I0CiN?=
- =?us-ascii?Q?zn23n1OfytA6bgcrqIcZpMxhavsW07FXlhRkD4d6uv/WlPdEORrdp+NZLJZ2?=
- =?us-ascii?Q?66TBR5hYL92QMFsZxJx7VHl4uBxNuYCBM2V9ZIMts3jegLvlEpvnxE21qYt+?=
- =?us-ascii?Q?uxsu/w2c6joy+X0NidtU5snhZ6GQBbcm+NuB4P7iLLzrjJqiSMyAG+2IVj9M?=
- =?us-ascii?Q?jZJbP2QEaky76yf/2UmdQtxKZt/coIxmO30BC8kd8UGb7xT+lfLA6vVbrIKH?=
- =?us-ascii?Q?T+wy486RQwJwOOHUY3zgRhOK++iWqLtpkReKj2hMQyHJEBIDvEJSH/9dp6QC?=
- =?us-ascii?Q?64u0wwjWdl8JGu0TwDJEwvLLqszGNbdOVZ4jxrctDJ6g3oK6f88wXlXPwyD7?=
- =?us-ascii?Q?ZjSNkUdj2DrNtJHyaorj+tKeltbRcaYBeevQaQqdRJYjzp1HoejcG3ZGAXOY?=
- =?us-ascii?Q?/QewIajmq6f3UaC1zW68XgLwzjYvvjXVrBAJcfdxcziB0oRNDFjdLtxq0Bzo?=
- =?us-ascii?Q?FhyICe1Oty4haKF2kXz7tNzHjfS9QdeD61UE4lWJYbfKSIqWzSCxB3UMs+w0?=
- =?us-ascii?Q?BKhFPU6FbRs75yDuMYBoeoJBByOAk9ayKKl0hzOs/aJ4UlR7PA6qKa/cr3wD?=
- =?us-ascii?Q?DcjJS41tUYBWk6Wvn7LbB7GySRfBA2Q5PmDGDYSBmCuP+zr23HRi?=
+	=?us-ascii?Q?jbjG0XaYEVOyysXREe1rv694V0Fo/gVKoC5/+n6fKhjC3RSMH4Vw3xPYq6pP?=
+ =?us-ascii?Q?0JC0kjcXfuBsBMhxAnqZ/4lQP9iwOxoN90zqT/U4ItSewQ2mKNm5DSc7OpOb?=
+ =?us-ascii?Q?LI4C012g9MlzrziCH1LFLYSAe4gMn2UuJg9JQkKacJ7/ePbts0vBxIvNWjAi?=
+ =?us-ascii?Q?MhIsAUmB2QYpVrTUQA4YyR9lOu+var4ak4fQIIamOEkjYlM+595izvxRzfBl?=
+ =?us-ascii?Q?r0h/lNI11yVHu5PuD9tGsrog6CPXz0Mb7lW0lZn40KK5CI7Rcc6tpg9tnh1N?=
+ =?us-ascii?Q?FghACDT0XUrn3LU7jIiIPOxcOdisK263+ypLID8brZroMLdE7mV6XKzfa5lX?=
+ =?us-ascii?Q?dZWz0TmyqT1rWrSh3/b9ImIScS9lqwS3J/RZM5qTDHNMmrGHqF4lyd0ExOW0?=
+ =?us-ascii?Q?AEcAQv7gSvDuMWCcxzg9+xy968VuYXH/EQVha7O62biszlCDZ+nJabGKpl0R?=
+ =?us-ascii?Q?CUB9JbixQ5ETUZ0I538fiaXjA9QekpSoR9FNFtvxq1NTl2wR3q8iPmVVEgKo?=
+ =?us-ascii?Q?xz7gJRL88NqLfPfFKYVuSTvDFDu2zGY2dgeJ4ztPkOGLsq4Q/j3n2CcU7QxM?=
+ =?us-ascii?Q?GlpWofW4pDJHi0kmBUs4bEd7bfWK0mJNvhWsiX3SrvOZvXSgo9CuGzSC8PX3?=
+ =?us-ascii?Q?9iNj3Jk5Tu8JZRcRX+1upfRpvyrkH53OsdFVJVP7xsGb+jVttiGJuYCp+1lT?=
+ =?us-ascii?Q?I+Mp0qJxU/j8RTMvoBj/SQRHIDXt8G45Aq1LJCWDyCgRpWrL/z01QmYCuLU1?=
+ =?us-ascii?Q?Pkt7sHkDrWDJc4b8tbDXd0NV0obcdm93uSm72GAOUyrEOuOpMpholA3kgGjd?=
+ =?us-ascii?Q?hR+A0wprZiWV1nFzrwW5ZCIzVhkISjSuWwxbkBq23tbh+lvJlADhJ8Gnbkiy?=
+ =?us-ascii?Q?IlJ02Um1pEtoSXrrcNXQ9zbaglnRePUoo18+NHZ5xfQTMAsKs2SqGzMj+vi1?=
+ =?us-ascii?Q?x8X9EI+8KB6K8D8Kmm16nqf/h4x6nhrxKfhHWuBSLs+wK04qzmc2BA/AP2LT?=
+ =?us-ascii?Q?RZ7/xnXc0gkOHGD7GAZ8ateOc0m5quXl8VENXD4+znvVqry1QyPbJjmSHyOu?=
+ =?us-ascii?Q?TJN1JvxH/JdCraRWtFKrIduUERrugBE+J7RrTqH5eL7JJj3Mw7J2Mfjq8AD3?=
+ =?us-ascii?Q?Wy0RR/tGQGl03C0amT4FR+YVG4gZx1DR8gOIsr722IVG9Is6onuT13/UgYLb?=
+ =?us-ascii?Q?//o927U5eJPqA2u4d25rA4jZS2KvZbSjaiG0PSadeEfUvONbwSZBbPWAM3Vg?=
+ =?us-ascii?Q?nLVSsTGAWnK29XGNCcPEYCYd84AU8JROA3ZLQA0ipTRsNFauv4fzdDSMm3An?=
+ =?us-ascii?Q?owUJun8BoI4iBATiWSXtC5soPMmjudv/OF5AKdpwzU09iOCr3HXYmT8wICNJ?=
+ =?us-ascii?Q?1amQMngwmVETj5xrMpnJx0v9uQjpa/Jrb1CbTfeMWurOZ2TL07k1CcT9MGq3?=
+ =?us-ascii?Q?n4ARJf8nsXw9rnN3KoptsgnT3/DXeUl0VZk01SjqcydLT4NTxDxswj1YWUVJ?=
+ =?us-ascii?Q?Dc++BKrYGw1fGioMcwnYT1h/X9sS14A3yC6bfVOu2ZcPrKF+TommhzVNA8XZ?=
+ =?us-ascii?Q?rD7gRJUh9RlsyBIib1sYUMmohT4sJRT+qbKZstYslgIcu78KJJT+Anx7frhY?=
+ =?us-ascii?Q?aX6/K/2gyPtHHuPxY2UKiqCrStlN9NxYk19Qq4do1OzflGj6KPge/pIkNtZ3?=
+ =?us-ascii?Q?WG56IKplWosaVglChJTCfzgfKCDTiYtJWjZfLews6vF6kLl1wTakPeAxY1i1?=
+ =?us-ascii?Q?5JNZurIwyca1BergzmBnjaAw9Ze4o7Ck6Q7KsEU4qbLYQDojw/rC?=
 X-OriginatorOrg: valinux.co.jp
-X-MS-Exchange-CrossTenant-Network-Message-Id: e69da4fb-4816-42f0-28b6-08df4c4fe932
+X-MS-Exchange-CrossTenant-Network-Message-Id: 0402aa95-2b79-4579-3d0b-08df4c5cb366
 X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 27 Nov 2026 06:30:21.0318
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 27 Nov 2026 08:01:54.2211
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: bpdvlVdfl29LjQF3eetb3aTbc/bDu+Ry5Q9IjpvslhBOXvhgmS0uMOxJ9KpevXvyGoTX52f/FGbmaRIh+LdgjQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY7P286MB6833
+X-MS-Exchange-CrossTenant-UserPrincipalName: 9Sk++nugrARfvkkh57eFZ3V/PyLT1ULoYil+X/W82jS580oihhKyVfGRx/bWnryHo+64CdRDKXab81ZkKJRYXw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: OSCP286MB5188
 
-On Thu, Nov 26, 2026 at 06:19:54AM +0300, Oguzhan KAYNAK wrote:
-> tool_remove() removes the device's whole debugfs directory with
-> debugfs_remove_recursive() before tool_clear_mws() frees the memory
-> windows. The per-window files peer<N>/mw<M> and peer<N>/peer_mw<M> are
-> created in that directory, so they are already gone when
-> tool_free_mw() and tool_free_peer_mw() pass their stored dentries to
-> debugfs_remove() again. Those dentries have been killed (d_inode is
-> NULL) and are freed after an RCU grace period.
+On Thu, Nov 26, 2026 at 06:15:06AM +0300, Oguzhan KAYNAK wrote:
+> Commit 21fbdc4d0b1e ("ntb/ntb_tool: correct sscanf format for u64 and
+> size_t in tool_peer_mw_trans_write") changed the format of the
+> peer_mw_trans parser from "%lli:%zi" to "%llu:%zu". Unlike %lli, the
+> kernel's vsscanf() parses %llu in base 10 only, so an address written in
+> hexadecimal is read as 0, the ':' in the format no longer matches, and
+> the write fails with -EINVAL.
 > 
-> Removing ntb_tool, or unbinding it from the device, while a memory
-> window is set up therefore crashes. With lockdep on x86-64:
+> This breaks the usage documented at the top of ntb_tool.c
+> ("echo 0xADD0BA5E:16384 > $DBG_DIR/peer0/peer_mw_trans0") and the NTB
+> selftest. tools/testing/selftests/ntb/ntb_test.sh writes back the "DMA
+> Address" that mw_trans<N> prints with %pad, i.e. in hexadecimal. As the
+> address format comes from ntb_tool itself, the first memory window test
+> fails this way independent of the NTB hardware driver:
 > 
->   BUG: kernel NULL pointer dereference, address: 0000000000000140
->   ...
->   Call Trace:
->    down_write_nested
->    __simple_recursive_removal
->    debugfs_remove
->    tool_free_peer_mw [ntb_tool]
->    tool_clear_mws [ntb_tool]
->    tool_remove [ntb_tool]
->    ntb_remove [ntb]
+>   Running mw0 tests on: 0000:00:04.0 /  0000:00:05.0
+>   ntb_test.sh: line 117: echo: write error: Invalid argument
 > 
-> (0x140 is offsetof(struct inode, i_rwsem) + offsetof(struct
-> rw_semaphore, dep_map) read through the NULL d_inode.) With KASAN the
-> same access is reported as "null-ptr-deref in range
-> [0x0000000000000140-0x0000000000000147]". If an RCU grace period has
-> passed by then, the dentries themselves are already freed.
+> Parse the address with %lli again, which accepts any base, as before
+> that commit. To keep the format and the argument type matching, which
+> was the point of that commit, store it in a long long; it is passed on
+> as u64 as before. A negative address is accepted and converted to u64,
+> as it was before that commit. Keep %zu for the size.
 > 
-> Found and tested on a virtual NTB device in QEMU: removing ntb_tool
-> with an inbound window, an outbound window, or both set up crashed every
-> time (tool_free_mw() or tool_free_peer_mw() in the trace); with this
-> patch it unloads cleanly on lockdep and KASAN kernels.
+> Found by running the NTB selftest against a virtual NTB device in
+> QEMU; the fix was tested the same way (the unmodified selftest passes,
+> and hexadecimal writes to peer_mw_trans0 succeed 10 out of 10 times).
 > 
-> Forget the window files once the directory has been removed, so that the
-> free functions only release the windows themselves. Removing debugfs
-> first is kept: it ends all user space access to the files before the
-> windows go away.
-> 
-> Fixes: 7f46c8b3a552 ("NTB: ntb_tool: Add full multi-port NTB API support")
+> Fixes: 21fbdc4d0b1e ("ntb/ntb_tool: correct sscanf format for u64 and size_t in tool_peer_mw_trans_write")
 > Cc: stable@vger.kernel.org
+> Cc: regressions@lists.linux.dev
+> Cc: yangqixiao <yangqixiao@inspur.com>
 > Assisted-by: LLM
 > Signed-off-by: Oguzhan KAYNAK <kaynak.oguzhan0@gmail.com>
-
-Reviewed-by: Koichiro Den <den@valinux.co.jp>
-Tested-by: Koichiro Den <den@valinux.co.jp>
-
 > ---
->  drivers/ntb/test/ntb_tool.c | 15 +++++++++++++++
->  1 file changed, 15 insertions(+)
+>  drivers/ntb/test/ntb_tool.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 > 
 > --- a/drivers/ntb/test/ntb_tool.c
 > +++ b/drivers/ntb/test/ntb_tool.c
-> @@ -1599,7 +1599,22 @@ static void tool_setup_dbgfs(struct tool
+> @@ -928,7 +928,7 @@ static ssize_t tool_peer_mw_trans_write(
+>  	size_t buf_size, wsize;
+>  	char buf[TOOL_BUF_LEN];
+>  	int ret, n;
+> -	u64 addr;
+> +	long long addr;
 >  
->  static void tool_clear_dbgfs(struct tool_ctx *tc)
->  {
-> +	int pidx, widx;
-> +
->  	debugfs_remove_recursive(tc->dbgfs_dir);
-> +	tc->dbgfs_dir = NULL;
-> +
-> +	/*
-> +	 * The memory window files lived in tc->dbgfs_dir and are gone now.
-> +	 * Forget their dentries so that tool_clear_mws() doesn't remove
-> +	 * them a second time.
-> +	 */
-> +	for (widx = 0; widx < tc->outmw_cnt; widx++)
-> +		tc->outmws[widx].dbgfs_file = NULL;
-> +
-> +	for (pidx = 0; pidx < tc->peer_cnt; pidx++)
-> +		for (widx = 0; widx < tc->peers[pidx].inmw_cnt; widx++)
-> +			tc->peers[pidx].inmws[widx].dbgfs_file = NULL;
->  }
+>  	buf_size = min(size, (sizeof(buf) - 1));
+>  	if (copy_from_user(buf, ubuf, buf_size))
+> @@ -936,7 +936,7 @@ static ssize_t tool_peer_mw_trans_write(
 >  
->  static int tool_probe(struct ntb_client *self, struct ntb_dev *ntb)
+>  	buf[buf_size] = '\0';
+>  
+> -	n = sscanf(buf, "%llu:%zu", &addr, &wsize);
+> +	n = sscanf(buf, "%lli:%zu", &addr, &wsize);
+
+Just to clarify, do we have any rule about negative values for the address part,
+like in "-1:4096"? 21fbdc4d0b1e mentions "-1" as a possible input for the size
+part, but doesn't mention it for the address part. (For either part, "-1" is
+really odd, but that's not the point.) As you mention, your patch starts
+accepting it for the address part again. Perhaps we should keep rejecting it
+there?
+
+If so, to cover the cases broguht up so far, perhaps it would be an option to
+split the input at ":" with strsep() and use kstrtou64() with base 0 for the
+address?
+That said, this looks like a nice and small improvement to me.
+
+  Reviewed-by: Koichiro Den <den@valinux.co.jp>
+
+Thanks!
+
+Best regards,
+Koichiro Den
+
+>  	if (n != 2)
+>  		return -EINVAL;
+>  
 > -- 
 > 2.34.1
+> 
