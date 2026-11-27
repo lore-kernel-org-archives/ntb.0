@@ -1,101 +1,57 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.229.108
-ARC-Seal: i=2; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=pass;
-	t=1795745169;
-	b=PncoIC3Hsl4+GMVMZEtZUQLQndfycBAxVg+ZpKj/Rv1ZJUbGVBN6TueZ5GYPe04FKAyR
-	 CyHe2zYad89cpVZk0vdVMSreiRd/BzVWQHA7KKt+M4XtOGgvoJ/yZIIhuMgb6mVYU6VsW
-	 a7NEXeGvFfxEaX05mLOTYVnoZ4ktfDLt/HG3tCdRcTIk01+ASDkhkj9ToW94ayiDVPNAl
-	 yTvy9ftTszl/6tTcm7IneREJYQi0b40BIEslvZT53++bRlDc8BzuefYcqqkbzOcQQo13d
-	 g8XiS3JruMgCmDP2d1KnZCyKb8JbEcrJv33q1t56bANFl4gPvUEXtAEHI4ZtFGghRdQ==
-ARC-Message-Signature: i=2; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795745169;
-	h=DMARC-Filter:DKIM-Signature:Received:Received:From:To:Cc:Subject:
-	 Date:Message-ID:X-Mailer:In-Reply-To:References:
-	 Content-Transfer-Encoding:Content-Type:X-ClientProxiedBy:MIME-Version:
-	 X-MS-PublicTrafficType:X-MS-TrafficTypeDiagnostic:
-	 X-MS-Office365-Filtering-Correlation-Id:X-MS-Exchange-SenderADCheck:
-	 X-MS-Exchange-AntiSpam-Relay:X-Microsoft-Antispam:
-	 X-Microsoft-Antispam-Message-Info:X-Forefront-Antispam-Report:
-	 X-MS-Exchange-AntiSpam-MessageData-ChunkCount:
-	 X-MS-Exchange-AntiSpam-MessageData-0:X-OriginatorOrg:
-	 X-MS-Exchange-CrossTenant-Network-Message-Id:
-	 X-MS-Exchange-CrossTenant-AuthSource:X-MS-Exchange-CrossTenant-AuthAs:
-	 X-MS-Exchange-CrossTenant-OriginalArrivalTime:
-	 X-MS-Exchange-CrossTenant-FromEntityHeader:
-	 X-MS-Exchange-CrossTenant-Id:X-MS-Exchange-CrossTenant-MailboxType:
-	 X-MS-Exchange-CrossTenant-UserPrincipalName:
-	 X-MS-Exchange-Transport-CrossTenantHeadersStamped;
-	bh=9370xYzXjM68J2gkAIxYVkHCczW6TxycL3X19QI1NU0=;
-	b=kfCzArsBN7tbNVtBCiihd2rFjN40CZD36FDG414qt+iK+kR0Rxf13BFDuOVU9Bxm4Qkk
-	 Of8x0OYGzcZ/SDvgp8nsFuvW86mmpLnBXcxS4xiOq38MQHxsLjTUDOVjqPxyIme1wn7h7
-	 lD8sYOreeA6pzeZzDJ8VayKCz+7VrhETDEgQcCVBb41bLePw5M162D52X39CqjkCMWtv6
-	 /fMrg4iT/pOg/Ue26Zrg/SGnnotNjTVNxmtBgMiLOeC2Qe3Zi56WBPxtbpDDlZeRxZbdx
-	 JwEU4AgX1FW7Xa/H8d2Z2kOtanO0GUF9zYowqU9Qd1nURpewPN645ANbCNCUn+A4PtA==
-ARC-Authentication-Results: i=2; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=valinux.co.jp;
-	spf=pass smtp.mailfrom=valinux.co.jp;
-	dkim=pass header.d=valinux.co.jp header.i=@valinux.co.jp header.a=rsa-sha256 header.s=selector1 header.b=qiI3ApMD;
-	arc=pass header.oldest-pass=0 smtp.remote-ip=52.101.229.108
-Received: from TY3P286CU002.outbound.protection.outlook.com (mail-japaneastazon11020108.outbound.protection.outlook.com [52.101.229.108])
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
+ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
+	t=1795746073;
+	b=1XPAUhSKfp8tRqFfpGqsc3dy6UZzdmJG5lNUomsmSLeQySpaASgDMNi7M8qmA8ZcAhmZ
+	 wsT49wvvKGIbSHsSVa1FuqQRGgvX82UNTck8yKN+7Rz7PYFuSrpz02097DMCC9qm149sg
+	 YIJ04C8pL064PeWCI/+vQATklYWiI767KD8CZKccO7aC/vB4i+PVm2XexBl/JUK6h7vlh
+	 aAWo9MJ21zqJ5GEuUISCg48MdV9kU2WQlBU3VCrwV9gBNqDCjRqGyTc7DIT0r5dFWFZop
+	 +TzeNt8nAj5dL/woI9jnjFvVfxN/R2lvNPmRycaqkEUVqEU4VwtRWAkpQK/DcF4pnQg==
+ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
+	a=rsa-sha256; c=relaxed/relaxed; t=1795746073;
+	h=Received:DKIM-Signature:Message-ID:From:Subject:Reply-To:To:Cc:
+	 In-Reply-To:References:Content-Type:Content-Transfer-Encoding:Date;
+	bh=vfxjZeCSa6LfhHU/gfWfG7y7AwEE6yzFHTJDnO9XO5U=;
+	b=CsJStek4/YiJSRW870B+50hmxTCaLw+IjyxEg7BVkvKdYm6a0CYsTYURQIXex1wujfFP
+	 n+TvZXRFFIXs4QDoTYfr7amQGL61p0jpKudNEEDdPutUaqjeDpRVI3PYa5uiQKjmIoXJh
+	 Uo5RWKGkjLiA44gwh8TdnFgL04LAXJu2s9iu91DBoko3yt/aHGj5UGuPOCfdJUEp+LL/B
+	 lQIGbLAfsxFQRXh753foeqP7mVM2J6+JngfObN1y9GtNkRVdLIrRGwXZR5GmVZuOy6fth
+	 Z5OnkFUwCl7lM87bxNmZEOJxuiVVZfcsSp3qjr/yj0qj12aa+803WC/JiPzVW1yb69Q==
+ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=ldnm7dYi;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange ECDHE (secp384r1) server-signature ECDSA (prime256v1) server-digest SHA256)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D3B50606A33C
-	for <ntb@lists.linux.dev>; Fri, 27 Nov 2026 02:06:08 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org D3B50606A33C
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valinux.co.jp
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valinux.co.jp
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C68F5606A31C
+	for <ntb@lists.linux.dev>; Fri, 27 Nov 2026 02:21:13 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key, unprotected) header.d=valinux.co.jp header.i=@valinux.co.jp header.a=rsa-sha256 header.s=selector1 header.b=qiI3ApMD
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=XiK/qMM3R0wuyHKg0in4kmtRpUX/Zuy5yDS8buu4mNhaVQRn7p+CPgYtB3CGQcABxlk/1su2QWE6vYEs2urxpVEwTku0XPq51A9ufh/rXYBHO8T5Apv9lZ8xIzLr1TARRDUh4W82xXpq13dK7PP8NR0XW0eIP9A3H4vX3iWwmjKI5ABQoK29tn/YTymcLhfOa6qcttqbMU3a50F1ELcFhj2AyVEaT1OZ3JirnsRoYCloBCwxhK9asS0Ax+vqRGKhm7QdKjRrtFVKVTT39Gt2IcIluyctlGttQev6uWNyBSRkULzHo9P2uod0Tqdms9rfvshsN4jxrkrPqXTnGgxODw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=9370xYzXjM68J2gkAIxYVkHCczW6TxycL3X19QI1NU0=;
- b=BPQI2xlI0PMkE68qqWwADIHe1DMIAnBO40q3GJkpjXz0yN/WlR8zXSf1UY1fc8jYV878kKiy6kqlv0kdkFaw6q1WuyV2nLyrcuXh3y4dX53hG3DucfLGOIcQ3qrRE4rVvNS0AMjDYQgWRPo6nh+HPUZavOeJChy/YS6hX6Y8aQC0hQWrNCr0aJA4od1KvLRtR3G6BxzlVn1TOFb9RPKAswFTSwUFPuRB5nHcJMQ09fFoaBVJWxA62C6+Te21+fyNLghklOXESsidbkjVft3xyF7lrUqfMrN54QIzrFlXMLt2mCPk8choWLWuiqnERN2Tbm48bbyLFxMhmNJbN4UFtA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=valinux.co.jp; dmarc=pass action=none
- header.from=valinux.co.jp; dkim=pass header.d=valinux.co.jp; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=valinux.co.jp;
- s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=9370xYzXjM68J2gkAIxYVkHCczW6TxycL3X19QI1NU0=;
- b=qiI3ApMDq6uf2kc3Wlpop0Yeiu8PADuFxdSt7mojv+3R7KI7/HC0m5KQSe0gK/ryXjnQraH6Db2o6VRcAj1tWuqJjQWloQviyWxYQ0vBxUcX+6OQuj398rh22F78BPwjnWhSeYxYmG21pc2ZW93jrUN2kyEJKeAPGx41+HO1Anw=
-Authentication-Results: mx.microsoft.com 1; dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=valinux.co.jp;
-Received: from TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM (2603:1096:405:325::11)
- by OSBP286MB5984.JPNP286.PROD.OUTLOOK.COM (2603:1096:604:3f8::6) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.662.9; Fri, 27 Nov
- 2026 02:06:01 +0000
-Received: from TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM
- ([fe80::cce5:2aa8:53f9:dba9]) by TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM
- ([fe80::cce5:2aa8:53f9:dba9%5]) with mapi id 15.21.0662.007; Fri, 27 Nov 2026
- 02:06:01 +0000
-From: Koichiro Den <den@valinux.co.jp>
-To: Jon Mason <jdmason@kudzu.us>,
-	Dave Jiang <dave.jiang@intel.com>,
-	Allen Hubbe <allenbh@gmail.com>,
-	Frank Li <Frank.Li@kernel.org>,
-	Logan Gunthorpe <logang@deltatee.com>
-Cc: fuyuanli <fuyuanli0722@gmail.com>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Nicholas Bellinger <nab@linux-iscsi.org>,
-	Joey Zhang <joey.zhang@microchip.com>,
-	ntb@lists.linux.dev,
-	linux-kernel@vger.kernel.org,
-	stable@vger.kernel.org
-Subject: [PATCH v4 15/15] NTB: ntb_transport: Remove clients before freeing transport resources
-Date: Fri, 27 Nov 2026 11:05:33 +0900
-Message-ID: <20261127020533.2481725-16-den@valinux.co.jp>
-X-Mailer: git-send-email 2.54.0
-In-Reply-To: <20261127020533.2481725-1-den@valinux.co.jp>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=ldnm7dYi
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1369A1F00897;
+	Fri, 27 Nov 2026 02:21:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1795746073;
+	bh=vfxjZeCSa6LfhHU/gfWfG7y7AwEE6yzFHTJDnO9XO5U=;
+	h=From:Subject:Reply-To:To:Cc:In-Reply-To:References:Date;
+	b=ldnm7dYil6LeauUMG0wzzKR4gcHPLxs7wOdhdA5oatm0mcCQVUQqGatk8TY9CBzZR
+	 BCiSERjs4ymgv2+s/yvsfjOS9jg4uzo4G6PIj20PH9Mn6gOZp0jdjQRpdvsVO2BOYy
+	 BSV6biV/jI3N9mhIKsbXi3leWuAXoGPLbjnnYBpRXDjnipdyJ98xKNtH9TsFz8eFS0
+	 nkJXhAe57SaJ/yCspkMA6zr7mD0s22hvgcVdnPPXg/6Pc/n1d5gvM3qNpRMiTxcKc0
+	 3/kiohKx3V7SwIuYXYPD6ieVmHARuGQN8QGVfhvbZqQxY/3Q5yjG2K1cbaUqAwNvfx
+	 jJbVS/Kv5BZAA==
+Message-ID: <sashiko-outbox-236448@kernel.org>
+From: sashiko-bot@kernel.org
+Subject: Re: [PATCH v4 12/15] NTB: ntb_transport: Prepare remote RX info
+ accesses for MW teardown
+Reply-To: sashiko-reviews@lists.linux.dev
+To: "Koichiro Den" <den@valinux.co.jp>
+Cc: ntb@lists.linux.dev
+In-Reply-To: <20261127020533.2481725-13-den@valinux.co.jp>
 References: <20261127020533.2481725-1-den@valinux.co.jp>
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: TY4P301CA0124.JPNP301.PROD.OUTLOOK.COM
- (2603:1096:405:37e::14) To TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM
- (2603:1096:405:325::11)
+ <20261127020533.2481725-13-den@valinux.co.jp>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Date: Fri, 27 Nov 2026 02:21:12 +0000
 X-Mailing-List: ntb@lists.linux.dev
 List-Id: <ntb.lists.linux.dev>
 List-Post: <mailto:ntb@lists.linux.dev>
@@ -104,135 +60,78 @@ List-Subscribe: <mailto:ntb+subscribe@lists.linux.dev>
 List-Unsubscribe: <mailto:ntb+unsubscribe@lists.linux.dev>
 List-Owner: <mailto:ntb+owner@lists.linux.dev>
 Precedence: list
-MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: TY7P286MB6866:EE_|OSBP286MB5984:EE_
-X-MS-Office365-Filtering-Correlation-Id: 7ce0129a-c328-4bab-6cf1-08df4c2afc4c
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|366016|23010399003|1800799024|10070799003|376014|7416014|56012099006|10067099003|261102123227099003|261026121527099003|261028144727099003|261026140227099003|261022075727099003|261021123027099003|261022105027099003|261021121427099003|261009221227099003|261009220027099003|261009223327099003|261009223027099003|261009221727099003|22082099003|18002099003;
-X-Microsoft-Antispam-Message-Info:
-	zilpdZfgk39q+XoJWKNKrCJYyACeCd/h4+dWs+hq8TgV3wLxQBpwO5ZPF0NdZE4775zyTKB9EiGp5n3Eu55hOxdL6VazLZFCXtrTw98RLBYdtyzMHB0oevVspIbCF9u9k0QW2kbL8Zg8ZC6JZT+cjgadaPMgSNhSaNN9CicXiRECsG7cKuaeN5HR+bIITP90EUCLpW5fgX9EtQuPotWOtB6NKAeewDcdyvXig1PGN6yfcv/7/6CsmB9nsPbbBBfUkuKATTgVUiBQr6s8QARbBFTtaru4GiihTd8DkPfbJ7iKuCMAiyLPz2Yz+ATNsTAXl1na7T4v89/xjcaMFxGPGG+Ivc52WebZZnAgAghlsFFkR2URtB0xWdYJl15Fo+ya5R1D4VKWR46ky0cafHMCYu3baIb+Pljhtwzcv1rxyjpM88b7YyG3zTP99Sc/j4Niz5PCgHC7NJDRt7pmUMKACgCnLtSA0Qg+Qgx6qIdvbXlL3idnReXAic1Rr/eaaSA3quJReAyOJJo8MGTSc14v8b2KDghEUnheDOrVypCdBFa3mYsYYlCWfx0SgOutb5P+5v5fXFsAREyxgrEtL9vtQTLUj9RqY3vz/rjLiOxcJqHwwr+ORIKpAzDozIqy5etdxTzfzU0gZ6xF7Q6b0DE+MLhD3MBSnMgiObQnohHfI1Y=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(366016)(23010399003)(1800799024)(10070799003)(376014)(7416014)(56012099006)(10067099003)(261102123227099003)(261026121527099003)(261028144727099003)(261026140227099003)(261022075727099003)(261021123027099003)(261022105027099003)(261021121427099003)(261009221227099003)(261009220027099003)(261009223327099003)(261009223027099003)(261009221727099003)(22082099003)(18002099003);DIR:OUT;SFP:1102;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?0ehTCu8jt9f2ymKrS3e6RS/mRBCY1pZuJ05RuO0pdrzwnNhQvkVNsW9kKTwN?=
- =?us-ascii?Q?OIv5Zxrxs9D3HsEK0TfT2lJHd0isihFjzh2WmKt156sgR1p2lmDTfjNcd84k?=
- =?us-ascii?Q?y7uq81HBXdYQ0KnPokgm6uu2GSuyZokWg80RyaW4kOQAb33G+BAoh76UVMeI?=
- =?us-ascii?Q?woH/MkwMbMlXRvcbv6f52a13iYIimIWDrSEzdgF9jD31o8zWKH9iDB1hLBwI?=
- =?us-ascii?Q?e+ikb+jj/ptUgA3Hf+E2P53Nx0Z6yiCSq3VZQgjpL4TuJytj4O0Z/DM6so7m?=
- =?us-ascii?Q?o6zCZ6puvtbGU1brdOoVRW1Kt+p5zYGaHtrSqTx6eXsR8o0QCBPHRwruyNRb?=
- =?us-ascii?Q?6slRxup3W3QWtGZxDMereoPDso2jt8jeMklHSKvz7ufm1NnpbjEyo7ioWjpv?=
- =?us-ascii?Q?cQEoIJeQq0MSUQLYv/nf8DKLvP2ZM3xGLrzHqUMRU3mXoRIJ//FJpabegSH5?=
- =?us-ascii?Q?idh9Gkv003ZZ2KWHmxSxc3GyE1S08+f9TTL6VL3gt3ytyouCIHFIwWkKbXGw?=
- =?us-ascii?Q?1gvozHSQyykKEtuwQfC/aovG3HuMr+k0CUc2FIpzKt3itQPOSc/q9PhL6Kva?=
- =?us-ascii?Q?SrIoLcqsp0II1vmR28GdtXkBAsQ0gSdqxwrnvT82LYiUcFaRymUlDHo8tfaI?=
- =?us-ascii?Q?/6GEoRm+gM6iKAv8YzVCZh1mf8QtSrf66NmhsRPjUzXbmoHqH9mI6TsEApzW?=
- =?us-ascii?Q?PXdQQZ/t/ZkFi31pmoky0zYEc/tmle+AW7L3Xi2qLoMyhrDvBXXUras0P1oa?=
- =?us-ascii?Q?/TbGcIbSQ0CjY9jiyc8AazT+OGqPzHRrVsjxT5AionfAojGleOvd+nxp+R8t?=
- =?us-ascii?Q?2rMrnpQS2fRZczkd1131UPpCcqFaXNQE8mmK4xNrkmQ2dt67DWpom/31vpky?=
- =?us-ascii?Q?BrDf1eGqXM+lir1TEigpoQ/dNKcmBU3uI3lO2hDpCelKYddzYn3ZP5XnF4qI?=
- =?us-ascii?Q?Tdp19eVCIenRioIm8FIqai3CHA2o7vhJTGRZDoBWMPSe3vLuzx+IUWOZ1wRo?=
- =?us-ascii?Q?cghFcn0tUHQigzUNcEIcDvkDxZeEkNLzcsUv7sj0TpnoElrhPdmGATQqtwcy?=
- =?us-ascii?Q?YDz3SFqmWzKtE5YBb+V+YljqtGwQn7UQBby4+kROMktiUcLqyn87LtJI6xwR?=
- =?us-ascii?Q?cZ/CHx5Ju5NrIMpMIiDCQQF3+ObEYAiPu/AW/BOVknE2w+Ch3EbvhTKNmE+k?=
- =?us-ascii?Q?WuH31yTcZfhioJWZfkWUh7NXV0yXP1J6uPKI8ojngxjrBuCb72zJys3Jk1ya?=
- =?us-ascii?Q?v3xZw5cBacpy9HRlfZKI4CPpWigGynm2OBB6tWZu0ZdXWz/Fz6cilOZsi9rW?=
- =?us-ascii?Q?YW5XVryLaMCsaCemrcyIFJt+AlPdIBmGzjeHxPQGEu67I7RhTNrvV8krq8Lq?=
- =?us-ascii?Q?7n2DKz2qXADLtLduI3+NRgEC0YjBE2ZQ4rvDFDkM375K+hDOhmI4sx4eMstN?=
- =?us-ascii?Q?H+lZ0nvvuHr2wQtsO3qHcEOkj5NdRYLJYf2+OXGysUFE0VrT8ba4pFHpOZW6?=
- =?us-ascii?Q?7Go8+gWcR27254MUKNNCM6tgP7aevx4XOTwIpqfpif6OI4aviDZqEYhIXjFa?=
- =?us-ascii?Q?YPRCKRAlpm8AQA9+eypYyg04WQDDqXIZH3JW8eMsXC+GuniHNUe4D+O9MXdj?=
- =?us-ascii?Q?5mIlqAKAMj+gw7n/eNgrYvu+C7cIJ8nkwe2pkTnY7JRV9oqMRs+Qn/QyFQ7V?=
- =?us-ascii?Q?ep0MNyCFlTkjsTCz/AJVPKbbw6hFgsQXUlyXMPcUZN5PPNCSSpDZLjRT3m8X?=
- =?us-ascii?Q?Ky5gxriMBtcAB0WhmwoaslmiRf7vxyPPRTO92wMS/5/kwszLYa4+?=
-X-OriginatorOrg: valinux.co.jp
-X-MS-Exchange-CrossTenant-Network-Message-Id: 7ce0129a-c328-4bab-6cf1-08df4c2afc4c
-X-MS-Exchange-CrossTenant-AuthSource: TY7P286MB6866.JPNP286.PROD.OUTLOOK.COM
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 27 Nov 2026 02:06:01.6538
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 7a57bee8-f73d-4c5f-a4f7-d72c91c8c111
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: Ehlr9fw+8YzWSa5VKW2MAqiWtg4TnI8B8nz3GfjvQLyeKHiyuzNa7hKLvkkU2rU4uyJ6S5bNSW4Oo1VS1T5A5Q==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: OSBP286MB5984
 
-Unbinding ntb_transport can call ntb_transport_free() while ntb_netdev
-is still bound. The transport frees MWs and QP resources before
-unregistering the clients, so the netdev's transmit path and timer can
-access freed memory. Its remove callback also calls
-ntb_transport_free_queue() on a QP whose resources have already been
-released. This teardown order is unsafe and somewhat unintuitive.
+Thank you for your contribution! Sashiko AI review found 1 potential
+issue to consider:
+- [High] ntb: TOCTOU use-after-free on remote_rx_info during MW teardown
+--
 
-The crash can be reproduced with an intensive TX load, during which you
-unbind the NTB device. The following is a KASAN report from my
-VHOST/HOST setup using vNTB.
+commit 19817e05f16664b733ed390594b75eacca761094
+Author: Koichiro Den <den@valinux.co.jp>
 
-  VHOST# sudo iperf3 -ub0 -c $HOST -l 100 -P 100 &
-  VHOST# echo $VHOST_NTB_DEV > /sys/bus/ntb/drivers/ntb_transport/unbind
+NTB: ntb_transport: Prepare remote RX info accesses for MW teardown
 
-  ==================================================================
-  BUG: KASAN: vmalloc-out-of-bounds in ntb_transport_tx_free_entry+0xf0
-  ...
-  Call trace:
-   ...
-   __asan_report_load4_noabort+0x1c/0x30
-   ntb_transport_tx_free_entry+0xf0/0x130 [ntb_transport]
-   ntb_netdev_tx_timer+0x78/0x260 [ntb_netdev]
-   ...
+This commit updates qp->remote_rx_info accesses to use READ_ONCE() and
+WRITE_ONCE() and check for NULL in preparation for clearing remote_rx_info
+during memory window teardown, and removes the redundant free-entry
+warning in ntb_async_tx().
 
-Disable and drain transport link work first, then unregister the clients
-so they stop using and release their QPs. After that, free any QPs left
-over before running transport link cleanup. Disabling the work keeps
-link events from restarting setup or cleanup during client removal.
+> diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
+> index 0c661558a5ebe..fa53fcb87bad5 100644
+> --- a/drivers/ntb/ntb_transport.c
+> +++ b/drivers/ntb/ntb_transport.c
+[ ... ]
+> @@ -2559,8 +2564,14 @@ EXPORT_SYMBOL_GPL(ntb_transport_max_size);
+> =20
+>  unsigned int ntb_transport_tx_free_entry(struct ntb_transport_qp *qp)
+>  {
+> +	struct ntb_rx_info *remote_rx_info =3D READ_ONCE(qp->remote_rx_info);
+>  	unsigned int head =3D qp->tx_index;
+> -	unsigned int tail =3D qp->remote_rx_info->entry;
+> +	unsigned int tail;
+> +
+> +	if (!remote_rx_info)
+> +		return 0;
+> +
+> +	tail =3D remote_rx_info->entry;
+> =20
+>  	return tail >=3D head ? tail - head : qp->tx_max_entry + tail - head;
+>  }
 
-Fixes: fce8a7bb5b4b ("PCI-Express Non-Transparent Bridge Support")
-Cc: stable@vger.kernel.org
-Reviewed-by: Logan Gunthorpe <logang@deltatee.com>
-Reviewed-by: Dave Jiang <dave.jiang@intel.com>
-Signed-off-by: Koichiro Den <den@valinux.co.jp>
----
-Changes in v4:
-  - None.
+[Severity: High]
+Can ntb_transport_tx_free_entry(), ntb_qp_debugfs_stats_show(), and
+ntb_qp_link_down_reset() still access freed DMA memory if ntb_free_mw()
+runs between READ_ONCE(qp->remote_rx_info) and the dereference of
+remote_rx_info->entry?
 
- drivers/ntb/ntb_transport.c | 11 ++++++-----
- 1 file changed, 6 insertions(+), 5 deletions(-)
+qp->remote_rx_info points into the inbound MW DMA buffer allocated in
+ntb_alloc_mw_buffer() and freed by dma_free_attrs() in ntb_free_mw().
+In the next commit in the series, commit "NTB: ntb_transport: Clear QP
+pointers when freeing an MW", ntb_free_mw() clears qp->remote_rx_info
+with WRITE_ONCE() and immediately frees the buffer without waiting for
+concurrent lockless readers or writers to finish:
 
-diff --git a/drivers/ntb/ntb_transport.c b/drivers/ntb/ntb_transport.c
-index 3293fc4b0009..3cf2d778bf92 100644
---- a/drivers/ntb/ntb_transport.c
-+++ b/drivers/ntb/ntb_transport.c
-@@ -1485,9 +1485,11 @@ static void ntb_transport_free(struct ntb_client *self, struct ntb_dev *ndev)
- 
- 	debugfs_remove_recursive(nt->debugfs_node_dir);
- 
--	ntb_transport_link_cleanup(nt);
--	cancel_work_sync(&nt->link_cleanup);
--	cancel_delayed_work_sync(&nt->link_work);
-+	/* Stop transport work before clients release their QPs. */
-+	disable_delayed_work_sync(&nt->link_work);
-+	disable_work_sync(&nt->link_cleanup);
-+
-+	ntb_bus_remove(nt);
- 
- 	qp_bitmap_alloc = nt->qp_bitmap & ~nt->qp_bitmap_free;
- 
-@@ -1498,11 +1500,10 @@ static void ntb_transport_free(struct ntb_client *self, struct ntb_dev *ndev)
- 			ntb_transport_free_queue(qp);
- 	}
- 
-+	ntb_transport_link_cleanup(nt);
- 	ntb_link_disable(ndev);
- 	ntb_clear_ctx(ndev);
- 
--	ntb_bus_remove(nt);
--
- 	for (i = nt->mw_count; i--; ) {
- 		ntb_free_mw(nt, i);
- 		iounmap(nt->mw_vec[i].vbase);
--- 
-2.54.0
+CPU0                                  CPU1
+ntb_netdev_tx_timer()
+  ntb_transport_tx_free_entry(qp)
+    remote_rx_info =3D
+      READ_ONCE(qp->remote_rx_info);
+    if (!remote_rx_info)
+                                      ntb_transport_link_cleanup_work()
+                                        ntb_transport_link_cleanup()
+                                          ntb_free_mw()
+                                            WRITE_ONCE(qp->remote_rx_info,
+                                                       NULL);
+                                            dma_free_attrs(...);
+    tail =3D remote_rx_info->entry;  <-- use-after-free
 
+During runtime link-down cleanup, ntb_qp_link_cleanup() notifies the
+client to stop the subqueue, but does not stop ntb_netdev_tx_timer() or
+serialize against in-flight ntb_qp_debugfs_stats_show() reads or
+ntb_transport_link_down() -> ntb_send_link_down() ->
+ntb_qp_link_down_reset() writes.  Any caller delayed after loading a
+non-NULL remote_rx_info will read or write the freed DMA buffer.
+
+--=20
+Sashiko AI review =C2=B7 https://sashiko.dev/#/patchset/20261127020533.2481=
+725-1-den@valinux.co.jp?part=3D12
